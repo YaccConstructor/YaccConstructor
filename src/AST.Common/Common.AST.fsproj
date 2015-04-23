@@ -45,9 +45,7 @@
     <Compile Include="DataStructures.fs" />
     <Compile Include="AST.fs" />
     <Compile Include="ASTGLL.fs" />
-    <Compile Include="ArnglrAst.fs" />
     <None Include="packages.config" />
-    <Compile Include="ArnglrAstSimpe.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

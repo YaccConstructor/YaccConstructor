@@ -3,7 +3,7 @@ open Yard.Generators.GLL
 open System 
 open System.Collections.Generic
 open Yard.Generators.GLL
-open Yard.Generators.Common.AST3
+open Yard.Generators.Common.ASTGLL
 open Yard.Generators.Common.DataStructures
 open Microsoft.FSharp.Collections
 open AbstractAnalysis.Common

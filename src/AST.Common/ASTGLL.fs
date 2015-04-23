@@ -1,4 +1,4 @@
-﻿module Yard.Generators.Common.AST3
+﻿module Yard.Generators.Common.ASTGLL
 open System
 open System.Collections.Generic
 open Yard.Generators.Common.DataStructures

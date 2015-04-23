@@ -4,7 +4,7 @@ open System
 open Yard.Generators.Common.FinalGrammar
 open System.Collections.Generic
 open Yard.Generators.Common
-open Yard.Generators.Common.AST3
+open Yard.Generators.Common.ASTGLL
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Microsoft.FSharp.Text.StructuredFormat

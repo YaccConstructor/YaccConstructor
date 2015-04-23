@@ -16,7 +16,6 @@ module Yard.Generators.Common.Epsilon
 
 open Yard.Generators.Common
 open Yard.Generators.Common.AST
-open Yard.Generators.Common.AST3
 open Yard.Generators.Common.AstNode
 open Yard.Core.IL
 open Yard.Core.IL.Production

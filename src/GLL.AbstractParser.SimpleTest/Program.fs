@@ -21,7 +21,7 @@ open NUnit.Framework
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.AbstractParser
 open YC.Tests.Helper
-open Yard.Generators.Common.AST3
+open Yard.Generators.Common.ASTGLL
 open GLL.AbstractParse.SimpleRightRecursion
 open GLL.AbstractParse.BadLeftRecursion
 open GLL.AbstractParse.SimpleAmb

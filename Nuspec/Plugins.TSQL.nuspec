@@ -15,7 +15,7 @@
 <copyright>Copyright 2013, 2014</copyright>
 <tags>Parsing Reengineering YaccConstructor YC Tool Grammarware .NET F# FSharp</tags>
 <dependencies>
-    <dependency id="ReSharper" version="8.0" />
+    <dependency id="ReSharper" version="8.1" />
 	<dependency id="SEL.Plugins.Core" version="0.0.3.0" />
 </dependencies>
 </metadata>

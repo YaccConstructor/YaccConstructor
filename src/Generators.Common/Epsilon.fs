@@ -17,6 +17,7 @@ module Yard.Generators.Common.Epsilon
 open Yard.Generators.Common
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AST3
+open Yard.Generators.Common.AstNode
 open Yard.Core.IL
 open Yard.Core.IL.Production
 
@@ -106,7 +107,7 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
                                         pos.[w] <- order.Count
                                         order.Add w
                                         res.Add (new AST (Unchecked.defaultof<_>, null))
-                                    box res.[pos.[w]])
+                                    res.[pos.[w]] :> AstNode)
                         children.Add <| new Family(rule, new Nodes(nodes))
                 if v = indexator.errorIndex 
                 then

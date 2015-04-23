@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{dafa5b16-8713-46ec-9d20-21c8ef8201e9}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>GLLParser.SimpleTest</RootNamespace>
     <AssemblyName>GLLParser.SimpleTest</AssemblyName>
     <Name>GLLParser.SimpleTest</Name>

@@ -58,4 +58,9 @@ type BlockResizeArray<'T> () =
             Array.blit arrays.[i] 0 res (i <<< shift) (count &&& smallPart)
         res
         
-        
+[<Struct>]
+type UsualOne<'T> =
+    val mutable first : 'T
+    val mutable other : 'T[]
+    new (f,o) = {first = f; other = o}
+

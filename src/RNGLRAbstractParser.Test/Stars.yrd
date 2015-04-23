@@ -1,0 +1,11 @@
+options {
+    translate = false
+    module = "RNGLR.Stars"
+    infEpsPath = epsilons
+    pos = uint64
+}
+
+[<Start>]
+s: e | r
+e: STAR SEMI 
+r: STAR STAR STAR SEMI 

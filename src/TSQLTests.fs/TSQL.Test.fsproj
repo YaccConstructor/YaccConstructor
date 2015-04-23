@@ -16,6 +16,9 @@
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <ItemGroup>
+    <Reference Include="DotParserProject">
+      <HintPath>..\..\3rdParty\DotParser\DotParserProject.exe</HintPath>
+    </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.ComponentModel">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.ComponentModel.dll</HintPath>
       <Private>False</Private>
@@ -115,7 +118,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MSParser.fs" />
+    <Compile Include="..\TSQL\MSParser.fs">
+      <Link>MSParser.fs</Link>
+    </Compile>
     <Compile Include="Lexer_Abstract.fs" />
     <Compile Include="TSQLTests.fs" />
     <None Include="packages.config" />
@@ -151,16 +156,6 @@
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Calc\Calc.fsproj">
-      <Name>Calc (ReSharper\Languages\Calc\Calc)</Name>
-      <Project>{016c2afb-d8aa-4dd4-94f9-83e0e6c93f72}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Calc\CalcHighlighting\CalcHighlighting.csproj">
-      <Name>CalcHighlighting</Name>
-      <Project>{0af126e6-f923-4b88-bc42-97cd3696e7e7}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\Generators.Common\Common.Generators.fsproj">
       <Name>Common.Generators</Name>
       <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
@@ -179,26 +174,6 @@
     <ProjectReference Include="..\RNGLRParser\RNGLRParser.fsproj">
       <Name>RNGLRParser</Name>
       <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\TSQL\TSQLHighlighting\TSQLHighlighting.csproj">
-      <Name>TSQLHighlighting</Name>
-      <Project>{6ee8bdd8-79e9-41f5-8a8e-e959835d60fb}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.SEL.SDK.Core.fsproj">
-      <Name>YC.SEL.SDK.Core</Name>
-      <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Helper\YC.ReSharper.AbstractAnalysis.Plugin.Helper.fsproj">
-      <Name>YC.ReSharper.AbstractAnalysis.Plugin.Helper</Name>
-      <Project>{f86a2827-4c61-4bc5-82c5-19c2b60ab831}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin\YC.ReSharper.AbstractAnalysis.Plugin.csproj">
-      <Name>YC.ReSharper.AbstractAnalysis.Plugin</Name>
-      <Project>{bc086b93-fa4b-41bd-9e95-3ed442592a01}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
@@ -225,8 +200,12 @@
 del JetBrains*</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <StartArguments>-f "C:\yc\recursive-ascent\Tests\AbstractPerformance\TSQL\2\1.dot"</StartArguments>
+    <StartArguments>-f C:\gsv\projects\YC\YaccConstructor\Tests\AbstractPerformance\TSQL\1\_1.dot  -p</StartArguments>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <StartArguments>-f C:\gsv\projects\YC\YaccConstructor\Tests\sbt\ready\idv_XAnyPayGBK_151str.dot     -p</StartArguments>
+  </PropertyGroup>
+  <!--StartArguments>-f C:\gsv\projects\YC\YaccConstructor\Tests\AbstractPerformance\TSQL\8\3.dot  -p</StartArguments-->
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

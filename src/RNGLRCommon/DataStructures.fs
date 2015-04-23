@@ -59,3 +59,9 @@ type BlockResizeArray<'T> () =
         res
         
         
+[<Struct>]
+type UsualOne<'T> =
+    val mutable first : 'T
+    val mutable other : 'T[]
+    new (f,o) = {first = f; other = o}
+

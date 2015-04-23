@@ -44,8 +44,8 @@ let lparen = '('
 let rparen = ')'
 let eol = '\r' | '\n' | '\r' '\n' (* See script.sql position (4560,27) *)
 let whitespaces = [' '  '\t']+
-let idenstarchar  = ['A'-'Z' 'a'-'z' '_' '@' '#' '%'  ] 
-let idenbody_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '%' '#' '$'  ] 
+let idenstarchar  = ['A'-'Z' 'a'-'z' '_' '@' '#' '%' '?' ] 
+let idenbody_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '%' '#' '$' '?' ] 
 // Разобраться с идентификаторами cyrillic с,а (885574,_) (1004524)
 //let with_dot = '.' | idenbody_char
 let ident = idenstarchar idenbody_char*
@@ -60,7 +60,7 @@ rule tokens = parse
  | '\'' | "N'" { clearBuf(); startPos := lexbuf.StartPos; literal lexbuf } *)
  | decnumber    { DEC_NUMBER(gr)|> Some }
  | whitespaces  { None }
-// | '.'       //  { getLiteral id brs "." }
+ | '.'      { L_dot_(gr) |> Some }
  | ','      { L_comma_(gr) |> Some }  //  { getLiteral id brs "," }
  | '='      { L_equal_(gr) |> Some }  //  { getLiteral id brs "=" }
  | '>'      { L_more_(gr) |> Some }  //  { getLiteral id brs ">"}
@@ -76,10 +76,15 @@ rule tokens = parse
  | '*'     { L_star_(gr) |> Some }// { getLiteral id brs "*" }*)
  //| "$"      { getLiteral brs "$" } 
  | "select" { L_select(gr) |> Some }
+ | "join" { L_join(gr) |> Some }
+ | "update" { L_update(gr) |> Some }
  | "from" { L_from(gr)|> Some }
  | "where" { L_where(gr)|> Some }
- | "and" { L_and_(gr) |> Some }
- | "or" { L_or_(gr) |> Some }
+ | "and" { L_and(gr) |> Some }
+ | "or" { L_or(gr) |> Some }
+ | "set" { L_set(gr) |> Some }
+ | "on" { L_on(gr) |> Some }
+ | "go" { L_go(gr) |> Some }
  | ident { IDENT(gr) |> Some }
 //| "--" [^'\r' '\n']*  { None (* parser knows nothing about comments *) }  
  (*| "/*" { commendepth := 1; clearBuf(); multiline_comment brs }*)

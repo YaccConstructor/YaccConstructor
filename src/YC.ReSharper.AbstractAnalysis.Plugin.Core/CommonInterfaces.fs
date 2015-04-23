@@ -6,6 +6,7 @@ open QuickGraph
 open QuickGraph.Algorithms
 open AbstractAnalysis.Common
 open Yard.Generators.Common.AST
+open Yard.Generators.Common.AstNode
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.GraphBasedFst
 open YC.FSA.FsaApproximation
@@ -13,7 +14,7 @@ open YC.FSA.GraphBasedFsa
 
 type TreeGenerationState<'node> = 
     | Start
-    | InProgress of 'node * int list
+    | InProgress of 'node * AstNode list
     | End of 'node
 
 type LexingFinishedArgs<'node> (tokens : ResizeArray<'node>, lang:string) =
@@ -57,7 +58,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
 
     let lexingFinished = new Event<LexingFinishedArgs<'node>>()
     let parsingFinished = new Event<ParsingFinishedArgs>()
-    let mutable forest: list<Tree<'TokenType> * _> = [] 
+    let mutable forest: list<_ * _> = [] 
     let mutable otherForest : list<OtherTree<'TokenType>> = []
 
     let mutable generationState : TreeGenerationState<'node> = Start
@@ -121,10 +122,10 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
             generationState <- End(null)
         else
             let mutable curSppf, errors = List.nth forest index
-            let unprocessed = 
+            let unprocessed : Terminal list = 
                 match generationState with
-                | Start ->   Array.init curSppf.TokensCount (fun i -> i) |> List.ofArray
-                | InProgress (_, unproc) ->  unproc
+                | Start ->   Array.init curSppf.TokensCount (fun i -> new Terminal(i)) |> List.ofArray
+                | InProgress (_, unproc) -> unproc |> List.map (fun n -> n :?> Terminal) 
                 | _ -> failwith "Unexpected state in treeGeneration"
                 
             let nextTree, unproc = curSppf.GetNextTree unprocessed (fun _ -> true)
@@ -133,7 +134,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
             
             if unproc.IsEmpty
             then generationState <- End (treeNode)
-            else generationState <- InProgress (treeNode, unproc) 
+            else generationState <- InProgress (treeNode, unproc |> List.map (fun n -> n :> AstNode)) 
 
         generationState
 

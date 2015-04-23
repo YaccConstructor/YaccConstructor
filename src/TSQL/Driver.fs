@@ -23,7 +23,7 @@ open Yard.Examples.MSParser
 open LexerHelper
 open System
 open System.IO
-open Yard.Generators.Common.AST
+open Yard.Generators.Common.ARNGLR.AST
 open YC.SDK.CommonInterfaces
 open YC.SDK.ReSharper.Helper
 open Mono.Addins
@@ -48,38 +48,38 @@ let getTokenName = tokenToNumber >> numToString
 
 let parse = fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGraph
 
-let args = 
-    {
-        tokenToRange = fun x -> new FSA<_>(),new FSA<_>()
-        zeroPosition = new FSA<_>()
-        clearAST = false
-        filterEpsilons = true
-    }
+//let args = 
+//    {
+//        tokenToRange = fun x -> new GraphTokenValue<_>(),new GraphTokenValue<_>()
+//        zeroPosition = new GraphTokenValue<_>()
+//        clearAST = false
+//        filterEpsilons = true
+//    }
 
 let printAstToDot ast name = defaultAstToDot ast name
 let printOtherAstToDot sppf name = otherAstToDot sppf name
 
-let xmlPath = xmlPath
-let tokenToTreeNode = tokenToTreeNode
-let translate ast errors = translate args ast errors
-
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
-do()
-
-[<ShellComponent>]
-[<Extension>]
-type TSQLInjectedLanguageModule () =
-    let processor = new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, "TSQL", calculatePos, getRange, printAstToDot, printOtherAstToDot)
-
-    interface IInjectedLanguageModule<br,range,node> with
-        member this.Name = "TSQL"
-        member this.Process graphs = processor.Process graphs
-        member this.LexingFinished = processor.LexingFinished
-        member this.ParsingFinished = processor.ParsingFinished
-        member this.XmlPath = xmlPath
-        member this.GetNextTree i = processor.GetNextTree i
-        member this.GetForestWithToken range = processor.GetForestWithToken range
-        member this.GetPairedRanges left right range toRight = processor.GetPairedRanges left right range toRight
-
-    interface IReSharperLanguage
+//let xmlPath = xmlPath
+//let tokenToTreeNode = tokenToTreeNode
+//let translate ast errors = translate args ast errors
+//
+//[<assembly:Addin>]
+//[<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
+//do()
+//
+//[<ShellComponent>]
+//[<Extension>]
+//type TSQLInjectedLanguageModule () =
+//    let processor = new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, "TSQL", calculatePos, getRange, printAstToDot, printOtherAstToDot)
+//
+//    interface IInjectedLanguageModule<br,range,node> with
+//        member this.Name = "TSQL"
+//        member this.Process graphs = processor.Process graphs
+//        member this.LexingFinished = processor.LexingFinished
+//        member this.ParsingFinished = processor.ParsingFinished
+//        member this.XmlPath = xmlPath
+//        member this.GetNextTree i = processor.GetNextTree i
+//        member this.GetForestWithToken range = processor.GetForestWithToken range
+//        member this.GetPairedRanges left right range toRight = processor.GetPairedRanges left right range toRight
+//
+//    interface IReSharperLanguage

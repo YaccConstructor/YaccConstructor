@@ -100,10 +100,10 @@ let buildFsa (file: ICSharpFile) =
 
     fsaForVar
 
-//let BuildApproximation (file: ICSharpFile) = 
-//    // the next line is for debug purposes
-//    DotUtils.allMethodsCFGToDot file myDebugFolderPath
-//    buildFsa file
+let BuildApproximation (file: ICSharpFile) = 
+    // the next line is for debug purposes
+    DotUtils.allMethodsCFGToDot file myDebugFolderPath
+    buildFsa file
 
 
 
@@ -123,10 +123,10 @@ let buildApproxForWholeMethod (methodDecl: ICSharpFunctionDeclaration) initialFs
     let ddg = ddgForNode exitNode.Id genericCfg
     buildAutomaton ddg initialFsaMap
 
-let BuildApproximation (file: ICSharpFile) =
-    let collector = RecursiveElementCollector(fun (node: ITreeNode) -> node :? IMethodDeclaration)
-    let methods = collector.GetResults() |> Seq.map (fun n -> n :?> IMethodDeclaration)
-    methods 
-    |> Seq.filter (fun m -> Seq.isEmpty m.DeclaredElement.Parameters)
-    |> Seq.map (fun m -> buildApproxForWholeMethod m Map.empty)
-    |> Seq.iter (fun fsa -> FsaHelper.toDebugDot )
+//let BuildApproximation (file: ICSharpFile) =
+//    let collector = RecursiveElementCollector(fun (node: ITreeNode) -> node :? IMethodDeclaration)
+//    let methods = collector.GetResults() |> Seq.map (fun n -> n :?> IMethodDeclaration)
+//    methods 
+//    |> Seq.filter (fun m -> Seq.isEmpty m.DeclaredElement.Parameters)
+//    |> Seq.map (fun m -> buildApproxForWholeMethod m Map.empty)
+//    |> Seq.iter (fun fsa -> FsaHelper.toDebugDot )

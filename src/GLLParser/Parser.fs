@@ -3,7 +3,7 @@ open Yard.Generators.GLL
 open System 
 open System.Collections.Generic
 open Yard.Generators.GLL
-open Yard.Generators.Common.AST3
+open Yard.Generators.Common.ASTGLL
 open Yard.Generators.Common.DataStructures
 open Microsoft.FSharp.Collections
 
@@ -441,6 +441,6 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             | Some res -> 
                     //drawDot parser tokens "gss.dot" gss
                     let r1 = new Tree<_> (tokens, res, parser.rules)
-                    r1.AstToDot parser.NumToString "ast1111111.dot"
+                    //r1.AstToDot parser.NumToString "ast1111111.dot"
                     Success (r1)   
                         

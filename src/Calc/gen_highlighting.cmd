@@ -1,6 +1,6 @@
 del log.txt
 
-..\..\Bin\Release\v40\YC.AbstractLexer.Generator.exe Lexer.fsl --unicode -o Lexer.fs
+..\..\Bin\Release\v40\AbstractLexer.Generator.exe Lexer.fsl --unicode -o Lexer.fs
 
 echo calc.yrd >> log.txt
     ..\..\Bin\Release\v40\YC.YaccConstructor.exe -f YardFrontend -i calc.yrd -c ExpandEbnf -c ExpandMeta ^

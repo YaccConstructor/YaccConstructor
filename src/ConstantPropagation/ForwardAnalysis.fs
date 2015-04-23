@@ -118,9 +118,9 @@ type BuildState = {
     DirHelper: LoopsDirectionHelper }
 
 module BuildStateFuncs =
-    let create ddg = { 
+    let create ddg initFsaMap = { 
         Operands = []; 
-        Automata = Map.empty; 
+        Automata = initFsaMap; 
         UnionNodes = Map.empty;
         LoopNodesFsaMap = Map.empty;
         DirHelper = LoopsDirectionHelperFuncs.create ddg }
@@ -128,7 +128,7 @@ module BuildStateFuncs =
 open BuildStateFuncs
 open LoopsDirectionHelperFuncs
 
-let buildAutomaton (ddg: DDG) =
+let buildAutomaton (ddg: DDG) (initialFsaMap: FSAMap) =
     // exception messages
     let unsupportedCaseMsg = "unsupported case encountered"
     let unexpectedNodeMsg = "unexpected node type is encountered in automaton building"
@@ -322,7 +322,7 @@ let buildAutomaton (ddg: DDG) =
                             processLoopSuccessors node state
                 | _ -> processNodeAndSuccessors node state
     
-    let initState = BuildStateFuncs.create ddg
+    let initState = BuildStateFuncs.create ddg initialFsaMap
     let finalState = build ddg.Root initState
     let nfsa = Map.find ddg.VarName finalState.Automata
     nfsa.NfaToDfa

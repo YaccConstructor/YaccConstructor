@@ -72,6 +72,8 @@ let private createControlFlowGraph (hotspot: IInvocationExpression) =
     CSharpControlFlowBuilder.Build methodDeclaration
 
 let buildDdg (file: ICSharpFile) =
+    // the next line is for debug purposes
+    DotUtils.allMethodsCFGToDot file myDebugFolderPath
     // process the first hotspot
     let lang, hotspot = (getHotspots file).[0]
     let csharpCFG = createControlFlowGraph hotspot
@@ -89,7 +91,7 @@ let buildDdg (file: ICSharpFile) =
 
 let buildFsa (file: ICSharpFile) =
     let ddg = buildDdg file
-    let fsaForVar = buildAutomaton ddg
+    let fsaForVar = buildAutomaton ddg Map.empty
 
     // for debug
     let fsaName = "fsa_" + file.GetHashCode().ToString()
@@ -98,7 +100,33 @@ let buildFsa (file: ICSharpFile) =
 
     fsaForVar
 
-let BuildApproximation (file: ICSharpFile) = 
-    // the next line is for debug purposes
-    DotUtils.allMethodsCFGToDot file myDebugFolderPath
-    buildFsa file
+//let BuildApproximation (file: ICSharpFile) = 
+//    // the next line is for debug purposes
+//    DotUtils.allMethodsCFGToDot file myDebugFolderPath
+//    buildFsa file
+
+
+
+let buildApproxForTarget (methodDecl: ICSharpFunctionDeclaration) (targetExpr: ICSharpExpression) initialFsaMap =
+    let csharpCfg = CSharpControlFlowBuilder.Build methodDecl
+    let additionalInfo = collectAdditionalInfo csharpCfg
+    let genericCfg = convert csharpCfg additionalInfo
+    let targetExprCfe = additionalInfo.AstCfgMap.[hash targetExpr] |> List.ofSeq |> List.head
+    let ddg = ddgForNode targetExprCfe.Value.Id genericCfg
+    buildAutomaton ddg initialFsaMap
+
+let buildApproxForWholeMethod (methodDecl: ICSharpFunctionDeclaration) initialFsaMap =
+    let csharpCfg = CSharpControlFlowBuilder.Build methodDecl
+    let additionalInfo = collectAdditionalInfo csharpCfg
+    let genericCfg = convert csharpCfg additionalInfo
+    let exitNode = genericCfg.Vertices |> Seq.find (fun v -> genericCfg.OutDegree(v) = 0)
+    let ddg = ddgForNode exitNode.Id genericCfg
+    buildAutomaton ddg initialFsaMap
+
+let BuildApproximation (file: ICSharpFile) =
+    let collector = RecursiveElementCollector(fun (node: ITreeNode) -> node :? IMethodDeclaration)
+    let methods = collector.GetResults() |> Seq.map (fun n -> n :?> IMethodDeclaration)
+    methods 
+    |> Seq.filter (fun m -> Seq.isEmpty m.DeclaredElement.Parameters)
+    |> Seq.map (fun m -> buildApproxForWholeMethod m Map.empty)
+    |> Seq.iter (fun fsa -> FsaHelper.toDebugDot )

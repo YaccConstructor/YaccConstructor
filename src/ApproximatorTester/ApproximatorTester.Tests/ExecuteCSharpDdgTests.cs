@@ -87,5 +87,11 @@ namespace ApproximatorTester.Tests
         {
             DoTestFiles("SimpleConcat.cs");
         }
+
+        [Test]
+        public void TestFailTest()
+        {
+            DoTestFiles("FailTest.cs");
+        }
     }
 }

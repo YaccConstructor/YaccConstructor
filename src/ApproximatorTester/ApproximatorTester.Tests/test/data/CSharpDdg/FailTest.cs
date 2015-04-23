@@ -29,6 +29,17 @@
         {
             return "arg: " + s;
         }
+
+        static string withMultiReturn()
+        {
+            string s = "";
+            if (s.IsNormalized())
+            {
+                return "norm";
+            }
+            string res = s + "some";
+            return res;
+        }
     }
 
     public class SomeClass

@@ -230,6 +230,13 @@ module GenericCFGFuncs =
         // end hacks
         { Graph = g; Root = root; VarName = varName }
 
+    let private nodeNotFoundMsg = "There is no node with specified ID in CFG"
+    let ddgForNode nodeId (cfg: GenericCFG) = 
+        let optNode = cfg.Vertices |> Seq.tryFind (fun n -> n.Id = nodeId)
+        match optNode with
+        | Some(node) -> ddgForVar node cfg
+        | _ -> failwith nodeNotFoundMsg
+
     let create(): GenericCFG = 
         new BidirectionalGraph<GraphNode, Edge<GraphNode>>(allowParallelEdges = false)
 

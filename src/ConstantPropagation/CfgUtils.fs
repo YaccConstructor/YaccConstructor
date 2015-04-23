@@ -56,9 +56,18 @@ let convert (csharpCFG: IControlFlowGraf) toGenericNode =
             |> List.iter(fun node -> genCFG.AddVerticesAndEdge(new Edge<GraphNode>(cur, node)) |> ignore)
             List.iter (fun ch -> dfs ch visited' genCFG) children
 
+    let mergeExits (genericCfg: GenericCFG) =
+        let nodeWithMaxId = Seq.maxBy (fun v -> v.Id) genericCfg.Vertices
+        let newExitNodeId = 1 + nodeWithMaxId.Id
+        let newExitNode = { Id = newExitNodeId; Type = OtherNode }
+        let exitNodes = genericCfg.Vertices |> Seq.filter (fun v -> genericCfg.OutDegree(v) = 0)
+        do genericCfg.AddVertex newExitNode |> ignore
+        do exitNodes |> Seq.iter (fun n -> genericCfg.AddEdge (Edge(n, newExitNode)) |> ignore)
+        genericCfg
+
     let genericCFG = GenericCFGFuncs.create()
     dfs csharpCFG.EntryElement Set.empty genericCFG
-    genericCFG
+    mergeExits genericCFG
 
 let correspondingCfe (treeNode: ITreeNode) (cfgInfo: CSharpCFGInfo) =
     let cfgNodes = cfgInfo.AstCfgMap.[treeNode.GetHashCode()]

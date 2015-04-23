@@ -41,19 +41,21 @@ let loadLexerInputGraph gFile =
     for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, e.Tag)))
     lexerInputG
 
-let test buildAstAbstract qGraph = 
+let test buildAstAbstract qGraph (intToString : int -> string) (fileName : string) = 
     let r = buildAstAbstract qGraph
     printfn "%A" r
     match r with
-        | Error str, _ ->
+        | Error str ->
             printfn "Error"
-        | Success tree, tokens ->
-            //tree.PrintAst()
+            Assert.Fail("")
+        | Success tree ->
+            tree.AstToDot intToString fileName
+            Assert.Pass("UIII")
 //            let n, e, eps, t, amb = tree.CountCounters()
 //            Assert.AreEqual(nodesCount, n, "Nodes count mismatch")
 //            Assert.AreEqual(edgesCount, e, "Edges count mismatch")
 //            Assert.AreEqual(epsilonsCount, eps, "Epsilons count mismatch")
-//            Assert.AreEqual(termsCount, t, "Terms count mismatch")
+//            Assert.AreEqual(termsCount, t, "Terms count mismatch") 
 //            Assert.AreEqual(ambiguityCount, amb, "Ambiguities count mismatch")
 //            Assert.Pass()
 
@@ -63,7 +65,7 @@ type ``GLL abstract parser tests`` () =
 
     [<Test>]
     member this.SimpleRightRecursion () =
-        let qGraph = new ParserInputGraph<_>(0, 4)
+        let qGraph = new ParserInputGraph<_>(0, 5)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (GLL.AbstractParse.SimpleRightRecursion.B 1)
              edg 1 2 (GLL.AbstractParse.SimpleRightRecursion.A 2)
@@ -72,7 +74,7 @@ type ``GLL abstract parser tests`` () =
              edg 4 5 (GLL.AbstractParse.SimpleRightRecursion.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.AbstractParse.SimpleRightRecursion qGraph 
+        test GLL.AbstractParse.SimpleRightRecursion.buildAbstractAst qGraph GLL.AbstractParse.SimpleRightRecursion.numToString "SimpleRightRecursion.dot"
 
     [<Test>]
     member this.BadLeftRecursion () =
@@ -84,7 +86,7 @@ type ``GLL abstract parser tests`` () =
              edg 3 4 (GLL.AbstractParse.BadLeftRecursion.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.AbstractParse.BadLeftRecursion.buildAstAbstract qGraph
+        test GLL.AbstractParse.BadLeftRecursion.buildAbstractAst qGraph GLL.AbstractParse.BadLeftRecursion.numToString "BadLeftRecursion.dot"
 
     [<Test>]
     member this.SimpleAmb () =
@@ -96,17 +98,17 @@ type ``GLL abstract parser tests`` () =
              edg 3 4 (GLL.AbstractParse.SimpleAmb.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.AbstractParse.SimpleAmb.buildAstAbstract qGraph
+        test GLL.AbstractParse.SimpleAmb.buildAbstractAst qGraph GLL.AbstractParse.SimpleAmb.numToString "SimpleAmb.dot"
     
     [<Test>]
     member this.SimpleRightNull () =
-        let qGraph = new ParserInputGraph<_>(0, 1)
+        let qGraph = new ParserInputGraph<_>(0, 2)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (GLL.AbstractParse.SimpleRightNull.A 1)
              edg 1 2 (GLL.AbstractParse.SimpleRightNull.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.AbstractParse.SimpleRightNull.buildAstAbstract qGraph
+        test GLL.AbstractParse.SimpleRightNull.buildAbstractAst qGraph GLL.AbstractParse.SimpleRightNull.numToString "SimpleRightNull.dot"
 
     [<Test>]
     member this.SimpleLeftRecursion () =
@@ -118,4 +120,4 @@ type ``GLL abstract parser tests`` () =
              edg 3 4 (GLL.AbstractParse.SimpleleftRecursion.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.AbstractParse.SimpleleftRecursion.buildAstAbstract qGraph
+        test GLL.AbstractParse.SimpleleftRecursion.buildAbstractAst qGraph GLL.AbstractParse.SimpleleftRecursion.numToString "SimpleleftRecursion.dot"

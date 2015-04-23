@@ -35,21 +35,19 @@ let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)
 
 let inputGraph =
-    let qGraph = new ParserInputGraph<Token>(0, 2)
+    let qGraph = new ParserInputGraph<Token>(0, 3)
     qGraph.AddVerticesAndEdgeRange
         [
-            edg 0 1 (GLL.AbstractParse.SimpleAmb.B 1)
-            //edg 0 1 (GLL.AbstractParse.SimpleAmb.C 2)
-            //edg 1 2 (GLL.AbstractParse.SimpleAmb.B 3)
-            //edg 1 2 (GLL.AbstractParse.SimpleAmb.D 4)
-            //edg 2 3 (GLL.AbstractParse.SimpleAmb.B 0)
-            edg 1 2 (GLL.AbstractParse.SimpleAmb.RNGLR_EOF 0)
+            edg 0 1 (GLL.AbstractParse.SimpleAmb.A 1)
+            edg 1 2 (GLL.AbstractParse.SimpleAmb.B 2)
+            edg 1 2 (GLL.AbstractParse.SimpleAmb.C 3)
+            edg 2 3 (GLL.AbstractParse.SimpleAmb.RNGLR_EOF 0)
         ] |> ignore
     qGraph
 
 
 let parser = GLL.AbstractParse.SimpleAmb.buildAbstractAst
-
+  
 let r = parser inputGraph
 
 match r with

@@ -119,10 +119,11 @@ type GLL() =
                         | s when s.Contains "." -> s.Split '.' |> Array.rev |> (fun a -> a.[0], String.concat "." a.[1..])
                         | s -> "GLL",s
   
-            let printHeaders moduleName fullPath light output isAbstract =
+            let printHeaders moduleName fullPath light (output: string) isAbstract =
+                let n = output.Substring(0, output.IndexOf("."))
                 let mName = 
                     if isAbstract then
-                        "GLL.AbstractParse"
+                        "GLL.AbstractParse." + n
                     else
                         "GLL.Parse"
 

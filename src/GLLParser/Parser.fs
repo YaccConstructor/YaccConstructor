@@ -441,6 +441,6 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             | Some res -> 
                     //drawDot parser tokens "gss.dot" gss
                     let r1 = new Tree<_> (tokens, res, parser.rules)
-                    r1.AstToDot parser.NumToString parser.TokenToNumber  parser.LeftSide "ast1111111.dot"
+                    r1.AstToDot parser.NumToString "ast1111111.dot"
                     Success (r1)   
                         

@@ -72,7 +72,7 @@ let table = [| [||];[||];[|0|];[|1|];[||];[|3|];[|2|];[|2|]; |]
 let private rules = [|4; 1; 2; 1|]
 let private canInferEpsilon = [|true; true; true; true; false; false|]
 let defaultAstToDot =
-    (fun (tree : Yard.Generators.Common.AST3.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
+    (fun (tree : Yard.Generators.Common.AST3.Tree<Token>) -> tree.AstToDot numToString)
 
 let private rulesStart = [|0; 3; 3; 4; 4|]
 let startRule = 2
@@ -90,7 +90,7 @@ let literalsCount = 0
 let slots = dict <| [|(-1, 0); (2, 1); (3, 2); (131073, 3)|]
 
 let private parserSource = new ParserSource2<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon, slots)
-let buildAbstractAst : (AbstractAnalysis.Common.ParserInputGraph<'token> -> ParseResult<_>) =
+let buildAbstractAst : (AbstractAnalysis.Common.ParserInputGraph<Token> -> ParseResult<_>) =
     buildAbstractAst<Token> parserSource
 
 

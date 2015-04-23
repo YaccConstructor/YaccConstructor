@@ -82,7 +82,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSource2<'TokenType>) (input : P
 
         let containsContext (inputVertex : int) (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
             let index = (int) inputVertex
-            if inputVertex <> input.FinalState - 1 
+            if inputVertex <> input.FinalState 
             then
                 let vertexKey = (vertex.Level, vertex.Label)
                 if setU.[index] <> Unchecked.defaultof<Dictionary<int<labelMeasure>, Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>>>
@@ -357,13 +357,12 @@ let buildAbstractAst<'TokenType> (parser : ParserSource2<'TokenType>) (input : P
             let position = getPosition !currentLabel
             if Array.length parser.rules.[rule] = 0 
             then
-//                let t = new TerminalNode(-1, packExtension !currentIndex !currentIndex)
-//                sppfNodes.Add t
-//                let res = sppfNodes.Count - 1
-//                currentR := res * 1<nodeMeasure>
-//                currentN := getNodeP !currentLabel !currentN !currentR  
-//                pop !currentGSSNode !currentVertexInInput !currentN
-              printf "ff"  
+              let t = new TerminalNode(-1, packExtension !currentVertexInInput !currentVertexInInput)
+              sppfNodes.Add t
+              let res = sppfNodes.Count - 1
+              currentR := res * 1<nodeMeasure>
+              currentN := getNodeP !currentLabel !currentN !currentR  
+              pop !currentGSSNode !currentVertexInInput !currentN 
             else
                 if Array.length parser.rules.[rule] <> position
                 then
@@ -373,20 +372,24 @@ let buildAbstractAst<'TokenType> (parser : ParserSource2<'TokenType>) (input : P
                        if (parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol)
                         then
                             let isEq (sym : int) (elem : ParserEdge<'TokenType>) = sym = parser.TokenToNumber elem.Tag
-                            let curEdge = Seq.find (isEq curSymbol) (input.OutEdges !currentVertexInInput)
-                            let curToken = parser.TokenToNumber curEdge.Tag
+                            let curEdge = Seq.tryFind (isEq curSymbol) (input.OutEdges !currentVertexInInput)
                             
-                            if curSymbol = curToken 
-                            then
-                                if !currentN = dummy
-                                then currentN := getNodeT curEdge
-                                else currentR := getNodeT curEdge
-                                currentVertexInInput := curEdge.Target
-                                currentLabel := packLabel (rule) ((position) + 1)
-                                if !currentR <> dummy
-                                then 
-                                    currentN := getNodeP !currentLabel !currentN !currentR
-                                condition := false
+                            match curEdge with
+                                | Some e -> 
+                                    let curToken = parser.TokenToNumber e.Tag
+                                    if curSymbol = curToken 
+                                    then
+                                        if !currentN = dummy
+                                        then currentN := getNodeT e
+                                        else currentR := getNodeT e
+                                        currentVertexInInput := e.Target
+                                        currentLabel := packLabel (rule) ((position) + 1)
+                                        if !currentR <> dummy
+                                        then 
+                                            currentN := getNodeP !currentLabel !currentN !currentR
+                                        condition := false
+                                | None _ -> ()
+                            
                         else 
                             let getIndex nTerm term = 
                                 let mutable index = nTerm
@@ -449,6 +452,6 @@ let buildAbstractAst<'TokenType> (parser : ParserSource2<'TokenType>) (input : P
             | Some res -> 
                     //drawDot parser tokens "gss.dot" gss
                     let r1 = new Tree<_> (tokens, res, parser.rules)
-                    r1.AstToDot parser.NumToString parser.TokenToNumber  parser.LeftSide "ast1111111.dot"
+                    r1.AstToDot parser.NumToString "ast1111111.dot"
                     Success (r1)   
                         

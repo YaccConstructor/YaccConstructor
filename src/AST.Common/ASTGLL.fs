@@ -80,7 +80,7 @@ type NumNode =
 [<AllowNullLiteral>]
 type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) =
    
-    member this.AstToDot (indToString : int -> string) tokenToNumber (leftSide : array<int>) (path : string) =
+    member this.AstToDot (indToString : int -> string) (path : string) =
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
 

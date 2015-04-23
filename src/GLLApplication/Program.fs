@@ -58,7 +58,7 @@ let run2 path astBuilder =
 //
 //let parser2 = GLL.Parse.SimpleAmb.buildAst
 //let str = String.init 1 (fun i -> "B ") + "B"
-let str = "B"
+let str = "A"
 let r = run2 str parser1
 //printfn "simple amb"
 

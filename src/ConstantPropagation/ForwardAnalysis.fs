@@ -237,6 +237,10 @@ let buildAutomaton (ddg: DDG) (initialFsaMap: FSAMap) =
                 operands', automata
             | Concat -> (applyConcat operands), automata
             | Arbitrary(name) -> failwith unsupportedCaseMsg
+        | ExitNode(varsSet) ->
+            let exitFsa = varsSet |> List.ofSeq |> List.map (fun v -> Map.find v automata)
+            let unitedFsa = List.reduce FsaHelper.union exitFsa
+            processAssingLikeNode "return" (unitedFsa :: operands) automata
         | _ -> failwith unexpectedNodeMsg
 
     let rec build (node: GraphNode) (state: BuildState) =

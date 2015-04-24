@@ -27,6 +27,7 @@ type GraphNodeType =
 // enter node index and body node index in Entries array
 | LoopNode of int * int
 | OtherNode
+| ExitNode of Set<string>
 
 type GraphNode = {
     Id: int
@@ -51,6 +52,7 @@ module GraphNodeFuncs =
         | VarRef(name) -> sprintf "varRef(%s)" name
         | LoopNode(_,_) -> "loopNode"
         | OtherNode -> "otherNode"
+        | ExitNode(vars) -> sprintf "exit(%s)" <| Seq.fold (fun acc v -> acc + "," + v) "" vars
 
 type GenericCFG = BidirectionalGraph<GraphNode, Edge<GraphNode>>
 
@@ -64,7 +66,7 @@ module GenericCFGFuncs =
 
     // exception messages 
     let private wrongCFGNodeTypeMsg = 
-        "CFGNode was expected to be of VarRef type case"
+        "CFGNode was expected to be of ExitNode type case"
 
     let private zeroCounterDecrMsg = "attempt to decrement zero counter"
 
@@ -96,7 +98,7 @@ module GenericCFGFuncs =
             then graph.AddEdge (new Edge<GraphNode>(src, dst)) |> ignore
             ddGraph
 
-        let create(finalNode: GraphNode) =
+        let create (finalNode: GraphNode) =
             let ddGraph = {
                 Graph = new BidirectionalGraph<GraphNode, Edge<GraphNode>>()
                 ConnectionNode = finalNode }
@@ -115,9 +117,9 @@ module GenericCFGFuncs =
         VisitedForks: Map<int, Set<string>>
         NodesToVisit: Set<int> }
 
-    let rec ddgForVar (varRef: GraphNode) (cfg: GenericCFG) = 
-        let varRefName = function
-        | VarRef(name) -> name
+    let rec private cfgToDdg (exitNode: GraphNode) (cfg: GenericCFG) = 
+        let getExitVars = function
+        | ExitNode(vars) -> vars
         | _ -> failwith wrongCFGNodeTypeMsg
 
         let setGraphConnectionNode nodeId (state: BuildState) =
@@ -197,45 +199,55 @@ module GenericCFGFuncs =
                     entries, state, varsSet
             processEntries entries updVarsSet updState 
 
-        let graphInfo = DDGBuildFuncs.create(varRef)
-        let varName = varRefName varRef.Type
-        let varsSet = Set.ofList [varName]
+        let graphInfo = DDGBuildFuncs.create exitNode
+        let varsSet = getExitVars exitNode.Type
         let initState = { 
             GraphInfo = graphInfo;
             VisitedForks = Map.empty
             NodesToVisit = Set.empty }
-        let resState = build varRef cfg varsSet initState
+        let resState = build exitNode cfg varsSet initState
+        let ddg = resState.GraphInfo.Graph
         // hack 1
         let root = 
             // bad algo
             // todo: improve
-            resState.GraphInfo.Graph.Vertices
-            |> List.ofSeq
-            |> List.find (fun n -> resState.GraphInfo.Graph.InDegree(n) = 0)
+            ddg.Vertices |> List.ofSeq |> List.find (fun n -> ddg.InDegree(n) = 0)
         // hack 2
-        let g = resState.GraphInfo.Graph
         let loopNodesInEdges =
-            g.Vertices
+            ddg.Vertices
             |> Seq.filter(fun n -> match n.Type with LoopNode(_, _) -> true | _ -> false)
-            |> Seq.map (fun n -> g.InEdges(n))
+            |> Seq.map (fun n -> ddg.InEdges(n))
             |> Seq.concat
             |> List.ofSeq
             |> List.rev
         do loopNodesInEdges
-        |> List.iter(fun e -> g.RemoveEdge(e) |> ignore)
+        |> List.iter(fun e -> ddg.RemoveEdge(e) |> ignore)
         // the main hack is here - we add edges in reversed order so 
         // enter edge index and body exit index are valid now
         do loopNodesInEdges
-        |> List.iter(fun e -> g.AddEdge(e) |> ignore)
-        // end hacks
-        { Graph = g; Root = root; VarName = varName }
+        |> List.iter(fun e -> ddg.AddEdge(e) |> ignore)
+        // end hacks, the last one is this varName below
+        { Graph = ddg; Root = root; VarName = "return" }
 
-    let private nodeNotFoundMsg = "There is no node with specified ID in CFG"
-    let ddgForNode nodeId (cfg: GenericCFG) = 
-        let optNode = cfg.Vertices |> Seq.tryFind (fun n -> n.Id = nodeId)
-        match optNode with
-        | Some(node) -> ddgForVar node cfg
-        | _ -> failwith nodeNotFoundMsg
+    let exitNodeTypeMsg = "only VarRef typed nodes are supported as exit nodes for now"
+    let private ddgForNodes (nodes: list<GraphNode>) (cfg: GenericCFG) =
+        let nodeWithMaxId = Seq.maxBy (fun v -> v.Id) cfg.Vertices
+        let newExitNodeId = 1 + nodeWithMaxId.Id
+        let nodeVarRefNames = 
+            nodes 
+            |> List.map (fun n -> match n.Type with | VarRef(name) -> name | _ -> failwith exitNodeTypeMsg)
+            |> Set.ofList
+        let newExitNode = { Id = newExitNodeId; Type = ExitNode(nodeVarRefNames) }
+        do cfg.AddVertex newExitNode |> ignore
+        do nodes |> Seq.iter (fun n -> cfg.AddEdge (Edge(n, newExitNode)) |> ignore)
+        cfgToDdg newExitNode cfg
+
+    let ddgForVar (varRef: GraphNode) (cfg: GenericCFG) =
+        ddgForNodes [varRef] cfg
+
+    let ddgForExits (cfg: GenericCFG) = 
+        let exitNodes =  cfg.Vertices |> Seq.filter (fun v -> cfg.OutDegree(v) = 0)
+        ddgForNodes (List.ofSeq exitNodes) cfg
 
     let create(): GenericCFG = 
         new BidirectionalGraph<GraphNode, Edge<GraphNode>>(allowParallelEdges = false)

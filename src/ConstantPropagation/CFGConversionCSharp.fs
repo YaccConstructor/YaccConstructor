@@ -155,7 +155,11 @@ let convert (csharpCFG: ICSharpControlFlowGraf) (cfgInfo: CSharpCFGInfo) =
                         addExpr.OperatorOperands 
                         |> List.ofSeq
                         |> List.map correspondingCfeId
-                    Operation(Concat, operandsIDs) 
+                    Operation(Concat, operandsIDs)
+                | :? IReturnStatement as retStmt ->
+                    // node: only var refs are supported in return statement for now
+                    let varRef = retStmt.Value :?> IReferenceExpression
+                    VarRef(varRef.NameIdentifier.Name)
                 | _ -> OtherNode
         { Id = cfe.Id; Type = nType }
 

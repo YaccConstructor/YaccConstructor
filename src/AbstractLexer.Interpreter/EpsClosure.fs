@@ -78,7 +78,7 @@ let NfaToDfa (inGraph: ParserInputGraph<_>)=
     let numNfaNodes = inGraph.VertexCount
     let rec EClosure1 (acc:NfaNodeIdSetBuilder) n = 
         if not (acc.Contains n) then 
-            acc.Add n |> ignore
+            acc.Add n |> ignore (*GET*)
             let epsTransitions = (inGraph.OutEdges n) |> List.ofSeq |> List.filter (fun x -> Option.isNone x.Tag) |> List.map (fun e -> e.Target)
             match epsTransitions with 
             | [] -> () // this Clause is an optimization - the list is normally empty

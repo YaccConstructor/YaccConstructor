@@ -23,7 +23,7 @@ open Yard.Examples.MSParser
 open LexerHelper
 open System
 open System.IO
-open Yard.Generators.Common.ARNGLR.AST
+open Yard.Generators.Common.AST
 open YC.SDK.CommonInterfaces
 open YC.SDK.ReSharper.Helper
 open Mono.Addins

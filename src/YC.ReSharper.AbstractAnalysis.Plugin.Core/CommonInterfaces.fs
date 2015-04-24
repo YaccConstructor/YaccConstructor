@@ -49,7 +49,6 @@ type IInjectedLanguageModule<'br,'range,'node when 'br : equality> =
 
 type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:equality and 'node:null 
     (
-        //tokenize: Appr<'br> -> ParserInputGraph<'TokenType>
         tokenize: Appr<'br> -> Test<ParserInputGraph<'TokenType>, array<Symb<char*Position<'br>>>>
         , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang, calculatePos:_->seq<'range>
         , getDocumentRange: 'br -> 'range
@@ -109,11 +108,11 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
                 y)
         |> Option.iter
             (function 
-                | Yard.Generators.RNGLR.Parser.Success(tree, _, errors) ->
-                    forest <- (tree, errors) :: forest
+                | Yard.Generators.ARNGLR.Parser.Success(tree) ->
+                    forest <- (tree, new ErrorDictionary<'TokenType>()) :: forest
                     otherForest <- new OtherTree<'TokenType>(tree) :: otherForest
                     parsingFinished.Trigger (new ParsingFinishedArgs (lang))
-                | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,_) -> tok |> Array.iter addPError 
+                | Yard.Generators.ARNGLR.Parser.Error(_,tok,_) -> tok |> addPError 
             )
 
     let getNextTree index : TreeGenerationState<'node> = 

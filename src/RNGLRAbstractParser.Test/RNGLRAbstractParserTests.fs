@@ -28,7 +28,6 @@ open YC.Tests.Helper
 open Yard.Generators.ARNGLR.Parser
 
 open YC.FSA.GraphBasedFsa
-open YC.FST.GraphBasedFst
 open YC.FSA.FsaApproximation
 
 let baseInputGraphsPath = "../../../Tests/AbstractRNGLR/DOT"
@@ -37,16 +36,13 @@ let path name = path baseInputGraphsPath name
 
 let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)
+
 let loadLexerInputGraph gFile =
     let qGraph = loadDotToQG baseInputGraphsPath gFile
     let lexerInputG = new LexerInputGraph<_>()
     lexerInputG.StartVertex <- 0
     for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, e.Tag)))
     lexerInputG
-    let graphFsa = lexerInputGraph.ApprToFSA() 
-    let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
-    let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
-    let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
 
 let test buildAstAbstract qGraph nodesCount edgesCount epsilonsCount termsCount ambiguityCount = 
     let r = (new Parser<_>()).Parse  buildAstAbstract qGraph

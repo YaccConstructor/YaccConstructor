@@ -416,3 +416,9 @@ src/Backup1/NoLiterals.fs
 src/Backup1/NoMeta.fs
 src/Backup1/packages.config
 src/Backup1/SingleModule.fs
+*.orig
+*.yrd.fs
+src/TSQL/Lexer_Abstract.fs
+src/TSQLTests.fs/Lexer_Abstract.fs
+src/TSQL/Lexer.fs
+src/Calc/Lexer.fs

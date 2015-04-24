@@ -12,8 +12,8 @@
     <Name>GLLApplication</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-  </PropertyGroup> 
-<Import Project="../YC.targets" />
+  </PropertyGroup>
+  <Import Project="../YC.targets" />
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
@@ -31,12 +31,8 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
-    <Compile Include="SimpleLeftRecursion.yrd.fs" />
-    <Compile Include="SimpleRightRecursion.yrd.fs" />
-    <Compile Include="SimpleAmb.yrd.fs" />
-    <Compile Include="Mixed.yrd.fs" />
-    <Compile Include="BadLeftRecursion.yrd.fs" />
     <None Include="App.config" />
+    <Compile Include="SimpleAmb.yrd.fs" />
     <Compile Include="Lexer2.fs" />
     <Compile Include="Program.fs" />
     <None Include="packages.config" />

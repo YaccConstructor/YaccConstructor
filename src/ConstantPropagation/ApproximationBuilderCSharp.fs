@@ -107,21 +107,21 @@ let BuildApproximation (file: ICSharpFile) =
 
 
 
-let buildApproxForTarget (methodDecl: ICSharpFunctionDeclaration) (targetExpr: ICSharpExpression) initialFsaMap =
-    let csharpCfg = CSharpControlFlowBuilder.Build methodDecl
-    let additionalInfo = collectAdditionalInfo csharpCfg
-    let genericCfg = convert csharpCfg additionalInfo
-    let targetExprCfe = additionalInfo.AstCfgMap.[hash targetExpr] |> List.ofSeq |> List.head
-    let ddg = ddgForNode targetExprCfe.Value.Id genericCfg
-    buildAutomaton ddg initialFsaMap
-
-let buildApproxForWholeMethod (methodDecl: ICSharpFunctionDeclaration) initialFsaMap =
-    let csharpCfg = CSharpControlFlowBuilder.Build methodDecl
-    let additionalInfo = collectAdditionalInfo csharpCfg
-    let genericCfg = convert csharpCfg additionalInfo
-    let exitNode = genericCfg.Vertices |> Seq.find (fun v -> genericCfg.OutDegree(v) = 0)
-    let ddg = ddgForNode exitNode.Id genericCfg
-    buildAutomaton ddg initialFsaMap
+//let buildApproxForTarget (methodDecl: ICSharpFunctionDeclaration) (targetExpr: ICSharpExpression) initialFsaMap =
+//    let csharpCfg = CSharpControlFlowBuilder.Build methodDecl
+//    let additionalInfo = collectAdditionalInfo csharpCfg
+//    let genericCfg = convert csharpCfg additionalInfo
+//    let targetExprCfe = additionalInfo.AstCfgMap.[hash targetExpr] |> List.ofSeq |> List.head
+//    let ddg = ddgForNode targetExprCfe.Value.Id genericCfg
+//    buildAutomaton ddg initialFsaMap
+//
+//let buildApproxForWholeMethod (methodDecl: ICSharpFunctionDeclaration) initialFsaMap =
+//    let csharpCfg = CSharpControlFlowBuilder.Build methodDecl
+//    let additionalInfo = collectAdditionalInfo csharpCfg
+//    let genericCfg = convert csharpCfg additionalInfo
+//    let exitNode = genericCfg.Vertices |> Seq.find (fun v -> genericCfg.OutDegree(v) = 0)
+//    let ddg = ddgForNode exitNode.Id genericCfg
+//    buildAutomaton ddg initialFsaMap
 
 //let BuildApproximation (file: ICSharpFile) =
 //    let collector = RecursiveElementCollector(fun (node: ITreeNode) -> node :? IMethodDeclaration)

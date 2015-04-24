@@ -511,13 +511,13 @@ type ``RNGLR abstract parser tests`` () =
             ] |> ignore
 
         test RNGLR.StrangeBrackets.buildAstAbstract qGraph 25 24 4 8 1
-[<EntryPoint>]
-let f x =
-    if System.IO.Directory.Exists "dot" 
-    then 
-        System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
-    else System.IO.Directory.CreateDirectory "dot" |> ignore
-    let t = new ``RNGLR abstract parser tests`` () 
+//[<EntryPoint>]
+//let f x =
+//    if System.IO.Directory.Exists "dot" 
+//    then 
+//        System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
+//    else System.IO.Directory.CreateDirectory "dot" |> ignore
+//    let t = new ``RNGLR abstract parser tests`` () 
 
 //    t._01_PrettySimpleCalc_SequenceInput ()
 //    t._02_PrettySimpleCalc_SimpleBranchedInput ()
@@ -546,6 +546,5 @@ let f x =
 //    t._25_UnambiguousBrackets_BiggerCircle ()
 //    t._26_UnambiguousBrackets_Inf()
 //    t._27_UnambiguousBrackets_WithoutEmptyString()
-    t._28_UnambiguousBrackets_DifferentPathLengths ()
-    0
-    
+//    t._28_UnambiguousBrackets_DifferentPathLengths ()
+//    0

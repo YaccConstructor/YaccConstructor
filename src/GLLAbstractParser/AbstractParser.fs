@@ -39,7 +39,7 @@ type ParseResult<'TokenType> =
     | Error of string
 
 
-let buildAbstractAst<'TokenType> (parser : ParserSource2<'TokenType>) (input : ParserInputGraph<'TokenType>) : ParseResult<_> = 
+let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : ParserInputGraph<'TokenType>) : ParseResult<_> = 
     
     if input.EdgeCount = 0 then
       //  if parser.AcceptEmptyInput then

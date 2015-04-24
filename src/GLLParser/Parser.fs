@@ -45,7 +45,7 @@ type ParseResult<'TokenType> =
     | Error of string
 
 
-let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'TokenType>) : ParseResult<_> = 
+let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'TokenType>) : ParseResult<_> = 
     let tokens = Seq.toArray tokens
     let inputLength = Seq.length tokens
     let nonTermsCountLimit = 1 + (Array.max parser.LeftSide)

@@ -1,7 +1,7 @@
 ﻿namespace Yard.Generators.GLL
 open System.Collections.Generic
        
-type ParserSource2<'TokenType> (
+type ParserSourceGLL<'TokenType> (
                                tokenToNumber        : 'TokenType -> int
                                , genLiteral         : string -> int -> 'TokenType option
                                , numToString        : int -> string
@@ -10,7 +10,6 @@ type ParserSource2<'TokenType> (
                                , isTerminal         : 'TokenType -> bool
                                , isNonTerminal      : 'TokenType -> bool
                                , getLiteralNames    : string list
-                               //, table              : string[][]
                                , table              : int [][]
                                , rules              : array<int>
                                , rulesStart         : array<int>

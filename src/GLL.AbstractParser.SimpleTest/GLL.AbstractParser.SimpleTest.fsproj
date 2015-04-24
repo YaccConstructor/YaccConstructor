@@ -68,6 +68,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <Compile Include="SimpleBranch.yrd.fs" />
     <Compile Include="BadLeftRecursion.yrd.fs" />
     <Compile Include="SimpleAmb.yrd.fs" />
     <Compile Include="SimpleleftRecursion.yrd.fs" />

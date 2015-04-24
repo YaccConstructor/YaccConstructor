@@ -26,7 +26,8 @@ open GLL.AbstractParse.SimpleRightRecursion
 open GLL.AbstractParse.BadLeftRecursion
 open GLL.AbstractParse.SimpleAmb
 open GLL.AbstractParse.SimpleRightNull
-open GLL.AbstractParse.SimpleleftRecursion
+open GLL.AbstractParse.SimpleLeftRecursion
+open GLL.AbstractParse.SimpleBranch
 
 let baseInputGraphsPath = "../../../Tests/AbstractRNGLR/DOT"
 
@@ -114,10 +115,22 @@ type ``GLL abstract parser tests`` () =
     member this.SimpleLeftRecursion () =
         let qGraph = new ParserInputGraph<_>(0, 4)
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (GLL.AbstractParse.SimpleleftRecursion.B 1)
-             edg 1 2 (GLL.AbstractParse.SimpleleftRecursion.B 2)
-             edg 2 3 (GLL.AbstractParse.SimpleleftRecursion.B 3)
-             edg 3 4 (GLL.AbstractParse.SimpleleftRecursion.RNGLR_EOF 0)
+            [edg 0 1 (GLL.AbstractParse.SimpleLeftRecursion.B 1)
+             edg 1 2 (GLL.AbstractParse.SimpleLeftRecursion.B 2)
+             edg 2 3 (GLL.AbstractParse.SimpleLeftRecursion.B 3)
+             edg 3 4 (GLL.AbstractParse.SimpleLeftRecursion.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.AbstractParse.SimpleleftRecursion.buildAbstractAst qGraph GLL.AbstractParse.SimpleleftRecursion.numToString "SimpleleftRecursion.dot"
+        test GLL.AbstractParse.SimpleLeftRecursion.buildAbstractAst qGraph GLL.AbstractParse.SimpleLeftRecursion.numToString "SimpleLeftRecursion.dot"
+
+    [<Test>]
+    member this.SimpleBranch () =
+        let qGraph = new ParserInputGraph<_>(0, 3)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (GLL.AbstractParse.SimpleBranch.A 1)
+             edg 1 2 (GLL.AbstractParse.SimpleBranch.C 2)
+             edg 1 2 (GLL.AbstractParse.SimpleBranch.B 3)
+             edg 2 3 (GLL.AbstractParse.SimpleBranch.RNGLR_EOF 0)
+             ] |> ignore
+
+        test GLL.AbstractParse.SimpleBranch.buildAbstractAst qGraph GLL.AbstractParse.SimpleBranch.numToString "SimpleBranch.dot"

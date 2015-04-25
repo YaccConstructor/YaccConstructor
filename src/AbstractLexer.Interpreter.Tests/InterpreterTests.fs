@@ -13,6 +13,11 @@ open YC.FSA.GraphBasedFsa
 
 let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
 let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
+
+//let printSmb (x:char*Position<_>) = 
+//        match x with
+//        | (y, _) when y = char 65535 -> "eof"  
+//        | _ -> (fst x).ToString() + "_br: " + (snd x).back_ref.ToString() + "(" + (snd x).start_offset.ToString() + "," + (snd x).end_offset.ToString() + ")"
      
 let TokenizationTest (graphAppr:Appr<_>) eCount vCount  =
     let graphFsa = graphAppr.ApprToFSA()

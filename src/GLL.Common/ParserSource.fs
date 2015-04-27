@@ -8,7 +8,6 @@ type ParserSourceGLL<'TokenType> (
                                , tokenData          : 'TokenType -> obj
                                , isLiteral          : 'TokenType -> bool
                                , isTerminal         : 'TokenType -> bool
-                               , isNonTerminal      : 'TokenType -> bool
                                , getLiteralNames    : string list
                                , table              : int [][]
                                , rules              : array<int>
@@ -49,7 +48,6 @@ type ParserSourceGLL<'TokenType> (
     member this.TokenData          = tokenData
     member this.IsLiteral          = isLiteral
     member this.IsTerminal         = isTerminal
-    member this.IsNonTerminal      = isNonTerminal 
     member this.GetLiteralNames    = getLiteralNames                         
     member this.Table              = table
     member this.rules              = _rules

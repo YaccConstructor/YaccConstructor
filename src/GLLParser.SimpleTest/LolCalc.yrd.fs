@@ -4,7 +4,7 @@ module GLL.ParseLolCalc
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.GLL.Parser
 open Yard.Generators.GLL
-open Yard.Generators.RNGLR.AST
+open Yard.Generators.Common.ASTGLL
 type Token =
     | A of (int)
     | ADD of (int)
@@ -92,7 +92,7 @@ let table = [| [||];[||];[||];[||];[||];[|2; 1; 0|];[||];[|2; 1; 0|];[||];[||];[
 let private rules = [|1; 5; 1; 1; 7; 1; 2; 1; 4; 6|]
 let private canInferEpsilon = [|true; false; false; false; false; false; false; false; false|]
 let defaultAstToDot =
-    (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
+    (fun (tree : Yard.Generators.Common.ASTGLL.Tree<Token>) -> tree.AstToDot numToString)
 
 let private rulesStart = [|0; 3; 6; 7; 8; 9; 10|]
 let startRule = 3
@@ -107,8 +107,9 @@ let literalStart = 9
 let literalEnd = 8
 let literalsCount = 0
 
+let slots = dict <| [|(-1, 0); (1, 1); (3, 2); (65537, 3); (65539, 4); (131073, 5); (196609, 6)|]
 
-let private parserSource = new ParserSource2<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon)
+let private parserSource = new ParserSource2<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon, slots)
 let buildAst : (seq<Token> -> ParseResult<_>) =
     buildAst<Token> parserSource
 

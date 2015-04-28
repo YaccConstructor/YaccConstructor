@@ -209,7 +209,7 @@ let () =
                 ilTree := apply_Conversion conv !ilTree
                 checkSources conv !ilTree
   //          printfn "========================================================"
-    //        printfn "%A" <| ilTree
+           // printfn "%A" <| !ilTree
             let gen =
                 let _raise () = InvalidGenName generatorName |> raise
                 if Array.exists (fun (elem : Generator) -> elem.Name = generatorName) addinGenerators
@@ -236,7 +236,9 @@ let () =
                             ilTree := {!ilTree with grammar = constr.Fix grammar}
 
                     match !generatorParams with
-                    | None -> gen.Generate !ilTree
+                    | None -> 
+                        printfn "%A" <| !ilTree
+                        gen.Generate !ilTree
                     | Some genParams -> gen.Generate(!ilTree, genParams)
                 //with
 //                | Yard.Generators.GNESCCGenerator.StartRuleNotFound 

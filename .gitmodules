@@ -4,3 +4,6 @@
 [submodule "FST"]
 	path = FST
 	url = https://github.com/YaccConstructor/YC.FST.git
+[submodule "facio"]
+	path = facio
+	url = git://github.com/emavchun/facio.git

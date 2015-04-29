@@ -421,3 +421,4 @@ src/TSQLTests.fs/Lexer_Abstract.fs
 src/TSQL/Lexer.fs
 src/Calc/Lexer.fs
 src/Calc/res.dot
+*.yrd.fs

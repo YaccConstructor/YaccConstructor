@@ -422,3 +422,7 @@ src/TSQL/Lexer.fs
 src/Calc/Lexer.fs
 src/Calc/res.dot
 *.yrd.fs
+src/GLL.AbstractParser.SimpleTest/*.dot
+src/GLL.AbstractParser.SimpleTest/*.yrd.fs
+src/GLL.AbstractParser.SimpleTest/*.yrd.fs
+src/GLLParser.SimpleTest/*.dot

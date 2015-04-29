@@ -25,6 +25,7 @@ module YC.TSQLLexer
 
 open Microsoft.FSharp.Collections
 open YC.FST.GraphBasedFst
+open YC.FSA.GraphBasedFsa
 open YC.FST.AbstractLexing.Interpreter
 open AbstractAnalysis.Common
 open Yard.Examples.MSParser
@@ -38,7 +39,7 @@ open System.Collections.Generic
 let mutable id = 0<id>
 
 
-# 41 "Lexer.fs"
+# 42 "Lexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -125,94 +126,94 @@ and tokens  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_tokens
 and _fslex_tokens  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 60 "Lexer.fsl"
+# 61 "Lexer.fsl"
                                  DEC_NUMBER(gr)|> Some 
-# 130 "Lexer.fs"
+# 131 "Lexer.fs"
           )
   | 1 -> ( 
-# 61 "Lexer.fsl"
+# 62 "Lexer.fsl"
                                  None 
-# 135 "Lexer.fs"
+# 136 "Lexer.fs"
           )
   | 2 -> ( 
-# 63 "Lexer.fsl"
+# 64 "Lexer.fsl"
                              L_comma_(gr) |> Some 
-# 140 "Lexer.fs"
+# 141 "Lexer.fs"
           )
   | 3 -> ( 
-# 64 "Lexer.fsl"
+# 65 "Lexer.fsl"
                              L_equal_(gr) |> Some 
-# 145 "Lexer.fs"
+# 146 "Lexer.fs"
           )
   | 4 -> ( 
-# 65 "Lexer.fsl"
+# 66 "Lexer.fsl"
                              L_more_(gr) |> Some 
-# 150 "Lexer.fs"
+# 151 "Lexer.fs"
           )
   | 5 -> ( 
-# 66 "Lexer.fsl"
+# 67 "Lexer.fsl"
                              L_less_(gr) |> Some 
-# 155 "Lexer.fs"
+# 156 "Lexer.fs"
           )
   | 6 -> ( 
-# 67 "Lexer.fsl"
+# 68 "Lexer.fsl"
                              L_colon_(gr) |> Some
-# 160 "Lexer.fs"
+# 161 "Lexer.fs"
           )
   | 7 -> ( 
-# 68 "Lexer.fsl"
+# 69 "Lexer.fsl"
                              L_left_bracket_(gr) |> Some
-# 165 "Lexer.fs"
+# 166 "Lexer.fs"
           )
   | 8 -> ( 
-# 69 "Lexer.fsl"
+# 70 "Lexer.fsl"
                              L_right_bracket_(gr) |> Some
-# 170 "Lexer.fs"
+# 171 "Lexer.fs"
           )
   | 9 -> ( 
-# 72 "Lexer.fsl"
+# 73 "Lexer.fsl"
                             L_plus_(gr) |> Some 
-# 175 "Lexer.fs"
+# 176 "Lexer.fs"
           )
   | 10 -> ( 
-# 73 "Lexer.fsl"
+# 74 "Lexer.fsl"
                             L_minus_(gr) |> Some 
-# 180 "Lexer.fs"
+# 181 "Lexer.fs"
           )
   | 11 -> ( 
-# 75 "Lexer.fsl"
+# 76 "Lexer.fsl"
                             L_star_(gr) |> Some 
-# 185 "Lexer.fs"
+# 186 "Lexer.fs"
           )
   | 12 -> ( 
-# 77 "Lexer.fsl"
+# 78 "Lexer.fsl"
                              L_select(gr) |> Some 
-# 190 "Lexer.fs"
+# 191 "Lexer.fs"
           )
   | 13 -> ( 
-# 78 "Lexer.fsl"
+# 79 "Lexer.fsl"
                            L_from(gr)|> Some 
-# 195 "Lexer.fs"
+# 196 "Lexer.fs"
           )
   | 14 -> ( 
-# 79 "Lexer.fsl"
+# 80 "Lexer.fsl"
                             L_where(gr)|> Some 
-# 200 "Lexer.fs"
+# 201 "Lexer.fs"
           )
   | 15 -> ( 
-# 80 "Lexer.fsl"
+# 81 "Lexer.fsl"
                           L_and_(gr) |> Some 
-# 205 "Lexer.fs"
+# 206 "Lexer.fs"
           )
   | 16 -> ( 
-# 81 "Lexer.fsl"
+# 82 "Lexer.fsl"
                          L_or_(gr) |> Some 
-# 210 "Lexer.fs"
+# 211 "Lexer.fs"
           )
   | 17 -> ( 
-# 82 "Lexer.fsl"
+# 83 "Lexer.fsl"
                           IDENT(gr) |> Some 
-# 215 "Lexer.fs"
+# 216 "Lexer.fs"
           )
   | _ -> failwith "tokens"
 

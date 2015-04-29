@@ -1,15 +1,16 @@
 module AbstractParser.Tokens
 
-open YC.FST.AbstractLexing.Interpreter
+open YC.FSA.GraphBasedFsa
+open YC.FSA.FsaApproximation
 
 type Token =
-    | NUMBER of GraphTokenValue<string>
-    | MINUS of GraphTokenValue<string>
-    | LBRACE of GraphTokenValue<string>
-    | RBRACE of GraphTokenValue<string>
-    | DIV of GraphTokenValue<string>
-    | PLUS of GraphTokenValue<string>
-    | POW of GraphTokenValue<string>
-    | MULT of GraphTokenValue<string>
-    | LITERAL of GraphTokenValue<string>
-    | RNGLR_EOF of GraphTokenValue<string>
+    | NUMBER of FSA<char*Position<string>>
+    | MINUS of FSA<char*Position<string>>
+    | LBRACE of FSA<char*Position<string>>
+    | RBRACE of FSA<char*Position<string>>
+    | DIV of FSA<char*Position<string>>
+    | PLUS of FSA<char*Position<string>>
+    | POW of FSA<char*Position<string>>
+    | MULT of FSA<char*Position<string>>
+    | LITERAL of FSA<char*Position<string>>
+    | RNGLR_EOF of FSA<char*Position<string>>

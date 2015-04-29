@@ -12,9 +12,6 @@
     <ProjectGuid>{bd2284a5-aa4d-442d-b4fb-e43b2fe9dd2a}</ProjectGuid>
     <Name>AbstractLexer.Generator</Name>
   </PropertyGroup>
-  <PropertyGroup>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
-  </PropertyGroup>
   <Import Project="../YC.targets" />
   <PropertyGroup>
     <DefineConstants>INTERNALIZED_POWER_PACK;$(DefineConstants)</DefineConstants>
@@ -23,11 +20,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <StartArguments>C:\yc\recursive-ascent\src\AbstractFsLex\Lexer.fsl -o C:\yc\recursive-ascent\src\AbstractFsLex\output</StartArguments>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <OutputPath>..\..\Bin\Release\v40\</OutputPath>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <Import Project="$(FSharpPowerPackSourcesRoot)\FSharpPowerPackSource.targets" />
+    <Import Project="$(FSharpPowerPackSourcesRoot)\FSharpPowerPackSource.targets" />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">
       <PropertyGroup>
@@ -103,6 +96,11 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\FST\FST\FSA\FSA.fsproj">
+      <Name>FSA</Name>
+      <Project>{b48cfdcc-86f7-4c3a-a5a2-8170950dd2ab}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\FST\FST\FST\FST.fsproj">
       <Name>FST</Name>
       <Project>{bcf4793c-e8b4-4fd5-9723-3c08859066c5}</Project>

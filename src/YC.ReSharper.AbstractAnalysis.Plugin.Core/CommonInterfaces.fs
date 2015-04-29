@@ -7,8 +7,9 @@ open QuickGraph.Algorithms
 open AbstractAnalysis.Common
 open Yard.Generators.Common.AST
 open YC.FST.AbstractLexing.Interpreter
-open YC.FST.FstApproximation
 open YC.FST.GraphBasedFst
+open YC.FSA.FsaApproximation
+open YC.FSA.GraphBasedFsa
 
 type TreeGenerationState<'node> = 
     | Start
@@ -33,7 +34,7 @@ type InjectedLanguageAttribute(language : string) =
     member this.language = language
 
 [<Interface>]
-type IInjectedLanguageModule<'br,'range,'node> =    
+type IInjectedLanguageModule<'br,'range,'node when 'br : equality> =    
      abstract Name: string
      abstract LexingFinished: IEvent<LexingFinishedArgs<'node>>
      abstract ParsingFinished: IEvent<ParsingFinishedArgs>
@@ -45,12 +46,12 @@ type IInjectedLanguageModule<'br,'range,'node> =
         : Appr<'br> -> ResizeArray<string * 'range> * ResizeArray<string * 'range>
 
 
-type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equality and 'node:null
+type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:equality and 'node:null 
     (
         //tokenize: Appr<'br> -> ParserInputGraph<'TokenType>
-        tokenize: Appr<'br> -> Test<ParserInputGraph<'TokenType>, array<Smbl<char * Position<'br>>>>
+        tokenize: Appr<'br> -> Test<ParserInputGraph<'TokenType>, array<Symb<char*Position<'br>>>>
         , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang, calculatePos:_->seq<'range>
-        , getDocumentRange:'br -> 'range
+        , getDocumentRange: 'br -> 'range
         , printAst: Tree<'TokenType> -> string -> unit
         , printOtherAst: OtherTree<'TokenType> -> string -> unit) as this =
 
@@ -155,7 +156,7 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
         | _ -> failwith "Unexpected state in tree generation"
 
     member this.TokenToPos calculatePos (token : 'TokenType)= 
-        let data : string * GraphTokenValue<'br> = unbox <| tokenData token
+        let data : string * FSA<char*Position<'br>> = unbox <| tokenData token
         calculatePos <| snd data
 
     member this.GetForestWithToken range = getForestWithToken range
@@ -176,18 +177,18 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
 
     member this.TranslateToTreeNode nextTree errors = (Seq.head <| translate nextTree errors)
     
-    member this.Process (graph:Appr<'br>) = 
+    member this.Process (graph:Appr<_>) = 
         let parserErrors = new ResizeArray<_>()
         let lexerErrors = new ResizeArray<_>()
 
         let addError tok =
-            let e tokName (tokenData: GraphTokenValue<'br>) = 
+            let e tokName (tokenData: FSA<char*Position<'br>>) = 
                 tokenData |> calculatePos
                 |> Seq.iter
                     ///TODO!!! Produce user friendly error message!
                     (fun br -> parserErrors.Add <| ((sprintf "%A" tokName), br))
             let name = tok |> (tokenToNumber >>  numToString)
-            let tokenData = tokenData tok :?> GraphTokenValue<'br>
+            let tokenData = tokenData tok :?> FSA<char*Position<'br>>
             e name tokenData
         
         

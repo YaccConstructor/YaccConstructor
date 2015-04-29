@@ -10,7 +10,6 @@
     <RootNamespace>GLLParser.SimpleTest</RootNamespace>
     <AssemblyName>GLLParser.SimpleTest</AssemblyName>
     <Name>GLLParser.SimpleTest</Name>
-    <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
     <RestorePackages>true</RestorePackages>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
   </PropertyGroup>

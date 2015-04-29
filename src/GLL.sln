@@ -78,6 +78,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AbstractAnalysis.Common", "
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLL.AbstractParser.SimpleTest", "GLL.AbstractParser.SimpleTest\GLL.AbstractParser.SimpleTest.fsproj", "{61A3B851-03A0-4A87-B786-D21DFE03B9DD}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSA", "..\FST\FST\FSA\FSA.fsproj", "{B48CFDCC-86F7-4C3A-A5A2-8170950DD2AB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -242,6 +244,12 @@ Global
 		{61A3B851-03A0-4A87-B786-D21DFE03B9DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61A3B851-03A0-4A87-B786-D21DFE03B9DD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{61A3B851-03A0-4A87-B786-D21DFE03B9DD}.Release|x86.ActiveCfg = Release|Any CPU
+		{B48CFDCC-86F7-4C3A-A5A2-8170950DD2AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B48CFDCC-86F7-4C3A-A5A2-8170950DD2AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B48CFDCC-86F7-4C3A-A5A2-8170950DD2AB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B48CFDCC-86F7-4C3A-A5A2-8170950DD2AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B48CFDCC-86F7-4C3A-A5A2-8170950DD2AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B48CFDCC-86F7-4C3A-A5A2-8170950DD2AB}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

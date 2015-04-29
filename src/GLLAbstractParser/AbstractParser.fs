@@ -450,7 +450,6 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         match !resultAST with
             | None -> Error ("String was not parsed")
             | Some res -> 
-                    //drawDot parser tokens "gss.dot" gss
                     let r1 = new Tree<_> (tokens, res, parser.rules)
                     r1.AstToDot parser.NumToString "ast1111111.dot"
                     Success (r1)   

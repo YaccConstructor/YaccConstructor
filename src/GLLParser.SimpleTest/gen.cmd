@@ -34,3 +34,23 @@ for %%i in (ComplexRightNull,Expr,First,List,SimpleRightNull) do (
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Brackets.yrd -c ExpandEbnf -c ExpandMeta ^
         -g "GLLGenerator -pos int -token int -abstract false -module GLL.Brackets -o Brackets.yrd.fs " >> log.txt
                                                                                                                                   
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i BadLeftRecursion.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "GLLGenerator -pos int -token int -abstract false -module GLL.BadLeftRecursion -o BadLeftRecursion.yrd.fs " >> log.txt
+
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i SimpleLeftRecursion.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "GLLGenerator -pos int -token int -abstract false -module GLL.SimpleLeftRecursion -o SimpleLeftRecursion.yrd.fs " >> log.txt
+
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i SimpleRightRecursion.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "GLLGenerator -pos int -token int -abstract false -module GLL.SimpleRightRecursion -o SimpleRightRecursion.yrd.fs " >> log.txt
+
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i SimpleAmb.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "GLLGenerator -pos int -token int -abstract false -module GLL.SimpleAmb -o SimpleAmb.yrd.fs " >> log.txt
+
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Mixed.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "GLLGenerator -pos int -token int -abstract false -module GLL.Mixed -o Mixed.yrd.fs " >> log.txt
+

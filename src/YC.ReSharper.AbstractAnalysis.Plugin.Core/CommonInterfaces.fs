@@ -55,8 +55,11 @@ type IInjectedLanguageModule<'br,'range,'node when 'br : equality> =
 type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:equality and 'node:null 
     (
         //tokenize: Appr<'br> -> ParserInputGraph<'TokenType>
-        tokenize: Appr<'br> -> Test<ParserInputGraph<'TokenType>, array<Symb<char*Position<'br>>>>
-        , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang, calculatePos:_->seq<'range>
+        tokenize: Appr<'br> -> Test<ParserInputGraph<'TokenType>
+        , array<Symb<char*Position<'br>>>>
+        , parse, translate, tokenToNumber: 'TokenType -> int
+        , numToString: int -> string, tokenData: 'TokenType -> obj
+        , tokenToTreeNode, lang, calculatePos:_->seq<'range>
         , getDocumentRange: 'br -> 'range
         , printAst: Tree<'TokenType> -> string -> unit
         , printOtherAst: OtherTree<'TokenType> -> string -> unit) as this =

@@ -190,6 +190,16 @@ let toGenericCfg (cfg: ICSharpControlFlowGraf) =
     let loopNodeToGeneric (cfe: IControlFlowElement) nodeId (info: ConvertInfo) = 
         { Id = nodeId; Type = OtherNode }
 
+    let tryGetMethodDeclaration (invocExpr: IInvocationExpression) = 
+        let decls = invocExpr
+                        .InvocationExpressionReference
+                        .Resolve()
+                        .DeclaredElement
+                        .GetDeclarations()
+        if Seq.length decls <> 0
+        then Some(decls |> Seq.head :?> IMethodDeclaration)
+        else None
+
     let toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) = 
         let nType = 
             match cfe with
@@ -227,7 +237,6 @@ let toGenericCfg (cfg: ICSharpControlFlowGraf) =
                 | :? ICSharpLiteralExpression as literalExpr ->
                     let literalVal = literalExpr.Literal.GetText().Trim[|'\"'|]
                     Literal(literalVal)
-                // todo: add support for static methods
                 | :? IInvocationExpression as invocExpr ->
                     let castToIRefExpr (n: ITreeNode) =
                         if n :? IReferenceExpression
@@ -236,15 +245,17 @@ let toGenericCfg (cfg: ICSharpControlFlowGraf) =
                     let invokedExpr = castToIRefExpr invocExpr.InvokedExpression
                     let methodName = invokedExpr.NameIdentifier.Name
                     let callTargetRefExpr = castToIRefExpr invokedExpr.QualifierExpression
-                    let declaredMethod = 
-                        let invocExprRef = invocExpr.InvocationExpressionReference.Resolve()
-                        invocExprRef.DeclaredElement :?> IMethod
+                    let psiMethod = 
+                        invocExpr
+                            .InvocationExpressionReference
+                            .Resolve()
+                            .DeclaredElement :?> IMethod
                     let args = 
                         invocExpr.Arguments 
                         |> List.ofSeq
                         |> List.map (fun a -> a.Value)
                     let dependencies = 
-                        if declaredMethod.IsStatic
+                        if psiMethod.IsStatic
                         then args
                         else callTargetRefExpr :> ICSharpExpression :: args
                     let depIDs = dependencies |> List.map (fun d -> getGenericNodeId d info)

@@ -28,7 +28,7 @@ namespace ApproximatorTester
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
             var inputFile = _provider.PsiFile;
-            var ddg = ApproximationBuilderCSharp.buildDdg(inputFile);
+            var ddg = ApproximateCsharp.buildDdg(inputFile);
             Utils.OutputCSharpResult(Utils.DdgToTestDot(ddg), _provider);
             return null;
         }

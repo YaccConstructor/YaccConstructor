@@ -1,5 +1,7 @@
 ﻿module Utils
 
+open System.IO
+
 module DotUtils =
     open JetBrains.ReSharper.Psi.ControlFlow.CSharp
     open JetBrains.ReSharper.Psi.ControlFlow
@@ -7,7 +9,6 @@ module DotUtils =
     open JetBrains.ReSharper.Psi.Tree
     open JetBrains.ReSharper.Psi
 
-    open System.IO
     open System.Collections.Generic
 
     let private toDot (cfg: IControlFlowGraf) (outStream: StreamWriter) =
@@ -16,7 +17,16 @@ module DotUtils =
             then 
                 let psiType = 
                     if node.SourceElement <> null 
-                    then node.SourceElement.NodeType.ToString()
+                    then
+                        let extraInfo = 
+                            match node.SourceElement with
+                            | :? IForStatement as forStmt ->
+                                let condHash = string <| hash forStmt.Condition
+                                sprintf "_%s" condHash
+                            | _ -> ""
+                        let nodeType = string node.SourceElement.NodeType
+                        let srcHash = string <| hash node.SourceElement
+                        sprintf "%s_%s%s" nodeType srcHash extraInfo
                     else "null"
                 node.Id.ToString(), psiType
             else
@@ -87,6 +97,7 @@ module DotUtils =
         processor.Process file
 
 let myDebugFolderPath = "E:\\Diploma\\Debug"
+let myDebugFilePath fileName = Path.Combine (myDebugFolderPath, fileName)
 
 let applyToMappedTypedArgs f mapper (arg1: 'a) (arg2: obj) typingFaildFunc =
     match arg2 with
@@ -100,3 +111,25 @@ module Option =
         match opt with
         | Some(value) -> value
         | None -> defaultVal
+
+module DictionaryFuns =
+    open System.Collections.Generic
+
+    let dictFromSeq (vals: seq<'a * 'b>) =
+        let dict = Dictionary()
+        vals |> Seq.iter (fun (a, b) -> dict.[a] <- b)
+        dict
+
+    let addToSetInDict key elemForSet (dict: Dictionary<_, HashSet<_>>) =
+        let set = 
+            match dict.TryGetValue key with 
+            | true, hs -> hs
+            | false, _ -> HashSet()
+        do set.Add elemForSet |> ignore
+        do dict.[key] <- set
+
+    let getMappingToOne key (dict: Dictionary<'k, HashSet<'v>>) =
+        let hSet = dict.[key]
+        if hSet.Count <> 1
+        then failwith "one to one mapping expected"
+        else hSet |> Seq.head

@@ -28,7 +28,7 @@ namespace ApproximatorTester
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
             var inputFile = _provider.PsiFile;
-            var fsa = ApproximationBuilderCSharp.BuildApproximation(inputFile);
+            var fsa = ApproximateCsharp.BuildApproximation(inputFile);
             Utils.OutputCSharpResult(Utils.FsaToTestDot(fsa), _provider);
             return null;
         }

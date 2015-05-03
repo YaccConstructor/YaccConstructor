@@ -40,14 +40,13 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Compile Include="Utils.fs" />
-    <Compile Include="FsaHelper.fs" />
-    <Compile Include="CSharpCFGInfo.fs" />
-    <Compile Include="DataDependencyGraph.fs" />
+    <Compile Include="GraphUtils.fs" />
+    <Compile Include="IControlFlowGraphUtils.fs" />
     <Compile Include="GenericGraphs.fs" />
-    <Compile Include="CfgUtils.fs" />
-    <Compile Include="ForwardAnalysis.fs" />
-    <Compile Include="CFGConversionCSharp.fs" />
-    <Compile Include="ApproximationBuilderCSharp.fs" />
+    <Compile Include="GenericCfgCsharp.fs" />
+    <Compile Include="FsaHelper.fs" />
+    <Compile Include="GenerateFsa.fs" />
+    <Compile Include="ApproximateCsharp.fs" />
     <Compile Include="CFGConversionJs.fs" />
     <Compile Include="ApproximationBuilderJs.fs" />
   </ItemGroup>

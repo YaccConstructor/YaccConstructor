@@ -1,4 +1,4 @@
-﻿module YC.ReSharper.AbstractAnalysis.LanguageApproximation.ApproximationBuilderCSharp
+﻿module YC.ReSharper.AbstractAnalysis.LanguageApproximation.ApproximateCsharp
 
 open QuickGraph
 
@@ -10,12 +10,9 @@ open JetBrains.ReSharper.Psi.ControlFlow.CSharp
 open JetBrains.ReSharper.Psi.ControlFlow
 
 open XMLParser
-open CSharpCFGInfo
 open Utils
-open CFGConversionCSharp
-open GenericGraphs
-open GenericGraphs.GenericCFGFuncs
-open ForwardAnalysis
+open Utils.DictionaryFuns
+open GenerateFsa
 
 open System.Collections.Generic
 open System.IO
@@ -71,21 +68,30 @@ let private createControlFlowGraph (hotspot: IInvocationExpression) =
     let methodDeclaration = getEnclosingMethod hotspot
     CSharpControlFlowBuilder.Build methodDeclaration
 
+let buildCfg (file: ICSharpFile) =
+    // the next line is for debug purposes
+    DotUtils.allMethodsCFGToDot file myDebugFolderPath
+    // process the first hotspot
+    let lang, hotspot = (getHotspots file).[0]
+    createControlFlowGraph hotspot
+
 let buildDdg (file: ICSharpFile) =
     // the next line is for debug purposes
     DotUtils.allMethodsCFGToDot file myDebugFolderPath
     // process the first hotspot
     let lang, hotspot = (getHotspots file).[0]
     let csharpCFG = createControlFlowGraph hotspot
-    let additionalInfo = collectAdditionalInfo csharpCFG
-    let genericCFG = convert csharpCFG additionalInfo
-    let hotVarRef = extractVarRefFromHotspot hotspot additionalInfo genericCFG
-    let ddg = ddgForVar hotVarRef genericCFG
+    let genericCFG, convertInfo = GenericCfgCsharp.toGenericCfg csharpCFG
 
-    // for debug
+    let genCfgName = "cfg_" + file.GetHashCode().ToString() 
+    GenericGraphs.GenericCFGFuncs.toDot genericCFG genCfgName (myDebugFilePath (genCfgName + ".dot"))
+
+    let hotVarRefCfe = (hotspot.Arguments.[0].Value) :> ITreeNode
+    let hotVarRef = getMappingToOne hotVarRefCfe convertInfo.AstToGenericNodesMapping
+    let ddg = GenericGraphs.GenericCFGFuncs.ddgForVar hotVarRef genericCFG
+
     let ddgName = "ddg_" + file.GetHashCode().ToString()
-    let path = Path.Combine (myDebugFolderPath, ddgName + ".dot")
-    DDGFuncs.toDot ddg ddgName path
+    GenericGraphs.DDGFuncs.toDot ddg.Graph ddgName (myDebugFilePath (ddgName + ".dot"))
 
     ddg
 
@@ -100,12 +106,8 @@ let buildFsa (file: ICSharpFile) =
 
     fsaForVar
 
-let BuildApproximation (file: ICSharpFile) = 
-    // the next line is for debug purposes
-    DotUtils.allMethodsCFGToDot file myDebugFolderPath
+let BuildApproximation (file: ICSharpFile) =
     buildFsa file
-
-
 
 //let buildApproxForTarget (methodDecl: ICSharpFunctionDeclaration) (targetExpr: ICSharpExpression) initialFsaMap =
 //    let csharpCfg = CSharpControlFlowBuilder.Build methodDecl

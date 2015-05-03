@@ -30,9 +30,9 @@ namespace ApproximatorTester
 
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
-            var jsCfg = _provider.GetControlFlowGraf();
-            var cfg = ApproximationBuilderJs.BuildApproximation(jsCfg);
-            OutputResult(Utils.DdgToTestDot(cfg));
+            // var jsCfg = _provider.GetControlFlowGraf();
+            // var cfg = ApproximationBuilderJs.BuildApproximation(jsCfg);
+            // OutputResult(Utils.DdgToTestDot(cfg));
             return null;
         }
 

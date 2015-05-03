@@ -24,17 +24,20 @@ type GraphNodeType =
 | Operation of OperationType * list<int>
 | Literal of string
 | VarRef of string
-// enter node index and body node index in Entries array
-| LoopNode of int * int
+| LoopNode
+| LoopEnter
+| LoopExit
+| LoopBodyBeg
+| LoopBodyEnd
 | OtherNode
-| ExitNode of Set<string>
+| ExitNode of list<GraphNode>
 
-type GraphNode = {
+and GraphNode = {
     Id: int
     Type: GraphNodeType }
 
 module GraphNodeFuncs =
-    let toString (node: GraphNode) =
+    let rec toString (node: GraphNode) =
         match node.Type with
         | Declaration(name, _) -> sprintf "decl(%s)" name
         | Updater(target, aType) -> 
@@ -50,196 +53,201 @@ module GraphNodeFuncs =
             | Arbitrary(name) -> sprintf "%s(%d)" name (List.length operands)
         | Literal(value) -> sprintf "literal(%s)" value
         | VarRef(name) -> sprintf "varRef(%s)" name
-        | LoopNode(_,_) -> "loopNode"
+        | LoopNode -> "loopNode"
+        | LoopEnter -> "loopEnter"
+        | LoopExit -> "loopExit"
+        | LoopBodyBeg -> "loopBodyBeg"
+        | LoopBodyEnd -> "loopBodyEnd"
         | OtherNode -> "otherNode"
-        | ExitNode(vars) -> sprintf "exit(%s)" <| Seq.fold (fun acc v -> acc + "," + v) "" vars
+        | ExitNode(vars) -> 
+            let labels = vars |> List.map toString
+            sprintf "exit(%s)" <| Seq.fold (fun acc v -> acc + "," + v) "" labels
 
 type GenericCFG = BidirectionalGraph<GraphNode, Edge<GraphNode>>
 
 type DDG = {
     Graph: BidirectionalGraph<GraphNode, Edge<GraphNode>>
-    Root: GraphNode
-    VarName: string }
+    Root: GraphNode }
+
+module CfgTopoTraverser =
+    open GraphUtils.TopoTraverser
+
+    let isLoopNode (node: GraphNode) =
+        match node.Type with LoopNode -> true | _ -> false
+    let getId (node: GraphNode) = node.Id
+
+module CfgTopoDownTraverser =
+    open GraphUtils.TopoTraverser
+    open CfgTopoTraverser
+
+    let private getInputsNumber (cfg: GenericCFG) (node: GraphNode) = 
+        cfg.InDegree node
+    let private getAllNextNodes (cfg: GenericCFG) (node: GraphNode) = 
+        cfg.OutEdges node
+        |> List.ofSeq 
+        |> List.map (fun e -> e.Target)
+    let private getLoopNextNodes (cfg: GenericCFG) (node: GraphNode) =
+        let outNodes = cfg.OutEdges node |> Seq.map (fun e -> e.Target)
+        let bodyBegNode = 
+            outNodes 
+            |> Seq.find 
+                (fun n -> match n.Type with | LoopBodyBeg -> true | _ -> false)
+        let exitNode = 
+            outNodes 
+            |> Seq.find 
+                (fun n -> match n.Type with | LoopExit -> true | _ -> false)
+        bodyBegNode, exitNode
+    let nextNode cfg (tState: TraverserState<GraphNode>) =
+        nextNode getId (getInputsNumber cfg) (getAllNextNodes cfg) isLoopNode (getLoopNextNodes cfg) tState
+
+module CfgTopoUpTraverser =
+    open GraphUtils.TopoTraverser
+    open CfgTopoTraverser
+
+    let private getInputsNumber (cfg: GenericCFG) (node: GraphNode) = 
+        cfg.OutDegree node
+    let private getAllNextNodes (cfg: GenericCFG) (node: GraphNode) = 
+        cfg.InEdges node
+        |> List.ofSeq 
+        |> List.map (fun e -> e.Source)
+    let private getLoopNextNodes (cfg: GenericCFG) (node: GraphNode) =
+        let inNodes = cfg.InEdges node |> Seq.map (fun e -> e.Source)
+        let bodyEndNode = 
+            inNodes 
+            |> Seq.find 
+                (fun n -> match n.Type with | LoopBodyEnd -> true | _ -> false)
+        let enterNode = 
+            inNodes 
+            |> Seq.find 
+                (fun n -> match n.Type with | LoopEnter -> true | _ -> false)
+        bodyEndNode, enterNode
+    let nextNode cfg (tState: TraverserState<GraphNode>) =
+        nextNode getId (getInputsNumber cfg) (getAllNextNodes cfg) isLoopNode (getLoopNextNodes cfg) tState
 
 module GenericCFGFuncs =
+    open System.Collections.Generic
+    open System.IO
     open GraphNodeFuncs
+    open GraphUtils.TopoTraverser
+    open CfgTopoUpTraverser
 
-    // exception messages 
-    let private wrongCFGNodeTypeMsg = 
-        "CFGNode was expected to be of ExitNode type case"
+    let create (): GenericCFG = 
+        new BidirectionalGraph<GraphNode, Edge<GraphNode>>(allowParallelEdges = false)
 
-    let private zeroCounterDecrMsg = "attempt to decrement zero counter"
-
-    let private updaterAssumptionMsg = "updated assumption failed"
-
-    type private DDGraphBuildInfo = {   
-        Graph: BidirectionalGraph<GraphNode, Edge<GraphNode>>
-        ConnectionNode: GraphNode }
-
-    module private DDGBuildFuncs =
-        // exception messages
-        let private noSuchNodeMsg = 
-            "cannot create edge - src or dst node is not added to graph"
-
-        let private addNode (ddGraph: DDGraphBuildInfo) node = 
-            if ddGraph.Graph.ContainsVertex node |> not
-            then ddGraph.Graph.AddVertex node |> ignore
-            ddGraph
-
-        let private failIfNoSuchKey (ddGraph: DDGraphBuildInfo) node =
-            if (not << ddGraph.Graph.ContainsVertex) node
-            then failwith noSuchNodeMsg
-
-        let private addEdge (ddGraph: DDGraphBuildInfo) src dst =
-            let graph = ddGraph.Graph
-            failIfNoSuchKey ddGraph src
-            failIfNoSuchKey ddGraph dst
-            if (not << (graph.ContainsEdge : GraphNode * GraphNode -> bool)) (src, dst)
-            then graph.AddEdge (new Edge<GraphNode>(src, dst)) |> ignore
-            ddGraph
-
-        let create (finalNode: GraphNode) =
-            let ddGraph = {
-                Graph = new BidirectionalGraph<GraphNode, Edge<GraphNode>>()
-                ConnectionNode = finalNode }
-            addNode ddGraph finalNode
-
-        let private addNodeAndEdge (ddGraph: DDGraphBuildInfo) srcNode =
-            let ddg = addNode ddGraph srcNode
-            addEdge ddg srcNode ddg.ConnectionNode
-
-        let addConnectionNodeAndEdge (ddGraph: DDGraphBuildInfo) srcNode =
-            let ddg' = addNodeAndEdge ddGraph srcNode
-            { ddg' with ConnectionNode = srcNode }
-
-    type private BuildState = {   
-        GraphInfo: DDGraphBuildInfo
+    type private ConvertState = {
+        Vars: Set<string>
         VisitedForks: Map<int, Set<string>>
-        NodesToVisit: Set<int> }
+        NodesToVisit: Set<int>
+        VisitedNodes: list<GraphNode> }
 
-    let rec private cfgToDdg (exitNode: GraphNode) (cfg: GenericCFG) = 
+    let private cfgToDdg (exitNode: GraphNode) (cfg: GenericCFG) = 
+        let wrongCfgNodeTypeMsg = 
+            "Cfg node was expected to be of ExitNode type case"
         let getExitVars = function
         | ExitNode(vars) -> vars
-        | _ -> failwith wrongCFGNodeTypeMsg
+        | _ -> failwith wrongCfgNodeTypeMsg 
 
-        let setGraphConnectionNode nodeId (state: BuildState) =
-            let graph' = { state.GraphInfo with ConnectionNode = nodeId }
-            { state with GraphInfo = graph' }
-
-        let rec build (cfNode: GraphNode) (cfg: GenericCFG) (varsSet: Set<string>) (state: BuildState) =
-            let processEntries (entries: list<Edge<GraphNode>>) (varsSet: Set<string>) (state: BuildState) =
-                let curConnectionNode = state.GraphInfo.ConnectionNode
-                entries
-                |> List.map (fun e -> e.Source) 
-                |> List.fold 
-                    (
-                        fun accState src -> 
-                            build src cfg varsSet accState 
-                            |> setGraphConnectionNode curConnectionNode
-                    ) 
-                    state
-            
-            let entries, updState, updVarsSet =
-                match cfNode.Type with
-                | Declaration(name, initializerId) when Set.contains name varsSet ->
-                    let gInfo' = DDGBuildFuncs.addConnectionNodeAndEdge state.GraphInfo cfNode
+        let rec findDdgNodes (cfg: GenericCFG) traverser (state: ConvertState) =
+            let makeVisited (node: GraphNode) (state: ConvertState) =
+                { state with VisitedNodes = node :: state.VisitedNodes }
+            let node, traverser = nextNode cfg traverser
+            let traverser, state =
+                match node.Type with
+                | ExitNode(nodes) ->
+                    let state = makeVisited node state
+                    let nodesToVisit = 
+                        (state.NodesToVisit, nodes)
+                        ||> List.fold (fun acc n -> Set.add n.Id acc)
+                    traverser, { state with NodesToVisit = nodesToVisit }
+                | Declaration(name, initializerId) when Set.contains name state.Vars ->
+                    let state = makeVisited node state
                     let nodesToVisit = Set.add initializerId state.NodesToVisit
-                    let state' = { state with GraphInfo = gInfo'; NodesToVisit = nodesToVisit }
-                    let entries = cfg.InEdges(cfNode) |> List.ofSeq
-                    entries, state', varsSet
-                // todo: updater can be an operand is some languages
-                | Updater(target, aType) when Set.contains target varsSet ->
-                    let gInfo' = DDGBuildFuncs.addConnectionNodeAndEdge state.GraphInfo cfNode
+                    traverser, { state with NodesToVisit = nodesToVisit }
+                // todo: updater can be an operand in some languages
+                | Updater(target, aType) when Set.contains target state.Vars ->
+                    let state = makeVisited node state
                     let operandsIDs = 
                         match aType with
                         | Assign(id) -> [id]
                         | PlusAssign(id1, id2) -> [id1; id2]
                     let nodesToVisit = 
-                        operandsIDs 
-                        |> List.fold (fun acc op -> Set.add op acc) state.NodesToVisit
-                    let state' = { state with GraphInfo = gInfo'; NodesToVisit = nodesToVisit }
-                    let entries = cfg.InEdges(cfNode) |> List.ofSeq
-                    entries, state', varsSet
-                | Operation(tType, operands) when Set.contains cfNode.Id state.NodesToVisit ->
-                    let gInfo' = DDGBuildFuncs.addConnectionNodeAndEdge state.GraphInfo cfNode
+                        (state.NodesToVisit, operandsIDs)
+                        ||> List.fold (fun acc op -> Set.add op acc)
+                    traverser, { state with NodesToVisit = nodesToVisit }
+                | Operation(tType, operands) when Set.contains node.Id state.NodesToVisit ->
+                    let state = makeVisited node state
                     let nodesToVisit = 
-                        operands 
-                        |> List.fold (fun acc op -> Set.add op acc) state.NodesToVisit
-                    let state' = { state with GraphInfo = gInfo'; NodesToVisit = nodesToVisit }
-                    let entries = cfg.InEdges(cfNode) |> List.ofSeq
-                    entries, state', varsSet
-                | Literal(value) when Set.contains cfNode.Id state.NodesToVisit ->
-                    let gInfo' = DDGBuildFuncs.addConnectionNodeAndEdge state.GraphInfo cfNode
-                    let state' = { state with GraphInfo = gInfo' }
-                    let entries = cfg.InEdges(cfNode) |> List.ofSeq
-                    entries, state', varsSet
-                | VarRef(name) when Set.contains cfNode.Id state.NodesToVisit ->
-                    let gInfo' = DDGBuildFuncs.addConnectionNodeAndEdge state.GraphInfo cfNode
-                    let state' = { state with GraphInfo = gInfo' }
-                    let varsSet' = Set.add name varsSet
-                    let entries = cfg.InEdges(cfNode) |> List.ofSeq
-                    entries, state', varsSet'
-                | LoopNode(enterIndex, bodyIndex) ->
-                    let gInfo' = DDGBuildFuncs.addConnectionNodeAndEdge state.GraphInfo cfNode
-                    let forkVarsSet = 
-                        match Map.tryFind cfNode.Id state.VisitedForks with
-                        | None -> Set.empty
-                        | Some(vs) -> vs
-                    let newVarsSet = Set.difference varsSet forkVarsSet
+                        (state.NodesToVisit, operands)
+                        ||> List.fold (fun acc op -> Set.add op acc)
+                    traverser, { state with NodesToVisit = nodesToVisit }
+                | Literal(value) when Set.contains node.Id state.NodesToVisit -> 
+                    traverser, makeVisited node state
+                | LoopEnter
+                | LoopExit
+                | LoopBodyBeg
+                | LoopBodyEnd -> traverser, makeVisited node state
+                | VarRef(name) when Set.contains node.Id state.NodesToVisit ->
+                    let state = makeVisited node state
+                    traverser, { state with Vars = Set.add name state.Vars }
+                | LoopNode ->
+                    let state = makeVisited node state
+                    let forkVarsSet = defaultArg (Map.tryFind node.Id state.VisitedForks) Set.empty
+                    let newVarsSet = Set.difference state.Vars forkVarsSet
                     if Set.isEmpty newVarsSet
                     then
-                        let enterEdge = cfg.InEdge(cfNode, enterIndex)
-                        [enterEdge], { state with GraphInfo = gInfo' }, varsSet
+                        setLoopExitDirection traverser, state
                     else 
-                        let visitedForks' = Map.add cfNode.Id varsSet state.VisitedForks
-                        let bodyExitEdge = cfg.InEdge(cfNode, bodyIndex)
-                        [bodyExitEdge], { state with GraphInfo = gInfo'; VisitedForks = visitedForks' }, varsSet
-                | _ -> 
-                    let entries = cfg.InEdges(cfNode) |> List.ofSeq
-                    entries, state, varsSet
-            processEntries entries updVarsSet updState 
+                        let visitedForks = Map.add node.Id state.Vars state.VisitedForks
+                        setLoopBodyDirection traverser, { state with VisitedForks = visitedForks }
+                | _ -> traverser, state
+            if isFinishedMode traverser
+            then state.VisitedNodes
+            else findDdgNodes cfg traverser state
 
-        let graphInfo = DDGBuildFuncs.create exitNode
-        let varsSet = getExitVars exitNode.Type
+        let removeNeedlessNodes (ddg: GenericCFG) (neededNodes: list<GraphNode>) =
+            let neededSet = neededNodes |> List.map (fun n -> n.Id) |> Set.ofList
+            let removeIfNotNeeded (node: GraphNode) =
+                if not <| Set.contains node.Id neededSet
+                then 
+                    let inEdges = ddg.InEdges node
+                    let outEdges = ddg.OutEdges node
+                    do ddg.RemoveVertex node |> ignore
+                    inEdges
+                    |> Seq.iter
+                        (
+                            fun ie ->
+                                outEdges
+                                |> Seq.iter
+                                    (fun oe -> ddg.AddEdge(Edge(ie.Source, oe.Target)) |> ignore)
+                        )
+            let vertices = List.ofSeq ddg.Vertices
+            do vertices |> List.iter removeIfNotNeeded
+
+        let ddg =
+            let g = BidirectionalGraph<GraphNode, Edge<GraphNode>>()
+            do g.AddVerticesAndEdgeRange cfg.Edges |> ignore
+            g
+        let traverser = init exitNode
         let initState = { 
-            GraphInfo = graphInfo;
-            VisitedForks = Map.empty
-            NodesToVisit = Set.empty }
-        let resState = build exitNode cfg varsSet initState
-        let ddg = resState.GraphInfo.Graph
-        // hack 1
-        let root = 
-            // bad algo
-            // todo: improve
-            ddg.Vertices |> List.ofSeq |> List.find (fun n -> ddg.InDegree(n) = 0)
-        // hack 2
-        let loopNodesInEdges =
-            ddg.Vertices
-            |> Seq.filter(fun n -> match n.Type with LoopNode(_, _) -> true | _ -> false)
-            |> Seq.map (fun n -> ddg.InEdges(n))
-            |> Seq.concat
-            |> List.ofSeq
-            |> List.rev
-        do loopNodesInEdges
-        |> List.iter(fun e -> ddg.RemoveEdge(e) |> ignore)
-        // the main hack is here - we add edges in reversed order so 
-        // enter edge index and body exit index are valid now
-        do loopNodesInEdges
-        |> List.iter(fun e -> ddg.AddEdge(e) |> ignore)
-        // end hacks, the last one is this varName below
-        { Graph = ddg; Root = root; VarName = "return" }
+            Vars = Set.empty; 
+            VisitedForks = Map.empty; 
+            NodesToVisit = Set.empty;
+            VisitedNodes = [] }
+        let neededNodes = findDdgNodes ddg traverser initState
+        let ddgRoot = List.head neededNodes
+        do removeNeedlessNodes ddg neededNodes
+        { Graph = ddg; Root = ddgRoot }
 
     let exitNodeTypeMsg = "only VarRef typed nodes are supported as exit nodes for now"
     let private ddgForNodes (nodes: list<GraphNode>) (cfg: GenericCFG) =
         let nodeWithMaxId = Seq.maxBy (fun v -> v.Id) cfg.Vertices
         let newExitNodeId = 1 + nodeWithMaxId.Id
-        let nodeVarRefNames = 
-            nodes 
-            |> List.map (fun n -> match n.Type with | VarRef(name) -> name | _ -> failwith exitNodeTypeMsg)
-            |> Set.ofList
-        let newExitNode = { Id = newExitNodeId; Type = ExitNode(nodeVarRefNames) }
+        let newExitNode = { Id = newExitNodeId; Type = ExitNode(nodes) }
         do cfg.AddVertex newExitNode |> ignore
-        do nodes |> Seq.iter (fun n -> cfg.AddEdge (Edge(n, newExitNode)) |> ignore)
+        do nodes 
+        |> List.iter 
+            (fun n -> cfg.OutEdges n |> List.ofSeq |> List.iter (cfg.RemoveEdge >> ignore))
+        do nodes |> List.iter (fun n -> cfg.AddEdge (Edge(n, newExitNode)) |> ignore)
         cfgToDdg newExitNode cfg
 
     let ddgForVar (varRef: GraphNode) (cfg: GenericCFG) =
@@ -249,17 +257,10 @@ module GenericCFGFuncs =
         let exitNodes =  cfg.Vertices |> Seq.filter (fun v -> cfg.OutDegree(v) = 0)
         ddgForNodes (List.ofSeq exitNodes) cfg
 
-    let create(): GenericCFG = 
-        new BidirectionalGraph<GraphNode, Edge<GraphNode>>(allowParallelEdges = false)
-
-module DDGFuncs =
-    open System.IO
-    open GraphNodeFuncs
-
-    let toDot (ddGraph: DDG) name path =
+    let toDot (cfg: GenericCFG) name path =
         use file = FileInfo(path).CreateText()
         file.WriteLine("digraph " + name + " {")
-        ddGraph.Graph.Vertices
+        cfg.Vertices
         |> List.ofSeq
         |> List.map 
             (
@@ -268,7 +269,7 @@ module DDGFuncs =
                     node.Id.ToString() + " [label=\"" + text + "\"]"
             )
         |> List.iter file.WriteLine
-        ddGraph.Graph.Edges
+        cfg.Edges
         |> List.ofSeq
         |> List.map
             (
@@ -276,3 +277,9 @@ module DDGFuncs =
             )
         |> List.iter file.WriteLine
         file.WriteLine("}")
+
+module DDGFuncs =
+    open System.IO
+    open GraphNodeFuncs
+
+    let toDot = GenericCFGFuncs.toDot

@@ -2,16 +2,23 @@
 
 open JetBrains.ReSharper.Psi.ControlFlow.CSharp
 open JetBrains.ReSharper.Psi.CSharp.Tree
+open JetBrains.ReSharper.Psi.Tree
 
+open UserDefOperationInfo
 open GenericCfgCsharp
 open GenericGraphs
 open FsaHelper
 open GenerateFsa
+open Utils.DictionaryFuns
+open ReshrperTreeUtils
+
+type ControlData = {
+    TargetMethod: string
+    TargetNode: ITreeNode
+    CurRecLevel: int }
 
 let bindArgsToParams (methodDecl: IMethodDeclaration) (stack: list<CharFSA>) =
-    let parameters = 
-        methodDecl.Params.ParameterDeclarations 
-        |> Seq.map (fun p -> p.DeclaredName)
+    let parameters = getStringTypedParams methodDecl
     let paramsNum = Seq.length parameters
     if List.length stack < paramsNum 
     then failwith "stack contains too few elements"
@@ -21,8 +28,8 @@ let bindArgsToParams (methodDecl: IMethodDeclaration) (stack: list<CharFSA>) =
         let boundParams = Seq.zip parameters argsToBind
         Map.ofSeq boundParams, restStack
 
-let rec fsaGenerator (functionInfo: ArbitraryOperationInfo) (stack: list<CharFSA>) recLevel =
-    if recLevel - 1 < 0
+let rec approximate (functionInfo: ArbitraryOperationInfo) (stack: list<CharFSA>) (controlData: ControlData) =
+    if controlData.CurRecLevel - 1 < 0
     then None, stack
     else 
         match functionInfo with
@@ -30,10 +37,16 @@ let rec fsaGenerator (functionInfo: ArbitraryOperationInfo) (stack: list<CharFSA
         | CsharpArbitraryFun (methodDecl) ->
             let csharpCfg = CSharpControlFlowBuilder.Build methodDecl
             let methodName = methodDecl.NameIdentifier.Name
-            let genericCFG, _ = toGenericCfg csharpCfg methodName
-            let ddg = GenericCFGFuncs.ddgForExits genericCFG
+            let genericCFG, convertInfo = toGenericCfg csharpCfg methodName
+            let ddg =
+                if methodName = controlData.TargetMethod
+                then 
+                    let targetNode = getMappingToOne controlData.TargetNode convertInfo.AstToGenericNodesMapping
+                    GenericCFGFuncs.ddgForVar targetNode genericCFG
+                else GenericCFGFuncs.ddgForExits genericCFG
             let initFsaMap, restStack = bindArgsToParams methodDecl stack
-            let fsa = buildAutomaton ddg initFsaMap (recLevel - 1) fsaGenerator
+            let controlData = { controlData with CurRecLevel = controlData.CurRecLevel - 1 }
+            let fsa = buildAutomaton ddg initFsaMap controlData approximate
             // for debug
             let path = Utils.myDebugFilePath ("fsa_" + methodName + ".dot")
             FsaHelper.toDot fsa path

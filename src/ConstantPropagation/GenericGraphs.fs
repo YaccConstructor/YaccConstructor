@@ -2,9 +2,7 @@
 
 open QuickGraph
 
-type ArbitraryOperationInfo =
-| CsharpArbitraryFun of JetBrains.ReSharper.Psi.CSharp.Tree.IMethodDeclaration
-| NoInfo
+open UserDefOperationInfo
 
 type OperationType =
 | Replace

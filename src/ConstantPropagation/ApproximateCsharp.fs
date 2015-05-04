@@ -17,6 +17,8 @@ open GenericGraphs
 open FsaHelper
 open GenerateFsa
 open BuildApproximation
+open UserDefOperationInfo
+open ReshrperTreeUtils
 
 open System.Collections.Generic
 open System.IO
@@ -61,23 +63,15 @@ let getHotspots (file: ICSharpFile) =
     hotspots
 
 let private getEnclosingMethodNullParentMsg = "can't get enclosing method, null parent encountered"
+let rec getEnclosingMethod (node: ITreeNode) =
+    match node with
+    | null -> failwith getEnclosingMethodNullParentMsg
+    | :? IMethodDeclaration as funDecl -> funDecl
+    | _ -> getEnclosingMethod node.Parent
 
 let private createControlFlowGraph (hotspot: IInvocationExpression) =
-    let rec getEnclosingMethod (node: ITreeNode) =
-        match node with
-        | null -> failwith getEnclosingMethodNullParentMsg
-        | :? ICSharpFunctionDeclaration as funDecl -> funDecl
-        | _ -> getEnclosingMethod node.Parent
-
     let methodDeclaration = getEnclosingMethod hotspot
     CSharpControlFlowBuilder.Build methodDeclaration, methodDeclaration.NameIdentifier.Name
-
-let buildCfg (file: ICSharpFile) =
-    // the next line is for debug purposes
-    DotUtils.allMethodsCFGToDot file myDebugFolderPath
-    // process the first hotspot
-    let lang, hotspot = (getHotspots file).[0]
-    createControlFlowGraph hotspot
 
 let buildDdg (file: ICSharpFile) =
     // the next line is for debug purposes
@@ -100,8 +94,23 @@ let buildDdg (file: ICSharpFile) =
     ddg
 
 let buildFsa (file: ICSharpFile) recursionMaxLevel =
-    let ddg = buildDdg file
-    let fsaForVar = buildAutomaton ddg Map.empty recursionMaxLevel fsaGenerator
+    DotUtils.allMethodsCFGToDot file myDebugFolderPath
+    // process the first hotspot
+    let lang, hotspot = (getHotspots file).[0]
+    let methodDeclaration = getEnclosingMethod hotspot
+
+    let stringParamsNum = Seq.length <| getStringTypedParams methodDeclaration
+    let stack = List.replicate stringParamsNum <| FsaHelper.anyWordsFsa ()
+    let methodName = methodDeclaration.NameIdentifier.Name
+    let hotVarRef = (hotspot.Arguments.[0].Value) :> ITreeNode
+    let controlInfo = { 
+        TargetMethod = methodName; 
+        TargetNode = hotVarRef; 
+        CurRecLevel = recursionMaxLevel }
+    let fsaForVar = 
+        approximate (CsharpArbitraryFun(methodDeclaration)) stack controlInfo
+        |> fst
+        |> Option.get
 
     // for debug
     let fsaName = "fsa_" + file.GetHashCode().ToString()

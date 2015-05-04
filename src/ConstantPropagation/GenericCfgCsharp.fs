@@ -13,6 +13,7 @@ open QuickGraph
 open GenericGraphs
 open IControlFlowGraphUtils
 open Utils.DictionaryFuns
+open UserDefOperationInfo
             
 type AstToCfgDict = Dictionary<ITreeNode, HashSet<IControlFlowElement>>
 type AstToGenericNodesDict = Dictionary<ITreeNode, HashSet<GraphNode>>

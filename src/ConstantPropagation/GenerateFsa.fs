@@ -18,7 +18,7 @@ type BuildState = {
 open GraphUtils.TopoTraverser
 open GenericGraphs.CfgTopoDownTraverser
 
-let buildAutomaton (ddg: DDG) (initialFsaMap: FSAMap) recLevel fsaGenerator =
+let buildAutomaton (ddg: DDG) (initialFsaMap: FSAMap) controlData approximate =
     // exception messages
     let unsupportedCaseMsg = "unsupported case encountered"
     let unexpectedNodeMsg = "unexpected node type is encountered in automaton building"
@@ -156,7 +156,7 @@ let buildAutomaton (ddg: DDG) (initialFsaMap: FSAMap) recLevel fsaGenerator =
                     operands', varsFsaSoFar, unboundRes', traverser
                 | Arbitrary(info) -> 
                     let fsa, operands = 
-                        match fsaGenerator info state.Operands recLevel with
+                        match approximate info state.Operands controlData with
                         | Some(fsa), ops -> fsa, ops
                         | _ -> FsaHelper.anyWordsFsa (), state.Operands
                     let operands' = fsa :: operands

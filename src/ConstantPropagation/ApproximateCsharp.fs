@@ -66,7 +66,7 @@ let private createControlFlowGraph (hotspot: IInvocationExpression) =
         | _ -> getEnclosingMethod node.Parent
 
     let methodDeclaration = getEnclosingMethod hotspot
-    CSharpControlFlowBuilder.Build methodDeclaration
+    CSharpControlFlowBuilder.Build methodDeclaration, methodDeclaration.NameIdentifier.Name
 
 let buildCfg (file: ICSharpFile) =
     // the next line is for debug purposes
@@ -80,18 +80,18 @@ let buildDdg (file: ICSharpFile) =
     DotUtils.allMethodsCFGToDot file myDebugFolderPath
     // process the first hotspot
     let lang, hotspot = (getHotspots file).[0]
-    let csharpCFG = createControlFlowGraph hotspot
-    let genericCFG, convertInfo = GenericCfgCsharp.toGenericCfg csharpCFG
+    let csharpCFG, methodName = createControlFlowGraph hotspot
+    let genericCFG, convertInfo = GenericCfgCsharp.toGenericCfg csharpCFG methodName
 
     let genCfgName = "cfg_" + file.GetHashCode().ToString() 
-    GenericGraphs.GenericCFGFuncs.toDot genericCFG genCfgName (myDebugFilePath (genCfgName + ".dot"))
+    GenericGraphs.BidirectGraphFuns.toDot genericCFG.Graph genCfgName (myDebugFilePath (genCfgName + ".dot"))
 
     let hotVarRefCfe = (hotspot.Arguments.[0].Value) :> ITreeNode
     let hotVarRef = getMappingToOne hotVarRefCfe convertInfo.AstToGenericNodesMapping
     let ddg = GenericGraphs.GenericCFGFuncs.ddgForVar hotVarRef genericCFG
 
     let ddgName = "ddg_" + file.GetHashCode().ToString()
-    GenericGraphs.DDGFuncs.toDot ddg.Graph ddgName (myDebugFilePath (ddgName + ".dot"))
+    GenericGraphs.BidirectGraphFuns.toDot ddg.Graph ddgName (myDebugFilePath (ddgName + ".dot"))
 
     ddg
 

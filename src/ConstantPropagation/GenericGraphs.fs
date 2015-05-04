@@ -50,10 +50,15 @@ and [<CustomEquality; CustomComparison>] GraphNode = {
                 let failFunc () = invalidArg "other" "cannot compare values of different types"
                 Utils.applyToMappedTypedArgs compare getId this other failFunc
 
-and GenericCFG = BidirectionalGraph<GraphNode, Edge<GraphNode>>
+and BidirectGraph = BidirectionalGraph<GraphNode, Edge<GraphNode>>
+
+and GenericCFG = {
+    FunctionName: string
+    Graph: BidirectGraph
+    MaxNodeId: int }
 
 type DDG = {
-    Graph: BidirectionalGraph<GraphNode, Edge<GraphNode>>
+    Graph: BidirectGraph
     Root: GraphNode }
 
 module GraphNodeFuncs =
@@ -83,6 +88,33 @@ module GraphNodeFuncs =
             let labels = vars |> List.map toString
             sprintf "exit(%s)" <| Seq.fold (fun acc v -> acc + "," + v) "" labels
 
+module BidirectGraphFuns =
+    open System.IO
+    open GraphNodeFuncs
+
+    let create () = BidirectGraph(allowParallelEdges = false)
+
+    let toDot (g: BidirectGraph) name path =
+        use file = FileInfo(path).CreateText()
+        file.WriteLine("digraph " + name + " {")
+        g.Vertices
+        |> List.ofSeq
+        |> List.map 
+            (
+                fun node ->
+                    let text = sprintf "%d_%s" node.Id (toString node)
+                    node.Id.ToString() + " [label=\"" + text + "\"]"
+            )
+        |> List.iter file.WriteLine
+        g.Edges
+        |> List.ofSeq
+        |> List.map
+            (
+                fun edge -> edge.Source.Id.ToString() + " -> " + edge.Target.Id.ToString()
+            )
+        |> List.iter file.WriteLine
+        file.WriteLine("}")
+
 module CfgTopoTraverser =
     open GraphUtils.TopoTraverser
 
@@ -94,13 +126,13 @@ module CfgTopoDownTraverser =
     open GraphUtils.TopoTraverser
     open CfgTopoTraverser
 
-    let private getInputsNumber (cfg: GenericCFG) (node: GraphNode) = 
+    let private getInputsNumber (cfg: BidirectGraph) (node: GraphNode) = 
         cfg.InDegree node
-    let private getAllNextNodes (cfg: GenericCFG) (node: GraphNode) = 
+    let private getAllNextNodes (cfg: BidirectGraph) (node: GraphNode) = 
         cfg.OutEdges node
         |> List.ofSeq 
         |> List.map (fun e -> e.Target)
-    let private getLoopNextNodes (cfg: GenericCFG) (node: GraphNode) =
+    let private getLoopNextNodes (cfg: BidirectGraph) (node: GraphNode) =
         let outNodes = cfg.OutEdges node |> Seq.map (fun e -> e.Target)
         let bodyBegNode = 
             outNodes 
@@ -118,13 +150,13 @@ module CfgTopoUpTraverser =
     open GraphUtils.TopoTraverser
     open CfgTopoTraverser
 
-    let private getInputsNumber (cfg: GenericCFG) (node: GraphNode) = 
+    let private getInputsNumber (cfg: BidirectGraph) (node: GraphNode) = 
         cfg.OutDegree node
-    let private getAllNextNodes (cfg: GenericCFG) (node: GraphNode) = 
+    let private getAllNextNodes (cfg: BidirectGraph) (node: GraphNode) = 
         cfg.InEdges node
         |> List.ofSeq 
         |> List.map (fun e -> e.Source)
-    let private getLoopNextNodes (cfg: GenericCFG) (node: GraphNode) =
+    let private getLoopNextNodes (cfg: BidirectGraph) (node: GraphNode) =
         let inNodes = cfg.InEdges node |> Seq.map (fun e -> e.Source)
         let bodyEndNode = 
             inNodes 
@@ -145,8 +177,10 @@ module GenericCFGFuncs =
     open GraphUtils.TopoTraverser
     open CfgTopoUpTraverser
 
-    let create (): GenericCFG = 
-        new BidirectionalGraph<GraphNode, Edge<GraphNode>>(allowParallelEdges = false)
+    let create name = {
+        FunctionName = name
+        Graph = BidirectGraphFuns.create ()
+        MaxNodeId = 0 }
 
     type private ConvertState = {
         Vars: Set<string>
@@ -161,7 +195,7 @@ module GenericCFGFuncs =
         | ExitNode(vars) -> vars
         | _ -> failwith wrongCfgNodeTypeMsg 
 
-        let rec findDdgNodes (cfg: GenericCFG) traverser (state: ConvertState) =
+        let rec findDdgNodes (cfg: BidirectGraph) traverser (state: ConvertState) =
             let makeVisited (node: GraphNode) (state: ConvertState) =
                 { state with VisitedNodes = node :: state.VisitedNodes }
             let node, traverser = nextNode cfg traverser
@@ -218,7 +252,7 @@ module GenericCFGFuncs =
             then state.VisitedNodes
             else findDdgNodes cfg traverser state
 
-        let removeNeedlessNodes (ddg: GenericCFG) (neededNodes: list<GraphNode>) =
+        let removeNeedlessNodes (ddg: BidirectGraph) (neededNodes: list<GraphNode>) =
             let neededSet = neededNodes |> List.map (fun n -> n.Id) |> Set.ofList
             let removeIfNotNeeded (node: GraphNode) =
                 if not <| Set.contains node.Id neededSet
@@ -238,8 +272,8 @@ module GenericCFGFuncs =
             do vertices |> List.iter removeIfNotNeeded
 
         let ddg =
-            let g = BidirectionalGraph<GraphNode, Edge<GraphNode>>()
-            do g.AddVerticesAndEdgeRange cfg.Edges |> ignore
+            let g = BidirectGraph()
+            do g.AddVerticesAndEdgeRange cfg.Graph.Edges |> ignore
             g
         let traverser = init exitNode
         let initState = { 
@@ -254,46 +288,19 @@ module GenericCFGFuncs =
 
     let exitNodeTypeMsg = "only VarRef typed nodes are supported as exit nodes for now"
     let private ddgForNodes (nodes: list<GraphNode>) (cfg: GenericCFG) =
-        let nodeWithMaxId = Seq.maxBy (fun v -> v.Id) cfg.Vertices
+        let nodeWithMaxId = Seq.maxBy (fun v -> v.Id) cfg.Graph.Vertices
         let newExitNodeId = 1 + nodeWithMaxId.Id
         let newExitNode = { Id = newExitNodeId; Type = ExitNode(nodes) }
-        do cfg.AddVertex newExitNode |> ignore
+        do cfg.Graph.AddVertex newExitNode |> ignore
         do nodes 
         |> List.iter 
-            (fun n -> cfg.OutEdges n |> List.ofSeq |> List.iter (cfg.RemoveEdge >> ignore))
-        do nodes |> List.iter (fun n -> cfg.AddEdge (Edge(n, newExitNode)) |> ignore)
+            (fun n -> cfg.Graph.OutEdges n |> List.ofSeq |> List.iter (cfg.Graph.RemoveEdge >> ignore))
+        do nodes |> List.iter (fun n -> cfg.Graph.AddEdge (Edge(n, newExitNode)) |> ignore)
         cfgToDdg newExitNode cfg
 
     let ddgForVar (varRef: GraphNode) (cfg: GenericCFG) =
         ddgForNodes [varRef] cfg
 
     let ddgForExits (cfg: GenericCFG) = 
-        let exitNodes =  cfg.Vertices |> Seq.filter (fun v -> cfg.OutDegree(v) = 0)
+        let exitNodes =  cfg.Graph.Vertices |> Seq.filter (fun v -> cfg.Graph.OutDegree(v) = 0)
         ddgForNodes (List.ofSeq exitNodes) cfg
-
-    let toDot (cfg: GenericCFG) name path =
-        use file = FileInfo(path).CreateText()
-        file.WriteLine("digraph " + name + " {")
-        cfg.Vertices
-        |> List.ofSeq
-        |> List.map 
-            (
-                fun node ->
-                    let text = sprintf "%d_%s" node.Id (toString node)
-                    node.Id.ToString() + " [label=\"" + text + "\"]"
-            )
-        |> List.iter file.WriteLine
-        cfg.Edges
-        |> List.ofSeq
-        |> List.map
-            (
-                fun edge -> edge.Source.Id.ToString() + " -> " + edge.Target.Id.ToString()
-            )
-        |> List.iter file.WriteLine
-        file.WriteLine("}")
-
-module DDGFuncs =
-    open System.IO
-    open GraphNodeFuncs
-
-    let toDot = GenericCFGFuncs.toDot

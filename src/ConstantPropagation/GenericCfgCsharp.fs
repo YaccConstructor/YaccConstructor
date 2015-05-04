@@ -168,7 +168,7 @@ let collectConvertInfo (cfg: IControlFlowGraf) =
     CfeToGenericNodesMapping = Dictionary() }
     
 // converting functions
-let rec toGenericCfg (cfg: ICSharpControlFlowGraf) =
+let rec toGenericCfg (cfg: ICSharpControlFlowGraf) functionName =
     // exception messages 
     let astToGenericNodeMappingProblemMsg = 
         "ast node maps to multiple or zero generic nodes where single mapping expected" 
@@ -202,7 +202,8 @@ let rec toGenericCfg (cfg: ICSharpControlFlowGraf) =
         | Some(methodDecl) ->
             let lazyGenerator () =
                 let csharpCfg = CSharpControlFlowBuilder.Build methodDecl
-                toGenericCfg csharpCfg |> fst
+                let methodName = methodDecl.NameIdentifier.Name
+                toGenericCfg csharpCfg methodName |> fst
             Some(lazyGenerator)
         | _ -> None
 
@@ -286,7 +287,7 @@ let rec toGenericCfg (cfg: ICSharpControlFlowGraf) =
                 | _ -> OtherNode
         { Id = nodeId; Type = nType }
 
-    let connectToTraversedSuccessors (e: IControlFlowElement) currentNode (graph: GenericCFG) (info: ConvertInfo) =
+    let connectToTraversedSuccessors (e: IControlFlowElement) currentNode (graph: BidirectGraph) (info: ConvertInfo) =
         let tryGetGenericOfTarget (rib: IControlFlowRib)=
             if rib.Target <> null 
             then 
@@ -300,7 +301,7 @@ let rec toGenericCfg (cfg: ICSharpControlFlowGraf) =
 
     let processNode 
             (e: IControlFlowElement) 
-            (graph: GenericCFG, parentsStack, lastId, info: ConvertInfo, alternativeExits) =
+            (graph: BidirectGraph, parentsStack, lastId, info: ConvertInfo, alternativeExits) =
         // convert cfe to generic node
         let newId = lastId + 1
         let genericNode = toGenericNode e newId info
@@ -332,7 +333,7 @@ let rec toGenericCfg (cfg: ICSharpControlFlowGraf) =
     let postProcess e (g, parentsStack, li, i, ae) =
         (g, List.tail parentsStack, li, i, ae)
 
-    let surroundLoopsWithMarkers (graph: GenericCFG) (info: ConvertInfo) lastId =
+    let surroundLoopsWithMarkers (graph: BidirectGraph) (info: ConvertInfo) lastId =
         let addOutMarkNode (edges: seq<Edge<GraphNode>>) markNode =
             do edges |> Seq.iter (graph.RemoveEdge >> ignore)
             let src = edges |> Seq.head |> (fun e -> e.Source)
@@ -381,14 +382,13 @@ let rec toGenericCfg (cfg: ICSharpControlFlowGraf) =
                     let loopNode = info.CfeToGenericNodesMapping.[loopCfe]
                     surroundLoopWithMarkers loopNode loopInfo prevId
             )
-        |> ignore
 
     let traverseConverting (cfg: ICSharpControlFlowGraf) (info: ConvertInfo) =
-        let initState = (GenericCFGFuncs.create (), [], 0, info, [])
+        let initState = (BidirectGraphFuns.create (), [], 0, info, [])
         let _, (graph, _, lastId, _, _) =
             dfsCfgBasic cfg.EntryElement (fun _ s -> s) processNode getNextNodes postProcess initState
-        do surroundLoopsWithMarkers graph info lastId
-        graph
+        let lastId = surroundLoopsWithMarkers graph info lastId
+        { FunctionName = functionName; Graph = graph; MaxNodeId = lastId }
 
     let convInfo = collectConvertInfo cfg 
     let genericCfg = traverseConverting cfg convInfo

@@ -28,7 +28,8 @@ namespace ApproximatorTester
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
             var inputFile = _provider.PsiFile;
-            var fsa = ApproximateCsharp.BuildApproximation(inputFile);
+            const int recursionMaxLevel = 2; // top and one level down
+            var fsa = ApproximateCsharp.buildFsa(inputFile, recursionMaxLevel);
             Utils.OutputCSharpResult(Utils.FsaToTestDot(fsa), _provider);
             return null;
         }

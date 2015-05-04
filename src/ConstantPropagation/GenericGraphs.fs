@@ -2,10 +2,14 @@
 
 open QuickGraph
 
+type ArbitraryOperationInfo =
+| CsharpArbitraryFun of JetBrains.ReSharper.Psi.CSharp.Tree.IMethodDeclaration
+| NoInfo
+
 type OperationType =
 | Replace
 | Concat
-| Arbitrary of (option<unit -> GenericCFG>)
+| Arbitrary of ArbitraryOperationInfo
 // and so on ...
 
 and UpdaterType =
@@ -54,8 +58,7 @@ and BidirectGraph = BidirectionalGraph<GraphNode, Edge<GraphNode>>
 
 and GenericCFG = {
     FunctionName: string
-    Graph: BidirectGraph
-    MaxNodeId: int }
+    Graph: BidirectGraph }
 
 type DDG = {
     Graph: BidirectGraph
@@ -179,8 +182,7 @@ module GenericCFGFuncs =
 
     let create name = {
         FunctionName = name
-        Graph = BidirectGraphFuns.create ()
-        MaxNodeId = 0 }
+        Graph = BidirectGraphFuns.create () }
 
     type private ConvertState = {
         Vars: Set<string>

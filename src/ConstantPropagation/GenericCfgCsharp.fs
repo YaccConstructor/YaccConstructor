@@ -196,16 +196,6 @@ let rec toGenericCfg (cfg: ICSharpControlFlowGraf) functionName =
         if Seq.length decls <> 0
         then Some(decls |> Seq.head :?> IMethodDeclaration)
         else None
-        
-    let tryCreateLazyCfgGenerator (invocExpr: IInvocationExpression) =
-        match tryGetMethodDeclaration invocExpr with
-        | Some(methodDecl) ->
-            let lazyGenerator () =
-                let csharpCfg = CSharpControlFlowBuilder.Build methodDecl
-                let methodName = methodDecl.NameIdentifier.Name
-                toGenericCfg csharpCfg methodName |> fst
-            Some(lazyGenerator)
-        | _ -> None
 
     let toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) = 
         let nType = 
@@ -269,8 +259,11 @@ let rec toGenericCfg (cfg: ICSharpControlFlowGraf) functionName =
                     if isReplaceMethod methodName (callTargetRefExpr.Type())
                     then Operation(Replace, depIDs)
                     else
-                        let optGen = tryCreateLazyCfgGenerator invocExpr 
-                        Operation(Arbitrary(optGen), depIDs)
+                        let operationInfo =
+                            match tryGetMethodDeclaration invocExpr with
+                            | Some(methodDecl) -> CsharpArbitraryFun(methodDecl)
+                            | _ -> NoInfo
+                        Operation(Arbitrary(operationInfo), depIDs)
                 | :? IReferenceExpression as refExpr ->
                     let name = refExpr.NameIdentifier.Name
                     VarRef(name)
@@ -382,13 +375,14 @@ let rec toGenericCfg (cfg: ICSharpControlFlowGraf) functionName =
                     let loopNode = info.CfeToGenericNodesMapping.[loopCfe]
                     surroundLoopWithMarkers loopNode loopInfo prevId
             )
+        |> ignore
 
     let traverseConverting (cfg: ICSharpControlFlowGraf) (info: ConvertInfo) =
         let initState = (BidirectGraphFuns.create (), [], 0, info, [])
         let _, (graph, _, lastId, _, _) =
             dfsCfgBasic cfg.EntryElement (fun _ s -> s) processNode getNextNodes postProcess initState
-        let lastId = surroundLoopsWithMarkers graph info lastId
-        { FunctionName = functionName; Graph = graph; MaxNodeId = lastId }
+        do surroundLoopsWithMarkers graph info lastId
+        { FunctionName = functionName; Graph = graph }
 
     let convInfo = collectConvertInfo cfg 
     let genericCfg = traverseConverting cfg convInfo

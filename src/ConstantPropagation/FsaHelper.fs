@@ -64,6 +64,15 @@ let private symbolsAreEqual (s1: FsaState) (s2: FsaState) = fst s1 = fst s2
 let private getChar = function Smbl(ch, p) -> ch | Eps -> failwith getCharMetEpsMsg
 let private newSymbol x =  Smbl(x, Unchecked.defaultof<_>)
 
+let anyWordsFsa (): CharFSA = 
+    let inits = ResizeArray.singleton 0
+    let finals = ResizeArray.singleton 0
+    let trans = 
+        alphabet 
+        |> Seq.map (fun ch -> (0, newSymbol ch, 0))
+        |> ResizeArray.ofSeq
+    CharFSA(inits, finals, trans)
+
 let union fsa1 fsa2 = CharFSA.Union (fsa1, fsa2)
 
 let replace origFsa matchFsa replaceFsa =

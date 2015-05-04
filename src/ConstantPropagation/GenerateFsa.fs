@@ -8,7 +8,7 @@ open YC.FSA.FsaApproximation
 open Utils
 
 type FsaState = char * Position<int>
-type FSAMap = Map<string, FSA<FsaState>>
+type FSAMap = Map<string, FsaHelper.CharFSA>
 
 type BuildState = {
     Operands: list<FSA<FsaState>>
@@ -18,7 +18,7 @@ type BuildState = {
 open GraphUtils.TopoTraverser
 open GenericGraphs.CfgTopoDownTraverser
 
-let buildAutomaton (ddg: DDG) (initialFsaMap: FSAMap) =
+let buildAutomaton (ddg: DDG) (initialFsaMap: FSAMap) recLevel fsaGenerator =
     // exception messages
     let unsupportedCaseMsg = "unsupported case encountered"
     let unexpectedNodeMsg = "unexpected node type is encountered in automaton building"
@@ -95,8 +95,8 @@ let buildAutomaton (ddg: DDG) (initialFsaMap: FSAMap) =
         let concatLeftOpFsa = operands |> List.tail |> List.head
         let operands' = operands |> List.tail |> List.tail
         let concatResFsa = FSA.Concat (concatLeftOpFsa, concatRightOpFsa)
-        concatResFsa :: operands'        
-
+        concatResFsa :: operands'
+       
     let varsFsaCollectedSoFar node traverser (state: BuildState) =
         let inNodes =
             match node.Type with
@@ -154,7 +154,14 @@ let buildAutomaton (ddg: DDG) (initialFsaMap: FSAMap) =
                     let operands' = (applyConcat state.Operands)
                     let unboundRes' = Map.add node.Id (List.head operands') state.UnboundResults
                     operands', varsFsaSoFar, unboundRes', traverser
-                | Arbitrary(name) -> failwith unsupportedCaseMsg
+                | Arbitrary(info) -> 
+                    let fsa, operands = 
+                        match fsaGenerator info state.Operands recLevel with
+                        | Some(fsa), ops -> fsa, ops
+                        | _ -> FsaHelper.anyWordsFsa (), state.Operands
+                    let operands' = fsa :: operands
+                    let unboundRes' = Map.add node.Id fsa state.UnboundResults
+                    operands', varsFsaSoFar, unboundRes', traverser
             | ExitNode(nodes) ->
                 let getPreExitNodeFsa (node: GraphNode) =
                     match node.Type with

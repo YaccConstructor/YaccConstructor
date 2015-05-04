@@ -12,7 +12,11 @@ open JetBrains.ReSharper.Psi.ControlFlow
 open XMLParser
 open Utils
 open Utils.DictionaryFuns
+open GenericCfgCsharp
+open GenericGraphs
+open FsaHelper
 open GenerateFsa
+open BuildApproximation
 
 open System.Collections.Generic
 open System.IO
@@ -81,23 +85,23 @@ let buildDdg (file: ICSharpFile) =
     // process the first hotspot
     let lang, hotspot = (getHotspots file).[0]
     let csharpCFG, methodName = createControlFlowGraph hotspot
-    let genericCFG, convertInfo = GenericCfgCsharp.toGenericCfg csharpCFG methodName
+    let genericCFG, convertInfo = toGenericCfg csharpCFG methodName
 
     let genCfgName = "cfg_" + file.GetHashCode().ToString() 
-    GenericGraphs.BidirectGraphFuns.toDot genericCFG.Graph genCfgName (myDebugFilePath (genCfgName + ".dot"))
+    BidirectGraphFuns.toDot genericCFG.Graph genCfgName (myDebugFilePath (genCfgName + ".dot"))
 
     let hotVarRefCfe = (hotspot.Arguments.[0].Value) :> ITreeNode
     let hotVarRef = getMappingToOne hotVarRefCfe convertInfo.AstToGenericNodesMapping
-    let ddg = GenericGraphs.GenericCFGFuncs.ddgForVar hotVarRef genericCFG
+    let ddg = GenericCFGFuncs.ddgForVar hotVarRef genericCFG
 
     let ddgName = "ddg_" + file.GetHashCode().ToString()
-    GenericGraphs.BidirectGraphFuns.toDot ddg.Graph ddgName (myDebugFilePath (ddgName + ".dot"))
+    BidirectGraphFuns.toDot ddg.Graph ddgName (myDebugFilePath (ddgName + ".dot"))
 
     ddg
 
-let buildFsa (file: ICSharpFile) =
+let buildFsa (file: ICSharpFile) recursionMaxLevel =
     let ddg = buildDdg file
-    let fsaForVar = buildAutomaton ddg Map.empty
+    let fsaForVar = buildAutomaton ddg Map.empty recursionMaxLevel fsaGenerator
 
     // for debug
     let fsaName = "fsa_" + file.GetHashCode().ToString()
@@ -105,30 +109,3 @@ let buildFsa (file: ICSharpFile) =
     FsaHelper.toDot fsaForVar path
 
     fsaForVar
-
-let BuildApproximation (file: ICSharpFile) =
-    buildFsa file
-
-//let buildApproxForTarget (methodDecl: ICSharpFunctionDeclaration) (targetExpr: ICSharpExpression) initialFsaMap =
-//    let csharpCfg = CSharpControlFlowBuilder.Build methodDecl
-//    let additionalInfo = collectAdditionalInfo csharpCfg
-//    let genericCfg = convert csharpCfg additionalInfo
-//    let targetExprCfe = additionalInfo.AstCfgMap.[hash targetExpr] |> List.ofSeq |> List.head
-//    let ddg = ddgForNode targetExprCfe.Value.Id genericCfg
-//    buildAutomaton ddg initialFsaMap
-//
-//let buildApproxForWholeMethod (methodDecl: ICSharpFunctionDeclaration) initialFsaMap =
-//    let csharpCfg = CSharpControlFlowBuilder.Build methodDecl
-//    let additionalInfo = collectAdditionalInfo csharpCfg
-//    let genericCfg = convert csharpCfg additionalInfo
-//    let exitNode = genericCfg.Vertices |> Seq.find (fun v -> genericCfg.OutDegree(v) = 0)
-//    let ddg = ddgForNode exitNode.Id genericCfg
-//    buildAutomaton ddg initialFsaMap
-
-//let BuildApproximation (file: ICSharpFile) =
-//    let collector = RecursiveElementCollector(fun (node: ITreeNode) -> node :? IMethodDeclaration)
-//    let methods = collector.GetResults() |> Seq.map (fun n -> n :?> IMethodDeclaration)
-//    methods 
-//    |> Seq.filter (fun m -> Seq.isEmpty m.DeclaredElement.Parameters)
-//    |> Seq.map (fun m -> buildApproxForWholeMethod m Map.empty)
-//    |> Seq.iter (fun fsa -> FsaHelper.toDebugDot )

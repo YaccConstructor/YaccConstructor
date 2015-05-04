@@ -46,6 +46,7 @@
     <Compile Include="GenericCfgCsharp.fs" />
     <Compile Include="FsaHelper.fs" />
     <Compile Include="GenerateFsa.fs" />
+    <Compile Include="BuildApproximation.fs" />
     <Compile Include="ApproximateCsharp.fs" />
     <Compile Include="CFGConversionJs.fs" />
     <Compile Include="ApproximationBuilderJs.fs" />

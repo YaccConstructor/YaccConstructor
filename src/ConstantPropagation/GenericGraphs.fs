@@ -5,17 +5,17 @@ open QuickGraph
 type OperationType =
 | Replace
 | Concat
-| Arbitrary of string
+| Arbitrary of (option<unit -> GenericCFG>)
 // and so on ...
 
-type UpdaterType =
+and UpdaterType =
 // initializer node ID
 | Assign of int
 // type and operand nodes' IDs
 | PlusAssign of int * int
 // function with updatable arg passing
 
-type GraphNodeType = 
+and GraphNodeType = 
 // declared name and initializer node ID
 | Declaration of string * int
 // update target and updater type
@@ -32,9 +32,29 @@ type GraphNodeType =
 | OtherNode
 | ExitNode of list<GraphNode>
 
-and GraphNode = {
+and [<CustomEquality; CustomComparison>] GraphNode = {
     Id: int
     Type: GraphNodeType }
+    with
+        override this.Equals other = 
+            let getId = fun (n: GraphNode) -> n.Id
+            let typeCheckFailedFunc () = false
+            Utils.applyToMappedTypedArgs (=) getId this other typeCheckFailedFunc
+
+        override this.GetHashCode() = 
+            13 * 7 + hash this.Id
+
+        interface System.IComparable with
+            member this.CompareTo other =
+                let getId = fun (n: GraphNode) -> n.Id
+                let failFunc () = invalidArg "other" "cannot compare values of different types"
+                Utils.applyToMappedTypedArgs compare getId this other failFunc
+
+and GenericCFG = BidirectionalGraph<GraphNode, Edge<GraphNode>>
+
+type DDG = {
+    Graph: BidirectionalGraph<GraphNode, Edge<GraphNode>>
+    Root: GraphNode }
 
 module GraphNodeFuncs =
     let rec toString (node: GraphNode) =
@@ -50,7 +70,7 @@ module GraphNodeFuncs =
             match oType with
             | Replace -> "replace"
             | Concat -> "concat"
-            | Arbitrary(name) -> sprintf "%s(%d)" name (List.length operands)
+            | Arbitrary(_) -> sprintf "arbitrary(%d)" (List.length operands)
         | Literal(value) -> sprintf "literal(%s)" value
         | VarRef(name) -> sprintf "varRef(%s)" name
         | LoopNode -> "loopNode"
@@ -62,12 +82,6 @@ module GraphNodeFuncs =
         | ExitNode(vars) -> 
             let labels = vars |> List.map toString
             sprintf "exit(%s)" <| Seq.fold (fun acc v -> acc + "," + v) "" labels
-
-type GenericCFG = BidirectionalGraph<GraphNode, Edge<GraphNode>>
-
-type DDG = {
-    Graph: BidirectionalGraph<GraphNode, Edge<GraphNode>>
-    Root: GraphNode }
 
 module CfgTopoTraverser =
     open GraphUtils.TopoTraverser

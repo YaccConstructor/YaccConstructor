@@ -99,10 +99,10 @@ module DotUtils =
 let myDebugFolderPath = "E:\\Diploma\\Debug"
 let myDebugFilePath fileName = Path.Combine (myDebugFolderPath, fileName)
 
-let applyToMappedTypedArgs f mapper (arg1: 'a) (arg2: obj) typingFaildFunc =
+let applyToMappedTypedArgs f mapper (arg1: 'a) (arg2: obj) typingFailedFunc =
     match arg2 with
     | :? 'a as arg2Typed-> f (mapper arg1) (mapper arg2Typed)
-    | _ -> typingFaildFunc ()
+    | _ -> typingFailedFunc ()
 
 let (===) = LanguagePrimitives.PhysicalEquality
 

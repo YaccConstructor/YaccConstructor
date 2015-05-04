@@ -168,7 +168,7 @@ let collectConvertInfo (cfg: IControlFlowGraf) =
     CfeToGenericNodesMapping = Dictionary() }
     
 // converting functions
-let toGenericCfg (cfg: ICSharpControlFlowGraf) =
+let rec toGenericCfg (cfg: ICSharpControlFlowGraf) =
     // exception messages 
     let astToGenericNodeMappingProblemMsg = 
         "ast node maps to multiple or zero generic nodes where single mapping expected" 
@@ -187,9 +187,6 @@ let toGenericCfg (cfg: ICSharpControlFlowGraf) =
     let isReplaceMethod (name: string) (callTargetType: IType) =
         name = "Replace" && callTargetType.IsString()
 
-    let loopNodeToGeneric (cfe: IControlFlowElement) nodeId (info: ConvertInfo) = 
-        { Id = nodeId; Type = OtherNode }
-
     let tryGetMethodDeclaration (invocExpr: IInvocationExpression) = 
         let decls = invocExpr
                         .InvocationExpressionReference
@@ -199,6 +196,15 @@ let toGenericCfg (cfg: ICSharpControlFlowGraf) =
         if Seq.length decls <> 0
         then Some(decls |> Seq.head :?> IMethodDeclaration)
         else None
+        
+    let tryCreateLazyCfgGenerator (invocExpr: IInvocationExpression) =
+        match tryGetMethodDeclaration invocExpr with
+        | Some(methodDecl) ->
+            let lazyGenerator () =
+                let csharpCfg = CSharpControlFlowBuilder.Build methodDecl
+                toGenericCfg csharpCfg |> fst
+            Some(lazyGenerator)
+        | _ -> None
 
     let toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) = 
         let nType = 
@@ -261,7 +267,9 @@ let toGenericCfg (cfg: ICSharpControlFlowGraf) =
                     let depIDs = dependencies |> List.map (fun d -> getGenericNodeId d info)
                     if isReplaceMethod methodName (callTargetRefExpr.Type())
                     then Operation(Replace, depIDs)
-                    else Operation(Arbitrary(methodName), depIDs)
+                    else
+                        let optGen = tryCreateLazyCfgGenerator invocExpr 
+                        Operation(Arbitrary(optGen), depIDs)
                 | :? IReferenceExpression as refExpr ->
                     let name = refExpr.NameIdentifier.Name
                     VarRef(name)

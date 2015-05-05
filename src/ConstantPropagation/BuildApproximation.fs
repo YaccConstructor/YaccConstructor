@@ -10,7 +10,7 @@ open GenericGraphs
 open FsaHelper
 open GenerateFsa
 open Utils.DictionaryFuns
-open ReshrperTreeUtils
+open ReshrperCsharpTreeUtils
 
 type ControlData = {
     TargetMethod: string

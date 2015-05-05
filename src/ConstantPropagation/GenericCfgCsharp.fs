@@ -14,6 +14,7 @@ open GenericGraphs
 open IControlFlowGraphUtils
 open Utils.DictionaryFuns
 open UserDefOperationInfo
+open ReshrperCsharpTreeUtils
             
 type AstToCfgDict = Dictionary<ITreeNode, HashSet<IControlFlowElement>>
 type AstToGenericNodesDict = Dictionary<ITreeNode, HashSet<GraphNode>>
@@ -187,16 +188,6 @@ let rec toGenericCfg (cfg: ICSharpControlFlowGraf) functionName =
         res.Id
     let isReplaceMethod (name: string) (callTargetType: IType) =
         name = "Replace" && callTargetType.IsString()
-
-    let tryGetMethodDeclaration (invocExpr: IInvocationExpression) = 
-        let decls = invocExpr
-                        .InvocationExpressionReference
-                        .Resolve()
-                        .DeclaredElement
-                        .GetDeclarations()
-        if Seq.length decls <> 0
-        then Some(decls |> Seq.head :?> IMethodDeclaration)
-        else None
 
     let toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) = 
         let nType = 

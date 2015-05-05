@@ -18,85 +18,44 @@ open FsaHelper
 open GenerateFsa
 open BuildApproximation
 open UserDefOperationInfo
-open ReshrperTreeUtils
+open ReshrperCsharpTreeUtils
 
 open System.Collections.Generic
 open System.IO
 
-let private hotspotInfoList = parseXml "Hotspots.xml"
-
-let private tryDefineLang (node: IInvocationExpression) = 
-    let typeDecl = node.InvokedExpression.GetText().Split('.')
-    let className = typeDecl.[0].ToLowerInvariant()
-    let methodName = typeDecl.[1].ToLowerInvariant()
-                
-    let args = node.AllArguments false
-    let argTypes = new ResizeArray<_>()
-    for argument in args do
-        argTypes.Add <| argument.GetExpressionType().GetLongPresentableName(CSharpLanguage.Instance).ToLowerInvariant()
-        
-    let retType = node.GetExpressionType().GetLongPresentableName(CSharpLanguage.Instance).ToLowerInvariant()
-
+let private tryDefineLang (node: IInvocationExpression) (hotspotInfoList: list<string * Hotspot>) = 
+    let methodName, className, parameters, retType = getMethodSigniture node
+    let retTypeName = retType.GetLongPresentableName(CSharpLanguage.Instance)
     hotspotInfoList
     |> List.tryFind 
         (
             fun hotspotInfo -> 
                 let hotspot = snd hotspotInfo
-                hotspot.Class = className 
-                && hotspot.Method = methodName 
-                && argTypes.[hotspot.QueryPosition] = "string" 
-                && hotspot.ReturnType = retType
+                hotspot.Class = className.ToLowerInvariant()
+                && hotspot.Method = methodName.ToLowerInvariant() 
+                && parameters.[hotspot.QueryPosition].Type.IsString() 
+                && hotspot.ReturnType = retTypeName.ToLowerInvariant()
         )
-    |> Option.map fst  
+    |> Option.map fst
 
-let getHotspots (file: ICSharpFile) =
+let findHotspots (file: ICSharpFile) (hotspotInfoList: list<string * Hotspot>) =
     let hotspots = new ResizeArray<_>() 
-    let addHotspot (node: ITreeNode) =
+    let processNode (node: ITreeNode) =
         match node with 
         | :? IInvocationExpression as invocExpr  -> 
-            tryDefineLang invocExpr
+            tryDefineLang invocExpr hotspotInfoList
             |> Option.iter (fun lang -> hotspots.Add (lang, invocExpr))
         | _ -> ()
 
-    let processor = RecursiveElementProcessor(fun x -> addHotspot x)
+    let processor = RecursiveElementProcessor(fun node -> processNode node)
     processor.Process file
     hotspots
 
-let private getEnclosingMethodNullParentMsg = "can't get enclosing method, null parent encountered"
-let rec getEnclosingMethod (node: ITreeNode) =
-    match node with
-    | null -> failwith getEnclosingMethodNullParentMsg
-    | :? IMethodDeclaration as funDecl -> funDecl
-    | _ -> getEnclosingMethod node.Parent
-
-let private createControlFlowGraph (hotspot: IInvocationExpression) =
-    let methodDeclaration = getEnclosingMethod hotspot
-    CSharpControlFlowBuilder.Build methodDeclaration, methodDeclaration.NameIdentifier.Name
-
-let buildDdg (file: ICSharpFile) =
-    // the next line is for debug purposes
-    DotUtils.allMethodsCFGToDot file myDebugFolderPath
-    // process the first hotspot
-    let lang, hotspot = (getHotspots file).[0]
-    let csharpCFG, methodName = createControlFlowGraph hotspot
-    let genericCFG, convertInfo = toGenericCfg csharpCFG methodName
-
-    let genCfgName = "cfg_" + file.GetHashCode().ToString() 
-    BidirectGraphFuns.toDot genericCFG.Graph genCfgName (myDebugFilePath (genCfgName + ".dot"))
-
-    let hotVarRefCfe = (hotspot.Arguments.[0].Value) :> ITreeNode
-    let hotVarRef = getMappingToOne hotVarRefCfe convertInfo.AstToGenericNodesMapping
-    let ddg = GenericCFGFuncs.ddgForVar hotVarRef genericCFG
-
-    let ddgName = "ddg_" + file.GetHashCode().ToString()
-    BidirectGraphFuns.toDot ddg.Graph ddgName (myDebugFilePath (ddgName + ".dot"))
-
-    ddg
-
 let buildFsa (file: ICSharpFile) recursionMaxLevel =
     DotUtils.allMethodsCFGToDot file myDebugFolderPath
-    // process the first hotspot
-    let lang, hotspot = (getHotspots file).[0]
+
+    let hotspotInfoList = XMLParser.parseXml "Hotspots.xml"
+    let lang, hotspot = (findHotspots file hotspotInfoList).[0]
     let methodDeclaration = getEnclosingMethod hotspot
 
     let stringParamsNum = Seq.length <| getStringTypedParams methodDeclaration
@@ -112,3 +71,28 @@ let buildFsa (file: ICSharpFile) recursionMaxLevel =
         |> fst
         |> Option.get
     fsaForVar
+
+
+// this method is obsolete and will be deleted soon
+let buildDdg (file: ICSharpFile) =
+    // the next line is for debug purposes
+    DotUtils.allMethodsCFGToDot file myDebugFolderPath
+
+    let hotspotInfoList = XMLParser.parseXml "Hotspots.xml"
+    let lang, hotspot = (findHotspots file hotspotInfoList).[0]
+    let methodDeclaration = getEnclosingMethod hotspot
+    let methodName = methodDeclaration.NameIdentifier.Name
+    let csharpCFG = CSharpControlFlowBuilder.Build methodDeclaration
+    let genericCFG, convertInfo = toGenericCfg csharpCFG methodName
+
+    let genCfgName = "cfg_" + file.GetHashCode().ToString() 
+    BidirectGraphFuns.toDot genericCFG.Graph genCfgName (myDebugFilePath (genCfgName + ".dot"))
+
+    let hotVarRefCfe = (hotspot.Arguments.[0].Value) :> ITreeNode
+    let hotVarRef = getMappingToOne hotVarRefCfe convertInfo.AstToGenericNodesMapping
+    let ddg = GenericCFGFuncs.ddgForVar hotVarRef genericCFG
+
+    let ddgName = "ddg_" + file.GetHashCode().ToString()
+    BidirectGraphFuns.toDot ddg.Graph ddgName (myDebugFilePath (ddgName + ".dot"))
+
+    ddg

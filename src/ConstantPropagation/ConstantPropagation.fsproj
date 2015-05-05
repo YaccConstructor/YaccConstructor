@@ -44,10 +44,10 @@
     <Compile Include="IControlFlowGraphUtils.fs" />
     <Compile Include="UserDefOperationInfo.fs" />
     <Compile Include="GenericGraphs.fs" />
+    <Compile Include="ReshrperCsharpTreeUtils.fs" />
     <Compile Include="GenericCfgCsharp.fs" />
     <Compile Include="FsaHelper.fs" />
     <Compile Include="GenerateFsa.fs" />
-    <Compile Include="ReshrperTreeUtils.fs" />
     <Compile Include="BuildApproximation.fs" />
     <Compile Include="ApproximateCsharp.fs" />
     <Compile Include="CFGConversionJs.fs" />

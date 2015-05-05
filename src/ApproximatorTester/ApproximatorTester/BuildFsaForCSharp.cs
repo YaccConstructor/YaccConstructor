@@ -29,7 +29,7 @@ namespace ApproximatorTester
         {
             var inputFile = _provider.PsiFile;
             const int recursionMaxLevel = 3; // 0 for top and 3 level down
-            var fsa = ApproximateCsharp.buildFsa(inputFile, recursionMaxLevel);
+            var fsa = ApproximateCsharp.ApproximateFile(inputFile, recursionMaxLevel);
             Utils.OutputCSharpResult(Utils.FsaToTestDot(fsa), _provider);
             return null;
         }

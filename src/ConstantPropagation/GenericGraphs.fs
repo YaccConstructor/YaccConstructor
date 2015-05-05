@@ -33,6 +33,7 @@ and GraphNodeType =
 | LoopBodyEnd
 | OtherNode
 | ExitNode of list<GraphNode>
+| StartNode
 
 and [<CustomEquality; CustomComparison>] GraphNode = {
     Id: int
@@ -88,6 +89,7 @@ module GraphNodeFuncs =
         | ExitNode(vars) -> 
             let labels = vars |> List.map toString
             sprintf "exit(%s)" <| Seq.fold (fun acc v -> acc + "," + v) "" labels
+        | StartNode -> "start"
 
 module BidirectGraphFuns =
     open System.IO
@@ -194,7 +196,6 @@ module GenericCFGFuncs =
         let getExitVars = function
         | ExitNode(vars) -> vars
         | _ -> failwith wrongCfgNodeTypeMsg 
-
         let rec findDdgNodes (cfg: BidirectGraph) traverser (state: ConvertState) =
             let makeVisited (node: GraphNode) (state: ConvertState) =
                 { state with VisitedNodes = node :: state.VisitedNodes }
@@ -233,7 +234,8 @@ module GenericCFGFuncs =
                 | LoopEnter
                 | LoopExit
                 | LoopBodyBeg
-                | LoopBodyEnd -> traverser, makeVisited node state
+                | LoopBodyEnd 
+                | StartNode -> traverser, makeVisited node state
                 | VarRef(name) when Set.contains node.Id state.NodesToVisit ->
                     let state = makeVisited node state
                     traverser, { state with Vars = Set.add name state.Vars }
@@ -251,7 +253,6 @@ module GenericCFGFuncs =
             if isFinishedMode traverser
             then state.VisitedNodes
             else findDdgNodes cfg traverser state
-
         let removeNeedlessNodes (ddg: BidirectGraph) (neededNodes: list<GraphNode>) =
             let neededSet = neededNodes |> List.map (fun n -> n.Id) |> Set.ofList
             let removeIfNotNeeded (node: GraphNode) =
@@ -270,7 +271,6 @@ module GenericCFGFuncs =
                         )
             let vertices = List.ofSeq ddg.Vertices
             do vertices |> List.iter removeIfNotNeeded
-
         let ddg =
             let g = BidirectGraph()
             do g.AddVerticesAndEdgeRange cfg.Graph.Edges |> ignore
@@ -286,21 +286,30 @@ module GenericCFGFuncs =
         do removeNeedlessNodes ddg neededNodes
         { Graph = ddg; Root = ddgRoot }
 
-    let exitNodeTypeMsg = "only VarRef typed nodes are supported as exit nodes for now"
-    let private ddgForNodes (nodes: list<GraphNode>) (cfg: GenericCFG) =
-        let nodeWithMaxId = Seq.maxBy (fun v -> v.Id) cfg.Graph.Vertices
-        let newExitNodeId = 1 + nodeWithMaxId.Id
-        let newExitNode = { Id = newExitNodeId; Type = ExitNode(nodes) }
+    let private addStartNode nodeId (cfg: GenericCFG) =
+        let newStartNode = { Id = nodeId; Type = StartNode }
+        let curStartNodes = cfg.Graph.Vertices |> Seq.filter (fun v -> cfg.Graph.InDegree(v) = 0) |> List.ofSeq
+        do cfg.Graph.AddVertex newStartNode |> ignore
+        do curStartNodes |> List.iter (fun n -> cfg.Graph.AddEdge (Edge(newStartNode, n)) |> ignore)
+
+    let private addExitNode nodeId (targetNodes: list<GraphNode>) (cfg: GenericCFG) =
+        let newExitNode = { Id = nodeId; Type = ExitNode(targetNodes) }
         do cfg.Graph.AddVertex newExitNode |> ignore
-        do nodes 
+        do targetNodes 
         |> List.iter 
             (fun n -> cfg.Graph.OutEdges n |> List.ofSeq |> List.iter (cfg.Graph.RemoveEdge >> ignore))
-        do nodes |> List.iter (fun n -> cfg.Graph.AddEdge (Edge(n, newExitNode)) |> ignore)
+        do targetNodes |> List.iter (fun n -> cfg.Graph.AddEdge (Edge(n, newExitNode)) |> ignore)
+        newExitNode
+
+    let private ddgForNodes (nodes: list<GraphNode>) (cfg: GenericCFG) =
+        let nodeWithMaxId = Seq.maxBy (fun v -> v.Id) cfg.Graph.Vertices
+        do addStartNode (nodeWithMaxId.Id + 1) cfg
+        let newExitNode = addExitNode (nodeWithMaxId.Id + 2) nodes cfg
         cfgToDdg newExitNode cfg
 
     let ddgForVar (varRef: GraphNode) (cfg: GenericCFG) =
         ddgForNodes [varRef] cfg
 
     let ddgForExits (cfg: GenericCFG) = 
-        let exitNodes =  cfg.Graph.Vertices |> Seq.filter (fun v -> cfg.Graph.OutDegree(v) = 0)
+        let exitNodes = cfg.Graph.Vertices |> Seq.filter (fun v -> cfg.Graph.OutDegree(v) = 0)
         ddgForNodes (List.ofSeq exitNodes) cfg

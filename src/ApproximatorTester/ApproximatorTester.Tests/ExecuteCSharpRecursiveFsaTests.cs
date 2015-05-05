@@ -27,5 +27,17 @@ namespace ApproximatorTester.Tests
         {
             DoTestFiles("ComplexOneLevelRec.cs");
         }
+
+        [Test]
+        public void TestThreeLevelRec()
+        {
+            DoTestFiles("ThreeLevelRec.cs");
+        }
+
+        [Test]
+        public void TestTooDeepRec()
+        {
+            DoTestFiles("TooDeepRec.cs");
+        }
     }
 }

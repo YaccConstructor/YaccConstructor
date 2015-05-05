@@ -29,7 +29,7 @@ let bindArgsToParams (methodDecl: IMethodDeclaration) (stack: list<CharFSA>) =
         Map.ofSeq boundParams, restStack
 
 let rec approximate (functionInfo: ArbitraryOperationInfo) (stack: list<CharFSA>) (controlData: ControlData) =
-    if controlData.CurRecLevel - 1 < 0
+    if controlData.CurRecLevel < 0
     then None, stack
     else 
         match functionInfo with

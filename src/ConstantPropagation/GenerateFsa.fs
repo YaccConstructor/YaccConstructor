@@ -187,7 +187,8 @@ let buildAutomaton (ddg: DDG) (initialFsaMap: FSAMap) controlData approximate =
             | LoopEnter
             | LoopExit
             | LoopBodyBeg
-            | LoopBodyEnd -> state.Operands, varsFsaSoFar, state.UnboundResults, traverser
+            | LoopBodyEnd
+            | StartNode -> state.Operands, varsFsaSoFar, state.UnboundResults, traverser
             | _ -> failwith unexpectedNodeMsg
         let state = {
             Operands = operands

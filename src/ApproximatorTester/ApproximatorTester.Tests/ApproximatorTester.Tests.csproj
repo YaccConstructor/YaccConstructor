@@ -56,6 +56,8 @@
     <Compile Include="ExecuteJsDdgTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ExecuteCSharpDdgTests.cs" />
+    <None Include="test\data\CSharpRecursiveFsa\ComplexOneLevelRec.cs" />
+    <None Include="test\data\CSharpRecursiveFsa\ComplexOneLevelRec.cs.gold" />
     <None Include="test\data\CSharpRecursiveFsa\SimpleUserDefMethod.cs" />
     <None Include="test\data\CSharpFsa\ForWithIf.cs" />
     <None Include="test\data\CSharpFsa\ForWithIf.cs.gold" />

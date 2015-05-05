@@ -38,12 +38,20 @@ let rec approximate (functionInfo: ArbitraryOperationInfo) (stack: list<CharFSA>
             let csharpCfg = CSharpControlFlowBuilder.Build methodDecl
             let methodName = methodDecl.NameIdentifier.Name
             let genericCFG, convertInfo = toGenericCfg csharpCfg methodName
+            // for debug
+            let path = Utils.myDebugFilePath ("cfg_" + methodName + ".dot")
+            BidirectGraphFuns.toDot genericCFG.Graph methodName path
+            // end
             let ddg =
                 if methodName = controlData.TargetMethod
                 then 
                     let targetNode = getMappingToOne controlData.TargetNode convertInfo.AstToGenericNodesMapping
                     GenericCFGFuncs.ddgForVar targetNode genericCFG
                 else GenericCFGFuncs.ddgForExits genericCFG
+            // for debug
+            let path = Utils.myDebugFilePath ("ddg_" + methodName + ".dot")
+            BidirectGraphFuns.toDot ddg.Graph methodName path
+            // end
             let initFsaMap, restStack = bindArgsToParams methodDecl stack
             let controlData = { controlData with CurRecLevel = controlData.CurRecLevel - 1 }
             let fsa = buildAutomaton ddg initFsaMap controlData approximate

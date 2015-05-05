@@ -253,7 +253,7 @@ let rec toGenericCfg (cfg: ICSharpControlFlowGraf) functionName =
                         |> List.ofSeq
                         |> List.map (fun a -> a.Value)
                     let dependencies = 
-                        if psiMethod.IsStatic
+                        if psiMethod.IsStatic || not <| callTargetRefExpr.Type().IsString()
                         then args
                         else callTargetRefExpr :> ICSharpExpression :: args
                     let depIDs = dependencies |> List.map (fun d -> getGenericNodeId d info)

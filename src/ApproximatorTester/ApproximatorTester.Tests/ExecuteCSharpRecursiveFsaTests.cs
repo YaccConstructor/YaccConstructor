@@ -21,5 +21,11 @@ namespace ApproximatorTester.Tests
         {
             DoTestFiles("SimpleUserDefMethod.cs");
         }
+
+        [Test]
+        public void TestComplexOneLevelRec()
+        {
+            DoTestFiles("ComplexOneLevelRec.cs");
+        }
     }
 }

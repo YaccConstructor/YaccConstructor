@@ -111,10 +111,4 @@ let buildFsa (file: ICSharpFile) recursionMaxLevel =
         approximate (CsharpArbitraryFun(methodDeclaration)) stack controlInfo
         |> fst
         |> Option.get
-
-    // for debug
-    let fsaName = "fsa_" + file.GetHashCode().ToString()
-    let path = Path.Combine (myDebugFolderPath, fsaName + ".dot")
-    FsaHelper.toDot fsaForVar path
-
     fsaForVar

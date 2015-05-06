@@ -1,4 +1,4 @@
-﻿module ReshrperCfgToGeneric
+﻿module ResharperCfgToGeneric
 
 open QuickGraph
 

@@ -12,9 +12,8 @@ open JetBrains.ReSharper.Psi.ControlFlow
 open XMLParser
 open Utils
 open UserDefOperationInfo
-open ReshrperCsharpTreeUtils
+open ResharperCsharpTreeUtils
 open BuildApproximation
-
 
 let private tryDefineLang (node: IInvocationExpression) (hotspotInfoList: list<string * Hotspot>) = 
     let methodName, className, parameters, retType = getMethodSigniture node

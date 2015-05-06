@@ -1,4 +1,4 @@
-﻿module ReshrperCsharpTreeUtils
+﻿module ResharperCsharpTreeUtils
 
 open JetBrains.ReSharper.Psi
 open JetBrains.ReSharper.Psi.CSharp.Tree

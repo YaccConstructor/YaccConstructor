@@ -6,10 +6,10 @@ open JetBrains.ReSharper.Psi.CSharp.Tree
 open JetBrains.ReSharper.Psi.ControlFlow.CSharp
 open JetBrains.ReSharper.Psi.ControlFlow
 
-open ReshrperCfgToGeneric
+open ResharperCfgToGeneric
 open Utils
 open GenericGraphs
-open ReshrperCsharpTreeUtils
+open ResharperCsharpTreeUtils
 open UserDefOperationInfo
 
 // exception messages
@@ -118,7 +118,7 @@ let private tryAsLoopTreeNode (node: ITreeNode) =
     | _ -> None
     
 let rec toGenericCfg (cfg: ICSharpControlFlowGraf) functionName =
-    ReshrperCfgToGeneric.toGenericCfg 
+    ResharperCfgToGeneric.toGenericCfg 
         cfg 
         toGenericNode 
         tryAsLoopTreeNode 

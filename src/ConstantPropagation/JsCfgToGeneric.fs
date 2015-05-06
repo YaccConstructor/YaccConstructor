@@ -8,10 +8,10 @@ open JetBrains.ReSharper.Psi.JavaScript.ControlFlow
 open JetBrains.ReSharper.Psi.JavaScript.Parsing
 open JetBrains.ReSharper.Psi.JavaScript.Resolve
 
-open ReshrperCfgToGeneric
+open ResharperCfgToGeneric
 open Utils
 open GenericGraphs
-open ReshrperCsharpTreeUtils
+open ResharperCsharpTreeUtils
 open UserDefOperationInfo
 
 // exception messages
@@ -94,7 +94,7 @@ let private tryAsLoopTreeNode (node: ITreeNode) =
     | _ -> None
 
 let rec toGenericCfg (cfg: IJsControlFlowGraf) functionName =
-    ReshrperCfgToGeneric.toGenericCfg 
+    ResharperCfgToGeneric.toGenericCfg 
         cfg 
         toGenericNode 
         tryAsLoopTreeNode 

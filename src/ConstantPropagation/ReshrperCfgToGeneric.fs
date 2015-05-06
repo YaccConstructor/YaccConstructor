@@ -53,9 +53,6 @@ let rec toGenericCfg (cfg: IControlFlowGraf) toGenericNode tryAsLoopTreeNode try
         if List.isEmpty parentsStack
         then do graph.AddVertex genericNode |> ignore
         else do graph.AddVerticesAndEdge (Edge(List.head parentsStack, genericNode)) |> ignore
-        // check if there are already traversed successors
-        // we must connect current node to
-        do connectToTraversedSuccessors cfe genericNode graph info
         // if cur node is loop, we must continue processing from it's exits
         // so alternative exits are added and will be used in getNextNodes during dfs
         let alternativeExits =
@@ -65,13 +62,18 @@ let rec toGenericCfg (cfg: IControlFlowGraf) toGenericNode tryAsLoopTreeNode try
             | _ -> alternativeExits
         graph, genericNode :: parentsStack, newId, info, alternativeExits
 
-    let getNextNodes (e: IControlFlowElement) ((g, ps, li, i, alternativeExits) as state) =
+    let getNextNodes cfe ((g, ps, li, i, alternativeExits) as state) =
         if List.isEmpty alternativeExits
-        then getCfeExits e state
+        then getCfeExits cfe state
         else alternativeExits, (g, ps, li, i, [])
 
-    let postProcess e (g, parentsStack, li, i, ae) =
-        (g, List.tail parentsStack, li, i, ae)
+    let postProcess cfe (graph, parentsStack, li, info, ae) =
+        // check if there are already traversed successors
+        // we must connect current node to
+        let genericNode = info.CfeToGenericNodes.[cfe]
+        do connectToTraversedSuccessors cfe genericNode graph info
+        // pop node from parentsStack
+        (graph, List.tail parentsStack, li, info, ae)
 
     let surroundLoopsWithMarkers (graph: BidirectGraph) (info: ConvertInfo) lastId =
         let addOutMarkNode (edges: seq<Edge<GraphNode>>) markNode =

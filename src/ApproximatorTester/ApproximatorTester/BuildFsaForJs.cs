@@ -14,11 +14,11 @@ using YC.ReSharper.AbstractAnalysis.LanguageApproximation;
 namespace ApproximatorTester
 {
     [ContextAction(Name = "RunApproximatorJs", Description = "Run Approximator for Js", Group = "JS")]
-    public class BuildDdgForJs : ContextActionBase
+    public class BuildFsaForJs : ContextActionBase
     {
         private readonly IJavaScriptContextActionDataProvider _provider;
 
-        public BuildDdgForJs(IJavaScriptContextActionDataProvider provider)
+        public BuildFsaForJs(IJavaScriptContextActionDataProvider provider)
         {
             _provider = provider;
         }
@@ -30,9 +30,9 @@ namespace ApproximatorTester
 
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
-            // var jsCfg = _provider.GetControlFlowGraf();
-            // var cfg = ApproximationBuilderJs.BuildApproximation(jsCfg);
-            // OutputResult(Utils.DdgToTestDot(cfg));
+            var jsCfg = _provider.GetControlFlowGraf();
+            var fsa = ApproximateJs.BuildFsaForOneFunctionCfg(jsCfg);
+            OutputResult(Utils.FsaToTestDot(fsa));
             return null;
         }
 

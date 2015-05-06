@@ -12,9 +12,7 @@ open GenericGraphs
 open ReshrperCsharpTreeUtils
 open UserDefOperationInfo
 
-// exception messages 
-let private astToGenericNodeMappingProblemMsg = 
-    "ast node maps to multiple or zero generic nodes where single mapping expected" 
+// exception messages
 let private badIRefExprCastMsg = 
     "unable to perform cast to IReferenceExpression"
 let private unexpectedInitializerTypeMsg =
@@ -119,7 +117,6 @@ let private tryAsLoopTreeNode (node: ITreeNode) =
     | :? IForStatement as forStmt -> Some(forStmt.Condition :> ITreeNode)
     | _ -> None
     
-// converting functions
 let rec toGenericCfg (cfg: ICSharpControlFlowGraf) functionName =
     ReshrperCfgToGeneric.toGenericCfg 
         cfg 

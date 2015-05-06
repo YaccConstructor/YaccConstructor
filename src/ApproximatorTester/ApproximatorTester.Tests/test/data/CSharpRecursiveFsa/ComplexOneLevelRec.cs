@@ -28,7 +28,7 @@
 
         static string genString()
         {
-            var res = "b"
+            var res = "b";
             return res;
         }
 
@@ -41,12 +41,13 @@
         static string withMultiReturn()
         {
             string s = "y";
+            var res = "";
             if (s.IsNormalized())
             {
-                var res = "x";
+                res = "x";
                 return res;
             }
-            string res = s + "z";
+            res = s + "z";
             return res;
         }
     }

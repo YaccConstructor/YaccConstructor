@@ -1,9 +1,9 @@
 ﻿{caret}function main()
 {
-    var query = "select";
+    var query = "a";
     for (var i = 0; i < 10; i++)
     {
-        query += " field";
+        query += "b";
     }
     execScript(query);
 }

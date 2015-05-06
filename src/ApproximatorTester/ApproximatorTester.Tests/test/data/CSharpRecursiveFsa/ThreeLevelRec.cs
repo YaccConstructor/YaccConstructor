@@ -16,15 +16,15 @@
             
         }
 
-        static string genStringWithArg(string s)
+        static public string genStringWithArg(string s)
         {
             var res = s + Program.genString();
             return res;
         }
 
-        static string genString()
+        static public string genString()
         {
-            var res = "b"
+            var res = "b";
             return res;
         }
     }

@@ -48,12 +48,12 @@
     <Compile Include="ResharperCfgAdditionalInfo.fs" />
     <Compile Include="ReshrperCfgToGeneric.fs" />
     <Compile Include="CsharpCfgToGeneric.fs" />
+    <Compile Include="JsCfgToGeneric.fs" />
     <Compile Include="FsaHelper.fs" />
     <Compile Include="GenerateFsa.fs" />
     <Compile Include="BuildApproximation.fs" />
     <Compile Include="ApproximateCsharp.fs" />
-    <Compile Include="CFGConversionJs.fs" />
-    <Compile Include="ApproximationBuilderJs.fs" />
+    <Compile Include="ApproximateJs.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

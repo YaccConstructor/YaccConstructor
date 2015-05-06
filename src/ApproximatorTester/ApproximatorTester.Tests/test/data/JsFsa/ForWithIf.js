@@ -1,16 +1,16 @@
 ﻿{caret}function main(cond)
 {
-    var query = "select";
+    var query = "a";
     for (var i = 0; i < 10 && i > 0 || query.IsNormalized(); i++)
     {
-        var localQ = "from ";
+        var localQ = "b ";
         if (cond)
         {
-            localQ += "Table1";
+            localQ += "c";
         }
         else
         {
-            localQ += "Table2";
+            localQ += "d";
         }
         query += localQ;
     }

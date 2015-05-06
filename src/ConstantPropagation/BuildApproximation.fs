@@ -5,7 +5,7 @@ open JetBrains.ReSharper.Psi.CSharp.Tree
 open JetBrains.ReSharper.Psi.Tree
 
 open UserDefOperationInfo
-open GenericCfgCsharp
+open CsharpCfgToGeneric
 open GenericGraphs
 open FsaHelper
 open GenerateFsa
@@ -45,7 +45,7 @@ let rec approximate (functionInfo: ArbitraryOperationInfo) (stack: list<CharFSA>
             let ddg =
                 if methodName = controlData.TargetMethod
                 then 
-                    let targetNode = getMappingToOne controlData.TargetNode convertInfo.AstToGenericNodesMapping
+                    let targetNode = getMappingToOne controlData.TargetNode convertInfo.AstToGenericNodes
                     GenericCFGFuncs.ddgForVar targetNode genericCFG
                 else GenericCFGFuncs.ddgForExits genericCFG
             // for debug

@@ -11,17 +11,10 @@ open JetBrains.ReSharper.Psi.ControlFlow
 
 open XMLParser
 open Utils
-open Utils.DictionaryFuns
-open GenericCfgCsharp
-open GenericGraphs
-open FsaHelper
-open GenerateFsa
-open BuildApproximation
 open UserDefOperationInfo
 open ReshrperCsharpTreeUtils
+open BuildApproximation
 
-open System.Collections.Generic
-open System.IO
 
 let private tryDefineLang (node: IInvocationExpression) (hotspotInfoList: list<string * Hotspot>) = 
     let methodName, className, parameters, retType = getMethodSigniture node

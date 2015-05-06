@@ -45,7 +45,9 @@
     <Compile Include="UserDefOperationInfo.fs" />
     <Compile Include="GenericGraphs.fs" />
     <Compile Include="ReshrperCsharpTreeUtils.fs" />
-    <Compile Include="GenericCfgCsharp.fs" />
+    <Compile Include="ResharperCfgAdditionalInfo.fs" />
+    <Compile Include="ReshrperCfgToGeneric.fs" />
+    <Compile Include="CsharpCfgToGeneric.fs" />
     <Compile Include="FsaHelper.fs" />
     <Compile Include="GenerateFsa.fs" />
     <Compile Include="BuildApproximation.fs" />

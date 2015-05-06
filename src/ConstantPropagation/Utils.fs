@@ -143,3 +143,5 @@ module DictionaryFuns =
         if hSet.Count <> 1
         then failwith "one to one mapping expected"
         else hSet |> Seq.head
+
+let flip f = fun x y -> f y x

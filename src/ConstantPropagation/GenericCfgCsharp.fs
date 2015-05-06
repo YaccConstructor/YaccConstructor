@@ -20,8 +20,8 @@ type AstToCfgDict = Dictionary<ITreeNode, HashSet<IControlFlowElement>>
 type AstToGenericNodesDict = Dictionary<ITreeNode, HashSet<GraphNode>>
 
 type LoopNodeInfo = {
-    LoopExit: IControlFlowElement
     BodyEnter: IControlFlowElement
+    LoopExit: IControlFlowElement
     BodyConditionNodes: HashSet<IControlFlowElement>
     ExitConditionNodes: HashSet<IControlFlowElement>
     BodyExits: list<IControlFlowRib> }
@@ -42,74 +42,53 @@ let private createAstNodeToCfeDict (cfg: IControlFlowGraf) =
     astNodeToCfeDict
 
 let private findLoopConditionExits (cfg: IControlFlowGraf) (astNodeToCfeDict: AstToCfgDict) =
-    let getForElems (astNodeToCfeDict: AstToCfgDict) =
+    let astConditionToPreLoopCfe =
+        let loopChooser (node: ITreeNode) (cfeSet: HashSet<IControlFlowElement>) =
+            match node with
+            | :? IForStatement as forStmt ->
+                cfeSet 
+                |> Seq.sortBy (fun e -> e.Id) 
+                |> Seq.head
+                |> fun e -> Some(forStmt.Condition :> ITreeNode, e)
+            | _ -> None
         astNodeToCfeDict 
-        |> Seq.choose 
-            (
-                fun kvp -> 
-                    if kvp.Key :? IForStatement 
-                    then 
-                        let forNode = kvp.Key :?> IForStatement
-                        kvp.Value 
-                        |> Seq.sortBy (fun e -> e.Id) 
-                        |> Seq.head
-                        |> fun e -> Some(forNode, e)
-                    else None
-            )
-
-    let loopNodeToConditionMapping (preLoopElems: seq<IForStatement * IControlFlowElement>) loopNodes =
+        |> Seq.choose (fun (KeyValue(key, value)) -> loopChooser key value)
+        |> dictFromSeq
+    let astConditionToExits =
+        let astConditionToCfeDict = Dictionary<ITreeNode, HashSet<IControlFlowElement>>()
+        let processNode (e: IControlFlowElement) () =
+            if e <> null && e.SourceElement <> null 
+            && astConditionToPreLoopCfe.ContainsKey e.SourceElement
+            then do addToSetInDict e.SourceElement e astConditionToCfeDict
+        do dfsCfgExits cfg.EntryElement processNode () |> ignore
+        let extractConditionExits (cfeSet: HashSet<IControlFlowElement>) =
+            let setSize = cfeSet.Count
+            if setSize < 2 then failwith "cond elems assumption failed"
+            let condElems = 
+                cfeSet 
+                |> List.ofSeq 
+                |> List.sortBy (fun e -> e.Id) 
+                |> Seq.skip (setSize - 2)
+            let bodyEnter = Seq.head <| condElems
+            let loopExit = (Seq.head << Seq.skip 1) condElems
+            (bodyEnter, loopExit)
+        let astConditionToExitsDict = Dictionary()
+        do astConditionToCfeDict
+        |> Seq.iter 
+            (fun (KeyValue(key, value)) -> 
+                astConditionToExitsDict.[key] <- extractConditionExits value)
+        astConditionToExitsDict
+    let preLoopKeyToLoopKey (preLoopToExits: Dictionary<IControlFlowElement, 'Exits>) loopNodes =
         let rec findLoopNode (elem: IControlFlowElement) =
             if Set.contains elem.Id loopNodes
             then elem
             else findLoopNode (elem.Exits |> Seq.head |> (fun edge -> edge.Target))
-        preLoopElems
-        |> Seq.map (fun (node, elem) -> node.Condition :> ITreeNode, findLoopNode elem)
-
-    let conditionToExitsMapping (conditionToLoopNode: seq<ITreeNode * IControlFlowElement>) =
-        // create
-        let rawConditionsDict = 
-            let dict = Dictionary()
-            do conditionToLoopNode 
-            |> Seq.map (fun (cond, _) -> cond, HashSet<IControlFlowElement>()) 
-            |> Seq.iter (fun (c, s) -> dict.[c] <- s)
-            dict
-        // fill
-        let processNode (e: IControlFlowElement) () =
-            if e <> null && e.SourceElement <> null && rawConditionsDict.ContainsKey e.SourceElement
-            then do addToSetInDict e.SourceElement e rawConditionsDict
-        do dfsCfgExits cfg.EntryElement processNode () |> ignore
-        // check and normalize
-        let conditionsDict = Dictionary()
-        do rawConditionsDict
-        |> Seq.iter 
-            (
-                fun kvp ->
-                    let condElemsNum = kvp.Value.Count
-                    if condElemsNum < 2 then failwith "cond elems assumption failed"
-                    let condElems = 
-                        kvp.Value 
-                        |> List.ofSeq 
-                        |> List.sortBy (fun e -> e.Id) 
-                        |> Seq.skip (condElemsNum - 2)
-                    let exits = {
-                        BodyEnter = Seq.head <| condElems; 
-                        LoopExit = (Seq.head << Seq.skip 1) condElems; 
-                        BodyConditionNodes = HashSet();
-                        ExitConditionNodes = HashSet();
-                        BodyExits = [] }
-                    conditionsDict.[kvp.Key] <- exits
-            )
-        conditionsDict
-
-    let forElems = getForElems astNodeToCfeDict
+        preLoopToExits
+        |> Seq.map (fun (KeyValue(preLoopNode, exits)) -> findLoopNode preLoopNode, exits)
+        |> dictFromSeq
+    let preLoopToExits = mergeDicts astConditionToPreLoopCfe astConditionToExits
     let loopNodes = findLoopNodes cfg
-    let conditionToLoopNode = loopNodeToConditionMapping forElems loopNodes
-    let conditionToExitsDict = conditionToExitsMapping conditionToLoopNode
-    // merge in one dict
-    let loopsDict = Dictionary()
-    conditionToLoopNode
-    |> Seq.iter (fun (condNode, loopId) -> loopsDict.[loopId] <- conditionToExitsDict.[condNode])
-    loopsDict
+    preLoopKeyToLoopKey preLoopToExits loopNodes
 
 let private findLoopBodyExits loopNodeId bodyEnterNode =
     let processNode (e: IControlFlowElement) bodyExits =
@@ -124,7 +103,7 @@ let private findLoopBodyExits loopNodeId bodyEnterNode =
         else getCfeExits e s
     snd <| dfsCfg bodyEnterNode processNode getNextNodes []
 
-let private collectConditionNodes loopNodeId (loopInfo: LoopNodeInfo) =
+let private collectConditionNodes loopNodeId (bodyEnter: IControlFlowElement) (loopExit: IControlFlowElement) =
     let processNode startId (e: IControlFlowElement) condNodes = 
         if e.Id <> loopNodeId && e.Id <> startId
         then e :: condNodes
@@ -134,32 +113,28 @@ let private collectConditionNodes loopNodeId (loopInfo: LoopNodeInfo) =
         then [], s
         else getCfeEntries e s
     let bodyCondNodes =
-        let processNode = processNode loopInfo.BodyEnter.Id
-        snd <| dfsCfg loopInfo.BodyEnter processNode getNextNodes []
+        let processNode = processNode bodyEnter.Id
+        snd <| dfsCfg bodyEnter processNode getNextNodes []
     let exitCondNodes =
-        let processNode = processNode loopInfo.LoopExit.Id
-        snd <| dfsCfg loopInfo.LoopExit processNode getNextNodes []
+        let processNode = processNode loopExit.Id
+        snd <| dfsCfg loopExit processNode getNextNodes []
     HashSet(bodyCondNodes), HashSet(exitCondNodes)
 
 let private collectLoopInfo cfg astNodeToCfeDict =
-    let rawLoopsDict = findLoopConditionExits cfg astNodeToCfeDict
-    let loopInfoUpdated = 
-        rawLoopsDict 
-        |> Seq.map
-            (
-                fun kvp ->
-                    let loopNode = kvp.Key
-                    let info = kvp.Value
-                    let bodyCondNodes, exitCondNodes = collectConditionNodes loopNode.Id info
-                    let bodyExits = findLoopBodyExits loopNode.Id info.BodyEnter
-                    let info = 
-                        { info with 
-                            BodyConditionNodes = bodyCondNodes; 
-                            ExitConditionNodes = exitCondNodes; 
-                            BodyExits = bodyExits }
-                    loopNode, info
-            )
-    dictFromSeq loopInfoUpdated
+    let loopNodeToCondExits = findLoopConditionExits cfg astNodeToCfeDict
+    let collectInfo (loopNode: IControlFlowElement) bodyEnter loopExit =
+        let bodyCondNodes, exitCondNodes = collectConditionNodes loopNode.Id bodyEnter loopExit
+        let bodyExits = findLoopBodyExits loopNode.Id bodyEnter
+        {   BodyEnter = bodyEnter
+            LoopExit = loopExit
+            BodyConditionNodes = bodyCondNodes
+            ExitConditionNodes = exitCondNodes
+            BodyExits = bodyExits }
+    loopNodeToCondExits 
+    |> Seq.map 
+        (fun (KeyValue(loopCfe, (bodyEnter, loopExit))) -> 
+            loopCfe, collectInfo loopCfe bodyEnter loopExit)
+    |> dictFromSeq
 
 let collectConvertInfo (cfg: IControlFlowGraf) = 
     let astNodeToCfeDict = createAstNodeToCfeDict cfg

@@ -119,15 +119,25 @@ module DictionaryFuns =
         let dict = Dictionary()
         vals |> Seq.iter (fun (a, b) -> dict.[a] <- b)
         dict
-
+    // todo: reassign may be redundant in case of set already exists
     let addToSetInDict key elemForSet (dict: Dictionary<_, HashSet<_>>) =
-        let set = 
-            match dict.TryGetValue key with 
-            | true, hs -> hs
-            | false, _ -> HashSet()
-        do set.Add elemForSet |> ignore
-        do dict.[key] <- set
-
+        match dict.TryGetValue key with 
+        | true, hs -> do hs.Add elemForSet |> ignore
+        | false, _ -> 
+            let hs = HashSet()
+            do hs.Add elemForSet |> ignore
+            do dict.[key] <- hs
+    let mergeDicts (dict1: Dictionary<'a, 'b>) (dict2: Dictionary<'a, 'c>) =
+        let resDict = Dictionary()
+        do dict1
+        |> Seq.iter 
+            (
+                fun (KeyValue(a, b)) -> 
+                    match dict2.TryGetValue a with
+                    | true, c -> resDict.[b] <- c
+                    | false, _ -> failwith "dict1 contains elements that dict2 doesn't"
+            )
+        resDict
     let getMappingToOne key (dict: Dictionary<'k, HashSet<'v>>) =
         let hSet = dict.[key]
         if hSet.Count <> 1

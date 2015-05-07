@@ -6,7 +6,9 @@ open JetBrains.ReSharper.Psi.Tree
 
 open UserDefOperationInfo
 open CsharpCfgToGeneric
-open GenericGraphs
+open GenericGraphElements
+open GenericCFG
+open DDG
 open FsaHelper
 open GenerateFsa
 open Utils.DictionaryFuns

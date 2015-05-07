@@ -7,7 +7,9 @@ open JetBrains.ReSharper.Psi.Tree
 
 open Utils
 open JsCfgToGeneric
-open GenericGraphs
+open GenericGraphElements
+open GenericCFG
+open DDG
 open Utils.DictionaryFuns
 open BuildApproximation
 open GenerateFsa

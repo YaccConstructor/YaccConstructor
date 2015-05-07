@@ -10,7 +10,7 @@ open JetBrains.ReSharper.Psi.JavaScript.Resolve
 
 open ResharperCfgToGeneric
 open Utils
-open GenericGraphs
+open GenericGraphElements
 open ResharperCsharpTreeUtils
 open UserDefOperationInfo
 

@@ -2,10 +2,13 @@
 
 open Microsoft.FSharp.Collections
 
-open GenericGraphs
+open GenericGraphElements
+open DDG
 open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation
 open Utils
+open GraphUtils.TopoTraverser
+open GenericGraphElements.CfgTopoDownTraverser
 
 type FsaState = char * Position<int>
 type FSAMap = Map<string, FsaHelper.CharFSA>
@@ -14,9 +17,6 @@ type BuildState = {
     Operands: list<FSA<FsaState>>
     NodesToVarFsa: Map<int, FSAMap>
     UnboundResults: Map<int, FSA<FsaState>> }
-
-open GraphUtils.TopoTraverser
-open GenericGraphs.CfgTopoDownTraverser
 
 let buildAutomaton (ddg: DDG) (initialFsaMap: FSAMap) controlData approximate =
     // exception messages

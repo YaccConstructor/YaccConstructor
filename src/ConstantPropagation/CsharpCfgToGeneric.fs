@@ -8,7 +8,7 @@ open JetBrains.ReSharper.Psi.ControlFlow
 
 open ResharperCfgToGeneric
 open Utils
-open GenericGraphs
+open GenericGraphElements
 open ResharperCsharpTreeUtils
 open UserDefOperationInfo
 open ResharperCfgAdditionalInfo

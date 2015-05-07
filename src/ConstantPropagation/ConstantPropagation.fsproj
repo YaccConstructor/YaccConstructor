@@ -43,7 +43,9 @@
     <Compile Include="GraphUtils.fs" />
     <Compile Include="IControlFlowGraphUtils.fs" />
     <Compile Include="UserDefOperationInfo.fs" />
-    <Compile Include="GenericGraphs.fs" />
+    <Compile Include="GenericGraphElements.fs" />
+    <Compile Include="DDG.fs" />
+    <Compile Include="GenericCFG.fs" />
     <Compile Include="ResharperCsharpTreeUtils.fs" />
     <Compile Include="ResharperCfgAdditionalInfo.fs" />
     <Compile Include="ResharperCfgToGeneric.fs" />

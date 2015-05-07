@@ -88,15 +88,10 @@ let toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) =
             | _ -> OtherNode
     { Id = nodeId; Type = nType }
 
-let private tryAsLoopTreeNode (node: ITreeNode) =
-    match node with
-    | :? IForStatement as forStmt -> Some(forStmt.ForCondition :> ITreeNode)
-    | _ -> None
-
 let rec toGenericCfg (cfg: IJsControlFlowGraf) functionName =
     ResharperCfgToGeneric.toGenericCfg 
         cfg 
         toGenericNode 
-        CsharpLoopInfo.collect 
+        JsLoopInfo.findLoopConditionExits 
         (flip (|LoopCfe|_|)) 
         functionName

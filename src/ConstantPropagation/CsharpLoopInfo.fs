@@ -9,7 +9,7 @@ open JetBrains.ReSharper.Psi.CSharp.Tree
 open Utils
 open ResharperCfgAdditionalInfo
 
-let private findLoopConditionExits (cfg: IControlFlowGraf) (astNodeToCfeDict: AstToCfgDict) =
+let findLoopConditionExits (cfg: IControlFlowGraf) (astNodeToCfeDict: AstToCfgDict) =
     let (|LoopTreeNode|_|) (node: ITreeNode) =
         match node with
         | :? IForStatement as forStmt -> Some(forStmt.Condition :> ITreeNode)
@@ -61,49 +61,3 @@ let private findLoopConditionExits (cfg: IControlFlowGraf) (astNodeToCfeDict: As
     let preLoopToExits = DictionaryFuns.mergeDicts astConditionToPreLoopCfe astConditionToExits
     let loopNodes = IControlFlowGraphUtils.findLoopNodes cfg
     preLoopKeyToLoopKey preLoopToExits loopNodes
-
-let private findLoopBodyExits loopNodeId bodyEnterNode =
-    let processNode (e: IControlFlowElement) bodyExits =
-        let curBodyExits = 
-            e.Exits 
-            |> Seq.filter (fun rib -> rib.Target <> null && rib.Target.Id = loopNodeId)
-            |> List.ofSeq
-        curBodyExits @ bodyExits
-    let getNextNodes (e: IControlFlowElement) s =
-        if e.Id = loopNodeId
-        then [], s
-        else IControlFlowGraphUtils.getCfeExits e s
-    snd <| IControlFlowGraphUtils.dfsCfg bodyEnterNode processNode getNextNodes []
-
-let private collectConditionNodes loopNodeId (bodyEnter: IControlFlowElement) (loopExit: IControlFlowElement) =
-    let processNode startId (e: IControlFlowElement) condNodes = 
-        if e.Id <> loopNodeId && e.Id <> startId
-        then e :: condNodes
-        else condNodes
-    let getNextNodes (e: IControlFlowElement) s =
-        if e.Id = loopNodeId
-        then [], s
-        else IControlFlowGraphUtils.getCfeEntries e s
-    let bodyCondNodes =
-        let processNode = processNode bodyEnter.Id
-        snd <| IControlFlowGraphUtils.dfsCfg bodyEnter processNode getNextNodes []
-    let exitCondNodes =
-        let processNode = processNode loopExit.Id
-        snd <| IControlFlowGraphUtils.dfsCfg loopExit processNode getNextNodes []
-    HashSet(bodyCondNodes), HashSet(exitCondNodes)
-
-let collect cfg astNodeToCfeDict =
-    let loopNodeToCondExits = findLoopConditionExits cfg astNodeToCfeDict
-    let collectInfo (loopNode: IControlFlowElement) bodyEnter loopExit =
-        let bodyCondNodes, exitCondNodes = collectConditionNodes loopNode.Id bodyEnter loopExit
-        let bodyExits = findLoopBodyExits loopNode.Id bodyEnter
-        {   BodyEnter = bodyEnter
-            LoopExit = loopExit
-            BodyConditionNodes = bodyCondNodes
-            ExitConditionNodes = exitCondNodes
-            BodyExits = bodyExits }
-    loopNodeToCondExits 
-    |> Seq.map 
-        (fun (KeyValue(loopCfe, (bodyEnter, loopExit))) -> 
-            loopCfe, collectInfo loopCfe bodyEnter loopExit)
-    |> DictionaryFuns.dictFromSeq

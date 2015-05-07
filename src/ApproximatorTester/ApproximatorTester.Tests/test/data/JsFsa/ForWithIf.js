@@ -3,7 +3,7 @@
     var query = "a";
     for (var i = 0; i < 10 && i > 0 || query.IsNormalized(); i++)
     {
-        var localQ = "b ";
+        var localQ = "b";
         if (cond)
         {
             localQ += "c";

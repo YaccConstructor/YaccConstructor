@@ -11,6 +11,7 @@ open Utils
 open GenericGraphs
 open ResharperCsharpTreeUtils
 open UserDefOperationInfo
+open ResharperCfgAdditionalInfo
 
 let (|LoopCfe|_|) (info: ConvertInfo) (cfe: IControlFlowElement) =
     match info.LoopNodes.TryGetValue cfe with
@@ -113,6 +114,6 @@ let rec toGenericCfg (cfg: ICSharpControlFlowGraf) functionName =
     ResharperCfgToGeneric.toGenericCfg 
         cfg 
         toGenericNode 
-        CsharpLoopInfo.collect 
+        CsharpLoopInfo.findLoopConditionExits 
         (flip (|LoopCfe|_|)) 
         functionName

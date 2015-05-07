@@ -22,29 +22,29 @@ namespace ApproximatorTester.Tests
             DoTestFiles("SimpleQuery.js");
         }
 
-        //[Test]
-        //public void TestSimpleFor()
-        //{
-        //    DoTestFiles("SimpleFor.js");
-        //}
+        [Test]
+        public void TestSimpleFor()
+        {
+            DoTestFiles("SimpleFor.js");
+        }
 
-        //[Test]
-        //public void TestNestedFor()
-        //{
-        //    DoTestFiles("NestedFor.js");
-        //}
+        [Test]
+        public void TestNestedFor()
+        {
+            DoTestFiles("NestedFor.js");
+        }
 
-        //[Test]
-        //public void TestForWithLocalVar()
-        //{
-        //    DoTestFiles("ForWithLocalVar.js");
-        //}
+        [Test]
+        public void TestForWithLocalVar()
+        {
+            DoTestFiles("ForWithLocalVar.js");
+        }
 
-        //[Test]
-        //public void TestForWithIf()
-        //{
-        //    DoTestFiles("ForWithIf.js");
-        //}
+        [Test]
+        public void TestForWithIf()
+        {
+            DoTestFiles("ForWithIf.js");
+        }
 
         [Test]
         public void TestFourVars()

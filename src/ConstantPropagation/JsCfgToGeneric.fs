@@ -70,7 +70,7 @@ let toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) =
                 let depIDs = args |> List.map (fun a -> getGenericNodeId a info)
                 if isReplaceMethod methodName
                 then Operation(Replace, depIDs)
-                else Operation(Arbitrary(NoInfo), depIDs)
+                else Operation(Arbitrary({ Name = methodName; Info = NoInfo }), depIDs)
             | :? IReferenceExpression as refExpr ->
                 let name = refExpr.Name
                 VarRef(name)

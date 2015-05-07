@@ -52,7 +52,8 @@ let buildFsaForMethod methodDecl target recursionMaxLevel =
         TargetNode = target; 
         CurRecLevel = recursionMaxLevel }
     let fsaForVar = 
-        approximate (CsharpArbitraryFun(methodDecl)) stack controlInfo
+        let functionInfo = { Name = methodName; Info = CsharpArbitraryFun(methodDecl) }
+        approximate functionInfo stack controlInfo
         |> fst
         |> Option.get
     fsaForVar

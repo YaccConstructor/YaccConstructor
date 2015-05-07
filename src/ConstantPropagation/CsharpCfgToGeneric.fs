@@ -89,7 +89,8 @@ let tryExtractNodeTypeInfo (node: ITreeNode) (info: ConvertInfo) =
                 match tryGetMethodDeclaration invocExpr with
                 | Some(methodDecl) -> CsharpArbitraryFun(methodDecl)
                 | _ -> NoInfo
-            Some(Operation(Arbitrary(operationInfo), depIDs))
+            let operation = { Name = methodName; Info = operationInfo }
+            Some(Operation(Arbitrary(operation), depIDs))
     | :? IReferenceExpression as refExpr ->
         let name = refExpr.NameIdentifier.Name
         Some(VarRef(name))

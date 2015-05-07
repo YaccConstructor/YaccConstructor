@@ -7,7 +7,7 @@ open UserDefOperationInfo
 type OperationType =
 | Replace
 | Concat
-| Arbitrary of ArbitraryOperationInfo
+| Arbitrary of ArbitraryOperation
 // and so on ...
 
 and UpdaterType =

@@ -28,11 +28,11 @@ let bindArgsToParams (methodDecl: IMethodDeclaration) (stack: list<CharFSA>) =
         let boundParams = Seq.zip parameters argsToBind
         Map.ofSeq boundParams, restStack
 
-let rec approximate (functionInfo: ArbitraryOperationInfo) (stack: list<CharFSA>) (controlData: ControlData) =
+let rec approximate (functionInfo: ArbitraryOperation) (stack: list<CharFSA>) (controlData: ControlData) =
     if controlData.CurRecLevel < 0
     then None, stack
     else 
-        match functionInfo with
+        match functionInfo.Info with
         | NoInfo -> None, stack
         | CsharpArbitraryFun (methodDecl) ->
             let csharpCfg = CSharpControlFlowBuilder.Build methodDecl

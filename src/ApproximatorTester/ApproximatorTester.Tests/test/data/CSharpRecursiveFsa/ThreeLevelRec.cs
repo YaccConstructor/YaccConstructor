@@ -18,14 +18,12 @@
 
         static public string genStringWithArg(string s)
         {
-            var res = s + Program.genString();
-            return res;
+            return s + Program.genString();
         }
 
         static public string genString()
         {
-            var res = "b";
-            return res;
+            return "b";
         }
     }
 

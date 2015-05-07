@@ -47,6 +47,7 @@
     <Compile Include="ResharperCsharpTreeUtils.fs" />
     <Compile Include="ResharperCfgAdditionalInfo.fs" />
     <Compile Include="ResharperCfgToGeneric.fs" />
+    <Compile Include="CsharpLoopInfo.fs" />
     <Compile Include="CsharpCfgToGeneric.fs" />
     <Compile Include="JsCfgToGeneric.fs" />
     <Compile Include="FsaHelper.fs" />

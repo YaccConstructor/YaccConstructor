@@ -12,13 +12,6 @@ open GenericGraphs
 open ResharperCsharpTreeUtils
 open UserDefOperationInfo
 
-// exception messages
-let private badIRefExprCastMsg = 
-    "unable to perform cast to IReferenceExpression"
-let private unexpectedInitializerTypeMsg =
-    "unexpected initializer type in local variable declaration"
-
-// utility methods
 let (|LoopCfe|_|) (info: ConvertInfo) (cfe: IControlFlowElement) =
     match info.LoopNodes.TryGetValue cfe with
     | true, loopInfo -> Some(loopInfo)
@@ -29,6 +22,10 @@ let getGenericNodeId (treeNode: ITreeNode) (info: ConvertInfo) =
 let isReplaceMethod (name: string) (callTargetType: IType) =
     name = "Replace" && callTargetType.IsString()
 
+let private badIRefExprCastMsg = 
+    "unable to perform cast to IReferenceExpression"
+let private unexpectedInitializerTypeMsg =
+    "unexpected initializer type in local variable declaration"
 let toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) = 
     let nType = 
         match cfe with
@@ -111,16 +108,11 @@ let toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) =
                 VarRef(varRef.NameIdentifier.Name)
             | _ -> OtherNode
     { Id = nodeId; Type = nType }
-
-let private tryAsLoopTreeNode (node: ITreeNode) =
-    match node with
-    | :? IForStatement as forStmt -> Some(forStmt.Condition :> ITreeNode)
-    | _ -> None
     
 let rec toGenericCfg (cfg: ICSharpControlFlowGraf) functionName =
     ResharperCfgToGeneric.toGenericCfg 
         cfg 
         toGenericNode 
-        tryAsLoopTreeNode 
+        CsharpLoopInfo.collect 
         (flip (|LoopCfe|_|)) 
         functionName

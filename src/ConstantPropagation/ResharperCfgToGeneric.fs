@@ -18,15 +18,15 @@ type ConvertInfo = {
     AstToGenericNodes: Dictionary<ITreeNode, HashSet<GraphNode>>
     CfeToGenericNodes: Dictionary<IControlFlowElement, GraphNode> }
 
-let private collectConvertInfo (cfg: IControlFlowGraf) tryAsLoopTreeNode = 
+let private collectConvertInfo (cfg: IControlFlowGraf) collectLoopNodesInfo = 
     let astNodeToCfeDict = GeneralCfgInfoFuns.astNodeToCfeDict cfg 
-    let loopsDict = LoopNodeInfoFuns.collect cfg tryAsLoopTreeNode astNodeToCfeDict
+    let loopsDict = collectLoopNodesInfo cfg astNodeToCfeDict
     {   AstToCfgMapping = astNodeToCfeDict; 
         LoopNodes = loopsDict; 
         AstToGenericNodes = Dictionary();
         CfeToGenericNodes = Dictionary() }
 
-let rec toGenericCfg (cfg: IControlFlowGraf) toGenericNode tryAsLoopTreeNode tryAsLoopCfe functionName =
+let rec toGenericCfg (cfg: IControlFlowGraf) toGenericNode collectLoopNodesInfo tryAsLoopCfe functionName =
     let connectToTraversedSuccessors (curCfe: IControlFlowElement) curNode (graph: BidirectGraph) (info: ConvertInfo) =
         let tryGetGenericOfTarget (rib: IControlFlowRib) =
             if rib.Target <> null 
@@ -131,6 +131,6 @@ let rec toGenericCfg (cfg: IControlFlowGraf) toGenericNode tryAsLoopTreeNode try
         do surroundLoopsWithMarkers graph info lastId
         { FunctionName = functionName; Graph = graph }
 
-    let convInfo = collectConvertInfo cfg tryAsLoopTreeNode
+    let convInfo = collectConvertInfo cfg collectLoopNodesInfo
     let genericCfg = traverseConverting cfg convInfo
     genericCfg, convInfo

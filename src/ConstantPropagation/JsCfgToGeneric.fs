@@ -97,6 +97,6 @@ let rec toGenericCfg (cfg: IJsControlFlowGraf) functionName =
     ResharperCfgToGeneric.toGenericCfg 
         cfg 
         toGenericNode 
-        tryAsLoopTreeNode 
+        CsharpLoopInfo.collect 
         (flip (|LoopCfe|_|)) 
         functionName

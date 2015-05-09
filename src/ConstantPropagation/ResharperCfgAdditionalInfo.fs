@@ -6,6 +6,7 @@ open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi.ControlFlow
 
 open Utils
+open GraphUtils
 open IControlFlowGraphUtils
 
 type AstToCfgDict = Dictionary<ITreeNode, HashSet<IControlFlowElement>>
@@ -17,7 +18,8 @@ module GeneralCfgInfoFuns =
         let processNode (e: IControlFlowElement) () =
             if e <> null && e.SourceElement <> null
             then do DictionaryFuns.addToSetInDict e.SourceElement e astNodeToCfeDict
-        do dfsCfgExits cfg.EntryElement processNode () |> ignore
+        let algoParts = cfgExitsDfsParts processNode
+        do dfs algoParts cfg.EntryElement Set.empty () |> ignore
         astNodeToCfeDict
 
 type LoopNodeInfo = {
@@ -39,7 +41,8 @@ module LoopNodeInfoFuns =
             if e.Id = loopNodeId
             then [], s
             else getCfeExits e s
-        snd <| dfsCfg bodyEnterNode processNode getNextNodes []
+        let algoParts = cfgDfsParts processNode getNextNodes
+        snd <| dfs algoParts bodyEnterNode Set.empty []
 
     let private collectConditionNodes loopNodeId (bodyEnter: IControlFlowElement) (loopExit: IControlFlowElement) =
         let processNode startId (e: IControlFlowElement) condNodes = 
@@ -52,10 +55,12 @@ module LoopNodeInfoFuns =
             else getCfeEntries e s
         let bodyCondNodes =
             let processNode = processNode bodyEnter.Id
-            snd <| dfsCfg bodyEnter processNode getNextNodes []
+            let algoParts = cfgDfsParts processNode getNextNodes
+            snd <| dfs algoParts bodyEnter Set.empty []
         let exitCondNodes =
             let processNode = processNode loopExit.Id
-            snd <| dfsCfg loopExit processNode getNextNodes []
+            let algoParts = cfgDfsParts processNode getNextNodes
+            snd <| dfs algoParts loopExit Set.empty []
         HashSet(bodyCondNodes), HashSet(exitCondNodes)
 
     let collect cfg (loopNodeToConditionExits: LoopToConditionExitsDict) =

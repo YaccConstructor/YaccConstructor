@@ -145,3 +145,6 @@ module DictionaryFuns =
         else hSet |> Seq.head
 
 let flip f = fun x y -> f y x
+
+module List =
+    let cons x xs = x :: xs

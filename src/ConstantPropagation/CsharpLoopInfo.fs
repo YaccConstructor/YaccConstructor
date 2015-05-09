@@ -7,6 +7,8 @@ open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi.CSharp.Tree
 
 open Utils
+open GraphUtils
+open IControlFlowGraphUtils
 open ResharperCfgAdditionalInfo
 
 let findLoopConditionExits (cfg: IControlFlowGraf) (astNodeToCfeDict: AstToCfgDict) =
@@ -32,7 +34,8 @@ let findLoopConditionExits (cfg: IControlFlowGraf) (astNodeToCfeDict: AstToCfgDi
             if e <> null && e.SourceElement <> null 
             && astConditionToPreLoopCfe.ContainsKey e.SourceElement
             then do DictionaryFuns.addToSetInDict e.SourceElement e astConditionToCfeDict
-        do IControlFlowGraphUtils.dfsCfgExits cfg.EntryElement processNode () |> ignore
+        let algoParts = cfgExitsDfsParts processNode 
+        do dfs algoParts cfg.EntryElement Set.empty () |> ignore
         let extractConditionExits (cfeSet: HashSet<IControlFlowElement>) =
             let setSize = cfeSet.Count
             if setSize < 2 then failwith "cond elems assumption failed"

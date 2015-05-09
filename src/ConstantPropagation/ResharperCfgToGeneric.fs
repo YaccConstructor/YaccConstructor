@@ -11,6 +11,7 @@ open ResharperCfgAdditionalInfo
 open GenericGraphElements
 open GenericCFG
 open Utils
+open GraphUtils
 open IControlFlowGraphUtils
 
 type ConvertInfo = {
@@ -120,7 +121,8 @@ let rec toGenericCfg (cfg: IControlFlowGraf) toGenericNode findLoopToCondExits t
     let traverseConverting (cfg: IControlFlowGraf) (info: ConvertInfo) =
         let initState = (BidirectGraphFuns.create (), [], 0, info, [])
         let _, (graph, _, lastId, _, _) =
-            dfsCfgBasic cfg.EntryElement (fun _ s -> s) processNode getNextNodes postProcess initState
+            let algoParts = basicCfgDfsParts (fun _ s -> s) processNode getNextNodes postProcess
+            dfs algoParts cfg.EntryElement Set.empty initState
         do surroundLoopsWithMarkers graph info lastId
         { FunctionName = functionName; Graph = graph }
 

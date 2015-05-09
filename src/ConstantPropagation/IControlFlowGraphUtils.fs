@@ -4,21 +4,35 @@ open JetBrains.ReSharper.Psi.ControlFlow
 
 open GraphUtils
 
-let dfsCfgBasic node preProcess processNode getNextNodes postProcess state = 
-    let isVisited (e: IControlFlowElement) v = Set.contains e.Id v
-    let makeVisited (e: IControlFlowElement) v = Set.add e.Id v
-    let initVisited = Set.empty
-    dfs node isVisited makeVisited initVisited preProcess processNode getNextNodes postProcess state
+let cfgIsVisited (e: IControlFlowElement) v = Set.contains e.Id v
+let cfgMakeVisited (e: IControlFlowElement) v = Set.add e.Id v
 
-let dfsCfg node processNode getNextNodes state =
-    dfsCfgBasic node (fun e s -> s) processNode getNextNodes (fun e s -> s) state
+let basicCfgDfsParts preProcess processNode getNextNodes postProcess = {
+    IsVisited = cfgIsVisited
+    MakeVisited = cfgMakeVisited
+    PreProcess = preProcess
+    ProcessNode = processNode
+    GetNextNodes = getNextNodes
+    PostProcess = postProcess }
 
+let notProcessNode e s = s
+
+let cfgDfsParts processNode getNextNodes = 
+    basicCfgDfsParts 
+        notProcessNode
+        processNode
+        getNextNodes
+        notProcessNode
+        
 let getCfeExits (e: IControlFlowElement) s =
     let exits =
         e.Exits
         |> Seq.choose (fun rib -> if rib.Target <> null then Some(rib.Target) else None)
         |> List.ofSeq
     exits, s
+
+let cfgExitsDfsParts processNode =
+    cfgDfsParts processNode getCfeExits
 
 let getCfeEntries (e: IControlFlowElement) s =
     let entries =
@@ -27,17 +41,8 @@ let getCfeEntries (e: IControlFlowElement) s =
         |> List.ofSeq
     entries, s
 
-let dfsCfgExits node processNode state =
-    dfsCfg node processNode getCfeExits state
-
-let dfsCfgEntries node processNode state =
-    let getEntries (e: IControlFlowElement) s =
-        let entries =
-            e.Entries
-            |> Seq.choose (fun rib -> if rib.Source <> null then Some(rib.Source) else None)
-            |> List.ofSeq
-        entries, s
-    dfsCfg node processNode getEntries state
+let cfgEntriesDfsParts processNode =
+    cfgDfsParts processNode getCfeEntries
  
 let findLoopNodes (cfg: IControlFlowGraf): Set<int> =
     let calculateEnterExit (cfg: IControlFlowGraf) =
@@ -53,8 +58,13 @@ let findLoopNodes (cfg: IControlFlowGraf): Set<int> =
             exits, s
         let postProcess (e: IControlFlowElement) (step, x, exit) =
             (step + 1, x, Map.add e.Id (step + 1) exit)
-        let visited, (step, enter, exit) = 
-            dfsCfgBasic cfg.EntryElement preProcess processNode getNextNodes postProcess initState
+        let algoParts = 
+            basicCfgDfsParts 
+                preProcess
+                processNode
+                getNextNodes
+                postProcess
+        let visited, (step, enter, exit) = dfs algoParts cfg.EntryElement Set.empty initState
         enter, exit
 
     let findCycleFirstNodes enter exit =

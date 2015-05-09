@@ -39,5 +39,11 @@ namespace ApproximatorTester.Tests
         {
             DoTestFiles("TooDeepRec.cs");
         }
+
+        [Test]
+        public void TestSimpleUserDefRecMethod()
+        {
+            DoTestFiles("SimpleUserDefRecMethod.cs");
+        }
     }
 }

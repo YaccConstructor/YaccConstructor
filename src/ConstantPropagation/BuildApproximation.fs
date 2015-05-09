@@ -40,26 +40,24 @@ let rec approximate (functionInfo: ArbitraryOperation) (stack: list<CharFSA>) (c
             let csharpCfg = CSharpControlFlowBuilder.Build methodDecl
             let methodName = methodDecl.NameIdentifier.Name
             let genericCFG, convertInfo = toGenericCfg csharpCfg methodName
-            // for debug
-            let path = Utils.myDebugFilePath ("cfg_" + methodName + ".dot")
-            BidirectGraphFuns.toDot genericCFG.Graph methodName path
-            // end
+            BidirectGraphFuns.toDot genericCFG.Graph methodName <| Utils.myDebugFilePath ("cfg_" + methodName + ".dot")
             let ddg =
                 if methodName = controlData.TargetMethod
                 then 
                     let targetNode = getMappingToOne controlData.TargetNode convertInfo.AstToGenericNodes
                     GenericCFGFuncs.ddgForVar targetNode genericCFG
                 else GenericCFGFuncs.ddgForExits genericCFG
-            // for debug
-            let path = Utils.myDebugFilePath ("ddg_" + methodName + ".dot")
-            BidirectGraphFuns.toDot ddg.Graph methodName path
-            // end
+            BidirectGraphFuns.toDot ddg.Graph methodName <| Utils.myDebugFilePath ("preddg_" + methodName + ".dot")
+            let ddg =
+                if isTailRecursive methodName ddg
+                then 
+                    let stringParams = getStringTypedParams methodDecl |> List.ofSeq
+                    tailRecursionToLoop methodName stringParams ddg
+                else ddg
+            BidirectGraphFuns.toDot ddg.Graph methodName <| Utils.myDebugFilePath ("ddg_" + methodName + ".dot")
             let initFsaMap, restStack = bindArgsToParams methodDecl stack
             let controlData = { controlData with CurRecLevel = controlData.CurRecLevel - 1 }
             let fsa = buildAutomaton ddg initFsaMap controlData approximate
-            // for debug
-            let path = Utils.myDebugFilePath ("fsa_" + methodName + ".dot")
-            FsaHelper.toDot fsa path
-            // end
+            FsaHelper.toDot fsa <| Utils.myDebugFilePath ("fsa_" + methodName + ".dot")
             Some(fsa), restStack
         | _ -> failwith "wrong operation info type"

@@ -8,7 +8,7 @@ using JetBrains.TextControl;
 using JetBrains.Util;
 using YC.ReSharper.AbstractAnalysis.LanguageApproximation;
 
-namespace ApproximatorTester
+namespace SELApproximator
 {
     [ContextAction(Name = "BuildFSAForCSharp", Description = "BuildFSAForCSharp", Group = "C#")]
     public class BuildFsaForCSharp : ContextActionBase

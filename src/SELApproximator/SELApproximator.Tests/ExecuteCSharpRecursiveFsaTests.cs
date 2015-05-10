@@ -1,7 +1,7 @@
 ﻿using JetBrains.ReSharper.Intentions.CSharp.Test;
 using NUnit.Framework;
 
-namespace ApproximatorTester.Tests
+namespace SELApproximator.Tests
 {
     [TestFixture]
     public class ExecuteCSharpRecursiveFsaTests : CSharpContextActionExecuteTestBase<BuildFsaForCSharp>

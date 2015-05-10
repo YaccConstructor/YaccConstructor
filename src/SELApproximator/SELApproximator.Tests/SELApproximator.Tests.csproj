@@ -126,8 +126,9 @@
       <Project>{bcf4793c-e8b4-4fd5-9723-3c08859066c5}</Project>
       <Name>FST</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ApproximatorTester\ApproximatorTester.csproj">
-      <Name>ApproximatorTester</Name>
+    <ProjectReference Include="..\SELApproximator\SELApproximator.csproj">
+      <Name>SELApproximator</Name>
+      <Project>{8766C954-D768-48C3-B35D-DCE8192CF166}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -21,7 +21,7 @@ public class TestEnvironmentAssembly : ReSharperTestEnvironmentAssembly
         // Test assembly
         yield return Assembly.GetExecutingAssembly();
 
-        yield return typeof(ApproximatorTester.BuildFsaForCSharp).Assembly;
+        yield return typeof(SELApproximator.BuildFsaForCSharp).Assembly;
     }
 
     public override void SetUp()

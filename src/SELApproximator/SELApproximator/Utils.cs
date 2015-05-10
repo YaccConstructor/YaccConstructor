@@ -6,7 +6,7 @@ using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;
 using YC.FSA;
 
-namespace ApproximatorTester
+namespace SELApproximator
 {
     public class Utils
     {

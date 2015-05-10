@@ -11,7 +11,7 @@ using JetBrains.TextControl;
 using JetBrains.Util;
 using YC.ReSharper.AbstractAnalysis.LanguageApproximation;
 
-namespace ApproximatorTester
+namespace SELApproximator
 {
     [ContextAction(Name = "RunApproximatorJs", Description = "Run Approximator for Js", Group = "JS")]
     public class BuildFsaForJs : ContextActionBase

@@ -57,10 +57,14 @@
     <Compile Include="ExecuteJsFsaTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ExecuteCSharpDdgTests.cs" />
-    <None Include="test\data\CSharpRecursiveFsa\SimpleUserDefRecMethod.cs" />
+    <None Include="test\data\CSharpRecursiveFsa\TailRecMethodWithTwoArgs.cs" />
+    <None Include="test\data\CSharpRecursiveFsa\TailRecMethodWithTwoArgs.cs.gold" />
+    <None Include="test\data\CSharpRecursiveFsa\TailRecMethodTwoExits.cs" />
+    <None Include="test\data\CSharpRecursiveFsa\TailRecMethodTwoExits.cs.gold" />
+    <None Include="test\data\CSharpRecursiveFsa\TailRecMethod.cs" />
     <Content Include="test\data\JsRecursiveFsa\SimpleUserDefMethod.js" />
     <Content Include="test\data\JsRecursiveFsa\ComplexOneLevelRec.js" />
-    <None Include="test\data\CSharpRecursiveFsa\SimpleUserDefRecMethod.cs.gold" />
+    <None Include="test\data\CSharpRecursiveFsa\TailRecMethod.cs.gold" />
     <None Include="test\data\JsRecursiveFsa\ComplexOneLevelRec.js.gold" />
     <None Include="test\data\JsRecursiveFsa\SimpleUserDefMethod.js.gold" />
     <None Include="test\data\CSharpRecursiveFsa\TooDeepRec.cs" />

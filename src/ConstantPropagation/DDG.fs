@@ -13,29 +13,33 @@ let ddgIsVisited (n: GraphNode) v = Set.contains n.Id v
 let ddgMakeVisited (n: GraphNode) v = Set.add n.Id v
 
 let private exitNodeExpectedMsg = "Node of ExitNode type expected"
-let private tryFindTailRecCall functionName = function
+let private findTailRecCalls functionName = function
     | { Id = _; Type = ExitNode(preExits) } ->
         let isRecCallNode = function 
             | { Id = _; 
                 Type = Operation(Arbitrary({ Name = operationName; Info = _ }), _) } ->
                 operationName = functionName
             | _ -> false
-        preExits |> List.tryFind isRecCallNode
+        preExits |> List.filter isRecCallNode
     | _ -> failwith exitNodeExpectedMsg
 
-let private removeRecCallToExitEdge (ddg: DDG) recCallNode newExitNodeId =
+let private removeRecCallToExitEdges (ddg: DDG) recCallNodes newExitNodeId =
+    let recCallNodesSet = 
+        recCallNodes 
+        |> List.map (fun n -> n.Id)
+        |> Set.ofList
     let newExitPreds = 
         preds ddg.Exit ddg.Graph
-        |> Seq.filter (fun n -> n.Id <> recCallNode.Id)
+        |> Seq.filter (fun n -> not <| Set.contains n.Id recCallNodesSet)
         |> List.ofSeq
     do ddg.Graph.InEdges ddg.Exit 
     |> List.ofSeq 
-    |> List.iter (ddg.Graph.RemoveEdge >> ignore)
-    do ddg.Graph.RemoveVertex ddg.Exit |> ignore
-    let newExitNode = { Id = newExitNodeId; Type = ExitNode(newExitPreds) }
+    |> List.iter (removeEdge ddg.Graph)
+    do removeVertex ddg.Graph ddg.Exit
+    let newFakeExitNode = { Id = newExitNodeId; Type = OtherNode }
     do newExitPreds
-    |> List.iter (fun n -> addVerticesAndEdge n newExitNode ddg.Graph)
-    ddg.Graph, ddg.Root, newExitNode
+    |> List.iter (fun n -> addVerticesAndEdge n newFakeExitNode ddg.Graph)
+    ddg.Graph, ddg.Root, newFakeExitNode
 
 let private basicDdgDfsParts preProcess processNode getNextNodes postProcess = {
     IsVisited = ddgIsVisited
@@ -51,7 +55,7 @@ let private showNextNodesStartNode node (graph: BidirectGraph) =
     | Some(_) -> []
     | _ -> nodePreds
 
-let private copyExitBranch (graph: BidirectGraph) (exitBranchEnd: GraphNode) startId =
+let private copyBranch (graph: BidirectGraph) (exitBranchEnd: GraphNode) startId =
     let state = ([], [], startId)
     let copyNode (node: GraphNode) (edgesAcc, nodesAcc, lastId) =
         let copyOfNode = { Id = lastId + 1; Type = node.Type }
@@ -71,19 +75,26 @@ let private copyExitBranch (graph: BidirectGraph) (exitBranchEnd: GraphNode) sta
         ShowNextNodes = showNextNodes
         GetNextNodes = getNextNodes
         BasicDfsParts = basicDdgDfsParts }
-    let edges, nodes, lastId = 
-        copyGraph algoParts exitBranchEnd Set.empty state
-    let graph = BidirectGraphFuns.create ()
+    copyGraph algoParts exitBranchEnd Set.empty state
+
+let private emptyExitBranchMsg = 
+    "exit branch has only exit node, graph structure assumption failed"
+let private copyExitBranch (graph: BidirectGraph) (exitBranchEnd: GraphNode) startId =
+    let edges, nodes, lastId = copyBranch graph exitBranchEnd startId
     if List.length nodes = 1 && List.length edges = 0
-    then 
-        graph.AddVertex (List.head nodes) |> ignore
-        let graph = { Graph = graph; Exit = List.head nodes; Roots = nodes }
-        graph, lastId
+    then failwith emptyExitBranchMsg
     else
-        edges |> List.iter (fun e -> graph.AddVerticesAndEdge e |> ignore)
-        let nodesRev = List.rev nodes
-        let graph = { Graph = graph; Exit = List.head nodesRev; Roots = List.tail nodesRev }
-        graph, lastId
+        let graph = BidirectGraphFuns.create ()
+        edges |> List.iter (addEdgeAndVertices graph)
+        let roots, fakeExit =
+            let nodesRev = List.rev nodes
+            List.tail nodesRev, List.head nodesRev
+        let fakeExitPreds = preds fakeExit graph |> List.ofSeq
+        do removeVertex graph fakeExit
+        let newExit = { Id = lastId + 1; Type = ExitNode(fakeExitPreds) }
+        do fakeExitPreds |> List.iter (fun e -> addVerticesAndEdge e newExit graph)
+        let graph = { Graph = graph; Exit = newExit; Roots = roots }
+        graph, lastId + 1
 
 let private onlyVisitDdgDfs node (nextNodes: GraphNode -> list<GraphNode>) =
     let doNothing n s = s
@@ -135,16 +146,33 @@ let private createAssignsChain paramNames startId =
     let chainEnd = Seq.last chainNodes
     { Graph = chainGraph; Root = chainBeg; Exit = chainEnd }, lastId
 
-let private replaceRecCallWithAssigns (recCallBranch: GraphWithSingleEnds) paramNames startId =
-    let assignsChain, lastId = createAssignsChain paramNames startId
-    let exitPreds = preds recCallBranch.Exit recCallBranch.Graph |> List.ofSeq 
-    do removeVertex recCallBranch.Graph recCallBranch.Exit
-    do exitPreds |> List.iter (fun ep -> addVerticesAndEdge ep assignsChain.Root recCallBranch.Graph)
-    do assignsChain.Graph.Edges |> Seq.iter (addEdgeAndVertices recCallBranch.Graph)
-    let graph = { Graph = recCallBranch.Graph; Root = recCallBranch.Root; Exit = assignsChain.Exit }
+let private replaceRecCallWithAssigns (recCallBranch: GraphWithSingleRoot) paramNames (startId: int) =
+    let exitPredsList = 
+        recCallBranch.Exits 
+        |> Seq.map (fun e -> preds e recCallBranch.Graph |> List.ofSeq)
+        |> List.ofSeq
+    do recCallBranch.Exits |> List.iter (removeVertex recCallBranch.Graph)
+    let assignsChains, lastId = 
+        let computations = List.replicate (List.length exitPredsList) ()
+        (([], startId), computations)
+        ||> List.fold
+            (fun (accChains, nextId) _ -> 
+                let chain, lastId = createAssignsChain paramNames nextId
+                chain :: accChains, lastId + 1)
+    let connectExitPredsToAssignsChain (exitPreds, assignsChain) =     
+        do exitPreds 
+        |> List.iter 
+            (fun ep -> addVerticesAndEdge ep assignsChain.Root recCallBranch.Graph)
+        do assignsChain.Graph.Edges 
+        |> Seq.iter (addEdgeAndVertices recCallBranch.Graph)
+    do (exitPredsList, assignsChains)
+    ||> List.zip
+    |> List.iter connectExitPredsToAssignsChain
+    let newExits = assignsChains |> List.map (fun ac -> ac.Exit)
+    let graph = { Graph = recCallBranch.Graph; Root = recCallBranch.Root; Exits = newExits }
     graph, lastId
 
-let private toLoop startId (recCallBranch: GraphWithSingleEnds) (exitBranch: GraphWithSingleExit) =
+let private toLoop startId (recCallBranch: GraphWithSingleRoot) (exitBranch: GraphWithSingleExit) =
     let resGraph = recCallBranch.Graph
     let resRoot = recCallBranch.Root
     let resExit = exitBranch.Exit
@@ -165,7 +193,7 @@ let private toLoop startId (recCallBranch: GraphWithSingleEnds) (exitBranch: Gra
     do addVerticesAndEdge loopNode loopBodyBeg resGraph
     do startSuccs |> List.iter (fun s -> addVerticesAndEdge loopBodyBeg s resGraph)
     // connect rec call branch to loop body end
-    do addVerticesAndEdge recCallBranch.Exit loopBodyEnd resGraph
+    do recCallBranch.Exits |> List.iter (fun e -> addVerticesAndEdge e loopBodyEnd resGraph)
     do addVerticesAndEdge loopBodyEnd loopNode resGraph
     // connect loop exit to exit branch
     do addVerticesAndEdge loopNode loopExit resGraph
@@ -173,18 +201,18 @@ let private toLoop startId (recCallBranch: GraphWithSingleEnds) (exitBranch: Gra
     { Graph = resGraph; Root = resRoot; Exit = resExit }
 
 let isTailRecursive functionName (ddg: DDG) =
-    match tryFindTailRecCall functionName ddg.Exit with
-    | Some(_) -> true
-    | None -> false
+    match findTailRecCalls functionName ddg.Exit with
+    | [] -> false
+    | _ -> true
 
 let tailRecursionToLoop functionName paramNames (ddg: DDG): DDG =
-    match tryFindTailRecCall functionName ddg.Exit with
-    | Some(recCallNode) -> 
+    match findTailRecCalls functionName ddg.Exit with
+    | [] -> failwith "graph is not tail recursive"
+    | recCallNodes -> 
         let lastId = ddg.Root.Id + 1
-        let graph, root, exit = removeRecCallToExitEdge ddg recCallNode (lastId + 1)
+        let graph, root, exit = removeRecCallToExitEdges ddg recCallNodes (lastId + 1)
         let exitBranch, lastId = copyExitBranch graph exit (lastId + 2)
-        do removeExitBranch graph exit recCallNode
-        let recCallBranch = { Graph = graph; Root = root; Exit = recCallNode }
+        do removeExitBranch graph exit <| List.head recCallNodes
+        let recCallBranch = { Graph = graph; Root = root; Exits = recCallNodes }
         let recCallBranch, lastId = replaceRecCallWithAssigns recCallBranch paramNames <| lastId + 1
         toLoop (lastId + 1) recCallBranch exitBranch
-    | None -> failwith "graph is not tail recursive"

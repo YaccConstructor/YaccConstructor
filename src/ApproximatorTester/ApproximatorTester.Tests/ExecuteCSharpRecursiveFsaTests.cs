@@ -41,9 +41,22 @@ namespace ApproximatorTester.Tests
         }
 
         [Test]
-        public void TestSimpleUserDefRecMethod()
+        public void TestTailRecMethod()
         {
-            DoTestFiles("SimpleUserDefRecMethod.cs");
+            DoTestFiles("TailRecMethod.cs");
         }
+
+        [Test]
+        public void TestTailRecMethodTwoExits()
+        {
+            DoTestFiles("TailRecMethodTwoExits.cs");
+        }
+
+        [Test]
+        public void TestTailRecMethodWithTwoArgs()
+        {
+            DoTestFiles("TailRecMethodWithTwoArgs.cs");
+        }
+        
     }
 }

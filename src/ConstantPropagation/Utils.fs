@@ -148,3 +148,7 @@ let flip f = fun x y -> f y x
 
 module List =
     let cons x xs = x :: xs
+        
+module Seq =
+    let unfoldS generator state =
+        Seq.unfold (generator >> Option.map (fun (u, s) -> (u, s), s)) state

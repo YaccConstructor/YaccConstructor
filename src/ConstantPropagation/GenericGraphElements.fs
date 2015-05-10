@@ -98,8 +98,8 @@ module GraphNodeFuncs =
         | LoopBodyBeg -> "loopBodyBeg"
         | LoopBodyEnd -> "loopBodyEnd"
         | OtherNode -> "otherNode"
-        | ExitNode(vars) -> 
-            let labels = vars |> List.map toString
+        | ExitNode(nodes) -> 
+            let labels = nodes |> List.map toString
             sprintf "exit(%s)" <| Seq.fold (fun acc v -> acc + "," + v) "" labels
         | StartNode -> "start"
 

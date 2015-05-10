@@ -33,12 +33,11 @@
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
   <ItemGroup>
-    <Compile Include="XMLParser.fs" />
-    <Compile Include="ConstantPropagation.fs" />
     <None Include="packages.config" />
     <Content Include="Hotspots.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Compile Include="XMLParser.fs" />
     <Compile Include="Utils.fs" />
     <Compile Include="GraphUtils.fs" />
     <Compile Include="IControlFlowGraphUtils.fs" />

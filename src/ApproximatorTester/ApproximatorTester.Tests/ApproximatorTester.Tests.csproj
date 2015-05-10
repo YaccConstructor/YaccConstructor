@@ -56,7 +56,6 @@
     <Compile Include="ExecuteCSharpFsaTests.cs" />
     <Compile Include="ExecuteJsFsaTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ExecuteCSharpDdgTests.cs" />
     <None Include="test\data\CSharpRecursiveFsa\TailRecMethodWithTwoArgs.cs" />
     <None Include="test\data\CSharpRecursiveFsa\TailRecMethodWithTwoArgs.cs.gold" />
     <None Include="test\data\CSharpRecursiveFsa\TailRecMethodTwoExits.cs" />
@@ -121,29 +120,6 @@
     <None Include="test\data\JsFsa\SimpleFor.js.gold" />
     <None Include="test\data\JsFsa\SimpleMethodCall.js.gold" />
     <None Include="test\data\JsFsa\SimpleQuery.js.gold" />
-    <None Include="test\data\CSharpDdg\SimpleConcat.cs" />
-    <None Include="test\data\CSharpDdg\SimpleConcat.cs.gold" />
-    <None Include="test\data\CSharpDdg\IfWithoutElse.cs" />
-    <None Include="test\data\CSharpDdg\IfWithoutElse.cs.gold" />
-    <None Include="test\data\CSharpDdg\MethodWithMethodCallArg.cs" />
-    <None Include="test\data\CSharpDdg\MethodWithMethodCallArg.cs.gold" />
-    <None Include="test\data\CSharpDdg\MethodWithRefArg.cs" />
-    <None Include="test\data\CSharpDdg\MethodWithRefArg.cs.gold" />
-    <None Include="test\data\CSharpDdg\SimpleMethodCall.cs" />
-    <None Include="test\data\CSharpDdg\SimpleMethodCall.cs.gold" />
-    <None Include="test\data\CSharpDdg\ForWithIf.cs" />
-    <None Include="test\data\CSharpDdg\ForWithIf.cs.gold" />
-    <None Include="test\data\CSharpDdg\NestedFor.cs" />
-    <None Include="test\data\CSharpDdg\ComplexConditionFor.cs" />
-    <None Include="test\data\CSharpDdg\ComplexConditionFor.cs.gold" />
-    <None Include="test\data\CSharpDdg\NestedFor.cs.gold" />
-    <None Include="test\data\CSharpDdg\ForWithLocalVar.cs" />
-    <None Include="test\data\CSharpDdg\ForWithLocalVar.cs.gold" />
-    <None Include="test\data\CSharpDdg\SimpleFor.cs" />
-    <None Include="test\data\CSharpDdg\FourVars.cs" />
-    <None Include="test\data\CSharpDdg\FourVars.cs.gold" />
-    <None Include="test\data\CSharpDdg\FailTest.cs.gold" />
-    <None Include="test\data\CSharpDdg\FailTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\FST\FST\FST\FST.fsproj">
@@ -157,11 +133,6 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="test\data\CSharpDdg\SimpleFor.cs.gold" />
-    <None Include="test\data\CSharpDdg\SimpleQuery.cs" />
-    <None Include="test\data\CSharpDdg\SimpleQuery.cs.gold" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -78,27 +78,3 @@ let buildInvocationTree (node: IInvocationExpression) =
     let nodes = refs |> Seq.map (fun r -> r.GetTreeNode())
     let enclMethods = nodes |> Seq.map (fun n -> getEnclosingMethod n)
     ()
-
-// this method is obsolete and will be deleted soon
-//let buildDdg (file: ICSharpFile) =
-//    // the next line is for debug purposes
-//    DotUtils.allMethodsCFGToDot file myDebugFolderPath
-//
-//    let hotspotInfoList = XMLParser.parseXml "Hotspots.xml"
-//    let lang, hotspot = (findHotspots file hotspotInfoList).[0]
-//    let methodDeclaration = getEnclosingMethod hotspot
-//    let methodName = methodDeclaration.NameIdentifier.Name
-//    let csharpCFG = CSharpControlFlowBuilder.Build methodDeclaration
-//    let genericCFG, convertInfo = toGenericCfg csharpCFG methodName
-//
-//    let genCfgName = "cfg_" + file.GetHashCode().ToString() 
-//    BidirectGraphFuns.toDot genericCFG.Graph genCfgName (myDebugFilePath (genCfgName + ".dot"))
-//
-//    let hotVarRefCfe = (hotspot.Arguments.[0].Value) :> ITreeNode
-//    let hotVarRef = getMappingToOne hotVarRefCfe convertInfo.AstToGenericNodesMapping
-//    let ddg = GenericCFGFuncs.ddgForVar hotVarRef genericCFG
-//
-//    let ddgName = "ddg_" + file.GetHashCode().ToString()
-//    BidirectGraphFuns.toDot ddg.Graph ddgName (myDebugFilePath (ddgName + ".dot"))
-//
-//    ddg

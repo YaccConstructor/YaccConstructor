@@ -67,7 +67,6 @@
   <ItemGroup>
     <Compile Include="BuildFsaForCSharp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="BuildDdgForCSharp.cs" />
     <Compile Include="BuildFsaForJs.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>

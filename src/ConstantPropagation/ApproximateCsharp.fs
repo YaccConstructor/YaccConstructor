@@ -1,4 +1,5 @@
-﻿module YC.ReSharper.AbstractAnalysis.LanguageApproximation.ApproximateCsharp
+﻿/// Functions for working with ReSharper's representation of C# source files
+module YC.ReSharper.AbstractAnalysis.LanguageApproximation.ApproximateCsharp
 
 open QuickGraph
 
@@ -11,9 +12,10 @@ open JetBrains.ReSharper.Psi.ControlFlow
 
 open XMLParser
 open Utils
-open UserDefOperationInfo
+open ArbitraryOperation
 open ResharperCsharpTreeUtils
 open BuildApproximation
+open ResharperCsharpTreeUtils
 
 let private tryDefineLang (node: IInvocationExpression) (hotspotInfoList: list<string * Hotspot>) = 
     let methodName, className, parameters, retType = getMethodSigniture node
@@ -30,7 +32,7 @@ let private tryDefineLang (node: IInvocationExpression) (hotspotInfoList: list<s
         )
     |> Option.map fst
 
-let findHotspots (file: ICSharpFile) (hotspotInfoList: list<string * Hotspot>) =
+let private findHotspots (file: ICSharpFile) (hotspotInfoList: list<string * Hotspot>) =
     let hotspots = new ResizeArray<_>() 
     let processNode (node: ITreeNode) =
         match node with 
@@ -43,12 +45,12 @@ let findHotspots (file: ICSharpFile) (hotspotInfoList: list<string * Hotspot>) =
     processor.Process file
     hotspots
 
-let buildFsaForMethod methodDecl target recursionMaxLevel =
+let private buildFsaForMethod methodDecl target recursionMaxLevel =
     let stringParamsNum = Seq.length <| getStringTypedParams methodDecl
     let stack = List.replicate stringParamsNum <| FsaHelper.anyWordsFsa ()
     let methodName = methodDecl.NameIdentifier.Name
     let controlInfo = { 
-        TargetMethod = methodName; 
+        TargetFunction = methodName; 
         TargetNode = target; 
         CurRecLevel = recursionMaxLevel }
     let fsaForVar = 
@@ -58,9 +60,13 @@ let buildFsaForMethod methodDecl target recursionMaxLevel =
         |> Option.get
     fsaForVar
 
+/// Finds the first hotspot in the given file and builds approximation
+/// for it, starting only from enclosing method.
+/// todo: 1. approximation can be built not only for enclosing method
+/// 2. all hotspots processing
 let ApproximateFile (file: ICSharpFile) recursionMaxLevel =
     // debug
-    DotUtils.allMethodsCFGToDot file myDebugFolderPath
+    allMethodsCfgToDot file myDebugFolderPath
     // end
     let hotspotInfoList = XMLParser.parseXml "Hotspots.xml"
     // only the first hotspot is processed in currect implementation
@@ -70,7 +76,7 @@ let ApproximateFile (file: ICSharpFile) recursionMaxLevel =
     buildFsaForMethod methodDeclaration hotVarRef recursionMaxLevel
 
 // stub
-let buildInvocationTree (node: IInvocationExpression) =
+let private buildInvocationTree (node: IInvocationExpression) =
     let services = node.GetContainingFile().GetPsiServices()
     let methDecl = node.InvocationExpressionReference.Resolve().DeclaredElement
 

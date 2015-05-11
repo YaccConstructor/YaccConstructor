@@ -1,14 +1,15 @@
-﻿module GenerateFsa
+﻿/// Functions for building FSA from DDG
+module GenerateFsa
 
 open Microsoft.FSharp.Collections
 
-open GenericGraphElements
+open GenericGraphs
 open DDG
 open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation
 open Utils
 open GraphUtils.TopoTraverser
-open GenericGraphElements.CfgTopoDownTraverser
+open GenericGraphs.BidirectTopoDownTraverser
 
 type FsaState = char * Position<int>
 type FSAMap = Map<string, FsaHelper.CharFSA>
@@ -18,6 +19,7 @@ type BuildState = {
     NodesToVarFsa: Map<int, FSAMap>
     UnboundResults: Map<int, FSA<FsaState>> }
 
+/// Builds FSA for a given DDG.
 let buildAutomaton (ddg: DDG) (initialFsaMap: FSAMap) controlData approximate =
     // exception messages
     let unsupportedCaseMsg = "unsupported case encountered"

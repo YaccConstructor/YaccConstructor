@@ -1,8 +1,13 @@
-﻿module GenericCFG
+﻿/// Represents generic control flow graph (CFG). Generic CFG is built from language specific
+/// CFG and represents function or method in source code. Source code instructions are
+/// represented by nodes, edges show the order of these instructions
+module GenericCFG
 
-open GenericGraphElements
+open GenericGraphs
 open DDG
 
+/// Generic CFG. Contains graph itself and 
+/// the name of a function it represents
 type GenericCFG = {
     FunctionName: string
     Graph: BidirectGraph }
@@ -12,9 +17,10 @@ module GenericCFGFuncs =
     open System.IO
     open GraphNodeFuncs
     open GraphUtils.TopoTraverser
-    open CfgTopoUpTraverser
+    open BidirectTopoUpTraverser
     open QuickGraph
 
+    /// Creates empty generic CFG
     let create name = {
         FunctionName = name
         Graph = BidirectGraphFuns.create () }
@@ -143,9 +149,14 @@ module GenericCFGFuncs =
         let newExitNode = addExitNode (nodeWithMaxId.Id + 2) nodes cfg
         cfgToDdg newExitNode cfg
 
-    let ddgForVar (varRef: GraphNode) (cfg: GenericCFG) =
+    /// Extracts DDG from passed generic CFG for a given node in CFG as 
+    /// a target
+    let ddgForNode (varRef: GraphNode) (cfg: GenericCFG) =
         ddgForNodes [varRef] cfg
 
+    /// Extracts DDG from passed generic CFG. All the nodes with no
+    /// successors are assumed as a target. Useful when DDG is needed for 
+    /// method's or function's return statements
     let ddgForExits (cfg: GenericCFG) = 
         let exitNodes = cfg.Graph.Vertices |> Seq.filter (fun v -> cfg.Graph.OutDegree(v) = 0)
         ddgForNodes (List.ofSeq exitNodes) cfg

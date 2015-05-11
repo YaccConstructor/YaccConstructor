@@ -1,4 +1,5 @@
-﻿module CsharpLoopInfo
+﻿/// Loop info collecting functions specific for C#
+module CsharpLoopInfo
 
 open System.Collections.Generic
 
@@ -11,6 +12,8 @@ open GraphUtils
 open IControlFlowGraphUtils
 open ResharperCfgAdditionalInfo
 
+/// Creates mapping from loop nodes to it's body enter and loop exit nodes 
+/// for a given IControlFlowGraf
 let findLoopConditionExits (cfg: IControlFlowGraf) (astNodeToCfeDict: AstToCfgDict) =
     let (|LoopTreeNode|_|) (node: ITreeNode) =
         match node with
@@ -27,13 +30,13 @@ let findLoopConditionExits (cfg: IControlFlowGraf) (astNodeToCfeDict: AstToCfgDi
             | _ -> None
         astNodeToCfeDict 
         |> Seq.choose (fun (KeyValue(key, value)) -> loopChooser key value)
-        |> DictionaryFuns.dictFromSeq
+        |> Dictionary.dictFromSeq
     let astConditionToExits =
         let astConditionToCfeDict = Dictionary<ITreeNode, HashSet<IControlFlowElement>>()
         let processNode (e: IControlFlowElement) () =
             if e <> null && e.SourceElement <> null 
             && astConditionToPreLoopCfe.ContainsKey e.SourceElement
-            then do DictionaryFuns.addToSetInDict e.SourceElement e astConditionToCfeDict
+            then do Dictionary.addToSetInDict e.SourceElement e astConditionToCfeDict
         let algoParts = cfgExitsDfsParts processNode 
         do dfs algoParts cfg.EntryElement Set.empty () |> ignore
         let extractConditionExits (cfeSet: HashSet<IControlFlowElement>) =
@@ -60,7 +63,7 @@ let findLoopConditionExits (cfg: IControlFlowGraf) (astNodeToCfeDict: AstToCfgDi
             else findLoopNode (elem.Exits |> Seq.head |> (fun edge -> edge.Target))
         preLoopToExits
         |> Seq.map (fun (KeyValue(preLoopNode, exits)) -> findLoopNode preLoopNode, exits)
-        |> DictionaryFuns.dictFromSeq
-    let preLoopToExits = DictionaryFuns.mergeDicts astConditionToPreLoopCfe astConditionToExits
+        |> Dictionary.dictFromSeq
+    let preLoopToExits = Dictionary.mergeDicts astConditionToPreLoopCfe astConditionToExits
     let loopNodes = IControlFlowGraphUtils.findLoopNodes cfg
     preLoopKeyToLoopKey preLoopToExits loopNodes

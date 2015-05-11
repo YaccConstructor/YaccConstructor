@@ -1,4 +1,12 @@
-﻿module YC.ReSharper.AbstractAnalysis.LanguageApproximation.ApproximateJs
+﻿/// Functions for building JavaScript's CFG approximation.
+/// todo: Here approximation is built only for one Js CFG
+/// because I don't know how to extract CFG from Js function calls,
+/// so BuildApproximation module is not used here. Further investigation
+/// of ReSharper's JavaScript support is nedded to be able to use
+/// BuildApproximation module's functionality. Also hotspots info 
+/// from Hotspots.xml is not used too because I don't know how to
+/// extract needed info from Js method calls.
+module YC.ReSharper.AbstractAnalysis.LanguageApproximation.ApproximateJs
 
 open JetBrains.ReSharper.Psi.JavaScript.ControlFlow
 open JetBrains.ReSharper.Psi.JavaScript.Tree
@@ -7,23 +15,24 @@ open JetBrains.ReSharper.Psi.Tree
 
 open Utils
 open JsCfgToGeneric
-open GenericGraphElements
+open GenericGraphs
 open GenericCFG
 open DDG
-open Utils.DictionaryFuns
+open Utils.Dictionary
 open BuildApproximation
 open GenerateFsa
+open IControlFlowGraphUtils
 
-let serializeJsCfg (cfg: IJsControlFlowGraf) = 
+let private serializeJsCfg (cfg: IJsControlFlowGraf) = 
     let name = "JsCfg_" + cfg.GetHashCode().ToString() + ".dot"
-    DotUtils.cfgToDot cfg (myDebugFilePath name) "JsCfg"
+    cfgToDot cfg (myDebugFilePath name) "JsCfg"
 
-let isHotspot (node: IInvocationExpression) = 
+let private isHotspot (node: IInvocationExpression) = 
     let invoked = node.InvokedExpression :?> IReferenceExpression
     let name = invoked.Name
     name = "execScript"
 
-let getHotspots (cfg: IJsControlFlowGraf) =
+let private getHotspots (cfg: IJsControlFlowGraf) =
     cfg.AllElements
     |> List.ofSeq
     |> List.choose
@@ -37,7 +46,7 @@ let getHotspots (cfg: IJsControlFlowGraf) =
                 | _ -> None
         )
 
-let build (jsCfg: IJsControlFlowGraf) =
+let private build (jsCfg: IJsControlFlowGraf) =
     let fstHotspot = getHotspots jsCfg |> List.head :> ITreeNode
     let methodName = "main"
     let genericCFG, convertInfo = toGenericCfg jsCfg methodName
@@ -47,13 +56,13 @@ let build (jsCfg: IJsControlFlowGraf) =
     // end
     let ddg =
         let targetNode = getMappingToOne fstHotspot convertInfo.AstToGenericNodes
-        GenericCFGFuncs.ddgForVar targetNode genericCFG
+        GenericCFGFuncs.ddgForNode targetNode genericCFG
     // for debug
     let path = Utils.myDebugFilePath ("ddg_" + methodName + ".dot")
     BidirectGraphFuns.toDot ddg.Graph methodName path
     // end
     let initFsaMap = Map.empty
-    let controlData = { TargetMethod = methodName; TargetNode = fstHotspot; CurRecLevel = 0 }
+    let controlData = { TargetFunction = methodName; TargetNode = fstHotspot; CurRecLevel = 0 }
     let fsa = buildAutomaton ddg initFsaMap controlData approximate
     // for debug
     let path = Utils.myDebugFilePath ("fsa_" + methodName + ".dot")
@@ -61,6 +70,7 @@ let build (jsCfg: IJsControlFlowGraf) =
     // end
     fsa
 
+/// Builds approximation for the first hotspot in a given Js function's CFG
 let BuildFsaForOneFunctionCfg (cfg: IJsControlFlowGraf) =
     serializeJsCfg cfg
     build cfg

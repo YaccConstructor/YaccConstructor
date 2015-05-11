@@ -1,4 +1,7 @@
-﻿module FsaHelper
+﻿/// Utilities for Finite State Automata (FSA).
+/// Also contains widening operator implementation
+/// (todo: move it to SEL.SDK.AbstractLexing.FSA)
+module FsaHelper
 
 open System.IO
 open System.Collections.Generic

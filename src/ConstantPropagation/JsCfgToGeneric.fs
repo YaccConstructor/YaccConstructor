@@ -1,4 +1,6 @@
-﻿module JsCfgToGeneric
+﻿/// JavaScript specific functions needed to run IControlFlowGraf to generic CFG
+/// conversion algo
+module JsCfgToGeneric
 
 open JetBrains.ReSharper.Psi
 open JetBrains.ReSharper.Psi.Tree
@@ -10,9 +12,9 @@ open JetBrains.ReSharper.Psi.JavaScript.Resolve
 
 open ResharperCfgToGeneric
 open Utils
-open GenericGraphElements
+open GenericGraphs
 open ResharperCsharpTreeUtils
-open UserDefOperationInfo
+open ArbitraryOperation
 
 // exception messages
 let private badIRefExprCastMsg = 
@@ -21,17 +23,17 @@ let private unexpectedInitializerTypeMsg =
     "unexpected initializer type in local variable declaration"
 
 // utility methods
-let (|LoopCfe|_|) (info: ConvertInfo) (cfe: IControlFlowElement) =
+let private (|LoopCfe|_|) (info: ConvertInfo) (cfe: IControlFlowElement) =
     match info.LoopNodes.TryGetValue cfe with
     | true, loopInfo -> Some(loopInfo)
     | _ -> None
-let getGenericNodeId (treeNode: ITreeNode) (info: ConvertInfo) = 
-    let res = DictionaryFuns.getMappingToOne treeNode info.AstToGenericNodes
+let private getGenericNodeId (treeNode: ITreeNode) (info: ConvertInfo) = 
+    let res = Dictionary.getMappingToOne treeNode info.AstToGenericNodes
     res.Id
-let isReplaceMethod (name: string) = 
+let private isReplaceMethod (name: string) = 
     name = "replace"
 
-let toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) = 
+let private toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) = 
     let nType = 
         match cfe with
         | LoopCfe info _ -> LoopNode
@@ -88,6 +90,8 @@ let toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) =
             | _ -> OtherNode
     { Id = nodeId; Type = nType }
 
+/// Converts JavaScript IJsControlFlowGraf to generic CFG by calling generic conversion
+/// algo with JavaScript specific functions passed as arguments
 let rec toGenericCfg (cfg: IJsControlFlowGraf) functionName =
     ResharperCfgToGeneric.toGenericCfg 
         cfg 

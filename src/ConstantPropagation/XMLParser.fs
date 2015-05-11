@@ -1,4 +1,6 @@
-﻿module XMLParser
+﻿/// For parsing Hotspots.xml file and producing it's object
+/// representation
+module XMLParser
 
 open System.Xml
 

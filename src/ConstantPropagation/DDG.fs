@@ -1,15 +1,21 @@
-﻿module DDG
+﻿/// Data dependency graph type  and processing functions
+module DDG
 
 open QuickGraph
 
 open Utils
-open GenericGraphElements
+open GenericGraphs
 open GraphUtils
 open BidirectGraphFuns
 
+/// Data depencendency graph. DDG's root always has StarNode type
+/// and end has ExitNode type
 type DDG = GraphWithSingleEnds
 
+/// IsVisited part of the DFS algo specific for DDG
 let ddgIsVisited (n: GraphNode) v = Set.contains n.Id v
+
+/// MakeVisited part of the DFS algo specific for DDG
 let ddgMakeVisited (n: GraphNode) v = Set.add n.Id v
 
 let private exitNodeExpectedMsg = "Node of ExitNode type expected"
@@ -200,11 +206,14 @@ let private toLoop startId (recCallBranch: GraphWithSingleRoot) (exitBranch: Gra
     do exitBranch.Roots |> List.iter (fun r -> addVerticesAndEdge loopExit r resGraph)
     { Graph = resGraph; Root = resRoot; Exit = resExit }
 
+/// Returns true if passed DDG represents tail recursive method or function
 let isTailRecursive functionName (ddg: DDG) =
     match findTailRecCalls functionName ddg.Exit with
     | [] -> false
     | _ -> true
 
+/// Turns passed tail recursive DDG to DDG with loop. It makes approximation algo able to 
+/// achieve automata building fixpoint (for tail recursive DDG it will not be acheved)
 let tailRecursionToLoop functionName paramNames (ddg: DDG): DDG =
     match findTailRecCalls functionName ddg.Exit with
     | [] -> failwith "graph is not tail recursive"

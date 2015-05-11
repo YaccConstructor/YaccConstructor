@@ -42,8 +42,8 @@
     <Compile Include="GraphUtils.fs" />
     <Compile Include="IControlFlowGraphUtils.fs" />
     <Compile Include="ResharperCsharpTreeUtils.fs" />
-    <Compile Include="UserDefOperationInfo.fs" />
-    <Compile Include="GenericGraphElements.fs" />
+    <Compile Include="ArbitraryOperation.fs" />
+    <Compile Include="GenericGraphs.fs" />
     <Compile Include="DDG.fs" />
     <Compile Include="GenericCFG.fs" />
     <Compile Include="ResharperCfgAdditionalInfo.fs" />
@@ -54,6 +54,7 @@
     <Compile Include="JsCfgToGeneric.fs" />
     <Compile Include="FsaHelper.fs" />
     <Compile Include="GenerateFsa.fs" />
+    <Compile Include="CsharpApprxomationUtils.fs" />
     <Compile Include="BuildApproximation.fs" />
     <Compile Include="ApproximateCsharp.fs" />
     <Compile Include="ApproximateJs.fs" />

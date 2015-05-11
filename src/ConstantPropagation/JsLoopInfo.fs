@@ -1,4 +1,5 @@
-﻿module JsLoopInfo
+﻿/// Loop info collecting functions specific for JavaScript
+module JsLoopInfo
 
 open System.Collections.Generic
 
@@ -9,6 +10,8 @@ open JetBrains.ReSharper.Psi.ControlFlow
 open ResharperCfgAdditionalInfo
 open Utils
 
+/// Creates mapping from loop nodes to it's body enter and loop exit nodes 
+/// for a given IControlFlowGraf
 let findLoopConditionExits (cfg: IControlFlowGraf) (astNodeToCfeDict: AstToCfgDict) =
     let jsCfgLoopsAssumptionMsg = "Assumption about Js cfg structure for loops failed"
     let loopConditionExits =
@@ -44,5 +47,5 @@ let findLoopConditionExits (cfg: IControlFlowGraf) (astNodeToCfeDict: AstToCfgDi
             else findLoopNode (elem.Entries |> Seq.head |> (fun edge -> edge.Source))
         loopConditionExits
         |> Seq.map (fun ((loopBodyBeg, loopExit) as p)-> findLoopNode loopBodyBeg, p)
-        |> DictionaryFuns.dictFromSeq
+        |> Dictionary.dictFromSeq
     loopNodeToExits

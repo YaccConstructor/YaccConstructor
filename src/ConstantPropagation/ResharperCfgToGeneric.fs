@@ -1,4 +1,6 @@
-﻿module ResharperCfgToGeneric
+﻿/// Functions for converting JetBrains.ReSharper.Psi.ControlFlow.IControlFlowGraf
+/// to generic CFG
+module ResharperCfgToGeneric
 
 open QuickGraph
 
@@ -8,18 +10,22 @@ open JetBrains.ReSharper.Psi.ControlFlow
 open JetBrains.ReSharper.Psi.Tree
 
 open ResharperCfgAdditionalInfo
-open GenericGraphElements
+open GenericGraphs
 open GenericCFG
 open Utils
 open GraphUtils
 open IControlFlowGraphUtils
 
+/// Additional info about converted IControlFlowGraf
 type ConvertInfo = {
     AstToCfgMapping: AstToCfgDict
     LoopNodes: Dictionary<IControlFlowElement, LoopNodeInfo>
     AstToGenericNodes: Dictionary<ITreeNode, HashSet<GraphNode>>
     CfeToGenericNodes: Dictionary<IControlFlowElement, GraphNode> }
 
+/// Generic function for converting IControlFlowGraf to generic CFG. Expects a function
+/// that can convert a single node of IControlFlowGraf to generic node and a function
+/// that generates basic loops info.
 let rec toGenericCfg (cfg: IControlFlowGraf) toGenericNode findLoopToCondExits tryAsLoopCfe functionName =
     let connectToTraversedSuccessors (curCfe: IControlFlowElement) curNode (graph: BidirectGraph) (info: ConvertInfo) =
         let tryGetGenericOfTarget (rib: IControlFlowRib) =
@@ -41,7 +47,7 @@ let rec toGenericCfg (cfg: IControlFlowGraf) toGenericNode findLoopToCondExits t
         let genericNode = toGenericNode cfe newId info
         // update info
         if cfe.SourceElement <> null
-        then do DictionaryFuns.addToSetInDict cfe.SourceElement genericNode info.AstToGenericNodes
+        then do Dictionary.addToSetInDict cfe.SourceElement genericNode info.AstToGenericNodes
         do info.CfeToGenericNodes.[cfe] <- genericNode
         // add to graph
         if List.isEmpty parentsStack

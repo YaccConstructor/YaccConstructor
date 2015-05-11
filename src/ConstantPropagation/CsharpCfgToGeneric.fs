@@ -1,4 +1,6 @@
-﻿module CsharpCfgToGeneric
+﻿/// C# specific functions needed to run IControlFlowGraf to generic CFG
+/// conversion algo
+module CsharpCfgToGeneric
 
 open JetBrains.ReSharper.Psi
 open JetBrains.ReSharper.Psi.Tree
@@ -8,26 +10,28 @@ open JetBrains.ReSharper.Psi.ControlFlow
 
 open ResharperCfgToGeneric
 open Utils
-open GenericGraphElements
+open GenericGraphs
 open ResharperCsharpTreeUtils
-open UserDefOperationInfo
+open ArbitraryOperation
 open ResharperCfgAdditionalInfo
 
-let (|LoopCfe|_|) (info: ConvertInfo) (cfe: IControlFlowElement) =
+let private (|LoopCfe|_|) (info: ConvertInfo) (cfe: IControlFlowElement) =
     match info.LoopNodes.TryGetValue cfe with
     | true, loopInfo -> Some(loopInfo)
     | _ -> None
-let getGenericNodeId (treeNode: ITreeNode) (info: ConvertInfo) = 
-    let res = DictionaryFuns.getMappingToOne treeNode info.AstToGenericNodes
+
+let private getGenericNodeId (treeNode: ITreeNode) (info: ConvertInfo) = 
+    let res = Dictionary.getMappingToOne treeNode info.AstToGenericNodes
     res.Id
-let isReplaceMethod (name: string) (callTargetType: IType) =
+
+let private isReplaceMethod (name: string) (callTargetType: IType) =
     name = "Replace" && callTargetType.IsString()
 
 let private badIRefExprCastMsg = 
     "unable to perform cast to IReferenceExpression"
 let private unexpectedInitializerTypeMsg =
     "unexpected initializer type in local variable declaration"
-let tryExtractNodeTypeInfo (node: ITreeNode) (info: ConvertInfo) =
+let private tryExtractNodeTypeInfo (node: ITreeNode) (info: ConvertInfo) =
     match node with
     | :? IAssignmentExpression as assignExpr 
         when (assignExpr.Dest :? IReferenceExpression)
@@ -102,8 +106,8 @@ let tryExtractNodeTypeInfo (node: ITreeNode) (info: ConvertInfo) =
         Some(Operation(Concat, operandsIDs))
     | _ -> None
 
-let returnStmtExpressionMsg = "unsupported expression in return statement is met"
-let toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) = 
+let private returnStmtExpressionMsg = "unsupported expression in return statement is met"
+let private toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) = 
     let nType = 
         match cfe with
         | LoopCfe info _ -> LoopNode
@@ -119,6 +123,8 @@ let toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) =
                 | _ -> OtherNode
     { Id = nodeId; Type = nType }
     
+/// Converts C# ICSharpControlFlowGraf to generic CFG by calling generic conversion
+/// algo with C# specific functions passed as arguments
 let rec toGenericCfg (cfg: ICSharpControlFlowGraf) functionName =
     ResharperCfgToGeneric.toGenericCfg 
         cfg 

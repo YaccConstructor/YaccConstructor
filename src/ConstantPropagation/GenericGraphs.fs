@@ -1,22 +1,29 @@
-﻿module GenericGraphElements
+﻿/// Types and functions for generic graphs representation
+module GenericGraphs
 
 open QuickGraph
 
-open UserDefOperationInfo
+open ArbitraryOperation
 
+/// Represents the type of the string manipulating operation.
+/// Functions, methods and operators in source code can all
+/// be thought as operations
 type OperationType =
 | Replace
 | Concat
 | Arbitrary of ArbitraryOperation
-// and so on ...
 
+/// Represents the type of the updater.
+/// Different kinds of assignments in source code can all
+/// be thought as updaters.
 and UpdaterType =
 // initializer node ID
 | Assign of int
 // type and operand nodes' IDs
 | PlusAssign of int * int
-// function with updatable arg passing
+// todo: functions with updatable arg passing
 
+/// Represents the type of generic CFG and DDG node
 and GraphNodeType = 
 // declared name and initializer node ID
 | Declaration of string * int
@@ -35,6 +42,7 @@ and GraphNodeType =
 | ExitNode of list<GraphNode>
 | StartNode
 
+/// Represents generic CFG and DDG node
 and [<CustomEquality; CustomComparison>] GraphNode = {
     Id: int
     Type: GraphNodeType }
@@ -53,23 +61,28 @@ and [<CustomEquality; CustomComparison>] GraphNode = {
                 let failFunc () = invalidArg "other" "cannot compare values of different types"
                 Utils.applyToMappedTypedArgs compare getId this other failFunc
 
+/// Bidirectional graph
 and BidirectGraph = BidirectionalGraph<GraphNode, Edge<GraphNode>>
 
+/// Bidirectional graph with multiple roots and exit nodes
 type GraphWithEnds = {
     Graph: BidirectGraph
     Roots: list<GraphNode>
     Exits: list<GraphNode> }
 
+/// Bidirectional graph with multiple roots and single exit nodes
 type GraphWithSingleExit = {
     Graph: BidirectGraph
     Roots: list<GraphNode>
     Exit: GraphNode }
 
+/// Bidirectional graph with single root and multiple exit nodes
 type GraphWithSingleRoot = {
     Graph: BidirectGraph
     Root: GraphNode
     Exits: list<GraphNode> }
 
+/// Bidirectional graph with single root and exit nodes
 type GraphWithSingleEnds = {
     Graph: BidirectGraph
     Root: GraphNode
@@ -102,7 +115,10 @@ module GraphNodeFuncs =
             let labels = nodes |> List.map toString
             sprintf "exit(%s)" <| Seq.fold (fun acc v -> acc + "," + v) "" labels
         | StartNode -> "start"
-
+    
+    /// Creates loop node's markers nodes. Marker nodes are 4 nodes connected directly
+    /// to loop node, 2 as predecessors (LoopEnter and LoopBodyEnd) ans 2 as succeessors
+    /// (LoopExit and LoopBodyBeg).
     let createLoopMarkers startId =
         let nodeId = ref (startId - 1)
         { Id = (incr nodeId; !nodeId); Type = LoopEnter },
@@ -115,6 +131,7 @@ module BidirectGraphFuns =
     open System.IO
     open GraphNodeFuncs
 
+    /// Creates empty graph with no parallel edges allowed
     let create () = BidirectGraph(allowParallelEdges = false)
     let toDot (g: BidirectGraph) name path =
         use file = FileInfo(path).CreateText()
@@ -153,16 +170,19 @@ module BidirectGraphFuns =
     let removeVertex (graph: BidirectGraph) node =
         graph.RemoveVertex node |> ignore
 
-module CfgTopoTraverser =
+/// Basic implementation of GraphUtils.TopoTraverser for BidirectGraph
+module BidirectTopoTraverser =
     open GraphUtils.TopoTraverser
 
     let isLoopNode (node: GraphNode) =
         match node.Type with LoopNode -> true | _ -> false
     let getId (node: GraphNode) = node.Id
 
-module CfgTopoDownTraverser =
+/// Implementation of GraphUtils.TopoTraverser for BidirectGraph
+/// with traverses graph from predecessors to successors
+module BidirectTopoDownTraverser =
     open GraphUtils.TopoTraverser
-    open CfgTopoTraverser
+    open BidirectTopoTraverser
 
     let private getInputsNumber (cfg: BidirectGraph) (node: GraphNode) = 
         cfg.InDegree node
@@ -184,9 +204,11 @@ module CfgTopoDownTraverser =
     let nextNode cfg (tState: TraverserState<GraphNode>) =
         nextNode getId (getInputsNumber cfg) (getAllNextNodes cfg) isLoopNode (getLoopNextNodes cfg) tState
 
-module CfgTopoUpTraverser =
+/// Implementation of GraphUtils.TopoTraverser for BidirectGraph
+/// with traverses graph from successors to predecessors
+module BidirectTopoUpTraverser =
     open GraphUtils.TopoTraverser
-    open CfgTopoTraverser
+    open BidirectTopoTraverser
 
     let private getInputsNumber (cfg: BidirectGraph) (node: GraphNode) = 
         cfg.OutDegree node

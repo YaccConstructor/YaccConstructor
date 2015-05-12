@@ -142,101 +142,107 @@ let trans : uint16[] array =
      [| 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65533us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; |];
     |] 
 let actions : uint16[] = [|65535us; 5us; 5us; 2us; 2us; 3us; 4us; 4us; 2us; 1us; 0us; 65535us; 1us; 2us; 2us; 3us; 4us; 2us; 0us; 65535us; 0us; 0us; 1us; 18us; 2us; 3us; 4us; 5us; 6us; 7us; 8us; 9us; 10us; 11us; 12us; 13us; 14us; 15us; 16us; 17us; 18us; 22us; 21us; 22us; 20us; 18us; 19us; 19us; 3us; 2us; 1us; 0us; |]
-let _fslex_tables = AbstractLexer.Core.UnicodeTables.Create(trans,actions)
+let _fslex_tables = Microsoft.FSharp.Text.Lexing.UnicodeTables.Create(trans,actions)
 let rec _fslex_dummy () = _fslex_dummy() 
 (* Rule tokens *)
-let fslex_actions_tokens  _fslex_state lexeme brs =
-  match _fslex_state with
+and tokens  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_tokens  19 lexbuf
+(* Rule literal *)
+and literal  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_literal  11 lexbuf
+(* Rule multiline_comment *)
+and multiline_comment  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_multiline_comment  0 lexbuf
+(* Rule tokens *)
+and _fslex_tokens  _fslex_state lexbuf =
+  match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
 # 53 "Lexer.fsl"
                                  lexbuf.EndPos <- lexbuf.EndPos.NextLine;tokens lexbuf 
-# 153 "Lexer.fs"
+# 159 "Lexer.fs"
           )
   | 1 -> ( 
 # 54 "Lexer.fsl"
                                 clearBuf(); startPos := lexbuf.StartPos; literal lexbuf 
-# 158 "Lexer.fs"
+# 164 "Lexer.fs"
           )
   | 2 -> ( 
 # 55 "Lexer.fsl"
                                  (*Printf.printf "decnumber %s\n" ( LexBuffer<_>.LexemeString(lexbuf) )*)
                                  DEC_NUMBER(defaultSourceText id lexbuf <| LexBuffer<_>.LexemeString(lexbuf)) 
-# 164 "Lexer.fs"
+# 170 "Lexer.fs"
           )
   | 3 -> ( 
 # 57 "Lexer.fsl"
                                  tokens lexbuf 
-# 169 "Lexer.fs"
+# 175 "Lexer.fs"
           )
   | 4 -> ( 
 # 58 "Lexer.fsl"
                                  getLiteral id lexbuf "." 
-# 174 "Lexer.fs"
+# 180 "Lexer.fs"
           )
   | 5 -> ( 
 # 59 "Lexer.fsl"
                                  getLiteral id lexbuf "," 
-# 179 "Lexer.fs"
+# 185 "Lexer.fs"
           )
   | 6 -> ( 
 # 60 "Lexer.fsl"
                                  getLiteral id lexbuf "=" 
-# 184 "Lexer.fs"
+# 190 "Lexer.fs"
           )
   | 7 -> ( 
 # 61 "Lexer.fsl"
                                  getLiteral id lexbuf ">" 
-# 189 "Lexer.fs"
+# 195 "Lexer.fs"
           )
   | 8 -> ( 
 # 62 "Lexer.fsl"
                                  getLiteral id lexbuf "<" 
-# 194 "Lexer.fs"
+# 200 "Lexer.fs"
           )
   | 9 -> ( 
 # 63 "Lexer.fsl"
                                  getLiteral id lexbuf ";" 
-# 199 "Lexer.fs"
+# 205 "Lexer.fs"
           )
   | 10 -> ( 
 # 64 "Lexer.fsl"
                              getLiteral id lexbuf "(" 
-# 204 "Lexer.fs"
+# 210 "Lexer.fs"
           )
   | 11 -> ( 
 # 65 "Lexer.fsl"
                              getLiteral id lexbuf ")" 
-# 209 "Lexer.fs"
+# 215 "Lexer.fs"
           )
   | 12 -> ( 
 # 66 "Lexer.fsl"
                              getLiteral id lexbuf "[" 
-# 214 "Lexer.fs"
+# 220 "Lexer.fs"
           )
   | 13 -> ( 
 # 67 "Lexer.fsl"
                              getLiteral id lexbuf "]" 
-# 219 "Lexer.fs"
+# 225 "Lexer.fs"
           )
   | 14 -> ( 
 # 68 "Lexer.fsl"
                              getLiteral id lexbuf "+" 
-# 224 "Lexer.fs"
+# 230 "Lexer.fs"
           )
   | 15 -> ( 
 # 69 "Lexer.fsl"
                              getLiteral id lexbuf "-" 
-# 229 "Lexer.fs"
+# 235 "Lexer.fs"
           )
   | 16 -> ( 
 # 70 "Lexer.fsl"
                              getLiteral id lexbuf "~" 
-# 234 "Lexer.fs"
+# 240 "Lexer.fs"
           )
   | 17 -> ( 
 # 71 "Lexer.fsl"
                              getLiteral id lexbuf "*" 
-# 239 "Lexer.fs"
+# 245 "Lexer.fs"
           )
   | 18 -> ( 
 # 73 "Lexer.fsl"
@@ -244,65 +250,65 @@ let fslex_actions_tokens  _fslex_state lexeme brs =
                            makeIdent false l (new Pair(id, int64 lexbuf.StartPos.AbsoluteOffset * _symbolL), 
                                                     new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL))
                         
-# 247 "Lexer.fs"
+# 253 "Lexer.fs"
           )
   | 19 -> ( 
 # 77 "Lexer.fsl"
                                         tokens lexbuf (* parser knows nothing about comments *) 
-# 252 "Lexer.fs"
+# 258 "Lexer.fs"
           )
   | 20 -> ( 
 # 78 "Lexer.fsl"
                          commendepth := 1; clearBuf(); multiline_comment lexbuf 
-# 257 "Lexer.fs"
+# 263 "Lexer.fs"
           )
   | 21 -> ( 
 # 79 "Lexer.fsl"
                         RNGLR_EOF(defaultSourceText id lexbuf  "")
-# 262 "Lexer.fs"
+# 268 "Lexer.fs"
           )
   | 22 -> ( 
 # 80 "Lexer.fsl"
                          failwith (sprintf "fucking shit received %s\n" (LexBuffer<_>.LexemeString(lexbuf)) ) 
-# 267 "Lexer.fs"
+# 273 "Lexer.fs"
           )
   | _ -> failwith "tokens"
 (* Rule literal *)
-let fslex_actions_literal  _fslex_state lexeme brs =
-  match _fslex_state with
+and _fslex_literal  _fslex_state lexbuf =
+  match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
 # 82 "Lexer.fsl"
                           appendBuf("'"); literal lexbuf 
-# 276 "Lexer.fs"
+# 282 "Lexer.fs"
           )
   | 1 -> ( 
 # 83 "Lexer.fsl"
                           STRING_CONST(defaultSourceText id  lexbuf (string str_buf)) 
-# 281 "Lexer.fs"
+# 287 "Lexer.fs"
           )
   | 2 -> ( 
 # 84 "Lexer.fsl"
                          appendBuf(lexeme lexbuf); lexbuf.EndPos <- lexbuf.EndPos.NextLine; literal lexbuf 
-# 286 "Lexer.fs"
+# 292 "Lexer.fs"
           )
   | 3 -> ( 
 # 85 "Lexer.fsl"
                          failwith "unclosed literal at the end of file" 
-# 291 "Lexer.fs"
+# 297 "Lexer.fs"
           )
   | 4 -> ( 
 # 86 "Lexer.fsl"
                        appendBuf(lexeme lexbuf); literal lexbuf 
-# 296 "Lexer.fs"
+# 302 "Lexer.fs"
           )
   | _ -> failwith "literal"
 (* Rule multiline_comment *)
-let fslex_actions_multiline_comment  _fslex_state lexeme brs =
-  match _fslex_state with
+and _fslex_multiline_comment  _fslex_state lexbuf =
+  match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
 # 89 "Lexer.fsl"
                      incr commendepth; appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf
-# 305 "Lexer.fs"
+# 311 "Lexer.fs"
           )
   | 1 -> ( 
 # 91 "Lexer.fsl"
@@ -312,27 +318,27 @@ let fslex_actions_multiline_comment  _fslex_state lexeme brs =
                      else 
                        appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf 
                    
-# 315 "Lexer.fs"
+# 321 "Lexer.fs"
           )
   | 2 -> ( 
 # 97 "Lexer.fsl"
                         lexbuf.EndPos <- lexbuf.EndPos.NextLine; appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf 
-# 320 "Lexer.fs"
+# 326 "Lexer.fs"
           )
   | 3 -> ( 
 # 98 "Lexer.fsl"
                          failwith "unclosed comment in the end of file" 
-# 325 "Lexer.fs"
+# 331 "Lexer.fs"
           )
   | 4 -> ( 
 # 99 "Lexer.fsl"
                                             appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf 
-# 330 "Lexer.fs"
+# 336 "Lexer.fs"
           )
   | 5 -> ( 
 # 100 "Lexer.fsl"
                        appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf 
-# 335 "Lexer.fs"
+# 341 "Lexer.fs"
           )
   | _ -> failwith "multiline_comment"
 

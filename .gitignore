@@ -426,3 +426,5 @@ src/GLL.AbstractParser.SimpleTest/*.dot
 src/GLL.AbstractParser.SimpleTest/*.yrd.fs
 src/GLL.AbstractParser.SimpleTest/*.yrd.fs
 src/GLLParser.SimpleTest/*.dot
+src/GLL.AbstractParser.SimpleTest/BadLeftRecursion.yrd.fs
+src/GLL.AbstractParser.SimpleTest/*.yrd.fs

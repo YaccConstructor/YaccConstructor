@@ -20,19 +20,19 @@ open Yard.Generators
 open Lexer2
 
 
-let run () =
-    let fe = new Yard.Frontends.YardFrontend.YardFrontend()
-    let gen = new Yard.Generators.GLL.GLL()
-    let il = ref <| fe.ParseGrammar(@"C:\Users\User\recursive-ascent\src\GLLApplication\SimpleAmb.yrd")
-    for constr in gen.Constraints do
-        let grammar = il.Value.grammar
-        if not <| constr.Check grammar then
-            eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
-            il := {!il with grammar = constr.Fix grammar}
-
-    gen.Generate(!il,"-pos int -token int -abstract false -module GLL.Parse.SimpleAmb -o SimpleAmb.yrd.fs -output C:\Users\User\recursive-ascent\src\GLLApplication")
-
-run () |> printfn "%A"
+//let run () =
+//    let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+//    let gen = new Yard.Generators.GLL.GLL()
+//    let il = ref <| fe.ParseGrammar(@"C:\Users\User\recursive-ascent\src\GLLApplication\SimpleAmb.yrd")
+//    for constr in gen.Constraints do
+//        let grammar = il.Value.grammar
+//        if not <| constr.Check grammar then
+//            eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
+//            il := {!il with grammar = constr.Fix grammar}
+//
+//    gen.Generate(!il,"-pos int -token int -abstract false -module GLL.Parse.SimpleAmb -o SimpleAmb.yrd.fs -output C:\Users\User\recursive-ascent\src\GLLApplication")
+//
+//run () |> printfn "%A"
 
 //let run1 astBuilder =
 //    let lb = LexBuffer<_>.FromString "1 - 2"
@@ -40,7 +40,7 @@ run () |> printfn "%A"
 //    astBuilder tokens, tokens
 
 
-//let parser1 = GLL.Parse.SimpleAmb.buildAst
+let parser1 = GLL.SimpleAmb.buildAst
 
 //for i in [1..10] do
 //    let str = String.init (i * 5) (fun i -> "B ")
@@ -56,15 +56,22 @@ let run2 path astBuilder =
 //
 //let parser2 = GLL.Parse.SimpleAmb.buildAst
 //let str = String.init 1 (fun i -> "B ") + "B"
-let str = "A D B"
-//let r = run2 str parser1
+let str = @"C:\Users\User\recursive-ascent\src\GLLApplication\Epsilon.txt"
+
+    
+
+let r = run2 str parser1
 //printfn "simple amb"
 
-//match r with
-//    | Parser.Error str, _ ->
-//        printfn "%s" "dddd" //str 
-//    | Parser.Success tree, tokens ->
-//        printfn "%s" "sss"
-        //GLL.SimpleLeftRecursion.defaultAstToDot tree "ast.dot"
+match r with
+    | Parser.Error str, _ ->
+        printfn "%s" "dddd" //str 
+    | Parser.Success tree, tokens ->
+        printfn "%s" "sss"
+        GLL.SimpleAmb.defaultAstToDot tree "ast.dot"
 ////
 //printfn "ff"
+///////////////////////////////////////////////////////////////////
+
+
+

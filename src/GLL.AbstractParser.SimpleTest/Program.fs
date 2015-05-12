@@ -54,6 +54,24 @@ open GLL.Stars
 open GLL.StrangeBrackets
 open GLL.Stars2
 
+open GLL.ParseAttrs
+open GLL.ParseCalc
+open GLL.ParseCond
+open GLL.ParseCounter
+open GLL.ParseCycle
+open GLL.ParseEps2
+open GLL.ParseEpsilon
+open GLL.ParseExpr
+open GLL.ParseFirst
+open GLL.ParseListEps
+open GLL.ParseLolCalc
+open GLL.ParseLongCycle
+open GLL.ParseLongCycle_BAD
+open GLL.ParseLongest
+open GLL.ParseMixed
+open GLL.ParseOmit
+//open GLL.ParseOrder
+
 let outputDir = @"../../../src/GLL.AbstractParser.SimpleTest/"
 
 let lbl tokenId = tokenId
@@ -81,77 +99,6 @@ let test buildAbstractAst qGraph (intToString : int -> string) (fileName : strin
 
 [<TestFixture>]
 type ``GLL abstract parser tests`` () =
-
-    [<Test>]
-    member this.SimpleRightRecursion () =
-        let qGraph = new ParserInputGraph<_>(0, 5)
-        qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (GLL.SimpleRightRecursion.B 1)
-             edg 1 2 (GLL.SimpleRightRecursion.A 2)
-             edg 2 3 (GLL.SimpleRightRecursion.A 3)
-             edg 3 4 (GLL.SimpleRightRecursion.B 4)
-             edg 4 5 (GLL.SimpleRightRecursion.RNGLR_EOF 0)
-             ] |> ignore
-
-        test GLL.SimpleRightRecursion.buildAbstractAst qGraph GLL.SimpleRightRecursion.numToString "SimpleRightRecursion.dot"
-
-    [<Test>]
-    member this.BadLeftRecursion () =
-        let qGraph = new ParserInputGraph<_>(0, 4)
-        qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (GLL.BadLeftRecursion.B 1)
-             edg 1 2 (GLL.BadLeftRecursion.B 2)
-             edg 2 3 (GLL.BadLeftRecursion.B 3)
-             edg 3 4 (GLL.BadLeftRecursion.RNGLR_EOF 0)
-             ] |> ignore
-
-        test GLL.BadLeftRecursion.buildAbstractAst qGraph GLL.BadLeftRecursion.numToString "BadLeftRecursion.dot"
-
-    [<Test>]
-    member this.SimpleAmb () =
-        let qGraph = new ParserInputGraph<_>(0, 4)
-        qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (GLL.SimpleAmb.A 1)
-             edg 1 2 (GLL.SimpleAmb.D 2)
-             edg 2 3 (GLL.SimpleAmb.B 3)
-             edg 3 4 (GLL.SimpleAmb.RNGLR_EOF 0)
-             ] |> ignore
-
-        test GLL.SimpleAmb.buildAbstractAst qGraph GLL.SimpleAmb.numToString "SimpleAmb.dot"
-    
-    [<Test>]
-    member this.SimpleRightNull () =
-        let qGraph = new ParserInputGraph<_>(0, 2)
-        qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (GLL.SimpleRightNull.A 1)
-             edg 1 2 (GLL.SimpleRightNull.RNGLR_EOF 0)
-             ] |> ignore
-
-        test GLL.SimpleRightNull.buildAbstractAst qGraph GLL.SimpleRightNull.numToString "SimpleRightNull.dot"
-
-    [<Test>]
-    member this.SimpleLeftRecursion () =
-        let qGraph = new ParserInputGraph<_>(0, 4)
-        qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (GLL.SimpleLeftRecursion.B 1)
-             edg 1 2 (GLL.SimpleLeftRecursion.B 2)
-             edg 2 3 (GLL.SimpleLeftRecursion.B 3)
-             edg 3 4 (GLL.SimpleLeftRecursion.RNGLR_EOF 0)
-             ] |> ignore
-
-        test GLL.SimpleLeftRecursion.buildAbstractAst qGraph GLL.SimpleLeftRecursion.numToString "SimpleLeftRecursion.dot"
-
-    [<Test>]
-    member this.SimpleBranch () =
-        let qGraph = new ParserInputGraph<_>(0, 3)
-        qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (GLL.ParseSimpleBranch.A 1)
-             edg 1 2 (GLL.ParseSimpleBranch.C 2)
-             edg 1 2 (GLL.ParseSimpleBranch.B 3)
-             edg 2 3 (GLL.ParseSimpleBranch.RNGLR_EOF 0)
-             ] |> ignore
-
-        test GLL.ParseSimpleBranch.buildAbstractAst qGraph GLL.ParseSimpleBranch.numToString "SimpleBranch.dot"
 
     [<Test>]
     member this._01_PrettySimpleCalc_SequenceInput () =
@@ -561,3 +508,283 @@ type ``GLL abstract parser tests`` () =
             ] |> ignore
 
         test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets6.dot"
+    
+    [<Test>]
+    member this._29_Attrs () =
+        let qGraph = new ParserInputGraph<_>(0, 6)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (GLL.ParseAttrs.A 1)
+            edg 1 2 (GLL.ParseAttrs.A 2)
+            edg 2 3 (GLL.ParseAttrs.A 3)
+            edg 3 4 (GLL.ParseAttrs.A 4)
+            edg 4 5 (GLL.ParseAttrs.A 5)
+            edg 5 6 (GLL.ParseAttrs.RNGLR_EOF 0)
+            ] |> ignore
+
+        test GLL.ParseAttrs.buildAbstractAst qGraph GLL.ParseAttrs.numToString "Attrs.dot"
+
+    [<Test>]
+    member this._30_Condition () =
+        let qGraph = new ParserInputGraph<_>(0, 6)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (GLL.ParseCond.IF 1)
+            edg 1 2 (GLL.ParseCond.IF 2)
+            edg 2 3 (GLL.ParseCond.A 3)
+            edg 3 4 (GLL.ParseCond.ELSE 4)
+            edg 4 5 (GLL.ParseCond.A 5)
+            edg 5 6 (GLL.ParseCond.RNGLR_EOF 0)
+            ] |> ignore
+
+        test GLL.ParseCond.buildAbstractAst qGraph GLL.ParseCond.numToString "Cond.dot"
+
+    [<Test>]
+    member this._31_Counter () =
+        let qGraph = new ParserInputGraph<_>(0, 6)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (GLL.ParseCounter.A 1)
+            edg 1 2 (GLL.ParseCounter.A 2)
+            edg 2 3 (GLL.ParseCounter.A 3)
+            edg 3 4 (GLL.ParseCounter.A 4)
+            edg 4 5 (GLL.ParseCounter.A 5)
+            edg 5 6 (GLL.ParseCounter.RNGLR_EOF 0)
+            ] |> ignore
+
+        test GLL.ParseCounter.buildAbstractAst qGraph GLL.ParseCounter.numToString "Counter.dot"
+    
+    [<Test>]
+    member this._32_Cycle () =
+        let qGraph = new ParserInputGraph<_>(0, 3)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (GLL.ParseCycle.A 1)
+            edg 1 2 (GLL.ParseCycle.B 2)
+            edg 2 3 (GLL.ParseCycle.RNGLR_EOF 0)
+            ] |> ignore
+
+        test GLL.ParseCycle.buildAbstractAst qGraph GLL.ParseCycle.numToString "Cycle.dot"
+
+    [<Test>]
+    member this._33_Epsilon2_with_eps2_yrd () =
+        let qGraph = new ParserInputGraph<_>(0, 3)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (GLL.ParseEps2.Z 1)
+            edg 1 2 (GLL.ParseEps2.N 2)
+            edg 2 3 (GLL.ParseEps2.RNGLR_EOF 0)
+            ] |> ignore
+
+        test GLL.ParseEps2.buildAbstractAst qGraph GLL.ParseEps2.numToString "Eps2.dot"
+
+    [<Test>]
+    member this._34_Epsilon () =
+        let qGraph = new ParserInputGraph<_>(0, 1)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (GLL.ParseEpsilon.RNGLR_EOF 0)
+            ] |> ignore
+
+        test GLL.ParseEpsilon.buildAbstractAst qGraph GLL.ParseEpsilon.numToString "Epsilon.dot"
+        
+    [<Test>]
+    member this._35_Expression () =
+        let qGraph = new ParserInputGraph<_>(0, 6)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (GLL.ParseExpr.N 1)
+            edg 1 2 (GLL.ParseExpr.P 2)
+            edg 2 3 (GLL.ParseExpr.N 3)
+            edg 3 4 (GLL.ParseExpr.P 4)
+            edg 4 5 (GLL.ParseExpr.N 5)
+            edg 5 6 (GLL.ParseExpr.RNGLR_EOF 0)
+            ] |> ignore
+
+        test GLL.ParseExpr.buildAbstractAst qGraph GLL.ParseExpr.numToString "Expr.dot"
+
+    [<Test>]
+    member this._36_First () =
+        let qGraph = new ParserInputGraph<_>(0, 6)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (GLL.ParseFirst.A 1)
+            edg 1 2 (GLL.ParseFirst.A 2)
+            edg 2 3 (GLL.ParseFirst.A 3)
+            edg 3 4 (GLL.ParseFirst.A 4)
+            edg 4 5 (GLL.ParseFirst.B 5)
+            edg 5 6 (GLL.ParseFirst.RNGLR_EOF 0)
+            ] |> ignore
+
+        test GLL.ParseFirst.buildAbstractAst qGraph GLL.ParseFirst.numToString "First.dot"
+
+    [<Test>]
+    member this._37_ListEps () =
+        let qGraph = new ParserInputGraph<_>(0, 3)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (GLL.ParseListEps.NUM 1)
+            edg 1 2 (GLL.ParseListEps.NUM 2)
+            edg 2 3 (GLL.ParseListEps.RNGLR_EOF 0)
+            ] |> ignore
+
+        test GLL.ParseListEps.buildAbstractAst qGraph GLL.ParseListEps.numToString "ListEps.dot"
+    
+    [<Test>]
+    member this._38_LolCalc () =
+        let qGraph = new ParserInputGraph<_>(0, 12)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (GLL.ParseLolCalc.A 1)
+            edg 1 2 (GLL.ParseLolCalc.MUL 2)
+            edg 2 3 (GLL.ParseLolCalc.B 3)
+            edg 3 4 (GLL.ParseLolCalc.ADD 4)
+            edg 4 5 (GLL.ParseLolCalc.A 5)
+            edg 5 6 (GLL.ParseLolCalc.MUL 6)
+            edg 6 7 (GLL.ParseLolCalc.B 7)
+            edg 7 8 (GLL.ParseLolCalc.ADD 8)
+            edg 8 9 (GLL.ParseLolCalc.B 9)
+            edg 9 10 (GLL.ParseLolCalc.MUL 10)
+            edg 10 11 (GLL.ParseLolCalc.A 11)
+            edg 11 12 (GLL.ParseLolCalc.RNGLR_EOF 0)
+            ] |> ignore
+
+        test GLL.ParseLolCalc.buildAbstractAst qGraph GLL.ParseLolCalc.numToString "LolCalc.dot"
+    
+    [<Test>]
+    member this._39_LongCycle () =
+        let qGraph = new ParserInputGraph<_>(0, 2)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (GLL.ParseLongCycle.A 1)
+            edg 1 2 (GLL.ParseLongCycle.RNGLR_EOF 0)
+            ] |> ignore
+
+        test GLL.ParseLongCycle.buildAbstractAst qGraph GLL.ParseLongCycle.numToString "LongCycle.dot"
+
+    [<Test>]
+    member this._40_LongCycle_Bad () =
+        let qGraph = new ParserInputGraph<_>(0, 2)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (GLL.ParseLongCycle_BAD.A 1)
+            edg 1 2 (GLL.ParseLongCycle_BAD.RNGLR_EOF 0)
+            ] |> ignore
+
+        test GLL.ParseLongCycle_BAD.buildAbstractAst qGraph GLL.ParseLongCycle_BAD.numToString "LongCycle_BAD.dot"
+    
+    [<Test>]
+    member this._41_Longest () =
+        let qGraph = new ParserInputGraph<_>(0, 6)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (GLL.ParseLongest.A 1)
+            edg 1 2 (GLL.ParseLongest.A 2)
+            edg 2 3 (GLL.ParseLongest.A 3)
+            edg 3 4 (GLL.ParseLongest.A 4)
+            edg 4 5 (GLL.ParseLongest.A 5)
+            edg 5 6 (GLL.ParseLongest.RNGLR_EOF 0)
+            ] |> ignore
+
+        test GLL.ParseLongest.buildAbstractAst qGraph GLL.ParseLongest.numToString "Longest.dot"
+
+    [<Test>]
+    member this._42_Mixed () =
+        let qGraph = new ParserInputGraph<_>(0, 5)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (GLL.ParseMixed.B 1)
+            edg 1 2 (GLL.ParseMixed.A 2)
+            edg 2 3 (GLL.ParseMixed.B 3)
+            edg 3 4 (GLL.ParseMixed.A 4)
+            edg 4 5 (GLL.ParseMixed.RNGLR_EOF 0)
+            ] |> ignore
+
+        test GLL.ParseMixed.buildAbstractAst qGraph GLL.ParseMixed.numToString "Mixed.dot"
+    
+    [<Test>]
+    member this._43_Omit () =
+        let qGraph = new ParserInputGraph<_>(0, 4)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (GLL.ParseOmit.A 1)
+            edg 1 2 (GLL.ParseOmit.B 2)
+            edg 2 3 (GLL.ParseOmit.A 3)
+            edg 3 4 (GLL.ParseOmit.RNGLR_EOF 0)
+            ] |> ignore 
+
+        test GLL.ParseOmit.buildAbstractAst qGraph GLL.ParseOmit.numToString "Omit.dot"
+    
+//    [<Test>]
+//    member this._44_Order () =
+//        let qGraph = new ParserInputGraph<_>(0, 9)
+//        qGraph.AddVerticesAndEdgeRange
+//           [edg 0 1 (GLL.ParseOrder.A 1)
+//            edg 1 2 (GLL.ParseOrder.A 2)
+//            edg 2 3 (GLL.ParseOrder.A 3)
+//            edg 3 4 (GLL.ParseOrder.A 4)
+//            edg 4 5 (GLL.ParseOrder.A 5)
+//            edg 5 6 (GLL.ParseOrder.A 6)
+//            edg 6 7 (GLL.ParseOrder.A 7)
+//            edg 7 8 (GLL.ParseOrder.A 8)
+//            edg 8 9 (GLL.ParseOrder.RNGLR_EOF 0)
+//            ] |> ignore
+//
+//        test GLL.ParseOrder.buildAbstractAst qGraph GLL.ParseOrder.numToString "Order.dot"
+
+    [<Test>]
+    member this._45_SimpleRightRecursion () =
+        let qGraph = new ParserInputGraph<_>(0, 5)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (GLL.SimpleRightRecursion.B 1)
+             edg 1 2 (GLL.SimpleRightRecursion.A 2)
+             edg 2 3 (GLL.SimpleRightRecursion.A 3)
+             edg 3 4 (GLL.SimpleRightRecursion.B 4)
+             edg 4 5 (GLL.SimpleRightRecursion.RNGLR_EOF 0)
+             ] |> ignore
+
+        test GLL.SimpleRightRecursion.buildAbstractAst qGraph GLL.SimpleRightRecursion.numToString "SimpleRightRecursion.dot"
+
+    [<Test>]
+    member this._46_BadLeftRecursion () =
+        let qGraph = new ParserInputGraph<_>(0, 4)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (GLL.BadLeftRecursion.B 1)
+             edg 1 2 (GLL.BadLeftRecursion.B 2)
+             edg 2 3 (GLL.BadLeftRecursion.B 3)
+             edg 3 4 (GLL.BadLeftRecursion.RNGLR_EOF 0)
+             ] |> ignore
+
+        test GLL.BadLeftRecursion.buildAbstractAst qGraph GLL.BadLeftRecursion.numToString "BadLeftRecursion.dot"
+
+    [<Test>]
+    member this._47_SimpleAmb () =
+        let qGraph = new ParserInputGraph<_>(0, 4)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (GLL.SimpleAmb.A 1)
+             edg 1 2 (GLL.SimpleAmb.D 2)
+             edg 2 3 (GLL.SimpleAmb.B 3)
+             edg 3 4 (GLL.SimpleAmb.RNGLR_EOF 0)
+             ] |> ignore
+
+        test GLL.SimpleAmb.buildAbstractAst qGraph GLL.SimpleAmb.numToString "SimpleAmb.dot"
+    
+    [<Test>]
+    member this._48_SimpleRightNull () =
+        let qGraph = new ParserInputGraph<_>(0, 2)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (GLL.SimpleRightNull.A 1)
+             edg 1 2 (GLL.SimpleRightNull.RNGLR_EOF 0)
+             ] |> ignore
+
+        test GLL.SimpleRightNull.buildAbstractAst qGraph GLL.SimpleRightNull.numToString "SimpleRightNull.dot"
+
+    [<Test>]
+    member this._49_SimpleLeftRecursion () =
+        let qGraph = new ParserInputGraph<_>(0, 4)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (GLL.SimpleLeftRecursion.B 1)
+             edg 1 2 (GLL.SimpleLeftRecursion.B 2)
+             edg 2 3 (GLL.SimpleLeftRecursion.B 3)
+             edg 3 4 (GLL.SimpleLeftRecursion.RNGLR_EOF 0)
+             ] |> ignore
+
+        test GLL.SimpleLeftRecursion.buildAbstractAst qGraph GLL.SimpleLeftRecursion.numToString "SimpleLeftRecursion.dot"
+
+    [<Test>]
+    member this._50_SimpleBranch () =
+        let qGraph = new ParserInputGraph<_>(0, 3)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (GLL.ParseSimpleBranch.A 1)
+             edg 1 2 (GLL.ParseSimpleBranch.C 2)
+             edg 1 2 (GLL.ParseSimpleBranch.B 3)
+             edg 2 3 (GLL.ParseSimpleBranch.RNGLR_EOF 0)
+             ] |> ignore
+
+        test GLL.ParseSimpleBranch.buildAbstractAst qGraph GLL.ParseSimpleBranch.numToString "SimpleBranch.dot"
+     

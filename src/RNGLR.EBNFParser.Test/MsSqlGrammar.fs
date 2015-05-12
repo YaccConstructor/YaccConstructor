@@ -8,75 +8,136 @@ open YC.Tests.Helper
 open Yard.Examples.MSParser
 open Lexer
 open Yard.Utils.SourceText
+open Yard.Utils.InfoClass
+open Yard.Utils.StructClass
+open LexerHelper
+open System.IO
+open YC.ReSharper.AbstractAnalysis.Languages.TSQL
 
-let getTokenName = tokenToNumber >> numToString
-
-let justParse (file:string) =
-    let lastTokenNum = ref 0L
-    let traceStep = 50000L
-    let c = ref 0
-    use reader = new System.IO.StreamReader(file)
-
-    let tokenizerFun = 
-        let lexbuf = Microsoft.FSharp.Text.Lexing.LexBuffer<_>.FromTextReader reader
-        lexbuf.EndPos <- { pos_bol = 0; pos_fname=""; pos_cnum=0; pos_lnum=1 }    
-        let prevToken = ref None            
-        let timeOfIteration = ref System.DateTime.Now
-        fun (chan:MailboxProcessor<array<_>>) ->
-        let post = chan.Post
-        async {
-            try                    
-                while not lexbuf.IsPastEndOfStream do
-                    let count = ref 0L
-                    let buf = int traceStep |> Array.zeroCreate
-                    while !count < traceStep && not lexbuf.IsPastEndOfStream do
-                        lastTokenNum := 1L + !lastTokenNum                        
-                        buf.[int !count] <- Lexer.tokens lexbuf
-                        count := !count + 1L                    
-                    let oldTime = !timeOfIteration
-                    timeOfIteration := System.DateTime.Now
-                    let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
-                    printfn "tkn# %10d Tkns/s:%8d - l" lastTokenNum.Value (1000L * traceStep/ (mSeconds + 1L))
-                    if int64 chan.CurrentQueueLength > 3L then                        
-                        int (int64 chan.CurrentQueueLength * mSeconds)  |> System.Threading.Thread.Sleep
-                    post buf
-                            
-            with e -> printfn "LexerError:%A" e.Message
-        }   
-
-    //let start = System.DateTime.Now
-    use tokenizer =  MailboxProcessor<_>.Start(tokenizerFun)
-    let lastTokenNum = ref 0L    
-    let timeOfIteration = ref System.DateTime.Now
-
-    let allTokens = 
-        seq{
-            while true do
-                let arr = tokenizer.Receive 100000 |> Async.RunSynchronously
-                lastTokenNum := !lastTokenNum + int64 arr.Length
-                if (!lastTokenNum % (traceStep)) = 0L then                 
-                    let oldTime = !timeOfIteration
-                    timeOfIteration := System.DateTime.Now
-                    let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
-                    printfn "tkn# %10d Tkns/s:%8d - p" lastTokenNum.Value (1000L * traceStep / (mSeconds + 1L))
-                yield! arr
-                }
-
-    let translateArgs = {
-        tokenToRange = fun x -> 0,0
-        zeroPosition = 0
-        clearAST = false
-        filterEpsilons = true
-    }
-
-    let start = System.DateTime.Now
-    let res = 
-       Yard.Examples.MSParser.buildAst allTokens
-    printfn "Time for parse file %s = %A" file (System.DateTime.Now - start)
-    res
 
 [<TestFixture>]
 type ``RNGLREBNF parser for MsSql grammar`` () =
+    let printErr (num, token : 'a, msg) =
+        printfn "Error in position %d on Token %A: %s" num token msg
+
+    let printError (projInf : ProjInfo) tok msg file = 
+            let coordinates = 
+                let x,y = tokenPos tok 
+                let x = projInf.GetCoordinates x
+                let y = projInf.GetCoordinates y
+                sprintf "(%A,%A) - (%A,%A)" (x.Line + 1<line>) x.Column (y.Line + 1<line>) y.Column
+            let data =
+                let d = tokenData tok
+                if isLiteral tok then ""
+                else (d :?> SourceText).text
+            let name = tok |> tokenToNumber |> numToString
+            printfn "Error in file %s at position %s on Token %s %s: %s" file coordinates name data msg
+            printfn "%s" msg
+           // dbg.drawGSSDot @"..\..\stack.dot"
+            Assert.Fail msg 
+    
+    let runParserTest (file : string)= 
+        let p = new ProjInfo()
+        let mutable counter = 1<id>
+        let StreamElement = new StreamReader(file, System.Text.Encoding.UTF8)
+
+        let map = p.GetMap StreamElement
+        Lexer.id <- counter
+        p.AddLine counter map
+        counter <- counter + 1<id>
+
+        match justParse file with
+        | Yard.Generators.RNGLR.EBNF.Parser.Error(num, tok, msg, _) -> 
+            for toks in tok do
+                printError p toks msg file
+        | Yard.Generators.RNGLR.EBNF.Parser.Success (ast, _) -> 
+            Assert.Pass()
+
+    let basePath = "../../../../YC.Abstract.SQL/Tests/MSSqlParser"
+    let bigFilesPath = "../../../../YC.Abstract.SQL/Tests/Materials/ms-sql"
+    let spFolder = "sysprocs"
+    let file name = System.IO.Path.Combine (basePath,name)
+    let complexSpFile name = System.IO.Path.Combine (bigFilesPath, spFolder, name)
     [<Test>]
-    member test.``Test`` () =
-        Assert.AreEqual(2, 2)
+    member test.``test``() = 
+        complexSpFile "sp_password.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0050000.``() = 
+        complexSpFile "test_0050000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0100000.``() = 
+        complexSpFile "test_0100000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0150000.``() = 
+        complexSpFile "test_0150000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0200000.``() = 
+        complexSpFile "test_0200000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0250000.``() = 
+        complexSpFile "test_0250000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0300000.``() = 
+        complexSpFile "test_0300000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0350000.``() = 
+        complexSpFile "test_0350000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0400000.``() = 
+        complexSpFile "test_0400000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0450000.``() = 
+        complexSpFile "test_0450000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0500000.``() = 
+        complexSpFile "test_0500000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0550000.``() = 
+        complexSpFile "test_0550000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0600000.``() = 
+        complexSpFile "test_0600000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0650000.``() = 
+        complexSpFile "test_0650000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0700000.``() = 
+        complexSpFile "test_0700000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0750000.``() = 
+        complexSpFile "test_0750000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0800000.``() = 
+        complexSpFile "test_0800000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0850000.``() = 
+        complexSpFile "test_0850000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0900000.``() = 
+        complexSpFile "test_0900000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_0950000.``() = 
+        complexSpFile "test_0950000.sql" |> runParserTest
+
+    [<Test>]
+    member test.``test_1000000.``() = 
+        complexSpFile "test_1000000.sql" |> runParserTest

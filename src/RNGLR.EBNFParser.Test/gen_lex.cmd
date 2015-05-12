@@ -1,3 +1,3 @@
 del log.txt
 
-..\..\Bin\Release\v40\YC.AbstractLexer.Generator.exe Lexer.fsl --unicode -o Lexer.fs
+..\packages\YC.Tools.0.0.6.10\lib\net40\FsLex.exe Lexer.fsl --unicode -o Lexer.fs

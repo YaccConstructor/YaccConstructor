@@ -71,8 +71,5 @@ let getLiteral id (lexbuf : LexBuffer<_>) value =
         
 let tokenPos token =
     let data = tokenData token
-    if isLiteral token then
-        data :?> uint64 * uint64
-    else
-        let x = data :?> SourceText
-        x.Range.Start, x.Range.End
+    let x = data :?> SourceText
+    x.Range.Start, x.Range.End

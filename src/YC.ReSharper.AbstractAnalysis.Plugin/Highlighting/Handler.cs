@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Media;
 using JetBrains.Application.Threading.Tasks;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
@@ -19,11 +16,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
     {
         public static HighlightingProcess Process { get; set; }
         private static Helper.ReSharperHelper<DocumentRange, ITreeNode> YcProcessor = Helper.ReSharperHelper<DocumentRange, ITreeNode>.Instance;
-        public static ArrayList DataGraphs;
+
         static Handler()
         {
-            DataGraphs = new ArrayList();
-
             foreach (var lexEvent in YcProcessor.LexingFinished)
                 lexEvent.AddHandler(OnLexingFinished);
 
@@ -52,23 +47,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                 fibers.EnqueueJob(action);
             }
 
-            //
-            Graph dataGraph = new Graph();
-            foreach (var vertex in args.Graph.Vertices)
-            {
-                dataGraph.AddVertex(new Vertex("") { ID = vertex });
-            }
-            var vlist = dataGraph.Vertices.ToList();
-            foreach (var tedge in args.Graph.Edges)
-            {
-                var sourceVertex = new Vertex(tedge.Source.ToString()) { ID = tedge.Source };
-                var targetVertex = new Vertex(tedge.Target.ToString()) { ID = tedge.Target };
-                int s = vlist.IndexOf(sourceVertex);
-                int t = vlist.IndexOf(targetVertex);
-                var edge = new Edge(tedge.Tag, vlist[s], vlist[t], Brushes.Black) { Text = tedge.Tag };
-                dataGraph.AddEdge(edge);
-            }
-            DataGraphs.Add(dataGraph);
             Process.DoHighlighting(new DaemonStageResult(consumer.Highlightings));
         }
 

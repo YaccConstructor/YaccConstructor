@@ -425,7 +425,7 @@ type ``RNGLR abstract parser tests`` () =
 
         test RNGLR.Brackets.buildAstAbstract qGraph 20 20 0 9 3
 
-    [<Test>]
+    //[<Test>]
     member this._22_Brackets_BackEdge () =
         let qGraph = new ParserInputGraph<_>(0, 2)
         qGraph.AddVerticesAndEdgeRange
@@ -475,7 +475,7 @@ type ``RNGLR abstract parser tests`` () =
 
         test RNGLR.StrangeBrackets.buildAstAbstract qGraph 25 25 4 8 1
 
-    [<Test>]
+    //[<Test>]
     member this._26_UnambiguousBrackets_Inf () =
         let qGraph = new ParserInputGraph<_>(0, 9)
         qGraph.AddVerticesAndEdgeRange

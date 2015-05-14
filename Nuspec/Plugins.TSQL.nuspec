@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
 <metadata>
-<id>SEL.Plugins.TSQL</id>
-<version>0.0.3.0</version>
+<id>YC.SEL.Plugins.TSQL</id>
+<version>0.0.3.1-On-branch--local</version>
 <title>TSQL plugin for ReSharper</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>
@@ -15,8 +15,8 @@
 <copyright>Copyright 2013, 2014</copyright>
 <tags>Parsing Reengineering YaccConstructor YC Tool Grammarware .NET F# FSharp</tags>
 <dependencies>
-    <dependency id="ReSharper" version="8.1" />
-	<dependency id="SEL.Plugins.Core" version="0.0.3.0" />
+<dependency id="ReSharper" version="8.1" />
+<dependency id="SEL.Plugins.Core" version="0.0.3.0" />
 </dependencies>
 </metadata>
 <files>

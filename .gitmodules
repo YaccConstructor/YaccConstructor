@@ -1,6 +1,6 @@
 [submodule "tools/Build.Tools"]
 	path = tools/Build.Tools
-	url = https://github.com/YaccConstructor/Build.Tools.git
+	url = https://github.com/unstope/Build.Tools.git
 [submodule "FST"]
 	path = FST
 	url = https://github.com/YaccConstructor/YC.FST.git

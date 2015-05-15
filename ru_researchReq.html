@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>YaccConstructor. Research process and results requirements.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="YaccConstructor"/>
+    <meta name="author" content="Semyon Grigorev and others"/>
+
+    <script src="https://code.jquery.com/jquery-1.8.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.8.23/jquery-ui.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
+    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet"/>
+
+    <link type="text/css" rel="stylesheet" href="./content/style.css" />
+    <script type="text/javascript" src="./content/tips.js"></script>
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+    <div class="container">
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <!--li><a href="http://yc.com">YaccConstructor</a></li-->
+          <li><a href="https://github.com/YaccConstructor/YaccConstructor">github page</a>
+          </li>
+        </ul>
+        <h3 class="muted"><a href="./index.html">YaccConstructor</a></h3>
+      </div>
+      <hr />
+      <div class="row">
+        <div class="span9" id="main">
+          
+<h1>Артефакты и сроки</h1>
+Результатом любой исследовательской работы является не только текст и не только код. В ходе работы может появиться множество артефктов и все они должны быть получены в нужное время и оформлены должным образом
+для получения хорошей оценки. Ниже описаны артефакты, сроки их предоставления ,"способ доставки", процесс работы. Так как выполнять работы могут люди с разных кафедр и даже из разных ВУЗов, то обратите внимание,
+ что требования могут отличаться от требований кафедры, но в итоге работа должна удовлетворять не менее чем объединению этих требований и требований кафедры (ВУЗа). Требования относятся ко всем видам работ: курсовая, дипломная, 
+ ВКР бакалавра, магистерская диссертация и т.д.
+
+<ul>
+<li> <h3>Тема работы</h3>
+Направление работы нужно выбирать как можно раньше. Идеально -- в конце предыдущего года. Тогда есть время за летнюю практику разобраться с областью, оценить свои силы, чётко сформулировать задачи.
+ Либо же на летней практике посмотреть на проект, задачи, попробовать что-то сделать и к концу лета выбрать направление работы.
+<br>
+При обращении за темой на текущий учебный год позже конца сентебря текущего учебного года велика вероятность просто не получить её.
+<br>
+Формальное название работы может меняться и утверждается по требованию кафедры.
+</li>
+
+<li> <h3>Код</h3> Работа над задачей, как правило, ведётся в отдельной ветке, но могут быть исключения. Решение о том, где вести разработку, принимается совместно с руководителем в самом начале процесса. В результате
+же код обязательно должен быть вмёржен в ветку dev. Для этого устанавливается специальный дедлайн diplomaYYYY (смотрите <a href="https://github.com/YaccConstructor/YaccConstructor/milestones">список дедлайнов</a>).
+Кроме этого, есть промежуточные дедлайны, к которым код должен попасть в dev. Например, nyYYYY-YYYY.
+<br>
+Требования к коду.
+    <ul>
+    <li> Код должен соответствовать <a href="https://docs.google.com/document/d/1Ta21jY09Z_kDFcWCPmKdd_LxfzrDOSZ_D0b9yFeBoZg/edit?usp=sharing">требованиям к оформлению</a>.
+    </li>
+    <li> Код должен быть снабжён unit-тестами. Система тестирования -- NUnit. 
+    </li>
+    <li> Прохождение сборки на <a href="http://teamcity.codebetter.com/viewType.html?buildTypeId=YaccConstructor_YcCoreGeneralBuild&guest=1">сервере</a>.
+    </li>
+    <li> Ну и конечно он должен запускаться и работать на произвольной машине, удовлетворяющей требованиям проекта, и на машине руководителя.
+    </li>
+    </ul>
+
+</li>
+<li> <h3>Конференции, публикации</h3>
+Если вы претендуете на оценку "отлично", то вы обязательно должны успешно выступить хотя бы на одной конференции (или иметь подтверждённое принятие вашего доклада на конференцию) до защиты.
+ На какой конференции, конкретные сроки подачи уточняйте у руководителя.
+<br>
+При работе надо иметь ввиду, что написание статьи требует много времени (больше одной недели). При этом сроки подачи статей на конференции, на которых можно успеть выступить до защиты, начинаются примерно с марта.
+Таким образом, если вы хотите, чтобы было о чём писать, то основные результаты должны быть получены к концу февраля.
+
+</li>
+<li> <h3>Презентация работы</h3>
+При оформлении необходимо пользоваться пользоваться <a href="http://se.math.spbu.ru/SE/YearlyProjects/yearlyProjectPresentation"> данными рекомендациями </a> или аналогичными рекомендациями вашей кафедры/ВУЗа.
+<br>
+Финальная версия презентации должна быть оформлена в TeX по <a href="https://github.com/YaccConstructor/articles/tree/master/TexPresentation"> шаблону </a> 
+и выложена в <a href="https://github.com/YaccConstructor/articles">репозиторий articles</a> в папку YYYY\diploma\ФИО_на_английском. Исходники должны сопровождаться скриптом сборки "из коробки" для windows и linux систем.
+ Т.е. процесс сборки не должен требовать ничего, кроме взятия из репозитория и запуска соотвествующего скрипта. Желательно использовать стандартные компиляторы и наборы пакетов. Если требуются особые пакеты/версии, то это должно быть явно указано в заголовке скриптов.
+<br>
+Разработка презентации должна вестись в гуглодиске или с использованием сервиса <a href="http://papeeria.com"> papeeria.com </a> для упрощения совместного редактирования.
+</li>
+<li> <h3>Текст работы</h3>
+При оформлении необходимо пользоваться пользоваться <a href="http://se.math.spbu.ru/SE/YearlyProjects/yearlyProjectText"> данными рекомендациями </a> или аналогичными рекомендациями вашей кафедры/ВУЗа.
+<br>
+Финальная версия текста должна быть оформлена в TeX по  шаблону "Матмех СПбГУ: дипломная/курсовая работа" сервиса <a href="http://papeeria.com"> papeeria.com </a>, либо же по шаблону вашего ВУЗа.
+и выложена в <a href="https://github.com/YaccConstructor/articles">репозиторий articles</a> в папку YYYY\diploma\ФИО_на_английском. Исходники должны сопровождаться скриптом сборки "из коробки" для windows и linux систем.
+ Т.е. процесс сборки не должен требовать ничего, кроме взятия из репозитория и запуска соотвествующего скрипта. Желательно использовать стандартные компиляторы и наборы пакетов. Если требуются особые пакеты/версии, то это должно быть явно указано в заголовке скриптов.
+<br>
+Разработка текста должна вестись в гуглодиске или с использованием сервиса <a href="http://papeeria.com"> papeeria.com </a> для упрощения совместного редактирования.
+<br>
+Текст дипломной работы должен быть готов в первой половине мая (идеально -- сразу после майских праздников) для своевременного предоставления рецензенту и для гарантированного наличия времени на доработку по его замечаниям.
+</li>
+</ul>
+
+</div>
+        <div class="span3">
+          <img src="./images/YC_big.jpg" alt="YaccConstructor" style="width:150px;margin:10px" />  
+          <ul class="nav nav-list" id="menu" style="margin-top: 20px;">
+            <li class="nav-header">YaccConstructor</li>
+            <li><a href="./index.html">Home page</a></li>
+            <li class="divider"></li>
+            <!--li><a href="https://www.nuget.org/packages/FSharpx.Core/">Get Library via NuGet</a></li-->
+            <li><a href="https://github.com/YaccConstructor/YaccConstructor">Source Code on GitHub</a></li>
+            <!--li><a href="https://github.com/fsprojects/fsharpx/blob/master/LICENSE.txt">License</a></li-->
+            <li><a href="https://github.com/YaccConstructor/YaccConstructor/zipball/master" class="button">
+                  <small>Download</small>
+                        .zip file
+                </a>
+            </li>
+            <li><a href="https://github.com/YaccConstructor/YaccConstructor/tarball/master" class="button">
+                  <small>Download</small>
+                        .tar.gz file
+                  </a>
+            </li>
+            <p class="repo-owner"><a href="https://github.com/YaccConstructor/YaccConstructor">YC</a> is maintained by <a href="https://github.com/YaccConstructor">YaccConstructor</a>.</p>
+            <!--li><a href="https://github.com/fsprojects/fsharpx/blob/master/RELEASE_NOTES.md">Release Notes</a></li>
+            
+            <li class="nav-header">Getting started</li>
+            <li><a href="./index.html">Introduction</a></li>
+
+            <li class="nav-header">Documentation</li>
+            <li><a href="./reference/index.html">API Reference</a></li-->
+          </ul>
+        </div>
+      </div>
+    </div>
+    <a href="https://github.com/YaccConstructor/YaccConstructor"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"/></a>
+  </body>
+</html>

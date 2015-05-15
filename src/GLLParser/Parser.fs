@@ -7,7 +7,8 @@ open Yard.Generators.Common.ASTGLL
 open Yard.Generators.Common.DataStructures
 open Microsoft.FSharp.Collections
 
-
+///////ва
+аа
 
 [<Measure>] type vertexMeasure
 [<Measure>] type nodeMeasure

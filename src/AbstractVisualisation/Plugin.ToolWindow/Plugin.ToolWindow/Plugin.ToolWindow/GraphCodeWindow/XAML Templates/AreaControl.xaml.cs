@@ -15,6 +15,8 @@ using System.Windows.Shapes;
 using GraphX;
 using GraphX.Controls;
 using GraphX.GraphSharp.Algorithms.Layout.Simple.FDP;
+using GraphX.Models;
+using JetBrains.TextControl;
 
 namespace Plugin.ToolWindow
 {
@@ -23,6 +25,7 @@ namespace Plugin.ToolWindow
     /// </summary>
     public partial class AreaControl : UserControl
     {
+        #region CreateGraph
         public AreaControl()
         {
             InitializeComponent();
@@ -63,32 +66,21 @@ namespace Plugin.ToolWindow
 
             //Finally assign logic core to GraphArea object
             Area.LogicCore = logicCore;// as IGXLogicCore<DataVertex, DataEdge, BidirectionalGraph<DataVertex, DataEdge>>;
+            Area.MoveAnimation = AnimationFactory.CreateMoveAnimation(MoveAnimation.Move, TimeSpan.FromSeconds(1));
         }
         public Graph Graph_Setup()
         {
-            //Lets make new data graph instance
             var dataGraph = new Graph();
-            //Now we need to create edges and vertices to fill data graph
-            //This edges and vertices will represent graph structure and connections
-            //Lets make some vertices
             for (int i = 1; i < 10; i++)
             {
-                //Create new vertex with specified Text. Also we will assign custom unique ID.
-                //This ID is needed for several features such as serialization and edge routing algorithms.
-                //If you don't need any custom IDs and you are using automatic Area.GenerateGraph() method then you can skip ID assignment
-                //because specified method automaticaly assigns missing data ids (this behavior controlled by method param).
                 var dataVertex = new Vertex("MyVertex " + i) { ID = i };
-                //Add vertex to data graph
                 dataGraph.AddVertex(dataVertex);
             }
-
-            //Now lets make some edges that will connect our vertices
-            //get the indexed list of graph vertices we have already added
             var vlist = dataGraph.Vertices.ToList();
-            //Then create two edges optionaly defining Text property to show who are connected
-            var dataEdge = new Edge(vlist[0], vlist[1]) { Text = string.Format("{0} -> {1}", vlist[0], vlist[1]) };
+            int[] a = new int[] { 0 };
+            var dataEdge = new Edge(a, vlist[0], vlist[1], Brushes.GreenYellow) { Text = string.Format("{0} -> {1}", vlist[0], vlist[1]) };
             dataGraph.AddEdge(dataEdge);
-            dataEdge = new Edge(vlist[2], vlist[3]) { Text = string.Format("{0} -> {1}", vlist[2], vlist[3]) };
+            dataEdge = new Edge(a, vlist[2], vlist[3], Brushes.Red) { Text = string.Format("{0} -> {1}", vlist[2], vlist[3]) };
             dataGraph.AddEdge(dataEdge);
 
             return dataGraph;
@@ -96,31 +88,25 @@ namespace Plugin.ToolWindow
 
         public void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            //lets create graph
-            //Note that you can't create it in class constructor as there will be problems with visuals
             gg_but_randomgraph_Click(null, null);
         }
 
         public void gg_but_relayout_Click(object sender, RoutedEventArgs e)
         {
-            //This method initiates graph relayout process which involves consequnet call to all selected algorithms.
-            //It behaves like GenerateGraph() method except that it doesn't create any visual object. Only update existing ones
-            //using current Area.Graph data graph.
             Area.RelayoutGraph();
             zoomctrler.ZoomToFill();
         }
 
         public void gg_but_randomgraph_Click(object sender, RoutedEventArgs e)
         {
-            //Lets generate configured graph using pre-created data graph assigned to LogicCore object.
-            //Optionaly we set first method param to True (False by default) so this method will automatically generate edges
-            //  By default edges are not generated. That allows to increase performance in cases where edges don't need to be drawn at first.
-            //  You can also handle edge generation by calling manually Area.GenerateAllEdges() method.
-            //Optionaly we set seconf param to True (True by default) so this method will automaticaly checks and assigns missing unique data ids
-            //for edges and vertices in _dataGraph.
-            //Note! Area.Graph property will be replaced by supplied _dataGraph object (if any).
             Area.GenerateGraph(true, true);
-
+            foreach (var d in Area.EdgesList)
+            {
+                d.Value.Foreground = d.Key.GetBrush();
+            }
+            Area.EdgeDoubleClick += Area_EdgeDoubleClick;
+            Area.EdgeMouseMove += EdgeMouseMove;
+            Area.EdgeMouseLeave += EdgeMouseUnMove;
             /* 
              * After graph generation is finished you can apply some additional settings for newly created visual vertex and edge controls
              * (VertexControl and EdgeControl classes).
@@ -131,16 +117,38 @@ namespace Plugin.ToolWindow
             //each edge individually using EdgeControl.DashStyle property.
             //For ex.: Area.EdgesList[0].DashStyle = GraphX.EdgeDashStyle.Dash;
             Area.SetEdgesDashStyle(EdgeDashStyle.Dash);
-
-            //This method sets edges arrows visibility. It is also applied to all edges in Area.EdgesList. You can also set property for
-            //each edge individually using property, for ex: Area.EdgesList[0].ShowArrows = true;
             Area.ShowAllEdgesArrows(true);
 
-            //This method sets edges labels visibility. It is also applied to all edges in Area.EdgesList. You can also set property for
-            //each edge individually using property, for ex: Area.EdgesList[0].ShowLabel = true;
             Area.ShowAllEdgesLabels(true);
 
             zoomctrler.ZoomToFill();
+        }
+        #endregion
+
+        public void EdgeMouseMove(object sender, EdgeSelectedEventArgs e)
+        {
+            e.EdgeControl.Foreground = Brushes.BlueViolet;
+        }
+        public void EdgeMouseUnMove(object sender, EdgeSelectedEventArgs e)
+        {
+            Edge p = (Edge)e.EdgeControl.Edge;
+
+            e.EdgeControl.Foreground = p.GetBrush();
+        }
+        public void Area_EdgeDoubleClick(object sender, EdgeSelectedEventArgs e)
+        {
+            Edge p = (Edge)e.EdgeControl.Edge;
+            MessageBox.Show("event was handled by vertex: " + e.EdgeControl.Edge.ToString() + p.thisObj().ToString());
+            WindowAction.GoToCode(WindowAction.textControl, (Edge)e.EdgeControl.Edge);
+        }
+        public static void GoToCode(ITextControl t, Edge e)
+        {
+            var textControl = t;
+            textControl.Caret.MoveTo(e.codeline, new CaretVisualPlacement());
+        }
+        public void Connect(int connectionId, object target)
+        {
+            throw new NotImplementedException();
         }
     }
 }

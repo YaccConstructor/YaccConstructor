@@ -13,6 +13,8 @@
     <UsePartialTypes>false</UsePartialTypes>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <PropertyGroup>
@@ -121,11 +123,6 @@
     <ProjectReference Include="..\Generators.Common\Common.Generators.fsproj">
       <Name>Common.Generators</Name>
       <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
-      <Name>RNGLRAbstractParser</Name>
-      <Project>{1873ea19-fab7-4d5f-b452-67c0b93c8b9b}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">

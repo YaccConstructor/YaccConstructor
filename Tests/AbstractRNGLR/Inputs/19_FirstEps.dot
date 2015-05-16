@@ -1,0 +1,8 @@
+digraph g
+{
+rankdir=LR
+node [shape=circle]
+0 -> 1 [label="Z 1"]
+1 -> 3 [label="N 2"]
+3 -> 4 [label="RNGLR_EOF 0"]
+}

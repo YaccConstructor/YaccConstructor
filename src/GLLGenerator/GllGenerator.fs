@@ -45,6 +45,7 @@ type GLL() =
             let mutable needTranslate = getBoolOption "translate" true
             let mutable light = getBoolOption "light" true
             let mutable printInfiniteEpsilonPath = getOption "infEpsPath" "" id
+            let mutable isAbstract = getBoolOption "abstract" true
             let mutable caseSensitive = getBoolOption "caseSensitive" false
             let mutable output =
                 let fstVal = getOption "output" (definition.info.fileName + ".fs") id
@@ -66,6 +67,7 @@ type GLL() =
                 | "-translate" -> needTranslate <- getBoolValue "translate" value
                 | "-light" -> light <- getBoolValue "light" value
                 | "-infEpsPath" -> printInfiniteEpsilonPath <- value
+                | "-abstract" -> isAbstract <- getBoolValue "abstract" value
                 | value -> failwithf "Unexpected %s option" value
                  
             let newDefinition = initialConvert definition
@@ -113,24 +115,36 @@ type GLL() =
                 Printf.kprintf (fun s -> res.Append(s) |> ignore) x
             let package, _class  =
                         match moduleName with
-                        | "" -> "GLL","Parse"
+                        | "" -> if isAbstract then "GLL","AbstractParse" else "GLL","Parse"
                         | s when s.Contains "." -> s.Split '.' |> Array.rev |> (fun a -> a.[0], String.concat "." a.[1..])
                         | s -> "GLL",s
   
-            let printHeaders moduleName fullPath light output =
+            let printHeaders moduleName fullPath light (output: string) isAbstract =
+                let n = output.Substring(0, output.IndexOf("."))
+                let mName = 
+                    if isAbstract then
+                        "GLL.AbstractParse." + n
+                    else
+                        "GLL.Parse"
+
                 let fsHeaders() = 
                     println "%s" <| getPosFromSource fullPath dummyPos (defaultSource output)
                     println "module %s"
                     <|  match moduleName with
-                        | "" -> "GLL.Parse"
+                        
+                        | "" -> mName
                         | s -> s
                     if not light then
                         println "#light \"off\""
                     println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
-
-                    println "open Yard.Generators.GLL.Parser"
+                    if isAbstract
+                    then
+                        println "open Yard.Generators.GLL.AbstractParser"
+                        println "open AbstractAnalysis.Common"
+                    else 
+                        println "open Yard.Generators.GLL.Parser"
                     println "open Yard.Generators.GLL"
-                    println "open Yard.Generators.Common.AST2"
+                    println "open Yard.Generators.Common.ASTGLL"
 
                     match definition.head with
                     | None -> ()
@@ -140,8 +154,8 @@ type GLL() =
                 
                 fsHeaders()
                 
-            printHeaders moduleName fullPath light output
-            let table = printTableGLL grammar table moduleName tokenType res _class positionType caseSensitive
+            printHeaders moduleName fullPath light output isAbstract
+            let table = printTableGLL grammar table moduleName tokenType res _class positionType caseSensitive isAbstract
             let res =  table
             let res = 
                 match definition.foot with
@@ -161,6 +175,7 @@ type GLL() =
                         |> ignore
                     res.ToString()
             out.WriteLine res
+            out.Flush()
             out.Close()
             eprintfn "Generation time: %A" <| System.DateTime.Now - start
             box ()

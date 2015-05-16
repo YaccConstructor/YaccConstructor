@@ -1,4 +1,5 @@
-﻿using GraphX;
+﻿using System.Windows.Media;
+using GraphX;
 
 namespace Plugin.ToolWindow
 {
@@ -16,6 +17,8 @@ namespace Plugin.ToolWindow
         /// Some string property for example purposes
         /// </summary>
         public string Text { get; set; }
+        private Brush b;
+        private object thisobject;
 
         #region Calculated or static props
 
@@ -34,10 +37,10 @@ namespace Plugin.ToolWindow
             : this("")
         {
         }
-
         public Vertex(string text = "")
         {
             Text = text;
         }
+        
     }
 }

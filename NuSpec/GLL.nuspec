@@ -2,7 +2,7 @@
 <package>
 <metadata>
 <id>GLL</id>
-<version>1.0.0.4</version>
+<version>0.0.3.0</version>
 <title>GLL of YaccConstructor</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>
@@ -10,13 +10,13 @@
 <projectUrl>https://code.google.com/p/recursive-ascent</projectUrl>
 <iconUrl>https://recursive-ascent.googlecode.com/git/logo/YC_big.jpg</iconUrl>
 <requireLicenseAcceptance>false</requireLicenseAcceptance>
-<description>Core of YaccConstructor: IL, common functions, grammar transformations, managers and checkers.</description>
+<description>GLL parsers generator  based on YaccConstructor. Creates top-down parser to analyse nondeterministic and ambiguous grammars and handle all context-free grammars, including left-recursive.</description>
 <releaseNotes>Support for .NET 4.0 .</releaseNotes>
 <copyright>Copyright 2013, 2014</copyright>
 <tags>Parsing Reengineering YaccConstructor YC Core Grammarware .NET F# FSharp</tags>
 <dependencies>
-<dependency id="YC.Core" version="1.0.0.3" />
-<dependency id="YC.Generators" version="1.0.0.3" />
+<dependency id="YC.Core" version="0.0.3.0" />
+<dependency id="YC.Generators" version="0.0.3.0" />
 <dependency id="FSharpx.Text.StructuredFormat" version="[1.10.2]" />
 </dependencies>
 </metadata>

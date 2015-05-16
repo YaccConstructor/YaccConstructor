@@ -2,7 +2,7 @@
 <package>
 <metadata>
 <id>YC.Generators</id>
-<version>1.0.0.3</version>
+<version>0.0.3.0</version>
 <title>Generators of YaccConstructor</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>
@@ -10,12 +10,13 @@
 <projectUrl>https://code.google.com/p/recursive-ascent</projectUrl>
 <iconUrl>https://recursive-ascent.googlecode.com/git/logo/YC_big.jpg</iconUrl>
 <requireLicenseAcceptance>false</requireLicenseAcceptance>
-<description>Core of YaccConstructor: IL, common functions, grammar transformations, managers and checkers.</description>
+<description>YaccConstructor generators: FsYaccPrinter, YardPrinter, TreeDump, FParsecGenerator. 
+Generator or backend is a module which generates something from IL into possible output format (derivation tree, F# code, etc).</description>
 <releaseNotes>Support for .NET 4.0 .</releaseNotes>
 <copyright>Copyright 2013, 2014</copyright>
 <tags>Parsing Reengineering YaccConstructor YC Core Grammarware .NET F# FSharp</tags>
 <dependencies>
-<dependency id="YC.Core" version="1.0.0.3" />
+<dependency id="YC.Core" version="0.0.3.0" />
 </dependencies>
 </metadata>
 <files>

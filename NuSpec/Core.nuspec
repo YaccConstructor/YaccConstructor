@@ -2,7 +2,7 @@
 <package>
 <metadata>
 <id>YC.Core</id>
-<version>1.0.0.3</version>
+<version>0.0.3.0</version>
 <title>Core of YaccConstructor</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>
@@ -10,7 +10,7 @@
 <projectUrl>https://code.google.com/p/recursive-ascent</projectUrl>
 <iconUrl>https://recursive-ascent.googlecode.com/git/logo/YC_big.jpg</iconUrl>
 <requireLicenseAcceptance>false</requireLicenseAcceptance>
-<description>Core of YaccConstructor: IL, common functions, grammar transformations, managers and checkers.</description>
+<description>Core of YaccConstructor: IL — inner representration of grammar, common functions, grammar transformations, grammar properties verification, modules managing. Contains YaccConstructor.exe, that is necessary to run YaccConstructor tools.</description>
 <releaseNotes>Support for .NET 4.0 .</releaseNotes>
 <copyright>Copyright 2013, 2014</copyright>
 <tags>Parsing Reengineering YaccConstructor YC Core Grammarware .NET F# FSharp</tags>
@@ -25,6 +25,7 @@
 <file src="..\README.md" target="README.txt" />
 <file src="..\LICENSE" target="LICENSE" />
 <file src="..\NOTICE" target="NOTICE" />
+<file src="..\Bin\Release\v40\FSharp.Core.*" target="lib\net40\" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\FsYacc.*" target="lib\net40\" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\YC.Common.*" target="lib\net40\" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\YC.Conversions.*" target="lib\net40\" exclude="**\*.Test.*" />

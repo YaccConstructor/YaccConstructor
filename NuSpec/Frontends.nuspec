@@ -2,7 +2,7 @@
 <package>
 <metadata>
 <id>YC.Frontends</id>
-<version>1.0.0.4</version>
+<version>0.0.3.0</version>
 <title>Frontends of YaccConstructor</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>
@@ -10,13 +10,13 @@
 <projectUrl>https://code.google.com/p/recursive-ascent</projectUrl>
 <iconUrl>https://recursive-ascent.googlecode.com/git/logo/YC_big.jpg</iconUrl>
 <requireLicenseAcceptance>false</requireLicenseAcceptance>
-<description>Core of YaccConstructor: IL, common functions, grammar transformations, managers and checkers.</description>
+<description>YaccConstructor frontends: FsYacc, YardFrontend, IronyFrontend, AntlrFrontend. Frontend is a module which translates grammar representation into IL according to grammar specification language.</description>
 <releaseNotes>Support for .NET 4.0 .</releaseNotes>
 <copyright>Copyright 2013, 2014</copyright>
 <tags>Parsing Reengineering YaccConstructor YC Core Grammarware .NET F# FSharp</tags>
 <dependencies>
-<dependency id="YC.Core" version="1.0.0.3" />
-<dependency id="RNGLR" version="1.0.0.3" />
+<dependency id="YC.Core" version="0.0.3.0" />
+<dependency id="RNGLR" version="0.0.3.0" />
 <dependency id="FSharpx.Text.StructuredFormat" version="[1.10.2]" />
 </dependencies>
 </metadata>

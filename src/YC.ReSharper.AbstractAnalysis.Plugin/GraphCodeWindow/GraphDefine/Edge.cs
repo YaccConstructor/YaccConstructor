@@ -11,7 +11,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
         /// <param name="source">Source vertex data</param>
         /// <param name="target">Target vertex data</param>
         /// <param name="weight">Optional edge weight</param>
-        public Edge(object info, Vertex source, Vertex target, SolidColorBrush br = null, double weight = 1)
+        public Edge(object info, Vertex source, Vertex target, SolidColorBrush br = null, double weight = 0.1)
             : base(source, target, weight)
         {
             thisobject = info;

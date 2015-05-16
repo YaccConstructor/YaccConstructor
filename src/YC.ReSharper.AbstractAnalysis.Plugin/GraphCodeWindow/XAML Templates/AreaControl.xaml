@@ -8,5 +8,5 @@
             xmlns:plugin="clr-namespace:YC.ReSharper.AbstractAnalysis.Plugin"
             mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="700">
-    
+
 </TabControl>

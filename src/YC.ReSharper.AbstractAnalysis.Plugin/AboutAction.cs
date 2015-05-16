@@ -1,6 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Windows;
 using System.Windows.Controls;
 using GraphX;
 using GraphX.Controls;
@@ -10,12 +8,7 @@ using JetBrains.Application.DataContext;
 using JetBrains.DocumentModel;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Daemon;
-using JetBrains.ReSharper.Psi;
-using JetBrains.ReSharper.Psi.CSharp;
-using JetBrains.ReSharper.Psi.CSharp.Tree;
-using JetBrains.ReSharper.Psi.Files;
 using JetBrains.UI.Application;
-using JetBrains.UI.CrossFramework;
 using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting;
 using MessageBox1 = JetBrains.Util.MessageBox;
 using JetBrains.TextControl;
@@ -28,7 +21,7 @@ using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin
 {
-    
+
     #region Descriptor
     [ToolWindowDescriptor(
     ProductNeutralId = "ClassName",
@@ -55,9 +48,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
         private UIApplication uiApplication;
         private IVsUIShell shell;
         private WindowRegistrar registrar;
-        private ISolution solution;
-        private ITextControl codefile;
-        public IDocument document;
+        //private ISolution solution;
+        //private ITextControl codefile;
+        //public IDocument document;
         public static ITextControl textControl;
         //public static IDeclaredElement element;
         public static AreaControl arcont;
@@ -65,13 +58,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
 
         public bool Update(IDataContext context, ActionPresentation presentation, DelegateUpdate nextUpdate)
         {
-
-            //if (WindowAction.arcont != null)
-            //{
-            //    if (WindowAction.arcont.Area.LogicCore.Graph != WindowAction.arcont.dataGraph)
-            //    WindowAction.arcont.Area.LogicCore.Graph = WindowAction.arcont.dataGraph;
-            //    WindowAction.arcont.gg_but_randomgraph_Click(null, null);
-            //}
             return true;
         }
         public static void GoToCode(ITextControl t, Edge e)
@@ -101,10 +87,13 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
                 logicCore.DefaultOverlapRemovalAlgorithmParams.VerticalGap = 50;
                 logicCore.DefaultEdgeRoutingAlgorithm = EdgeRoutingAlgorithmTypeEnum.SimpleER;
                 logicCore.AsyncAlgorithmCompute = false;
-                arcont.EControl.Items.Add(new TabItem() { Header = "Graph" + (pos+1).ToString(), Content = new ZoomControl()
-                    {Content = new EmptyGraphArea(){LogicCore = logicCore}}});
+                arcont.EControl.Items.Add(new TabItem()
+                {
+                    Header = "Graph" + (pos + 1).ToString(),
+                    Content = new ZoomControl() { Content = new EmptyGraphArea() { LogicCore = logicCore } }
+                });
                 //arcont.EControl.Items.Add(WindowAction.arcont.DataGraphs[0]);
-                
+
                 a--;
             }
         }
@@ -112,7 +101,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
         public static void AddTabControls(object sender, EventArgs e)
         {
 
-            arcont.EControl.Items.Add(new TabItem());   
+            arcont.EControl.Items.Add(new TabItem());
         }
 
         public void Execute(IDataContext context, DelegateExecute nextExecute)
@@ -121,7 +110,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
 
             try
             {
-                solution = DataConstantsExtensions.GetComponent<ISolution>(context);
+                //solution = DataConstantsExtensions.GetComponent<ISolution>(context);
                 textControl = context.GetData(JetBrains.TextControl.DataContext.DataConstants.TEXT_CONTROL);
                 //TODO mere beayty analiser
                 //TextControl.Caret.CaretMoved += GoToGraph;
@@ -169,7 +158,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
             null, // return a System.Drawing.Image to be displayed
             (lt, twi) =>
             {
-                
+
                 return WindowAction.arcont;
             });
             instance.EnsureControlCreated().Show();
@@ -179,13 +168,11 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
         {
             if (WindowAction.arcont != null)
             {
-                
-                //WindowAction.arcont.Area.LogicCore.Graph = WindowAction.arcont.dataGraph;
                 WindowAction.ControlsForGraphs();
-                //WindowAction.arcont.Area.SetVerticesMathShape(VertexShape.Circle);
+
                 WindowAction.arcont.gg_but_randomgraph_Click(null, null);
             }
-            //WindowAction.AddTabControls();
+
             instance.EnsureControlCreated().Show();
         }
     }

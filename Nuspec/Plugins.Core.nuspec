@@ -32,7 +32,7 @@
 <file src="..\Bin\Release\v40\YC.SEL.SDK.Core.*" target="lib\net40" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\ReSharperExtension.*" target="lib\net40" />
 <file src="..\Bin\Release\v40\YC.ReSharper.AbstractAnalysis.Plugin.Helper*" target="lib\net40" exclude="**\*.Test.*" />
-<file src="..\Bin\Release\v40\YC.ReSharper.AbstractAnalysis.Plugin.dll.config" target="lib\net40" />
+<!--<file src="..\Bin\Release\v40\YC.ReSharper.AbstractAnalysis.Plugin.dll.config" target="lib\net40" />-->
 <file src="..\Bin\Release\v40\YC.ReSharper.AbstractAnalysis.Plugin.*" target="ReSharper\v8.0\plugins" exclude="**\*.Test.*" />
 </files>
 </package>

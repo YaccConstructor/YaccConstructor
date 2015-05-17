@@ -7,11 +7,8 @@ open Yard.Core.IL
 
 let printTableGLL 
     (grammar : FinalGrammar )(table : Table) (moduleName : string) 
-    (tokenType : Map<_,_>) (res : System.Text.StringBuilder)  
-    _class positionType caseSensitive (isAbstract : bool) : string =
-
-    let inline packRulePosition rule position = (int rule <<< 16) ||| int position
-
+    (tokenType : Map<_,_>) (res : System.Text.StringBuilder) 
+    _class positionType caseSensitive : string =
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
     let inline printInd num (x : 'a) =
@@ -47,20 +44,10 @@ let printTableGLL
          l |> List.iteri (fun i x -> if i <> 0 then print sep printer x)
          print rBr
 
-    let printResizeArray prefix lBr rBr sep (arr : ResizeArray<_>)  printer = 
-        print prefix
-        print lBr
-        for i = 0 to arr.Count - 1 do
-            if i <> 0 then print sep
-            printer arr.[i]
-        printBr rBr
-        
 
 
     let printArr (arr : 'a[]) printer = printArr "" "[|" "|]" "; " (arr : 'a[]) printer
     let printArr2 (arr : 'a[]) printer = printArr2 "" "[|" "|]" "; " (arr : 'a[]) printer
-    
-    let printRessizeArrayAsList (arr : ResizeArray<_>) printer = printResizeArray "" "[|" "|]" "; " (arr : ResizeArray<_>) printer
 
     let leftSide = Array.zeroCreate grammar.rules.rulesCount
     for i = 0 to grammar.rules.rulesCount-1 do
@@ -81,16 +68,6 @@ let printTableGLL
             cur <- cur + 1
     rulesStart.[grammar.rules.rulesCount] <- cur
 
-    let createSlots =
-        let slots = new List<_>()
-        slots.Add(packRulePosition -1 -1, 0)
-        for i = 0 to grammar.rules.rulesCount - 1 do
-            let currentRightSide = grammar.rules.rightSide i
-            for j = 0 to currentRightSide.Length - 1 do
-                if grammar.indexator.isNonTerm currentRightSide.[j] then
-                    let key = packRulePosition i (j + 1)
-                    slots.Add(key, slots.Count)
-        slots
 
     let printTable () =
         let indexator = grammar.indexator
@@ -233,7 +210,7 @@ let printTableGLL
         printArr grammar.canInferEpsilon (print "%A")
 
         printBr "let defaultAstToDot ="
-        printBrInd 1 "(fun (tree : Yard.Generators.Common.ASTGLL.Tree<Token>) -> tree.AstToDot numToString)"
+        printBrInd 1 "(fun (tree : Yard.Generators.Common.AST2.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)"
 
         printBr ""
 
@@ -254,22 +231,12 @@ let printTableGLL
        
         printBr ""
 
-        let slots = createSlots
-        print "let slots = dict <| "
-        printRessizeArrayAsList slots (print "%A")
-        
-
         printBr ""
 
-        printBrInd 0 "let private parserSource = new ParserSourceGLL<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon, slots)"
-        
-        if not isAbstract
-        then               
-            printBr "let buildAst : (seq<Token> -> ParseResult<_>) ="
-            printBrInd 1 "buildAst<Token> parserSource"
-        else
-            printBr "let buildAbstractAst : (AbstractAnalysis.Common.ParserInputGraph<Token> -> ParseResult<_>) ="
-            printBrInd 1 "buildAbstractAst<Token> parserSource"
+        printBrInd 0 "let private parserSource = new ParserSource2<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon)"
+                       
+        printBr "let buildAst : (seq<Token> -> ParseResult<_>) ="
+        printBrInd 1 "buildAst<Token> parserSource"
         printBr ""
         res.ToString()
     printTable ()

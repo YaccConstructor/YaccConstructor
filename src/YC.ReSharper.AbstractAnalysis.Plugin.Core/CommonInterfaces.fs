@@ -6,26 +6,31 @@ open QuickGraph
 open QuickGraph.Algorithms
 open AbstractAnalysis.Common
 open Yard.Generators.Common.AST
-open Yard.Generators.Common.AstNode
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.GraphBasedFst
 open YC.FSA.FsaApproximation
 open YC.FSA.GraphBasedFsa
+open System.Collections.Generic
 
 type TreeGenerationState<'node> = 
     | Start
-    | InProgress of 'node * AstNode list
+    | InProgress of 'node * int list
     | End of 'node
+    
+    //add typegraph
+type DrawingGraph (vertices : IEnumerable<int>, edges : List<TaggedEdge<int, string>>) =
+    member this.Vertices = vertices
+    member this.Edges = edges
 
-type LexingFinishedArgs<'node> (tokens : ResizeArray<'node>, lang:string) =
+type LexingFinishedArgs<'node> (tokens : ResizeArray<'node>, lang:string, drawGraph : DrawingGraph) =
      inherit System.EventArgs()
      member this.Tokens = tokens
      member this.Lang = lang
+     member this.Graph = drawGraph
 
 type ParsingFinishedArgs(lang:string) = 
     inherit System.EventArgs()
     member this.Lang = lang
-
 
 exception LexerError of string*obj
 
@@ -49,15 +54,19 @@ type IInjectedLanguageModule<'br,'range,'node when 'br : equality> =
 
 type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:equality and 'node:null 
     (
-        tokenize: Appr<'br> -> Test<ParserInputGraph<'TokenType>, array<Symb<char*Position<'br>>>>
-        , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang, calculatePos:_->seq<'range>
+        //tokenize: Appr<'br> -> ParserInputGraph<'TokenType>
+        tokenize: Appr<'br> -> Test<ParserInputGraph<'TokenType>
+        , array<Symb<char*Position<'br>>>>
+        , parse, translate, tokenToNumber: 'TokenType -> int
+        , numToString: int -> string, tokenData: 'TokenType -> obj
+        , tokenToTreeNode, lang, calculatePos:_->seq<'range>
         , getDocumentRange: 'br -> 'range
         , printAst: Tree<'TokenType> -> string -> unit
         , printOtherAst: OtherTree<'TokenType> -> string -> unit) as this =
 
     let lexingFinished = new Event<LexingFinishedArgs<'node>>()
     let parsingFinished = new Event<ParsingFinishedArgs>()
-    let mutable forest: list<_ * _> = [] 
+    let mutable forest: list<Tree<'TokenType> * _> = [] 
     let mutable otherForest : list<OtherTree<'TokenType>> = []
 
     let mutable generationState : TreeGenerationState<'node> = Start
@@ -65,9 +74,17 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
     let prepareToHighlighting (graphOpt : ParserInputGraph<'token> option) tokenToTreeNode = 
         if graphOpt.IsSome
         then
+            
             let tokensList = new ResizeArray<_>()
 
-            let inGraph = graphOpt.Value 
+            let inGraph = graphOpt.Value
+            let edges = ResizeArray()
+            for e in inGraph.Edges do
+                let tokenName = e.Tag |> tokenToNumber |> numToString
+                edges.Add( new TaggedEdge<int, string>(e.Source, e.Target, tokenName))
+            let vertices = inGraph.Vertices
+                     
+            let drawGraph = DrawingGraph(vertices, edges)
             inGraph.TopologicalSort()
             |> Seq.iter 
                 (fun vertex -> 
@@ -75,7 +92,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
                         |> Seq.iter (fun edge -> tokensList.Add <| tokenToTreeNode edge.Tag)
                 )
 
-            lexingFinished.Trigger(new LexingFinishedArgs<'node>(tokensList, lang))
+            lexingFinished.Trigger(new LexingFinishedArgs<'node>(tokensList, lang, drawGraph))
 
     let processLang graph addLError addPError =
 //        let tokenize g =
@@ -108,11 +125,11 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
                 y)
         |> Option.iter
             (function 
-                | Yard.Generators.ARNGLR.Parser.Success(tree) ->
-                    forest <- (tree, new ErrorDictionary<'TokenType>()) :: forest
+                | Yard.Generators.RNGLR.Parser.Success(tree, _, errors) ->
+                    forest <- (tree, errors) :: forest
                     otherForest <- new OtherTree<'TokenType>(tree) :: otherForest
                     parsingFinished.Trigger (new ParsingFinishedArgs (lang))
-                | Yard.Generators.ARNGLR.Parser.Error(_,tok,_) -> tok |> addPError 
+                | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,_) -> tok |> Array.iter addPError 
             )
 
     let getNextTree index : TreeGenerationState<'node> = 
@@ -121,10 +138,10 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
             generationState <- End(null)
         else
             let mutable curSppf, errors = List.nth forest index
-            let unprocessed : Terminal list = 
+            let unprocessed = 
                 match generationState with
-                | Start ->   Array.init curSppf.TokensCount (fun i -> new Terminal(i)) |> List.ofArray
-                | InProgress (_, unproc) -> unproc |> List.map (fun n -> n :?> Terminal) 
+                | Start ->   Array.init curSppf.TokensCount (fun i -> i) |> List.ofArray
+                | InProgress (_, unproc) ->  unproc
                 | _ -> failwith "Unexpected state in treeGeneration"
                 
             let nextTree, unproc = curSppf.GetNextTree unprocessed (fun _ -> true)
@@ -133,7 +150,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
             
             if unproc.IsEmpty
             then generationState <- End (treeNode)
-            else generationState <- InProgress (treeNode, unproc |> List.map (fun n -> n :> AstNode)) 
+            else generationState <- InProgress (treeNode, unproc) 
 
         generationState
 

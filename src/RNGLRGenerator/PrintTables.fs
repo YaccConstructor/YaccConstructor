@@ -26,7 +26,7 @@ type TargetLanguage =
 let printTables 
     (grammar : FinalGrammar) head (tables : Tables) (moduleName : string) 
     (tokenType : Map<_,_>) (res : System.Text.StringBuilder) targetLanguage 
-    _class positionType caseSensitive isAbstractParsingMode =
+    _class positionType caseSensitive =
     
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
@@ -254,7 +254,7 @@ let printTables
         printBr ""
 
         printBr "let defaultAstToDot ="
-        printBrInd 1 "(fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber %s leftSide)" (if isAbstractParsingMode then "(Some tokenData)" else "None")
+        printBrInd 1 "(fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)"
 
         printBr ""
 
@@ -289,18 +289,15 @@ let printTables
         printBrInd 0 "let errorIndex = %d" grammar.errorIndex
         printBrInd 0 "let errorRulesExists = %b" grammar.errorRulesExists
         
-        printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists%s)" (if isAbstractParsingMode then ", tokenData" else "")
+        printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)"
 
-        if isAbstractParsingMode
-        then
-            printBr "let buildAstAbstract : (ParserInputGraph<'TokenType> -> Yard.Generators.ARNGLR.Parser.ParseResult<Token>) = "
-            printBrInd 1 "buildAstAbstract<Token> parserSource"
-            printBr ""
-        else
-            printBr "let buildAst : (seq<'TokenType> -> ParseResult<Token>) ="
-            printBrInd 1 "buildAst<Token> parserSource"
-            printBr ""
-
+        printBr "let buildAstAbstract : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) ="
+        printBrInd 1 "buildAstAbstract<Token> parserSource"
+        printBr ""
+        
+        printBr "let buildAst : (seq<'TokenType> -> ParseResult<Token>) ="
+        printBrInd 1 "buildAst<Token> parserSource"
+        printBr ""
         res.ToString()
 
     let printTablesToScala () =    

@@ -77,7 +77,6 @@ type RNGLR() =
                     | "fsharp" -> FSharp
                     | "scala" -> Scala
                     | x -> failwithf "Unsupported output language: %s." x
-            let isAbstractParsingMode = ref <| getBoolOption "abstract" false
             let getBoolValue name = function
                     | "true" -> true
                     | "false" -> false
@@ -109,7 +108,6 @@ type RNGLR() =
                         | "fsharp" -> FSharp
                         | "scala" -> Scala
                         | s -> failwithf "Language %s is not supported" s
-                | "-abstract" -> isAbstractParsingMode := getBoolValue "abstract" value
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
             let mutable newDefinition = initialConvert definition
@@ -151,7 +149,7 @@ type RNGLR() =
                     for cycle in grammar.EpsilonCyclicNonTerms do
                         let nonTerm = List.head cycle
                         grammar.epsilonTrees.[grammar.indexator.nonTermToIndex nonTerm].AstToDot
-                            grammar.indexator.indexToNonTerm (fun _ -> 0) None grammar.rules.leftSideArr
+                            grammar.indexator.indexToNonTerm (fun _ -> 0) grammar.rules.leftSideArr
                             (System.IO.Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot"))
                 grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
             
@@ -180,17 +178,11 @@ type RNGLR() =
                     then println "#light \"off\""
                     println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
-                    if !isAbstractParsingMode
-                    then 
-                        println "open Yard.Generators.ARNGLR.Parser"
-                        println "open AbstractAnalysis.Common"
-                    else 
-                        println "open Yard.Generators.RNGLR.Parser"
-                    
+
+                    println "open Yard.Generators.RNGLR.Parser"
                     println "open Yard.Generators.RNGLR"
                     println "open Yard.Generators.Common.AST"
-                    println "open Yard.Generators.Common.AstNode"
-
+                    
                     if !needHighlighting && !needTranslate
                     then 
                         println "open YC.SDK.ReSharper.Helper"
@@ -215,7 +207,7 @@ type RNGLR() =
                 | Scala -> scalaHeaders()
 
             printHeaders moduleName fullPath light output targetLanguage
-            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive !isAbstractParsingMode
+            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive
             let res = 
                 if not !needTranslate || targetLanguage = Scala 
                 then tables
@@ -226,7 +218,7 @@ type RNGLR() =
                         else None
                                 
                     tables + printTranslator grammar newDefinition.grammar.[0].rules 
-                                    positionType fullPath output dummyPos caseSensitive xmlOpt !isAbstractParsingMode
+                                    positionType fullPath output dummyPos caseSensitive xmlOpt
 
             let res = 
                 match definition.foot with

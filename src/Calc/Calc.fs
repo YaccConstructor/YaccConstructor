@@ -3,6 +3,7 @@
 open Calc.AbstractParser
 open Yard.Generators.Common.AST
 open YC.SDK.CommonInterfaces
+open YC.SDK.CommonInterfaces
 open Mono.Addins
 open YC.SDK.ReSharper.Helper
 open ReSharperExtension

@@ -2,16 +2,15 @@
 # 2 "Parser.fs"
 module AbstractLexer.Test.Calc.Parser
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
-open Yard.Generators.ARNGLR.Parser
+open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
-open Yard.Generators.Common.ARNGLR.AST
-open AbstractAnalysis.Common
+open Yard.Generators.Common.AST
 
 # 1 "calc.yrd"
 
 open AbstractLexer.Core
 
-# 14 "Parser.fs"
+# 13 "Parser.fs"
 type Token =
     | DIV of (string*array<Position<string>>)
     | LBRACE of (string*array<Position<string>>)
@@ -96,7 +95,7 @@ let startRule = 1
 let acceptEmptyInput = false
 
 let defaultAstToDot =
-    (fun (tree : Yard.Generators.Common.ARNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
+    (fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
 let otherAstToDot =
     (fun (tree : Yard.Generators.RNGLR.OtherSPPF.OtherTree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
@@ -157,7 +156,10 @@ let eofIndex = 23
 let errorIndex = 0
 let errorRulesExists = false
 let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)
-let buildAstAbstract : (ParserInputGraph<'TokenType> -> Yard.Generators.ARNGLR.Parser.ParseResult<Token>) = 
+let buildAstAbstract : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) =
     buildAstAbstract<Token> parserSource
+
+let buildAst : (seq<'TokenType> -> ParseResult<Token>) =
+    buildAst<Token> parserSource
 
 

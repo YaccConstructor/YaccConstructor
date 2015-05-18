@@ -34,85 +34,91 @@ type ``RNGLREBNF parser tests with simple lexer`` () =
 
     [<Test>]
     member test.``CalcEBNF`` () = 
-        let parser = RNGLR.ParseCalcEBNF.buildAst
+        let parser = RNGLR.ParserCalcEBNF.buildAst
         let file = "CalcEBNF.txt"
         runTest parser file
 
     [<Test>]
+    member test.``Choice`` () = 
+        let parser = RNGLR.ParserChoice.buildAst
+        let file = "Choice.txt"
+        runTest parser file
+
+    [<Test>]
     member test.``ComplexRightNull`` () = 
-        let parser = RNGLR.ParseComplexRightNull.buildAst
+        let parser = RNGLR.ParserComplexRightNull.buildAst
         let file = "ComplexRightNull.txt"
         runTest parser file
 
     [<Test>]
     member test.``ComplexRightNull2`` () = 
-        let parser = RNGLR.ParseComplexRightNull.buildAst
+        let parser = RNGLR.ParserComplexRightNull.buildAst
         let file = "ComplexRightNull2.txt"
         runTest parser file
 
     [<Test>]
     member test.``ManyAndOne0`` () = 
-        let parser = RNGLR.ParseManyAndOne.buildAst
+        let parser = RNGLR.ParserManyAndOne.buildAst
         let file = "ManyAndOne0.txt"
         runTest parser file
     
     [<Test>]
     member test.``ManyAndOne1`` () = 
-        let parser = RNGLR.ParseManyAndOne.buildAst
+        let parser = RNGLR.ParserManyAndOne.buildAst
         let file = "ManyAndOne1.txt"
         runTest parser file
 
     [<Test>]
     member test.``ManyAndOne2`` () = 
-        let parser = RNGLR.ParseManyAndOne.buildAst
+        let parser = RNGLR.ParserManyAndOne.buildAst
         let file = "ManyAndOne2.txt"
         runTest parser file
 
     [<Test>]
     member test.``simpleOneTerm`` () = 
-        let parser = RNGLR.ParseSimpleOpt.buildAst
+        let parser = RNGLR.ParserSimpleOpt.buildAst
         let file = "simpleOneTerm.txt"
         runTest parser file
 
     [<Test>]
     member test.``RightNull`` () = 
-        let parser = RNGLR.ParseRightNull.buildAst
+        let parser = RNGLR.ParserRightNull.buildAst
         let file = "RightNull.txt"
         runTest parser file
 
     [<Test>]
     member test.``SimpleEpsilon`` () = 
-        let parser = RNGLR.ParseSimpleEpsilon.buildAst
+        let parser = RNGLR.ParserSimpleEpsilon.buildAst
         let file = "simpleEpsilon.txt"
         runTest parser file
 
     [<Test>]
     member test.``SimpleRightNull`` () = 
-        let parser = RNGLR.ParseSimpleRightNull.buildAst
+        let parser = RNGLR.ParserSimpleRightNull.buildAst
         let file = "SimpleRightNull.txt"
         runTest parser file
 
     [<Test>]
     member test.``StackingConflictWrong`` () = 
-        let parser = RNGLR.ParseStackingConflict.buildAst
+        let parser = RNGLR.ParserStackingConflict.buildAst
         let file = "StackingConflictWrong.txt"
         runTest parser file
 
     [<Test>]
     member test.``TwoEpsilonMiddle`` () = 
-        let parser = RNGLR.ParseTwoEpsilonsMiddle.buildAst
+        let parser = RNGLR.ParserTwoEpsilonsMiddle.buildAst
         let file = "TwoEpsilonsMiddle.txt"
         runTest parser file
 
     [<Test>]
     member test.``TwoEpsilonMiddleWrong`` () = 
-        let parser = RNGLR.ParseTwoEpsilonsMiddle.buildAst
+        let parser = RNGLR.ParserTwoEpsilonsMiddle.buildAst
         let file = "TwoEpsilonsMiddleWrong.txt"
         runTest parser file
 
 [<EntryPoint>]
 let main argv = 
-    let parser = RNGLR.ParseSimpleOpt.buildAst
+    let parser = RNGLR.ParserSimpleOpt.buildAst
     let path = dir + "simpleOneTerm.txt"
     match run path parser with
         | Error (num, tok, err, _) -> printErr (num, tok, err)

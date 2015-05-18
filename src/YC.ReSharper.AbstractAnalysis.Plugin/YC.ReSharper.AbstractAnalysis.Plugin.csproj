@@ -73,6 +73,9 @@
       <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
+    <Reference Include="YAXLib">
+      <HintPath>..\packages\YAXLib.2.13\lib\YAXLib.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractAnalysisDaemonStage.cs" />

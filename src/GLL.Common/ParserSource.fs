@@ -1,7 +1,7 @@
 ﻿namespace Yard.Generators.GLL
-open System.Collections.Generic
+
        
-type ParserSourceGLL<'TokenType> (
+type ParserSource2<'TokenType> (
                                tokenToNumber        : 'TokenType -> int
                                , genLiteral         : string -> int -> 'TokenType option
                                , numToString        : int -> string
@@ -10,10 +10,10 @@ type ParserSourceGLL<'TokenType> (
                                , isTerminal         : 'TokenType -> bool
                                , isNonTerminal      : 'TokenType -> bool
                                , getLiteralNames    : string list
-                               , table              : int [][]
-                               , rules              : array<int>
-                               , rulesStart         : array<int>
-                               , leftSide           : array<int>
+                               , table              : int[][]
+                               , rules              : int array
+                               , rulesStart         : int array
+                               , leftSide           : int array
                                , startRule          : int
                                , literalEnd         : int
                                , literalStart       : int
@@ -30,7 +30,6 @@ type ParserSourceGLL<'TokenType> (
                                , numIsNonTerminal   : int -> bool
                                , numIsLiteral       : int -> bool
                                , canInferEpsilon    : bool array
-                               , slots              : IDictionary<int,int>
                                ) =
     let length =
         let res = Array.zeroCreate <| (rulesStart.Length - 1)
@@ -73,5 +72,4 @@ type ParserSourceGLL<'TokenType> (
     member this.NumIsTerminal      = numIsTerminal
     member this.NumIsNonTerminal   = numIsNonTerminal
     member this.NumIsLiteral       = numIsLiteral
-    member this.CanInferEpsilon    = canInferEpsilon
-    member this.Slots              = slots
+    member this.canInferEpsilon    = canInferEpsilon

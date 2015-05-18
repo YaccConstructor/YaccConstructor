@@ -2,8 +2,7 @@
 
 open AbstractAnalysis.Common
 open QuickGraph
-//open Yard.Generators.RNGLR
-open Yard.Generators.ARNGLR
+open Yard.Generators.RNGLR
 open Yard.Generators.Common.AST
 open Yard.Generators.RNGLR.AbstractParser
 open Yard.Generators.RNGLR.OtherSPPF
@@ -48,8 +47,8 @@ type ``RNGLR ast to otherSPPF translation test`` () =
         let parseResult = (new Parser<_>()).Parse  RNGLR.ParseElementary.buildAstAbstract qGraph
         
         match parseResult with 
-        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
-        | Parser.Success (mAst) ->
+        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
+        | Parser.Success (mAst, _, _) ->
 //            RNGLR.ParseElementary.defaultAstToDot mAst "Elementary before.dot"
             let other = new OtherTree<_>(mAst)
             RNGLR.ParseElementary.otherAstToDot other "Elementary after.dot"
@@ -68,8 +67,8 @@ type ``RNGLR ast to otherSPPF translation test`` () =
         let parseResult = (new Parser<_>()).Parse  RNGLR.ParseElementary.buildAstAbstract qGraph
         
         match parseResult with 
-        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
-        | Parser.Success (mAst) ->
+        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
+        | Parser.Success (mAst, _, _) ->
 //            RNGLR.ParseElementary.defaultAstToDot mAst "Epsilon before.dot"
             let other = new OtherTree<_>(mAst)
             RNGLR.ParseElementary.otherAstToDot other "Epsilon after.dot"
@@ -89,8 +88,8 @@ type ``RNGLR ast to otherSPPF translation test`` () =
         let parseResult = (new Parser<_>()).Parse  RNGLR.ParseAmbiguous.buildAstAbstract qGraph
         
         match parseResult with 
-        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
-        | Parser.Success (mAst) ->
+        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
+        | Parser.Success (mAst, _, _) ->
 //            RNGLR.ParseAmbiguous.defaultAstToDot mAst "Ambiguous before.dot"
             let other = new OtherTree<_>(mAst)
             RNGLR.ParseAmbiguous.otherAstToDot other "Ambiguous after.dot"
@@ -109,8 +108,8 @@ type ``RNGLR ast to otherSPPF translation test`` () =
         let parseResult = (new Parser<_>()).Parse  RNGLR.ParseAmbiguous.buildAstAbstract qGraph
         
         match parseResult with 
-        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
-        | Parser.Success (mAst) ->
+        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
+        | Parser.Success (mAst, _, _) ->
             let other = new OtherTree<_>(mAst)
             RNGLR.ParseAmbiguous.otherAstToDot other "Parents after.dot"
             Assert.Pass "Parents test: PASSED"
@@ -127,8 +126,8 @@ type ``RNGLR ast to otherSPPF translation test`` () =
         let parseResult = (new Parser<_>()).Parse  RNGLR.ParseCycles.buildAstAbstract qGraph
         
         match parseResult with 
-        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
-        | Parser.Success (mAst) ->
+        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
+        | Parser.Success (mAst, _, _) ->
 //            RNGLR.ParseCycles.defaultAstToDot mAst "Cycles before.dot"
 
             let other = new OtherTree<_>(mAst)
@@ -163,8 +162,8 @@ type ``Classic case: matching brackets``() =
         let parseResult = (new Parser<_>()).Parse  RNGLR.ParseSummator.buildAstAbstract qGraph
         
         match parseResult with 
-        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
-        | Parser.Success (mAst) ->
+        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
+        | Parser.Success (mAst, _, _) ->
             let other = new OtherTree<_>(mAst)
             
             let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
@@ -199,8 +198,8 @@ type ``Classic case: matching brackets``() =
         let parseResult = (new Parser<_>()).Parse  RNGLR.ParseSummator.buildAstAbstract qGraph
         
         match parseResult with 
-        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
-        | Parser.Success (mAst) ->
+        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
+        | Parser.Success (mAst, _, _) ->
             let other = new OtherTree<_>(mAst)
 
             let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
@@ -236,8 +235,8 @@ type ``Classic case: matching brackets``() =
         let parseResult = (new Parser<_>()).Parse RNGLR.ParseSummator.buildAstAbstract qGraph
         
         match parseResult with 
-        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
-        | Parser.Success (mAst) ->
+        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
+        | Parser.Success (mAst, _, _) ->
             
             let other = new OtherTree<_>(mAst)
 
@@ -273,8 +272,8 @@ type ``Classic case: matching brackets``() =
 
         let result = (new Parser<_>()).Parse  RNGLR.ParseSummator.buildAstAbstract qGraph
         match result with
-        | Parser.Error (num, tok, message) -> printErr (num, tok, message)
-        | Parser.Success(mAst) ->
+        | Parser.Error (num, tok, message, debug, _) -> printErr (num, tok, message)
+        | Parser.Success(mAst, _, _) ->
             let other = new OtherTree<_>(mAst)
             
             let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 3 false tokToNumber tokToPos
@@ -309,8 +308,8 @@ type ``Classic case: matching brackets``() =
 
         let result = (new Parser<_>()).Parse  RNGLR.ParseSummator.buildAstAbstract qGraph
         match result with
-        | Parser.Error (num, tok, message) -> printErr (num, tok, message)
-        | Parser.Success(mAst) ->
+        | Parser.Error (num, tok, message, debug, _) -> printErr (num, tok, message)
+        | Parser.Success(mAst, _, _) ->
             let other = new OtherTree<_>(mAst)
 
             RNGLR.ParseSummator.otherAstToDot other "Classic case right to left 2.dot"
@@ -362,8 +361,8 @@ type ``Abstract case: matching brackets``() =
 
         let result = parse qGraph
         match result with
-        | Parser.Error (num, tok, message) -> printErr (num, tok, message)
-        | Parser.Success(mAst) ->
+        | Parser.Error (num, tok, message, debug, _) -> printErr (num, tok, message)
+        | Parser.Success(mAst, _, _) ->
             let other = new OtherTree<_>(mAst)
 
             let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
@@ -402,8 +401,8 @@ type ``Abstract case: matching brackets``() =
 
         let result = parse qGraph
         match result with
-        | Parser.Error (num, tok, message) -> printErr (num, tok, message)
-        | Parser.Success(mAst) ->
+        | Parser.Error (num, tok, message, debug, _) -> printErr (num, tok, message)
+        | Parser.Success(mAst, _, _) ->
             let other = new OtherTree<_>(mAst)
             
             let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
@@ -444,8 +443,8 @@ type ``Abstract case: matching brackets``() =
         let result = parse qGraph
         
         match result with
-        | Parser.Error (num, tok, message) -> printErr (num, tok, message)
-        | Parser.Success(mAst) ->
+        | Parser.Error (num, tok, message, debug, _) -> printErr (num, tok, message)
+        | Parser.Success(mAst, _, _) ->
             
             let other = new OtherTree<_>(mAst)
             
@@ -487,8 +486,8 @@ type ``Abstract case: matching brackets``() =
         let result = parse qGraph
         
         match result with
-        | Parser.Error (num, tok, message) -> printErr (num, tok, message)
-        | Parser.Success(mAst) ->
+        | Parser.Error (num, tok, message, debug, _) -> printErr (num, tok, message)
+        | Parser.Success(mAst, _, _) ->
             
             let other = new OtherTree<_>(mAst)
             
@@ -532,8 +531,8 @@ type ``Abstract case: matching brackets``() =
         let result = parse qGraph
         
         match result with
-        | Parser.Error (num, tok, message) -> printErr (num, tok, message)
-        | Parser.Success(mAst) ->
+        | Parser.Error (num, tok, message, debug, _) -> printErr (num, tok, message)
+        | Parser.Success(mAst, _, _) ->
             
             let other = new OtherTree<_>(mAst)
             let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 5 false tokToNumber tokToPos

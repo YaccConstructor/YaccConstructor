@@ -15,10 +15,9 @@
 module Yard.Generators.RNGLR.Parser              
 
 open Yard.Generators.RNGLR
+open Yard.Generators.Common.AST
 open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
-open Yard.Generators.Common.AST
-open Yard.Generators.Common.AstNode
 open Microsoft.FSharp.Collections
 // Custom graph structure. For optimization and needed (by algorithm) relation with AST
 
@@ -34,7 +33,7 @@ type Vertex  =
 and Edge =
     struct
         /// AST on the edge
-        val Ast : AstNode
+        val Ast : obj
         /// End of the vertex (begin is not needed)
         val Dest : Vertex
         new (d,a) = {Dest = d; Ast = a}
@@ -47,8 +46,8 @@ type ParserDebugFuns<'TokenType> = {
 }
 
 type ParseResult<'TokenType> =
-    | Success of Tree<'TokenType> * array<'TokenType> * Dictionary<Family, ErrorNode<'TokenType>>
-    | Error of int * array<'TokenType> * string * ParserDebugFuns<'TokenType> * Dictionary<Family, ErrorNode<'TokenType>>
+    | Success of Tree<'TokenType> * array<'TokenType> * Dictionary<Family, ErrorNode>
+    | Error of int * array<'TokenType> * string * ParserDebugFuns<'TokenType> * Dictionary<Family, ErrorNode>
 
 /// Compare vertex like a pair: (level, state)
 let inline private less (v' : Vertex) (v : Vertex) = v'.Level < v.Level || (v'.Level = v.Level && v'.State < v.State)
@@ -56,14 +55,14 @@ let inline private eq (v' : Vertex) (v : Vertex) = v'.Level = v.Level && v'.Stat
 
 /// Add edges, what must be unique (after shift or epsilon-edges).
 /// All edges are sorted by destination ascending.
-let private addSimpleEdge (v : Vertex) (ast : AstNode) (out : ResizeArray<Vertex * AstNode>) =
+let private addSimpleEdge (v : Vertex) (ast : obj) (out : ResizeArray<Vertex * obj>) =
     let mutable i = out.Count - 1
     while i >= 0 && less (fst out.[i]) v do
         i <- i - 1
     out.Insert (i+1, (v, ast))
 
 /// Check if edge with specified destination and AST already exists
-let private containsSimpleEdge (v : Vertex) (f : AstNode) (out : ResizeArray<Vertex * AstNode>) =
+let private containsSimpleEdge (v : Vertex) (f : obj) (out : ResizeArray<Vertex * obj>) =
     let mutable i = out.Count - 1
     while i >= 0 && less (fst out.[i]) v do
         i <- i - 1
@@ -120,10 +119,10 @@ let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide 
     let print s = out.WriteLine ("    " + s)
     let curNum = ref 0
     print "rankdir=RL"
-    let getAstString (ast : AstNode) =
+    let getAstString (ast : obj) =
         match ast with
-        | :? Terminal as i -> tokens.[i.TokenNumber] |> tokenToNumber |> numToString |> sprintf "%s"    
-        | :? Epsilon as i -> "eps " + numToString (-i.EpsilonNonTerm-1)
+        | :? int as i when i >= 0 -> tokens.[i] |> tokenToNumber |> numToString |> sprintf "%s"    
+        | :? int as i when i < 0 -> "eps " + numToString (-i-1)
         | :? AST as ast -> 
             let nonT = 
                 if ast.first.prod < leftSide.Length then ast.first.prod
@@ -160,6 +159,12 @@ let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide 
     out.WriteLine "}"
     out.Close()
 
+
+let isEpsilonAst (ast : obj) =
+    match ast with
+    | :? int as e when e < 0 -> true
+    | _ -> false
+
 let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq<'TokenType>) =
     let enum = tokens.GetEnumerator()
     // Change if it doesn't equal to zero. Now it's true according to states building algorithm
@@ -167,16 +172,16 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
     let startNonTerm = parserSource.LeftSide.[parserSource.StartRule]
     let nonTermsCountLimit = 1 + (Array.max parserSource.LeftSide)
     let getEpsilon =
-        let epsilons = Array.init nonTermsCountLimit (fun i -> new Epsilon(-i-1))
+        let epsilons = Array.init nonTermsCountLimit (fun i -> box (-i-1))
         fun i -> epsilons.[i]
     /// info about errors
-    let errDict = new Dictionary<Family, ErrorNode<_>>()
+    let errDict = new Dictionary<Family, ErrorNode>()
                               
     // If input stream is empty or consists only of RNGLR_EOF token
     if not <| enum.MoveNext() || parserSource.EofIndex = parserSource.TokenToNumber enum.Current then
         if parserSource.AcceptEmptyInput 
         then
-            Success (new Tree<_>(null, (getEpsilon startNonTerm) :> AstNode, null), [||], errDict)
+            Success (new Tree<_>(null, getEpsilon startNonTerm, null), [||], errDict)
         else
             Error (0, [||], "This grammar cannot accept empty string",
                     {
@@ -195,14 +200,14 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         // New edges can be created only from last level.
         /// Temporary storage for edges data (after all reductions real edges will be created).
         let edges = Array.init statesCount (fun _ -> new ResizeArray<Vertex * Family * AST>())
-        let simpleEdges = Array.init statesCount (fun _ -> new ResizeArray<Vertex * AstNode>())
+        let simpleEdges = Array.init statesCount (fun _ -> new ResizeArray<Vertex * obj>())
 
         let pushes = new Stack<_> (statesCount * 2 + 10)
         /// Stores states, used on current level. Instead statesCount must be number of non-terminals, but doesn't matter
         let usedStates = new Stack<_>(statesCount)
         let stateToVertex : Vertex[] = Array.zeroCreate statesCount
 
-        let addVertex state level (edgeOpt : option<Vertex * AstNode>) =
+        let addVertex state level (edgeOpt : option<Vertex * obj>) =
             let dict = stateToVertex
             if dict.[state] = null then
                 let v = new Vertex(state, level)
@@ -217,7 +222,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         reductions.Push (v, prod, 0, None)
                 usedStates.Push state
             let v = dict.[state]
-            if edgeOpt.IsSome && not (isEpsilon <| snd edgeOpt.Value) then 
+            if edgeOpt.IsSome && not (isEpsilonAst <| snd edgeOpt.Value) then 
                 let arr = parserSource.Reduces.[state].[!curNum]
                 if arr <> null then
                     for (prod, pos) in arr do
@@ -231,7 +236,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 let vertex, prod, pos, edgeOpt = reductions.Pop()
                 let nonTerm = parserSource.LeftSide.[prod]
 
-                let handlePath (path : AstNode[]) (final : Vertex) =
+                let handlePath (path : obj[]) (final : Vertex) =
                     if final = null
                     then recovery()//pushes.Clear()
                     else
@@ -241,9 +246,9 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         let family = new Family(prod, new Nodes(Array.copy path))
                         if not <| containsEdge final family edges.[state] then
                             let isCreated, edgeLabel = addEdge final family edges.[state] false
-                            if pos > 0 && isCreated && not (isEpsilon edgeLabel) then
+                            if pos > 0 && isCreated && not (isEpsilonAst edgeLabel) then
                                 let arr = parserSource.Reduces.[state].[!curNum]
-                                let edgeOpt = Some (final, edgeLabel :> AstNode)
+                                let edgeOpt = Some (final, box edgeLabel)
                                 if arr <> null then
                                     for (prod, pos) in arr do
                                         reductions.Push (newVertex, prod, pos, edgeOpt)
@@ -271,7 +276,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                             while i < edges.Count do
                                 let (v,_,a) = edges.[i]
                                 let mutable j = i+1
-                                path.[remainLength - 1] <- a :> AstNode
+                                path.[remainLength - 1] <- box a
                                 walk (remainLength - 1) v path
                                 while j < edges.Count && trd edges.[j] = a do
                                     j <- j + 1
@@ -324,9 +329,9 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         else
                             null
                     if count >= 0 then
-                        vEdges.[count] <- new Edge(v, a)
+                        vEdges.[count] <- new Edge(v, box a)
                     else
-                        first <- new Edge(v, a)
+                        first <- new Edge(v, box a)
                     count <- count + 1
                     a.first <- snd3 edges.[i]
                     a.other <- other
@@ -345,7 +350,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 simpleEdges.[vertex].Clear()
 
         let shift num =
-            let newAstNode = Terminal(tokens.Count)
+            let newAstNode = box tokens.Count
             tokens.Add enum.Current
             if enum.MoveNext() then
                 curToken := enum.Current
@@ -366,7 +371,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             usedStates.Clear()
 
             for (vertex, state) in oldPushes do
-                let newVertex = addVertex state num <| Some (vertex, newAstNode :> AstNode)
+                let newVertex = addVertex state num <| Some (vertex, newAstNode)
                 addSimpleEdge vertex newAstNode simpleEdges.[state]
         
         /// returns all the terminals and non-terminals that make the push or reduce
@@ -382,37 +387,40 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             !expected
         
         /// returns  array that consists of tokens or error non-teminal (and its children)
-        let astToTokens (x : AstNode) =            
+        let astToTokens (x : obj) =            
             let visited = ref 0
-            let res = new ResizeArray<_>()
-            let rec go (x : AstNode) =                
+            let rec go (x : obj) =
+                let mutable res = []
                 incr visited
                 if !visited < 100 
                 then                    
-                    match x  with 
-                    | :? Terminal as t -> res.Add x
+                    match x : obj with 
+                    | :? int as t when t >= 0 -> res <- x :: res
+                    | :? Family as fam ->                    
+                        for i = 0 to fam.nodes.Length - 1 do
+                            res <- res @ go fam.nodes.[i]
                     | :? AST as ast ->
                         if ast.other <> null 
-                        then
+                        then                            
                             for family in ast.other do
                                 if family.prod = parserSource.LeftSide.Length
-                                then res.Add ast
-                                else family.nodes.doForAll go
+                                then res <- res @ [ast]
+                                else res <- res @ go family
                             
                         if ast.first.prod = parserSource.LeftSide.Length
-                        then res.Add ast
-                        else ast.first.nodes.doForAll go
+                        then res <- [ast] @ res
+                        else res <- go ast.first @ res
                     | _ -> ()
+                res
             go x
-            res |> List.ofSeq
         
         /// collects info about error that is needed in the translation
-        let createErrorNode (errFamily : Family) errOn (prod : int) (expected : int[]) (recToks : int[]) = 
+        let createErrorNode (errFamily : Family) (errOn : obj) (prod : int) (expected : int[]) (recToks : int[]) = 
 
             let exp = expected |> Array.map (fun i -> parserSource.NumToString i)
             let recToks = recToks |> Array.map (fun i -> parserSource.NumToString i)
             
-            try errDict.Add (errFamily, new ErrorNode<'TokenType> (errOn, -1, exp, recToks))
+            try errDict.Add (errFamily, new ErrorNode (errOn, -1, exp, recToks))
             with _ -> ()
 
         let containsRecState (oldVertices : Stack<Vertex * _ list>)(temp : Queue<_>) recVertNum recovery =
@@ -424,7 +432,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     let arr = parserSource.Reduces.[vertex.State].[!curNum]
                     if arr <> null
                     then 
-                        if  not (isEpsilon vertex.OutEdges.first.Ast) then
+                        if  not (isEpsilonAst vertex.OutEdges.first.Ast) then
                             let edgeOpt = Some (vertex.OutEdges.first.Dest, vertex.OutEdges.first.Ast)
                             for (prod, pos) in arr do
                                 reductions.Push (vertex, prod, pos, edgeOpt)
@@ -475,8 +483,8 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             curVertices
 
         /// creates a family of the unbrowsed tokens
-        let createErrorFam (unbrowsed : AstNode[])  = 
-            let reduceToError (vertex : Vertex) state (unbrowsed : AstNode[])= 
+        let createErrorFam (unbrowsed : obj[])  = 
+            let reduceToError (vertex : Vertex) state (unbrowsed : obj[])= 
                 let prodNumber = parserSource.Rules.Length
                 if unbrowsed.Length = 0 
                 then 
@@ -485,9 +493,9 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     then
                         addSimpleEdge vertex ast simpleEdges.[state]
                         let arr = parserSource.Reduces.[state].[!curNum]
-                        if arr <> null  && not (isEpsilon ast)
+                        if arr <> null  && not (isEpsilonAst ast)
                         then
-                            let edgeOpt = Some (vertex, ast :> AstNode)
+                            let edgeOpt = Some (vertex, ast)
                             for (prod, pos) in arr do
                                 reductions.Push (vertex, prod, pos, edgeOpt)
                     new Family(prodNumber, new Nodes([|ast|]))
@@ -498,9 +506,9 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     then
                         let _, edgeLabel = addEdge vertex family edges.[state] true
                         let arr = parserSource.Reduces.[state].[!curNum]
-                        if arr <> null && not (isEpsilon edgeLabel)
+                        if arr <> null && not (isEpsilonAst edgeLabel)
                         then
-                            let edgeOpt = Some (vertex, edgeLabel :> AstNode)
+                            let edgeOpt = Some (vertex, box edgeLabel)
                             for (prod, pos) in arr do
                                 reductions.Push (vertex, prod, pos, edgeOpt)
                     family
@@ -578,9 +586,9 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 let var = ref <| isRecToken !curNum
 
                 while !var = -1 && !curNum <> parserSource.EofIndex do
-                    let newAstNode = new Terminal(tokens.Count)
+                    let newAstNode = box tokens.Count
                     tokens.Add !curToken
-                    skipped.Enqueue (newAstNode :> AstNode)
+                    skipped.Enqueue newAstNode
                     if enum.MoveNext() 
                     then
                         curToken := enum.Current
@@ -600,11 +608,11 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     let rec onTok i =
                         if i >= 0
                         then
-                            let x = tokens.[i]
+                            let x = tokens.[i] 
                             if box x <> null
-                            then Some x
+                            then box x
                             else onTok (i-1)
-                        else None
+                        else null
                             
                     createErrorNode fam <| onTok errInd <| 0 <| Set.toArray !expected <| thr arr.[!var]
 
@@ -612,7 +620,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         let wasError = ref false
 
         while not !isEnd && not !wasError do
-            if usedStates.Count = 0 && reductions.Count = 0 
+            if usedStates.Count = 0 && reductions.Count = 0
             then 
                 wasError := true
             else
@@ -669,7 +677,5 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             match !root with
             | None -> Error (!curInd, [|!curToken|], "Input was fully processed, but it's not complete correct string.", debugFuns (), errDict)
             | Some res -> 
-                debugFuns().drawGSSDot "res.dot"
-                let tree = new Tree<_> (tokens.ToArray(), res :> AstNode, parserSource.Rules)
-                //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber None parserSource.LeftSide "../../../Tests/RNGLR/sppf.dot"
-                Success (tree, [||], errDict)
+            //    debugFuns().drawGSSDot "res.dot"
+                Success (new Tree<_> (tokens.ToArray(), res, parserSource.Rules), [||], errDict)

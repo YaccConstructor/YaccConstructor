@@ -6,18 +6,22 @@
 <title>CYK of YaccConstructor</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>
-<licenseUrl>https://code.google.com/p/recursive-ascent/source/browse/LICENSE</licenseUrl>
-<projectUrl>https://code.google.com/p/recursive-ascent</projectUrl>
+<licenseUrl>https://github.com/YaccConstructor/YaccConstructor/blob/dev/LICENSE</licenseUrl>
+<projectUrl>https://github.com/YaccConstructor/YaccConstructor</projectUrl>
 <iconUrl>https://recursive-ascent.googlecode.com/git/logo/YC_big.jpg</iconUrl>
 <requireLicenseAcceptance>false</requireLicenseAcceptance>
 <description>Parser generator based on YaccConstructor. Creates bottom-up parser, based on CYK algoruthm, that handle context-free grammars in CNF.
 </description>
 <releaseNotes>Support for .NET 4.0 .</releaseNotes>
-<copyright>Copyright 2013, 2014</copyright>
+<copyright>Copyright 2013, 2014, 2015</copyright>
 <tags>Parsing Reengineering YaccConstructor YC Core Grammarware .NET F# FSharp</tags>
 <dependencies>
-<dependency id="YC.Core" version="0.0.3.0" />
+<dependency id="YC.Core" version="0.3.0.0" />
 </dependencies>
+<references>
+  <reference file="CYKCommon.dll" />
+  <reference file="CYKGenerator.dll" />
+</references>>
 </metadata>
 <files>
 <file src="..\README.md" target="README.txt" />

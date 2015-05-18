@@ -1,4 +1,4 @@
-﻿module Yard.Generators.RNGLR.EBNF.States
+﻿module Yard.Generators.RNGLR.EBNF.DFA.States
 
 open System.Collections.Generic
 open Yard.EBNF.FinalGrammar
@@ -107,7 +107,7 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
     let stateToDerivedLookahead = new ResizeArray<Set<int>[] >()
     let curSymbol kernel = KernelInterpreter.symbol grammar kernel
     let symbolAndLookAheads (*kernel lookAheads*) = KernelInterpreter.symbolAndLookAheads grammar
-    let wasEdge = new ResizeArray<Set<int> >()
+    let wasEdge = new ResizeArray<Set<int>>()
     let wasNonTerm = Array.zeroCreate grammar.indexator.fullCount
     let wasNTermSymbol : bool[,] = Array2D.zeroCreate grammar.indexator.fullCount grammar.indexator.fullCount
     let addedNTermsSymbols = new ResizeArray<_>(grammar.indexator.fullCount * grammar.indexator.fullCount)

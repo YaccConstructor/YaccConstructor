@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-namespace Yard.Generators.RNGLR.EBNF
+namespace Yard.Generators.RNGLR.EBNF.DFA
 
 type ParserSourceEBNF<'TokenType> (gotos : (int * (int * int)) option [][] //goto consists of number of state where to go to and sets of productions to Stack/not to Stack
                                , reduces : int [][][]

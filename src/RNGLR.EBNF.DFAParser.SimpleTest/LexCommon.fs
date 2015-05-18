@@ -1,7 +1,7 @@
 ﻿module LexCommon
 
 open Microsoft.FSharp.Text
-open Yard.Generators.RNGLR.EBNF.Parser
+open Yard.Generators.RNGLR.EBNF.DFA.Parser
 open Microsoft.FSharp.Reflection
 
 let tokens<'lexType>(path) = 

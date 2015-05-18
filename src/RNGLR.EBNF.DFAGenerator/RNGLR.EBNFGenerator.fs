@@ -1,10 +1,9 @@
-﻿namespace Yard.Generators.RNGLR.EBNF
+﻿namespace Yard.Generators.RNGLR.EBNF.DFA
 
 open Mono.Addins
 open Yard.Core
 open IL
 open Constraints
-//open Yard.Generators.RNGLR
 open Yard.Generators.Common.InitialConvert
 open Yard.EBNF.FinalGrammar
 open Yard.Generators.RNGLR.States
@@ -20,9 +19,9 @@ open Option
 do()
 
 [<Extension>]
-type RNGLREBNF() = 
+type RNGLREBNFDFA() = 
     inherit Generator()
-        override this.Name = "RNGLR.EBNFGenerator"
+        override this.Name = "RNGLR.EBNF.DFAGenerator"
         override this.Constraints = [|noMeta; noBrackets; needAC; singleModule|]
         override this.Generate (definition, args) =
             let start = System.DateTime.Now
@@ -165,8 +164,8 @@ type RNGLREBNF() =
                     println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
                     
-                    println "open Yard.Generators.RNGLR.EBNF"
-                    println "open Yard.Generators.RNGLR.EBNF.Parser"
+                    println "open Yard.Generators.RNGLR.EBNF.DFA"
+                    println "open Yard.Generators.RNGLR.EBNF.DFA.Parser"
                     println "open Yard.Generators.Common.AST"
                     
                     if !needHighlighting && !needTranslate
@@ -184,7 +183,7 @@ type RNGLREBNF() =
                 let scalaHeaders () =
 
                     println "package %s" package
-                    println "//import Yard.Generators.RNGLR.Parser"
+                    println "//import Yard.Generators.RNGLR.DFA.Parser"
                     println "//import Yard.Generators.RNGLR"
                     println "//import Yard.Generators.RNGLR.AST"
 

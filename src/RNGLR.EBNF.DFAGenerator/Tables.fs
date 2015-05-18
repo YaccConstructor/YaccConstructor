@@ -1,8 +1,8 @@
-﻿namespace Yard.Generators.RNGLR.EBNF
+﻿namespace Yard.Generators.RNGLR.EBNF.DFA
 
 open Yard.EBNF.FinalGrammar
 open Yard.Generators.RNGLR.States
-open Yard.Generators.RNGLR.EBNF.States
+open Yard.Generators.RNGLR.EBNF.DFA.States
 
 type TablesEBNF(grammar : FinalGrammarNFA, states : StatesInterpreterEBNF) =
     let _reduces, _gotos, _acc =

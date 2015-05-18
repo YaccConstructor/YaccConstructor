@@ -1,8 +1,8 @@
-﻿module RNGLREBNFParserSimpleTest
+﻿module RNGLREBNFDFAParserSimpleTest
 
 open Yard.Generators.Common.AST
-open Yard.Generators.RNGLR.EBNF.Parser
-open Yard.Generators.RNGLR.EBNF
+open Yard.Generators.RNGLR.EBNF.DFA.Parser
+open Yard.Generators.RNGLR.EBNF.DFA
 open NUnit.Framework
 open LexCommon
 
@@ -11,7 +11,7 @@ let run path astBuilder =
     let tokens = LexCommon.tokens(path)
     astBuilder tokens
 
-let dir = @"../../../Tests/RNGLR.EBNF/"
+let dir = @"../../../Tests/RNGLR.EBNF.DFA/"
 let inline printErr (num, token : 'a, msg) =
     printfn "Error in position %d on Token %A: %s" num token msg
 

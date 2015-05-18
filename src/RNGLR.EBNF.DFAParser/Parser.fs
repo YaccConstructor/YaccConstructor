@@ -12,12 +12,12 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Generators.RNGLR.EBNF.Parser
+module Yard.Generators.RNGLR.EBNF.DFA.Parser
 
 open Yard.Generators.Common.AST
 open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
-open Yard.Generators.RNGLR.EBNF
+open Yard.Generators.RNGLR.EBNF.DFA
 open Microsoft.FSharp.Collections
 
 [<AllowNullLiteral>]

@@ -388,3 +388,6 @@ src/RNGLRParser.SimpleTest/*.dot
 src/GLLParser.SimpleTest/*.yrd.fs
 src/GLLParser.SimpleTest/log.txt
 BuildScripts/TestResult.xml
+src/ExtCalc/ExtCalcHighlighting/*.xml
+src/ExtCalc/ExtCalcHighlighting/*.target
+src/ExtCalc/ExtCalcHighlighting/*.config

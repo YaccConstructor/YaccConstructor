@@ -14,7 +14,7 @@
     <RestorePackages>true</RestorePackages>
     <TargetFrameworkProfile />
   </PropertyGroup>
- <Import Project="../YC.targets" />
+  <Import Project="../YC.targets" />
   <ItemGroup>
     <Reference Include="Antlr3.Runtime">
       <HintPath>..\..\3rdParty\graphviz4net\Antlr3.Runtime.dll</HintPath>
@@ -31,8 +31,7 @@
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\NUnit.3.0.0-beta-1\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="QuickGraph">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>

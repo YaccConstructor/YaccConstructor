@@ -4,13 +4,14 @@ module YC.ExtCalcLexer
 
 open Microsoft.FSharp.Collections
 open YC.FST.GraphBasedFst
+open YC.FSA.GraphBasedFsa
 open YC.FST.AbstractLexing.Interpreter
 open AbstractAnalysis.Common
 open ExtCalc.AbstractParser
 open System.Collections.Generic
 open YC.SDK.CommonInterfaces
 
-# 13 "Lexer.fs"
+# 14 "Lexer.fs"
 let trans : uint16[] array = 
     [| 
    (* State 0 *)
@@ -63,59 +64,59 @@ and token  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_token  
 and _fslex_token  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 18 "Lexer.fsl"
+# 19 "Lexer.fsl"
                               None 
-# 68 "Lexer.fs"
+# 69 "Lexer.fs"
           )
   | 1 -> ( 
-# 19 "Lexer.fsl"
+# 20 "Lexer.fsl"
                                                                   NUMBER(gr) |> Some 
-# 73 "Lexer.fs"
+# 74 "Lexer.fs"
           )
   | 2 -> ( 
-# 20 "Lexer.fsl"
+# 21 "Lexer.fsl"
                            VARIABLE(gr) |> Some 
-# 78 "Lexer.fs"
+# 79 "Lexer.fs"
           )
   | 3 -> ( 
-# 21 "Lexer.fsl"
+# 22 "Lexer.fsl"
                        EQ(gr) |> Some 
-# 83 "Lexer.fs"
+# 84 "Lexer.fs"
           )
   | 4 -> ( 
-# 22 "Lexer.fsl"
+# 23 "Lexer.fsl"
                        SEMI(gr) |> Some 
-# 88 "Lexer.fs"
+# 89 "Lexer.fs"
           )
   | 5 -> ( 
-# 23 "Lexer.fsl"
+# 24 "Lexer.fsl"
                        MINUS(gr) |> Some 
-# 93 "Lexer.fs"
+# 94 "Lexer.fs"
           )
   | 6 -> ( 
-# 24 "Lexer.fsl"
+# 25 "Lexer.fsl"
                        LBRACE(gr) |> Some 
-# 98 "Lexer.fs"
+# 99 "Lexer.fs"
           )
   | 7 -> ( 
-# 25 "Lexer.fsl"
+# 26 "Lexer.fsl"
                        RBRACE(gr) |> Some 
-# 103 "Lexer.fs"
+# 104 "Lexer.fs"
           )
   | 8 -> ( 
-# 26 "Lexer.fsl"
+# 27 "Lexer.fsl"
                        DIV(gr) |> Some 
-# 108 "Lexer.fs"
+# 109 "Lexer.fs"
           )
   | 9 -> ( 
-# 27 "Lexer.fsl"
+# 28 "Lexer.fsl"
                        PLUS(gr) |> Some 
-# 113 "Lexer.fs"
+# 114 "Lexer.fs"
           )
   | 10 -> ( 
-# 28 "Lexer.fsl"
+# 29 "Lexer.fsl"
                        MUL(gr) |> Some 
-# 118 "Lexer.fs"
+# 119 "Lexer.fs"
           )
   | _ -> failwith "token"
 

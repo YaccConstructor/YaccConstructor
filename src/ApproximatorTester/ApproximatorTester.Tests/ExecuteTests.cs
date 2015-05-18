@@ -17,9 +17,15 @@ namespace ApproximatorTester.Tests
         }
 
         [Test]
-        public void Test0()
+        public void TestSimpleQuery()
         {
-            DoTestFiles("test0.cs");
+            DoTestFiles("SimpleQuery.cs");
+        }
+
+        [Test]
+        public void TestFourVars()
+        {
+            DoTestFiles("FourVars.cs");
         }
     }
 }

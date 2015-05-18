@@ -57,8 +57,8 @@ open System.Runtime.InteropServices
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-// [assembly: AssemblyVersion("0.0.6.113")]
-[<assembly: AssemblyVersion("0.0.6.113")>]
-[<assembly: AssemblyFileVersion("0.0.6.113")>]
+// [assembly: AssemblyVersion("0.0.6.131")]
+[<assembly: AssemblyVersion("0.0.6.131")>]
+[<assembly: AssemblyFileVersion("0.0.6.131")>]
 
 do ()

@@ -7,19 +7,27 @@ open QuickGraph.Algorithms
 open AbstractAnalysis.Common
 open Yard.Generators.Common.AST
 open YC.FST.AbstractLexing.Interpreter
-open YC.FST.FstApproximation
 open YC.FST.GraphBasedFst
+open YC.FSA.FsaApproximation
+open YC.FSA.GraphBasedFsa
+open System.Collections.Generic
 open ControlFlowGraph
 
 type TreeGenerationState<'node> = 
     | Start
     | InProgress of 'node * int list
     | End of 'node
+    
+    //add typegraph
+type DrawingGraph (vertices : IEnumerable<int>, edges : List<TaggedEdge<int, string>>) =
+    member this.Vertices = vertices
+    member this.Edges = edges
 
-type LexingFinishedArgs<'node> (tokens : ResizeArray<'node>, lang : string) =
+type LexingFinishedArgs<'node> (tokens : ResizeArray<'node>, lang:string, drawGraph : DrawingGraph) =
      inherit System.EventArgs()
      member this.Tokens = tokens
      member this.Lang = lang
+     member this.Graph = drawGraph
 
 type ParsingFinishedArgs(lang : string) = 
     inherit System.EventArgs()
@@ -33,7 +41,7 @@ type InjectedLanguageAttribute(language : string) =
     member this.language = language
 
 [<Interface>]
-type IInjectedLanguageModule<'br,'range,'node> =    
+type IInjectedLanguageModule<'br,'range,'node when 'br : equality> =    
      abstract Name: string
      abstract LexingFinished: IEvent<LexingFinishedArgs<'node>>
      abstract ParsingFinished: IEvent<ParsingFinishedArgs>
@@ -46,12 +54,15 @@ type IInjectedLanguageModule<'br,'range,'node> =
             ResizeArray<string * 'range> * ResizeArray<string * 'range> * ResizeArray<string * 'range>
 
 
-type Processor<'TokenType, 'br, 'range, 'node>  when 'br:equality and  'range:equality and 'node:null
+type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:equality and 'node:null 
     (
         //tokenize: Appr<'br> -> ParserInputGraph<'TokenType>
-        tokenize: Appr<'br> -> Test<ParserInputGraph<'TokenType>, array<Smbl<char * Position<'br>>>>
-        , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang, calculatePos:_->seq<'range>
-        , getDocumentRange:'br -> 'range
+        tokenize: Appr<'br> -> Test<ParserInputGraph<'TokenType>
+        , array<Symb<char*Position<'br>>>>
+        , parse, translate, tokenToNumber: 'TokenType -> int
+        , numToString: int -> string, tokenData: 'TokenType -> obj
+        , tokenToTreeNode, lang, calculatePos:_->seq<'range>
+        , getDocumentRange: 'br -> 'range
         , printAst: Tree<'TokenType> -> string -> unit
         , printOtherAst: OtherTree<'TokenType> -> string -> unit
         , semantic : _ option) as this =
@@ -67,9 +78,17 @@ type Processor<'TokenType, 'br, 'range, 'node>  when 'br:equality and  'range:eq
     let prepareToHighlighting (graphOpt : ParserInputGraph<'token> option) tokenToTreeNode = 
         if graphOpt.IsSome
         then
+            
             let tokensList = new ResizeArray<_>()
 
-            let inGraph = graphOpt.Value 
+            let inGraph = graphOpt.Value
+            let edges = ResizeArray()
+            for e in inGraph.Edges do
+                let tokenName = e.Tag |> tokenToNumber |> numToString
+                edges.Add( new TaggedEdge<int, string>(e.Source, e.Target, tokenName))
+            let vertices = inGraph.Vertices
+                     
+            let drawGraph = DrawingGraph(vertices, edges)
             inGraph.TopologicalSort()
             |> Seq.iter 
                 (fun vertex -> 
@@ -77,7 +96,7 @@ type Processor<'TokenType, 'br, 'range, 'node>  when 'br:equality and  'range:eq
                         |> Seq.iter (fun edge -> tokensList.Add <| tokenToTreeNode edge.Tag)
                 )
 
-            lexingFinished.Trigger(new LexingFinishedArgs<'node>(tokensList, lang))
+            lexingFinished.Trigger(new LexingFinishedArgs<'node>(tokensList, lang, drawGraph))
 
     let processLang graph addLError addPError addSError =
 //        let tokenize g =
@@ -168,7 +187,7 @@ type Processor<'TokenType, 'br, 'range, 'node>  when 'br:equality and  'range:eq
         | _ -> failwith "Unexpected state in tree generation"
 
     member this.TokenToPos calculatePos (token : 'TokenType)= 
-        let data : string * GraphTokenValue<'br> = unbox <| tokenData token
+        let data : string * FSA<char*Position<'br>> = unbox <| tokenData token
         calculatePos <| snd data
 
     member this.GetForestWithToken range = getForestWithToken range
@@ -195,7 +214,7 @@ type Processor<'TokenType, 'br, 'range, 'node>  when 'br:equality and  'range:eq
         let semanticErrors = new ResizeArray<_>()
 
         let addError tok isParse =
-            let e tokName (tokenData: GraphTokenValue<'br>) = 
+            let e tokName (tokenData: FSA<char*Position<'br>>) = 
                 tokenData |> calculatePos
                 |> Seq.iter
                     ///TODO!!! Produce user friendly error message!
@@ -203,7 +222,7 @@ type Processor<'TokenType, 'br, 'range, 'node>  when 'br:equality and  'range:eq
                                then parserErrors.Add <| ((sprintf "%A" tokName), br)
                                else semanticErrors.Add <| ((sprintf "%A" tokName), br))
             let name = tok |> (tokenToNumber >>  numToString)
-            let tokenData = tokenData tok :?> GraphTokenValue<'br>
+            let tokenData = tokenData tok :?> FSA<char*Position<'br>>
             e name tokenData
         
         let addPError tok = addError tok true

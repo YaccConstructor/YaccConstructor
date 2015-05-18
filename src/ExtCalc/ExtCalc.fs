@@ -1,4 +1,4 @@
-﻿namespace YC.ReSharper.AbstractAnalysis.Languages.Calc
+﻿namespace YC.ReSharper.AbstractAnalysis.Languages.ExtCalc
 
 open ExtCalc.AbstractParser
 open Yard.Generators.Common.AST
@@ -8,6 +8,9 @@ open YC.SDK.ReSharper.Helper
 open ReSharperExtension
 open JetBrains.Application
 open YC.FST.AbstractLexing.Interpreter
+open YC.FSA.GraphBasedFsa
+open YC.FSA.FsaApproximation
+open YC.FST.GraphBasedFst
 open ControlFlowGraph
 
 [<assembly:Addin>]
@@ -20,9 +23,13 @@ type br = JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression
 [<Extension>]
 [<ShellComponent>]
 type ExtCalcInjectedLanguageModule () =
-    let tokenize lexerInputGraph =
-        let eof = RNGLR_EOF(new GraphTokenValue<_>())    
-        YC.ExtCalcLexer.tokenize eof lexerInputGraph
+    let tokenize (lexerInputGraph:Appr<_>) =
+        let graphFsa = lexerInputGraph.ApprToFSA()
+        let eof = RNGLR_EOF(new FSA<_>())
+        let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
+        let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
+        let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
+        YC.ExtCalcLexer.tokenize eof graphFst
 
     let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
 
@@ -46,11 +53,11 @@ type ExtCalcInjectedLanguageModule () =
     let translate ast errors = translate args ast errors
 
     // variables for some semantic actions
-    let semicolonNumber = tokenToNumber <| Token.SEMI (new GraphTokenValue<br>())
-    let eqNumber = tokenToNumber <| Token.EQ (new GraphTokenValue<br>())
+    let semicolonNumber = tokenToNumber <| Token.SEMI (new FSA<_>())
+    let eqNumber = tokenToNumber <| Token.EQ (new FSA<_>())
     let isVariable = 
         fun n -> 
-            let num2 = tokenToNumber <| Token.VARIABLE (new GraphTokenValue<br>())
+            let num2 = tokenToNumber <| Token.VARIABLE (new FSA<_>())
             n = num2
 
     let nodeToType = dict["assign", Assignment;]
@@ -58,16 +65,11 @@ type ExtCalcInjectedLanguageModule () =
     let langSource = new LanguageSource(nodeToType, typeToDelimiters, -1, -1, eqNumber, isVariable)
 
     let tokToSourceString token = 
-        let tok = (unbox <| tokenData token) :> GraphTokenValue<br>
+        let tok = (unbox <| tokenData token) :> FSA<char*Position<br>>
         
-        tok.Edges
-        |> Seq.map (fun edge -> 
-            let range = edge.BackRef.GetNavigationRange()
-            let startOffset = range.StartOffsetRange().TextRange.StartOffset
-            let newStart = startOffset + 1 + edge.StartPos
-            let newEnd = startOffset + 1 + edge.EndPos
-            range.SetStartTo(newStart).SetEndTo(newEnd).GetText()
-            )
+        calculatePos tok
+        |> List.ofSeq
+        |> List.map (fun range -> range.GetText())
         |> List.ofSeq
         |> List.fold (fun acc elem -> acc + elem) ""
 

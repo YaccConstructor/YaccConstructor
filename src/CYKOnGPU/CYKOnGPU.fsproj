@@ -9,7 +9,6 @@
     <OutputType>Library</OutputType>
     <RootNamespace>CYKOnGPU</RootNamespace>
     <AssemblyName>CYKOnGPU</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>CYKOnGPU</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -18,35 +17,28 @@
   <Import Project="../YC.targets" />
   <ItemGroup>
     <Reference Include="Brahma">
-      <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.dll</HintPath>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.AST">
-      <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.FSharp.OpenCL.AST.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.FSharp.OpenCL.AST.dll</HintPath>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Core">
-      <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.FSharp.OpenCL.Core.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.FSharp.OpenCL.Core.dll</HintPath>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Extensions">
-      <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.FSharp.OpenCL.Extensions.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.FSharp.OpenCL.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Printer">
-      <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.FSharp.OpenCL.Printer.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.FSharp.OpenCL.Printer.dll</HintPath>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Translator">
-      <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.FSharp.OpenCL.Translator.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.FSharp.OpenCL.Translator.dll</HintPath>
     </Reference>
     <Reference Include="Brahma.Helpers">
-      <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.Helpers.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.Helpers.dll</HintPath>
     </Reference>
     <Reference Include="Brahma.OpenCL">
-      <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.OpenCL.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.OpenCL.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>

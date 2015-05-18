@@ -1,9 +1,10 @@
 {
-open YC.FST.AbstractLexing.Interpreter
+open YC.FSA.FsaApproximation
+open YC.FSA.GraphBasedFsa
 }
 
 tokens {
-    _ of GraphTokenValue<string>
+    _ of FSA<char*Position<string>>
 }
 
 options {

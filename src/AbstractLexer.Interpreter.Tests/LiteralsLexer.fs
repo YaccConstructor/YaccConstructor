@@ -4,12 +4,13 @@ module YC.FST.AbstractLexing.LiteralsLexer
 
 open Microsoft.FSharp.Collections
 open YC.FST.GraphBasedFst
+open YC.FSA.GraphBasedFsa
 open YC.FST.AbstractLexing.Interpreter
 open AbstractAnalysis.Common
 open AbstractParser.Tokens
 open System.Collections.Generic
 
-# 12 "LiteralsLexer.fs"
+# 13 "LiteralsLexer.fs"
 let trans : uint16[] array = 
     [| 
    (* State 0 *)
@@ -32,9 +33,9 @@ and token  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_token  
 and _fslex_token  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 15 "LiteralsLexer.fsl"
+# 16 "LiteralsLexer.fsl"
                                    LITERAL(gr) |> Some 
-# 37 "LiteralsLexer.fs"
+# 38 "LiteralsLexer.fs"
           )
   | _ -> failwith "token"
 

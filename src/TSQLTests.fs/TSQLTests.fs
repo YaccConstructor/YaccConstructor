@@ -24,33 +24,17 @@ let eofToken = Yard.Examples.MSParser.RNGLR_EOF (new FSA<_>())
 let path baseInputGraphsPath name = System.IO.Path.Combine(baseInputGraphsPath,name)
 
 let loadGraphFromDOT filePath =
-//    let parser = AntlrParserAdapter<string>.GetParser()
-//    parser.Parse(new StreamReader(File.OpenRead filePath))
-    let graphs = DotLangParser.parse filePath
-    let processed = new System.Collections.Generic.Dictionary<_,_>()
-    let taggedHandler v1 v2 (tags: list<string*string>) =
-        if processed.ContainsKey(v1,v2) |> not
-        then
-            processed.Add((v1,v2),1)
-            match tags.Length with
-            | 0 ->
-                [new TaggedEdge<int, string>(int v1, int v2, "_no_tag_")]
-            | _ ->
-                tags
-                |> List.map (fun (_,tag) ->  new TaggedEdge<int, string>(int v1, int v2, tag.ToLowerInvariant()))
-        else []
-
-    let edges = graphs.[0].GetTaggedEdgeArray taggedHandler |> Array.reduce (@)
-    let graph = edges.ToAdjacencyGraph<_, TaggedEdge<_,_>>()
-    graph
+    let parser = AntlrParserAdapter<string>.GetParser()
+    parser.Parse(new StreamReader(File.OpenRead filePath))
 
 let loadDotToQG baseInputGraphsPath gFile =
     let qGraph = loadGraphFromDOT(path baseInputGraphsPath gFile)
     let graphAppr = new Appr<_>()
     graphAppr.InitState <- ResizeArray.singleton 0
 
-    for e in qGraph.Edges do        
-        new TaggedEdge<_,_>(e.Source, e.Target, (Smb(e.Tag, e.Tag))) |> graphAppr.AddVerticesAndEdge |> ignore
+    for e in qGraph.Edges do
+        let edg = e :?> DotEdge<string>
+        new TaggedEdge<_,_>(int edg.Source.Id, int edg.Destination.Id, (edg.Label, new CalcHighlighting.CalcBaseTreeNode("", 0))) |> graphAppr.AddVerticesAndEdge |> ignore
 
     graphAppr.FinalState <- ResizeArray.singleton (Seq.max graphAppr.Vertices)
     graphAppr
@@ -65,12 +49,7 @@ let getResultFileName path pref =
     System.IO.Path.Combine (!resultDirectoryPath, pref + System.IO.Path.GetFileName path)
                                   //path.Substring(path.LastIndexOf("\\") + 1)
 
-let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
-
-let getTokenName = tokenToNumber >> numToString
-
-let parse = fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGraph
-
+//let flg = ref false
 let LexerTSQL (srcFilePath:string) =
     let lexerInputGraph = loadLexerInputGraph srcFilePath
     let graphFsa = lexerInputGraph.ApprToFSA()
@@ -79,35 +58,12 @@ let LexerTSQL (srcFilePath:string) =
     let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
     let tokenize srcFilePath = 
         let start = System.DateTime.Now
-        for i in 1..5 do YC.TSQLLexer.tokenize eofToken lexerInputGraph  |> ignore
+        for i in 1..10 do YC.TSQLLexer.tokenize eofToken graphFst  |> ignore
         printf  "%s " (System.IO.Path.GetFileNameWithoutExtension(srcFilePath))
         printf " %A " <| (System.DateTime.Now - start).TotalMilliseconds / 10.0
         printfn " "
-        //System.GC.Collect()
+        System.GC.Collect()
     tokenize srcFilePath
-
-let parseSQL srcFilePath = 
-    let lexerInputGraph = loadLexerInputGraph srcFilePath
-    let s = System.DateTime.Now
-    let input =
-        match YC.TSQLLexer.tokenize eofToken lexerInputGraph with
-        | YC.FST.GraphBasedFst.Test.Success r -> 
-            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName srcFilePath)
-            |> ignore
-            r.PrintToDot (System.IO.Path.Combine(System.IO.Path.GetDirectoryName srcFilePath, System.IO.Path.GetFileNameWithoutExtension srcFilePath) + ".tokenized.dot") getTokenName
-            r
-        | YC.FST.GraphBasedFst.Test.Error e -> failwithf "Tokenization failed! %A" e
-    printfn "Lexer time = %A" (System.DateTime.Now - s)
-    //QuickGraph.EdgeListGraph
-    let start = System.DateTime.Now
-    for i in 1..1 do 
-        let r = parse input
-        match r with
-        | Yard.Generators.ARNGLR.Parser.ParseResult.Success (t) -> t.PrintAst()
-        | _ -> failwith "!!!!!"
-        printf  "%s " (System.IO.Path.GetFileNameWithoutExtension(srcFilePath))
-        printf " %A " <| (System.DateTime.Now - start).TotalMilliseconds / 10.0
-        printfn " "
 
 let LexerTSQLAllDirectory (directoryName:string) =
     resultDirectoryPath := System.IO.Path.Combine(directoryName, "results")
@@ -118,20 +74,15 @@ let LexerTSQLAllDirectory (directoryName:string) =
 do 
     let inPath = ref @"..\..\tests\s2.dot"
     let lexerDir = ref false
-    let parse = ref false
-
     let commandLineSpecs =
         [
          "-f", ArgType.String (fun s -> inPath := path baseInputGraphsPath s), "Input file."
          "-d", ArgType.String (fun s -> lexerDir := true; inPath := s), "Input dir. Use for parse all files in specified directory."
-         "-p", ArgType.Unit (fun _ -> parse := true), "Run parsing."
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
     ArgParser.Parse commandLineSpecs
 
     !inPath
     |> if !lexerDir
        then LexerTSQLAllDirectory
-       elif !parse
-       then parseSQL
-       else LexerTSQL 
+       else LexerTSQL
 

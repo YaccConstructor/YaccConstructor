@@ -8,7 +8,7 @@
     <ProjectGuid>b343a9c6-170b-48e9-8296-771f874675dc</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>RNGLR.EBNF.DFAParser</RootNamespace>
-    <AssemblyName>RNGLR.EBNF.DFAParser</AssemblyName>
+    <AssemblyName>YC.RNGLR.EBNF.DFAParser</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
     <Name>RNGLR.EBNF.DFAParser</Name>
@@ -42,7 +42,21 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
+      <Name>Common.AST</Name>
+      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLR.EBNF.DFACommon\RNGLR.EBNF.DFACommon.fsproj">
+      <Name>RNGLR.EBNF.DFACommon</Name>
+      <Project>{e7f2f65a-94bf-4681-8bba-e5b69521e5c3}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Parser.fs" />
+  </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>

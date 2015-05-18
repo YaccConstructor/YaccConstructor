@@ -8,11 +8,13 @@
     <ProjectGuid>55a3fc49-5acc-42ee-a510-65b158ea1858</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>RNGLR.EBNF.DFAGenerator</RootNamespace>
-    <AssemblyName>RNGLR.EBNF.DFAGenerator</AssemblyName>
+    <AssemblyName>YC.RNGLR.EBNF.DFAGenerator</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
     <Name>RNGLR.EBNF.DFAGenerator</Name>
     <TargetFrameworkProfile />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -33,16 +35,6 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\RNGLR.EBNF.DFAGenerator.XML</DocumentationFile>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup />
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
@@ -59,6 +51,58 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <Compile Include="PrintTables.fs" />
+    <Compile Include="RNGLR.EBNFGenerator.fs" />
+    <Compile Include="States.fs" />
+    <Compile Include="Tables.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Mono.Addins">
+      <HintPath>..\packages\Mono.Addins.1.2\lib\net40\Mono.Addins.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="mscorlib" />
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\FsYacc\FsYacc.fsproj">
+      <Name>FsYacc</Name>
+      <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Generators.Common\Common.Generators.fsproj">
+      <Name>Common.Generators</Name>
+      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLR.EBNF.DFACommon\RNGLR.EBNF.DFACommon.fsproj">
+      <Name>RNGLR.EBNF.DFACommon</Name>
+      <Project>{e7f2f65a-94bf-4681-8bba-e5b69521e5c3}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLRGenerator\RNGLRGenerator.fsproj">
+      <Name>RNGLRGenerator</Name>
+      <Project>{5baf0fba-31b7-406d-bea4-1bcc1418a63f}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

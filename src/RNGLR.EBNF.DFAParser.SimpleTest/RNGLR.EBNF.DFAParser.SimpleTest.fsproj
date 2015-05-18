@@ -8,7 +8,7 @@
     <ProjectGuid>e28f399c-5b62-413c-a1a5-521d0a448c6c</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>RNGLR.EBNF.DFAParser.SimpleTest</RootNamespace>
-    <AssemblyName>RNGLR.EBNF.DFAParser.SimpleTest</AssemblyName>
+    <AssemblyName>YC.RNGLR.EBNF.DFAParser.SimpleTest</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
@@ -38,20 +38,6 @@
     <DocumentationFile>bin\Release\RNGLR.EBNF.DFAParser.SimpleTest.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
@@ -68,6 +54,46 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
+  <ItemGroup>
+    <Compile Include="LexCommon.fs" />
+    <None Include="CalcEBNF.yrd" />
+    <None Include="ComplexRightNull.yrd" />
+    <None Include="EpsilonCycle.yrd" />
+    <None Include="ManyAndOne.yrd" />
+    <None Include="ManyAndOpt.yrd" />
+    <None Include="RightNull.yrd" />
+    <None Include="SimpleEpsilon.yrd" />
+    <None Include="SimpleOpt.yrd" />
+    <None Include="SimpleRightNull.yrd" />
+    <None Include="SimpleSome.yrd" />
+    <None Include="StackingConflict.yrd" />
+    <None Include="TwoEpsilonsMiddle.yrd" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
+      <Name>Common.AST</Name>
+      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLR.EBNF.DFACommon\RNGLR.EBNF.DFACommon.fsproj">
+      <Name>RNGLR.EBNF.DFACommon</Name>
+      <Project>{e7f2f65a-94bf-4681-8bba-e5b69521e5c3}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLR.EBNF.DFAParser\RNGLR.EBNF.DFAParser.fsproj">
+      <Name>RNGLR.EBNF.DFAParser</Name>
+      <Project>{b343a9c6-170b-48e9-8296-771f874675dc}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

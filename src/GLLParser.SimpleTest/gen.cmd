@@ -54,3 +54,7 @@ for %%i in (ComplexRightNull,Expr,First,List,SimpleRightNull) do (
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Mixed.yrd -c ExpandEbnf -c ExpandMeta ^
         -g "GLLGenerator -pos int -token int -abstract false -module GLL.Mixed -o Mixed.yrd.fs " >> log.txt
 
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i PrettySimpleCalc.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "GLLGenerator -pos int -token int -abstract false -module GLL.PrettySimpleCalc -o PrettySimpleCalc.yrd.fs " >> log.txt
+
+

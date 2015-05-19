@@ -44,6 +44,8 @@
     <Compile Include="SimpleRightNull.yrd.fs" />
     <Compile Include="LexCommon.fs" />
     <Compile Include="Cond.yrd.fs" />
+    <Compile Include="Order.yrd.fs" />
+    <Compile Include="PrettySimpleCalc.yrd.fs" />
     <Compile Include="GLLParserSimpleTest.fs" />
   </ItemGroup>
   <ItemGroup>

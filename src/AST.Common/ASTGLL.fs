@@ -175,20 +175,12 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
         out.WriteLine("}")
         out.Close()
 
-    member this.CountCounters () =
+    member this.CountCounters  =
          
         let nodesCount = ref 0
         let edgesCount = ref 0
         let termsCount = ref 0
         let ambiguityCount = ref 0
-
-        let incrNodesCounter = incr nodesCount
-        let incrEdgesCounter = incr edgesCount
-        let incrAmbiguityCounter = incr ambiguityCount
-         
-        let incrTermsCounter =
-            incr termsCount
-            incrNodesCounter
 
         let nodeQueue = new Queue<NumNode>()
         let used = new Dictionary<_,_>()
@@ -202,7 +194,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
 
                 if currentPair.Node <> null && used.TryGetValue(currentPair.Node, key)
                 then
-                    incrEdgesCounter
+                    incr edgesCount
                 else    
                     num := !num + 1
                     used.Add(currentPair.Node, !num)
@@ -210,38 +202,39 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     | :? NonTerminalNode as a -> 
                         if a.Others <> Unchecked.defaultof<_>
                         then
-                            incrNodesCounter
-                            incrAmbiguityCounter
+                            incr nodesCount
+                            incr ambiguityCount
                         else    
-                            incrNodesCounter
+                            incr nodesCount
                         
-                        incrEdgesCounter
+                        incr edgesCount
                         nodeQueue.Enqueue(new NumNode(!num, a.First))
                         if a.Others <> Unchecked.defaultof<_>
                         then
                             for n in a.Others do
                                 nodeQueue.Enqueue(new NumNode(!num, n))
                     | :? PackedNode as p ->
-                        incrNodesCounter
-                        incrEdgesCounter
+                        incr nodesCount
+                        incr edgesCount
                         nodeQueue.Enqueue(new NumNode(!num, p.Left))
                         nodeQueue.Enqueue(new NumNode(!num, p.Right))
                     | :? IntermidiateNode as i ->
-                        incrNodesCounter
-                        incrEdgesCounter
+                        incr nodesCount
+                        incr edgesCount
                         nodeQueue.Enqueue(new NumNode(!num, i.First))
                         if i.Others <> Unchecked.defaultof<ResizeArray<PackedNode>>
                         then
                             for nodes in i.Others do
                                 nodeQueue.Enqueue(new NumNode(!num, nodes))
                     | :? TerminalNode as t ->
-                            incrTermsCounter
-                            incrEdgesCounter
+                            incr termsCount
+                            incr nodesCount
+                            incr edgesCount
                     | null -> ()
             else
                 let a = currentPair.Node :?> NonTerminalNode
                 num := !num + 1
-                incrNodesCounter
+                incr nodesCount
                 nodeQueue.Enqueue(new NumNode(!num, a.First))
                 if a.Others <> Unchecked.defaultof<_>
                 then

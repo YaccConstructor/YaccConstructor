@@ -81,14 +81,17 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TSQLParserToken.fs" />
     <Compile Include="ParserTokens.fs" />
     <Compile Include="CalcLexer_Abstract.fs" />
     <Compile Include="LiteralsLexer_Abstract.fs" />
     <Compile Include="FstLexer.fs" />
+    <Compile Include="Lexer_Abstract.fs" />
     <Compile Include="CommonTestChecker.fs" />
-    <Compile Include="InterpreterTests.fs" />
     <Compile Include="LiteralsTests.fs" />
     <Compile Include="CalcTests.fs" />
+    <Compile Include="InterpreterTests.fs" />
+    <Compile Include="TSQLTests.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>

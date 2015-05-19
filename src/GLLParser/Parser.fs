@@ -7,9 +7,6 @@ open Yard.Generators.Common.ASTGLL
 open Yard.Generators.Common.DataStructures
 open Microsoft.FSharp.Collections
 
-///////ва
-аа
-
 [<Measure>] type vertexMeasure
 [<Measure>] type nodeMeasure
 [<Measure>] type labelMeasure
@@ -309,7 +306,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                     let arr = setP.[vertexKey]
                     for tree in arr do
                         let y = getNodeP label ast tree
-                        let index = int <| getTreeExtension y 
+                        let index = getRightExtension <| getTreeExtension y 
                         addContext index label vertex y 
             v
 
@@ -440,8 +437,6 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         match !resultAST with
             | None -> Error ("String was not parsed")
             | Some res -> 
-                    //drawDot parser tokens "gss.dot" gss
                     let r1 = new Tree<_> (tokens, res, parser.rules)
-                    //r1.AstToDot parser.NumToString "ast1111111.dot"
                     Success (r1)   
                         

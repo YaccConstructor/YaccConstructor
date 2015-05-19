@@ -69,7 +69,6 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let edges = Array2D.zeroCreate<Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>> slots.Count (input.VertexCount )
         let terminalNodes = Array3D.zeroCreate<int<nodeMeasure>> input.VertexCount input.VertexCount parser.TermCount  
         let epsilonNode = new TerminalNode(-1, packExtension 0 0)
-        let epsilon = 1<nodeMeasure>
         let sppfNodes = new BlockResizeArray<INode>()
         sppfNodes.Add(dummyAST)
         sppfNodes.Add(epsilonNode)
@@ -78,47 +77,52 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let currentGSSNode = ref <| dummyGSSNode
         let currentContext = ref <| new Context(!currentVertexInInput, !currentLabel, !currentGSSNode, dummy)
         
-        let finalExtension = packExtension input.InitState (input.FinalState - 1)
+        let finalExtensions =
+            let len = input.FinalStates.Length
+            let arr = Array.zeroCreate<int64<extension>> len
+            for i = 0 to len - 1 do
+                arr.[i] <- packExtension input.InitState input.FinalStates.[i]
+            arr
 
         let containsContext (inputVertex : int) (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
             let index = (int) inputVertex
-            if inputVertex <> input.FinalState 
+            //if inputVertex <> input.FinalState 
+            //then
+            let vertexKey = (vertex.Level, vertex.Label)
+            if setU.[index] <> Unchecked.defaultof<Dictionary<int<labelMeasure>, Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>>>
             then
-                let vertexKey = (vertex.Level, vertex.Label)
-                if setU.[index] <> Unchecked.defaultof<Dictionary<int<labelMeasure>, Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>>>
-                then
-                    let cond, current = setU.[index].TryGetValue(label) 
-                    if  cond then
-                       if current.ContainsKey(vertexKey) then
-                            let trees = current.[vertexKey]
-                            if not <| trees.Contains(ast)
-                            then 
-                                trees.Add(ast)
-                                false
-                            else
-                                true
-                        else 
-                            let arr = new ResizeArray<int<nodeMeasure>>()
-                            arr.Add(ast)
-                            current.Add(vertexKey, arr)                    
+                let cond, current = setU.[index].TryGetValue(label) 
+                if  cond then
+                    if current.ContainsKey(vertexKey) then
+                        let trees = current.[vertexKey]
+                        if not <| trees.Contains(ast)
+                        then 
+                            trees.Add(ast)
                             false
+                        else
+                            true
                     else 
-                        let dict = new Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>()
-                        setU.[index].Add(label, dict)
                         let arr = new ResizeArray<int<nodeMeasure>>()
                         arr.Add(ast)
-                        dict.Add(vertexKey, arr) 
+                        current.Add(vertexKey, arr)                    
                         false
                 else 
-                    let dict1 =  new Dictionary<int<labelMeasure>, Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>>()
-                    setU.[index] <- dict1
-                    let dict2 = new Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>()
-                    dict1.Add(label, dict2)
+                    let dict = new Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>()
+                    setU.[index].Add(label, dict)
                     let arr = new ResizeArray<int<nodeMeasure>>()
                     arr.Add(ast)
-                    dict2.Add(vertexKey, arr)
+                    dict.Add(vertexKey, arr) 
                     false
-            else true
+            else 
+                let dict1 =  new Dictionary<int<labelMeasure>, Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>>()
+                setU.[index] <- dict1
+                let dict2 = new Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>()
+                dict1.Add(label, dict2)
+                let arr = new ResizeArray<int<nodeMeasure>>()
+                arr.Add(ast)
+                dict2.Add(vertexKey, arr)
+                false
+            //else true
                       
 
         let addContext (inputVertex : int) (label : int<labelMeasure>) vertex ast =
@@ -308,8 +312,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     let arr = setP.[vertexKey]
                     for tree in arr do
                         let y = getNodeP label ast tree
-                        let index = int <| getTreeExtension y 
-                        addContext inputVertex label vertex y 
+                        let index = getRightExtension <| getTreeExtension y 
+                        addContext index label vertex y 
             v
 
         let pop (u : Vertex) (i : int) (z : int<nodeMeasure>) =
@@ -342,9 +346,12 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             if setR.Count <> 0
             then
                 currentContext := setR.Dequeue()
+                
                 currentVertexInInput := currentContext.Value.InputVertex
                 currentGSSNode := currentContext.Value.Vertex
                 currentLabel := currentContext.Value.Label
+                let tempRule = getRule !currentLabel
+                let tempPos = getPosition !currentLabel
                 currentN := currentContext.Value.Ast 
                 currentR := dummy
                 condition := false
@@ -367,67 +374,63 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 if Array.length parser.rules.[rule] <> position
                 then
                     let curSymbol = parser.rules.[rule].[position]
-                    if !currentVertexInInput <> input.FinalState - 1
+                    //if !currentVertexInInput <> input.FinalState - 1
+                   // then
+                    if (parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol)
                     then
-                       if (parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol)
-                        then
-                            let isEq (sym : int) (elem : ParserEdge<'TokenType>) = sym = parser.TokenToNumber elem.Tag
-                            let curEdge = Seq.tryFind (isEq curSymbol) (input.OutEdges !currentVertexInInput)
-                            
-                            match curEdge with
-                                | Some e -> 
-                                    let curToken = parser.TokenToNumber e.Tag
-                                    if curSymbol = curToken 
-                                    then
-                                        if !currentN = dummy
-                                        then currentN := getNodeT e
-                                        else currentR := getNodeT e
-                                        currentVertexInInput := e.Target
-                                        currentLabel := packLabel (rule) ((position) + 1)
-                                        if !currentR <> dummy
-                                        then 
-                                            currentN := getNodeP !currentLabel !currentN !currentR
-                                        condition := false
-                                | None _ -> ()
-                            
-                        else 
-                            let getIndex nTerm term = 
-                                let mutable index = nTerm
-                                index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
-                                index <- index + term - parser.NonTermCount
-                                index
+                        let isEq (sym : int) (elem : ParserEdge<'TokenType>) = sym = parser.TokenToNumber elem.Tag
+                        let curEdge = Seq.tryFind (isEq curSymbol) (input.OutEdges !currentVertexInInput)
+                        match curEdge with
+                        | Some edge ->
+                            let curToken = parser.TokenToNumber edge.Tag
+                            if curSymbol = curToken 
+                            then
+                                if !currentN = dummy
+                                then currentN := getNodeT edge
+                                else currentR := getNodeT edge
+                                currentVertexInInput := edge.Target
+                                currentLabel := packLabel (rule) ((position) + 1)
+                                if !currentR <> dummy
+                                then 
+                                    currentN := getNodeP !currentLabel !currentN !currentR
+                                condition := false
+                        | None _ -> ()
+                    else 
+                        let getIndex nTerm term = 
+                            let mutable index = nTerm
+                            index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
+                            index <- index + term - parser.NonTermCount
+                            index
+                        currentGSSNode := create !currentVertexInInput (packLabel (rule) (position + 1)) !currentGSSNode  !currentN
+                        for edge in input.OutEdges !currentVertexInInput do
+                            let curToken = parser.TokenToNumber edge.Tag
 
-                            ///так
-                            currentGSSNode := create !currentVertexInInput (packLabel (rule) (position + 1)) !currentGSSNode  !currentN
-                            for edge in input.OutEdges !currentVertexInInput do
-                                let curToken = parser.TokenToNumber edge.Tag
-
-                                let index = getIndex curSymbol curToken
-                                
-                                if Array.length table.[index] <> 0 
-                                then
-                                    let a rule = 
-                                        let newLabel = packLabel rule 0
-                                        addContext !currentVertexInInput newLabel !currentGSSNode dummy 
-                                    table.[index] |>  Array.iter a
-                    else
-                        if parser.CanInferEpsilon.[curSymbol]
-                        then
-                            let curToken = parser.IndexEOF
-                            let getIndex nTerm term = 
-                                let mutable index = nTerm
-                                index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
-                                index <- index + term - parser.NonTermCount
-                                index
                             let index = getIndex curSymbol curToken
-                            currentGSSNode := create !currentVertexInInput (packLabel (rule) (position + 1)) !currentGSSNode  !currentN
+                                
                             if Array.length table.[index] <> 0 
                             then
                                 let a rule = 
                                     let newLabel = packLabel rule 0
                                     addContext !currentVertexInInput newLabel !currentGSSNode dummy 
                                 table.[index] |>  Array.iter a
-                        condition := true
+//                    else
+//                        if parser.CanInferEpsilon.[curSymbol]
+//                        then
+//                            let curToken = parser.IndexEOF
+//                            let getIndex nTerm term = 
+//                                let mutable index = nTerm
+//                                index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
+//                                index <- index + term - parser.NonTermCount
+//                                index
+//                            let index = getIndex curSymbol curToken
+//                            currentGSSNode := create !currentVertexInInput (packLabel (rule) (position + 1)) !currentGSSNode  !currentN
+//                            if Array.length table.[index] <> 0 
+//                            then
+//                                let a rule = 
+//                                    let newLabel = packLabel rule 0
+//                                    addContext !currentVertexInInput newLabel !currentGSSNode dummy 
+//                                table.[index] |>  Array.iter a
+//                        condition := true
                                     
                 else
                     let curRight =  sppfNodes.Item <| int !currentN 
@@ -437,9 +440,11 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             let r = (sppfNodes.Item <| int !currentN) :?> NonTerminalNode 
                             pop !currentGSSNode !currentVertexInInput !currentN
                         | :? NonTerminalNode as r ->
-                            if (r.Name = parser.LeftSide.[parser.StartRule]) && r.Extension = finalExtension
+                            if (r.Name = parser.LeftSide.[parser.StartRule]) && (Array.exists (fun a -> a = r.Extension) finalExtensions)
                             then 
-                                resultAST := Some r 
+                                match !resultAST with
+                                    | None -> resultAST := Some r
+                                    | Some a -> a.AddChild r.First
                             pop !currentGSSNode !currentVertexInInput !currentN
 
         let control () =
@@ -451,6 +456,5 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             | None -> Error ("String was not parsed")
             | Some res -> 
                     let r1 = new Tree<_> (tokens, res, parser.rules)
-                    r1.AstToDot parser.NumToString "ast1111111.dot"
                     Success (r1)   
                         

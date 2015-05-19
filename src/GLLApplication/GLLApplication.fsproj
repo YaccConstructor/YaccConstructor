@@ -9,35 +9,11 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>GLLApplication</RootNamespace>
     <AssemblyName>GLLApplication</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>GLLApplication</Name>
-    <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <Tailcalls>false</Tailcalls>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\GLLApplication.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <Tailcalls>true</Tailcalls>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\GLLApplication.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
+  <Import Project="../YC.targets" />
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
@@ -55,12 +31,8 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
-    <Compile Include="SimpleLeftRecursion.yrd.fs" />
-    <Compile Include="SimpleRightRecursion.yrd.fs" />
-    <Compile Include="SimpleAmb.yrd.fs" />
-    <Compile Include="Mixed.yrd.fs" />
-    <Compile Include="BadLeftRecursion.yrd.fs" />
     <None Include="App.config" />
+    <Compile Include="SimpleAmb.yrd.fs" />
     <Compile Include="Lexer2.fs" />
     <Compile Include="Program.fs" />
     <None Include="packages.config" />
@@ -71,6 +43,16 @@
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Generators.Common\Common.Generators.fsproj">
+      <Name>Common.Generators</Name>
+      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\GLLGenerator\GLLGenerator.fsproj">
+      <Name>GLLGenerator</Name>
+      <Project>{8756690f-8138-495a-a368-39afb9029823}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\GLLParser\GLLParser.fsproj">
       <Name>GLLParser</Name>
       <Project>{1548a831-3a8d-489d-8592-dda12fbc3ea4}</Project>
@@ -79,6 +61,11 @@
     <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
       <Name>RNGLRCommon</Name>
       <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">
+      <Name>YardFrontend</Name>
+      <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

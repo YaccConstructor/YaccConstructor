@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{b1d8c4fb-23e7-46ff-81b0-4ea3cd6e716e}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>RNGLRAbstractParser.Tests</RootNamespace>
     <AssemblyName>YC.RNGLRAbstractParser.Test</AssemblyName>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -32,19 +32,30 @@
   <ItemGroup>
     <None Include="simpleCalc.yrd" />
     <None Include="Lexer.fsl" />
+    <Compile Include="Brackets.yrd.fs" />
     <Compile Include="Calc.yrd.fs" />
     <!--Compile Include="MsParser.fs" /-->
     <!--Compile Include="LexerHelper.fs" /-->
     <!--Compile Include="MsLexer.fs" /-->
+    <Compile Include="CroppedBrackets.yrd.fs" />
+    <Compile Include="Eps.yrd.fs" />
+    <Compile Include="FirstEps.yrd.fs" />
+    <Compile Include="List.yrd.fs" />
     <!--Compile Include="calcDemo.yrd.fs" /-->
     <Compile Include="SimpleCalc.yrd.fs" />
     <Compile Include="simpleCalc_with_Nterms_2.yrd.fs" />
     <!--Compile Include="Lexer.fs" /-->
     <Compile Include="simpleCalc_with_Nterms_3.yrd.fs" />
     <Compile Include="simpleCalc_with_Nterms_4.yrd.fs" />
+    <!--Compile Include="Epsilons.yrd.fs" /-->
     <Compile Include="simpleCalc_with_Nterms.yrd.fs" />
     <Compile Include="PrettySimpleCalc.yrd.fs" />
-    <Compile Include="Lexer_Abstract.fs" />
+    <Compile Include="NotAmbigousSimpleCalc.yrd.fs" />
+    <Compile Include="NotAmbigousSimpleCalcWith2Ops.yrd.fs" />
+    <Compile Include="Stars.yrd.fs" />
+    <!--Compile Include="Epsilons2.yrd.fs" /-->
+    <Compile Include="Stars2.yrd.fs" />
+    <Compile Include="StrangeBrackets.yrd.fs" />
     <Compile Include="RNGLRAbstractParserTests.fs" />
     <None Include="packages.config" />
     <None Include="app.config" />

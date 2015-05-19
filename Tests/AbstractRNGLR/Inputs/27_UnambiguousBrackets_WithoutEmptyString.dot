@@ -1,0 +1,9 @@
+digraph g
+{
+rankdir=LR
+node [shape=circle]
+0 -> 1 [label="LBR 0"]
+1 -> 0 [label="RBR 1"]
+1 -> 2 [label="RBR 2"]
+2 -> 9 [label="RNGLR_EOF 0"]
+}

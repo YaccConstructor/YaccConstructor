@@ -2,9 +2,11 @@
 # 2 "ExtCalc.yrd.fs"
 module ExtCalc.AbstractParser
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
-open Yard.Generators.RNGLR.Parser
+open Yard.Generators.ARNGLR.Parser
+open AbstractAnalysis.Common
 open Yard.Generators.RNGLR
 open Yard.Generators.Common.AST
+open Yard.Generators.Common.AstNode
 open YC.SDK.ReSharper.Helper
 open JetBrains.ReSharper.Psi.Tree
 open ExtCalcHighlighting
@@ -14,7 +16,7 @@ open ExtCalcHighlighting
 open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation
 
-# 17 "ExtCalc.yrd.fs"
+# 19 "ExtCalc.yrd.fs"
 type Token =
     | DIV of (FSA<char*Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
     | EQ of (FSA<char*Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
@@ -117,7 +119,7 @@ let startRule = 1
 let acceptEmptyInput = false
 
 let defaultAstToDot =
-    (fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
+    (fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber (Some tokenData) leftSide)
 
 let otherAstToDot =
     (fun (tree : Yard.Generators.RNGLR.OtherSPPF.OtherTree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
@@ -177,12 +179,9 @@ for i = 0 to 31 do
 let eofIndex = 27
 let errorIndex = 1
 let errorRulesExists = false
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)
-let buildAstAbstract : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) =
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists, tokenData)
+let buildAstAbstract : (ParserInputGraph<'TokenType> -> Yard.Generators.ARNGLR.Parser.ParseResult<Token>) = 
     buildAstAbstract<Token> parserSource
-
-let buildAst : (seq<'TokenType> -> ParseResult<Token>) =
-    buildAst<Token> parserSource
 
 let xmlPath = "ExtCalcHighlighting.xml" 
 
@@ -226,8 +225,8 @@ let tokenToTreeNode token =
         new VARIABLETermNode(ranges) :> ITreeNode
 
 
-let _rnglr_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(25, new Nodes([||])), null)), null); null; null; null; null; null; null; null; null; null; null; null; null; null; null; null; null|]
-let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(25, new Nodes([||])), null)), null); null; null; null; null; null; null; null; null; null; null; null; null; null; null; null; null|]
+let _rnglr_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,(new AST(new Family(25, new Nodes([||])), null)), null); null; null; null; null; null; null; null; null; null; null; null; null; null; null; null; null|]
+let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,(new AST(new Family(25, new Nodes([||])), null)), null); null; null; null; null; null; null; null; null; null; null; null; null; null; null; null; null|]
 for x in _rnglr_filtered_epsilons do if x <> null then x.ChooseSingleAst()
 let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats = 
   (Array.zeroCreate 0 : array<'_rnglr_type_assign * '_rnglr_type_error * '_rnglr_type_expr * '_rnglr_type_highlight_DIV * '_rnglr_type_highlight_EQ * '_rnglr_type_highlight_ERROR * '_rnglr_type_highlight_LBRACE * '_rnglr_type_highlight_MINUS * '_rnglr_type_highlight_MUL * '_rnglr_type_highlight_NUMBER * '_rnglr_type_highlight_PLUS * '_rnglr_type_highlight_RBRACE * '_rnglr_type_highlight_SEMI * '_rnglr_type_highlight_VARIABLE * '_rnglr_type_start * '_rnglr_type_yard_exp_brackets_1 * '_rnglr_type_yard_some_1 * '_rnglr_type_yard_start_rule>), 
@@ -253,7 +252,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 21 "extCalc.yrd"
                : '_rnglr_type_start) 
-# 256 "ExtCalc.yrd.fs"
+# 255 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -263,7 +262,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 21 "extCalc.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 266 "ExtCalc.yrd.fs"
+# 265 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -286,7 +285,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 21 "extCalc.yrd"
                : '_rnglr_type_yard_some_1) 
-# 289 "ExtCalc.yrd.fs"
+# 288 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -311,7 +310,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 21 "extCalc.yrd"
                : '_rnglr_type_yard_some_1) 
-# 314 "ExtCalc.yrd.fs"
+# 313 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -340,7 +339,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "extCalc.yrd"
                : '_rnglr_type_assign) 
-# 343 "ExtCalc.yrd.fs"
+# 342 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -367,7 +366,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 25 "extCalc.yrd"
                : '_rnglr_type_expr) 
-# 370 "ExtCalc.yrd.fs"
+# 369 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -390,7 +389,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 25 "extCalc.yrd"
                : '_rnglr_type_expr) 
-# 393 "ExtCalc.yrd.fs"
+# 392 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -413,7 +412,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 25 "extCalc.yrd"
                : '_rnglr_type_expr) 
-# 416 "ExtCalc.yrd.fs"
+# 415 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -440,7 +439,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 25 "extCalc.yrd"
                : '_rnglr_type_expr) 
-# 443 "ExtCalc.yrd.fs"
+# 442 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -463,7 +462,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 25 "extCalc.yrd"
                : '_rnglr_type_expr) 
-# 466 "ExtCalc.yrd.fs"
+# 465 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -486,7 +485,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_yard_exp_brackets_1) 
-# 489 "ExtCalc.yrd.fs"
+# 488 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -509,7 +508,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_yard_exp_brackets_1) 
-# 512 "ExtCalc.yrd.fs"
+# 511 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -532,7 +531,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_yard_exp_brackets_1) 
-# 535 "ExtCalc.yrd.fs"
+# 534 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -555,7 +554,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_yard_exp_brackets_1) 
-# 558 "ExtCalc.yrd.fs"
+# 557 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -578,7 +577,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_VARIABLE) 
-# 581 "ExtCalc.yrd.fs"
+# 580 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -601,7 +600,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_EQ) 
-# 604 "ExtCalc.yrd.fs"
+# 603 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -624,7 +623,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_SEMI) 
-# 627 "ExtCalc.yrd.fs"
+# 626 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -647,7 +646,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_NUMBER) 
-# 650 "ExtCalc.yrd.fs"
+# 649 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -670,7 +669,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_LBRACE) 
-# 673 "ExtCalc.yrd.fs"
+# 672 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -693,7 +692,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_RBRACE) 
-# 696 "ExtCalc.yrd.fs"
+# 695 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -716,7 +715,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_ERROR) 
-# 719 "ExtCalc.yrd.fs"
+# 718 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -739,7 +738,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_PLUS) 
-# 742 "ExtCalc.yrd.fs"
+# 741 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -762,7 +761,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_MINUS) 
-# 765 "ExtCalc.yrd.fs"
+# 764 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -785,7 +784,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_DIV) 
-# 788 "ExtCalc.yrd.fs"
+# 787 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -808,7 +807,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_MUL) 
-# 811 "ExtCalc.yrd.fs"
+# 810 "ExtCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -826,7 +825,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 829 "ExtCalc.yrd.fs"
+# 828 "ExtCalc.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

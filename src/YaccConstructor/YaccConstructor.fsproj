@@ -21,9 +21,11 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-i "C:\gsv\projects\recursive-ascent\src\RNGLRParser.SimpleTest\Attrs.yrd " -c ExpandEbnf -c ExpandMeta  -g "RNGLRGenerator -pos int -token int -module LL.Parse2 -o 222.yrd.fs"</StartArguments>
+    <StartArguments>-i "C:\YC\YaccConstructor\src\RNGLRParser.SimpleTest\First.yrd" -c ExpandEbnf -c ExpandMeta  -g "RNGLRGenerator -pos int -token int -module LL.Parse2 -o 222.yrd.fs"</StartArguments>
     <StartWorkingDirectory>
     </StartWorkingDirectory>
   </PropertyGroup>

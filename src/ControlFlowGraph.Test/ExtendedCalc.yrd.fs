@@ -2,9 +2,11 @@
 # 2 "ExtendedCalc.yrd.fs"
 module RNGLR.ParseExtendedCalc
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
-open Yard.Generators.RNGLR.Parser
+open Yard.Generators.ARNGLR.Parser
+open AbstractAnalysis.Common
 open Yard.Generators.RNGLR
 open Yard.Generators.Common.AST
+open Yard.Generators.Common.AstNode
 type Token =
     | DIV of (int)
     | EIGHT of (int)
@@ -165,7 +167,7 @@ let startRule = 1
 let acceptEmptyInput = false
 
 let defaultAstToDot =
-    (fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
+    (fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber (Some tokenData) leftSide)
 
 let otherAstToDot =
     (fun (tree : Yard.Generators.RNGLR.OtherSPPF.OtherTree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
@@ -225,11 +227,8 @@ for i = 0 to 52 do
 let eofIndex = 35
 let errorIndex = 2
 let errorRulesExists = false
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)
-let buildAstAbstract : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) =
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists, tokenData)
+let buildAstAbstract : (ParserInputGraph<'TokenType> -> Yard.Generators.ARNGLR.Parser.ParseResult<Token>) = 
     buildAstAbstract<Token> parserSource
-
-let buildAst : (seq<'TokenType> -> ParseResult<Token>) =
-    buildAst<Token> parserSource
 
 

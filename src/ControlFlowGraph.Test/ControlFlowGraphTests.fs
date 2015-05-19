@@ -3,6 +3,7 @@
 open AbstractAnalysis.Common
 open QuickGraph
 open Yard.Generators.RNGLR
+open Yard.Generators.ARNGLR
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR.AbstractParser
 open ControlFlowGraph
@@ -46,8 +47,8 @@ type ``Control Flow Graph Building`` () =
         let parseResult = (new Parser<_>()).Parse buildAbstractAst graph
         
         match parseResult with 
-        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
-        | Parser.Success (mAst, _, _) ->
+        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Parser.Success mAst ->
             RNGLR.ParseExtendedCalc.defaultAstToDot mAst astName
             let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealString)
             
@@ -160,8 +161,8 @@ type ``Control Flow Graph: If`` () =
         let parseResult = (new Parser<_>()).Parse buildAbstractAst graph
         
         match parseResult with 
-        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
-        | Parser.Success (mAst, _, _) ->
+        | Parser.Error (num, tok, message) -> printErr (num, tok, message)
+        | Parser.Success mAst ->
             RNGLR.ParseIf.defaultAstToDot mAst astName
             let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealString)
             
@@ -301,12 +302,12 @@ type ``Find undefined variables`` () =
     let parserSource = new ParserSource<RNGLR.ParseExtendedCalc.Token>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, typeToDelimiters, -1, -1, eqNumber, isVariable)
 
-    let runTest qGraph expected astName cfgName = 
+    let runTest qGraph expected (astName : string) cfgName = 
         let parseResult = (new Parser<_>()).Parse buildAbstractAst qGraph
         
         match parseResult with 
-        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
-        | Parser.Success (mAst, _, _) ->
+        | Parser.Error (num, tok, message) -> printErr (num, tok, message)
+        | Parser.Success mAst ->
             RNGLR.ParseExtendedCalc.defaultAstToDot mAst astName
             let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealName)
             

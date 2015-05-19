@@ -1,6 +1,7 @@
 ﻿module ControlFlowGraph
 
 open Yard.Generators.Common.AST
+open Yard.Generators.Common.AstNode
 open System.Collections.Generic
 open QuickGraph
 
@@ -360,7 +361,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
     let start, finish = 
         let treeRoot = 
             match tree.Root with 
-            | :? AST as ast -> ast
+            | :? AstNode as ast -> ast :?> AST
             | _ -> null
 
         let createNewBlock tokens blockType = 

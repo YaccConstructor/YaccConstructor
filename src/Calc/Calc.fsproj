@@ -153,7 +153,7 @@
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\ControlFlowGraph\ControlFlowGraph.fsproj">
-      <Name>ControlFlowGraph (SEL.SDK\ControlFlowGraph\ControlFlowGraph)</Name>
+      <Name>ControlFlowGraph</Name>
       <Project>{e94970c1-26a4-4fa6-bb3b-261b70938ff4}</Project>
       <Private>True</Private>
     </ProjectReference>

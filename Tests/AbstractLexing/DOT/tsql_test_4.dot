@@ -1,0 +1,6 @@
+digraph g
+{
+0;1;
+0 -> 1 [label="select nameX from tableY where x < "]
+1 -> 1 [label="+ 1 "]
+}         

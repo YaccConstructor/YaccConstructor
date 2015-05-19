@@ -31,7 +31,8 @@
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.3.0.0-beta-1\lib\net45\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="QuickGraph">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
@@ -54,14 +55,17 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TSQLParserToken.fs" />
     <Compile Include="ParserTokens.fs" />
     <Compile Include="CalcLexer_Abstract.fs" />
     <Compile Include="LiteralsLexer_Abstract.fs" />
     <Compile Include="FstLexer.fs" />
+    <Compile Include="Lexer_Abstract.fs" />
     <Compile Include="CommonTestChecker.fs" />
-    <Compile Include="InterpreterTests.fs" />
     <Compile Include="LiteralsTests.fs" />
     <Compile Include="CalcTests.fs" />
+    <Compile Include="InterpreterTests.fs" />
+    <Compile Include="TSQLTests.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
@@ -114,6 +118,9 @@
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>..\..\..\Bin\Debug\v40\</OutputPath>
   </PropertyGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">

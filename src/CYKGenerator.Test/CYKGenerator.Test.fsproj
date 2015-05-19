@@ -34,6 +34,7 @@
   <ItemGroup>
     <Compile Include="CYKGeneratorTests.fs" />
     <None Include="packages.config" />
+    <Content Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">

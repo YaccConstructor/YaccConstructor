@@ -14,7 +14,7 @@
     <RestorePackages>true</RestorePackages>
     <TargetFrameworkProfile />
   </PropertyGroup>
- <Import Project="../YC.targets" />
+  <Import Project="../YC.targets" />
   <ItemGroup>
     <Reference Include="Antlr3.Runtime">
       <HintPath>..\..\3rdParty\graphviz4net\Antlr3.Runtime.dll</HintPath>
@@ -118,6 +118,9 @@
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>..\..\..\Bin\Debug\v40\</OutputPath>
   </PropertyGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">

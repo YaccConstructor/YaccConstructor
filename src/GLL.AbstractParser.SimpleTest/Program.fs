@@ -78,7 +78,7 @@ let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)
 
 
-let test buildAbstractAst qGraph (intToString : int -> string) (fileName : string) = 
+let test buildAbstractAst qGraph (intToString : int -> string) (fileName : string) nodesCount edgesCount termsCount ambiguityCount = 
     let r = buildAbstractAst qGraph
     printfn "%A" r
     match r with
@@ -87,14 +87,13 @@ let test buildAbstractAst qGraph (intToString : int -> string) (fileName : strin
             Assert.Fail("")
         | Success tree ->
             tree.AstToDot intToString (outputDir + fileName)
-            Assert.Pass("UIII")
-//            let n, e, eps, t, amb = tree.CountCounters()
-//            Assert.AreEqual(nodesCount, n, "Nodes count mismatch")
-//            Assert.AreEqual(edgesCount, e, "Edges count mismatch")
-//            Assert.AreEqual(epsilonsCount, eps, "Epsilons count mismatch")
-//            Assert.AreEqual(termsCount, t, "Terms count mismatch") 
-//            Assert.AreEqual(ambiguityCount, amb, "Ambiguities count mismatch")
-//            Assert.Pass()
+            let n, e, t, amb = tree.CountCounters
+            printfn "%d %d %d %d" n e t amb
+            Assert.AreEqual(nodesCount, n, "Nodes count mismatch")
+            Assert.AreEqual(edgesCount, e, "Edges count mismatch")
+            Assert.AreEqual(termsCount, t, "Terms count mismatch") 
+            Assert.AreEqual(ambiguityCount, amb, "Ambiguities count mismatch")
+            Assert.Pass()
 
 
 [<TestFixture>]
@@ -102,7 +101,7 @@ type ``GLL abstract parser tests`` () =
 
     [<Test>]
     member this._01_PrettySimpleCalc_SequenceInput () =
-        let qGraph = new ParserInputGraph<_>(0, 4)
+        let qGraph = new ParserInputGraph<_>(0, 3)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (GLL.PrettySimpleCalc.NUM 1)
              edg 1 2 (GLL.PrettySimpleCalc.PLUS 2)
@@ -110,89 +109,81 @@ type ``GLL abstract parser tests`` () =
              edg 3 4 (GLL.PrettySimpleCalc.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.PrettySimpleCalc.buildAbstractAst qGraph GLL.PrettySimpleCalc.numToString "PrettySimpleCalc.dot"
+        test GLL.PrettySimpleCalc.buildAbstractAst qGraph GLL.PrettySimpleCalc.numToString "PrettySimpleCalcSeq.dot" 18 21 4 0
 
     [<Test>]
     member this._02_PrettySimpleCalcSimple_BranchedInput () =
-        let qGraph = new ParserInputGraph<_>(0, 4)
+        let qGraph = new ParserInputGraph<_>([|0|], [|3; 1|])
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (GLL.PrettySimpleCalc.NUM 1)
              edg 1 2 (GLL.PrettySimpleCalc.PLUS 2)
              edg 2 3 (GLL.PrettySimpleCalc.NUM 3)
-             edg 0 3 (GLL.PrettySimpleCalc.NUM 4)
-             edg 3 4 (GLL.PrettySimpleCalc.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.PrettySimpleCalc.buildAbstractAst qGraph GLL.PrettySimpleCalc.numToString "PrettySimpleCalc.dot"
+        test GLL.PrettySimpleCalc.buildAbstractAst qGraph GLL.PrettySimpleCalc.numToString "PrettySimpleCalcBranched1.dot" 0 0 0 0
+//
+//    [<Test>]
+//    member this._03_PrettySimpleCalc_BranchedInput () =
+//        let qGraph = new ParserInputGraph<_>(2, 9)
+//        qGraph.AddVerticesAndEdgeRange
+//            [
+//             edg 2 3 (GLL.PrettySimpleCalc.NUM 1)
+//             edg 3 4 (GLL.PrettySimpleCalc.PLUS 2)
+//             edg 4 5 (GLL.PrettySimpleCalc.NUM 3)
+//             edg 3 6 (GLL.PrettySimpleCalc.PLUS 4)
+//             edg 6 5 (GLL.PrettySimpleCalc.NUM 5)
+//             edg 5 7 (GLL.PrettySimpleCalc.PLUS 6)
+//             edg 7 8 (GLL.PrettySimpleCalc.NUM 7)
+//             edg 8 9 (GLL.PrettySimpleCalc.RNGLR_EOF 0)
+//             ] |> ignore
+//        
+//        test GLL.PrettySimpleCalc.buildAbstractAst qGraph GLL.PrettySimpleCalc.numToString "PrettySimpleCalcBranched2.dot" 0 0 0 0
 
-    [<Test>]
-    member this._03_PrettySimpleCalc_BranchedInput () =
-        let qGraph = new ParserInputGraph<_>(2, 9)
-        qGraph.AddVerticesAndEdgeRange
-            [
-             edg 2 3 (GLL.PrettySimpleCalc.NUM 1)
-             edg 3 4 (GLL.PrettySimpleCalc.PLUS 2)
-             edg 4 5 (GLL.PrettySimpleCalc.NUM 3)
-             edg 3 6 (GLL.PrettySimpleCalc.PLUS 4)
-             edg 6 5 (GLL.PrettySimpleCalc.NUM 5)
-             edg 5 7 (GLL.PrettySimpleCalc.PLUS 6)
-             edg 7 8 (GLL.PrettySimpleCalc.NUM 7)
-             edg 8 9 (GLL.PrettySimpleCalc.RNGLR_EOF 0)
-             ] |> ignore
-        
-        test GLL.PrettySimpleCalc.buildAbstractAst qGraph GLL.PrettySimpleCalc.numToString "PrettySimpleCalc.dot"
-
-    [<Test>]
-    member this._04_PrettySimpleCalc_LotsOfVariants () =
-        let qGraph = new ParserInputGraph<_>(0, 9)
-        qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (GLL.PrettySimpleCalc.NUM 1)
-             edg 1 2 (GLL.PrettySimpleCalc.PLUS 2)
-             edg 2 3 (GLL.PrettySimpleCalc.NUM 3)
-             edg 3 4 (GLL.PrettySimpleCalc.PLUS 4)
-             edg 4 5 (GLL.PrettySimpleCalc.NUM 5)
-             edg 3 6 (GLL.PrettySimpleCalc.PLUS 6)
-             edg 6 5 (GLL.PrettySimpleCalc.NUM 7)
-             edg 5 7 (GLL.PrettySimpleCalc.PLUS 8)
-             edg 7 8 (GLL.PrettySimpleCalc.NUM 9)
-             edg 8 9 (GLL.PrettySimpleCalc.RNGLR_EOF 0)
-             ] |> ignore
-        
-        test GLL.PrettySimpleCalc.buildAbstractAst qGraph GLL.PrettySimpleCalc.numToString "PrettySimpleCalc.dot"
+//    [<Test>]
+//    member this._04_PrettySimpleCalc_LotsOfVariants () =
+//        let qGraph = new ParserInputGraph<_>(0, 9)
+//        qGraph.AddVerticesAndEdgeRange
+//            [edg 0 1 (GLL.PrettySimpleCalc.NUM 1)
+//             edg 1 2 (GLL.PrettySimpleCalc.PLUS 2)
+//             edg 2 3 (GLL.PrettySimpleCalc.NUM 3)
+//             edg 3 4 (GLL.PrettySimpleCalc.PLUS 4)
+//             edg 4 5 (GLL.PrettySimpleCalc.NUM 5)
+//             edg 3 6 (GLL.PrettySimpleCalc.PLUS 6)
+//             edg 6 5 (GLL.PrettySimpleCalc.NUM 7)
+//             edg 5 7 (GLL.PrettySimpleCalc.PLUS 8)
+//             edg 7 8 (GLL.PrettySimpleCalc.NUM 9)
+//             edg 8 9 (GLL.PrettySimpleCalc.RNGLR_EOF 0)
+//             ] |> ignore
+//        
+//        test GLL.PrettySimpleCalc.buildAbstractAst qGraph GLL.PrettySimpleCalc.numToString "PrettySimpleCalcLotsVariants1.dot" 0 0 0 0
 
     [<Test>]
     member this._05_NotAmbigousSimpleCalc_LotsOfVariants () =
-        let qGraph = new ParserInputGraph<_>(0, 9)
+        let qGraph = new ParserInputGraph<_>(0, 7)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (GLL.NotAmbigousSimpleCalc.NUM  1)
              edg 1 2 (GLL.NotAmbigousSimpleCalc.PLUS 2)
              edg 2 3 (GLL.NotAmbigousSimpleCalc.NUM 3)
              edg 3 4 (GLL.NotAmbigousSimpleCalc.PLUS 4)
              edg 4 5 (GLL.NotAmbigousSimpleCalc.NUM 5)
-             edg 3 6 (GLL.NotAmbigousSimpleCalc.PLUS 6)
-             edg 6 5 (GLL.NotAmbigousSimpleCalc.NUM 7)
-             edg 5 7 (GLL.NotAmbigousSimpleCalc.PLUS 8)
-             edg 7 8 (GLL.NotAmbigousSimpleCalc.NUM 9)
-             edg 8 9 (GLL.NotAmbigousSimpleCalc.RNGLR_EOF 0)
+             edg 5 6 (GLL.NotAmbigousSimpleCalc.PLUS 6)
+             edg 6 7 (GLL.NotAmbigousSimpleCalc.NUM 7)
              ] |> ignore
         
-        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc1.dot"
+        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc.dot" 32 36 8 0
 
     [<Test>]
     member this._06_NotAmbigousSimpleCalc_Loop () =
-        let qGraph = new ParserInputGraph<_>(0 , 7)
+        let qGraph = new ParserInputGraph<_>([|0|] , [|1|] )
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (GLL.NotAmbigousSimpleCalc.NUM  1)
              edg 1 2 (GLL.NotAmbigousSimpleCalc.PLUS 2)
              edg 2 3 (GLL.NotAmbigousSimpleCalc.NUM 3)
              edg 3 4 (GLL.NotAmbigousSimpleCalc.PLUS 4)
-             edg 4 5 (GLL.NotAmbigousSimpleCalc.NUM 5)
-             edg 5 2 (GLL.NotAmbigousSimpleCalc.PLUS 6)
-             edg 4 6 (GLL.NotAmbigousSimpleCalc.NUM 7)
-             edg 6 7 (GLL.NotAmbigousSimpleCalc.RNGLR_EOF 0)
+             edg 4 1 (GLL.NotAmbigousSimpleCalc.NUM 5)
              ] |> ignore
         
-        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc2.dot"
+        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc2.dot" 0 0 0 0
 
     [<Test>]
     member this._07_NotAmbigousSimpleCalc_Loop2 () =
@@ -208,7 +199,7 @@ type ``GLL abstract parser tests`` () =
              edg 6 7 (GLL.NotAmbigousSimpleCalc.RNGLR_EOF 0)
              ] |> ignore
         
-        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc3.dot"
+        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc3.dot" 0 0 0 0
 
     [<Test>]
     member this._08_NotAmbigousSimpleCalc_Loop3 () =
@@ -225,7 +216,7 @@ type ``GLL abstract parser tests`` () =
              edg 6 8 (GLL.NotAmbigousSimpleCalc.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc4.dot"
+        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc4.dot" 0 0 0 0
         
     [<Test>]
     member this._09_NotAmbigousSimpleCalc_Loop4 () =
@@ -241,7 +232,7 @@ type ``GLL abstract parser tests`` () =
              edg 6 8 (GLL.NotAmbigousSimpleCalc.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc5.dot"
+        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc5.dot" 0 0 0 0
 
     [<Test>]
     member this._10_NotAmbigousSimpleCalc_Loop5 () =
@@ -260,7 +251,7 @@ type ``GLL abstract parser tests`` () =
              ] |> ignore
 
 
-        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc6.dot"
+        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc6.dot" 0 0 0 0
 
     [<Test>]
     member this._11_NotAmbigousSimpleCalc_Loop6 () =
@@ -279,7 +270,7 @@ type ``GLL abstract parser tests`` () =
              ] |> ignore
 
 
-        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc7.dot"
+        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc7.dot" 0 0 0 0
 
     [<Test>]
     member this._12_NotAmbigousSimpleCalc_Loop7 () =
@@ -298,7 +289,7 @@ type ``GLL abstract parser tests`` () =
              ] |> ignore
 
 
-        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc8.dot"
+        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc8.dot" 0 0 0 0
 
     [<Test>]
     member this._13_NotAmbigousSimpleCalc_Loop8 () =
@@ -318,7 +309,7 @@ type ``GLL abstract parser tests`` () =
              ] |> ignore
 
 
-        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc9.dot"
+        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc9.dot" 0 0 0 0
 
     [<Test>]
     member this._14_NotAmbigousSimpleCalcWith2Ops_Loop () =
@@ -334,7 +325,7 @@ type ``GLL abstract parser tests`` () =
              edg 6 7 (GLL.NotAmbigousSimpleCalcWith2Ops.RNGLR_EOF 0)
              ] |> ignore
         
-        test GLL.NotAmbigousSimpleCalcWith2Ops.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalcWith2Ops.numToString "NotAmbigousSimpleCalcWith2Ops.dot"
+        test GLL.NotAmbigousSimpleCalcWith2Ops.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalcWith2Ops.numToString "NotAmbigousSimpleCalcWith2Ops.dot" 0 0 0 0
 
     [<Test>]
     member this._15_NotAmbigousSimpleCalcWith2Ops_Loops () =
@@ -352,7 +343,7 @@ type ``GLL abstract parser tests`` () =
              edg 7 8 (GLL.NotAmbigousSimpleCalcWith2Ops.RNGLR_EOF 0)
              ] |> ignore
         
-        test GLL.NotAmbigousSimpleCalcWith2Ops.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalcWith2Ops.numToString "NotAmbigousSimpleCalcWith2Ops2.dot"
+        test GLL.NotAmbigousSimpleCalcWith2Ops.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalcWith2Ops.numToString "NotAmbigousSimpleCalcWith2Ops2.dot" 0 0 0 0
 
     [<Test>]
     member this._16_Stars_Loop () =
@@ -363,7 +354,7 @@ type ``GLL abstract parser tests`` () =
              edg 1 2 (GLL.Stars.RNGLR_EOF 0)
              ] |> ignore
         
-        test GLL.Stars.buildAbstractAst qGraph GLL.Stars.numToString "Stars.dot"
+        test GLL.Stars.buildAbstractAst qGraph GLL.Stars.numToString "Stars.dot" 0 0 0 0
 
     [<Test>]
     member this._17_Stars2_Loop () =
@@ -373,7 +364,7 @@ type ``GLL abstract parser tests`` () =
              edg 0 1 (GLL.Stars2.RNGLR_EOF 0)
              ] |> ignore
         
-        test GLL.Stars2.buildAbstractAst qGraph GLL.Stars2.numToString "Stars2.dot"
+        test GLL.Stars2.buildAbstractAst qGraph GLL.Stars2.numToString "Stars2.dot" 0 0 0 0
 
     [<Test>]
     member this._18_Stars2_Loop2 () =
@@ -384,7 +375,7 @@ type ``GLL abstract parser tests`` () =
              edg 1 2 (GLL.Stars2.RNGLR_EOF 0)
              ] |> ignore
         
-        test GLL.Stars2.buildAbstractAst qGraph GLL.Stars2.numToString "Stars2_2.dot"
+        test GLL.Stars2.buildAbstractAst qGraph GLL.Stars2.numToString "Stars2_2.dot" 0 0 0 0
 
     [<Test>]
     member this._19_FirstEps () =
@@ -395,7 +386,7 @@ type ``GLL abstract parser tests`` () =
             edg 3 4 (GLL.FirstEps.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.FirstEps.buildAbstractAst qGraph GLL.FirstEps.numToString "FirstEps.dot"
+        test GLL.FirstEps.buildAbstractAst qGraph GLL.FirstEps.numToString "FirstEps.dot" 0 0 0 0
     
     [<Test>]
     member this._20_CroppedBrackets () =
@@ -407,7 +398,7 @@ type ``GLL abstract parser tests`` () =
             edg 1 2 (GLL.CroppedBrackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.CroppedBrackets.buildAbstractAst qGraph GLL.CroppedBrackets.numToString "CroppedBrackets.dot"
+        test GLL.CroppedBrackets.buildAbstractAst qGraph GLL.CroppedBrackets.numToString "CroppedBrackets.dot" 0 0 0 0
 
     [<Test>]
     member this._21_Brackets () =
@@ -419,7 +410,7 @@ type ``GLL abstract parser tests`` () =
             edg 1 2 (GLL.Brackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.Brackets.buildAbstractAst qGraph GLL.Brackets.numToString "Brackets.dot"
+        test GLL.Brackets.buildAbstractAst qGraph GLL.Brackets.numToString "Brackets.dot" 0 0 0 0
 
     [<Test>]
     member this._22_Brackets_BackEdge () =
@@ -432,7 +423,7 @@ type ``GLL abstract parser tests`` () =
             edg 1 2 (GLL.Brackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.Brackets.buildAbstractAst qGraph GLL.Brackets.numToString "Brackets_backEdge.dot"
+        test GLL.Brackets.buildAbstractAst qGraph GLL.Brackets.numToString "Brackets_backEdge.dot" 0 0 0 0
 
     [<Test>]
     member this._23_UnambiguousBrackets () =
@@ -445,7 +436,7 @@ type ``GLL abstract parser tests`` () =
             edg 2 3 (GLL.StrangeBrackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets.dot"
+        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets.dot" 0 0 0 0
 
     [<Test>]
     member this._24_UnambiguousBrackets_Circle () =
@@ -456,7 +447,7 @@ type ``GLL abstract parser tests`` () =
             edg 0 9 (GLL.StrangeBrackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets2.dot"
+        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets2.dot" 0 0 0 0
 
     [<Test>]
     member this._25_UnambiguousBrackets_BiggerCircle () =
@@ -469,7 +460,7 @@ type ``GLL abstract parser tests`` () =
             edg 0 9 (GLL.StrangeBrackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets3.dot"
+        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets3.dot" 0 0 0 0
 
     [<Test>]
     member this._26_UnambiguousBrackets_Inf () =
@@ -480,7 +471,7 @@ type ``GLL abstract parser tests`` () =
             edg 0 9 (GLL.StrangeBrackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets4.dot"
+        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets4.dot" 0 0 0 0
 
     [<Test>]
     member this._27_UnambiguousBrackets_WithoutEmptyString () =
@@ -491,7 +482,7 @@ type ``GLL abstract parser tests`` () =
             edg 1 2 (GLL.StrangeBrackets.RBR 2)
             edg 2 9 (GLL.StrangeBrackets.RNGLR_EOF 0)
             ] |> ignore
-        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets5.dot"
+        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets5.dot" 0 0 0 0
 
     [<Test>]
     member this._28_UnambiguousBrackets_DifferentPathLengths () =
@@ -507,7 +498,7 @@ type ``GLL abstract parser tests`` () =
             edg 4 9 (GLL.StrangeBrackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets6.dot"
+        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets6.dot" 0 0 0 0
     
     [<Test>]
     member this._29_Attrs () =
@@ -521,7 +512,7 @@ type ``GLL abstract parser tests`` () =
             edg 5 6 (GLL.ParseAttrs.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.ParseAttrs.buildAbstractAst qGraph GLL.ParseAttrs.numToString "Attrs.dot"
+        test GLL.ParseAttrs.buildAbstractAst qGraph GLL.ParseAttrs.numToString "Attrs.dot" 26 30 6 0
 
     [<Test>]
     member this._30_Condition () =
@@ -535,7 +526,7 @@ type ``GLL abstract parser tests`` () =
             edg 5 6 (GLL.ParseCond.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.ParseCond.buildAbstractAst qGraph GLL.ParseCond.numToString "Cond.dot"
+        test GLL.ParseCond.buildAbstractAst qGraph GLL.ParseCond.numToString "Cond.dot" 41 54 6 1
 
     [<Test>]
     member this._31_Counter () =
@@ -549,7 +540,7 @@ type ``GLL abstract parser tests`` () =
             edg 5 6 (GLL.ParseCounter.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.ParseCounter.buildAbstractAst qGraph GLL.ParseCounter.numToString "Counter.dot"
+        test GLL.ParseCounter.buildAbstractAst qGraph GLL.ParseCounter.numToString "Counter.dot" 18 18 6 0
     
     [<Test>]
     member this._32_Cycle () =
@@ -560,8 +551,8 @@ type ``GLL abstract parser tests`` () =
             edg 2 3 (GLL.ParseCycle.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.ParseCycle.buildAbstractAst qGraph GLL.ParseCycle.numToString "Cycle.dot"
-
+        test GLL.ParseCycle.buildAbstractAst qGraph GLL.ParseCycle.numToString "Cycle.dot" 12 15 3 1
+         
     [<Test>]
     member this._33_Epsilon2_with_eps2_yrd () =
         let qGraph = new ParserInputGraph<_>(0, 3)
@@ -571,7 +562,7 @@ type ``GLL abstract parser tests`` () =
             edg 2 3 (GLL.ParseEps2.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.ParseEps2.buildAbstractAst qGraph GLL.ParseEps2.numToString "Eps2.dot"
+        test GLL.ParseEps2.buildAbstractAst qGraph GLL.ParseEps2.numToString "Eps2.dot" 23 27 5 0
 
     [<Test>]
     member this._34_Epsilon () =
@@ -580,7 +571,7 @@ type ``GLL abstract parser tests`` () =
            [edg 0 1 (GLL.ParseEpsilon.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.ParseEpsilon.buildAbstractAst qGraph GLL.ParseEpsilon.numToString "Epsilon.dot"
+        test GLL.ParseEpsilon.buildAbstractAst qGraph GLL.ParseEpsilon.numToString "Epsilon.dot" 18 21 4 0
         
     [<Test>]
     member this._35_Expression () =
@@ -594,7 +585,7 @@ type ``GLL abstract parser tests`` () =
             edg 5 6 (GLL.ParseExpr.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.ParseExpr.buildAbstractAst qGraph GLL.ParseExpr.numToString "Expr.dot"
+        test GLL.ParseExpr.buildAbstractAst qGraph GLL.ParseExpr.numToString "Expr.dot" 33 42 6 1
 
     [<Test>]
     member this._36_First () =
@@ -608,7 +599,7 @@ type ``GLL abstract parser tests`` () =
             edg 5 6 (GLL.ParseFirst.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.ParseFirst.buildAbstractAst qGraph GLL.ParseFirst.numToString "First.dot"
+        test GLL.ParseFirst.buildAbstractAst qGraph GLL.ParseFirst.numToString "First.dot" 18 18 6 0
 
     [<Test>]
     member this._37_ListEps () =
@@ -619,7 +610,7 @@ type ``GLL abstract parser tests`` () =
             edg 2 3 (GLL.ParseListEps.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.ParseListEps.buildAbstractAst qGraph GLL.ParseListEps.numToString "ListEps.dot"
+        test GLL.ParseListEps.buildAbstractAst qGraph GLL.ParseListEps.numToString "ListEps.dot" 0 0 0 0
     
     [<Test>]
     member this._38_LolCalc () =
@@ -639,7 +630,7 @@ type ``GLL abstract parser tests`` () =
             edg 11 12 (GLL.ParseLolCalc.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.ParseLolCalc.buildAbstractAst qGraph GLL.ParseLolCalc.numToString "LolCalc.dot"
+        test GLL.ParseLolCalc.buildAbstractAst qGraph GLL.ParseLolCalc.numToString "LolCalc.dot" 0 0 0 0
     
     [<Test>]
     member this._39_LongCycle () =
@@ -649,17 +640,7 @@ type ``GLL abstract parser tests`` () =
             edg 1 2 (GLL.ParseLongCycle.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.ParseLongCycle.buildAbstractAst qGraph GLL.ParseLongCycle.numToString "LongCycle.dot"
-
-    [<Test>]
-    member this._40_LongCycle_Bad () =
-        let qGraph = new ParserInputGraph<_>(0, 2)
-        qGraph.AddVerticesAndEdgeRange
-           [edg 0 1 (GLL.ParseLongCycle_BAD.A 1)
-            edg 1 2 (GLL.ParseLongCycle_BAD.RNGLR_EOF 0)
-            ] |> ignore
-
-        test GLL.ParseLongCycle_BAD.buildAbstractAst qGraph GLL.ParseLongCycle_BAD.numToString "LongCycle_BAD.dot"
+        test GLL.ParseLongCycle.buildAbstractAst qGraph GLL.ParseLongCycle.numToString "LongCycle.dot" 11 15 2 1
     
     [<Test>]
     member this._41_Longest () =
@@ -673,8 +654,8 @@ type ``GLL abstract parser tests`` () =
             edg 5 6 (GLL.ParseLongest.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.ParseLongest.buildAbstractAst qGraph GLL.ParseLongest.numToString "Longest.dot"
-
+        test GLL.ParseLongest.buildAbstractAst qGraph GLL.ParseLongest.numToString "Longest.dot" 88 120 13 1
+         
     [<Test>]
     member this._42_Mixed () =
         let qGraph = new ParserInputGraph<_>(0, 5)
@@ -686,7 +667,7 @@ type ``GLL abstract parser tests`` () =
             edg 4 5 (GLL.ParseMixed.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.ParseMixed.buildAbstractAst qGraph GLL.ParseMixed.numToString "Mixed.dot"
+        test GLL.ParseMixed.buildAbstractAst qGraph GLL.ParseMixed.numToString "Mixed.dot" 21 24 5 0
     
     [<Test>]
     member this._43_Omit () =
@@ -698,7 +679,7 @@ type ``GLL abstract parser tests`` () =
             edg 3 4 (GLL.ParseOmit.RNGLR_EOF 0)
             ] |> ignore 
 
-        test GLL.ParseOmit.buildAbstractAst qGraph GLL.ParseOmit.numToString "Omit.dot"
+        test GLL.ParseOmit.buildAbstractAst qGraph GLL.ParseOmit.numToString "Omit.dot" 23 27 5 0
     
 //    [<Test>]
 //    member this._44_Order () =
@@ -719,16 +700,15 @@ type ``GLL abstract parser tests`` () =
 
     [<Test>]
     member this._45_SimpleRightRecursion () =
-        let qGraph = new ParserInputGraph<_>(0, 5)
+        let qGraph = new ParserInputGraph<_>(0, 4)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (GLL.SimpleRightRecursion.B 1)
-             edg 1 2 (GLL.SimpleRightRecursion.A 2)
-             edg 2 3 (GLL.SimpleRightRecursion.A 3)
-             edg 3 4 (GLL.SimpleRightRecursion.B 4)
-             edg 4 5 (GLL.SimpleRightRecursion.RNGLR_EOF 0)
+             edg 1 2 (GLL.SimpleRightRecursion.B 2)
+             edg 2 3 (GLL.SimpleRightRecursion.B 3)
+             edg 3 4 (GLL.SimpleRightRecursion.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.SimpleRightRecursion.buildAbstractAst qGraph GLL.SimpleRightRecursion.numToString "SimpleRightRecursion.dot"
+        test GLL.SimpleRightRecursion.buildAbstractAst qGraph GLL.SimpleRightRecursion.numToString "SimpleRightRecursion.dot" 12 12 4 0
 
     [<Test>]
     member this._46_BadLeftRecursion () =
@@ -740,7 +720,7 @@ type ``GLL abstract parser tests`` () =
              edg 3 4 (GLL.BadLeftRecursion.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.BadLeftRecursion.buildAbstractAst qGraph GLL.BadLeftRecursion.numToString "BadLeftRecursion.dot"
+        test GLL.BadLeftRecursion.buildAbstractAst qGraph GLL.BadLeftRecursion.numToString "BadLeftRecursion.dot" 30 42 4 1
 
     [<Test>]
     member this._47_SimpleAmb () =
@@ -752,17 +732,18 @@ type ``GLL abstract parser tests`` () =
              edg 3 4 (GLL.SimpleAmb.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.SimpleAmb.buildAbstractAst qGraph GLL.SimpleAmb.numToString "SimpleAmb.dot"
+        test GLL.SimpleAmb.buildAbstractAst qGraph GLL.SimpleAmb.numToString "SimpleAmb.dot" 15 18 4 1
     
     [<Test>]
     member this._48_SimpleRightNull () =
-        let qGraph = new ParserInputGraph<_>(0, 2)
+        let qGraph = new ParserInputGraph<_>(0, 3)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (GLL.SimpleRightNull.A 1)
-             edg 1 2 (GLL.SimpleRightNull.RNGLR_EOF 0)
+             edg 1 2 (GLL.SimpleRightNull.A 1)
+             edg 2 3 (GLL.SimpleRightNull.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.SimpleRightNull.buildAbstractAst qGraph GLL.SimpleRightNull.numToString "SimpleRightNull.dot"
+        test GLL.SimpleRightNull.buildAbstractAst qGraph GLL.SimpleRightNull.numToString "SimpleRightNull.dot" 19 21 5 0
 
     [<Test>]
     member this._49_SimpleLeftRecursion () =
@@ -774,7 +755,7 @@ type ``GLL abstract parser tests`` () =
              edg 3 4 (GLL.SimpleLeftRecursion.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.SimpleLeftRecursion.buildAbstractAst qGraph GLL.SimpleLeftRecursion.numToString "SimpleLeftRecursion.dot"
+        test GLL.SimpleLeftRecursion.buildAbstractAst qGraph GLL.SimpleLeftRecursion.numToString "SimpleLeftRecursion.dot" 16 18 4 0
 
     [<Test>]
     member this._50_SimpleBranch () =
@@ -786,5 +767,5 @@ type ``GLL abstract parser tests`` () =
              edg 2 3 (GLL.ParseSimpleBranch.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.ParseSimpleBranch.buildAbstractAst qGraph GLL.ParseSimpleBranch.numToString "SimpleBranch.dot"
+        test GLL.ParseSimpleBranch.buildAbstractAst qGraph GLL.ParseSimpleBranch.numToString "SimpleBranch.dot" 11 12 4 1
      

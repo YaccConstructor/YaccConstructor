@@ -41,7 +41,7 @@ open Lexer2
 
 
 let parser1 = GLL.SimpleAmb.buildAst
-
+let outDir = @"../../../src/GLLApplication/"
 //for i in [1..10] do
 //    let str = String.init (i * 5) (fun i -> "B ")
 //    let start = System.DateTime.Now
@@ -55,9 +55,7 @@ let run2 path astBuilder =
     astBuilder tokens, tokens
 //
 //let parser2 = GLL.Parse.SimpleAmb.buildAst
-//let str = String.init 1 (fun i -> "B ") + "B"
-let str = @"C:\Users\User\recursive-ascent\src\GLLApplication\Epsilon.txt"
-
+let str =  "B B B" //String.init 1 (fun i -> "B ") + "B"
     
 
 let r = run2 str parser1
@@ -68,7 +66,8 @@ match r with
         printfn "%s" "dddd" //str 
     | Parser.Success tree, tokens ->
         printfn "%s" "sss"
-        GLL.SimpleAmb.defaultAstToDot tree "ast.dot"
+        GLL.SimpleAmb.defaultAstToDot tree (outDir + "ast.dot")
+
 ////
 //printfn "ff"
 ///////////////////////////////////////////////////////////////////

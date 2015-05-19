@@ -66,9 +66,9 @@
     <Compile Include="RNGLR.EBNFGenerator.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Common.EBNF\Common.EBNF.fsproj">
-      <Name>Common.EBNF</Name>
-      <Project>{939fadff-a1a7-4aee-b072-f3007396f1a9}</Project>
+    <ProjectReference Include="..\Common.EBNF.DFA\Common.EBNF.DFA.fsproj">
+      <Name>Common.EBNF.DFA</Name>
+      <Project>{75421c75-612a-473b-852f-1af3bd4352f3}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Constraints\Constraints.fsproj">

@@ -58,7 +58,6 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="LexCommon.fs" />
-    <Compile Include="Program.fs" />
     <None Include="CalcEBNF.yrd" />
     <None Include="ComplexRightNull.yrd" />
     <None Include="EpsilonCycle.yrd" />
@@ -71,6 +70,19 @@
     <None Include="SimpleSome.yrd" />
     <None Include="StackingConflict.yrd" />
     <None Include="TwoEpsilonsMiddle.yrd" />
+    <Compile Include="CalcEBNF.yrd.fs" />
+    <Compile Include="ComplexRightNull.yrd.fs" />
+    <Compile Include="EpsilonCycle.yrd.fs" />
+    <Compile Include="ManyAndOne.yrd.fs" />
+    <Compile Include="ManyAndOpt.yrd.fs" />
+    <Compile Include="RightNull.yrd.fs" />
+    <Compile Include="SimpleEpsilon.yrd.fs" />
+    <Compile Include="SimpleOpt.yrd.fs" />
+    <Compile Include="SimpleRightNull.yrd.fs" />
+    <Compile Include="SimpleSome.yrd.fs" />
+    <Compile Include="StackingConflict.yrd.fs" />
+    <Compile Include="TwoEpsilonsMiddle.yrd.fs" />
+    <Compile Include="Program.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

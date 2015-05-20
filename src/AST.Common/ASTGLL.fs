@@ -32,7 +32,7 @@ type NonTerminalNode =
     
 and TerminalNode =
     interface INode
-    val Name : int
+    val Name : int*int
     val Extension : int64<extension>
     new (name, extension) = {Name = name; Extension = extension}
 
@@ -78,9 +78,9 @@ type NumNode =
     new (num, node) = {Num = num; Node = node} 
 
 [<AllowNullLiteral>]
-type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) =
-   
-    member this.AstToDot (indToString : int -> string) (path : string) =
+type Tree<'TokenType> (toks : Dictionary<int*int, 'TokenType>, root : obj, rules : int[][]) =
+    member this.tokens = toks
+    member this.AstToDot (indToString : int -> string) (tokenToNumber : 'TokenType -> int) (tokenData : 'TokenType -> obj) (path : string) =
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
 
@@ -152,9 +152,10 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     | :? TerminalNode as t ->
                         if t.Extension <> packExtension -1 -1 
                         then
-                            if t.Name <> -1
+                            
+                            if getLeftExtension t.Extension <> getRightExtension t.Extension
                             then
-                                createNode !num false Terminal ("t " + indToString t.Name)
+                                createNode !num false Terminal ("t " +  (indToString <| (tokenToNumber this.tokens.[t.Name])) + " " + string(tokenData this.tokens.[t.Name]))
                                 createEdge currentPair.Num !num false ""
                             else
                                 createNode !num false Terminal ("epsilon")

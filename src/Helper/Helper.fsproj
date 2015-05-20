@@ -62,7 +62,7 @@
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.3.0.0-beta-1\lib\net45\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="QuickGraph">
       <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Generator.0.0.6.5\tools\QuickGraph.dll</HintPath>

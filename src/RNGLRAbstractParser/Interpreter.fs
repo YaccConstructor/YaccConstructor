@@ -32,6 +32,8 @@ type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
     | Error of int * 'TokenType * string
 
+type IorB = I of int | B of bool
+
 [<AllowNullLiteral>]
 type Vertex (state : int, level : int) =
     let out = new ResizeArray<Edge>(4)
@@ -205,18 +207,17 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             let push = parserSource.Gotos.[gssVertex.State].[parserSource.TokenToNumber e.Tag]
             if push <> 0 
             then
-                let targetGssV, isNew = addVertex e.Target push (if currentGraphV.vNum = e.Target.vNum then newUnprocessedGssVs else e.Target.unprocessedGssVertices)
+                let tailGssV, isNew = addVertex e.Target push (if currentGraphV.vNum = e.Target.vNum then newUnprocessedGssVs else e.Target.unprocessedGssVertices)
 
                 if not <| edgesToTerms.ContainsKey e
                 then
                     terminals.Add e.Tag
                     nodes.Add <| Terminal (terminals.Count - 1)
                     edgesToTerms.Add(e, nodes.Count - 1)
-
                 let edge = new Edge(gssVertex, edgesToTerms.[e])
 
-                if targetGssV.FindIndex gssVertex.State gssVertex.Level = -1
-                then addEdge e.Target isNew targetGssV edge true
+                if tailGssV.FindIndex gssVertex.State gssVertex.Level = -1
+                then addEdge e.Target isNew tailGssV edge true
 
         if not <| currentGraphV.processedGssVertices.Contains(gssVertex)
         then 
@@ -357,5 +358,5 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             | None -> Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state")
             | Some res -> 
                 let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules)
-                //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
+                tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
                 Success <| tree

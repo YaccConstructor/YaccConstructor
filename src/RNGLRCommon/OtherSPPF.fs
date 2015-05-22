@@ -209,7 +209,8 @@ type OtherTree<'TokenType> (tree : Yard.Generators.Common.AST.Tree<'TokenType>) 
                         if dict.ContainsKey ast
                         then box <| dict.[ast]
                         else box <| processAST ast
-                    | :? int as token -> box token
+                    | :? Terminal as terminal -> box terminal.TokenNumber
+                    | :? Epsilon as epsilon -> box epsilon.EpsilonNonTerm
                     | _ -> failwithf "Unexpected AST element in OtherSPPF"
                 
                 newNodes := newElem :: !newNodes
@@ -249,7 +250,7 @@ type OtherTree<'TokenType> (tree : Yard.Generators.Common.AST.Tree<'TokenType>) 
                                     if dict.ContainsKey ast
                                     then box <| dict.[ast]
                                     else failwith "Unexpected AST"
-                                | :? int as token -> box token
+                                | :? Terminal as terminal -> box terminal.TokenNumber
                                 | _ -> failwithf "Unexpected AST element in OtherSPPF"
                 
                             children := newElem :: !children
@@ -318,8 +319,8 @@ type OtherTree<'TokenType> (tree : Yard.Generators.Common.AST.Tree<'TokenType>) 
                                     temp := !temp @ calcTokens fam
                             tokens := !tokens @ !temp
                             visitingAST.Remove ast |> ignore
-                    | :? int as t when t >= 0 ->
-                        tokens := t :: !tokens
+                    | :? Terminal as terminal ->
+                        tokens := terminal.TokenNumber :: !tokens
                     | _ -> ()
                 )
                 
@@ -353,8 +354,8 @@ type OtherTree<'TokenType> (tree : Yard.Generators.Common.AST.Tree<'TokenType>) 
                             then handleFamily fam
                         )
                 
-                | :? int as t when t >= 0 -> 
-                    if containsRange t && not <| List.exists (fun fam -> fam = family) !parents
+                | :? Terminal as terminal when terminal.TokenNumber >= 0 -> 
+                    if containsRange terminal.TokenNumber && not <| List.exists (fun fam -> fam = family) !parents
                     then
                         parents := family :: !parents
                         child := node

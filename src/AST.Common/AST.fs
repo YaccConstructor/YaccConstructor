@@ -18,6 +18,11 @@ open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
 open Yard.Generators.Common.AstNode
 
+type TS<'Token> =
+    | Tok of 'Token
+    | Seq of TS<'Token> list
+    | Alt of TS<'Token> list
+
 /// Arguments for tanslation calling, seen by user
 type TranslateArguments<'Token, 'Position> = {
     tokenToRange : 'Token -> 'Position * 'Position
@@ -355,7 +360,46 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                     res <- processFamily ast.first @ res
                 | _ -> ()
             res
+        processFamily family    
+
+    member this.getStructuredTokensFromFamily (family : Family) = 
+        let seen = ref []
+        let rec processFamily (fam : Family) : TS<'TokenType> = 
+            let mutable sequential : TS<'TokenType> list = []
+            for j = 0 to fam.nodes.Length-1 do
+                match fam.nodes.[j] with
+                | :? Terminal as t -> 
+                    sequential <- sequential @ [Tok tokens.[t.TokenNumber]]
+                | :? AST as ast -> 
+                    let isSeen = List.tryFind (fun x -> x = ast.pos) !seen
+                    match isSeen with 
+                    | None -> 
+                              seen := ast.pos :: !seen
+                              let tokensFromAst = getTokensFromAst ast                                  
+                              sequential <- sequential @ [tokensFromAst]
+                    | _ -> ()
+                | _ -> ()
+            Seq sequential
+        and getTokensFromAst ast =
+            if ast.other = null 
+            then 
+                processFamily ast.first
+            else
+                let mutable alternative : TS<'TokenType> list = []
+                for other in ast.other do
+                    alternative <- alternative @ [processFamily other]
+                Alt alternative
         processFamily family
+
+    member this.GetTokens (ast : AST) =
+        if ast.other = null 
+        then 
+            this.getStructuredTokensFromFamily ast.first
+        else
+            let mutable alternative : TS<'TokenType> list = []
+            for other in ast.other do
+                alternative <- alternative @ [this.getStructuredTokensFromFamily other]
+            Alt alternative
 
     member private this.getTokensFromFamilyAsTokenTypes (family : Family) = 
         this.getTokensFromFamily family |> List.map (fun t -> tokens.[t.TokenNumber]) |> List.toArray
@@ -663,7 +707,8 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
         let createNode num isAmbiguous nodeType (str : string) =
             let label =
                 let cur = str.Replace("\n", "\\n").Replace ("\r", "")
-                if not isAmbiguous then cur
+                if not isAmbiguous 
+                then cur
                 else cur + " !"
             let shape =
                 match nodeType with

@@ -216,8 +216,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     edgesToTerms.Add(e, nodes.Count - 1)
                 let edge = new Edge(gssVertex, edgesToTerms.[e])
 
-                if tailGssV.FindIndex gssVertex.State gssVertex.Level = -1
+                let ind = tailGssV.FindIndex gssVertex.State gssVertex.Level 
+                if ind = -1 || (tailGssV.Edge ind).Ast <> edgesToTerms.[e]
                 then addEdge e.Target isNew tailGssV edge true
+               
 
         if not <| currentGraphV.processedGssVertices.Contains(gssVertex)
         then 
@@ -357,6 +359,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             match !root with
             | None -> Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state")
             | Some res -> 
-                let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules)
-                tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
-                Success <| tree
+                try 
+                    let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules)
+                //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
+                    Success <| tree
+                with
+                e -> Error (-1, Unchecked.defaultof<'TokenType>, e.Message)

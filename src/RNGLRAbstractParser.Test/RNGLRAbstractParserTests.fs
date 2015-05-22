@@ -123,7 +123,6 @@ type ``RNGLR abstract parser tests`` () =
              edg 0 3 (RNGLR.PrettySimpleCalc.NUM 4)
              edg 3 4 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
              ] |> ignore
-
         test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 15 14 0 4 1
 
     [<Test>]
@@ -484,6 +483,26 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
 
     [<Test>]
+    member this.temp () =
+        let qGraph = new ParserInputGraph<_>(0, 9)
+        qGraph.AddVerticesAndEdgeRange
+//           [edg 0 0 (RNGLR.StrangeBrackets.LBR 1)
+//            edg 0 1 (RNGLR.StrangeBrackets.LBR 2)
+//            edg 1 2 (RNGLR.StrangeBrackets.RBR 3)
+//            edg 2 2 (RNGLR.StrangeBrackets.RBR 4)
+//            edg 2 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+//            ] |> ignore
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 0)
+            edg 1 3 (RNGLR.StrangeBrackets.RBR 3)
+            edg 1 2 (RNGLR.StrangeBrackets.RBR 1)
+            edg 2 3 (RNGLR.StrangeBrackets.LBR 2)
+            edg 0 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
+
+    [<Test>]
     member this._27_UnambiguousBrackets_WithoutEmptyString () =
         let qGraph = new ParserInputGraph<_>(0, 9)
         qGraph.AddVerticesAndEdgeRange
@@ -543,6 +562,7 @@ let f x =
 //    t._25_UnambiguousBrackets_BiggerCircle ()
 //    t._26_UnambiguousBrackets_Inf()
 //    t._27_UnambiguousBrackets_WithoutEmptyString()
-    t._28_UnambiguousBrackets_DifferentPathLengths ()
+//    t._28_UnambiguousBrackets_DifferentPathLengths ()
+    t.temp()
     0
     

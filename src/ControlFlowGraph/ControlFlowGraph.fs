@@ -447,8 +447,8 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
         let rec collectTokens (node : obj) (tokensGraph : CfgTokensGraph) startVertex endVertex = 
             
             match node with 
-            | :? int as t -> 
-                let tagOpt = if t >= 0 then Some t else None
+            | :? Terminal as t -> 
+                let tagOpt = if t.TokenNumber >= 0 then Some t.TokenNumber else None
                 let edge = new TokensEdge(!startVertex, !endVertex, tagOpt)
                 tokensGraph.AddEdgeForced edge 
 

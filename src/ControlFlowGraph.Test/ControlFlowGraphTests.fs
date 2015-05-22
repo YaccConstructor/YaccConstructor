@@ -43,45 +43,52 @@ type ``Control Flow Graph Building`` () =
     let parserSource = new ParserSource<RNGLR.ParseExtendedCalc.Token>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, typeToDelimiters)
 
-    let runTest graph astName cfgName = 
+    let runTest graph (needPrint : _ option) = 
         let parseResult = (new Parser<_>()).Parse buildAbstractAst graph
         
         match parseResult with 
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
         | Parser.Success mAst ->
-            RNGLR.ParseExtendedCalc.defaultAstToDot mAst astName
-            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealString)
             
-            cfg.PrintToDot cfgName
+            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealString)
             printfn "%s" <| cfg.ToString()
+
+            if needPrint.IsSome
+            then 
+                let astName, cfgName = needPrint.Value
+                RNGLR.ParseExtendedCalc.defaultAstToDot mAst astName
+                cfg.PrintToDot cfgName
+                
 
     [<Test>]
     member test.``Elementary test``() =
-        let qGraph = new ParserInputGraph<_>(0, 12)
+        let qGraph = new ParserInputGraph<_>(0, 13)
         let vertexRange = List.init 13 (fun i -> i)
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
-                createEdge 0 1 (RNGLR.ParseExtendedCalc.X 0)
-                createEdge 1 2 (RNGLR.ParseExtendedCalc.EQ 1)
-                createEdge 2 3 (RNGLR.ParseExtendedCalc.ONE 2)
-                createEdge 3 4 (RNGLR.ParseExtendedCalc.SEMICOLON 3)
-                createEdge 4 5 (RNGLR.ParseExtendedCalc.Y 4)
-                createEdge 5 6 (RNGLR.ParseExtendedCalc.EQ 5)
-                createEdge 6 7 (RNGLR.ParseExtendedCalc.TWO 6)
-                createEdge 7 8 (RNGLR.ParseExtendedCalc.SEMICOLON 7)
-                createEdge 8 9 (RNGLR.ParseExtendedCalc.Z 8)
-                createEdge 9 10 (RNGLR.ParseExtendedCalc.EQ 9)
-                createEdge 10 11 (RNGLR.ParseExtendedCalc.THREE 10)
-                createEdge 11 12 (RNGLR.ParseExtendedCalc.SEMICOLON 11)
+                createEdge 0 1 (RNGLR.ParseExtendedCalc.X 1)
+                createEdge 1 2 (RNGLR.ParseExtendedCalc.EQ 2)
+                createEdge 2 3 (RNGLR.ParseExtendedCalc.ONE 3)
+                createEdge 3 4 (RNGLR.ParseExtendedCalc.SEMICOLON 4)
+                createEdge 4 5 (RNGLR.ParseExtendedCalc.Y 5)
+                createEdge 5 6 (RNGLR.ParseExtendedCalc.EQ 6)
+                createEdge 6 7 (RNGLR.ParseExtendedCalc.TWO 7)
+                createEdge 7 8 (RNGLR.ParseExtendedCalc.SEMICOLON 8)
+                createEdge 8 9 (RNGLR.ParseExtendedCalc.Z 9)
+                createEdge 9 10 (RNGLR.ParseExtendedCalc.EQ 10)
+                createEdge 10 11 (RNGLR.ParseExtendedCalc.THREE 11)
+                createEdge 11 12 (RNGLR.ParseExtendedCalc.SEMICOLON 12)
+                createEdge 12 13 (RNGLR.ParseExtendedCalc.RNGLR_EOF 0)
             ] |> ignore
 
-        runTest qGraph "ast elementary (cfg construction).dot" "cfg elementary (cfg construction).dot"
+        let printOpt = None//Some <| ("ast elementary (cfg construction).dot", "cfg elementary (cfg construction).dot")
+        runTest qGraph printOpt
 
     [<Test>]
     member test.``Ambiguous test``() =
-        let qGraph = new ParserInputGraph<_>(0, 15)
-        let vertexRange = List.init 16 (fun i -> i)
+        let qGraph = new ParserInputGraph<_>(0, 16)
+        let vertexRange = List.init 17 (fun i -> i)
         qGraph.AddVertexRange vertexRange |> ignore
 
         //          -> Y = 2;
@@ -105,14 +112,17 @@ type ``Control Flow Graph Building`` () =
                 createEdge 12 13 (RNGLR.ParseExtendedCalc.EQ 9)
                 createEdge 13 14 (RNGLR.ParseExtendedCalc.FOUR 10)
                 createEdge 14 15 (RNGLR.ParseExtendedCalc.SEMICOLON 11)
+                createEdge 15 16 (RNGLR.ParseExtendedCalc.RNGLR_EOF 12)
             ] |> ignore
 
-        runTest qGraph "ast ambiguous (cfg construction).dot" "cfg ambiguous (cfg construction).dot"
+        let printOpt = None// Some <| ("ast ambiguous (cfg construction).dot" "cfg ambiguous (cfg construction).dot")
+
+        runTest qGraph printOpt
 
     [<Test>]
     member this.``Ambiguous2 test``() = 
-        let qGraph = new ParserInputGraph<_>(0, 4)
-        let vertexRange = List.init 5 (fun i -> i)
+        let qGraph = new ParserInputGraph<_>(0, 5)
+        let vertexRange = List.init 6 (fun i -> i)
         qGraph.AddVertexRange vertexRange |> ignore
 
         qGraph.AddVerticesAndEdgeRange
@@ -122,12 +132,14 @@ type ``Control Flow Graph Building`` () =
                 createEdge 1 2 (RNGLR.ParseExtendedCalc.EQ 2)
                 createEdge 2 3 (RNGLR.ParseExtendedCalc.FIVE 3)
                 createEdge 3 4 (RNGLR.ParseExtendedCalc.SEMICOLON 4)
+                createEdge 4 5 (RNGLR.ParseExtendedCalc.RNGLR_EOF 5)
             ] |> ignore
 
-        runTest qGraph "ast ambiguous2 (cfg construction).dot" "cfg ambiguous2 (cfg construction).dot"
+        let printOpt = None // Some <| ("ast ambiguous2 (cfg construction).dot" "cfg ambiguous2 (cfg construction).dot")
+        runTest qGraph printOpt
 
 
-[<TestFixture>]
+//[<TestFixture>]
 type ``Control Flow Graph: If`` () =
     let buildAbstractAst = RNGLR.ParseIf.buildAstAbstract
     let tokenToNumber = RNGLR.ParseIf.tokenToNumber
@@ -157,19 +169,24 @@ type ``Control Flow Graph: If`` () =
     let parserSource = new ParserSource<RNGLR.ParseIf.Token>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, typeToDelimiters, elseNumber, endIfNumber)
 
-    let runTest graph astName cfgName = 
+    let runTest graph (printOpt : _ option) = 
         let parseResult = (new Parser<_>()).Parse buildAbstractAst graph
         
         match parseResult with 
         | Parser.Error (num, tok, message) -> printErr (num, tok, message)
         | Parser.Success mAst ->
-            RNGLR.ParseIf.defaultAstToDot mAst astName
+
             let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealString)
-            
-            cfg.PrintToDot cfgName
             printfn "%s" <| cfg.ToString()
 
-    [<Test>]
+            if printOpt.IsSome
+            then
+                let astName, cfgName = printOpt.Value
+                RNGLR.ParseIf.defaultAstToDot mAst astName
+                cfg.PrintToDot cfgName
+                
+
+//    [<Test>]
     member test.``Simple If test``() =
         let qGraph = new ParserInputGraph<_>(0, 11)
         let vertexRange = List.init 12 (fun i -> i)
@@ -189,12 +206,13 @@ type ``Control Flow Graph: If`` () =
                 createEdge 10 11 (RNGLR.ParseIf.SEMICOLON 10)
             ] |> ignore
 
-        runTest qGraph "ast simple if (cfg construction).dot" "cfg simple if (cfg construction).dot"
+        let printOpt = None //Some <| ("ast simple if (cfg construction).dot" "cfg simple if (cfg construction).dot")
+        runTest qGraph printOpt
 
-    [<Test>]
+//    [<Test>]
     member test.``Big If test``() =
-        let qGraph = new ParserInputGraph<_>(0, 15)
-        let vertexRange = List.init 16 (fun i -> i)
+        let qGraph = new ParserInputGraph<_>(0, 16)
+        let vertexRange = List.init 17 (fun i -> i)
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -213,15 +231,17 @@ type ``Control Flow Graph: If`` () =
                 createEdge 12 13 (RNGLR.ParseIf.ENDIF 12)
                 createEdge 13 14 (RNGLR.ParseIf.F 13)
                 createEdge 14 15 (RNGLR.ParseIf.SEMICOLON 14)
+                createEdge 15 16 (RNGLR.ParseIf.RNGLR_EOF 15)
             ] |> ignore
 
-        runTest qGraph "ast big if (cfg construction).dot" "cfg big if (cfg construction).dot"
+        let printOpt = None //Some <| ("ast big if (cfg construction).dot", "cfg big if (cfg construction).dot")
+        runTest qGraph printOpt
 
-    [<Test>]
+//    [<Test>]
     member test.``If without else test``() =
-        let qGraph = new ParserInputGraph<_>(0, 10)
+        let qGraph = new ParserInputGraph<_>(0, 11)
 
-        let vertexRange = List.init 11 (fun i -> i)
+        let vertexRange = List.init 12 (fun i -> i)
         qGraph.AddVertexRange vertexRange |> ignore
 
         qGraph.AddVerticesAndEdgeRange
@@ -236,11 +256,13 @@ type ``Control Flow Graph: If`` () =
                 createEdge 7 8 (RNGLR.ParseIf.ENDIF 7)
                 createEdge 8 9 (RNGLR.ParseIf.F 8)
                 createEdge 9 10 (RNGLR.ParseIf.SEMICOLON 9)
+                createEdge 10 11 (RNGLR.ParseIf.RNGLR_EOF 10)
             ] |> ignore
 
-        runTest qGraph "ast if-without-else (cfg construction).dot" "cfg if-without-else (cfg construction).dot"
+        let printOpt = None//Some <| ("ast if-without-else (cfg construction).dot", "cfg if-without-else (cfg construction).dot")
+        runTest qGraph printOpt
             
-    [<Test>]
+//    [<Test>]
     member test.``Inner if``() =
         let qGraph = new ParserInputGraph<_>(0, 23)
         let vertices = Array.init 23 (fun i -> i)
@@ -270,9 +292,11 @@ type ``Control Flow Graph: If`` () =
                 createEdge 20 21(RNGLR.ParseIf.SEMICOLON 20)
                 createEdge 21 22(RNGLR.ParseIf.ENDIF 21)
                 createEdge 22 23(RNGLR.ParseIf.ENDIF 22)
+                createEdge 23 24(RNGLR.ParseIf.RNGLR_EOF 23)
             ] |> ignore
 
-        runTest qGraph "ast inner if (cfg construction).dot" "cfg inner if (cfg construction).dot"
+        let printOpt = None //Some <| ("ast inner if (cfg construction).dot", "cfg inner if (cfg construction).dot")
+        runTest qGraph printOpt
 
 
 [<TestFixture>]
@@ -302,23 +326,27 @@ type ``Find undefined variables`` () =
     let parserSource = new ParserSource<RNGLR.ParseExtendedCalc.Token>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, typeToDelimiters, -1, -1, eqNumber, isVariable)
 
-    let runTest qGraph expected (astName : string) cfgName = 
+    let runTest qGraph expected (printOpt : _ option) = 
         let parseResult = (new Parser<_>()).Parse buildAbstractAst qGraph
         
         match parseResult with 
         | Parser.Error (num, tok, message) -> printErr (num, tok, message)
         | Parser.Success mAst ->
-            RNGLR.ParseExtendedCalc.defaultAstToDot mAst astName
+            
             let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealName)
-            
-            cfg.PrintToDot cfgName
-            
             let errorList = cfg.FindUndefVariable()
             
             printfn "%A" errorList
             printfn "Expected: %d. Actual: %d." expected errorList.Length 
             
             Assert.AreEqual(expected, errorList.Length)
+
+            if printOpt.IsSome 
+            then
+                let astName, cfgName = printOpt.Value
+                RNGLR.ParseExtendedCalc.defaultAstToDot mAst astName
+                cfg.PrintToDot cfgName
+                
 
     [<Test>]
     member test.``Elementary``() = 
@@ -335,10 +363,14 @@ type ``Find undefined variables`` () =
                 createEdge 5 6 (RNGLR.ParseExtendedCalc.EQ 5)
                 createEdge 6 7 (RNGLR.ParseExtendedCalc.X 6)
                 createEdge 7 8 (RNGLR.ParseExtendedCalc.SEMICOLON 7)
+                createEdge 8 9 (RNGLR.ParseExtendedCalc.RNGLR_EOF 8)
             ] |> ignore
 
+        printfn ("X = Z; Y = X;")
+
         let expected = 1
-        runTest qGraph expected "ast elementary (undefined variables).dot" "cfg elementary (undefined variables).dot"
+        let printOpt = None //Some <| ("ast elementary (undefined variables).dot", "cfg elementary (undefined variables).dot")
+        runTest qGraph expected printOpt
 
     [<Test>]
     member test.``X = X``() = 
@@ -347,24 +379,24 @@ type ``Find undefined variables`` () =
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
-                createEdge 0 1 (RNGLR.ParseExtendedCalc.X 0)
-                createEdge 1 2 (RNGLR.ParseExtendedCalc.EQ 1)
-                createEdge 2 3 (RNGLR.ParseExtendedCalc.X 2)
-                createEdge 3 4 (RNGLR.ParseExtendedCalc.SEMICOLON 3)
+                createEdge 0 1 (RNGLR.ParseExtendedCalc.X 1)
+                createEdge 1 2 (RNGLR.ParseExtendedCalc.EQ 2)
+                createEdge 2 3 (RNGLR.ParseExtendedCalc.X 3)
+                createEdge 3 4 (RNGLR.ParseExtendedCalc.SEMICOLON 4)
+                createEdge 4 5 (RNGLR.ParseExtendedCalc.RNGLR_EOF 5)
             ] |> ignore
 
+        printfn ("X = X;")
         let expected = 1
-        runTest qGraph expected "ast X = X (undefined variables).dot" "cfg X = X (undefined variables).dot"
+        let printOpt = None //Some <| ("ast X = X (undefined variables).dot", "cfg X = X (undefined variables).dot")
+        runTest qGraph expected printOpt
 
     [<Test>]
     member test.``Undef: ambiguous``() =
-        let qGraph = new ParserInputGraph<_>(0, 17)
+        let qGraph = new ParserInputGraph<_>(0, 18)
         let vertexRange = List.init 18 (fun i -> i)
         qGraph.AddVertexRange vertexRange |> ignore
 
-        //          -> Y = 2;
-        // X = 1;                -> X = Y * Z;
-        //          -> Z = 3;
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (RNGLR.ParseExtendedCalc.X 0)
@@ -385,10 +417,16 @@ type ``Find undefined variables`` () =
                 createEdge 14 15 (RNGLR.ParseExtendedCalc.MULT 14)
                 createEdge 15 16 (RNGLR.ParseExtendedCalc.Z 15)
                 createEdge 16 17 (RNGLR.ParseExtendedCalc.SEMICOLON 16)
+                createEdge 17 18 (RNGLR.ParseExtendedCalc.RNGLR_EOF 17)
             ] |> ignore
 
+        printfn "           | --> Y = 2; --> |"
+        printfn "X = 1; --> |                | --> X = Y * Z;"
+        printfn "           | --> Z = 3; --> |"
+
         let expected = 2
-        runTest qGraph expected "ast ambiguous1 (undefined variables).dot" "cfg ambiguous1 (undefined variables).dot"
+        let printOpt = None //Some <| ("ast ambiguous1 (undefined variables).dot", "cfg ambiguous1 (undefined variables).dot")
+        runTest qGraph expected printOpt
             
     [<Test>]
     member test.``Undef: ambiguous 2``() =
@@ -396,8 +434,6 @@ type ``Find undefined variables`` () =
         let vertexRange = List.init 15 (fun i -> i)
         qGraph.AddVertexRange vertexRange |> ignore
 
-        //        ---> Y = 2; ---> 
-        // X = 1; ---------------> X = Y * Z;   
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (RNGLR.ParseExtendedCalc.X 0)
@@ -415,16 +451,22 @@ type ``Find undefined variables`` () =
                 createEdge 11 12 (RNGLR.ParseExtendedCalc.MULT 11)
                 createEdge 12 13 (RNGLR.ParseExtendedCalc.Z 12)
                 createEdge 13 14 (RNGLR.ParseExtendedCalc.SEMICOLON 13)
+                createEdge 14 15 (RNGLR.ParseExtendedCalc.RNGLR_EOF 14)
             ] |> ignore
 
-        let expected = 2
-        runTest qGraph expected "ast ambiguous2 (undefined variables).dot" "cfg ambiguous2 (undefined variables).dot"
+        printfn ("        |--> Y = 2; --> |")
+        printfn ("        |               |")
+        printfn ("X = 1 --|-----------------> X = Y * Z")
 
-[<EntryPoint>]
+        let expected = 2
+        let printOpt = None //Some <| ("ast ambiguous2 (undefined variables).dot", "cfg ambiguous2 (undefined variables).dot")
+        runTest qGraph expected printOpt
+
+//[<EntryPoint>]
 let f x = 
     let cfgBuilding = new ``Control Flow Graph Building``()
-//    cfgBuilding.``Elementary test``()
-    cfgBuilding.``Ambiguous2 test``()
+    cfgBuilding.``Elementary test``()
+//    cfgBuilding.``Ambiguous2 test``()
 //    let ifBuilding = new ``Control Flow Graph: If``()
 //    ifBuilding.``If without else test``()
 //    let undefVariables = new ``Find undefined variables``()

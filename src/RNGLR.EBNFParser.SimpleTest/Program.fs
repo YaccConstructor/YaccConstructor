@@ -57,6 +57,12 @@ type ``RNGLREBNF parser tests with simple lexer`` () =
         runTest parser file
 
     [<Test>]
+    member test.``LeftRec`` () = 
+        let parser = RNGLR.ParserLeftRec.buildAst
+        let file = "LeftRec.txt"
+        runTest parser file
+
+    [<Test>]
     member test.``ManyAndOne0`` () = 
         let parser = RNGLR.ParserManyAndOne.buildAst
         let file = "ManyAndOne0.txt"

@@ -16,12 +16,8 @@
 <copyright>Copyright 2013, 2014, 2015</copyright>
 <tags>Parsing Reengineering YaccConstructor YC Core Grammarware .NET F# FSharp</tags>
 <dependencies>
-<dependency id="YC.Core" version="0.3.0.0" />
+<dependency id="YC.Core" version="" />
 </dependencies>
-<references>
-  <reference file="CYKCommon.dll" />
-  <reference file="CYKGenerator.dll" />
-</references>>
 </metadata>
 <files>
 <file src="..\README.md" target="README.txt" />

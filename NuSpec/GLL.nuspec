@@ -15,16 +15,10 @@
 <copyright>Copyright 2013, 2014, 2015</copyright>
 <tags>Parsing Reengineering YaccConstructor YC Core Grammarware .NET F# FSharp</tags>
 <dependencies>
-<dependency id="YC.Core" version="0.3.0.0" />
-<dependency id="YC.Generators" version="0.3.0.0" />
+<dependency id="YC.Core" version="" />
+<dependency id="YC.Generators" version="" />
 <dependency id="FSharpx.Text.StructuredFormat" version="[1.10.2]" />
 </dependencies>
-<references>
-  <reference file="GLL.Common.dll" />
-  <reference file="GLLApplication.dll" />
-  <reference file="GLLGenerator.dll" />
-  <reference file="GLLParser.dll" />
-</references>>
 </metadata>
 <files>
 <file src="..\README.md" target="README.txt" />

@@ -16,15 +16,8 @@ Generator or backend is a module which generates something from IL into possible
 <copyright>Copyright 2013, 2014, 2015</copyright>
 <tags>Parsing Reengineering YaccConstructor YC Core Grammarware .NET F# FSharp</tags>
 <dependencies>
-<dependency id="YC.Core" version="0.3.0.0" />
+<dependency id="YC.Core" version="" />
 </dependencies>
-<references>
-  <reference file="FParsec.dll" />
-  <reference file="FParsecGenerator.dll" />
-  <reference file="FsYaccPrinter.dll" />
-  <reference file="TreeDump.dll" />
-  <reference file="YardPrinter.dll" />
-</references>>
 </metadata>
 <files>
 <file src="..\README.md" target="README.txt" />

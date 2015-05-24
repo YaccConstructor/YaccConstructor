@@ -15,18 +15,10 @@
 <copyright>Copyright 2013, 2014, 2015</copyright>
 <tags>Parsing Reengineering YaccConstructor YC Core Grammarware .NET F# FSharp</tags>
 <dependencies>
-<dependency id="YC.Core" version="0.3.0.0" />
-<dependency id="RNGLR" version="0.3.0.0" />
+<dependency id="YC.Core" version="" />
+<dependency id="RNGLR" version="" />
 <dependency id="FSharpx.Text.StructuredFormat" version="[1.10.2]" />
 </dependencies>
-<references>
-  <reference file="AntlrFrontend.dll" />
-  <reference file="FsYaccFrontend.dll" />
-  <reference file="IronyFrontend.dll" />
-  <reference file="AbstractLexer.Generator.dll" />
-  <reference file="Irony.dll" />
-  <reference file=YC.YardFrontend.dll" />
-</references>>
 </metadata>
 <files>
 <file src="..\README.md" target="README.txt" />

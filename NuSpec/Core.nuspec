@@ -23,7 +23,7 @@
 <references>
   <reference file="FsYacc..dll" />
   <reference file="YC.Common.dll" />
-  <reference file="YC.Conversions..dll" />
+  <reference file="YC.Conversions.dll" />
   <reference file="YC.Constraints.dll" />
   <reference file="YC.AbstractAnalysis.Common.dll" />
   <reference file="AST.Common.dll" />

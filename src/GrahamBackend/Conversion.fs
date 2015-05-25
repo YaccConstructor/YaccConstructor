@@ -56,9 +56,12 @@ type TestGenerator() =
                             match part with
                             | h :: t ->
                                 match h.rule with
-                                | Production.PToken pt -> tks.Add pt.text
+                                | Production.PToken pt -> 
+                                    if not (tks.Contains pt.text) then
+                                        tks.Add pt.text
                                 //| Production.PRef(nt,_) -> nTerms.Add nt.text
-                                | _ -> func t
+                                | _ -> () //func t
+                                func t
                             | [] -> ()
                         func p
                     | _ -> ()
@@ -71,10 +74,15 @@ type TestGenerator() =
             for i = 0 to pairs.Length-1 do
                 pairs.[i] <- args.[i * 2], args.[i * 2 + 1]
 
+            let  outputParserPath = ref None
             let  defaultTokenType = ref <| Some("")
+            let  parserType = ref None
+
             for opt, value in pairs do
                 match opt with
                 | "-token" -> defaultTokenType := Some value
+                | "-o" -> outputParserPath := Some value
+                | "-parserType" -> parserType := Some value
                 | _ -> ()
 
             let terminals = getTermsNonterms t.grammar
@@ -105,7 +113,7 @@ type TestGenerator() =
                 |> List.map (fun kvp -> kvp.Key, kvp.Value)
 
             let getNonterminalDeclarations (startingProductions : NonterminalIdentifier list) =
-                let value : DeclaredType = "obj"
+                let value : DeclaredType = "_"
                 let (objList : DeclaredType list) = List.init startingProductions.Length (fun _ -> value)
                 List.zip objList startingProductions
 
@@ -167,15 +175,23 @@ type TestGenerator() =
                 Productions = getProductions } //["Smth",[{Symbols=["Expr";"PRINT"]; Action=Some(" Print($2) "); ImpersonatedPrecedence=Some("")}]]; }
             
             let backendOpt : FSharpYacc.FsyaccBackendOptions = {
-                OutputPath = "C:\\Users\\Ekaterina\\YaccConstructor\\src\\RNGLRParser.SimpleTest\\Calc_new.fs";
+                OutputPath = (!outputParserPath).Value ; //"C:\\Users\\Ekaterina\\YaccConstructor\\src\\CheckInterpreter\\Parser.fs";
                 ModuleName = Some("Parser");
                 LexerInterpreterNamespace = None;
                 ParserInterpreterNamespace = None;
                 OpenDeclarations = [||]; // Ast ???
                 InternalModule = true; }
             
+            let getParserType =
+                match (!parserType).Value with
+                | "LR0" -> FSharpYacc.ParserType.LR0
+                | "LR1" -> FSharpYacc.ParserType.LR1
+                | "SLR1" -> FSharpYacc.ParserType.SLR1
+                | "LALR1" -> FSharpYacc.ParserType.LALR1
+                | _ -> failwith "Unrecognized parser type: %s" (!parserType).Value
+
             let options : FSharpYacc.CompilationOptions = {
-                ParserType = FSharpYacc.Lelr;
+                ParserType = getParserType;
                 FsyaccBackendOptions = Some(backendOpt); }
             
             let procSpec, validMes = FSharpYacc.Compiler.precompile(specification, options)
@@ -184,9 +200,14 @@ type TestGenerator() =
 
             let backendInvoke =
                 match compileRes with
-                | Choice2Of2 errorMessages ->
-                    ()
-                | Choice1Of2 parserTable ->
+                | Choice2Of3 errorMessages ->
+                    failwith "ERROR: %s"errorMessages
+                | Choice1Of3 parserTable ->
+                    backends.FsyaccBackend.Invoke (
+                        procSpec,
+                        parserTable,
+                        options)
+                | Choice3Of3 parserTable ->
                     backends.FsyaccBackend.Invoke (
                         procSpec,
                         parserTable,

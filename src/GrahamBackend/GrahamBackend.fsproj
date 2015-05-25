@@ -17,11 +17,7 @@
   <Import Project="../YC.targets" />
   <ItemGroup>
     <Reference Include="FsYacc">
-      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\FsYacc.exe</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Helper">
-      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\Helper.dll</HintPath>
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net45\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Addins">
@@ -35,14 +31,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="YC.FsYacc">
-      <HintPath>..\packages\YC.Tools.0.0.6.121\lib\net40\YC.FsYacc.0.0.6.121.exe</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.Helper">
-      <HintPath>..\packages\YC.Tools.0.0.6.121\lib\net40\YC.Helper.0.0.6.121.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Conversion.fs" />

@@ -1,4 +1,4 @@
-﻿namespace Yard.EBNF.GrammarWithNFARightSide
+﻿namespace Yard.EBNF.DFA.GrammarWithNFARightSide
 
 open Yard.Core.IL
 open Yard.Generators.Common
@@ -9,6 +9,7 @@ module NFAProduction =
     
         numberOfStates : int
         startState : Vertex<int,int>
+        //массив ко всем состояним автомата
         stateToVertex : Vertex<int, int>[]
     }  
 

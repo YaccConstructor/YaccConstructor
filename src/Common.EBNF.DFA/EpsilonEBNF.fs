@@ -1,10 +1,10 @@
-﻿module Yard.EBNF.Epsilon
+﻿module Yard.EBNF.DFA.Epsilon
 
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Generators.Common
-open Yard.EBNF.Indexator
-open Yard.EBNF.NumberedRules
+open Yard.EBNF.DFA.Indexator
+open Yard.EBNF.DFA.NumberedRules
 
 let canInferEpsilonNFA (rules : NumberedRulesEBNF) (indexator : IndexatorEBNF) =
     let result : bool[] = Array.zeroCreate (indexator.fullCount + 1) //+1 for epsilon

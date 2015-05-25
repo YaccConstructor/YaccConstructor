@@ -1,10 +1,10 @@
-﻿namespace Yard.EBNF.NumberedRules
+﻿namespace Yard.EBNF.DFA.NumberedRules
 
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open System.Collections.Generic
-open Yard.EBNF.GrammarWithNFARightSide
-open Yard.EBNF.Indexator
+open Yard.EBNF.DFA.GrammarWithNFARightSide
+open Yard.EBNF.DFA.Indexator
 open Yard.Generators.Common
 
 type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : IndexatorEBNF, caseSensitive) =
@@ -116,6 +116,7 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
             )
         |> Array.ofList
 
+    // по индексу нетерминала возвращает номера правил с этим нетерм в правой части
     let rulesWithLeft =
         let result : int list array = Array.create indexator.fullCount []
         for i in 0..rules.Length-1 do

@@ -7,7 +7,11 @@ open Yard.Generators.RNGLR.EBNF.DFA.States
 type TablesEBNF(grammar : FinalGrammarNFA, states : StatesInterpreterEBNF) =
     let _reduces, _gotos, _acc =
         let symbolCount = grammar.indexator.fullCount
+        // первый индекс - сост анализатора, второй индекс символ грамм
+        // list<int - номер правила для свертки
         let reduces : list<int * ReduceLabel>[,] = Array2D.create states.count symbolCount []
+        // первый индекс - сост анализ, второй индекс - символ грамм
+        // list<int - куда переходим, два множества
         let gotos : list<int * (Set<int> * Set<int>)>[,] = Array2D.create states.count symbolCount []
         let mutable acc = []
         if grammar.canInferEpsilon.[grammar.rules.leftSide grammar.startRule] then acc <- (*startState*)0::acc

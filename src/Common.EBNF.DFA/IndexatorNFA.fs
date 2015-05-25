@@ -1,4 +1,4 @@
-﻿namespace Yard.EBNF.Indexator
+﻿namespace Yard.EBNF.DFA.Indexator
 
 open Yard.Core.IL
 open Yard.Core.IL.Production
@@ -59,6 +59,7 @@ type IndexatorEBNF (ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
     
     let _errorIndex = let (x,_,_) = nonTermsConnect in x "error"
 
+    // символ для epsilon
     let _epsilonIndex = literalsShift + (let (_,_,x) = literalsConnect in x)
 
     let _getLiteralName i =

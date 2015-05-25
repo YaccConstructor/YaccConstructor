@@ -107,6 +107,10 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GrahamBackend", "GrahamBack
 		{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08} = {10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}
 	EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CheckInterpreter", "CheckInterpreter\CheckInterpreter.fsproj", "{0606EB5B-A0F4-4BAE-A5B4-820541C8EE1E}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsLexYacc.Runtime", "..\facio\FsLexYacc\src\FsLexYacc.Runtime\FsLexYacc.Runtime.fsproj", "{7E90D6CE-A10B-4858-A5BC-41DF7250CBCC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -283,6 +287,18 @@ Global
 		{8229C806-85DA-4336-8CFD-5EB846C0FFFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8229C806-85DA-4336-8CFD-5EB846C0FFFA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8229C806-85DA-4336-8CFD-5EB846C0FFFA}.Release|x86.ActiveCfg = Release|Any CPU
+		{0606EB5B-A0F4-4BAE-A5B4-820541C8EE1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0606EB5B-A0F4-4BAE-A5B4-820541C8EE1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0606EB5B-A0F4-4BAE-A5B4-820541C8EE1E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0606EB5B-A0F4-4BAE-A5B4-820541C8EE1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0606EB5B-A0F4-4BAE-A5B4-820541C8EE1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0606EB5B-A0F4-4BAE-A5B4-820541C8EE1E}.Release|x86.ActiveCfg = Release|Any CPU
+		{7E90D6CE-A10B-4858-A5BC-41DF7250CBCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E90D6CE-A10B-4858-A5BC-41DF7250CBCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E90D6CE-A10B-4858-A5BC-41DF7250CBCC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7E90D6CE-A10B-4858-A5BC-41DF7250CBCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E90D6CE-A10B-4858-A5BC-41DF7250CBCC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E90D6CE-A10B-4858-A5BC-41DF7250CBCC}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

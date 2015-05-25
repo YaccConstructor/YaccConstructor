@@ -57,18 +57,18 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let currentrule = parser.StartRule
         let currentLabel = ref <| packLabel currentrule 0
         let dummyGSSNode = new Vertex(!currentVertexInInput, !currentLabel)
-        let dummyAST = new TerminalNode((-1,-1), packExtension -1 -1)
+        let dummyAST = new TerminalNode(-1, packExtension -1 -1)
         let dummy = 0<nodeMeasure>
         let currentN = ref <| dummy
         let currentR = ref <| dummy
-        let tokens = new Dictionary<int*int,'TokenType>()
+        let tokens = new BlockResizeArray<'TokenType>()
         let resultAST = ref None
         let packedNodes = Array3D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount) (input.VertexCount) (input.VertexCount)
         let nonTerminalNodes = Array3D.zeroCreate<int<nodeMeasure>> parser.NonTermCount (input.VertexCount) (input.VertexCount)
         let intermidiateNodes = Array2D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount) (input.VertexCount) //убрала +1
         let edges = Array2D.zeroCreate<Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>> slots.Count (input.VertexCount )
         let terminalNodes = Array3D.zeroCreate<int<nodeMeasure>> input.VertexCount input.VertexCount parser.TermCount  
-        let epsilonNode = new TerminalNode((-1,-1), packExtension 0 0)
+        let epsilonNode = new TerminalNode(-1, packExtension 0 0)
         let sppfNodes = new BlockResizeArray<INode>()
         sppfNodes.Add(dummyAST)
         sppfNodes.Add(epsilonNode)
@@ -243,9 +243,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             then
                 terminalNodes.[beginVertix, endVertix, i]
             else
-                let key = beginVertix, endVertix
-                if not <| tokens.ContainsKey key then tokens.Add(key, tag)
-                let t = new TerminalNode(key, packExtension beginVertix endVertix)
+                tokens.Add tag
+                let t = new TerminalNode(tokens.Count - 1, packExtension beginVertix endVertix)
                 sppfNodes.Add t
                 let res = sppfNodes.Count - 1
                 terminalNodes.[beginVertix, endVertix, i] <- ((sppfNodes.Count - 1)*1<nodeMeasure>)
@@ -365,7 +364,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             let position = getPosition !currentLabel
             if Array.length parser.rules.[rule] = 0 
             then
-              let t = new TerminalNode((-1, -1), packExtension !currentVertexInInput !currentVertexInInput)
+              let t = new TerminalNode(-1, packExtension !currentVertexInInput !currentVertexInInput)
               sppfNodes.Add t
               let res = sppfNodes.Count - 1
               currentR := res * 1<nodeMeasure>
@@ -375,7 +374,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 if Array.length parser.rules.[rule] <> position
                 then
                     let curSymbol = parser.rules.[rule].[position]
-                    //if !currentVertexInInput <> input.FinalState - 1
+                   // if !currentVertexInInput <> input.FinalState
                    // then
                     if (parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol)
                     then
@@ -415,23 +414,25 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                     addContext !currentVertexInInput newLabel !currentGSSNode dummy 
                                 table.[index] |>  Array.iter a
 //                    else
-//                        if parser.CanInferEpsilon.[curSymbol]
+//                        if Seq.length <| input.OutEdges !currentVertexInInput = 0
 //                        then
-//                            let curToken = parser.IndexEOF
-//                            let getIndex nTerm term = 
-//                                let mutable index = nTerm
-//                                index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
-//                                index <- index + term - parser.NonTermCount
-//                                index
-//                            let index = getIndex curSymbol curToken
-//                            currentGSSNode := create !currentVertexInInput (packLabel (rule) (position + 1)) !currentGSSNode  !currentN
-//                            if Array.length table.[index] <> 0 
+//                            if parser.CanInferEpsilon.[curSymbol]
 //                            then
-//                                let a rule = 
-//                                    let newLabel = packLabel rule 0
-//                                    addContext !currentVertexInInput newLabel !currentGSSNode dummy 
-//                                table.[index] |>  Array.iter a
-//                        condition := true
+//                                let curToken = parser.IndexEOF
+//                                let getIndex nTerm term = 
+//                                    let mutable index = nTerm
+//                                    index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
+//                                    index <- index + term - parser.NonTermCount
+//                                    index
+//                                let index = getIndex curSymbol curToken
+//                                currentGSSNode := create !currentVertexInInput (packLabel (rule) (position + 1)) !currentGSSNode  !currentN
+//                                if Array.length table.[index] <> 0 
+//                                then
+//                                    let a rule = 
+//                                        let newLabel = packLabel rule 0
+//                                        addContext !currentVertexInInput newLabel !currentGSSNode dummy 
+//                                    table.[index] |>  Array.iter a
+//                            condition := true
                                     
                 else
                     let curRight =  sppfNodes.Item <| int !currentN 
@@ -456,6 +457,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         match !resultAST with
             | None -> Error ("String was not parsed")
             | Some res -> 
-                    let r1 = new Tree<_> (tokens,res, parser.rules)
+                    let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
+                    r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
                     Success (r1)   
                         

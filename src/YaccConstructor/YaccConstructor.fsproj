@@ -23,15 +23,17 @@
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-g "TestGenerator" -i C:\Users\Ekaterina\YaccConstructor\src\RNGLRParser.SimpleTest\Calc_new.yrd</StartArguments>
+    <StartArguments>-f YardFrontend -g "TestGenerator -token int -o C:\Users\Ekaterina\YaccConstructor\src\CheckInterpreter\Parser_new.fs" -i C:\Users\Ekaterina\YaccConstructor\src\CheckInterpreter\Lr0_grammar.yrd</StartArguments>
     <StartWorkingDirectory>C:\Users\Ekaterina\YaccConstructor\src\</StartWorkingDirectory>
     <StartAction>Project</StartAction>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <StartArguments>-i "C:\Users\Ekaterina\YaccConstructor\src\RNGLRParser.SimpleTest\Calc_new.yrd "  -g "TestGenerator -pos int -token int -module LL.Parse2 -o Calc_new.yrd.fs"</StartArguments>
+    <StartArguments>-i C:\Users\Ekaterina\YaccConstructor\src\CheckInterpreter\Calc.yrd -g "TestGenerator -pos int -token int -o C:\Users\Ekaterina\YaccConstructor\src\CheckInterpreter\Calc_lalr1.fs -parserType LALR1"</StartArguments>
     <RemoteDebugEnabled>false</RemoteDebugEnabled>
     <RemoteDebugMachine />
     <OutputPath>..\..\Bin\Release\v40\</OutputPath>
+    <StartWorkingDirectory>
+    </StartWorkingDirectory>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" />

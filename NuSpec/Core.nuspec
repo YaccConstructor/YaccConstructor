@@ -2,7 +2,7 @@
 <package>
 <metadata>
 <id>YC.Core</id>
-<version>0.3.0.1</version>
+<version>0.3.0.6-On-branch--local</version>
 <title>Core of YaccConstructor</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>
@@ -21,14 +21,14 @@
 <dependency id="Mono.Addins" version="1.1.0" />
 </dependencies>
 <references>
-  <reference file="FsYacc..dll" />
-  <reference file="YC.Common.dll" />
-  <reference file="YC.Conversions.dll" />
-  <reference file="YC.Constraints.dll" />
-  <reference file="YC.AbstractAnalysis.Common.dll" />
-  <reference file="AST.Common.dll" />
-  <reference file="Generators.Common.dll" />
-</references>>
+<!--<reference file="FsYacc.exe" />-->
+<reference file="YC.Common.dll" />
+<reference file="YC.Conversions.dll" />
+<reference file="YC.Constraints.dll" />
+<reference file="YC.AbstractAnalysis.Common.dll" />
+<reference file="AST.Common.dll" />
+<reference file="Generators.Common.dll" />
+</references>
 </metadata>
 <files>
 <file src="..\README.md" target="README.txt" />

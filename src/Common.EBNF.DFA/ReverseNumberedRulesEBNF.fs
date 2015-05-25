@@ -18,14 +18,16 @@ type ReverseNumberdRulesEBNF (rules : NumberedRulesEBNF, indexator : IndexatorEB
             let rec buildReverseStateVertex (currentState : Vertex<_,_>) (currentReverseState : Vertex<_,_>) (firstReverseState : Vertex<_,_>) (processedVertex : HashSet<_>) =
                 processedVertex.Add(currentState.label) |> ignore
                 let currentEdges = currentState.outEdges
-                if currentEdges.Count = 0 then
+                if currentEdges.Count = 0
+                then
                     firstReverseState = currentReverseState |> ignore
                 for edge in currentEdges do
                     let vertexDest = edge.dest
                     let labelEdge = edge.label
                     let vertexDestReverse = new Vertex<_,_>(vertexDest.label)
                     vertexDestReverse.addEdge(new Edge<_,_>(currentReverseState, labelEdge))
-                    if not (processedVertex.Contains(vertexDest.label)) then
+                    if not (processedVertex.Contains(vertexDest.label))
+                    then
                         buildReverseStateVertex vertexDest vertexDestReverse firstReverseState processedVertex
             let rec setReverseStateLabels (currentState : Vertex<_,_>) (stateToReverseVertex : ResizeArray<Vertex<_,_>>) =
                 currentState.setLabel(nextReverseStateNumber)
@@ -91,15 +93,90 @@ type ReverseNumberdRulesEBNF (rules : NumberedRulesEBNF, indexator : IndexatorEB
     member this.getStateTable rule = getTable rule 
     //member this.rulesWithLeftSide = 
 
-//type ReverseNumberdRulesDFA (rules : ReverseNumberdRulesEBNF) = 
-//    
+let getDFA (rule : NFAProduction.t) (indexator : IndexatorEBNF) =
+    let containsSet (statesDFA : ResizeArray<_>) (statesNFA : HashSet<_>) = 
+        match Seq.tryFindIndex (fun set -> statesNFA.SetEquals(set)) statesDFA with
+        | Some index    -> (true, index)
+        | None          -> (false, -1)
+
+    let move (stateSet : HashSet<_>) symbol =
+        let result = new HashSet<_>()
+        for state in stateSet do
+            let vertex = rule.stateToVertex.[state]
+            let edges = vertex.outEdges
+            for edge in edges do
+                if indexator.epsilonIndex <> edge.label && edge.label = symbol
+                then
+                    result.Add(edge.dest.label) |> ignore
+        result
+
+    let epsilonClosureSet (set : HashSet<_>) =
+        let stack = new Stack<_>(set)
+        let resultSet = new HashSet<_>(set)
+        while stack.Count <> 0 do
+            let numOfVertex = stack.Pop()
+            let vertex = rule.stateToVertex.[numOfVertex]
+            let edges = vertex.outEdges
+            for edge in edges do
+                if edge.label = indexator.epsilonIndex
+                then
+                    let vertexDist = edge.dest
+                    if not (resultSet.Contains(vertexDist.label))
+                    then
+                        resultSet.Add(vertexDist.label) |> ignore
+                        stack.Push(vertexDist.label)
+        resultSet
+
+    let table = 
+        let resultDict = new Dictionary<_,_>()
+
+        let startStateNFA = rule.startState
+        let startSetNFA = new HashSet<_>()
+        startSetNFA.Add(startStateNFA.label) |> ignore
+
+        let statesDFA = new ResizeArray<_>()
+        let matchStatesDFA = new Queue<_>()
+        let startStateDFA = epsilonClosureSet startSetNFA
+        statesDFA.Add(startStateDFA)
+        matchStatesDFA.Enqueue((startStateDFA, 0))
+        
+        while matchStatesDFA.Count <> 0 do
+            let state = matchStatesDFA.Dequeue()
+            let set = fst state
+            let numberOfState = snd state
+            for i in 0..indexator.fullCount do
+                let nextSet = move set i |> epsilonClosureSet
+                let containsNextSet = containsSet statesDFA nextSet
+                if not (fst containsNextSet )
+                then
+                    statesDFA.Add(nextSet)
+                    matchStatesDFA.Enqueue(nextSet, statesDFA.Count - 1)
+                    resultDict.Add((numberOfState, i), statesDFA.Count - 1)
+                else
+                    resultDict.Add((numberOfState, i), snd containsNextSet)
+
+        let result : int[][] = Array.zeroCreate statesDFA.Count
+        for i in 0..statesDFA.Count - 1 do
+            result.[i] <- Array.create indexator.fullCount -1
+            for j in 0..indexator.fullCount - 1 do
+                result.[i].[j] <- resultDict.[(i, j)]
+        result
+    table
+
+
+//type ReverseNumberdRulesDFA (rules : NumberedRulesEBNF, indexator : IndexatorEBNF) = 
+//    let reverseNumberedRulesEBNF = ReverseNumberdRulesEBNF(rules, indexator)
+//
+//
 //    member this.rulesCount = rules.rulesCount
 //    member this.startRule = rules.startRule
-//    member this.startSymbol = 
-//    member this.leftSideArr = 
-//    member this.rightSide num = 
-//    member this.numberOfStates num = 
-//    member this.state rule pos = 
+//    member this.rightReverseSide num = rightReverseNFA.[num]
+//    member this.numberOfStates num = rightReverseNFA.[num].numberOfStates
+//    member this.state rule pos = rightReverseNFA.[rule].stateToVertex.[pos]
 //    member this.symbol rule pos = 
+//        let (symbol, _) = symbolAndNextPos.[rule].[pos]
+//        symbol
 //    member this.nextPos rule pos = 
-//    member this.rulesWithLeftSide = 
+//        let (_, nextPos) = symbolAndNextPos.[rule].[pos]
+//        nextPos
+//    member this.getStateTable rule = getTable rule 

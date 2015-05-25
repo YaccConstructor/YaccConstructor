@@ -43,7 +43,8 @@ type ParseResult<'TokenType> =
     | Error of string
 
 
-let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'TokenType>) : ParseResult<_> = 
+let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'TokenType>) : ParseResult<_>  = 
+    let tokens = seq {yield! tokens; yield parser.EOF}
     let tokens = Seq.toArray tokens
     let inputLength = Seq.length tokens
     let nonTermsCountLimit = 1 + (Array.max parser.LeftSide)
@@ -70,13 +71,31 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let currentR = ref <| dummy
 
         let resultAST = ref None
+        let packedNodesReadCount = ref 0
+        let packedNodesWriteCount = ref 0
+        let packedNodesX = Array.zeroCreate<int> (inputLength + 1)
+        let packedNodesY = Array.zeroCreate<int> (inputLength + 1)
+        let packedNodesZ = Array.zeroCreate<int> (inputLength + 1)
         let packedNodes = Array3D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (inputLength + 1) (inputLength + 1) (inputLength + 1)
+
+        let nonTerminalNodesReadCount = ref 0
+        let nonTerminalNodesWriteCount = ref 0
+        let nonterminalNodesX = Array.zeroCreate parser.NonTermCount
+        let nonterminalNodesY = Array.zeroCreate (inputLength + 1)
+        let nonterminalNodesZ = Array.zeroCreate (inputLength + 1)
         let nonTerminalNodes = Array3D.zeroCreate<int<nodeMeasure>> parser.NonTermCount (inputLength + 1) (inputLength + 1)
+
+        let intermidiateNodesReadCount = ref 0
+        let intermidiateNodesWriteCount = ref 0
+        //we can use dictionary <extension, dict>
         let intermidiateNodes = Array2D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (inputLength + 1) (inputLength + 1) 
+
+        let edgesReadCount = ref 0
+        let edgesWriteCount = ref 0
         let edges = Array2D.zeroCreate<Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>> slots.Count (inputLength + 1)
+        
         let terminalNodes = new BlockResizeArray<int<nodeMeasure>>()
         let epsilonNode = new TerminalNode(-1, packExtension 0 0)
-        let epsilon = 1<nodeMeasure>
         let sppfNodes = new BlockResizeArray<INode>()
         sppfNodes.Add(dummyAST)
         sppfNodes.Add(epsilonNode)
@@ -138,30 +157,39 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let findSppfNode label lExt rExt : int<nodeMeasure> =
             let isEnd = slotIsEnd label
             let nTerm = parser.LeftSide.[getRule label]
-            let rule = getRule label
             if isEnd
             then
-                if nonTerminalNodes.[nTerm, lExt, rExt] = Unchecked.defaultof<int<nodeMeasure>>
+                let cur = nonTerminalNodes.[nTerm, lExt, rExt]
+                nonTerminalNodesReadCount := !nonTerminalNodesReadCount + 1
+                if  cur = Unchecked.defaultof<int<nodeMeasure>>
                 then
                     let newNode = new NonTerminalNode(nTerm, (packExtension lExt rExt))
                     sppfNodes.Add(newNode)
                     let num = sppfNodes.Count - 1
                     nonTerminalNodes.[nTerm, lExt, rExt] <- num*1<nodeMeasure>
+                    nonterminalNodesX.[nTerm] <- nonterminalNodesX.[nTerm] + 1
+                    nonterminalNodesY.[lExt] <- nonterminalNodesY.[lExt] + 1
+                    nonterminalNodesZ.[rExt] <- (nonterminalNodesZ.[rExt] + 1)
+                    nonTerminalNodesWriteCount := !nonTerminalNodesWriteCount + 1
                     num*1<nodeMeasure>
                 else
-                    nonTerminalNodes.[nTerm, lExt, rExt]
+                    cur
             else
-                if intermidiateNodes.[lExt, rExt] = Unchecked.defaultof<Dictionary<int<labelMeasure>, int<nodeMeasure>>>
+                intermidiateNodesReadCount := !intermidiateNodesReadCount + 1 
+                let cur = intermidiateNodes.[lExt, rExt]
+                if cur = Unchecked.defaultof<Dictionary<int<labelMeasure>, int<nodeMeasure>>>
                 then
                     let d = new Dictionary<int<labelMeasure>, int<nodeMeasure>>()
                     let newNode = new IntermidiateNode(int label, (packExtension lExt rExt))
                     sppfNodes.Add(newNode)
                     let num = (sppfNodes.Count - 1)*1<nodeMeasure>
                     d.Add(label, num)
+                    intermidiateNodesWriteCount := !intermidiateNodesWriteCount + 1
                     intermidiateNodes.[lExt, rExt] <- d 
                     num
                 else
-                    let dict = intermidiateNodes.[lExt, rExt] 
+                    //intermidiateNodesReadCount := !intermidiateNodesReadCount + 1
+                    let dict = cur//intermidiateNodes.[lExt, rExt] 
                     if dict.ContainsKey label
                     then
                         dict.[label]
@@ -177,12 +205,18 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             let j = getRightExtension leftExtension
             let k = getRightExtension rightExtension
             let rule = getRule label
-            let d = 
-                if packedNodes.[i, j, k] <> null then
-                    packedNodes.[i, j, k]
+            let d =
+                let cur = packedNodes.[i, j, k] 
+                packedNodesReadCount := !packedNodesReadCount + 1
+                if cur <> null then
+                    cur
                 else 
                     let t = new Dictionary<int<labelMeasure>, int<nodeMeasure>>()
                     packedNodes.[i, j, k] <- t
+                    packedNodesWriteCount := !packedNodesWriteCount + 1
+                    packedNodesX.[i] <- packedNodesX.[i] + 1
+                    packedNodesY.[j] <- packedNodesY.[j] + 1
+                    packedNodesZ.[k] <- packedNodesZ.[k] + 1
                     t
             if d.ContainsKey label
             then
@@ -239,7 +273,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             then
                 terminalNodes.Item index
             else
-                let t = new TerminalNode(parser.TokenToNumber tokens.[index], packExtension index (index + 1))
+                let t = new TerminalNode(index, packExtension index (index + 1))
                 sppfNodes.Add t
                 let res = sppfNodes.Count - 1
                 terminalNodes.Set index ((sppfNodes.Count - 1)*1<nodeMeasure>)
@@ -248,7 +282,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                      
         let containsEdge (b : Vertex) (e : Vertex) ast =
             let labelN = slots.[int b.Label]
-
+            edgesReadCount := !edgesReadCount + 1
             let dict1 = edges.[labelN, b.Level]
             if dict1 <> Unchecked.defaultof<Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>>
             then
@@ -281,6 +315,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                 newArr.Add(e.Level)
                 newDict2.Add(e.Label, newArr)
                 newDict1.Add(ast, newDict2)
+                edgesWriteCount := !edgesWriteCount + 1
                 edges.[labelN, b.Level] <- newDict1
                 false                    
         
@@ -322,6 +357,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                     newList.Add(z)
                     setP.Add(vertexKey, newList)
                 let outEdges = edges.[slots.[ int u.Label], u.Level]
+                edgesReadCount := !edgesReadCount + 1
                 for edge in outEdges do
                     let sppfNodeOnEdge = edge.Key
                     for slotLevels in edge.Value do   
@@ -343,6 +379,8 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                 currentIndex := currentContext.Value.Index
                 currentGSSNode := currentContext.Value.Vertex
                 currentLabel := currentContext.Value.Label
+                let tempRule = getRule !currentLabel
+                let tempPos = getPosition !currentLabel
                 currentN := currentContext.Value.Ast 
                 currentR := dummy
                 condition := false
@@ -414,6 +452,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                                     let newLabel = packLabel rule 0
                                     addContext !currentIndex newLabel !currentGSSNode dummy 
                                 table.[index] |>  Array.iter a
+                            condition := true
                         condition := true
                                     
                 else
@@ -433,10 +472,39 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
              while not !stop do
                 if !condition then dispatcher() else processing()
         control()
-                 
+          
+//        let tempPrintArr (arr : array<int>) (name : string) (out : System.IO.StreamWriter) = 
+//            out.WriteLine(name)
+//           
+//            for i = 0 to arr.Length - 1 do
+//                if i % 20 = 0 then out.WriteLine()
+//                out.Write(arr.[i].ToString() + " ")
+//            out.WriteLine()
+//            out.WriteLine("------------------------------------------")
+
         match !resultAST with
             | None -> Error ("String was not parsed")
             | Some res -> 
                     let r1 = new Tree<_> (tokens, res, parser.rules)
+                    let path = @"../../../src/GLLApplication/out.txt"
+//                    let out = new System.IO.StreamWriter (path) 
+//                    out.WriteLine("packed nodes read count = " + (!packedNodesReadCount).ToString())
+//                    out.WriteLine("packed nodes write count = " + (!packedNodesWriteCount).ToString()) 
+//                    tempPrintArr packedNodesX "packed nodes X count" out 
+//                    tempPrintArr packedNodesY "packed nodes Y count" out 
+//                    tempPrintArr packedNodesZ "packed nodes Z count" out 
+//
+//                    out.WriteLine("nonterminal nodes read count = " + (!nonTerminalNodesReadCount).ToString())
+//                    out.WriteLine("nonterminal nodes write count = " + (!nonTerminalNodesWriteCount).ToString())
+//                    tempPrintArr nonterminalNodesX "nonterminal nodes X count"  out
+//                    tempPrintArr nonterminalNodesY "nonterminal nodes Y count" out
+//                    tempPrintArr nonterminalNodesZ "nonterminal nodes Z count" out
+//
+//                    out.WriteLine("intermidiate nodes read count = " + (!intermidiateNodesReadCount).ToString())
+//                    out.WriteLine("intermidiate nodes write count = " + (!intermidiateNodesWriteCount).ToString())
+//
+//                    out.WriteLine("edges nodes read count = " + (!edgesReadCount).ToString())
+//                    out.WriteLine("edges nodes write count = " + (!edgesWriteCount).ToString())
+//                    out.Close()
                     Success (r1)   
                         

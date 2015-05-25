@@ -93,7 +93,7 @@ type ReverseNumberdRulesEBNF (rules : NumberedRulesEBNF, indexator : IndexatorEB
     member this.getStateTable rule = getTable rule 
     //member this.rulesWithLeftSide = 
 
-let getDFA (rule : NFAProduction.t) (indexator : IndexatorEBNF) =
+let getDFATable (rule : NFAProduction.t) (indexator : IndexatorEBNF) =
     let containsSet (statesDFA : ResizeArray<_>) (statesNFA : HashSet<_>) = 
         match Seq.tryFindIndex (fun set -> statesNFA.SetEquals(set)) statesDFA with
         | Some index    -> (true, index)
@@ -164,19 +164,9 @@ let getDFA (rule : NFAProduction.t) (indexator : IndexatorEBNF) =
     table
 
 
-//type ReverseNumberdRulesDFA (rules : NumberedRulesEBNF, indexator : IndexatorEBNF) = 
-//    let reverseNumberedRulesEBNF = ReverseNumberdRulesEBNF(rules, indexator)
-//
-//
-//    member this.rulesCount = rules.rulesCount
-//    member this.startRule = rules.startRule
-//    member this.rightReverseSide num = rightReverseNFA.[num]
-//    member this.numberOfStates num = rightReverseNFA.[num].numberOfStates
-//    member this.state rule pos = rightReverseNFA.[rule].stateToVertex.[pos]
-//    member this.symbol rule pos = 
-//        let (symbol, _) = symbolAndNextPos.[rule].[pos]
-//        symbol
-//    member this.nextPos rule pos = 
-//        let (_, nextPos) = symbolAndNextPos.[rule].[pos]
-//        nextPos
-//    member this.getStateTable rule = getTable rule 
+type ReverseNumberdRulesDFA (rules : NumberedRulesEBNF, indexator : IndexatorEBNF) = 
+    let reverseNumberedRulesEBNF = ReverseNumberdRulesEBNF(rules, indexator)
+
+    member this.rulesCount = rules.rulesCount
+    member this.startRule = rules.startRule
+    member this.dfaTable rule = reverseNumberedRulesEBNF.rightReverseSide rule |> getDFATable

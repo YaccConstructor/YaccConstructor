@@ -21,6 +21,8 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <StartArguments>-f YardFrontend -g "TestGenerator -token int -o C:\Users\Ekaterina\YaccConstructor\src\CheckInterpreter\Parser_new.fs" -i C:\Users\Ekaterina\YaccConstructor\src\CheckInterpreter\Lr0_grammar.yrd</StartArguments>

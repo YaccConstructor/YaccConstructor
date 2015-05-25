@@ -1,22 +1,32 @@
-﻿namespace Yard.EBNF.FinalGrammar
+﻿namespace Yard.EBNF.DFA.FinalGrammar
 
 open Yard.Core.IL
-open Yard.EBNF.Indexator
-open Yard.EBNF.NumberedRules
-open Yard.EBNF.Epsilon
-open Yard.EBNF.SymbolSets
-open Yard.EBNF.StateSets
+open Yard.EBNF.DFA.Indexator
+open Yard.EBNF.DFA.NumberedRules
+open Yard.EBNF.DFA.ReverseNumberedRules
+open Yard.EBNF.DFA.Epsilon
+open Yard.EBNF.DFA.SymbolSets
+open Yard.EBNF.DFA.StateSets
 
 type FinalGrammarNFA(ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
     let _indexator = new IndexatorEBNF(ruleList, caseSensitive)
     let _nfaRules = new NumberedRulesEBNF (ruleList, _indexator, caseSensitive)
+    let _dfaReverseRules = new ReverseNumberdRulesEBNF(_nfaRules, _indexator)
+    // из символа может породиться пустая цепочка
     let _canInferEpsilon = canInferEpsilonNFA _nfaRules _indexator
+    // i - номер правила, j - номер сост, дальше может быть пустой хвост
     let _hasEpsilonTail = hasEpsilonTail _nfaRules _canInferEpsilon
+    // 
     let _firstSet = firstSetNFA _nfaRules _indexator _canInferEpsilon //
+    // 
     let _followSet = followSetNFA _nfaRules _indexator _canInferEpsilon _firstSet
+    // i - номер правила, j - номер сост, какие состоянися дост по eps
     let _epsilonReachable = epsilonReachable _nfaRules _indexator
+    // для правила возр множество сост, из которых есть переход по сиволу грамм
     let _usefulStates = usefulStates _nfaRules _indexator
+    // стартовые полезные состояния
     let _startPositions = startPositions _nfaRules _epsilonReachable _usefulStates
+    // i - номер правила, j - номер сост, слудющие полезные сост
     let _nextPositions = nextPositions _nfaRules _indexator _epsilonReachable _usefulStates
     //let _epsilonCyclicNonTerms = getEpsilonCyclicNonTerms _numberedRules _indexator _canInferEpsilon // нетермиалы
     //let _epsilonTrees = epsilonTrees _numberedRules _indexator _canInferEpsilon // написать Дмитрию Авдюхину. 
@@ -26,6 +36,7 @@ type FinalGrammarNFA(ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
 
     member this.indexator = _indexator
     member this.rules = _nfaRules
+    member this.reverseRules = _dfaReverseRules
     //member this.EpsilonCyclicNonTerms = _epsilonCyclicNonTerms
     member this.canInferEpsilon = _canInferEpsilon
     member this.hasEpsilonTail = _hasEpsilonTail

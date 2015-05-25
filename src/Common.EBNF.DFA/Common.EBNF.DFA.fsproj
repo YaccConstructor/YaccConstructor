@@ -44,6 +44,7 @@
     <Compile Include="GrammarWithNFARightSide.fs" />
     <Compile Include="IndexatorNFA.fs" />
     <Compile Include="NumberedRulesEBNF.fs" />
+    <Compile Include="ReverseNumberedRulesEBNF.fs" />
     <Compile Include="EpsilonEBNF.fs" />
     <Compile Include="SymbolSets.fs" />
     <Compile Include="StateSets.fs" />

@@ -63,7 +63,7 @@
     <Compile Include="States.fs" />
     <Compile Include="Tables.fs" />
     <Compile Include="PrintTables.fs" />
-    <Compile Include="RNGLR.EBNFGenerator.fs" />
+    <Compile Include="RNGLR.EBNF.DFAGenerator.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common.EBNF.DFA\Common.EBNF.DFA.fsproj">

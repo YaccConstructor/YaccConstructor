@@ -28,8 +28,7 @@
     </StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <StartArguments>-i ../../src/RNGLRParserEBNF.SimpleTest/CalcEBNF.yrd -c ExpandMeta ^
-        -g "RNGLRGenerator -pos int -token int -module RNGLR.ParseCalcEBNF -translate true -table LR -o RNGLR.ParseCalcEBNF.yrd.fs"</StartArguments>
+    <StartArguments>-i ..\..\..\src\RNGLR.EBNFParser.SimpleTest\Choice.yrd  -c Linearize -g "RNGLR.EBNF.DFAGenerator -table LALR -o Choice.yrd.fs"</StartArguments>
     <RemoteDebugEnabled>false</RemoteDebugEnabled>
     <RemoteDebugMachine />
     <OutputPath>..\..\Bin\Release\v40\</OutputPath>

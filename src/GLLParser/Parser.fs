@@ -59,6 +59,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let slots = parser.Slots
         let setR = new Queue<Context>()   
         let setP = new Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>> ()
+        //свернуть в 1 инт
         let setU = Array.zeroCreate<Dictionary<int<labelMeasure>, Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>>> (inputLength + 1)
 
         let currentIndex = ref 0
@@ -76,23 +77,25 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let packedNodesX = Array.zeroCreate<int> (inputLength + 1)
         let packedNodesY = Array.zeroCreate<int> (inputLength + 1)
         let packedNodesZ = Array.zeroCreate<int> (inputLength + 1)
-        let packedNodes = Array3D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (inputLength + 1) (inputLength + 1) (inputLength + 1)
+        let packedNodes = new Dictionary<int, Dictionary<int, Dictionary<int, Dictionary<int<labelMeasure>, int<nodeMeasure>>>>>()
 
         let nonTerminalNodesReadCount = ref 0
         let nonTerminalNodesWriteCount = ref 0
         let nonterminalNodesX = Array.zeroCreate parser.NonTermCount
         let nonterminalNodesY = Array.zeroCreate (inputLength + 1)
         let nonterminalNodesZ = Array.zeroCreate (inputLength + 1)
-        let nonTerminalNodes = Array3D.zeroCreate<int<nodeMeasure>> parser.NonTermCount (inputLength + 1) (inputLength + 1)
+        let nonTerminalNodes = Array.zeroCreate<Dictionary<int64<extension>, int<nodeMeasure>>> parser.NonTermCount
+
 
         let intermidiateNodesReadCount = ref 0
         let intermidiateNodesWriteCount = ref 0
         //we can use dictionary <extension, dict>
-        let intermidiateNodes = Array2D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (inputLength + 1) (inputLength + 1) 
-
+        let intermidiateNodes = new Dictionary<int64<extension>, Dictionary<int<labelMeasure>, int<nodeMeasure>>>()
+ 
+ //посчитать размерв коллекций
         let edgesReadCount = ref 0
         let edgesWriteCount = ref 0
-        let edges = Array2D.zeroCreate<Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>> slots.Count (inputLength + 1)
+        let edges = new Dictionary<int64<vertexMeasure>, Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>>()
         
         let terminalNodes = new BlockResizeArray<int<nodeMeasure>>()
         let epsilonNode = new TerminalNode(-1, packExtension 0 0)
@@ -154,51 +157,51 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let slotIsEnd (label : int<labelMeasure>) =
             (getPosition label) = Array.length (parser.rules.[getRule label])
 
-        let findSppfNode label lExt rExt : int<nodeMeasure> =
+        let findSppfNode label ext : int<nodeMeasure> =
             let isEnd = slotIsEnd label
             let nTerm = parser.LeftSide.[getRule label]
             if isEnd
             then
-                let cur = nonTerminalNodes.[nTerm, lExt, rExt]
-                nonTerminalNodesReadCount := !nonTerminalNodesReadCount + 1
-                if  cur = Unchecked.defaultof<int<nodeMeasure>>
+                let cur = nonTerminalNodes.[nTerm]
+                if  cur <> Unchecked.defaultof<Dictionary<int64<extension>, int<nodeMeasure>>>
                 then
-                    let newNode = new NonTerminalNode(nTerm, (packExtension lExt rExt))
-                    sppfNodes.Add(newNode)
-                    let num = sppfNodes.Count - 1
-                    nonTerminalNodes.[nTerm, lExt, rExt] <- num*1<nodeMeasure>
-                    nonterminalNodesX.[nTerm] <- nonterminalNodesX.[nTerm] + 1
-                    nonterminalNodesY.[lExt] <- nonterminalNodesY.[lExt] + 1
-                    nonterminalNodesZ.[rExt] <- (nonterminalNodesZ.[rExt] + 1)
-                    nonTerminalNodesWriteCount := !nonTerminalNodesWriteCount + 1
-                    num*1<nodeMeasure>
+                    if cur.ContainsKey(ext) then
+                        cur.[ext]
+                    else
+                        let newNode = new NonTerminalNode(nTerm, ext)
+                        sppfNodes.Add(newNode)
+                        let num = (sppfNodes.Count - 1)*1<nodeMeasure>
+                        cur.Add(ext, num)
+                        num
                 else
-                    cur
+                    let d = new Dictionary<int64<extension>, int<nodeMeasure>>()
+                    let newNode = new NonTerminalNode(nTerm, ext)
+                    sppfNodes.Add(newNode)
+                    let num = (sppfNodes.Count - 1)*1<nodeMeasure>
+                    d.Add(ext, num)
+                    nonTerminalNodes.[nTerm] <- d
+                    num
             else
-                intermidiateNodesReadCount := !intermidiateNodesReadCount + 1 
-                let cur = intermidiateNodes.[lExt, rExt]
-                if cur = Unchecked.defaultof<Dictionary<int<labelMeasure>, int<nodeMeasure>>>
+                if intermidiateNodes.ContainsKey(ext)
                 then
+                    let d1 = intermidiateNodes.[ext]
+                    if d1.ContainsKey(label)
+                    then
+                        d1.[label]
+                    else
+                        let newNode = new IntermidiateNode(int label, ext)
+                        sppfNodes.Add(newNode)
+                        let num = (sppfNodes.Count - 1)*1<nodeMeasure>
+                        d1.Add(label, num)
+                        num  
+                else
                     let d = new Dictionary<int<labelMeasure>, int<nodeMeasure>>()
-                    let newNode = new IntermidiateNode(int label, (packExtension lExt rExt))
+                    let newNode = new IntermidiateNode(int label, ext)
                     sppfNodes.Add(newNode)
                     let num = (sppfNodes.Count - 1)*1<nodeMeasure>
                     d.Add(label, num)
-                    intermidiateNodesWriteCount := !intermidiateNodesWriteCount + 1
-                    intermidiateNodes.[lExt, rExt] <- d 
+                    intermidiateNodes.Add(ext, d)
                     num
-                else
-                    //intermidiateNodesReadCount := !intermidiateNodesReadCount + 1
-                    let dict = cur//intermidiateNodes.[lExt, rExt] 
-                    if dict.ContainsKey label
-                    then
-                        dict.[label]
-                    else
-                        let newNode = new IntermidiateNode(int label, (packExtension lExt rExt))
-                        sppfNodes.Add(newNode)
-                        let num = (sppfNodes.Count - 1)*1<nodeMeasure>
-                        dict.Add(label, num)
-                        num
 
         let findSppfPackedNode symbolNode label leftExtension rightExtension (left : INode) (right : INode) : int<nodeMeasure> = 
             let i = getLeftExtension leftExtension
@@ -206,18 +209,33 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             let k = getRightExtension rightExtension
             let rule = getRule label
             let d =
-                let cur = packedNodes.[i, j, k] 
-                packedNodesReadCount := !packedNodesReadCount + 1
-                if cur <> null then
-                    cur
-                else 
-                    let t = new Dictionary<int<labelMeasure>, int<nodeMeasure>>()
-                    packedNodes.[i, j, k] <- t
-                    packedNodesWriteCount := !packedNodesWriteCount + 1
-                    packedNodesX.[i] <- packedNodesX.[i] + 1
-                    packedNodesY.[j] <- packedNodesY.[j] + 1
-                    packedNodesZ.[k] <- packedNodesZ.[k] + 1
-                    t
+                if packedNodes.ContainsKey(i)
+                then
+                    let d1 = packedNodes.[i]
+                    if d1.ContainsKey(j)
+                    then
+                        let d2 = d1.[j]
+                        if d2.ContainsKey(k)
+                        then
+                            d2.[k]
+                        else
+                            let d3 = new Dictionary<int<labelMeasure>, int<nodeMeasure>>()
+                            d2.Add(k, d3)
+                            d3
+                    else
+                        let d2 = new Dictionary<int, Dictionary<int<labelMeasure>, int<nodeMeasure>>>()
+                        let d3 = new Dictionary<int<labelMeasure>, int<nodeMeasure>>() 
+                        d2.Add(k, d3)
+                        d1.Add(j, d2)
+                        d3
+                else
+                    let d1 = new Dictionary<int, Dictionary<int, Dictionary<int<labelMeasure>, int<nodeMeasure>>>>()
+                    let d2 = new Dictionary<int, Dictionary<int<labelMeasure>, int<nodeMeasure>>>()
+                    let d3 = new Dictionary<int<labelMeasure>, int<nodeMeasure>>()
+                    d2.Add(k, d3)
+                    d1.Add(j, d2)
+                    packedNodes.Add(i, d1)
+                    d3
             if d.ContainsKey label
             then
                 d.[label] 
@@ -258,11 +276,11 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                         term.Extension 
                     | _ -> failwith "Smth strange, Nastya" 
                     
-                let y = findSppfNode label (getLeftExtension leftExt) (getRightExtension rightExt)
+                let y = findSppfNode label (packExtension (getLeftExtension leftExt) (getRightExtension rightExt))
                 ignore <| findSppfPackedNode y label leftExt rightExt currentLeft currentRight
                 y
             else
-                let y = findSppfNode label (getLeftExtension rightExt) (getRightExtension rightExt)
+                let y = findSppfNode label (packExtension (getLeftExtension rightExt) (getRightExtension rightExt))
                 ignore <| findSppfPackedNode y label rightExt rightExt dummyAST currentRight 
                 y
             
@@ -283,9 +301,10 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let containsEdge (b : Vertex) (e : Vertex) ast =
             let labelN = slots.[int b.Label]
             edgesReadCount := !edgesReadCount + 1
-            let dict1 = edges.[labelN, b.Level]
-            if dict1 <> Unchecked.defaultof<Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>>
+            
+            if edges.ContainsKey(packVertex labelN b.Level) //dict1 <> Unchecked.defaultof<Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>>
             then
+                let dict1 = edges.[packVertex labelN b.Level]
                 if dict1.ContainsKey(ast)
                 then
                     let dict2 = dict1.[ast]
@@ -316,7 +335,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                 newDict2.Add(e.Label, newArr)
                 newDict1.Add(ast, newDict2)
                 edgesWriteCount := !edgesWriteCount + 1
-                edges.[labelN, b.Level] <- newDict1
+                edges.Add((packVertex labelN b.Level), newDict1)
                 false                    
         
         let getTreeExtension (node : int<nodeMeasure>) =
@@ -356,7 +375,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                     let newList = new ResizeArray<int<nodeMeasure>>()
                     newList.Add(z)
                     setP.Add(vertexKey, newList)
-                let outEdges = edges.[slots.[ int u.Label], u.Level]
+                let outEdges = edges.[packVertex slots.[ int u.Label] u.Level]
                 edgesReadCount := !edgesReadCount + 1
                 for edge in outEdges do
                     let sppfNodeOnEdge = edge.Key

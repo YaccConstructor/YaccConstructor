@@ -19,7 +19,6 @@ open Yard.Generators.GLL
 open Yard.Generators
 open Lexer2
 
-
 //let run () =
 //    let fe = new Yard.Frontends.YardFrontend.YardFrontend()
 //    let gen = new Yard.Generators.GLL.GLL()
@@ -39,38 +38,49 @@ open Lexer2
 //    let tokens = seq{while not lb.IsPastEndOfStream do yield Calc.Lexer.token lb}
 //    astBuilder tokens, tokens
 
-
-let parser1 = GLL.SimpleAmb.buildAst
 let outDir = @"../../../src/GLLApplication/"
-//for i in [1..10] do
-//    let str = String.init (i * 5) (fun i -> "B ")
-//    let start = System.DateTime.Now
-//    let r = run1 (str.Trim()) parser1
-//    let t = System.DateTime.Now - start
-//    printfn "%A" t.TotalSeconds
 
-//////////////////////////////////////
-let run2 path astBuilder =
-    let tokens = Lexer2.tokens(path)
-    astBuilder tokens, tokens
+//let parser1 = GLL.SimpleAmb.buildAst
 //
-//let parser2 = GLL.Parse.SimpleAmb.buildAst
-let str =  "B B B" //String.init 1 (fun i -> "B ") + "B"
+//let run1 path astBuilder =
+//    let tokens = Lexer2.tokens(path)
+//    astBuilder tokens, tokens
+//
+//let str1 = String.init 500 (fun i -> "B ") + "B"
+//   
+//let start = System.DateTime.Now
+//let r = run1 str1 parser1
+//let t = System.DateTime.Now - start
+//printfn "%A" t.TotalSeconds
+//
+//match r with
+//    | Parser.Error str, _ ->
+//        printfn "%s" "dddd" //str 
+//    | Parser.Success tree, tokens ->
+//        printfn "%s" "sss"
+//        GLL.SimpleAmb.defaultAstToDot tree GLL.SimpleAmb.tokenToNumber GLL.SimpleAmb.tokenData  (outDir + "SimpleLeft.dot") 
+
+let str2 = String.init 250 (fun i -> "A + ( A * B ) * A + ( A * B ) + ( A + ( A * B + A + ( A * B ) ) ) + A + ( A * B ) * A + ( A * B ) + ( A + ( A * B + A + ( A * B ) ) ) + ( A + ( A * B ) * A + ( A * B ) + ( A + ( A * B + A + ( A * B ) ) ) + A + ( A * B ) * A + ( A * B ) + ( A + ( A * B + A + ( A * B ) ) ) ) ; ") + "B ;"
+let parser2 = GLL.Calc.buildAst
+
+let run2 path astBuilder =
+    let tokens = Lexer2.tokens3(path)   
+    astBuilder tokens, tokens
+
     
+let start2 = System.DateTime.Now
+let r2 = run2 str2 parser2
+let t2 = System.DateTime.Now - start2
+printfn "%A" t2.TotalSeconds
 
-let r = run2 str parser1
-//printfn "simple amb"
-
-match r with
+match r2 with
     | Parser.Error str, _ ->
         printfn "%s" "dddd" //str 
     | Parser.Success tree, tokens ->
         printfn "%s" "sss"
-        GLL.SimpleAmb.defaultAstToDot tree (outDir + "ast.dot")
+        GLL.Calc.defaultAstToDot tree GLL.Calc.tokenToNumber GLL.Calc.tokenData  (outDir + "Calc.dot") 
 
-////
-//printfn "ff"
-///////////////////////////////////////////////////////////////////
+
 
 
 

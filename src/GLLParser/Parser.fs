@@ -149,12 +149,12 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             else true
                       
 
-        let addContext index (label : int<labelMeasure>) vertex ast =
+        let inline addContext index (label : int<labelMeasure>) vertex ast =
             if not <| containsContext index label vertex ast
             then
                 setR.Enqueue(new Context(index, label, vertex, ast))
 
-        let slotIsEnd (label : int<labelMeasure>) =
+        let inline slotIsEnd (label : int<labelMeasure>) =
             (getPosition label) = Array.length (parser.rules.[getRule label])
 
         let findSppfNode label ext : int<nodeMeasure> =
@@ -182,12 +182,13 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                     nonTerminalNodes.[nTerm] <- d
                     num
             else
-                if intermidiateNodes.ContainsKey(ext)
+                let contains, d1 = intermidiateNodes.TryGetValue ext
+                if contains
                 then
-                    let d1 = intermidiateNodes.[ext]
-                    if d1.ContainsKey(label)
+                    let contains, d2 = d1.TryGetValue label
+                    if contains
                     then
-                        d1.[label]
+                        d2
                     else
                         let newNode = new IntermidiateNode(int label, ext)
                         sppfNodes.Add(newNode)
@@ -209,15 +210,16 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             let k = getRightExtension rightExtension
             let rule = getRule label
             let d =
-                if packedNodes.ContainsKey(i)
+                let contains, d1 = packedNodes.TryGetValue i
+                if contains
                 then
-                    let d1 = packedNodes.[i]
-                    if d1.ContainsKey(j)
+                    let contains, d2 = d1.TryGetValue j
+                    if contains
                     then
-                        let d2 = d1.[j]
-                        if d2.ContainsKey(k)
+                        let contains, d3 = d2.TryGetValue k
+                        if contains
                         then
-                            d2.[k]
+                            d3
                         else
                             let d3 = new Dictionary<int<labelMeasure>, int<nodeMeasure>>()
                             d2.Add(k, d3)
@@ -236,9 +238,10 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                     d1.Add(j, d2)
                     packedNodes.Add(i, d1)
                     d3
-            if d.ContainsKey label
+            let contains, d1 = d.TryGetValue label
+            if contains
             then
-                d.[label] 
+                d1 
             else 
                 let newNode = new PackedNode(rule, left, right)
                 sppfNodes.Add(newNode)

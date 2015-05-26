@@ -15,12 +15,13 @@ type ReverseNumberdRulesEBNF (rules : NumberedRulesEBNF, indexator : IndexatorEB
             let nextReverseStateNumber =
                 incr number
                 !number
-            let rec buildReverseStateVertex (currentState : Vertex<_,_>) (currentReverseState : Vertex<_,_>) (firstReverseState : Vertex<_,_>) (processedVertex : HashSet<_>) =
+            let rec buildReverseStateVertex (currentState : Vertex<_,_>) (currentReverseState : Vertex<_,_>) (arrayWithFirstState : ResizeArray<_>) (processedVertex : HashSet<_>) =
                 processedVertex.Add(currentState.label) |> ignore
                 let currentEdges = currentState.outEdges
                 if currentEdges.Count = 0
                 then
-                    firstReverseState = currentReverseState |> ignore
+                    //let firstReverseState = currentReverseState
+                    arrayWithFirstState.Add(currentReverseState)
                 for edge in currentEdges do
                     let vertexDest = edge.dest
                     let labelEdge = edge.label
@@ -28,7 +29,7 @@ type ReverseNumberdRulesEBNF (rules : NumberedRulesEBNF, indexator : IndexatorEB
                     vertexDestReverse.addEdge(new Edge<_,_>(currentReverseState, labelEdge))
                     if not (processedVertex.Contains(vertexDest.label))
                     then
-                        buildReverseStateVertex vertexDest vertexDestReverse firstReverseState processedVertex
+                        buildReverseStateVertex vertexDest vertexDestReverse arrayWithFirstState processedVertex
             let rec setReverseStateLabels (currentState : Vertex<_,_>) (stateToReverseVertex : ResizeArray<Vertex<_,_>>) =
                 currentState.setLabel(nextReverseStateNumber)
                 stateToReverseVertex.Add(currentState)
@@ -39,14 +40,15 @@ type ReverseNumberdRulesEBNF (rules : NumberedRulesEBNF, indexator : IndexatorEB
             let stateToReverseVertex = new ResizeArray<Vertex<_,_>>()
             let firstState = nfaProduction.startState
             let lastReverseState = new Vertex<_,_>(firstState.label)
-            let firstReverseState = null
+            let arrayWithFirstReverseState = new ResizeArray<_>()
             let setOfLabels = new HashSet<_>()
-            buildReverseStateVertex firstState lastReverseState firstReverseState setOfLabels
+            buildReverseStateVertex firstState lastReverseState arrayWithFirstReverseState setOfLabels
+            let firstReverseState = arrayWithFirstReverseState.[0]
             setReverseStateLabels firstReverseState stateToReverseVertex
             let prodReverse : NFAProduction.t = {numberOfStates = nfaProduction.numberOfStates; startState = firstReverseState; stateToVertex = stateToReverseVertex |> Seq.toArray}
             prodReverse
 
-        Array.map (fun i -> rules.rightSide i |> reverseNFA) [|0..rules.rulesCount|]
+        Array.map (fun i -> rules.rightSide i |> reverseNFA) [|0..rules.rulesCount - 1|]
             
     let symbolAndNextPos =
         let result : (int * int) [][] = Array.zeroCreate rules.rulesCount

@@ -42,6 +42,12 @@ type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
     | Error of string
 
+[<Struct>]
+type LblNodePair =
+    val lbl: int<labelMeasure>
+    val node: int<nodeMeasure>
+    new (l,n) = {lbl=l; node=n}
+
 
 let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'TokenType>) : ParseResult<_>  = 
     let tokens = seq {yield! tokens; yield parser.EOF}
@@ -71,13 +77,14 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let currentN = ref <| dummy
         let currentR = ref <| dummy
 
+        let m = ref 0
         let resultAST = ref None
         let packedNodesReadCount = ref 0
         let packedNodesWriteCount = ref 0
         let packedNodesX = Array.zeroCreate<int> (inputLength + 1)
         let packedNodesY = Array.zeroCreate<int> (inputLength + 1)
         let packedNodesZ = Array.zeroCreate<int> (inputLength + 1)
-        let packedNodes = Array.zeroCreate<Dictionary<int, Dictionary<int, Dictionary<int<labelMeasure>, int<nodeMeasure>>>>> (inputLength + 1)
+        let packedNodes = Array.zeroCreate<Dictionary<int, Dictionary<int, ResizibleUsualOne<LblNodePair>>>> (inputLength + 1)
 
         let nonTerminalNodesReadCount = ref 0
         let nonTerminalNodesWriteCount = ref 0 
@@ -85,13 +92,11 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let nonterminalNodesY = Array.zeroCreate (inputLength + 1)
         let nonterminalNodesZ = Array.zeroCreate (inputLength + 1)        
         let nonTerminalNodes = Array.zeroCreate<Dictionary<int, Dictionary<int, int<nodeMeasure>>>> parser.NonTermCount
-        //let nonTerminalNodes = Array3D.zeroCreate<int<nodeMeasure>> parser.NonTermCount (inputLength + 1) (inputLength + 1)
-
 
         let intermidiateNodesReadCount = ref 0
         let intermidiateNodesWriteCount = ref 0
         //we can use dictionary <extension, dict>
-        let intermidiateNodes = new Dictionary<int64<extension>, Dictionary<int<labelMeasure>, int<nodeMeasure>>>()
+        let intermidiateNodes = new Dictionary<int, Dictionary<int, Dictionary<int<labelMeasure>, int<nodeMeasure>>>>()
  
  //посчитать размерв коллекций
         let edgesReadCount = ref 0
@@ -158,7 +163,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let inline slotIsEnd (label : int<labelMeasure>) =
             (getPosition label) = Array.length (parser.rules.[getRule label])
 
-        let findSppfNode label ext : int<nodeMeasure> =
+        let findSppfNode label lExt rExt : int<nodeMeasure> =
             let isEnd = slotIsEnd label
             let nTerm = parser.LeftSide.[getRule label]
             if isEnd
@@ -166,70 +171,96 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                 let cur = nonTerminalNodes.[nTerm]
                 if  cur <> Unchecked.defaultof<_> //<Dictionary<int64<extension>, int<nodeMeasure>>>
                 then
-                        let contains , d1 = cur.TryGetValue(getLeftExtension ext)
+                        let contains , d1 = cur.TryGetValue(lExt)
                         if contains
                         then
-                            let contains, d2 = d1.TryGetValue(getRightExtension ext)
+                            let contains, d2 = d1.TryGetValue(rExt)
                             if contains
                             then
                                 d2
                             else
-                                let newNode = new NonTerminalNode(nTerm, ext)
+                                let newNode = new NonTerminalNode(nTerm, packExtension lExt rExt)
                                 sppfNodes.Add(newNode)
                                 let num = (sppfNodes.Count - 1)*1<nodeMeasure>
-                                d1.Add(getRightExtension ext, num)
+                                d1.Add(rExt, num)
                                 num
                         else
                             let d2 = new Dictionary<int, int<nodeMeasure>>()
                             //let d1 = new Dictionary<int, Dictionary<int, int<nodeMeasure>>>()
-                            let newNode = new NonTerminalNode(nTerm, ext)
+                            let newNode = new NonTerminalNode(nTerm, packExtension lExt rExt)
                             sppfNodes.Add(newNode)
                             let num = (sppfNodes.Count - 1)*1<nodeMeasure>
-                            d2.Add(getRightExtension ext, num)
-                            cur.Add(getLeftExtension ext, d2)
+                            d2.Add(rExt, num)
+                            cur.Add(lExt, d2)
                             num
                         
                 else
                     //let d = new Dictionary<int64<extension>, int<nodeMeasure>>()
                     let d2 = new Dictionary<int, int<nodeMeasure>>()
                     let d1 = new Dictionary<int, Dictionary<int, int<nodeMeasure>>>()
-                    let newNode = new NonTerminalNode(nTerm, ext)
+                    let newNode = new NonTerminalNode(nTerm, packExtension lExt rExt)
                     sppfNodes.Add(newNode)
                     let num = (sppfNodes.Count - 1)*1<nodeMeasure>
                     //d.Add(ext, num)
-                    d2.Add(getRightExtension ext, num)
-                    d1.Add(getLeftExtension ext, d2)
+                    d2.Add(rExt, num)
+                    d1.Add(lExt, d2)
                      
                     nonTerminalNodes.[nTerm] <- d1 
                     num
             else
-                let contains, d1 = intermidiateNodes.TryGetValue ext
+                let contains, d1 = intermidiateNodes.TryGetValue lExt
                 if contains
                 then
-                    let contains, d2 = d1.TryGetValue label
+                    let contains, d2 = d1.TryGetValue rExt
                     if contains
                     then
-                        d2
+                        let contains, d3 = d2.TryGetValue(label)
+                        if contains
+                        then
+                            d3
+                        else
+                            let newNode = new IntermidiateNode(int label, packExtension lExt rExt)
+                            sppfNodes.Add(newNode)
+                            let num = (sppfNodes.Count - 1)*1<nodeMeasure>
+                            d2.Add(label, num)
+                            num
+
                     else
-                        let newNode = new IntermidiateNode(int label, ext)
+                        let d2 = new Dictionary<int<labelMeasure>, int<nodeMeasure>>()
+                        let newNode = new IntermidiateNode(int label, packExtension lExt rExt)
                         sppfNodes.Add(newNode)
                         let num = (sppfNodes.Count - 1)*1<nodeMeasure>
-                        d1.Add(label, num)
+                        d2.Add(label, num)
+                        d1.Add(rExt,d2)
                         num  
                 else
-                    let d = new Dictionary<int<labelMeasure>, int<nodeMeasure>>()
-                    let newNode = new IntermidiateNode(int label, ext)
+                    let d1 = new Dictionary<int, Dictionary<int<labelMeasure>, int<nodeMeasure>>>()
+                    let d2 = new Dictionary<int<labelMeasure>, int<nodeMeasure>>()
+                    let newNode = new IntermidiateNode(int label, packExtension lExt rExt)
                     sppfNodes.Add(newNode)
                     let num = (sppfNodes.Count - 1)*1<nodeMeasure>
-                    d.Add(label, num)
-                    intermidiateNodes.Add(ext, d)
+                    d2.Add(label, num)
+                    d1.Add(rExt, d2)
+                    intermidiateNodes.Add(lExt, d1)
                     num
 
         let findSppfPackedNode symbolNode label leftExtension rightExtension (left : INode) (right : INode) : int<nodeMeasure> = 
+            let rule = getRule label
+            let createNode () =
+                let newNode = new PackedNode(rule, left, right)
+                sppfNodes.Add(newNode)
+                let num = (sppfNodes.Count - 1 )*1<nodeMeasure>
+                match (sppfNodes.Item (int symbolNode)) with
+                | :? NonTerminalNode as n ->
+                    n.AddChild newNode
+                | :? IntermidiateNode as i ->
+                    i.AddChild newNode
+                | _ -> ()
+                num
             let i = getLeftExtension leftExtension
             let j = getRightExtension leftExtension
             let k = getRightExtension rightExtension
-            let rule = getRule label
+            
             let d =
                 let d1 = packedNodes.[i]
                 if d1 <> Unchecked.defaultof<_>
@@ -239,42 +270,35 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                     then
                         let contains, d3 = d2.TryGetValue k
                         if contains
-                        then
-                            d3
+                        then                            
+                            match d3.TryFind (fun x -> x.lbl = label) with
+                            | Some num -> num.node
+                            | None -> 
+                                let newNode = createNode()
+                                d3.Add(new LblNodePair(label,newNode))
+                                newNode
                         else
-                            let d3 = new Dictionary<int<labelMeasure>, int<nodeMeasure>>()
+                            let newNode = createNode()
+                            let d3 = new ResizibleUsualOne<_>(new LblNodePair(label,newNode))
                             d2.Add(k, d3)
-                            d3
+                            newNode
                     else
-                        let d2 = new Dictionary<int, Dictionary<int<labelMeasure>, int<nodeMeasure>>>()
-                        let d3 = new Dictionary<int<labelMeasure>, int<nodeMeasure>>() 
+                        let d2 = new Dictionary<int, ResizibleUsualOne<_>>()
+                        let newNode = createNode()
+                        let d3 = new ResizibleUsualOne<_>(new LblNodePair(label,newNode))
                         d2.Add(k, d3)
                         d1.Add(j, d2)
-                        d3
+                        newNode
                 else
-                    let d1 = new Dictionary<int, Dictionary<int, Dictionary<int<labelMeasure>, int<nodeMeasure>>>>()
-                    let d2 = new Dictionary<int, Dictionary<int<labelMeasure>, int<nodeMeasure>>>()
-                    let d3 = new Dictionary<int<labelMeasure>, int<nodeMeasure>>()
+                    let d1 = new Dictionary<int, Dictionary<int, ResizibleUsualOne<_>>>()
+                    let d2 = new Dictionary<int, ResizibleUsualOne<_>>()
+                    let newNode = createNode()
+                    let d3 = new ResizibleUsualOne<_>(new LblNodePair(label,newNode))
                     d2.Add(k, d3)
                     d1.Add(j, d2)
                     packedNodes.[i] <- d1
-                    d3
-            let contains, d1 = d.TryGetValue label
-            if contains
-            then
-                d1 
-            else 
-                let newNode = new PackedNode(rule, left, right)
-                sppfNodes.Add(newNode)
-                let num = (sppfNodes.Count - 1 )*1<nodeMeasure>
-                d.Add(label, num)
-                match (sppfNodes.Item (int symbolNode)) with
-                | :? NonTerminalNode as n ->
-                    n.AddChild newNode
-                | :? IntermidiateNode as i ->
-                    i.AddChild newNode
-                | _ -> ()
-                num
+                    newNode
+            d
                 
         let getNodeP (label : int<labelMeasure>) (left : int<nodeMeasure>) (right : int<nodeMeasure>) : int<nodeMeasure> =
             let currentRight = sppfNodes.Item (int right)
@@ -300,11 +324,11 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                         term.Extension 
                     | _ -> failwith "Smth strange, Nastya" 
                     
-                let y = findSppfNode label (packExtension (getLeftExtension leftExt) (getRightExtension rightExt))
+                let y = findSppfNode label (getLeftExtension leftExt) (getRightExtension rightExt)
                 ignore <| findSppfPackedNode y label leftExt rightExt currentLeft currentRight
                 y
             else
-                let y = findSppfNode label (packExtension (getLeftExtension rightExt) (getRightExtension rightExt))
+                let y = findSppfNode label (getLeftExtension rightExt) (getRightExtension rightExt)
                 ignore <| findSppfPackedNode y label rightExt rightExt dummyAST currentRight 
                 y
             
@@ -529,6 +553,8 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             | Some res -> 
                     let r1 = new Tree<_> (tokens, res, parser.rules)
                     let path = @"../../../src/GLLApplication/out.txt"
+                    printfn "!!!!!"
+                    //packedNodes |> Array.iter(fun d -> d |> Seq.iter (fun kvp -> kvp.Value |> Seq.iter (fun kvp -> kvp.Value.Count |> printf "%A; " )))
 //                    let out = new System.IO.StreamWriter (path) 
 //                    out.WriteLine("packed nodes read count = " + (!packedNodesReadCount).ToString())
 //                    out.WriteLine("packed nodes write count = " + (!packedNodesWriteCount).ToString()) 

@@ -62,5 +62,18 @@ type BlockResizeArray<'T> () =
 type UsualOne<'T> =
     val mutable first : 'T
     val mutable other : 'T[]
+    new (f,o) = {first = f; other = o}    
+
+[<Struct>]
+type ResizibleUsualOne<'T> =
+    val mutable first : 'T
+    val mutable other : list<'T>
     new (f,o) = {first = f; other = o}
+    new (f) = {first = f; other = []}
+    member this.Add x =
+        this.other <- x :: this.other
+    member this.TryFind f =
+        if f this.first
+        then Some this.first
+        else List.tryFind f this.other
 

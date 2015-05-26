@@ -60,7 +60,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let setR = new Queue<Context>()   
         let setP = new Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>> ()
         //свернуть в 1 инт
-        let setU = Array.zeroCreate<Dictionary<int<labelMeasure>, Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>>> (inputLength + 1)
+        let setU = Array.zeroCreate<Dictionary<int<labelMeasure>, Dictionary<int64<vertexMeasure>, ResizeArray<int<nodeMeasure>>>>> (inputLength + 1)
 
         let currentIndex = ref 0
         let currentrule = parser.StartRule
@@ -112,8 +112,8 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let containsContext index (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
             if index <= inputLength
             then
-                let vertexKey = (vertex.Level, vertex.Label)
-                if setU.[index] <> Unchecked.defaultof<Dictionary<int<labelMeasure>, Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>>>
+                let vertexKey = packVertex vertex.Level vertex.Label
+                if setU.[index] <> Unchecked.defaultof<Dictionary<int<labelMeasure>, Dictionary<int64<vertexMeasure>, ResizeArray<int<nodeMeasure>>>>>
                 then
                     let cond, current = setU.[index].TryGetValue(label) 
                     if  cond then
@@ -131,16 +131,16 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                             current.Add(vertexKey, arr)                    
                             false
                     else 
-                        let dict = new Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>()
+                        let dict = new Dictionary<int64<vertexMeasure>, ResizeArray<int<nodeMeasure>>>()
                         setU.[index].Add(label, dict)
                         let arr = new ResizeArray<int<nodeMeasure>>()
                         arr.Add(ast)
                         dict.Add(vertexKey, arr) 
                         false
                 else 
-                    let dict1 =  new Dictionary<int<labelMeasure>, Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>>()
+                    let dict1 =  new Dictionary<int<labelMeasure>, Dictionary<int64<vertexMeasure>, ResizeArray<int<nodeMeasure>>>>()
                     setU.[index] <- dict1
-                    let dict2 = new Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>()
+                    let dict2 = new Dictionary<int64<vertexMeasure>, ResizeArray<int<nodeMeasure>>>()
                     dict1.Add(label, dict2)
                     let arr = new ResizeArray<int<nodeMeasure>>()
                     arr.Add(ast)

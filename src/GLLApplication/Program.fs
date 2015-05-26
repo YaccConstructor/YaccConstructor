@@ -60,7 +60,7 @@ let outDir = @"../../../src/GLLApplication/"
 //        printfn "%s" "sss"
 //        GLL.SimpleAmb.defaultAstToDot tree GLL.SimpleAmb.tokenToNumber GLL.SimpleAmb.tokenData  (outDir + "SimpleLeft.dot") 
 
-let str2 = String.init 250 (fun i -> "A + ( A * B ) * A + ( A * B ) + ( A + ( A * B + A + ( A * B ) ) ) + A + ( A * B ) * A + ( A * B ) + ( A + ( A * B + A + ( A * B ) ) ) + ( A + ( A * B ) * A + ( A * B ) + ( A + ( A * B + A + ( A * B ) ) ) + A + ( A * B ) * A + ( A * B ) + ( A + ( A * B + A + ( A * B ) ) ) ) ; ") + "B ;"
+let str2 = String.init 5000 (fun i -> "A + ( A * B ) ; ") + "B ;"
 let parser2 = GLL.Calc.buildAst
 
 let run2 path astBuilder =

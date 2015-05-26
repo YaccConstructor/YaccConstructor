@@ -65,15 +65,15 @@ type UsualOne<'T> =
     new (f,o) = {first = f; other = o}    
 
 [<Struct>]
-type ResizibleUsualOne<'T> =
+type ResizableUsualOne<'T> =
     val mutable first : 'T
-    val mutable other : list<'T>
-    new (f,o) = {first = f; other = o}
-    new (f) = {first = f; other = []}
-    member this.Add x =
-        this.other <- x :: this.other
+    val other : ref<list<'T>>
+    new (f,o) = {first = f; other = ref o}
+    new (f) = {first = f; other = ref []}
+    member this.Add x =        
+        this.other := x :: !this.other
     member this.TryFind f =
         if f this.first
         then Some this.first
-        else List.tryFind f this.other
+        else List.tryFind f !this.other
 

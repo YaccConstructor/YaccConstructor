@@ -82,7 +82,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let packedNodesX = Array.zeroCreate<int> (inputLength + 1)
         let packedNodesY = Array.zeroCreate<int> (inputLength + 1)
         let packedNodesZ = Array.zeroCreate<int> (inputLength + 1)
-        let packedNodes = Array.zeroCreate<Dictionary<int, Dictionary<int, ResizibleUsualOne<LblNodePair>>>> (inputLength + 1)
+        let packedNodes = Array.zeroCreate<Dictionary<int, Dictionary<int, ResizableUsualOne<LblNodePair>>>> (inputLength + 1)
 
         let nonTerminalNodesReadCount = ref 0
         let nonTerminalNodesWriteCount = ref 0 
@@ -243,6 +243,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                     i.AddChild newNode
                 | _ -> ()
                 num
+
             let i = getLeftExtension leftExtension
             let j = getRightExtension leftExtension
             let k = getRightExtension rightExtension
@@ -264,21 +265,21 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                             newNode
                     else
                         let newNode = createNode()
-                        let d3 = new ResizibleUsualOne<_>(new LblNodePair(label,newNode))
+                        let d3 = new ResizableUsualOne<_>(new LblNodePair(label,newNode))
                         d2.Add(k, d3)
                         newNode
                 else
-                    let d2 = new Dictionary<int, ResizibleUsualOne<_>>()
+                    let d2 = new Dictionary<int, ResizableUsualOne<_>>()
                     let newNode = createNode()
-                    let d3 = new ResizibleUsualOne<_>(new LblNodePair(label,newNode))
+                    let d3 = new ResizableUsualOne<_>(new LblNodePair(label,newNode))
                     d2.Add(k, d3)
                     d1.Add(j, d2)
                     newNode
             else
-                let d1 = new Dictionary<int, Dictionary<int, ResizibleUsualOne<_>>>()
-                let d2 = new Dictionary<int, ResizibleUsualOne<_>>()
+                let d1 = new Dictionary<int, Dictionary<int, ResizableUsualOne<_>>>()
+                let d2 = new Dictionary<int, ResizableUsualOne<_>>()
                 let newNode = createNode()
-                let d3 = new ResizibleUsualOne<_>(new LblNodePair(label,newNode))
+                let d3 = new ResizableUsualOne<_>(new LblNodePair(label,newNode))
                 d2.Add(k, d3)
                 d1.Add(j, d2)
                 packedNodes.[i] <- d1

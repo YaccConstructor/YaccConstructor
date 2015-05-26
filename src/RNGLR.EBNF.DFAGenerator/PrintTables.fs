@@ -1,8 +1,8 @@
 ﻿module Yard.Generators.RNGLR.EBNF.DFA.Printer
 
-open Yard.EBNF.FinalGrammar
+open Yard.EBNF.DFA.FinalGrammar
 open System.Collections.Generic
-open Yard.Generators.RNGLR.EBNF
+open Yard.Generators.RNGLR.EBNF.DFA
 open Yard.Generators.RNGLR.EBNF.DFA.States
 open Yard.Core.IL
 

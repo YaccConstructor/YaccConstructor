@@ -5,7 +5,7 @@ open Yard.Core
 open IL
 open Constraints
 open Yard.Generators.Common.InitialConvert
-open Yard.EBNF.FinalGrammar
+open Yard.EBNF.DFA.FinalGrammar
 open Yard.Generators.RNGLR.States
 open States
 open Printer

@@ -6,6 +6,8 @@ open Yard.Generators.RNGLR.EBNF.DFA
 open NUnit.Framework
 open LexCommon
 
+open System.Collections.Generic
+
 
 let run path astBuilder =
     let tokens = LexCommon.tokens(path)
@@ -112,10 +114,22 @@ type ``RNGLREBNF parser tests with simple lexer`` () =
 
 [<EntryPoint>]
 let main argv = 
-    let parser = RNGLR.EBNF.DFAParserSimpleOpt.buildAst
-    let path = dir + "simpleOneTerm.txt"
-    match run path parser with
-        | Error (num, tok, err, _) -> printErr (num, tok, err)
-        | Success (tree, _) -> 
-            printfn "Success"
+    let setOne = new HashSet<_>()
+    let setTwo = new HashSet<_>()
+
+    setOne.Add(1) |> ignore
+    setOne.Add(2) |> ignore
+    setOne.Add(3) |> ignore
+    setTwo.Add(1) |> ignore
+    setTwo.Add(2) |> ignore
+    //setTwo.Add(3) |> ignore
+
+    let resOne = setOne.SetEquals(setTwo)
+    printfn "%A" resOne
+//    let parser = RNGLR.EBNF.DFAParserSimpleOpt.buildAst
+//    let path = dir + "simpleOneTerm.txt"
+//    match run path parser with
+//        | Error (num, tok, err, _) -> printErr (num, tok, err)
+//        | Success (tree, _) -> 
+//            printfn "Success"
     0 // return an integer exit code

@@ -1,10 +1,10 @@
 ﻿module Yard.Generators.RNGLR.EBNF.DFA.States
 
 open System.Collections.Generic
-open Yard.EBNF.FinalGrammar
+open Yard.EBNF.DFA.FinalGrammar
 open Yard.Generators.Common
 open Yard.Generators.RNGLR.States
-open Yard.EBNF.Indexator // DELETE
+open Yard.EBNF.DFA.Indexator // DELETE
 open System.IO //DELETE
 open System.Threading // DELETE
 

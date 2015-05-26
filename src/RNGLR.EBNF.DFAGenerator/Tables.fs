@@ -1,6 +1,6 @@
 ﻿namespace Yard.Generators.RNGLR.EBNF.DFA
 
-open Yard.EBNF.FinalGrammar
+open Yard.EBNF.DFA.FinalGrammar
 open Yard.Generators.RNGLR.States
 open Yard.Generators.RNGLR.EBNF.DFA.States
 

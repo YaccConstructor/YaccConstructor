@@ -11,7 +11,7 @@ open Yard.EBNF.DFA.StateSets
 type FinalGrammarNFA(ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
     let _indexator = new IndexatorEBNF(ruleList, caseSensitive)
     let _nfaRules = new NumberedRulesEBNF (ruleList, _indexator, caseSensitive)
-    let _dfaReverseRules = new ReverseNumberdRulesEBNF(_nfaRules, _indexator)
+    let _dfaReverseRules = new ReverseNumberdRulesDFA (_nfaRules, _indexator)
     // из символа может породиться пустая цепочка
     let _canInferEpsilon = canInferEpsilonNFA _nfaRules _indexator
     // i - номер правила, j - номер сост, дальше может быть пустой хвост

@@ -32,14 +32,14 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\FsYacc.exe</HintPath>
     </Reference>
-    <Reference Include="GraphX.PCL.Common">
-      <HintPath>..\packages\GraphX.2.1.8.1\lib\net40-client\GraphX.PCL.Common.dll</HintPath>
+    <Reference Include="GraphX.Common">
+      <HintPath>..\packages\GraphX.2.0.2\lib\net40\GraphX.Common.dll</HintPath>
     </Reference>
-    <Reference Include="GraphX.PCL.Logic">
-      <HintPath>..\packages\GraphX.2.1.8.1\lib\net40-client\GraphX.PCL.Logic.dll</HintPath>
+    <Reference Include="GraphX.Controls">
+      <HintPath>..\packages\GraphX.2.0.2\lib\net40\GraphX.Controls.dll</HintPath>
     </Reference>
-    <Reference Include="GraphX.WPF.Controls">
-      <HintPath>..\packages\GraphX.2.1.8.1\lib\net40-client\GraphX.WPF.Controls.dll</HintPath>
+    <Reference Include="GraphX.Logic">
+      <HintPath>..\packages\GraphX.2.0.2\lib\net40\GraphX.Logic.dll</HintPath>
     </Reference>
     <Reference Include="Helper, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -65,7 +65,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
@@ -80,14 +79,6 @@
   <ItemGroup>
     <Compile Include="AbstractAnalysisDaemonStage.cs" />
     <Compile Include="AbstractAnalysisDaemonStageProcess.cs" />
-    <Compile Include="GraphCodeWindow\GraphDefine\Edge.cs" />
-    <Compile Include="GraphCodeWindow\GraphDefine\EmptyGraphArea.cs" />
-    <Compile Include="GraphCodeWindow\GraphDefine\Graph.cs" />
-    <Compile Include="GraphCodeWindow\GraphDefine\LogicCore.cs" />
-    <Compile Include="GraphCodeWindow\GraphDefine\Vertex.cs" />
-    <Compile Include="GraphCodeWindow\XAML Templates\AreaControl.xaml.cs">
-      <DependentUpon>AreaControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Highlighting\ColorHelper.cs" />
     <Compile Include="Highlighting\Dynamic\ExistingTreeNodes.cs" />
     <Compile Include="Highlighting\Dynamic\MatchingBraceContextHighlighter.cs" />
@@ -150,15 +141,7 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Page Include="GraphCodeWindow\XAML Templates\AreaControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Targets')" />

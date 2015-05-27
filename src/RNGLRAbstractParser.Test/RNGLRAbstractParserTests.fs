@@ -485,7 +485,7 @@ type ``RNGLR abstract parser tests`` () =
 
         test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
 
-    [<Test>]
+    //[<Test>]
     member this.temp () =
         let qGraph = new ParserInputGraph<_>(0, 9)
         qGraph.AddVerticesAndEdgeRange

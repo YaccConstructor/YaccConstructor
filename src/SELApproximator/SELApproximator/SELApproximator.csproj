@@ -9,8 +9,8 @@
     <ProjectGuid>{8766C954-D768-48C3-B35D-DCE8192CF166}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ApproximatorTester</RootNamespace>
-    <AssemblyName>ApproximatorTester</AssemblyName>
+    <RootNamespace>SELApproximator</RootNamespace>
+    <AssemblyName>SELApproximator</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>

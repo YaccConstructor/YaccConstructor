@@ -22,7 +22,7 @@
 -->
 
 <Addins>
-	<Directory include-subdirs="true">../../../</Directory>
+	<Directory>../../../</Directory>
 	<!-- 
 		<Directory>PATH</Directory>
 	-->	

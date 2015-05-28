@@ -357,7 +357,15 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         |> addTreeTop
                         |> nodes.Add
             match !root with
-            | None -> Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state")
+            | None -> 
+                let states = 
+                    innerGraph.Vertices 
+                    |> Seq.filter (fun v -> innerGraph.OutEdges(v) 
+                                            |> Seq.exists(fun e -> e.Target.processedGssVertices.Count = 0 (*&& e.Target.unprocessedGssVertices.Count = 0*)
+                                                                   && v.processedGssVertices.Count <> 0 (*&& v.unprocessedGssVertices.Count <> 0*)))
+                    |> Seq.map (fun v -> string v.vNum)
+                    |> String.concat "; "
+                Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state. Possible errors: (" + states + ")")
             | Some res -> 
                 try 
                     let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules)

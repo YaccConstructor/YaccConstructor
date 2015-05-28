@@ -243,6 +243,15 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
 
             this.FilterChildren handleChildren
 
+    member this.FindNonterminalsByInd nonterminal (leftSide : array<int>) =
+        order |> Array.filter (fun x -> nonterminal = leftSide.[x.first.prod])
+
+    member this.FindNonterminalsByString nonterminal (leftSide : array<int>) (numToString : int -> string) =
+        let nontermInd = leftSide |> Array.tryFind (fun x -> String.Equals (numToString x, nonterminal))
+        match nontermInd with
+        | Some n -> this.FindNonterminalsByInd n leftSide
+        | None -> null
+   
     /// handleCycleNode is used for handling nodes, contained in cycles
     ///   and having no children family, where each node has smaller position.
     member this.TraverseWithRanges tokenToRange dispose handleCycleNode f =

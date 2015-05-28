@@ -11,6 +11,8 @@ open Microsoft.FSharp.Collections
 [<Measure>] type nodeMeasure
 [<Measure>] type labelMeasure
 
+let inline pack left right : int64 =  ((int64 left <<< 32) ||| int64 right)
+
 let inline packExtension left right : int64<extension> =  LanguagePrimitives.Int64WithMeasure ((int64 left <<< 32) ||| int64 right)
 let inline getRightExtension (long : int64<extension>) = int <| ((int64 long) &&& 0xffffffffL)
 let inline getLeftExtension (long : int64<extension>)  = int <| ((int64 long) >>> 32)
@@ -63,9 +65,9 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
     else
         let slots = parser.Slots
         let setR = new Queue<Context>()   
-        let setP = new Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>> ()
+        let setP = new Dictionary<int64, ResizeArray<int<nodeMeasure>>> ()
         //свернуть в 1 инт
-        let setU = Array.zeroCreate<Dictionary<int<labelMeasure>, Dictionary<int64<vertexMeasure>, ResizeArray<int<nodeMeasure>>>>> (inputLength + 1)
+        let setU = Array.zeroCreate<IntDictionary<Dictionary<int64<vertexMeasure>, ResizeArray<int<nodeMeasure>>>>> (inputLength + 1)
 
         let currentIndex = ref 0
         let currentrule = parser.StartRule
@@ -82,21 +84,21 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let packedNodesX = Array.zeroCreate<int> (inputLength + 1)
         let packedNodesY = Array.zeroCreate<int> (inputLength + 1)
         let packedNodesZ = Array.zeroCreate<int> (inputLength + 1)
-        let packedNodes = Array.zeroCreate<Dictionary<int, Dictionary<int, ResizableUsualOne<LblNodePair>>>> (inputLength + 1)
+        let packedNodes = Array.zeroCreate<IntDictionary<IntDictionary<ResizableUsualOne<LblNodePair>>>> (inputLength + 1)
 
         let nonTerminalNodesReadCount = ref 0
         let nonTerminalNodesWriteCount = ref 0 
         let nonterminalNodesX = Array.zeroCreate parser.NonTermCount
         let nonterminalNodesY = Array.zeroCreate (inputLength + 1)
         let nonterminalNodesZ = Array.zeroCreate (inputLength + 1)        
-        let nonTerminalNodes = Array.zeroCreate<Dictionary<int, Dictionary<int, int<nodeMeasure>>>> parser.NonTermCount
+        let nonTerminalNodes = Array.zeroCreate<IntDictionary<IntDictionary<int<nodeMeasure>>>> parser.NonTermCount
         //let nonTerminalNodes = Array3D.zeroCreate<int<nodeMeasure>> parser.NonTermCount (inputLength + 1) (inputLength + 1)
 
 
         let intermidiateNodesReadCount = ref 0
         let intermidiateNodesWriteCount = ref 0
         //we can use dictionary <extension, dict>
-        let intermidiateNodes = new Dictionary<int64<extension>, Dictionary<int<labelMeasure>, int<nodeMeasure>>>()
+        let intermidiateNodes = new Dictionary<int64<extension>, IntDictionary<int<nodeMeasure>>>()
  
  //посчитать размерв коллекций
         let edgesReadCount = ref 0
@@ -119,9 +121,9 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             if index <= inputLength
             then
                 let vertexKey = packVertex vertex.Level vertex.Label
-                if setU.[index] <> Unchecked.defaultof<Dictionary<int<labelMeasure>, Dictionary<int64<vertexMeasure>, ResizeArray<int<nodeMeasure>>>>>
+                if setU.[index] <> Unchecked.defaultof<_>
                 then
-                    let cond, current = setU.[index].TryGetValue(label) 
+                    let cond, current = setU.[index].TryGetValue(int label) 
                     if  cond then
                        if current.ContainsKey(vertexKey) then
                             let trees = current.[vertexKey]
@@ -138,16 +140,16 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                             false
                     else 
                         let dict = new Dictionary<int64<vertexMeasure>, ResizeArray<int<nodeMeasure>>>()
-                        setU.[index].Add(label, dict)
+                        setU.[index].Add(int label, dict)
                         let arr = new ResizeArray<int<nodeMeasure>>()
                         arr.Add(ast)
                         dict.Add(vertexKey, arr) 
                         false
                 else 
-                    let dict1 =  new Dictionary<int<labelMeasure>, Dictionary<int64<vertexMeasure>, ResizeArray<int<nodeMeasure>>>>()
+                    let dict1 =  new IntDictionary<_>()
                     setU.[index] <- dict1
                     let dict2 = new Dictionary<int64<vertexMeasure>, ResizeArray<int<nodeMeasure>>>()
-                    dict1.Add(label, dict2)
+                    dict1.Add(int label, dict2)
                     let arr = new ResizeArray<int<nodeMeasure>>()
                     arr.Add(ast)
                     dict2.Add(vertexKey, arr)
@@ -185,7 +187,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                                 d1.Add(getRightExtension ext, num)
                                 num
                         else
-                            let d2 = new Dictionary<int, int<nodeMeasure>>()
+                            let d2 = new IntDictionary<int<nodeMeasure>>()
                             //let d1 = new Dictionary<int, Dictionary<int, int<nodeMeasure>>>()
                             let newNode = new NonTerminalNode(nTerm, ext)
                             sppfNodes.Add(newNode)
@@ -196,8 +198,8 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                         
                 else
                     //let d = new Dictionary<int64<extension>, int<nodeMeasure>>()
-                    let d2 = new Dictionary<int, int<nodeMeasure>>()
-                    let d1 = new Dictionary<int, Dictionary<int, int<nodeMeasure>>>()
+                    let d2 = new IntDictionary<int<nodeMeasure>>()
+                    let d1 = new IntDictionary<IntDictionary<int<nodeMeasure>>>()
                     let newNode = new NonTerminalNode(nTerm, ext)
                     sppfNodes.Add(newNode)
                     let num = (sppfNodes.Count - 1)*1<nodeMeasure>
@@ -211,7 +213,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                 let contains, d1 = intermidiateNodes.TryGetValue ext
                 if contains
                 then
-                    let contains, d2 = d1.TryGetValue label
+                    let contains, d2 = d1.TryGetValue (int label)
                     if contains
                     then
                         d2
@@ -219,14 +221,14 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                         let newNode = new IntermidiateNode(int label, ext)
                         sppfNodes.Add(newNode)
                         let num = (sppfNodes.Count - 1)*1<nodeMeasure>
-                        d1.Add(label, num)
+                        d1.Add(int label, num)
                         num  
                 else
-                    let d = new Dictionary<int<labelMeasure>, int<nodeMeasure>>()
+                    let d = new IntDictionary<int<nodeMeasure>>()
                     let newNode = new IntermidiateNode(int label, ext)
                     sppfNodes.Add(newNode)
                     let num = (sppfNodes.Count - 1)*1<nodeMeasure>
-                    d.Add(label, num)
+                    d.Add(int label, num)
                     intermidiateNodes.Add(ext, d)
                     num
 
@@ -269,15 +271,15 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                         d2.Add(k, d3)
                         newNode
                 else
-                    let d2 = new Dictionary<int, ResizableUsualOne<_>>()
+                    let d2 = new IntDictionary<ResizableUsualOne<_>>()
                     let newNode = createNode()
                     let d3 = new ResizableUsualOne<_>(new LblNodePair(label,newNode))
                     d2.Add(k, d3)
                     d1.Add(j, d2)
                     newNode
             else
-                let d1 = new Dictionary<int, Dictionary<int, ResizableUsualOne<_>>>()
-                let d2 = new Dictionary<int, ResizableUsualOne<_>>()
+                let d1 = new IntDictionary<IntDictionary<ResizableUsualOne<_>>>()
+                let d2 = new IntDictionary<ResizableUsualOne<_>>()
                 let newNode = createNode()
                 let d3 = new ResizableUsualOne<_>(new LblNodePair(label,newNode))
                 d2.Add(k, d3)
@@ -331,11 +333,11 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                 res * 1<nodeMeasure>
             
                      
-        let containsEdge (b : Vertex) (e : Vertex) ast =
+        let containsEdge (b : Vertex) (e : Vertex) (ast : int<nodeMeasure>) =
             let labelN = slots.[int b.Label]
             edgesReadCount := !edgesReadCount + 1
             let dict1 = edges.[labelN, b.Level]
-            if dict1 <> Unchecked.defaultof<Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>>
+            if dict1 <> Unchecked.defaultof<_>
             then
                 if dict1.ContainsKey(ast)
                 then
@@ -353,15 +355,15 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                         dict2.Add(e.Label, arr)
                         false
                 else
-                    let d = new Dictionary<int<labelMeasure>, ResizeArray<int>>()
+                    let d = new Dictionary<int<labelMeasure>,ResizeArray<int>>()
                     dict1.Add(ast, d)
                     let l = new ResizeArray<int>()
                     l.Add(e.Level)
                     d.Add(e.Label, l)
                     false
             else
-                let newDict1 = new Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>()
-                let newDict2 = new Dictionary<int<labelMeasure>, ResizeArray<int>>()
+                let newDict1 = new Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>,ResizeArray<int>>>()
+                let newDict2 = new Dictionary<int<labelMeasure>,ResizeArray<int>>()
                 let newArr = new ResizeArray<int>()
                 newArr.Add(e.Level)
                 newDict2.Add(e.Label, newArr)
@@ -381,9 +383,9 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                 | _ -> failwith "Bad type for tree node"
 
         
-        let create index label (vertex : Vertex) ast = 
+        let create index label (vertex : Vertex) (ast : int<nodeMeasure>) = 
             let v = new Vertex(index, label)
-            let vertexKey = (index, label)
+            let vertexKey = pack index (int label)
             let temp = containsEdge v vertex ast
             if not <| temp //containsEdge v vertex ast
             then
@@ -399,7 +401,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let pop (u : Vertex) (i : int) (z : int<nodeMeasure>) =
             if u <> dummyGSSNode
             then
-                let vertexKey = (u.Level, u.Label)
+                let vertexKey = pack u.Level (int u.Label)
                 if setP.ContainsKey vertexKey
                 then
                     setP.[vertexKey].Add(z)
@@ -523,39 +525,28 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
              while not !stop do
                 if !condition then dispatcher() else processing()
         control()
-          
-//        let tempPrintArr (arr : array<int>) (name : string) (out : System.IO.StreamWriter) = 
-//            out.WriteLine(name)
-//           
-//            for i = 0 to arr.Length - 1 do
-//                if i % 20 = 0 then out.WriteLine()
-//                out.Write(arr.[i].ToString() + " ")
-//            out.WriteLine()
-//            out.WriteLine("------------------------------------------")
 
         match !resultAST with
             | None -> Error ("String was not parsed")
             | Some res -> 
-                    let r1 = new Tree<_> (tokens, res, parser.rules)
-                    let path = @"../../../src/GLLApplication/out.txt"
-//                    let out = new System.IO.StreamWriter (path) 
-//                    out.WriteLine("packed nodes read count = " + (!packedNodesReadCount).ToString())
-//                    out.WriteLine("packed nodes write count = " + (!packedNodesWriteCount).ToString()) 
-//                    tempPrintArr packedNodesX "packed nodes X count" out 
-//                    tempPrintArr packedNodesY "packed nodes Y count" out 
-//                    tempPrintArr packedNodesZ "packed nodes Z count" out 
-//
-//                    out.WriteLine("nonterminal nodes read count = " + (!nonTerminalNodesReadCount).ToString())
-//                    out.WriteLine("nonterminal nodes write count = " + (!nonTerminalNodesWriteCount).ToString())
-//                    tempPrintArr nonterminalNodesX "nonterminal nodes X count"  out
-//                    tempPrintArr nonterminalNodesY "nonterminal nodes Y count" out
-//                    tempPrintArr nonterminalNodesZ "nonterminal nodes Z count" out
-//
-//                    out.WriteLine("intermidiate nodes read count = " + (!intermidiateNodesReadCount).ToString())
-//                    out.WriteLine("intermidiate nodes write count = " + (!intermidiateNodesWriteCount).ToString())
-//
-//                    out.WriteLine("edges nodes read count = " + (!edgesReadCount).ToString())
-//                    out.WriteLine("edges nodes write count = " + (!edgesWriteCount).ToString())
+                let r1 = new Tree<_> (tokens, res, parser.rules)
+                Success (r1)
+                    
+//                    for d in packedNodes do
+//                        if d = Unchecked.defaultof<_> then printf "null; " else printf "1; "
+//                    printfn "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+//                    printfn "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+//                    packedNodes |> Array.iter(fun d -> if d <> null then d |> Seq.iter (fun kvp -> if kvp.Value <> null then kvp.Value |> Seq.iter (fun kvp -> kvp.Value.other.Value.Length |> printf "%A; ")))
+//                    let r1 = new Tree<_> (tokens, res, parser.rules)
+//                    let path = @"../../../src/GLLApplication/out1000.txt"
+//                    printfn "PACKED NODES"
+//                    //packedNodes |> Array.iter(fun d -> d |> Seq.iter (fun kvp -> kvp.Value |> Seq.iter (fun kvp -> kvp.Value.other.Value.Length |> printf "%A; ")))
+//                    printfn ""
+//                    printfn "INTERMIDIATE NODES"
+//                    intermidiateNodes  |> Seq.iter (fun kvp -> kvp.Value.Count |> printf "%A; ")
+//                    printfn ""
+//                    printfn "NONTERMINAL NODES"
+//                    nonTerminalNodes |> Seq.iter (fun kvp -> kvp.Count |> printf "%A; ")
 //                    out.Close()
-                    Success (r1)   
+                       
                         

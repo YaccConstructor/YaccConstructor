@@ -98,7 +98,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let intermidiateNodesReadCount = ref 0
         let intermidiateNodesWriteCount = ref 0
         //we can use dictionary <extension, dict>
-        let intermidiateNodes = new Dictionary<int64<extension>, IntDictionary<int<nodeMeasure>>>()
+        let intermidiateNodes = new Dictionary<int64<extension>, ResizableUsualFive<LblNodePair>>()
  
  //посчитать размерв коллекций
         let edgesReadCount = ref 0
@@ -176,16 +176,20 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                         let contains , d1 = cur.TryGetValue(getLeftExtension ext)
                         if contains
                         then
+                            printf "true1; "
                             let contains, d2 = d1.TryGetValue(getRightExtension ext)
                             if contains
                             then
+                                printf "true2; "
                                 d2
                             else
                                 let newNode = new NonTerminalNode(nTerm, ext)
                                 sppfNodes.Add(newNode)
                                 let num = (sppfNodes.Count - 1)*1<nodeMeasure>
                                 d1.Add(getRightExtension ext, num)
+                                printf "false2; "
                                 num
+                                
                         else
                             let d2 = new IntDictionary<int<nodeMeasure>>()
                             //let d1 = new Dictionary<int, Dictionary<int, int<nodeMeasure>>>()
@@ -194,8 +198,9 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                             let num = (sppfNodes.Count - 1)*1<nodeMeasure>
                             d2.Add(getRightExtension ext, num)
                             cur.Add(getLeftExtension ext, d2)
+                            printf "false1; "
                             num
-                        
+                            
                 else
                     //let d = new Dictionary<int64<extension>, int<nodeMeasure>>()
                     let d2 = new IntDictionary<int<nodeMeasure>>()
@@ -213,22 +218,21 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                 let contains, d1 = intermidiateNodes.TryGetValue ext
                 if contains
                 then
-                    let contains, d2 = d1.TryGetValue (int label)
-                    if contains
-                    then
-                        d2
-                    else
-                        let newNode = new IntermidiateNode(int label, ext)
-                        sppfNodes.Add(newNode)
-                        let num = (sppfNodes.Count - 1)*1<nodeMeasure>
-                        d1.Add(int label, num)
-                        num  
+                    let d2 = d1.TryFind (fun x -> x.lbl = label)
+                    match d2 with
+                        | Some d -> d.node 
+                        | None ->
+                            let newNode = new IntermidiateNode(int label, ext)
+                            sppfNodes.Add(newNode)
+                            let num = (sppfNodes.Count - 1)*1<nodeMeasure>
+                            d1.Add(new LblNodePair(label, num))
+                            num  
                 else
-                    let d = new IntDictionary<int<nodeMeasure>>()
+                    
                     let newNode = new IntermidiateNode(int label, ext)
                     sppfNodes.Add(newNode)
                     let num = (sppfNodes.Count - 1)*1<nodeMeasure>
-                    d.Add(int label, num)
+                    let d = new ResizableUsualFive<_>(new LblNodePair(label, num))
                     intermidiateNodes.Add(ext, d)
                     num
 

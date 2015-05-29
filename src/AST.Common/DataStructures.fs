@@ -77,3 +77,53 @@ type ResizableUsualOne<'T> =
         then Some this.first
         else List.tryFind f !this.other
 
+[<Struct>]
+type ResizableUsualFive<'T when 'T:equality> =
+    val mutable first  : 'T
+    val mutable second : 'T
+    val mutable third  : 'T
+    val mutable fourth : 'T
+    val mutable fifth  : 'T
+    val other          : ref<list<'T>>
+    member this.Add x =
+        if this.second <> Unchecked.defaultof<_> 
+        then 
+            if this.third <> Unchecked.defaultof<_>
+            then
+                if this.fourth <> Unchecked.defaultof<_>
+                then
+                    if this.fifth <> Unchecked.defaultof<_>
+                    then
+                        this.other := x :: !this.other
+                    else
+                        this.fifth <- x
+                else
+                    this.fourth <- x
+            else
+                this.third <- x
+        else
+            this.second <- x
+        this.other := x :: !this.other
+
+    member this.TryFind f =
+        if f this.first
+        then Some this.first
+        else 
+            if f this.second
+            then Some this.second
+            else
+                if f this.third
+                then Some this.third
+                else
+                    if f this.fourth
+                    then Some this.fourth
+                    else
+                        if f this.fifth
+                        then
+                            Some this.fifth
+                        else
+                            List.tryFind f !this.other
+    new (f) = {first = f; second = Unchecked.defaultof<_>; third = Unchecked.defaultof<_>; fourth = Unchecked.defaultof<_>; fifth = Unchecked.defaultof<_>; other = ref []}
+    
+
+

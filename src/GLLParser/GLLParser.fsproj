@@ -9,13 +9,11 @@
     <OutputType>Library</OutputType>
     <RootNamespace>GLLParser</RootNamespace>
     <AssemblyName>GLLParser</AssemblyName>
-
     <Name>GLLParser</Name>
-
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
-<Import Project="../YC.targets" />
+  <Import Project="../YC.targets" />
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
@@ -55,6 +53,9 @@
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
+    <Reference Include="System.Collections.Generic.IntDictionary">
+      <HintPath>..\..\3rdParty\IntDict\System.Collections.Generic.IntDictionary.dll</HintPath>
+    </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <ProjectReference Include="..\AST.Common\Common.AST.fsproj">

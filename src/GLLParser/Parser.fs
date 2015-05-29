@@ -98,7 +98,8 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let intermidiateNodesReadCount = ref 0
         let intermidiateNodesWriteCount = ref 0
         //we can use dictionary <extension, dict>
-        let intermidiateNodes = new Dictionary<int64<extension>, ResizableUsualFive<LblNodePair>>()
+        let intermidiateNodes = Array2D.zeroCreate<ResizableUsualFive<LblNodePair>> (inputLength + 1) (inputLength + 1) 
+        //new Dictionary<int64<extension>, ResizableUsualFive<LblNodePair>>()
  
  //посчитать размерв коллекций
         let edgesReadCount = ref 0
@@ -176,18 +177,18 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                         let contains , d1 = cur.TryGetValue(getLeftExtension ext)
                         if contains
                         then
-                            printf "true1; "
+                            //printf "true1; "
                             let contains, d2 = d1.TryGetValue(getRightExtension ext)
                             if contains
                             then
-                                printf "true2; "
+                                //printf "true2; "
                                 d2
                             else
                                 let newNode = new NonTerminalNode(nTerm, ext)
                                 sppfNodes.Add(newNode)
                                 let num = (sppfNodes.Count - 1)*1<nodeMeasure>
                                 d1.Add(getRightExtension ext, num)
-                                printf "false2; "
+                               // printf "false2; "
                                 num
                                 
                         else
@@ -198,7 +199,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                             let num = (sppfNodes.Count - 1)*1<nodeMeasure>
                             d2.Add(getRightExtension ext, num)
                             cur.Add(getLeftExtension ext, d2)
-                            printf "false1; "
+                            //printf "false1; "
                             num
                             
                 else
@@ -215,8 +216,8 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                     nonTerminalNodes.[nTerm] <- d1 
                     num
             else
-                let contains, d1 = intermidiateNodes.TryGetValue ext
-                if contains
+                let d1 = intermidiateNodes.[(getLeftExtension ext), (getRightExtension ext)]
+                if d1 <> Unchecked.defaultof<_>
                 then
                     let d2 = d1.TryFind (fun x -> x.lbl = label)
                     match d2 with
@@ -228,13 +229,14 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                             d1.Add(new LblNodePair(label, num))
                             num  
                 else
-                    
+
                     let newNode = new IntermidiateNode(int label, ext)
                     sppfNodes.Add(newNode)
                     let num = (sppfNodes.Count - 1)*1<nodeMeasure>
-                    let d = new ResizableUsualFive<_>(new LblNodePair(label, num))
-                    intermidiateNodes.Add(ext, d)
-                    num
+                    let d1 = new ResizableUsualFive<_>(new LblNodePair(label, num))
+                    intermidiateNodes.[(getLeftExtension ext), (getRightExtension ext)] <- d1
+                    num  
+               
 
         let findSppfPackedNode symbolNode label leftExtension rightExtension (left : INode) (right : INode) : int<nodeMeasure> = 
             let rule = getRule label

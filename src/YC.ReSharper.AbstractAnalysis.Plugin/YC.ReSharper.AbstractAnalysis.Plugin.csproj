@@ -84,7 +84,9 @@
     <Compile Include="GraphCodeWindow\GraphDefine\EmptyGraphArea.cs" />
     <Compile Include="GraphCodeWindow\GraphDefine\Graph.cs" />
     <Compile Include="GraphCodeWindow\GraphDefine\LogicCore.cs" />
-    <Compile Include="GraphCodeWindow\GraphDefine\Vertex.cs" />
+    <Compile Include="GraphCodeWindow\GraphDefine\Vertex.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="GraphCodeWindow\XAML Templates\AreaControl.xaml.cs">
       <DependentUpon>AreaControl.xaml</DependentUpon>
     </Compile>

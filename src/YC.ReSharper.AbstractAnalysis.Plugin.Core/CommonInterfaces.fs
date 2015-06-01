@@ -141,7 +141,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
                         let semErrors = cfg.FindUndefVariable()
                         semErrors |> List.iter addSError
 
-                | Yard.Generators.RNGLR.Parser.Error(_, tok, _, _, _) -> tok |> Array.iter addPError 
+                | Yard.Generators.ARNGLR.Parser.Error(_, tok, _) -> tok |> addPError 
             )
 
     let getNextTree index : TreeGenerationState<'node> = 

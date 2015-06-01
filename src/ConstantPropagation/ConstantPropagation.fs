@@ -103,7 +103,7 @@ type Approximator(file:ICSharpFile) =
                         && argTypes.[hot.QueryPosition] = "string" && hot.ReturnType = retType)
         |> Option.map fst        
 
-    member this.Approximate ((*defineLang: ITreeNode -> 'a*)) =
+    member this.Approximate () =
         let hotspots = new ResizeArray<_>() 
         let addHotspot (node:ITreeNode) =
             match node with 

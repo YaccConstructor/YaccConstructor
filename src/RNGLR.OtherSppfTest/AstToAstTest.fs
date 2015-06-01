@@ -51,7 +51,8 @@ type ``RNGLR ast to otherSPPF translation test`` () =
         | Parser.Success (mAst, _, _) ->
 //            RNGLR.ParseElementary.defaultAstToDot mAst "Elementary before.dot"
             let other = new OtherTree<_>(mAst)
-            RNGLR.ParseElementary.otherAstToDot other "Elementary after.dot"
+//            RNGLR.ParseElementary.otherAstToDot other "Elementary after.dot"
+            other.PrintAst()
             Assert.Pass "Elementary test: PASSED"
 
     [<Test>]
@@ -71,7 +72,8 @@ type ``RNGLR ast to otherSPPF translation test`` () =
         | Parser.Success (mAst, _, _) ->
 //            RNGLR.ParseElementary.defaultAstToDot mAst "Epsilon before.dot"
             let other = new OtherTree<_>(mAst)
-            RNGLR.ParseElementary.otherAstToDot other "Epsilon after.dot"
+//            RNGLR.ParseElementary.otherAstToDot other "Epsilon after.dot"
+            other.PrintAst()
             Assert.Pass "Epsilon test: PASSED"
 
     [<Test>]
@@ -92,7 +94,8 @@ type ``RNGLR ast to otherSPPF translation test`` () =
         | Parser.Success (mAst, _, _) ->
 //            RNGLR.ParseAmbiguous.defaultAstToDot mAst "Ambiguous before.dot"
             let other = new OtherTree<_>(mAst)
-            RNGLR.ParseAmbiguous.otherAstToDot other "Ambiguous after.dot"
+//            RNGLR.ParseAmbiguous.otherAstToDot other "Ambiguous after.dot"
+            other.PrintAst()
             Assert.Pass "Ambiguous test: PASSED"
 
     [<Test>]
@@ -111,7 +114,8 @@ type ``RNGLR ast to otherSPPF translation test`` () =
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
             let other = new OtherTree<_>(mAst)
-            RNGLR.ParseAmbiguous.otherAstToDot other "Parents after.dot"
+//            RNGLR.ParseAmbiguous.otherAstToDot other "Parents after.dot"
+            other.PrintAst()
             Assert.Pass "Parents test: PASSED"
 
     [<Test>]
@@ -348,7 +352,9 @@ type ``Abstract case: matching brackets``() =
     [<Test>]
     member test.``Abstract case. Left to right. Two parentheses 1``() =
         let qGraph = new ParserInputGraph<_>(0, 3)
-        printfn "                  -> ')'"
+        printfn "                | --> ')'"
+        printfn "'(' --> '1' --> |        "
+        printfn "                | --> ')'"
         
         qGraph.AddVertexRange[0; 1; 2; 3] |> ignore
         qGraph.AddVerticesAndEdgeRange
@@ -387,7 +393,9 @@ type ``Abstract case: matching brackets``() =
     [<Test>]
     member test.``Abstract case. Left to right. Two parentheses 2``() =
         let qGraph = new ParserInputGraph<_>(0, 7)
-        printfn "            -> '2' -> ')'"
+        printfn "     |--> 1 --> ')'"
+        printfn "( -->|             "
+        printfn "     |--> 2 --> ')'"
         
         qGraph.AddVertexRange[0; 1; 2; 3; 4; ] |> ignore
         qGraph.AddVerticesAndEdgeRange
@@ -426,9 +434,9 @@ type ``Abstract case: matching brackets``() =
 
     [<Test>]
     member test.``Abstract case. Right to left. Two parentheses 1``() =
-        printfn " '(' -> "
-        printfn "        '2' -> ')'[caret]"
-        printfn " '(' -> "
+        printfn " '(' --> "
+        printfn "         '2' --> ')'[caret]"
+        printfn " '(' --> "
         
         let qGraph = new ParserInputGraph<_>(0, 3)
         qGraph.AddVertexRange[0; 1; 2; 3; ] |> ignore
@@ -470,8 +478,9 @@ type ``Abstract case: matching brackets``() =
     [<Test>]
     member test.``Abstract case. Right to left. Two parentheses 2``() =
         let qGraph = new ParserInputGraph<_>(0, 5)
+        printfn " '(' --> '2' -->"
         printfn "               ')'[caret]"
-        printfn " '(' -> '3' ->"
+        printfn " '(' --> '3' -->"
         
         qGraph.AddVertexRange[0; 1; 2; 3; ] |> ignore
         qGraph.AddVerticesAndEdgeRange
@@ -548,7 +557,7 @@ type ``Abstract case: matching brackets``() =
             Assert.AreEqual (expected, actual, infoAboutError)
             Assert.Pass "Abstract case. Right to left. One parenthesis 1 PASSED"
 
-[<EntryPoint>]
+//[<EntryPoint>]
 let f x = 
     let elementary = new ``RNGLR ast to otherSPPF translation test``()
 //    elementary.``Parents test``()

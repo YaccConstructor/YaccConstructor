@@ -45,15 +45,21 @@
       <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="FsYacc">
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\FsYacc.exe</HintPath>
+    </Reference>
+    <Reference Include="Helper">
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\Helper.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Addins">
-      <HintPath>..\packages\Mono.Addins.1.2\lib\net40\Mono.Addins.dll</HintPath>
+      <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
     <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.3.0.0-beta-1\lib\net45\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -78,12 +84,6 @@
       <Project>{94eeea1d-60e8-45f8-b6cb-ba0b0fb487b8}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="YC.FsYacc.0.0.6.131-GLLBranch-ci">
-      <HintPath>..\packages\YC.Tools.0.0.6.131-GLLBranch-ci\lib\net40\YC.FsYacc.0.0.6.131-GLLBranch-ci.exe</HintPath>
-    </Reference>
-    <Reference Include="YC.Helper.0.0.6.131-GLLBranch-ci">
-      <HintPath>..\packages\YC.Tools.0.0.6.131-GLLBranch-ci\lib\net40\YC.Helper.0.0.6.131-GLLBranch-ci.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.

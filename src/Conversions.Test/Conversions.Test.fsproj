@@ -48,22 +48,22 @@
       <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="FsYacc">
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\FsYacc.exe</HintPath>
+    </Reference>
+    <Reference Include="Helper">
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\Helper.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Addins">
-      <HintPath>..\packages\Mono.Addins.1.2\lib\net40\Mono.Addins.dll</HintPath>
+      <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.3.0.0-beta-1\lib\net45\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="YC.FsYacc.0.0.6.131-GLLBranch-ci">
-      <HintPath>..\packages\YC.Tools.0.0.6.131-GLLBranch-ci\lib\net40\YC.FsYacc.0.0.6.131-GLLBranch-ci.exe</HintPath>
-    </Reference>
-    <Reference Include="YC.Helper.0.0.6.131-GLLBranch-ci">
-      <HintPath>..\packages\YC.Tools.0.0.6.131-GLLBranch-ci\lib\net40\YC.Helper.0.0.6.131-GLLBranch-ci.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

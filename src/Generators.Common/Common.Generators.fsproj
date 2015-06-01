@@ -52,18 +52,21 @@
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
+    <Reference Include="FsYacc">
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\FsYacc.exe</HintPath>
+    </Reference>
+    <Reference Include="Helper">
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\Helper.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Addins">
+      <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="YC.FsYacc.0.0.6.131-GLLBranch-ci">
-      <HintPath>..\packages\YC.Tools.0.0.6.131-GLLBranch-ci\lib\net40\YC.FsYacc.0.0.6.131-GLLBranch-ci.exe</HintPath>
-    </Reference>
-    <Reference Include="YC.Helper.0.0.6.131-GLLBranch-ci">
-      <HintPath>..\packages\YC.Tools.0.0.6.131-GLLBranch-ci\lib\net40\YC.Helper.0.0.6.131-GLLBranch-ci.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.Utils.SourceText.0.1.6500.26-dev-ci">
-      <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.26-dev-ci\lib\net40\YC.Utils.SourceText.0.1.6500.26-dev-ci.dll</HintPath>
+    <Reference Include="Utils.SourceText">
+      <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -84,6 +84,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let packedNodesX = Array.zeroCreate<int> (inputLength + 1)
         let packedNodesY = Array.zeroCreate<int> (inputLength + 1)
         let packedNodesZ = Array.zeroCreate<int> (inputLength + 1)
+        //let packedNodes = Array.zeroCreate<IntDictionary<IntDictionary<int>>> (inputLength + 1)
         let packedNodes = Array.zeroCreate<IntDictionary<IntDictionary<ResizableUsualOne<LblNodePair>>>> (inputLength + 1)
 
         let nonTerminalNodesReadCount = ref 0
@@ -98,7 +99,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let intermidiateNodesReadCount = ref 0
         let intermidiateNodesWriteCount = ref 0
         //we can use dictionary <extension, dict>
-        let intermidiateNodes = new Dictionary<int64<extension>, ResizableUsualFive<LblNodePair>>()
+        let intermidiateNodes = Array2D.zeroCreate<ResizableUsualFive<LblNodePair>> (inputLength + 1) (inputLength + 1) 
  
  //посчитать размерв коллекций
         let edgesReadCount = ref 0
@@ -116,6 +117,34 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let currentContext = ref <| new Context(!currentIndex, !currentLabel, !currentGSSNode, dummy)
         
         let finalExtension = packExtension 0 (inputLength)
+
+        let inline addA (a : ResizableUsualFive<_>[,]) i j x =
+            if a.[i, j].first = Unchecked.defaultof<_> 
+            then a.[i, j].first <- x
+                elif a.[i, j].second = Unchecked.defaultof<_>
+                then a.[i, j].second <- x
+                    elif a.[i, j].third = Unchecked.defaultof<_>
+                    then a.[i, j].third <- x
+                        elif a.[i, j].fourth = Unchecked.defaultof<_>
+                        then a.[i, j].fourth <- x
+                            elif a.[i, j].fifth = Unchecked.defaultof<_>
+                            then a.[i, j].fifth <- x
+                            else a.[i, j].other <- x :: a.[i, j].other
+
+        let inline addD (d:System.Collections.Generic.Dictionary<int,ResizableUsualFive<_>>) i x =
+            let mutable a = d.[i]
+            if a.first = Unchecked.defaultof<_> 
+            then a.first <- x
+                elif a.second = Unchecked.defaultof<_>
+                then a.second <- x
+                    elif a.third = Unchecked.defaultof<_>
+                    then a.third <- x
+                        elif a.fourth = Unchecked.defaultof<_>
+                        then a.fourth <- x
+                            elif a.fifth = Unchecked.defaultof<_>
+                            then a.fifth <- x
+                            else a.other <- x :: a.other
+            d.[i] <- a
 
         let containsContext index (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
             if index <= inputLength
@@ -176,18 +205,15 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                         let contains , d1 = cur.TryGetValue(getLeftExtension ext)
                         if contains
                         then
-                            printf "true1; "
                             let contains, d2 = d1.TryGetValue(getRightExtension ext)
                             if contains
                             then
-                                printf "true2; "
                                 d2
                             else
                                 let newNode = new NonTerminalNode(nTerm, ext)
                                 sppfNodes.Add(newNode)
                                 let num = (sppfNodes.Count - 1)*1<nodeMeasure>
                                 d1.Add(getRightExtension ext, num)
-                                printf "false2; "
                                 num
                                 
                         else
@@ -198,7 +224,6 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                             let num = (sppfNodes.Count - 1)*1<nodeMeasure>
                             d2.Add(getRightExtension ext, num)
                             cur.Add(getLeftExtension ext, d2)
-                            printf "false1; "
                             num
                             
                 else
@@ -215,8 +240,10 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                     nonTerminalNodes.[nTerm] <- d1 
                     num
             else
-                let contains, d1 = intermidiateNodes.TryGetValue ext
-                if contains
+                let lExt = getLeftExtension ext
+                let rExt = getRightExtension ext
+                let d1 = intermidiateNodes.[lExt, rExt]
+                if not <| d1.Eq Unchecked.defaultof<_>
                 then
                     let d2 = d1.TryFind (fun x -> x.lbl = label)
                     match d2 with
@@ -225,16 +252,15 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                             let newNode = new IntermidiateNode(int label, ext)
                             sppfNodes.Add(newNode)
                             let num = (sppfNodes.Count - 1)*1<nodeMeasure>
-                            d1.Add(new LblNodePair(label, num))
+                            addA intermidiateNodes lExt rExt (new LblNodePair(label, num))
                             num  
                 else
-                    
                     let newNode = new IntermidiateNode(int label, ext)
                     sppfNodes.Add(newNode)
                     let num = (sppfNodes.Count - 1)*1<nodeMeasure>
-                    let d = new ResizableUsualFive<_>(new LblNodePair(label, num))
-                    intermidiateNodes.Add(ext, d)
-                    num
+                    intermidiateNodes.[getLeftExtension ext, getRightExtension ext] <- new ResizableUsualFive<_>(new LblNodePair(label, num))
+                    num  
+                
 
         let findSppfPackedNode symbolNode label leftExtension rightExtension (left : INode) (right : INode) : int<nodeMeasure> = 
             let rule = getRule label
@@ -253,7 +279,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             let i = getLeftExtension leftExtension
             let j = getRightExtension leftExtension
             let k = getRightExtension rightExtension
-                        
+            //Array.zeroCreate<IntDictionary<IntDictionary<int>>> (inputLength + 1)            
             let d1 = packedNodes.[i]
             if d1 <> Unchecked.defaultof<_>
             then

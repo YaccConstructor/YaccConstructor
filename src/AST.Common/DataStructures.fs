@@ -84,7 +84,9 @@ type ResizableUsualFive<'T when 'T:equality> =
     val mutable third  : 'T
     val mutable fourth : 'T
     val mutable fifth  : 'T
-    val other          : ref<list<'T>>
+    val mutable other          : list<'T>
+    member this.Eq (o : ResizableUsualFive<_>) = 
+        this.first = o.first && this.second = o.second && this.third = o.third && this.fourth = o.fourth && this.fifth = o.fifth
     member this.Add x =
         if this.second <> Unchecked.defaultof<_> 
         then 
@@ -94,7 +96,7 @@ type ResizableUsualFive<'T when 'T:equality> =
                 then
                     if this.fifth <> Unchecked.defaultof<_>
                     then
-                        this.other := x :: !this.other
+                        this.other <- x :: this.other
                     else
                         this.fifth <- x
                 else
@@ -122,8 +124,8 @@ type ResizableUsualFive<'T when 'T:equality> =
                         then
                             Some this.fifth
                         else
-                            List.tryFind f !this.other
-    new (f) = {first = f; second = Unchecked.defaultof<_>; third = Unchecked.defaultof<_>; fourth = Unchecked.defaultof<_>; fifth = Unchecked.defaultof<_>; other = ref []}
+                            List.tryFind f this.other
+    new (f) = {first = f; second = Unchecked.defaultof<_>; third = Unchecked.defaultof<_>; fourth = Unchecked.defaultof<_>; fifth = Unchecked.defaultof<_>; other = []}
     
 
 

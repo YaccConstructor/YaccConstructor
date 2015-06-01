@@ -9,13 +9,13 @@ open Yard.Generators.Common.DataStructures
 [<AllowNullLiteral>]
 type INode = 
     interface
+    abstract member getExtension : unit -> int64<extension>
     end
 
 [<AllowNullLiteral>]
 type NonTerminalNode =
-    interface INode
-    val Name      : int
     val Extension : int64<extension>
+    val Name      : int
     val mutable First     : PackedNode 
     val mutable Others    : ResizeArray<PackedNode> 
     member this.AddChild (child : PackedNode) : unit = 
@@ -28,27 +28,33 @@ type NonTerminalNode =
                 this.Others <- new ResizeArray<PackedNode>()
                 this.Others.Add child
         else this.First <- child
+    interface INode with
+        member this.getExtension () = this.Extension
+    
     new (name, extension) = {Name = name; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
     
 and TerminalNode =
-    interface INode
     val Name : int
     val Extension : int64<extension>
+    interface INode with
+        member this.getExtension () = this.Extension
     new (name, extension) = {Name = name; Extension = extension}
 
-and PackedNode =
-    interface INode    
+and PackedNode =    
     val Production : int
     val Left : INode
     val Right : INode
+    interface INode with
+        member this.getExtension () = this.Right.getExtension ()
     new (p, l, r) = {Production = p; Left = l; Right = r}
 
 and IntermidiateNode = 
-    interface INode
     val Slot      : int
     val Extension : int64<extension>
     val mutable First     : PackedNode
     val mutable Others    : ResizeArray<PackedNode>
+    interface INode with
+        member this.getExtension () = this.Extension
     member this.AddChild (child : PackedNode) : unit = 
         if this.First <> Unchecked.defaultof<_>
         then 

@@ -68,7 +68,7 @@ let ApproximateFile (file: ICSharpFile) recursionMaxLevel =
     // debug
     allMethodsCfgToDot file myDebugFolderPath
     // end
-    let hotspotInfoList = XMLParser.parseXml "Hotspots.xml"
+    let hotspotInfoList = XMLParser.parseXml "..\\..\\..\\..\\ConstantPropagation\\Hotspots.xml"
     // only the first hotspot is processed in currect implementation
     let lang, hotspot = (findHotspots file hotspotInfoList).[0]
     let methodDeclaration = getEnclosingMethod hotspot

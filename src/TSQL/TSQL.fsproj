@@ -41,6 +41,15 @@
     <OutputPath>$(SolutionDir)..\Bin\Debug\Addins\</OutputPath>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>cd $(TargetDir)
+del JetBrains.*</PostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <None Include="Lexer.fsl" />
     <FsYard Include="mssql.yrd" />
@@ -64,6 +73,8 @@
     <Compile Include="Lexer_Abstract.fs" />
     <Compile Include="Driver.fs" />
     <None Include="packages.config" />
+    <EmbeddedResource Include="Actions.xml" />
+    <Compile Include="AboutAction.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -95,6 +106,9 @@
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.Shell.Extensions">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Shell.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.UI">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.UI.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.Util">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
@@ -136,12 +150,11 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="Utils.SourceText">
       <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
       <Private>True</Private>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\FST\FST\FSA\FSA.fsproj">
       <Name>FSA</Name>
       <Project>{b48cfdcc-86f7-4c3a-a5a2-8170950dd2ab}</Project>
@@ -208,15 +221,6 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PostBuildEvent>cd $(TargetDir)
-del JetBrains.*</PostBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

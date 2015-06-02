@@ -32,6 +32,8 @@ type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
     | Error of int * 'TokenType * string
 
+type IorB = I of int | B of bool
+
 [<AllowNullLiteral>]
 type Vertex (state : int, level : int) =
     let out = new ResizeArray<Edge>(4)
@@ -205,18 +207,19 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             let push = parserSource.Gotos.[gssVertex.State].[parserSource.TokenToNumber e.Tag]
             if push <> 0 
             then
-                let targetGssV, isNew = addVertex e.Target push (if currentGraphV.vNum = e.Target.vNum then newUnprocessedGssVs else e.Target.unprocessedGssVertices)
+                let tailGssV, isNew = addVertex e.Target push (if currentGraphV.vNum = e.Target.vNum then newUnprocessedGssVs else e.Target.unprocessedGssVertices)
 
                 if not <| edgesToTerms.ContainsKey e
                 then
                     terminals.Add e.Tag
                     nodes.Add <| Terminal (terminals.Count - 1)
                     edgesToTerms.Add(e, nodes.Count - 1)
-
                 let edge = new Edge(gssVertex, edgesToTerms.[e])
 
-                if targetGssV.FindIndex gssVertex.State gssVertex.Level = -1
-                then addEdge e.Target isNew targetGssV edge true
+                let ind = tailGssV.FindIndex gssVertex.State gssVertex.Level 
+                if ind = -1 || (tailGssV.Edge ind).Ast <> edgesToTerms.[e]
+                then addEdge e.Target isNew tailGssV edge true
+               
 
         if not <| currentGraphV.processedGssVertices.Contains(gssVertex)
         then 
@@ -354,8 +357,19 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         |> addTreeTop
                         |> nodes.Add
             match !root with
-            | None -> Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state")
+            | None -> 
+                let states = 
+                    innerGraph.Vertices 
+                    |> Seq.filter (fun v -> innerGraph.OutEdges(v) 
+                                            |> Seq.exists(fun e -> e.Target.processedGssVertices.Count = 0 (*&& e.Target.unprocessedGssVertices.Count = 0*)
+                                                                   && v.processedGssVertices.Count <> 0 (*&& v.unprocessedGssVertices.Count <> 0*)))
+                    |> Seq.map (fun v -> string v.vNum)
+                    |> String.concat "; "
+                Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state. Possible errors: (" + states + ")")
             | Some res -> 
-                let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules)
+                try 
+                    let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules)
                 //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
-                Success <| tree
+                    Success <| tree
+                with
+                e -> Error (-1, Unchecked.defaultof<'TokenType>, e.Message)

@@ -190,8 +190,7 @@ type ``Classic case: matching brackets``() =
 
             let expectedPairs = 1
             Assert.AreEqual (expectedPairs, pairTokens.Count)
-
-            
+    
             let actual = 
                 match pairTokens.[0] with
                 | RNGLR.ParseSummator.RBRACE pos -> pos
@@ -237,7 +236,7 @@ type ``Classic case: matching brackets``() =
                 | RNGLR.ParseSummator.RBRACE pos -> pos
                 | _ -> 
                     let token = RNGLR.ParseSummator.numToString <| tokToNumber pairTokens.[0]
-                    Assert.Fail <| sprintf "%s was founded" token
+                    Assert.Fail <| sprintf "%s was found" token
                     -1
             
             let expectedPos = 4
@@ -408,8 +407,8 @@ type ``Abstract case: matching brackets``() =
             
             let other = new OtherTree<_>(mAst)
 
-            RNGLR.ParseSummator.defaultAstToDot mAst "ast.dot"
-            RNGLR.ParseSummator.otherAstToDot other "other.dot"
+//            RNGLR.ParseSummator.defaultAstToDot mAst "ast.dot"
+//            RNGLR.ParseSummator.otherAstToDot other "other.dot"
             let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
 
             Assert.AreEqual (expected.Length, pairTokens.Count)

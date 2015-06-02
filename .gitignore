@@ -365,7 +365,10 @@ src/TSQL/out
 src/Calc/CalcHighlighting/*
 src/JSON_Parser/JSONHighlighting/*
 src/TSQL/TSQLHighlighting/*
-src/ExtCalc/ExtCalcHighlighting/*
+src/ExtCalc/ExtCalcHighlighting/*.cs
+src/ExtCalc/ExtCalcHighlighting/*.xml
+src/ExtCalc/ExtCalcHighlighting/*.target
+src/ExtCalc/ExtCalcHighlighting/*.config
 
 BuildScripts/packages/*
 src/JSON_Parser/JSONParser.fs

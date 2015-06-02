@@ -1,6 +1,7 @@
 ﻿module ControlFlowGraph
 
 open Yard.Generators.Common.AST
+open Yard.Generators.Common.AstNode
 open System.Collections.Generic
 open QuickGraph
 
@@ -446,9 +447,8 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
         let rec collectTokens (node : obj) (tokensGraph : CfgTokensGraph) startVertex endVertex = 
             
             match node with 
-            | :? int as t -> 
-                let tagOpt = if t >= 0 then Some t else None
-                let edge = new TokensEdge(!startVertex, !endVertex, tagOpt)
+            | :? Terminal as t -> 
+                let edge = new TokensEdge(!startVertex, !endVertex, Some <| t.TokenNumber)
                 tokensGraph.AddEdgeForced edge 
 
                 startVertex := !endVertex
@@ -496,8 +496,8 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
 
                 let handle (node : obj) = 
                     match node with 
-                    | :? int as t when t < 0 -> () 
-                    | :? int as t -> ()
+                    | :? Epsilon -> () 
+                    | :? Terminal as t -> ()
 //                        let delimiters = langSource.typeToDelimiters.[!blockType]
 //                        let tokNumber = parserSource.tokenToNumber input.[t]
 //

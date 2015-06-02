@@ -418,7 +418,6 @@ src/TSQL/Lexer.fs
 src/Calc/Lexer.fs
 src/Calc/res.dot
 
-src/ControlFlowGraph.Test/*.yrd.fs
 src/ExtCalc/*.yrd.fs
 src/ExtCalc/Lexer.fs
 src/ExtCalc/Lexer_Abstract.fs
@@ -427,3 +426,6 @@ src/RNGLR.OtherSppfTest/res.dot
 src/TSQL/Lexer.fs
 src/TSQL/Lexer_Abstract.fs
 src/ExtCalc/*.dot
+
+src/ControlFlowGraph.Test/*.yrd.fs
+src/ControlFlowGraph.Test/*.dot

@@ -77,6 +77,11 @@ del JetBrains.*</PostBuildEvent>
     <Compile Include="AboutAction.fs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="TSQLHighlighting\TSQLHighlighting.csproj">
+      <Name>TSQLHighlighting</Name>
+      <Project>{6ee8bdd8-79e9-41f5-8a8e-e959835d60fb}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
@@ -213,11 +218,6 @@ del JetBrains.*</PostBuildEvent>
     <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Helper\YC.ReSharper.AbstractAnalysis.Plugin.Helper.fsproj">
       <Name>YC.ReSharper.AbstractAnalysis.Plugin.Helper</Name>
       <Project>{f86a2827-4c61-4bc5-82c5-19c2b60ab831}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="TSQLHighlighting\TSQLHighlighting.csproj">
-      <Name>TSQLHighlighting</Name>
-      <Project>{6ee8bdd8-79e9-41f5-8a8e-e959835d60fb}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

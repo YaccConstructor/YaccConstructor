@@ -180,19 +180,9 @@ del JetBrains.*</PostBuildEvent>
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Common\Common.fsproj">
-      <Name>Common</Name>
-      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Constraints\Constraints.fsproj">
-      <Name>Constraints</Name>
-      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Conversions\Conversions.fsproj">
-      <Name>Conversions</Name>
-      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+    <ProjectReference Include="..\ControlFlowGraph\ControlFlowGraph.fsproj">
+      <Name>ControlFlowGraph (SEL.SDK\ControlFlowGraph\ControlFlowGraph)</Name>
+      <Project>{e94970c1-26a4-4fa6-bb3b-261b70938ff4}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\ReSharperExtension\ReSharperExtension.csproj">

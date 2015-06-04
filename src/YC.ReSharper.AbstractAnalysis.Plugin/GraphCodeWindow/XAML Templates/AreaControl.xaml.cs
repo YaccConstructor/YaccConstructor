@@ -24,7 +24,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
     /// </summary>
     public partial class AreaControl : TabControl
     {
-
+         
         //public static Helper.ReSharperHelper<DocumentRange, ITreeNode> YcProcessor = Helper.ReSharperHelper<DocumentRange, ITreeNode>.Instance;
         ////public ArrayList DataGraphs; 
         //public void Handler()
@@ -50,7 +50,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
         //    //    dataGraph.AddEdge(edge);
         //    //}
         //    //DataGraphs.Add(dataGraph);
-
+            
         //    //BackgroundWorker bw = new BackgroundWorker();
         //    ////System.ComponentModel.ProgressChangedEventHandler)
         //    ////bw.ProgressChanged += (System.ComponentModel.ProgressChangedEventHandler)WindowAction.AddTabControls;
@@ -75,11 +75,11 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
         {
             //WindowAction.arcont.Area.SetVerticesMathShape(VertexShape.Circle);
             //Lets create logic core and filled data graph with edges and vertices
-            var logicCore = new LogicCore() { };
+            var logicCore = new LogicCore() {  };
             //This property sets layout algorithm that will be used to calculate vertices positions
             //Different algorithms uses different values and some of them uses edge Weight property.
             logicCore.DefaultLayoutAlgorithm = LayoutAlgorithmTypeEnum.Tree;
-
+            
             //Now we can set parameters for selected algorithm using AlgorithmFactory property. This property provides methods for
             //creating all available algorithms and algo parameters.
             logicCore.DefaultLayoutAlgorithmParams = logicCore.AlgorithmFactory.CreateLayoutParameters(LayoutAlgorithmTypeEnum.LinLog);
@@ -105,7 +105,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
             //Finally assign logic core to GraphArea object
             //Area.LogicCore = logicCore;// as IGXLogicCore<DataVertex, DataEdge, BidirectionalGraph<DataVertex, DataEdge>>;
             //Area.MoveAnimation = AnimationFactory.CreateMoveAnimation(MoveAnimation.Move, TimeSpan.FromSeconds(1));
-
+            
         }
         public Graph Graph_Setup()
         {

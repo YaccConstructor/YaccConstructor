@@ -102,10 +102,6 @@ del JetBrains.*
       <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Mono.Addins">
-      <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="QuickGraph">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
@@ -166,6 +162,11 @@ del JetBrains.*
       <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\ControlFlowGraph\ControlFlowGraph.fsproj">
+      <Name>ControlFlowGraph (SEL.SDK\ControlFlowGraph\ControlFlowGraph)</Name>
+      <Project>{e94970c1-26a4-4fa6-bb3b-261b70938ff4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Conversions\Conversions.fsproj">
       <Name>Conversions</Name>
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
@@ -207,6 +208,12 @@ del JetBrains.*
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
+  <Import Project="..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\Plugin.NoReferences.Targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>cd $(TargetDir)
+del JetBrains.*
+</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

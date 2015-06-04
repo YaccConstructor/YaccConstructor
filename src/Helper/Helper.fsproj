@@ -63,7 +63,6 @@
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="QuickGraph">
       <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Generator.0.0.6.5\tools\QuickGraph.dll</HintPath>
@@ -73,9 +72,6 @@
     </Reference>
     <Reference Include="QuickGraph.Graphviz">
       <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Generator.0.0.6.5\tools\QuickGraph.Graphviz.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="QuickGraph.Serialization">
       <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Generator.0.0.6.5\tools\QuickGraph.Serialization.dll</HintPath>

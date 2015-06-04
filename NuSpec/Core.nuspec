@@ -2,7 +2,7 @@
 <package>
 <metadata>
 <id>YC.Core</id>
-<version>0.3.0.6-On-branch--local</version>
+<version>0.3.0.13-On-branch--local</version>
 <title>Core of YaccConstructor</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>
@@ -35,18 +35,25 @@
 <file src="..\README.md" target="README.txt" />
 <file src="..\LICENSE" target="LICENSE" />
 <file src="..\NOTICE" target="NOTICE" />
-<file src="..\Bin\Release\v40\Mono.Addins.*" target="lib\net40\" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\AST.Common.*" target="lib\net40\" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\FSharp.Core.*" target="lib\net40\" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\FSharpx.Core.*" target="lib\net40\" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\FSharpx.Text.StructuredFormat.*" target="lib\net40\" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\FsYacc.*" target="lib\net40\" exclude="**\*.Test.*" />
-<file src="..\Bin\Release\v40\YC.FsYacc.*" target="lib\net40\" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\Generators.Common.*" target="lib\net40\" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\Mono.Addins.*" target="lib\net40\" exclude="**\*.Test.*" />
+<file src="..\NuSpec\YaccConstructor.addins" target="lib\net40\" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\YC.AbstractAnalysis.Common.*" target="lib\net40\" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\YC.Common.*" target="lib\net40\" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\YC.Conversions.*" target="lib\net40\" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\YC.Constraints.*" target="lib\net40\" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\YC.FsYacc.*" target="lib\net40\" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\YC.FsYacc.exe.config" target="lib\net40\" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\YC.YaccConstructor.*" target="lib\net40\" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\YC.YaccConstructor.exe.config" target="lib\net40\" exclude="**\*.Test.*" />
-<file src="..\Bin\Release\v40\YC.AbstractAnalysis.Common.*" target="lib\net40\" exclude="**\*.Test.*" />
-<file src="..\Bin\Release\v40\AST.Common.*" target="lib\net40\" exclude="**\*.Test.*" />
-<file src="..\Bin\Release\v40\Generators.Common.*" target="lib\net40\" exclude="**\*.Test.*" />
-<file src="..\NuSpec\YaccConstructor.addins" target="lib\net40\" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\YC.RNGLR.*" target="lib\net40\" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\YC.RNGLRAbstractParser.*" target="lib\net40\" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\YC.RNGLRCommon.*" target="lib\net40\" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\YC.RNGLRParser.*" target="lib\net40\" exclude="**\*.SimpleTest.*" />
 </files>
 </package>

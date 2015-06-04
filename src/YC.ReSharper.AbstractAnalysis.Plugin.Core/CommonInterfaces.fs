@@ -24,15 +24,14 @@ type LexingFinishedArgs<'node> (tokens : ResizeArray<'node>, lang:string, drawGr
      member this.Lang = lang
      member this.Graph = drawGraph
 
+type ParsingFinishedArgs(lang : string) = 
+    inherit System.EventArgs()
+    member this.Lang = lang
 
 type TreeGenerationState<'node> = 
     | Start
     | InProgress of 'node * AstNode list
     | End of 'node
-
-type ParsingFinishedArgs(lang : string) = 
-    inherit System.EventArgs()
-    member this.Lang = lang
 
 
 exception LexerError of string * obj
@@ -56,7 +55,7 @@ type IInjectedLanguageModule<'br,'range,'node when 'br : equality> =
             ResizeArray<string * 'range> * ResizeArray<string * 'range> * ResizeArray<string * 'range>
 
 
-type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:equality and 'node:null 
+type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:equality and 'node:null  and 'TokenType : equality
     (
         tokenize: Appr<'br> -> Test<ParserInputGraph<'TokenType>, array<Symb<char*Position<'br>>>>
         , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang, calculatePos:_->seq<'range>
@@ -141,7 +140,9 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
                         let semErrors = cfg.FindUndefVariable()
                         semErrors |> List.iter addSError
 
-                | Yard.Generators.ARNGLR.Parser.Error(_, tok, _) -> tok |> addPError 
+                | Yard.Generators.ARNGLR.Parser.Error(_, tok, _) -> 
+                    if tok <> Unchecked.defaultof<'TokenType>
+                    then tok |> addPError 
             )
 
     let getNextTree index : TreeGenerationState<'node> = 
@@ -185,8 +186,8 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
         | _ -> failwith "Unexpected state in tree generation"
 
     member this.TokenToPos calculatePos (token : 'TokenType)= 
-        let data : string * FSA<char*Position<'br>> = unbox <| tokenData token
-        calculatePos <| snd data
+        let data (*: FSA<char*Position<'br>>*) = unbox <| tokenData token
+        calculatePos data
 
     member this.GetForestWithToken range = getForestWithToken range
 
@@ -207,14 +208,14 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
     member this.TranslateToTreeNode nextTree errors = (Seq.head <| translate nextTree errors)
     
     member this.Process (graph:Appr<_>) = 
-        let parserErrors = new ResizeArray<_>()
         let lexerErrors = new ResizeArray<_>()
         let parserErrors = new ResizeArray<_>()
         let semanticErrors = new ResizeArray<_>()
 
         let addError tok isParse =
             let e tokName (tokenData: FSA<char*Position<'br>>) = 
-                tokenData |> calculatePos
+                tokenData 
+                |> calculatePos
                 |> Seq.iter
                     ///TODO!!! Produce user friendly error message!
                     (fun br -> if isParse 

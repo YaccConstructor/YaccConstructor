@@ -368,7 +368,6 @@ src/TSQL/TSQLHighlighting/*
 src/ExtCalc/ExtCalcHighlighting/*.cs
 src/ExtCalc/ExtCalcHighlighting/*.xml
 src/ExtCalc/ExtCalcHighlighting/*.target
-src/ExtCalc/ExtCalcHighlighting/*.config
 
 BuildScripts/packages/*
 src/JSON_Parser/JSONParser.fs
@@ -432,3 +431,4 @@ src/ExtCalc/*.dot
 
 src/ControlFlowGraph.Test/*.yrd.fs
 src/ControlFlowGraph.Test/*.dot
+src/YC.ReSharper.AbstractAnalysis.Plugin/YC.ReSharper.AbstractAnalysis.Plugin.csproj.user

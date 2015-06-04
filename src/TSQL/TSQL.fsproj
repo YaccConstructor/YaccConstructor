@@ -51,23 +51,51 @@
 del JetBrains.*</PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="Lexer.fsl" />
-    <FsYard Include="mssql.yrd" />
-    <FsYard Include="datatype.yrd" />
-    <FsYard Include="stmnt.yrd" />
-    <FsYard Include="expr.yrd" />
-    <FsYard Include="execute_stmnt.yrd" />
-    <FsYard Include="set_stmnt.yrd" />
-    <FsYard Include="crud.yrd" />
-    <FsYard Include="select_crud.yrd" />
-    <FsYard Include="cycles_stmnt.yrd" />
-    <FsYard Include="create_proc.yrd" />
-    <FsYard Include="create_table.yrd" />
-    <FsYard Include="transaction.yrd" />
-    <FsYard Include="MsCommon.yrd" />
-    <FsYard Include="../../GrammarTemplates/Common.yrd">
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\LexerAbstract.fsl">
+      <Link>LexerAbstract.fsl</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\mssql_abstract.yrd">
+      <Link>mssql_abstract.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\datatype.yrd">
+      <Link>datatype.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\stmnt.yrd">
+      <Link>stmnt.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\expr.yrd">
+      <Link>expr.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\execute_stmnt.yrd">
+      <Link>execute_stmnt.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\Common\set_stmnt.yrd">
+      <Link>set_stmnt.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\crud.yrd">
+      <Link>crud.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\select_crud.yrd">
+      <Link>select_crud.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\cycles_stmnt.yrd">
+      <Link>cycles_stmnt.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\create_proc.yrd">
+      <Link>create_proc.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\create_table.yrd">
+      <Link>create_table.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\transaction.yrd">
+      <Link>transaction.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\Common\MsCommon.yrd">
+      <Link>MsCommon.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\Common\Common.yrd">
       <Link>Common.yrd</Link>
-    </FsYard>
+    </None>
     <Compile Include="MsParser.fs" />
     <Compile Include="LexerHelper.fs" />
     <Compile Include="Lexer_Abstract.fs" />

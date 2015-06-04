@@ -1,1 +1,1 @@
-..\..\Bin\Release\v40\AbstractLexer.Generator.exe Lexer.fsl -o Lexer.fs --unicode
+..\..\Bin\Release\v40\AbstractLexer.Generator.exe ..\YC.Grammar\SQL\TSQL\LexerAbstract.fsl -o Lexer.fs --unicode  --abstract

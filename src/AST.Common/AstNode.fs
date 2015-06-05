@@ -24,10 +24,24 @@ type AST =
     val mutable pos : int
     new (f, o) = {pos = -1; first = f; other = o}
     member inline this.findFamily f =
-        if f this.first then Some this.first
-        elif this.other <> null then
-            Array.tryFind f this.other
+        if f this.first 
+        then Some this.first
+        elif this.other <> null 
+        then Array.tryFind f this.other
         else None
+
+    member this.filterFamilies f =
+        let res = new ResizeArray<Family>()
+        if f this.first
+        then res.Add this.first
+        if this.other <> null 
+        then res.AddRange(Array.filter f this.other)
+        res
+
+    member inline this.doForAllFamilies f =
+        f this.first
+        if this.other <> null
+        then Array.iter f this.other
 
 and Family =
     struct

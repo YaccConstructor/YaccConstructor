@@ -255,8 +255,38 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
         let nontermInd = leftSide |> Array.tryFind (fun x -> String.Equals (numToString x, nonterminal))
         match nontermInd with
         | Some n -> this.FindNonterminalsByInd n leftSide
-        | None -> null
+        | None -> [||]
    
+    member this.GetTypeOfExpression nonterminals (leftSide : array<int>) (numToString : int -> string) =
+        let visited = new Dictionary<_,_>()
+        let nonterminalsInd = 
+            nonterminals 
+            |> Array.map (fun n -> leftSide |> Array.find (fun x -> String.Equals (numToString x, n)))
+        
+        let isWanted (f : Family) =
+            Array.exists (fun x -> x = leftSide.[f.prod]) nonterminalsInd
+        
+        let rec find (node : AstNode) = 
+            if not <| visited.ContainsKey(node)
+            then
+                visited.Add(node, true)
+                match node with 
+                | :? Epsilon -> null
+                | :? AST as ast -> 
+                    let wanted = ast.filterFamilies isWanted
+                    if wanted <> null && wanted.Count > 0
+                    then Array.init wanted.Count (fun i -> numToString(leftSide.[wanted.[i].prod]))
+                    else 
+                        let res = new ResizeArray<_>()
+                        ast.doForAllFamilies (fun x -> x.nodes.doForAll (fun y -> res.AddRange(find y)))
+                        Array.init res.Count (fun i -> res.[i])
+                | _ -> [||]
+            else 
+                [||]
+
+        find root
+
+
     /// handleCycleNode is used for handling nodes, contained in cycles
     ///   and having no children family, where each node has smaller position.
     member this.TraverseWithRanges tokenToRange dispose handleCycleNode f =
@@ -720,11 +750,10 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                 else ",style=\"filled\",fillcolor=red"
             out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + color + shape + "]")
         let createEdge (b : int) (e : int) isBold (str : string) =
-            let label = str.Replace("\n", "\\n").Replace ("\r", "")
             let bold = 
                 if not isBold then ""
-                else "style=bold,width=10,"
-            out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "label=\"" + label + "\"" + "]")
+                else "style=bold,width=10"
+            out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "]")
         let createEpsilon ind = 
             let res = next()
             createNode res false AstNodeType ("n " + indToString (-1-ind))

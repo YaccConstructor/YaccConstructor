@@ -286,6 +286,41 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
 
         find root
 
+    member this.CalculateStatistics nonterminal (leftSide : array<int>) (numToString : int -> string) =
+        let remembered = new Dictionary<AstNode, int * int * double>()
+
+        let nontermInd =
+            leftSide |> Array.find (fun x -> String.Equals (numToString x, nonterminal))
+
+        let calculateStat (arr : (int * int * double)[]) =
+            let curMax = ref System.Int32.MinValue
+            let curMin = ref System.Int32.MaxValue
+            let curSum = ref 0.0
+            for (max, min, ave) in arr do
+                if max > !curMax then curMax := max
+                if min < !curMin then curMin := min
+                curSum := !curSum + ave
+            !curMax, !curMin, (!curSum / double arr.Length)
+
+        let rec count (node : AstNode) : int * int * double = 
+            if remembered.ContainsKey(node)
+            then remembered.[node]
+            else 
+                let stat = 
+                    match node with 
+                    | :? Terminal as t -> 0, 0, 0.0
+                    | :? Epsilon -> 0, 0, 0.0
+                    | :? AST as ast -> 
+                        ast.map(fun f -> 
+                                    f.nodes.map ((fun inc a -> let max, min, ave = count a;
+                                                               max + inc, min + inc, ave + double inc) (if leftSide.[f.prod] = nontermInd then 1 else 0))
+                                    |> calculateStat)
+                        |> calculateStat
+                    | _ -> failwith "Something happened"
+                remembered.Add(node, stat)
+                stat
+
+        count this.Root 
 
     /// handleCycleNode is used for handling nodes, contained in cycles
     ///   and having no children family, where each node has smaller position.

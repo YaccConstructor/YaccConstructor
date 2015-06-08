@@ -188,6 +188,14 @@ type CommonAstTest () =
         Assert.IsTrue(typeOfExpr <> null && typeOfExpr.Length = 1 && String.Equals(typeOfExpr.[0], "e"))
 
     [<Test>]
+    member this.CalculateStatisticsTest () =
+        let (max, min, average) = tree_3.CalculateStatistics "e" leftSide numToString
+        Assert.AreEqual(1, max)
+        Assert.AreEqual(0, min)
+        Assert.IsTrue(0.04 > average && 0.03 < average )
+
+
+    [<Test>]
     member this.GetTypeOfExpressionTest_4 () =
         let typeOfExpr = tree_4.GetTypeOfExpression [|"e"; "error"|] leftSide numToString
         Assert.IsTrue(typeOfExpr <> null 
@@ -208,7 +216,7 @@ let f x =
     else System.IO.Directory.CreateDirectory directoryPath |> ignore
     let t = new CommonAstTest () 
 
-    tree_4.AstToDot numToString tokenToNumber (Some tokenData) leftSide path
+    tree_3.AstToDot numToString tokenToNumber (Some tokenData) leftSide path
 
     t.FindNonterminalsByIndTest ()
     t.FindNonterminalsByStringTest ()
@@ -227,5 +235,7 @@ let f x =
     
     t.GetTypeOfExpressionTest_4 ()
     t.GetTypeOfExpressionTest2_4 ()
+
+    t.CalculateStatisticsTest()
     0
 

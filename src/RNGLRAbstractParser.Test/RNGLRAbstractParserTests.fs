@@ -488,7 +488,7 @@ type ``RNGLR abstract parser tests`` () =
     //[<Test>]
     member this.temp () =
         let qGraph = new ParserInputGraph<_>(0, 9)
-        qGraph.AddVerticesAndEdgeRange
+//        qGraph.AddVerticesAndEdgeRange
 //           [edg 0 0 (RNGLR.StrangeBrackets.LBR 1)
 //            edg 0 1 (RNGLR.StrangeBrackets.LBR 2)
 //            edg 1 2 (RNGLR.StrangeBrackets.RBR 3)

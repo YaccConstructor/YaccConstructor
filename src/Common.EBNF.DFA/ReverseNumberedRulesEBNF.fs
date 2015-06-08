@@ -48,20 +48,20 @@ type ReverseNumberdRulesEBNF (rules : NumberedRulesEBNF, indexator : IndexatorEB
             let prodReverse : NFAProduction.t = {numberOfStates = nfaProduction.numberOfStates; startState = firstReverseState; stateToVertex = stateToReverseVertex |> Seq.toArray}
             prodReverse
 
-        Array.map (fun i -> rules.rightSide i |> reverseNFA) [|0..rules.rulesCount - 1|]
+        Array.map (fun i -> rules.rightSide i |> reverseNFA) [|0..(rules.rulesCount - 1)|]
             
-    let symbolAndNextPos =
-        let result : (int * int) [][] = Array.zeroCreate rules.rulesCount
-        for i in 0..rules.rulesCount - 1 do
-            let nfaReverse = rightReverseNFA.[i]
-            result.[i] <- Array.create nfaReverse.numberOfStates (indexator.epsilonIndex, 0)
-            for j in 0..nfaReverse.numberOfStates - 1 do
-                let rec getSymbol = function
-                |[] -> ()
-                |(x : Edge<_,_>)::xs -> 
-                    if x.label <> indexator.epsilonIndex then result.[i].[j] <- (x.label, x.dest.label) else getSymbol xs
-                nfaReverse.stateToVertex.[j].outEdges |> List.ofSeq |> getSymbol
-        result
+//    let symbolAndNextPos =
+//        let result : (int * int) [][] = Array.zeroCreate rules.rulesCount
+//        for i in 0..rules.rulesCount - 1 do
+//            let nfaReverse = rightReverseNFA.[i]
+//            result.[i] <- Array.create nfaReverse.numberOfStates (indexator.epsilonIndex, 0)
+//            for j in 0..nfaReverse.numberOfStates - 1 do
+//                let rec getSymbol = function
+//                |[] -> ()
+//                |(x : Edge<_,_>)::xs -> 
+//                    if x.label <> indexator.epsilonIndex then result.[i].[j] <- (x.label, x.dest.label) else getSymbol xs
+//                nfaReverse.stateToVertex.[j].outEdges |> List.ofSeq |> getSymbol
+//        result
 
     let getTable rule =
         let nfaReverseProd = rightReverseNFA.[rule] 
@@ -86,12 +86,6 @@ type ReverseNumberdRulesEBNF (rules : NumberedRulesEBNF, indexator : IndexatorEB
     member this.rightReverseSide num = rightReverseNFA.[num]
     member this.numberOfStates num = rightReverseNFA.[num].numberOfStates
     member this.state rule pos = rightReverseNFA.[rule].stateToVertex.[pos]
-    member this.symbol rule pos = 
-        let (symbol, _) = symbolAndNextPos.[rule].[pos]
-        symbol
-    member this.nextPos rule pos = 
-        let (_, nextPos) = symbolAndNextPos.[rule].[pos]
-        nextPos
     member this.getStateTable rule = getTable rule 
     //member this.rulesWithLeftSide = 
 

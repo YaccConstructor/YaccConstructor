@@ -76,6 +76,11 @@
       <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\RNGLRGenerator\RNGLRGenerator.fsproj">
+      <Name>RNGLRGenerator</Name>
+      <Project>{5baf0fba-31b7-406d-bea4-1bcc1418a63f}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Mono.Addins">
       <HintPath>..\packages\Mono.Addins.1.2\lib\net40\Mono.Addins.dll</HintPath>
@@ -103,11 +108,6 @@
     <ProjectReference Include="..\RNGLR.EBNF.DFACommon\RNGLR.EBNF.DFACommon.fsproj">
       <Name>RNGLR.EBNF.DFACommon</Name>
       <Project>{e7f2f65a-94bf-4681-8bba-e5b69521e5c3}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\RNGLRGenerator\RNGLRGenerator.fsproj">
-      <Name>RNGLRGenerator</Name>
-      <Project>{5baf0fba-31b7-406d-bea4-1bcc1418a63f}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

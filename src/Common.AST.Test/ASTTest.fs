@@ -17,6 +17,19 @@ let getFamily prod nodes = new Family(prod, nodes)
 let getAst family otherFamilies = new AST(family, otherFamilies)
 let getTree<'T> tokens root rules = new Tree<'T>(tokens, root, rules)
 
+let leftSide = [|2; 3; 0; 0; 1|]
+
+let numToString = function
+    | 0 -> "e"
+    | 1 -> "error"
+    | 2 -> "s"
+    | 3 -> "yard_start_rule"
+    | 4 -> "NUM"
+    | 5 -> "PLUS"
+    | 6 -> "RNGLR_EOF"
+    | 7 -> "MULT"
+    | _ -> ""
+
 let epsilonTree = getTree<int> [||] (getEpsilon 0) [||]
 
 let terminal0 = getTerminal 0
@@ -40,7 +53,7 @@ let ast4 = getAst <| getFamily 2 (getNodes [|ast3; terminal7; terminal8|]) <| nu
 let ast5 = getAst <| getFamily 0 (getNodes [|ast4|]) <| null
 let ast6  = getAst <| getFamily 1 (getNodes [|ast5|]) <| null
 
-let tree  = new Tree<TokenType>(tokens, ast6, [||])
+let tree  = new Tree<TokenType>(tokens, ast6, [||], Some leftSide, Some numToString)
 
 let tokens_1 = [|NUM 1; PLUS 2; NUM 3; PLUS 4; NUM 5; PLUS 6; NUM 7; MULT 8; NUM 9;|]
 
@@ -53,7 +66,7 @@ let ast4_1 = getAst <| getFamily 2 (getNodes [|ast3_1; terminal7; terminal8|]) <
 let ast5_1 = getAst <| getFamily 0 (getNodes [|ast4_1|]) <| null
 let ast6_1 = getAst <| getFamily 1 (getNodes [|ast5_1|]) <| null
 
-let tree_1 = new Tree<TokenType>(tokens_1, ast6_1, [||])
+let tree_1 = new Tree<TokenType>(tokens_1, ast6_1, [||], Some leftSide, Some numToString)
 
 
 let tokens_2 = [|NUM 1; PLUS 2; NUM 3; PLUS 4; NUM 5; PLUS 6; NUM 7; MULT 8; NUM 9;|]
@@ -67,7 +80,7 @@ let ast4_2 = getAst
 let ast5_2 = getAst <| getFamily 2 (getNodes [|ast4_2; terminal7; terminal8|]) <| null
 let ast6_2 = getAst <| getFamily 1 (getNodes [|ast5_2|]) <| null
 
-let tree_2 = new Tree<TokenType>(tokens_2, ast6_2, [||])
+let tree_2 = new Tree<TokenType>(tokens_2, ast6_2, [||], Some leftSide, Some numToString)
 
 let tokens_3 = [|NUM 1; PLUS 2; NUM 3; PLUS 4; NUM 5; PLUS 6; NUM 7; MULT 8; NUM 9;|]
 
@@ -80,7 +93,7 @@ let ast4_3 = getAst
 let ast5_3 = getAst <| getFamily 0 (getNodes [|ast4_3; terminal7; terminal8|]) <| null
 let ast6_3 = getAst <| getFamily 1 (getNodes [|ast5_3|]) <| null
 
-let tree_3 = new Tree<TokenType>(tokens_3, ast6_3, [||])
+let tree_3 = new Tree<TokenType>(tokens_3, ast6_3, [||], Some leftSide, Some numToString)
 
 let tokens_4 = [|NUM 1; PLUS 2; NUM 3; PLUS 4; NUM 5; PLUS 6; NUM 7; MULT 8; NUM 9;|]
 
@@ -95,18 +108,7 @@ let ast6_4 = getAst <| getFamily 1 (getNodes [|ast5_4|]) <| null
 
 ast1_4.other <- [| getFamily 0 (getNodes [|ast5_4|]) |]
 
-let tree_4 = new Tree<TokenType>(tokens_4, ast6_4, [||])
-
-let numToString = function
-    | 0 -> "e"
-    | 1 -> "error"
-    | 2 -> "s"
-    | 3 -> "yard_start_rule"
-    | 4 -> "NUM"
-    | 5 -> "PLUS"
-    | 6 -> "RNGLR_EOF"
-    | 7 -> "MULT"
-    | _ -> ""
+let tree_4 = new Tree<TokenType>(tokens_4, ast6_4, [||], Some leftSide, Some numToString)
 
 let tokenToNumber = function
     | NUM _ -> 4
@@ -120,50 +122,48 @@ let tokenData = function
     | MULT x -> box x
     | RNGLR_EOF x -> box x
 
-let leftSide = [|2; 3; 0; 0; 1|]
-
 [<TestFixture>]
 type CommonAstTest () = 
     [<Test>]
     member this.FindNonterminalsByIndTest () =
-        Assert.AreEqual(1, tree.FindNonterminalsByInd 3 leftSide |> Array.length)
-        Assert.AreEqual(1, tree.FindNonterminalsByInd 2 leftSide |> Array.length)
-        Assert.AreEqual(4, tree.FindNonterminalsByInd 0 leftSide |> Array.length)
-        Assert.AreEqual(0, tree.FindNonterminalsByInd 10 leftSide |> Array.length)
+        Assert.AreEqual(1, tree.FindNonterminalsByInd 3 |> Array.length)
+        Assert.AreEqual(1, tree.FindNonterminalsByInd 2 |> Array.length)
+        Assert.AreEqual(4, tree.FindNonterminalsByInd 0 |> Array.length)
+        Assert.AreEqual(0, tree.FindNonterminalsByInd 10 |> Array.length)
 
     [<Test>]
     member this.FindNonterminalsByStringTest () =
-        Assert.AreEqual(1, tree.FindNonterminalsByString "yard_start_rule" leftSide numToString |> Array.length)
-        Assert.AreEqual(1, tree.FindNonterminalsByString "s" leftSide numToString |> Array.length)
-        Assert.AreEqual(4, tree.FindNonterminalsByString "e" leftSide numToString |> Array.length)
-        Assert.AreEqual(0, tree.FindNonterminalsByString "nothing" leftSide numToString  |> Array.length)
+        Assert.AreEqual(1, tree.FindNonterminalsByString "yard_start_rule" |> Array.length)
+        Assert.AreEqual(1, tree.FindNonterminalsByString "s" |> Array.length)
+        Assert.AreEqual(4, tree.FindNonterminalsByString "e" |> Array.length)
+        Assert.AreEqual(0, tree.FindNonterminalsByString "nothing" |> Array.length)
 
     [<Test>]
     member this.GetTypeOfExpressionTest () =
-        let typeOfExpr = tree.GetTypeOfExpression [|"s"; "e"|] leftSide numToString
+        let typeOfExpr = tree.GetTypeOfExpression [|"s"; "e"|]
         Assert.IsTrue(typeOfExpr <> null && typeOfExpr.Length = 1 && String.Equals(typeOfExpr.[0], "s"))
 
 
     [<Test>]
     member this.GetTypeOfExpressionTest2 () =
-        let typeOfExpr = tree.GetTypeOfExpression [|"e"|] leftSide numToString
+        let typeOfExpr = tree.GetTypeOfExpression [|"e"|]
         Assert.IsTrue(typeOfExpr <> null && typeOfExpr.Length = 1 && String.Equals(typeOfExpr.[0], "e"))
         
 
     [<Test>]
     member this.GetTypeOfExpressionTest_1 () =
-        let typeOfExpr = tree_1.GetTypeOfExpression [|"s"; "e"|] leftSide numToString
+        let typeOfExpr = tree_1.GetTypeOfExpression [|"s"; "e"|]
         Assert.IsTrue(typeOfExpr <> null && typeOfExpr.Length = 1 && String.Equals(typeOfExpr.[0], "s"))
 
 
     [<Test>]
     member this.GetTypeOfExpressionTest2_1 () =
-        let typeOfExpr = tree_1.GetTypeOfExpression [|"e"|] leftSide numToString
+        let typeOfExpr = tree_1.GetTypeOfExpression [|"e"|]
         Assert.IsTrue(typeOfExpr <> null && typeOfExpr.Length = 1 && String.Equals(typeOfExpr.[0], "e"))
 
     [<Test>]
     member this.GetTypeOfExpressionTest_2 () =
-        let typeOfExpr = tree_2.GetTypeOfExpression [|"s"; "error"|] leftSide numToString
+        let typeOfExpr = tree_2.GetTypeOfExpression [|"s"; "error"|]
         Assert.IsTrue(typeOfExpr <> null 
                       && typeOfExpr.Length = 2 
                       && typeOfExpr |> Array.exists (fun x -> String.Equals("s", x))
@@ -171,12 +171,12 @@ type CommonAstTest () =
 
     [<Test>]
     member this.GetTypeOfExpressionTest2_2 () =
-        let typeOfExpr = tree_2.GetTypeOfExpression [|"e"|] leftSide numToString
+        let typeOfExpr = tree_2.GetTypeOfExpression [|"e"|]
         Assert.IsTrue(typeOfExpr <> null && typeOfExpr.Length = 1 && String.Equals(typeOfExpr.[0], "e"))
         
     [<Test>]
     member this.GetTypeOfExpressionTest_3 () =
-        let typeOfExpr = tree_3.GetTypeOfExpression [|"e"; "error"|] leftSide numToString
+        let typeOfExpr = tree_3.GetTypeOfExpression [|"e"; "error"|]
         Assert.IsTrue(typeOfExpr <> null 
                       && typeOfExpr.Length = 2 
                       && typeOfExpr |> Array.exists (fun x -> String.Equals("e", x))
@@ -184,61 +184,61 @@ type CommonAstTest () =
 
     [<Test>]
     member this.GetTypeOfExpressionTest2_3 () =
-        let typeOfExpr = tree_3.GetTypeOfExpression [|"e"|] leftSide numToString
+        let typeOfExpr = tree_3.GetTypeOfExpression [|"e"|]
         Assert.IsTrue(typeOfExpr <> null && typeOfExpr.Length = 1 && String.Equals(typeOfExpr.[0], "e"))
 
     [<Test>]
     member this.CalculateStatisticsTest () =
-        let (max, min, average) = tree_3.CalculateStatistics "e" leftSide numToString
+        let (max, min, average) = tree_3.CalculateStatistics "e" 
         Assert.AreEqual(1, max)
         Assert.AreEqual(1, min)
         Assert.AreEqual(1.0, average)
 
     [<Test>]
     member this.CalculateStatisticsTest_1 () =
-        let (max, min, average) = tree_3.CalculateStatistics "s" leftSide numToString
+        let (max, min, average) = tree_3.CalculateStatistics "s" 
         Assert.AreEqual(3, max)
         Assert.AreEqual(2, min)
         Assert.AreEqual(2.5, average)
 
     [<Test>]
     member this.CalculateStatisticsTest_2 () =
-        let (max, min, average) = tree_3.CalculateStatistics "error" leftSide numToString
+        let (max, min, average) = tree_3.CalculateStatistics "error" 
         Assert.AreEqual(1, max)
         Assert.AreEqual(0, min)
         Assert.AreEqual(0.5, average)
 
     [<Test>]
     member this.CalculateStatisticsTest_3 () =
-        let (max, min, average) = tree_3.CalculateStatistics "yard_start_rule" leftSide numToString
+        let (max, min, average) = tree_3.CalculateStatistics "yard_start_rule"
         Assert.AreEqual(1, max)
         Assert.AreEqual(1, min)
         Assert.AreEqual(1.0, average)
 
     [<Test>]
     member this.CalculateStatisticsTest_4 () =
-        let (max, min, average) = tree_2.CalculateStatistics "e" leftSide numToString
+        let (max, min, average) = tree_2.CalculateStatistics "e"
         Assert.AreEqual(3, max)
         Assert.AreEqual(3, min)
         Assert.AreEqual(3.0, average)
 
     [<Test>]
     member this.CalculateStatisticsTest_5 () =
-        let (max, min, average) = tree_2.CalculateStatistics "s" leftSide numToString
+        let (max, min, average) = tree_2.CalculateStatistics "s"
         Assert.AreEqual(1, max)
         Assert.AreEqual(0, min)
         Assert.AreEqual(0.5, average)
 
     [<Test>]
     member this.GetTypeOfExpressionTest_4 () =
-        let typeOfExpr = tree_4.GetTypeOfExpression [|"e"; "error"|] leftSide numToString
+        let typeOfExpr = tree_4.GetTypeOfExpression [|"e"; "error"|]
         Assert.IsTrue(typeOfExpr <> null 
                       && typeOfExpr.Length = 1
                       && String.Equals("error", typeOfExpr.[0]))
 
     [<Test>]
     member this.GetTypeOfExpressionTest2_4 () =
-        let typeOfExpr = tree_4.GetTypeOfExpression [|"e"|] leftSide numToString
+        let typeOfExpr = tree_4.GetTypeOfExpression [|"e"|]
         Assert.IsTrue(typeOfExpr <> null && typeOfExpr.Length = 0)
         
 

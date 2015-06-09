@@ -13,6 +13,7 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <TargetFrameworkProfile />
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <!--PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -176,6 +177,11 @@
     <ProjectReference Include="..\ReSharperExtension\ReSharperExtension.csproj">
       <Name>ReSharperExtension</Name>
       <Project>{70133fea-83f5-416a-8869-0e745ef37778}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLRAbstractParser.Test\RNGLRAbstractParser.Test.fsproj">
+      <Name>RNGLRAbstractParser.Test</Name>
+      <Project>{b1d8c4fb-23e7-46ff-81b0-4ea3cd6e716e}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">

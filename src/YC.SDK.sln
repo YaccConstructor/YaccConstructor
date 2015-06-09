@@ -149,6 +149,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AbstractLexer.Interpreter",
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TSQL.Test", "TSQL.Test\TSQL.Test.fsproj", "{711A4859-419F-4C32-844A-949B58FAB756}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Helper", "Helper\Helper.fsproj", "{FC9A166C-780D-4D15-B366-CA06277C803D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -487,6 +489,12 @@ Global
 		{711A4859-419F-4C32-844A-949B58FAB756}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{711A4859-419F-4C32-844A-949B58FAB756}.Release|Any CPU.Build.0 = Release|Any CPU
 		{711A4859-419F-4C32-844A-949B58FAB756}.Release|x86.ActiveCfg = Release|Any CPU
+		{FC9A166C-780D-4D15-B366-CA06277C803D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC9A166C-780D-4D15-B366-CA06277C803D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC9A166C-780D-4D15-B366-CA06277C803D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FC9A166C-780D-4D15-B366-CA06277C803D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC9A166C-780D-4D15-B366-CA06277C803D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC9A166C-780D-4D15-B366-CA06277C803D}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

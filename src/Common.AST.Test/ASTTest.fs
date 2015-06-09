@@ -191,9 +191,43 @@ type CommonAstTest () =
     member this.CalculateStatisticsTest () =
         let (max, min, average) = tree_3.CalculateStatistics "e" leftSide numToString
         Assert.AreEqual(1, max)
-        Assert.AreEqual(0, min)
-        Assert.IsTrue(0.04 > average && 0.03 < average )
+        Assert.AreEqual(1, min)
+        Assert.AreEqual(1.0, average)
 
+    [<Test>]
+    member this.CalculateStatisticsTest_1 () =
+        let (max, min, average) = tree_3.CalculateStatistics "s" leftSide numToString
+        Assert.AreEqual(3, max)
+        Assert.AreEqual(2, min)
+        Assert.AreEqual(2.5, average)
+
+    [<Test>]
+    member this.CalculateStatisticsTest_2 () =
+        let (max, min, average) = tree_3.CalculateStatistics "error" leftSide numToString
+        Assert.AreEqual(1, max)
+        Assert.AreEqual(0, min)
+        Assert.AreEqual(0.5, average)
+
+    [<Test>]
+    member this.CalculateStatisticsTest_3 () =
+        let (max, min, average) = tree_3.CalculateStatistics "yard_start_rule" leftSide numToString
+        Assert.AreEqual(1, max)
+        Assert.AreEqual(1, min)
+        Assert.AreEqual(1.0, average)
+
+    [<Test>]
+    member this.CalculateStatisticsTest_4 () =
+        let (max, min, average) = tree_2.CalculateStatistics "e" leftSide numToString
+        Assert.AreEqual(3, max)
+        Assert.AreEqual(3, min)
+        Assert.AreEqual(3.0, average)
+
+    [<Test>]
+    member this.CalculateStatisticsTest_5 () =
+        let (max, min, average) = tree_2.CalculateStatistics "s" leftSide numToString
+        Assert.AreEqual(1, max)
+        Assert.AreEqual(0, min)
+        Assert.AreEqual(0.5, average)
 
     [<Test>]
     member this.GetTypeOfExpressionTest_4 () =
@@ -210,13 +244,13 @@ type CommonAstTest () =
 
 [<EntryPoint>]
 let f x =
-    if System.IO.Directory.Exists directoryPath
+    if not <| System.IO.Directory.Exists directoryPath
     then 
-        System.IO.Directory.GetFiles directoryPath |> Seq.iter System.IO.File.Delete
-    else System.IO.Directory.CreateDirectory directoryPath |> ignore
+        (*System.IO.Directory.GetFiles directoryPath |> Seq.iter System.IO.File.Delete
+    else*) System.IO.Directory.CreateDirectory directoryPath |> ignore
     let t = new CommonAstTest () 
 
-    tree_3.AstToDot numToString tokenToNumber (Some tokenData) leftSide path
+    tree_4.AstToDot numToString tokenToNumber (Some tokenData) leftSide path
 
     t.FindNonterminalsByIndTest ()
     t.FindNonterminalsByStringTest ()
@@ -236,6 +270,11 @@ let f x =
     t.GetTypeOfExpressionTest_4 ()
     t.GetTypeOfExpressionTest2_4 ()
 
-    t.CalculateStatisticsTest()
+    t.CalculateStatisticsTest ()
+    t.CalculateStatisticsTest_1 ()
+    t.CalculateStatisticsTest_2 ()
+    t.CalculateStatisticsTest_3 ()
+    t.CalculateStatisticsTest_4 ()
+    t.CalculateStatisticsTest_5 ()
     0
 

@@ -47,8 +47,6 @@
     </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>cd $(TargetDir)
-del JetBrains.*</PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\YC.GrammarZOO\SQL\TSQL\LexerAbstract.fsl">

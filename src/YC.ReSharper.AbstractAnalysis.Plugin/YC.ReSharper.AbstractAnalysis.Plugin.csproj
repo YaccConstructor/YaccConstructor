@@ -165,7 +165,5 @@
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Targets')" />
   <PropertyGroup>
-    <PostBuildEvent>cd $(TargetDir)
-del JetBrains.*</PostBuildEvent>
   </PropertyGroup>
 </Project>

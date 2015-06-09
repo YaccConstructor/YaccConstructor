@@ -60,7 +60,7 @@ type ErrorNode<'TokenType> =
 type ErrorDictionary<'TokenType> = Dictionary<Family, ErrorNode<'TokenType>>
 
 [<AllowNullLiteral>]
-type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[][], leftSide : array<int> option, numToString : (int -> string) option) =
+type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[][], _leftSide : array<int> option, _numToString : (int -> string) option) =
     let rootFamily, isEpsilonTree =
         match root with
         | :? AST as ast -> ast, false
@@ -95,9 +95,12 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                         for family in children.other do
                             handle family
         res.ToArray()
-    
+
+    let leftSide = ref _leftSide
+    let numToString = ref _numToString
+
     let checkFamilyIsGivenNonterminal nonterminalInd (family : Family) = 
-        match leftSide with 
+        match !leftSide with 
         | None -> failwith "leftSide is not specified"
         | Some ls -> nonterminalInd = ls.[family.prod]
 
@@ -112,10 +115,10 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
         | true -> arr.[0]
 
     let getNonterminalIndex nonterminal =
-        match numToString with
+        match !numToString with
         | None -> failwith "numToString is not specified"
         | Some nts ->
-            match leftSide with 
+            match !leftSide with 
             | None -> failwith "leftSide is not specified"
             | Some ls -> ls |> Array.tryFind (fun x -> String.Equals (nts x, nonterminal))
 
@@ -125,10 +128,10 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
         | Some ind -> ind
 
     let getNonterminalStringByProd prod =
-        match numToString with
+        match !numToString with
         | None -> failwith "numToString is not specified"
         | Some nts ->
-            match leftSide with 
+            match !leftSide with 
             | None -> failwith "leftSide is not specified"
             | Some ls -> nts <| ls.[prod]
 
@@ -140,6 +143,12 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
     member this.RulesCount = rules.GetLength(0)
     member this.Tokens = tokens
     member this.TokensCount = tokens.Length
+
+    member this.SpecifyNumToString nts = 
+        numToString := nts 
+
+    member this.SpecifyLeftSide ls = 
+        leftSide := ls 
 
     static member inline private smaller pos : (AstNode -> _) = function
         | :? Epsilon | :? Terminal -> true

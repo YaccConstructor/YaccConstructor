@@ -60,7 +60,7 @@ type ErrorNode<'TokenType> =
 type ErrorDictionary<'TokenType> = Dictionary<Family, ErrorNode<'TokenType>>
 
 [<AllowNullLiteral>]
-type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[][]) =
+type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[][], leftSide : array<int> option, numToString : (int -> string) option) =
     let rootFamily, isEpsilonTree =
         match root with
         | :? AST as ast -> ast, false
@@ -95,6 +95,45 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                         for family in children.other do
                             handle family
         res.ToArray()
+    
+    let checkFamilyIsGivenNonterminal nonterminalInd (family : Family) = 
+        match leftSide with 
+        | None -> failwith "leftSide is not specified"
+        | Some ls -> nonterminalInd = ls.[family.prod]
+
+    let checkAstIsGivenNonterminal nonterminalInd (ast : AST) = 
+        let arr = ast.map <| checkFamilyIsGivenNonterminal nonterminalInd
+        let isAllFamiliesOfOneNonterm = 
+            match arr.Length with
+            | 0 -> failwith "No families in ast"
+            | _ -> Array.forall (fun x -> x = arr.[0]) arr
+        match isAllFamiliesOfOneNonterm with
+        | false -> failwith "SPPF is incorrect!" 
+        | true -> arr.[0]
+
+    let getNonterminalIndex nonterminal =
+        match numToString with
+        | None -> failwith "numToString is not specified"
+        | Some nts ->
+            match leftSide with 
+            | None -> failwith "leftSide is not specified"
+            | Some ls -> ls |> Array.tryFind (fun x -> String.Equals (nts x, nonterminal))
+
+    let getNonterminalIndexValue nonterminal = 
+        match getNonterminalIndex nonterminal with 
+        | None -> failwith <| sprintf "The grammar does not contain nonterminal %s" nonterminal
+        | Some ind -> ind
+
+    let getNonterminalStringByProd prod =
+        match numToString with
+        | None -> failwith "numToString is not specified"
+        | Some nts ->
+            match leftSide with 
+            | None -> failwith "leftSide is not specified"
+            | Some ls -> nts <| ls.[prod]
+
+    new (tokens : array<'TokenType>, root : AstNode, rules : int[][]) =
+        Tree<'TokenType>(tokens, root, rules, None, None)
 
     member this.Order = order
     member this.Root = root
@@ -248,23 +287,23 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
 
             this.FilterChildren handleChildren
 
-    member this.FindNonterminalsByInd nonterminal (leftSide : array<int>) =
-        order |> Array.filter (fun x -> nonterminal = leftSide.[x.first.prod])
+    member this.FindNonterminalsByInd nonterminal =
+        order |> Array.filter (checkAstIsGivenNonterminal nonterminal)
 
-    member this.FindNonterminalsByString nonterminal (leftSide : array<int>) (numToString : int -> string) =
-        let nontermInd = leftSide |> Array.tryFind (fun x -> String.Equals (numToString x, nonterminal))
+    member this.FindNonterminalsByString nonterminal =
+        let nontermInd = getNonterminalIndex nonterminal
         match nontermInd with
-        | Some n -> this.FindNonterminalsByInd n leftSide
+        | Some n -> this.FindNonterminalsByInd n
         | None -> [||]
    
-    member this.GetTypeOfExpression nonterminals (leftSide : array<int>) (numToString : int -> string) =
+    member this.GetTypeOfExpression nonterminals =
         let visited = new Dictionary<_,_>()
         let nonterminalsInd = 
             nonterminals 
-            |> Array.map (fun n -> leftSide |> Array.find (fun x -> String.Equals (numToString x, n)))
+            |> Array.choose getNonterminalIndex
         
         let isWanted (f : Family) =
-            Array.exists (fun x -> x = leftSide.[f.prod]) nonterminalsInd
+            Array.exists (fun x -> checkFamilyIsGivenNonterminal x f) nonterminalsInd
         
         let rec find (node : AstNode) = 
             if not <| visited.ContainsKey(node)
@@ -275,7 +314,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                 | :? AST as ast -> 
                     let wanted = ast.filterFamilies isWanted
                     if wanted <> null && wanted.Count > 0
-                    then Array.init wanted.Count (fun i -> numToString(leftSide.[wanted.[i].prod]))
+                    then Array.init wanted.Count (fun i -> getNonterminalStringByProd wanted.[i].prod)
                     else 
                         let res = new ResizeArray<_>()
                         ast.doForAllFamilies (fun x -> x.nodes.doForAll (fun y -> res.AddRange(find y)))
@@ -286,31 +325,26 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
 
         find root
 
-    member this.CalculateStatistics nonterminal (leftSide : array<int>) (numToString : int -> string) =
+    member this.CalculateStatistics nonterminal  =
         let remembered = new Dictionary<AstNode, (int * int * double) option>()
-
-        let nontermInd =
-            leftSide |> Array.find (fun x -> String.Equals (numToString x, nonterminal))
+        let nontermInd = getNonterminalIndexValue nonterminal
 
         let calculateStat (arr : ((int * int * double) option)[]) =
-            let filtered = arr |> Array.filter (fun x -> x.IsSome)
+            let filtered = arr |> Array.choose id 
 
             if filtered.Length = 0
             then None
             elif filtered.Length = 1
-            then filtered.[0]
+            then Some filtered.[0]
             else
                 let curMax = ref System.Int32.MinValue
                 let curMin = ref System.Int32.MaxValue
                 let curSum = ref 0.0
 
-                for a in filtered do
-                    match a with 
-                    | Some (max, min, ave) -> 
-                        if max > !curMax then curMax := max
-                        if min < !curMin then curMin := min
-                        curSum := !curSum + ave
-                    | None -> failwith "Seems that Array.filter does not work"
+                for (max, min, ave) in filtered do
+                    if max > !curMax then curMax := max
+                    if min < !curMin then curMin := min
+                    curSum := !curSum + ave
                 Some (!curMax, !curMin, (!curSum / double filtered.Length))
 
         let rec count (node : AstNode) : (int * int * double) option = 
@@ -322,28 +356,26 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                     | :? Terminal -> None
                     | :? Epsilon -> None
                     | :? AST as ast -> 
+                        let inc = if checkAstIsGivenNonterminal nontermInd ast then 1 else 0
                         let statistics = 
                             ast.map(fun f -> 
-                                        f.nodes.map ((fun inc a -> let prev = count a;
-                                                                   let updated = 
-                                                                       match prev with 
-                                                                       | Some (max, min, ave) -> Some (max + inc, min + inc, ave + double inc)
-                                                                       | _ -> None
-                                                                   updated) (if leftSide.[f.prod] = nontermInd then 1 else 0))
+                                        f.nodes.map (fun a -> let prev = count a
+                                                              let updated = 
+                                                                  match prev with 
+                                                                  | Some (max, min, ave) -> Some (max + inc, min + inc, ave + double inc)
+                                                                  | _ -> None
+                                                              updated)
                                         |> calculateStat)
                             |> calculateStat
                         if statistics.IsNone 
                         then 
-                            let inc = if leftSide.[ast.first.prod] = nontermInd then 1 else 0
                             Some (inc, inc, double inc) 
                         else statistics 
-                    | _ -> failwith "Something happened"
+                    | _ -> failwith "Unexpected AstNode"
                 remembered.Add(node, stat)
                 stat
 
-        match count this.Root with
-        | Some (max, min, ave) -> max, min, ave
-        | _ -> failwith "Something happened"
+        (count this.Root).Value
 
     /// handleCycleNode is used for handling nodes, contained in cycles
     ///   and having no children family, where each node has smaller position.

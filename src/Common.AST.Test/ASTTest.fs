@@ -110,6 +110,21 @@ ast1_4.other <- [| getFamily 0 (getNodes [|ast5_4|]) |]
 
 let tree_4 = new Tree<TokenType>(tokens_4, ast6_4, [||], Some leftSide, Some numToString)
 
+let tokens_5 = [|NUM 1; PLUS 2; NUM 3; PLUS 4; NUM 5; PLUS 6; NUM 7; MULT 8; NUM 9;|]
+
+let ast1_5 = getAst <| getFamily 2 (getNodes [|terminal0|]) <| null
+let ast1_2_5 = getAst <| getFamily 2 (getNodes [|terminal0|]) <| null
+let ast2_5 = getAst <| getFamily 4 (getNodes [|ast1_5; ast1_2_5; terminal1; terminal2|]) <| null
+let ast3_5 = getAst <| getFamily 0 (getNodes [|ast1_5; terminal1; terminal2|]) <| null
+let ast4_5 = getAst 
+           <| getFamily 0 (getNodes [|ast2_5; terminal3; terminal4|]) 
+           <| [| getFamily 0 (getNodes [|ast3_5; terminal5; terminal6|]) |]
+let ast5_5 = getAst <| getFamily 0 (getNodes [|terminal7; terminal8|]) <| null
+let ast6_5 = getAst <| getFamily 0 (getNodes [|ast4_5; ast5_5; terminal7; terminal8|]) <| null
+let ast7_5 = getAst <| getFamily 1 (getNodes [|ast6_5|]) <| null
+
+let tree_5 = new Tree<TokenType>(tokens_5, ast7_5, [||], Some leftSide, Some numToString)
+
 let tokenToNumber = function
     | NUM _ -> 4
     | PLUS _ -> 5
@@ -229,6 +244,21 @@ type CommonAstTest () =
         Assert.AreEqual(0, min)
         Assert.AreEqual(0.5, average)
 
+
+    [<Test>]
+    member this.CalculateStatisticsTest_6 () =
+        let (max, min, average) = tree_5.CalculateStatistics "e"
+        Assert.AreEqual(2, max)
+        Assert.AreEqual(1, min)
+        Assert.AreEqual(1.5, average)
+
+    [<Test>]
+    member this.CalculateStatisticsTest_7 () =
+        let (max, min, average) = tree_5.CalculateStatistics "s"
+        Assert.AreEqual(4, max)
+        Assert.AreEqual(3, min)
+        Assert.AreEqual(3.5, average)
+
     [<Test>]
     member this.GetTypeOfExpressionTest_4 () =
         let typeOfExpr = tree_4.GetTypeOfExpression [|"e"; "error"|]
@@ -250,7 +280,7 @@ let f x =
     else*) System.IO.Directory.CreateDirectory directoryPath |> ignore
     let t = new CommonAstTest () 
 
-    tree_4.AstToDot numToString tokenToNumber (Some tokenData) leftSide path
+    tree_5.AstToDot numToString tokenToNumber (Some tokenData) leftSide path
 
     t.FindNonterminalsByIndTest ()
     t.FindNonterminalsByStringTest ()
@@ -276,5 +306,7 @@ let f x =
     t.CalculateStatisticsTest_3 ()
     t.CalculateStatisticsTest_4 ()
     t.CalculateStatisticsTest_5 ()
+    t.CalculateStatisticsTest_6 ()
+    t.CalculateStatisticsTest_7 ()
     0
 

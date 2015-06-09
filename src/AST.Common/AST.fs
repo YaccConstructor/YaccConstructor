@@ -350,11 +350,29 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                 let curMin = ref System.Int32.MaxValue
                 let curSum = ref 0.0
 
-                for (max, min, ave) in filtered do
+                for (max, min, avg) in filtered do
                     if max > !curMax then curMax := max
                     if min < !curMin then curMin := min
-                    curSum := !curSum + ave
+                    curSum := !curSum + avg
                 Some (!curMax, !curMin, (!curSum / double filtered.Length))
+        
+        let sumStat (arr : ((int * int * double) option)[]) =
+            let filtered = arr |> Array.choose id 
+
+            if filtered.Length = 0
+            then None
+            elif filtered.Length = 1
+            then Some filtered.[0]
+            else
+                let curMax = ref 0
+                let curMin = ref 0
+                let curSum = ref 0.0
+
+                for (max, min, avg) in filtered do
+                    curMax := !curMax + max
+                    curMin := !curMin + min
+                    curSum := !curSum + avg
+                Some (!curMax, !curMin, !curSum)
 
         let rec count (node : AstNode) : (int * int * double) option = 
             if remembered.ContainsKey(node)
@@ -367,23 +385,14 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                     | :? AST as ast -> 
                         let inc = if checkAstIsGivenNonterminal nontermInd ast then 1 else 0
                         let statistics = 
-                            ast.map(fun f -> 
-                                        f.nodes.map (fun a -> let prev = count a
-                                                              let updated = 
-                                                                  match prev with 
-                                                                  | Some (max, min, ave) -> Some (max + inc, min + inc, ave + double inc)
-                                                                  | _ -> None
-                                                              updated)
-                                        |> calculateStat)
+                            ast.map(fun f -> f.nodes.map (fun a -> count a) |> sumStat)
                             |> calculateStat
-                        if statistics.IsNone 
-                        then 
-                            Some (inc, inc, double inc) 
-                        else statistics 
+                        match statistics with
+                        | None -> Some (inc, inc, double inc) 
+                        | Some (max, min, avg) -> Some (max + inc, min + inc, avg + double inc) 
                     | _ -> failwith "Unexpected AstNode"
                 remembered.Add(node, stat)
                 stat
-
         (count this.Root).Value
 
     /// handleCycleNode is used for handling nodes, contained in cycles

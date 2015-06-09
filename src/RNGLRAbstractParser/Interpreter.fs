@@ -214,8 +214,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     edgesToTerms.Add(e, nodes.Count - 1)
                 let edge = new Edge(gssVertex, edgesToTerms.[e])
 
-                if tailGssV.FindIndex gssVertex.State gssVertex.Level = -1
+                let ind = tailGssV.FindIndex gssVertex.State gssVertex.Level 
+                if ind = -1 || (tailGssV.Edge ind).Ast <> edgesToTerms.[e]
                 then addEdge e.Target isNew tailGssV edge true
+               
 
         if not <| currentGraphV.processedGssVertices.Contains(gssVertex)
         then 
@@ -353,9 +355,20 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         |> addTreeTop
                         |> nodes.Add
             match !root with
-            | None -> Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state")
+            | None -> 
+                let states = 
+                    innerGraph.Vertices 
+                    |> Seq.filter (fun v -> innerGraph.OutEdges(v) 
+                                            |> Seq.exists(fun e -> e.Target.processedGssVertices.Count = 0 (*&& e.Target.unprocessedGssVertices.Count = 0*)
+                                                                   && v.processedGssVertices.Count <> 0 (*&& v.unprocessedGssVertices.Count <> 0*)))
+                    |> Seq.map (fun v -> string v.vNum)
+                    |> String.concat "; "
+                Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state. Possible errors: (" + states + ")")
             | Some res -> 
-                let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
-                tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
+                try 
+                    let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
+                    //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
 
-                Success <| tree
+                    Success <| tree
+                with
+                e -> Error (-1, Unchecked.defaultof<'TokenType>, e.Message)

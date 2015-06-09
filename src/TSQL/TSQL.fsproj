@@ -41,31 +41,75 @@
     <OutputPath>$(SolutionDir)..\Bin\Debug\Addins\</OutputPath>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>cd $(TargetDir)
+del JetBrains.*</PostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
-    <None Include="Lexer.fsl" />
-    <FsYard Include="mssql.yrd" />
-    <FsYard Include="datatype.yrd" />
-    <FsYard Include="stmnt.yrd" />
-    <FsYard Include="expr.yrd" />
-    <FsYard Include="execute_stmnt.yrd" />
-    <FsYard Include="set_stmnt.yrd" />
-    <FsYard Include="crud.yrd" />
-    <FsYard Include="select_crud.yrd" />
-    <FsYard Include="cycles_stmnt.yrd" />
-    <FsYard Include="create_proc.yrd" />
-    <FsYard Include="create_table.yrd" />
-    <FsYard Include="transaction.yrd" />
-    <FsYard Include="MsCommon.yrd" />
-    <FsYard Include="../../GrammarTemplates/Common.yrd">
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\LexerAbstract.fsl">
+      <Link>LexerAbstract.fsl</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\mssql_abstract.yrd">
+      <Link>mssql_abstract.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\datatype.yrd">
+      <Link>datatype.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\stmnt.yrd">
+      <Link>stmnt.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\expr.yrd">
+      <Link>expr.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\execute_stmnt.yrd">
+      <Link>execute_stmnt.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\Common\set_stmnt.yrd">
+      <Link>set_stmnt.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\crud.yrd">
+      <Link>crud.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\select_crud.yrd">
+      <Link>select_crud.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\cycles_stmnt.yrd">
+      <Link>cycles_stmnt.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\create_proc.yrd">
+      <Link>create_proc.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\create_table.yrd">
+      <Link>create_table.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\transaction.yrd">
+      <Link>transaction.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\Common\MsCommon.yrd">
+      <Link>MsCommon.yrd</Link>
+    </None>
+    <None Include="..\YC.GrammarZOO\SQL\Common\Common.yrd">
       <Link>Common.yrd</Link>
-    </FsYard>
+    </None>
     <Compile Include="MsParser.fs" />
     <Compile Include="LexerHelper.fs" />
     <Compile Include="Lexer_Abstract.fs" />
     <Compile Include="Driver.fs" />
     <None Include="packages.config" />
+    <EmbeddedResource Include="Actions.xml" />
+    <Compile Include="AboutAction.fs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="TSQLHighlighting\TSQLHighlighting.csproj">
+      <Name>TSQLHighlighting</Name>
+      <Project>{6ee8bdd8-79e9-41f5-8a8e-e959835d60fb}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
@@ -95,6 +139,9 @@
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.Shell.Extensions">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Shell.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.UI">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.UI.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.Util">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
@@ -136,12 +183,16 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="Utils.SourceText">
       <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
       <Private>True</Private>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
+    <ProjectReference Include="..\..\FST\FST\FSA\FSA.fsproj">
+      <Name>FSA</Name>
+      <Project>{b48cfdcc-86f7-4c3a-a5a2-8170950dd2ab}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\FST\FST\FST\FST.fsproj">
       <Name>FST</Name>
       <Project>{bcf4793c-e8b4-4fd5-9723-3c08859066c5}</Project>
@@ -162,19 +213,9 @@
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Common\Common.fsproj">
-      <Name>Common</Name>
-      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Constraints\Constraints.fsproj">
-      <Name>Constraints</Name>
-      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Conversions\Conversions.fsproj">
-      <Name>Conversions</Name>
-      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+    <ProjectReference Include="..\ControlFlowGraph\ControlFlowGraph.fsproj">
+      <Name>ControlFlowGraph (SEL.SDK\ControlFlowGraph\ControlFlowGraph)</Name>
+      <Project>{e94970c1-26a4-4fa6-bb3b-261b70938ff4}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\ReSharperExtension\ReSharperExtension.csproj">
@@ -208,15 +249,6 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PostBuildEvent>cd $(TargetDir)
-del JetBrains.*</PostBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

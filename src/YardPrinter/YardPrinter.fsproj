@@ -42,7 +42,6 @@
     </Reference>
     <Reference Include="FsYacc">
       <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\FsYacc.exe</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="Helper">
       <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\Helper.dll</HintPath>
@@ -59,15 +58,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="YC.Common, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.Constraints, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.Conversions, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

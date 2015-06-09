@@ -671,5 +671,5 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             | Some res -> 
                 debugFuns().drawGSSDot "res.dot"
                 let tree = new Tree<_> (tokens.ToArray(), res :> AstNode, parserSource.Rules)
-                tree.AstToDot parserSource.NumToString parserSource.TokenToNumber None parserSource.LeftSide "../../../Tests/RNGLR/sppf.dot"
+                //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber None parserSource.LeftSide "../../../Tests/RNGLR/sppf.dot"
                 Success (tree, [||], errDict)

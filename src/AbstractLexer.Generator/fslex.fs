@@ -14,6 +14,7 @@ open System.IO
 open YC.FST.GraphBasedFst
 open Microsoft.FSharp.Collections 
 open QuickGraph
+open YC.FSA.GraphBasedFsa
 
 //------------------------------------------------------------------
 // This code is duplicated from Microsoft.FSharp.Compiler.UnicodeLexing
@@ -45,6 +46,7 @@ let input = ref None
 let out = ref None
 let inputCodePage = ref None
 let light = ref None
+let abstractLexer = ref false
 
 let mutable lexlib = "Microsoft.FSharp.Text.Lexing"
 
@@ -54,7 +56,8 @@ let usage =
     ArgInfo ("--light", ArgType.Unit (fun () ->  light := Some true), "(ignored)");
     ArgInfo ("--light-off", ArgType.Unit (fun () ->  light := Some false), "Add #light \"off\" to the top of the generated file");
     ArgInfo ("--lexlib", ArgType.String (fun s ->  lexlib <- s), "Specify the namespace for the implementation of the lexer table interperter (default Microsoft.FSharp.Text.Lexing)");
-    ArgInfo ("--unicode", ArgType.Set unicode, "Produce a lexer for use with 16-bit unicode characters.");  
+    ArgInfo ("--unicode", ArgType.Set unicode, "Produce a lexer for use with 16-bit unicode characters.");
+    ArgInfo ("--abstract", ArgType.Unit (fun () -> abstractLexer := true), "Lexer is based on FST.");  
   ]
 
 let _ = ArgParser.Parse(usage, (fun x -> match !input with Some _ -> failwith "more than one input given" | None -> input := Some x), "fslex <filename>")
@@ -244,96 +247,93 @@ let main() =
     printLinesIfCodeDefined spec.BottomCode
     cfprintfn os "# 3000000 \"%s\"" output;
   
-    
-    let ToGraphBasedFst  =
-        let resFST = new FST<_,_>()
-        resFST.InitState.Add((fst perRuleData.[0]).Id) //we SUGGEST that we have one init state
+    if !abstractLexer then 
+        let ToGraphBasedFst  =
+            let resFST = new FST<_,_>()
+            resFST.InitState.Add((fst perRuleData.[0]).Id) //we SUGGEST that we have one init state
         
-        let stEOF = tableTransitions.[0].[(sizeTable - 1)] 
-        new TaggedEdge<_,_>(0, stEOF, new EdgeLbl<_,_>(Smbl (char Eof), Eps)) |> resFST.AddVerticesAndEdge |> ignore
-        resFST.FinalState.Add(stEOF)
+            let stEOF = tableTransitions.[0].[(sizeTable - 1)] 
+            new EdgeFST<_,_>(0, stEOF, ( Smbl (char Eof), Eps)) |> resFST.AddVerticesAndEdge |> ignore
+            resFST.FinalState.Add(stEOF)
                          
-        for state in dfaNodes do
-            for i in 0..(sizeTable - 1) do
-                let st = tableTransitions.[state.Id].[i]
-                if st <> sentinel 
-                then 
-                    new TaggedEdge<_,_>(state.Id, st, new EdgeLbl<_,_>(Smbl (char (if i = sizeTable - 1 then int Eof else i)), Eps)) |> resFST.AddVerticesAndEdge |> ignore                       
-                else 
-                    if state.Id <> 0
+            for state in dfaNodes do
+                for i in 0..(sizeTable - 1) do
+                    let st = tableTransitions.[state.Id].[i]
+                    if st <> sentinel 
                     then 
-                        let action = if actionFunc.[state.Id].Count > 0 then Smbl (actionFunc.[state.Id].[0]) else Eps
-                        if tableTransitions.[0].[i] <> sentinel || i = sizeTable - 1
-                        then  
-                            new TaggedEdge<_,_>(state.Id, tableTransitions.[0].[i], new EdgeLbl<_,_>(Smbl (char (if i = sizeTable - 1 then int Eof else i)), action)) |> resFST.AddVerticesAndEdge |> ignore
+                        new EdgeFST<_,_>(state.Id, st, (Smbl (char (if i = sizeTable - 1 then int Eof else i)), Eps)) |> resFST.AddVerticesAndEdge |> ignore                       
+                    else 
+                        if state.Id <> 0
+                        then 
+                            let action = if actionFunc.[state.Id].Count > 0 then Smbl (actionFunc.[state.Id].[0]) else Eps
+                            if tableTransitions.[0].[i] <> sentinel || i = sizeTable - 1
+                            then  
+                                new EdgeFST<_,_>(state.Id, tableTransitions.[0].[i], (Smbl (char (if i = sizeTable - 1 then int Eof else i)), action)) |> resFST.AddVerticesAndEdge |> ignore
                             
-        let getVal printV s = 
-            match s with
-            | Smbl y -> "Smbl " + printV y
-            | Eps -> "Eps"
-            | _ -> ""
+            let getVal printV s = 
+                match s with
+                | Smbl y -> "Smbl " + printV y
+                | Eps -> "Eps"
 
-        let filePathFst = 
-            match !out with 
-            | Some x -> Path.Combine (Path.GetDirectoryName x,Path.GetFileNameWithoutExtension(x)) + "_Abstract.fs" 
-            | _ -> Path.Combine (Path.GetDirectoryName filename,Path.GetFileNameWithoutExtension(filename)) + "_Abstract.fs"
+            let filePathFst = 
+                match !out with 
+                | Some x -> Path.Combine (Path.GetDirectoryName x,Path.GetFileNameWithoutExtension(x)) + "_Abstract.fs" 
+                | _ -> Path.Combine (Path.GetDirectoryName filename,Path.GetFileNameWithoutExtension(filename)) + "_Abstract.fs"
 
-        let fstStream = new StreamWriter(filePathFst)
+            let fstStream = new StreamWriter(filePathFst)
 
-        let printIfCodeDefined (code,pos:Position) =
-            if pos <> Position.Empty  // If bottom code is unspecified, then position is empty.        
-            then 
-                 fstStream.WriteLine(sprintf "%s" code);
+            let printIfCodeDefined (code,pos:Position) =
+                if pos <> Position.Empty  // If bottom code is unspecified, then position is empty.        
+                then 
+                     fstStream.WriteLine(sprintf "%s" code);
 
-        printIfCodeDefined spec.TopCode
+            printIfCodeDefined spec.TopCode
 
-        fstStream.WriteLine("let fstLexer () = ")
-        fstStream.WriteLine(sprintf "   let startState = ResizeArray.singleton %i" resFST.InitState.[0]) // one init state...
-        fstStream.WriteLine(sprintf "   let finishState = ResizeArray.singleton %i" resFST.FinalState.[0]) //one final state...
-        fstStream.WriteLine("   let transitions = new ResizeArray<_>()")
-        //let alphabet = new ResizeArray<_>()
-        let alphabet = new HashSet<_>()
-        for edge in resFST.Edges do         
-            alphabet.Add((getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'" | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") edge.Tag.InSymb)) |> ignore
-            fstStream.WriteLine(
-                sprintf  
-                    "   transitions.Add(%i, new EdgeLbl<_,_>(%s, %s), %i)"
-                    edge.Source
-                    (getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'"  | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") edge.Tag.InSymb)
-                    //(getVal (fun y -> if y = char Eof then "(char 65535)" else ( "'" + y.ToString().Replace("\"","\\\"") + "'")) edge.Tag.InSymb)
-                    (getVal (string) edge.Tag.OutSymb) edge.Target)            
+            fstStream.WriteLine("let fstLexer () = ")
+            fstStream.WriteLine(sprintf "   let startState = ResizeArray.singleton %i" resFST.InitState.[0]) // one init state...
+            fstStream.WriteLine(sprintf "   let finishState = ResizeArray.singleton %i" resFST.FinalState.[0]) //one final state...
+            fstStream.WriteLine("   let transitions = new ResizeArray<_>()")
+            let alphabet = new HashSet<_>()
+            for edge in resFST.Edges do         
+                alphabet.Add((getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'" | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") (fst edge.Tag))) |> ignore
+                fstStream.WriteLine(
+                    sprintf  
+                        "   transitions.Add(%i, (%s, %s), %i)"
+                        edge.Source
+                        (getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'"  | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") (fst edge.Tag))
+                        (getVal (string) (snd edge.Tag)) edge.Target)            
                                                  
-        fstStream.WriteLine("   new FST<_,_>(startState, finishState, transitions)")
+            fstStream.WriteLine("   new FST<_,_>(startState, finishState, transitions)")
 
-        fstStream.WriteLine("\nlet actions () =")
-        fstStream.WriteLine("   [|")
+            fstStream.WriteLine("\nlet actions () =")
+            fstStream.WriteLine("   [|")
         
-        let strs = ref ""
-        for ((startNode, actions),(ident,args,_)) in List.zip perRuleData spec.Rules do
-                actions |> Seq.iteri (fun i (code,pos) -> 
-                    strs := !strs + "\n      (fun (gr : GraphTokenValue<_>) ->\n"  
+            let strs = ref ""
+            for ((startNode, actions),(ident,args,_)) in List.zip perRuleData spec.Rules do
+                    actions |> Seq.iteri (fun i (code,pos) -> 
+                        strs := !strs + "\n      (fun (gr : FSA<_>) ->\n"  
 
-                    let lines = code.Split([| '\r'; '\n' |], StringSplitOptions.RemoveEmptyEntries)
-                    for line in lines do
-                        strs := !strs +  (sprintf "               %s" line);
-                    strs := !strs + ");")
+                        let lines = code.Split([| '\r'; '\n' |], StringSplitOptions.RemoveEmptyEntries)
+                        for line in lines do
+                            strs := !strs +  (sprintf "               %s" line);
+                        strs := !strs + ");")
     
-        fstStream.WriteLine(!strs)
-        fstStream.WriteLine()
+            fstStream.WriteLine(!strs)
+            fstStream.WriteLine()
 
-        fstStream.WriteLine("   |]\n")
+            fstStream.WriteLine("   |]\n")
         
 
-        fstStream.WriteLine("\nlet alphabet () = ")
-        //alphabet |> Set.toArray |> Array.iter (fun i -> sprintf " %s;" i) |> Array.concat |> fstStream.WriteLine 
-        let alp = ref ""
-        for i in alphabet do
-            alp := !alp + (sprintf " %s;" i)
-        fstStream.WriteLine(" new HashSet<_>([|" + !alp + "|])\n")
-        fstStream.WriteLine("let tokenize eof approximation = Tokenize (fstLexer()) (actions()) (alphabet()) eof approximation")
-        fstStream.Close()
+            fstStream.WriteLine("\nlet alphabet () = ")
+            //alphabet |> Set.toArray |> Array.iter (fun i -> sprintf " %s;" i) |> Array.concat |> fstStream.WriteLine 
+            let alp = ref ""
+            for i in alphabet do
+                alp := !alp + (sprintf " %s;" i)
+            fstStream.WriteLine(" new HashSet<_>([|" + !alp + "|])\n")
+            fstStream.WriteLine("let tokenize eof approximation = Tokenize (fstLexer()) (actions()) (alphabet()) eof approximation")
+            fstStream.Close()
 
-    ToGraphBasedFst    
+        ToGraphBasedFst    
     
   with e -> 
     printf "FSLEX: error FSL000: %s" (match e with Failure s -> s | e -> e.ToString());

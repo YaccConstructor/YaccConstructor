@@ -13,11 +13,13 @@ open Microsoft.FSharp.Text
 open Yard.Examples.MSParser
 open Yard.Utils.SourceText
 open YC.FST.AbstractLexing.Interpreter
-open YC.FST.FstApproximation
+open YC.FSA.FsaApproximation
 open Microsoft.FSharp.Collections
+open YC.FSA.GraphBasedFsa
+open YC.FST.GraphBasedFst
 
 let baseInputGraphsPath = "../../../Tests/AbstractPerformance/TSQL"
-let eofToken = Yard.Examples.MSParser.RNGLR_EOF (new GraphTokenValue<_>())
+let eofToken = Yard.Examples.MSParser.RNGLR_EOF (new FSA<_>())
 
 let path baseInputGraphsPath name = System.IO.Path.Combine(baseInputGraphsPath,name)
 
@@ -71,6 +73,10 @@ let parse = fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGra
 
 let LexerTSQL (srcFilePath:string) =
     let lexerInputGraph = loadLexerInputGraph srcFilePath
+    let graphFsa = lexerInputGraph.ApprToFSA()
+    let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
+    let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
+    let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
     let tokenize srcFilePath = 
         let start = System.DateTime.Now
         for i in 1..5 do YC.TSQLLexer.tokenize eofToken lexerInputGraph  |> ignore

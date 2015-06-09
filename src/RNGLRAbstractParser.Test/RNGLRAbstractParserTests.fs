@@ -27,6 +27,8 @@ open Yard.Generators.RNGLR.AbstractParser
 open YC.Tests.Helper
 open Yard.Generators.ARNGLR.Parser
 
+open YC.FSA.GraphBasedFsa
+open YC.FSA.FsaApproximation
 
 let baseInputGraphsPath = "../../../Tests/AbstractRNGLR/DOT"
 
@@ -34,6 +36,7 @@ let path name = path baseInputGraphsPath name
 
 let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)
+
 let loadLexerInputGraph gFile =
     let qGraph = loadDotToQG baseInputGraphsPath gFile
     let lexerInputG = new LexerInputGraph<_>()
@@ -421,7 +424,7 @@ type ``RNGLR abstract parser tests`` () =
 
         test RNGLR.Brackets.buildAstAbstract qGraph 20 20 0 9 3
 
-    [<Test>]
+    //[<Test>]
     member this._22_Brackets_BackEdge () =
         let qGraph = new ParserInputGraph<_>(0, 2)
         qGraph.AddVerticesAndEdgeRange
@@ -471,7 +474,7 @@ type ``RNGLR abstract parser tests`` () =
 
         test RNGLR.StrangeBrackets.buildAstAbstract qGraph 25 25 4 8 1
 
-    [<Test>]
+    //[<Test>]
     member this._26_UnambiguousBrackets_Inf () =
         let qGraph = new ParserInputGraph<_>(0, 9)
         qGraph.AddVerticesAndEdgeRange
@@ -482,7 +485,7 @@ type ``RNGLR abstract parser tests`` () =
 
         test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
 
-    [<Test>]
+    //[<Test>]
     member this.temp () =
         let qGraph = new ParserInputGraph<_>(0, 9)
         qGraph.AddVerticesAndEdgeRange
@@ -527,13 +530,13 @@ type ``RNGLR abstract parser tests`` () =
             ] |> ignore
 
         test RNGLR.StrangeBrackets.buildAstAbstract qGraph 25 24 4 8 1
-[<EntryPoint>]
-let f x =
-    if System.IO.Directory.Exists "dot" 
-    then 
-        System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
-    else System.IO.Directory.CreateDirectory "dot" |> ignore
-    let t = new ``RNGLR abstract parser tests`` () 
+//[<EntryPoint>]
+//let f x =
+//    if System.IO.Directory.Exists "dot" 
+//    then 
+//        System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
+//    else System.IO.Directory.CreateDirectory "dot" |> ignore
+//    let t = new ``RNGLR abstract parser tests`` () 
 
 //    t._01_PrettySimpleCalc_SequenceInput ()
 //    t._02_PrettySimpleCalc_SimpleBranchedInput ()
@@ -563,6 +566,4 @@ let f x =
 //    t._26_UnambiguousBrackets_Inf()
 //    t._27_UnambiguousBrackets_WithoutEmptyString()
 //    t._28_UnambiguousBrackets_DifferentPathLengths ()
-    t.temp()
-    0
-    
+//    0

@@ -23,6 +23,11 @@ namespace RShT1
             return 0;
         }
 
+        public static int ExtEval(string s)
+        {
+            return 0;
+        }
+
         static void Main(string[] args)
         {
         }

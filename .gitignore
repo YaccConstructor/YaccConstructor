@@ -405,3 +405,4 @@ Tests/AbstractRNGLR/DOT/_sppf.dot
 Tests/RNGLR/sppf.dot
 Tests/RNGLR/sppf.dot.pdf
 src/GLLParser.SimpleTest/res.dot
+src/Tests/AbstractRNGLR/DOT/ast.dot

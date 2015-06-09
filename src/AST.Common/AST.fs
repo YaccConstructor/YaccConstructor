@@ -287,40 +287,63 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
         find root
 
     member this.CalculateStatistics nonterminal (leftSide : array<int>) (numToString : int -> string) =
-        let remembered = new Dictionary<AstNode, int * int * double>()
+        let remembered = new Dictionary<AstNode, (int * int * double) option>()
 
         let nontermInd =
             leftSide |> Array.find (fun x -> String.Equals (numToString x, nonterminal))
 
-        let calculateStat (arr : (int * int * double)[]) =
-            let curMax = ref System.Int32.MinValue
-            let curMin = ref System.Int32.MaxValue
-            let curSum = ref 0.0
-            for (max, min, ave) in arr do
-                if max > !curMax then curMax := max
-                if min < !curMin then curMin := min
-                curSum := !curSum + ave
-            !curMax, !curMin, (!curSum / double arr.Length)
+        let calculateStat (arr : ((int * int * double) option)[]) =
+            let filtered = arr |> Array.filter (fun x -> x.IsSome)
 
-        let rec count (node : AstNode) : int * int * double = 
+            if filtered.Length = 0
+            then None
+            elif filtered.Length = 1
+            then filtered.[0]
+            else
+                let curMax = ref System.Int32.MinValue
+                let curMin = ref System.Int32.MaxValue
+                let curSum = ref 0.0
+
+                for a in filtered do
+                    match a with 
+                    | Some (max, min, ave) -> 
+                        if max > !curMax then curMax := max
+                        if min < !curMin then curMin := min
+                        curSum := !curSum + ave
+                    | None -> failwith "Seems that Array.filter does not work"
+                Some (!curMax, !curMin, (!curSum / double filtered.Length))
+
+        let rec count (node : AstNode) : (int * int * double) option = 
             if remembered.ContainsKey(node)
             then remembered.[node]
             else 
                 let stat = 
                     match node with 
-                    | :? Terminal as t -> 0, 0, 0.0
-                    | :? Epsilon -> 0, 0, 0.0
+                    | :? Terminal -> None
+                    | :? Epsilon -> None
                     | :? AST as ast -> 
-                        ast.map(fun f -> 
-                                    f.nodes.map ((fun inc a -> let max, min, ave = count a;
-                                                               max + inc, min + inc, ave + double inc) (if leftSide.[f.prod] = nontermInd then 1 else 0))
-                                    |> calculateStat)
-                        |> calculateStat
+                        let statistics = 
+                            ast.map(fun f -> 
+                                        f.nodes.map ((fun inc a -> let prev = count a;
+                                                                   let updated = 
+                                                                       match prev with 
+                                                                       | Some (max, min, ave) -> Some (max + inc, min + inc, ave + double inc)
+                                                                       | _ -> None
+                                                                   updated) (if leftSide.[f.prod] = nontermInd then 1 else 0))
+                                        |> calculateStat)
+                            |> calculateStat
+                        if statistics.IsNone 
+                        then 
+                            let inc = if leftSide.[ast.first.prod] = nontermInd then 1 else 0
+                            Some (inc, inc, double inc) 
+                        else statistics 
                     | _ -> failwith "Something happened"
                 remembered.Add(node, stat)
                 stat
 
-        count this.Root 
+        match count this.Root with
+        | Some (max, min, ave) -> max, min, ave
+        | _ -> failwith "Something happened"
 
     /// handleCycleNode is used for handling nodes, contained in cycles
     ///   and having no children family, where each node has smaller position.

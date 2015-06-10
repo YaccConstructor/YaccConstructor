@@ -63,8 +63,10 @@
     <Compile Include="Parser_lalr1.fs" />
     <Compile Include="Parser_lr0.fs" />
     <Compile Include="Parser_slr1.fs" />
+    <Compile Include="Calc_slr1.fs" />
     <Compile Include="Calc_lr1.fs" />
     <Compile Include="Calc_lalr1.fs" />
+    <Compile Include="Calc_lexer_slr1.fs" />
     <Compile Include="Calc_lexer_lalr1.fs" />
     <Compile Include="Calc_lexer_lr1.fs" />
     <Compile Include="Lexer_lr1.fs" />

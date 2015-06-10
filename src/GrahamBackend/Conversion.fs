@@ -10,17 +10,11 @@ open Mono.Addins
 do()
 
 [<Extension>]
-type TestGenerator() = 
+type FacioBackend() = 
     inherit Generator()
-        override this.Name = "TestGenerator"
+        override this.Name = "FacioBackend"
         override this.Generate (t, args) =       
-        //override this.Generate t =
-            //this.Generate (t, "")
-            (*let grhmIl = {
-                Terminals = Set.empty.Add("INT").Add("DO").Add("PRINT").Add("WHILE")                
-                Nonterminals = Set.empty.Add("Expr").Add("start")                
-                Productions = Map.empty.Add("Expr", [|[|Terminal  "INT"|]|]); } *)
-
+        
             let getHeader =
                 match t.head with
                 | Some v -> Some v.text
@@ -175,11 +169,11 @@ type TestGenerator() =
                 Productions = getProductions } //["Smth",[{Symbols=["Expr";"PRINT"]; Action=Some(" Print($2) "); ImpersonatedPrecedence=Some("")}]]; }
             
             let backendOpt : FSharpYacc.FsyaccBackendOptions = {
-                OutputPath = (!outputParserPath).Value ; //"C:\\Users\\Ekaterina\\YaccConstructor\\src\\CheckInterpreter\\Parser.fs";
+                OutputPath = (!outputParserPath).Value ;
                 ModuleName = Some("Parser");
                 LexerInterpreterNamespace = None;
                 ParserInterpreterNamespace = None;
-                OpenDeclarations = [||]; // Ast ???
+                OpenDeclarations = [||];
                 InternalModule = true; }
             
             let getParserType =
@@ -214,11 +208,7 @@ type TestGenerator() =
                         options)
             backendInvoke
             box "3" 
-            (*override this.Generate(t, tokenType) = 
-            let outFile = t.info.fileName + ".fsy"
-            let res = generate t tokenType
-            System.IO.File.WriteAllText(outFile,res)
-            res :> obj*)
+           
         override this.Constraints = [|noMeta; noEbnf; noInnerAlt; noAlt; noLiterals; noBrackets; needAC; singleModule|]
         override this.Generate definition = this.Generate (definition, "")
 

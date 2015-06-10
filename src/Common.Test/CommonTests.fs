@@ -27,7 +27,7 @@ type ``Components loader tests`` () =
             List.ofSeq generatorNames
             |> List.sort
         let expetedResult = 
-            ["TestGenerator"; "CYKGenerator"; "FParsecGenerator"; "FsYaccPrinter"; "GLLGenerator"; (*"GLLGenerator2";*) "RNGLRGenerator"; "TreeDump"; "YardPrinter"]
+            ["FacioBackend"; "CYKGenerator"; "FParsecGenerator"; "FsYaccPrinter"; "GLLGenerator"; (*"GLLGenerator2";*) "RNGLRGenerator"; "TreeDump"; "YardPrinter"]
             |> List.sort
         Seq.iter (printfn "%A;") allGenerators
         printfn "**********************"

@@ -5,13 +5,13 @@ statementList : statement TZ statementList { $1::$3 }
               | statement TZ { [$1] }
 
 statement : expr { $1 }
-	      | ID EQ expr { { global_vars[$1] = $3 } }
+	      | ID EQ expr { $3 }
 
 expr : multExpression PLUS multExpression { $1 + $3 }
      | multExpression MINUS multExpression { $1 - $3 }
      | multExpression { $1}
 
-atom : ID { { return global_vars[$1] } }
+atom : ID { $1 }
 	| INT { $1 }
 	| LBRACE expr RBRACE { $2 }
 	

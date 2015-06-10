@@ -1,14 +1,14 @@
 # 1 "Calc.fsl"
  
-module LexerCalcLALR1
+module LexerCalcSLR1
 
-open ParserCalcLALR1
+open ParserCalcSLR1
 open System
 open Microsoft.FSharp.Text.Lexing
 
 let lexeme (lexbuf : LexBuffer<char>) = new System.String(lexbuf.Lexeme)
 
-# 11 "Calc_lexer_lalr1.fs"
+# 11 "Calc_lexer_slr1.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -63,63 +63,63 @@ and _fslex_tokenize  _fslex_state lexbuf =
   | 0 -> ( 
 # 17 "Calc.fsl"
                        PLUS (0) 
-# 66 "Calc_lexer_lalr1.fs"
+# 66 "Calc_lexer_slr1.fs"
           )
   | 1 -> ( 
 # 18 "Calc.fsl"
                        MINUS (0) 
-# 71 "Calc_lexer_lalr1.fs"
+# 71 "Calc_lexer_slr1.fs"
           )
   | 2 -> ( 
 # 19 "Calc.fsl"
                        MULT (0) 
-# 76 "Calc_lexer_lalr1.fs"
+# 76 "Calc_lexer_slr1.fs"
           )
   | 3 -> ( 
 # 20 "Calc.fsl"
                        DIV (0) 
-# 81 "Calc_lexer_lalr1.fs"
+# 81 "Calc_lexer_slr1.fs"
           )
   | 4 -> ( 
 # 21 "Calc.fsl"
                        LBRACE (0) 
-# 86 "Calc_lexer_lalr1.fs"
+# 86 "Calc_lexer_slr1.fs"
           )
   | 5 -> ( 
 # 22 "Calc.fsl"
                        RBRACE (0) 
-# 91 "Calc_lexer_lalr1.fs"
+# 91 "Calc_lexer_slr1.fs"
           )
   | 6 -> ( 
 # 23 "Calc.fsl"
                        EQ (0) 
-# 96 "Calc_lexer_lalr1.fs"
+# 96 "Calc_lexer_slr1.fs"
           )
   | 7 -> ( 
 # 24 "Calc.fsl"
                        TZ (0) 
-# 101 "Calc_lexer_lalr1.fs"
+# 101 "Calc_lexer_slr1.fs"
           )
   | 8 -> ( 
 # 25 "Calc.fsl"
                           INT (int(lexeme lexbuf)) 
-# 106 "Calc_lexer_lalr1.fs"
+# 106 "Calc_lexer_slr1.fs"
           )
   | 9 -> ( 
 # 26 "Calc.fsl"
                              ID (0) 
-# 111 "Calc_lexer_lalr1.fs"
+# 111 "Calc_lexer_slr1.fs"
           )
   | 10 -> ( 
 # 27 "Calc.fsl"
                        EOF (-1) 
-# 116 "Calc_lexer_lalr1.fs"
+# 116 "Calc_lexer_slr1.fs"
           )
   | 11 -> ( 
 # 28 "Calc.fsl"
                      failwithf "UNEXPEXTED INPUT: %s" <| "-" 
-# 121 "Calc_lexer_lalr1.fs"
+# 121 "Calc_lexer_slr1.fs"
           )
   | _ -> failwith "tokenize"
 
-# 3000000 "Calc_lexer_lalr1.fs"
+# 3000000 "Calc_lexer_slr1.fs"

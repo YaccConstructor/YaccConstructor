@@ -6,7 +6,6 @@ using JetBrains.ReSharper.Daemon.CSharp.Stages;
 using JetBrains.ReSharper.Feature.Services.Bulbs;
 using JetBrains.ReSharper.Feature.Services.CSharp.Bulbs;
 using JetBrains.ReSharper.Feature.Services.LinqTools;
-using JetBrains.ReSharper.Intentions.Extensibility;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Tree;
@@ -18,6 +17,9 @@ using JetBrains.TextControl.Impl;
 using JetBrains.UI.ActionSystem.Actions.CloseAll;
 using JetBrains.UI.RichText;
 using JetBrains.Util;
+using JetBrains.ReSharper.Feature.Services.ContextActions;
+using JetBrains.ReSharper.Feature.Services.CSharp.Analyses.Bulbs;
+
 //using YS.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation;
 //using ;
 

@@ -1,24 +1,28 @@
+using System;
 using System.Windows.Forms;
+using System.Windows.Controls;
+
+using Microsoft.VisualStudio.Shell.Interop;
+
+using GraphX;
+using GraphX.Controls;
+using GraphX.GraphSharp.Algorithms.Layout.Simple.FDP;
+
+using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting;
+
+using JetBrains.UI.ActionsRevised;
+using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ActionManagement;
 using JetBrains.Application.DataContext;
 using JetBrains.DataFlow;
 using JetBrains.UI.ToolWindowManagement;
 using JetBrains.UI.Application;
-using Microsoft.VisualStudio.Shell.Interop;
-using JetBrains.ReSharper.Daemon;
 using JetBrains.TextControl;
 using JetBrains.Application;
-using System;
-using JetBrains.ReSharper.Features.Altering.Resources;
-using GraphX;
-using GraphX.GraphSharp.Algorithms.Layout.Simple.FDP;
-using System.Windows.Controls;
-using GraphX.Controls;
-using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting;
+using JetBrains.ReSharper.Feature.Services.Resources;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin
 {
-
     #region Descriptor
     [ToolWindowDescriptor(
     ProductNeutralId = "ClassName",
@@ -29,14 +33,16 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
     InitialDocking = ToolWindowInitialDocking.NotSpecified)]
     public class WindowDescriptor : ToolWindowDescriptor
     {
-        public WindowDescriptor(IApplicationDescriptor applicationDescriptor)
-            : base(applicationDescriptor)
+        public WindowDescriptor(IApplicationHost applicationHost)
+            : base(applicationHost)
         {
         }
     }
     #endregion
-    [ActionHandler("Plugin.ToolWindow.About")]
-    public class WindowAction : IActionHandler
+    
+    //[ActionHandler("Plugin.ToolWindow.About")]
+    [ActionHandler(typeof(WindowDescriptor))]
+    public class WindowAction : ActivateToolWindowActionHandler<WindowDescriptor>
     {
         private readonly IDaemonProcess myDaemonProcess;
         private WindowDescriptor descriptor;

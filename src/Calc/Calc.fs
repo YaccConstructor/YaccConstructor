@@ -6,18 +6,20 @@ open YC.SDK.CommonInterfaces
 open Mono.Addins
 open YC.SDK.ReSharper.Helper
 open ReSharperExtension
-open JetBrains.Application
 open YC.FST.AbstractLexing.Interpreter
 open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation
 open YC.FST.GraphBasedFst
+
+open JetBrains.Application
+open JetBrains.ReSharper.Psi.CSharp.Tree
 
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
 
 do()
 
-type br = JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression
+type br = ICSharpLiteralExpression
 
 [<Extension>]
 [<ShellComponent>]

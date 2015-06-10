@@ -1,4 +1,4 @@
-﻿module XMLParser
+﻿module HotspotParser
 
 open System.Xml
 
@@ -17,7 +17,7 @@ type Hotspot =
     new (full : string array, position, returnType) = 
         new Hotspot(full.[0], full.[1], position, returnType)
 
-let parseXml (path : string) = 
+let parseHotspots (path : string) = 
     let parseHotspot (hotspot : XmlNode) = 
         let mutable child = hotspot
         if child.NodeType = XmlNodeType.Comment 

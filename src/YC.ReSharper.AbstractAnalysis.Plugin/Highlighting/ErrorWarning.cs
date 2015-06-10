@@ -14,41 +14,50 @@
  * limitations under the License.
  */
 
+using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
+using JetBrains.ReSharper.Feature.Services.Daemon;
+using JetBrains.ReSharper.Psi.Tree;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
-  /// <summary>
-  /// The highlighting that warns about high complexity
-  /// </summary>
-  [StaticSeverityHighlighting(Severity.ERROR, "CSharpInfo")]
-  public class ErrorWarning : IHighlighting
-  {
-    private readonly string myTooltip;
-
-    public ErrorWarning(string toolTip)
+    /// <summary>
+    /// The highlighting that warns about high complexity
+    /// </summary>
+    [StaticSeverityHighlighting(Severity.ERROR, "CSharpInfo")]
+    public class ErrorWarning : IHighlighting
     {
-      myTooltip = toolTip;
-    }
+        private readonly string myTooltip;
+        private DocumentRange range;
 
-    public string ToolTip
-    {
-      get { return myTooltip; }
-    }
+        public ErrorWarning(DocumentRange range, string toolTip)
+        {
+            myTooltip = toolTip;
+        }
 
-    public string ErrorStripeToolTip
-    {
-      get { return myTooltip; }
-    }
+        public string ToolTip
+        {
+            get { return myTooltip; }
+        }
 
-    public int NavigationOffsetPatch
-    {
-      get { return 0; }
-    }
+        public string ErrorStripeToolTip
+        {
+            get { return myTooltip; }
+        }
 
-    public bool IsValid()
-    {
-      return true;
+        public int NavigationOffsetPatch
+        {
+            get { return 0; }
+        }
+
+        public bool IsValid()
+        {
+            return true;
+        }
+
+        public DocumentRange CalculateRange()
+        {
+            return range;
+        }
     }
-  }
 }

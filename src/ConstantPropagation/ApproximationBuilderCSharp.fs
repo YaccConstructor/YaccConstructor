@@ -2,14 +2,15 @@
 
 open QuickGraph
 
+open JetBrains.ReSharper.Psi.CSharp.ControlFlow
 open JetBrains.ReSharper.Psi.CSharp.Tree
 open JetBrains.ReSharper.Psi.CSharp
 open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi
-open JetBrains.ReSharper.Psi.ControlFlow.CSharp
 open JetBrains.ReSharper.Psi.ControlFlow
 
-open XMLParser
+open HotspotParser
+open CSharpCfgBuilderHelper
 open DataDependencyGraph
 
 open System.Collections.Generic
@@ -18,7 +19,7 @@ open System.IO
 open Utils
 
 
-let private hotspotInfoList = parseXml "Hotspots.xml"
+let private hotspotInfoList = parseHotspots "Hotspots.xml"
 
 let private tryDefineLang (node: IInvocationExpression) = 
     let typeDecl = node.InvokedExpression.GetText().Split('.')
@@ -67,9 +68,9 @@ let private createControlFlowGraph (hotspot: IInvocationExpression) =
         | _ -> getEnclosingMethod node.Parent
 
     let methodDeclaration = getEnclosingMethod hotspot
-    CSharpControlFlowBuilder.Build methodDeclaration
+    nodeToCSharpCfg methodDeclaration
 
-let createAstCfgMap (cfg: ICSharpControlFlowGraf): Dictionary<ITreeNode, IControlFlowElement> =
+let createAstCfgMap (cfg: IControlFlowGraph): Dictionary<ITreeNode, IControlFlowElement> =
     let dict = new Dictionary<ITreeNode, IControlFlowElement>()
     cfg.AllElements
     |> List.ofSeq

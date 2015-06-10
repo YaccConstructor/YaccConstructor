@@ -1,8 +1,8 @@
 ﻿module Utils
 
 module DotUtils =
-    open JetBrains.ReSharper.Psi.ControlFlow.CSharp
     open JetBrains.ReSharper.Psi.ControlFlow
+    open JetBrains.ReSharper.Psi.CSharp.ControlFlow
     open JetBrains.ReSharper.Psi.CSharp.Tree
     open JetBrains.ReSharper.Psi.Tree
     open JetBrains.ReSharper.Psi
@@ -10,7 +10,11 @@ module DotUtils =
     open System.IO
     open System.Collections.Generic
 
-    let private toDot (cfg: ICSharpControlFlowGraf) (outStream: StreamWriter) =
+    open CSharpCfgBuilderHelper
+
+    
+
+    let private toDot (cfg: ICSharpControlFlowGraph) (outStream: StreamWriter) =
         let getNodeInfo (node: IControlFlowElement) =
             if node <> null
             then 
@@ -62,7 +66,7 @@ module DotUtils =
 
     // Converts passed cfg "cfg" to DOT's digraph with name "name" 
     // and stores it in the file specified by "outPath"
-    let cfgToDot (cfg: ICSharpControlFlowGraf) outPath name =
+    let cfgToDot (cfg: ICSharpControlFlowGraph) outPath name =
         use outStream = FileInfo(outPath).CreateText()
         outStream.WriteLine("digraph " + name + " {")
         toDot cfg outStream
@@ -74,7 +78,8 @@ module DotUtils =
     let methodCFGToDot (methodDecl: IMethodDeclaration) (outDirPath: string) =
         let methodName = methodDecl.NameIdentifier.GetText()
         let outPath = Path.Combine(outDirPath, methodName + ".dot")
-        let cfg = CSharpControlFlowBuilder.Build methodDecl
+                
+        let cfg = nodeToCSharpCfg methodDecl
         cfgToDot cfg outPath methodName
 
     // Applies "CFGUtils.methodCFGToDot" to all the methods in the file

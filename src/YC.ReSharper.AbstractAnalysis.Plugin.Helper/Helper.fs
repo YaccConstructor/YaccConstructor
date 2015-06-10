@@ -1,21 +1,25 @@
 ﻿module YC.SDK.ReSharper.Helper
 
 open System.Collections.Generic
+
+//open JetBrains.Application
 open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi.CSharp.Tree
-open JetBrains.Application
-open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
+open JetBrains.ReSharper.Resources.Shell
+
 open Microsoft.FSharp.Collections
 open ReSharperExtension
 open Constants
+open YC.SDK.CommonInterfaces
 open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation
+open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 
 type br = JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression
 type range = JetBrains.DocumentModel.DocumentRange
 type node = JetBrains.ReSharper.Psi.Tree.ITreeNode 
 
-let getRange =  fun (x:JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression) -> (x:>ITreeNode).GetDocumentRange()
+let getRange =  fun (x : ICSharpLiteralExpression) -> (x :> ITreeNode).GetDocumentRange()
 
 let addSemantic (parent : ITreeNode) (children : ITreeNode list) = 
     let mutable prev = null
@@ -75,7 +79,7 @@ type ProcessErrors(lexerErrors : Error, parserErrors : Error, semanticErrors : E
 type ReSharperHelper<'range, 'node> private() =
     let getAllProcessors() =
         Shell.Instance.GetComponents<IReSharperLanguage>()
-
+        
     let getProcessor (lang: string) = 
         let processors = getAllProcessors() |> Array.ofSeq
         let l = lang.ToLowerInvariant()

@@ -1,6 +1,5 @@
 using System.Reflection;
 using JetBrains.ActionManagement;
-using JetBrains.Application.PluginSupport;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
@@ -17,9 +16,4 @@ using JetBrains.Application.PluginSupport;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
-[assembly: ActionsXml("YC.ReSharper.AbstractAnalysis.Plugin.Actions.xml")]
-
-// The following information is displayed by ReSharper in the Plugins dialog
-[assembly: PluginTitle("ReSharper.AbstractAnalysis")]
-[assembly: PluginDescription("Abstract analysis for string-embedded languages.")]
-[assembly: PluginVendor("JetBrains Lab")]
+//[assembly: ActionsXml("YC.ReSharper.AbstractAnalysis.Plugin.Actions.xml")]

@@ -1,6 +1,7 @@
 ﻿using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Impl;
+using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.Tree;
 using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting;
 
@@ -9,7 +10,7 @@ using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting;
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
     [ConfigurableSeverityHighlighting(SEVERITY_ID, LANGUAGE_NAME, OverlapResolve = OverlapResolveKind.NONE, ToolTipFormatString = null)]
-    internal class TokenHighlighting : ICustomAttributeIdHighlighting, IHighlightingWithRange
+    internal class TokenHighlighting : ICustomAttributeIdHighlighting
     {
         //public const string HIGHLIGHTING_ID = "YC.SEL.SDK Highlighting";
         public const string SEVERITY_ID = "YC.SEL.SDK Highlighting";
@@ -52,10 +53,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         {
             get { return attributeId; }
         }
-
-        #endregion
-
-        #region IHighlightingWithRange Members
 
         public DocumentRange CalculateRange()
         {

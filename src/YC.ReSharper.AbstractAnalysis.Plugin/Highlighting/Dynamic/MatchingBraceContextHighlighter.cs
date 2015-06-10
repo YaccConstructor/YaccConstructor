@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
+using YC.SDK.ReSharper;
+
 using JetBrains.DataFlow;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon.CaretDependentFeatures;
-using JetBrains.ReSharper.Feature.Services.Bulbs;
-using JetBrains.ReSharper.Feature.Services.ContextHighlighters;
+using JetBrains.ReSharper.Feature.Services.Contexts;
+using JetBrains.ReSharper.Feature.Services.ContextActions;
 using JetBrains.ReSharper.Feature.Services.CSharp.Bulbs;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Parsing;
 using JetBrains.ReSharper.Psi.Parsing;
 using JetBrains.ReSharper.Psi.Tree;
-using YC.SDK.ReSharper;
 using JetBrains.Util;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
@@ -27,19 +29,20 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 
         [AsyncContextConsumer]
         public static Action ProcessDataContext(
-            Lifetime lifetime,
-            [ContextKey(typeof(CSharpContextActionDataProvider.ContextKey))] IContextActionDataProvider dataProvider,
-            InvisibleBraceHintManager invisibleBraceHintManager,
-            MatchingBraceSuggester matchingBraceSuggester)
+            Lifetime lifetime, 
+            [NotNull, ContextKey(typeof (CSharpContextActionDataProvider.ContextKey))] IContextActionDataProvider dataProvider,
+            InvisibleBraceHintManager invisibleBraceHintManager, 
+            MatchingBraceSuggester matchingBraceSuggester, 
+            HighlightingProlongedLifetime prolongedLifetime)
         {
-            return new MatchingBraceContextHighlighter(dataProvider).ProcessDataContextImpl(lifetime, dataProvider, invisibleBraceHintManager, matchingBraceSuggester);
+            return new MatchingBraceContextHighlighter(dataProvider).ProcessDataContextImpl(lifetime, prolongedLifetime, dataProvider, invisibleBraceHintManager, matchingBraceSuggester);
         }
 
         // We have left brace. We'll find all right braces.
         // '[caret]LBRACE'
         protected override void TryHighlightToRight(MatchingHighlightingsConsumer consumer, ITokenNode selectedToken, TreeOffset treeOffset)
         {
-            if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL)
+            if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL_VERBATIM)
                 return;
 
             if (ExistingTreeNodes.ExistingTrees.Count == 0)
@@ -122,7 +125,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
         // 'RBRACE[caret]'
         protected override void TryHighlightToLeft(MatchingHighlightingsConsumer consumer, ITokenNode selectedToken, TreeOffset treeOffset)
         {
-            if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL)
+            if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL_VERBATIM)
                 return;
 
             if (ExistingTreeNodes.ExistingTrees.Count == 0)

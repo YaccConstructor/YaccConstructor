@@ -1,21 +1,23 @@
 ﻿namespace YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 
-open XMLParser
+open HotspotParser
+open CSharpCfgBuilderHelper
+open AbstractAnalysis.Common
+open Microsoft.FSharp.Collections
+
 open JetBrains.ReSharper.Psi.CSharp
 open JetBrains.ReSharper.Psi.CSharp.Tree
 open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi
 open JetBrains.ReSharper.Psi.Files
-open AbstractAnalysis.Common
-open Microsoft.FSharp.Collections
 open JetBrains.ReSharper.Psi.ControlFlow
-open JetBrains.ReSharper.Psi.ControlFlow.CSharp
+open JetBrains.ReSharper.Psi.ControlFlow.Impl
+open JetBrains.ReSharper.Psi.CSharp.ControlFlow
 open JetBrains.ReSharper.Psi.CSharp.Impl.Resolve
-open Microsoft.FSharp.Collections
 
 type Approximator(file:ICSharpFile) = 
-    static let langToHotspot : (string * Hotspot) list = parseXml "Hotspots.xml"
-    
+    static let langToHotspot : (string * Hotspot) list = parseHotspots "Hotspots.xml"
+
     let propagate (hotspot:IInvocationExpression) =
         
 //        let declaration = hotspot.FindPrevNode(fun node -> match node with :? ICSharpFunctionDeclaration -> TreeNodeActionType.ACCEPT |_ ->  TreeNodeActionType.CONTINUE)
@@ -25,7 +27,8 @@ type Approximator(file:ICSharpFile) =
                 parent <- parent.Parent
             parent :?> ICSharpFunctionDeclaration
 
-        let graph = CSharpControlFlowBuilder.Build(declaration (*:?> ICSharpFunctionDeclaration*))
+        let graph = nodeToCSharpCfg declaration
+        
         let x = graph.Inspect(ValueAnalysisMode.OPTIMISTIC)
         let defUses = x.AssignmentsUsage
         let count = ref 0

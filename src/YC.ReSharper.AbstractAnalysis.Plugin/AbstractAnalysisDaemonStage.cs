@@ -20,6 +20,7 @@ using System.Windows.Documents;
 using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Psi;
+using JetBrains.ReSharper.Feature.Services.Daemon;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin
 {

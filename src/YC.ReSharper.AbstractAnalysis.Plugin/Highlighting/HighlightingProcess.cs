@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Application.Settings;
 using JetBrains.DocumentModel;
-using JetBrains.ReSharper.Daemon;
-using JetBrains.ReSharper.Daemon.Stages;
+using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
@@ -89,21 +88,21 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             if (parserErrors.Count > 0)
             {
                 highlightings.AddRange(from error in parserErrors
-                                       select new HighlightingInfo(error.Item2, new ErrorWarning("Syntax error. Unexpected token " /*+ error.Item1*/)));
+                                       select new HighlightingInfo((DocumentRange)error.Item2, new ErrorWarning((DocumentRange) error.Item2, "Syntax error. Unexpected token ")));
             }
 
             var lexerErrors = errors.LexerErrors.Info;
             if (lexerErrors.Count > 0)
             {
                 highlightings.AddRange(from error in lexerErrors
-                                       select new HighlightingInfo(error.Item2, new ErrorWarning("Unexpected symbol: " + error.Item1 + ".")));
+                                       select new HighlightingInfo((DocumentRange)error.Item2, new ErrorWarning((DocumentRange) error.Item2, "Unexpected symbol: " + error.Item1 + ".")));
             }
 
             var semanticErrors = errors.SemanticErrors.Info;
             if (semanticErrors.Count > 0)
             {
                 highlightings.AddRange(from error in semanticErrors
-                                       select new HighlightingInfo(error.Item2, new ErrorWarning("Semantic error. Symbol: " + error.Item1 + ".")));
+                                       select new HighlightingInfo((DocumentRange)error.Item2, new ErrorWarning((DocumentRange) error.Item2, "Semantic error. Symbol: " + error.Item1 + ".")));
             }
             //var highlightings = (from e in errors.Item2 select new HighlightingInfo(e.Item2, new ErrorWarning())).Concat(
             //                    from e in errors.Item1 select new HighlightingInfo(e.Item2, new ErrorWarning("Unexpected symbol: " + e.Item1 + ".")));

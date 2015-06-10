@@ -3,15 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media;
-using JetBrains.Application.Threading.Tasks;
-using JetBrains.DocumentModel;
-using JetBrains.ReSharper.Daemon;
-using JetBrains.ReSharper.Daemon.Stages;
-using JetBrains.ReSharper.Psi.Tree;
+
 using YC.SDK;
 using YC.SDK.ReSharper;
 using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic;
-using JetBrains.ReSharper.Psi.CSharp.Tree;
+
+using JetBrains.Application.Threading.Tasks;
+using JetBrains.DocumentModel;
+using JetBrains.ReSharper.Feature.Services.Daemon;
+using JetBrains.ReSharper.Psi.Tree;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
@@ -25,7 +25,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             DataGraphs = new ArrayList();
 
             foreach (var lexEvent in YcProcessor.LexingFinished)
+            {
                 lexEvent.AddHandler(OnLexingFinished);
+            }
 
             foreach (var parseEvent in YcProcessor.ParsingFinished)
                 parseEvent.AddHandler(OnParsingFinished);
@@ -36,7 +38,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         /// </summary>
         /// <param name="sender">Now always null</param>
         /// <param name="args"></param>
-        private static void OnLexingFinished(object sender, CommonInterfaces.LexingFinishedArgs<ITreeNode> args)
+        private static void OnLexingFinished<T>(object sender, CommonInterfaces.LexingFinishedArgs<T> args)
         {
             IHighlightingConsumer consumer = Process.Consumer;
             var processor = new TreeNodeProcessor(consumer, Process.CSharpFile);
@@ -45,7 +47,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             ColorHelper.ParseFile(xmlPath, args.Lang);
 
             Action action =
-                () => args.Tokens.ForEach(node => processor.ProcessAfterInterior(node));
+                () => args.Tokens.ForEach(node => 
+                    processor.ProcessAfterInterior(node as ITreeNode));
 
             using (TaskBarrier fibers = Process.DaemonProcess.CreateFibers())
             {

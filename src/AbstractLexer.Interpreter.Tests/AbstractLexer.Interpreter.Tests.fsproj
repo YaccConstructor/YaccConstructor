@@ -8,7 +8,7 @@
     <ProjectGuid>114e4775-bf85-464f-bb3d-d68de62615bd</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>AbstractLexer.Interpreter.Tests</RootNamespace>
-    <AssemblyName>AbstractLexer.Interpreter.Tests</AssemblyName>
+    <AssemblyName>YC.AbstractLexer.Interpreter.Test</AssemblyName>
     <Name>AbstractLexer.Interpreter.Tests</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>

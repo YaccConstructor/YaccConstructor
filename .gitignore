@@ -429,6 +429,12 @@ src/TSQL/Lexer.fs
 src/TSQL/Lexer_Abstract.fs
 src/ExtCalc/*.dot
 
+src/Tests/AbstractRNGLR/DOT/ast.dot
 src/ControlFlowGraph.Test/*.yrd.fs
 src/ControlFlowGraph.Test/*.dot
 src/YC.ReSharper.AbstractAnalysis.Plugin/YC.ReSharper.AbstractAnalysis.Plugin.csproj.user
+
+Tests/AbstractRNGLR/DOT/sppf.dot*
+Tests/AbstractRNGLR/DOT/_sppf.dot*
+Tests/AbstractRNGLR/Inputs/*.pdf
+Tests/RNGLR/sppf.dot*

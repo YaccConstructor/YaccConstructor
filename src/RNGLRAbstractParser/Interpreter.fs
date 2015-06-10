@@ -32,8 +32,6 @@ type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
     | Error of int * 'TokenType * string
 
-type IorB = I of int | B of bool
-
 [<AllowNullLiteral>]
 type Vertex (state : int, level : int) =
     let out = new ResizeArray<Edge>(4)
@@ -368,8 +366,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state. Possible errors: (" + states + ")")
             | Some res -> 
                 try 
-                    let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules)
-                //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
+                    let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
+                    //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
+
                     Success <| tree
                 with
                 e -> Error (-1, Unchecked.defaultof<'TokenType>, e.Message)

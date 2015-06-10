@@ -24,10 +24,36 @@ type AST =
     val mutable pos : int
     new (f, o) = {pos = -1; first = f; other = o}
     member inline this.findFamily f =
-        if f this.first then Some this.first
-        elif this.other <> null then
-            Array.tryFind f this.other
+        if f this.first 
+        then Some this.first
+        elif this.other <> null 
+        then Array.tryFind f this.other
         else None
+
+    member this.filterFamilies f =
+        let res = new ResizeArray<Family>()
+        if f this.first
+        then res.Add this.first
+        if this.other <> null 
+        then res.AddRange(Array.filter f this.other)
+        res
+
+    member inline this.doForAllFamilies f =
+        f this.first
+        if this.other <> null
+        then Array.iter f this.other
+
+    member inline this.map f =
+        let length = let count = ref 0; 
+                     this.doForAllFamilies (fun _ -> count := !count + 1)
+                     !count
+        let res = Array.zeroCreate length
+        res.[0] <- f this.first
+        if this.other <> null
+        then
+            for i = 0 to this.other.Length-1 do
+                res.[i+1] <- f this.other.[i]
+        res
 
 and Family =
     struct
@@ -45,50 +71,66 @@ and Nodes =
 
         new (arr : array<_>) =
             let mutable res = new Nodes()
-            if arr <> null then
-                if arr.Length > 0 then
+            if arr <> null 
+            then
+                if arr.Length > 0
+                then
                     res.fst <- arr.[0]
-                    if arr.Length > 1 then
+                    if arr.Length > 1
+                    then
                         res.snd <- arr.[1]
-                        if arr.Length > 2 then
+                        if arr.Length > 2
+                        then
                             res.other <- arr.[2..]
             {fst = res.fst; snd = res.snd; other = res.other}
             //match arr with
 
         member nodes.doForAll f =
-            if nodes.fst <> null then
+            if nodes.fst <> null
+            then
                 f nodes.fst
-                if nodes.snd <> null then
+                if nodes.snd <> null
+                then
                     f nodes.snd
-                    if nodes.other <> null then
+                    if nodes.other <> null
+                    then
                         for x in nodes.other do
                             f x
 
         member nodes.doForAllRev f =
-            if nodes.fst <> null then
-                if nodes.snd <> null then
-                    if nodes.other <> null then
+            if nodes.fst <> null
+            then
+                if nodes.snd <> null
+                then
+                    if nodes.other <> null 
+                    then
                         for i = nodes.other.Length - 1 downto 0 do
                             f nodes.other.[i]
                     f nodes.snd
                 f nodes.fst
 
         member nodes.isForAll f =
-            if nodes.fst <> null then
-                if not <| f nodes.fst then false
-                elif nodes.snd <> null then
-                        if not <| f nodes.snd then false
-                        elif nodes.other <> null then
-                            nodes.other |> Array.forall f
-                        else true
+            if nodes.fst <> null
+            then
+                if not <| f nodes.fst 
+                then false
+                elif nodes.snd <> null 
+                then
+                    if not <| f nodes.snd 
+                    then false
+                    elif nodes.other <> null 
+                    then nodes.other |> Array.forall f
+                    else true
                 else true
             else true
 
         member inline nodes.Length = 
-            if nodes.fst <> null then
-                if nodes.snd <> null then
-                    if nodes.other <> null then
-                        2 + nodes.other.Length
+            if nodes.fst <> null
+            then
+                if nodes.snd <> null
+                then
+                    if nodes.other <> null
+                    then 2 + nodes.other.Length
                     else 2
                 else 1
             else 0

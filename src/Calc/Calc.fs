@@ -44,17 +44,20 @@ type CalcInjectedLanguageModule () =
             filterEpsilons = true
         }
 
+    
     let printAstToDot ast name = defaultAstToDot ast name
-    let tokenToTreeNode = tokenToTreeNode
+    
+    let langName = "calc"
     let xmlPath = xmlPath
+    let tokenToTreeNode = tokenToTreeNode
     let translate ast errors = translate args ast errors
 
     let processor =
-        new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode,"calc",calculatePos
-                      , getRange, printAstToDot, otherAstToDot)
+        new Processor<Token, br, range, node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, langName, calculatePos
+                      , getRange, printAstToDot, otherAstToDot, None)
     
-    interface IInjectedLanguageModule<br,range,node> with
-        member this.Name = "calc"
+    interface IInjectedLanguageModule<br, range, node> with
+        member this.Name = langName
         member this.Process graphs = processor.Process graphs
         member this.LexingFinished = processor.LexingFinished
         member this.ParsingFinished = processor.ParsingFinished

@@ -1,3 +1,12 @@
 [submodule "tools/Build.Tools"]
 	path = tools/Build.Tools
 	url = https://github.com/YaccConstructor/Build.Tools.git
+[submodule "FST"]
+	path = FST
+	url = https://github.com/YaccConstructor/YC.FST.git
+[submodule "facio"]
+	path = facio
+	url = git://github.com/emavchun/facio.git
+[submodule "src/YC.GrammarZOO"]
+	path = src/YC.GrammarZOO
+	url = https://github.com/YaccConstructor/YC.GrammarZOO.git

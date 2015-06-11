@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -22,31 +22,20 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DefineConstants>JET_MODE_ASSERT;DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <OutputPath>..\..\Bin\Debug\v40\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="FsYacc, Version=2.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\FsYacc.exe</HintPath>
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="GraphX.PCL.Common">
+      <HintPath>..\packages\GraphX.2.1.8.1\lib\net40-client\GraphX.PCL.Common.dll</HintPath>
     </Reference>
-    <Reference Include="GraphX.Common">
-      <HintPath>..\packages\GraphX.2.0.2\lib\net40\GraphX.Common.dll</HintPath>
+    <Reference Include="GraphX.PCL.Logic">
+      <HintPath>..\packages\GraphX.2.1.8.1\lib\net40-client\GraphX.PCL.Logic.dll</HintPath>
     </Reference>
-    <Reference Include="GraphX.Controls">
-      <HintPath>..\packages\GraphX.2.0.2\lib\net40\GraphX.Controls.dll</HintPath>
-    </Reference>
-    <Reference Include="GraphX.Logic">
-      <HintPath>..\packages\GraphX.2.0.2\lib\net40\GraphX.Logic.dll</HintPath>
-    </Reference>
-    <Reference Include="Helper, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\Helper.dll</HintPath>
+    <Reference Include="GraphX.WPF.Controls">
+      <HintPath>..\packages\GraphX.2.1.8.1\lib\net40-client\GraphX.WPF.Controls.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Addins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -68,6 +57,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
@@ -82,16 +72,16 @@
   <ItemGroup>
     <Compile Include="AbstractAnalysisDaemonStage.cs" />
     <Compile Include="AbstractAnalysisDaemonStageProcess.cs" />
-    <Compile Include="GraphCodeWindow\GoToCode.cs" />
-    <Compile Include="GraphCodeWindow\GraphClasses\DataGraph.cs" />
-    <Compile Include="GraphCodeWindow\GraphClasses\DataEdge.cs" />
-    <Compile Include="GraphCodeWindow\GraphClasses\DataVertex.cs" />
-    <Compile Include="GraphCodeWindow\GraphClasses\EmptyGraphArea.cs" />
-    <Compile Include="GraphCodeWindow\GraphClasses\LogicCore.cs" />
-    <Compile Include="GraphCodeWindow\GraphCodeToolWindow.cs" />
-    <Compile Include="GraphCodeWindow\GraphCodeToolWindowAction.cs" />
-    <Compile Include="GraphCodeWindow\GraphLoader.cs" />
-    <Compile Include="GraphCodeWindow\InitializeGraphArea.cs" />
+    <Compile Include="GraphCodeWindow\GraphDefine\Edge.cs" />
+    <Compile Include="GraphCodeWindow\GraphDefine\EmptyGraphArea.cs" />
+    <Compile Include="GraphCodeWindow\GraphDefine\Graph.cs" />
+    <Compile Include="GraphCodeWindow\GraphDefine\LogicCore.cs" />
+    <Compile Include="GraphCodeWindow\GraphDefine\Vertex.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GraphCodeWindow\XAML Templates\AreaControl.xaml.cs">
+      <DependentUpon>AreaControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Highlighting\ColorHelper.cs" />
     <Compile Include="Highlighting\Dynamic\ExistingTreeNodes.cs" />
     <Compile Include="Highlighting\Dynamic\MatchingBraceContextHighlighter.cs" />
@@ -129,6 +119,14 @@
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Name>Conversions</Name>
     </ProjectReference>
+    <ProjectReference Include="..\FsYacc\FsYacc.fsproj">
+      <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>
+      <Name>FsYacc</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Helper\Helper.fsproj">
+      <Project>{fc9a166c-780d-4d15-b366-ca06277c803d}</Project>
+      <Name>Helper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ReSharperExtension\ReSharperExtension.csproj">
       <Project>{70133fea-83f5-416a-8869-0e745ef37778}</Project>
       <Name>ReSharperExtension</Name>
@@ -154,13 +152,11 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <Page Include="GraphCodeWindow\XAML_Templates\GraphAreaTemplates.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="GraphCodeWindow\XAML_Templates\ReadyGraphArea.xaml">
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="GraphCodeWindow\XAML Templates\AreaControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -169,7 +165,5 @@
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Targets')" />
   <PropertyGroup>
-    <PostBuildEvent>cd $(TargetDir)
-del JetBrains.*</PostBuildEvent>
   </PropertyGroup>
 </Project>

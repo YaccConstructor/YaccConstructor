@@ -53,16 +53,12 @@
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Graphviz4Net">
       <HintPath>..\..\3rdParty\graphviz4net\Graphviz4Net.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="QuickGraph">
@@ -73,9 +69,6 @@
     </Reference>
     <Reference Include="QuickGraph.Graphviz">
       <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Generator.0.0.6.5\tools\QuickGraph.Graphviz.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="QuickGraph.Serialization">
       <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Generator.0.0.6.5\tools\QuickGraph.Serialization.dll</HintPath>

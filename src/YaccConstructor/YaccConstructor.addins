@@ -23,7 +23,7 @@
 
 <Addins>
 	<!--Directory include-subdirs="true"></Directory-->
-	<!-- 
-		<Directory>PATH</Directory>
-	-->	
+	 
+    <Directory>C:\Users\Ekaterina\YaccConstructor\src\GrahamBackend\obj\Debug</Directory>
+	
 </Addins>

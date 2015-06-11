@@ -1,8 +1,0 @@
-digraph g
-{
-0;1;2;3;
-0 -> 1 [label="select x, a from "];
-1 -> 2 [label=" y"];
-1 -> 2 [label=" select s from b"];
-2->3 [label=" where (a > b)"];
-}

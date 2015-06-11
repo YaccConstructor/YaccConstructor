@@ -16,10 +16,6 @@
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <ItemGroup>
-    <Reference Include="FsYacc">
-      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net45\FsYacc.exe</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Mono.Addins">
       <HintPath>..\packages\Mono.Addins.1.2\lib\net40\Mono.Addins.dll</HintPath>
       <Private>True</Private>
@@ -56,6 +52,11 @@
     <ProjectReference Include="..\Constraints\Constraints.fsproj">
       <Name>Constraints</Name>
       <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\FsYacc\FsYacc.fsproj">
+      <Name>FsYacc</Name>
+      <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

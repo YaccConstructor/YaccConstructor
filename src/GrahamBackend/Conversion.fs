@@ -59,7 +59,7 @@ type FacioBackend() =
                             | [] -> ()
                         func p
                     | _ -> ()
-                grammar |> List.map (fun m -> m.rules |> List.map f)
+                grammar |> List.iter (fun m -> m.rules |> List.iter f)
                 List.ofSeq tks//, List.ofSeq nTerms
 
             //parse args

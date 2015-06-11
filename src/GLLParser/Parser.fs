@@ -12,6 +12,8 @@ open Microsoft.FSharp.Collections
 [<Measure>] type labelMeasure
 
 let inline pack left right : int64 =  ((int64 left <<< 32) ||| int64 right)
+let inline getRight (long : int64) = int <| ((int64 long) &&& 0xffffffffL)
+let inline getLeft (long : int64)  = int <| ((int64 long) >>> 32)
 
 let inline packExtension left right : int64<extension> =  LanguagePrimitives.Int64WithMeasure ((int64 left <<< 32) ||| int64 right)
 let inline getRightExtension (long : int64<extension>) = int <| ((int64 long) &&& 0xffffffffL)
@@ -106,7 +108,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
  //посчитать размерв коллекций
         let edgesReadCount = ref 0
         let edgesWriteCount = ref 0
-        let edges = Array2D.zeroCreate<Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>> slots.Count (inputLength + 1)
+        let edges = Array2D.zeroCreate<Dictionary<int64, ResizeArray<int>>> slots.Count (inputLength + 1)
         
         let terminalNodes = new BlockResizeArray<int<nodeMeasure>>()
         let epsilonNode = new TerminalNode(-1, packExtension 0 0)
@@ -301,39 +303,28 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             let labelN = slots.[int b.Label]
             edgesReadCount := !edgesReadCount + 1
             let dict1 = edges.[labelN, b.Level]
+            let key = pack ast (int e.Label)
             if dict1 <> Unchecked.defaultof<_>
             then
-                if dict1.ContainsKey(ast)
+                let contains, t = dict1.TryGetValue(key)
+                if contains
                 then
-                    let dict2 = dict1.[ast]
-                    if dict2.ContainsKey(e.Label)
-                    then
-                        let t = dict2.[e.Label]
-                        if t.Contains(e.Level) then true
-                        else 
-                            t.Add(e.Level) 
-                            false
-                    else
-                        let arr = new ResizeArray<int>()
-                        arr.Add(e.Level) 
-                        dict2.Add(e.Label, arr)
+                    if t.Contains(e.Level) then true
+                    else 
+                        t.Add(e.Level) 
                         false
                 else
-                    let d = new Dictionary<int<labelMeasure>,ResizeArray<int>>()
-                    dict1.Add(ast, d)
-                    let l = new ResizeArray<int>()
-                    l.Add(e.Level)
-                    d.Add(e.Label, l)
+                    let arr = new ResizeArray<int>()
+                    arr.Add(e.Level) 
+                    dict1.Add(key, arr)
                     false
             else
-                let newDict1 = new Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>,ResizeArray<int>>>()
-                let newDict2 = new Dictionary<int<labelMeasure>,ResizeArray<int>>()
+                let newDict = new Dictionary<int64,ResizeArray<int>>()
                 let newArr = new ResizeArray<int>()
                 newArr.Add(e.Level)
-                newDict2.Add(e.Label, newArr)
-                newDict1.Add(ast, newDict2)
+                newDict.Add(key, newArr)
                 edgesWriteCount := !edgesWriteCount + 1
-                edges.[labelN, b.Level] <- newDict1
+                edges.[labelN, b.Level] <- newDict
                 false                    
         
         let getTreeExtension (node : int<nodeMeasure>) =
@@ -376,13 +367,13 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                 let outEdges = edges.[slots.[ int u.Label], u.Level]
                 edgesReadCount := !edgesReadCount + 1
                 for edge in outEdges do
-                    let sppfNodeOnEdge = edge.Key
-                    for slotLevels in edge.Value do   
-                         let slot = slotLevels.Key
-                         for level in slotLevels.Value do
-                            let resTree = getNodeP u.Label sppfNodeOnEdge z 
-                            let newVertex = new Vertex(level, slot)
-                            addContext i u.Label newVertex resTree
+                    let sppfNodeOnEdge = (getLeft edge.Key) * 1<nodeMeasure>
+                    let slot = (getRight edge.Key) * 1<labelMeasure>
+                    let arr = edge.Value
+                    for level in arr do
+                        let resTree = getNodeP u.Label sppfNodeOnEdge z 
+                        let newVertex = new Vertex(level, slot)
+                        addContext i u.Label newVertex resTree
 
         let table = parser.Table
         
@@ -513,4 +504,4 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
 //                    nonTerminalNodes |> Seq.iter (fun kvp -> kvp.Count |> printf "%A; ")
 //                    out.Close()
                        
-                        
+                            

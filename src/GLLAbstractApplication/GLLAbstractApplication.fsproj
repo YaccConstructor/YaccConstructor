@@ -9,8 +9,9 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>GLLAbstractApplication</RootNamespace>
     <AssemblyName>GLLAbstractApplication</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>GLLAbstractApplication</Name>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

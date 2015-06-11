@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="ItemsGroup.target" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <Import Project="..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets" Condition="Exists('..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets')" />
+  <!--Import Project="..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets" Condition="Exists('..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets')" /-->
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -174,7 +174,7 @@
     <Error Condition="!Exists('..\..\packages\JetBrains.Platform.Tests.Framework.102.0.20150522.70700\build\JetBrains.Platform.Tests.Framework.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Platform.Tests.Framework.102.0.20150522.70700\build\JetBrains.Platform.Tests.Framework.Targets'))" />
     <Error Condition="!Exists('..\..\packages\JetBrains.Psi.Features.test.Framework.102.0.20150522.71619\build\JetBrains.Psi.Features.test.Framework.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Psi.Features.test.Framework.102.0.20150522.71619\build\JetBrains.Psi.Features.test.Framework.Targets'))" />
     <Error Condition="!Exists('..\..\packages\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.2.0.20141124.0\build\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.2.0.20141124.0\build\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.Targets'))" />
-    <Error Condition="!Exists('..\..\packages\JetBrains.ReSharper.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets'))" />
+    <!--Error Condition="!Exists('..\..\packages\JetBrains.ReSharper.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets'))" /-->
   </Target>
   <Import Project="..\..\packages\JetBrains.Platform.Core.Shell.102.0.20150522.70022\build\JetBrains.Platform.Core.Shell.Targets" Condition="Exists('..\..\packages\JetBrains.Platform.Core.Shell.102.0.20150522.70022\build\JetBrains.Platform.Core.Shell.Targets')" />
   <Import Project="..\..\packages\JetBrains.Platform.Core.Text.102.0.20150522.70700\build\JetBrains.Platform.Core.Text.Targets" Condition="Exists('..\..\packages\JetBrains.Platform.Core.Text.102.0.20150522.70700\build\JetBrains.Platform.Core.Text.Targets')" />
@@ -191,7 +191,7 @@
   <Import Project="..\..\packages\JetBrains.Platform.Tests.Framework.102.0.20150522.70700\build\JetBrains.Platform.Tests.Framework.Targets" Condition="Exists('..\..\packages\JetBrains.Platform.Tests.Framework.102.0.20150522.70700\build\JetBrains.Platform.Tests.Framework.Targets')" />
   <Import Project="..\..\packages\JetBrains.Psi.Features.test.Framework.102.0.20150522.71619\build\JetBrains.Psi.Features.test.Framework.Targets" Condition="Exists('..\..\packages\JetBrains.Psi.Features.test.Framework.102.0.20150522.71619\build\JetBrains.Psi.Features.test.Framework.Targets')" />
   <Import Project="..\..\packages\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.2.0.20141124.0\build\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.Targets" Condition="Exists('..\..\packages\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.2.0.20141124.0\build\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.Targets')" />
-  <Import Project="..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets" Condition="Exists('..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets')" />
+  <!--Import Project="..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets" Condition="Exists('..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets')" /-->
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

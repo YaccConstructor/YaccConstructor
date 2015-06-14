@@ -6,6 +6,7 @@ open IL
 open Constraints
 open Yard.Generators.Common.InitialConvert
 open Yard.EBNF.DFA.FinalGrammar
+open Yard.EBNF.DFA.PrintFA
 open Yard.Generators.RNGLR.States
 open States
 open Printer
@@ -102,6 +103,7 @@ type RNGLREBNFDFA() =
                 newDefinition <- highlightingConvertions newDefinition*)
 
             let grammar = new FinalGrammarNFA(newDefinition.grammar.[0].rules, caseSensitive)
+            //printAll grammar
 
             (*if !needHighlighting && !needTranslate
             then

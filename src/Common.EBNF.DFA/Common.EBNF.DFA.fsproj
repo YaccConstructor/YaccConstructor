@@ -49,6 +49,7 @@
     <Compile Include="SymbolSets.fs" />
     <Compile Include="StateSets.fs" />
     <Compile Include="FinalGrammarEBNF.fs" />
+    <Compile Include="PrintFA.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

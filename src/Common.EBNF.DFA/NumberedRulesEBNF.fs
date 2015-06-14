@@ -144,6 +144,31 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
                     if x.label <> indexator.epsilonIndex then result.[i].[j] <- (x.label, x.dest.label) else getSymbol xs
                 nfa.stateToVertex.[j].outEdges |> List.ofSeq |> getSymbol 
         result
+
+    let getTable rule = 
+        let body = right.[rule].body
+        printfn "Number of states = %A" body.numberOfStates
+        let result : HashSet<_>[][] = Array.zeroCreate body.numberOfStates
+        for i in 0..body.numberOfStates - 1 do
+            result.[i] <- Array.zeroCreate (indexator.fullCount + 1)
+        for i in 0..body.numberOfStates - 1 do
+            for j in 0..indexator.fullCount do
+                result.[i].[j] <- new HashSet<_>() 
+
+        printfn "Full count indexator = %A" indexator.fullCount
+        let rec collectStates (currentState : Vertex<_,_>) (processedStates : HashSet<_>) =
+            if not (processedStates.Contains(currentState.label)) then
+                processedStates.Add(currentState.label) |> ignore
+                let edges = currentState.outEdges
+                for edge in edges do
+                    let label = edge.label
+                    let vertexDist = edge.dest
+                    result.[currentState.label].[label].Add(vertexDist.label) |> ignore
+                    collectStates vertexDist processedStates
+        let startState = body.startState
+        let processedStates = new HashSet<_>()
+        collectStates startState processedStates
+        result
     
     member this.rulesCount = rules.Length
     member this.startRule = start
@@ -153,6 +178,7 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
     member this.rightSide num = right.[num].body
     member this.numberOfStates num = right.[num].body.numberOfStates
     member this.state rule pos = right.[rule].body.stateToVertex.[pos]
+    member this.table rule = getTable rule
     member this.symbol rule pos = 
         let (symbol, _) = symbolAndNextPos.[rule].[pos]
         symbol

@@ -86,7 +86,7 @@ let printFrames (frames: ResizeArray<int * GrammarSymbol * Frame[]>) =  //DELETE
         i <- i + 1
     streamWriter.Close()*)
 
-type StatesInterpreterEBNF (stateToVertex : Vertex<int,int * (Set<int> * Set<int>)>[], stateToMainKernels : Kernel[][], stateToMainLookahead : Set<int>[][], stateToDerivedKernels : Kernel[][], stateToDerivedLookahead : Set<int>[][]) =
+type StatesInterpreterEBNF (stateToVertex : Vertex<int, int>[], stateToMainKernels : Kernel[][], stateToMainLookahead : Set<int>[][], stateToDerivedKernels : Kernel[][], stateToDerivedLookahead : Set<int>[][]) =
     member this.count = stateToVertex.Length
     member this.vertex i = stateToVertex.[i]
     member this.mainKernels i = stateToMainKernels.[i]
@@ -99,8 +99,9 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
         let num = ref -1
         (fun () -> incr num; !num)
         , (fun () -> !num + 1)
-    let kernelsToVertex = new Dictionary<string, Vertex<int,int * (Set<int> * Set<int>)>>()
-    let vertices = new ResizeArray<Vertex<int,int * (Set<int> * Set<int>)> >()
+    //let kernelsToVertex = new Dictionary<string, Vertex<int,int * (Set<int> * Set<int>)>>()
+    let kernelsToVertex = new Dictionary<string, Vertex<int, int>>()
+    let vertices = new ResizeArray<Vertex<int, int>>()
     let stateToMainKernels = new ResizeArray<Kernel[]>()
     let stateToMainLookahead = new ResizeArray<Set<int>[] >()
     let stateToDerivedKernels = new ResizeArray<Kernel[]>()
@@ -196,7 +197,7 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
                     diffDerived.[i] <- diffSet
                 vertex, diffMain, diffDerived, needDfs
             else
-                let vertex = new Vertex<int,int * (Set<int> * Set<int>)>(nextIndex())
+                let vertex = new Vertex<int, int>(nextIndex())
                 wasEdge.Add Set.empty
                 vertices.Add vertex
                 kernelsToVertex.[key] <- vertex
@@ -216,12 +217,12 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
                         if curSymbol derivedKernels.[j] = i && not newDerivedLookaheads.[j].IsEmpty then hasNewLookahead <- true
                     let destStates = new Dictionary<int, Set<int>>()
                     if hasNewLookahead then
-                        let mutable stackSet = Set.empty
-                        let mutable dontStackSet = Set.empty
+//                        let mutable stackSet = Set.empty
+//                        let mutable dontStackSet = Set.empty
                         for j = 0 to mainKernels.Length-1 do
                             if curSymbol mainKernels.[j] = i then
                                 let nextKernels = KernelInterpreter.nextPos grammar mainKernels.[j]
-                                dontStackSet <- Set.add (KernelInterpreter.getProd mainKernels.[j]) dontStackSet 
+//                                dontStackSet <- Set.add (KernelInterpreter.getProd mainKernels.[j]) dontStackSet 
                                 for nextKernel in nextKernels do
                                     if not <| destStates.ContainsKey nextKernel then
                                         destStates.[nextKernel] <- newMainLookaheads.[j]
@@ -230,7 +231,7 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
                         for j = 0 to derivedKernels.Length-1 do
                             if curSymbol derivedKernels.[j] = i then
                                 let nextKernels = KernelInterpreter.nextPos grammar derivedKernels.[j]
-                                stackSet <- Set.add (KernelInterpreter.getProd derivedKernels.[j]) stackSet 
+//                                stackSet <- Set.add (KernelInterpreter.getProd derivedKernels.[j]) stackSet 
                                 for nextKernel in nextKernels do
                                     if not <| destStates.ContainsKey nextKernel then
                                         destStates.[nextKernel] <- newDerivedLookaheads.[j]
@@ -245,7 +246,7 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
                         let newVertex : Vertex<_,_> = dfsLALR destStates_arr
                         if not <| wasEdge.[vertex.label].Contains newVertex.label then
                             wasEdge.[vertex.label] <- wasEdge.[vertex.label].Add newVertex.label
-                            vertex.addEdge <| new Edge<_,_>(newVertex, (i, (dontStackSet, stackSet)))
+                            vertex.addEdge <| new Edge<_,_>(newVertex, i)
         decr dfsDepth
         vertex
 
@@ -265,7 +266,8 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
         if kernelsToVertex.ContainsKey key then
             kernelsToVertex.[key]
         else
-            let vertex = new Vertex<int,int * (Set<int> * Set<int>)>(nextIndex())
+            // <num, indexsymb*(stak, dontstack)>
+            let vertex = new Vertex<int, int>(nextIndex())
             //wasEdge.Add Set.empty
             vertices.Add vertex
             kernelsToVertex.[key] <- vertex
@@ -275,13 +277,14 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
             stateToDerivedLookahead.Add derivedLookaheads
             for i = 0 to grammar.indexator.fullCount - 1 do
                 if i <> grammar.indexator.eofIndex then
+                    // new kernel with lookaheads
                     let destStates = new Dictionary<int, Set<int>>()
-                    let mutable dontStackSet = Set.empty
-                    let mutable stackSet = Set.empty
+//                    let mutable dontStackSet = Set.empty
+//                    let mutable stackSet = Set.empty
                     for j = 0 to mainKernels.Length-1 do
                             if curSymbol mainKernels.[j] = i && not mainLookaheads.[j].IsEmpty then
                                 let nextKernels = KernelInterpreter.nextPos grammar mainKernels.[j]
-                                dontStackSet <- Set.add (KernelInterpreter.getProd mainKernels.[j]) dontStackSet 
+//                                dontStackSet <- Set.add (KernelInterpreter.getProd mainKernels.[j]) dontStackSet 
                                 for nextKernel in nextKernels do
                                     if not <| destStates.ContainsKey nextKernel then
                                         destStates.[nextKernel] <- mainLookaheads.[j]
@@ -290,7 +293,7 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
                     for j = 0 to derivedKernels.Length-1 do
                             if curSymbol derivedKernels.[j] = i && not derivedLookaheads.[j].IsEmpty then
                                 let nextKernels = KernelInterpreter.nextPos grammar derivedKernels.[j]
-                                stackSet <- Set.add (KernelInterpreter.getProd derivedKernels.[j]) stackSet
+//                                stackSet <- Set.add (KernelInterpreter.getProd derivedKernels.[j]) stackSet
                                 for nextKernel in nextKernels do
                                     if not <| destStates.ContainsKey nextKernel then
                                         destStates.[nextKernel] <- derivedLookaheads.[j]
@@ -303,7 +306,7 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
                             destStates_arr.[!dsIter] <- destState.Key, destState.Value
                             incr dsIter
                         let newVertex : Vertex<_,_> = destStates_arr |> dfsLR
-                        vertex.addEdge <| new Edge<_,_>(newVertex, (i, (dontStackSet, stackSet)))
+                        vertex.addEdge <| new Edge<_,_>(newVertex, i)
             decr dfsDepth
             vertex
 

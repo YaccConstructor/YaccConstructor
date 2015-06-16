@@ -2,22 +2,22 @@
 
 open System.Collections.Generic
 
-//open JetBrains.Application
+open JetBrains.DocumentModel
 open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi.CSharp.Tree
 open JetBrains.ReSharper.Resources.Shell
 
 open Microsoft.FSharp.Collections
-open ReSharperExtension
+open ReSharperLanguage
 open Constants
 open YC.SDK.CommonInterfaces
 open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation
 open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 
-type br = JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression
-type range = JetBrains.DocumentModel.DocumentRange
-type node = JetBrains.ReSharper.Psi.Tree.ITreeNode 
+type br = ICSharpLiteralExpression
+type range = DocumentRange
+type node = ITreeNode 
 
 let getRange =  fun (x : ICSharpLiteralExpression) -> (x :> ITreeNode).GetDocumentRange()
 

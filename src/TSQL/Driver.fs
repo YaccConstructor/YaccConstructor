@@ -19,20 +19,24 @@
 
 module YC.ReSharper.AbstractAnalysis.Languages.TSQL
 
-open Yard.Examples.MSParser
-open LexerHelper
 open System
 open System.IO
-open Yard.Generators.Common.AST
-open YC.SDK.CommonInterfaces
-open YC.SDK.ReSharper.Helper
+
 open Mono.Addins
-open ReSharperExtension
+
 open JetBrains.Application
-open YC.FST.AbstractLexing.Interpreter
+
+open LexerHelper
+open Yard.Examples.MSParser
+open Yard.Generators.Common.AST
 open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation
+open YC.FST.AbstractLexing.Interpreter
 open YC.FST.GraphBasedFst
+open YC.SDK.CommonInterfaces
+open YC.SDK.ReSharper.Helper
+open ReSharperLanguage
+
 
 let tokenize (lexerInputGraph:Appr<_>) =
     let graphFsa = lexerInputGraph.ApprToFSA()

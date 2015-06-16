@@ -8,8 +8,6 @@ using GraphX;
 using GraphX.Controls;
 using GraphX.GraphSharp.Algorithms.Layout.Simple.FDP;
 
-using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting;
-
 using JetBrains.UI.ActionsRevised;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ActionManagement;

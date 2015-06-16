@@ -101,6 +101,10 @@ let printTablesEBNF
     for i = 0 to grammar.rules.rulesCount-1 do
         rulesArr.[i] <- grammar.rules.rightSide i
 
+    let dfaArr = Array.zeroCreate grammar.reverseRules.rulesCount
+    for i = 0 to grammar.reverseRules.rulesCount - 1 do
+        dfaArr.[i] <- grammar.reverseRules.dfaTable i
+
     let totalRulesNumberOfStates = rulesArr |> Array.sumBy (fun x -> x.numberOfStates)
     (*let rulesStart = Array.zeroCreate <| grammar.rules.rulesCount + 1
     let mutable cur = 0
@@ -157,17 +161,18 @@ let printTablesEBNF
             printBrInd 2 "let j = small_%s.[cur + k*2] >>> 16" name
             printBrInd 2 "let x = small_%s.[cur + k*2] &&& %d" name andNum
             
-            printBrInd 2 "let dontStackSetNum = small_%s.[cur + k*2 + 1] >>> 16" name
-            printBrInd 2 "let stackSetNum = small_%s.[cur + k*2 + 1] &&& %d" name andNum
+//            printBrInd 2 "let dontStackSetNum = small_%s.[cur + k*2 + 1] >>> 16" name
+//            printBrInd 2 "let stackSetNum = small_%s.[cur + k*2 + 1] &&& %d" name andNum
 
-            printBrInd 2 "%s.[i].[j] <- Some (lists_%s.[x], (dontStackSetNum, stackSetNum))" name name
+            printBrInd 2 "%s.[i].[j] <- Some (lists_%s.[x])" name name
+//            printBrInd 2 "%s.[i].[j] <- Some (lists_%s.[x], (dontStackSetNum, stackSetNum))" name name
             printBrInd 1 "cur <- cur + length * 2"
                 
         let printGotoArrList() =
             // although we have lists of gotos and stacLabels, only first elements of these lists are really processed
             let checker = fun (x : _ list ) -> not x.IsEmpty
             let printerGotos = fun (x : _ list ) -> print "%d" x.[0]
-            let printersStackSets = fun x -> printSetAsArray x (fun y -> print "%d" y)
+            //let printersStackSets = fun x -> printSetAsArray x (fun y -> print "%d" y)
             let name = "gotos"
             let lBr : Printf.StringFormat<_,_> =  "[|"
             let rBr : Printf.StringFormat<_,_> =  "|]"
@@ -175,9 +180,7 @@ let printTablesEBNF
             let bindKW = "let private"
             
 
-            let unzipArr = tables.gotos |> Array2D.map List.unzip
-            let gotos = unzipArr |> Array2D.map fst
-            let stackSets = unzipArr |> Array2D.map snd
+            let gotos = tables.gotos
 
             (*let stackLabelSign = function
             |DontStack -> 0
@@ -185,32 +188,35 @@ let printTablesEBNF
             |StackingConflict _-> 2*)
                         
             let gotoLists = new Dictionary<_,_>()
-            let stackSetLists = new Dictionary<_,_>()
-            let nextGoto, nextStackSet =
+            //let stackSetLists = new Dictionary<_,_>()
+            let nextGoto =
                 let numGoto = ref -1
-                let numSet = ref -1
-                (fun () -> incr numGoto; !numGoto),
-                (fun () -> incr numSet; !numSet)
+                fun () -> incr numGoto; !numGoto
+//            let nextGoto, nextStackSet =
+//                let numGoto = ref -1
+//                let numSet = ref -1
+//                (fun () -> incr numGoto; !numGoto),
+//                (fun () -> incr numSet; !numSet)
             for i = 0 to statesLim do
                 for j = 0 to symbolsLim do
                     if checker gotos.[i,j] then
                         if not <| gotoLists.ContainsKey gotos.[i,j] then
                             gotoLists.Add (gotos.[i,j], nextGoto())
-                        let dontStackSet, stackSet = stackSets.[i,j].[0]
-                        if not <| stackSetLists.ContainsKey dontStackSet then
-                                stackSetLists.Add(dontStackSet, nextStackSet())
-                        if not <| stackSetLists.ContainsKey stackSet then
-                                stackSetLists.Add(stackSet, nextStackSet())
+                        //let dontStackSet, stackSet = stackSets.[i,j].[0]
+//                        if not <| stackSetLists.ContainsKey dontStackSet then
+//                                stackSetLists.Add(dontStackSet, nextStackSet())
+//                        if not <| stackSetLists.ContainsKey stackSet then
+//                                stackSetLists.Add(stackSet, nextStackSet())
             let gotoListsArr = Array.zeroCreate gotoLists.Count
             for v in gotoLists do
                 gotoListsArr.[v.Value] <- v.Key
-            let stackSetListsArr = Array.zeroCreate stackSetLists.Count
-            for v in stackSetLists do
-                stackSetListsArr.[v.Value] <- v.Key
+//            let stackSetListsArr = Array.zeroCreate stackSetLists.Count
+//            for v in stackSetLists do
+//                stackSetListsArr.[v.Value] <- v.Key
             printInd 0 (Printf.StringFormat<_,_>(bindKW + " lists_%s = ")) name
             printArr gotoListsArr printerGotos
             printInd 0 (Printf.StringFormat<_,_>(bindKW + " %s = ")) "stackArrays"
-            printArr stackSetListsArr printersStackSets
+//            printArr stackSetListsArr printersStackSets
             printBrInd 0 (Printf.StringFormat<_,_>(bindKW + " %s = stackArrays |> Array.map Set.ofArray")) "stackSets"
 
             printBrInd 0 (Printf.StringFormat<_,_>(bindKW + " small_%s =")) name
@@ -234,8 +240,8 @@ let printTablesEBNF
                         print sep
                         print "%d" <| pack j gotoLists.[gotos.[i,j]]
                         print sep
-                        let dontStackSet, stackSet = stackSets.[i,j].[0]
-                        print "%d" <| pack stackSetLists.[dontStackSet] stackSetLists.[stackSet]
+//                        let dontStackSet, stackSet = stackSets.[i,j].[0]
+//                        print "%d" <| pack stackSetLists.[dontStackSet] stackSetLists.[stackSet]
                         cur <- cur + 1
                         if cur > next then
                             next <- next + 1000

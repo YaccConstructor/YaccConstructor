@@ -1,6 +1,9 @@
 ﻿module HotspotParser
 
+open System
+open System.IO
 open System.Xml
+
 
 type Hotspot = 
     val Class : string
@@ -17,7 +20,15 @@ type Hotspot =
     new (full : string array, position, returnType) = 
         new Hotspot(full.[0], full.[1], position, returnType)
 
-let parseHotspots (path : string) = 
+let tryFindFile fileName = 
+    let currentDir = Directory.GetCurrentDirectory()
+    let files = Directory.GetFiles(currentDir, fileName)
+
+    if files.Length > 0 
+    then Some files.[0] 
+    else None
+
+let parseHotspots (fileName : string) = 
     let parseHotspot (hotspot : XmlNode) = 
         let mutable child = hotspot
         if child.NodeType = XmlNodeType.Comment 
@@ -43,7 +54,7 @@ let parseHotspots (path : string) =
 
         let pos = 
             match child.Name.ToLowerInvariant() with
-            | "argumentposition" -> System.Int32.Parse <| child.InnerText.Trim()
+            | "argumentposition" -> Int32.Parse <| child.InnerText.Trim()
             | x -> failwithf "Unexpected tag %A. Expected <ArgumentListType>" x
         
         child <- child.NextSibling
@@ -57,17 +68,23 @@ let parseHotspots (path : string) =
 
         language, new Hotspot(methodName, pos, returnType)
     
-    let xmlDocument = new XmlDocument()
-    xmlDocument.Load (path)
+    let pathOpt = tryFindFile fileName
+    if pathOpt.IsNone
+    then 
+        failwithf "File %s isn't found" fileName
+    else 
+        let path = pathOpt.Value
+        let xmlDocument = new XmlDocument()
+        xmlDocument.Load (path)
 
-    let mutable element = xmlDocument.DocumentElement.ChildNodes
-    let mutable result = []
+        let mutable element = xmlDocument.DocumentElement.ChildNodes
+        let mutable result = []
     
-    for hotNode in element do
-        if hotNode.NodeType <> XmlNodeType.Comment 
-        then
-            match hotNode.Name.ToLowerInvariant() with
-            | "hotspot" -> 
-                result <- parseHotspot hotNode.FirstChild :: result
-            | x -> failwithf "Unexpected tag %A. Expected <Hotspot>" x
-    result
+        for hotNode in element do
+            if hotNode.NodeType <> XmlNodeType.Comment 
+            then
+                match hotNode.Name.ToLowerInvariant() with
+                | "hotspot" -> 
+                    result <- parseHotspot hotNode.FirstChild :: result
+                | x -> failwithf "Unexpected tag %A. Expected <Hotspot>" x
+        result

@@ -120,13 +120,13 @@ type Approximator(file:ICSharpFile) =
         let graphs = ResizeArray.map (fun (lang, hotspot) -> lang, propagate hotspot) hotspots
         graphs
         |> ResizeArray.map 
-            (fun (l,g) -> 
+            (fun (lang, graph) -> 
                 let res = new YC.FSA.FsaApproximation.Appr<_>()
-                res.AddVerticesAndEdgeRange (g.Edges |> Seq.map (fun e -> new QuickGraph.TaggedEdge<_,_>(e.Source, e.Target, (e.Label.Value,e.BackRef.Value))))
+                res.AddVerticesAndEdgeRange (graph.Edges |> Seq.map (fun e -> new QuickGraph.TaggedEdge<_,_>(e.Source, e.Target, (e.Label.Value,e.BackRef.Value))))
                 |> ignore
                 res.InitState <- new ResizeArray<_>([0])
-                res.FinalState <- new ResizeArray<_>([g.Vertices |> Seq.find (fun v -> g.OutDegree(v) = 0)])
-                l,res
+                res.FinalState <- new ResizeArray<_>([graph.Vertices |> Seq.find (fun v -> graph.OutDegree(v) = 0)])
+                lang, res
             )
         
         

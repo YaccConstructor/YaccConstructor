@@ -17,7 +17,8 @@ namespace Yard.Generators.RNGLR.EBNF.DFA
 type ParserSourceEBNF<'TokenType> (gotos : (int * (int * int)) option [][] //goto consists of number of state where to go to and sets of productions to Stack/not to Stack
                                , reduces : int [][][]
                                , zeroReduces : int[][][]
-                               , stackSets : Set<int>[]
+                               , dfaList : int[][][]
+                               , finiteStates : int[][]
                                , accStates : bool[]
                                , leftSide : int[]
                                , startRule : int
@@ -32,7 +33,8 @@ type ParserSourceEBNF<'TokenType> (gotos : (int * (int * int)) option [][] //got
     member this.Reduces = reduces
     member this.ZeroReduces = zeroReduces
     member this.Gotos = gotos
-    member this.StackSets = stackSets
+    member this.DfaList = dfaList
+    member this.finiteStates = finiteStates
     member this.AccStates = accStates
     member this.LeftSide = leftSide
     member this.StartRule = startRule

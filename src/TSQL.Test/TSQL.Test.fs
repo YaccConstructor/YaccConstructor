@@ -15,10 +15,11 @@ open Graphviz4Net.Dot
 open Yard.Generators.RNGLR.AbstractParser
 open Yard.Generators.ARNGLR.Parser
 open RNGLRAbstractParserTests
+open System
 
 let baseInputGraphsPath = "../../../src/TSQL.Test/DotTSQL"
 
-let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
+let transform x = (x, match x with |Smbl(y:char, _) when y <> (char 65535) -> Smbl(int <| Convert.ToUInt32(y)) |Smbl(y:char, _) when y = (char 65535) -> Smbl 65535 |_ -> Eps)
 let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
 let equalSmbl x y = (fst x) = (fst y)
 let newSmb x =  Smbl(x, Unchecked.defaultof<_>)

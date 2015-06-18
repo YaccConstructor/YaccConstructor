@@ -12,6 +12,7 @@ open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation
 open YC.FST.GraphBasedFst
 open ControlFlowGraph
+open System 
 
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
@@ -26,7 +27,7 @@ type ExtCalcInjectedLanguageModule () =
     let tokenize (lexerInputGraph:Appr<_>) =
         let graphFsa = lexerInputGraph.ApprToFSA()
         let eof = RNGLR_EOF(new FSA<_>())
-        let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
+        let transform x = (x, match x with |Smbl(y:char, _) when y <> (char 65535) -> Smbl(int <| Convert.ToUInt32(y)) |Smbl(y:char, _) when y = (char 65535) -> Smbl 65535 |_ -> Eps)
         let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
         let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
         YC.ExtCalcLexer.tokenize eof graphFst

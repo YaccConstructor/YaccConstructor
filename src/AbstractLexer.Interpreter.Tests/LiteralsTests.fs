@@ -9,10 +9,11 @@ open YC.FST.AbstractLexing.Interpreter
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
 open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation
+open System
 
 let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"
 
-let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
+let transform x = (x, match x with |Smbl(y:char, _) when y <> (char 65535) -> Smbl(int <| Convert.ToUInt32(y)) |Smbl(y:char, _) when y = (char 65535) -> Smbl 65535 |_ -> Eps)
 let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
   
 let literalsTokenizationTest path eCount vCount pathPrint =

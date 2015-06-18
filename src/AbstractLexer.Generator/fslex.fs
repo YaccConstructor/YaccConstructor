@@ -253,7 +253,7 @@ let main() =
             resFST.InitState.Add((fst perRuleData.[0]).Id) //we SUGGEST that we have one init state
         
             let stEOF = tableTransitions.[0].[(sizeTable - 1)] 
-            new EdgeFST<_,_>(0, stEOF, ( Smbl (char Eof), Eps)) |> resFST.AddVerticesAndEdge |> ignore
+            new EdgeFST<_,_>(0, stEOF, ( Smbl 65535, Eps)) |> resFST.AddVerticesAndEdge |> ignore
             resFST.FinalState.Add(stEOF)
                          
             for state in dfaNodes do
@@ -261,14 +261,14 @@ let main() =
                     let st = tableTransitions.[state.Id].[i]
                     if st <> sentinel 
                     then 
-                        new EdgeFST<_,_>(state.Id, st, (Smbl (char (if i = sizeTable - 1 then int Eof else i)), Eps)) |> resFST.AddVerticesAndEdge |> ignore                       
+                        new EdgeFST<_,_>(state.Id, st, (Smbl (if i = sizeTable - 1 then 65535 else i), Eps)) |> resFST.AddVerticesAndEdge |> ignore                       
                     else 
                         if state.Id <> 0
                         then 
                             let action = if actionFunc.[state.Id].Count > 0 then Smbl (actionFunc.[state.Id].[0]) else Eps
                             if tableTransitions.[0].[i] <> sentinel || i = sizeTable - 1
                             then  
-                                new EdgeFST<_,_>(state.Id, tableTransitions.[0].[i], (Smbl (char (if i = sizeTable - 1 then int Eof else i)), action)) |> resFST.AddVerticesAndEdge |> ignore
+                                new EdgeFST<_,_>(state.Id, tableTransitions.[0].[i], (Smbl (if i = sizeTable - 1 then 65535 else i), action)) |> resFST.AddVerticesAndEdge |> ignore
                             
             let getVal printV s = 
                 match s with
@@ -295,12 +295,14 @@ let main() =
             fstStream.WriteLine("   let transitions = new ResizeArray<_>()")
             let alphabet = new HashSet<_>()
             for edge in resFST.Edges do         
-                alphabet.Add((getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'" | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") (fst edge.Tag))) |> ignore
+                //alphabet.Add((getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'" | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") (fst edge.Tag))) |> ignore
+                alphabet.Add(match fst edge.Tag with |Smbl 65535 -> "Smbl 65535" |Smbl y -> ("Smbl "+ Convert.ToUInt32(y).ToString())| Eps -> "Eps")  |> ignore                
                 fstStream.WriteLine(
                     sprintf  
                         "   transitions.Add(%i, (%s, %s), %i)"
                         edge.Source
-                        (getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'"  | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") (fst edge.Tag))
+                        //(getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'"  | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") (fst edge.Tag))
+                        (match fst edge.Tag with |Smbl 65535 -> "Smbl 65535" |Smbl y -> ("Smbl " + Convert.ToUInt32(y).ToString())  |Eps -> "Eps") 
                         (getVal (string) (snd edge.Tag)) edge.Target)            
                                                  
             fstStream.WriteLine("   new FST<_,_>(startState, finishState, transitions)")
@@ -324,8 +326,7 @@ let main() =
             fstStream.WriteLine("   |]\n")
         
 
-            fstStream.WriteLine("\nlet alphabet () = ")
-            //alphabet |> Set.toArray |> Array.iter (fun i -> sprintf " %s;" i) |> Array.concat |> fstStream.WriteLine 
+            fstStream.WriteLine("\nlet alphabet () = ")            
             let alp = ref ""
             for i in alphabet do
                 alp := !alp + (sprintf " %s;" i)

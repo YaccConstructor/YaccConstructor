@@ -79,8 +79,8 @@ let printTablesEBNF
         for v in lists do
             listsArr.[v.Value] <- v.Key
         printArr listsArr printer
-        printBrInd 0 (Printf.StringFormat<_,_>(bindKW + " small_%s =")) name
-        printInd 2 lBr
+        printInd 0 (Printf.StringFormat<_,_>(bindKW + " small_%s = ")) name
+        print lBr
         let mutable next = 1000
         let mutable cur = 0
         let mutable firstI = true
@@ -125,8 +125,8 @@ let printTablesEBNF
         for v in lists do
             listsArr.[v.Value] <- v.Key
         printArr listsArr printer
-        printBrInd 0 (Printf.StringFormat<_,_>(bindKW + " small_%s =")) name
-        printInd 2 lBr
+        printInd 0 (Printf.StringFormat<_,_>(bindKW + " small_%s = ")) name
+        print lBr
         let mutable next = 1000
         let mutable cur = 0
         let mutable firstI = true
@@ -176,6 +176,9 @@ let printTablesEBNF
             for s = 0 to dfaArr.[i].Length - 1 do
                 dfaArrList.[i, j] <- s::(dfaArr.[i].[s].[j])::dfaArrList.[i, j]
     let finitStatesSet = dfaTableArr |> Array.map (fun x -> snd x)
+    let amountOfStates = Array.zeroCreate rulesCount
+    for i = 0 to rulesCount - 1 do
+        amountOfStates.[i] <- dfaArr.[i].Length
     
 
     let totalRulesNumberOfStates = rulesArr |> Array.sumBy (fun x -> x.numberOfStates)
@@ -207,7 +210,7 @@ let printTablesEBNF
         let resultReducesArrayCreationCodePrinter name = 
             printBrInd 0 "let %s = Array.zeroCreate %d" name statesCount 
             printBrInd 0 "for i = 0 to %d do" statesLim
-            printBrInd 2 "%s.[i] <- Array.zeroCreate %d" name symbolsCount
+            printBrInd 1 "%s.[i] <- Array.zeroCreate %d" name symbolsCount
 
             printBrInd 0 "cur <- 0"
             printBrInd 0 "while cur < small_%s.Length do" name
@@ -224,7 +227,7 @@ let printTablesEBNF
             let name = "gotos"
             printBrInd 0 "let %s = Array.zeroCreate %d" name statesCount 
             printBrInd 0 "for i = 0 to %d do" statesLim
-            printBrInd 2 "%s.[i] <- Array.create %d None" name symbolsCount
+            printBrInd 1 "%s.[i] <- Array.create %d None" name symbolsCount
 
             printBrInd 0 "cur <- 0"
             printBrInd 0 "while cur < small_%s.Length do" name
@@ -246,7 +249,7 @@ let printTablesEBNF
         let resultDfaArrayCreationCodePrinter name prodCount = 
             printBrInd 0 "let %s = Array.zeroCreate %d" name prodCount
             printBrInd 0 "for i = 0 to %d do" (prodCount - 1)
-            printBrInd 2 "%s.[i] <- Array.zeroCreate %d" name symbolsCount
+            printBrInd 1 "%s.[i] <- Array.zeroCreate %d" name symbolsCount
             printBrInd 0 "cur <- 0"
             printBrInd 0 "while cur < small_%s.Length do" name
             printBrInd 1 "let i = small_%s.[cur] >>> 16" name
@@ -309,8 +312,8 @@ let printTablesEBNF
 //            printArr stackSetListsArr printersStackSets
 //            printBrInd 0 (Printf.StringFormat<_,_>(bindKW + " %s = stackArrays |> Array.map Set.ofArray")) "stackSets"
 
-            printBrInd 0 (Printf.StringFormat<_,_>(bindKW + " small_%s =")) name
-            printInd 2 lBr
+            printInd 0 (Printf.StringFormat<_,_>(bindKW + " small_%s = ")) name
+            print lBr
             let mutable next = 1000
             let mutable cur = 0
             let mutable firstI = true
@@ -329,7 +332,7 @@ let printTablesEBNF
                         let j = good.[v]
                         print sep
                         print "%d" <| pack j gotoLists.[gotos.[i,j]]
-                        print sep
+//                        print sep
 //                        let dontStackSet, stackSet = stackSets.[i,j].[0]
 //                        print "%d" <| pack stackSetLists.[dontStackSet] stackSetLists.[stackSet]
                         cur <- cur + 1
@@ -343,7 +346,6 @@ let printTablesEBNF
         
         let print2DReduceArrList (arr : 'a list[,]) checker printer name =
             print2DArrList "[|" "|]" "; " "let private" printArr resultReducesArrayCreationCodePrinter (arr : 'a list[,]) checker printer name
-
 
 
 
@@ -444,8 +446,8 @@ let printTablesEBNF
         printBr "let acceptEmptyInput = %A" grammar.canInferEpsilon.[leftSide.[grammar.startRule]]
         printBr ""
 
-        printBr "let defaultAstToDot ="
-        printBrInd 1 "(fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)"
+        print "let defaultAstToDot = "
+        printBrInd 0 "(fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)"
 
         printBr ""
 
@@ -469,21 +471,22 @@ let printTablesEBNF
             "dfaList"
 
         printArrHashSet "let private finiteStates = " finitStatesSet (fun x -> print "%d" x)
-
+        print "let private amountOfStates = "
+        printArr amountOfStates (fun x -> print "%d" x)
 
         printInd 0 "let private small_acc = "
         printList tables.acc (fun x -> print "%d" x)
         printBr ""
         printBrInd 0 "let private accStates = Array.zeroCreate %d" <| tables.gotos.GetLength 0
         printBrInd 0 "for i = 0 to %d do" statesLim
-        printBrInd 2 "accStates.[i] <- List.exists ((=) i) small_acc"
+        printBrInd 1 "accStates.[i] <- List.exists ((=) i) small_acc"
 
         printBrInd 0 "let eofIndex = %d" grammar.indexator.eofIndex
     
         printBrInd 0 "let errorIndex = %d" grammar.errorIndex
         //printBrInd 0 "let errorRulesExists = %b" grammar.errorRulesExists
         
-        printBrInd 0 "let private parserSource = new ParserSourceEBNF<Token> (gotos, reduces, zeroReduces, dfaList, finiteStates, accStates, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex)"
+        printBrInd 0 "let private parserSource = new ParserSourceEBNF<Token> (gotos, reduces, zeroReduces, dfaList, finiteStates, amountOfStates, accStates, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex)"
 
         (*printBr "let buildAstAbstract : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) ="
         printBrInd 1 "buildAstAbstract<Token> parserSource"

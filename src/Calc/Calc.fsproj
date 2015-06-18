@@ -39,6 +39,9 @@
     <Module>Calc.AbstractParser</Module>
     <EpsilonPath>epsilons</EpsilonPath>
   </PropertyGroup>
+  <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
+  <PropertyGroup>
+  </PropertyGroup>
   <ItemGroup>
     <None Include="Lexer.fsl" />
     <FsYard Include="Calc.yrd" />
@@ -46,6 +49,8 @@
     <Compile Include="Lexer_Abstract.fs" />
     <Compile Include="Calc.fs" />
     <None Include="packages.config" />
+    <EmbeddedResource Include="Actions.xml" />
+    <Compile Include="AboutAction.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -61,35 +66,34 @@
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.ComponentModel">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.ComponentModel.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.DocumentManager">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.DocumentManager.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.DocumentModel">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.DocumentModel.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.Shell">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Shell.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.Shell.Extensions">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Shell.Extensions.dll</HintPath>
     </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.UI">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.UI.dll</HintPath>
+    </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.Util">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.ReSharper.Psi.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi.CSharp">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Addins">
-      <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Addins">
       <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
@@ -115,12 +119,11 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="Utils.SourceText">
       <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
       <Private>True</Private>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\FST\FST\FSA\FSA.fsproj">
       <Name>FSA</Name>
       <Project>{b48cfdcc-86f7-4c3a-a5a2-8170950dd2ab}</Project>
@@ -156,9 +159,19 @@
       <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\ControlFlowGraph\ControlFlowGraph.fsproj">
+      <Name>ControlFlowGraph (SEL.SDK\ControlFlowGraph\ControlFlowGraph)</Name>
+      <Project>{e94970c1-26a4-4fa6-bb3b-261b70938ff4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Conversions\Conversions.fsproj">
       <Name>Conversions</Name>
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\FsYacc\FsYacc.fsproj">
+      <Name>FsYacc</Name>
+      <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\ReSharperExtension\ReSharperExtension.csproj">
@@ -197,11 +210,8 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
+  <Import Project="..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\Plugin.NoReferences.Targets')" />
   <PropertyGroup>
-    <PostBuildEvent>cd $(TargetDir)
-del JetBrains.*
-</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

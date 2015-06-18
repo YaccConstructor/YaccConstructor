@@ -18,4 +18,10 @@
       <ArgumentPosition> 0 </ArgumentPosition>
       <ReturnType> int </ReturnType>
   </Hotspot>
+  <Hotspot>
+      <Language> ExtCalc </Language>
+      <Method>Program.ExtEval</Method>
+      <ArgumentPosition> 0 </ArgumentPosition>
+      <ReturnType> int </ReturnType>
+  </Hotspot>
 </Body>

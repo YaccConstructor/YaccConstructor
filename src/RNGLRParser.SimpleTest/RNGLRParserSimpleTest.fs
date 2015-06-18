@@ -206,13 +206,13 @@ type ``RNGLR parser tests with simple lexer`` () =
     member test._Brackets() =
         runTest RNGLR._Brackets.buildAst "_Brackets.txt" printAst
 
-[<EntryPoint>]
-let f x =
-    if System.IO.Directory.Exists "dot" 
-    then 
-        System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
-    else System.IO.Directory.CreateDirectory "dot" |> ignore
-    let t = new ``RNGLR parser tests with simple lexer`` ()
-    t._Brackets ()
-
-    0
+//[<EntryPoint>]
+//let f x =
+//    if System.IO.Directory.Exists "dot" 
+//    then 
+//        System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
+//    else System.IO.Directory.CreateDirectory "dot" |> ignore
+//    let t = new ``RNGLR parser tests with simple lexer`` ()
+//    t._Brackets ()
+//
+//    0

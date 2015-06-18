@@ -260,8 +260,9 @@ let main() =
                 for i in 0..(sizeTable - 1) do
                     let st = tableTransitions.[state.Id].[i]
                     if st <> sentinel 
-                    then 
-                        new EdgeFST<_,_>(state.Id, st, (Smbl (if i = sizeTable - 1 then 65535 else i), Eps)) |> resFST.AddVerticesAndEdge |> ignore                       
+                    then
+                        if st <> - 1 
+                        then new EdgeFST<_,_>(state.Id, st, (Smbl (if i = sizeTable - 1 then 65535 else i), Eps)) |> resFST.AddVerticesAndEdge |> ignore                       
                     else 
                         if state.Id <> 0
                         then 

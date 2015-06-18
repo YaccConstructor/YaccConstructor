@@ -88,6 +88,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RNGLR.EBNF.DFAParser\RNGLR.EBNF.DFAParser.fsproj">
+      <Name>RNGLR.EBNF.DFAParser</Name>
+      <Project>{b343a9c6-170b-48e9-8296-771f874675dc}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework">
@@ -105,11 +110,6 @@
     <ProjectReference Include="..\RNGLR.EBNF.DFACommon\RNGLR.EBNF.DFACommon.fsproj">
       <Name>RNGLR.EBNF.DFACommon</Name>
       <Project>{e7f2f65a-94bf-4681-8bba-e5b69521e5c3}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\RNGLR.EBNF.DFAParser\RNGLR.EBNF.DFAParser.fsproj">
-      <Name>RNGLR.EBNF.DFAParser</Name>
-      <Project>{b343a9c6-170b-48e9-8296-771f874675dc}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

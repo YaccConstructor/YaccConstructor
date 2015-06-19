@@ -235,15 +235,15 @@ let printTablesEBNF
             printBrInd 1 "let length = small_%s.[cur] &&& %d" name andNum
             printBrInd 1 "cur <- cur + 1"
             printBrInd 1 "for k = 0 to length-1 do"
-            printBrInd 2 "let j = small_%s.[cur + k*2] >>> 16" name
-            printBrInd 2 "let x = small_%s.[cur + k*2] &&& %d" name andNum
+            printBrInd 2 "let j = small_%s.[cur + k] >>> 16" name
+            printBrInd 2 "let x = small_%s.[cur + k] &&& %d" name andNum
             
 //            printBrInd 2 "let dontStackSetNum = small_%s.[cur + k*2 + 1] >>> 16" name
 //            printBrInd 2 "let stackSetNum = small_%s.[cur + k*2 + 1] &&& %d" name andNum
 
             printBrInd 2 "%s.[i].[j] <- Some (lists_%s.[x])" name name
 //            printBrInd 2 "%s.[i].[j] <- Some (lists_%s.[x], (dontStackSetNum, stackSetNum))" name name
-            printBrInd 1 "cur <- cur + length * 2"
+            printBrInd 1 "cur <- cur + length"
 
 
         let resultDfaArrayCreationCodePrinter name prodCount = 

@@ -72,7 +72,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
 
     let mutable generationState : TreeGenerationState<'node> = Start
     
-    let prepareToHighlighting (graphOpt : ParserInputGraph<'token> option) tokenToTreeNode = 
+    let prepareToHighlighting (graphOpt : ParserInputGraph<'TokenType> option) tokenToTreeNode = 
         if graphOpt.IsSome
         then
             

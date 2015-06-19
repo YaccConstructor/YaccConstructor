@@ -20,8 +20,6 @@ open JetBrains.ReSharper.Psi.CSharp.Tree
 
 do()
 
-type br = ICSharpLiteralExpression
-
 [<Extension>]
 [<ShellComponent>]
 type ExtCalcInjectedLanguageModule () =

@@ -5,7 +5,7 @@ open Yard.Generators.Common.AST
 open YC.SDK.CommonInterfaces
 open Mono.Addins
 open YC.SDK.ReSharper.Helper
-open ReSharperLanguage
+open ReSharperExtension
 open YC.FST.AbstractLexing.Interpreter
 open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation

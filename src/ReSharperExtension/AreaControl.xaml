@@ -5,7 +5,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
             
             xmlns:controls="clr-namespace:GraphX.Controls;assembly=GraphX.WPF.Controls"
-            xmlns:plugin="clr-namespace:YC.ReSharper.AbstractAnalysis.Plugin"
             mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="700">    
 </TabControl>

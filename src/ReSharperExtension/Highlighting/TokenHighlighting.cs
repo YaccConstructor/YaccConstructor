@@ -2,6 +2,7 @@
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.Tree;
 using ReSharperExtension.Highlighting;
+using ReSharperExtension.YcIntegration;
 
 [assembly: RegisterConfigurableSeverity(TokenHighlighting.SEVERITY_ID, null, HighlightingGroupIds.LanguageUsage, TokenHighlighting.SEVERITY_ID, TokenHighlighting.SEVERITY_ID, 
     Severity.INFO, false, Internal = false)]

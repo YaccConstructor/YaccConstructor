@@ -43,7 +43,7 @@ namespace ReSharperExtension
     [ActionHandler(typeof(WindowDescriptor))]
     public class WindowAction : ActivateToolWindowActionHandler<WindowDescriptor>
     {
-        private readonly IDaemonProcess myDaemonProcess;
+        //private readonly IDaemonProcess myDaemonProcess;
         private WindowDescriptor descriptor;
         private ToolWindowManager manager;
         private Lifetime lifetime;
@@ -58,7 +58,7 @@ namespace ReSharperExtension
         public static AreaControl arcont;
 
 
-        public bool Update(IDataContext context, ActionPresentation presentation, DelegateUpdate nextUpdate)
+        public override bool Update(IDataContext context, ActionPresentation presentation, DelegateUpdate nextUpdate)
         {
             return true;
         }
@@ -106,7 +106,7 @@ namespace ReSharperExtension
             arcont.EControl.Items.Add(new TabItem());
         }
 
-        public void Execute(IDataContext context, DelegateExecute nextExecute)
+        public override void Execute(IDataContext context, DelegateExecute nextExecute)
         {
             //TODO same method
 

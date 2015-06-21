@@ -4,6 +4,8 @@ using System.Linq;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Psi.Tree;
 
+using ReSharperExtension.YcIntegration;
+
 namespace ReSharperExtension.Highlighting.Dynamic
 {
     public static class ExistingTreeNodes

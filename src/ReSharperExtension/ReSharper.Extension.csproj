@@ -55,15 +55,15 @@
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="GraphX.PCL.Common, Version=2.1.8.0, Culture=neutral, PublicKeyToken=a6cdb671d651b60a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\GraphX.2.1.8.1\lib\net40-client\GraphX.PCL.Common.dll</HintPath>
+      <HintPath>..\packages\GraphX.2.1.7\lib\net40-client\GraphX.PCL.Common.dll</HintPath>
     </Reference>
-    <Reference Include="GraphX.PCL.Logic, Version=2.1.8.0, Culture=neutral, PublicKeyToken=3b65ef85075e278f, processorArchitecture=MSIL">
+    <Reference Include="GraphX.PCL.Logic, Version=2.1.7.0, Culture=neutral, PublicKeyToken=3b65ef85075e278f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\GraphX.2.1.7\lib\net40-client\GraphX.PCL.Logic.dll</HintPath>
     </Reference>
     <Reference Include="GraphX.WPF.Controls, Version=2.1.8.0, Culture=neutral, PublicKeyToken=bab23663f80c9e76, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\GraphX.2.1.8.1\lib\net40-client\GraphX.WPF.Controls.dll</HintPath>
+      <HintPath>..\packages\GraphX.2.1.7\lib\net40-client\GraphX.WPF.Controls.dll</HintPath>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\packages\SharpZipLib.JetBrains.Stripped.0.86.20150204.1\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
@@ -180,15 +180,15 @@
       <HintPath>..\packages\JetBrains.Platform.Lib.WpfContrib.2.0.20140304.0\lib\WpfContrib.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="YAXLib, Version=2.13.0.0, Culture=neutral, PublicKeyToken=7cc39f8266ad1835, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\YAXLib.2.13\lib\YAXLib.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AboutActionHandler.cs" />
     <Compile Include="AreaControl.xaml.cs">
       <DependentUpon>AreaControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="LanguageLoader.cs" />
+    <Compile Include="YcIntegration\Constants.cs" />
+    <Compile Include="YcIntegration\ErrorInfo.cs" />
     <Compile Include="GraphDefine\Edge.cs" />
     <Compile Include="GraphDefine\EmptyGraphArea.cs" />
     <Compile Include="GraphDefine\Graph.cs" />
@@ -205,10 +205,13 @@
     <Compile Include="Highlighting\MyFileStructureExplorer.cs" />
     <Compile Include="Highlighting\TokenHighlighting.cs" />
     <Compile Include="Highlighting\TreeNodeProcessor.cs" />
-    <Compile Include="LanguageLoader.cs" />
+    <Compile Include="IReSharperLanguage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="AboutAction.cs" />
+    <Compile Include="YcIntegration\ReSharperHelper.cs" />
+    <Compile Include="WindowAction.cs" />
     <Compile Include="ReverseStringAction.cs" />
+    <Compile Include="YcIntegration\YcHelper.cs" />
+    <Compile Include="ZoneMarker.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">
@@ -220,16 +223,17 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Actions.xml" />
-  </ItemGroup>
-  <ItemGroup>
+    <ProjectReference Include="..\..\FST\FST\FSA\FSA.fsproj">
+      <Project>{B48CFDCC-86F7-4C3A-A5A2-8170950DD2AB}</Project>
+      <Name>FSA</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ConstantPropagation\ConstantPropagation.fsproj">
+      <Project>{42485bca-665d-48fb-befd-4a0232f2cf0b}</Project>
+      <Name>ConstantPropagation</Name>
+    </ProjectReference>
     <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.SEL.SDK.Core.fsproj">
       <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>
       <Name>YC.SEL.SDK.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Helper\YC.ReSharper.AbstractAnalysis.Plugin.Helper.fsproj">
-      <Project>{f86a2827-4c61-4bc5-82c5-19c2b60ab831}</Project>
-      <Name>YC.ReSharper.AbstractAnalysis.Plugin.Helper</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

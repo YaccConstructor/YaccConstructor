@@ -13,7 +13,7 @@ using JetBrains.ReSharper.Psi.CSharp.Parsing;
 using JetBrains.ReSharper.Psi.Parsing;
 using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.Util;
-using YC.SDK.ReSharper;
+using ReSharperExtension.YcIntegration;
 
 namespace ReSharperExtension.Highlighting.Dynamic
 {
@@ -42,7 +42,7 @@ namespace ReSharperExtension.Highlighting.Dynamic
         // '[caret]LBRACE'
         protected override void TryHighlightToRight(MatchingHighlightingsConsumer consumer, ITokenNode selectedToken, TreeOffset treeOffset)
         {
-            if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL_VERBATIM)
+            if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL_REGULAR)
                 return;
 
             if (ExistingTreeNodes.ExistingTrees.Count == 0)
@@ -64,7 +64,7 @@ namespace ReSharperExtension.Highlighting.Dynamic
             int leftNumber = Int32.Parse(node.UserData.GetData(Constants.YcTokNumber));
             int rightNumber = LanguageHelper.GetNumberFromYcName(lang, rBrother);
 
-            var helper = Helper.ReSharperHelper<DocumentRange, ITreeNode>.Instance;
+            var helper = ReSharperHelper<DocumentRange, ITreeNode>.Instance;
 
             IEnumerable<DocumentRange> ranges = helper.GetPairedRanges(lang, leftNumber, rightNumber, lBraceRange, true);
             
@@ -125,7 +125,7 @@ namespace ReSharperExtension.Highlighting.Dynamic
         // 'RBRACE[caret]'
         protected override void TryHighlightToLeft(MatchingHighlightingsConsumer consumer, ITokenNode selectedToken, TreeOffset treeOffset)
         {
-            if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL_VERBATIM)
+            if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL_REGULAR)
                 return;
 
             if (ExistingTreeNodes.ExistingTrees.Count == 0)
@@ -149,7 +149,7 @@ namespace ReSharperExtension.Highlighting.Dynamic
             int leftNumber = LanguageHelper.GetNumberFromYcName(lang, lbrother);
             int rightNumber = Int32.Parse(node.UserData.GetData(Constants.YcTokNumber));
 
-            var helper = Helper.ReSharperHelper<DocumentRange, ITreeNode>.Instance;
+            var helper = ReSharperHelper<DocumentRange, ITreeNode>.Instance;
 
             IEnumerable<DocumentRange> ranges = helper.GetPairedRanges(lang, leftNumber, rightNumber, rBraceRange, false);
             foreach (DocumentRange range in ranges)

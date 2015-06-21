@@ -144,6 +144,10 @@
     <Compile Include="@(ExternalCompile)" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ReSharperExtension\ReSharper.Extension.csproj">
+      <Project>{70133fea-83f5-416a-8869-0e745ef37778}</Project>
+      <Name>ReSharper.Extension</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\YC.ReSharper.AbstractAnalysis.Plugin.Helper\YC.ReSharper.AbstractAnalysis.Plugin.Helper.fsproj">
       <Project>{f86a2827-4c61-4bc5-82c5-19c2b60ab831}</Project>
       <Name>YC.ReSharper.AbstractAnalysis.Plugin.Helper</Name>

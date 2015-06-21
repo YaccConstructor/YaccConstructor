@@ -10,15 +10,15 @@ using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.Tree;
 
 using ReSharperExtension.Highlighting.Dynamic;
+using ReSharperExtension.YcIntegration;
 using YC.SDK;
-using YC.SDK.ReSharper;
 
 namespace ReSharperExtension.Highlighting
 {
     static class Handler
     {
         public static HighlightingProcess Process { get; set; }
-        private static Helper.ReSharperHelper<DocumentRange, ITreeNode> YcProcessor = Helper.ReSharperHelper<DocumentRange, ITreeNode>.Instance;
+        private static ReSharperHelper<DocumentRange, ITreeNode> YcProcessor = ReSharperHelper<DocumentRange, ITreeNode>.Instance;
         public static ArrayList DataGraphs;
         static Handler()
         {
@@ -43,7 +43,7 @@ namespace ReSharperExtension.Highlighting
             IHighlightingConsumer consumer = Process.Consumer;
             var processor = new TreeNodeProcessor(consumer, Process.CSharpFile);
 
-            string xmlPath = YcProcessor.XmlPath(args.Lang);
+            string xmlPath = YcProcessor.GetXmlPath(args.Lang);
             ColorHelper.ParseFile(xmlPath, args.Lang);
 
             Action action =

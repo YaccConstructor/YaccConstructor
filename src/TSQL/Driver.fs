@@ -35,7 +35,7 @@ open YC.FST.AbstractLexing.Interpreter
 open YC.FST.GraphBasedFst
 open YC.SDK.CommonInterfaces
 open YC.SDK.ReSharper.Helper
-open ReSharperLanguage
+open ReSharperExtension
 
 
 let tokenize (lexerInputGraph:Appr<_>) =
@@ -90,3 +90,4 @@ type TSQLInjectedLanguageModule () =
         member this.GetPairedRanges left right range toRight = processor.GetPairedRanges left right range toRight
 
     interface IReSharperLanguage
+        

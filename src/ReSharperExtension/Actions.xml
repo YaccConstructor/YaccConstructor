@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<actions>
-  <insert group-id="ReSharper" position="last">
-    <action-group id="ReSharperExtension" text="ReSharperExtension">
-      <action id="ReSharperExtension.About" text="About 2"/>
-      <!-- to break up elements use <separator/> -->
-    </action-group>
-  </insert>
-</actions>

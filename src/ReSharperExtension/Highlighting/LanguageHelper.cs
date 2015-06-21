@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting;
-using YC.SDK.ReSharper;
+using ReSharperExtension.YcIntegration;
 
 namespace ReSharperExtension.Highlighting
 {
@@ -84,7 +83,7 @@ namespace ReSharperExtension.Highlighting
 
         public int GetNumber(string ycName)
         {
-            return Helper.YcHelper.GetNumber(LanguageName, ycName);
+            return YcHelper.GetNumber(LanguageName, ycName);
         }
     }
 

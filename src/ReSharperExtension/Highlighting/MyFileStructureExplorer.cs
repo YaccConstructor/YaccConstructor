@@ -8,7 +8,7 @@ using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.GeneratedCode;
 using JetBrains.ReSharper.Psi.Tree;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
+namespace ReSharperExtension.Highlighting
 {
     [FileStructureExplorer]
     public class MyFileStructureExplorer : IFileStructureExplorer

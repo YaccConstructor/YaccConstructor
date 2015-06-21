@@ -25,6 +25,7 @@ open System.IO
 open Mono.Addins
 
 open JetBrains.Application
+open JetBrains.Application.BuildScript.Application.Zones
 
 open LexerHelper
 open ReSharperExtension
@@ -38,6 +39,8 @@ open YC.SDK.CommonInterfaces
 open YC.SDK.ReSharper.Helper
 
 
+[<ZoneMarker>]
+type ZoneMarker() = class end
 
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]

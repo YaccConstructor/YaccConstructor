@@ -1,19 +1,25 @@
 ﻿namespace YC.ReSharper.AbstractAnalysis.Languages.ExtCalc
 
-open ExtCalc.AbstractParser
-open Yard.Generators.Common.AST
-open YC.SDK.CommonInterfaces
 open Mono.Addins
-open YC.SDK.ReSharper.Helper
-open ReSharperExtension
-open YC.FST.AbstractLexing.Interpreter
-open YC.FSA.GraphBasedFsa
-open YC.FSA.FsaApproximation
-open YC.FST.GraphBasedFst
-open ControlFlowGraph
 
 open JetBrains.Application
+open JetBrains.Application.BuildScript.Application.Zones
 open JetBrains.ReSharper.Psi.CSharp.Tree
+
+open ControlFlowGraph
+open ExtCalc.AbstractParser
+open ReSharperExtension
+open Yard.Generators.Common.AST
+open YC.FSA.GraphBasedFsa
+open YC.FSA.FsaApproximation
+open YC.FST.AbstractLexing.Interpreter
+open YC.FST.GraphBasedFst
+open YC.SDK.CommonInterfaces
+open YC.SDK.ReSharper.Helper
+
+
+[<ZoneMarker>]
+type ZoneMarker() = class end
 
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
@@ -33,9 +39,7 @@ type ExtCalcInjectedLanguageModule () =
 
     let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
 
-    let parse =
-    
-        fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGraph
+    let parse = fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGraph
 
     let args = 
         {

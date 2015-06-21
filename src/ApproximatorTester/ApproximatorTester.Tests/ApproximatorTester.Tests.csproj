@@ -149,6 +149,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ExecuteTests.cs" />
+    <None Include="packages.config" />
     <None Include="test\data\AllTests\FourVars.cs" />
     <None Include="test\data\AllTests\FourVars.cs.gold" />
     <None Include="test\data\AllTests\FailTest.cs.gold" />
@@ -164,7 +165,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -179,9 +179,6 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
     <Error Condition="!Exists('..\..\packages\JetBrains.Platform.Core.Shell.102.0.20150522.70022\build\JetBrains.Platform.Core.Shell.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Platform.Core.Shell.102.0.20150522.70022\build\JetBrains.Platform.Core.Shell.Targets'))" />
     <Error Condition="!Exists('..\..\packages\JetBrains.Platform.Core.Text.102.0.20150522.70700\build\JetBrains.Platform.Core.Text.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Platform.Core.Text.102.0.20150522.70700\build\JetBrains.Platform.Core.Text.Targets'))" />
-    <Error Condition="!Exists('..\..\packages\JetBrains.Platform.Core.Ide.102.0.20150522.70700\build\JetBrains.Platform.Core.Ide.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Platform.Core.Ide.102.0.20150522.70700\build\JetBrains.Platform.Core.Ide.Targets'))" />
-    <Error Condition="!Exists('..\..\packages\JetBrains.Platform.Symbols.102.0.20150522.70700\build\JetBrains.Platform.Symbols.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Platform.Symbols.102.0.20150522.70700\build\JetBrains.Platform.Symbols.Targets'))" />
-    <Error Condition="!Exists('..\..\packages\JetBrains.Platform.Interop.dotMemoryUnit.Interop.102.0.20150522.70700\build\JetBrains.Platform.Interop.dotMemoryUnit.Interop.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Platform.Interop.dotMemoryUnit.Interop.102.0.20150522.70700\build\JetBrains.Platform.Interop.dotMemoryUnit.Interop.Targets'))" />
     <Error Condition="!Exists('..\..\packages\Antlr2.Tools.2.7.6.3\build\Antlr2.Tools.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Antlr2.Tools.2.7.6.3\build\Antlr2.Tools.targets'))" />
     <Error Condition="!Exists('..\..\packages\JetBrains.Psi.Features.Tasks.102.0.20150522.71619\build\JetBrains.Psi.Features.Tasks.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Psi.Features.Tasks.102.0.20150522.71619\build\JetBrains.Psi.Features.Tasks.Targets'))" />
     <Error Condition="!Exists('..\..\packages\JetBrains.Psi.Features.src.102.0.20150522.71619\build\JetBrains.Psi.Features.src.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Psi.Features.src.102.0.20150522.71619\build\JetBrains.Psi.Features.src.Targets'))" />
@@ -194,13 +191,12 @@
     <Error Condition="!Exists('..\..\packages\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.2.0.20141124.0\build\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.2.0.20141124.0\build\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.Targets'))" />
     <Error Condition="!Exists('..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets'))" />
     <Error Condition="!Exists('..\..\packages\JetBrains.ReSharper.SDK.Tests.$(rshVer)\build\JetBrains.ReSharper.SDK.Tests.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.ReSharper.SDK.Tests.$(rshVer)\build\JetBrains.ReSharper.SDK.Tests.props'))" />
+    <Error Condition="!Exists('..\..\packages\JetBrains.Platform.Symbols.102.0.20150522.70700\build\JetBrains.Platform.Symbols.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Platform.Symbols.102.0.20150522.70700\build\JetBrains.Platform.Symbols.Targets'))" />
+    <Error Condition="!Exists('..\..\packages\JetBrains.Platform.Interop.dotMemoryUnit.Interop.102.0.20150522.70700\build\JetBrains.Platform.Interop.dotMemoryUnit.Interop.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Platform.Interop.dotMemoryUnit.Interop.102.0.20150522.70700\build\JetBrains.Platform.Interop.dotMemoryUnit.Interop.Targets'))" />
   </Target>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="..\..\packages\JetBrains.Platform.Core.Shell.102.0.20150522.70022\build\JetBrains.Platform.Core.Shell.Targets" Condition="Exists('..\..\packages\JetBrains.Platform.Core.Shell.102.0.20150522.70022\build\JetBrains.Platform.Core.Shell.Targets')" />
   <Import Project="..\..\packages\JetBrains.Platform.Core.Text.102.0.20150522.70700\build\JetBrains.Platform.Core.Text.Targets" Condition="Exists('..\..\packages\JetBrains.Platform.Core.Text.102.0.20150522.70700\build\JetBrains.Platform.Core.Text.Targets')" />
-  <Import Project="..\..\packages\JetBrains.Platform.Core.Ide.102.0.20150522.70700\build\JetBrains.Platform.Core.Ide.Targets" Condition="Exists('..\..\packages\JetBrains.Platform.Core.Ide.102.0.20150522.70700\build\JetBrains.Platform.Core.Ide.Targets')" />
-  <Import Project="..\..\packages\JetBrains.Platform.Symbols.102.0.20150522.70700\build\JetBrains.Platform.Symbols.Targets" Condition="Exists('..\..\packages\JetBrains.Platform.Symbols.102.0.20150522.70700\build\JetBrains.Platform.Symbols.Targets')" />
-  <Import Project="..\..\packages\JetBrains.Platform.Interop.dotMemoryUnit.Interop.102.0.20150522.70700\build\JetBrains.Platform.Interop.dotMemoryUnit.Interop.Targets" Condition="Exists('..\..\packages\JetBrains.Platform.Interop.dotMemoryUnit.Interop.102.0.20150522.70700\build\JetBrains.Platform.Interop.dotMemoryUnit.Interop.Targets')" />
   <Import Project="..\..\packages\Antlr2.Tools.2.7.6.3\build\Antlr2.Tools.targets" Condition="Exists('..\..\packages\Antlr2.Tools.2.7.6.3\build\Antlr2.Tools.targets')" />
   <Import Project="..\..\packages\JetBrains.Psi.Features.Tasks.102.0.20150522.71619\build\JetBrains.Psi.Features.Tasks.Targets" Condition="Exists('..\..\packages\JetBrains.Psi.Features.Tasks.102.0.20150522.71619\build\JetBrains.Psi.Features.Tasks.Targets')" />
   <Import Project="..\..\packages\JetBrains.Psi.Features.src.102.0.20150522.71619\build\JetBrains.Psi.Features.src.Targets" Condition="Exists('..\..\packages\JetBrains.Psi.Features.src.102.0.20150522.71619\build\JetBrains.Psi.Features.src.Targets')" />
@@ -212,4 +208,6 @@
   <Import Project="..\..\packages\JetBrains.Psi.Features.test.Framework.102.0.20150522.71619\build\JetBrains.Psi.Features.test.Framework.Targets" Condition="Exists('..\..\packages\JetBrains.Psi.Features.test.Framework.102.0.20150522.71619\build\JetBrains.Psi.Features.test.Framework.Targets')" />
   <Import Project="..\..\packages\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.2.0.20141124.0\build\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.Targets" Condition="Exists('..\..\packages\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.2.0.20141124.0\build\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.Targets')" />
   <Import Project="..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets" Condition="Exists('..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets')" />
+  <Import Project="..\..\packages\JetBrains.Platform.Symbols.102.0.20150522.70700\build\JetBrains.Platform.Symbols.Targets" Condition="Exists('..\..\packages\JetBrains.Platform.Symbols.102.0.20150522.70700\build\JetBrains.Platform.Symbols.Targets')" />
+  <Import Project="..\..\packages\JetBrains.Platform.Interop.dotMemoryUnit.Interop.102.0.20150522.70700\build\JetBrains.Platform.Interop.dotMemoryUnit.Interop.Targets" Condition="Exists('..\..\packages\JetBrains.Platform.Interop.dotMemoryUnit.Interop.102.0.20150522.70700\build\JetBrains.Platform.Interop.dotMemoryUnit.Interop.Targets')" />
 </Project>

@@ -23,31 +23,11 @@
 <file src="..\README.md" target="README.txt" />
 <file src="..\LICENSE" target="LICENSE" />
 <file src="..\NOTICE" target="NOTICE" />
-<!-- ReSharper libs -->
-<file src="..\Bin\Release\v40\antlr.*.dll" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\AsyncBridge.*.dll" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\CookComputing.*.dll" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\DevExpress.*.dll" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\ICSharpCode.*.dll" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\Ionic.*.dll" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\JetBrains.*.dll" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\Microsoft.*.dll" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\Newtonsoft.*.dll" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\NuGet.*.dll" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\Microsoft.*.dll" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\nunit.*.dll" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\NVelocity.*.dll" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\OperatorsResolveCacheGenerator.exe" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\System.*.dll" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\Vestris.*.dll" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\UnitTesting.*.dll" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\WpfContrib.*.dll" target="DotFiles\v9.1\plugins" />
-<file src="..\Bin\Release\v40\yWorks.*.dll" target="DotFiles\v9.1\plugins" />
 <!-- Other libs -->
 <file src="..\Bin\Release\v40\FSharpX.Core.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\GraphX.*" target="DotFiles\v9.1\plugins" />
 <file src="..\Bin\Release\v40\Mono.Addins.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\QuickGraph.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
-<file src="..\Bin\Release\v40\YAXLib.dll" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 <!-- YC.Tools -->
 <file src="..\Bin\Release\v40\YC.FsYacc.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\YC.FsLex.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
@@ -84,8 +64,8 @@
 <file src="..\Bin\Release\v40\YC.ConstantPropagation.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\Hotspots.xml" target="DotFiles\v9.1\plugins" />
 <file src="..\Bin\Release\v40\YC.SEL.SDK.Core.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\ControlFlowGraph.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\ReSharperExtension.*" target="DotFiles\v9.1\plugins" />
 <file src="..\Bin\Release\v40\YC.ReSharper.AbstractAnalysis.Plugin.Helper*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
-<file src="..\Bin\Release\v40\YC.ReSharper.AbstractAnalysis.Plugin.*" target="DotFiles\v9.1\plugins\" exclude="**\*.Test.*" />
 </files>
 </package>

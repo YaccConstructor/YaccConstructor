@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module YC.ReSharper.AbstractAnalysis.Languages.TSQL
+namespace YC.ReSharper.AbstractAnalysis.Languages.TSQL
 
 open System
 open System.IO
@@ -27,6 +27,7 @@ open Mono.Addins
 open JetBrains.Application
 
 open LexerHelper
+open ReSharperExtension
 open Yard.Examples.MSParser
 open Yard.Generators.Common.AST
 open YC.FSA.GraphBasedFsa
@@ -35,48 +36,48 @@ open YC.FST.AbstractLexing.Interpreter
 open YC.FST.GraphBasedFst
 open YC.SDK.CommonInterfaces
 open YC.SDK.ReSharper.Helper
-open ReSharperExtension
-
-
-let tokenize (lexerInputGraph:Appr<_>) =
-    let graphFsa = lexerInputGraph.ApprToFSA()
-    let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
-    let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
-    let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
-    let eof = RNGLR_EOF(new FSA<_>())    
-    YC.TSQLLexer.tokenize eof graphFst
-
-let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
-
-let getTokenName = tokenToNumber >> numToString
-
-let parse = fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGraph
-
-let args = 
-    {
-        tokenToRange = fun x -> new FSA<_>(),new FSA<_>()
-        zeroPosition = new FSA<_>()
-        clearAST = false
-        filterEpsilons = true
-    }
-
-let printAstToDot ast name = defaultAstToDot ast name
-let printOtherAstToDot sppf name = otherAstToDot sppf name
-
-let langName = "TSQL"
-let xmlPath = xmlPath
-let tokenToTreeNode = tokenToTreeNode
-let translate ast errors = translate args ast errors
 
 
 
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
+
 do()
 
 [<ShellComponent>]
 [<Extension>]
 type TSQLInjectedLanguageModule () =
+
+    let tokenize (lexerInputGraph:Appr<_>) =
+        let graphFsa = lexerInputGraph.ApprToFSA()
+        let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
+        let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
+        let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
+        let eof = RNGLR_EOF(new FSA<_>())    
+        YC.TSQLLexer.tokenize eof graphFst
+
+    let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
+
+    let getTokenName = tokenToNumber >> numToString
+
+    let parse = fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGraph
+
+    let args = 
+        {
+            tokenToRange = fun x -> new FSA<_>(),new FSA<_>()
+            zeroPosition = new FSA<_>()
+            clearAST = false
+            filterEpsilons = true
+        }
+
+    let printAstToDot ast name = defaultAstToDot ast name
+    let printOtherAstToDot sppf name = otherAstToDot sppf name
+
+    let langName = "TSQL"
+    let xmlPath = xmlPath
+    let tokenToTreeNode = tokenToTreeNode
+    let translate ast errors = translate args ast errors
+    
     let processor = new Processor<Token, br, range, node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, langName, calculatePos, getRange, printAstToDot, printOtherAstToDot, None)
 
     interface IInjectedLanguageModule<br, range, node> with

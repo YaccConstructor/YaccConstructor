@@ -27,7 +27,6 @@ namespace ReSharperExtension.YcIntegration
 
     class ReSharperHelper<TRange, TNode> 
         where TNode : ITreeNode
-        where TRange : struct 
     {
         private static ReSharperHelper<TRange, TNode> instance;
         public static ReSharperHelper<TRange, TNode> Instance

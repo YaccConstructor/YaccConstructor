@@ -1,18 +1,21 @@
 ﻿module YC.SDK.CommonInterfaces
 
 open Microsoft.FSharp.Collections
-open Yard.Generators.RNGLR.OtherSPPF
+open System.Collections.Generic
+
 open QuickGraph
 open QuickGraph.Algorithms
+
 open AbstractAnalysis.Common
+open ControlFlowGraph
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
+open Yard.Generators.RNGLR.OtherSPPF
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.GraphBasedFst
 open YC.FSA.FsaApproximation
 open YC.FSA.GraphBasedFsa
-open System.Collections.Generic
-open ControlFlowGraph
+
 
 type DrawingGraph (vertices : IEnumerable<int>, edges : List<TaggedEdge<int, string>>) =
     member this.Vertices = vertices

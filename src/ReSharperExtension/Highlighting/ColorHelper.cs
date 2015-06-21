@@ -82,7 +82,7 @@ namespace ReSharperExtension.Highlighting
 
             var path = GetFullPath(fileName);
 
-            if (string.IsNullOrEmpty(path))
+            if (String.IsNullOrEmpty(path))
                 throw new Exception(string.Format("File {0} doesn't exist", fileName));
 
             var xmlDocument = new XmlDocument();

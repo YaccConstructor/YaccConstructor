@@ -39,7 +39,7 @@ namespace ReSharperExtension
 
         public object thisobject;
         public int codeline;
-        private int codecolumn;
+        //private int codecolumn;
         public string Text { get; set; }
 
         #region GET members

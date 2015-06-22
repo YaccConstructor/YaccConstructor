@@ -163,6 +163,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                             createNode !num false Terminal ("dummy")
                             createEdge currentPair.Num !num false ""
                     | null -> ()
+                    | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
             else
                 let a = currentPair.Node :?> NonTerminalNode
                 num := !num + 1

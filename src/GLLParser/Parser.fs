@@ -430,6 +430,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                             then 
                                 resultAST := Some r 
                             pop !currentGSSNode !currentIndex !currentN
+                        | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
 
         let control () =
              while not !stop do

@@ -10,8 +10,10 @@ namespace ReSharperExtension
         /// Some string property for example purposes
         /// </summary>
         public string Text { get; set; }
-        private Brush b;
-        private object thisobj;
+
+        //private Brush b;
+        //private object thisobj;
+        
 
         #region Calculated or static props
 
@@ -30,6 +32,7 @@ namespace ReSharperExtension
             : this("")
         {
         }
+
         public Vertex(string text = "")
         {
             Text = text;
@@ -51,6 +54,11 @@ namespace ReSharperExtension
                 return true;
             return false;
             //return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.ID;
         }
     }
 }

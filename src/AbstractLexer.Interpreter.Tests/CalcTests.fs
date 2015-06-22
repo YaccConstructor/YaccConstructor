@@ -30,7 +30,7 @@ let calcTokenizationTest path eCount vCount countEdgesArray =
     let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphFst    
     match res with
     | Success res ->
-        ToDot res @"../../../src/AbstractLexer.Interpreter.Tests/Tests/TestInterpretParserLexer.dot" (printBref printSmbString)
+        //ToDot res @"../../../src/AbstractLexer.Interpreter.Tests/Tests/TestInterpretParserLexer.dot" (printBref printSmbString)
         checkArr (countEdges res) countEdgesArray
         checkGraph res eCount vCount            
     | Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" path e)

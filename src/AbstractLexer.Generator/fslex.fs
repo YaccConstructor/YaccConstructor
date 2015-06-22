@@ -295,17 +295,28 @@ let main() =
             fstStream.WriteLine(sprintf "   let finishState = ResizeArray.singleton %i" resFST.FinalState.[0]) //one final state...
             fstStream.WriteLine("   let transitions = new ResizeArray<_>()")
             let alphabet = new HashSet<_>()
-            for edge in resFST.Edges do         
-                //alphabet.Add((getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'" | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") (fst edge.Tag))) |> ignore
-                alphabet.Add(match fst edge.Tag with |Smbl 65535 -> "Smbl 65535" |Smbl y -> ("Smbl "+ Convert.ToUInt32(y).ToString())| Eps -> "Eps")  |> ignore                
-                fstStream.WriteLine(
-                    sprintf  
-                        "   transitions.Add(%i, (%s, %s), %i)"
-                        edge.Source
-                        //(getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'"  | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") (fst edge.Tag))
-                        (match fst edge.Tag with |Smbl 65535 -> "Smbl 65535" |Smbl y -> ("Smbl " + Convert.ToUInt32(y).ToString())  |Eps -> "Eps") 
-                        (getVal (string) (snd edge.Tag)) edge.Target)            
-                                                 
+
+            let split length (xs: seq<'T>) =
+                let rec loop xs =
+                    [
+                        yield Seq.truncate length xs |> Seq.toList
+                        match Seq.length xs <= length with
+                        | false -> yield! loop (Seq.skip length xs)
+                        | true -> ()
+                    ]
+                loop xs
+
+            let printEdg (edge:EdgeFST<_,_>) =
+                alphabet.Add(match fst edge.Tag with |Smbl 65535 -> "Smbl 65535" |Smbl y -> ("Smbl "+ (int y |> string))| Eps -> "Eps")  |> ignore
+                sprintf  
+                    "(%i, (%s, %s), %i)"
+                    edge.Source
+                    (match fst edge.Tag with |Smbl 65535 -> "Smbl 65535" |Smbl y -> ("Smbl " + (int y |> string))  |Eps -> "Eps") 
+                    (getVal (string) (snd edge.Tag)) edge.Target
+
+            split 1000 resFST.Edges
+            |> Seq.iter (fun lst -> fstStream.WriteLine("   transitions.AddRange([|" + (lst |> List.map printEdg |> String.concat "; ") + "|])"))
+
             fstStream.WriteLine("   new FST<_,_>(startState, finishState, transitions)")
 
             fstStream.WriteLine("\nlet actions () =")

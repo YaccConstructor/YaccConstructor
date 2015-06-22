@@ -20,14 +20,6 @@ type Hotspot =
     new (full : string array, position, returnType) = 
         new Hotspot(full.[0], full.[1], position, returnType)
 
-let tryFindFile fileName = 
-    let currentDir = Directory.GetCurrentDirectory()
-    let files = Directory.GetFiles(currentDir, fileName)
-
-    if files.Length > 0 
-    then Some files.[0] 
-    else None
-
 let parseHotspots (fileName : string) = 
     let parseHotspot (hotspot : XmlNode) = 
         let mutable child = hotspot
@@ -64,18 +56,16 @@ let parseHotspots (fileName : string) =
         let returnType = 
             match child.Name.ToLowerInvariant() with
             | "returntype" -> child.InnerText.Trim().ToLowerInvariant()
-            | x -> failwithf "Unexpected tag %A. Expected <ReturnType>" x
+            | x -> failwithf "Unexpected tag %s. Expected <ReturnType>" x
 
         language, new Hotspot(methodName, pos, returnType)
     
-    let pathOpt = tryFindFile fileName
-    if pathOpt.IsNone
+    if not <| File.Exists fileName
     then 
         failwithf "File %s isn't found" fileName
     else 
-        let path = pathOpt.Value
         let xmlDocument = new XmlDocument()
-        xmlDocument.Load (path)
+        xmlDocument.Load(fileName)
 
         let mutable element = xmlDocument.DocumentElement.ChildNodes
         let mutable result = []

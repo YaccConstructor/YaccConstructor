@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bugs.cs" />
     <Compile Include="calc.cs" />
     <Compile Include="BracketsHighlighting.cs" />
     <Compile Include="Example5.cs" />

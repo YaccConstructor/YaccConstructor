@@ -7,6 +7,7 @@ open NUnit.Framework
 open LexCommon
 
 open System.Collections.Generic
+open System.IO
 
 
 let run path astBuilder =
@@ -29,10 +30,15 @@ type ``RNGLREBNF parser tests with simple lexer`` () =
 //        Assert.AreEqual(expected, res)
 
     let runTest parser file = 
+//        let pathToLog = @".\res.txt"
+//        let wr = new StreamWriter(pathToLog, true)
         let path = dir + file
+//        let start = System.DateTime.Now
         match run path parser with
         | Error (num, tok, err, _) -> printErr (num, tok, err)
         | Success (tree, _) -> printfn "Success"
+//        | Success (tree, _) -> wr.WriteLine(System.DateTime.Now - start)
+//        wr.Close()
 
     [<Test>]
     member test.``CalcEBNF`` () = 
@@ -118,12 +124,132 @@ type ``RNGLREBNF parser tests with simple lexer`` () =
         let file = "TwoEpsilonsMiddleWrong.txt"
         runTest parser file
 
+//    [<Test>]
+//    member test.``Choice_0050000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0050000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0100000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0100000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0150000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0150000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0200000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0200000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0250000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0250000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0300000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0300000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0350000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0350000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0400000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0400000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0450000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0450000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0500000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0500000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0550000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0550000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0600000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0600000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0650000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0650000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0700000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0700000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0750000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0750000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0800000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0800000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0850000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0850000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0900000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0900000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_0950000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_0950000.txt"
+//        runTest parser file
+//
+//    [<Test>]
+//    member test.``Choice_1000000`` () = 
+//        let parser = RNGLR.EBNF.DFAParserChoice.buildAst
+//        let file = "Choice_1000000.txt"
+//        runTest parser file
+
 [<EntryPoint>]
 let main argv = 
     let parser = RNGLR.EBNF.DFAParserChoice.buildAst
     let path = dir + "Choice.txt"
+    let start = System.DateTime.Now
     match run path parser with
         | Error (num, tok, err, _) -> printErr (num, tok, err)
-        | Success (tree, _) -> 
-            printfn "Success"
+        | Success (tree, _) -> printfn "%A" (System.DateTime.Now - start)
     0 // return an integer exit code

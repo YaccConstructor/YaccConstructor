@@ -253,7 +253,7 @@ Examples/RNGLR/PLSql/*.dot
 Examples/RNGLR/PLSql/*.pdf
 Examples/RNGLR/PLSql/epsilons/*.dot
 Examples/RNGLR/PLSql/Lexer.fs
-src/RNGLRParser.ErrorRecoveryTest/res.dot
+src/RNGLRParser.ErrorRecoveryTest/*.dot
 src/RNGLRParser.SimpleTest/*.yrd.fs
 src/RNGLRParser.SimpleTest/log.txt
 src/RNGLR.EBNFParser.SimpleTest/*.yrd.fs
@@ -277,7 +277,6 @@ src/RNGLRParser.ErrorRecoveryTest/*.yrd.fs
 src/YardFrontend/Parser.fs
 Examples/AbstractAnalysis/SQL/tests/*.dot.pdf
 src/RNGLRAbstractParser.Test/*.yrd.fs
-src/RNGLRParser.ErrorRecoveryTest/*.yrd.fs
 src/FsYaccFrontend/Parser.fs
 *.userprefs
 src/packages/*
@@ -328,14 +327,10 @@ Tests/AbstractRNGLR/DOT/errors6.dot.pdf
 Tests/AbstractRNGLR/DOT/errors7.dot.pdf
 Tests/AbstractRNGLR/DOT/errors8.dot.pdf
 Tests/AbstractRNGLR/DOT/errors9.dot.pdf
-src/TSQL/Highlight_*.cs
-src/TSQL/*TermNode.cs
-src/TSQL/*LitNode.cs
 src/TSQL/out
 *log.txt
 **/out
 **/Calc.yrd.fs
-src/Calc/CalcHighlighting/*
 src/JSON_Parser/JSONHighlighting/*
 Tests/Alvor/GenerateTestforAlvor/packages/*
 src/packages/*
@@ -356,8 +351,6 @@ Tests/AbstractRNGLR/DOT/errors6.dot.pdf
 Tests/AbstractRNGLR/DOT/errors7.dot.pdf
 Tests/AbstractRNGLR/DOT/errors8.dot.pdf
 Tests/AbstractRNGLR/DOT/errors9.dot.pdf
-src/TSQL/Highlight_*.cs
-src/TSQL/*Node.cs
 src/TSQL/out
 *log.txt
 **/out
@@ -432,3 +425,4 @@ src/ExtCalc/*.dot
 src/ControlFlowGraph.Test/*.yrd.fs
 src/ControlFlowGraph.Test/*.dot
 src/YC.ReSharper.AbstractAnalysis.Plugin/YC.ReSharper.AbstractAnalysis.Plugin.csproj.user
+BuildScripts/*.txt

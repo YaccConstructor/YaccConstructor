@@ -8,7 +8,7 @@ using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.Util;
 using Microsoft.FSharp.Control;
-using YC.ReSharper.AbstractAnalysis.LanguageApproximation;
+using YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation;
 using YC.SDK;
 
 
@@ -80,32 +80,30 @@ namespace ReSharperExtension.YcIntegration
             }
         }
 
-        public string GetXmlPath(string lang)
-        {
-            return GetProcessor(lang).XmlPath;
-        }
+        
         
         private ReSharperHelper()
         {
         }
 
-        private IEnumerable<IReSharperLanguage> GetAllProcessors()
+        public List<DocumentRange> GetPairedRanges(string lang, int left, int right, DocumentRange range, bool toRight)
         {
-            return Shell.Instance.GetComponents<IReSharperLanguage>();
+            return GetProcessor(lang).GetPairedRanges(left, right, range, toRight);
         }
 
-        private IReSharperLanguage GetProcessor(string lang)
+        public List<ITreeNode> GetForestWithToken(string lang, DocumentRange range)
         {
-            List<IReSharperLanguage> processors =  GetAllProcessors().AsList();
-            lang = lang.ToLowerInvariant();
+            return GetProcessor(lang).GetForestWithToken(range);
+        }
 
-            IReSharperLanguage res =  processors.Find(processor => processor.Name == lang);
-            if (res == null)
-                throw new Exception(
-                    String.Format("{0} language isn't found. Total loaded: {1}", lang, processors.Count)
-                    );
+        public Tuple<ITreeNode, bool> GetNextTree(string lang, int number)
+        {
+            return GetProcessor(lang).GetNextTree(number);
+        }
 
-            return res;
+        public string GetXmlPath(string lang)
+        {
+            return GetProcessor(lang).XmlPath;
         }
 
         public ProcessErrors Process(ICSharpFile file)
@@ -114,7 +112,7 @@ namespace ReSharperExtension.YcIntegration
             var parserErrors = new List<ErrorInfo>();
             var semanticErrors = new List<ErrorInfo>();
 
-            var graphs = (new ConstantPropagation.Approximator(file)).Approximate();
+            var graphs = (new Approximator(file)).Approximate();
 
             foreach (var tuple in graphs)
             {
@@ -134,6 +132,28 @@ namespace ReSharperExtension.YcIntegration
             return new ProcessErrors(lexerErrors, parserErrors, semanticErrors);
         }
 
+        private IEnumerable<IReSharperLanguage> GetAllProcessors()
+        {
+            return Shell.Instance.GetComponents<IReSharperLanguage>();
+        }
+
+
+        private IReSharperLanguage GetProcessor(string lang)
+        {
+            List<IReSharperLanguage> processors =  GetAllProcessors().AsList();
+            lang = lang.ToLowerInvariant();
+
+            IReSharperLanguage res =  processors.Find(processor => processor.Name.ToLowerInvariant() == lang);
+            if (res == null)
+                throw new Exception(
+                    String.Format("{0} language isn't found. Total loaded: {1}", lang, processors.Count)
+                    );
+
+            return res;
+        }
+
+        
+
         private ErrorInfo TupleToErrorInfo(Tuple<string, DocumentRange> pair)
         {
             return new ErrorInfo
@@ -141,21 +161,6 @@ namespace ReSharperExtension.YcIntegration
                         Message = pair.Item1,
                         Range = pair.Item2,
                     };
-        }
-
-        public List<DocumentRange> GetPairedRanges(string lang, int left, int right, DocumentRange range, bool toRight)
-        {
-            return GetProcessor(lang).GetPairedRanges(left, right, range, toRight);
-        }
-
-        public List<ITreeNode> GetForestWithToken(string lang, DocumentRange range)
-        {
-            return GetProcessor(lang).GetForestWithToken(range);
-        }
-
-        public Tuple<ITreeNode, bool> GetNextTree(string lang, int number)
-        {
-            return GetProcessor(lang).GetNextTree(number);
         }
     }
 }

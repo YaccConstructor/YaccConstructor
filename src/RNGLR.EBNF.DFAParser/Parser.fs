@@ -35,7 +35,8 @@ and Edge =
         val Ast : obj
         /// End of the vertex (begin is not needed)
         val Dest : Vertex
-        new (d, a) = {Dest = d; Ast = a}
+        val Symbol : int
+        new (d, s, a) = {Dest = d; Symbol = s; Ast = a}
     end
 
 type ParserDebugFuns<'TokenType> = {
@@ -71,8 +72,8 @@ let private addSimpleEdge (v : Vertex) (ast : obj) (out : ResizeArray<Vertex * o
     let mutable i = out.Count - 1
     while i >= 0 && less (fst2 out.[i]) v do
         i <- i - 1
-    while i >= 0 && eq (fst2 out.[i]) v do
-        i <- i - 1
+//    while i >= 0 && eq (fst2 out.[i]) v do
+//        i <- i - 1
     out.Insert (i+1, (v, ast))
 
 /// Check if edge with specified destination and AST already exists
@@ -82,8 +83,8 @@ let private containsSimpleEdge (v : Vertex) (f : obj) (out : ResizeArray<Vertex 
     let mutable i = out.Count - 1
     while i >= 0 && less (fst2 out.[i]) v do
         i <- i - 1
-    while i >= 0 && eq (fst2 out.[i]) v do
-        i <- i - 1
+//    while i >= 0 && eq (fst2 out.[i]) v do
+//        i <- i - 1
     while i >= 0 && (let v',f' = out.[i] in eq v' v && f <> f') do
         i <- i - 1
     i >= 0 && (let v',f' = out.[i] in eq v' v && f = f')
@@ -97,8 +98,8 @@ let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * F
     let inline trd3 (_,_,x) = x
     while i >= 0 && less (fst3 out.[i]) v do
         i <- i - 1
-    while i >= 0 && eq (fst3 out.[i]) v do
-        i <- i - 1
+//    while i >= 0 && eq (fst3 out.[i]) v do
+//        i <- i - 1
 
     let isCreated = not (i >= 0 && eq (fst3 out.[i]) v)
 
@@ -127,8 +128,8 @@ let private containsEdge (v : Vertex) (f : Family) (out : ResizeArray<Vertex * F
     let mutable i = out.Count - 1
     while i >= 0 && less (fst3 out.[i]) v do
         i <- i - 1
-    while i >= 0 && eq (fst3 out.[i]) v do
-        i <- i - 1
+//    while i >= 0 && eq (fst3 out.[i]) v do
+//        i <- i - 1
     while i >= 0 && (let v',f',_ = out.[i] in eq v' v && f <> f') do
         i <- i - 1
     i >= 0 && (let v',f',_ = out.[i] in eq v' v && f = f')
@@ -227,7 +228,8 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
     let getExpectedGoto i j =
         match parserSource.Gotos.[i].[j] with
             |Some x -> x
-            |None -> failwithf "Expected goto[%d][%s]" i (parserSource.NumToString j)
+            |None -> -1 
+            //|None -> failwithf "Expected goto[%d][%s]" i (parserSource.NumToString j)
 
     // If input stream is empty or consists only of RNGLR_EOF token
     if not <| enum.MoveNext() || parserSource.EofIndex = parserSource.TokenToNumber enum.Current then
@@ -245,6 +247,8 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
         // Currently processed token
         let curToken = ref enum.Current
         let curNum = ref (parserSource.TokenToNumber enum.Current)
+        let prevNum = ref (parserSource.TokenToNumber enum.Current)
+        let mutable initPrevToken = false
         /// Here all tokens from the input will be collected
         let tokens = new BlockResizeArray<_>()
         let reductions = new Stack<_>(10)
@@ -265,20 +269,107 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
         let dfaTabels = recoverDfa dfaListSource amountOfStates
         let finiteStates = recoverFiniteStates finiteStatesSource
 
-        for i = 0 to dfaTabels.Length - 1 do
-            printfn "Prod : %A" i
-            for j = 0 to dfaTabels.[i].Length - 1 do
-                for k = 0 to dfaTabels.[i].[j].Length - 1 do
-                    printf "%A " dfaTabels.[i].[j].[k]
-                printfn ""
-            printfn "-------------"
-        printfn "\n"
-        for i = 0 to finiteStates.Length - 1 do
-            for e in finiteStates.[i] do
-                printf "%A " e
-            printfn ""
+        let rec printAllRec (v : Vertex) (wasForPrint : HashSet<_>) =
+            if v <> null && not <| wasForPrint.Contains(v.Level, v.State)
+            then
+                let levelV = v.Level
+                let stateV = v.State
+                wasForPrint.Add(levelV, stateV) |> ignore
+                let outEdgesV = v.OutEdges
+                let first = outEdgesV.first
+                let other = outEdgesV.other
 
-        let addVertex state level (edgeOpt : option<Vertex * obj>) =
+                printfn "Vertex: lev = %A  state = %A" levelV stateV
+                printf "firstS = %A  " first.Symbol
+                let dest = first.Dest
+                if dest <> null
+                then
+                    printfn "vert: lev = %A state = %A" first.Dest.Level first.Dest.State
+                else
+                    printfn "vert: null"
+                if other <> null
+                then
+                    for e in other do
+                        printf "otherS = %A  " e.Symbol
+                        let d = e.Dest
+                        if d <> null
+                        then
+                            printfn "vert: lev = %A state = %A" e.Dest.Level e.Dest.State
+                        else
+                            printfn "vert: null"
+                printfn "-----------"
+
+                let simpleEdgesV = simpleEdges.[stateV]
+                let edgesV = edges.[stateV]
+                printfn "Call first edge\n***********"
+                printAllRec first.Dest wasForPrint
+                if other <> null
+                then
+                    for e in other do
+                        printfn "Call other edge\n***********"
+                        printAllRec e.Dest wasForPrint
+                for d in simpleEdgesV do
+                    let (v,_) = d
+                    printfn "Call simple edge\n***********"
+                    printAllRec v wasForPrint
+                for t in edgesV do
+                    let (v,_,_) = t
+                    printfn "Call edge edge\n***********"
+                    printAllRec v wasForPrint
+            else
+                if v <> null
+                then
+                    printfn "\nWas: %A %A" v.Level v.State
+
+        let printAll (v : Vertex) =
+            let wasForPrint = new HashSet<_>()
+            printAllRec v wasForPrint
+
+        let printStateToVertex () =
+            for v in stateToVertex do
+                printAll v
+
+        let printVer (v : Vertex) = 
+            if v <> null
+            then
+                let levelV = v.Level
+                let stateV = v.State
+                let outEdgesV = v.OutEdges
+                let first = outEdgesV.first
+                let other = outEdgesV.other
+
+                printfn "Just Vertex"
+                printfn "Vertex: lev = %A  state = %A" levelV stateV
+                printf "firstS = %A  " first.Symbol
+                let dest = first.Dest
+                if dest <> null
+                then
+                    printfn "vert: lev = %A state = %A" first.Dest.Level first.Dest.State
+                else
+                    printfn "vert: null"
+                if other <> null
+                then
+                    for e in other do
+                        printf "otherS = %A  " e.Symbol
+                        let d = e.Dest
+                        if d <> null
+                        then
+                            printfn "vert: lev = %A state = %A" e.Dest.Level e.Dest.State
+                        else
+                            printfn "vert: null"
+
+                let simpleEdgesV = simpleEdges.[stateV]
+                let edgesV = edges.[stateV]
+                for d in simpleEdgesV do
+                    let (v,_) = d
+                    printfn "from simple edge| vert: lev = %A state = %A" v.Level v.State
+                for t in edgesV do
+                    let (v,_,_) = t
+                    printfn "from simple edge| vert: lev = %A state = %A" v.Level v.State
+                printfn "-----------"
+
+
+        let addVertex state level (edgeOpt : option<Vertex * int * obj>) =
             let dict = stateToVertex
             if dict.[state] = null then
                 let v = new Vertex(state, level)
@@ -302,17 +393,31 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
                 if arr <> null then
                     for prod in arr do
                         reductions.Push (v, prod, Reduce, edgeOpt)
+
+//            printfn "New Vertex"
+//            printAll v
             v
 
         ignore <| addVertex startState 0 None
         let inline fst2 (x,_) = x
         let inline snd2 (_,x) = x
         let inline trd (_,_,x) = x
+        let inline fst3 (x,_,_) = x
+        let inline snd3 (_,x,_) = x
         let inline trd4 (_,_,x,_) = x
         let inline frth (_,_,_,x) = x
         let makeReductions num recovery =
             while reductions.Count > 0 do
                 let vertex, prod, rLabel, edgeOpt = reductions.Pop()
+
+//                printfn "\n----------------FromRed----------------"
+//                printAll vertex
+//                printfn "------EdgeOpt----------"
+//                match edgeOpt with
+//                | Some x -> printfn "vert: lev = %A  state = %A" (fst3 x).Level (fst3 x).State
+//                | None   -> printfn ""
+//                printfn "\n----------------EndRed----------------"
+
                 let nonTerm = parserSource.LeftSide.[prod]
                 let vertexSet = ref Set.empty
 
@@ -321,45 +426,78 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
                     then recovery()//pushes.Clear()
                     else
                         let state = getExpectedGoto final.State nonTerm
-                        let newVertex = addVertex state num None
-                    
-                        let family = new Family(prod, new Nodes(Array.ofList path))
-                        if not <| containsEdge final family edges.[state] then
-                            let isCreated, edgeLabel = addEdge final family edges.[state] false
-                            if (rLabel = Reduce && isCreated) then
-                                let arr = parserSource.Reduces.[state].[!curNum]
-                                if arr <> null then
-                                    for prod in arr do
-                                        reductions.Push (newVertex, prod, Reduce, Some (final, box edgeLabel))
+                        if state <> -1
+                        then
+                            let newVertex = addVertex state num None           
+                            let family = new Family(prod, new Nodes(Array.ofList path))
+                            if not <| containsEdge final family edges.[state] then
+                                let isCreated, edgeLabel = addEdge final family edges.[state] false
+                                if (rLabel = Reduce && isCreated) then
+                                    let arr = parserSource.Reduces.[state].[!curNum]
+                                    if arr <> null then
+                                        for prod in arr do
+                                            reductions.Push (newVertex, prod, Reduce, Some (final, nonTerm, box edgeLabel))
 
-                let rec walk (vertex : Vertex) prod (path : obj list) =
-                    let handle, walkFurther = false, false
-                    
+
+
+                let rec walk (vertex : Vertex) prod state (path : obj list) edgeOptWas =
+//                    printVer vertex
+
+                    let handle = finiteStates.[prod].Contains state
+                    let walkFurther =
+                        if state <> -1
+                        then
+                            let mutable contain = false
+                            if vertex.OutEdges.other <> null
+                            then
+                                contain <- vertex.OutEdges.other |> Array.exists (fun e -> dfaTabels.[prod].[state].[e.Symbol] <> -1)
+                            match edgeOpt with
+                            | Some t -> contain || (dfaTabels.[prod].[state].[vertex.OutEdges.first.Symbol] <> -1) || ((dfaTabels.[prod].[state].[snd3 t] <> -1) && not <| edgeOptWas)
+                            | None   -> contain || (dfaTabels.[prod].[state].[vertex.OutEdges.first.Symbol] <> -1)
+                        else
+                            false
+
                     if handle then handlePath path vertex
                     if walkFurther && vertex <> null
                     then
-                        let visitVertex (v : Vertex) a =
-                            if not <| Set.contains (v.Level, v.State) !vertexSet then
-                                vertexSet := Set.add (v.Level, v.State) !vertexSet
-                                walk v prod (a::path)
+                        let visitVertex (v : Vertex) state symb a edgeOptWas =
+                            if v <> null && not <| Set.contains (v.Level, v.State, state) !vertexSet 
+                            then
+                                vertexSet := Set.add (v.Level, v.State, state) !vertexSet
+                                if symb <> -1
+                                then
+                                    walk v prod dfaTabels.[prod].[state].[symb] (a::path) edgeOptWas
+
+                        if (edgeOpt.IsSome) && not <| edgeOptWas
+                        then
+                            visitVertex (fst3 edgeOpt.Value) 0 (snd3 edgeOpt.Value) (trd edgeOpt.Value) true
 
                         if vertex.Level <> num then
                             if vertex.OutEdges.other <> null then
                                 vertex.OutEdges.other |> Array.iter
                                     (fun e -> 
-                                        visitVertex e.Dest e.Ast)
-                            let e = vertex.OutEdges.first
-                            visitVertex e.Dest e.Ast
+                                        visitVertex e.Dest state e.Symbol e.Ast edgeOptWas)
+                            let e = vertex.OutEdges.first                    
+                            visitVertex e.Dest state e.Symbol e.Ast edgeOptWas
                         else
-                            simpleEdges.[vertex.State] |> ResizeArray.iter(fun (v,a) ->
-                                visitVertex v a)
-                            
+                            for d in simpleEdges.[vertex.State] do
+                                visitVertex (fst d) state -1 (snd d) edgeOptWas
                             let mutable i = 0
                             let edges = edges.[vertex.State]
                             while i < edges.Count do
                                 let (v,_,a) = edges.[i]
-                                visitVertex v a
+                                if v.OutEdges.other <> null 
+                                then
+                                    v.OutEdges.other |> Array.iter (fun e -> visitVertex e.Dest state e.Symbol e.Ast edgeOptWas)
+                                let e = v.OutEdges.first                    
+                                visitVertex e.Dest state e.Symbol e.Ast edgeOptWas
+                                i <- i + 1
                     else recovery() //pushes.Clear()
+
+//                printfn "\n----------------StartState---------------"
+//                printStateToVertex()
+//                printfn "----------------EndState---------------\n"
+
                 match rLabel with
                 |StackReduce ->
                     let goto = getExpectedGoto vertex.State nonTerm
@@ -368,9 +506,11 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
                     if not <| containsSimpleEdge vertex ast simpleEdges.[goto] then
                         addSimpleEdge vertex ast simpleEdges.[goto]
                 |Reduce ->
-                    let path = [snd edgeOpt.Value]
-                    vertexSet := Set.add ((fst2 edgeOpt.Value).Level, (fst2 edgeOpt.Value).State) !vertexSet
-                    walk (fst2 edgeOpt.Value) prod path                    
+                    let path = [trd edgeOpt.Value]
+//                    vertexSet := Set.add ((fst3 edgeOpt.Value).Level, (fst3 edgeOpt.Value).State, 0) !vertexSet
+                    vertexSet := Set.add (vertex.Level, vertex.State, 0) !vertexSet
+//                    walk (fst2 edgeOpt.Value) prod 0 path
+                    walk vertex prod 0 path false
 
         let curInd = ref 0
         let isEnd = ref false
@@ -408,9 +548,9 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
                         else
                             null
                     if count >= 0 then
-                        vEdges.[count] <- new Edge(v, box a)
+                        vEdges.[count] <- new Edge(v, !prevNum, box a)
                     else
-                        first <- new Edge(v, box a)
+                        first <- new Edge(v, !prevNum, box a)
                     count <- count + 1
                     a.first <- snd3 edges.[i]
                     a.other <- other
@@ -419,9 +559,9 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
                 for i = 0 to simpleEdges.[vertex].Count - 1 do
                     let v, a = simpleEdges.[vertex].[i]
                     if count >= 0 then
-                        vEdges.[count] <- new Edge(v, a)
+                        vEdges.[count] <- new Edge(v, !prevNum, a)
                     else
-                        first <- new Edge(v, a)
+                        first <- new Edge(v, !prevNum, a)
                     count <- count + 1
 
                 stateToVertex.[vertex].OutEdges <- UsualOne<_>(first, vEdges)
@@ -431,6 +571,7 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
         let shift num =
             let newAstNode = box tokens.Count
             tokens.Add enum.Current
+            prevNum := !curNum 
             if enum.MoveNext() then
                 curToken := enum.Current
                 curNum := parserSource.TokenToNumber enum.Current
@@ -450,7 +591,7 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
             usedStates.Clear()
 
             for (vertex, state) in oldPushes do
-                let newVertex = addVertex state num <| Some (vertex, newAstNode)
+                let newVertex = addVertex state num <| Some (vertex, !prevNum, newAstNode)
                 addSimpleEdge vertex newAstNode simpleEdges.[state]
         
         /// returns all the terminals and non-terminals that make the push or reduce
@@ -712,6 +853,10 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
                 else
                     incr curInd
                     shift !curInd
+
+//            printfn "\n----------------StartState---------------"
+//            printStateToVertex()
+//            printfn "----------------EndState---------------\n"
         
         let isAcceptState() =                
             usedStates.ToArray()
@@ -755,5 +900,5 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
             match !root with
             | None -> Error (!curInd, [|!curToken|], "Input was fully processed, but it's not complete correct string.", errDict)
             | Some res -> 
-                debugFuns().drawGSSDot "res.dot"
+                //debugFuns().drawGSSDot "res.dot"
                 Success (new Tree<_> (tokens.ToArray(), res, [||]), errDict)

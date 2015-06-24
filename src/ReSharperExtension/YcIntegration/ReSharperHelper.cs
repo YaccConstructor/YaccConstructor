@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using JetBrains.DocumentModel;
-using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.Util;
@@ -106,7 +105,7 @@ namespace ReSharperExtension.YcIntegration
             return GetProcessor(lang).XmlPath;
         }
 
-        public ProcessErrors Process(ICSharpFile file)
+        public ProcessErrors Process(IFile file)
         {
             var lexerErrors = new List<ErrorInfo>();
             var parserErrors = new List<ErrorInfo>();

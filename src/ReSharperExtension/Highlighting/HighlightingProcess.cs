@@ -8,6 +8,8 @@ using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Files;
+using JetBrains.ReSharper.Psi.JavaScript.LanguageImpl;
+using JetBrains.ReSharper.Psi.JavaScript.Tree;
 using JetBrains.ReSharper.Psi.Tree;
 using ReSharperExtension.Highlighting.Dynamic;
 using ReSharperExtension.YcIntegration;
@@ -30,21 +32,34 @@ namespace ReSharperExtension.Highlighting
             }
         }
 
-        private ICSharpFile csFile;
-        public ICSharpFile CSharpFile
+        public IFile File
         {
-            get
-            {
-                if (csFile == null)
-                    csFile = GetCsFile();
-                return csFile;
-            }
+            get { return GetFile(); }
         }
 
-        private ICSharpFile GetCsFile()
+        private IFile GetFile()
+        {
+            IFile csFile = GetcsFile();
+            if (csFile != null)
+                return csFile;
+
+            IFile jsFile = GetJsFile();
+            if (jsFile != null)
+                return jsFile;
+            
+            return null;
+        }
+
+        private IFile GetcsFile()
         {
             IPsiServices psiServices = DaemonProcess.SourceFile.GetPsiServices();
             return psiServices.Files.GetDominantPsiFile<CSharpLanguage>(DaemonProcess.SourceFile) as ICSharpFile;
+        }
+
+        private IFile GetJsFile() 
+        {
+            IPsiServices psiServices = DaemonProcess.SourceFile.GetPsiServices();
+            return psiServices.Files.GetDominantPsiFile<JavaScriptLanguage>(DaemonProcess.SourceFile) as IJavaScriptFile;
         }
 
         public HighlightingProcess(IDaemonProcess process, IContextBoundSettingsStore settingsStore)
@@ -61,14 +76,14 @@ namespace ReSharperExtension.Highlighting
 
         public void Execute(Action<DaemonStageResult> commiter)
         {
-            if (CSharpFile == null)
+            if (File == null)
                 return;
 
             myCommiter = commiter;
             UpdateHandler();
 
             ExistingTreeNodes.ClearExistingTree(DaemonProcess.Document);
-            var errors = YcProcessor.Process(CSharpFile);
+            var errors = YcProcessor.Process(File);
             OnErrors(errors);
             // remove all old highlightings
             //if (DaemonProcess.FullRehighlightingRequired)

@@ -13,8 +13,8 @@ open IControlFlowGraphUtils
 open ResharperCfgAdditionalInfo
 
 /// Creates mapping from loop nodes to it's body enter and loop exit nodes 
-/// for a given IControlFlowGraf
-let findLoopConditionExits (cfg: IControlFlowGraf) (astNodeToCfeDict: AstToCfgDict) =
+/// for a given IControlFlowGraph
+let findLoopConditionExits (cfg: IControlFlowGraph) (astNodeToCfeDict: AstToCfgDict) =
     let (|LoopTreeNode|_|) (node: ITreeNode) =
         match node with
         | :? IForStatement as forStmt -> Some(forStmt.Condition :> ITreeNode)

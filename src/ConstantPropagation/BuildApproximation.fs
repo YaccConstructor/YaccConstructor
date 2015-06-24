@@ -1,7 +1,7 @@
 ﻿/// Main module for building string embedded languages regular approximation
 module BuildApproximation
 
-open JetBrains.ReSharper.Psi.ControlFlow.CSharp
+open JetBrains.ReSharper.Psi.CSharp.ControlFlow
 open JetBrains.ReSharper.Psi.Tree
 
 open ArbitraryOperation
@@ -40,7 +40,7 @@ let rec approximate (functionInfo: ArbitraryOperation) (stack: list<CharFSA>) (c
         match functionInfo.Info with
         | NoInfo -> None, stack
         | CsharpArbitraryFun (methodDecl) ->
-            let csharpCfg = CSharpControlFlowBuilder.Build methodDecl
+            let csharpCfg = nodeToCSharpCfg methodDecl
             let methodName = methodDecl.NameIdentifier.Name
             let genericCFG, convertInfo = toGenericCfg csharpCfg methodName
             BidirectGraphFuns.toDot genericCFG.Graph methodName <| Utils.myDebugFilePath ("cfg_" + methodName + ".dot")

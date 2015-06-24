@@ -1,4 +1,4 @@
-﻿using JetBrains.ReSharper.Intentions.CSharp.Test;
+﻿using JetBrains.ReSharper.FeaturesTestFramework.Intentions;
 using NUnit.Framework;
 
 namespace SELApproximator.Tests

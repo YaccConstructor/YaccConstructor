@@ -1,132 +1,44 @@
 ﻿namespace YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 
-open HotspotParser
-open CSharpCfgBuilderHelper
-open AbstractAnalysis.Common
-open Microsoft.FSharp.Collections
+open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ApproximateCsharp
 
 open JetBrains.ReSharper.Psi.CSharp
 open JetBrains.ReSharper.Psi.CSharp.Tree
 open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi
+
 open JetBrains.ReSharper.Psi.Files
 open JetBrains.ReSharper.Psi.ControlFlow
 open JetBrains.ReSharper.Psi.ControlFlow.Impl
 open JetBrains.ReSharper.Psi.CSharp.ControlFlow
 open JetBrains.ReSharper.Psi.CSharp.Impl.Resolve
 
-type Approximator(file:ICSharpFile) = 
-    static let langToHotspot : (string * Hotspot) list = parseHotspots "Hotspots.xml"
 
-    let propagate (hotspot:IInvocationExpression) =
+open JetBrains.ReSharper.Psi
+open JetBrains.ReSharper.Psi.Tree
+open JetBrains.ReSharper.Psi.CSharp.Tree
+open JetBrains.ReSharper.Psi.CSharp.ControlFlow
+
+open System.IO
+
+open IControlFlowGraphUtils
+
+type Approximator(file:IFile) = 
+    // 0 for top and 3 level down
+    let recursionMaxLevel = 3
+
+    member this.Approximate() = 
         
-//        let declaration = hotspot.FindPrevNode(fun node -> match node with :? ICSharpFunctionDeclaration -> TreeNodeActionType.ACCEPT |_ ->  TreeNodeActionType.CONTINUE)
-        let declaration = 
-            let mutable parent = hotspot :> ITreeNode
-            while not <| parent :? ICSharpFunctionDeclaration do
-                parent <- parent.Parent
-            parent :?> ICSharpFunctionDeclaration
+        let res = new ResizeArray<_>()
+        let lang, fsa = 
+            match file with 
+            | :? ICSharpFile as csFile -> 
+                ApproximateFile csFile recursionMaxLevel
+            | _ -> failwithf "Sorry, this file type doesn't supported now"
 
-        let graph = nodeToCSharpCfg declaration
         
-        let x = graph.Inspect(ValueAnalysisMode.OPTIMISTIC)
-        let defUses = x.AssignmentsUsage
-        let count = ref 0
-        let args = hotspot.ArgumentList.Arguments |> Array.ofSeq
-
-        let edges = new ResizeArray<_>()
-
-        let rec go start _end (node:ITreeNode) =
-            let processVar start _end (v:IReferenceExpression) =
-                let decl = v.Reference.CurrentResolveResult.DeclaredElement //.Resolve().DeclaredElement
-                let assignments =
-                    let x =  
-                        defUses.[decl] 
-                        |> Seq.filter (fun kvp -> kvp.Value <> null && kvp.Value.Contains v)
-                    x
-                    |> Seq.map (fun kvp -> 
-                      match kvp.Key with
-                      | :? ILocalVariableDeclaration as lvDecl -> (lvDecl.Initial :?> IExpressionInitializer).Value
-                      | _ -> 
-                        match kvp.Key.Parent with 
-                        | :? IAssignmentExpression as ae -> 
-                            match ae.AssignmentType with
-                            | AssignmentType.PLUSEQ -> ae :> ICSharpExpression
-                            | _ -> (ae.Arguments.[1] :?> ExpressionArgumentInfo).Expression
-                        | x -> failwithf "Unexpected parent type: %A" x
-                      //| :? IMultipleLocalVariableDeclaration as vd -> vd.Declarators.[0] )
-                      )
-                    |> Array.ofSeq    
-                assignments |> Array.iter (go start _end) 
-            match node with
-            | :? IAdditiveExpression as a ->
-                let n = incr count; !count
-                go start n a.LeftOperand 
-                go n _end a.RightOperand
-            | :? ICSharpLiteralExpression as l -> 
-                new LexerEdge<_,_>(start,_end,Some(l.Literal.GetText().Replace("\\","").Trim[|'"'|],l))
-                |> edges.Add
-            | :? IReferenceExpression as re -> processVar start _end re
-            | :? IConditionalTernaryExpression as tern -> 
-                go start _end tern.ElseResult
-                go start _end tern.ThenResult
-//            | :? INullCoalescingExpression as nce ->
-//                go start _end nce.RightOperand
-//                go ??startVertex?? _end nce.LeftOperand
-            | :? IAssignmentExpression as ae -> 
-                let n = incr count; !count
-                go start n (ae.Arguments.[0] :?> ExpressionArgumentInfo).Expression
-                go n _end  (ae.Arguments.[1] :?> ExpressionArgumentInfo).Expression
-
-            | x -> failwithf "Unexpected node type: %A" x
-
-        go 0 (incr count; !count) args.[0].Value
-
-        let res = new LexerInputGraph<_>()
-        res.AddVerticesAndEdgeRange edges |> ignore
-        res.StartVertex <- 0
+        res.Add((lang, fsa))
         res
+            
 
-    member this.TryDefineLang (node : IInvocationExpression) = 
-        let typeDecl = node.InvokedExpression.GetText().Split('.')
-        let className = typeDecl.[0].ToLowerInvariant()
-        let methodName = typeDecl.[1].ToLowerInvariant()
-                
-        let args = node.AllArguments false
-        let argTypes = new ResizeArray<_>()
-        for argument in args do
-            argTypes.Add <| argument.GetExpressionType().GetLongPresentableName(CSharpLanguage.Instance).ToLowerInvariant()
-        
-        let retType = node.GetExpressionType().GetLongPresentableName(CSharpLanguage.Instance).ToLowerInvariant()
-
-        langToHotspot
-        |> List.tryFind (fun record -> 
-                        let hot = snd record
-                        hot.Class = className && hot.Method = methodName 
-                        && argTypes.[hot.QueryPosition] = "string" && hot.ReturnType = retType)
-        |> Option.map fst        
-
-    member this.Approximate () =
-        let hotspots = new ResizeArray<_>() 
-        let addHotspot (node:ITreeNode) =
-            match node with 
-            | :? IInvocationExpression as m  -> 
-                this.TryDefineLang m
-                |> Option.iter (fun lang -> hotspots.Add (lang, m))
-            | _ -> ()
-        //InvocationExpressionNavigator.
-        let processor = RecursiveElementProcessor(fun x -> addHotspot x)
-        processor.Process file
-        let graphs = ResizeArray.map (fun (lang, hotspot) -> lang, propagate hotspot) hotspots
-        graphs
-        |> ResizeArray.map 
-            (fun (lang, graph) -> 
-                let res = new YC.FSA.FsaApproximation.Appr<_>()
-                res.AddVerticesAndEdgeRange (graph.Edges |> Seq.map (fun e -> new QuickGraph.TaggedEdge<_,_>(e.Source, e.Target, (e.Label.Value,e.BackRef.Value))))
-                |> ignore
-                res.InitState <- new ResizeArray<_>([0])
-                res.FinalState <- new ResizeArray<_>([graph.Vertices |> Seq.find (fun v -> graph.OutDegree(v) = 0)])
-                lang, res
-            )
-        
-        
+    

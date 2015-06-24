@@ -11,8 +11,8 @@ open ResharperCfgAdditionalInfo
 open Utils
 
 /// Creates mapping from loop nodes to it's body enter and loop exit nodes 
-/// for a given IControlFlowGraf
-let findLoopConditionExits (cfg: IControlFlowGraf) (astNodeToCfeDict: AstToCfgDict) =
+/// for a given IControlFlowGraph
+let findLoopConditionExits (cfg: IControlFlowGraph) (astNodeToCfeDict: AstToCfgDict) =
     let jsCfgLoopsAssumptionMsg = "Assumption about Js cfg structure for loops failed"
     let loopConditionExits =
         let loopChooser (node: ITreeNode) (cfeSet: HashSet<IControlFlowElement>) =

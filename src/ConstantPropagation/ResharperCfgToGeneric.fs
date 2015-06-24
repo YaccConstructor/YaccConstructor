@@ -1,4 +1,4 @@
-﻿/// Functions for converting JetBrains.ReSharper.Psi.ControlFlow.IControlFlowGraf
+﻿/// Functions for converting JetBrains.ReSharper.Psi.ControlFlow.IControlFlowGraph
 /// to generic CFG
 module ResharperCfgToGeneric
 
@@ -16,19 +16,19 @@ open Utils
 open GraphUtils
 open IControlFlowGraphUtils
 
-/// Additional info about converted IControlFlowGraf
+/// Additional info about converted IControlFlowGraph
 type ConvertInfo = {
     AstToCfgMapping: AstToCfgDict
     LoopNodes: Dictionary<IControlFlowElement, LoopNodeInfo>
     AstToGenericNodes: Dictionary<ITreeNode, HashSet<GraphNode>>
     CfeToGenericNodes: Dictionary<IControlFlowElement, GraphNode> }
 
-/// Generic function for converting IControlFlowGraf to generic CFG. Expects a function
-/// that can convert a single node of IControlFlowGraf to generic node and a function
+/// Generic function for converting IControlFlowGraph to generic CFG. Expects a function
+/// that can convert a single node of IControlFlowGraph to generic node and a function
 /// that generates basic loops info.
-let rec toGenericCfg (cfg: IControlFlowGraf) toGenericNode findLoopToCondExits tryAsLoopCfe functionName =
+let rec toGenericCfg (cfg: IControlFlowGraph) toGenericNode findLoopToCondExits tryAsLoopCfe functionName =
     let connectToTraversedSuccessors (curCfe: IControlFlowElement) curNode (graph: BidirectGraph) (info: ConvertInfo) =
-        let tryGetGenericOfTarget (rib: IControlFlowRib) =
+        let tryGetGenericOfTarget (rib: IControlFlowEdge) =
             if rib.Target <> null 
             then 
                 match info.CfeToGenericNodes.TryGetValue rib.Target with
@@ -88,7 +88,7 @@ let rec toGenericCfg (cfg: IControlFlowGraf) toGenericNode findLoopToCondExits t
             do Edge(markNode, dst) |> graph.AddVerticesAndEdge |> ignore
             let sourcesToMark = edges |> Seq.map (fun e -> Edge(e.Source, markNode))
             do graph.AddVerticesAndEdgeRange sourcesToMark |> ignore
-        let getLoopGenericInEdges (loopNode: GraphNode) (bodyExits: list<IControlFlowRib>) =
+        let getLoopGenericInEdges (loopNode: GraphNode) (bodyExits: list<IControlFlowEdge>) =
             let nodes = 
                 bodyExits 
                 |> List.map (fun r -> info.CfeToGenericNodes.[r.Source])
@@ -124,7 +124,7 @@ let rec toGenericCfg (cfg: IControlFlowGraf) toGenericNode findLoopToCondExits t
                     surroundLoopWithMarkers loopNode loopInfo prevId)
         |> ignore
 
-    let traverseConverting (cfg: IControlFlowGraf) (info: ConvertInfo) =
+    let traverseConverting (cfg: IControlFlowGraph) (info: ConvertInfo) =
         let initState = (BidirectGraphFuns.create (), [], 0, info, [])
         let _, (graph, _, lastId, _, _) =
             let algoParts = basicCfgDfsParts (fun _ s -> s) processNode getNextNodes postProcess

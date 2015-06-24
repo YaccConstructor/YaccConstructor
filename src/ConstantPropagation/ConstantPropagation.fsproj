@@ -37,13 +37,11 @@
   <Import Project="..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\Plugin.NoReferences.Targets')" />
   <ItemGroup>
     <Compile Include="HotspotParser.fs" />
-    <Compile Include="CSharpCfgBuilderHelper.fs" />
-    <Compile Include="ConstantPropagation.fs" />
+    <Compile Include="Utils.fs" />
     <None Include="packages.config" />
     <Content Include="Hotspots.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Compile Include="Utils.fs" />
     <Compile Include="GraphUtils.fs" />
     <Compile Include="IControlFlowGraphUtils.fs" />
     <Compile Include="ResharperCsharpTreeUtils.fs" />
@@ -63,6 +61,7 @@
     <Compile Include="BuildApproximation.fs" />
     <Compile Include="ApproximateCsharp.fs" />
     <Compile Include="ApproximateJs.fs" />
+    <Compile Include="ConstantPropagation.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

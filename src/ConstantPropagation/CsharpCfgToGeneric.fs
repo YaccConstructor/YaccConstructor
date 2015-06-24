@@ -1,11 +1,11 @@
-﻿/// C# specific functions needed to run IControlFlowGraf to generic CFG
+﻿/// C# specific functions needed to run IControlFlowGraph to generic CFG
 /// conversion algo
 module CsharpCfgToGeneric
 
 open JetBrains.ReSharper.Psi
 open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi.CSharp.Tree
-open JetBrains.ReSharper.Psi.ControlFlow.CSharp
+open JetBrains.ReSharper.Psi.CSharp.ControlFlow
 open JetBrains.ReSharper.Psi.ControlFlow
 
 open ResharperCfgToGeneric
@@ -123,9 +123,9 @@ let private toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) 
                 | _ -> OtherNode
     { Id = nodeId; Type = nType }
     
-/// Converts C# ICSharpControlFlowGraf to generic CFG by calling generic conversion
+/// Converts C# ICSharpControlFlowGraph to generic CFG by calling generic conversion
 /// algo with C# specific functions passed as arguments
-let rec toGenericCfg (cfg: ICSharpControlFlowGraf) functionName =
+let rec toGenericCfg (cfg: ICSharpControlFlowGraph) functionName =
     ResharperCfgToGeneric.toGenericCfg 
         cfg 
         toGenericNode 

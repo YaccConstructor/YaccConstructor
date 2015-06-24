@@ -7,10 +7,10 @@ open JetBrains.ReSharper.Psi.CSharp.Tree
 open JetBrains.ReSharper.Psi.CSharp
 open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi
-open JetBrains.ReSharper.Psi.ControlFlow.CSharp
+open JetBrains.ReSharper.Psi.CSharp.ControlFlow
 open JetBrains.ReSharper.Psi.ControlFlow
 
-open XMLParser
+open HotspotParser
 open Utils
 open ArbitraryOperation
 open ResharperCsharpTreeUtils
@@ -68,12 +68,13 @@ let ApproximateFile (file: ICSharpFile) recursionMaxLevel =
     // debug
     allMethodsCfgToDot file myDebugFolderPath
     // end
-    let hotspotInfoList = XMLParser.parseXml "..\\..\\..\\..\\ConstantPropagation\\Hotspots.xml"
+    let hotspotInfoList = HotspotParser.parseHotspots "..\\..\\..\\..\\ConstantPropagation\\Hotspots.xml"
     // only the first hotspot is processed in currect implementation
     let lang, hotspot = (findHotspots file hotspotInfoList).[0]
     let methodDeclaration = getEnclosingMethod hotspot
     let hotVarRef = (hotspot.Arguments.[0].Value) :> ITreeNode
-    buildFsaForMethod methodDeclaration hotVarRef recursionMaxLevel
+    let fsaRes = buildFsaForMethod methodDeclaration hotVarRef recursionMaxLevel
+    lang, fsaRes
 
 // stub
 let private buildInvocationTree (node: IInvocationExpression) =

@@ -41,7 +41,7 @@ namespace ReSharperExtension.Highlighting
         private static void OnLexingFinished<T>(object sender, CommonInterfaces.LexingFinishedArgs<T> args)
         {
             IHighlightingConsumer consumer = Process.Consumer;
-            var processor = new TreeNodeProcessor(consumer, Process.CSharpFile);
+            var processor = new TreeNodeProcessor(consumer, Process.File);
 
             string xmlPath = YcProcessor.GetXmlPath(args.Lang);
             ColorHelper.ParseFile(xmlPath, args.Lang);

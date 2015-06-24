@@ -1,12 +1,11 @@
 ﻿using System;
-using JetBrains.Application;
 using JetBrains.Application.Progress;
 using JetBrains.ProjectModel;
-using JetBrains.ReSharper.Feature.Services.Bulbs;
+using JetBrains.ReSharper.Feature.Services.ContextActions;
 using JetBrains.ReSharper.Feature.Services.JavaScript.Bulbs;
-using JetBrains.ReSharper.Intentions.Extensibility;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;
+using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.TextControl;
 using JetBrains.Util;
 using YC.ReSharper.AbstractAnalysis.LanguageApproximation;
@@ -30,7 +29,7 @@ namespace SELApproximator
 
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
-            var jsCfg = _provider.GetControlFlowGraf();
+            var jsCfg = _provider.GetControlFlowGraph();
             var fsa = ApproximateJs.BuildFsaForOneFunctionCfg(jsCfg);
             OutputResult(Utils.FsaToTestDot(fsa));
             return null;

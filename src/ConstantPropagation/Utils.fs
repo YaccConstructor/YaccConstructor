@@ -1,7 +1,6 @@
 ﻿/// General purpose utilities
 module Utils
 
-    open JetBrains.ReSharper.Psi.CSharp.ControlFlow
 open System.IO
 
 /// Extension methods for .net Dictionary class

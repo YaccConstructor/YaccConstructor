@@ -4,11 +4,17 @@ module ResharperCsharpTreeUtils
 open JetBrains.ReSharper.Psi
 open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi.CSharp.Tree
-open JetBrains.ReSharper.Psi.ControlFlow.CSharp
+open JetBrains.ReSharper.Psi.CSharp.ControlFlow
 
 open System.IO
 
 open IControlFlowGraphUtils
+
+/// Returns control flow graph for ITreeNode
+let nodeToCSharpCfg (declaration : ITreeNode) = 
+    let cSharpCfgBuilder = new CSharpControlFlowBuilder()
+    let graph = cSharpCfgBuilder.GraphFromNode (declaration, null, false)
+    graph :?> ICSharpControlFlowGraph
 
 /// Extracts C# CFG from method declaration and converts it
 /// to DOT's digraph. The output file's name and the digraph's name
@@ -16,7 +22,7 @@ open IControlFlowGraphUtils
 let methodCfgToDot (methodDecl: IMethodDeclaration) (outDirPath: string) =
     let methodName = methodDecl.NameIdentifier.GetText()
     let outPath = Path.Combine(outDirPath, methodName + ".dot")
-    let cfg = CSharpControlFlowBuilder.Build methodDecl
+    let cfg = nodeToCSharpCfg methodDecl
     cfgToDot cfg outPath methodName
 
 /// Creates CFGs for all the methods in the passed file and outputs

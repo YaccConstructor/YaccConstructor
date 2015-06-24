@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
-using JetBrains.Application;
-using JetBrains.ReSharper.Feature.Services.CSharp.Bulbs;
+
+using JetBrains.ReSharper.Feature.Services.CSharp.Analyses.Bulbs;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;
+using JetBrains.ReSharper.Resources.Shell;
 using YC.FSA;
 
 namespace SELApproximator

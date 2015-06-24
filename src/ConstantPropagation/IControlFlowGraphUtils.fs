@@ -1,4 +1,4 @@
-﻿/// Utilities for JetBrains.ReSharper.Psi.ControlFlow.IControlFlowGraf
+﻿/// Utilities for JetBrains.ReSharper.Psi.ControlFlow.IControlFlowGraph
 module IControlFlowGraphUtils
 
 open JetBrains.ReSharper.Psi.ControlFlow
@@ -8,7 +8,7 @@ open System.Collections.Generic
 
 open GraphUtils
 
-let private toDot (cfg: IControlFlowGraf) (outStream: StreamWriter) =
+let private toDot (cfg: IControlFlowGraph) (outStream: StreamWriter) =
     let getNodeInfo (node: IControlFlowElement) =
         if node <> null
         then 
@@ -59,16 +59,16 @@ let private toDot (cfg: IControlFlowGraf) (outStream: StreamWriter) =
 
 /// Converts passed cfg "cfg" to DOT's digraph with name "name" 
 /// and stores it in the file specified by "outPath"
-let cfgToDot (cfg: IControlFlowGraf) outPath name =
+let cfgToDot (cfg: IControlFlowGraph) outPath name =
     use outStream = FileInfo(outPath).CreateText()
     outStream.WriteLine("digraph " + name + " {")
     toDot cfg outStream
     outStream.WriteLine("}")
 
-/// IsVisited part of the DFS algo specific for IControlFlowGraf
+/// IsVisited part of the DFS algo specific for IControlFlowGraph
 let cfgIsVisited (e: IControlFlowElement) v = Set.contains e.Id v
 
-/// MakeVisited part of the DFS algo specific for IControlFlowGraf
+/// MakeVisited part of the DFS algo specific for IControlFlowGraph
 let cfgMakeVisited (e: IControlFlowElement) v = Set.add e.Id v
 
 /// Returns DfsParts instance with IsVisited and MakeVisited set to 
@@ -123,12 +123,12 @@ let getCfeEntries (e: IControlFlowElement) s =
 let cfgEntriesDfsParts processNode =
     cfgDfsParts processNode getCfeEntries
 
-/// Cycles searching algorithm implementation for IControlFlowGraf.
+/// Cycles searching algorithm implementation for IControlFlowGraph.
 /// Searches for the loop enter nodes. These nodes
 /// have successors looped to the nodes under discussion.
 /// The set of loop enter node ID's is returned.
-let findLoopNodes (cfg: IControlFlowGraf): Set<int> =
-    let calculateEnterExit (cfg: IControlFlowGraf) =
+let findLoopNodes (cfg: IControlFlowGraph): Set<int> =
+    let calculateEnterExit (cfg: IControlFlowGraph) =
         let initState = (0, Map.empty, Map.empty)
         let preProcess (e: IControlFlowElement) (step, enter, x) = 
             (step + 1, Map.add e.Id (step + 1) enter, x)

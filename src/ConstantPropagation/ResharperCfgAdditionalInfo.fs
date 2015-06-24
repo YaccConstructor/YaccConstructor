@@ -2,8 +2,8 @@
 /// The info includes mapping from AST elements (from JetBrains.ReSharper.Psi.Tree)
 /// to JetBrains.ReSharper.Psi.ControlFlow.IControlFlowElements
 /// (back mapping is provided by Resharper), and information about loops
-/// in IControlFlowGraf. All this info is used to convert language specific
-/// IControlFlowGraf to Generic CFG.
+/// in IControlFlowGraph. All this info is used to convert language specific
+/// IControlFlowGraph to Generic CFG.
 module ResharperCfgAdditionalInfo
 
 open System.Collections.Generic
@@ -20,8 +20,8 @@ type LoopToConditionExitsDict = Dictionary<IControlFlowElement, IControlFlowElem
 
 module GeneralCfgInfoFuns =
     /// Builds mapping from AST elements to IControlFlowElements
-    /// for a given IControlFlowGraf
-    let astNodeToCfeDict (cfg: IControlFlowGraf) =
+    /// for a given IControlFlowGraph
+    let astNodeToCfeDict (cfg: IControlFlowGraph) =
         let astNodeToCfeDict = AstToCfgDict()
         let processNode (e: IControlFlowElement) () =
             if e <> null && e.SourceElement <> null
@@ -30,7 +30,7 @@ module GeneralCfgInfoFuns =
         do dfs algoParts cfg.EntryElement Set.empty () |> ignore
         astNodeToCfeDict
 
-/// Holds the info about a loop in IControlFlowGraf. The loop has the following structure.
+/// Holds the info about a loop in IControlFlowGraph. The loop has the following structure.
 /// The first node of a loop is called loop node. The loop node's subtree (part of it, the nearest
 /// to the node) represents loop's condition. This subtree part ends with 2 exit nodes - one
 /// leads to the loop's body (hold by BodyEnter field), another - out of the loop (hold by 
@@ -42,7 +42,7 @@ type LoopNodeInfo = {
     LoopExit: IControlFlowElement
     BodyConditionNodes: HashSet<IControlFlowElement>
     ExitConditionNodes: HashSet<IControlFlowElement>
-    BodyExits: list<IControlFlowRib> }
+    BodyExits: list<IControlFlowEdge> }
 
 module LoopNodeInfoFuns =
     let private findLoopBodyExits loopNodeId bodyEnterNode =

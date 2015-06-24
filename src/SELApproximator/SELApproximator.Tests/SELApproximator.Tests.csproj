@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\packages\JetBrains.ReSharper.SDK.Tests.8.2.1158\build\JetBrains.ReSharper.SDK.Tests.Props" Condition="Exists('..\..\packages\JetBrains.ReSharper.SDK.Tests.8.2.1158\build\JetBrains.ReSharper.SDK.Tests.Props')" />
+  <Import Project="..\..\packages\JetBrains.ReSharper.SDK.8.2.1158\build\JetBrains.ReSharper.SDK.Props" Condition="Exists('..\..\packages\JetBrains.ReSharper.SDK.8.2.1158\build\JetBrains.ReSharper.SDK.Props')" />
+  <PropertyGroup>
+    <ReSharperSdkMode>Tests</ReSharperSdkMode>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D92E08CC-6E81-4EA3-B01E-8AB0CC2C042F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SELApproximator.Tests</RootNamespace>
+    <AssemblyName>SELApproximator.Tests</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <Import Project="../../YC.targets" />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DefineConstants>JET_MODE_ASSERT;DEBUG;TRACE</DefineConstants>
+    <OutputPath>bin\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ExecuteJsRecursiveFsaTests.cs" />
+    <Compile Include="ExecuteCSharpRecursiveFsaTests.cs" />
+    <Compile Include="ExecuteCSharpFsaTests.cs" />
+    <Compile Include="ExecuteJsFsaTests.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="test\data\CSharpFsa\Demo2.cs" />
+    <None Include="test\data\CSharpFsa\Demo1.cs" />
+    <None Include="test\data\CSharpFsa\Demo1.cs.gold" />
+    <None Include="test\data\CSharpFsa\Demo2.cs.gold" />
+    <None Include="test\data\CSharpRecursiveFsa\TailRecMethodWithTwoArgs.cs" />
+    <None Include="test\data\CSharpRecursiveFsa\TailRecMethodWithTwoArgs.cs.gold" />
+    <None Include="test\data\CSharpRecursiveFsa\TailRecMethodTwoExits.cs" />
+    <None Include="test\data\CSharpRecursiveFsa\TailRecMethodTwoExits.cs.gold" />
+    <None Include="test\data\CSharpRecursiveFsa\TailRecMethod.cs" />
+    <Content Include="test\data\JsRecursiveFsa\SimpleUserDefMethod.js" />
+    <Content Include="test\data\JsRecursiveFsa\ComplexOneLevelRec.js" />
+    <None Include="test\data\CSharpRecursiveFsa\TailRecMethod.cs.gold" />
+    <None Include="test\data\JsRecursiveFsa\ComplexOneLevelRec.js.gold" />
+    <None Include="test\data\JsRecursiveFsa\SimpleUserDefMethod.js.gold" />
+    <None Include="test\data\CSharpRecursiveFsa\TooDeepRec.cs" />
+    <None Include="test\data\CSharpRecursiveFsa\TooDeepRec.cs.gold" />
+    <None Include="test\data\CSharpRecursiveFsa\ThreeLevelRec.cs" />
+    <None Include="test\data\CSharpRecursiveFsa\ComplexOneLevelRec.cs" />
+    <None Include="test\data\CSharpRecursiveFsa\ComplexOneLevelRec.cs.gold" />
+    <None Include="test\data\CSharpRecursiveFsa\ThreeLevelRec.cs.gold" />
+    <None Include="test\data\CSharpRecursiveFsa\SimpleUserDefMethod.cs" />
+    <None Include="test\data\CSharpFsa\ForWithIf.cs" />
+    <None Include="test\data\CSharpFsa\ForWithIf.cs.gold" />
+    <None Include="test\data\CSharpFsa\NestedFor.cs" />
+    <None Include="test\data\CSharpFsa\ForWithLocalVar.cs" />
+    <None Include="test\data\CSharpFsa\ComplexConditionFor.cs" />
+    <None Include="test\data\CSharpFsa\ComplexConditionFor.cs.gold" />
+    <None Include="test\data\CSharpFsa\ForWithLocalVar.cs.gold" />
+    <None Include="test\data\CSharpFsa\NestedFor.cs.gold" />
+    <None Include="test\data\CSharpFsa\SimpleFor.cs" />
+    <None Include="test\data\CSharpFsa\SimpleFor.cs.gold" />
+    <None Include="test\data\CSharpFsa\SimpleQuery.cs" />
+    <None Include="test\data\CSharpFsa\SimpleMethodCall.cs" />
+    <None Include="test\data\CSharpFsa\SimpleConcat.cs" />
+    <None Include="test\data\CSharpFsa\FourVars.cs" />
+    <None Include="test\data\CSharpFsa\FourVars.cs.gold" />
+    <None Include="test\data\CSharpFsa\IfWithoutElse.cs" />
+    <None Include="test\data\CSharpFsa\IfWithoutElse.cs.gold" />
+    <None Include="test\data\CSharpFsa\MethodWithMethodCallArg.cs" />
+    <None Include="test\data\CSharpFsa\MethodWithMethodCallArg.cs.gold" />
+    <None Include="test\data\CSharpFsa\MethodWithRefArg.cs" />
+    <Content Include="test\data\JsFsa\SimpleConcat.js" />
+    <None Include="test\data\CSharpFsa\MethodWithRefArg.cs.gold" />
+    <None Include="test\data\CSharpFsa\SimpleConcat.cs.gold" />
+    <None Include="test\data\CSharpFsa\SimpleMethodCall.cs.gold" />
+    <None Include="test\data\CSharpFsa\SimpleQuery.cs.gold" />
+    <None Include="test\data\CSharpRecursiveFsa\SimpleUserDefMethod.cs.gold" />
+    <None Include="test\data\JsFsa\SimpleConcat.js.gold" />
+    <Content Include="test\data\JsFsa\SimpleMethodCall.js" />
+    <Content Include="test\data\JsFsa\MethodWithRefArg.js" />
+    <Content Include="test\data\JsFsa\MethodWithMethodCallArg.js" />
+    <Content Include="test\data\JsFsa\IfWithoutElse.js" />
+    <Content Include="test\data\JsFsa\FourVars.js" />
+    <Content Include="test\data\JsFsa\ForWithLocalVar.js" />
+    <Content Include="test\data\JsFsa\ForWithIf.js" />
+    <Content Include="test\data\JsFsa\NestedFor.js" />
+    <Content Include="test\data\JsFsa\SimpleFor.js" />
+    <Content Include="test\data\JsFsa\SimpleQuery.js" />
+    <None Include="test\data\JsFsa\ForWithIf.js.gold" />
+    <None Include="test\data\JsFsa\ForWithLocalVar.js.gold" />
+    <None Include="test\data\JsFsa\FourVars.js.gold" />
+    <None Include="test\data\JsFsa\IfWithoutElse.js.gold" />
+    <None Include="test\data\JsFsa\MethodWithMethodCallArg.js.gold" />
+    <None Include="test\data\JsFsa\MethodWithRefArg.js.gold" />
+    <None Include="test\data\JsFsa\NestedFor.js.gold" />
+    <None Include="test\data\JsFsa\SimpleFor.js.gold" />
+    <None Include="test\data\JsFsa\SimpleMethodCall.js.gold" />
+    <None Include="test\data\JsFsa\SimpleQuery.js.gold" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\FST\FST\FST\FST.fsproj">
+      <Project>{bcf4793c-e8b4-4fd5-9723-3c08859066c5}</Project>
+      <Name>FST</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SELApproximator\SELApproximator.csproj">
+      <Name>SELApproximator</Name>
+      <Project>{8766C954-D768-48C3-B35D-DCE8192CF166}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\JetBrains.ReSharper.SDK.8.2.1158\build\JetBrains.ReSharper.SDK.Props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.ReSharper.SDK.8.2.1158\build\JetBrains.ReSharper.SDK.Props'))" />
+    <Error Condition="!Exists('..\..\packages\JetBrains.ReSharper.SDK.8.2.1158\build\JetBrains.ReSharper.SDK.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.ReSharper.SDK.8.2.1158\build\JetBrains.ReSharper.SDK.Targets'))" />
+    <Error Condition="!Exists('..\..\packages\JetBrains.ReSharper.SDK.Tests.8.2.1158\build\JetBrains.ReSharper.SDK.Tests.Props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.ReSharper.SDK.Tests.8.2.1158\build\JetBrains.ReSharper.SDK.Tests.Props'))" />
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <Import Project="..\..\packages\JetBrains.ReSharper.SDK.8.2.1158\build\JetBrains.ReSharper.SDK.Targets" Condition="Exists('..\..\packages\JetBrains.ReSharper.SDK.8.2.1158\build\JetBrains.ReSharper.SDK.Targets')" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+</Project>

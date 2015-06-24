@@ -1,28 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\JetBrains.ReSharper.SDK.Tests.$(rshVer)\build\JetBrains.ReSharper.SDK.Tests.props" Condition="Exists('..\..\packages\JetBrains.ReSharper.SDK.Tests.$(rshVer)\build\JetBrains.ReSharper.SDK.Tests.props')" />
-  <Import Project="..\..\packages\JetBrains.ReSharper.SDK.Tests.8.2.1158\build\JetBrains.ReSharper.SDK.Tests.Props" Condition="Exists('..\..\packages\JetBrains.ReSharper.SDK.Tests.8.2.1158\build\JetBrains.ReSharper.SDK.Tests.Props')" />
-  <Import Project="..\..\packages\JetBrains.ReSharper.SDK.8.2.1158\build\JetBrains.ReSharper.SDK.Props" Condition="Exists('..\..\packages\JetBrains.ReSharper.SDK.8.2.1158\build\JetBrains.ReSharper.SDK.Props')" />
-  <PropertyGroup>
-    <ReSharperSdkMode>Tests</ReSharperSdkMode>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{D92E08CC-6E81-4EA3-B01E-8AB0CC2C042F}</ProjectGuid>
+    <ProjectGuid>{8766C954-D768-48C3-B35D-DCE8192CF166}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ApproximatorTester.Tests</RootNamespace>
-    <AssemblyName>ApproximatorTester.Tests</AssemblyName>
+    <RootNamespace>SELApproximator</RootNamespace>
+    <AssemblyName>SELApproximator</AssemblyName>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <Import Project="../../YC.targets" />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <StartAction>Program</StartAction>
     <DefineConstants>JET_MODE_ASSERT;DEBUG;TRACE</DefineConstants>
+    <StartProgram>$(VsInstallDir)devenv.exe</StartProgram>
+    <StartArguments>/ReSharper.Plugin $(AssemblyName).dll /ReSharper.Internal</StartArguments>
+    <StartWorkingDirectory>$(MSBuildProjectDirectory)\$(OutputPath)</StartWorkingDirectory>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="antlr.runtime">
@@ -41,7 +40,7 @@
       <HintPath>..\..\packages\JetBrains.Platform.Lib.DevExpress.2.0.20140304.0\lib\DevExpress.Data.v7.1.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DevExpress.Utils.v7.1">
+    <Reference Include="DevExpress.Utils.v7.1, Version=7.1.3.0, Culture=neutral, PublicKeyToken=ac81f19954537d54, processorArchitecture=MSIL">
       <HintPath>..\..\packages\JetBrains.Platform.Lib.DevExpress.2.0.20140304.0\lib\DevExpress.Utils.v7.1.dll</HintPath>
       <Private>True</Private>
     </Reference>
@@ -61,11 +60,7 @@
       <HintPath>..\..\packages\DotNetZip.Reduced.1.9.1.8\lib\net20\Ionic.Zip.Reduced.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="JetBrains.Annotations">
-      <HintPath>..\..\packages\JetBrains.Annotations.9.1.1\lib\net20\JetBrains.Annotations.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Deployment.Compression">
+    <Reference Include="Microsoft.Deployment.Compression, Version=3.0.0.0, Culture=neutral, PublicKeyToken=ce35f76fcda82bad, processorArchitecture=MSIL">
       <HintPath>..\..\packages\JetBrains.Platform.Lib.Microsoft.Deployment.Compression.Cab.2.0.20140304.0\lib\Microsoft.Deployment.Compression.dll</HintPath>
       <Private>True</Private>
     </Reference>
@@ -122,6 +117,18 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="PresentationCore" />
+    <Reference Include="QuickGraph">
+      <HintPath>..\..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickGraph.Data">
+      <HintPath>..\..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickGraph.Graphviz">
+      <HintPath>..\..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickGraph.Serialization">
+      <HintPath>..\..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Serialization.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <!--Reference Include="System.Drawing" /-->
@@ -149,30 +156,37 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BuildFsaForCSharp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ExecuteTests.cs" />
-    <None Include="packages.config" />
-    <None Include="test\data\AllTests\FourVars.cs" />
-    <None Include="test\data\AllTests\FourVars.cs.gold" />
-    <None Include="test\data\AllTests\FailTest.cs.gold" />
-    <None Include="test\data\AllTests\FailTest.cs" />
+    <Compile Include="BuildFsaForJs.cs" />
+    <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Actions.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\FST\FST\FSA\FSA.fsproj">
+      <Project>{b48cfdcc-86f7-4c3a-a5a2-8170950dd2ab}</Project>
+      <Name>FSA</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\FST\FST\FST\FST.fsproj">
       <Project>{bcf4793c-e8b4-4fd5-9723-3c08859066c5}</Project>
       <Name>FST</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ApproximatorTester\ApproximatorTester.csproj">
-      <Name>ApproximatorTester</Name>
+    <ProjectReference Include="..\..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
+      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
+      <Name>AbstractAnalysis.Common</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-    <None Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="test\data\AllTests\SimpleQuery.cs" />
-    <None Include="test\data\AllTests\SimpleQuery.cs.gold" />
+    <ProjectReference Include="..\..\ConstantPropagation\ConstantPropagation.fsproj">
+      <Project>{42485bca-665d-48fb-befd-4a0232f2cf0b}</Project>
+      <Name>ConstantPropagation</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -182,6 +196,9 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
     <Error Condition="!Exists('..\..\packages\JetBrains.Platform.Core.Shell.102.0.20150522.70022\build\JetBrains.Platform.Core.Shell.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Platform.Core.Shell.102.0.20150522.70022\build\JetBrains.Platform.Core.Shell.Targets'))" />
     <Error Condition="!Exists('..\..\packages\JetBrains.Platform.Core.Text.102.0.20150522.70700\build\JetBrains.Platform.Core.Text.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Platform.Core.Text.102.0.20150522.70700\build\JetBrains.Platform.Core.Text.Targets'))" />
+    <Error Condition="!Exists('..\..\packages\JetBrains.Platform.Core.Ide.102.0.20150522.70700\build\JetBrains.Platform.Core.Ide.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Platform.Core.Ide.102.0.20150522.70700\build\JetBrains.Platform.Core.Ide.Targets'))" />
+    <Error Condition="!Exists('..\..\packages\JetBrains.Platform.Symbols.102.0.20150522.70700\build\JetBrains.Platform.Symbols.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Platform.Symbols.102.0.20150522.70700\build\JetBrains.Platform.Symbols.Targets'))" />
+    <Error Condition="!Exists('..\..\packages\JetBrains.Platform.Interop.dotMemoryUnit.Interop.102.0.20150522.70700\build\JetBrains.Platform.Interop.dotMemoryUnit.Interop.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Platform.Interop.dotMemoryUnit.Interop.102.0.20150522.70700\build\JetBrains.Platform.Interop.dotMemoryUnit.Interop.Targets'))" />
     <Error Condition="!Exists('..\..\packages\Antlr2.Tools.2.7.6.3\build\Antlr2.Tools.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Antlr2.Tools.2.7.6.3\build\Antlr2.Tools.targets'))" />
     <Error Condition="!Exists('..\..\packages\JetBrains.Psi.Features.Tasks.102.0.20150522.71619\build\JetBrains.Psi.Features.Tasks.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Psi.Features.Tasks.102.0.20150522.71619\build\JetBrains.Psi.Features.Tasks.Targets'))" />
     <Error Condition="!Exists('..\..\packages\JetBrains.Psi.Features.src.102.0.20150522.71619\build\JetBrains.Psi.Features.src.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Psi.Features.src.102.0.20150522.71619\build\JetBrains.Psi.Features.src.Targets'))" />
@@ -193,13 +210,13 @@
     <Error Condition="!Exists('..\..\packages\JetBrains.Psi.Features.test.Framework.102.0.20150522.71619\build\JetBrains.Psi.Features.test.Framework.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Psi.Features.test.Framework.102.0.20150522.71619\build\JetBrains.Psi.Features.test.Framework.Targets'))" />
     <Error Condition="!Exists('..\..\packages\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.2.0.20141124.0\build\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.2.0.20141124.0\build\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.Targets'))" />
     <Error Condition="!Exists('..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets'))" />
-    <Error Condition="!Exists('..\..\packages\JetBrains.ReSharper.SDK.Tests.$(rshVer)\build\JetBrains.ReSharper.SDK.Tests.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.ReSharper.SDK.Tests.$(rshVer)\build\JetBrains.ReSharper.SDK.Tests.props'))" />
-    <Error Condition="!Exists('..\..\packages\JetBrains.Platform.Symbols.102.0.20150522.70700\build\JetBrains.Platform.Symbols.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Platform.Symbols.102.0.20150522.70700\build\JetBrains.Platform.Symbols.Targets'))" />
-    <Error Condition="!Exists('..\..\packages\JetBrains.Platform.Interop.dotMemoryUnit.Interop.102.0.20150522.70700\build\JetBrains.Platform.Interop.dotMemoryUnit.Interop.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Platform.Interop.dotMemoryUnit.Interop.102.0.20150522.70700\build\JetBrains.Platform.Interop.dotMemoryUnit.Interop.Targets'))" />
   </Target>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="..\..\packages\JetBrains.Platform.Core.Shell.102.0.20150522.70022\build\JetBrains.Platform.Core.Shell.Targets" Condition="Exists('..\..\packages\JetBrains.Platform.Core.Shell.102.0.20150522.70022\build\JetBrains.Platform.Core.Shell.Targets')" />
   <Import Project="..\..\packages\JetBrains.Platform.Core.Text.102.0.20150522.70700\build\JetBrains.Platform.Core.Text.Targets" Condition="Exists('..\..\packages\JetBrains.Platform.Core.Text.102.0.20150522.70700\build\JetBrains.Platform.Core.Text.Targets')" />
+  <Import Project="..\..\packages\JetBrains.Platform.Core.Ide.102.0.20150522.70700\build\JetBrains.Platform.Core.Ide.Targets" Condition="Exists('..\..\packages\JetBrains.Platform.Core.Ide.102.0.20150522.70700\build\JetBrains.Platform.Core.Ide.Targets')" />
+  <Import Project="..\..\packages\JetBrains.Platform.Symbols.102.0.20150522.70700\build\JetBrains.Platform.Symbols.Targets" Condition="Exists('..\..\packages\JetBrains.Platform.Symbols.102.0.20150522.70700\build\JetBrains.Platform.Symbols.Targets')" />
+  <Import Project="..\..\packages\JetBrains.Platform.Interop.dotMemoryUnit.Interop.102.0.20150522.70700\build\JetBrains.Platform.Interop.dotMemoryUnit.Interop.Targets" Condition="Exists('..\..\packages\JetBrains.Platform.Interop.dotMemoryUnit.Interop.102.0.20150522.70700\build\JetBrains.Platform.Interop.dotMemoryUnit.Interop.Targets')" />
   <Import Project="..\..\packages\Antlr2.Tools.2.7.6.3\build\Antlr2.Tools.targets" Condition="Exists('..\..\packages\Antlr2.Tools.2.7.6.3\build\Antlr2.Tools.targets')" />
   <Import Project="..\..\packages\JetBrains.Psi.Features.Tasks.102.0.20150522.71619\build\JetBrains.Psi.Features.Tasks.Targets" Condition="Exists('..\..\packages\JetBrains.Psi.Features.Tasks.102.0.20150522.71619\build\JetBrains.Psi.Features.Tasks.Targets')" />
   <Import Project="..\..\packages\JetBrains.Psi.Features.src.102.0.20150522.71619\build\JetBrains.Psi.Features.src.Targets" Condition="Exists('..\..\packages\JetBrains.Psi.Features.src.102.0.20150522.71619\build\JetBrains.Psi.Features.src.Targets')" />
@@ -211,6 +228,4 @@
   <Import Project="..\..\packages\JetBrains.Psi.Features.test.Framework.102.0.20150522.71619\build\JetBrains.Psi.Features.test.Framework.Targets" Condition="Exists('..\..\packages\JetBrains.Psi.Features.test.Framework.102.0.20150522.71619\build\JetBrains.Psi.Features.test.Framework.Targets')" />
   <Import Project="..\..\packages\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.2.0.20141124.0\build\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.Targets" Condition="Exists('..\..\packages\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.2.0.20141124.0\build\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.Targets')" />
   <Import Project="..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets" Condition="Exists('..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets')" />
-  <Import Project="..\..\packages\JetBrains.Platform.Symbols.102.0.20150522.70700\build\JetBrains.Platform.Symbols.Targets" Condition="Exists('..\..\packages\JetBrains.Platform.Symbols.102.0.20150522.70700\build\JetBrains.Platform.Symbols.Targets')" />
-  <Import Project="..\..\packages\JetBrains.Platform.Interop.dotMemoryUnit.Interop.102.0.20150522.70700\build\JetBrains.Platform.Interop.dotMemoryUnit.Interop.Targets" Condition="Exists('..\..\packages\JetBrains.Platform.Interop.dotMemoryUnit.Interop.102.0.20150522.70700\build\JetBrains.Platform.Interop.dotMemoryUnit.Interop.Targets')" />
 </Project>

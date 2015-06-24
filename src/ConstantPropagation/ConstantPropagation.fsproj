@@ -44,9 +44,25 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Compile Include="Utils.fs" />
-    <Compile Include="DataDependencyGraph.fs" />
-    <Compile Include="ApproximationBuilderCSharp.fs" />
-    <Compile Include="Approximator.fs" />
+    <Compile Include="GraphUtils.fs" />
+    <Compile Include="IControlFlowGraphUtils.fs" />
+    <Compile Include="ResharperCsharpTreeUtils.fs" />
+    <Compile Include="ArbitraryOperation.fs" />
+    <Compile Include="GenericGraphs.fs" />
+    <Compile Include="DDG.fs" />
+    <Compile Include="GenericCFG.fs" />
+    <Compile Include="ResharperCfgAdditionalInfo.fs" />
+    <Compile Include="ResharperCfgToGeneric.fs" />
+    <Compile Include="CsharpLoopInfo.fs" />
+    <Compile Include="CsharpCfgToGeneric.fs" />
+    <Compile Include="JsLoopInfo.fs" />
+    <Compile Include="JsCfgToGeneric.fs" />
+    <Compile Include="FsaHelper.fs" />
+    <Compile Include="GenerateFsa.fs" />
+    <Compile Include="CsharpApprxomationUtils.fs" />
+    <Compile Include="BuildApproximation.fs" />
+    <Compile Include="ApproximateCsharp.fs" />
+    <Compile Include="ApproximateJs.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -73,6 +89,9 @@
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi.CSharp">
       <HintPath>..\packages\JetBrains.Psi.Features.src.102.0.20150522.71619\DotFiles\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.ReSharper.Psi.JavaScript">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.2.1158\bin\JetBrains.ReSharper.Psi.JavaScript.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Addins">
       <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>

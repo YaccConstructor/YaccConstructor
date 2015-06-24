@@ -1,4 +1,6 @@
 ﻿module HotspotParser
+/// For parsing Hotspots.xml file and producing it's object
+/// representation
 
 open System
 open System.IO

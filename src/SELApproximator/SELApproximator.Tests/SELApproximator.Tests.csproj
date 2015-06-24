@@ -22,7 +22,7 @@
   <Import Project="../../YC.targets" />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DefineConstants>JET_MODE_ASSERT;DEBUG;TRACE</DefineConstants>
-	<OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -45,6 +45,10 @@
     <Compile Include="ExecuteCSharpFsaTests.cs" />
     <Compile Include="ExecuteJsFsaTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="test\data\CSharpFsa\Demo2.cs" />
+    <None Include="test\data\CSharpFsa\Demo1.cs" />
+    <None Include="test\data\CSharpFsa\Demo1.cs.gold" />
+    <None Include="test\data\CSharpFsa\Demo2.cs.gold" />
     <None Include="test\data\CSharpRecursiveFsa\TailRecMethodWithTwoArgs.cs" />
     <None Include="test\data\CSharpRecursiveFsa\TailRecMethodWithTwoArgs.cs.gold" />
     <None Include="test\data\CSharpRecursiveFsa\TailRecMethodTwoExits.cs" />

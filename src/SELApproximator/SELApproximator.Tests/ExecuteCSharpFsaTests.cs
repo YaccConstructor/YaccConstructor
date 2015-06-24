@@ -87,5 +87,18 @@ namespace SELApproximator.Tests
         {
             DoTestFiles("ForWithIf.cs");
         }
+
+        // Tests for Secr Demo
+        [Test]
+        public void TestDemo1()
+        {
+            DoTestFiles("Demo1.cs");
+        }
+
+        [Test]
+        public void TestDemo2()
+        {
+            DoTestFiles("Demo2.cs");
+        }
     }
 }

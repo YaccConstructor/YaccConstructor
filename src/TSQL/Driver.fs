@@ -51,11 +51,11 @@ do()
 [<Extension>]
 type TSQLInjectedLanguageModule () =
 
-    let tokenize (lexerInputGraph:Appr<_>) =
-        let graphFsa = lexerInputGraph.ApprToFSA()
+    let tokenize (lexerInputGraph:FSA<'br>) =
+//        let graphFsa = lexerInputGraph.ApprToFSA()
         let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
         let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
-        let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
+        let graphFst = FST<_,_>.FSAtoFST(lexerInputGraph, transform, smblEOF)
         let eof = RNGLR_EOF(new FSA<_>())    
         YC.TSQLLexer.tokenize eof graphFst
 

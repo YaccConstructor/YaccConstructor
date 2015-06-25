@@ -29,12 +29,12 @@ do()
 [<Extension>]
 [<ShellComponent>]
 type ExtCalcInjectedLanguageModule () =
-    let tokenize (lexerInputGraph:Appr<_>) =
-        let graphFsa = lexerInputGraph.ApprToFSA()
+    let tokenize (lexerInputGraph:FSA<'br>) =
+//        let graphFsa = lexerInputGraph.ApprToFSA()
         let eof = RNGLR_EOF(new FSA<_>())
         let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
         let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
-        let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
+        let graphFst = FST<_,_>.FSAtoFST(lexerInputGraph, transform, smblEOF)
         YC.ExtCalcLexer.tokenize eof graphFst
 
     let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()

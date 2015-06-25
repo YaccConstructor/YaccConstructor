@@ -227,6 +227,10 @@
       <Project>{B48CFDCC-86F7-4C3A-A5A2-8170950DD2AB}</Project>
       <Name>FSA</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\FST\FST\FST\FST.fsproj">
+      <Project>{bcf4793c-e8b4-4fd5-9723-3c08859066c5}</Project>
+      <Name>FST</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ConstantPropagation\ConstantPropagation.fsproj">
       <Project>{42485bca-665d-48fb-befd-4a0232f2cf0b}</Project>
       <Name>ConstantPropagation</Name>

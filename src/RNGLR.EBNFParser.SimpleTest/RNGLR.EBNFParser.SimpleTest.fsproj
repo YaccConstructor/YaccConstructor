@@ -38,6 +38,7 @@
     <None Include="ManyAndOpt.yrd" />
     <None Include="RightNull.yrd" />
     <None Include="SimpleEpsilon.yrd" />
+    <None Include="SimpleOpt.yrd" />
     <None Include="SimpleRightNull.yrd" />
     <None Include="SimpleSome.yrd" />
     <None Include="StackingConflict.yrd" />

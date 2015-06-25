@@ -23,7 +23,7 @@
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-i ../../../../../YC.Abstract.SQL-temp\src\TSQL\mssqlNonAbstract.yrd -c Linearize -g "RNGLR.EBNFGenerator -table LALR -o RNGLR.EBNF.sql.yrd.fs"</StartArguments>
+    <StartArguments>-i ../../..\src\RNGLR.EBNFParser.SimpleTest\CalcEBNF.yrd -g "RNGLR.EBNFGenerator -pos int -token int -module RNGLR.ParseCalc -translate true -table LALR -o CalcEBNF.yrd.fs"</StartArguments>
     <StartWorkingDirectory>
     </StartWorkingDirectory>
   </PropertyGroup>

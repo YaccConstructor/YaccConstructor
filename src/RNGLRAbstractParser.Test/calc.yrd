@@ -1,9 +1,14 @@
+{
+open YC.FSA.FsaApproximation
+open YC.FSA.GraphBasedFsa
+}
+
 tokens {
-    _ of string
+    _ of FSA<char*Position<string>>
 }
 
 options {
-    translate = true
+    translate = false
     module = "Calc.Parser"
     infEpsPath = epsilons
     pos = uint64
@@ -28,5 +33,5 @@ factor: res=binExpr<powExpr powOp> { res }
 
 powOp: POW { (fun x y -> (float x ** float y) |> int) }
 
-powExpr: n=NUMBER { n } | LBRACE e=expr RBRACE { e }
+powExpr: n=NUMBER { 1 } | LBRACE e=expr RBRACE { e }
 

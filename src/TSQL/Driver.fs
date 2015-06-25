@@ -29,10 +29,18 @@ open YC.SDK.ReSharper.Helper
 open Mono.Addins
 open ReSharperExtension
 open JetBrains.Application
+open YC.FST.AbstractLexing.Interpreter
+open YC.FSA.GraphBasedFsa
+open YC.FSA.FsaApproximation
+open YC.FST.GraphBasedFst
 
-let tokenize lexerInputGraph =
-    let eof = Yard.Examples.MSParser.RNGLR_EOF("",[||])
-    Lexer._fslex_tables.Tokenize(Lexer.fslex_actions_tokens, lexerInputGraph, eof)
+let tokenize (lexerInputGraph:Appr<_>) =
+    let graphFsa = lexerInputGraph.ApprToFSA()
+    let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
+    let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
+    let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
+    let eof = RNGLR_EOF(new FSA<_>())    
+    YC.TSQLLexer.tokenize eof graphFst
 
 let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
 
@@ -42,8 +50,8 @@ let parse = fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGra
 
 let args = 
     {
-        tokenToRange = fun _ -> [||],[||]
-        zeroPosition = [||]
+        tokenToRange = fun x -> new FSA<_>(),new FSA<_>()
+        zeroPosition = new FSA<_>()
         clearAST = false
         filterEpsilons = true
     }
@@ -51,9 +59,12 @@ let args =
 let printAstToDot ast name = defaultAstToDot ast name
 let printOtherAstToDot sppf name = otherAstToDot sppf name
 
+let langName = "TSQL"
 let xmlPath = xmlPath
 let tokenToTreeNode = tokenToTreeNode
 let translate ast errors = translate args ast errors
+
+
 
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
@@ -62,10 +73,10 @@ do()
 [<ShellComponent>]
 [<Extension>]
 type TSQLInjectedLanguageModule () =
-    let processor = new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, "TSQL", calculatePos, getRange, printAstToDot, printOtherAstToDot)
+    let processor = new Processor<Token, br, range, node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, langName, calculatePos, getRange, printAstToDot, printOtherAstToDot, None)
 
-    interface IInjectedLanguageModule<br,range,node> with
-        member this.Name = "TSQL"
+    interface IInjectedLanguageModule<br, range, node> with
+        member this.Name = langName
         member this.Process graphs = processor.Process graphs
         member this.LexingFinished = processor.LexingFinished
         member this.ParsingFinished = processor.ParsingFinished

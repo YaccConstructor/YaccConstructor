@@ -27,8 +27,9 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <StartArguments>-i ../../..\src\RNGLR.EBNFParser.SimpleTest\CalcEBNF.yrd -g "RNGLR.EBNFGenerator -pos int -token int -module RNGLR.ParseCalc -translate true -table LALR -o CalcEBNF.yrd.fs"</StartArguments>
     <StartArguments>-i ../../../../../YC.Abstract.SQL-temp\src\TSQL\mssqlNonAbstract.yrd -c Linearize -g "RNGLR.EBNFGenerator -table LALR -o RNGLR.EBNF.sql.yrd.fs"</StartArguments>
-    <StartArguments>-f YardFrontend -g "TestGenerator -token int -o C:\Users\Ekaterina\YaccConstructor\src\CheckInterpreter\Parser_new.fs" -i C:\Users\Ekaterina\YaccConstructor\src\CheckInterpreter\Lr0_grammar.yrd</StartArguments>
-    <StartWorkingDirectory>C:\Users\Ekaterina\YaccConstructor\src\</StartWorkingDirectory>
+    <StartArguments>-i ../../../src\RNGLR.EBNFParser.SimpleTest\CalcEBNF.yrd -g "RNGLR.EBNFGenerator -pos int -token int -module RNGLR.ParseCalc -translate true -table LR -o CalcEBNF.yrd.fs"</StartArguments>
+    <StartWorkingDirectory>
+    </StartWorkingDirectory>
     <StartAction>Project</StartAction>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">

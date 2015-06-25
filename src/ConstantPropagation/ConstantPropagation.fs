@@ -22,20 +22,20 @@ open JetBrains.ReSharper.Psi.CSharp.ControlFlow
 open System.IO
 
 open IControlFlowGraphUtils
+open YC.FSA.GraphBasedFsa
 
-type Approximator(file:IFile) = 
+type Approximator<'br when 'br : equality>(file:IFile) = 
     // 0 for top and 3 level down
     let recursionMaxLevel = 3
 
     member this.Approximate() = 
         
-        let res = new ResizeArray<_>()
+        let res = new ResizeArray<string * FSA<'br>>()
         let lang, fsa = 
             match file with 
             | :? ICSharpFile as csFile -> 
                 ApproximateFile csFile recursionMaxLevel
             | _ -> failwithf "Sorry, this file type doesn't supported now"
-
         
         res.Add((lang, fsa))
         res

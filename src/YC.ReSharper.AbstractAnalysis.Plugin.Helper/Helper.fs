@@ -16,11 +16,11 @@ open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation
 open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 
-type br = ILiteralExpression
+type br = ICSharpLiteralExpression
 type range = DocumentRange
 type node = ITreeNode 
 
-let getRange =  fun (x : ILiteralExpression) -> (x :> ITreeNode).GetDocumentRange()
+let getRange =  fun (x : ICSharpLiteralExpression) -> (x :> ITreeNode).GetDocumentRange()
 
 let addSemantic (parent : ITreeNode) (children : ITreeNode list) = 
     let mutable prev = null

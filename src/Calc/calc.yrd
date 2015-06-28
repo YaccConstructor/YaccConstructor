@@ -4,7 +4,7 @@ open YC.FSA.FsaApproximation
 }
 
 tokens {
-    _ of FSA<char*Position<JetBrains.ReSharper.Psi.Tree.ILiteralExpression>>
+    _ of FSA<char*Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>
 }
 
 options {

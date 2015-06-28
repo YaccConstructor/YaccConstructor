@@ -6,7 +6,7 @@ using YC.SDK;
 
 namespace ReSharperExtension
 {
-    public interface IReSharperLanguage : CommonInterfaces.IInjectedLanguageModule<ILiteralExpression, DocumentRange, ITreeNode>
+    public interface IReSharperLanguage : CommonInterfaces.IInjectedLanguageModule<ICSharpLiteralExpression, DocumentRange, ITreeNode>
     {
     }
 }

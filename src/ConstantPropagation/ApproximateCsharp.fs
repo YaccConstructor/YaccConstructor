@@ -5,12 +5,12 @@ open QuickGraph
 
 open JetBrains.ReSharper.Psi.CSharp.Tree
 open JetBrains.ReSharper.Psi.CSharp
+open JetBrains.ReSharper.Psi.CSharp.ControlFlow
 open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi
-open JetBrains.ReSharper.Psi.ControlFlow.CSharp
 open JetBrains.ReSharper.Psi.ControlFlow
 
-open XMLParser
+open HotspotParser
 open Utils
 open ArbitraryOperation
 open ResharperCsharpTreeUtils
@@ -66,12 +66,13 @@ let private buildFsaForMethod methodDecl target recursionMaxLevel fsaParams logg
 /// todo: 1. approximation can be built not only for enclosing method
 /// 2. all hotspots processing
 let ApproximateFileWithParams (file: ICSharpFile) recursionMaxLevel fsaParams logger =
-    let hotspotInfoList = XMLParser.parseXml "..\\..\\..\\..\\ConstantPropagation\\Hotspots.xml"
+    let hotspotInfoList = HotspotParser.parseHotspots "..\\..\\..\\..\\ConstantPropagation\\Hotspots.xml"
     // only the first hotspot is processed in currect implementation
     let lang, hotspot = (findHotspots file hotspotInfoList).[0]
     let methodDeclaration = getEnclosingMethod hotspot
     let hotVarRef = (hotspot.Arguments.[0].Value) :> ITreeNode
-    buildFsaForMethod methodDeclaration hotVarRef recursionMaxLevel fsaParams logger
+    let fsa = buildFsaForMethod methodDeclaration hotVarRef recursionMaxLevel fsaParams logger
+    lang, fsa
 
 /// Finds the first hotspot in the given file and builds approximation
 /// for it, starting only from enclosing method. Logs approximation process

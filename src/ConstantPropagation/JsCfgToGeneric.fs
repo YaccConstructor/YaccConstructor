@@ -40,8 +40,8 @@ let private toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo<_
         | _ -> 
             match cfe.SourceElement with
             | :? IBinaryExpression as assignExpr 
-                when assignExpr.IsAssignment
-                && (assignExpr.Sign.GetTokenType() = JavaScriptTokenType.EQ
+                when (*assignExpr.IsAssignment
+                &&*) (assignExpr.Sign.GetTokenType() = JavaScriptTokenType.EQ
                 || assignExpr.Sign.GetTokenType() = JavaScriptTokenType.PLUSEQ)
                 ->
                 let assignTokenType = assignExpr.Sign.GetTokenType()
@@ -55,7 +55,7 @@ let private toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo<_
                         PlusAssign(getGenericNodeId fstOp info, getGenericNodeId sndOp info)
                 Updater(target, assingnType)
             | :? IVariableDeclaration as varDecl ->
-                let name = varDecl.DeclaredName
+                let name = varDecl.NameNode.GetDeclaredName()//was varDecl.DeclaredName
                 Declaration(name, getGenericNodeId varDecl.Value info)
             | :? IJavaScriptLiteralExpression as literalExpr ->
                 let literalVal = literalExpr.Literal.GetText().Trim[|'\"'|]
@@ -63,7 +63,7 @@ let private toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo<_
             | :? IInvocationExpression as invocExpr ->
                 let invokedExpr = invocExpr.InvokedExpression :?> IReferenceExpression
                 let methodName = invokedExpr.Name
-                let callTargetRefExpr = invokedExpr.Qualifier
+                let callTargetRefExpr = invokedExpr.Qualifier :> IExpressionOrSpread
                 let args = 
                     let argsList = List.ofSeq invocExpr.Arguments
                     if callTargetRefExpr <> null
@@ -90,9 +90,9 @@ let private toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo<_
             | _ -> OtherNode
     { Id = nodeId; Type = nType }
 
-/// Converts JavaScript IJsControlFlowGraf to generic CFG by calling generic conversion
+/// Converts JavaScript IJsControlFlowGraph to generic CFG by calling generic conversion
 /// algo with JavaScript specific functions passed as arguments
-let rec toGenericCfg (cfg: IJsControlFlowGraf) functionName =
+let rec toGenericCfg (cfg: IJsControlFlowGraph) functionName =
     ResharperCfgToGeneric.toGenericCfg 
         cfg 
         toGenericNode 

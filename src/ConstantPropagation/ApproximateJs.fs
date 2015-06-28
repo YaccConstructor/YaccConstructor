@@ -23,7 +23,7 @@ open BuildApproximation
 open GenerateFsa
 open IControlFlowGraphUtils
 
-let private serializeJsCfg (cfg: IJsControlFlowGraf) = 
+let private serializeJsCfg (cfg: IJsControlFlowGraph) = 
     let name = "JsCfg_" + cfg.GetHashCode().ToString() + ".dot"
     cfgToDot cfg (myDebugFilePath name) "JsCfg"
 
@@ -32,7 +32,7 @@ let private isHotspot (node: IInvocationExpression) =
     let name = invoked.Name
     name = "execScript"
 
-let private getHotspots (cfg: IJsControlFlowGraf) =
+let private getHotspots (cfg: IJsControlFlowGraph) =
     cfg.AllElements
     |> List.ofSeq
     |> List.choose
@@ -46,7 +46,7 @@ let private getHotspots (cfg: IJsControlFlowGraf) =
                 | _ -> None
         )
 
-let private build (jsCfg: IJsControlFlowGraf) =
+let private build (jsCfg: IJsControlFlowGraph) =
     let fstHotspot = getHotspots jsCfg |> List.head :> ITreeNode
     let methodName = "main"
     let genericCFG, convertInfo = toGenericCfg jsCfg methodName
@@ -75,6 +75,6 @@ let private build (jsCfg: IJsControlFlowGraf) =
     fsa
 
 /// Builds approximation for the first hotspot in a given Js function's CFG
-let BuildFsaForOneFunctionCfg (cfg: IJsControlFlowGraf) =
+let BuildFsaForOneFunctionCfg (cfg: IJsControlFlowGraph) =
     serializeJsCfg cfg
     build cfg

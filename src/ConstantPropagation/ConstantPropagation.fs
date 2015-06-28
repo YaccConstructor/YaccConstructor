@@ -23,14 +23,15 @@ open System.IO
 
 open IControlFlowGraphUtils
 open YC.FSA.GraphBasedFsa
+open YC.FSA.FsaApproximation
 
-type Approximator<'br when 'br : equality>(file:IFile) = 
+type Approximator(file:IFile) = 
     // 0 for top and 3 level down
     let recursionMaxLevel = 3
 
     member this.Approximate() = 
         
-        let res = new ResizeArray<string * FSA<'br>>()
+        let res = new ResizeArray<string * FSA<char * Position<'br>>>()
         let lang, fsa = 
             match file with 
             | :? ICSharpFile as csFile -> 

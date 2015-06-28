@@ -10,7 +10,7 @@ open System.IO
 
 open IControlFlowGraphUtils
 
-/// Returns control flow graph for ITreeNode
+/// Returns ICSharpControlFlowGraph graph for ITreeNode
 let nodeToCSharpCfg (declaration : ITreeNode) = 
     let cSharpCfgBuilder = new CSharpControlFlowBuilder()
     let graph = cSharpCfgBuilder.GraphFromNode (declaration, null, false)

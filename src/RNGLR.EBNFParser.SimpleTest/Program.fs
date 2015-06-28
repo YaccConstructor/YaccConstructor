@@ -33,11 +33,11 @@ type ``RNGLREBNF parser tests with simple lexer`` () =
         let path = dir + file
         match run path parser, expected with
         | Error (num, tok, err, _), TER_Error -> printErr (num, tok, err)
-        | Success (tree, _), TER_Success -> printfn "Success"
+        | Success (tree, _, _), TER_Success -> printfn "Success"
         | Error (num, tok, err, _), TER_Success ->  
             printErr (num, tok, err)
             Assert.Fail()
-        | Success (tree, _), TER_Error -> 
+        | Success (tree, _, _), TER_Error -> 
             printfn "Wrong chain was accessed"
             Assert.Fail()
 
@@ -119,12 +119,7 @@ type ``RNGLREBNF parser tests with simple lexer`` () =
         let file = "TwoEpsilonsMiddleWrong.txt"
         runTest parser file TER_Error
 
-(*[<EntryPoint>]
+[<EntryPoint>]
 let main argv = 
-    let parser = RNGLR.ParseSimpleOpt.buildAst
-    let path = dir + "simpleOneTerm.txt"
-    match run path parser with
-        | Error (num, tok, err, _) -> printErr (num, tok, err)
-        | Success (tree, _) -> 
-            printfn "Success"
-    0 // return an integer exit code*)
+    (new ``RNGLREBNF parser tests with simple lexer``()).CalcEBNF();
+    0 // return an integer exit code

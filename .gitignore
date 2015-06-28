@@ -440,3 +440,4 @@ Tests/AbstractRNGLR/DOT/sppf.dot*
 Tests/AbstractRNGLR/DOT/_sppf.dot*
 Tests/AbstractRNGLR/Inputs/*.pdf
 Tests/RNGLR/sppf.dot*
+src/RNGLR.EBNFParser.SimpleTest/res.dot

@@ -15,9 +15,6 @@ open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation
 open Utils
 
-type FsaState = char * Position<int>
-type CharFSA = FSA<FsaState>
-
 type MarkedVal<'a when 'a: comparison> = {
     Value: 'a
     Marked: bool }
@@ -53,56 +50,41 @@ module EqClassFuns =
         EqClass (TwoSetsFuns.add mv ts)
     let contains v (EqClass ts) = TwoSetsFuns.contains v ts
 
-let alphabet = 
-    let lst = 
-        [
-            'a'; 'b'; 'c'; 'd'; 'e'; 'f'; 'g'; 'h'; 'i'; 'j'; 'k'; 'l'; 'm'; 'n';
-            'o'; 'p'; 'q'; 'r'; 's'; 't'; 'u'; 'v'; 'w'; 'x'; 'y'; 'z';
-            '*'; ','; ' '; '-'; '('; ')';
-        ]
-    HashSet(lst)
+// specific fsa debug
+let toDot (fsa: FSA<char * 'b>) path =
+    let stateToString (st: char * 'b) =
+        let ch = fst st
+        let p = snd st
+        sprintf "%c" ch
+    fsa.PrintToDOT (path, stateToString)
 
-// General wrap/unwrap functions
-let private getCharMetEpsMsg = "getChar met Eps symbol"
-let private symbolsAreEqual (s1: FsaState) (s2: FsaState) = fst s1 = fst s2
-let private getChar = function Smbl(ch, p) -> ch | Eps -> failwith getCharMetEpsMsg
-let private newSymbol x =  Smbl(x, Unchecked.defaultof<_>)
+type FsaParams<'a, 'b, 'c when 'b: equality> = {
+    Alphabet: HashSet<'a>
+    NewSymbol: 'a -> Symb<'b>
+    GetChar: Symb<'b> -> 'a
+    SymbolsAreEqual: 'b -> 'b -> bool
+    SeparatorSmbl1: 'a
+    SeparatorSmbl2: 'a }
 
-let anyWordsFsa (): CharFSA = 
+let anyWordsFsa (fsaParams: FsaParams<_,_,_>) = 
     let inits = ResizeArray.singleton 0
     let finals = ResizeArray.singleton 0
     let trans = 
-        alphabet 
-        |> Seq.map (fun ch -> (0, newSymbol ch, 0))
+        fsaParams.Alphabet 
+        |> Seq.map (fun ch -> (0, fsaParams.NewSymbol ch, 0))
         |> ResizeArray.ofSeq
-    CharFSA(inits, finals, trans)
-
-let union fsa1 fsa2 = CharFSA.Union (fsa1, fsa2)
-
-let replace origFsa matchFsa replaceFsa =
-    CharFSA.Replace (origFsa, matchFsa, replaceFsa, '~', '^', getChar, newSymbol, symbolsAreEqual)
-
-let toDot (fsa: CharFSA) path =
-    let stateToString (st: FsaState) =
-        let ch = fst st
-        let p = snd st
-        sprintf "%c, (%d, %d, %d)" ch p.start_offset p.end_offset p.back_ref
-    fsa.PrintToDOT (path, stateToString)
-
-let toDebugDot fsa name =
-    let path = Path.Combine (myDebugFolderPath, name + ".dot")
-    toDot fsa path
+    FSA(inits, finals, trans)
 
 /// Checks if the language accepted by FSA a1 is a sublanguage 
 /// of the language accepted by FSA a2. 
 /// Expects any fsa
-let isSubFsa (a1: CharFSA) (a2: CharFSA) = 
+let isSubFsa (a1: FSA<_>) (a2: FSA<_>) (fsaParams: FsaParams<_,_,_>)= 
     if a1.IsEmpty
     then true
     elif not <| a2.IsEmpty
     then
-        let a2Complement = a2.Complementation (alphabet, newSymbol, getChar)
-        let intersFsa = CharFSA.Intersection (a1, a2Complement, symbolsAreEqual)
+        let a2Complement = a2.Complementation (fsaParams.Alphabet, fsaParams.NewSymbol, fsaParams.GetChar)
+        let intersFsa = FSA.Intersection (a1, a2Complement, fsaParams.SymbolsAreEqual)
         intersFsa.IsEmpty
     else false
 
@@ -115,8 +97,8 @@ let private eqClassMultipleTransitionsMsg =
     "Widened FSA under construction is NFA"
 let private epsTransitionInWideningMsg = stateMultipleTransitionsMsg
 
-let private dfsCollectingEdges (state: int) (getNextEdges: int -> list<EdgeFSA<FsaState>>) getNextState =
-    let rec dfs state visited (edges: list<EdgeFSA<FsaState>>) =
+let private dfsCollectingEdges (state: int) (getNextEdges: int -> list<EdgeFSA<'a>>) getNextState =
+    let rec dfs state visited (edges: list<EdgeFSA<'a>>) =
         if not <| Set.contains state visited
         then
             let visited = Set.add state visited
@@ -128,7 +110,7 @@ let private dfsCollectingEdges (state: int) (getNextEdges: int -> list<EdgeFSA<F
         else visited, edges
     dfs state Set.empty []
 
-let private buildFsaParts state vertices (edges: list<EdgeFSA<FsaState>>) filterStates =
+let private buildFsaParts state vertices (edges: list<EdgeFSA<'a>>) filterStates =
     let states1 = ResizeArray.singleton(state)
     let filterSet = Set.ofSeq filterStates
     let states2 = 
@@ -143,13 +125,13 @@ let private buildFsaParts state vertices (edges: list<EdgeFSA<FsaState>>) filter
 
 /// Builds the sub automaton that generates the language consisting of words 
 /// accepted by the original automaton with q being the initial state
-let private subFsaFrom (fsa: CharFSA) q =
+let private subFsaFrom (fsa: FSA<_>) q =
     let getOutEdges st = List.ofSeq <| fsa.OutEdges(st)
     let getTarget (e: Edge<_>) = e.Target
     let vertices, edges = dfsCollectingEdges q getOutEdges getTarget
     let inits, finals, trans = buildFsaParts q vertices edges fsa.FinalState
     let fsa = 
-        let fsa = CharFSA (inits, finals, trans)
+        let fsa = FSA (inits, finals, trans)
         // here we add vertices because 'trans' list can be empty
         vertices |> Set.iter (ignore << fsa.AddVertex)
         fsa
@@ -157,14 +139,14 @@ let private subFsaFrom (fsa: CharFSA) q =
 
 /// Builds the sub automaton that generates the language consisting of words 
 /// accepted by the original automaton with q being the only final state
-let private subFsaTo (fsa: CharFSA) q =
+let private subFsaTo (fsa: FSA<_>) q =
     let bidirectionalFsa = fsa.ToBidirectionalGraph()
     let getInEdges st = List.ofSeq <| bidirectionalFsa.InEdges(st)
     let getSource (e: Edge<_>) = e.Source
     let vertices, edges = dfsCollectingEdges q getInEdges getSource
     let finals, inits, trans = buildFsaParts q vertices edges fsa.InitState
     let fsa = 
-        let fsa = CharFSA (inits, finals, trans)
+        let fsa = FSA (inits, finals, trans)
         // here we add vertices because 'trans' list can be empty
         vertices |> Set.iter (ignore << fsa.AddVertex)
         fsa
@@ -172,19 +154,19 @@ let private subFsaTo (fsa: CharFSA) q =
 
 /// Checks if q1 from fsa1 is equivalent to q2 from fsa2
 /// in the sense of relation assumed by widening operator 
-let private isEquivalent q1 (fsa1: CharFSA) q2 (fsa2: CharFSA) =
+let private isEquivalent q1 (fsa1: FSA<_>) q2 (fsa2: FSA<_>) (fsaParams: FsaParams<_,_,_>) =
     let fsaFromQ1 = subFsaFrom fsa1 q1
     let fsaFromQ2 = subFsaFrom fsa2 q2
-    if isSubFsa fsaFromQ1 fsaFromQ2 && 
-        isSubFsa fsaFromQ2 fsaFromQ1
+    if isSubFsa fsaFromQ1 fsaFromQ2 fsaParams && 
+        isSubFsa fsaFromQ2 fsaFromQ1 fsaParams
     then true
     else
         let fsaToQ1 = subFsaTo fsa1 q1
         let fsaToQ2 = subFsaTo fsa2 q2
-        let intersFsa = CharFSA.Intersection(fsaToQ1, fsaToQ2, symbolsAreEqual)
+        let intersFsa = FSA.Intersection(fsaToQ1, fsaToQ2, fsaParams.SymbolsAreEqual)
         not <| intersFsa.IsEmpty
 
-let private findRelations (fsa1: CharFSA) (fsa2: CharFSA) =
+let private findRelations (fsa1: FSA<_>) (fsa2: FSA<_>) (fsaParams: FsaParams<_,_,_>) =
     let createLoop1 st = 
         let sf = StateFromFsaFuns.fromFsa1 st
         Edge(sf, sf)
@@ -192,7 +174,7 @@ let private findRelations (fsa1: CharFSA) (fsa2: CharFSA) =
         let sf = StateFromFsaFuns.fromFsa2 st
         Edge(sf, sf)
     let tryCreateEdge12 src dst =
-        if isEquivalent src fsa1 dst fsa2
+        if isEquivalent src fsa1 dst fsa2 fsaParams
         then
             let sf1 = StateFromFsaFuns.fromFsa1 src
             let sf2 = StateFromFsaFuns.fromFsa2 dst
@@ -212,9 +194,9 @@ let private findRelations (fsa1: CharFSA) (fsa2: CharFSA) =
     allRelations, inverseRelations
 
 /// Builds equivalence classees using FSA.isEquivalent function
-let private buildEquivalenceClasses (fsa1: CharFSA) (fsa2: CharFSA) =
+let private buildEquivalenceClasses (fsa1: FSA<_>) (fsa2: FSA<_>) (fsaParams: FsaParams<_,_,_>) =
     // find relations
-    let relations, inverseRelations = findRelations fsa1 fsa2
+    let relations, inverseRelations = findRelations fsa1 fsa2 fsaParams
     // build relations graph and find connected components
     let relationsGraph = AdjacencyGraph<StateFromFsa,Edge<StateFromFsa>>()
     do relationsGraph.AddVerticesAndEdgeRange relations |> ignore
@@ -232,7 +214,7 @@ let private buildEquivalenceClasses (fsa1: CharFSA) (fsa2: CharFSA) =
         )
         Map.empty
 
-let private symbolsToCheck (eqClass: EqClass) (fsa1: CharFSA) (fsa2: CharFSA) =
+let private symbolsToCheck (eqClass: EqClass) (fsa1: FSA<_>) (fsa2: FSA<_>) =
     let getOutEdges states (fsa: FSA<_>) =
         states
         |> Set.toList
@@ -247,7 +229,7 @@ let private symbolsToCheck (eqClass: EqClass) (fsa1: CharFSA) (fsa2: CharFSA) =
     |> Seq.distinctBy 
         (
             function 
-                | Smbl(ch, pos) -> (ch, pos.start_offset, pos.end_offset, pos.back_ref)
+                | Smbl(ch) -> ch
                 | _ -> failwith epsTransitionInWideningMsg
         )
 
@@ -257,10 +239,10 @@ let private filterByContainsWithQuantifier quantifier elems (eqClasses: Map<int,
         (fun _ ec -> quantifier (fun e -> EqClassFuns.contains e ec) elems)
 
 let private createTransition eqClassId sym (eqClasses: Map<int, EqClass>) fsa1 fsa2 =
-    let isSink state (fsa: CharFSA) =
+    let isSink state (fsa: FSA<_>) =
         let isNotFinal = ResizeArray.tryFind ((=) state) fsa.FinalState |> Option.isNone
         isNotFinal && (fsa.OutEdges(state) |> Seq.forall (fun e -> e.Target = e.Source))
-    let getDstStates srcStates (fsa: CharFSA) =
+    let getDstStates srcStates (fsa: FSA<_>) =
         srcStates
         |> Set.toList
         |> List.map
@@ -281,7 +263,7 @@ let private createTransition eqClassId sym (eqClasses: Map<int, EqClass>) fsa1 f
                     | _ -> failwith stateMultipleTransitionsMsg
             )
         |> Set.ofList
-    let tryCreateTransition srcStates (fsa: CharFSA) =
+    let tryCreateTransition srcStates (fsa: FSA<_>) =
         let dstStates = getDstStates srcStates fsa
         if Set.isEmpty dstStates
         then None
@@ -303,7 +285,7 @@ let private createTransition eqClassId sym (eqClasses: Map<int, EqClass>) fsa1 f
     | None, opt2 -> opt2
     | _ -> None
 
-let private createTransitions (eqClasses: Map<int, EqClass>) (fsa1: CharFSA) (fsa2: CharFSA) =
+let private createTransitions (eqClasses: Map<int, EqClass>) (fsa1: FSA<_>) (fsa2: FSA<_>) =
     let symbolsMap = Map.map (fun _ v -> symbolsToCheck v fsa1 fsa2) eqClasses
     eqClasses
     |> Map.toList
@@ -321,10 +303,10 @@ let private createTransitions (eqClasses: Map<int, EqClass>) (fsa1: CharFSA) (fs
     |> Seq.concat
     |> ResizeArray.ofSeq
         
-let widen (fsa1: CharFSA) (fsa2: CharFSA) =
+let widen (fsa1: FSA<_>) (fsa2: FSA<_>) (fsaParams: FsaParams<_,_,_>) =
     let dfa1 = fsa1.NfaToDfa
     let dfa2 = fsa2.NfaToDfa
-    let eqClasses = buildEquivalenceClasses dfa1 dfa2
+    let eqClasses = buildEquivalenceClasses dfa1 dfa2 fsaParams
     let wTransitions = createTransitions eqClasses dfa1 dfa2
     let wInits = 
         let unitedInits = ResizeArray.append dfa1.InitState dfa2.InitState
@@ -336,4 +318,4 @@ let widen (fsa1: CharFSA) (fsa2: CharFSA) =
         |> ResizeArray.ofSeq |> ResizeArray.map (fun kvp -> kvp.Key)
     if ResizeArray.isEmpty wInits || ResizeArray.isEmpty wFinals
     then failwith initsOrFinalsProblemMsg
-    CharFSA (wInits, wFinals, wTransitions)
+    FSA (wInits, wFinals, wTransitions)

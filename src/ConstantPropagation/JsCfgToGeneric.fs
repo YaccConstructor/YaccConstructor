@@ -1,4 +1,4 @@
-﻿/// JavaScript specific functions needed to run IControlFlowGraph to generic CFG
+﻿/// JavaScript specific functions needed to run IControlFlowGraf to generic CFG
 /// conversion algo
 module JsCfgToGeneric
 
@@ -23,25 +23,25 @@ let private unexpectedInitializerTypeMsg =
     "unexpected initializer type in local variable declaration"
 
 // utility methods
-let private (|LoopCfe|_|) (info: ConvertInfo) (cfe: IControlFlowElement) =
+let private (|LoopCfe|_|) (info: ConvertInfo<_>) (cfe: IControlFlowElement) =
     match info.LoopNodes.TryGetValue cfe with
     | true, loopInfo -> Some(loopInfo)
     | _ -> None
-let private getGenericNodeId (treeNode: ITreeNode) (info: ConvertInfo) = 
+let private getGenericNodeId (treeNode: ITreeNode) (info: ConvertInfo<_>) = 
     let res = Dictionary.getMappingToOne treeNode info.AstToGenericNodes
     res.Id
 let private isReplaceMethod (name: string) = 
     name = "replace"
 
-let private toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) = 
+let private toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo<_>) = 
     let nType = 
         match cfe with
         | LoopCfe info _ -> LoopNode
         | _ -> 
             match cfe.SourceElement with
             | :? IBinaryExpression as assignExpr 
-                when (*assignExpr.IsAssignment
-                &&*) (assignExpr.Sign.GetTokenType() = JavaScriptTokenType.EQ
+                when assignExpr.IsAssignment
+                && (assignExpr.Sign.GetTokenType() = JavaScriptTokenType.EQ
                 || assignExpr.Sign.GetTokenType() = JavaScriptTokenType.PLUSEQ)
                 ->
                 let assignTokenType = assignExpr.Sign.GetTokenType()
@@ -55,15 +55,15 @@ let private toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) 
                         PlusAssign(getGenericNodeId fstOp info, getGenericNodeId sndOp info)
                 Updater(target, assingnType)
             | :? IVariableDeclaration as varDecl ->
-                let name = varDecl.NameNode.GetDeclaredName()//was varDecl.DeclaredName
+                let name = varDecl.DeclaredName
                 Declaration(name, getGenericNodeId varDecl.Value info)
             | :? IJavaScriptLiteralExpression as literalExpr ->
                 let literalVal = literalExpr.Literal.GetText().Trim[|'\"'|]
-                Literal(literalVal)
+                Literal(literalVal, literalExpr)
             | :? IInvocationExpression as invocExpr ->
                 let invokedExpr = invocExpr.InvokedExpression :?> IReferenceExpression
                 let methodName = invokedExpr.Name
-                let callTargetRefExpr = invokedExpr.Qualifier :> IExpressionOrSpread
+                let callTargetRefExpr = invokedExpr.Qualifier
                 let args = 
                     let argsList = List.ofSeq invocExpr.Arguments
                     if callTargetRefExpr <> null
@@ -90,9 +90,9 @@ let private toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo) 
             | _ -> OtherNode
     { Id = nodeId; Type = nType }
 
-/// Converts JavaScript IJsControlFlowGraph to generic CFG by calling generic conversion
+/// Converts JavaScript IJsControlFlowGraf to generic CFG by calling generic conversion
 /// algo with JavaScript specific functions passed as arguments
-let rec toGenericCfg (cfg: IJsControlFlowGraph) functionName =
+let rec toGenericCfg (cfg: IJsControlFlowGraf) functionName =
     ResharperCfgToGeneric.toGenericCfg 
         cfg 
         toGenericNode 

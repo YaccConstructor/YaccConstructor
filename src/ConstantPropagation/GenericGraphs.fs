@@ -24,14 +24,14 @@ and UpdaterType =
 // todo: functions with updatable arg passing
 
 /// Represents the type of generic CFG and DDG node
-and GraphNodeType = 
+and GraphNodeType<'Lit> = 
 // declared name and initializer node ID
 | Declaration of string * int
 // update target and updater type
 | Updater of string * UpdaterType
 // type and operand nodes' IDs
 | Operation of OperationType * list<int>
-| Literal of string
+| Literal of string * 'Lit
 | VarRef of string
 | LoopNode
 | LoopEnter
@@ -39,16 +39,16 @@ and GraphNodeType =
 | LoopBodyBeg
 | LoopBodyEnd
 | OtherNode
-| ExitNode of list<GraphNode>
+| ExitNode of list<GraphNode<'Lit>>
 | StartNode
 
 /// Represents generic CFG and DDG node
-and [<CustomEquality; CustomComparison>] GraphNode = {
+and [<CustomEquality; CustomComparison>] GraphNode<'Lit> = {
     Id: int
-    Type: GraphNodeType }
+    Type: GraphNodeType<'Lit> }
     with
         override this.Equals other = 
-            let getId = fun (n: GraphNode) -> n.Id
+            let getId = fun (n: GraphNode<'Lit>) -> n.Id
             let typeCheckFailedFunc () = false
             Utils.applyToMappedTypedArgs (=) getId this other typeCheckFailedFunc
 
@@ -57,39 +57,39 @@ and [<CustomEquality; CustomComparison>] GraphNode = {
 
         interface System.IComparable with
             member this.CompareTo other =
-                let getId = fun (n: GraphNode) -> n.Id
+                let getId = fun (n: GraphNode<'Lit>) -> n.Id
                 let failFunc () = invalidArg "other" "cannot compare values of different types"
                 Utils.applyToMappedTypedArgs compare getId this other failFunc
 
 /// Bidirectional graph
-and BidirectGraph = BidirectionalGraph<GraphNode, Edge<GraphNode>>
+and BidirectGraph<'Lit> = BidirectionalGraph<GraphNode<'Lit>, Edge<GraphNode<'Lit>>>
 
 /// Bidirectional graph with multiple roots and exit nodes
-type GraphWithEnds = {
-    Graph: BidirectGraph
-    Roots: list<GraphNode>
-    Exits: list<GraphNode> }
+type GraphWithEnds<'Lit> = {
+    Graph: BidirectGraph<'Lit>
+    Roots: list<GraphNode<'Lit>>
+    Exits: list<GraphNode<'Lit>> }
 
 /// Bidirectional graph with multiple roots and single exit nodes
-type GraphWithSingleExit = {
-    Graph: BidirectGraph
-    Roots: list<GraphNode>
-    Exit: GraphNode }
+type GraphWithSingleExit<'Lit> = {
+    Graph: BidirectGraph<'Lit>
+    Roots: list<GraphNode<'Lit>>
+    Exit: GraphNode<'Lit> }
 
 /// Bidirectional graph with single root and multiple exit nodes
-type GraphWithSingleRoot = {
-    Graph: BidirectGraph
-    Root: GraphNode
-    Exits: list<GraphNode> }
+type GraphWithSingleRoot<'Lit> = {
+    Graph: BidirectGraph<'Lit>
+    Root: GraphNode<'Lit>
+    Exits: list<GraphNode<'Lit>> }
 
 /// Bidirectional graph with single root and exit nodes
-type GraphWithSingleEnds = {
-    Graph: BidirectGraph
-    Root: GraphNode
-    Exit: GraphNode }
+type GraphWithSingleEnds<'Lit> = {
+    Graph: BidirectGraph<'Lit>
+    Root: GraphNode<'Lit>
+    Exit: GraphNode<'Lit> }
 
 module GraphNodeFuncs =
-    let rec toString (node: GraphNode) =
+    let rec toString (node: GraphNode<_>) =
         match node.Type with
         | Declaration(name, _) -> sprintf "decl(%s)" name
         | Updater(target, aType) -> 
@@ -103,7 +103,7 @@ module GraphNodeFuncs =
             | Replace -> "replace"
             | Concat -> "concat"
             | Arbitrary(_) -> sprintf "arbitrary(%d)" (List.length operands)
-        | Literal(value) -> sprintf "literal(%s)" value
+        | Literal(value, _) -> sprintf "literal(%s)" value
         | VarRef(name) -> sprintf "varRef(%s)" name
         | LoopNode -> "loopNode"
         | LoopEnter -> "loopEnter"
@@ -133,7 +133,7 @@ module BidirectGraphFuns =
 
     /// Creates empty graph with no parallel edges allowed
     let create () = BidirectGraph(allowParallelEdges = false)
-    let toDot (g: BidirectGraph) name path =
+    let toDot (g: BidirectGraph<_>) name path =
         use file = FileInfo(path).CreateText()
         file.WriteLine("digraph " + name + " {")
         g.Vertices
@@ -153,30 +153,30 @@ module BidirectGraphFuns =
             )
         |> List.iter file.WriteLine
         file.WriteLine("}")
-    let succs node (graph: BidirectGraph) =
+    let succs node (graph: BidirectGraph<_>) =
         graph.OutEdges node |> Seq.map (fun edge -> edge.Target)
-    let preds node (graph: BidirectGraph) =
+    let preds node (graph: BidirectGraph<_>) =
         graph.InEdges node |> Seq.map (fun edge -> edge.Source)
-    let addVerticesAndEdge fromNode toNode (graph: BidirectGraph) =
+    let addVerticesAndEdge fromNode toNode (graph: BidirectGraph<_>) =
         graph.AddVerticesAndEdge (Edge (fromNode, toNode)) |> ignore
-    let addEdgeAndVertices (graph: BidirectGraph) edge =
+    let addEdgeAndVertices (graph: BidirectGraph<_>) edge =
         graph.AddVerticesAndEdge edge |> ignore
-    let addEdge (graph: BidirectGraph) edge =
+    let addEdge (graph: BidirectGraph<_>) edge =
         graph.AddEdge edge |> ignore
-    let removeEdge (graph: BidirectGraph) edge =
+    let removeEdge (graph: BidirectGraph<_>) edge =
         graph.RemoveEdge edge |> ignore
-    let addVertex (graph: BidirectGraph) node =
+    let addVertex (graph: BidirectGraph<_>) node =
         graph.AddVertex node |> ignore
-    let removeVertex (graph: BidirectGraph) node =
+    let removeVertex (graph: BidirectGraph<_>) node =
         graph.RemoveVertex node |> ignore
 
 /// Basic implementation of GraphUtils.TopoTraverser for BidirectGraph
 module BidirectTopoTraverser =
     open GraphUtils.TopoTraverser
 
-    let isLoopNode (node: GraphNode) =
+    let isLoopNode (node: GraphNode<_>) =
         match node.Type with LoopNode -> true | _ -> false
-    let getId (node: GraphNode) = node.Id
+    let getId (node: GraphNode<_>) = node.Id
 
 /// Implementation of GraphUtils.TopoTraverser for BidirectGraph
 /// with traverses graph from predecessors to successors
@@ -184,13 +184,13 @@ module BidirectTopoDownTraverser =
     open GraphUtils.TopoTraverser
     open BidirectTopoTraverser
 
-    let private getInputsNumber (cfg: BidirectGraph) (node: GraphNode) = 
+    let private getInputsNumber (cfg: BidirectGraph<_>) (node: GraphNode<_>) = 
         cfg.InDegree node
-    let private getAllNextNodes (cfg: BidirectGraph) (node: GraphNode) = 
+    let private getAllNextNodes (cfg: BidirectGraph<_>) (node: GraphNode<_>) = 
         cfg.OutEdges node
         |> List.ofSeq 
         |> List.map (fun e -> e.Target)
-    let private getLoopNextNodes (cfg: BidirectGraph) (node: GraphNode) =
+    let private getLoopNextNodes (cfg: BidirectGraph<_>) (node: GraphNode<_>) =
         let outNodes = cfg.OutEdges node |> Seq.map (fun e -> e.Target)
         let bodyBegNode = 
             outNodes 
@@ -201,7 +201,7 @@ module BidirectTopoDownTraverser =
             |> Seq.find 
                 (fun n -> match n.Type with | LoopExit -> true | _ -> false)
         bodyBegNode, exitNode
-    let nextNode cfg (tState: TraverserState<GraphNode>) =
+    let nextNode cfg (tState: TraverserState<GraphNode<_>>) =
         nextNode getId (getInputsNumber cfg) (getAllNextNodes cfg) isLoopNode (getLoopNextNodes cfg) tState
 
 /// Implementation of GraphUtils.TopoTraverser for BidirectGraph
@@ -210,13 +210,13 @@ module BidirectTopoUpTraverser =
     open GraphUtils.TopoTraverser
     open BidirectTopoTraverser
 
-    let private getInputsNumber (cfg: BidirectGraph) (node: GraphNode) = 
+    let private getInputsNumber (cfg: BidirectGraph<_>) (node: GraphNode<_>) = 
         cfg.OutDegree node
-    let private getAllNextNodes (cfg: BidirectGraph) (node: GraphNode) = 
+    let private getAllNextNodes (cfg: BidirectGraph<_>) (node: GraphNode<_>) = 
         cfg.InEdges node
         |> List.ofSeq 
         |> List.map (fun e -> e.Source)
-    let private getLoopNextNodes (cfg: BidirectGraph) (node: GraphNode) =
+    let private getLoopNextNodes (cfg: BidirectGraph<_>) (node: GraphNode<_>) =
         let inNodes = cfg.InEdges node |> Seq.map (fun e -> e.Source)
         let bodyEndNode = 
             inNodes 
@@ -227,5 +227,5 @@ module BidirectTopoUpTraverser =
             |> Seq.find 
                 (fun n -> match n.Type with | LoopEnter -> true | _ -> false)
         bodyEndNode, enterNode
-    let nextNode cfg (tState: TraverserState<GraphNode>) =
+    let nextNode cfg (tState: TraverserState<GraphNode<_>>) =
         nextNode getId (getInputsNumber cfg) (getAllNextNodes cfg) isLoopNode (getLoopNextNodes cfg) tState

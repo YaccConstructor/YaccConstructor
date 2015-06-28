@@ -23,7 +23,7 @@ open BuildApproximation
 open GenerateFsa
 open IControlFlowGraphUtils
 
-let private serializeJsCfg (cfg: IJsControlFlowGraph) = 
+let private serializeJsCfg (cfg: IJsControlFlowGraf) = 
     let name = "JsCfg_" + cfg.GetHashCode().ToString() + ".dot"
     cfgToDot cfg (myDebugFilePath name) "JsCfg"
 
@@ -32,7 +32,7 @@ let private isHotspot (node: IInvocationExpression) =
     let name = invoked.Name
     name = "execScript"
 
-let private getHotspots (cfg: IJsControlFlowGraph) =
+let private getHotspots (cfg: IJsControlFlowGraf) =
     cfg.AllElements
     |> List.ofSeq
     |> List.choose
@@ -46,7 +46,7 @@ let private getHotspots (cfg: IJsControlFlowGraph) =
                 | _ -> None
         )
 
-let private build (jsCfg: IJsControlFlowGraph) =
+let private build (jsCfg: IJsControlFlowGraf) =
     let fstHotspot = getHotspots jsCfg |> List.head :> ITreeNode
     let methodName = "main"
     let genericCFG, convertInfo = toGenericCfg jsCfg methodName
@@ -62,8 +62,12 @@ let private build (jsCfg: IJsControlFlowGraph) =
     BidirectGraphFuns.toDot ddg.Graph methodName path
     // end
     let initFsaMap = Map.empty
-    let controlData = { TargetFunction = methodName; TargetNode = fstHotspot; CurRecLevel = 0 }
-    let fsa = buildAutomaton ddg initFsaMap controlData approximate
+    let controlData = { 
+        TargetFunction = methodName; 
+        TargetNode = fstHotspot; 
+        CurRecLevel = 0;
+        LoggerState = Logger.disabledLogger }
+    let fsa = buildAutomaton ddg initFsaMap controlData approximateJs CharFsa.charFsaParams
     // for debug
     let path = Utils.myDebugFilePath ("fsa_" + methodName + ".dot")
     FsaHelper.toDot fsa path
@@ -71,6 +75,6 @@ let private build (jsCfg: IJsControlFlowGraph) =
     fsa
 
 /// Builds approximation for the first hotspot in a given Js function's CFG
-let BuildFsaForOneFunctionCfg (cfg: IJsControlFlowGraph) =
+let BuildFsaForOneFunctionCfg (cfg: IJsControlFlowGraf) =
     serializeJsCfg cfg
     build cfg

@@ -1,8 +1,9 @@
 ﻿using System;
 using JetBrains.Application.Progress;
 using JetBrains.ProjectModel;
-using JetBrains.ReSharper.Feature.Services.ContextActions;
-using JetBrains.ReSharper.Feature.Services.CSharp.Analyses.Bulbs;
+using JetBrains.ReSharper.Feature.Services.Bulbs;
+using JetBrains.ReSharper.Feature.Services.CSharp.Bulbs;
+using JetBrains.ReSharper.Intentions.Extensibility;
 using JetBrains.TextControl;
 using JetBrains.Util;
 using YC.ReSharper.AbstractAnalysis.LanguageApproximation;
@@ -28,7 +29,7 @@ namespace SELApproximator
         {
             var inputFile = _provider.PsiFile;
             const int recursionMaxLevel = 3; // 0 for top and 3 level down
-            var fsa = ApproximateCsharp.ApproximateFile(inputFile, recursionMaxLevel).Item2;
+            var fsa = ApproximateCsharp.ApproximateFileWithLogging(inputFile, recursionMaxLevel);
             Utils.OutputCSharpResult(Utils.FsaToTestDot(fsa), _provider);
             return null;
         }

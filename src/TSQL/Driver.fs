@@ -51,7 +51,7 @@ do()
 [<Extension>]
 type TSQLInjectedLanguageModule () =
 
-    let tokenize (lexerInputGraph:FSA<'br>) =
+    let tokenize (lexerInputGraph : FSA<char * Position<'br>>) =
 //        let graphFsa = lexerInputGraph.ApprToFSA()
         let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
         let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)

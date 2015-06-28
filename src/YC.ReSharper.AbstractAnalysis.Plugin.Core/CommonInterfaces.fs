@@ -54,13 +54,13 @@ type IInjectedLanguageModule<'br,'range,'node when 'br : equality> =
      abstract GetForestWithToken: 'range -> ResizeArray<'node>
      abstract GetPairedRanges: int -> int -> 'range -> bool -> ResizeArray<'range>
      abstract Process
-        : FSA<'br> -> 
+        : FSA<char * Position<'br>> -> 
             ResizeArray<string * 'range> * ResizeArray<string * 'range> * ResizeArray<string * 'range>
 
 
 type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:equality and 'node:null  and 'TokenType : equality
     (
-        tokenize: FSA<'br> -> Test<ParserInputGraph<'TokenType>, array<Symb<char*Position<'br>>>>
+        tokenize: FSA<char * Position<'br>> -> Test<ParserInputGraph<'TokenType>, array<Symb<char*Position<'br>>>>
         , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang, calculatePos:_->seq<'range>
         , getDocumentRange: 'br -> 'range
         , printAst: Tree<'TokenType> -> string -> unit
@@ -135,10 +135,12 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
 
                     if semantic.IsSome 
                     then
-                        printAst tree "result ast.dot"
+                        //sometimes it needs for debugging purposes
+                        //printAst tree "result ast.dot"
                         let pSource, lSource, tokToSourceString = semantic.Value
                         let cfg = new ControlFlow<'TokenType>(tree, pSource, lSource, tree.Tokens, tokToSourceString)
-                        cfg.PrintToDot "result cfg.dot"
+                        //sometimes it needs for debugging purposes
+                        //cfg.PrintToDot "result cfg.dot"
                         let semErrors = cfg.FindUndefVariable()
                         semErrors |> List.iter addSError
 
@@ -209,7 +211,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
 
     member this.TranslateToTreeNode nextTree errors = (Seq.head <| translate nextTree errors)
     
-    member this.Process (graph : FSA<'br>) = 
+    member this.Process (graph : FSA<char * Position<'br>>) = 
         let lexerErrors = new ResizeArray<_>()
         let parserErrors = new ResizeArray<_>()
         let semanticErrors = new ResizeArray<_>()

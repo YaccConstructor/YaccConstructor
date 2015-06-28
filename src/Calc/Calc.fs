@@ -29,7 +29,7 @@ do()
 [<Extension>]
 [<ShellComponent>]
 type CalcInjectedLanguageModule () =
-    let tokenize (lexerInputGraph:FSA<'br>) =
+    let tokenize (lexerInputGraph:FSA<char * Position<'br>>) =
         //let graphFsa = lexerInputGraph.ApprToFSA()
         let eof = RNGLR_EOF(new FSA<_>())
         let transform x = (x, match x with |Smbl (y, _) -> Smbl y |_ -> Eps)

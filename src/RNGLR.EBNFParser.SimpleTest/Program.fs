@@ -119,7 +119,7 @@ type ``RNGLREBNF parser tests with simple lexer`` () =
         let file = "TwoEpsilonsMiddleWrong.txt"
         runTest parser file TER_Error
 
-[<EntryPoint>]
+(*[<EntryPoint>]
 let main argv = 
     (new ``RNGLREBNF parser tests with simple lexer``()).CalcEBNF();
-    0 // return an integer exit code
+    0 // return an integer exit code*)

@@ -24,7 +24,7 @@
     <OutputPath>bin\Debug\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\..\..\Bin\Release\v40\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="antlr.runtime">

@@ -62,21 +62,33 @@ let parseHotspots (fileName : string) =
 
         language, new Hotspot(methodName, pos, returnType)
     
-    if not <| File.Exists fileName
-    then 
-        failwithf "File %s isn't found" fileName
-    else 
-        let xmlDocument = new XmlDocument()
-        xmlDocument.Load(fileName)
+    let findFile path = 
+        if File.Exists path
+        then
+            path
+        else
+            let getNameWithoutDir (path : string)= 
+                let arr = path.Split([|'\\'|])
+                arr.[arr.Length - 1]
 
-        let mutable element = xmlDocument.DocumentElement.ChildNodes
-        let mutable result = []
+            let name = getNameWithoutDir path
+            if File.Exists name
+            then name
+            else failwithf "Files %s and %s aren't found" path name
+
+
+    let path = findFile fileName
+    let xmlDocument = new XmlDocument()
+    xmlDocument.Load(path)
+
+    let mutable element = xmlDocument.DocumentElement.ChildNodes
+    let mutable result = []
     
-        for hotNode in element do
-            if hotNode.NodeType <> XmlNodeType.Comment 
-            then
-                match hotNode.Name.ToLowerInvariant() with
-                | "hotspot" -> 
-                    result <- parseHotspot hotNode.FirstChild :: result
-                | x -> failwithf "Unexpected tag %A. Expected <Hotspot>" x
-        result
+    for hotNode in element do
+        if hotNode.NodeType <> XmlNodeType.Comment 
+        then
+            match hotNode.Name.ToLowerInvariant() with
+            | "hotspot" -> 
+                result <- parseHotspot hotNode.FirstChild :: result
+            | x -> failwithf "Unexpected tag %A. Expected <Hotspot>" x
+    result

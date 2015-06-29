@@ -365,7 +365,9 @@ src/TSQL/out
 src/Calc/CalcHighlighting/*
 src/JSON_Parser/JSONHighlighting/*
 src/TSQL/TSQLHighlighting/*
-src/ExtCalc/ExtCalcHighlighting/*
+src/ExtCalc/ExtCalcHighlighting/*.cs
+src/ExtCalc/ExtCalcHighlighting/*.xml
+src/ExtCalc/ExtCalcHighlighting/*.target
 
 BuildScripts/packages/*
 src/JSON_Parser/JSONParser.fs
@@ -419,3 +421,22 @@ src/TSQLTests.fs/Lexer_Abstract.fs
 src/TSQL/Lexer.fs
 src/Calc/Lexer.fs
 src/Calc/res.dot
+
+src/ExtCalc/*.yrd.fs
+src/ExtCalc/Lexer.fs
+src/ExtCalc/Lexer_Abstract.fs
+src/Calc/Lexer.fs
+src/RNGLR.OtherSppfTest/res.dot
+src/TSQL/Lexer.fs
+src/TSQL/Lexer_Abstract.fs
+src/ExtCalc/*.dot
+
+src/Tests/AbstractRNGLR/DOT/ast.dot
+src/ControlFlowGraph.Test/*.yrd.fs
+src/ControlFlowGraph.Test/*.dot
+src/YC.ReSharper.AbstractAnalysis.Plugin/YC.ReSharper.AbstractAnalysis.Plugin.csproj.user
+
+Tests/AbstractRNGLR/DOT/sppf.dot*
+Tests/AbstractRNGLR/DOT/_sppf.dot*
+Tests/AbstractRNGLR/Inputs/*.pdf
+Tests/RNGLR/sppf.dot*

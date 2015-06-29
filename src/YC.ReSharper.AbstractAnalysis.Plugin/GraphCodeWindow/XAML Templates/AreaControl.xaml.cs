@@ -24,47 +24,47 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
     /// </summary>
     public partial class AreaControl : TabControl
     {
-
-        public static Helper.ReSharperHelper<DocumentRange, ITreeNode> YcProcessor = Helper.ReSharperHelper<DocumentRange, ITreeNode>.Instance;
-        //public ArrayList DataGraphs; 
-        public void Handler()
-        {
-            foreach (var lexEvent in YcProcessor.LexingFinished)
-                lexEvent.AddHandler(OnLexingFinished);
-        }
-        private void OnLexingFinished(object sender, CommonInterfaces.LexingFinishedArgs<ITreeNode> args)
-        {
-            //Graph dataGraph = new Graph();
-            //foreach (var vertex in args.Graph.Vertices)
-            //{
-            //    dataGraph.AddVertex(new Vertex("") {ID = vertex});
-            //}
-            //var vlist = dataGraph.Vertices.ToList();
-            //foreach (var tedge in args.Graph.Edges)
-            //{
-            //    var sourceVertex = new Vertex(tedge.Source.ToString()) { ID = tedge.Source };
-            //    var targetVertex = new Vertex(tedge.Target.ToString()) { ID = tedge.Target };
-            //    int s = vlist.IndexOf(sourceVertex);
-            //    int t = vlist.IndexOf(targetVertex);
-            //    var edge = new Edge(tedge.Tag, vlist[s], vlist[t], Brushes.Black) { Text = tedge.Tag };
-            //    dataGraph.AddEdge(edge);
-            //}
-            //DataGraphs.Add(dataGraph);
-
-            //BackgroundWorker bw = new BackgroundWorker();
-            ////System.ComponentModel.ProgressChangedEventHandler)
-            ////bw.ProgressChanged += (System.ComponentModel.ProgressChangedEventHandler)WindowAction.AddTabControls;
-            //bw.RunWorkerAsync();
-            //bw.DoWork += (System.ComponentModel.DoWorkEventHandler)WindowAction.AddTabControls;
-            //bw.RunWorkerAsync();
-            ////TabItem tab = new TabItem();
-            //EControl.Items.Add(new TabItem());
-        }
+         
+        //public static Helper.ReSharperHelper<DocumentRange, ITreeNode> YcProcessor = Helper.ReSharperHelper<DocumentRange, ITreeNode>.Instance;
+        ////public ArrayList DataGraphs; 
+        //public void Handler()
+        //{
+        //    foreach (var lexEvent in YcProcessor.LexingFinished)
+        //        lexEvent.AddHandler(OnLexingFinished);
+        //}
+        //private void OnLexingFinished(object sender, CommonInterfaces.LexingFinishedArgs<ITreeNode> args)
+        //{
+        //    //Graph dataGraph = new Graph();
+        //    //foreach (var vertex in args.Graph.Vertices)
+        //    //{
+        //    //    dataGraph.AddVertex(new Vertex("") {ID = vertex});
+        //    //}
+        //    //var vlist = dataGraph.Vertices.ToList();
+        //    //foreach (var tedge in args.Graph.Edges)
+        //    //{
+        //    //    var sourceVertex = new Vertex(tedge.Source.ToString()) { ID = tedge.Source };
+        //    //    var targetVertex = new Vertex(tedge.Target.ToString()) { ID = tedge.Target };
+        //    //    int s = vlist.IndexOf(sourceVertex);
+        //    //    int t = vlist.IndexOf(targetVertex);
+        //    //    var edge = new Edge(tedge.Tag, vlist[s], vlist[t], Brushes.Black) { Text = tedge.Tag };
+        //    //    dataGraph.AddEdge(edge);
+        //    //}
+        //    //DataGraphs.Add(dataGraph);
+            
+        //    //BackgroundWorker bw = new BackgroundWorker();
+        //    ////System.ComponentModel.ProgressChangedEventHandler)
+        //    ////bw.ProgressChanged += (System.ComponentModel.ProgressChangedEventHandler)WindowAction.AddTabControls;
+        //    //bw.RunWorkerAsync();
+        //    //bw.DoWork += (System.ComponentModel.DoWorkEventHandler)WindowAction.AddTabControls;
+        //    //bw.RunWorkerAsync();
+        //    ////TabItem tab = new TabItem();
+        //    //EControl.Items.Add(new TabItem());
+        //}
         #region CreateGraph
         public AreaControl()
         {
             InitializeComponent();
-            Handler();
+            //Handler();
             //ZoomControl.SetViewFinderVisibility(zoomctrler, Visibility.Visible);
             //Set Fill zooming strategy so whole graph will be always visible
             //zoomctrler.ZoomToFill();
@@ -75,11 +75,11 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
         {
             //WindowAction.arcont.Area.SetVerticesMathShape(VertexShape.Circle);
             //Lets create logic core and filled data graph with edges and vertices
-            var logicCore = new LogicCore() { };
+            var logicCore = new LogicCore() {  };
             //This property sets layout algorithm that will be used to calculate vertices positions
             //Different algorithms uses different values and some of them uses edge Weight property.
-            logicCore.DefaultLayoutAlgorithm = LayoutAlgorithmTypeEnum.LinLog;
-
+            logicCore.DefaultLayoutAlgorithm = LayoutAlgorithmTypeEnum.Tree;
+            
             //Now we can set parameters for selected algorithm using AlgorithmFactory property. This property provides methods for
             //creating all available algorithms and algo parameters.
             logicCore.DefaultLayoutAlgorithmParams = logicCore.AlgorithmFactory.CreateLayoutParameters(LayoutAlgorithmTypeEnum.LinLog);
@@ -105,7 +105,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
             //Finally assign logic core to GraphArea object
             //Area.LogicCore = logicCore;// as IGXLogicCore<DataVertex, DataEdge, BidirectionalGraph<DataVertex, DataEdge>>;
             //Area.MoveAnimation = AnimationFactory.CreateMoveAnimation(MoveAnimation.Move, TimeSpan.FromSeconds(1));
-
+            
         }
         public Graph Graph_Setup()
         {

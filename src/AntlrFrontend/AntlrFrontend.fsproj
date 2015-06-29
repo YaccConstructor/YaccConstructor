@@ -17,10 +17,6 @@
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
-  <PropertyGroup>
-    <FsYaccToolPath>$(YCToolsPath)</FsYaccToolPath>
-    <FsLexToolPath>$(YCToolsPath)</FsLexToolPath>
-  </PropertyGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">
       <PropertyGroup Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')">
@@ -34,15 +30,12 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
-  <Import Project="$(YCToolsPath)\FSharp.PowerPack.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
-    <FsLex Include="Lexer.fsl">
-      <OtherFlags>--unicode</OtherFlags>
-    </FsLex>
-    <FsYacc Include="Parser.fsy">
-      <OtherFlags>--module Yard.Frontends.AntlrFrontend.Parser --open Yard.Core.IL</OtherFlags>
-    </FsYacc>
+    <None Include="Lexer.fsl"/>
+      
+    <None Include="Parser.fsy"/>
+      
     <Compile Include="Parser.fsi" />
     <Compile Include="Parser.fs" />
     <Compile Include="Lexer.fs" />
@@ -86,6 +79,16 @@
     <ProjectReference Include="..\Conversions\Conversions.fsproj">
       <Name>Conversions</Name>
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\FsYacc\FsYacc.fsproj">
+      <Name>FsYacc</Name>
+      <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Helper\Helper.fsproj">
+      <Name>Helper</Name>
+      <Project>{fc9a166c-780d-4d15-b366-ca06277c803d}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

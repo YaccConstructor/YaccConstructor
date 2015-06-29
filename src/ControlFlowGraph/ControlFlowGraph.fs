@@ -361,7 +361,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
     let start, finish = 
         let treeRoot = 
             match tree.Root with 
-            | :? AstNode as ast -> ast :?> AST
+            | :? AST as ast -> ast
             | _ -> null
 
         let createNewBlock tokens blockType = 
@@ -448,8 +448,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
             
             match node with 
             | :? Terminal as t -> 
-                let tagOpt = if t.TokenNumber >= 0 then Some t.TokenNumber else None
-                let edge = new TokensEdge(!startVertex, !endVertex, tagOpt)
+                let edge = new TokensEdge(!startVertex, !endVertex, Some <| t.TokenNumber)
                 tokensGraph.AddEdgeForced edge 
 
                 startVertex := !endVertex
@@ -497,8 +496,8 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
 
                 let handle (node : obj) = 
                     match node with 
-                    | :? int as t when t < 0 -> () 
-                    | :? int as t -> ()
+                    | :? Epsilon -> () 
+                    | :? Terminal as t -> ()
 //                        let delimiters = langSource.typeToDelimiters.[!blockType]
 //                        let tokNumber = parserSource.tokenToNumber input.[t]
 //

@@ -79,8 +79,12 @@ type ReSharperHelper<'range, 'node> private() =
     let getProcessor (lang: string) = 
         let processors = getAllProcessors() |> Array.ofSeq
         let l = lang.ToLowerInvariant()
-        processors
-        |> Array.find (fun processor -> processor.Name.ToLowerInvariant() = l)
+        let resOpt = processors
+                     |> Array.tryFind (fun processor -> processor.Name.ToLowerInvariant() = l)
+
+        if resOpt.IsSome
+        then resOpt.Value
+        else failwithf "Language %s couldn't load (total loaded: %d)" lang processors.Length
     
     static let instance = new ReSharperHelper<'range, 'node>()
     static member Instance = instance

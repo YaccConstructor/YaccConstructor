@@ -1,23 +1,20 @@
-using System;
-using System.Windows.Controls;
-using GraphX;
-using GraphX.Controls;
-using GraphX.GraphSharp.Algorithms.Layout.Simple.FDP;
+using System.Windows.Forms;
 using JetBrains.ActionManagement;
 using JetBrains.Application.DataContext;
-using JetBrains.DocumentModel;
-using JetBrains.ProjectModel;
-using JetBrains.ReSharper.Daemon;
+using JetBrains.DataFlow;
+using JetBrains.UI.ToolWindowManagement;
 using JetBrains.UI.Application;
-using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting;
-using MessageBox1 = JetBrains.Util.MessageBox;
+using Microsoft.VisualStudio.Shell.Interop;
+using JetBrains.ReSharper.Daemon;
 using JetBrains.TextControl;
 using JetBrains.Application;
-using JetBrains.DataFlow;
+using System;
 using JetBrains.ReSharper.Features.Altering.Resources;
-using JetBrains.UI.ToolWindowManagement;
-using Microsoft.VisualStudio.Shell.Interop;
-using MessageBox = System.Windows.Forms.MessageBox;
+using GraphX;
+using GraphX.GraphSharp.Algorithms.Layout.Simple.FDP;
+using System.Windows.Controls;
+using GraphX.Controls;
+using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin
 {

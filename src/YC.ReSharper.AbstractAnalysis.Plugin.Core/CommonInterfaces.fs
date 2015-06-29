@@ -13,13 +13,7 @@ open YC.FSA.FsaApproximation
 open YC.FSA.GraphBasedFsa
 open System.Collections.Generic
 open ControlFlowGraph
-    
-type TreeGenerationState<'node> = 
-    | Start
-    | InProgress of 'node * AstNode list
-    | End of 'node
 
-//add typegraph
 type DrawingGraph (vertices : IEnumerable<int>, edges : List<TaggedEdge<int, string>>) =
     member this.Vertices = vertices
     member this.Edges = edges
@@ -33,6 +27,12 @@ type LexingFinishedArgs<'node> (tokens : ResizeArray<'node>, lang:string, drawGr
 type ParsingFinishedArgs(lang : string) = 
     inherit System.EventArgs()
     member this.Lang = lang
+
+type TreeGenerationState<'node> = 
+    | Start
+    | InProgress of 'node * AstNode list
+    | End of 'node
+
 
 exception LexerError of string * obj
 
@@ -55,13 +55,10 @@ type IInjectedLanguageModule<'br,'range,'node when 'br : equality> =
             ResizeArray<string * 'range> * ResizeArray<string * 'range> * ResizeArray<string * 'range>
 
 
-type Processor<'TokenType, 'br, 'range, 'node>  when 'br:equality and  'range:equality and 'node:null 
+type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:equality and 'node:null  and 'TokenType : equality
     (
-        //tokenize: Appr<'br> -> ParserInputGraph<'TokenType>
         tokenize: Appr<'br> -> Test<ParserInputGraph<'TokenType>, array<Symb<char*Position<'br>>>>
-        , parse, translate, tokenToNumber: 'TokenType -> int
-        , numToString: int -> string, tokenToData: 'TokenType -> obj
-        , tokenToTreeNode, lang, calculatePos:_->seq<'range>
+        , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang, calculatePos:_->seq<'range>
         , getDocumentRange: 'br -> 'range
         , printAst: Tree<'TokenType> -> string -> unit
         , printOtherAst: OtherTree<'TokenType> -> string -> unit
@@ -69,20 +66,23 @@ type Processor<'TokenType, 'br, 'range, 'node>  when 'br:equality and  'range:eq
 
     let lexingFinished = new Event<LexingFinishedArgs<'node>>()
     let parsingFinished = new Event<ParsingFinishedArgs>()
-    let mutable forest: list<_ * _> = [] 
+    
+    let mutable forest: list<Tree<'TokenType> * _> = [] 
     let mutable otherForest : list<OtherTree<'TokenType>> = []
 
     let mutable generationState : TreeGenerationState<'node> = Start
-    let prepareToHighlighting (graphOpt : ParserInputGraph<'TokenType> option) tokenToTreeNode = 
+    
+    let prepareToHighlighting (graphOpt : ParserInputGraph<'token> option) tokenToTreeNode = 
         if graphOpt.IsSome
         then
+            
             let tokensList = new ResizeArray<_>()
 
             let inGraph = graphOpt.Value
             let edges = ResizeArray()
             for e in inGraph.Edges do
                 let tokenName = e.Tag |> tokenToNumber |> numToString
-                edges.Add(new TaggedEdge<int, string>(e.Source, e.Target, tokenName))
+                edges.Add( new TaggedEdge<int, string>(e.Source, e.Target, tokenName))
             let vertices = inGraph.Vertices
                      
             let drawGraph = DrawingGraph(vertices, edges)
@@ -133,14 +133,16 @@ type Processor<'TokenType, 'br, 'range, 'node>  when 'br:equality and  'range:eq
 
                     if semantic.IsSome 
                     then
-//                        printAst tree "result ast.dot"
+                        printAst tree "result ast.dot"
                         let pSource, lSource, tokToSourceString = semantic.Value
                         let cfg = new ControlFlow<'TokenType>(tree, pSource, lSource, tree.Tokens, tokToSourceString)
-//                        cfg.PrintToDot "result cfg.dot"
+                        cfg.PrintToDot "result cfg.dot"
                         let semErrors = cfg.FindUndefVariable()
                         semErrors |> List.iter addSError
 
-                | Yard.Generators.ARNGLR.Parser.Error(_, tok, _) -> tok |> addPError 
+                | Yard.Generators.ARNGLR.Parser.Error(_, tok, _) -> 
+                    if tok <> Unchecked.defaultof<'TokenType>
+                    then tok |> addPError 
             )
 
     let getNextTree index : TreeGenerationState<'node> = 
@@ -168,10 +170,9 @@ type Processor<'TokenType, 'br, 'range, 'node>  when 'br:equality and  'range:eq
     let getForestWithToken range = 
         let res = new ResizeArray<'node>()
         for ast, errors in forest do
-            let tokenToRange tok = this.TokenToPos calculatePos tok
-            let trees = ast.GetForestWithToken range tokenToRange
+            let trees = ast.GetForestWithToken range <| (this.TokenToPos calculatePos)
             for tree in trees do
-                let treeNode = this.TranslateToTreeNode tree errors
+                let treeNode = (this.TranslateToTreeNode tree errors)
                 res.Add treeNode
         res
 
@@ -184,9 +185,9 @@ type Processor<'TokenType, 'br, 'range, 'node>  when 'br:equality and  'range:eq
             treeNode, true
         | _ -> failwith "Unexpected state in tree generation"
 
-    member this.TokenToPos calculatePos token = 
-        let data = unbox <| tokenToData token //: string * FSA<char*Position<'br>>
-        calculatePos <| snd data
+    member this.TokenToPos calculatePos (token : 'TokenType)= 
+        let data (*: FSA<char*Position<'br>>*) = unbox <| tokenData token
+        calculatePos data
 
     member this.GetForestWithToken range = getForestWithToken range
 
@@ -199,7 +200,8 @@ type Processor<'TokenType, 'br, 'range, 'node>  when 'br:equality and  'range:eq
         
         let ranges = new ResizeArray<_>()
         tokens 
-        |> ResizeArray.iter (fun token -> Seq.iter (fun r -> ranges.Add r) <| tokToPos token)
+        |> ResizeArray.iter (fun token -> 
+            Seq.iter (fun r -> ranges.Add r) <| tokToPos token)
 
         ranges
 
@@ -212,14 +214,15 @@ type Processor<'TokenType, 'br, 'range, 'node>  when 'br:equality and  'range:eq
 
         let addError tok isParse =
             let e tokName (tokenData: FSA<char*Position<'br>>) = 
-                tokenData |> calculatePos
+                tokenData 
+                |> calculatePos
                 |> Seq.iter
                     ///TODO!!! Produce user friendly error message!
                     (fun br -> if isParse 
                                then parserErrors.Add <| ((sprintf "%A" tokName), br)
                                else semanticErrors.Add <| ((sprintf "%A" tokName), br))
             let name = tok |> (tokenToNumber >>  numToString)
-            let tokenData = tokenToData tok :?> FSA<char*Position<'br>>
+            let tokenData = tokenData tok :?> FSA<char*Position<'br>>
             e name tokenData
         
         let addPError tok = addError tok true

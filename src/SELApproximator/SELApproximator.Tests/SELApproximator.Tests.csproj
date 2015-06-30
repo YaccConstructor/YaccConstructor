@@ -1,8 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\JetBrains.ReSharper.SDK.Tests.$(rshVer)\build\JetBrains.ReSharper.SDK.Tests.props" Condition="Exists('..\..\packages\JetBrains.ReSharper.SDK.Tests.$(rshVer)\build\JetBrains.ReSharper.SDK.Tests.props')" />
   <PropertyGroup>
     <ReSharperSdkMode>Tests</ReSharperSdkMode>
+    <!-- This tells the SDK to copy all assemblies and other content for test projects. For non-test projects, we no longer copy-local.-->
+    <JetTestProject>True</JetTestProject>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
@@ -24,7 +25,7 @@
     <OutputPath>bin\Debug\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <OutputPath>..\..\..\Bin\Release\v40\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="antlr.runtime">
@@ -230,6 +231,9 @@
     <None Include="test\data\JsFsa\SimpleFor.js.gold" />
     <None Include="test\data\JsFsa\SimpleMethodCall.js.gold" />
     <None Include="test\data\JsFsa\SimpleQuery.js.gold" />
+    <None Include="test\data\nuget.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\FST\FST\FST\FST.fsproj">
@@ -266,7 +270,6 @@
     <Error Condition="!Exists('..\..\packages\JetBrains.Psi.Features.test.Framework.102.0.20150522.71619\build\JetBrains.Psi.Features.test.Framework.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Psi.Features.test.Framework.102.0.20150522.71619\build\JetBrains.Psi.Features.test.Framework.Targets'))" />
     <Error Condition="!Exists('..\..\packages\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.2.0.20141124.0\build\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.2.0.20141124.0\build\JetBrains.Build.Platform.Tasks.ThemedIconsPacker.Targets'))" />
     <Error Condition="!Exists('..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets'))" />
-    <Error Condition="!Exists('..\..\packages\JetBrains.ReSharper.SDK.Tests.$(rshVer)\build\JetBrains.ReSharper.SDK.Tests.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.ReSharper.SDK.Tests.$(rshVer)\build\JetBrains.ReSharper.SDK.Tests.props'))" />
   </Target>
   <Import Project="..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets" Condition="Exists('..\..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Targets')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

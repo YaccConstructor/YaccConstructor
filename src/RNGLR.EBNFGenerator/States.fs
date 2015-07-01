@@ -209,6 +209,8 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
             for i = 0 to grammar.indexator.fullCount - 1 do
                 if i <> grammar.indexator.eofIndex then
                     //check that at least one current kernel has new lookaheads
+                    if vertex.label = 941 && i = 209 then
+                        ()
                     let mutable hasNewLookahead = false
                     for j = 0 to mainKernels.Length - 1 do
                         if curSymbol mainKernels.[j] = i && not newMainLookaheads.[j].IsEmpty then hasNewLookahead <- true
@@ -243,8 +245,8 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
                             destStates_arr.[!dsIter] <- destState.Key, destState.Value
                             incr dsIter
                         let newVertex : Vertex<_,_> = dfsLALR destStates_arr
-                        if not <| wasEdge.[vertex.label].Contains newVertex.label then
-                            wasEdge.[vertex.label] <- wasEdge.[vertex.label].Add newVertex.label
+                        if not <| wasEdge.[vertex.label].Contains i then
+                            wasEdge.[vertex.label] <- wasEdge.[vertex.label].Add i
                             vertex.addEdge <| new Edge<_,_>(newVertex, (i, (dontStackSet, stackSet)))
         decr dfsDepth
         vertex

@@ -27,14 +27,13 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <StartArguments>-i ../../..\src\RNGLR.EBNFParser.SimpleTest\CalcEBNF.yrd -g "RNGLR.EBNFGenerator -pos int -token int -module RNGLR.ParseCalc -translate true -table LALR -o CalcEBNF.yrd.fs"</StartArguments>
     <StartArguments>-i ../../../../../YC.Abstract.SQL-temp\src\TSQL\mssqlNonAbstract.yrd -c Linearize -g "RNGLR.EBNFGenerator -table LALR -o RNGLR.EBNF.sql.yrd.fs"</StartArguments>
-    <StartArguments>-i ../../../src\RNGLR.EBNFParser.SimpleTest\CalcEBNF.yrd -g "RNGLR.EBNFGenerator -pos int -token int -module RNGLR.ParseCalc -translate true -table LR -o CalcEBNF.yrd.fs"</StartArguments>
+    <StartArguments>-i ..\..\..\src\RNGLR.EBNFParser.SimpleTest\AlternativeInMiddle.yrd  -c ExpandMeta -g "RNGLR.EBNFGenerator -pos int -token int -module RNGLR.ParseAlt -translate true -table LALR -o altin.fs"</StartArguments>
     <StartWorkingDirectory>
     </StartWorkingDirectory>
     <StartAction>Project</StartAction>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <StartArguments>-i ../../src/RNGLRParserEBNF.SimpleTest/CalcEBNF.yrd -c ExpandMeta ^
-        -g "RNGLRGenerator -pos int -token int -module RNGLR.ParseCalcEBNF -translate true -table LR -o RNGLR.ParseCalcEBNF.yrd.fs"</StartArguments>
+    <StartArguments>-i ..\..\..\src\RNGLR.EBNFParser.SimpleTest\AlternativeInMiddle.yrd  -c ExpandMeta -g "RNGLR.EBNFGenerator -pos int -token int -module RNGLR.ParseAlt -translate true -table LALR -o altin.fs"</StartArguments>
     <RemoteDebugEnabled>false</RemoteDebugEnabled>
     <RemoteDebugMachine />
     <OutputPath>..\..\Bin\Release\v40\</OutputPath>

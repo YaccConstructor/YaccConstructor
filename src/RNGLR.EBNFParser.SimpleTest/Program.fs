@@ -40,6 +40,18 @@ type ``RNGLREBNF parser tests with simple lexer`` () =
         | Success (tree, _, _), TER_Error -> 
             printfn "Wrong chain was accessed"
             Assert.Fail()
+    
+    [<Test>]
+    member test.``First alternative in the middle``() =
+        let parser = RNGLR.ParseAlternativeInMiddle.buildAst
+        let file = "AlternativeInMiddle1.txt"
+        runTest parser file TER_Success
+
+    [<Test>]
+    member test.``Second alternative in the middle``() =
+        let parser = RNGLR.ParseAlternativeInMiddle.buildAst
+        let file = "AlternativeInMiddle2.txt"
+        runTest parser file TER_Success
 
     [<Test>]
     member test.``CalcEBNF`` () = 
@@ -119,7 +131,7 @@ type ``RNGLREBNF parser tests with simple lexer`` () =
         let file = "TwoEpsilonsMiddleWrong.txt"
         runTest parser file TER_Error
 
-(*[<EntryPoint>]
+[<EntryPoint>]
 let main argv = 
-    (new ``RNGLREBNF parser tests with simple lexer``()).CalcEBNF();
-    0 // return an integer exit code*)
+    (new ``RNGLREBNF parser tests with simple lexer``()).``Second alternative in the middle``();
+    0 // return an integer exit code

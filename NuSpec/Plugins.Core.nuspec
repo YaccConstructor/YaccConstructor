@@ -2,7 +2,7 @@
 <package>
 <metadata>
 <id>YC.SEL.Plugins.Core</id>
-<version>0.3.0.19-On-branch--local</version>
+<version>0.3.0.19</version>
 <title>Core of SEL plugins</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>
@@ -38,7 +38,6 @@
 <!-- YC.Core -->
 <file src="..\Bin\Release\v40\Mono.Addins.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\FSharp.Core.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
-<file src="..\Bin\Release\v40\FsYacc.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\YC.Common.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\YC.Conversions.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\YC.Constraints.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />

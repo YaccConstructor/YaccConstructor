@@ -83,6 +83,8 @@ let ApproximateFileWithLogging (file: ICSharpFile) recursionMaxLevel =
 /// Finds the first hotspot in the given file and builds approximation
 /// for it, starting only from enclosing method. Logging is disabled
 let ApproximateFile (file: ICSharpFile) recursionMaxLevel =
+    // allMethodsCfgToDot file myDebugFolderPath
+    // let loggerSt = Logger.create Utils.myDebugFilePath true FsaHelper.toDot
     ApproximateFileWithParams file recursionMaxLevel CharFsa.charFsaParams Logger.disabledLogger
 
 // stub

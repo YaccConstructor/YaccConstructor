@@ -13,7 +13,7 @@ open IControlFlowGraphUtils
 /// Returns ICSharpControlFlowGraph graph for ITreeNode
 let nodeToCSharpCfg (declaration : ITreeNode) = 
     let cSharpCfgBuilder = new CSharpControlFlowBuilder()
-    let graph = cSharpCfgBuilder.GraphFromNode (declaration, null, false)
+    let graph = cSharpCfgBuilder.GraphFromNode (declaration, null, true)
     graph :?> ICSharpControlFlowGraph
 
 /// Extracts C# CFG from method declaration and converts it

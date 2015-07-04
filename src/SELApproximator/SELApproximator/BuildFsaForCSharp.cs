@@ -30,7 +30,7 @@ namespace SELApproximator
         {
             var inputFile = _provider.PsiFile;
             const int recursionMaxLevel = 3; // 0 for top and 3 level down
-            var fsa = ApproximateCsharp.ApproximateFileWithLogging(inputFile, recursionMaxLevel).Item2;
+            var fsa = ApproximateCsharp.ApproximateFileWithLogging(inputFile, recursionMaxLevel)[0].Item2;
             Utils.OutputCSharpResult(Utils.FsaToTestDot(fsa), _provider);
             return null;
         }

@@ -30,16 +30,9 @@ type Approximator(file:IFile) =
     let recursionMaxLevel = 3
 
     member this.Approximate() = 
+        match file with 
+        | :? ICSharpFile as csFile -> 
+            ApproximateFile csFile recursionMaxLevel
+        | _ -> new ResizeArray<_>()//failwithf "Sorry, this file type doesn't supported now"
         
-        let res = new ResizeArray<string * FSA<char * Position<'br>>>()
-        let lang, fsa = 
-            match file with 
-            | :? ICSharpFile as csFile -> 
-                ApproximateFile csFile recursionMaxLevel
-            | _ -> failwithf "Sorry, this file type doesn't supported now"
-        
-        res.Add((lang, fsa))
-        res
-            
-
     

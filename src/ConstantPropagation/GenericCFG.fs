@@ -19,6 +19,8 @@ module GenericCFGFuncs =
     open GraphUtils.TopoTraverser
     open BidirectTopoUpTraverser
     open QuickGraph
+    open GenericGraphs.BidirectGraphFuns
+    open GraphUtils
 
     /// Creates empty generic CFG
     let create name = {
@@ -37,6 +39,23 @@ module GenericCFGFuncs =
         let getExitVars = function
         | ExitNode(vars) -> vars
         | _ -> failwith wrongCfgNodeTypeMsg 
+        let removeUnreachable (cfg: BidirectGraph<_>) exitNode =
+            let isVisited (n: GraphNode<_>) v = Set.contains n.Id v
+            let makeVisited (n: GraphNode<_>) v = Set.add n.Id v
+            let doNothing n s = s
+            let getPrevNodes n s = preds n cfg |> List.ofSeq, s
+            let dfsParts = {
+                IsVisited = isVisited
+                MakeVisited = makeVisited
+                PreProcess = doNothing
+                ProcessNode = doNothing
+                GetNextNodes = getPrevNodes
+                PostProcess = doNothing }
+            let visited, _ = dfs dfsParts exitNode Set.empty ()
+            cfg.Vertices
+            |> List.ofSeq
+            |> List.iter (fun n -> if not <| Set.contains n.Id visited then removeVertex cfg n)
+            cfg
         let rec findDdgNodes (cfg: BidirectGraph<_>) traverser (state: ConvertState<_>) =
             let makeVisited (node: GraphNode<_>) (state: ConvertState<_>) =
                 { state with VisitedNodes = node :: state.VisitedNodes }
@@ -115,7 +134,7 @@ module GenericCFGFuncs =
         let ddg =
             let g = BidirectGraph()
             do g.AddVerticesAndEdgeRange cfg.Graph.Edges |> ignore
-            g
+            removeUnreachable g exitNode
         let traverser = init exitNode
         let initState = { 
             Vars = Set.empty; 

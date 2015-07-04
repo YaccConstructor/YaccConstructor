@@ -16,6 +16,7 @@ open ArbitraryOperation
 open ResharperCsharpTreeUtils
 open BuildApproximation
 open ResharperCsharpTreeUtils
+open Microsoft.FSharp.Collections
 
 let private tryDefineLang (node: IInvocationExpression) (hotspotInfoList: list<string * Hotspot>) = 
     let methodName, className, parameters, retType = getMethodSigniture node
@@ -61,27 +62,30 @@ let private buildFsaForMethod methodDecl target recursionMaxLevel fsaParams logg
         |> Option.get
     fsaForVar
 
-/// Finds the first hotspot in the given file and builds approximation
-/// for it, starting only from enclosing method.
-/// todo: 1. approximation can be built not only for enclosing method
-/// 2. all hotspots processing
+/// Finds hotspots in the given file and builds approximation
+/// for them, starting only from enclosing method.
+/// todo: approximation can be built not only for enclosing method
 let ApproximateFileWithParams (file: ICSharpFile) recursionMaxLevel fsaParams logger =
     let hotspotInfoList = HotspotParser.parseHotspots "..\\..\\..\\..\\ConstantPropagation\\Hotspots.xml"
-    // only the first hotspot is processed in currect implementation
-    let lang, hotspot = (findHotspots file hotspotInfoList).[0]
-    let methodDeclaration = getEnclosingMethod hotspot
-    let hotVarRef = (hotspot.Arguments.[0].Value) :> ITreeNode
-    let fsa = buildFsaForMethod methodDeclaration hotVarRef recursionMaxLevel fsaParams logger
-    lang, fsa
+    let hotspots = findHotspots file hotspotInfoList
+    hotspots
+    |> ResizeArray.map 
+        (
+            fun (lang, invocExpr) -> 
+                let methodDeclaration = getEnclosingMethod invocExpr
+                let hotVarRef = (invocExpr.Arguments.[0].Value) :> ITreeNode
+                let fsa = buildFsaForMethod methodDeclaration hotVarRef recursionMaxLevel fsaParams logger
+                lang, fsa
+        )
 
-/// Finds the first hotspot in the given file and builds approximation
-/// for it, starting only from enclosing method. Logs approximation process
+/// Finds hotspots in the given file and builds approximation
+/// for them, starting only from enclosing method. Logs approximation process
 let ApproximateFileWithLogging (file: ICSharpFile) recursionMaxLevel =
     let loggerSt = Logger.create Utils.myDebugFilePath true FsaHelper.toDot
     ApproximateFileWithParams file recursionMaxLevel CharFsa.charFsaParams loggerSt
 
-/// Finds the first hotspot in the given file and builds approximation
-/// for it, starting only from enclosing method. Logging is disabled
+/// Finds hotspots in the given file and builds approximation
+/// for them, starting only from enclosing method. Logging is disabled
 let ApproximateFile (file: ICSharpFile) recursionMaxLevel =
     // allMethodsCfgToDot file myDebugFolderPath
     // let loggerSt = Logger.create Utils.myDebugFilePath true FsaHelper.toDot

@@ -131,6 +131,7 @@
     <Compile Include="BracketsHighlighting.cs" />
     <Compile Include="Example5.cs" />
     <Compile Include="extCalc.cs" />
+    <Compile Include="SECRDemo.cs" />
     <Compile Include="SimpleConcat.cs" />
     <Compile Include="TSQLDemo.cs" />
     <Compile Include="EmbeddedCalc.cs" />

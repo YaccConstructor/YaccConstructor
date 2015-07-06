@@ -1,4 +1,4 @@
-﻿/// JavaScript specific functions needed to run IControlFlowGraf to generic CFG
+﻿/// JavaScript specific functions needed to run IControlFlowGraph to generic CFG
 /// conversion algo
 module JsCfgToGeneric
 

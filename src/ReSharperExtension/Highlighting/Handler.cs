@@ -20,13 +20,15 @@ namespace ReSharperExtension.Highlighting
         public static HighlightingProcess Process { get; set; }
         private static ReSharperHelper<DocumentRange, ITreeNode> YcProcessor = ReSharperHelper<DocumentRange, ITreeNode>.Instance;
         public static ArrayList DataGraphs;
+        
         static Handler()
         {
             DataGraphs = new ArrayList();
 
             foreach (var lexEvent in YcProcessor.LexingFinished)
             {
-                lexEvent.AddHandler(OnLexingFinished);
+                lexEvent.AddHandler(HighlightTokens);
+                lexEvent.AddHandler(UpdateDataGraph);
             }
 
             foreach (var parseEvent in YcProcessor.ParsingFinished)
@@ -34,11 +36,12 @@ namespace ReSharperExtension.Highlighting
         }
 
         /// <summary>
-        /// Do highlighting some tokens chunk.
+        /// Does highlighting all tokens that are passed with parameter args.
         /// </summary>
-        /// <param name="sender">Now always null</param>
-        /// <param name="args"></param>
-        private static void OnLexingFinished<T>(object sender, CommonInterfaces.LexingFinishedArgs<T> args)
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sender">Now it's always null</param>
+        /// <param name="args">Contains info about tokens and language</param>
+        private static void HighlightTokens<T>(object sender, CommonInterfaces.LexingFinishedArgs<T> args)
         {
             IHighlightingConsumer consumer = Process.Consumer;
             var processor = new TreeNodeProcessor(consumer, Process.File);
@@ -55,7 +58,17 @@ namespace ReSharperExtension.Highlighting
                 fibers.EnqueueJob(action);
             }
 
-            //
+            Process.DoHighlighting(new DaemonStageResult(consumer.Highlightings));
+        }
+
+        /// <summary>
+        /// Updates info about existing graphs that exist in current file
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sender"></param>
+        /// <param name="args">Contains info about graph</param>
+        private static void UpdateDataGraph<T>(object sender, CommonInterfaces.LexingFinishedArgs<T> args)
+        {
             Graph dataGraph = new Graph();
             foreach (var vertex in args.Graph.Vertices)
             {
@@ -72,11 +85,10 @@ namespace ReSharperExtension.Highlighting
                 dataGraph.AddEdge(edge);
             }
             DataGraphs.Add(dataGraph);
-            Process.DoHighlighting(new DaemonStageResult(consumer.Highlightings));
         }
 
         /// <summary>
-        /// Do translate sppf to ReSharper trees and store result. It is need further.
+        /// Translates sppf to ReSharper trees and stores result. It's need further.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args">Now it contains only language</param>

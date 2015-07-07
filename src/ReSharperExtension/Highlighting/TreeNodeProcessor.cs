@@ -52,8 +52,7 @@ namespace ReSharperExtension.Highlighting
                 return;
 
             colorConstantRange.ForEach(
-                range =>
-                AddHighLighting(range, consumer, new TokenHighlighting(treeNode)));
+                range => AddHighLighting(range, consumer, new TokenHighlighting(treeNode)));
         }
 
         private void AddHighLighting(DocumentRange range, IHighlightingConsumer consumer, IHighlighting highlighting)

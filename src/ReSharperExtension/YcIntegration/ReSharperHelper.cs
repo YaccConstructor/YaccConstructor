@@ -67,8 +67,7 @@ namespace ReSharperExtension.YcIntegration
             {
                 if (parserEvents == null)
                 {
-                    parserEvents =
-                        new List<YcParseEvent>();
+                    parserEvents = new List<YcParseEvent>();
 
                     foreach (IReSharperLanguage processor in GetAllProcessors())
                     {                        
@@ -78,9 +77,7 @@ namespace ReSharperExtension.YcIntegration
                 return parserEvents;
             }
         }
-
-        
-        
+      
         private ReSharperHelper()
         {
         }

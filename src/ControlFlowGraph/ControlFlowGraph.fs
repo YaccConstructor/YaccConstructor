@@ -2,7 +2,12 @@
 
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
+
+open System
+open System.IO
 open System.Collections.Generic
+
+
 open QuickGraph
 
 type BlockType = 
@@ -14,8 +19,21 @@ type BlockType =
     | ElseStatement 
     | ForStatement 
     | WhileStatement
-    | Start
+    | Entry
     | NoneBlock 
+
+    static member BlockTypeToString block = 
+        match block with
+        | Assignment -> "Assignment"
+        | Declaration -> "Declaration"
+        | Definition -> "Definition"
+        | IfStatement -> "IfStatement"
+        | ThenStatement -> "ThenStatement"
+        | ElseStatement -> "ElseStatement"
+        | ForStatement -> "ForStatement"
+        | WhileStatement -> "WhileStatement"
+        | Entry -> "Entry"
+        | NoneBlock -> "None"
 
 type ParserSource<'TokenType> = 
     val tokenToNumber : 'TokenType -> int
@@ -165,18 +183,7 @@ type Block<'TokenType> =
         this.children <- this.children @ newChildren
 
     member this.BlockToString (tokToString : 'TokenType -> string) = 
-        let typeStr = 
-            match this.blockType with
-            | Assignment -> "Assignment"
-            | Declaration -> "Declaration"
-            | Definition -> "Definition"
-            | IfStatement -> "IfStatement"
-            | ThenStatement -> "ThenStatement"
-            | ElseStatement -> "ElseStatement"
-            | ForStatement -> "ForStatement"
-            | WhileStatement -> "WhileStatement"
-            | Start -> "Start"
-            | NoneBlock -> "None"
+        let typeStr = BlockType.BlockTypeToString this.blockType
 
         let strValues = 
             this.values
@@ -203,7 +210,7 @@ and InterNode<'TokenType> =
         then this.parents <- [parent]
         else this.parents <- this.parents @ [parent]
 
-    /// replace finish node on some other node
+    /// replace exit node on some other node
     member this.ReplaceMeForParents (node : InterNode<_>) = 
         
         if node <> this
@@ -213,7 +220,7 @@ and InterNode<'TokenType> =
             this.parents
             |> List.iter (fun block -> block.ReplaceChild this [node])
 
-    /// replace start node on some other node
+    /// replace entry node on some other node
     member this.ReplaceMeForChildren (node : InterNode<_>) = 
 
         if node <> this
@@ -230,9 +237,9 @@ and InterNode<'TokenType> =
         then "Empty Node"
         else 
             if this.parents.IsEmpty
-            then "Start Node"
+            then "Entry Node"
             elif this.children.IsEmpty
-            then "Finish Node"
+            then "Exit Node"
             else "Node"
 
 type BlockEdge<'TokenType>(source, target, tag) = 
@@ -255,23 +262,12 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                             , tokToSourceString : _ -> string) = 
     
     let blockToString (block : Block<'TokenType>) = 
-        let typeStr = 
-            match block.blockType with
-            | Assignment -> "Assignment"
-            | Declaration -> "Declaration"
-            | Definition -> "Definition"
-            | IfStatement -> "IfStatement"
-            | ThenStatement -> "ThenStatement"
-            | ElseStatement -> "ElseStatement"
-            | ForStatement -> "ForStatement"
-            | WhileStatement -> "WhileStatement"
-            | Start -> "Start"
-            | NoneBlock -> "None"
+        let typeStr = BlockType.BlockTypeToString block.blockType
 
         let strValues = 
             block.values
             |> Array.map (fun t -> tokToSourceString t)
-            |> Array.fold (fun prev tokName -> prev + " " + tokName) System.String.Empty
+            |> Array.fold (fun prev tokName -> prev + " " + tokName) String.Empty
 
         sprintf "%s\n tokens: %s\n" typeStr strValues
     
@@ -303,27 +299,27 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
             |> Seq.iter(fun edge -> processEdge edge)
             
         let concatNodes (from : InterNode<_> * InterNode<_>) (_to : InterNode<_> * InterNode<_>) = 
-            let start, oldFinish = from
-            let oldStart, finish = _to
+            let entry, oldExit = from
+            let oldEntry, exit = _to
 
-            oldStart.ReplaceMeForChildren oldFinish
+            oldEntry.ReplaceMeForChildren oldExit
 
-            start, finish
+            entry, exit
 
         let mergeNodes (nodes : (InterNode<_> * InterNode<_>) list) = 
-            let commonStart, commonEnd = nodes.Head
+            let commonEntry, commonExit = nodes.Head
 
             nodes
             |> List.tail
             |> List.iter 
                     (
                         fun block -> 
-                            let oldStart, oldEnd = block
-                            oldStart.ReplaceMeForChildren commonStart
-                            oldEnd.ReplaceMeForParents commonEnd
+                            let oldEntry, oldExit = block
+                            oldEntry.ReplaceMeForChildren commonEntry
+                            oldExit.ReplaceMeForParents commonExit
                     )
 
-            commonStart, commonEnd
+            commonEntry, commonExit
 
         processFirst()
         while visited.Count > 0 do
@@ -358,7 +354,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
 
         vertexToInterNode.[endVertex].Head
 
-    let start, finish = 
+    let entry, exit = 
         let treeRoot = 
             match tree.Root with 
             | :? AST as ast -> ast
@@ -424,7 +420,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
 
         
         let stack = Stack<_>()
-        let blockType = ref Start
+        let blockType = ref Entry
         let blocksGraph = new CfgBlocksGraph<'TokenType>()
         let bStartVertex = ref CfgBlocksGraph<_>.StartVertex
         let bEndVertex = ref <| CfgBlocksGraph<_>.StartVertex + 1
@@ -707,21 +703,21 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                                 processBlock child
                     )
 
-        processInterNode start []
+        processInterNode entry []
 
         !errorList
 
-    member this.Start = start
-    member this.Finish = finish
+    member this.Entry = entry
+    member this.Exit = exit
 
     member this.FindUndefVariable() = findUndefVariable()
 
     member this.PrintToDot name = 
         let count = ref -1
-        let blockToNumber = new System.Collections.Generic.Dictionary<_, _>()
-        let interNodeToNumber = new System.Collections.Generic.Dictionary<_, _>()
+        let blockToNumber = new Dictionary<_, _>()
+        let interNodeToNumber = new Dictionary<_, _>()
         
-        use out = new System.IO.StreamWriter (name : string)
+        use out = new StreamWriter (name : string)
         out.WriteLine("digraph AST {")
 
         let rec printBlock (block : Block<'TokenType>) parentNumber = 
@@ -742,7 +738,8 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
             
             out.WriteLine (sprintf ("%d -> %d") parentNumber nodeNumber)
 
-            if isNew then
+            if isNew 
+            then
                 block.children
                 |> List.iter (fun child -> printInterNode child nodeNumber)
 
@@ -772,7 +769,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                 interNode.children
                 |> List.iter (fun block -> printBlock block nodeNumber)
                     
-        printInterNode this.Start -1
+        printInterNode this.Entry -1
 
         out.WriteLine("}")
         out.Close()

@@ -62,7 +62,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
     (
         tokenize: FSA<char * Position<'br>> -> Test<ParserInputGraph<'TokenType>, array<Symb<char*Position<'br>>>>
         , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang, calculatePos:_->seq<'range>
-        , getDocumentRange: 'br -> 'range
+        , getDocumentRange: Position<'br> -> 'range
         , printAst: Tree<'TokenType> -> string -> unit
         , printOtherAst: OtherTree<'TokenType> -> string -> unit
         , semantic : _ option) as this =
@@ -114,7 +114,8 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
             match tokenize graph with
             | Success res -> res |> Some
             | Error errors -> 
-                errors |> Array.map (function Smbl e -> fst e |> string, (e |> snd).back_ref |> getDocumentRange | e -> failwithf "Unexpected tocenization result: %A" e)
+                errors 
+                |> Array.map (function Smbl e -> fst e |> string, (e |> snd) |> getDocumentRange | e -> failwithf "Unexpected tocenization result: %A" e)
                 |> Array.iter addLError 
                 None
 

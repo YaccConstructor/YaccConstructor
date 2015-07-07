@@ -20,7 +20,15 @@ type br = ICSharpLiteralExpression
 type range = DocumentRange
 type node = ITreeNode 
 
-let getRange =  fun (x : ICSharpLiteralExpression) -> (x :> ITreeNode).GetDocumentRange()
+/// todo: this function code is very similar of code calculatePos function. It's bad. Need refactoring.
+let getRange (pos : Position<br>) = 
+    let startOffset = pos.start_offset
+    let beginPosTok, endPosTok = startOffset + 1, startOffset + 2
+    let grTokenBackRef = pos.back_ref
+    let endPos = 
+        grTokenBackRef.GetDocumentRange().TextRange.EndOffset - endPosTok 
+        - grTokenBackRef.GetDocumentRange().TextRange.StartOffset 
+    grTokenBackRef.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
 
 let addSemantic (parent : ITreeNode) (children : ITreeNode list) = 
     let mutable prev = null

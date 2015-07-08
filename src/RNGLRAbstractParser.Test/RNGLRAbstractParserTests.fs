@@ -463,6 +463,45 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
 
     [<Test>]
+    member this._24_UnambiguousBrackets_Circle_1 () =
+        let qGraph = new ParserInputGraph<_>(0, 9)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 0)
+            edg 1 2 (RNGLR.StrangeBrackets.RBR 1)
+            edg 2 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
+
+    [<Test>]
+    member this._24_UnambiguousBrackets_Circle_2 () =
+        let qGraph = new ParserInputGraph<_>(0, 9)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 0)
+            edg 1 2 (RNGLR.StrangeBrackets.RBR 1)
+            edg 2 3 (RNGLR.StrangeBrackets.LBR 0)
+            edg 3 4 (RNGLR.StrangeBrackets.RBR 1)
+            edg 4 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
+
+    [<Test>]
+    member this._24_UnambiguousBrackets_Circle_3 () =
+        let qGraph = new ParserInputGraph<_>(0, 9)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 0)
+            edg 1 2 (RNGLR.StrangeBrackets.RBR 1)
+            edg 2 3 (RNGLR.StrangeBrackets.LBR 0)
+            edg 3 4 (RNGLR.StrangeBrackets.RBR 1)
+            edg 4 5 (RNGLR.StrangeBrackets.LBR 0)
+            edg 5 6 (RNGLR.StrangeBrackets.RBR 1)
+            edg 6 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
+
+    [<Test>]
     member this._25_UnambiguousBrackets_BiggerCircle () =
         let qGraph = new ParserInputGraph<_>(0, 9)
         qGraph.AddVerticesAndEdgeRange
@@ -511,13 +550,13 @@ type ``RNGLR abstract parser tests`` () =
             ] |> ignore
 
         test RNGLR.StrangeBrackets.buildAstAbstract qGraph 25 24 4 8 1
-//[<EntryPoint>]
-//let f x =
-//    if System.IO.Directory.Exists "dot" 
-//    then 
-//        System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
-//    else System.IO.Directory.CreateDirectory "dot" |> ignore
-//    let t = new ``RNGLR abstract parser tests`` () 
+[<EntryPoint>]
+let f x =
+    if System.IO.Directory.Exists "dot" 
+    then 
+        System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
+    else System.IO.Directory.CreateDirectory "dot" |> ignore
+    let t = new ``RNGLR abstract parser tests`` () 
 
 //    t._01_PrettySimpleCalc_SequenceInput ()
 //    t._02_PrettySimpleCalc_SimpleBranchedInput ()
@@ -547,4 +586,5 @@ type ``RNGLR abstract parser tests`` () =
 //    t._26_UnambiguousBrackets_Inf()
 //    t._27_UnambiguousBrackets_WithoutEmptyString()
 //    t._28_UnambiguousBrackets_DifferentPathLengths ()
-//    0
+    t.``_24_UnambiguousBrackets_Circle_3``()
+    0

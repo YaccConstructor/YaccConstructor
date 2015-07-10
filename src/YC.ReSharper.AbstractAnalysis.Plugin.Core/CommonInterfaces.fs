@@ -75,27 +75,34 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
 
     let mutable generationState : TreeGenerationState<'node> = Start
     
-    let prepareToHighlighting (graphOpt : ParserInputGraph<'TokenType> option) tokenToTreeNode = 
-        if graphOpt.IsSome
-        then
-            let tokensList = new ResizeArray<_>()
+    ///creates instance of LexingFinishedArgs
+    let prepareToTrigger (graph : ParserInputGraph<'TokenType>) tokenToTreeNode = 
+        
+        /// returns graph which will be later shown to user
+        let createDrawGraph (graph : ParserInputGraph<_>) = 
+            let edges = 
+                graph.Edges
+                |> Seq.map 
+                    (
+                        fun edge -> 
+                            let tokenName = edge.Tag |> tokenToNumber |> numToString
+                            new TaggedEdge<_, _>(edge.Source, edge.Target, tokenName)
+                    )
+                |> ResizeArray.ofSeq
 
-            let inGraph = graphOpt.Value
-            let edges = ResizeArray()
-            for e in inGraph.Edges do
-                let tokenName = e.Tag |> tokenToNumber |> numToString
-                edges.Add( new TaggedEdge<int, string>(e.Source, e.Target, tokenName))
-            let vertices = inGraph.Vertices
-                     
-            let drawGraph = DrawingGraph(vertices, edges)
-            inGraph.TopologicalSort()
-            |> Seq.iter 
-                (fun vertex -> 
-                        inGraph.OutEdges vertex 
-                        |> Seq.iter (fun edge -> tokensList.Add <| tokenToTreeNode edge.Tag)
-                )
-
-            lexingFinished.Trigger(new LexingFinishedArgs<'node>(tokensList, lang, drawGraph))
+            let vertices = graph.Vertices
+            DrawingGraph(vertices, edges)
+        
+        ///creates treeNodes collection. Highlighting needs in this collection.
+        let createTreeNodes (graph : ParserInputGraph<_>) = 
+            graph.Edges
+            |> Seq.map(fun edge -> tokenToTreeNode edge.Tag)
+            |> ResizeArray.ofSeq
+        
+        let drawGraph = createDrawGraph graph
+        let treeNodes = createTreeNodes graph
+            
+        new LexingFinishedArgs<'node>(treeNodes, lang, drawGraph)
 
     let processLang graph addLError addPError addSError =
 //        let tokenize g =
@@ -119,7 +126,10 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
                 |> Array.iter addLError 
                 None
 
-        prepareToHighlighting tokenizedGraph tokenToTreeNode 
+        if tokenizedGraph.IsSome
+        then 
+            let lexFinishedArgs = prepareToTrigger tokenizedGraph.Value tokenToTreeNode 
+            lexingFinished.Trigger(lexFinishedArgs)
 
         tokenizedGraph 
         |> Option.map

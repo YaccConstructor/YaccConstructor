@@ -2,13 +2,13 @@
 open System.Collections.Generic
        
 type ParserSourceGLL<'TokenType> (
-                               tokenToNumber        : 'TokenType -> int
+                               eof                  : 'TokenType
+                               ,tokenToNumber       : 'TokenType -> int
                                , genLiteral         : string -> int -> 'TokenType option
                                , numToString        : int -> string
                                , tokenData          : 'TokenType -> obj
                                , isLiteral          : 'TokenType -> bool
                                , isTerminal         : 'TokenType -> bool
-                               , isNonTerminal      : 'TokenType -> bool
                                , getLiteralNames    : string list
                                , table              : int [][]
                                , rules              : array<int>
@@ -49,7 +49,6 @@ type ParserSourceGLL<'TokenType> (
     member this.TokenData          = tokenData
     member this.IsLiteral          = isLiteral
     member this.IsTerminal         = isTerminal
-    member this.IsNonTerminal      = isNonTerminal 
     member this.GetLiteralNames    = getLiteralNames                         
     member this.Table              = table
     member this.rules              = _rules
@@ -75,3 +74,4 @@ type ParserSourceGLL<'TokenType> (
     member this.NumIsLiteral       = numIsLiteral
     member this.CanInferEpsilon    = canInferEpsilon
     member this.Slots              = slots
+    member this.EOF                = eof

@@ -30,6 +30,20 @@ type Table (grammar : FinalGrammar) =
                 List.iter (addElementsToSet followSets.[currentruleLeft]) previousNonTerms
         followSets
 
+
+    let newRightSideForStartRule () =
+        let oldRightSide = grammar.rules.rightSide grammar.rules.startRule 
+        let newRightSide = Array.zeroCreate<int> (oldRightSide.Length + 1)
+        for i = 0 to oldRightSide.Length do
+            if i <> oldRightSide.Length
+            then
+                newRightSide.[i] <- oldRightSide.[i]
+            else
+                newRightSide.[i] <- grammar.indexator.eofIndex
+        //grammar.rules.
+        grammar.rules.setRightSide grammar.rules.startRule newRightSide
+    
+
     let follow = getFollowSets
 
     let canInferEpsilon = Array.create grammar.rules.rulesCount false
@@ -68,6 +82,7 @@ type Table (grammar : FinalGrammar) =
 //ε ∈ FIRST(α) и $ ∈ FOLLOW(A), добавить A → α к M[A, $]
 //Все пустые ячейки — ошибка во входном слове
     let _table = 
+        newRightSideForStartRule()
         let length1 = grammar.indexator.nonTermCount
         let length2 = grammar.indexator.fullCount - grammar.indexator.nonTermCount
         let arr = Array2D.create length1 length2 (List.empty<int>)
@@ -91,3 +106,4 @@ type Table (grammar : FinalGrammar) =
     
 
     member this.result = _table
+    

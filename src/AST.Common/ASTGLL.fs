@@ -78,9 +78,9 @@ type NumNode =
     new (num, node) = {Num = num; Node = node} 
 
 [<AllowNullLiteral>]
-type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) =
-   
-    member this.AstToDot (indToString : int -> string) (path : string) =
+type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
+    member this.tokens = toks
+    member this.AstToDot (indToString : int -> string) (tokenToNumber : 'TokenType -> int) (tokenData : 'TokenType -> obj) (path : string) =
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
 
@@ -154,7 +154,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                         then
                             if t.Name <> -1
                             then
-                                createNode !num false Terminal ("t " + indToString t.Name)
+                                createNode !num false Terminal ("t " +  (indToString <| (tokenToNumber this.tokens.[t.Name])) + " " + string(tokenData this.tokens.[t.Name]))
                                 createEdge currentPair.Num !num false ""
                             else
                                 createNode !num false Terminal ("epsilon")
@@ -172,7 +172,72 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                 then
                     for n in a.Others do
                         nodeQueue.Enqueue(new NumNode(!num, n))
-
-
         out.WriteLine("}")
         out.Close()
+
+    member this.CountCounters  =
+         
+        let nodesCount = ref 0
+        let edgesCount = ref 0
+        let termsCount = ref 0
+        let ambiguityCount = ref 0
+
+        let nodeQueue = new Queue<NumNode>()
+        let used = new Dictionary<_,_>()
+        let num = ref -1
+        nodeQueue.Enqueue(new NumNode(!num, root))
+        while nodeQueue.Count <> 0 do
+            let currentPair = nodeQueue.Dequeue()
+            let key = ref 0
+            if !num <> -1
+            then
+
+                if currentPair.Node <> null && used.TryGetValue(currentPair.Node, key)
+                then
+                    incr edgesCount
+                else    
+                    num := !num + 1
+                    used.Add(currentPair.Node, !num)
+                    match currentPair.Node with 
+                    | :? NonTerminalNode as a -> 
+                        if a.Others <> Unchecked.defaultof<_>
+                        then
+                            incr nodesCount
+                            incr ambiguityCount
+                        else    
+                            incr nodesCount
+                        
+                        incr edgesCount
+                        nodeQueue.Enqueue(new NumNode(!num, a.First))
+                        if a.Others <> Unchecked.defaultof<_>
+                        then
+                            for n in a.Others do
+                                nodeQueue.Enqueue(new NumNode(!num, n))
+                    | :? PackedNode as p ->
+                        incr nodesCount
+                        incr edgesCount
+                        nodeQueue.Enqueue(new NumNode(!num, p.Left))
+                        nodeQueue.Enqueue(new NumNode(!num, p.Right))
+                    | :? IntermidiateNode as i ->
+                        incr nodesCount
+                        incr edgesCount
+                        nodeQueue.Enqueue(new NumNode(!num, i.First))
+                        if i.Others <> Unchecked.defaultof<ResizeArray<PackedNode>>
+                        then
+                            for nodes in i.Others do
+                                nodeQueue.Enqueue(new NumNode(!num, nodes))
+                    | :? TerminalNode as t ->
+                            incr termsCount
+                            incr nodesCount
+                            incr edgesCount
+                    | null -> ()
+            else
+                let a = currentPair.Node :?> NonTerminalNode
+                num := !num + 1
+                incr nodesCount
+                nodeQueue.Enqueue(new NumNode(!num, a.First))
+                if a.Others <> Unchecked.defaultof<_>
+                then
+                    for n in a.Others do
+                        nodeQueue.Enqueue(new NumNode(!num, n))
+        !nodesCount, !edgesCount, !termsCount, !ambiguityCount 

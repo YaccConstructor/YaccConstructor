@@ -429,6 +429,10 @@ src/Calc/Lexer.fs
 src/RNGLR.OtherSppfTest/res.dot
 src/TSQL/Lexer.fs
 src/TSQL/Lexer_Abstract.fs
+src/GLL.AbstractParser.SimpleTest/BadLeftRecursion.yrd.fs
+src/GLL.AbstractParser.SimpleTest/*.yrd.fs
+src/GLLParser.SimpleTest/*.yrd.fs
+src/GLLParser.SimpleTest/res.dot
 src/ExtCalc/*.dot
 
 src/Tests/AbstractRNGLR/DOT/ast.dot

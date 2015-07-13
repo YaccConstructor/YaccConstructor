@@ -1,3 +1,3 @@
-[<Start>]
+[<Start>]                       
 s: e
-e : e PLUS e | NUM
+e: e PLUS NUM | e STAR NUM | NUM

@@ -1,8 +1,8 @@
 ﻿namespace Yard.Generators.GLL
 open System.Collections.Generic
        
-type ParserSourceGLL<'TokenType> (
-                               tokenToNumber        : 'TokenType -> int
+type ParserSourceGLL<'TokenType> (eof                  : 'TokenType
+                               , tokenToNumber      : 'TokenType -> int
                                , genLiteral         : string -> int -> 'TokenType option
                                , numToString        : int -> string
                                , tokenData          : 'TokenType -> obj
@@ -73,3 +73,4 @@ type ParserSourceGLL<'TokenType> (
     member this.NumIsLiteral       = numIsLiteral
     member this.CanInferEpsilon    = canInferEpsilon
     member this.Slots              = slots
+    member this.EOF                = eof

@@ -32,6 +32,8 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <None Include="App.config" />
+    <Compile Include="Calc.yrd.fs" />
+    <Compile Include="BadLeftRec.yrd.fs" />
     <Compile Include="SimpleAmb.yrd.fs" />
     <Compile Include="Lexer2.fs" />
     <Compile Include="Program.fs" />

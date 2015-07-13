@@ -19,6 +19,37 @@ let tokens(str : string) =
     str.Split([|' '|])
     |> Array.map toLexerTag
 
+let tokens2(str : string) = 
+    let toLexerTag (name:string) =
+            match name with
+            //| "A" -> GLL.SimpleAmb.A (2)
+            //| "D" -> GLL.SimpleAmb.D (2)
+            | "B" -> GLL.BadLeftRec.B (2)
+            | x -> failwithf "Unexpected token %s" x
+
+    str.Split([|' '|])
+    |> Array.map toLexerTag
+
+let tokens3(str : string) = 
+    let toLexerTag (name:string) =
+            match name with
+            //| "A" -> GLL.SimpleAmb.A (2)
+            //| "D" -> GLL.SimpleAmb.D (2)
+            | "/" -> GLL.Calc.DIV (2)
+            | "(" -> GLL.Calc.LBRACE (2)
+            | ")" -> GLL.Calc.RBRACE (2)
+            | "-" -> GLL.Calc.MINUS (2)
+            | "+" -> GLL.Calc.PLUS (2)
+            | "*" -> GLL.Calc.MULT (2)
+            | "A" -> GLL.Calc.NUMBER (2)
+            | "B" -> GLL.Calc.NUMBER (2)
+            | "**" -> GLL.Calc.POW (2)
+            | ";" -> GLL.Calc.SEMI (2)
+            | x -> failwithf "Unexpected token %s" x
+
+    str.Split([|' '|])
+    |> Array.map toLexerTag
+
     
 
 //let tokens<'lexType>(path) = 

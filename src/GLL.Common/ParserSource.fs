@@ -3,7 +3,6 @@ open System.Collections.Generic
        
 type ParserSourceGLL<'TokenType> (eof                  : 'TokenType
                                , tokenToNumber      : 'TokenType -> int
-                               ,tokenToNumber       : 'TokenType -> int
                                , genLiteral         : string -> int -> 'TokenType option
                                , numToString        : int -> string
                                , tokenData          : 'TokenType -> obj

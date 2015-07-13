@@ -13,6 +13,18 @@ open YC.FSA.FsaApproximation
 open YC.FSA.GraphBasedFsa
 open System.Collections.Generic
 open ControlFlowGraph
+
+
+type DrawingGraph (vertices : IEnumerable<int>, edges : List<TaggedEdge<int, string>>) =
+    member this.Vertices = vertices
+    member this.Edges = edges
+
+type LexingFinishedArgs<'node> (tokens : ResizeArray<'node>, lang:string, drawGraph : DrawingGraph) =
+     inherit System.EventArgs()
+     member this.Tokens = tokens
+     member this.Lang = lang
+     member this.Graph = drawGraph
+
 type ParsingFinishedArgs(lang : string) = 
     inherit System.EventArgs()
     member this.Lang = lang
@@ -81,6 +93,8 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
                         inGraph.OutEdges vertex 
                         |> Seq.iter (fun edge -> tokensList.Add <| tokenToTreeNode edge.Tag)
                 )
+            lexingFinished.Trigger(new LexingFinishedArgs<'node>(tokensList, lang, drawGraph))
+
 
     let processLang graph addLError addPError addSError =
 //        let tokenize g =

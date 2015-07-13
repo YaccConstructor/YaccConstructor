@@ -186,6 +186,8 @@
     <Compile Include="AreaControl.xaml.cs">
       <DependentUpon>AreaControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Highlighting\Dynamic\CSharpBraceHighlighter.cs" />
+    <Compile Include="Highlighting\Dynamic\JavaScriptBraceHighlighter.cs" />
     <Compile Include="LanguageLoader.cs" />
     <Compile Include="YcIntegration\Constants.cs" />
     <Compile Include="YcIntegration\ErrorInfo.cs" />
@@ -196,7 +198,7 @@
     <Compile Include="GraphDefine\Vertex.cs" />
     <Compile Include="Highlighting\ColorHelper.cs" />
     <Compile Include="Highlighting\Dynamic\ExistingTreeNodes.cs" />
-    <Compile Include="Highlighting\Dynamic\MatchingBraceContextHighlighter.cs" />
+    <Compile Include="Highlighting\Dynamic\BaseBraceHighlighter.cs" />
     <Compile Include="Highlighting\ErrorWarning.cs" />
     <Compile Include="Highlighting\Handler.cs" />
     <Compile Include="Highlighting\HighlightingProcess.cs" />

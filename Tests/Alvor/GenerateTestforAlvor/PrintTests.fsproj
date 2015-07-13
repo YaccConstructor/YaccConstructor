@@ -40,10 +40,6 @@
     <Reference Include="Antlr3.Runtime">
       <HintPath>..\..\..\3rdParty\graphviz4net\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="fsyacc">
-      <HintPath>packages\YC.Tools.0.0.6.7\lib\net40\FsYacc.exe</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Graphviz4Net">
       <HintPath>..\..\..\3rdParty\graphviz4net\Graphviz4Net.dll</HintPath>
     </Reference>

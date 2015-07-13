@@ -76,6 +76,7 @@ let replaceLiteralsInProduction production (replacedLiterals:Dictionary<_,_>) (g
         | PMany x -> PMany(_replaceLiterals x)
         | PSome x -> PSome(_replaceLiterals x)
         | POpt x  -> POpt(_replaceLiterals x)
+        | PMetaRef (nt, s, args) -> PMetaRef(nt,s,args |> List.map _replaceLiterals)
         | PLiteral src -> 
             let str = src.text
             if replacedLiterals.ContainsKey str

@@ -33,10 +33,11 @@ open YC.FST.AbstractLexing.Interpreter
 open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation
 open YC.FST.GraphBasedFst
+open System
 
 let tokenize (lexerInputGraph:Appr<_>) =
     let graphFsa = lexerInputGraph.ApprToFSA()
-    let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
+    let transform x = (x, match x with |Smbl(y:char, _) when y <> (char 65535) -> Smbl(int <| Convert.ToUInt32(y)) |Smbl(y:char, _) when y = (char 65535) -> Smbl 65535 |_ -> Eps)
     let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
     let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
     let eof = RNGLR_EOF(new FSA<_>())    
@@ -48,38 +49,41 @@ let getTokenName = tokenToNumber >> numToString
 
 let parse = fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGraph
 
-//let args = 
-//    {
-//        tokenToRange = fun x -> new GraphTokenValue<_>(),new GraphTokenValue<_>()
-//        zeroPosition = new GraphTokenValue<_>()
-//        clearAST = false
-//        filterEpsilons = true
-//    }
+let args = 
+    {
+        tokenToRange = fun x -> new FSA<_>(),new FSA<_>()
+        zeroPosition = new FSA<_>()
+        clearAST = false
+        filterEpsilons = true
+    }
 
 let printAstToDot ast name = defaultAstToDot ast name
 let printOtherAstToDot sppf name = otherAstToDot sppf name
 
-//let xmlPath = xmlPath
-//let tokenToTreeNode = tokenToTreeNode
-//let translate ast errors = translate args ast errors
-//
-//[<assembly:Addin>]
-//[<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
-//do()
-//
-//[<ShellComponent>]
-//[<Extension>]
-//type TSQLInjectedLanguageModule () =
-//    let processor = new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, "TSQL", calculatePos, getRange, printAstToDot, printOtherAstToDot)
-//
-//    interface IInjectedLanguageModule<br,range,node> with
-//        member this.Name = "TSQL"
-//        member this.Process graphs = processor.Process graphs
-//        member this.LexingFinished = processor.LexingFinished
-//        member this.ParsingFinished = processor.ParsingFinished
-//        member this.XmlPath = xmlPath
-//        member this.GetNextTree i = processor.GetNextTree i
-//        member this.GetForestWithToken range = processor.GetForestWithToken range
-//        member this.GetPairedRanges left right range toRight = processor.GetPairedRanges left right range toRight
-//
-//    interface IReSharperLanguage
+let langName = "TSQL"
+let xmlPath = xmlPath
+let tokenToTreeNode = tokenToTreeNode
+let translate ast errors = translate args ast errors
+
+
+
+[<assembly:Addin>]
+[<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
+do()
+
+[<ShellComponent>]
+[<Extension>]
+type TSQLInjectedLanguageModule () =
+    let processor = new Processor<Token, br, range, node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, langName, calculatePos, getRange, printAstToDot, printOtherAstToDot, None)
+
+    interface IInjectedLanguageModule<br, range, node> with
+        member this.Name = langName
+        member this.Process graphs = processor.Process graphs
+        member this.LexingFinished = processor.LexingFinished
+        member this.ParsingFinished = processor.ParsingFinished
+        member this.XmlPath = xmlPath
+        member this.GetNextTree i = processor.GetNextTree i
+        member this.GetForestWithToken range = processor.GetForestWithToken range
+        member this.GetPairedRanges left right range toRight = processor.GetPairedRanges left right range toRight
+
+    interface IReSharperLanguage

@@ -7,6 +7,4 @@ namespace ReSharperExtension
     public interface IReSharperLanguage : YC.SDK.CommonInterfaces.IInjectedLanguageModule<ICSharpLiteralExpression, DocumentRange, ITreeNode>
     {
     }
-
-
 }

@@ -1,6 +1,16 @@
 using System.Windows.Forms;
 using JetBrains.ActionManagement;
 using JetBrains.Application.DataContext;
+using JetBrains.DataFlow;
+using JetBrains.UI.ToolWindowManagement;
+using Microsoft.VisualStudio.Shell.Interop;
+using JetBrains.ReSharper.Daemon;
+using System;
+using GraphX;
+using GraphX.GraphSharp.Algorithms.Layout.Simple.FDP;
+using System.Windows.Controls;
+using GraphX.Controls;
+using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin
 {

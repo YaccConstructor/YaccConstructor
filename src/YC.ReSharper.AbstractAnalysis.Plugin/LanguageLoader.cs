@@ -9,6 +9,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
     {
         public LanguageLoader(IEnumerable<IReSharperLanguage> providers)
         {
+            //At this point all languages must be found and loaded"
         }
     }
 }

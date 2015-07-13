@@ -24,9 +24,6 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="@(ExternalCompile)" />
   </ItemGroup>
   <ItemGroup>

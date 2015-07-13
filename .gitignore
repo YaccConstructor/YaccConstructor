@@ -833,3 +833,5 @@ Tests/AbstractRNGLR/DOT/sppf.dot*
 Tests/AbstractRNGLR/DOT/_sppf.dot*
 Tests/AbstractRNGLR/Inputs/*.pdf
 Tests/RNGLR/sppf.dot*
+src/GLLApplication/BadLeftRec.yrd.fs
+src/GLLApplication/res.dot

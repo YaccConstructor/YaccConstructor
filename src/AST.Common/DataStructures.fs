@@ -84,9 +84,9 @@ type ResizableUsualFive<'T when 'T:equality> =
     val mutable third  : 'T
     val mutable fourth : 'T
     val mutable fifth  : 'T
-    val mutable other  : list<'T>
-    member this.Eq (o : ResizableUsualFive<'T>) =
-        this.second = o.second && this.first = o.first && this.third = o.third && this.fourth = this.fourth && this.fifth = o.fifth
+    val mutable other          : list<'T>
+    member this.Eq (o : ResizableUsualFive<_>) = 
+        this.first = o.first && this.second = o.second && this.third = o.third && this.fourth = o.fourth && this.fifth = o.fifth
     member this.Add x =
         if this.second <> Unchecked.defaultof<_> 
         then 

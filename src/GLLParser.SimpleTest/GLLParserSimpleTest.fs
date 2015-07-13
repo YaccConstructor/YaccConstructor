@@ -56,7 +56,7 @@ let runTest parser input (intToString : int -> string) (outFileName : string) no
             Assert.AreEqual(edgesCount, e, "Edges count mismatch")
             Assert.AreEqual(termsCount, t, "Terms count mismatch")
             Assert.AreEqual(ambiguityCount, a, "Ambiguities count mismatch")
-            tree.AstToDot intToString (outDir + outFileName)
+            //tree.AstToDot intToString (outDir + outFileName)
             Assert.Pass()
             
             

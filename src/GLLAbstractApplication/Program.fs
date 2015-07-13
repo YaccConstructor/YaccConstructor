@@ -37,12 +37,17 @@ let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)
 
 let inputGraph =
-    let qGraph = new ParserInputGraph<_>([|0|], [|3; 1|])
+    let qGraph = new ParserInputGraph<_>([|0|], [|6|])
     qGraph.AddVerticesAndEdgeRange
-        [edg 0 1 (GLL.SimpleAmb.NUM 1)
-         edg 1 2 (GLL.SimpleAmb.PLUS 2)
-         edg 2 3 (GLL.SimpleAmb.NUM 3)
-         ] |> ignore
+            [edg 0 1 (GLL.SimpleAmb.NUM  1)
+             edg 1 2 (GLL.SimpleAmb.PLUS 2)
+             edg 2 3 (GLL.SimpleAmb.NUM 3)
+             edg 3 4 (GLL.SimpleAmb.PLUS 4)
+             edg 4 5 (GLL.SimpleAmb.NUM 5)
+             edg 5 0 (GLL.SimpleAmb.PLUS 6)
+             edg 5 2 (GLL.SimpleAmb.STAR 7)
+             edg 5 6 (GLL.SimpleAmb.RNGLR_EOF 8)
+             ] |> ignore
     qGraph
 
 
@@ -54,7 +59,7 @@ match r with
 | AbstractParser.Error _ ->
     printfn "Error"     
 | AbstractParser.Success tree->
-    GLL.SimpleAmb.defaultAstToDot tree "ast334.dot"
+    
     printfn "%s" "sss"
     
 

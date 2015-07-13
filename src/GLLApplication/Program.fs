@@ -41,18 +41,19 @@ open Lexer2
 let outDir = @"../../../src/GLLApplication/"
 
 //let parser1 = GLL.SimpleAmb.buildAst
-//
+////
 //let run1 path astBuilder =
 //    let tokens = Lexer2.tokens(path)
 //    astBuilder tokens, tokens
 //
-//let str1 = String.init 500 (fun i -> "B ") + "B"
+//for j = 1 to 10 do
+//    let str1 = String.init (100 * j) (fun i -> "B ") + "B"
 //   
-//let start = System.DateTime.Now
-//let r = run1 str1 parser1
-//let t = System.DateTime.Now - start
-//printfn "%A" t.TotalSeconds
-//
+//    let start = System.DateTime.Now
+//    let r = run1 str1 parser1
+//    let t = System.DateTime.Now - start
+//    printfn "%A" t.TotalSeconds
+
 //match r with
 //    | Parser.Error str, _ ->
 //        printfn "%s" "dddd" //str 
@@ -60,7 +61,9 @@ let outDir = @"../../../src/GLLApplication/"
 //        printfn "%s" "sss"
 //        GLL.SimpleAmb.defaultAstToDot tree GLL.SimpleAmb.tokenToNumber GLL.SimpleAmb.tokenData  (outDir + "SimpleLeft.dot") 
 
-let str2 = String.init 1 (fun i -> "A + ( A * B ) ; ") + "B ;"
+//
+//for j = 1 to 50 do
+let str2 = String.init (2000) (fun i -> "A + ( A * B ) ; ") + "B ;"
 let parser2 = GLL.Calc.buildAst
 
 let run2 path astBuilder =
@@ -71,14 +74,14 @@ let run2 path astBuilder =
 let start2 = System.DateTime.Now
 let r2 = run2 str2 parser2
 let t2 = System.DateTime.Now - start2
-printfn "%A" t2.TotalSeconds
+printfn "%d input %A" (100) t2.TotalSeconds 
 
-match r2 with
-    | Parser.Error str, _ ->
-        printfn "%s" "dddd" //str 
-    | Parser.Success tree, tokens ->
-        printfn "%s" "sss"
-        GLL.Calc.defaultAstToDot tree GLL.Calc.tokenToNumber GLL.Calc.tokenData  (outDir + "Calc.dot") 
+//match r2 with
+//    | Parser.Error str, _ ->
+//        printfn "%s" "dddd" //str 
+//    | Parser.Success tree, tokens ->
+//        printfn "%s" "sss"
+//        GLL.Calc.defaultAstToDot tree GLL.Calc.tokenToNumber GLL.Calc.tokenData  (outDir + "Calc.dot") 
 
 
 

@@ -7,4 +7,4 @@ options {
 
 [<Start>]
 s: e
-e: e PLUS NUM | NUM 
+e: e PLUS NUM | e STAR NUM | NUM 

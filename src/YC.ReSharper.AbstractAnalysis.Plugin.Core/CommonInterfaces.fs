@@ -22,11 +22,6 @@ type TreeGenerationState<'node> =
     | InProgress of 'node * AstNode list
     | End of 'node
 
-type LexingFinishedArgs<'node> (tokens : ResizeArray<'node>, lang:string) =
-     inherit System.EventArgs()
-     member this.Tokens = tokens
-     member this.Lang = lang
-
 
 exception LexerError of string * obj
 
@@ -69,17 +64,23 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
     let prepareToHighlighting (graphOpt : ParserInputGraph<'token> option) tokenToTreeNode = 
         if graphOpt.IsSome
         then
+            
             let tokensList = new ResizeArray<_>()
 
-            let inGraph = graphOpt.Value 
+            let inGraph = graphOpt.Value
+            let edges = ResizeArray()
+            for e in inGraph.Edges do
+                let tokenName = e.Tag |> tokenToNumber |> numToString
+                edges.Add( new TaggedEdge<int, string>(e.Source, e.Target, tokenName))
+            let vertices = inGraph.Vertices
+                     
+            let drawGraph = DrawingGraph(vertices, edges)
             inGraph.TopologicalSort()
             |> Seq.iter 
                 (fun vertex -> 
                         inGraph.OutEdges vertex 
                         |> Seq.iter (fun edge -> tokensList.Add <| tokenToTreeNode edge.Tag)
                 )
-
-            lexingFinished.Trigger(new LexingFinishedArgs<'node>(tokensList, lang))
 
     let processLang graph addLError addPError addSError =
 //        let tokenize g =

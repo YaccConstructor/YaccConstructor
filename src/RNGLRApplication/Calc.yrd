@@ -1,10 +1,18 @@
-options {
-    pos = int
-    token = "int * int"
-    module = "RNGLR.ParseCalc"
-    translate = true
-    output = "Calc.yrd.fs"
-}
+binExpr<operand binOp>:
+  operand (binOp operand )*
+
 
 [<Start>]
-s : s s | B
+expr: (binExpr<term termOp> SEMI)+ | binExpr<term termOp>
+
+termOp: PLUS | MINUS
+
+term: binExpr<factor factorOp> 
+
+factorOp: MULT | DIV 
+
+factor: binExpr<powExpr powOp>
+
+powOp: POW 
+
+powExpr: NUMBER | LBRACE expr RBRACE

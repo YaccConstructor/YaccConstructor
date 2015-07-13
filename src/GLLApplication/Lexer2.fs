@@ -50,7 +50,9 @@ let tokens3(str : string) =
     str.Split([|' '|])
     |> Array.map toLexerTag
 
-    
+
+    str.Split([|' '|])
+    |> Array.map toLexerTag    
 
 //let tokens<'lexType>(path) = 
 //    let toLexerTag = 

@@ -105,8 +105,7 @@ type ResizableUsualFive<'T when 'T:equality> =
                 this.third <- x
         else
             this.second <- x
-        //this.other := x :: !this.other
-
+        
     member this.TryFind f =
         if f this.first
         then Some this.first

@@ -25,7 +25,7 @@ open System.Runtime.InteropServices
 // associated with an assembly.
 [<assembly: AssemblyTitle("YC.FsYARD")>]
 [<assembly: AssemblyDescription("FsYARD is a parsers generator for F#. It is  based on RNGLR algorithm.")>]
-[<assembly: AssemblyConfiguration("")>]
+[<assembly: AssemblyConfiguration("Release")>]
 [<assembly: AssemblyCompany("YaccConstructor Software Foundation")>]
 [<assembly: AssemblyProduct("YC.FsYARD")>]
 [<assembly: AssemblyCopyright("Copyright © 2013. YaccConstructor Software Foundation https://code.google.com/p/recursive-ascent/")>]

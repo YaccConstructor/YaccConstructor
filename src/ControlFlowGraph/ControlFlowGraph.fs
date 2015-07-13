@@ -85,10 +85,9 @@ type CfgTokensGraph() =
             if vertexToTokens.ContainsKey(newVertex)
             then
                 let oldData = vertexToTokens.[newVertex]
-                vertexToTokens.Remove(newVertex) |> ignore
-                vertexToTokens.Add(newVertex, List.append oldData newData)
+                vertexToTokens.[newVertex] <- List.append oldData newData
             else
-                vertexToTokens.Add(newVertex, newData)
+                vertexToTokens.[newVertex] <- newData
                 expected.Enqueue newVertex
             
         let handleVertex vertex = 
@@ -96,7 +95,7 @@ type CfgTokensGraph() =
             let data = 
                 if not <| vertexToTokens.ContainsKey vertex 
                 then 
-                    vertexToTokens.Add (vertex, [[]])
+                    vertexToTokens.[vertex] <-  [[]]
                 vertexToTokens.[vertex]
             
             this.OutEdges vertex
@@ -273,18 +272,18 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
     
     let graphToCfg (graph : CfgBlocksGraph<'TokenType>) = 
         
-        let vertexToInterNode = Dictionary<int, (InterNode<'TokenType> * InterNode<'TokenType>) list>()
-        let visited = Queue<int>()
+        let vertexToInterNode = Dictionary<_, (InterNode<'TokenType> * InterNode<'TokenType>) list>()
+        let visited = Queue<_>()
         let endVertex = graph.VertexCount - 1
 
         let addToDictionary key value = 
             if vertexToInterNode.ContainsKey key 
             then
                 let oldData = vertexToInterNode.[key]
-                vertexToInterNode.Remove(key)|> ignore
-                vertexToInterNode.Add(key, oldData @ [value])
+                //vertexToInterNode.Remove(key)|> ignore
+                vertexToInterNode.[key] <- oldData @ [value]
             else
-                vertexToInterNode.Add(key, [value])
+                vertexToInterNode.[key] <- [value]
         
         let processEdge (edge : BlockEdge<_>) = 
             let target = edge.Target
@@ -329,8 +328,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
             if data.Length > 1
             then 
                 let newData = mergeNodes data
-                vertexToInterNode.Remove(vertex) |> ignore
-                vertexToInterNode.Add(vertex, [newData])
+                vertexToInterNode.[vertex] <- [newData]
 
             //At this point length of vertexToInterNode.[vertex] always is equal to 1.
             let oldValue = vertexToInterNode.[vertex].Head
@@ -431,7 +429,6 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
         let updateVertices() = 
             bStartVertex := !bEndVertex
             incr bEndVertex
-
 
         let restoreContext() = 
             let oldType, oldTokens, oldWasElse = stack.Pop()
@@ -663,10 +660,11 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                 then
                     let varName = tok |> tokToSourceString
 
-                    if not <| List.exists (fun t -> t = varName) !defVars //it's error
+                    //Is it error?
+                    if not <| List.exists (fun t -> t = varName) !defVars
                     then
                         let tokData = parserSource.tokenData tok
-                        //if it's new error
+                        //is it new error?
                         if not <| List.exists (fun t -> parserSource.tokenData t = tokData) !errorList     
                         then errorList := tok :: !errorList 
 
@@ -699,7 +697,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                                     processBlock child
 
                             else
-                                blockToVars.Add(child, defVars)
+                                blockToVars.[child] <- defVars
                                 processBlock child
                     )
 
@@ -731,7 +729,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                     let blockString = blockToString block
 
                     out.WriteLine (sprintf "%d [label=\"%s\",shape=box]"  !count blockString)
-                    blockToNumber.Add (block, !count)
+                    blockToNumber.[block] <- !count
                     !count, true
 
             let nodeNumber, isNew = getBlockNumber block
@@ -756,7 +754,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                         if node.children.Length <= 1 then ""
                         else ",style=\"filled\",fillcolor=red"
                     out.WriteLine (sprintf "%d [label=\"%s\"%s]" !count label color)
-                    interNodeToNumber.Add (node, !count)
+                    interNodeToNumber.[node] <- !count
                     !count, true
             
             let nodeNumber, isNew = getNodeNumber interNode

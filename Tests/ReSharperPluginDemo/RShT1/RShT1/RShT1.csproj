@@ -129,6 +129,7 @@
     <Compile Include="Bugs.cs" />
     <Compile Include="calc.cs" />
     <Compile Include="BracketsHighlighting.cs" />
+    <Compile Include="CalcWithCyclesAndCalls.cs" />
     <Compile Include="Example5.cs" />
     <Compile Include="extCalc.cs" />
     <Compile Include="SECRDemo.cs" />

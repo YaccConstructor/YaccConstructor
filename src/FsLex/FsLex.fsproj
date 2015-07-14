@@ -17,7 +17,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <!-- Always use x86 emulation for this binary... -->
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProjectGuid>{BD2284A5-AA4D-442D-B4FB-E43B2FE9DD2A}</ProjectGuid>
+    <ProjectGuid>{117fe82b-461d-4ab6-ada6-e6d0782d5f83}</ProjectGuid>
     <TreatWarningsAsErrors>
     </TreatWarningsAsErrors>
     <!-- 5310 tracks reenabling -->

@@ -196,6 +196,7 @@ module Definition =
      /// Text after a grammar description, what will be simply copied
      foot    :'expr option;
      options : Map<string, string>
+     ///
      tokens : Map<string, string option>
     }    
     

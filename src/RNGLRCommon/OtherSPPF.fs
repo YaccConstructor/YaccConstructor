@@ -1,6 +1,8 @@
 ﻿module Yard.Generators.RNGLR.OtherSPPF
 
 open System.Collections.Generic
+open System.IO
+
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 open Yard.Generators.Common.DataStructures
@@ -121,8 +123,7 @@ and OtherNodes =
                     then
                         for i = 0 to nodes.other.Length - 1 do
                             if needDo 
-                            then 
-                                f nodes.other.[i]
+                            then f nodes.other.[i]
                             needDo <- needDo || nodes.other.[i] = nd
 
         /// <summary>
@@ -180,18 +181,19 @@ type OtherTree<'TokenType> (tree : Yard.Generators.Common.AST.Tree<'TokenType>) 
             | :? Epsilon -> Unchecked.defaultof<_>
             | _ -> failwith "Strange tree - singleNode with non-negative value"
 
-        let dict = new System.Collections.Generic.Dictionary<AST, OtherAST>()
+        let dict = new Dictionary<AST, OtherAST>()
         
         // to avoid problems with cycles
         let knownNodes = new ResizeArray<_>()
         
-        let nodesDict = System.Collections.Generic.Dictionary<Nodes, OtherNodes>()
+        let nodesDict = new Dictionary<Nodes, OtherNodes>()
         // reverse edges that will be added after all
-        let postActions = new System.Collections.Generic.Dictionary<OtherFamily, Nodes>() 
+        let postActions = new Dictionary<OtherFamily, Nodes>() 
         let rec processFamily (family : Family) = 
             let processAST (ast : AST) = 
                 if dict.ContainsKey ast 
-                then dict.[ast]
+                then 
+                    dict.[ast]
                 else
                     let fstChild = processFamily ast.first
                     let otherChildren = 
@@ -228,9 +230,12 @@ type OtherTree<'TokenType> (tree : Yard.Generators.Common.AST.Tree<'TokenType>) 
                 newFamily
             else
                 let newNodes = ref []
-                family.nodes.doForAll (fun node -> 
-                    knownNodes.Add node
-                    processNode node newNodes)
+                family.nodes.doForAll 
+                    (
+                        fun node -> 
+                            knownNodes.Add node
+                            processNode node newNodes
+                    )
                 let newNodes = new OtherNodes(!newNodes |> List.rev |> Array.ofList)
                 nodesDict.Add (family.nodes, newNodes)
                 let newFamily = new OtherFamily (family.prod, newNodes)
@@ -293,20 +298,19 @@ type OtherTree<'TokenType> (tree : Yard.Generators.Common.AST.Tree<'TokenType>) 
                     let inline handleAst (ast : obj) =
                         match ast with
                         | :? OtherAST as ast ->
-                            if ast.pos = -1 then
-                                stack.Push ast
+                            if ast.pos = -1 
+                            then stack.Push ast
                         | _ -> ()
                     family.nodes.doForAllRev handleAst
                 handle children.first
-                if children.other <> null then
-                    for family in children.other do
-                        handle family
+                if children.other <> null 
+                then children.other |> Array.iter (fun family -> handle family)
         res.ToArray()
 
     let familyToTokens = 
         let dict = new Dictionary<OtherFamily, int list>()
         // to avoid problems with cycles
-        let processedAst = new ResizeArray<OtherAST>()
+        let processedAst = new ResizeArray<_>()
 
         let rec calcTokens (family : OtherFamily) = 
             if dict.ContainsKey family 
@@ -314,23 +318,31 @@ type OtherTree<'TokenType> (tree : Yard.Generators.Common.AST.Tree<'TokenType>) 
                 dict.[family]
             else
                 let tokens = ref []
-                family.nodes.doForAll (fun node -> 
+
+                let processNode (node : obj) = 
                     match node with
                     | :? OtherAST as ast -> 
                         if not <| processedAst.Contains ast
                         then
                             processedAst.Add ast
-                            let temp = ref <| calcTokens ast.first
-                            if ast.other <> null
-                            then 
-                                for fam in ast.other do
-                                    temp := !temp @ calcTokens fam
-                            tokens := !tokens @ !temp
+
+                            let temp = 
+                                if ast.other = null 
+                                then 
+                                    calcTokens ast.first 
+                                else
+                                    ast.other
+                                    |> Array.map (fun fam -> calcTokens fam)
+                                    |> Array.append [| calcTokens ast.first |]
+                                    |> List.concat
+                            tokens := !tokens @ temp
                             processedAst.Remove ast |> ignore
                     | :? Terminal as t ->
                         tokens := t.TokenNumber :: !tokens
                     | _ -> ()
-                )
+
+
+                family.nodes.doForAll (fun node -> processNode node)
                 
                 dict.Add (family, !tokens)
                 
@@ -348,34 +360,27 @@ type OtherTree<'TokenType> (tree : Yard.Generators.Common.AST.Tree<'TokenType>) 
             |> Seq.exists (fun range -> range = now)
 
         let rec handleFamily (family : OtherFamily) = 
-            family.nodes.doForAll (fun node -> 
-                match node with
-                | :? OtherAST as ast -> 
-                    
-                    let famTokens = familyToTokens.[ast.first]
+            family.nodes.doForAll 
+                (   
+                    fun node -> 
+                        match node with
+                        | :? OtherAST as ast -> 
+                            let processFam fam = 
+                                let toks = familyToTokens.[fam]
+                                if toks |> List.exists (fun t -> containsRange t)
+                                then handleFamily fam
 
-                    let interesting = familyToTokens.Values
-                    interesting.ToString() |> ignore
-                    
-                    if List.exists (fun t -> containsRange t) famTokens
-                    then handleFamily ast.first
-                    
-                    if ast.other <> null 
-                    then
-                        ast.other
-                        |> Array.iter (fun fam ->
-                            if List.exists (fun t -> containsRange t) familyToTokens.[fam]
-                            then handleFamily fam
-                        )
-                
-                | :? Terminal as t -> 
-                    let isNewParent = not <| List.exists (fun fam -> fam = family) !parents
-                    if containsRange t.TokenNumber && isNewParent
-                    then
-                        parents := family :: !parents
-                        child := node
-                | :? Epsilon -> ()
-                | _ -> failwithf "Unexpected node type in OtherSppf: %s" <| child.GetType().ToString()
+                            processFam ast.first
+                            if ast.other <> null 
+                            then ast.other |> Array.iter (fun fam -> processFam fam)
+                        | :? Terminal as t -> 
+                            let isNewParent = not <| List.exists (fun fam -> fam = family) !parents
+                            if containsRange t.TokenNumber && isNewParent
+                            then
+                                parents := family :: !parents
+                                child := node
+                        | :? Epsilon -> ()
+                        | _ -> failwithf "Unexpected node type in OtherSppf: %s" <| child.GetType().ToString()
                 )
         handleFamily root.first
         !child, !parents
@@ -532,7 +537,7 @@ type OtherTree<'TokenType> (tree : Yard.Generators.Common.AST.Tree<'TokenType>) 
                 incr cur
                 !cur
 
-        use out = new System.IO.StreamWriter (path : string)
+        use out = new StreamWriter (path : string)
         out.WriteLine("digraph AST {")
         
         let createNode num isAmbiguous isTerminal nodeType (str : string) =

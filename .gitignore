@@ -835,3 +835,5 @@ Tests/AbstractRNGLR/Inputs/*.pdf
 Tests/RNGLR/sppf.dot*
 src/GLLApplication/BadLeftRec.yrd.fs
 src/GLLApplication/res.dot
+src/GLLParser.SimpleTest/*.dot
+src/GLLApplication/*.yrd.fs

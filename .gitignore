@@ -837,3 +837,4 @@ src/GLLApplication/BadLeftRec.yrd.fs
 src/GLLApplication/res.dot
 src/GLLParser.SimpleTest/*.dot
 src/GLLApplication/*.yrd.fs
+src/Calc/Lexer_Abstract.fs

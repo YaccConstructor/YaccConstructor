@@ -72,7 +72,8 @@
   </ItemGroup>
   <!--Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" /-->
   <ItemGroup>
-    <None Include="Lexer.fsl"/>
+    <None Include="app.config" />
+    <None Include="Lexer.fsl" />
     <None Include="Parser.fsy" />
     <Compile Include="Parser.fs" />
     <Compile Include="Lexer.fs" />

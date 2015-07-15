@@ -13,6 +13,7 @@
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Calc.yrd" />
     <Compile Include="SimpleAmb.yrd.fs" />
     <Compile Include="LexCommon.fs" />

@@ -35,6 +35,7 @@
     <Compile Include="OtherSPPF.fs" />
     <Compile Include="ParserSource.fs" />
     <Compile Include="Helper.fs" />
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

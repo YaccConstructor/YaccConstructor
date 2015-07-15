@@ -33,6 +33,7 @@
   <ItemGroup>
     <Compile Include="Generator.fs" />
     <Compile Include="YardPrinter.fs" />
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

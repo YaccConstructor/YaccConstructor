@@ -105,31 +105,28 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
         new LexingFinishedArgs<'node>(treeNodes, lang, drawGraph)
 
     let processLang graph addLError addPError addSError =
-//        let tokenize g =
-//            try 
-//                tokenize g
-//                |> Some 
-//            with
-//            | LexerError(t,grToken) ->
-//                (t, (grToken :?> GraphTokenValue<'br>).Edges |> Seq.nth 0 |> fun e -> e.BackRef |> getDocumentRange)
-//                |> addLError
-//                None
-//        
-//        let tokenizedGraph = tokenize graph         
-    
+        
         let tokenizedGraph = 
             match tokenize graph with
             | Success res -> res |> Some
             | Error errors -> 
                 errors 
-                |> Array.map (function Smbl e -> fst e |> string, (e |> snd) |> getDocumentRange | e -> failwithf "Unexpected tocenization result: %A" e)
+                |> Array.map 
+                    (
+                        function 
+                            Smbl e -> fst e |> string, snd e |> getDocumentRange 
+                            | e -> failwithf "Unexpected tokenization result: %A" e
+                    )
                 |> Array.iter addLError 
                 None
 
-        if tokenizedGraph.IsSome
-        then 
-            let lexFinishedArgs = prepareToTrigger tokenizedGraph.Value tokenToTreeNode 
-            lexingFinished.Trigger(lexFinishedArgs)
+        tokenizedGraph
+        |> Option.iter 
+            (
+                fun graph -> 
+                    let lexFinishedArgs = prepareToTrigger graph tokenToTreeNode 
+                    lexingFinished.Trigger(lexFinishedArgs)
+            )
 
         tokenizedGraph 
         |> Option.map
@@ -141,6 +138,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
             (function 
                 | Yard.Generators.ARNGLR.Parser.Success(tree) ->
                     forest <- (tree, new ErrorDictionary<'TokenType>()) :: forest
+
                     otherForest <- new OtherTree<'TokenType>(tree) :: otherForest
                     parsingFinished.Trigger(new ParsingFinishedArgs(lang))
 
@@ -154,21 +152,22 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
                         //cfg.PrintToDot "result cfg.dot"
                         let semErrors = cfg.FindUndefVariable()
                         semErrors |> List.iter addSError
+                    
 
                 | Yard.Generators.ARNGLR.Parser.Error(_, tok, _) -> 
                     if tok <> Unchecked.defaultof<'TokenType>
                     then tok |> addPError 
             )
 
-    let getNextTree index : TreeGenerationState<'node> = 
+    let getNextTree index = 
         if forest.Length <= index
         then
             generationState <- End(null)
         else
             let mutable curSppf, errors = List.nth forest index
-            let unprocessed : Terminal list = 
+            let unprocessed = 
                 match generationState with
-                | Start ->   Array.init curSppf.TokensCount (fun i -> new Terminal(i)) |> List.ofArray
+                | Start ->   List.init curSppf.TokensCount (fun i -> new Terminal(i))
                 | InProgress (_, unproc) -> unproc |> List.map (fun n -> n :?> Terminal) 
                 | _ -> failwith "Unexpected state in treeGeneration"
                 
@@ -183,13 +182,17 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
         generationState
 
     let getForestWithToken range = 
-        let res = new ResizeArray<'node>()
-        for ast, errors in forest do
-            let trees = ast.GetForestWithToken range <| (this.TokenToPos calculatePos)
-            for tree in trees do
-                let treeNode = (this.TranslateToTreeNode tree errors)
-                res.Add treeNode
-        res
+
+        forest
+        |> List.map
+            (
+                fun (ast, errors) -> 
+                    let trees = ast.GetForestWithToken range <| this.TokenToPos calculatePos
+                    trees
+                    |> List.map (fun tree -> this.TranslateToTreeNode tree errors)
+            )
+        |> List.concat
+        |> ResizeArray.ofList
 
     member this.GetNextTree index =         
         let state = getNextTree 0//index
@@ -200,25 +203,28 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
             treeNode, true
         | _ -> failwith "Unexpected state in tree generation"
 
-    member this.TokenToPos calculatePos (token : 'TokenType)= 
+    member this.TokenToPos calculatePos (token : 'TokenType) = 
         let data (*: FSA<char*Position<'br>>*) = unbox <| tokenData token
         calculatePos data
 
     member this.GetForestWithToken range = getForestWithToken range
 
     member this.GetPairedRanges leftNumber rightNumber range toRight = 
-        let tokens = new ResizeArray<_>()
-        let tokToPos = this.TokenToPos calculatePos
-
-        for otherTree in otherForest do
-            tokens.AddRange <| otherTree.FindAllPair leftNumber rightNumber range toRight tokenToNumber tokToPos
         
-        let ranges = new ResizeArray<_>()
-        tokens 
-        |> ResizeArray.iter (fun token -> 
-            Seq.iter (fun r -> ranges.Add r) <| tokToPos token)
+        let tokToPos = this.TokenToPos calculatePos
+        
+        otherForest
+        |> List.map (fun otherTree -> otherTree.FindAllPair leftNumber rightNumber range toRight tokenToNumber tokToPos)
+        |> List.map 
+            (
+                fun token -> 
+                    token 
+                    |> ResizeArray.map(fun token -> tokToPos token)
+                    |> Seq.concat
+            )
+        |> Seq.concat
+        |> ResizeArray.ofSeq
 
-        ranges
 
     member this.TranslateToTreeNode nextTree errors = (Seq.head <| translate nextTree errors)
     

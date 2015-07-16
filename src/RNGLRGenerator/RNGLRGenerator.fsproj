@@ -37,6 +37,7 @@
     <Compile Include="PrintTranslator.fs" />
     <Compile Include="HighlightingConvertions.fs" />
     <Compile Include="RNGLRGenerator.fs" />
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

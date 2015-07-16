@@ -22,6 +22,7 @@
     <Compile Include="BadLeftRecursion.yrd.fs" />
     <Compile Include="SimpleLeftRecursion.yrd.fs" />
     <Compile Include="SimpleRightRecursion.yrd.fs" />
+    <None Include="app.config" />
     <None Include="packages.config" />
     <Compile Include="Attrs.yrd.fs" />
     <Compile Include="Brackets.yrd.fs" />

@@ -15,6 +15,7 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
  <Import Project="../YC.targets" />
+  <Import Project="../YC.targets" />
   <ItemGroup>
     <Reference Include="Antlr3.Runtime">
       <HintPath>..\..\3rdParty\graphviz4net\Antlr3.Runtime.dll</HintPath>

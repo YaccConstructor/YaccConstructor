@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon.CaretDependentFeatures;
 using JetBrains.ReSharper.Feature.Services.ContextActions;
 using JetBrains.ReSharper.Psi;
-using JetBrains.ReSharper.Psi.CSharp.Parsing;
 using JetBrains.ReSharper.Psi.Parsing;
 using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.Util;
@@ -15,7 +15,7 @@ namespace ReSharperExtension.Highlighting.Dynamic
     public class BaseBraceHighlighter : MatchingBraceContextHighlighterBase
     {
         protected IContextActionDataProvider myProvider;
-        protected ITokenNodeType stringLiteral = CSharpTokenType.STRING_LITERAL_REGULAR;
+        protected ITokenNodeType stringLiteral;
 
         private ReSharperHelper<DocumentRange, ITreeNode> helper = ReSharperHelper<DocumentRange, ITreeNode>.Instance;
 

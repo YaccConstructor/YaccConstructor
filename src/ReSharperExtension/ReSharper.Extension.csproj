@@ -188,6 +188,7 @@
     </Compile>
     <Compile Include="Highlighting\Dynamic\CSharpBraceHighlighter.cs" />
     <Compile Include="Highlighting\Dynamic\JavaScriptBraceHighlighter.cs" />
+    <Compile Include="Highlighting\HostLanguageHelper.cs" />
     <Compile Include="LanguageLoader.cs" />
     <Compile Include="YcIntegration\Constants.cs" />
     <Compile Include="YcIntegration\ErrorInfo.cs" />

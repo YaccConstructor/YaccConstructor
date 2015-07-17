@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Application.Settings;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.Files;
+using JetBrains.ReSharper.Psi.JavaScript.LanguageImpl;
 using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.Util;
 
@@ -15,11 +17,13 @@ namespace ReSharperExtension.Highlighting
     {
         private static Dictionary<IDocument, HighlightingProcess> documentToProcess = new Dictionary<IDocument, HighlightingProcess>();
 
+        #region IDaemonStage members
+
         public IEnumerable<IDaemonStageProcess> CreateProcess(IDaemonProcess process, IContextBoundSettingsStore settings, DaemonProcessKind processKind)
         {
             Handler.Init();
             if (processKind != DaemonProcessKind.VISIBLE_DOCUMENT ||
-                !IsSupported(process.SourceFile))
+                !HostLanguageHelper.IsSupportedFile(process.SourceFile))
             {
                 return EmptyList<IDaemonStageProcess>.InstanceList;
             }
@@ -43,15 +47,7 @@ namespace ReSharperExtension.Highlighting
             return ErrorStripeRequest.NONE;
         }
 
-        private bool IsSupported(IPsiSourceFile sourceFile)
-        {
-            if (sourceFile == null || !sourceFile.IsValid())
-            {
-                return false;
-            }
-            IPsiServices psiServices = sourceFile.GetPsiServices();
-            IFile psiFile = psiServices.Files.GetDominantPsiFile<CSharpLanguage>(sourceFile);
-            return psiFile != null && psiFile.Language.Is<CSharpLanguage>();
-        }
+        #endregion
+        
     }
 }

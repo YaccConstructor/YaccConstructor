@@ -25,7 +25,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
     public partial class AreaControl : TabControl
     {
          
-
         //public static Helper.ReSharperHelper<DocumentRange, ITreeNode> YcProcessor = Helper.ReSharperHelper<DocumentRange, ITreeNode>.Instance;
         ////public ArrayList DataGraphs; 
         //public void Handler()

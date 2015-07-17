@@ -151,12 +151,12 @@ type ``GLL parser tests with simple lexer`` () =
     [<Test>]
     member test.``ListEps``() =
         let parser = GLL.ListEps.buildAst
-        runTest parser "ListEps.txt" GLL.ListEps.numToString "ListEps.dot" 0 0 0 0 GLL.ListEps.tokenToNumber GLL.ListEps.tokenData
+        runTest parser "ListEps.txt" GLL.ListEps.numToString "ListEps.dot" 33 39 7 0 GLL.ListEps.tokenToNumber GLL.ListEps.tokenData
 
     [<Test>]
     member test.``Order``() =
         let parser = GLL.ParseOrder.buildAst
-        runTest parser "Order.txt" GLL.ParseOrder.numToString "Order.dot" 0 0 0 0 GLL.ParseOrder.tokenToNumber GLL.ParseOrder.tokenData
+        runTest parser "Order.txt" GLL.ParseOrder.numToString "Order.dot" 58 72 10 0 GLL.ParseOrder.tokenToNumber GLL.ParseOrder.tokenData
 
 //    [<Test>]
 //    member test.``Lol calc``() =

@@ -97,6 +97,10 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
     printer.PrintBrInd 1 "{"
 
     printer.PrintBrInd 2 "private NodeUserDataHolder dataHolder = new NodeUserDataHolder();"
+    printer.PrintBr ""
+    printer.PrintBrInd 2 "#region ITreeNode members"
+    printer.PrintBr ""
+    
 
     printer.PrintBrInd 2 "public ITreeNode Parent"
     printer.PrintBrInd 2 "{"
@@ -136,27 +140,6 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
     printer.PrintBrInd 2 "public NodeUserData UserData { get; private set; }"
     printer.PrintBrInd 2 "public NodeUserData PersistentUserData { get; private set; }"
 
-    printer.PrintBr ""
-    printer.PrintBrInd 2 "public %s (string ycTokName, int ycTokNumber)" nameOfClass
-    printer.PrintBrInd 2 "{"
-    printer.PrintBrInd 3 "UserData = dataHolder.GetNodeUserData(this);"
-    printer.PrintBrInd 3 "PersistentUserData = dataHolder.GetNodePersistentUserData(this);"
-    printer.PrintBr ""
-    printer.PrintBrInd 3 "UserData.PutData(Constants.YcTokenName, ycTokName);"
-    printer.PrintBrInd 3 "UserData.PutData(Constants.YcTokNumber, ycTokNumber.ToString());"
-    printer.PrintBrInd 3 "UserData.PutData(Constants.YcLanguage, \"%s\");" <| lang.ToLowerInvariant()
-    printer.PrintBrInd 2 "}"
-    
-    printer.PrintBr ""
-    printer.PrintBrInd 2 "public %s (string ycTokName, int ycTokNumber, IEnumerable<DocumentRange> positions) : this (ycTokName, ycTokNumber)" nameOfClass
-    printer.PrintBrInd 2 "{"
-    printer.PrintBrInd 3 "var ranges = positions.ToList();"
-    printer.PrintBrInd 3 "if (ranges.Count > 0)"
-    printer.PrintBrInd 3 "{"
-    printer.PrintBrInd 4 "UserData.PutData(Constants.Document, ranges[0].Document);"
-    printer.PrintBrInd 4 "UserData.PutData(Constants.Ranges, ranges);"
-    printer.PrintBrInd 3 "}"
-    printer.PrintBrInd 2 "}"
     printer.PrintBr ""
 
     printer.PrintBrInd 2 "public IPsiServices GetPsiServices()"
@@ -213,12 +196,6 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
     printer.PrintBrInd 2 "public bool IsValid()"
     printer.PrintBrInd 2 "{"
     printer.PrintBrInd 3 "return true;"
-    printer.PrintBrInd 2 "}"
-    printer.PrintBr ""
-
-    printer.PrintBrInd 2 "public bool IsStub()"
-    printer.PrintBrInd 2 "{"
-    printer.PrintBrInd 3 "return false;"
     printer.PrintBrInd 2 "}"
     printer.PrintBr ""
 
@@ -315,6 +292,31 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
     printer.PrintBrInd 2 "public ITreeNode FindTokenAt(TreeOffset treeTextOffset)"
     printer.PrintBrInd 2 "{"
     printer.PrintBrInd 3 "return null;"
+    printer.PrintBrInd 2 "}"
+    printer.PrintBr ""
+
+    printer.PrintBrInd 2 "#endregion"
+    printer.PrintBr ""
+
+    printer.PrintBrInd 2 "public %s (string ycTokName, int ycTokNumber)" nameOfClass
+    printer.PrintBrInd 2 "{"
+    printer.PrintBrInd 3 "UserData = dataHolder.GetNodeUserData(this);"
+    printer.PrintBrInd 3 "PersistentUserData = dataHolder.GetNodePersistentUserData(this);"
+    printer.PrintBr ""
+    printer.PrintBrInd 3 "UserData.PutData(Constants.YcTokenName, ycTokName);"
+    printer.PrintBrInd 3 "UserData.PutData(Constants.YcTokNumber, ycTokNumber.ToString());"
+    printer.PrintBrInd 3 "UserData.PutData(Constants.YcLanguage, \"%s\");" <| lang.ToLowerInvariant()
+    printer.PrintBrInd 2 "}"
+    
+    printer.PrintBr ""
+    printer.PrintBrInd 2 "public %s (string ycTokName, int ycTokNumber, IEnumerable<DocumentRange> positions) : this (ycTokName, ycTokNumber)" nameOfClass
+    printer.PrintBrInd 2 "{"
+    printer.PrintBrInd 3 "var ranges = positions.ToList();"
+    printer.PrintBrInd 3 "if (ranges.Count > 0)"
+    printer.PrintBrInd 3 "{"
+    printer.PrintBrInd 4 "UserData.PutData(Constants.Document, ranges[0].Document);"
+    printer.PrintBrInd 4 "UserData.PutData(Constants.Ranges, ranges);"
+    printer.PrintBrInd 3 "}"
     printer.PrintBrInd 2 "}"
     printer.PrintBr ""
 

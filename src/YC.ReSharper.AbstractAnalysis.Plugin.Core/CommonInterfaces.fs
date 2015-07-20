@@ -14,6 +14,7 @@ open YC.FSA.GraphBasedFsa
 open System.Collections.Generic
 open ControlFlowGraph
 
+
 type DrawingGraph (vertices : IEnumerable<int>, edges : List<TaggedEdge<int, string>>) =
     member this.Vertices = vertices
     member this.Edges = edges
@@ -92,8 +93,8 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
                         inGraph.OutEdges vertex 
                         |> Seq.iter (fun edge -> tokensList.Add <| tokenToTreeNode edge.Tag)
                 )
-
             lexingFinished.Trigger(new LexingFinishedArgs<'node>(tokensList, lang, drawGraph))
+
 
     let processLang graph addLError addPError addSError =
 //        let tokenize g =

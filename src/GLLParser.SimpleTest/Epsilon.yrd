@@ -1,0 +1,7 @@
+tokens {
+    _ of string
+}
+
+[<Start>]
+s : a1=op<A> a2=op<B> a3=op<C> {a1 + a2 + a3}
+op<a> : a {10} | {1}

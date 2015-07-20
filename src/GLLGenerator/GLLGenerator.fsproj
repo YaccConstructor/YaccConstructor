@@ -44,6 +44,7 @@
     <Compile Include="Table.fs" />
     <Compile Include="PrintTable.fs" />
     <Compile Include="GllGenerator.fs" />
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -60,11 +61,6 @@
     <ProjectReference Include="..\Generators.Common\Common.Generators.fsproj">
       <Name>Common.Generators</Name>
       <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Helper\Helper.fsproj">
-      <Name>Helper</Name>
-      <Project>{fc9a166c-780d-4d15-b366-ca06277c803d}</Project>
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

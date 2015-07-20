@@ -110,18 +110,6 @@
     <Reference Include="NuGet.Core">
       <HintPath>..\..\..\..\packages\Nuget.Core.2.8.3\lib\net40-Client\NuGet.Core.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.core">
-      <HintPath>..\..\..\..\packages\NUnit.Core.2.6.4\lib\nunit.core.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.core.interfaces">
-      <HintPath>..\..\..\..\packages\NUnit.Core.2.6.4\lib\nunit.core.interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\..\..\..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.util">
-      <HintPath>..\..\..\..\packages\NUnit.Core.2.6.4\lib\nunit.util.dll</HintPath>
-    </Reference>
     <Reference Include="NVelocity">
       <HintPath>..\..\..\..\packages\NVelocity.1.0.3\lib\NVelocity.dll</HintPath>
     </Reference>

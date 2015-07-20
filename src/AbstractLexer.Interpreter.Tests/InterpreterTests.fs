@@ -14,11 +14,6 @@ open System
 
 let transform x = (x, match x with |Smbl(y:char, _) when y <> (char 65535) -> Smbl(int y) |Smbl(y:char, _) when y = (char 65535) -> Smbl 65535 |_ -> Eps)
 let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
-
-//let printSmb (x:char*Position<_>) = 
-//        match x with
-//        | (y, _) when y = char 65535 -> "eof"  
-//        | _ -> (fst x).ToString() + "_br: " + (snd x).back_ref.ToString() + "(" + (snd x).start_offset.ToString() + "," + (snd x).end_offset.ToString() + ")"
      
 let TokenizationTest (graphAppr:Appr<_>) eCount vCount  =
     let graphFsa = graphAppr.ApprToFSA()
@@ -26,7 +21,7 @@ let TokenizationTest (graphAppr:Appr<_>) eCount vCount  =
     let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphFst       
     match res with
     | Success res -> 
-                //ToDot res @"../../../src/AbstractLexer.Interpreter.Tests/Tests/TestInterpretParserLexer.dot" (printBref printSmbString)
+                //ToDot res @"../../../src/AbstractLexer.Interpreter.Tests/Tests/TestInterpretParser.dot" (printBref printSmbString)
                 checkGraph res eCount vCount   
     | Error e -> Assert.Fail(sprintf "Tokenization problem %A:" e)
  

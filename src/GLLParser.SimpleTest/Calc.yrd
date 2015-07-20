@@ -1,0 +1,4 @@
+[<Start>]
+expr : a=expr '+' b=expr {a + b} | f=fact {f};
+fact : a=fact '*' b=fact {a * b} | n=num {n};
+num : A {3} | B{5};

@@ -1,0 +1,6 @@
+[<Start>]
+s : list<a B>
+
+list<item separator>: {[]} | hd=item tl=(-separator item)* {hd::tl}
+
+a : A

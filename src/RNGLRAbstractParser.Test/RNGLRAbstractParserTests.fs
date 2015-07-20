@@ -143,6 +143,28 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 15 14 0 4 1
 
     [<Test>]
+    member this._03_NASTYA () =
+        let qGraph = new ParserInputGraph<_>([|0|] , [|5|] )
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
+             edg 1 2 (RNGLR.NotAmbigousSimpleCalc.PLUS 2)
+             edg 2 3 (RNGLR.NotAmbigousSimpleCalc.NUM 3)
+             edg 3 4 (RNGLR.NotAmbigousSimpleCalc.PLUS 4)
+             edg 4 1 (RNGLR.NotAmbigousSimpleCalc.NUM 5)
+             edg 1 5 (RNGLR.NotAmbigousSimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+
+        let r = (new Parser<_>()).Parse  RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph
+    
+        match r with
+        | Error (num, tok, message) ->
+            printfn "Error in position %d on Token %A: %s" num tok message
+            Assert.Fail "!!!!!!"
+        | Success(tree) ->
+            tree.AstToDot RNGLR.NotAmbigousSimpleCalc.numToString RNGLR.NotAmbigousSimpleCalc.tokenToNumber None RNGLR.NotAmbigousSimpleCalc.leftSide "NASTYATEST.dot"
+        test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph 15 14 0 4 1
+
+    [<Test>]
     member this._03_PrettySimpleCalc_BranchedInput () =
         let qGraph = new ParserInputGraph<_>(2, 9)
         qGraph.AddVerticesAndEdgeRange
@@ -438,7 +460,7 @@ type ``RNGLR abstract parser tests`` () =
 
         test RNGLR.Brackets.buildAstAbstract qGraph 20 20 0 9 3
 
-    //[<Test>]
+    [<Test>]
     member this._22_Brackets_BackEdge () =
         let qGraph = new ParserInputGraph<_>(0, 2)
         qGraph.AddVerticesAndEdgeRange
@@ -527,7 +549,7 @@ type ``RNGLR abstract parser tests`` () =
 
         test RNGLR.StrangeBrackets.buildAstAbstract qGraph 25 25 4 8 1
 
-    //[<Test>]
+    [<Test>]
     member this._26_UnambiguousBrackets_Inf () =
         let qGraph = new ParserInputGraph<_>(0, 9)
         qGraph.AddVerticesAndEdgeRange
@@ -709,7 +731,7 @@ type ``RNGLR abstract parser tests`` () =
 
            
 
-[<EntryPoint>]
+//[<EntryPoint>]
 let f x =
     if System.IO.Directory.Exists "dot" 
     then 
@@ -744,7 +766,7 @@ let f x =
 //    t._25_UnambiguousBrackets_BiggerCircle ()
 //    t._26_UnambiguousBrackets_Inf()
 //    t._27_UnambiguousBrackets_WithoutEmptyString()
-//    t._28_UnambiguousBrackets_DifferentPathLengths ()
+    t._28_UnambiguousBrackets_DifferentPathLengths ()
    // t.``TSQL performance test for Alvor`` 2 100 false
     t.``TSQL performance test 2`` 2 100 false
     0

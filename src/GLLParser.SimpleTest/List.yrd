@@ -1,0 +1,3 @@
+[<Start>]
+list : l=list C r=elem { l@[r] } | e=elem { [e] }
+elem : A | B

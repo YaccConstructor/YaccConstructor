@@ -17,6 +17,8 @@ open System
 open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
 open Yard.Generators.Common.AstNode
+open FSharpx.Collections.Experimental
+
 
 type TS<'Token> =
     | Tok of 'Token
@@ -77,7 +79,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                 let u = stack.Pop()
                 let children = u
                 if children.pos = -2 then
-                    children.pos <- res.Count
+                    children.pos <- res.Length
                     res.Add u
                 elif children.pos = -1 then
                     children.pos <- -2
@@ -455,7 +457,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                         let rightRange = getRanges nodes.[k]
                         ranges.Add (fst leftRange, snd rightRange)
                     else //may occurs because of error recovery
-                        let rang = ranges.[ranges.Count-1]
+                        let rang = ranges.[ranges.Length-1]
                         ranges.Add (snd rang, snd rang)
                     f i ranges
                     let inline clear (x : AstNode) =

@@ -1300,3 +1300,4 @@ src/GLLParser.SimpleTest/*.dot
 *.suo
 src/GLLAbstractApplication/*.dot
 src/GLLAbstractApplication/*.yrd.fs
+Tests/AbstractRNGLR/DOT/*.dot

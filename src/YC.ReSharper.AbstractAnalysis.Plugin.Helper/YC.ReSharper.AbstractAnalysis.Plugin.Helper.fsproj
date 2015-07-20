@@ -43,6 +43,7 @@
     <None Include="packages.config" />
     <Compile Include="Constants.fs" />
     <Compile Include="Helper.fs" />
+    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\FST\FST\FSA\FSA.fsproj">

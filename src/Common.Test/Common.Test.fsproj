@@ -33,6 +33,7 @@
   <ItemGroup>
     <Compile Include="CommonTests.fs" />
     <None Include="packages.config" />
+    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharpx.Core">

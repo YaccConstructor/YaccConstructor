@@ -20,6 +20,7 @@ open Yard.Generators.Common.DataStructures
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 open Microsoft.FSharp.Collections
+open FSharpx.Collections.Experimental
 // Custom graph structure. For optimization and needed (by algorithm) relation with AST
 
 [<AllowNullLiteral>]
@@ -345,7 +346,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 simpleEdges.[vertex].Clear()
 
         let shift num =
-            let newAstNode = Terminal(tokens.Count)
+            let newAstNode = Terminal(tokens.Length)
             tokens.Add enum.Current
             if enum.MoveNext() then
                 curToken := enum.Current
@@ -522,7 +523,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 for vertex, state in oldPushes do
                     fam := reduceToError vertex state unbrowsed
 
-                    let astNode = box tokens.Count
+                    let astNode = box tokens.Length
                     tokens.Add !curToken
                     addVertex state !curInd None |> ignore
                 !fam
@@ -578,7 +579,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 let var = ref <| isRecToken !curNum
 
                 while !var = -1 && !curNum <> parserSource.EofIndex do
-                    let newAstNode = new Terminal(tokens.Count)
+                    let newAstNode = new Terminal(tokens.Length)
                     tokens.Add !curToken
                     skipped.Enqueue (newAstNode :> AstNode)
                     if enum.MoveNext() 
@@ -642,7 +643,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
 //            else wasError := true
 
         let lastTokens count =
-            [| for i = max 0 (tokens.Count-count) to tokens.Count-1 do
+            [| for i = max 0 (tokens.Length-count) to tokens.Length-1 do
                 yield tokens.[i]|]
         let debugFuns () =
             let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])

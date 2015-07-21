@@ -36,7 +36,7 @@ namespace ReSharperExtension.Highlighting
         }
 
         /// <summary>
-        /// Does highlighting all tokens that are passed with parameter args.
+        /// Highlights all tokens that are passed with parameter args.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sender">Now it's always null</param>

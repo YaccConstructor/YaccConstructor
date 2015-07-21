@@ -13,10 +13,12 @@ namespace ReSharperExtension.Highlighting
     [FileStructureExplorer]
     public class MyFileStructureExplorer : IFileStructureExplorer
     {
+        #region IFileStructureExplorer members
         public IFileStructure Run(Predicate<DocumentRange> isRangeInvalidated, IPsiSourceFile psiSourceFile, IContextBoundSettingsStore settingsStore, IFile file)
         {
             return new MyFileStructure(file, settingsStore);
         }
+        #endregion
 
         private class MyFileStructure : FileStructureWithRegionsBase
         {

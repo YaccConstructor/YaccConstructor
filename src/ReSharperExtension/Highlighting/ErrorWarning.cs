@@ -33,6 +33,7 @@ namespace ReSharperExtension.Highlighting
             myTooltip = toolTip;
         }
 
+        #region IHighlighting members
         public string ToolTip
         {
             get { return myTooltip; }
@@ -57,5 +58,6 @@ namespace ReSharperExtension.Highlighting
         {
             return range;
         }
+        #endregion
     }
 }

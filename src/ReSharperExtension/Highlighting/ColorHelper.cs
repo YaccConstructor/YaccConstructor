@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using JetBrains.ReSharper.Feature.Services.Daemon;
+using JetBrains.Util;
 
 namespace ReSharperExtension.Highlighting
 {
@@ -76,14 +77,12 @@ namespace ReSharperExtension.Highlighting
         public static void ParseFile(string fileName, string lang)
         {
             if (parsedFiles.Contains(fileName))
-            {
                 return;
-            }
 
-            var path = GetFullPath(fileName);
+            string path = GetFullPath(fileName);
 
             if (String.IsNullOrEmpty(path))
-                throw new Exception(string.Format("File {0} doesn't exist", fileName));
+                throw new Exception(String.Format("File {0} doesn't exist", fileName));
 
             var xmlDocument = new XmlDocument();
             xmlDocument.Load(fileName);

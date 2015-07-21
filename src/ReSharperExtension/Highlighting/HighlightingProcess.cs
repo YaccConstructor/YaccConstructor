@@ -31,7 +31,7 @@ namespace ReSharperExtension.Highlighting
                 return;
 
             myCommiter = commiter;
-            UpdateHandler();
+            Handler.Process = this;
 
             ExistingTreeNodes.ClearExistingTree(DaemonProcess.Document);
             var errors = YcProcessor.Process(File);
@@ -61,11 +61,6 @@ namespace ReSharperExtension.Highlighting
         public void DoHighlighting(DaemonStageResult result)
         {
             myCommiter(result);
-        }
-
-        private void UpdateHandler()
-        {
-            Handler.Process = this;
         }
 
         private void OnErrors(ProcessErrors errors)

@@ -44,7 +44,7 @@ namespace ReSharperExtension.Highlighting
 
         #endregion
 
-        public void VisitLeaf(ITreeNode treeNode, IHighlightingConsumer consumer)
+        private void VisitLeaf(ITreeNode treeNode, IHighlightingConsumer consumer)
         {
             ICollection<DocumentRange> colorConstantRange = treeNode.UserData.GetData(Constants.Ranges);
 

@@ -130,11 +130,8 @@ namespace ReSharperExtension.Highlighting.Dynamic
                 if (treeRanges == null)
                     continue;
 
-                foreach (DocumentRange range in treeRanges)
-                {
-                    if (needRange.ContainedIn(range))
-                        return tree.FindNodeAt(GetTreeTextRange(needRange.TextRange));
-                }
+                if (treeRanges.Any(range => needRange.ContainedIn(range)))
+                    return tree.FindNodeAt(GetTreeTextRange(needRange.TextRange));
             }
 
             return null;

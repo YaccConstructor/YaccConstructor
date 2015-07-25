@@ -44,8 +44,10 @@
     <None Include="StackingConflict.yrd" />
     <None Include="TwoEpsilonsMiddle.yrd" />
     <Compile Include="CalcEBNF.yrd.fs" />
+    <Compile Include="Choice.yrd.fs" />
     <Compile Include="ComplexRightNull.yrd.fs" />
     <Compile Include="EpsilonCycle.yrd.fs" />
+    <Compile Include="LeftRec.yrd.fs" />
     <Compile Include="ManyAndOne.yrd.fs" />
     <Compile Include="ManyAndOpt.yrd.fs" />
     <Compile Include="SimpleOpt.yrd.fs" />

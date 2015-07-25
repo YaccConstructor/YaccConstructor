@@ -24,6 +24,7 @@
     <Compile Include="Brackets.yrd.fs" />
     <Compile Include="_Brackets.yrd.fs" />
     <Compile Include="Calc.yrd.fs" />
+    <Compile Include="Choice.yrd.fs" />
     <Compile Include="ComplexRightNull.yrd.fs" />
     <Compile Include="Cond.yrd.fs" />
     <Compile Include="Counter.yrd.fs" />
@@ -45,6 +46,7 @@
     <Compile Include="ListEps.yrd.fs" />
     <Compile Include="RNGLRParserSimpleTest.fs" />
     <None Include="Calc.yrd" />
+    <None Include="Choice.yrd" />
     <None Include="ComplexRightNull.yrd" />
     <None Include="Cond.yrd" />
     <None Include="Counter.yrd" />

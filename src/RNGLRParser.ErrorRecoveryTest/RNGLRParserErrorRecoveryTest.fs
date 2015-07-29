@@ -137,51 +137,6 @@ type ``RNGLR error recovery tests`` () =
             mAst.PrintAst()
             RNGLR.ParseErrorToEps.defaultAstToDot mAst "Eps error in the end.dot"
     
-   // [<Test>]
-    member test.``Error to epsilon translate``() = 
-        let parser = RNGLR.ParseErrorToEpsilonTranslate.buildAst
-        let path = dir + "Error to epsilon translate.txt"
-
-        match run path parser with 
-        | Parser.Error (num, tok, err, debugs, _) -> 
-            printErr (num, tok, err)
-        | Parser.Success (mAst, _, errors) ->
-            mAst.PrintAst()
-            RNGLR.ParseErrorToEpsilonTranslate.defaultAstToDot mAst "Error to epsilon translate.dot"
-            let res = translate RNGLR.ParseErrorToEpsilonTranslate.translate mAst errors
-            printfn "res %A" res
-            Assert.AreEqual([-1], res)
-    
-    [<Test>]
-    member test.``Primitive translate``() = 
-        let parser = RNGLR.ParsePrimitiveErrorTranslate.buildAst
-        let path = dir + "Primitive translate.txt"
-
-        match run path parser with 
-        | Parser.Error (num, tok, err, debugs, _) -> 
-            printErr (num, tok, err)
-        | Parser.Success (mAst, _, errors) ->
-            mAst.PrintAst()
-            RNGLR.ParsePrimitiveErrorTranslate.defaultAstToDot mAst "Eps error in the end.dot"
-            let res = translate RNGLR.ParsePrimitiveErrorTranslate.translate mAst errors
-            printfn "res : %A" res
-            Assert.AreEqual([-1], res)
-
-    (*[<Test>]
-    member test.``Error to epsilon translate``() = 
-        let parser = RNGLR.ParsePrimitiveErrorTranslate.buildAst
-        let path = dir + "Primitive translate2.txt"
-
-        match run path parser with 
-        | Parser.Error (num, tok, err, debugs) ->
-            printErr (num, tok, err)
-        | Parser.Success (mAst, _, errors) ->
-            mAst.PrintAst()
-            RNGLR.ParsePrimitiveErrorTranslate.defaultAstToDot mAst "Error to epsilon translate.dot"
-            let res = translate RNGLR.ParsePrimitiveErrorTranslate.translate mAst errors
-            printfn "res : %A" res
-            Assert.AreEqual([-1], res)*)
-
     [<Test>]
     member test.``Ambiguous``() = 
         let parser = RNGLR.ParseAmbiguous.buildAst
@@ -194,6 +149,9 @@ type ``RNGLR error recovery tests`` () =
             mAst.PrintAst()
             RNGLR.ParseAmbiguous.defaultAstToDot mAst "Ambiguous.dot"
 
+[<TestFixture>]
+type ``RNGLR error recovery tests Semantics`` () =
+    
     [<Test>]
     member test.``PrintErrorInfo``() = 
         let parser = RNGLR.ParsePrintErrorInfo.buildAst
@@ -220,6 +178,37 @@ type ``RNGLR error recovery tests`` () =
            let res = translate RNGLR.ParsePrintErrorInfo.translate mAst errors
            Assert.AreEqual([-1], res)
 
+
+    [<Test>]
+    member test.``Primitive translate``() = 
+        let parser = RNGLR.ParsePrimitiveErrorTranslate.buildAst
+        let path = dir + "Primitive translate.txt"
+
+        match run path parser with 
+        | Parser.Error (num, tok, err, debugs, _) -> 
+            printErr (num, tok, err)
+        | Parser.Success (mAst, _, errors) ->
+            mAst.PrintAst()
+            RNGLR.ParsePrimitiveErrorTranslate.defaultAstToDot mAst "Eps error in the end.dot"
+            let res = translate RNGLR.ParsePrimitiveErrorTranslate.translate mAst errors
+            printfn "res : %A" res
+            Assert.AreEqual([-1], res)
+
+    //[<Test>]
+    member test.``Error to epsilon translate``() = 
+        let parser = RNGLR.ParsePrimitiveErrorTranslate.buildAst
+        let path = dir + "Primitive translate2.txt"
+
+        match run path parser with 
+        | Parser.Error (num, tok, err, debugs, _) ->
+            printErr (num, tok, err)
+        | Parser.Success (mAst, _, errors) ->
+            mAst.PrintAst()
+            RNGLR.ParsePrimitiveErrorTranslate.defaultAstToDot mAst "Error to epsilon translate.dot"
+            let res = translate RNGLR.ParsePrimitiveErrorTranslate.translate mAst errors
+            printfn "res : %A" res
+            Assert.AreEqual([-1], res)
+
 (*[<EntryPoint>]
 (new ``RNGLR error recovery tests``()).Ambiguous()*)
 
@@ -227,4 +216,4 @@ type ``RNGLR error recovery tests`` () =
 (new ``RNGLR error recovery tests``()).``Calc error inside in braces2``()*)
 
 [<EntryPoint>]
-(new ``RNGLR error recovery tests``()).``PrintErrorInfoEOF``()
+(new ``RNGLR error recovery tests Semantics``()).``PrintErrorInfoEOF``()

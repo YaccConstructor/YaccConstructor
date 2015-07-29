@@ -62,7 +62,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
         | :? Epsilon as e -> Unchecked.defaultof<_>, true
         | _ -> failwith "Strange tree - consists of terminal"
     let order =
-        let stack = new System.Collections.Generic.Stack<_>()
+        let stack = new Stack<_>()
         match root with
         | :? AST as ast -> stack.Push ast
         | _ -> ()
@@ -339,26 +339,51 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                     res.Add (ranges.[i], Array.append [|children.first.prod|] (children.other |> Array.map (fun family -> family.prod)))
         res
 
-    member private this.getTokensFromFamily (family : Family) = 
-        let rec processFamily (fam : Family) = 
-            let mutable res = []
-            for j = 0 to fam.nodes.Length-1 do
-                match fam.nodes.[j] with
-                | :? Terminal as t -> 
-                    res <- res @ [t]
+    static member FamilyToTokens = Dictionary<Family, Terminal list>()
+    static member GetTokensFromFamily (family : Family) : Terminal list = 
+        let cache = Tree<_>.FamilyToTokens
+        // for avoiding problems with cycles
+        let remembered = new ResizeArray<_>()
+
+        let rec familyToTokens family = 
+            
+            let nodeToTokens (node : obj) = 
+                match node with
+                | :? Terminal as t -> [t]
+                | :? Epsilon -> []
                 | :? AST as ast -> 
-                    res <- processFamily ast.first @ res
-                    if ast.other <> null 
-                    then
-                        for other in ast.other do
-                            res <- res @ processFamily other 
-                    res <- processFamily ast.first @ res
-                | _ -> ()
-            res
-        processFamily family
+                    if ast.other <> null
+                    then 
+                        ast.other
+                        |> Array.map (fun fam -> familyToTokens family)
+                        |> List.concat
+                        |> List.append (familyToTokens ast.first)
+                    else
+                        familyToTokens ast.first
+                | x -> failwithf "Unexpected node type in AST: %s" <| x.GetType().ToString()
+                
+            if remembered.Contains family
+            then 
+                []
+            else
+                remembered.Add family
+                let toks = 
+                    family.nodes.map(fun node -> nodeToTokens node)
+                    |> List.concat
+            
+                ignore <| remembered.Remove family
+                toks
+
+        if not <| cache.ContainsKey family
+        then 
+            let res = familyToTokens family
+            cache.[family] <- res
+        cache.[family]
 
     member private this.getTokensFromFamilyAsTokenTypes (family : Family) = 
-        this.getTokensFromFamily family |> List.map (fun t -> tokens.[t.TokenNumber]) |> List.toArray
+        Tree<_>.GetTokensFromFamily family 
+        |> List.map (fun t -> tokens.[t.TokenNumber]) 
+        |> List.toArray
 
     member this.collectErrors tokenToRange = 
         let res = new ResizeArray<'Position * 'Position * array<'TokenType>>()
@@ -524,13 +549,10 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
     /// Returns tree which contains some unprocessed tokens. 
     /// Uses in highlighting.
     /// <para> unprocessed - list of number of tokens that need process. </para>
-    /// <para> filter is a function that is involved in choosing trees.</para>
+    /// <para> inputFilter is a function that is involved in choosing trees.</para>
     /// </summary>
-    member this.GetNextTree (unprocessed : Terminal list) filter = 
-        let processed = [| 
-                            for i = 0 to tokens.Length - 1 do
-                                yield not (unprocessed |> List.exists (fun j -> j.TokenNumber = i))
-                        |]
+    member this.GetNextTree (unprocessed : Terminal list) inputFilter = 
+        let processedToks = Array.init tokens.Length (fun i -> not (unprocessed |> List.exists (fun j -> j.TokenNumber = i)))
         
         let rootFamily = 
             match root with
@@ -538,16 +560,33 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
             | :? Epsilon -> Unchecked.defaultof<_>
             | _ -> failwith "Strange tree - singleNode with non-negative value"
 
-        /// choose family from AST which contains the more unprocessed tokens
+        let processedFamily = new ResizeArray<_>()
+
+        let filter family = 
+            if processedFamily.Contains family 
+            then false
+            else inputFilter family
+
+        /// choose family from AST which contains the more unprocessed tokens.
+        /// if filter returns 'false' for all families then ast.first will be returned. 
         let handleAST (ast : AST) = 
-            if ast.other = null || not <| Seq.exists (fun i -> i = false) processed
-            then ast.first
+            if ast.other = null || not <| Seq.exists (fun i -> i = false) processedToks
+            then 
+                ast.first
             else                
                 let getUnprocessedCount family = 
                     let familyLeaves = 
-                        this.getTokensFromFamily family |> Seq.distinct |> Seq.toList
+                        Tree<_>.GetTokensFromFamily family 
+                        |> Seq.distinct 
+                        |> Seq.toList
                     let newToksList = 
-                        unprocessed |> List.filter (fun leaf -> familyLeaves |> List.exists ((fun x -> x.TokenNumber = leaf.TokenNumber)))
+                        unprocessed 
+                        |> List.filter 
+                            (
+                                fun leaf -> 
+                                    familyLeaves 
+                                    |> List.exists (fun x -> x.TokenNumber = leaf.TokenNumber)
+                            )
                     newToksList.Length
 
                 let mutable nextFam = ast.first
@@ -566,6 +605,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                 nextFam
 
         let rec processFamily (family : Family) = 
+            processedFamily.Add family
             let children = new ResizeArray<_>()
             
             let processNode (node : AstNode) = 
@@ -574,7 +614,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                     let child = processFamily <| handleAST ast
                     children.Add child
                 | :? Terminal as tok -> 
-                    processed.[tok.TokenNumber] <- true
+                    processedToks.[tok.TokenNumber] <- true
                     children.Add node
                 | :? Epsilon -> children.Add node
                 | _ -> failwithf "Error in generation one of highlighting tree"
@@ -587,11 +627,13 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
 
         /// list of unprocessed token after adding new tree
         let finalUnprocessed = 
-            let mutable res = [] 
-            for i = 0 to processed.Length - 1 do
-                if not processed.[i] 
-                then res <- new Terminal(i) :: res
-            List.rev res
+            let index = ref -1
+            let processElem elem acc = 
+                incr index
+                if elem then acc else new Terminal(!index) :: acc
+
+            processedToks
+            |> Array.fold (fun acc elem -> processElem elem acc) []
 
         // now parameter 'tokens' is all sppf tokens rather than tokens from new tree
         let newTree = new Tree<_> (tokens, tree, rules)
@@ -599,7 +641,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
         newTree, finalUnprocessed
 
     ///<summary>
-    /// Returns all trees which contain some token.
+    /// Returns all trees that contain some token.
     /// <para> tokenName - name of token </para>
     /// <para> tokRange - range of token </para>
     ///</summary>
@@ -614,17 +656,18 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
 
         let tokNumberOption = findToken()
         if tokNumberOption.IsNone
-        then []
+        then 
+            []
         else
             let token = new Terminal(tokNumberOption.Value)
             let forestFam = ref []
             let mutable forestTree = []
             let filter (family : Family) = 
-                let nodes = this.getTokensFromFamily family
+                let nodes = Tree<_>.GetTokensFromFamily family
                 if List.exists (fun tok -> tok = token) nodes
                 then 
                     not <| List.exists (fun fam -> 
-                                        let famNodes = this.getTokensFromFamily fam
+                                        let famNodes = Tree<_>.GetTokensFromFamily fam
                                         let newList = List.filter (fun node1 -> List.exists (fun node2 -> node1 = node2) famNodes) nodes
                                         newList.Length = nodes.Length
                                     ) !forestFam 
@@ -637,7 +680,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                     let res = filter ast.first
                     if res then forestFam := ast.first :: !forestFam
                     res
-                | _ -> failwith "Error in GetForestWithToken function"
+                | x -> failwith "Error in GetForestWithToken function. Expected AST as tree.Root but %s was" <| x.GetType().ToString()
 
             let mutable tree = fst <| this.GetNextTree [token] filter
 

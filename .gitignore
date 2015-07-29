@@ -426,3 +426,5 @@ src/ControlFlowGraph.Test/*.yrd.fs
 src/ControlFlowGraph.Test/*.dot
 src/YC.ReSharper.AbstractAnalysis.Plugin/YC.ReSharper.AbstractAnalysis.Plugin.csproj.user
 BuildScripts/*.txt
+src/AST.Test/*.dot
+src/AST.Test/*.yrd.fs

@@ -33,6 +33,7 @@
   <ItemGroup>
     <Compile Include="YardFrontendTests.fs" />
     <None Include="packages.config" />
+    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Accessibility" />

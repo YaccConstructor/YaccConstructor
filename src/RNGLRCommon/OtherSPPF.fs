@@ -4,6 +4,7 @@ open System.Collections.Generic
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 open Yard.Generators.Common.DataStructures
+open FSharpx.Collections.Experimental
 
 [<AllowNullLiteral>]
 type OtherAST =
@@ -283,7 +284,7 @@ type OtherTree<'TokenType> (tree : Yard.Generators.Common.AST.Tree<'TokenType>) 
             let children = u
             if children.pos = -2 
             then
-                children.pos <- res.Count
+                children.pos <- res.Length
                 res.Add u
             elif children.pos = -1 
             then

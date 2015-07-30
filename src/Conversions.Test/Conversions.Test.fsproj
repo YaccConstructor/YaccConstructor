@@ -39,6 +39,7 @@
     <Compile Include="EliminateLeftRecursionTests.fs" />
     <Compile Include="ToCNFTests.fs" />
     <None Include="packages.config" />
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

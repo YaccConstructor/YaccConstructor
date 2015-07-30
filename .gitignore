@@ -1301,5 +1301,4 @@ src/GLLParser.SimpleTest/*.dot
 src/GLLAbstractApplication/*.dot
 src/GLLAbstractApplication/*.yrd.fs
 src/GLLApplication/Lexer2.fs
-src/GLLAbstractApplication/Program.fs
-src/GLLAbstractApplication/Program.fs
+Tests/AbstractRNGLR/DOT/*.dot

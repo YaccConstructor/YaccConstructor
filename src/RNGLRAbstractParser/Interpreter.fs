@@ -27,6 +27,7 @@ open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 open Yard.Generators.Common.DataStructures
 open Yard.Generators.RNGLR
+open FSharpx.Collections.Experimental
 
 type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
@@ -210,8 +211,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 if not <| edgesToTerms.ContainsKey e
                 then
                     terminals.Add e.Tag
-                    nodes.Add <| Terminal (terminals.Count - 1)
-                    edgesToTerms.Add(e, nodes.Count - 1)
+                    nodes.Add <| Terminal (terminals.Length - 1)
+                    edgesToTerms.Add(e, nodes.Length - 1)
                 let edge = new Edge(gssVertex, edgesToTerms.[e])
 
                 let ind = tailGssV.FindIndex gssVertex.State gssVertex.Level 
@@ -250,7 +251,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         let ast = 
             match newVertex.FindIndex final.State final.Level with
             | -1 -> 
-                let edge = new Edge(final, nodes.Count)
+                let edge = new Edge(final, nodes.Length)
                 nodes.Add <| new AST (Unchecked.defaultof<_>, null)
                 addEdge  startV isNew newVertex edge (pos > 0)
                 edge.Ast
@@ -258,10 +259,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         if ast >= 0 
         then addChildren nodes.[ast] path prod
         else 
-            let edge = new Edge(final, nodes.Count)
+            let edge = new Edge(final, nodes.Length)
             nodes.Add <| new AST (Unchecked.defaultof<_>, null)
             addEdge  startV isNew newVertex edge (pos > 0)
-            addChildren nodes.[nodes.Count - 1] path prod
+            addChildren nodes.[nodes.Length - 1] path prod
 
     let rec walk remainLength (vertex : Vertex) path startV nonTerm pos prod shouldEnqueueVertex = 
         if remainLength = 0 
@@ -347,7 +348,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             for v in innerGraph.Edges |> Seq.filter (fun e -> e.Target = finalV) |> Seq.collect (fun e -> e.Source.processedGssVertices) do
                 if parserSource.AccStates.[v.State]
                 then
-                    root := Some nodes.Count
+                    root := Some nodes.Length
                     let nonEpsilonEdge = v.OutEdges.FirstOrDefault(fun x -> x.Ast >= 0)
                     if nonEpsilonEdge <> Unchecked.defaultof<_>
                     then

@@ -14,7 +14,6 @@ open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RNGLR
 //open GLL.SimpleLeftRecursion
 
-open Yard.Frontends.YardFrontend
 open Yard.Generators.GLL
 open Yard.Generators
 open Lexer2

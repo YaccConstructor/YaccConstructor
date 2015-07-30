@@ -1,1 +1,1 @@
-A MUL A MUL A ADD B MUL B MUL A ADD A
+A L_star_ A L_star_ A L_plus_ B L_star_ B L_star_ A L_plus_ A

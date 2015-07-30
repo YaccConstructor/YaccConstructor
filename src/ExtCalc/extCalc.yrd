@@ -10,7 +10,7 @@ tokens {
 
 options {
     translate = true
-    module = "Calc.AbstractParser"
+    module = "ExtCalc.AbstractParser"
     infEpsPath = epsilons
     pos = uint64
 }

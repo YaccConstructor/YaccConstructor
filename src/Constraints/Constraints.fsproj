@@ -43,7 +43,9 @@
     <Compile Include="NoInnerAlt.fs" />
     <Compile Include="NoBrackets.fs" />
     <Compile Include="NoLiterals.fs" />
+    <Compile Include="NoAlt.fs" />
     <Compile Include="Constraints.fs" />
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

@@ -14,8 +14,10 @@ open Yard.Generators.GLL
 open Yard.Generators.GLL.AbstractParser 
 open Yard.Frontends.YardFrontend
 open Yard.Generators.GLL
-open GLL.AbstractParse.SimpleAmb
+open GLL.SimpleAmb
 open Yard.Generators.GLL.AbstractParser
+
+let outDir = @"../../../src/GLLAbstractApplication/"
 
 let run () =
     let fe = new Yard.Frontends.YardFrontend.YardFrontend()
@@ -35,18 +37,21 @@ let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)
 
 let inputGraph =
-    let qGraph = new ParserInputGraph<Token>(0, 3)
+    let qGraph = new ParserInputGraph<_>([|0|], [|6|])
     qGraph.AddVerticesAndEdgeRange
-        [
-            edg 0 1 (GLL.AbstractParse.SimpleAmb.A 1)
-            edg 1 2 (GLL.AbstractParse.SimpleAmb.B 2)
-            edg 1 2 (GLL.AbstractParse.SimpleAmb.C 3)
-            edg 2 3 (GLL.AbstractParse.SimpleAmb.RNGLR_EOF 0)
-        ] |> ignore
+            [edg 0 1 (GLL.SimpleAmb.NUM  1)
+             edg 1 2 (GLL.SimpleAmb.PLUS 2)
+             edg 2 3 (GLL.SimpleAmb.NUM 3)
+             edg 3 4 (GLL.SimpleAmb.PLUS 4)
+             edg 4 5 (GLL.SimpleAmb.NUM 5)
+             edg 5 0 (GLL.SimpleAmb.PLUS 6)
+             edg 5 2 (GLL.SimpleAmb.STAR 7)
+             edg 5 6 (GLL.SimpleAmb.RNGLR_EOF 8)
+             ] |> ignore
     qGraph
 
 
-let parser = GLL.AbstractParse.SimpleAmb.buildAbstractAst
+let parser = GLL.SimpleAmb.buildAbstractAst
   
 let r = parser inputGraph
 
@@ -54,6 +59,7 @@ match r with
 | AbstractParser.Error _ ->
     printfn "Error"     
 | AbstractParser.Success tree->
+    
     printfn "%s" "sss"
     
 

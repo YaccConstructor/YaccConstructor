@@ -1,9 +1,0 @@
-digraph g
-{
-0;1;2;3;4;
-0 -> 1 [label="select name"]
-1 -> 2 [label="X"]
-1 -> 2 [label="Y"]
-1 -> 2 [label="Z"]
-2 -> 3 [label=" from table"]
-}         

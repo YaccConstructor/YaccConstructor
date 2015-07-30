@@ -7,4 +7,5 @@
             xmlns:controls="clr-namespace:GraphX.Controls;assembly=GraphX.WPF.Controls"
             mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="700">    
+
 </TabControl>

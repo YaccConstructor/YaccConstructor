@@ -253,22 +253,23 @@ let main() =
             resFST.InitState.Add((fst perRuleData.[0]).Id) //we SUGGEST that we have one init state
         
             let stEOF = tableTransitions.[0].[(sizeTable - 1)] 
-            new EdgeFST<_,_>(0, stEOF, ( Smbl (char Eof), Eps)) |> resFST.AddVerticesAndEdge |> ignore
+            new EdgeFST<_,_>(0, stEOF, ( Smbl 65535, Eps)) |> resFST.AddVerticesAndEdge |> ignore
             resFST.FinalState.Add(stEOF)
                          
             for state in dfaNodes do
                 for i in 0..(sizeTable - 1) do
                     let st = tableTransitions.[state.Id].[i]
                     if st <> sentinel 
-                    then 
-                        new EdgeFST<_,_>(state.Id, st, (Smbl (char (if i = sizeTable - 1 then int Eof else i)), Eps)) |> resFST.AddVerticesAndEdge |> ignore                       
+                    then
+                        if st <> - 1 
+                        then new EdgeFST<_,_>(state.Id, st, (Smbl (if i = sizeTable - 1 then 65535 else i), Eps)) |> resFST.AddVerticesAndEdge |> ignore                       
                     else 
                         if state.Id <> 0
                         then 
                             let action = if actionFunc.[state.Id].Count > 0 then Smbl (actionFunc.[state.Id].[0]) else Eps
                             if tableTransitions.[0].[i] <> sentinel || i = sizeTable - 1
                             then  
-                                new EdgeFST<_,_>(state.Id, tableTransitions.[0].[i], (Smbl (char (if i = sizeTable - 1 then int Eof else i)), action)) |> resFST.AddVerticesAndEdge |> ignore
+                                new EdgeFST<_,_>(state.Id, tableTransitions.[0].[i], (Smbl (if i = sizeTable - 1 then 65535 else i), action)) |> resFST.AddVerticesAndEdge |> ignore
                             
             let getVal printV s = 
                 match s with
@@ -294,15 +295,28 @@ let main() =
             fstStream.WriteLine(sprintf "   let finishState = ResizeArray.singleton %i" resFST.FinalState.[0]) //one final state...
             fstStream.WriteLine("   let transitions = new ResizeArray<_>()")
             let alphabet = new HashSet<_>()
-            for edge in resFST.Edges do         
-                alphabet.Add((getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'" | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") (fst edge.Tag))) |> ignore
-                fstStream.WriteLine(
-                    sprintf  
-                        "   transitions.Add(%i, (%s, %s), %i)"
-                        edge.Source
-                        (getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'"  | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") (fst edge.Tag))
-                        (getVal (string) (snd edge.Tag)) edge.Target)            
-                                                 
+
+            let split length (xs: seq<'T>) =
+                let rec loop xs =
+                    [
+                        yield Seq.truncate length xs |> Seq.toList
+                        match Seq.length xs <= length with
+                        | false -> yield! loop (Seq.skip length xs)
+                        | true -> ()
+                    ]
+                loop xs
+
+            let printEdg (edge:EdgeFST<_,_>) =
+                alphabet.Add(match fst edge.Tag with |Smbl 65535 -> "Smbl 65535" |Smbl y -> ("Smbl "+ (int y |> string))| Eps -> "Eps")  |> ignore
+                sprintf  
+                    "(%i, (%s, %s), %i)"
+                    edge.Source
+                    (match fst edge.Tag with |Smbl 65535 -> "Smbl 65535" |Smbl y -> ("Smbl " + (int y |> string))  |Eps -> "Eps") 
+                    (getVal (string) (snd edge.Tag)) edge.Target
+
+            split 1000 resFST.Edges
+            |> Seq.iter (fun lst -> fstStream.WriteLine("   transitions.AddRange([|" + (lst |> List.map printEdg |> String.concat "; ") + "|])"))
+
             fstStream.WriteLine("   new FST<_,_>(startState, finishState, transitions)")
 
             fstStream.WriteLine("\nlet actions () =")
@@ -324,8 +338,7 @@ let main() =
             fstStream.WriteLine("   |]\n")
         
 
-            fstStream.WriteLine("\nlet alphabet () = ")
-            //alphabet |> Set.toArray |> Array.iter (fun i -> sprintf " %s;" i) |> Array.concat |> fstStream.WriteLine 
+            fstStream.WriteLine("\nlet alphabet () = ")            
             let alp = ref ""
             for i in alphabet do
                 alp := !alp + (sprintf " %s;" i)

@@ -17,6 +17,13 @@ open System
 open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
 open Yard.Generators.Common.AstNode
+open FSharpx.Collections.Experimental
+
+
+type TS<'Token> =
+    | Tok of 'Token
+    | Seq of TS<'Token> list
+    | Alt of TS<'Token> list
 
 /// Arguments for tanslation calling, seen by user
 type TranslateArguments<'Token, 'Position> = {
@@ -55,7 +62,7 @@ type ErrorNode<'TokenType> =
 type ErrorDictionary<'TokenType> = Dictionary<Family, ErrorNode<'TokenType>>
 
 [<AllowNullLiteral>]
-type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[][]) =
+type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[][], _leftSide : array<int> option, _numToString : (int -> string) option) =
     let rootFamily, isEpsilonTree =
         match root with
         | :? AST as ast -> ast, false
@@ -72,7 +79,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                 let u = stack.Pop()
                 let children = u
                 if children.pos = -2 then
-                    children.pos <- res.Count
+                    children.pos <- res.Length
                     res.Add u
                 elif children.pos = -1 then
                     children.pos <- -2
@@ -91,11 +98,59 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                             handle family
         res.ToArray()
 
+    let leftSide = ref _leftSide
+    let numToString = ref _numToString
+
+    let checkFamilyIsGivenNonterminal nonterminalInd (family : Family) = 
+        match !leftSide with 
+        | None -> failwith "leftSide is not specified"
+        | Some ls -> nonterminalInd = ls.[family.prod]
+
+    let checkAstIsGivenNonterminal nonterminalInd (ast : AST) = 
+        let arr = ast.map <| checkFamilyIsGivenNonterminal nonterminalInd
+        let isAllFamiliesOfOneNonterm = 
+            match arr.Length with
+            | 0 -> failwith "No families in ast"
+            | _ -> Array.forall (fun x -> x = arr.[0]) arr
+        match isAllFamiliesOfOneNonterm with
+        | false -> failwith "SPPF is incorrect!" 
+        | true -> arr.[0]
+
+    let getNonterminalIndex nonterminal =
+        match !numToString with
+        | None -> failwith "numToString is not specified"
+        | Some nts ->
+            match !leftSide with 
+            | None -> failwith "leftSide is not specified"
+            | Some ls -> ls |> Array.tryFind (fun x -> String.Equals (nts x, nonterminal))
+
+    let getNonterminalIndexValue nonterminal = 
+        match getNonterminalIndex nonterminal with 
+        | None -> failwith <| sprintf "The grammar does not contain nonterminal %s" nonterminal
+        | Some ind -> ind
+
+    let getNonterminalStringByProd prod =
+        match !numToString with
+        | None -> failwith "numToString is not specified"
+        | Some nts ->
+            match !leftSide with 
+            | None -> failwith "leftSide is not specified"
+            | Some ls -> nts <| ls.[prod]
+
+    new (tokens : array<'TokenType>, root : AstNode, rules : int[][]) =
+        Tree<'TokenType>(tokens, root, rules, None, None)
+
     member this.Order = order
     member this.Root = root
     member this.RulesCount = rules.GetLength(0)
     member this.Tokens = tokens
     member this.TokensCount = tokens.Length
+
+    member this.SpecifyNumToString nts = 
+        numToString := nts 
+
+    member this.SpecifyLeftSide ls = 
+        leftSide := ls 
 
     static member inline private smaller pos : (AstNode -> _) = function
         | :? Epsilon | :? Terminal -> true
@@ -243,15 +298,105 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
 
             this.FilterChildren handleChildren
 
-    member this.FindNonterminalsByInd nonterminal (leftSide : array<int>) =
-        order |> Array.filter (fun x -> nonterminal = leftSide.[x.first.prod])
+    member this.FindNonterminalsByInd nonterminal =
+        order |> Array.filter (checkAstIsGivenNonterminal nonterminal)
 
-    member this.FindNonterminalsByString nonterminal (leftSide : array<int>) (numToString : int -> string) =
-        let nontermInd = leftSide |> Array.tryFind (fun x -> String.Equals (numToString x, nonterminal))
+    member this.FindNonterminalsByString nonterminal =
+        let nontermInd = getNonterminalIndex nonterminal
         match nontermInd with
-        | Some n -> this.FindNonterminalsByInd n leftSide
-        | None -> null
+        | Some n -> this.FindNonterminalsByInd n
+        | None -> [||]
    
+    member this.GetTypeOfExpression nonterminals =
+        let visited = new Dictionary<_,_>()
+        let nonterminalsInd = 
+            nonterminals 
+            |> Array.choose getNonterminalIndex
+        
+        let isWanted (f : Family) =
+            Array.exists (fun x -> checkFamilyIsGivenNonterminal x f) nonterminalsInd
+        
+        let rec find (node : AstNode) = 
+            if not <| visited.ContainsKey(node)
+            then
+                visited.Add(node, true)
+                match node with 
+                | :? Epsilon -> null
+                | :? AST as ast -> 
+                    let wanted = ast.filterFamilies isWanted
+                    if wanted <> null && wanted.Count > 0
+                    then Array.init wanted.Count (fun i -> getNonterminalStringByProd wanted.[i].prod)
+                    else 
+                        let res = new ResizeArray<_>()
+                        ast.doForAllFamilies (fun x -> x.nodes.doForAll (fun y -> res.AddRange(find y)))
+                        Array.init res.Count (fun i -> res.[i])
+                | _ -> [||]
+            else 
+                [||]
+
+        find root
+
+    member this.CalculateStatistics nonterminal  =
+        let remembered = new Dictionary<AstNode, (int * int * double) option>()
+        let nontermInd = getNonterminalIndexValue nonterminal
+
+        let calculateStat (arr : ((int * int * double) option)[]) =
+            let filtered = arr |> Array.choose id 
+
+            if filtered.Length = 0
+            then None
+            elif filtered.Length = 1
+            then Some filtered.[0]
+            else
+                let curMax = ref System.Int32.MinValue
+                let curMin = ref System.Int32.MaxValue
+                let curSum = ref 0.0
+
+                for (max, min, avg) in filtered do
+                    if max > !curMax then curMax := max
+                    if min < !curMin then curMin := min
+                    curSum := !curSum + avg
+                Some (!curMax, !curMin, (!curSum / double filtered.Length))
+        
+        let sumStat (arr : ((int * int * double) option)[]) =
+            let filtered = arr |> Array.choose id 
+
+            if filtered.Length = 0
+            then None
+            elif filtered.Length = 1
+            then Some filtered.[0]
+            else
+                let curMax = ref 0
+                let curMin = ref 0
+                let curSum = ref 0.0
+
+                for (max, min, avg) in filtered do
+                    curMax := !curMax + max
+                    curMin := !curMin + min
+                    curSum := !curSum + avg
+                Some (!curMax, !curMin, !curSum)
+
+        let rec count (node : AstNode) : (int * int * double) option = 
+            if remembered.ContainsKey(node)
+            then remembered.[node]
+            else 
+                let stat = 
+                    match node with 
+                    | :? Terminal -> None
+                    | :? Epsilon -> None
+                    | :? AST as ast -> 
+                        let inc = if checkAstIsGivenNonterminal nontermInd ast then 1 else 0
+                        let statistics = 
+                            ast.map(fun f -> f.nodes.map (fun a -> count a) |> sumStat)
+                            |> calculateStat
+                        match statistics with
+                        | None -> Some (inc, inc, double inc) 
+                        | Some (max, min, avg) -> Some (max + inc, min + inc, avg + double inc) 
+                    | _ -> failwith "Unexpected AstNode"
+                remembered.Add(node, stat)
+                stat
+        (count this.Root).Value
+
     /// handleCycleNode is used for handling nodes, contained in cycles
     ///   and having no children family, where each node has smaller position.
     member this.TraverseWithRanges tokenToRange dispose handleCycleNode f =
@@ -312,7 +457,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                         let rightRange = getRanges nodes.[k]
                         ranges.Add (fst leftRange, snd rightRange)
                     else //may occurs because of error recovery
-                        let rang = ranges.[ranges.Count-1]
+                        let rang = ranges.[ranges.Length-1]
                         ranges.Add (snd rang, snd rang)
                     f i ranges
                     let inline clear (x : AstNode) =
@@ -379,6 +524,45 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
             let res = familyToTokens family
             cache.[family] <- res
         cache.[family]
+
+    member this.getStructuredTokensFromFamily (family : Family) = 
+        let seen = ref []
+        let rec processFamily (fam : Family) : TS<'TokenType> = 
+            let mutable sequential : TS<'TokenType> list = []
+            for j = 0 to fam.nodes.Length-1 do
+                match fam.nodes.[j] with
+                | :? Terminal as t -> 
+                    sequential <- sequential @ [Tok tokens.[t.TokenNumber]]
+                | :? AST as ast -> 
+                    let isSeen = List.tryFind (fun x -> x = ast.pos) !seen
+                    match isSeen with 
+                    | None -> 
+                              seen := ast.pos :: !seen
+                              let tokensFromAst = getTokensFromAst ast                                  
+                              sequential <- sequential @ [tokensFromAst]
+                    | _ -> ()
+                | _ -> ()
+            Seq sequential
+        and getTokensFromAst ast =
+            if ast.other = null 
+            then 
+                processFamily ast.first
+            else
+                let mutable alternative : TS<'TokenType> list = []
+                for other in ast.other do
+                    alternative <- alternative @ [processFamily other]
+                Alt alternative
+        processFamily family
+
+    member this.GetTokens (ast : AST) =
+        if ast.other = null 
+        then 
+            this.getStructuredTokensFromFamily ast.first
+        else
+            let mutable alternative : TS<'TokenType> list = []
+            for other in ast.other do
+                alternative <- alternative @ [this.getStructuredTokensFromFamily other]
+            Alt alternative
 
     member private this.getTokensFromFamilyAsTokenTypes (family : Family) = 
         Tree<_>.GetTokensFromFamily family 
@@ -706,7 +890,8 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
         let createNode num isAmbiguous nodeType (str : string) =
             let label =
                 let cur = str.Replace("\n", "\\n").Replace ("\r", "")
-                if not isAmbiguous then cur
+                if not isAmbiguous 
+                then cur
                 else cur + " !"
             let shape =
                 match nodeType with
@@ -718,11 +903,10 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                 else ",style=\"filled\",fillcolor=red"
             out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + color + shape + "]")
         let createEdge (b : int) (e : int) isBold (str : string) =
-            let label = str.Replace("\n", "\\n").Replace ("\r", "")
             let bold = 
                 if not isBold then ""
-                else "style=bold,width=10,"
-            out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "label=\"" + label + "\"" + "]")
+                else "style=bold,width=10"
+            out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "]")
         let createEpsilon ind = 
             let res = next()
             createNode res false AstNodeType ("n " + indToString (-1-ind))

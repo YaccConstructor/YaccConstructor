@@ -9,10 +9,11 @@ open YC.FST.AbstractLexing.Interpreter
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
 open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation
+open System
 
 let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"
 
-let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
+let transform x = (x, match x with |Smbl(y:char, _) when y <> (char 65535) -> Smbl(int y) |Smbl(y:char, _) when y = (char 65535) -> Smbl 65535 |_ -> Eps)
 let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
 
 //let printSmb (x:char*Position<_>) = 
@@ -29,6 +30,7 @@ let calcTokenizationTest path eCount vCount countEdgesArray =
     let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphFst    
     match res with
     | Success res ->
+        //ToDot res @"../../../src/AbstractLexer.Interpreter.Tests/Tests/TestInterpretParserLexer.dot" (printBref printSmbString)
         checkArr (countEdges res) countEdgesArray
         checkGraph res eCount vCount            
     | Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" path e)

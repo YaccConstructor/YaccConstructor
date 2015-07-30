@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{b1d8c4fb-23e7-46ff-81b0-4ea3cd6e716e}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>RNGLRAbstractParser.Tests</RootNamespace>
     <AssemblyName>YC.RNGLRAbstractParser.Test</AssemblyName>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -64,7 +64,16 @@
     <Reference Include="Antlr3.Runtime">
       <HintPath>..\..\3rdParty\graphviz4net\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <Reference Include="FSharp.Core">
+      <HintPath>..\packages\FSharp.Core.3.1.2.5\lib\net40\FSharp.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Collections">
+      <HintPath>..\packages\FSharpx.Collections.1.12.1\lib\net40\FSharpx.Collections.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Collections.Experimental">
+      <HintPath>..\packages\FSharpx.Collections.Experimental.1.12.1\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
@@ -124,11 +133,6 @@
       <Project>{114e4775-bf85-464f-bb3d-d68de62615bd}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\AbstractLexer.Interpreter\AbstractLexer.Interpreter.fsproj">
-      <Name>AbstractLexer.Interpreter</Name>
-      <Project>{0a44967a-f233-4d77-8abb-d165af90075a}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
       <Name>Common.AST</Name>
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
@@ -162,6 +166,11 @@
     <ProjectReference Include="..\RNGLRParser\RNGLRParser.fsproj">
       <Name>RNGLRParser</Name>
       <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\TSQL\TSQL.fsproj">
+      <Name>TSQL</Name>
+      <Project>{5c8b9089-f612-4761-b712-09ecb5317c76}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

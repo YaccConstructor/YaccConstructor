@@ -26,6 +26,7 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyTitle("YC.FsYARD")>]
 [<assembly: AssemblyDescription("FsYARD is a parsers generator for F#. It is  based on RNGLR algorithm.")>]
 [<assembly: AssemblyConfiguration("Release")>]
+[<assembly: AssemblyConfiguration("Release")>]
 [<assembly: AssemblyCompany("YaccConstructor Software Foundation")>]
 [<assembly: AssemblyProduct("YC.FsYARD")>]
 [<assembly: AssemblyCopyright("Copyright © 2013. YaccConstructor Software Foundation https://code.google.com/p/recursive-ascent/")>]
@@ -57,8 +58,5 @@ open System.Runtime.InteropServices
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-// [assembly: AssemblyVersion("0.3.0.19")]
-[<assembly: AssemblyVersion("0.3.0.19")>]
-[<assembly: AssemblyFileVersion("0.3.0.19")>]
 
 do ()

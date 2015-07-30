@@ -198,12 +198,6 @@ let printTableGLL
         printBrInd 1 "| _ -> false"
         printBr ""
 
-        printBrInd 0 "let isNonTerminal = function"   
-        for i = 0 to indexator.nonTermCount-1 do
-            printBrInd 1 "| %s -> true" <| indexator.indexToNonTerm i
-        printBrInd 1 "| _ -> false"
-        printBr ""
-
         printInd 0 "let getLiteralNames = ["
         for i = indexator.literalsStart to indexator.literalsEnd do
             print "\"%s\";" <| indexator.indexToLiteral i
@@ -261,7 +255,7 @@ let printTableGLL
 
         printBr ""
 
-        printBrInd 0 "let private parserSource = new ParserSourceGLL<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon, slots)"
+        printBrInd 0 "let private parserSource = new ParserSourceGLL<Token> (Token.RNGLR_EOF 0, tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon, slots)"
         
         if not isAbstract
         then               

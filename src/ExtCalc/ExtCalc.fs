@@ -32,7 +32,7 @@ type ExtCalcInjectedLanguageModule () =
     let tokenize (lexerInputGraph : FSA<char * Position<'br>>) =
 //        let graphFsa = lexerInputGraph.ApprToFSA()
         let eof = RNGLR_EOF(new FSA<_>())
-        let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
+        let transform x = (x, match x with |Smbl(y:char, _) when y <> (char 65535) -> Smbl(int <| Convert.ToUInt32(y)) |Smbl(y:char, _) when y = (char 65535) -> Smbl 65535 |_ -> Eps)
         let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
         let graphFst = FST<_,_>.FSAtoFST(lexerInputGraph, transform, smblEOF)
         YC.ExtCalcLexer.tokenize eof graphFst

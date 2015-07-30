@@ -104,14 +104,14 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AbstractLexer.Interpreter\AbstractLexer.Interpreter.fsproj">
+      <Name>AbstractLexer.Interpreter</Name>
+      <Project>{0a44967a-f233-4d77-8abb-d165af90075a}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\FsYacc\FsYacc.fsproj">
       <Name>FsYacc</Name>
       <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\ReSharperExtension\ReSharper.Extension.csproj">
-      <Name>ReSharper.Extension</Name>
-      <Project>{70133fea-83f5-416a-8869-0e745ef37778}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="TSQLHighlighting\TSQLHighlighting.csproj">
@@ -119,7 +119,16 @@
       <Project>{6ee8bdd8-79e9-41f5-8a8e-e959835d60fb}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <Reference Include="FSharp.Core">
+      <HintPath>..\packages\FSharp.Core.3.1.2.5\lib\net40\FSharp.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Collections">
+      <HintPath>..\packages\FSharpx.Collections.1.12.1\lib\net40\FSharpx.Collections.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Collections.Experimental">
+      <HintPath>..\packages\FSharpx.Collections.Experimental.1.12.1\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">

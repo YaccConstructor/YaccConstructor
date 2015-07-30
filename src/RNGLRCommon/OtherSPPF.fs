@@ -6,6 +6,7 @@ open System.IO
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 open Yard.Generators.Common.DataStructures
+open FSharpx.Collections.Experimental
 
 [<AllowNullLiteral>]
 type OtherAST =
@@ -260,7 +261,7 @@ type OtherTree<'TokenType> (tree : Yard.Generators.Common.AST.Tree<'TokenType>) 
                                     if dict.ContainsKey ast
                                     then box <| dict.[ast]
                                     else failwith "Unexpected AST"
-                                | :? int as token -> box token
+                                | :? Terminal as terminal -> box terminal.TokenNumber
                                 | _ -> failwithf "Unexpected node type in OtherSppf: %s" <| node.GetType().ToString()
                 
                             children := newElem :: !children
@@ -288,7 +289,7 @@ type OtherTree<'TokenType> (tree : Yard.Generators.Common.AST.Tree<'TokenType>) 
             let children = u
             if children.pos = -2 
             then
-                children.pos <- res.Count
+                children.pos <- res.Length
                 res.Add u
             elif children.pos = -1 
             then

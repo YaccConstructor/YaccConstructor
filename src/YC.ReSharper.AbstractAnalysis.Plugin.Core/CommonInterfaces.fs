@@ -17,6 +17,7 @@ open YC.FSA.FsaApproximation
 open YC.FSA.GraphBasedFsa
 
 
+
 type DrawingGraph (vertices : IEnumerable<int>, edges : List<TaggedEdge<int, string>>) =
     member this.Vertices = vertices
     member this.Edges = edges

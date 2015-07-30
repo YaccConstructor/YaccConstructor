@@ -1,7 +1,0 @@
-digraph g
-{
-0;1;2;
-0 -> 1 [label="select name"]
-1 -> 1 [label="X"]
-1 -> 2 [label=" from tableY"]
-}         

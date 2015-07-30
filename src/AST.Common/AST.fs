@@ -594,7 +594,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                             clearAST (errDict : ErrorDictionary<'TokenType>) =
 
         if isEpsilonTree 
-        then epsilons.[(root :?> Epsilon).EpsilonNonTerm].TranslateEpsilon funs leftSides concat (zeroPosition, zeroPosition)
+        then epsilons.[-(root :?> Epsilon).EpsilonNonTerm-1].TranslateEpsilon funs leftSides concat (zeroPosition, zeroPosition)
         else
             let result = new BlockResizeArray<_>()
             let inline dispose i =

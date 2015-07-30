@@ -1300,3 +1300,6 @@ src/GLLParser.SimpleTest/*.dot
 *.suo
 src/GLLAbstractApplication/*.dot
 src/GLLAbstractApplication/*.yrd.fs
+src/GLLApplication/Lexer2.fs
+src/GLLAbstractApplication/Program.fs
+src/GLLAbstractApplication/Program.fs

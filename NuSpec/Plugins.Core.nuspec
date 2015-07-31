@@ -38,6 +38,7 @@
 <!-- YC.Core -->
 <file src="..\Bin\Release\v40\Mono.Addins.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\FSharp.Core.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\FSharpx.Collections.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\YC.Common.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\YC.Conversions.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\YC.Constraints.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
@@ -64,6 +65,7 @@
 <file src="..\Bin\Release\v40\Hotspots.xml" target="DotFiles\v9.1\plugins" />
 <file src="..\Bin\Release\v40\YC.SEL.SDK.Core.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\ControlFlowGraph.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\OtherSPPF.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\ReSharperExtension.*" target="DotFiles\v9.1\plugins" />
 <file src="..\Bin\Release\v40\YC.ReSharper.AbstractAnalysis.Plugin.Helper*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 </files>

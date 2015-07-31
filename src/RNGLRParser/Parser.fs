@@ -633,14 +633,14 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             |> Array.exists (fun state -> parserSource.AccStates.[state])
 
         // if finish isn't accepting state then error
-//        if !isEnd && usedStates.Count > 0 && not <| isAcceptState() 
-//        then
-//            if errorRuleExist 
-//            then 
-//                 recovery()
-//                 makeReductions (!curInd + 1) recovery
-//                 attachEdges()
-//            else wasError := true
+        if !isEnd && usedStates.Count > 0 && not <| isAcceptState() 
+        then
+            if errorRuleExist 
+            then 
+                 recovery()
+                 makeReductions (!curInd + 1) recovery
+                 attachEdges()
+            else wasError := true
 
         let lastTokens count =
             [| for i = max 0 (tokens.Length-count) to tokens.Length-1 do

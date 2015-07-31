@@ -2,7 +2,7 @@
 <package>
 <metadata>
 <id>YC.SEL.Plugins.ExtCalc</id>
-<version>0.3.0.19</version>
+<version>0.3.0.12</version>
 <title>ExtCalc plugin for ReSharper</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>

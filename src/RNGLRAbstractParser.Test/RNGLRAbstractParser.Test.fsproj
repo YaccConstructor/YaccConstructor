@@ -83,6 +83,9 @@
     <Reference Include="Graphviz4Net">
       <HintPath>..\..\3rdParty\graphviz4net\Graphviz4Net.dll</HintPath>
     </Reference>
+    <Reference Include="JetBrains.ReSharper.Psi.CSharp">
+      <HintPath>..\packages\JetBrains.Psi.Features.src.102.0.20150522.71619\DotFiles\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>

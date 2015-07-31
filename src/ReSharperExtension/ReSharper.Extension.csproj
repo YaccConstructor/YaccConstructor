@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{70133FEA-83F5-416A-8869-0E745EF37778}</ProjectGuid>
+    <ProjectGuid>{740981F9-878C-4E96-AC6D-8CE178C28C38}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ReSharperExtension</RootNamespace>
@@ -53,7 +53,10 @@
       <HintPath>..\packages\JetBrains.Platform.Lib.DevExpress.2.0.20140304.0\lib\DevExpress.XtraTreeList.v7.1.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\FSharp.Core.3.1.2.5\lib\net40\FSharp.Core.dll</HintPath>
+    </Reference>
     <Reference Include="GraphX.PCL.Common, Version=2.1.8.0, Culture=neutral, PublicKeyToken=a6cdb671d651b60a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\GraphX.2.1.7\lib\net40-client\GraphX.PCL.Common.dll</HintPath>

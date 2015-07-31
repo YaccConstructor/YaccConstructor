@@ -114,6 +114,11 @@
       <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\ReSharperExtension\ReSharper.Extension.csproj">
+      <Name>ReSharper.Extension</Name>
+      <Project>{740981f9-878c-4e96-ac6d-8ce178c28c38}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="TSQLHighlighting\TSQLHighlighting.csproj">
       <Name>TSQLHighlighting</Name>
       <Project>{6ee8bdd8-79e9-41f5-8a8e-e959835d60fb}</Project>

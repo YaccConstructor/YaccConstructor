@@ -148,7 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ReSharperExtension\ReSharper.Extension.csproj">
-      <Project>{70133fea-83f5-416a-8869-0e745ef37778}</Project>
+      <Project>{740981f9-878c-4e96-ac6d-8ce178c28c38}</Project>
       <Name>ReSharper.Extension</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\YC.ReSharper.AbstractAnalysis.Plugin.Helper\YC.ReSharper.AbstractAnalysis.Plugin.Helper.fsproj">

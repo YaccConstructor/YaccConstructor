@@ -177,7 +177,7 @@
     </ProjectReference>
     <ProjectReference Include="..\ReSharperExtension\ReSharper.Extension.csproj">
       <Name>ReSharper.Extension</Name>
-      <Project>{70133fea-83f5-416a-8869-0e745ef37778}</Project>
+      <Project>{740981f9-878c-4e96-ac6d-8ce178c28c38}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">

@@ -24,6 +24,8 @@ open System.IO
 
 open Mono.Addins
 
+open System
+
 open JetBrains.Application
 open JetBrains.Application.BuildScript.Application.Zones
 
@@ -43,17 +45,21 @@ open YC.SDK.ReSharper.Helper
 type ZoneMarker() = class end
 
 [<assembly:Addin>]
-[<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
+[<assembly:AddinDependency("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
 
 do()
 
 [<ShellComponent>]
 [<Extension>]
-type TSQLInjectedLanguageModule () =
+type TSQLInjectedLanguageModule() =
 
     let tokenize (lexerInputGraph : FSA<char * Position<'br>>) =
 //        let graphFsa = lexerInputGraph.ApprToFSA()
-        let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
+        let transform x = 
+            match x with 
+            | Smbl(y : char, _) when y <> (char 65535) -> x, Smbl(int <| Convert.ToUInt32(y)) 
+            | Smbl(y : char, _) when y = (char 65535)  -> x, Smbl 65535 
+            | _ -> x, Eps
         let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
         let graphFst = FST<_,_>.FSAtoFST(lexerInputGraph, transform, smblEOF)
         let eof = RNGLR_EOF(new FSA<_>())    

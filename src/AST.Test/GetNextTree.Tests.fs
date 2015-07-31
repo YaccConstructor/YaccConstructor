@@ -34,7 +34,7 @@ let inline translate (f : TranslateArguments<_,_> -> 'b -> 'c) (ast : 'b) =
 let filter = fun _ -> true
 
 [<TestFixture>]
-type ``AST GetNextTree test``() =
+type ``AST GetNextTree tests``() =
     let runTest graph parse toDot translator errDict (expected : int) testName  = 
         printfn "%s" <| String.init 50 (fun i -> "*")
         printfn "%s" testName
@@ -157,6 +157,6 @@ type ``AST GetNextTree test``() =
 
 //[<EntryPoint>]
 let f x = 
-    let tester = new ``AST GetNextTree test``()
+    let tester = new ``AST GetNextTree tests``()
     tester.``Cycles 1``()
     0

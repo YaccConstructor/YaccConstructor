@@ -2,6 +2,8 @@
 
 open Mono.Addins
 
+open System
+
 open JetBrains.Application
 open JetBrains.Application.BuildScript.Application.Zones
 open JetBrains.ReSharper.Psi.CSharp.Tree
@@ -28,11 +30,15 @@ do()
 
 [<Extension>]
 [<ShellComponent>]
-type CalcInjectedLanguageModule () =
-    let tokenize (lexerInputGraph:FSA<char * Position<'br>>) =
+type CalcInjectedLanguageModule() =
+    let tokenize (lexerInputGraph : FSA<char * Position<'br>>) =
         //let graphFsa = lexerInputGraph.ApprToFSA()
         let eof = RNGLR_EOF(new FSA<_>())
-        let transform x = (x, match x with |Smbl (y, _) -> Smbl y |_ -> Eps)
+        let transform x = 
+            match x with 
+            | Smbl(y : char, _) when y <> (char 65535) -> x, Smbl(int <| Convert.ToUInt32(y)) 
+            | Smbl(y : char, _) when y =  (char 65535) -> x, Smbl 65535 
+            | _ -> x, Eps
         let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
         let graphFst = FST<_,_>.FSAtoFST(lexerInputGraph, transform, smblEOF)
         YC.CalcLexer.tokenize eof graphFst

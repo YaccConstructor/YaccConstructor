@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+
 using JetBrains.Annotations;
 using JetBrains.Application.Settings;
 using JetBrains.DocumentModel;

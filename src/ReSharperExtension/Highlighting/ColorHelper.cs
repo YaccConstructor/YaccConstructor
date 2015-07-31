@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+
 using JetBrains.ReSharper.Feature.Services.Daemon;
-using JetBrains.Util;
 
 namespace ReSharperExtension.Highlighting
 {

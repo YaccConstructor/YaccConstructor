@@ -1,13 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+
 using JetBrains.Application.Settings;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi;
-using JetBrains.ReSharper.Psi.CSharp;
-using JetBrains.ReSharper.Psi.Files;
-using JetBrains.ReSharper.Psi.JavaScript.LanguageImpl;
-using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.Util;
 
 namespace ReSharperExtension.Highlighting

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.Files;

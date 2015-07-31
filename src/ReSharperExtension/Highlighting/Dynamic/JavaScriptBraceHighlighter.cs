@@ -1,4 +1,5 @@
 ﻿using System;
+
 using JetBrains.Annotations;
 using JetBrains.DataFlow;
 using JetBrains.ReSharper.Daemon.CaretDependentFeatures;

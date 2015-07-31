@@ -3,17 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media;
-
 using JetBrains.Application.Threading.Tasks;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.Tree;
-
+using ReSharperExtension.Highlighting;
 using ReSharperExtension.Highlighting.Dynamic;
 using ReSharperExtension.YcIntegration;
 using YC.SDK;
 
-namespace ReSharperExtension.Highlighting
+namespace ReSharperExtension
 {
     static class Handler
     {

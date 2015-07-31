@@ -205,7 +205,7 @@
     <Compile Include="Highlighting\Dynamic\ExistingTreeNodes.cs" />
     <Compile Include="Highlighting\Dynamic\BaseBraceHighlighter.cs" />
     <Compile Include="Highlighting\ErrorWarning.cs" />
-    <Compile Include="Highlighting\Handler.cs" />
+    <Compile Include="Handler.cs" />
     <Compile Include="Highlighting\HighlightingProcess.cs" />
     <Compile Include="Highlighting\HighlightingStage.cs" />
     <Compile Include="Highlighting\LanguageHelper.cs" />
@@ -231,12 +231,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\FST\FST\FSA\FSA.fsproj">
-      <Project>{B48CFDCC-86F7-4C3A-A5A2-8170950DD2AB}</Project>
+      <Project>{b48cfdcc-86f7-4c3a-a5a2-8170950dd2ab}</Project>
       <Name>FSA</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\FST\FST\FST\FST.fsproj">
-      <Project>{bcf4793c-e8b4-4fd5-9723-3c08859066c5}</Project>
-      <Name>FST</Name>
     </ProjectReference>
     <ProjectReference Include="..\ConstantPropagation\ConstantPropagation.fsproj">
       <Project>{42485bca-665d-48fb-befd-4a0232f2cf0b}</Project>

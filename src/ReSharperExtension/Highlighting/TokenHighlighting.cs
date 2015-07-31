@@ -1,6 +1,7 @@
 ﻿using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.Tree;
+
 using ReSharperExtension.Highlighting;
 using ReSharperExtension.YcIntegration;
 

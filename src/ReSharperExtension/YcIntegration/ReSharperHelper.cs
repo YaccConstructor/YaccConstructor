@@ -6,7 +6,9 @@ using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.Util;
+
 using Microsoft.FSharp.Control;
+
 using YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation;
 using YC.SDK;
 

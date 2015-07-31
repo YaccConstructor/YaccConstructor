@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using JetBrains.Application.Settings;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.Tree;
+
 using ReSharperExtension.Highlighting.Dynamic;
 using ReSharperExtension.YcIntegration;
 
@@ -71,7 +73,7 @@ namespace ReSharperExtension.Highlighting
             foreach (ErrorInfo error in parserErrors)
             {
                 var newHighlighting = 
-                    new HighlightingInfo(error.Range, new ErrorWarning(error.Range, "Syntax error. Unexpected token "));
+                    new HighlightingInfo(error.Range, new ErrorWarning(error.Range, String.Format("Syntax error. Unexpected token {0}", error.Message)));
                 highlightings.Add(newHighlighting);
             }
 
@@ -87,7 +89,7 @@ namespace ReSharperExtension.Highlighting
             foreach (ErrorInfo error in semanticErrors)
             {
                 var newHighlighting =
-                    new HighlightingInfo(error.Range, new ErrorWarning(error.Range, String.Format("Undefined variable: {0} .", error.Message)));
+                    new HighlightingInfo(error.Range, new ErrorWarning(error.Range, error.Message));
                 highlightings.Add(newHighlighting);
             }
 

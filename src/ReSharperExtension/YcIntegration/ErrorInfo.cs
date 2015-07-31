@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+
 using JetBrains.DocumentModel;
 
 namespace ReSharperExtension.YcIntegration

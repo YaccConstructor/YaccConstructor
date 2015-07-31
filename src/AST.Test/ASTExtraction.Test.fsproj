@@ -8,8 +8,8 @@
     <ProjectGuid>bdf3d124-24c2-4911-9bb3-c94d0c0ae705</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>AST.Test</RootNamespace>
-    <AssemblyName>YC.AST.Test</AssemblyName>
-    <Name>AST.Test</Name>
+    <AssemblyName>YC.ASTExtraction.Test</AssemblyName>
+    <Name>ASTExtraction.Test</Name>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <PropertyGroup>

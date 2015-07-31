@@ -167,7 +167,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SELApproximator.Tests", "SE
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReSharper.Extension", "ReSharperExtension\ReSharper.Extension.csproj", "{740981F9-878C-4E96-AC6D-8CE178C28C38}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AST.Test", "AST.Test\AST.Test.fsproj", "{BDF3D124-24C2-4911-9BB3-C94D0C0AE705}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ASTExtraction.Test", "AST.Test\ASTExtraction.Test.fsproj", "{BDF3D124-24C2-4911-9BB3-C94D0C0AE705}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

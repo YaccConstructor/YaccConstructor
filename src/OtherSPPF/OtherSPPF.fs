@@ -1,4 +1,4 @@
-﻿module Yard.Generators.RNGLR.OtherSPPF
+﻿module OtherSPPF
 
 open System.Collections.Generic
 open System.IO
@@ -7,6 +7,7 @@ open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 open Yard.Generators.Common.DataStructures
 open FSharpx.Collections.Experimental
+
 
 [<AllowNullLiteral>]
 type OtherAST =
@@ -173,7 +174,7 @@ type private Context =
     end
 
 [<AllowNullLiteral>]
-type OtherTree<'TokenType> (tree : Yard.Generators.Common.AST.Tree<'TokenType>) = 
+type OtherTree<'TokenType> (tree : Tree<'TokenType>) = 
     let tokens = tree.Tokens
     let root = 
         let root = 
@@ -531,7 +532,7 @@ type OtherTree<'TokenType> (tree : Yard.Generators.Common.AST.Tree<'TokenType>) 
     /// <summary>
     /// Prints sppf in .dot file
     /// </summary>
-    member this.AstToDot (indToString : int -> string) tokenToNumber (leftSide : array<int>) (path : string) =
+    member this.ToDot (indToString : int -> string) tokenToNumber (leftSide : array<int>) (path : string) =
         let next =
             let cur = ref order.Length
             fun () ->

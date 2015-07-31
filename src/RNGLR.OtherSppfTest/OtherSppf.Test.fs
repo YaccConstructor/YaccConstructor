@@ -1,12 +1,10 @@
 ﻿module RNGLRAstToAstTest
 
 open AbstractAnalysis.Common
-open QuickGraph
-//open Yard.Generators.RNGLR
 open Yard.Generators.ARNGLR
-open Yard.Generators.Common.AST
 open Yard.Generators.RNGLR.AbstractParser
-open Yard.Generators.RNGLR.OtherSPPF
+open OtherSPPF
+
 open NUnit.Framework
 
 let createEdge from _to label = new ParserEdge<_>(from, _to, label)
@@ -15,15 +13,6 @@ let inline printErr (num, token : 'a, msg) =
     printfn "Error in position %d on Token %A: %s" num token msg
     Assert.Fail(sprintf "Error in position %d on Token %A: %s" num token msg)
 
-let inline translate (f : TranslateArguments<_, _> -> 'b -> 'c) (ast : 'b) =
-    let args = {
-        tokenToRange = fun _ -> 0,0
-        zeroPosition = 0
-        clearAST = false
-        filterEpsilons = true
-    }
-    f args ast
-
 let tokenToPos (tokenData : _ -> obj) token = 
     let t = tokenData token
     match t with
@@ -31,7 +20,7 @@ let tokenToPos (tokenData : _ -> obj) token =
     | _ -> failwithf "Unexpected token data: %s" <| t.GetType().ToString()
 
 [<TestFixture>]
-type ``RNGLR ast to otherSPPF translation test`` () =
+type ``AST to otherSPPF translation test`` () =
 
     [<Test>]
     member test.``Elementary test``() =
@@ -163,6 +152,19 @@ type ``Classic case: matching brackets``() =
     
     let errorMessage = "Expected bracket wasn't found"
 
+    let notBracketIsFound token = 
+        let tokenName = RNGLR.ParseSummator.numToString <| tokToNumber token
+        Assert.Fail <| sprintf "%s is found" tokenName
+        -1
+
+
+    let printToDot (otherTree : OtherTree<_>) name = 
+        let indToString = RNGLR.ParseSummator.numToString
+        let leftSide = RNGLR.ParseSummator.leftSide
+
+        otherTree.ToDot indToString tokToNumber leftSide name 
+        
+
     [<Test>]
     member test.``Classic case. Simple test``() =
         let qGraph = new ParserInputGraph<_>(0, 6)
@@ -195,10 +197,7 @@ type ``Classic case: matching brackets``() =
             let actual = 
                 match pairTokens.[0] with
                 | RNGLR.ParseSummator.RBRACE pos -> pos
-                | _ -> 
-                    let token = RNGLR.ParseSummator.numToString <| tokToNumber pairTokens.[0]
-                    Assert.Fail <| sprintf "%s was found" token
-                    -1
+                | _ -> notBracketIsFound pairTokens.[0]
             
             let expectedPos = 4
             Assert.AreEqual (expectedPos, actual, errorMessage)
@@ -235,10 +234,7 @@ type ``Classic case: matching brackets``() =
             let actual = 
                 match pairTokens.[0] with
                 | RNGLR.ParseSummator.RBRACE pos -> pos
-                | _ -> 
-                    let token = RNGLR.ParseSummator.numToString <| tokToNumber pairTokens.[0]
-                    Assert.Fail <| sprintf "%s was founded" token
-                    -1
+                | _ -> notBracketIsFound pairTokens.[0]
             
             let expectedPos = 4
             Assert.AreEqual (expectedPos, actual, errorMessage)
@@ -276,10 +272,7 @@ type ``Classic case: matching brackets``() =
             let actual = 
                 match pairTokens.[0] with
                 | RNGLR.ParseSummator.RBRACE pos -> pos
-                | _ -> 
-                    let token = RNGLR.ParseSummator.numToString <| tokToNumber pairTokens.[0]
-                    Assert.Fail <| sprintf "%s was found" token
-                    -1
+                | _ -> notBracketIsFound pairTokens.[0]
             
             let expectedPos = 3
             Assert.AreEqual (expectedPos, actual, errorMessage)
@@ -316,10 +309,7 @@ type ``Classic case: matching brackets``() =
             let actual = 
                 match pairTokens.[0] with
                 | RNGLR.ParseSummator.LBRACE pos -> pos
-                | _ -> 
-                    let token = RNGLR.ParseSummator.numToString <| tokToNumber pairTokens.[0]
-                    Assert.Fail <| sprintf "%s was found" token
-                    -1
+                | _ -> notBracketIsFound pairTokens.[0]
 
             let expectedPos = 1
             Assert.AreEqual (expectedPos, actual, errorMessage)
@@ -347,7 +337,7 @@ type ``Classic case: matching brackets``() =
         | Parser.Success(mAst) ->
             let other = new OtherTree<_>(mAst)
 
-            RNGLR.ParseSummator.otherAstToDot other "Classic case right to left 2.dot"
+            //printToDot other "Classic case right to left 2.dot"
 
             let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 4 false tokToNumber tokToPos
             
@@ -357,10 +347,7 @@ type ``Classic case: matching brackets``() =
             let actual = 
                 match pairTokens.[0] with
                 | RNGLR.ParseSummator.LBRACE pos -> pos
-                | _ -> 
-                    let token = RNGLR.ParseSummator.numToString <| tokToNumber pairTokens.[0]
-                    Assert.Fail <| sprintf "%s was found" token
-                    -1
+                | _ -> notBracketIsFound pairTokens.[0]
             
             let expected = 0
             Assert.AreEqual (expected, actual, errorMessage)
@@ -408,8 +395,8 @@ type ``Abstract case: matching brackets``() =
             
             let other = new OtherTree<_>(mAst)
 
-            RNGLR.ParseSummator.defaultAstToDot mAst "ast.dot"
-            RNGLR.ParseSummator.otherAstToDot other "other.dot"
+//            RNGLR.ParseSummator.defaultAstToDot mAst "ast.dot"
+//            printToDot other "other.dot"
             let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
 
             Assert.AreEqual (expected.Length, pairTokens.Count)
@@ -607,7 +594,7 @@ type ``Abstract case: matching brackets``() =
 
 //[<EntryPoint>]
 let f x = 
-    let elementary = new ``RNGLR ast to otherSPPF translation test``()
+    let elementary = new ``AST to otherSPPF translation test``()
 //    elementary.``Parents test``()
 //    elementary.``Elementary test``()
 //    elementary.``Epsilon test``()

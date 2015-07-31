@@ -8,6 +8,7 @@ open JetBrains.Application
 open JetBrains.Application.BuildScript.Application.Zones
 open JetBrains.ReSharper.Psi.CSharp.Tree
 
+open OtherSPPF
 open Calc.AbstractParser
 open ReSharperExtension
 open Yard.Generators.Common.AST
@@ -63,9 +64,13 @@ type CalcInjectedLanguageModule() =
     let tokenToTreeNode = tokenToTreeNode
     let translate ast errors = translate args ast errors
 
+    let otherAstToDot (otherAst : OtherTree<_>) name = 
+        otherAst.ToDot numToString tokenToNumber leftSide name
+
     let processor =
-        new Processor<Token, br, range, node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, langName, calculatePos
-                      , getRange, printAstToDot, otherAstToDot, None)
+        new Processor<Token, br, range, node>(tokenize, parse, translate, tokenToNumber
+                        , numToString, tokenData, tokenToTreeNode, langName, calculatePos
+                        , getRange, printAstToDot, otherAstToDot, None)
     
     interface IInjectedLanguageModule<br, range, node> with
         member this.Name = langName

@@ -9,6 +9,7 @@ open JetBrains.Application.BuildScript.Application.Zones
 open JetBrains.ReSharper.Psi.CSharp.Tree
 
 open ControlFlowGraph
+open OtherSPPF
 open ExtCalc.AbstractParser
 open ReSharperExtension
 open Yard.Generators.Common.AST
@@ -57,6 +58,9 @@ type ExtCalcInjectedLanguageModule() =
     
     let printAstToDot ast name = defaultAstToDot ast name
     
+    let otherAstToDot (otherAst : OtherTree<_>) name = 
+        otherAst.ToDot numToString tokenToNumber leftSide name
+    
     let langName = "extcalc"
     let xmlPath = xmlPath
     let tokenToTreeNode = tokenToTreeNode
@@ -87,8 +91,9 @@ type ExtCalcInjectedLanguageModule() =
     let semantic = Some <| (parserSource, langSource, tokToSourceString)
 
     let processor =
-        new Processor<Token, br, range, node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, langName, calculatePos
-                      , getRange, printAstToDot, otherAstToDot, semantic)
+        new Processor<Token, br, range, node>(tokenize, parse, translate, tokenToNumber
+                        , numToString, tokenData, tokenToTreeNode, langName, calculatePos
+                        , getRange, printAstToDot, otherAstToDot, semantic)
     
     interface IInjectedLanguageModule<br, range, node> with
         member this.Name = langName

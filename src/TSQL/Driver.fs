@@ -31,6 +31,7 @@ open JetBrains.Application.BuildScript.Application.Zones
 
 open LexerHelper
 open ReSharperExtension
+open OtherSPPF
 open Yard.Examples.MSParser
 open Yard.Generators.Common.AST
 open YC.FSA.GraphBasedFsa
@@ -80,14 +81,18 @@ type TSQLInjectedLanguageModule() =
         }
 
     let printAstToDot ast name = defaultAstToDot ast name
-    let printOtherAstToDot sppf name = otherAstToDot sppf name
+    
+    let otherAstToDot (otherAst : OtherTree<_>) name = 
+        otherAst.ToDot numToString tokenToNumber leftSide name
 
     let langName = "TSQL"
     let xmlPath = xmlPath
     let tokenToTreeNode = tokenToTreeNode
     let translate ast errors = translate args ast errors
     
-    let processor = new Processor<Token, br, range, node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, langName, calculatePos, getRange, printAstToDot, printOtherAstToDot, None)
+    let processor = new Processor<Token, br, range, node>(tokenize, parse, translate, tokenToNumber
+                        , numToString, tokenData, tokenToTreeNode, langName, calculatePos
+                        , getRange, printAstToDot, otherAstToDot, None)
 
     interface IInjectedLanguageModule<br, range, node> with
         member this.Name = langName

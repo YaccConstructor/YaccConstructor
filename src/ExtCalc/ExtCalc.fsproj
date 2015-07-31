@@ -146,6 +146,11 @@
       <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\OtherSPPF\OtherSPPF.fsproj">
+      <Name>OtherSPPF (SEL.SDK\OtherSPPF\OtherSPPF)</Name>
+      <Project>{f04ea94f-614d-4e58-b214-f328518cbc14}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\ReSharperExtension\ReSharper.Extension.csproj">
       <Name>ReSharper.Extension</Name>
       <Project>{740981f9-878c-4e96-ac6d-8ce178c28c38}</Project>

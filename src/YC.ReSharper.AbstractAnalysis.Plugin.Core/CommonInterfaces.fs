@@ -8,15 +8,13 @@ open QuickGraph.Algorithms
 
 open AbstractAnalysis.Common
 open ControlFlowGraph
+open OtherSPPF
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
-open Yard.Generators.RNGLR.OtherSPPF
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.GraphBasedFst
 open YC.FSA.FsaApproximation
 open YC.FSA.GraphBasedFsa
-
-
 
 type DrawingGraph (vertices : IEnumerable<int>, edges : List<TaggedEdge<int, string>>) =
     member this.Vertices = vertices

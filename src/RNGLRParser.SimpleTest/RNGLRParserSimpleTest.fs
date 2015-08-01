@@ -206,7 +206,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     member test._Brackets() =
         runTest RNGLR._Brackets.buildAst "_Brackets.txt" printAst
 
-[<EntryPoint>]
+//[<EntryPoint>]
 let f x =
     if System.IO.Directory.Exists "dot" 
     then 

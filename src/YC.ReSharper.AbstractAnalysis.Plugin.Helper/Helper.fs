@@ -14,15 +14,18 @@ type br = ICSharpLiteralExpression
 type range = DocumentRange
 type node = ITreeNode 
 
-/// todo: this function code is very similar of code calculatePos function. It's bad. Need refactoring.
-let getRange (pos : Position<br>) = 
-    let startOffset = pos.start_offset
-    let beginPosTok, endPosTok = startOffset + 1, startOffset + 2
-    let grTokenBackRef = pos.back_ref
+
+let private getNeedRange (backRef : br) beginPosTok endPosTok = 
+    let grTokenBackRefRange = backRef.GetDocumentRange()
     let endPos = 
-        grTokenBackRef.GetDocumentRange().TextRange.EndOffset - endPosTok 
-        - grTokenBackRef.GetDocumentRange().TextRange.StartOffset 
-    grTokenBackRef.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
+        let txtRange = grTokenBackRefRange.TextRange
+        txtRange.EndOffset - endPosTok - txtRange.StartOffset 
+    grTokenBackRefRange.ExtendLeft(-beginPosTok).ExtendRight(-endPos)
+
+let getRange (pos : Position<br>) = 
+    let beginPosTok = pos.start_offset + 1
+    let endPosTok = pos.start_offset + 2
+    getNeedRange pos.back_ref beginPosTok endPosTok
 
 let addSemantic (parent : ITreeNode) (children : ITreeNode list) = 
     let mutable prev = null
@@ -50,21 +53,41 @@ let addSemantic (parent : ITreeNode) (children : ITreeNode list) =
 let calculatePos (grToken: FSA<char*Position<#ITreeNode>>) =    
     let ranges = 
         grToken.Edges 
-        |> Seq.groupBy (fun x -> match x.Tag with |Smbl y -> (snd y).back_ref |_ -> failwith "Unexpected Eps!!") //x.BackRef)
+        |> Seq.groupBy 
+            (
+                fun x -> 
+                    match x.Tag with 
+                    | Smbl y -> (snd y).back_ref 
+                    | _ -> failwith "Unexpected Eps!!"
+            ) //x.BackRef)
         |> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)
-        |> Seq.map(fun grToken ->
-            try
-                let pos =  grToken |> Array.map(fun i -> match i.Tag with |Smbl y -> (snd y).start_offset |_ -> failwith "Unexpected Eps!!") //i.StartPos)
-                let lengthTok = pos.Length
-                let beginPosTok = pos.[0] + 1
-                let endPosTok = pos.[lengthTok-1] + 2
-                let grTokenBackRef = match grToken.[0].Tag with |Smbl y -> (snd y).back_ref |_ -> failwith "Unexpected Eps!!" 
-                let endPos = 
-                    grTokenBackRef.GetDocumentRange().TextRange.EndOffset - endPosTok 
-                    - grTokenBackRef.GetDocumentRange().TextRange.StartOffset 
-                grTokenBackRef.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
-            with
-            | e -> 
-                let grTokenBackRef = match grToken.[0].Tag with |Smbl y -> (snd y).back_ref |_ -> failwith "Unexpected Eps!!"
-                grTokenBackRef.GetDocumentRange())
+        |> Seq.map
+            (
+                fun grToken ->
+                    try
+                        let pos =  
+                            grToken 
+                            |> Array.map
+                                (
+                                    fun i -> 
+                                        match i.Tag with 
+                                        | Smbl y -> (snd y).start_offset 
+                                        | _ -> failwith "Unexpected Eps!!"
+                                ) //i.StartPos)
+                        let lengthTok = pos.Length
+                        let beginPosTok = pos.[0] + 1
+                        let endPosTok = pos.[lengthTok-1] + 2
+                        let grTokenBackRef = 
+                            match grToken.[0].Tag with 
+                            | Smbl y -> (snd y).back_ref 
+                            | _ -> failwith "Unexpected Eps!!" 
+                        getNeedRange grTokenBackRef beginPosTok endPosTok
+                    with
+                    | e -> 
+                        let grTokenBackRef = 
+                            match grToken.[0].Tag with 
+                            | Smbl y -> (snd y).back_ref 
+                            | _  -> failwith "Unexpected Eps!!"
+                        grTokenBackRef.GetDocumentRange()
+            )
     ranges

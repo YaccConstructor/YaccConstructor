@@ -4,14 +4,13 @@ open Microsoft.FSharp.Collections
 open System.Collections.Generic
 
 open QuickGraph
-open QuickGraph.Algorithms
 
 open AbstractAnalysis.Common
 open ControlFlowGraph
 open OtherSPPF
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
-open YC.FST.AbstractLexing.Interpreter
+
 open YC.FST.GraphBasedFst
 open YC.FSA.FsaApproximation
 open YC.FSA.GraphBasedFsa
@@ -20,7 +19,7 @@ type DrawingGraph (vertices : IEnumerable<int>, edges : List<TaggedEdge<int, str
     member this.Vertices = vertices
     member this.Edges = edges
 
-type LexingFinishedArgs<'node> (tokens : ResizeArray<'node>, lang:string, drawGraph : DrawingGraph) =
+type LexingFinishedArgs<'node> (tokens : ResizeArray<'node>, lang : string, drawGraph : DrawingGraph) =
      inherit System.EventArgs()
      member this.Tokens = tokens
      member this.Lang = lang
@@ -60,7 +59,9 @@ type IInjectedLanguageModule<'br,'range,'node when 'br : equality> =
 type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:equality and 'node:null  and 'TokenType : equality
     (
         tokenize: FSA<char * Position<'br>> -> Test<ParserInputGraph<'TokenType>, array<Symb<char*Position<'br>>>>
-        , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang, calculatePos:_->seq<'range>
+        , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string
+        , tokenData: 'TokenType -> obj, tokenToTreeNode, lang
+        , calculatePos:_->seq<'range>
         , getDocumentRange: Position<'br> -> 'range
         , printAst: Tree<'TokenType> -> string -> unit
         , printOtherAst: OtherTree<'TokenType> -> string -> unit
@@ -150,7 +151,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
                         //sometimes it needs for debugging purposes
                         //cfg.PrintToDot "result cfg.dot"
                         let semErrors = cfg.FindUndefVariable()
-                        semErrors |> List.iter addSError
+                        semErrors |> List.iter (fun err -> addSError err "Undefined variable")
                     
 
                 | Yard.Generators.ARNGLR.Parser.Error(_, tok, _) -> 
@@ -232,21 +233,23 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
         let parserErrors = new ResizeArray<_>()
         let semanticErrors = new ResizeArray<_>()
 
-        let addError tok isParse =
+        let addPError tok =
             let e tokName (tokenData: FSA<char*Position<'br>>) = 
                 tokenData 
                 |> calculatePos
                 |> Seq.iter
                     ///TODO!!! Produce user friendly error message!
-                    (fun br -> if isParse 
-                               then parserErrors.Add <| ((sprintf "%A" tokName), br)
-                               else semanticErrors.Add <| ((sprintf "%A" tokName), br))
+                    (fun br -> parserErrors.Add <| ((sprintf "%s" tokName), br))
             let name = tok |> (tokenToNumber >>  numToString)
             let tokenData = tokenData tok :?> FSA<char*Position<'br>>
             e name tokenData
         
-        let addPError tok = addError tok true
-        let addSError tok = addError tok false
+        let addSError tok errorMsg = 
+            let name = tok |> (tokenToNumber >> numToString)
+            let data = tokenData tok :?> FSA<char*Position<'br>>
+            data 
+            |> calculatePos
+            |> Seq.iter (fun br -> semanticErrors.Add <| ((sprintf "%s %s" errorMsg name), br))
         
         processLang graph lexerErrors.Add addPError addSError
 

@@ -3,8 +3,6 @@
 open Yard.Generators.RNGLR
 open Yard.Generators.Common.AST
 open NUnit.Framework
-open Yard.Generators
-open LexCommon
 open Microsoft.FSharp.Collections
 
 let run path astBuilder =
@@ -28,7 +26,7 @@ let inline translate (f : TranslateArguments<_,_> -> 'b -> 'c) (ast : 'b) =
 [<TestFixture>]
 type ``RNGLR parser tests with simple lexer`` () =
 
-    let translateAndCheck toDot translateFunction (expected:List<_>) (ast:Tree<_>) file errors = 
+    let translateAndCheck toDot translateFunction (expected : List<_>) (ast : Tree<_>) file errors = 
         ast.PrintAst()
         toDot ast (file + ".dot")
         let res = translate translateFunction ast errors
@@ -83,7 +81,12 @@ type ``RNGLR parser tests with simple lexer`` () =
 
     [<Test>]
     member test.``Translate with Attributes``() =
-        runTest RNGLR.ParseAttrs.buildAst "attrs.txt" (translateAndCheck RNGLR.ParseAttrs.defaultAstToDot RNGLR.ParseAttrs.translate [48])
+        let processSuccess (mAst : Tree<_>) file errors = 
+            mAst.PrintAst()
+            let res = (translate RNGLR.ParseAttrs.translate mAst errors) 3 : int list
+            printfn "Result: %A" res
+            Assert.AreEqual([48], res)
+        runTest RNGLR.ParseAttrs.buildAst "attrs.txt" processSuccess
 
     [<Test>]
     member test.``Parse empty string``() =
@@ -206,13 +209,14 @@ type ``RNGLR parser tests with simple lexer`` () =
     member test._Brackets() =
         runTest RNGLR._Brackets.buildAst "_Brackets.txt" printAst
 
-[<EntryPoint>]
+
+//[<EntryPoint>]
 let f x =
     if System.IO.Directory.Exists "dot" 
     then 
         System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
     else System.IO.Directory.CreateDirectory "dot" |> ignore
     let t = new ``RNGLR parser tests with simple lexer`` ()
-    t.``Calc test - simple for translator`` ()
+    t.``Translate with Attributes`` ()
 
     0

@@ -288,11 +288,11 @@ let printTables
 
         if isAbstractParsingMode
         then
-            printBr "let buildAstAbstract : (ParserInputGraph<'TokenType> -> Yard.Generators.ARNGLR.Parser.ParseResult<Token>) = "
+            printBr "let buildAstAbstract : (ParserInputGraph<Token> -> Yard.Generators.ARNGLR.Parser.ParseResult<Token>) = "
             printBrInd 1 "buildAstAbstract<Token> parserSource"
             printBr ""
         else
-            printBr "let buildAst : (seq<'TokenType> -> ParseResult<Token>) ="
+            printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
             printBrInd 1 "buildAst<Token> parserSource"
             printBr ""
 

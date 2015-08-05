@@ -152,7 +152,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             let value = 
                 if name <> "error" || highlightingOpt.IsSome
                 then sprintf "((unbox %s.[%d]) : '_rnglr_type_%s) " childrenName !num name
-                else sprintf "((unbox %s.[%d]) : list<ErrorNode<'TokenType>>)" childrenName !num
+                else sprintf "((unbox %s.[%d]) : list<ErrorNode<Token>>)" childrenName !num
             value + (printArgsCallOpt args)
             |> wordL
         | PToken name -> 

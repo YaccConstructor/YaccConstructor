@@ -7,6 +7,8 @@ open Yard.Generators.Common.ASTGLL
 open Yard.Generators.Common.DataStructures
 open Microsoft.FSharp.Collections
 open AbstractAnalysis.Common
+open FSharpx.Collections.Experimental
+
 
 //[<Measure>] type vertexMeasure
 [<Measure>] type nodeMeasure
@@ -52,7 +54,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let setR = new Queue<Context>()   
         let setP = new Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>> ()
         let setU = Array.zeroCreate<Dictionary<int<labelMeasure>, Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>>> (input.VertexCount )///1
-
+        let tempCount = ref 0
         let currentVertexInInput = ref 0
         let currentrule = parser.StartRule
         let currentLabel = ref <| packLabel currentrule 0
@@ -129,6 +131,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             if not <| containsContext inputVertex label vertex ast
             then
                 setR.Enqueue(new Context(inputVertex, label, vertex, ast))
+                tempCount := !tempCount + 1
 
         let slotIsEnd (label : int<labelMeasure>) =
             (getPosition label) = Array.length (parser.rules.[getRule label])
@@ -145,7 +148,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 then
                     let newNode = new NonTerminalNode(nTerm, (packExtension lExt rExt))
                     sppfNodes.Add(newNode)
-                    let num = sppfNodes.Count - 1
+                    let num = sppfNodes.Length - 1
                     nonTerminalNodes.[nTerm, lExt, rExt] <- num*1<nodeMeasure>
                     num*1<nodeMeasure>
                 else
@@ -156,7 +159,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     let d = new Dictionary<int<labelMeasure>, int<nodeMeasure>>()
                     let newNode = new IntermidiateNode(int label, (packExtension lExt rExt))
                     sppfNodes.Add(newNode)
-                    let num = (sppfNodes.Count - 1)*1<nodeMeasure>
+                    let num = (sppfNodes.Length - 1)*1<nodeMeasure>
                     d.Add(label, num)
                     intermidiateNodes.[lExt, rExt] <- d 
                     num
@@ -168,7 +171,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     else
                         let newNode = new IntermidiateNode(int label, (packExtension lExt rExt))
                         sppfNodes.Add(newNode)
-                        let num = (sppfNodes.Count - 1)*1<nodeMeasure>
+                        let num = (sppfNodes.Length - 1)*1<nodeMeasure>
                         dict.Add(label, num)
                         num
 
@@ -190,7 +193,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             else 
                 let newNode = new PackedNode(rule, left, right)
                 sppfNodes.Add(newNode)
-                let num = (sppfNodes.Count - 1 )*1<nodeMeasure>
+                let num = (sppfNodes.Length - 1 )*1<nodeMeasure>
                 d.Add(label, num)
                 match (sppfNodes.Item (int symbolNode)) with
                 | :? NonTerminalNode as n ->
@@ -244,10 +247,10 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 terminalNodes.[beginVertix, endVertix, i]
             else
                 tokens.Add tag
-                let t = new TerminalNode(tokens.Count - 1, packExtension beginVertix endVertix)
+                let t = new TerminalNode(tokens.Length - 1, packExtension beginVertix endVertix)
                 sppfNodes.Add t
-                let res = sppfNodes.Count - 1
-                terminalNodes.[beginVertix, endVertix, i] <- ((sppfNodes.Count - 1)*1<nodeMeasure>)
+                let res = sppfNodes.Length - 1
+                terminalNodes.[beginVertix, endVertix, i] <- ((sppfNodes.Length - 1)*1<nodeMeasure>)
                 res * 1<nodeMeasure>
             
                      
@@ -366,7 +369,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             then
               let t = new TerminalNode(-1, packExtension !currentVertexInInput !currentVertexInInput)
               sppfNodes.Add t
-              let res = sppfNodes.Count - 1
+              let res = sppfNodes.Length - 1
               currentR := res * 1<nodeMeasure>
               currentN := getNodeP !currentLabel !currentN !currentR  
               pop !currentGSSNode !currentVertexInInput !currentN 
@@ -435,11 +438,11 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
 //                            condition := true
                                     
                 else
-                    let curRight =  sppfNodes.Item <| int !currentN 
+                    let curRight =  sppfNodes.Item (int !currentN) 
                     match curRight with
                         | :? TerminalNode as t ->
                             currentN := getNodeP !currentLabel !currentR !currentN
-                            let r = (sppfNodes.Item <| int !currentN) :?> NonTerminalNode 
+                            let r = (sppfNodes.Item (int !currentN)) :?> NonTerminalNode 
                             pop !currentGSSNode !currentVertexInInput !currentN
                         | :? NonTerminalNode as r ->
                             if (r.Name = parser.LeftSide.[parser.StartRule]) && (Array.exists (fun a -> a = r.Extension) finalExtensions)
@@ -459,5 +462,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             | Some res -> 
                     let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
                     r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
+                    printfn "%d" !tempCount
                     Success (r1)   
+                     
                         

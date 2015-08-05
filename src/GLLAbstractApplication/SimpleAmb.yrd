@@ -1,3 +1,2 @@
 [<Start>]                       
-s: e
-e: e PLUS NUM | e STAR NUM | NUM
+s : B | s B

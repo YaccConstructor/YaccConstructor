@@ -2,7 +2,7 @@
 <package>
 <metadata>
 <id>YC.SEL.Plugins.Core</id>
-<version>0.3.0.8-On-branch--local</version>
+<version>0.3.0.12</version>
 <title>Core of SEL plugins</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>
@@ -26,7 +26,6 @@
 <file src="..\Bin\Release\v40\FSharpX.Core.*" target="ReSharper\v8.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\Mono.Addins.*" target="ReSharper\v8.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\QuickGraph.*" target="ReSharper\v8.1\plugins" exclude="**\*.Test.*" />
-
 <!-- YC.Tools -->
 <file src="..\Bin\Release\v40\YC.FsYacc.*" target="ReSharper\v8.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\YC.FsLex.*" target="ReSharper\v8.1\plugins" exclude="**\*.Test.*" />

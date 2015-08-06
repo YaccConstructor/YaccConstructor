@@ -2,7 +2,7 @@
 <package>
 <metadata>
 <id>YC.Core</id>
-<version>0.3.0.13-On-branch--local</version>
+<version>0.3.0.12</version>
 <title>Core of YaccConstructor</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>
@@ -21,7 +21,6 @@
 <dependency id="Mono.Addins" version="1.1.0" />
 </dependencies>
 <references>
-<reference file="FsYacc.exe" />
 <reference file="YC.FsYacc.exe" />
 <reference file="YC.Common.dll" />
 <reference file="YC.Conversions.dll" />
@@ -40,7 +39,6 @@
 <file src="..\Bin\Release\v40\FSharp.Core.*" target="lib\net40\" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\FSharpx.Core.*" target="lib\net40\" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\FSharpx.Text.StructuredFormat.*" target="lib\net40\" exclude="**\*.Test.*" />
-<file src="..\Bin\Release\v40\FsYacc.*" target="lib\net40\" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\Generators.Common.*" target="lib\net40\" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\YC.FsYacc.*" target="lib\net40\" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\Mono.Addins.*" target="lib\net40\" exclude="**\*.Test.*" />

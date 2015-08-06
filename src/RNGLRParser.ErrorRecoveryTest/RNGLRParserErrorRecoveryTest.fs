@@ -227,4 +227,4 @@ type ``RNGLR error recovery tests`` () =
 (new ``RNGLR error recovery tests``()).``Calc error inside in braces2``()*)
 
 (*[<EntryPoint>]
-(new ``RNGLR error recovery tests``()).``PrintErrorInfoEOF``()*)
+(new ``RNGLR error recovery tests``()).``PrintErrorInfo``()*)

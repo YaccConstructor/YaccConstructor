@@ -12,7 +12,6 @@
     <Name>OtherSPPF</Name>
   </PropertyGroup>
   <Import Project="../YC.targets" />
-  <Import Project="../YC.targets" />
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>

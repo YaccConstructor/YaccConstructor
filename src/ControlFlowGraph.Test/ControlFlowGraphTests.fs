@@ -15,7 +15,7 @@ open Yard.Generators.RNGLR.AbstractParser
 open NUnit.Framework
 open QuickGraph
 
-let needPrint = true
+let needPrint = false
 
 let createEdge from _to label = new ParserEdge<_>(from, _to, label)
 

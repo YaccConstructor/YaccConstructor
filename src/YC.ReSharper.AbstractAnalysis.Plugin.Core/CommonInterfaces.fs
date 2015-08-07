@@ -147,7 +147,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
                         //sometimes it needs for debugging purposes
                         //printAst tree "result ast.dot"
                         let pSource, lSource, tokToSourceString = semantic.Value
-                        let cfg = new ControlFlow<'TokenType>(tree, pSource, lSource, tree.Tokens, tokToSourceString)
+                        let cfg = new ControlFlow<'TokenType>(tree, pSource, lSource, tokToSourceString)
                         //sometimes it needs for debugging purposes
                         //cfg.PrintToDot "result cfg.dot"
                         let semErrors = cfg.FindUndefVariable()

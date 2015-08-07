@@ -8,7 +8,9 @@ open JetBrains.Application
 open JetBrains.Application.BuildScript.Application.Zones
 open JetBrains.ReSharper.Psi.CSharp.Tree
 
-open ControlFlowGraph
+open ControlFlowGraph.Common
+open ControlFlowGraph.InputStructures
+
 open OtherSPPF
 open ExtCalc.AbstractParser
 open ReSharperExtension
@@ -75,8 +77,8 @@ type ExtCalcInjectedLanguageModule() =
             n = num2
 
     let nodeToType = dict["assign", Assignment;]
-    let typeToDelimiters = dict [Assignment, [semicolonNumber]; ]
-    let langSource = new LanguageSource(nodeToType, typeToDelimiters, -1, -1, eqNumber, isVariable)
+    let keywordToInt = dict [SEMICOLON, semicolonNumber; ]
+    let langSource = new LanguageSource(nodeToType, keywordToInt, isVariable)
 
     let tokToSourceString token = 
         let tok = (unbox <| tokenData token) :> FSA<char*Position<br>>
@@ -87,7 +89,7 @@ type ExtCalcInjectedLanguageModule() =
         |> List.ofSeq
         |> List.fold (fun acc elem -> acc + elem) ""
 
-    let parserSource = new ParserSource<Token>(tokenToNumber, numToString, leftSide, tokenData)
+    let parserSource = new CfgParserSource<Token>(tokenToNumber, numToString, leftSide, tokenData)
     let semantic = Some <| (parserSource, langSource, tokToSourceString)
 
     let processor =

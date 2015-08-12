@@ -4,27 +4,32 @@ open Microsoft.FSharp.Collections
 open System.Collections.Generic
 
 open ControlFlowGraph.Common
-open ControlFlowGraph.InputStructures
 open ControlFlowGraph.CfgElements
 open ControlFlowGraph.InnerGraph
 
+///Links tow nodes: exit from first node is entry for second one
 let private concatNodes (from : InterNode<_> * InterNode<_>) (_to : InterNode<_> * InterNode<_>) = 
     let entry, oldExit = from
     let oldEntry, exit = _to
-
+    
     oldEntry.ReplaceMeForChildrenOn oldExit
 
     entry, exit
 
+///Sets for current nodes common entry node and exit node
 let private mergeTwoNodes (one : (InterNode<_> * InterNode<_>)) (two : (InterNode<_> * InterNode<_>)) = 
     let commonEntry, commonExit = one
-    
-    (fst two).ReplaceMeForChildrenOn commonEntry
-    (snd two).ReplaceMeForParentsOn commonExit
+    let sndStart, sndFinish = two
 
+    if commonEntry <> sndStart
+    then sndStart.ReplaceMeForChildrenOn commonEntry
+    
+    if commonExit <> sndFinish
+    then sndFinish.ReplaceMeForParentsOn commonExit
+    
     commonEntry, commonExit    
 
-//sets common parent and common children for nodes
+//Sets common parent and common children for nodes
 let private mergeNodes (nodes : (InterNode<_> * InterNode<_> list) list) = 
     let setCommonParent commonEntry = 
         nodes
@@ -43,13 +48,13 @@ let private mergeNodes (nodes : (InterNode<_> * InterNode<_> list) list) =
         nodes
         |> List.tail
         |> List.iter 
-                (
-                    fun block -> 
-                        let oldExit = snd block
-                        oldExit 
-                        |> List.iter2 
-                            (fun oldChild newChild -> replace oldChild newChild) commonExit 
-                )    
+            (
+                fun block -> 
+                    let oldExit = snd block
+                    oldExit 
+                    |> List.iter2 
+                        (fun oldChild newChild -> replace oldChild newChild) commonExit 
+            )
     
     let commonEntry, commonExit = nodes.Head
     setCommonParent commonEntry
@@ -59,16 +64,17 @@ let private mergeNodes (nodes : (InterNode<_> * InterNode<_> list) list) =
 
 let private processAssignmentGraph (graph : CfgBlocksGraph<_>) = 
     
+    let processEdge (edge : BlockEdge<_>) = 
+        match edge.Tag with
+        | Simple toks -> 
+            let tokens = toks |> List.toArray 
+            AssignmentBlock.Create tokens
+        | x -> failwithf "Unexpected edge type in Assignment: %s" <| x.GetType().ToString()
+
     let start = graph.StartVertex
     let assigns = 
         graph.OutEdges(start)
-        |> Seq.map
-            (
-                fun (edge : BlockEdge<_>)-> 
-                    match edge.Tag with
-                    | Simple toks -> AssignmentBlock.Create <| List.toArray toks
-                    | x -> failwithf "Unexpected edge type in Assignment: %s" <| x.GetType().ToString()
-            )
+        |> Seq.map processEdge
         //all assign blocks have only one child
         |> Seq.map (fun assign -> assign.Parent, assign.Children)
         |> List.ofSeq
@@ -79,16 +85,15 @@ let private processAssignmentGraph (graph : CfgBlocksGraph<_>) =
 
 let private processConditionGraph (graph : CfgBlocksGraph<_>) = 
     
+    let processEdge (edge : BlockEdge<_>) = 
+        match edge.Tag with
+        | Simple toks -> ConditionBlock.Create <| List.toArray toks
+        | x -> failwithf "Unexpected edge type in Condition: %s" <| x.GetType().ToString()
+
     let start = graph.StartVertex
     let conds = 
         graph.OutEdges(start)
-        |> Seq.map
-            (
-                fun (edge : BlockEdge<_>)-> 
-                    match edge.Tag with
-                    | Simple toks -> ConditionBlock.Create <| List.toArray toks
-                    | x -> failwithf "Unexpected edge type in Condition: %s" <| x.GetType().ToString()
-            )
+        |> Seq.map processEdge
         |> Seq.map (fun cond -> cond.Parent, cond.Children)
         |> List.ofSeq
         
@@ -145,7 +150,7 @@ let rec processIfGraph (ifGraph : CfgBlocksGraph<_>) =
     else
         //exit node in 'then' block must be exactly the same as that of 'cond' block
 
-        //supposed then block has only one exit node
+        //supposed 'then' block has only one exit node
         let thenExit = snd thenBlock.Value
         exits.[1].ReplaceMeForParentsOn thenExit
         exitNode <- thenExit
@@ -154,7 +159,7 @@ let rec processIfGraph (ifGraph : CfgBlocksGraph<_>) =
 
 and processSeq (graph : CfgBlocksGraph<_>) = 
 
-    let vertexToInterNode = new Dictionary<_, (InterNode<'TokenType> * InterNode<'TokenType>)>()
+    let vertexToInterNode = new Dictionary<_, _>()
     let queue = new Queue<_>()
 
     let addToDictionary key value = 
@@ -178,8 +183,13 @@ and processSeq (graph : CfgBlocksGraph<_>) =
             (
                 fun edge -> 
                     let target = edge.Target
-                    if not <| queue.Contains target
-                    then queue.Enqueue target
+
+                    //target <= vertex means that current edge is reverse edge. 
+                    //so if we add target vertex to queue then cycle is occured.
+                    if target > vertex
+                    then
+                        if not <| queue.Contains target
+                        then queue.Enqueue target
                     
                     let oldValue = getOldValue vertex
 
@@ -206,9 +216,8 @@ and processSeq (graph : CfgBlocksGraph<_>) =
                     | x -> failwith "Unexpected edge tag: %s" <| x.GetType().ToString()
             )
     
-    let endVertex = graph.VertexCount - 1
-    vertexToInterNode.[endVertex]
+    vertexToInterNode.[graph.EndVertex]
 
-let graphToCfg (graph : CfgBlocksGraph<'TokenType>) = 
-    
+let graphToCfg (graph : CfgBlocksGraph<_>) tokenToString = 
+    //graph.RelaxedPrintToDot "``input.dot" tokenToString
     processSeq graph

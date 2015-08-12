@@ -14,7 +14,7 @@ type EdgeType<'TokenType> =
     static member ToString edge = 
         match edge with
         | EmptyEdge -> "Empty edge"
-        | Simple _ -> "Simple edge"
+        | Simple tokens -> tokens.ToString()// "Simple edge"
         | Complicated (blockType, _) -> BlockType.BlockTypeToString blockType
 
 and BlockEdge<'TokenType>(source, target, tag) = 
@@ -29,6 +29,7 @@ and CfgBlocksGraph<'TokenType>() =
     inherit AdjacencyGraph<int, BlockEdge<'TokenType>>()
 
     member this.StartVertex = 0
+    member this.EndVertex = Seq.max this.Vertices
 
     member this.AddEdgeForced (e : BlockEdge<'TokenType>) =
         this.AddVertex e.Source |> ignore
@@ -40,7 +41,8 @@ and CfgBlocksGraph<'TokenType>() =
     /// Each edge contains edgeType only
     /// </summary>
     /// <param name="name">Name of .dot file</param>
-    member this.RelaxedPrintToDot (name : string) = 
+    /// <param name="tokenToStringOpt">Token to string mapping option</param>
+    member this.RelaxedPrintToDot (name : string) (tokenToStringOpt : _ option)= 
         use out = new StreamWriter (name : string)
         out.WriteLine("digraph AST {")
         out.WriteLine "rankdir=LR"
@@ -48,11 +50,33 @@ and CfgBlocksGraph<'TokenType>() =
         |> Seq.iter (fun i -> out.Write (sprintf "%d ;" i))
         out.WriteLine()
 
+        let getSuffix (tag : EdgeType<_>) = 
+            if tokenToStringOpt.IsNone
+            then 
+                ""
+            else
+                let tok2String = tokenToStringOpt.Value
+                match tag with
+                | Complicated (_, graph) -> 
+                    if graph.EdgeCount = 1 
+                    then 
+                        let edge = graph.Edges |> Seq.toList |> List.head 
+                        match edge.Tag with
+                        | Simple tokens -> 
+                            tokens 
+                            |> List.map tok2String
+                            |> String.concat " "
+                        | _ -> ""
+                    else ""
+                | _ -> ""
+
         this.Edges
         |> Seq.iter
             (
                 fun edge ->
-                    let tagName = EdgeType<_>.ToString edge.Tag
+                    let prefix = EdgeType<_>.ToString edge.Tag
+                    let suffix = getSuffix edge.Tag
+                    let tagName = prefix + " " + suffix
                     out.WriteLine (sprintf "%d -> %d [label=\" %s \"]" edge.Source edge.Target tagName)
             )
         out.WriteLine("}")
@@ -73,21 +97,25 @@ type GraphConstructor<'TokenType> =
     new (g : CfgBlocksGraph<_>) = new GraphConstructor<_>(g, g.StartVertex, g.StartVertex + 1)
     new () = new GraphConstructor<_>(new CfgBlocksGraph<_>())
 
-    ///Adds edge with edgeTag.
-    ///Source vertex is StartVertex.
-    ///Target vertex is EndVertex.
+    /// <summary>
+    ///<para>Adds edge with edgeTag to graph.</para><br />
+    ///<para>Source vertex is StartVertex.</para><br />
+    ///<para>Target vertex is EndVertex.</para><br />
+    /// </summary>
     member this.AddEdge edgeTag = 
         let edge = new BlockEdge<_>(this.StartVertex, this.EndVertex, edgeTag)
         this.Graph.AddEdgeForced edge
 
-    /// Adds edge with edgeTag from source vertex to target vertex
+    /// <summary>
+    ///<para>Adds edge with edgeTag from source vertex to target vertex</para><br />
+    /// </summary>
     member this.AddEdgeFromTo edgeTag source target = 
         let edge = new BlockEdge<_>(source, target, edgeTag)
         this.Graph.AddEdgeForced edge
 
     /// <summary>
     /// Updates StartVertex and EndVertex values.
-    /// StartVertex becomes equal to EndVertex and
+    /// <para>StartVertex becomes equal to EndVertex and</para><br />
     /// EndVertex increments its value.
     /// </summary>
     member this.UpdateVertices() = 

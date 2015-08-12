@@ -14,13 +14,12 @@ open ControlFlowGraph.TokensExtractor
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 
-
 type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                             , parserSource : CfgParserSource<'TokenType>
                             , langSource : LanguageSource
                             , tokToSourceString : _ -> string) = 
     
-    let input = tree.Tokens
+    let intToToken = fun i -> tree.Tokens.[i]
 
     let entry, exit = 
         let treeRoot = 
@@ -28,6 +27,9 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
             | :? AST as ast -> ast
             | _ -> null
         
+        let familyToStartVertex = new Dictionary<_, _>()
+        let familyToEndVertex = new Dictionary<_, _>()
+
         let rec handleAst (ast : AST) (parentGraphInfo : GraphConstructor<_>) = 
         
             let handleFamily (family : Family) = 
@@ -40,59 +42,15 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                     | :? AST as ast -> handleAst ast parentGraphInfo
                     | x -> failwithf "Unexpected AST node type in Control Flow graph construction: %s" <| x.GetType().ToString()
 
+
                 if langSource.NodeToType.ContainsKey familyName 
                 then 
                     match langSource.NodeToType.[familyName] with
                     | IfStatement -> 
-                        let blockType = ref IfStatement
-                        
+
                         let tempDict = langSource.GetTempIfDict()
-
-                        let condGraph = new GraphConstructor<_>()
-                        let thenGraph = new GraphConstructor<_>()
-                        let elseGraphOpt = ref None
-
-                        family.nodes.doForAll
-                            (
-                                fun node -> 
-                                    match node with
-                                    | :? Epsilon -> ()
-                                    | :? Terminal as t -> 
-                                        let terminalNum = parserSource.TokenToNumber input.[t.TokenNumber]
-                                        if tempDict.ContainsKey terminalNum 
-                                        then blockType := tempDict.[terminalNum]
-
-                                    | :? AST as ast -> 
-                                        match !blockType with
-                                        | IfStatement -> 
-                                            let condToksGraphs = extractNodesFromAST ast
-
-                                            condToksGraphs
-                                            |> Array.map 
-                                                (
-                                                    fun graph -> 
-                                                        graph.CollectAllTokens()
-                                                        |> List.concat
-                                                        |> List.map (fun t -> input.[t])
-                                                    )
-                                            |> Array.iter(fun tokensSet -> condGraph.AddEdge <| Simple tokensSet) 
-                                            blockType := ThenStatement
-                                        
-                                        | ThenStatement -> 
-                                            handle ast thenGraph
-                                            blockType := ElseStatement
-
-                                        | ElseStatement -> 
-                                            let elseGraph = new GraphConstructor<_>()
-                                            handle ast elseGraph
-                                            elseGraphOpt := Some <| elseGraph.Graph
-
-                                        | x -> failwithf "Unexpected type in 'if' construction: %s" <| x.ToString()
-                                    
-                                    | x -> failwithf "Unexpected node type: %s" <| x.ToString()
-                            )
-
-                        let ifGraph = createIfGraph condGraph.Graph thenGraph.Graph !elseGraphOpt
+                        
+                        let ifGraph = processIf family handle intToToken tempDict parserSource.TokenToNumber
                         let ifTag = Complicated (IfStatement, ifGraph)
                         parentGraphInfo.AddEdge ifTag
                         parentGraphInfo.UpdateVertices()
@@ -104,12 +62,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                         let assignmentGraph = new GraphConstructor<_>()
 
                         toksGraph.CollectAllTokens()
-                        |> List.map 
-                                (
-                                    fun tokensSet -> 
-                                        tokensSet
-                                        |> List.map (fun tok -> tree.Tokens.[tok])
-                                )
+                        |> List.map(fun tokensSet -> tokensSet |> List.map intToToken)
                         |> List.iter(fun tokensSet -> assignmentGraph.AddEdge <| Simple tokensSet)
 
                         let assignmentTag = Complicated (Assignment, assignmentGraph.Graph)
@@ -123,9 +76,20 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
             let family = ast.first
 
             let commonStart = parentGraphInfo.StartVertex
-            handleFamily family
-            let finishNumber = parentGraphInfo.StartVertex
+            
+            if familyToStartVertex.ContainsKey family 
+            then 
+                let target = familyToStartVertex.[family]
+                
+                parentGraphInfo.AddEdgeFromTo EmptyEdge commonStart target
+                printfn "familyToEndVertex.Contains family %b" <| familyToEndVertex.ContainsKey family
+                //what about familyToEndVertex?
+            else
+                familyToStartVertex.[family] <- parentGraphInfo.StartVertex
+                handleFamily family
+                familyToEndVertex.[family] <- parentGraphInfo.StartVertex
 
+            let finishNumber = familyToEndVertex.[family]
             if ast.other <> null 
             then
                 let newEndNumbers = 
@@ -134,22 +98,37 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                         (
                             fun family -> 
                                 parentGraphInfo.StartVertex <- commonStart
-                                handleFamily family
-                                parentGraphInfo.StartVertex
+                                
+                                if familyToStartVertex.ContainsKey family 
+                                then 
+                                    let target = familyToStartVertex.[family]
+                
+                                    parentGraphInfo.AddEdgeFromTo EmptyEdge commonStart target
+                                    printfn "familyToEndVertex.Contains family %b" <| familyToEndVertex.ContainsKey family
+                                    //what about familyToEndVertex?
+                                else
+                                    familyToStartVertex.[family] <- parentGraphInfo.StartVertex
+                                    handleFamily family
+                                    familyToEndVertex.[family] <- parentGraphInfo.StartVertex
+                                
+                                if familyToEndVertex.ContainsKey family
+                                then Some familyToEndVertex.[family]
+                                else None
                         )
+                    |> Array.append [|Some finishNumber|]
 
                 let commonFinish = parentGraphInfo.EndVertex
-                parentGraphInfo.AddEdgeFromTo EmptyEdge finishNumber commonFinish
-
                 newEndNumbers
-                |> Array.iter (fun num -> parentGraphInfo.AddEdgeFromTo EmptyEdge num commonFinish)
-                
+                |> Array.iter 
+                    (
+                        Option.iter (fun num -> parentGraphInfo.AddEdgeFromTo EmptyEdge num commonFinish)
+                    )
                 parentGraphInfo.UpdateVertices()
 
         let graphInfo = new GraphConstructor<_>()
         handleAst treeRoot graphInfo
         
-        graphToCfg graphInfo.Graph
+        graphToCfg graphInfo.Graph (Some parserSource.TokenToString)
 
     let findUndefVariable() = 
         
@@ -192,11 +171,11 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                     let varName = tok |> tokToSourceString
 
                     //Is it error?
-                    if not <| List.exists (fun t -> t = varName) !defVars
+                    if List.forall ((<>) varName) !defVars
                     then
                         let tokData = parserSource.TokenToData tok
                         //Is it new error?
-                        if not <| List.exists (fun t -> parserSource.TokenToData t = tokData) !errorList     
+                        if List.forall (fun t -> parserSource.TokenToData t <> tokData) !errorList     
                         then errorList := tok :: !errorList 
 
             if newVar.IsSome 
@@ -209,7 +188,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
             
             let intersect one two = 
                 one 
-                |> List.filter (fun elem1 -> List.exists (fun elem2 -> elem1 = elem2) two)
+                |> List.filter (fun elem1 -> List.exists ((=) elem1) two)
 
             node.Children 
             |> List.iter 
@@ -249,7 +228,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
         while queue.Count > 0 do
             let node = queue.Dequeue()
             node.Children
-            |> List.iter(fun block -> block.Children |> List.iter(fun n -> processNode n))
+            |> List.iter(fun block -> block.Children |> List.iter processNode)
 
         markedNodes.Count
 
@@ -265,13 +244,13 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                     queue.Enqueue block
         
             node.Children 
-            |> List.iter(fun block -> processBlock block)
+            |> List.iter processBlock
     
         processNode entry
         while queue.Count > 0 do
             let block = queue.Dequeue()
             block.Children
-            |> List.iter(fun node -> processNode node)
+            |> List.iter processNode
 
         markedBlocks.Count
 

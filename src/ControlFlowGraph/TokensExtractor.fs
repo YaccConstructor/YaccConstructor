@@ -4,12 +4,15 @@ open System.Collections.Generic
 
 open QuickGraph
 
-open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 
 type TokensEdge(source, target, tag) = 
     inherit TaggedEdge<int, int option>(source, target, tag)
 
+/// <summary>
+/// <para>Intermediate structure that is obtained after processing the AST node or family.</para><br />
+/// Each edge is labelled token option.
+/// </summary>
 type CfgTokensGraph() =
     inherit AdjacencyGraph<int, TokensEdge>()
     
@@ -32,12 +35,12 @@ type CfgTokensGraph() =
             let newData = 
                 data
                 |> List.map 
-                        (
-                            fun tokList -> 
-                                if edge.Tag.IsSome
-                                then tokList |> List.append [edge.Tag.Value]
-                                else tokList
-                        )
+                    (
+                        fun tokList -> 
+                            if edge.Tag.IsSome
+                            then tokList |> List.append [edge.Tag.Value]
+                            else tokList
+                    )
             
             let newVertex = edge.Target
             
@@ -53,8 +56,7 @@ type CfgTokensGraph() =
             
             let data = 
                 if not <| vertexToTokens.ContainsKey vertex 
-                then 
-                    vertexToTokens.[vertex] <-  [[]]
+                then vertexToTokens.[vertex] <-  [[]]
                 vertexToTokens.[vertex]
             
             this.OutEdges vertex
@@ -65,12 +67,14 @@ type CfgTokensGraph() =
             handleVertex vertex
 
         vertexToTokens.[endVertex]
-        |> List.map (fun set -> set |> List.rev)
+        |> List.map List.rev
 
-///takes family and builds graph
-///each edge is labeled some token
-///if family doesn't contain ambiguous then graph'll be linear.
-///otherwise it'll contain branches.
+/// <summary>
+///<para>Takes family and builds graph.
+///Each edge is labeled some token.</para><br />
+///<para>If there aren't ambiguous then graph'll be linear.
+///Otherwise it'll contain branches.</para><br />
+/// </summary>
 let extractNodesFromFamily (fam : Family) = 
     let tokensGraph = new CfgTokensGraph()
     let tStartVertex = ref tokensGraph.StartVertex
@@ -103,11 +107,11 @@ let extractNodesFromFamily (fam : Family) =
 
                 allEndVertex
                 |> List.iter 
-                        (
-                            fun num -> 
-                                let edge = TokensEdge(num, commonEndVertex, None)
-                                tokensGraph.AddEdgeForced edge
-                        )
+                    (
+                        fun num -> 
+                            let edge = TokensEdge(num, commonEndVertex, None)
+                            tokensGraph.AddEdgeForced edge
+                    )
                 startVertex := !endVertex
                 incr endVertex
             else
@@ -123,11 +127,17 @@ let extractNodesFromFamily (fam : Family) =
     fam.nodes.doForAll(fun node -> collectTokens node tStartVertex tEndVertex)
     tokensGraph
 
+/// <summary>
+///<para>Takes AST and builds graph.
+///Each edge is labeled some token.</para><br />
+///<para>If there aren't ambiguous then graph'll be linear.
+///Otherwise it'll contain branches.</para><br />
+/// </summary>
 let extractNodesFromAST (ast : AST)= 
     if ast.other = null
     then
         [|extractNodesFromFamily ast.first|]
     else
         ast.other
-        |> Array.map (fun fam -> extractNodesFromFamily fam)
+        |> Array.map extractNodesFromFamily
         |> Array.append [| extractNodesFromFamily ast.first |] 

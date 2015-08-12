@@ -4,6 +4,8 @@ open System.Collections.Generic
 
 open ControlFlowGraph.Common
 
+///Contains information about parser generated stuff:
+///number to string mapping, token to number mapping etc.
 type CfgParserSource<'TokenType> = 
     val TokenToNumber : 'TokenType -> int
     val LeftSides : array<int>
@@ -20,7 +22,9 @@ type CfgParserSource<'TokenType> =
 
     member this.TokenToString = this.TokenToNumber >> this.NumToString
         
-
+///Contains information about language:
+///non-terminal to block type mapping, 
+///keywords to int mapping etc
 type LanguageSource = 
     val NodeToType : IDictionary<string, BlockType>
     val KeywordToInt : IDictionary<Keyword, int>

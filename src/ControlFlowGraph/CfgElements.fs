@@ -11,6 +11,7 @@ type Block<'TokenType>(blockType, vals) =
     let mutable parent = new InterNode<'TokenType>()
     let mutable children = []
 
+    /// Tokens 
     member this.Values = values
     member this.Parent 
         with get() = parent
@@ -24,13 +25,15 @@ type Block<'TokenType>(blockType, vals) =
 
     member this.ReplaceParent parent = this.Parent <- parent
     
-    member this.AddChild (child : InterNode<_>)= 
+    member this.AddChild (child : InterNode<_>) = 
         if children.IsEmpty 
         then children <- [child]
-        else children <- children @ [child]
+        //checks if it's new child
+        elif children |> List.forall ((<>) child)
+        then children <- children @ [child]
 
     member this.ReplaceChild oldChild newChildren = 
-        children <- children |> List.filter (fun child -> child <> oldChild)
+        children <- children |> List.filter ((<>) oldChild)
         children <- children @ newChildren
 
     member this.BlockToString (tokToString : 'TokenType -> string) = 
@@ -74,30 +77,58 @@ and InterNode<'TokenType>(children : list<_>, parents : list<_>) =
     member this.AddChild (block : Block<'TokenType>) : unit = 
         if children.IsEmpty
         then children <- [block]
-        else children <- children @ [block]
+        elif children |> List.forall ((<>) block)
+        then children <- children @ [block]
 
     member this.AddParent (parent : Block<'TokenType>) : unit = 
         if parents.IsEmpty
         then parents <- [parent]
         else parents <- parents @ [parent]
 
-    /// replace exit node on some other node
+    /// <summary>
+    /// <para>Replaces exit node on some other node.</para><br />
+    /// <para>Possible duplicated are ignored.</para>
+    /// </summary>
     member this.ReplaceMeForParentsOn (node : InterNode<_>) = 
         
         if node <> this
         then
-            node.Parents <- node.Parents @ this.Parents
-        
+            let temp = 
+                this.Parents
+                |> List.fold
+                    (
+                        fun acc parent ->  
+                            if acc |> List.forall ((<>) parent)
+                            then acc @ [parent]
+                            else acc
+                    ) 
+                    node.Parents
+            
+            node.Parents <- temp
+
             this.Parents
             |> List.iter (fun block -> block.ReplaceChild this [node])
 
-    /// replace entry node on some other node
+    /// <summary>
+    /// <para>Replaces entry node on some other node.</para><br />
+    /// <para>Possible duplicated are ignored.</para>
+    /// </summary>
     member this.ReplaceMeForChildrenOn (node : InterNode<_>) = 
 
         if node <> this
         then
-            node.Children <- node.Children @ this.Children
-        
+            let temp = 
+                this.Children
+                |> List.fold
+                    (
+                        fun acc child -> 
+                            if acc |> List.forall ((<>) child)
+                            then acc @ [child]
+                            else acc
+                    ) node.Children
+
+            node.Children <- temp
+            
             this.Children
             |> List.iter (fun block -> block.ReplaceParent node)
 
@@ -130,6 +161,7 @@ type ConditionBlock<'TokenType>(tokens) =
 
         let res = Block.AttachParentAndChild condBlock
         
+        //conditional block has two exit nodes (for 'true' and 'false' cases)
         let sndChild = new InterNode<'TokenType>()
         res.AddChild sndChild
         sndChild.AddParent res

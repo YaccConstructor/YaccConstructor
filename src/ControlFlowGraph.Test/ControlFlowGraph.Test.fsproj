@@ -34,6 +34,7 @@
   <ItemGroup>
     <Compile Include="ExtendedCalc.yrd.fs" />
     <Compile Include="If.yrd.fs" />
+    <Compile Include="Simple.yrd.fs" />
     <Compile Include="ControlFlowGraphTests.fs" />
     <None Include="packages.config" />
     <None Include="app.config" />

@@ -1,6 +1,7 @@
 ﻿module ControlFlowGraphTests
 
-open System.Collections.Generic
+open NUnit.Framework
+open QuickGraph
 
 open AbstractAnalysis.Common
 
@@ -11,9 +12,6 @@ open ControlFlowGraph.InputStructures
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR.AbstractParser
-
-open NUnit.Framework
-open QuickGraph
 
 let needPrint = false
 
@@ -30,7 +28,7 @@ let tokenToPos (tokenData : _ -> obj) token =
     | _ -> failwith ""
 
 [<TestFixture>]
-type ``Control Flow Graph Building`` () =
+type ``Control Flow Graph building: Simple cases`` () =
     let buildAbstractAst = RNGLR.ParseExtendedCalc.buildAstAbstract
     let tokenToNumber = RNGLR.ParseExtendedCalc.tokenToNumber
     let leftSides = RNGLR.ParseExtendedCalc.leftSide
@@ -43,8 +41,6 @@ type ``Control Flow Graph Building`` () =
         
     let keywordToInt = dict [SEMICOLON, semicolonNumber;]
 
-    let stmntNumber = 0
-        
     let tokToRealString tok = tok |> tokenToNumber |> indToString
     let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, keywordToInt)
@@ -97,7 +93,7 @@ type ``Control Flow Graph Building`` () =
 
         let expectedNodes = 4
         let expectedBlocks = 3
-        let printNames = "ast elementary (cfg construction).dot", "cfg elementary (cfg construction).dot"
+        let printNames = "`cfg construction ast elementary.dot", "`cfg construction cfg elementary.dot"
         runTest qGraph expectedBlocks expectedNodes printNames
 
     [<Test>]
@@ -132,7 +128,7 @@ type ``Control Flow Graph Building`` () =
 
         let expectedNodes = 4
         let expectedBlocks = 4
-        let printNames = "ast ambiguous (cfg construction).dot", "cfg ambiguous (cfg construction).dot"
+        let printNames = "`cfg construction ast ambiguous.dot", "`cfg construction cfg ambiguous.dot"
         runTest qGraph expectedBlocks expectedNodes printNames
 
     [<Test>]
@@ -153,12 +149,96 @@ type ``Control Flow Graph Building`` () =
 
         let expectedNodes = 2
         let expectedBlocks = 2
-        let printNames = "ast ambiguous2 (cfg construction).dot", "cfg ambiguous2 (cfg construction).dot"
+        let printNames = "`cfg construction ast ambiguous2.dot", "`cfg construction cfg ambiguous2.dot"
+        runTest qGraph expectedBlocks expectedNodes  printNames
+
+[<TestFixture>]
+type ``Control Flow Graph building: Cycles``() = 
+    let buildAbstractAst = RNGLR.ParseSimple.buildAstAbstract
+    let tokenToNumber = RNGLR.ParseSimple.tokenToNumber
+    let leftSides = RNGLR.ParseSimple.leftSide
+    let indToString = RNGLR.ParseSimple.numToString
+    let tokenData = RNGLR.ParseSimple.tokenData
+
+    let semicolon = RNGLR.ParseSimple.SEMICOLON 0
+    let semicolonNumber = tokenToNumber semicolon
+    let nodeToType = dict["assign", Assignment;]
+        
+    let keywordToInt = dict [SEMICOLON, semicolonNumber;]
+
+    let tokToRealString tok = tok |> tokenToNumber |> indToString
+    let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
+    let langSource = new LanguageSource(nodeToType, keywordToInt)
+
+    let runTest graph expectedBlocksCount expectedNodesCount printNames = 
+        let parseResult = (new Parser<_>()).Parse buildAbstractAst graph
+        
+        match parseResult with 
+        | Yard.Generators.ARNGLR.Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Yard.Generators.ARNGLR.Parser.Success (mAst) ->
+            if needPrint
+            then
+                let astName = fst printNames
+                RNGLR.ParseSimple.defaultAstToDot mAst astName
+
+            let cfg = ControlFlow (mAst, parserSource, langSource, tokToRealString)
+            
+            if needPrint
+            then
+                let cfgName = snd printNames
+                cfg.PrintToDot cfgName
+            
+            let blocksCount = cfg.CalculateBlocksCount()
+            Assert.AreEqual(expectedBlocksCount, blocksCount, "Blocks count isn't equal expected one")
+
+            let nodesCount = cfg.CalculateNodesCount()
+            Assert.AreEqual(expectedNodesCount, nodesCount, "Intermediate nodes count isn't equal expected one")
+
+    [<Test>]
+    member this.``Simple Cycle``() = 
+        
+        let qGraph = new ParserInputGraph<_>(0, 3)
+        let vertexRange = List.init 4 (fun i -> i)
+        qGraph.AddVertexRange vertexRange |> ignore
+
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (RNGLR.ParseSimple.A 0)
+                createEdge 1 2 (RNGLR.ParseSimple.SEMICOLON 1)
+                createEdge 1 0 (RNGLR.ParseSimple.SEMICOLON 1)
+                createEdge 2 3 (RNGLR.ParseSimple.RNGLR_EOF 2)
+            ] |> ignore
+
+        let expectedNodes = 3
+        let expectedBlocks = 4
+        let printNames = "`cfg construction ast simple cycle.dot", "`cfg construction cfg simple cycle.dot"
         runTest qGraph expectedBlocks expectedNodes  printNames
 
 
+    [<Test>]
+    member this.``Cycle``() = 
+        
+        let qGraph = new ParserInputGraph<_>(0, 5)
+        let vertexRange = List.init 6 (fun i -> i)
+        qGraph.AddVertexRange vertexRange |> ignore
+
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (RNGLR.ParseSimple.A 0)
+                createEdge 1 2 (RNGLR.ParseSimple.SEMICOLON 1)
+                createEdge 2 3 (RNGLR.ParseSimple.B 2)
+                createEdge 3 0 (RNGLR.ParseSimple.SEMICOLON 3)
+                createEdge 3 4 (RNGLR.ParseSimple.SEMICOLON 3)
+                createEdge 4 5 (RNGLR.ParseSimple.RNGLR_EOF 4)
+            ] |> ignore
+
+        let expectedNodes = 4
+        let expectedBlocks = 4
+        let printNames = "`cfg construction ast cycle.dot", "`cfg construction cfg cycle.dot"
+        runTest qGraph expectedBlocks expectedNodes  printNames
+
 [<TestFixture>]
-type ``Control Flow Graph: Building If statements`` () =
+type ``Control Flow Graph building: If statements`` () =
     let buildAbstractAst = RNGLR.ParseIf.buildAstAbstract
     let tokenToNumber = RNGLR.ParseIf.tokenToNumber
     let leftSides = RNGLR.ParseIf.leftSide
@@ -237,7 +317,7 @@ type ``Control Flow Graph: Building If statements`` () =
                 createEdge 11 12 (RNGLR.ParseIf.RNGLR_EOF 11)
             ] |> ignore
 
-        let printNames = "ast simple if (cfg construction).dot", "cfg simple if (cfg construction).dot"
+        let printNames = "`cfg construction ast simple if.dot", "`cfg construction cfg simple if.dot"
         let expectedBlocksCount = 4
         let expectedNodesCount = 5
         runTest qGraph expectedBlocksCount expectedNodesCount printNames
@@ -267,7 +347,7 @@ type ``Control Flow Graph: Building If statements`` () =
                 createEdge 15 16 (RNGLR.ParseIf.RNGLR_EOF 15)
             ] |> ignore
 
-        let printNames = "ast big if (cfg construction).dot", "cfg big if (cfg construction).dot"
+        let printNames = "`cfg construction ast big if.dot", "`cfg construction cfg big if.dot"
         let expectedBlocksCount = 6
         let expectedNodesCount = 7
         runTest qGraph expectedBlocksCount expectedNodesCount printNames
@@ -294,7 +374,7 @@ type ``Control Flow Graph: Building If statements`` () =
                 createEdge 10 11 (RNGLR.ParseIf.RNGLR_EOF 10)
             ] |> ignore
 
-        let printNames = "ast if-without-else (cfg construction).dot", "cfg if-without-else (cfg construction).dot"
+        let printNames = "`cfg construction ast if-without-else.dot", "`cfg construction cfg if-without-else.dot"
         let expectedBlocksCount = 4
         let expectedNodesCount = 5
         runTest qGraph expectedBlocksCount expectedNodesCount printNames
@@ -332,7 +412,7 @@ type ``Control Flow Graph: Building If statements`` () =
                 createEdge 23 24(RNGLR.ParseIf.RNGLR_EOF 23)
             ] |> ignore
 
-        let printNames = "ast inner if (cfg construction).dot", "cfg inner if (cfg construction).dot"
+        let printNames = "`cfg construction ast inner if.dot", "`cfg construction cfg inner if.dot"
         let expectedBlocksCount = 7
         let expectedNodesCount = 8
         runTest qGraph expectedBlocksCount expectedNodesCount printNames
@@ -412,7 +492,7 @@ type ``Find undefined variables`` () =
             ] |> ignore
 
         let expected = 1
-        let printNames = "ast elementary (undefined variables).dot", "cfg elementary (undefined variables).dot"
+        let printNames = "`cfg undefined variables ast elementary.dot", "`cfg undefined variables cfg elementary.dot"
         runTest qGraph expected printNames
 
     [<Test>]
@@ -430,7 +510,7 @@ type ``Find undefined variables`` () =
             ] |> ignore
 
         let expected = 1
-        let printNames = "ast X = X (undefined variables).dot", "cfg X = X (undefined variables).dot"
+        let printNames = "`cfg undefined variables ast X = X.dot", "`cfg undefined variables cfg X = X.dot"
         runTest qGraph expected printNames
 
     [<Test>]
@@ -466,7 +546,7 @@ type ``Find undefined variables`` () =
             ] |> ignore
 
         let expected = 2
-        let printNames = "ast ambiguous1 (undefined variables).dot", "cfg ambiguous1 (undefined variables).dot"
+        let printNames = "`cfg undefined variables ast ambiguous1.dot", "`cfg undefined variables cfg ambiguous1.dot"
         runTest qGraph expected printNames
             
     [<Test>]
@@ -498,17 +578,20 @@ type ``Find undefined variables`` () =
             ] |> ignore
 
         let expected = 2
-        let printNames = "ast ambiguous2 (undefined variables).dot", "cfg ambiguous2 (undefined variables).dot"
+        let printNames = "`cfg undefined variables ast ambiguous2.dot", "`cfg undefined variables cfg ambiguous2.dot"
         runTest qGraph expected printNames
 
 //[<EntryPoint>]
 let f x = 
-    let cfgBuilding = new ``Control Flow Graph Building``()
-    cfgBuilding.``Elementary test``()
+    let cfgBuilding = new ``Control Flow Graph building: Simple cases``()
+//    cfgBuilding.``Ambiguous test``()
+    let cycleBuilding = new ``Control Flow Graph building: Cycles``()
+    cycleBuilding.``Simple Cycle``()
+    cycleBuilding.Cycle()
 //    cfgBuilding.``Ambiguous test``()
 //    cfgBuilding.``Ambiguous2 test``()
-    let ifBuilding = new ``Control Flow Graph: Building If statements``()
-    ifBuilding.``Simple If test``()
+    let ifBuilding = new ``Control Flow Graph building: If statements``()
+//    ifBuilding.``Simple If test``()
 //    let undefVariables = new ``Find undefined variables``()
 //    undefVariables.``Undef: ambiguous 2``()
     1

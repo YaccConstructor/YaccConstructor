@@ -96,14 +96,15 @@ and OtherNodes =
         member nodes.exist f = 
             if nodes.fst <> null 
             then 
-                if f nodes.fst then true
+                if f nodes.fst 
+                then true
                 else 
                     if nodes.snd <> null 
                     then 
                         if f nodes.snd then true
                         else
                             if nodes.other <> null 
-                            then Array.exists (fun node -> f node) nodes.other
+                            then nodes.other |> Array.exists f
                             else false
                     else false
             else false
@@ -140,7 +141,7 @@ and OtherNodes =
                     if nodes.other <> null 
                     then 
                         let bound = 
-                            let index = Array.tryFindIndex (fun n -> n = nd) nodes.other
+                            let index = nodes.other |> Array.tryFindIndex ((=) nd) 
                             if index.IsSome 
                             then index.Value - 1
                             else nodes.other.Length - 1
@@ -201,7 +202,7 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                     let otherChildren = 
                         if ast.other = null
                         then null
-                        else Array.map (fun child -> processFamily child) ast.other
+                        else ast.other |> Array.map processFamily
 
                     let newAST = new OtherAST (fstChild, otherChildren)
                     dict.Add (ast, newAST)
@@ -224,7 +225,7 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                 
                 newNodes := newElem :: !newNodes
             
-            if family.nodes.isForAll (fun node -> knownNodes.Contains node)
+            if family.nodes.isForAll knownNodes.Contains
             then
                 let fakeNodes = new OtherNodes(new obj())
                 let newFamily = new OtherFamily (family.prod, fakeNodes)
@@ -267,7 +268,7 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                 
                             children := newElem :: !children
                 
-                        oldNodes.doForAll (fun node -> handle node)
+                        oldNodes.doForAll handle
                         new OtherNodes(!children |> List.rev |> Array.ofList)
                 
                 otherFamily.ReplaceNodes newNodes
@@ -306,7 +307,7 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                     family.nodes.doForAllRev handleAst
                 handle children.first
                 if children.other <> null 
-                then children.other |> Array.iter (fun family -> handle family)
+                then children.other |> Array.iter handle
         res.ToArray()
 
     let familyToTokens = 
@@ -334,7 +335,7 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                                     calcTokens ast.first 
                                 else
                                     ast.other
-                                    |> Array.map (fun fam -> calcTokens fam)
+                                    |> Array.map calcTokens
                                     |> Array.append [| calcTokens ast.first |]
                                     |> List.concat
                             tokens := !tokens @ temp
@@ -344,7 +345,7 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                     | _ -> ()
 
 
-                family.nodes.doForAll (fun node -> processNode node)
+                family.nodes.doForAll processNode
                 
                 dict.Add (family, !tokens)
                 
@@ -359,7 +360,7 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
 
         let containsRange number = 
             tokenToPos tokens.[number]
-            |> Seq.exists (fun range -> range = now)
+            |> Seq.exists ((=) now)
 
         let rec handleFamily (family : OtherFamily) = 
             family.nodes.doForAll 
@@ -369,14 +370,14 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                         | :? OtherAST as ast -> 
                             let processFam fam = 
                                 let toks = familyToTokens.[fam]
-                                if toks |> List.exists (fun t -> containsRange t)
+                                if toks |> List.exists containsRange
                                 then handleFamily fam
 
                             processFam ast.first
                             if ast.other <> null 
-                            then ast.other |> Array.iter (fun fam -> processFam fam)
+                            then ast.other |> Array.iter processFam
                         | :? Terminal as t -> 
-                            let isNewParent = not <| List.exists (fun fam -> fam = family) !parents
+                            let isNewParent = !parents |> List.forall ((<>) family) 
                             if containsRange t.TokenNumber && isNewParent
                             then
                                 parents := family :: !parents
@@ -438,9 +439,9 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                         | :? Epsilon -> ()
                         | _ -> failwithf "Unexpected node type in OtherSppf: %s" <| node.GetType().ToString()
         
-                    if family.nodes.exist (fun node -> node = !child)
+                    if family.nodes.exist ((=) !child)
                     then handleSomeNodes !child family handle 
-                    else handleAllNodes family (fun node -> handle node)
+                    else handleAllNodes family handle
 
             and processAST (ast : OtherAST) = 
                 let value = !count

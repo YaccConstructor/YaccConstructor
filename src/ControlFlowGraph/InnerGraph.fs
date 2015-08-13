@@ -51,23 +51,27 @@ and CfgBlocksGraph<'TokenType>() =
         out.WriteLine()
 
         let getSuffix (tag : EdgeType<_>) = 
-            if tokenToStringOpt.IsNone
-            then 
-                ""
-            else
-                let tok2String = tokenToStringOpt.Value
+            match tokenToStringOpt with
+            | None -> ""
+            | Some tok2String ->
                 match tag with
                 | Complicated (_, graph) -> 
-                    if graph.EdgeCount = 1 
+                    if graph.EndVertex = 1 
                     then 
-                        let edge = graph.Edges |> Seq.toList |> List.head 
-                        match edge.Tag with
-                        | Simple tokens -> 
-                            tokens 
-                            |> List.map tok2String
-                            |> String.concat " "
-                        | _ -> ""
-                    else ""
+                        let edges = graph.Edges |> Seq.toList
+                        edges 
+                        |> List.map 
+                            (
+                                fun edge -> 
+                                    match edge.Tag with
+                                    | Simple tokens -> 
+                                        tokens 
+                                        |> List.map tok2String
+                                        |> String.concat " "
+                                    | _ -> ""
+                            )
+                        |> String.concat " or \n"
+                    else "complicated"
                 | _ -> ""
 
         this.Edges
@@ -76,7 +80,7 @@ and CfgBlocksGraph<'TokenType>() =
                 fun edge ->
                     let prefix = EdgeType<_>.ToString edge.Tag
                     let suffix = getSuffix edge.Tag
-                    let tagName = prefix + " " + suffix
+                    let tagName = sprintf "%s [%s]" prefix suffix
                     out.WriteLine (sprintf "%d -> %d [label=\" %s \"]" edge.Source edge.Target tagName)
             )
         out.WriteLine("}")

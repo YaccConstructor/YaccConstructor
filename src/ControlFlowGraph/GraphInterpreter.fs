@@ -76,12 +76,16 @@ let private processAssignmentGraph (graph : CfgBlocksGraph<_>) =
         graph.OutEdges(start)
         |> Seq.map processEdge
         //all assign blocks have only one child
-        |> Seq.map (fun assign -> assign.Parent, assign.Children)
+        |> Seq.map (fun assign -> assign.Parent, assign.Children.Head)
         |> List.ofSeq
 
-    let entry, exits = mergeNodes assigns
-    //all assignments has one child only
-    entry, exits.Head
+    let one = assigns.Head
+
+    assigns
+    |> List.tail
+    |> List.map (fun two -> mergeTwoNodes one two)
+    |> ignore
+    one
 
 let private processConditionGraph (graph : CfgBlocksGraph<_>) = 
     
@@ -202,16 +206,16 @@ and processSeq (graph : CfgBlocksGraph<_>) =
                             | x -> failwithf "Now this statement type isn't supported: %s" <| x.GetType().ToString()
 
                         let newData = 
-                            if oldValue.IsSome
-                            then concatNodes oldValue.Value nodes
-                            else nodes
+                            match oldValue with
+                            | Some oldNodes -> concatNodes oldNodes nodes
+                            | None -> nodes
 
                         addToDictionary edge.Target newData
 
                     | EmptyEdge -> 
-                        if oldValue.IsSome
-                        then addToDictionary edge.Target oldValue.Value
-                        else failwithf "Unexpected state during cfg building"
+                        match oldValue with
+                        | Some oldNodes -> addToDictionary edge.Target oldNodes
+                        | None -> failwithf "Unexpected state during cfg building"
 
                     | x -> failwith "Unexpected edge tag: %s" <| x.GetType().ToString()
             )

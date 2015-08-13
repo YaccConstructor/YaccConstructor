@@ -37,9 +37,9 @@ type CfgTokensGraph() =
                 |> List.map 
                     (
                         fun tokList -> 
-                            if edge.Tag.IsSome
-                            then tokList |> List.append [edge.Tag.Value]
-                            else tokList
+                            match edge.Tag with
+                            | Some token -> tokList |> List.append [token]
+                            | None -> tokList
                     )
             
             let newVertex = edge.Target

@@ -14,6 +14,7 @@ open ControlFlowGraph.TokensExtractor
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 
+
 type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                             , parserSource : CfgParserSource<'TokenType>
                             , langSource : LanguageSource
@@ -41,7 +42,6 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                     | :? Terminal -> ()
                     | :? AST as ast -> handleAst ast parentGraphInfo
                     | x -> failwithf "Unexpected AST node type in Control Flow graph construction: %s" <| x.GetType().ToString()
-
 
                 if langSource.NodeToType.ContainsKey familyName 
                 then 
@@ -73,23 +73,26 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                 else 
                     family.nodes.doForAll (fun node -> handle node parentGraphInfo)
 
-            let family = ast.first
-
             let commonStart = parentGraphInfo.StartVertex
             
-            if familyToStartVertex.ContainsKey family 
-            then 
-                let target = familyToStartVertex.[family]
-                
-                parentGraphInfo.AddEdgeFromTo EmptyEdge commonStart target
-                printfn "familyToEndVertex.Contains family %b" <| familyToEndVertex.ContainsKey family
-                //what about familyToEndVertex?
-            else
-                familyToStartVertex.[family] <- parentGraphInfo.StartVertex
-                handleFamily family
-                familyToEndVertex.[family] <- parentGraphInfo.StartVertex
+            let processFamily (family : Family) = 
+                if familyToStartVertex.ContainsKey family 
+                then 
+                    let target = familyToStartVertex.[family]
+                    parentGraphInfo.AddEdgeFromTo EmptyEdge commonStart target
+                else
+                    familyToStartVertex.[family] <- parentGraphInfo.StartVertex
+                    handleFamily family
+                    familyToEndVertex.[family] <- parentGraphInfo.StartVertex
 
-            let finishNumber = familyToEndVertex.[family]
+            let getEndVertex family = 
+                if familyToEndVertex.ContainsKey family
+                then Some familyToEndVertex.[family]
+                else None
+            
+            processFamily ast.first
+            let finishNumber = getEndVertex ast.first
+
             if ast.other <> null 
             then
                 let newEndNumbers = 
@@ -98,32 +101,30 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                         (
                             fun family -> 
                                 parentGraphInfo.StartVertex <- commonStart
-                                
-                                if familyToStartVertex.ContainsKey family 
-                                then 
-                                    let target = familyToStartVertex.[family]
-                
-                                    parentGraphInfo.AddEdgeFromTo EmptyEdge commonStart target
-                                    printfn "familyToEndVertex.Contains family %b" <| familyToEndVertex.ContainsKey family
-                                    //what about familyToEndVertex?
-                                else
-                                    familyToStartVertex.[family] <- parentGraphInfo.StartVertex
-                                    handleFamily family
-                                    familyToEndVertex.[family] <- parentGraphInfo.StartVertex
-                                
-                                if familyToEndVertex.ContainsKey family
-                                then Some familyToEndVertex.[family]
-                                else None
+                                processFamily family
+                                getEndVertex family
                         )
-                    |> Array.append [|Some finishNumber|]
+                    |> Array.append [|finishNumber|]
 
                 let commonFinish = parentGraphInfo.EndVertex
+                let isEdgeAdded = ref false
                 newEndNumbers
-                |> Array.iter 
+                |> Array.fold 
                     (
-                        Option.iter (fun num -> parentGraphInfo.AddEdgeFromTo EmptyEdge num commonFinish)
+                        fun acc num -> 
+                            match num with
+                            | Some n when parentGraphInfo.Graph.OutDegree(n) = 0 ->
+                                n :: acc
+                            | _ -> acc
+                    ) []
+                |> List.iter 
+                    (
+                        fun num -> 
+                            parentGraphInfo.AddEdgeFromTo EmptyEdge num commonFinish
+                            isEdgeAdded := true
                     )
-                parentGraphInfo.UpdateVertices()
+                if !isEdgeAdded 
+                then parentGraphInfo.UpdateVertices()
 
         let graphInfo = new GraphConstructor<_>()
         handleAst treeRoot graphInfo
@@ -163,23 +164,27 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
 
                 | _ -> block.Values |> List.ofArray
 
-            for tok in tokens do 
-                let tokNumber = parserSource.TokenToNumber tok
+            //need refactoring to functional style
+            let isVariable token = 
+                token |> parserSource.TokenToNumber |> langSource.IsVariable
 
-                if langSource.IsVariable tokNumber
-                then
-                    let varName = tok |> tokToSourceString
+            let isUndefinedVariable token = 
+                let varName = token |> tokToSourceString
+                !defVars |> List.forall ((<>) varName)
+            
+            let isNewError token = 
+                let tokData = parserSource.TokenToData token
+                !errorList
+                |> List.forall (fun t -> parserSource.TokenToData t <> tokData) 
 
-                    //Is it error?
-                    if List.forall ((<>) varName) !defVars
-                    then
-                        let tokData = parserSource.TokenToData tok
-                        //Is it new error?
-                        if List.forall (fun t -> parserSource.TokenToData t <> tokData) !errorList     
-                        then errorList := tok :: !errorList 
+            tokens
+            |> List.filter isVariable
+            |> List.filter isUndefinedVariable
+            |> List.filter isNewError
+            |> List.iter (fun token -> errorList := token :: !errorList)
 
-            if newVar.IsSome 
-            then defVars := newVar.Value :: !defVars
+            newVar
+            |> Option.iter (fun varName -> defVars := varName :: !defVars)
                 
             block.Children 
             |> List.iter (fun child -> processInterNode child !defVars)

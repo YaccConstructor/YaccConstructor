@@ -7,6 +7,7 @@ open AbstractAnalysis.Common
 
 open ControlFlowGraph
 open ControlFlowGraph.Common
+open ControlFlowGraph.CfgElements
 open ControlFlowGraph.InputStructures
 
 open Yard.Generators.RNGLR
@@ -170,7 +171,13 @@ type ``Control Flow Graph building: Cycles``() =
     let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, keywordToInt)
 
-    let runTest graph expectedBlocksCount expectedNodesCount printNames = 
+    let postCondition condition (exitNode : InterNode<_>) = 
+        exitNode.Parents
+        |> List.map(fun node -> node.Values)
+        |> List.map(fun tokens -> tokens |> Array.map tokenToNumber)
+        |> List.forall condition
+
+    let runTest graph expectedBlocksCount expectedNodesCount postCond printNames = 
         let parseResult = (new Parser<_>()).Parse buildAbstractAst graph
         
         match parseResult with 
@@ -194,8 +201,11 @@ type ``Control Flow Graph building: Cycles``() =
             let nodesCount = cfg.CalculateNodesCount()
             Assert.AreEqual(expectedNodesCount, nodesCount, "Intermediate nodes count isn't equal expected one")
 
+            let isCorrect = postCond cfg.Exit
+            Assert.IsTrue (isCorrect, "Incorrect cfg was builded")
+
     [<Test>]
-    member this.``Simple Cycle``() = 
+    member this.``Cycle A+``() = 
         
         let qGraph = new ParserInputGraph<_>(0, 3)
         let vertexRange = List.init 4 (fun i -> i)
@@ -209,14 +219,80 @@ type ``Control Flow Graph building: Cycles``() =
                 createEdge 2 3 (RNGLR.ParseSimple.RNGLR_EOF 2)
             ] |> ignore
 
+        if needPrint 
+        then qGraph.PrintToDot "`Cycle A+ input.dot" tokToRealString
+
         let expectedNodes = 3
         let expectedBlocks = 4
-        let printNames = "`cfg construction ast simple cycle.dot", "`cfg construction cfg simple cycle.dot"
-        runTest qGraph expectedBlocks expectedNodes  printNames
+        let postCond = postCondition (fun _ -> true)
+        let printNames = "`Cycle A+ ast.dot", "`Cycle A+ cfg.dot"
+        runTest qGraph expectedBlocks expectedNodes postCond printNames
+
+    [<Test>]
+    member this.``Cycle (A | B)+``() = 
+        
+        let qGraph = new ParserInputGraph<_>(0, 3)
+        let vertexRange = List.init 4 (fun i -> i)
+        qGraph.AddVertexRange vertexRange |> ignore
+
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (RNGLR.ParseSimple.A 0)
+                createEdge 0 1 (RNGLR.ParseSimple.B 0)
+                createEdge 1 2 (RNGLR.ParseSimple.SEMICOLON 1)
+                createEdge 1 0 (RNGLR.ParseSimple.SEMICOLON 1)
+                createEdge 2 3 (RNGLR.ParseSimple.RNGLR_EOF 2)
+            ] |> ignore
+
+        if needPrint 
+        then qGraph.PrintToDot "`Cycle (A or B)+ input.dot" tokToRealString
+
+        let expectedNodes = 3
+        let expectedBlocks = 8
+        let postCond = postCondition (fun _ -> true)
+        let printNames = "`Cycle (A or B)+ ast.dot", "`Cycle (A or B)+ cfg.dot"
+        runTest qGraph expectedBlocks expectedNodes postCond printNames
+
+    [<Test>]
+    member this.``Cycle A (B+ | C+)``() = 
+        
+        let qGraph = new ParserInputGraph<_>(0, 7)
+        let vertexRange = List.init 8 (fun i -> i)
+        qGraph.AddVertexRange vertexRange |> ignore
+
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (RNGLR.ParseSimple.A 0)
+                createEdge 1 2 (RNGLR.ParseSimple.SEMICOLON 1)
+                createEdge 1 4 (RNGLR.ParseSimple.SEMICOLON 1)
+                createEdge 2 3 (RNGLR.ParseSimple.B 2)
+                createEdge 3 2 (RNGLR.ParseSimple.SEMICOLON 3)
+                createEdge 3 6 (RNGLR.ParseSimple.SEMICOLON 3)
+                createEdge 4 5 (RNGLR.ParseSimple.C 4)
+                createEdge 5 4 (RNGLR.ParseSimple.SEMICOLON 5)
+                createEdge 5 6 (RNGLR.ParseSimple.SEMICOLON 5)
+                createEdge 6 7 (RNGLR.ParseSimple.RNGLR_EOF 6)
+            ] |> ignore
+        if needPrint 
+        then qGraph.PrintToDot "`Cycle A (B+ or C+) input.dot" tokToRealString
+
+        let expectedNodes = 4
+        let expectedBlocks = 6
+
+
+        let numbers = [ RNGLR.ParseSimple.B 0; RNGLR.ParseSimple.C 0] |> List.map tokenToNumber
+        
+        let myCond tokenSet = 
+            numbers 
+            |> List.fold (fun acc num -> acc || tokenSet |> Array.exists ((=) num)) false
+
+        let postCond = postCondition myCond
+        let printNames = "`Cycle A (B+ or C+) ast.dot", "`Cycle A (B+ or C+) cfg.dot"
+        runTest qGraph expectedBlocks expectedNodes postCond printNames
 
 
     [<Test>]
-    member this.``Cycle``() = 
+    member this.``Cycle (AB)+``() = 
         
         let qGraph = new ParserInputGraph<_>(0, 5)
         let vertexRange = List.init 6 (fun i -> i)
@@ -231,11 +307,150 @@ type ``Control Flow Graph building: Cycles``() =
                 createEdge 3 4 (RNGLR.ParseSimple.SEMICOLON 3)
                 createEdge 4 5 (RNGLR.ParseSimple.RNGLR_EOF 4)
             ] |> ignore
+        if needPrint 
+        then qGraph.PrintToDot "`Cycle (AB)+ input.dot" tokToRealString
 
         let expectedNodes = 4
         let expectedBlocks = 4
-        let printNames = "`cfg construction ast cycle.dot", "`cfg construction cfg cycle.dot"
-        runTest qGraph expectedBlocks expectedNodes  printNames
+
+        let bNumber = tokenToNumber <| RNGLR.ParseSimple.B 0
+
+        let myCond = 
+             fun tokens -> tokens |> Array.exists ((=) bNumber)
+
+        let postCond = postCondition myCond
+
+        let printNames = "`Cycle (AB)+ ast.dot", "`Cycle (AB)+ cfg.dot"
+        runTest qGraph expectedBlocks expectedNodes postCond printNames
+
+    [<Test>]
+    member this.``Cycle (AB)+C``() = 
+        
+        let qGraph = new ParserInputGraph<_>(0, 7)
+        let vertexRange = List.init 8 (fun i -> i)
+        qGraph.AddVertexRange vertexRange |> ignore
+
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (RNGLR.ParseSimple.A 0)
+                createEdge 1 2 (RNGLR.ParseSimple.SEMICOLON 1)
+                createEdge 2 3 (RNGLR.ParseSimple.B 2)
+                createEdge 3 0 (RNGLR.ParseSimple.SEMICOLON 3)
+                createEdge 3 4 (RNGLR.ParseSimple.SEMICOLON 3)
+                createEdge 4 5 (RNGLR.ParseSimple.C 4)
+                createEdge 5 6 (RNGLR.ParseSimple.SEMICOLON 5)
+                createEdge 6 7 (RNGLR.ParseSimple.RNGLR_EOF 6)
+            ] |> ignore
+        if needPrint 
+        then qGraph.PrintToDot "`Cycle (AB)+C input.dot" tokToRealString
+        let expectedNodes = 5
+        let expectedBlocks = 5
+
+        let cNumber = tokenToNumber <| RNGLR.ParseSimple.C 0
+
+        let postCond = postCondition (fun tokens -> tokens |> Array.exists ((=) cNumber))
+
+        let printNames = "`Cycle (AB)+C ast.dot", "`Cycle (AB)+C cfg.dot"
+        runTest qGraph expectedBlocks expectedNodes postCond printNames
+
+    [<Test>]
+    member this.``Cycle after cycle A+B+``() = 
+        
+        let qGraph = new ParserInputGraph<_>(0, 5)
+        let vertexRange = List.init 6 (fun i -> i)
+        qGraph.AddVertexRange vertexRange |> ignore
+
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (RNGLR.ParseSimple.A 0)
+                createEdge 1 2 (RNGLR.ParseSimple.SEMICOLON 1)
+                createEdge 1 0 (RNGLR.ParseSimple.SEMICOLON 1)
+                createEdge 2 3 (RNGLR.ParseSimple.B 2)
+                createEdge 3 2 (RNGLR.ParseSimple.SEMICOLON 3)
+                createEdge 3 4 (RNGLR.ParseSimple.SEMICOLON 3)
+                createEdge 4 5 (RNGLR.ParseSimple.RNGLR_EOF 4)
+            ] |> ignore
+
+        if needPrint 
+        then qGraph.PrintToDot "`Cycle after cycle A+B+ input.dot" tokToRealString
+
+        let bNumber = tokenToNumber <| RNGLR.ParseSimple.B 0
+
+        let postCond = postCondition (fun tokens -> tokens |> Array.exists ((=) bNumber))
+
+        let expectedNodes = 4
+        let expectedBlocks = 6
+        let printNames = 
+            "`Cycle after cycle A+B+ ast.dot", 
+            "`Cycle after cycle A+B+ cfg.dot"
+        runTest qGraph expectedBlocks expectedNodes postCond printNames
+
+    [<Test>]
+    member this.``Cycle inside cycle (A+B)+``() = 
+        
+        let qGraph = new ParserInputGraph<_>(0, 5)
+        let vertexRange = List.init 6 (fun i -> i)
+        qGraph.AddVertexRange vertexRange |> ignore
+
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (RNGLR.ParseSimple.A 0)
+                createEdge 1 0 (RNGLR.ParseSimple.SEMICOLON 1)
+                createEdge 1 2 (RNGLR.ParseSimple.SEMICOLON 1)
+                createEdge 2 3 (RNGLR.ParseSimple.B 2)
+                createEdge 3 0 (RNGLR.ParseSimple.SEMICOLON 3)
+                createEdge 3 4 (RNGLR.ParseSimple.SEMICOLON 3)
+                createEdge 4 5 (RNGLR.ParseSimple.RNGLR_EOF 4)
+            ] |> ignore
+
+        if needPrint 
+        then qGraph.PrintToDot "`Cycle inside cycle (A+B)+ input.dot" tokToRealString
+
+        let bNumber = tokenToNumber <| RNGLR.ParseSimple.B 0
+
+        let postCond = postCondition (fun tokens -> tokens |> Array.exists ((=) bNumber))
+
+        let expectedNodes = 4
+        let expectedBlocks = 6
+        let printNames = 
+            "`Cycle inside cycle (A+B)+ ast.dot", 
+            "`Cycle inside cycle (A+B)+ cfg.dot"
+        runTest qGraph expectedBlocks expectedNodes postCond printNames
+
+    [<Test>]
+    member this.``Cycle inside cycle ((AB)+C)+``() = 
+        
+        let qGraph = new ParserInputGraph<_>(0, 7)
+        let vertexRange = List.init 8 (fun i -> i)
+        qGraph.AddVertexRange vertexRange |> ignore
+
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (RNGLR.ParseSimple.A 0)
+                createEdge 1 2 (RNGLR.ParseSimple.SEMICOLON 1)
+                createEdge 2 3 (RNGLR.ParseSimple.B 2)
+                createEdge 3 0 (RNGLR.ParseSimple.SEMICOLON 3)
+                createEdge 3 4 (RNGLR.ParseSimple.SEMICOLON 3)
+                createEdge 4 5 (RNGLR.ParseSimple.C 4)
+                createEdge 5 0 (RNGLR.ParseSimple.SEMICOLON 5)
+                createEdge 5 6 (RNGLR.ParseSimple.SEMICOLON 5)
+                createEdge 6 7 (RNGLR.ParseSimple.RNGLR_EOF 6)
+            ] |> ignore
+
+        if needPrint 
+        then qGraph.PrintToDot "`Cycle inside cycle ((AB)+C)+ input.dot" tokToRealString
+
+        let cNumber = tokenToNumber <| RNGLR.ParseSimple.C 0
+
+        let postCond = postCondition (fun tokens -> tokens |> Array.exists ((=) cNumber))
+
+        let expectedNodes = 5
+        let expectedBlocks = 7
+        let printNames = 
+            "`Cycle inside cycle ((AB)+C)+ ast.dot", 
+            "`Cycle inside cycle ((AB)+C)+ cfg.dot"
+        runTest qGraph expectedBlocks expectedNodes postCond printNames
+
 
 [<TestFixture>]
 type ``Control Flow Graph building: If statements`` () =
@@ -586,8 +801,9 @@ let f x =
     let cfgBuilding = new ``Control Flow Graph building: Simple cases``()
 //    cfgBuilding.``Ambiguous test``()
     let cycleBuilding = new ``Control Flow Graph building: Cycles``()
-    cycleBuilding.``Simple Cycle``()
-    cycleBuilding.Cycle()
+    cycleBuilding.``Cycle (A | B)+``()
+    //cycleBuilding.``Simple Cycle``()
+    //cycleBuilding.Cycle()
 //    cfgBuilding.``Ambiguous test``()
 //    cfgBuilding.``Ambiguous2 test``()
     let ifBuilding = new ``Control Flow Graph building: If statements``()

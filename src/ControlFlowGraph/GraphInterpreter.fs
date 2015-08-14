@@ -114,29 +114,29 @@ let rec processIfGraph (ifGraph : CfgBlocksGraph<_>) =
     let ifQueue = new Queue<_>()
     ifQueue.Enqueue ifGraph.StartVertex
 
+    let processEdge (edge : BlockEdge<_>)=
+        ifQueue.Enqueue edge.Target
+        match edge.Tag with
+        | Complicated (block, innerGraph) -> 
+            match block with
+            | Condition -> condBlock := processConditionGraph innerGraph
+            | ThenStatement -> thenBlock := processSeq innerGraph
+            | ElseStatement -> 
+                elseBlock := processSeq innerGraph
+                elseExists := true
+            | x -> failwithf "Unexpected statement type in ifStatement: %s" <| x.GetType().ToString()
+        | EmptyEdge -> ()
+        | x -> failwithf "Unexpected edge type in IfStatement: %s" <| x.GetType().ToString()
+
+
     while ifQueue.Count > 0 do
         let vertex = ifQueue.Dequeue()
                 
         ifGraph.OutEdges(vertex)
-        |> Seq.iter
-            (
-                fun edge ->
-                    ifQueue.Enqueue edge.Target
-                    match edge.Tag with
-                    | Complicated (block, innerGraph) -> 
-                        match block with
-                        | Condition -> condBlock := processConditionGraph innerGraph
-                        | ThenStatement -> thenBlock := processSeq innerGraph
-                        | ElseStatement -> 
-                            elseBlock := processSeq innerGraph
-                            elseExists := true
-                        | x -> failwithf "Unexpected statement type in ifStatement: %s" <| x.GetType().ToString()
-                    | EmptyEdge -> ()
-                    | x -> failwithf "Unexpected edge type in IfStatement: %s" <| x.GetType().ToString()
-            )
+        |> Seq.iter processEdge
 
-    let exits = snd condBlock.Value
-    exits.Head.ReplaceMeForParentsOn <| fst thenBlock.Value
+    let exits = snd !condBlock
+    exits.Head.ReplaceMeForParentsOn <| fst !thenBlock
 
     let mutable exitNode = Unchecked.defaultof<InterNode<_>>
 
@@ -155,11 +155,11 @@ let rec processIfGraph (ifGraph : CfgBlocksGraph<_>) =
         //exit node in 'then' block must be exactly the same as that of 'cond' block
 
         //supposed 'then' block has only one exit node
-        let thenExit = snd thenBlock.Value
+        let thenExit = snd !thenBlock
         exits.[1].ReplaceMeForParentsOn thenExit
         exitNode <- thenExit
 
-    fst condBlock.Value, exitNode
+    fst !condBlock, exitNode
 
 and processSeq (graph : CfgBlocksGraph<_>) = 
 

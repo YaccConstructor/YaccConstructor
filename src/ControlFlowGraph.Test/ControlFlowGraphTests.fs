@@ -173,7 +173,7 @@ type ``Control Flow Graph building: Cycles``() =
 
     let postCondition condition (exitNode : InterNode<_>) = 
         exitNode.Parents
-        |> List.map(fun node -> node.Values)
+        |> List.map(fun node -> node.Tokens)
         |> List.map(fun tokens -> tokens |> Array.map tokenToNumber)
         |> List.forall condition
 

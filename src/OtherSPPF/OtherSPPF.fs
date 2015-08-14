@@ -130,7 +130,7 @@ and OtherNodes =
                             needDo <- needDo || nodes.other.[i] = nd
 
         /// <summary>
-        /// applies function f to nodes which are located to the left than node nd. 
+        /// Applies function f to nodes that are located to the left than node nd. 
         /// Left sibling of nd is first.
         /// </summary>
         member nodes.doForAllBeforeNode nd f = 
@@ -141,10 +141,11 @@ and OtherNodes =
                     if nodes.other <> null 
                     then 
                         let bound = 
-                            let index = nodes.other |> Array.tryFindIndex ((=) nd) 
-                            if index.IsSome 
-                            then index.Value - 1
-                            else nodes.other.Length - 1
+                            let indexOpt = nodes.other |> Array.tryFindIndex ((=) nd) 
+                            
+                            match indexOpt with
+                            | Some value -> value - 1
+                            | None -> nodes.other.Length - 1
                         for i = bound downto 0 do
                             f nodes.other.[i]
                     f nodes.snd
@@ -348,7 +349,6 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                 family.nodes.doForAll processNode
                 
                 dict.Add (family, !tokens)
-                
                 !tokens
 
         calcTokens root.first |> ignore
@@ -389,7 +389,7 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
         !child, !parents
 
     /// <summary>
-    /// Returnes all paired tokens for token that is located in range. 
+    /// Returns all paired tokens for token that is located in range. 
     /// For example it returns all paired right_brackets for left_bracket 
     /// </summary>
     /// <param name="left">Number of left paired token</param>

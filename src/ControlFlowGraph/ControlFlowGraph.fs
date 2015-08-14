@@ -75,6 +75,11 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
 
             let commonStart = parentGraphInfo.StartVertex
             
+            let getEndVertex family = 
+                if familyToEndVertex.ContainsKey family
+                then Some familyToEndVertex.[family]
+                else None
+
             let processFamily (family : Family) = 
                 if familyToStartVertex.ContainsKey family 
                 then 
@@ -84,14 +89,9 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                     familyToStartVertex.[family] <- parentGraphInfo.StartVertex
                     handleFamily family
                     familyToEndVertex.[family] <- parentGraphInfo.StartVertex
+                getEndVertex family
 
-            let getEndVertex family = 
-                if familyToEndVertex.ContainsKey family
-                then Some familyToEndVertex.[family]
-                else None
-            
-            processFamily ast.first
-            let finishNumber = getEndVertex ast.first
+            let finishNumber = processFamily ast.first
 
             if ast.other <> null 
             then
@@ -102,7 +102,6 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                             fun family -> 
                                 parentGraphInfo.StartVertex <- commonStart
                                 processFamily family
-                                getEndVertex family
                         )
                     |> Array.append [|finishNumber|]
 
@@ -145,26 +144,28 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
             let eqNumber = langSource.KeywordToInt.[EQ]
 
             let tokens = 
+                let isNotEq token = 
+                    parserSource.TokenToNumber token <> eqNumber
+
                 match block.BlockType with 
                 | Assignment -> 
                     let leftPart = 
-                         block.Values 
-                         |> Seq.takeWhile (fun tok -> parserSource.TokenToNumber tok <> eqNumber)
+                         block.Tokens 
+                         |> Seq.takeWhile isNotEq
                          |> List.ofSeq
 
                     if leftPart.Length = 1 
                     then
                         let varName = leftPart.Head |> tokToSourceString
-                        newVar <- Some <| varName
+                        newVar <- Some varName
                     
-                    block.Values 
-                    |> Seq.skipWhile (fun tok -> parserSource.TokenToNumber tok <> eqNumber)
+                    block.Tokens
+                    |> Seq.skipWhile isNotEq
                     |> List.ofSeq
                     |> List.tail
 
-                | _ -> block.Values |> List.ofArray
+                | _ -> block.Tokens |> List.ofArray
 
-            //need refactoring to functional style
             let isVariable token = 
                 token |> parserSource.TokenToNumber |> langSource.IsVariable
 
@@ -275,7 +276,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
         use out = new StreamWriter (name : string)
         out.WriteLine("digraph AST {")
 
-        let rec printBlock block parentNumber = 
+        let rec printBlock parentNumber block = 
             let getBlockNumber (block : Block<'TokenType>) = 
                 if blockToNumber.ContainsKey block 
                 then 
@@ -284,7 +285,6 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                     incr count
                     
                     let blockString = block.BlockToString parserSource.TokenToString
-
                     out.WriteLine (sprintf "%d [label=\"%s\",shape=box]" !count blockString)
                     blockToNumber.[block] <- !count
                     !count, true
@@ -295,10 +295,11 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
 
             if isNew 
             then
+                let printNodeWithParentNumber = printInterNode nodeNumber 
                 block.Children
-                |> List.iter (fun child -> printInterNode child nodeNumber)
+                |> List.iter printNodeWithParentNumber
 
-        and printInterNode interNode parentNumber =
+        and printInterNode parentNumber interNode =
             
             let getNodeNumber (node : InterNode<_>) = 
                 if interNodeToNumber.ContainsKey node 
@@ -322,10 +323,11 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
 
             if isNew 
             then
+                let printBlockWithNumber = printBlock nodeNumber
                 interNode.Children
-                |> List.iter (fun block -> printBlock block nodeNumber)
+                |> List.iter printBlockWithNumber
                     
-        printInterNode this.Entry -1
+        printInterNode -1 this.Entry 
 
         out.WriteLine("}")
         out.Close()

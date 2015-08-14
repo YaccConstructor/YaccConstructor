@@ -5,14 +5,13 @@ open ControlFlowGraph.Common
 /// <summary>
 /// Control flow graph blocks
 /// </summary>
-type Block<'TokenType>(blockType, vals) = 
+type Block<'TokenType>(blockType, toks) = 
     let mutable blockType = blockType
-    let mutable values = vals
+    let mutable tokens = toks
     let mutable parent = new InterNode<'TokenType>()
     let mutable children = []
 
-    /// Tokens 
-    member this.Values = values
+    member this.Tokens = tokens
     member this.Parent 
         with get() = parent
         and set(value) = parent <- value
@@ -40,7 +39,7 @@ type Block<'TokenType>(blockType, vals) =
         let typeStr = BlockType.BlockTypeToString blockType
 
         let strValues = 
-            this.Values
+            this.Tokens
             |> Array.map (fun t -> tokToString t)
             |> String.concat " "
 

@@ -19,6 +19,8 @@ let tokenToPos (tokenData : _ -> obj) token =
     | :? int as i -> [i] |> Seq.ofList
     | _ -> failwithf "Unexpected token data: %s" <| t.GetType().ToString()
 
+let needPrintToDot = false
+
 [<TestFixture>]
 type ``AST to otherSPPF translation test`` () =
 
@@ -41,9 +43,17 @@ type ``AST to otherSPPF translation test`` () =
         match parseResult with 
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
         | Parser.Success (mAst) ->
-//            RNGLR.ParseElementary.defaultAstToDot mAst "Elementary before.dot"
+            
+            if needPrintToDot 
+            then RNGLR.ParseElementary.defaultAstToDot mAst "Elementary before.dot"
             let other = new OtherTree<_>(mAst)
-//            RNGLR.ParseElementary.otherAstToDot other "Elementary after.dot"
+            if needPrintToDot 
+            then 
+                let indToString = RNGLR.ParseElementary.numToString
+                let tokToNumber = RNGLR.ParseElementary.tokenToNumber
+                let leftSide = RNGLR.ParseElementary.leftSide
+
+                other.ToDot indToString tokToNumber leftSide "Elementary after.dot"
             other.PrintAst()
             Assert.Pass "Elementary test: PASSED"
 
@@ -65,9 +75,16 @@ type ``AST to otherSPPF translation test`` () =
         match parseResult with 
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
         | Parser.Success (mAst) ->
-//            RNGLR.ParseElementary.defaultAstToDot mAst "Epsilon before.dot"
+            if needPrintToDot 
+            then RNGLR.ParseElementary.defaultAstToDot mAst "Epsilon before.dot"
             let other = new OtherTree<_>(mAst)
-//            RNGLR.ParseElementary.otherAstToDot other "Epsilon after.dot"
+            if needPrintToDot 
+            then 
+                let indToString = RNGLR.ParseElementary.numToString
+                let tokToNumber = RNGLR.ParseElementary.tokenToNumber
+                let leftSide = RNGLR.ParseElementary.leftSide
+
+                other.ToDot indToString tokToNumber leftSide "Epsilon after.dot"
             other.PrintAst()
             Assert.Pass "Epsilon test: PASSED"
 
@@ -90,9 +107,18 @@ type ``AST to otherSPPF translation test`` () =
         match parseResult with 
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
         | Parser.Success (mAst) ->
-//            RNGLR.ParseAmbiguous.defaultAstToDot mAst "Ambiguous before.dot"
+            if needPrintToDot 
+            then RNGLR.ParseAmbiguous.defaultAstToDot mAst "Ambiguous before.dot"
+            
             let other = new OtherTree<_>(mAst)
-//            RNGLR.ParseAmbiguous.otherAstToDot other "Ambiguous after.dot"
+            
+            if needPrintToDot 
+            then 
+                let indToString = RNGLR.ParseAmbiguous.numToString
+                let tokToNumber = RNGLR.ParseAmbiguous.tokenToNumber
+                let leftSide = RNGLR.ParseAmbiguous.leftSide
+
+                other.ToDot indToString tokToNumber leftSide "Ambiguous after.dot"
             other.PrintAst()
             Assert.Pass "Ambiguous test: PASSED"
 
@@ -114,7 +140,13 @@ type ``AST to otherSPPF translation test`` () =
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
         | Parser.Success (mAst) ->
             let other = new OtherTree<_>(mAst)
-//            RNGLR.ParseAmbiguous.otherAstToDot other "Parents after.dot"
+            if needPrintToDot 
+            then 
+                let indToString = RNGLR.ParseAmbiguous.numToString
+                let tokToNumber = RNGLR.ParseAmbiguous.tokenToNumber
+                let leftSide = RNGLR.ParseAmbiguous.leftSide
+
+                other.ToDot indToString tokToNumber leftSide "Parents after.dot"
             other.PrintAst()
             Assert.Pass "Parents test: PASSED"
 
@@ -135,11 +167,19 @@ type ``AST to otherSPPF translation test`` () =
         match parseResult with 
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
         | Parser.Success (mAst) ->
-//            RNGLR.ParseCycles.defaultAstToDot mAst "Cycles before.dot"
+            if needPrintToDot 
+            then RNGLR.ParseCycles.defaultAstToDot mAst "Cycles before.dot"
 
             let other = new OtherTree<_>(mAst)
             
-//            RNGLR.ParseCycles.otherAstToDot other "Cycles after.dot"
+            if needPrintToDot 
+            then 
+                let indToString = RNGLR.ParseCycles.numToString
+                let tokToNumber = RNGLR.ParseCycles.tokenToNumber
+                let leftSide = RNGLR.ParseCycles.leftSide
+
+                other.ToDot indToString tokToNumber leftSide "Cycles after.dot"
+            
             other.PrintAst()
             Assert.Pass "Cycles test: PASSED"
 
@@ -337,7 +377,8 @@ type ``Classic case: matching brackets``() =
         | Parser.Success(mAst) ->
             let other = new OtherTree<_>(mAst)
 
-            //printToDot other "Classic case right to left 2.dot"
+            if needPrintToDot 
+            then printToDot other "Classic case right to left 2.dot"
 
             let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 4 false tokToNumber tokToPos
             
@@ -356,6 +397,7 @@ type ``Classic case: matching brackets``() =
 [<TestFixture>]
 type ``Abstract case: matching brackets``() =
     let tokToNumber = RNGLR.ParseSummator.tokenToNumber
+    let numToString = RNGLR.ParseSummator.numToString
     let leftBraceNumber  = tokToNumber <| RNGLR.ParseSummator.Token.LBRACE -1
     let rightBraceNumber = tokToNumber <| RNGLR.ParseSummator.Token.RBRACE -1
     let tokToPos = tokenToPos RNGLR.ParseSummator.tokenData
@@ -367,6 +409,12 @@ type ``Abstract case: matching brackets``() =
         let tokenName = RNGLR.ParseSummator.numToString <| tokToNumber token
         Assert.Fail <| sprintf "%s is found" tokenName
         -1
+
+    let astToDot ast dotName = 
+        RNGLR.ParseSummator.defaultAstToDot ast dotName
+
+    let otherToDot (otherSppf : OtherTree<_>) dotName = 
+        otherSppf.ToDot numToString tokToNumber RNGLR.ParseSummator.leftSide dotName
 
     [<Test>]
     member test.``Abstract case. Left to right. Two parentheses 1``() =
@@ -395,8 +443,10 @@ type ``Abstract case: matching brackets``() =
             
             let other = new OtherTree<_>(mAst)
 
-//            RNGLR.ParseSummator.defaultAstToDot mAst "ast.dot"
-//            printToDot other "other.dot"
+            if needPrintToDot 
+            then 
+                astToDot mAst "ast.dot"
+                otherToDot other "other.dot"
             let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
 
             Assert.AreEqual (expected.Length, pairTokens.Count)

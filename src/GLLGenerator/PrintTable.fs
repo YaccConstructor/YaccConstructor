@@ -177,7 +177,8 @@ let printTableGLL
         printBrInd 0 "let isTerminal = function"
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %s _ -> true" <| indexator.indexToTerm i
-        printBrInd 1 "| _ -> false"
+        if indexator.literalsCount > 0
+        then printBrInd 1 "| _ -> false"
         printBr ""
 
         printBrInd 0 "let numIsTerminal = function"

@@ -212,9 +212,10 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
     member this.GetPairedRanges leftNumber rightNumber range toRight = 
         
         let tokToPos = this.TokenToPos calculatePos
+        let info = new BracketSearchInfo<_>(leftNumber, rightNumber, range, toRight)
         
         otherForest
-        |> List.map (fun otherTree -> otherTree.FindAllPair leftNumber rightNumber range toRight tokenToNumber tokToPos)
+        |> List.map (fun otherTree -> otherTree.FindAllPair info tokenToNumber tokToPos)
         |> List.map 
             (
                 fun token -> 

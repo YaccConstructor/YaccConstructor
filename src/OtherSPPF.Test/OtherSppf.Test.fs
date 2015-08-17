@@ -7,7 +7,7 @@ open OtherSPPF
 
 open NUnit.Framework
 
-let createEdge from _to label = new ParserEdge<_>(from, _to, label)
+let createEdge source target label = new ParserEdge<_>(source, target, label)
 
 let inline printErr (num, token : 'a, msg) =
     printfn "Error in position %d on Token %A: %s" num token msg
@@ -27,7 +27,7 @@ type ``AST to otherSPPF translation test`` () =
     [<Test>]
     member test.``Elementary test``() =
         let qGraph = new ParserInputGraph<_>(0, 5)
-        let vertexRange = List.init 6 (fun i -> i)
+        let vertexRange = List.init 6 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -61,7 +61,7 @@ type ``AST to otherSPPF translation test`` () =
     [<Test>]
     member test.``Epsilon test``() =
         let qGraph = new ParserInputGraph<_>(0, 3)
-        let vertexRange = List.init 4 (fun i -> i)
+        let vertexRange = List.init 4 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -92,7 +92,7 @@ type ``AST to otherSPPF translation test`` () =
     member test.``Ambiguous test``() =
         let qGraph = new ParserInputGraph<_>(0, 4)
 
-        let vertexRange = List.init 5 (fun i -> i)
+        let vertexRange = List.init 5 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -126,7 +126,7 @@ type ``AST to otherSPPF translation test`` () =
     member test.``Parents test``() =
         let qGraph = new ParserInputGraph<_>(0, 2)
 
-        let vertexRange = List.init 3 (fun i -> i)
+        let vertexRange = List.init 3 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -154,7 +154,7 @@ type ``AST to otherSPPF translation test`` () =
     member test.``Cycles test``() =
         let qGraph = new ParserInputGraph<_>(0, 2)
         
-        let vertexRange = List.init 3 (fun i -> i)
+        let vertexRange = List.init 3 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -209,7 +209,7 @@ type ``Classic case: matching brackets``() =
     member test.``Classic case. Simple test``() =
         let qGraph = new ParserInputGraph<_>(0, 6)
         
-        let vertexRange = List.init 7 (fun i -> i)
+        let vertexRange = List.init 7 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -228,7 +228,9 @@ type ``Classic case: matching brackets``() =
         | Parser.Success (mAst) ->
             let other = new OtherTree<_>(mAst)
             
-            let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
+            let bracketInfo = new BracketSearchInfo<_>(leftBraceNumber, rightBraceNumber, 0, true)
+
+            let pairTokens = other.FindAllPair bracketInfo tokToNumber tokToPos
 
             let expectedPairs = 1
             Assert.AreEqual (expectedPairs, pairTokens.Count)
@@ -247,7 +249,7 @@ type ``Classic case: matching brackets``() =
     member test.``Classic case. Many brackets 1``() =
         let qGraph = new ParserInputGraph<_>(0, 6)
         
-        let vertexRange = List.init 7 (fun i -> i)
+        let vertexRange = List.init 7 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -267,7 +269,9 @@ type ``Classic case: matching brackets``() =
             let other = new OtherTree<_>(mAst)
 
             let expectedPairs = 1
-            let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
+
+            let bracketInfo = new BracketSearchInfo<_>(leftBraceNumber, rightBraceNumber, 0, true)
+            let pairTokens = other.FindAllPair bracketInfo tokToNumber tokToPos
 
             Assert.AreEqual (expectedPairs, pairTokens.Count)
             
@@ -284,7 +288,7 @@ type ``Classic case: matching brackets``() =
     member test.``Classic case. Many brackets 2``() =
         let qGraph = new ParserInputGraph<_>(0, 6)
         
-        let vertexRange = List.init 7 (fun i -> i)
+        let vertexRange = List.init 7 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -305,7 +309,8 @@ type ``Classic case: matching brackets``() =
             let other = new OtherTree<_>(mAst)
 
             let expectedPairs = 1
-            let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 1 true tokToNumber tokToPos
+            let bracketInfo = new BracketSearchInfo<_>(leftBraceNumber, rightBraceNumber, 1, true)
+            let pairTokens = other.FindAllPair bracketInfo tokToNumber tokToPos
 
             Assert.AreEqual (expectedPairs, pairTokens.Count)
             
@@ -322,7 +327,7 @@ type ``Classic case: matching brackets``() =
     member test.``Classic case. Right to left 1``() =
         let qGraph = new ParserInputGraph<_>(0, 6)
         
-        let vertexRange = List.init 7 (fun i -> i)
+        let vertexRange = List.init 7 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -340,7 +345,8 @@ type ``Classic case: matching brackets``() =
         | Parser.Success(mAst) ->
             let other = new OtherTree<_>(mAst)
             
-            let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 3 false tokToNumber tokToPos
+            let bracketInfo = new BracketSearchInfo<_>(leftBraceNumber, rightBraceNumber, 3, false)
+            let pairTokens = other.FindAllPair bracketInfo tokToNumber tokToPos
             
             let expectedPairs = 1
             Assert.AreEqual (expectedPairs, pairTokens.Count)
@@ -359,7 +365,7 @@ type ``Classic case: matching brackets``() =
     member test.``Classic case. Right to left 2``() =
         let qGraph = new ParserInputGraph<_>(0, 6)
         
-        let vertexRange = List.init 7 (fun i -> i)
+        let vertexRange = List.init 7 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -380,7 +386,8 @@ type ``Classic case: matching brackets``() =
             if needPrintToDot 
             then printToDot other "Classic case right to left 2.dot"
 
-            let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 4 false tokToNumber tokToPos
+            let bracketInfo = new BracketSearchInfo<_>(leftBraceNumber, rightBraceNumber, 4, false)
+            let pairTokens = other.FindAllPair bracketInfo tokToNumber tokToPos
             
             let expectedCount = 1
             Assert.AreEqual (expectedCount, pairTokens.Count)
@@ -405,7 +412,7 @@ type ``Abstract case: matching brackets``() =
 
     let infoAboutError = "Some expected brackets weren't found"
 
-    let NotBracketIsFound token = 
+    let notBracketIsFound token = 
         let tokenName = RNGLR.ParseSummator.numToString <| tokToNumber token
         Assert.Fail <| sprintf "%s is found" tokenName
         -1
@@ -423,7 +430,7 @@ type ``Abstract case: matching brackets``() =
         printfn "[caret]'(' --> '1' --> |        "
         printfn "                       | --> ')'"
         
-        let vertexRange = List.init 5 (fun i -> i)
+        let vertexRange = List.init 5 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -447,20 +454,23 @@ type ``Abstract case: matching brackets``() =
             then 
                 astToDot mAst "ast.dot"
                 otherToDot other "other.dot"
-            let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
+            
+            let bracketInfo = new BracketSearchInfo<_>(leftBraceNumber, rightBraceNumber, 0, true)
+            let pairTokens = other.FindAllPair bracketInfo tokToNumber tokToPos
 
             Assert.AreEqual (expected.Length, pairTokens.Count)
 
             let actual = 
                 pairTokens 
                 |> Seq.map 
-                    (fun token -> 
-                        match token with
-                        | RNGLR.ParseSummator.RBRACE pos -> pos
-                        | _ -> NotBracketIsFound token
+                    (
+                        fun token -> 
+                            match token with
+                            | RNGLR.ParseSummator.RBRACE pos -> pos
+                            | _ -> notBracketIsFound token
                     )
                 |> Seq.sort
-                |> Array.ofSeq        
+                |> Array.ofSeq
 
             Assert.AreEqual (expected, actual, infoAboutError)
             Assert.Pass "Abstract case. Left to right. Two parentheses 1 PASSED"
@@ -472,7 +482,7 @@ type ``Abstract case: matching brackets``() =
         printfn "( -->|             "
         printfn "     |--> 2 --> ')'"
         
-        let vertexRange = List.init 6 (fun i -> i)
+        let vertexRange = List.init 6 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -490,7 +500,8 @@ type ``Abstract case: matching brackets``() =
         | Parser.Success(mAst) ->
             let other = new OtherTree<_>(mAst)
             
-            let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
+            let bracketInfo = new BracketSearchInfo<_>(leftBraceNumber, rightBraceNumber, 0, true)
+            let pairTokens = other.FindAllPair bracketInfo tokToNumber tokToPos
 
             let expected = [|3; 4|]
 
@@ -502,7 +513,7 @@ type ``Abstract case: matching brackets``() =
                     (fun token -> 
                         match token with
                         | RNGLR.ParseSummator.RBRACE pos -> pos
-                        | _ -> NotBracketIsFound token
+                        | _ -> notBracketIsFound token
                      )
                 |> Seq.sort
                 |> Array.ofSeq
@@ -517,7 +528,7 @@ type ``Abstract case: matching brackets``() =
         printfn " '(' --> "
         
         let qGraph = new ParserInputGraph<_>(0, 4)
-        let vertexRange = List.init 5 (fun i -> i)
+        let vertexRange = List.init 5 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -536,7 +547,8 @@ type ``Abstract case: matching brackets``() =
             
             let other = new OtherTree<_>(mAst)
             
-            let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 3 false tokToNumber tokToPos
+            let bracketInfo = new BracketSearchInfo<_>(leftBraceNumber, rightBraceNumber, 3, false)
+            let pairTokens = other.FindAllPair bracketInfo tokToNumber tokToPos
             
             let expected = [|0; 1;|]
             Assert.AreEqual (expected.Length, pairTokens.Count)
@@ -547,7 +559,7 @@ type ``Abstract case: matching brackets``() =
                     (fun token -> 
                         match token with
                         | RNGLR.ParseSummator.LBRACE pos -> pos
-                        | _ -> NotBracketIsFound token
+                        | _ -> notBracketIsFound token
                      )
                 |> Seq.sort
                 |> Array.ofSeq
@@ -562,7 +574,7 @@ type ``Abstract case: matching brackets``() =
         printfn "               ')'[caret]"
         printfn " '(' --> '3' -->"
         
-        let vertexRange = List.init 6 (fun i -> i)
+        let vertexRange = List.init 6 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -582,7 +594,8 @@ type ``Abstract case: matching brackets``() =
             
             let other = new OtherTree<_>(mAst)
             
-            let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 4 false tokToNumber tokToPos
+            let bracketInfo = new BracketSearchInfo<_>(leftBraceNumber, rightBraceNumber, 4, false)
+            let pairTokens = other.FindAllPair bracketInfo tokToNumber tokToPos
             
             let expected = [|0; 1;|]
             Assert.AreEqual (expected.Length, pairTokens.Count)
@@ -593,7 +606,7 @@ type ``Abstract case: matching brackets``() =
                     (fun token -> 
                         match token with
                         | RNGLR.ParseSummator.LBRACE pos -> pos
-                        | _ -> NotBracketIsFound token
+                        | _ -> notBracketIsFound token
                      )
                 |> Seq.sort
                 |> Array.ofSeq
@@ -608,7 +621,7 @@ type ``Abstract case: matching brackets``() =
         printfn "        '(' -> "
         
         let qGraph = new ParserInputGraph<_>(0, 6)
-        let vertexRange = List.init 7 (fun i -> i) 
+        let vertexRange = List.init 7 id 
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -628,7 +641,8 @@ type ``Abstract case: matching brackets``() =
         | Parser.Success(mAst) ->
             
             let other = new OtherTree<_>(mAst)
-            let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 5 false tokToNumber tokToPos
+            let bracketInfo = new BracketSearchInfo<_>(leftBraceNumber, rightBraceNumber, 5, false)
+            let pairTokens = other.FindAllPair bracketInfo tokToNumber tokToPos
             
             let expectedPairs = 1
             Assert.AreEqual (expectedPairs, pairTokens.Count)
@@ -636,7 +650,7 @@ type ``Abstract case: matching brackets``() =
             let actual = 
                 match pairTokens.[0] with
                 | RNGLR.ParseSummator.LBRACE pos -> pos
-                | _ -> NotBracketIsFound pairTokens.[0]
+                | _ -> notBracketIsFound pairTokens.[0]
 
             let expectedPos = 0
             Assert.AreEqual (expectedPos, actual, infoAboutError)

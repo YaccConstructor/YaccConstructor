@@ -16,7 +16,7 @@ open QuickGraph
 
 let needPrint = false
 let threshold = 10
-let createEdge from _to label = new ParserEdge<_>(from, _to, label)
+let createEdge source target label = new ParserEdge<_>(source, target, label)
 
 let inline printErr (num, token : 'a, msg) =
     printfn "Error in position %d on Token %A: %s" num token msg
@@ -71,7 +71,7 @@ type ``AST GetNextTree tests``() =
     member this.``Cycles A + (A + ... + A)``()= 
         
         let qGraph = new ParserInputGraph<_>(0, 2)
-        let vertexRange = List.init 3 (fun i -> i)
+        let vertexRange = List.init 3 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -90,7 +90,7 @@ type ``AST GetNextTree tests``() =
     member this.``Cycles A + B * A + B * A + B * ... + B``()= 
         
         let qGraph = new ParserInputGraph<_>(0, 4)
-        let vertexRange = List.init 5 (fun i -> i)
+        let vertexRange = List.init 5 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -111,7 +111,7 @@ type ``AST GetNextTree tests``() =
     member this.``Branches``()= 
         
         let qGraph = new ParserInputGraph<_>(0, 4)
-        let vertexRange = List.init 5 (fun i -> i)
+        let vertexRange = List.init 5 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -134,7 +134,7 @@ type ``AST GetNextTree tests``() =
     [<Test>]
     member this.``Simple Cycle``()= 
         let qGraph = new ParserInputGraph<_>(0, 2)
-        let vertexRange = List.init 3 (fun i -> i)
+        let vertexRange = List.init 3 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [

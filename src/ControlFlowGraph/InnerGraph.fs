@@ -1,6 +1,9 @@
 ﻿module ControlFlowGraph.InnerGraph
 
+open Microsoft.FSharp.Collections
+
 open System.IO
+open System.Collections.Generic
 
 open QuickGraph
 
@@ -28,6 +31,11 @@ and BlockEdge<'TokenType>(source, target, tag) =
 and CfgBlocksGraph<'TokenType>() = 
     inherit AdjacencyGraph<int, BlockEdge<'TokenType>>()
 
+    let isEpsilonEdge (edge : BlockEdge<_>) = 
+        match edge.Tag with
+        | EmptyEdge -> true
+        | _ -> false
+
     member this.StartVertex = 0
     member this.EndVertex = Seq.max this.Vertices
 
@@ -36,9 +44,44 @@ and CfgBlocksGraph<'TokenType>() =
         this.AddVertex e.Target |> ignore
         this.AddEdge e |> ignore
 
+    member this.RemoveDuplicateEpsilons() = 
+        
+        let isTheSame (edge1 : BlockEdge<_>) (edge2 : BlockEdge<_>) = 
+            edge1.Source = edge2.Source && edge1.Target = edge2.Target
+
+        let needRemove = ref []
+
+        this.Edges
+        |> Seq.filter isEpsilonEdge
+        |> Seq.fold
+            (
+                fun acc edge -> 
+                    if acc |> List.exists (isTheSame edge)
+                    then 
+                        needRemove := edge :: !needRemove
+                        acc
+                    else edge :: acc
+            ) []
+        |> ignore
+
+        !needRemove
+        |> List.iter (this.RemoveEdge >> ignore)
+
+    member this.RemoveEpsilonLoopEdges() = 
+        
+        let needRemove = ref []
+
+        this.Edges
+        |> Seq.filter isEpsilonEdge
+        |> Seq.filter (fun edge -> edge.Source = edge.Target)
+        |> Seq.iter (fun edge -> needRemove := edge :: !needRemove)
+
+        !needRemove
+        |> List.iter (this.RemoveEdge >> ignore)
+
     /// <summary>
     /// Prints graph to .dot file. 
-    /// Each edge contains edgeType only
+    /// Each complicated edge (except ASSIGNMENT) contains edgeType only
     /// </summary>
     /// <param name="name">Name of .dot file</param>
     /// <param name="tokenToStringOpt">Token to string mapping option</param>
@@ -47,7 +90,7 @@ and CfgBlocksGraph<'TokenType>() =
         out.WriteLine("digraph AST {")
         out.WriteLine "rankdir=LR"
         this.Vertices
-        |> Seq.iter (fun i -> out.Write (sprintf "%d ;" i))
+        |> Seq.iter (sprintf "%d ;" >> string >> out.Write)
         out.WriteLine()
 
         let getSuffix (tag : EdgeType<_>) = 
@@ -87,14 +130,14 @@ and CfgBlocksGraph<'TokenType>() =
         out.Close()
 
 /// <summary>
-/// Builds CfgBlocksGraph
+/// Builds CfgBlocksGraph.
 /// </summary>
 type GraphConstructor<'TokenType> = 
-    ///current graph
+    ///Current graph
     val Graph : CfgBlocksGraph<'TokenType>
-    ///existing vertex with the biggest number
+    ///Existing vertex 
     val mutable StartVertex : int
-    ///next vertex will have this number
+    ///Next vertex will have this number
     val mutable EndVertex : int
 
     new (g, s, e) = {Graph = g; StartVertex = s; EndVertex = e}
@@ -125,3 +168,32 @@ type GraphConstructor<'TokenType> =
     member this.UpdateVertices() = 
         this.StartVertex <- this.EndVertex
         this.EndVertex <- this.EndVertex + 1
+
+    member this.FindLastVertex start = 
+        let markedEdges = new ResizeArray<_>()
+        let queue = new Queue<_>()
+        let graph = this.Graph
+
+        let addEdge edge = 
+            if not <| markedEdges.Contains edge
+            then
+                queue.Enqueue edge
+                markedEdges.Add edge
+
+        this.Graph.OutEdges start
+        |> Seq.iter addEdge
+
+        let mutable res = []
+
+        while queue.Count > 0 do
+            let edge = queue.Dequeue()
+            if graph.OutDegree edge.Target = 0
+            then res <- edge.Target :: res
+            else 
+                this.Graph.OutEdges(edge.Target)
+                |> Seq.iter addEdge
+
+        graph.RelaxedPrintToDot "`temp.dot" None
+        if res.Length <> 1
+        then None //failwith "OOOOPS"
+        else Some <| res.Head

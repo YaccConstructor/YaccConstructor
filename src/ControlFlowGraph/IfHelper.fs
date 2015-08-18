@@ -1,4 +1,4 @@
-﻿module ControlFlowGraph.Helper
+﻿module ControlFlowGraph.IfHelper
 
 open System.Collections.Generic
 
@@ -30,12 +30,12 @@ let private createIfGraph condGraph thenGraph (elseGraph : _ option) =
 /// <summary>
 /// Takes ast family deriving 'if-then-else' and builds appropriate graph.
 /// </summary>
+/// <param name="intToToken">Position in input to token mapping</param>
+/// <param name="tokenToNumber">Token to int mapping</param>
+/// <param name="tempDict">Key is non-terminal number, value is block type of cfg</param>
 /// <param name="family">AST node that would be processed</param>
 /// <param name="processSeq">This function will be  then и else branches</param>
-/// <param name="intToToken">Position in input to token mapping</param>
-/// <param name="tempDict">Key is non-terminal number, value is block type of cfg</param>
-/// <param name="tokenToNumber">Token to int mapping</param>
-let processIf (family : Family) processSeq intToToken (tempDict : Dictionary<int, _>) tokenToNumber = 
+let processIf intToToken tokenToNumber (tempDict : Dictionary<int, _>) (family : Family) processSeq = 
     let blockType = ref IfStatement
                         
     let condGraph = new GraphConstructor<_>()
@@ -62,8 +62,8 @@ let processIf (family : Family) processSeq intToToken (tempDict : Dictionary<int
                             graph.CollectAllTokens()
                             |> List.concat
                             |> List.map intToToken
-                        )
-                |> Array.iter(fun tokensSet -> condGraph.AddEdge <| Simple tokensSet) 
+                    )
+                |> Array.iter(Simple >> condGraph.AddEdge)
                 blockType := ThenStatement
                                         
             | ThenStatement -> 
@@ -81,4 +81,5 @@ let processIf (family : Family) processSeq intToToken (tempDict : Dictionary<int
 
     family.nodes.doForAll processNode
     
-    createIfGraph condGraph.Graph thenGraph.Graph !elseGraphOpt
+    let ifGraph = createIfGraph condGraph.Graph thenGraph.Graph !elseGraphOpt
+    Complicated (IfStatement, ifGraph)

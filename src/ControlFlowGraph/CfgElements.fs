@@ -3,7 +3,7 @@
 open ControlFlowGraph.Common
 
 /// <summary>
-/// Control flow graph blocks
+/// Control flow graph blocks.
 /// </summary>
 type Block<'TokenType>(blockType, toks) = 
     let mutable blockType = blockType
@@ -40,7 +40,7 @@ type Block<'TokenType>(blockType, toks) =
 
         let strValues = 
             this.Tokens
-            |> Array.map (fun t -> tokToString t)
+            |> Array.map tokToString
             |> String.concat " "
 
         sprintf "%s\n tokens: %s\n" typeStr strValues
@@ -96,7 +96,7 @@ and InterNode<'TokenType>(children : list<_>, parents : list<_>) =
                 this.Parents
                 |> List.fold
                     (
-                        fun acc parent ->  
+                        fun acc parent ->
                             if acc |> List.forall ((<>) parent)
                             then acc @ [parent]
                             else acc

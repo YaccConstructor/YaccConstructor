@@ -38,6 +38,7 @@
     <Compile Include="InnerGraph.fs" />
     <Compile Include="GraphInterpreter.fs" />
     <Compile Include="IfHelper.fs" />
+    <Compile Include="AssignmentHelper.fs" />
     <Compile Include="ControlFlowGraph.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />

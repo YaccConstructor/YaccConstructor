@@ -1,7 +1,6 @@
 ﻿module ControlFlowGraphTests
 
 open NUnit.Framework
-open QuickGraph
 
 open AbstractAnalysis.Common
 
@@ -11,12 +10,11 @@ open ControlFlowGraph.CfgElements
 open ControlFlowGraph.InputStructures
 
 open Yard.Generators.RNGLR
-open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR.AbstractParser
 
 let needPrint = false
 
-let createEdge from _to label = new ParserEdge<_>(from, _to, label)
+let createEdge source target label = new ParserEdge<_>(source, target, label)
 
 let inline printErr (num, token : 'a, msg) =
     printfn "Error in position %d on Token %A: %s" num token msg
@@ -29,7 +27,7 @@ let tokenToPos (tokenData : _ -> obj) token =
     | _ -> failwith ""
 
 [<TestFixture>]
-type ``Control Flow Graph building: Simple cases`` () =
+type ``Control Flow Graph building: Simple cases``() =
     let buildAbstractAst = RNGLR.ParseExtendedCalc.buildAstAbstract
     let tokenToNumber = RNGLR.ParseExtendedCalc.tokenToNumber
     let leftSides = RNGLR.ParseExtendedCalc.leftSide
@@ -64,16 +62,16 @@ type ``Control Flow Graph building: Simple cases`` () =
                 let cfgName = snd printNames
                 cfg.PrintToDot cfgName
             
-            let blocksCount = cfg.CalculateBlocksCount()
-            Assert.AreEqual(expectedBlocksCount, blocksCount, "Blocks count isn't equal expected one")
-
-            let nodesCount = cfg.CalculateNodesCount()
-            Assert.AreEqual(expectedNodesCount, nodesCount, "Intermediate nodes count isn't equal expected one")
+            Assert.IsTrue(cfg.Entry.Parents.IsEmpty, "Entry node has parent node!")
+            Assert.IsTrue(cfg.Exit.Children.IsEmpty, "Exit node has child node!")
+            
+            Assert.AreEqual(expectedBlocksCount, cfg.Blocks.Length, "Blocks count isn't equal expected one")
+            Assert.AreEqual(expectedNodesCount, cfg.Nodes.Length, "Intermediate nodes count isn't equal expected one")
             
     [<Test>]
     member test.``Elementary test``() =
         let qGraph = new ParserInputGraph<_>(0, 13)
-        let vertexRange = List.init 14 (fun i -> i)
+        let vertexRange = List.init 14 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -94,13 +92,13 @@ type ``Control Flow Graph building: Simple cases`` () =
 
         let expectedNodes = 4
         let expectedBlocks = 3
-        let printNames = "`cfg construction ast elementary.dot", "`cfg construction cfg elementary.dot"
+        let printNames = "`elementary ast.dot", "`elementary cfg.dot"
         runTest qGraph expectedBlocks expectedNodes printNames
 
     [<Test>]
     member test.``Ambiguous test``() =
         let qGraph = new ParserInputGraph<_>(0, 16)
-        let vertexRange = List.init 17 (fun i -> i)
+        let vertexRange = List.init 17 id
         qGraph.AddVertexRange vertexRange |> ignore
 
         //          -> Y = 2;
@@ -129,13 +127,13 @@ type ``Control Flow Graph building: Simple cases`` () =
 
         let expectedNodes = 4
         let expectedBlocks = 4
-        let printNames = "`cfg construction ast ambiguous.dot", "`cfg construction cfg ambiguous.dot"
+        let printNames = "`ambiguous ast.dot", "`ambiguous cfg.dot"
         runTest qGraph expectedBlocks expectedNodes printNames
 
     [<Test>]
     member this.``Ambiguous2 test``() = 
         let qGraph = new ParserInputGraph<_>(0, 5)
-        let vertexRange = List.init 6 (fun i -> i)
+        let vertexRange = List.init 6 id
         qGraph.AddVertexRange vertexRange |> ignore
 
         qGraph.AddVerticesAndEdgeRange
@@ -150,7 +148,7 @@ type ``Control Flow Graph building: Simple cases`` () =
 
         let expectedNodes = 2
         let expectedBlocks = 2
-        let printNames = "`cfg construction ast ambiguous2.dot", "`cfg construction cfg ambiguous2.dot"
+        let printNames = "`ambiguous2 ast.dot", "`ambiguous2 cfg.dot"
         runTest qGraph expectedBlocks expectedNodes  printNames
 
 [<TestFixture>]
@@ -173,8 +171,7 @@ type ``Control Flow Graph building: Cycles``() =
 
     let postCondition condition (exitNode : InterNode<_>) = 
         exitNode.Parents
-        |> List.map(fun node -> node.Tokens)
-        |> List.map(fun tokens -> tokens |> Array.map tokenToNumber)
+        |> List.map(fun node -> node.Tokens |> Array.map tokenToNumber)
         |> List.forall condition
 
     let runTest graph expectedBlocksCount expectedNodesCount postCond printNames = 
@@ -195,11 +192,11 @@ type ``Control Flow Graph building: Cycles``() =
                 let cfgName = snd printNames
                 cfg.PrintToDot cfgName
             
-            let blocksCount = cfg.CalculateBlocksCount()
-            Assert.AreEqual(expectedBlocksCount, blocksCount, "Blocks count isn't equal expected one")
+            Assert.IsTrue(cfg.Entry.Parents.IsEmpty, "Entry node has parent node!")
+            Assert.IsTrue(cfg.Exit.Children.IsEmpty, "Exit node has child node!")
 
-            let nodesCount = cfg.CalculateNodesCount()
-            Assert.AreEqual(expectedNodesCount, nodesCount, "Intermediate nodes count isn't equal expected one")
+            Assert.AreEqual(expectedBlocksCount, cfg.Blocks.Length, "Blocks count isn't equal expected one")
+            Assert.AreEqual(expectedNodesCount, cfg.Nodes.Length, "Intermediate nodes count isn't equal expected one")
 
             let isCorrect = postCond cfg.Exit
             Assert.IsTrue (isCorrect, "Incorrect cfg was builded")
@@ -208,7 +205,7 @@ type ``Control Flow Graph building: Cycles``() =
     member this.``Cycle A+``() = 
         
         let qGraph = new ParserInputGraph<_>(0, 3)
-        let vertexRange = List.init 4 (fun i -> i)
+        let vertexRange = List.init 4 id
         qGraph.AddVertexRange vertexRange |> ignore
 
         qGraph.AddVerticesAndEdgeRange
@@ -229,10 +226,77 @@ type ``Control Flow Graph building: Cycles``() =
         runTest qGraph expectedBlocks expectedNodes postCond printNames
 
     [<Test>]
+    member this.``Cycle A B*``() = 
+        
+        let qGraph = new ParserInputGraph<_>(0, 4)
+        let vertexRange = List.init 5 id
+        qGraph.AddVertexRange vertexRange |> ignore
+
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (RNGLR.ParseSimple.A 0)
+                createEdge 1 2 (RNGLR.ParseSimple.SEMICOLON 1)
+                createEdge 2 3 (RNGLR.ParseSimple.B 2)
+                createEdge 3 2 (RNGLR.ParseSimple.SEMICOLON 3)
+                createEdge 2 4 (RNGLR.ParseSimple.RNGLR_EOF 4)
+            ] |> ignore
+
+        if needPrint 
+        then qGraph.PrintToDot "`Cycle A B asteriks input.dot" tokToRealString
+
+        let expectedNodes = 3
+        let expectedBlocks = 2
+
+        let expectedParents = 
+            [|RNGLR.ParseSimple.A 0 ; RNGLR.ParseSimple.B 0|]
+            |> Array.map tokenToNumber
+
+        let myCond tokenSet = 
+            expectedParents
+            |> Array.fold (fun acc num -> acc || tokenSet |> Array.exists ((=) num)) false
+
+        let postCond = postCondition myCond
+        let printNames = "`Cycle A B asteriks ast.dot", "`Cycle A B asteriks cfg.dot"
+        runTest qGraph expectedBlocks expectedNodes postCond printNames
+
+    [<Test>]
+    member this.``Cycle A B* C``() = 
+        
+        let qGraph = new ParserInputGraph<_>(0, 6)
+        let vertexRange = List.init 7 id
+        qGraph.AddVertexRange vertexRange |> ignore
+
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (RNGLR.ParseSimple.A 0)
+                createEdge 1 2 (RNGLR.ParseSimple.SEMICOLON 1)
+                createEdge 2 3 (RNGLR.ParseSimple.B 2)
+                createEdge 3 2 (RNGLR.ParseSimple.SEMICOLON 3)
+                createEdge 2 4 (RNGLR.ParseSimple.C 4)
+                createEdge 4 5 (RNGLR.ParseSimple.SEMICOLON 5)
+                createEdge 5 6 (RNGLR.ParseSimple.RNGLR_EOF 6)
+            ] |> ignore
+
+        if needPrint 
+        then qGraph.PrintToDot "`Cycle A B asteriks C input.dot" tokToRealString
+
+        let expectedNodes = 3
+        let expectedBlocks = 3
+
+        let expectedParent = RNGLR.ParseSimple.C 0 |> tokenToNumber
+
+        let myCond tokenSet = 
+            tokenSet |> Array.exists ((=) expectedParent)
+
+        let postCond = postCondition myCond
+        let printNames = "`Cycle A B asteriks C ast.dot", "`Cycle A B asteriks C cfg.dot"
+        runTest qGraph expectedBlocks expectedNodes postCond printNames
+
+    [<Test>]
     member this.``Cycle (A | B)+``() = 
         
         let qGraph = new ParserInputGraph<_>(0, 3)
-        let vertexRange = List.init 4 (fun i -> i)
+        let vertexRange = List.init 4 id
         qGraph.AddVertexRange vertexRange |> ignore
 
         qGraph.AddVerticesAndEdgeRange
@@ -257,7 +321,7 @@ type ``Control Flow Graph building: Cycles``() =
     member this.``Cycle A (B+ | C+)``() = 
         
         let qGraph = new ParserInputGraph<_>(0, 7)
-        let vertexRange = List.init 8 (fun i -> i)
+        let vertexRange = List.init 8 id
         qGraph.AddVertexRange vertexRange |> ignore
 
         qGraph.AddVerticesAndEdgeRange
@@ -295,7 +359,7 @@ type ``Control Flow Graph building: Cycles``() =
     member this.``Cycle (AB)+``() = 
         
         let qGraph = new ParserInputGraph<_>(0, 5)
-        let vertexRange = List.init 6 (fun i -> i)
+        let vertexRange = List.init 6 id
         qGraph.AddVertexRange vertexRange |> ignore
 
         qGraph.AddVerticesAndEdgeRange
@@ -327,7 +391,7 @@ type ``Control Flow Graph building: Cycles``() =
     member this.``Cycle (AB)+C``() = 
         
         let qGraph = new ParserInputGraph<_>(0, 7)
-        let vertexRange = List.init 8 (fun i -> i)
+        let vertexRange = List.init 8 id
         qGraph.AddVertexRange vertexRange |> ignore
 
         qGraph.AddVerticesAndEdgeRange
@@ -357,7 +421,7 @@ type ``Control Flow Graph building: Cycles``() =
     member this.``Cycle after cycle A+B+``() = 
         
         let qGraph = new ParserInputGraph<_>(0, 5)
-        let vertexRange = List.init 6 (fun i -> i)
+        let vertexRange = List.init 6 id
         qGraph.AddVertexRange vertexRange |> ignore
 
         qGraph.AddVerticesAndEdgeRange
@@ -389,7 +453,7 @@ type ``Control Flow Graph building: Cycles``() =
     member this.``Cycle inside cycle (A+B)+``() = 
         
         let qGraph = new ParserInputGraph<_>(0, 5)
-        let vertexRange = List.init 6 (fun i -> i)
+        let vertexRange = List.init 6 id
         qGraph.AddVertexRange vertexRange |> ignore
 
         qGraph.AddVerticesAndEdgeRange
@@ -421,7 +485,7 @@ type ``Control Flow Graph building: Cycles``() =
     member this.``Cycle inside cycle ((AB)+C)+``() = 
         
         let qGraph = new ParserInputGraph<_>(0, 7)
-        let vertexRange = List.init 8 (fun i -> i)
+        let vertexRange = List.init 8 id
         qGraph.AddVertexRange vertexRange |> ignore
 
         qGraph.AddVerticesAndEdgeRange
@@ -445,7 +509,7 @@ type ``Control Flow Graph building: Cycles``() =
         let postCond = postCondition (fun tokens -> tokens |> Array.exists ((=) cNumber))
 
         let expectedNodes = 5
-        let expectedBlocks = 7
+        let expectedBlocks = 6
         let printNames = 
             "`Cycle inside cycle ((AB)+C)+ ast.dot", 
             "`Cycle inside cycle ((AB)+C)+ cfg.dot"
@@ -504,17 +568,17 @@ type ``Control Flow Graph building: If statements`` () =
                 let cfgName = snd printNames
                 cfg.PrintToDot cfgName
             
-            let blocksCount = cfg.CalculateBlocksCount()
-            Assert.AreEqual(expectedBlocksCount, blocksCount, "Blocks count isn't equal expected one")
-            
-            let nodesCount = cfg.CalculateNodesCount()
-            Assert.AreEqual(expectedNodesCount, nodesCount, "Intermediate nodes count isn't equal expected one")
+            Assert.IsTrue(cfg.Entry.Parents.IsEmpty, "Entry node has parent node!")
+            Assert.IsTrue(cfg.Exit.Children.IsEmpty, "Exit node has child node!")
+
+            Assert.AreEqual(expectedBlocksCount, cfg.Blocks.Length, "Blocks count isn't equal expected one")
+            Assert.AreEqual(expectedNodesCount, cfg.Nodes.Length, "Intermediate nodes count isn't equal expected one")
 
 
     [<Test>]
     member test.``Simple If test``() =
         let qGraph = new ParserInputGraph<_>(0, 12)
-        let vertexRange = List.init 13 (fun i -> i)
+        let vertexRange = List.init 13 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -532,7 +596,7 @@ type ``Control Flow Graph building: If statements`` () =
                 createEdge 11 12 (RNGLR.ParseIf.RNGLR_EOF 11)
             ] |> ignore
 
-        let printNames = "`cfg construction ast simple if.dot", "`cfg construction cfg simple if.dot"
+        let printNames = "`simple if ast.dot", "`simple if cfg.dot"
         let expectedBlocksCount = 4
         let expectedNodesCount = 5
         runTest qGraph expectedBlocksCount expectedNodesCount printNames
@@ -540,7 +604,7 @@ type ``Control Flow Graph building: If statements`` () =
     [<Test>]
     member test.``Big If test``() =
         let qGraph = new ParserInputGraph<_>(0, 16)
-        let vertexRange = List.init 17 (fun i -> i)
+        let vertexRange = List.init 17 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -562,7 +626,7 @@ type ``Control Flow Graph building: If statements`` () =
                 createEdge 15 16 (RNGLR.ParseIf.RNGLR_EOF 15)
             ] |> ignore
 
-        let printNames = "`cfg construction ast big if.dot", "`cfg construction cfg big if.dot"
+        let printNames = "`big if ast.dot", "`big if cfg.dot"
         let expectedBlocksCount = 6
         let expectedNodesCount = 7
         runTest qGraph expectedBlocksCount expectedNodesCount printNames
@@ -571,7 +635,7 @@ type ``Control Flow Graph building: If statements`` () =
     member test.``If without else test``() =
         let qGraph = new ParserInputGraph<_>(0, 11)
 
-        let vertexRange = List.init 12 (fun i -> i)
+        let vertexRange = List.init 12 id
         qGraph.AddVertexRange vertexRange |> ignore
 
         qGraph.AddVerticesAndEdgeRange
@@ -589,7 +653,7 @@ type ``Control Flow Graph building: If statements`` () =
                 createEdge 10 11 (RNGLR.ParseIf.RNGLR_EOF 10)
             ] |> ignore
 
-        let printNames = "`cfg construction ast if-without-else.dot", "`cfg construction cfg if-without-else.dot"
+        let printNames = "`if-without-else ast.dot", "`if-without-else cfg.dot"
         let expectedBlocksCount = 4
         let expectedNodesCount = 5
         runTest qGraph expectedBlocksCount expectedNodesCount printNames
@@ -597,7 +661,7 @@ type ``Control Flow Graph building: If statements`` () =
     [<Test>]
     member test.``Inner if``() =
         let qGraph = new ParserInputGraph<_>(0, 24)
-        let vertices = Array.init 25 (fun i -> i)
+        let vertices = Array.init 25 id
         qGraph.AddVertexRange vertices |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -627,7 +691,7 @@ type ``Control Flow Graph building: If statements`` () =
                 createEdge 23 24(RNGLR.ParseIf.RNGLR_EOF 23)
             ] |> ignore
 
-        let printNames = "`cfg construction ast inner if.dot", "`cfg construction cfg inner if.dot"
+        let printNames = "`inner if ast.dot", "`inner if cfg.dot"
         let expectedBlocksCount = 7
         let expectedNodesCount = 8
         runTest qGraph expectedBlocksCount expectedNodesCount printNames
@@ -654,11 +718,11 @@ type ``Find undefined variables`` () =
         
     let varsNumbers = 
         [RNGLR.ParseExtendedCalc.X 0; RNGLR.ParseExtendedCalc.Y 0; RNGLR.ParseExtendedCalc.Z 0]
-        |> List.map (fun t -> tokenToNumber t)
+        |> List.map tokenToNumber
 
     let isVariable tok = varsNumbers |> List.exists (fun t -> t = tok) 
 
-    let tokToRealName tok = tok |> tokenToNumber |> indToString   
+    let tokToRealName = tokenToNumber >> indToString
         
     let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, keywordToInt, isVariable)
@@ -691,7 +755,7 @@ type ``Find undefined variables`` () =
     [<Test>]
     member test.``Elementary``() = 
         let qGraph = new ParserInputGraph<_>(0, 9)
-        let vertexRange = List.init 10 (fun i -> i)
+        let vertexRange = List.init 10 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -713,7 +777,7 @@ type ``Find undefined variables`` () =
     [<Test>]
     member test.``X = X``() = 
         let qGraph = new ParserInputGraph<_>(0, 5)
-        let vertexRange = List.init 6 (fun i -> i)
+        let vertexRange = List.init 6 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -731,7 +795,7 @@ type ``Find undefined variables`` () =
     [<Test>]
     member test.``Undef: ambiguous``() =
         let qGraph = new ParserInputGraph<_>(0, 18)
-        let vertexRange = List.init 19 (fun i -> i)
+        let vertexRange = List.init 19 id
         qGraph.AddVertexRange vertexRange |> ignore
 
         //          -> Y = 2;
@@ -767,11 +831,11 @@ type ``Find undefined variables`` () =
     [<Test>]
     member test.``Undef: ambiguous 2``() =
         let qGraph = new ParserInputGraph<_>(0, 15)
-        let vertexRange = List.init 16 (fun i -> i)
+        let vertexRange = List.init 16 id
         qGraph.AddVertexRange vertexRange |> ignore
 
         //        ---> Y = 2; ---> 
-        // X = 1; ---------------> X = Y * Z;   
+        // X = 1; ---------------> X = Y * Z;
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (RNGLR.ParseExtendedCalc.X 0)
@@ -801,13 +865,14 @@ let f x =
     let cfgBuilding = new ``Control Flow Graph building: Simple cases``()
 //    cfgBuilding.``Ambiguous test``()
     let cycleBuilding = new ``Control Flow Graph building: Cycles``()
-    cycleBuilding.``Cycle (A | B)+``()
+    //cycleBuilding.``Cycle A B*``()
+    //cycleBuilding.``Cycle inside cycle ((AB)+C)+``()
     //cycleBuilding.``Simple Cycle``()
     //cycleBuilding.Cycle()
 //    cfgBuilding.``Ambiguous test``()
 //    cfgBuilding.``Ambiguous2 test``()
     let ifBuilding = new ``Control Flow Graph building: If statements``()
 //    ifBuilding.``Simple If test``()
-//    let undefVariables = new ``Find undefined variables``()
-//    undefVariables.``Undef: ambiguous 2``()
+    let undefVariables = new ``Find undefined variables``()
+    undefVariables.``Undef: ambiguous``()
     1

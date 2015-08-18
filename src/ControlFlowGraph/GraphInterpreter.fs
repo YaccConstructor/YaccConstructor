@@ -7,27 +7,59 @@ open ControlFlowGraph.Common
 open ControlFlowGraph.CfgElements
 open ControlFlowGraph.InnerGraph
 
-///Links tow nodes: exit from first node is entry for second one
-let private concatNodes (from : InterNode<_> * InterNode<_>) (_to : InterNode<_> * InterNode<_>) = 
-    let entry, oldExit = from
-    let oldEntry, exit = _to
-    
-    oldEntry.ReplaceMeForChildrenOn oldExit
+/// <summary>
+/// Contains entry and exit blocks of some part CFG
+/// </summary>
+type EntryExit<'T> = 
+    val mutable Entry : InterNode<'T>
+    val mutable Exit : InterNode<'T>
 
-    entry, exit
+    new (entry, exit) = {Entry = entry; Exit = exit}
 
-///Sets for current nodes common entry node and exit node
-let private mergeTwoNodes (one : (InterNode<_> * InterNode<_>)) (two : (InterNode<_> * InterNode<_>)) = 
-    let commonEntry, commonExit = one
-    let sndStart, sndFinish = two
+    ///Links two nodes: exit from first node is entry for second one
+    static member ConcatNodes (first : EntryExit<_>) (second : EntryExit<_>) = 
+        let entry, oldExit = first.Entry, first.Exit
+        let oldEntry, exit = second.Entry, second.Exit
+    
+        oldEntry.ReplaceMeForChildrenOn oldExit
+        second.Entry <- oldExit
 
-    if commonEntry <> sndStart
-    then sndStart.ReplaceMeForChildrenOn commonEntry
+        new EntryExit<_>(entry, exit)
+
+    ///Sets for current nodes common entry node and exit node
+    static member MergeTwoNodes (one : EntryExit<_>) (two : EntryExit<_>) = 
+        let mutable commonStart, commonEnd = one.Entry, one.Exit
+
+        if one.Entry <> two.Entry
+        then 
+            two.Entry.ReplaceMeForChildrenOn commonStart
+            two.Entry <- commonStart
     
-    if commonExit <> sndFinish
-    then sndFinish.ReplaceMeForParentsOn commonExit
-    
-    commonEntry, commonExit    
+        if one.Exit <> two.Exit
+        then 
+            if two.Exit.Children.Length = 0
+            then 
+                two.Exit.ReplaceMeForParentsOn one.Exit
+                two.Exit <- one.Exit
+            elif one.Exit.Children.Length = 0
+            then
+                one.Exit.ReplaceMeForParentsOn two.Exit
+                one.Exit <- two.Exit
+            else
+                failwithf "Finish nodes have children!"
+                
+        new EntryExit<_>(commonStart, commonEnd)
+
+let private addExitNode (exitNode : InterNode<_>) = 
+    let newExitNode = new InterNode<_>()
+    exitNode.Parents
+    |> List.iter 
+        (
+            fun parent -> 
+                parent.AddChild newExitNode
+                newExitNode.AddParent parent
+        )
+    newExitNode
 
 //Sets common parent and common children for nodes
 let private mergeNodes (nodes : (InterNode<_> * InterNode<_> list) list) = 
@@ -52,8 +84,7 @@ let private mergeNodes (nodes : (InterNode<_> * InterNode<_> list) list) =
                 fun block -> 
                     let oldExit = snd block
                     oldExit 
-                    |> List.iter2 
-                        (fun oldChild newChild -> replace oldChild newChild) commonExit 
+                    |> List.iter2 replace commonExit 
             )
     
     let commonEntry, commonExit = nodes.Head
@@ -73,17 +104,19 @@ let private processAssignmentGraph (graph : CfgBlocksGraph<_>) =
 
     let start = graph.StartVertex
     let assigns = 
+        let getEntryExit (block : Block<_>) = 
+            //all assign blocks have only one child at this point
+            new EntryExit<_>(block.Parent, block.Children.Head)
+
         graph.OutEdges(start)
-        |> Seq.map processEdge
-        //all assign blocks have only one child
-        |> Seq.map (fun assign -> assign.Parent, assign.Children.Head)
+        |> Seq.map (processEdge >> getEntryExit)
         |> List.ofSeq
 
     let one = assigns.Head
 
     assigns
     |> List.tail
-    |> List.map (fun two -> mergeTwoNodes one two)
+    |> List.map (fun two -> EntryExit<_>.MergeTwoNodes one two)
     |> ignore
     one
 
@@ -92,13 +125,13 @@ let private processConditionGraph (graph : CfgBlocksGraph<_>) =
     let processEdge (edge : BlockEdge<_>) = 
         match edge.Tag with
         | Simple toks -> ConditionBlock.Create <| List.toArray toks
-        | x -> failwithf "Unexpected edge type in Condition: %s" <| x.GetType().ToString()
+        | x -> failwithf "Unexpected edge type in Condition: %A" x
 
     let start = graph.StartVertex
     let conds = 
+        let getParentAndChildren (cond : Block<_>) = cond.Parent, cond.Children
         graph.OutEdges(start)
-        |> Seq.map processEdge
-        |> Seq.map (fun cond -> cond.Parent, cond.Children)
+        |> Seq.map (processEdge >> getParentAndChildren)
         |> List.ofSeq
         
     mergeNodes conds
@@ -107,9 +140,7 @@ let rec processIfGraph (ifGraph : CfgBlocksGraph<_>) =
         
     let condBlock = ref Unchecked.defaultof<_>
     let thenBlock = ref Unchecked.defaultof<_>
-    let elseBlock = ref Unchecked.defaultof<_>
-
-    let elseExists = ref false
+    let elseBlockOpt = ref None
 
     let ifQueue = new Queue<_>()
     ifQueue.Enqueue ifGraph.StartVertex
@@ -121,13 +152,10 @@ let rec processIfGraph (ifGraph : CfgBlocksGraph<_>) =
             match block with
             | Condition -> condBlock := processConditionGraph innerGraph
             | ThenStatement -> thenBlock := processSeq innerGraph
-            | ElseStatement -> 
-                elseBlock := processSeq innerGraph
-                elseExists := true
-            | x -> failwithf "Unexpected statement type in ifStatement: %s" <| x.GetType().ToString()
+            | ElseStatement -> elseBlockOpt := Some <| processSeq innerGraph
+            | x -> failwithf "Unexpected statement type in ifStatement: %A" x
         | EmptyEdge -> ()
-        | x -> failwithf "Unexpected edge type in IfStatement: %s" <| x.GetType().ToString()
-
+        | x -> failwithf "Unexpected edge type in IfStatement: %A" x
 
     while ifQueue.Count > 0 do
         let vertex = ifQueue.Dequeue()
@@ -140,18 +168,18 @@ let rec processIfGraph (ifGraph : CfgBlocksGraph<_>) =
 
     let mutable exitNode = Unchecked.defaultof<InterNode<_>>
 
-    if !elseExists
-    then
-        let elseEntry = fst !elseBlock
+    match !elseBlockOpt with
+    | Some elseBlock -> 
+        let elseEntry = fst elseBlock
         exits.[1].ReplaceMeForParentsOn elseEntry
         //exit node in 'then' block must be exactly the same as that of 'else' block
             
         let thenExit : InterNode<_> = snd !thenBlock
-        let elseExit = snd !elseBlock
+        let elseExit = snd elseBlock
         elseExit.ReplaceMeForParentsOn thenExit
             
         exitNode <- thenExit
-    else
+    | None ->
         //exit node in 'then' block must be exactly the same as that of 'cond' block
 
         //supposed 'then' block has only one exit node
@@ -159,18 +187,18 @@ let rec processIfGraph (ifGraph : CfgBlocksGraph<_>) =
         exits.[1].ReplaceMeForParentsOn thenExit
         exitNode <- thenExit
 
-    fst !condBlock, exitNode
+    new EntryExit<_>(fst !condBlock, exitNode)
 
 and processSeq (graph : CfgBlocksGraph<_>) = 
 
-    let vertexToInterNode = new Dictionary<_, _>()
+    let vertexToInterNode = new Dictionary<_, EntryExit<_>>()
     let queue = new Queue<_>()
 
     let addToDictionary key value = 
         if vertexToInterNode.ContainsKey key 
         then
             let oldData = vertexToInterNode.[key]
-            vertexToInterNode.[key] <- mergeTwoNodes oldData value
+            vertexToInterNode.[key] <- EntryExit<_>.MergeTwoNodes oldData value
         else
             vertexToInterNode.[key] <- value
 
@@ -179,49 +207,58 @@ and processSeq (graph : CfgBlocksGraph<_>) =
         then Some vertexToInterNode.[target]
         else None
 
-    queue.Enqueue graph.StartVertex
+    let updateQueue = 
+        let processed = new ResizeArray<_>()
+        fun vertex -> 
+            if not <| processed.Contains vertex
+            then 
+                processed.Add vertex
+                queue.Enqueue vertex
+
+    updateQueue graph.StartVertex
     while queue.Count > 0 do
         let vertex = queue.Dequeue()
-        graph.OutEdges(vertex)
-        |> Seq.iter
-            (
-                fun edge -> 
-                    let target = edge.Target
 
-                    //target <= vertex means that current edge is reverse edge. 
-                    //so if we add target vertex to queue then cycle is occured.
-                    if target > vertex
-                    then
-                        if not <| queue.Contains target
-                        then queue.Enqueue target
+        let processEdge (edge : BlockEdge<_>) = 
+            updateQueue edge.Target
                     
-                    let oldValue = getOldValue vertex
+            let oldValue = getOldValue vertex
 
-                    match edge.Tag with
-                    | Complicated (block, innerGraph) ->
-                        let nodes = 
-                            match block with
-                            | IfStatement -> processIfGraph innerGraph
-                            | Assignment -> processAssignmentGraph innerGraph
-                            | x -> failwithf "Now this statement type isn't supported: %s" <| x.GetType().ToString()
+            match edge.Tag with
+            | Complicated (block, innerGraph) ->
+                let nodes = 
+                    match block with
+                    | IfStatement -> processIfGraph innerGraph
+                    | Assignment -> processAssignmentGraph innerGraph
+                    | x -> failwithf "Now this statement type isn't supported: %s" <| x.GetType().ToString()
 
-                        let newData = 
-                            match oldValue with
-                            | Some oldNodes -> concatNodes oldNodes nodes
-                            | None -> nodes
+                let newData = 
+                    match oldValue with
+                    | Some oldNodes -> EntryExit<_>.ConcatNodes oldNodes nodes
+                    | None -> nodes
 
-                        addToDictionary edge.Target newData
+                addToDictionary edge.Target newData
 
-                    | EmptyEdge -> 
-                        match oldValue with
-                        | Some oldNodes -> addToDictionary edge.Target oldNodes
-                        | None -> failwithf "Unexpected state during cfg building"
+            | EmptyEdge -> 
+                match oldValue with
+                | Some oldNodes -> addToDictionary edge.Target oldNodes
+                | None -> failwith "Unexpected state during cfg building"
 
-                    | x -> failwith "Unexpected edge tag: %s" <| x.GetType().ToString()
-            )
+            | x -> failwithf "Unexpected edge tag: %s" <| x.GetType().ToString()
+
+        graph.OutEdges(vertex)
+        |> Seq.iter processEdge
     
-    vertexToInterNode.[graph.EndVertex]
+    let entry = vertexToInterNode.[graph.EndVertex].Entry
+    let mutable exit = vertexToInterNode.[graph.EndVertex].Exit
+
+    if exit.Children.Length > 0
+    then exit <- addExitNode exit
+
+    entry, exit
 
 let graphToCfg (graph : CfgBlocksGraph<_>) tokenToString = 
+    graph.RemoveDuplicateEpsilons()
+    graph.RemoveEpsilonLoopEdges()
     //graph.RelaxedPrintToDot "``input.dot" tokenToString
     processSeq graph

@@ -353,6 +353,7 @@ src/GLL.AbstractParser.SimpleTest/*.yrd.fs
 src/GLLAbstractApplication/*.dot
 src/GLLAbstractApplication/*.yrd.fs
 src/GLLApplication/*.yrd.fs
+src/GLLApplication/*.yrd.fs
 src/GLLApplication/res.dot
 src/GLLApplication/Lexer2.fs
 src/GLLParser.SimpleTest/*.yrd.fs

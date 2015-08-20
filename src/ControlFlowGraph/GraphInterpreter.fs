@@ -102,7 +102,7 @@ let private processAssignmentGraph (graph : CfgBlocksGraph<_>) =
             AssignmentBlock.Create tokens
         | x -> failwithf "Unexpected edge type in Assignment: %s" <| x.GetType().ToString()
 
-    let start = graph.StartVertex
+    let start = graph.FirstVertex
     let assigns = 
         let getEntryExit (block : Block<_>) = 
             //all assign blocks have only one child at this point
@@ -127,7 +127,7 @@ let private processConditionGraph (graph : CfgBlocksGraph<_>) =
         | Simple toks -> ConditionBlock.Create <| List.toArray toks
         | x -> failwithf "Unexpected edge type in Condition: %A" x
 
-    let start = graph.StartVertex
+    let start = graph.FirstVertex
     let conds = 
         let getParentAndChildren (cond : Block<_>) = cond.Parent, cond.Children
         graph.OutEdges(start)
@@ -143,7 +143,7 @@ let rec processIfGraph (ifGraph : CfgBlocksGraph<_>) =
     let elseBlockOpt = ref None
 
     let ifQueue = new Queue<_>()
-    ifQueue.Enqueue ifGraph.StartVertex
+    ifQueue.Enqueue ifGraph.FirstVertex
 
     let processEdge (edge : BlockEdge<_>)=
         ifQueue.Enqueue edge.Target
@@ -215,7 +215,7 @@ and processSeq (graph : CfgBlocksGraph<_>) =
                 processed.Add vertex
                 queue.Enqueue vertex
 
-    updateQueue graph.StartVertex
+    updateQueue graph.FirstVertex
     while queue.Count > 0 do
         let vertex = queue.Dequeue()
 
@@ -249,8 +249,8 @@ and processSeq (graph : CfgBlocksGraph<_>) =
         graph.OutEdges(vertex)
         |> Seq.iter processEdge
     
-    let entry = vertexToInterNode.[graph.EndVertex].Entry
-    let mutable exit = vertexToInterNode.[graph.EndVertex].Exit
+    let entry = vertexToInterNode.[graph.LastVertex].Entry
+    let mutable exit = vertexToInterNode.[graph.LastVertex].Exit
 
     if exit.Children.Length > 0
     then exit <- addExitNode exit

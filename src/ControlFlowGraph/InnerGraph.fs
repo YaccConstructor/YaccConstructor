@@ -36,8 +36,8 @@ and CfgBlocksGraph<'TokenType>() =
         | EmptyEdge -> true
         | _ -> false
 
-    member this.StartVertex = 0
-    member this.EndVertex = Seq.max this.Vertices
+    member this.FirstVertex = 0
+    member this.LastVertex = Seq.max this.Vertices
 
     member this.AddEdgeForced (e : BlockEdge<'TokenType>) =
         this.AddVertex e.Source |> ignore
@@ -96,10 +96,10 @@ and CfgBlocksGraph<'TokenType>() =
         let getSuffix (tag : EdgeType<_>) = 
             match tokenToStringOpt with
             | None -> ""
-            | Some tok2String ->
+            | Some tokenToString ->
                 match tag with
                 | Complicated (_, graph) -> 
-                    if graph.EndVertex = 1 
+                    if graph.LastVertex = 1 
                     then 
                         let edges = graph.Edges |> Seq.toList
                         edges 
@@ -109,7 +109,7 @@ and CfgBlocksGraph<'TokenType>() =
                                     match edge.Tag with
                                     | Simple tokens -> 
                                         tokens 
-                                        |> List.map tok2String
+                                        |> List.map tokenToString
                                         |> String.concat " "
                                     | _ -> ""
                             )
@@ -133,24 +133,29 @@ and CfgBlocksGraph<'TokenType>() =
 /// Builds CfgBlocksGraph.
 /// </summary>
 type GraphConstructor<'TokenType> = 
-    ///Current graph
     val Graph : CfgBlocksGraph<'TokenType>
-    ///Existing vertex 
-    val mutable StartVertex : int
-    ///Next vertex will have this number
-    val mutable EndVertex : int
+    val mutable CurrentVertex : int
+    val mutable private LastCreatedVertex : int
 
-    new (g, s, e) = {Graph = g; StartVertex = s; EndVertex = e}
-    new (g : CfgBlocksGraph<_>) = new GraphConstructor<_>(g, g.StartVertex, g.StartVertex + 1)
+    new (g, s, e) = {Graph = g; CurrentVertex = s; LastCreatedVertex = e}
+    new (g : CfgBlocksGraph<_>) = new GraphConstructor<_>(g, g.FirstVertex, g.FirstVertex)
     new () = new GraphConstructor<_>(new CfgBlocksGraph<_>())
 
     /// <summary>
+    /// Creates new vertex.
+    /// </summary>
+    member this.CreateNewVertex() = 
+        this.LastCreatedVertex <- this.LastCreatedVertex + 1
+        this.LastCreatedVertex
+
+    /// <summary>
     ///<para>Adds edge with edgeTag to graph.</para><br />
-    ///<para>Source vertex is StartVertex.</para><br />
-    ///<para>Target vertex is EndVertex.</para><br />
+    ///<para>Source vertex is CurrentVertex.</para><br />
+    ///<para>Target vertex is new created vertex.</para><br />
     /// </summary>
     member this.AddEdge edgeTag = 
-        let edge = new BlockEdge<_>(this.StartVertex, this.EndVertex, edgeTag)
+        let target = this.CreateNewVertex()
+        let edge = new BlockEdge<_>(this.CurrentVertex, target, edgeTag)
         this.Graph.AddEdgeForced edge
 
     /// <summary>
@@ -161,24 +166,25 @@ type GraphConstructor<'TokenType> =
         this.Graph.AddEdgeForced edge
 
     /// <summary>
-    /// Updates StartVertex and EndVertex values.
-    /// <para>StartVertex becomes equal to EndVertex and</para><br />
-    /// EndVertex increments its value.
+    /// CurrentVertex becomes equal to number of last created vertex.
     /// </summary>
-    member this.UpdateVertices() = 
-        this.StartVertex <- this.EndVertex
-        this.EndVertex <- this.EndVertex + 1
+    member this.UpdateVertex() = this.CurrentVertex <- this.LastCreatedVertex
 
+    /// <summary>
+    /// Does BFS from start vertex. Returns the vertex that has out degree = 0.
+    /// If such vertices are few or none, then None will be returned.
+    /// </summary>
+    /// <param name="start">First vertex for BFS</param>
     member this.FindLastVertex start = 
-        let markedEdges = new ResizeArray<_>()
+        
         let queue = new Queue<_>()
-        let graph = this.Graph
-
-        let addEdge edge = 
-            if not <| markedEdges.Contains edge
-            then
-                queue.Enqueue edge
-                markedEdges.Add edge
+        let addEdge = 
+            let markedEdges = new ResizeArray<_>()
+            fun edge -> 
+                if not <| markedEdges.Contains edge
+                then
+                    queue.Enqueue edge
+                    markedEdges.Add edge
 
         this.Graph.OutEdges start
         |> Seq.iter addEdge
@@ -187,13 +193,13 @@ type GraphConstructor<'TokenType> =
 
         while queue.Count > 0 do
             let edge = queue.Dequeue()
-            if graph.OutDegree edge.Target = 0
-            then res <- edge.Target :: res
+            if this.Graph.OutDegree edge.Target = 0
+            then 
+                res <- edge.Target :: res
             else 
                 this.Graph.OutEdges(edge.Target)
                 |> Seq.iter addEdge
 
-        graph.RelaxedPrintToDot "`temp.dot" None
-        if res.Length <> 1
-        then None //failwith "OOOOPS"
-        else Some <| res.Head
+        if res.Length = 1
+        then Some <| res.Head
+        else None

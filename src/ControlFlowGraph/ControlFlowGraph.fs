@@ -14,6 +14,12 @@ open ControlFlowGraph.GraphInterpreter
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 
+type private StartEndVertices = 
+    val mutable Start : int
+    val mutable Finish : int option
+
+    new(start) = {Start = start; Finish = None}
+
 type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                             , parserSource : CfgParserSource<'TokenType>
                             , langSource : LanguageSource
@@ -31,29 +37,25 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
     let processIf' = processIf intToToken parserSource.TokenToNumber <| langSource.GetTempIfDict()
 
     let entry, exit = 
-        let familyToStartVertex = new Dictionary<_, _>()
-        let familyToEndVertex = new Dictionary<_, _>()
+        let familyToVertices = new Dictionary<_, StartEndVertices>()
 
-        let getEndVertex family = 
-            if familyToEndVertex.ContainsKey family
-            then Some familyToEndVertex.[family]
-            else None
+        let getEndVertex family = familyToVertices.[family].Finish
 
-        let rec handleNode (node : obj) (parentGraphInfo : GraphConstructor<_>) = 
+        let rec handleNode (node : obj) (currentGraph : GraphConstructor<_>) = 
             let handleFamily (family : Family) = 
-                if familyToStartVertex.ContainsKey family 
+                if familyToVertices.ContainsKey family 
                 then 
-                    let target = familyToStartVertex.[family]
-                    parentGraphInfo.AddEdgeFromTo EmptyEdge parentGraphInfo.StartVertex target
+                    let target = familyToVertices.[family].Start
+                    currentGraph.AddEdgeFromTo EmptyEdge currentGraph.CurrentVertex target
                     
                     match getEndVertex family with
-                    | Some n -> parentGraphInfo.StartVertex <- n
+                    | Some n -> currentGraph.CurrentVertex <- n
                     | None -> 
-                        let newEndVertex = parentGraphInfo.FindLastVertex target
+                        let newEndVertex = currentGraph.FindLastVertex target
                         newEndVertex
-                        |> Option.iter (fun n -> parentGraphInfo.StartVertex <- n)
+                        |> Option.iter(fun n -> currentGraph.CurrentVertex <- n)
                 else
-                    familyToStartVertex.[family] <- parentGraphInfo.StartVertex
+                    familyToVertices.[family] <- new StartEndVertices(currentGraph.CurrentVertex)
                     let familyName = parserSource.LeftSides.[family.prod] |> parserSource.NumToString
 
                     if langSource.NodeToType.ContainsKey familyName 
@@ -62,39 +64,40 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                             match langSource.NodeToType.[familyName] with
                             | IfStatement -> processIf' family handleNode
                             | Assignment -> processAssignment intToToken family
-                            | x -> failwithf "This construction isn't supported now: %s" <| x.GetType().ToString()
+                            | x -> failwithf "This construction isn't supported now: %A" x
                     
-                        parentGraphInfo.AddEdge edge
-                        parentGraphInfo.UpdateVertices()
+                        currentGraph.AddEdge edge
+                        currentGraph.UpdateVertex()
                     else 
-                        family.nodes.doForAll (fun node -> handleNode node parentGraphInfo)
-                    familyToEndVertex.[family] <- parentGraphInfo.StartVertex
+                        family.nodes.doForAll (fun node -> handleNode node currentGraph)
+                    familyToVertices.[family].Finish <- Some currentGraph.CurrentVertex
                 getEndVertex family
 
             match node with 
             | :? Epsilon 
             | :? Terminal -> ()
             | :? AST as ast ->
-                let commonStart = parentGraphInfo.StartVertex
+                let commonStart = currentGraph.CurrentVertex
                 let endNumbersRef = ref []
                 
                 let setStartAndHandle family = 
-                    parentGraphInfo.StartVertex <- commonStart
+                    currentGraph.CurrentVertex <- commonStart
                     let endNum = handleFamily family
-                    endNum
-                    |> Option.iter (fun num -> endNumbersRef := num :: !endNumbersRef)
+                    endNumbersRef := endNum :: !endNumbersRef
                 
                 ast.doForAllFamilies setStartAndHandle
-                let endNumbers = endNumbersRef.Value
+                let endNumbers = !endNumbersRef |> List.choose id
+                
                 if endNumbers.Length = 1
-                then parentGraphInfo.StartVertex <- endNumbers.Head
+                then 
+                    currentGraph.CurrentVertex <- endNumbers.Head
                 elif endNumbers.Length >= 2 
                 then 
-                    let commonFinish = parentGraphInfo.EndVertex
-                    !endNumbersRef
-                    |> Seq.iter (fun num -> parentGraphInfo.AddEdgeFromTo EmptyEdge num commonFinish)
+                    let commonFinish = currentGraph.CreateNewVertex()
+                    endNumbers
+                    |> Seq.iter (fun num -> currentGraph.AddEdgeFromTo EmptyEdge num commonFinish)
                 
-                    parentGraphInfo.UpdateVertices()
+                    currentGraph.UpdateVertex()
                     
             | x -> failwithf "Unexpected node type: %s" <| x.GetType().ToString()
 
@@ -168,7 +171,6 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                     |> Seq.skipWhile isNotEq
                     |> List.ofSeq
                     |> List.tail
-
                 | _ -> block.Tokens |> List.ofArray
 
             let isUndefinedVariable token = 
@@ -225,6 +227,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
 
     member this.PrintToDot name = 
         let count = ref -1
+        
         let blockToNumber = new Dictionary<_, _>()
         let interNodeToNumber = new Dictionary<_, _>()
         
@@ -283,6 +286,6 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                 |> List.iter printBlockWithNumber
                     
         printInterNode -1 this.Entry 
-
+        
         out.WriteLine("}")
         out.Close()

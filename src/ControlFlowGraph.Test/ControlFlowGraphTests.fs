@@ -1,5 +1,6 @@
 ﻿module ControlFlowGraphTests
 
+open System.Collections.Generic
 open NUnit.Framework
 
 open AbstractAnalysis.Common
@@ -8,11 +9,13 @@ open ControlFlowGraph
 open ControlFlowGraph.Common
 open ControlFlowGraph.CfgElements
 open ControlFlowGraph.InputStructures
+open ControlFlowGraph.TestHelper
 
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AbstractParser
 
 let needPrint = false
+let extension = ".dot"
 
 let createEdge source target label = new ParserEdge<_>(source, target, label)
 
@@ -26,6 +29,7 @@ let tokenToPos (tokenData : _ -> obj) token =
     | :? int as i -> [i] |> Seq.ofList
     | _ -> failwith ""
 
+
 [<TestFixture>]
 type ``Control Flow Graph building: Simple cases``() =
     let buildAbstractAst = RNGLR.ParseExtendedCalc.buildAstAbstract
@@ -36,7 +40,11 @@ type ``Control Flow Graph building: Simple cases``() =
 
     let semicolon = RNGLR.ParseExtendedCalc.SEMICOLON 0
     let semicolonNumber = tokenToNumber semicolon
-    let nodeToType = dict["assign", Assignment;]
+    let xNumber = tokenToNumber <| RNGLR.ParseExtendedCalc.X 0
+    let yNumber = tokenToNumber <| RNGLR.ParseExtendedCalc.Y 0
+    let zNumber = tokenToNumber <| RNGLR.ParseExtendedCalc.Z 0
+
+    let nodeToType = dict ["assign", Assignment;]
         
     let keywordToInt = dict [SEMICOLON, semicolonNumber;]
 
@@ -44,29 +52,36 @@ type ``Control Flow Graph building: Simple cases``() =
     let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, keywordToInt)
 
-    let runTest graph expectedBlocksCount expectedNodesCount printNames = 
+    let runTest graph expectedBlocksCount expectedNodesCount printNames checks = 
         let parseResult = (new Parser<_>()).Parse buildAbstractAst graph
         
         match parseResult with 
-        | Yard.Generators.ARNGLR.Parser.Error (num, tok, err) -> printErr (num, tok, err)
-        | Yard.Generators.ARNGLR.Parser.Success (mAst) ->
+        | Yard.Generators.ARNGLR.Parser.Error(num, tok, err) -> printErr(num, tok, err)
+        | Yard.Generators.ARNGLR.Parser.Success(mAst) ->
             if needPrint
             then
                 let astName = fst printNames
-                RNGLR.ParseExtendedCalc.defaultAstToDot mAst astName
+                RNGLR.ParseExtendedCalc.defaultAstToDot mAst <| sprintf "%s%s" astName extension
 
             let cfg = ControlFlow (mAst, parserSource, langSource, tokToRealString)
             
             if needPrint
             then
                 let cfgName = snd printNames
-                cfg.PrintToDot cfgName
+                cfg.PrintToDot <| sprintf "%s%s" cfgName extension
             
             Assert.IsTrue(cfg.Entry.Parents.IsEmpty, "Entry node has parent node!")
             Assert.IsTrue(cfg.Exit.Children.IsEmpty, "Exit node has child node!")
             
             Assert.AreEqual(expectedBlocksCount, cfg.Blocks.Length, "Blocks count isn't equal expected one")
             Assert.AreEqual(expectedNodesCount, cfg.Nodes.Length, "Intermediate nodes count isn't equal expected one")
+
+            let checkCondition condition = 
+                let res = condition cfg.Blocks
+                Assert.True(res, "Incorrect cfg was built")
+
+            checks
+            |> Seq.iter checkCondition
             
     [<Test>]
     member test.``Elementary test``() =
@@ -90,10 +105,18 @@ type ``Control Flow Graph building: Simple cases``() =
                 createEdge 12 13 (RNGLR.ParseExtendedCalc.RNGLR_EOF 12)
             ] |> ignore
 
+        let nodeToChildren = dict [xNumber, [yNumber]; yNumber, [zNumber]; zNumber, [];]
+        let myChildrenCheck = checkChildren tokenToNumber nodeToChildren
+
+        let nodeToParents = dict [xNumber, []; yNumber, [xNumber]; zNumber, [yNumber];]
+        let myParentsCheck = checkParent tokenToNumber nodeToParents
+
+        let myConds = [myChildrenCheck; myParentsCheck]
+        
         let expectedNodes = 4
         let expectedBlocks = 3
-        let printNames = "`elementary ast.dot", "`elementary cfg.dot"
-        runTest qGraph expectedBlocks expectedNodes printNames
+        let printNames = "`elementary ast", "`elementary cfg"
+        runTest qGraph expectedBlocks expectedNodes printNames myConds
 
     [<Test>]
     member test.``Ambiguous test``() =
@@ -127,8 +150,16 @@ type ``Control Flow Graph building: Simple cases``() =
 
         let expectedNodes = 4
         let expectedBlocks = 4
-        let printNames = "`ambiguous ast.dot", "`ambiguous cfg.dot"
-        runTest qGraph expectedBlocks expectedNodes printNames
+
+        let blockToChildren = dict [yNumber, [xNumber]; zNumber, [xNumber];]
+        let checkChildren' = checkChildren tokenToNumber blockToChildren
+
+        let blockToParents = dict [yNumber, [xNumber]; zNumber, [xNumber];]
+        let checkParents' = checkParent tokenToNumber blockToParents
+        let myChecks = [checkChildren'; checkParents';]
+
+        let printNames = "`ambiguous ast", "`ambiguous cfg"
+        runTest qGraph expectedBlocks expectedNodes printNames myChecks
 
     [<Test>]
     member this.``Ambiguous2 test``() = 
@@ -148,8 +179,16 @@ type ``Control Flow Graph building: Simple cases``() =
 
         let expectedNodes = 2
         let expectedBlocks = 2
-        let printNames = "`ambiguous2 ast.dot", "`ambiguous2 cfg.dot"
-        runTest qGraph expectedBlocks expectedNodes  printNames
+
+        let blockToChildren = dict [yNumber, []; zNumber, [];]
+        let checkChildren' = checkChildren tokenToNumber blockToChildren
+
+        let blockToParents = dict [yNumber, []; zNumber, [];]
+        let checkParents' = checkParent tokenToNumber blockToChildren
+        let myChecks = [checkChildren'; checkParents']
+
+        let printNames = "`ambiguous2 ast", "`ambiguous2 cfg"
+        runTest qGraph expectedBlocks expectedNodes  printNames []
 
 [<TestFixture>]
 type ``Control Flow Graph building: Cycles``() = 
@@ -162,6 +201,10 @@ type ``Control Flow Graph building: Cycles``() =
     let semicolon = RNGLR.ParseSimple.SEMICOLON 0
     let semicolonNumber = tokenToNumber semicolon
     let nodeToType = dict["assign", Assignment;]
+
+    let aNumber = tokenToNumber <| RNGLR.ParseSimple.A 0
+    let bNumber = tokenToNumber <| RNGLR.ParseSimple.B 0
+    let cNumber = tokenToNumber <| RNGLR.ParseSimple.C 0
         
     let keywordToInt = dict [SEMICOLON, semicolonNumber;]
 
@@ -174,7 +217,7 @@ type ``Control Flow Graph building: Cycles``() =
         |> List.map(fun node -> node.Tokens |> Array.map tokenToNumber)
         |> List.forall condition
 
-    let runTest graph expectedBlocksCount expectedNodesCount postCond printNames = 
+    let runTest graph expectedBlocksCount expectedNodesCount checkEntryNode checkExitNode printNames = 
         let parseResult = (new Parser<_>()).Parse buildAbstractAst graph
         
         match parseResult with 
@@ -190,7 +233,7 @@ type ``Control Flow Graph building: Cycles``() =
             if needPrint
             then
                 let cfgName = snd printNames
-                cfg.PrintToDot cfgName
+                cfg.PrintToDot <| sprintf "%s%s" cfgName extension
             
             Assert.IsTrue(cfg.Entry.Parents.IsEmpty, "Entry node has parent node!")
             Assert.IsTrue(cfg.Exit.Children.IsEmpty, "Exit node has child node!")
@@ -198,7 +241,7 @@ type ``Control Flow Graph building: Cycles``() =
             Assert.AreEqual(expectedBlocksCount, cfg.Blocks.Length, "Blocks count isn't equal expected one")
             Assert.AreEqual(expectedNodesCount, cfg.Nodes.Length, "Intermediate nodes count isn't equal expected one")
 
-            let isCorrect = postCond cfg.Exit
+            let isCorrect = checkExitNode cfg.Exit
             Assert.IsTrue (isCorrect, "Incorrect cfg was builded")
 
     [<Test>]
@@ -217,13 +260,17 @@ type ``Control Flow Graph building: Cycles``() =
             ] |> ignore
 
         if needPrint 
-        then qGraph.PrintToDot "`Cycle A+ input.dot" tokToRealString
+        then qGraph.PrintToDot "`Cycle A+ input" tokToRealString
 
         let expectedNodes = 3
         let expectedBlocks = 4
-        let postCond = postCondition (fun _ -> true)
-        let printNames = "`Cycle A+ ast.dot", "`Cycle A+ cfg.dot"
-        runTest qGraph expectedBlocks expectedNodes postCond printNames
+        let alwaysTrue =  (fun _ -> true)
+
+        let checkEntryNode' = checkEntryNode tokenToNumber alwaysTrue
+        let checkExitNode' = checkExitNode tokenToNumber alwaysTrue
+
+        let printNames = "`Cycle A+ ast", "`Cycle A+ cfg"
+        runTest qGraph expectedBlocks expectedNodes checkEntryNode' checkExitNode' printNames
 
     [<Test>]
     member this.``Cycle A B*``() = 
@@ -242,22 +289,25 @@ type ``Control Flow Graph building: Cycles``() =
             ] |> ignore
 
         if needPrint 
-        then qGraph.PrintToDot "`Cycle A B asteriks input.dot" tokToRealString
+        then qGraph.PrintToDot "`Cycle A B asteriks input" tokToRealString
 
         let expectedNodes = 3
         let expectedBlocks = 2
 
-        let expectedParents = 
-            [|RNGLR.ParseSimple.A 0 ; RNGLR.ParseSimple.B 0|]
-            |> Array.map tokenToNumber
+        let firstBlocks = [|aNumber|]
+        let lastBlocks = [|aNumber; bNumber|]
 
-        let myCond tokenSet = 
-            expectedParents
+        let myCond expected tokenSet = 
+            expected
             |> Array.fold (fun acc num -> acc || tokenSet |> Array.exists ((=) num)) false
 
-        let postCond = postCondition myCond
-        let printNames = "`Cycle A B asteriks ast.dot", "`Cycle A B asteriks cfg.dot"
-        runTest qGraph expectedBlocks expectedNodes postCond printNames
+        let entryCond = myCond firstBlocks
+        let exitCond = myCond lastBlocks
+
+        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
+        let checkExitNode' = checkExitNode tokenToNumber exitCond
+        let printNames = "`Cycle A B asteriks ast", "`Cycle A B asteriks cfg"
+        runTest qGraph expectedBlocks expectedNodes checkEntryNode' checkExitNode' printNames
 
     [<Test>]
     member this.``Cycle A B* C``() = 
@@ -278,19 +328,26 @@ type ``Control Flow Graph building: Cycles``() =
             ] |> ignore
 
         if needPrint 
-        then qGraph.PrintToDot "`Cycle A B asteriks C input.dot" tokToRealString
+        then qGraph.PrintToDot "`Cycle A B asteriks C input" tokToRealString
 
         let expectedNodes = 3
         let expectedBlocks = 3
 
-        let expectedParent = RNGLR.ParseSimple.C 0 |> tokenToNumber
+        let firstBlocks = [|aNumber|]
+        let lastBlocks = [|cNumber|]
 
-        let myCond tokenSet = 
-            tokenSet |> Array.exists ((=) expectedParent)
+        let myCond expected tokenSet = 
+            expected
+            |> Array.fold (fun acc num -> acc || tokenSet |> Array.exists ((=) num)) false
+        
+        let entryCond = myCond firstBlocks
+        let exitCond = myCond lastBlocks
 
-        let postCond = postCondition myCond
-        let printNames = "`Cycle A B asteriks C ast.dot", "`Cycle A B asteriks C cfg.dot"
-        runTest qGraph expectedBlocks expectedNodes postCond printNames
+        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
+        let checkExitNode' = checkExitNode tokenToNumber exitCond
+
+        let printNames = "`Cycle A B asteriks C ast", "`Cycle A B asteriks C cfg"
+        runTest qGraph expectedBlocks expectedNodes checkEntryNode' checkExitNode' printNames
 
     [<Test>]
     member this.``Cycle (A | B)+``() = 
@@ -309,13 +366,26 @@ type ``Control Flow Graph building: Cycles``() =
             ] |> ignore
 
         if needPrint 
-        then qGraph.PrintToDot "`Cycle (A or B)+ input.dot" tokToRealString
+        then qGraph.PrintToDot "`Cycle (A or B)+ input" tokToRealString
 
         let expectedNodes = 3
         let expectedBlocks = 8
-        let postCond = postCondition (fun _ -> true)
-        let printNames = "`Cycle (A or B)+ ast.dot", "`Cycle (A or B)+ cfg.dot"
-        runTest qGraph expectedBlocks expectedNodes postCond printNames
+
+        let myCond expected tokenSet = 
+            expected
+            |> Array.fold (fun acc num -> acc || tokenSet |> Array.exists ((=) num)) false
+
+        let firstBlocks = [| aNumber; bNumber |]
+        let lastBlocks = [| aNumber; bNumber |]
+
+        let entryCond = myCond firstBlocks
+        let exitCond = myCond lastBlocks
+
+        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
+        let checkExitNode' = checkExitNode tokenToNumber exitCond
+
+        let printNames = "`Cycle (A or B)+ ast", "`Cycle (A or B)+ cfg"
+        runTest qGraph expectedBlocks expectedNodes checkEntryNode' checkExitNode' printNames
 
     [<Test>]
     member this.``Cycle A (B+ | C+)``() = 
@@ -338,7 +408,7 @@ type ``Control Flow Graph building: Cycles``() =
                 createEdge 6 7 (RNGLR.ParseSimple.RNGLR_EOF 6)
             ] |> ignore
         if needPrint 
-        then qGraph.PrintToDot "`Cycle A (B+ or C+) input.dot" tokToRealString
+        then qGraph.PrintToDot "`Cycle A (B+ or C+) input" tokToRealString
 
         let expectedNodes = 4
         let expectedBlocks = 6
@@ -346,13 +416,21 @@ type ``Control Flow Graph building: Cycles``() =
 
         let numbers = [ RNGLR.ParseSimple.B 0; RNGLR.ParseSimple.C 0] |> List.map tokenToNumber
         
-        let myCond tokenSet = 
-            numbers 
-            |> List.fold (fun acc num -> acc || tokenSet |> Array.exists ((=) num)) false
+        let myCond expected tokenSet = 
+            expected
+            |> Array.fold (fun acc num -> acc || tokenSet |> Array.exists ((=) num)) false
 
-        let postCond = postCondition myCond
-        let printNames = "`Cycle A (B+ or C+) ast.dot", "`Cycle A (B+ or C+) cfg.dot"
-        runTest qGraph expectedBlocks expectedNodes postCond printNames
+        let firstBlocks = [|aNumber|]
+        let lastBlocks = [|bNumber; cNumber|]
+
+        let entryCond = myCond firstBlocks
+        let exitCond = myCond lastBlocks
+
+        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
+        let checkExitNode' = checkExitNode tokenToNumber exitCond
+
+        let printNames = "`Cycle A (B+ or C+) ast", "`Cycle A (B+ or C+) cfg"
+        runTest qGraph expectedBlocks expectedNodes checkEntryNode' checkExitNode' printNames
 
 
     [<Test>]
@@ -361,7 +439,6 @@ type ``Control Flow Graph building: Cycles``() =
         let qGraph = new ParserInputGraph<_>(0, 5)
         let vertexRange = List.init 6 id
         qGraph.AddVertexRange vertexRange |> ignore
-
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (RNGLR.ParseSimple.A 0)
@@ -372,20 +449,26 @@ type ``Control Flow Graph building: Cycles``() =
                 createEdge 4 5 (RNGLR.ParseSimple.RNGLR_EOF 4)
             ] |> ignore
         if needPrint 
-        then qGraph.PrintToDot "`Cycle (AB)+ input.dot" tokToRealString
+        then qGraph.PrintToDot "`Cycle (AB)+ input" tokToRealString
 
         let expectedNodes = 4
         let expectedBlocks = 4
 
-        let bNumber = tokenToNumber <| RNGLR.ParseSimple.B 0
+        let myCond expected tokenSet = 
+            expected
+            |> Array.fold (fun acc num -> acc || tokenSet |> Array.exists ((=) num)) false
 
-        let myCond = 
-             fun tokens -> tokens |> Array.exists ((=) bNumber)
+        let firstBlocks = [|aNumber|]
+        let lastBlocks  = [|bNumber|]
 
-        let postCond = postCondition myCond
+        let entryCond = myCond firstBlocks
+        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
 
-        let printNames = "`Cycle (AB)+ ast.dot", "`Cycle (AB)+ cfg.dot"
-        runTest qGraph expectedBlocks expectedNodes postCond printNames
+        let exitCond = myCond lastBlocks
+        let checkExitNode' = checkExitNode tokenToNumber exitCond
+
+        let printNames = "`Cycle (AB)+ ast", "`Cycle (AB)+ cfg"
+        runTest qGraph expectedBlocks expectedNodes checkEntryNode' checkExitNode' printNames
 
     [<Test>]
     member this.``Cycle (AB)+C``() = 
@@ -406,16 +489,27 @@ type ``Control Flow Graph building: Cycles``() =
                 createEdge 6 7 (RNGLR.ParseSimple.RNGLR_EOF 6)
             ] |> ignore
         if needPrint 
-        then qGraph.PrintToDot "`Cycle (AB)+C input.dot" tokToRealString
+        then qGraph.PrintToDot "`Cycle (AB)+C input" tokToRealString
         let expectedNodes = 5
         let expectedBlocks = 5
 
         let cNumber = tokenToNumber <| RNGLR.ParseSimple.C 0
 
-        let postCond = postCondition (fun tokens -> tokens |> Array.exists ((=) cNumber))
+        let myCond expected tokenSet = 
+            expected
+            |> Array.fold (fun acc num -> acc || tokenSet |> Array.exists ((=) num)) false
 
-        let printNames = "`Cycle (AB)+C ast.dot", "`Cycle (AB)+C cfg.dot"
-        runTest qGraph expectedBlocks expectedNodes postCond printNames
+        let firstBlocks = [|aNumber|]
+        let lastBlocks =  [|cNumber|]
+
+        let entryCond = myCond firstBlocks
+        let exitCond = myCond lastBlocks
+
+        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
+        let checkExitNode' = checkExitNode tokenToNumber exitCond
+
+        let printNames = "`Cycle (AB)+C ast", "`Cycle (AB)+C cfg"
+        runTest qGraph expectedBlocks expectedNodes checkEntryNode' checkExitNode' printNames
 
     [<Test>]
     member this.``Cycle after cycle A+B+``() = 
@@ -436,18 +530,29 @@ type ``Control Flow Graph building: Cycles``() =
             ] |> ignore
 
         if needPrint 
-        then qGraph.PrintToDot "`Cycle after cycle A+B+ input.dot" tokToRealString
+        then qGraph.PrintToDot "`Cycle after cycle A+B+ input" tokToRealString
 
         let bNumber = tokenToNumber <| RNGLR.ParseSimple.B 0
 
-        let postCond = postCondition (fun tokens -> tokens |> Array.exists ((=) bNumber))
+        let myCond expected tokenSet = 
+            expected
+            |> Array.fold (fun acc num -> acc || tokenSet |> Array.exists ((=) num)) false
+
+        let firstBlocks = [|aNumber|]
+        let lastBlocks =  [|bNumber|]
+
+        let entryCond = myCond firstBlocks
+        let exitCond = myCond lastBlocks
+
+        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
+        let checkExitNode' = checkExitNode tokenToNumber exitCond
 
         let expectedNodes = 4
         let expectedBlocks = 6
         let printNames = 
-            "`Cycle after cycle A+B+ ast.dot", 
-            "`Cycle after cycle A+B+ cfg.dot"
-        runTest qGraph expectedBlocks expectedNodes postCond printNames
+            "`Cycle after cycle A+B+ ast", 
+            "`Cycle after cycle A+B+ cfg"
+        runTest qGraph expectedBlocks expectedNodes checkEntryNode' checkExitNode' printNames
 
     [<Test>]
     member this.``Cycle inside cycle (A+B)+``() = 
@@ -468,18 +573,27 @@ type ``Control Flow Graph building: Cycles``() =
             ] |> ignore
 
         if needPrint 
-        then qGraph.PrintToDot "`Cycle inside cycle (A+B)+ input.dot" tokToRealString
+        then qGraph.PrintToDot "`Cycle inside cycle (A+B)+ input" tokToRealString
 
-        let bNumber = tokenToNumber <| RNGLR.ParseSimple.B 0
+        let myCond expected tokenSet = 
+            expected
+            |> Array.fold (fun acc num -> acc || tokenSet |> Array.exists ((=) num)) false
 
-        let postCond = postCondition (fun tokens -> tokens |> Array.exists ((=) bNumber))
+        let firstBlocks = [|aNumber|]
+        let lastBlocks =  [|bNumber|]
+
+        let entryCond = myCond firstBlocks
+        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
+
+        let exitCond = myCond lastBlocks
+        let checkExitNode' = checkExitNode tokenToNumber exitCond
 
         let expectedNodes = 4
         let expectedBlocks = 6
         let printNames = 
-            "`Cycle inside cycle (A+B)+ ast.dot", 
-            "`Cycle inside cycle (A+B)+ cfg.dot"
-        runTest qGraph expectedBlocks expectedNodes postCond printNames
+            "`Cycle inside cycle (A+B)+ ast", 
+            "`Cycle inside cycle (A+B)+ cfg"
+        runTest qGraph expectedBlocks expectedNodes checkEntryNode' checkExitNode' printNames
 
     [<Test>]
     member this.``Cycle inside cycle ((AB)+C)+``() = 
@@ -502,18 +616,27 @@ type ``Control Flow Graph building: Cycles``() =
             ] |> ignore
 
         if needPrint 
-        then qGraph.PrintToDot "`Cycle inside cycle ((AB)+C)+ input.dot" tokToRealString
+        then qGraph.PrintToDot "`Cycle inside cycle ((AB)+C)+ input" tokToRealString
 
-        let cNumber = tokenToNumber <| RNGLR.ParseSimple.C 0
+        let myCond expected tokenSet = 
+            expected
+            |> Array.fold (fun acc num -> acc || tokenSet |> Array.exists ((=) num)) false
 
-        let postCond = postCondition (fun tokens -> tokens |> Array.exists ((=) cNumber))
+        let firstBlocks = [|aNumber|]
+        let lastBlocks = [| bNumber; cNumber;|]
+
+        let entryCond = myCond firstBlocks
+        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
+
+        let exitCond = myCond lastBlocks
+        let checkExitNode' = checkExitNode tokenToNumber exitCond
 
         let expectedNodes = 5
         let expectedBlocks = 6
         let printNames = 
-            "`Cycle inside cycle ((AB)+C)+ ast.dot", 
-            "`Cycle inside cycle ((AB)+C)+ cfg.dot"
-        runTest qGraph expectedBlocks expectedNodes postCond printNames
+            "`Cycle inside cycle ((AB)+C)+ ast", 
+            "`Cycle inside cycle ((AB)+C)+ cfg"
+        runTest qGraph expectedBlocks expectedNodes checkEntryNode' checkExitNode' printNames
 
 
 [<TestFixture>]
@@ -544,7 +667,7 @@ type ``Control Flow Graph building: If statements`` () =
                                     THEN, thenNumber;
                                     ELSE, elseNumber;
                                     ENDIF, endIfNumber; 
-                                ]
+                            ]
 
     let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, keywordToInt)
@@ -566,7 +689,7 @@ type ``Control Flow Graph building: If statements`` () =
             if needPrint
             then
                 let cfgName = snd printNames
-                cfg.PrintToDot cfgName
+                cfg.PrintToDot <| sprintf "%s%s" cfgName extension
             
             Assert.IsTrue(cfg.Entry.Parents.IsEmpty, "Entry node has parent node!")
             Assert.IsTrue(cfg.Exit.Children.IsEmpty, "Exit node has child node!")
@@ -596,7 +719,7 @@ type ``Control Flow Graph building: If statements`` () =
                 createEdge 11 12 (RNGLR.ParseIf.RNGLR_EOF 11)
             ] |> ignore
 
-        let printNames = "`simple if ast.dot", "`simple if cfg.dot"
+        let printNames = "`simple if ast", "`simple if cfg"
         let expectedBlocksCount = 4
         let expectedNodesCount = 5
         runTest qGraph expectedBlocksCount expectedNodesCount printNames
@@ -626,7 +749,7 @@ type ``Control Flow Graph building: If statements`` () =
                 createEdge 15 16 (RNGLR.ParseIf.RNGLR_EOF 15)
             ] |> ignore
 
-        let printNames = "`big if ast.dot", "`big if cfg.dot"
+        let printNames = "`big if ast", "`big if cfg"
         let expectedBlocksCount = 6
         let expectedNodesCount = 7
         runTest qGraph expectedBlocksCount expectedNodesCount printNames
@@ -653,7 +776,7 @@ type ``Control Flow Graph building: If statements`` () =
                 createEdge 10 11 (RNGLR.ParseIf.RNGLR_EOF 10)
             ] |> ignore
 
-        let printNames = "`if-without-else ast.dot", "`if-without-else cfg.dot"
+        let printNames = "`if-without-else ast", "`if-without-else cfg"
         let expectedBlocksCount = 4
         let expectedNodesCount = 5
         runTest qGraph expectedBlocksCount expectedNodesCount printNames
@@ -691,7 +814,7 @@ type ``Control Flow Graph building: If statements`` () =
                 createEdge 23 24(RNGLR.ParseIf.RNGLR_EOF 23)
             ] |> ignore
 
-        let printNames = "`inner if ast.dot", "`inner if cfg.dot"
+        let printNames = "`inner if ast", "`inner if cfg"
         let expectedBlocksCount = 7
         let expectedNodesCount = 8
         runTest qGraph expectedBlocksCount expectedNodesCount printNames
@@ -720,7 +843,7 @@ type ``Find undefined variables`` () =
         [RNGLR.ParseExtendedCalc.X 0; RNGLR.ParseExtendedCalc.Y 0; RNGLR.ParseExtendedCalc.Z 0]
         |> List.map tokenToNumber
 
-    let isVariable tok = varsNumbers |> List.exists (fun t -> t = tok) 
+    let isVariable tok = varsNumbers |> List.exists ((=) tok) 
 
     let tokToRealName = tokenToNumber >> indToString
         
@@ -743,7 +866,7 @@ type ``Find undefined variables`` () =
             if needPrint
             then
                 let cfgName = snd printNames
-                cfg.PrintToDot cfgName
+                cfg.PrintToDot <| sprintf "%s%s" cfgName extension
             
             let errorList = cfg.FindUndefVariable()
             
@@ -771,7 +894,7 @@ type ``Find undefined variables`` () =
             ] |> ignore
 
         let expected = 1
-        let printNames = "`cfg undefined variables ast elementary.dot", "`cfg undefined variables cfg elementary.dot"
+        let printNames = "`cfg undefined variables ast elementary", "`cfg undefined variables cfg elementary"
         runTest qGraph expected printNames
 
     [<Test>]
@@ -789,7 +912,7 @@ type ``Find undefined variables`` () =
             ] |> ignore
 
         let expected = 1
-        let printNames = "`cfg undefined variables ast X = X.dot", "`cfg undefined variables cfg X = X.dot"
+        let printNames = "`cfg undefined variables ast X = X", "`cfg undefined variables cfg X = X"
         runTest qGraph expected printNames
 
     [<Test>]
@@ -825,7 +948,7 @@ type ``Find undefined variables`` () =
             ] |> ignore
 
         let expected = 2
-        let printNames = "`cfg undefined variables ast ambiguous1.dot", "`cfg undefined variables cfg ambiguous1.dot"
+        let printNames = "`cfg undefined variables ast ambiguous1", "`cfg undefined variables cfg ambiguous1"
         runTest qGraph expected printNames
             
     [<Test>]
@@ -857,13 +980,13 @@ type ``Find undefined variables`` () =
             ] |> ignore
 
         let expected = 2
-        let printNames = "`cfg undefined variables ast ambiguous2.dot", "`cfg undefined variables cfg ambiguous2.dot"
+        let printNames = "`cfg undefined variables ast ambiguous2", "`cfg undefined variables cfg ambiguous2"
         runTest qGraph expected printNames
 
 //[<EntryPoint>]
 let f x = 
     let cfgBuilding = new ``Control Flow Graph building: Simple cases``()
-//    cfgBuilding.``Ambiguous test``()
+    cfgBuilding.``Ambiguous test``()
     let cycleBuilding = new ``Control Flow Graph building: Cycles``()
     //cycleBuilding.``Cycle A B*``()
     //cycleBuilding.``Cycle inside cycle ((AB)+C)+``()

@@ -12,7 +12,6 @@ open Yard.Generators.GLL
 open Yard.Generators.GLL.Parser    
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RNGLR
-//open GLL.SimpleLeftRecursion
 
 open Yard.Generators.GLL
 open Yard.Generators
@@ -62,11 +61,12 @@ let outDir = @"../../../src/GLLApplication/"
 
 //
 //for j = 1 to 50 do
-let str2 = String.init (2000) (fun i -> "A + ( A * B ) ; ") + "B ;"
-let parser2 = GLL.Calc.buildAst
+//let str2 = String.init (2000) (fun i -> "A + ( A * B ) ; ") + "B ;"
+let str2 = " "
+let parser2 = GLL.SimpleAmb.buildAst
 
 let run2 path astBuilder =
-    let tokens = Lexer2.tokens3(path)   
+    let tokens = Lexer2.tokens(path)   
     astBuilder tokens, tokens
 
     

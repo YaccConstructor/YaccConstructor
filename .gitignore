@@ -386,3 +386,4 @@ Tests/RNGLR/sppf.dot*
 *log.txt
 **/out
 **/Calc.yrd.fs
+src/GLLApplication/Lexer2.fs

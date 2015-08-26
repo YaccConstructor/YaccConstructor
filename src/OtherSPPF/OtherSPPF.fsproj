@@ -10,8 +10,9 @@
     <RootNamespace>OtherSPPF</RootNamespace>
     <AssemblyName>OtherSPPF</AssemblyName>
     <Name>OtherSPPF</Name>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
-  <Import Project="../YC.targets" />
   <Import Project="../YC.targets" />
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

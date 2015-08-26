@@ -67,7 +67,7 @@ let rec approximateCSharp (functionInfo: ArbitraryOperation) (stack: list<FSA<_>
             let fsa = buildAutomaton ddg initFsaMap controlData approximateCSharp fsaParams
             do Logger.logFsa fsa methodName controlData.LoggerState
             Some(fsa), restStack
-        | _ -> failwith "wrong operation info type"
+        //| _ -> failwith "wrong operation info type"
 
 let rec approximateJs (functionInfo: ArbitraryOperation) (stack: list<FSA<_>>) 
                     (controlData: ControlData<_>) (fsaParams: FsaParams<_,_,_>) =

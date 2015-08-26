@@ -2,7 +2,7 @@
 <package>
 <metadata>
 <id>AbstractLexicalAnalysis</id>
-<version>0.3.0.12</version>
+<version>0.3.0.15</version>
 <title>AbstractLexicalAnalysis of YaccConstructor</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>

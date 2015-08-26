@@ -16,7 +16,7 @@ open QuickGraph
 
 let needPrint = false
 let threshold = 10
-let createEdge from _to label = new ParserEdge<_>(from, _to, label)
+let createEdge source target label = new ParserEdge<_>(source, target, label)
 
 let inline printErr (num, token : 'a, msg) =
     printfn "Error in position %d on Token %A: %s" num token msg
@@ -36,9 +36,6 @@ let filter = fun _ -> true
 [<TestFixture>]
 type ``AST GetNextTree tests``() =
     let runTest graph parse toDot translator errDict (expected : int) testName  = 
-        printfn "%s" <| String.init 50 (fun i -> "*")
-        printfn "%s" testName
-
         let parseResult = parse graph
         
         match parseResult with 
@@ -66,18 +63,15 @@ type ``AST GetNextTree tests``() =
             //checks if extracted trees are valid
             extracted
             |> List.map (fun ast -> translate translator ast errDict)
-            |> ignore
-//            |> List.iter (fun i -> printf "%d " i)
-//            printfn ""
+            |> List.iter (fun i -> printf "%A " i)
+            printfn ""
             
-    
-        printfn "%s" <| String.init 50 (fun i -> "*")
 
     [<Test>]
-    member this.``Cycles 1``()= 
+    member this.``Cycles A + (A + ... + A)``()= 
         
         let qGraph = new ParserInputGraph<_>(0, 2)
-        let vertexRange = List.init 3 (fun i -> i)
+        let vertexRange = List.init 3 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -90,13 +84,13 @@ type ``AST GetNextTree tests``() =
         let toDot = RNGLR.ParseCalc.defaultAstToDot
         let translator = RNGLR.ParseCalc.translate
         let errDict = new Dictionary<_,_>()
-        runTest qGraph parse toDot translator errDict 1 "``Cycles1``"
+        runTest qGraph parse toDot translator errDict 1 "Cycles A + (A + ... + A)"
 
     [<Test>]
-    member this.``Cycles 2``()= 
+    member this.``Cycles A + B * A + B * A + B * ... + B``()= 
         
         let qGraph = new ParserInputGraph<_>(0, 4)
-        let vertexRange = List.init 5 (fun i -> i)
+        let vertexRange = List.init 5 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -111,13 +105,13 @@ type ``AST GetNextTree tests``() =
         let toDot = RNGLR.ParseCalc.defaultAstToDot
         let translator = RNGLR.ParseCalc.translate
         let errDict = new Dictionary<_,_>()
-        runTest qGraph parse toDot translator errDict 1 "``Cycles2``"
+        runTest qGraph parse toDot translator errDict 1 "Cycles A plus B mul A plus B mul ... plus B"
 
     [<Test>]
     member this.``Branches``()= 
         
         let qGraph = new ParserInputGraph<_>(0, 4)
-        let vertexRange = List.init 5 (fun i -> i)
+        let vertexRange = List.init 5 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -140,7 +134,7 @@ type ``AST GetNextTree tests``() =
     [<Test>]
     member this.``Simple Cycle``()= 
         let qGraph = new ParserInputGraph<_>(0, 2)
-        let vertexRange = List.init 3 (fun i -> i)
+        let vertexRange = List.init 3 id
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -158,5 +152,5 @@ type ``AST GetNextTree tests``() =
 //[<EntryPoint>]
 let f x = 
     let tester = new ``AST GetNextTree tests``()
-    tester.``Cycles 1``()
+    tester.``Cycles A + (A + ... + A)``()
     0

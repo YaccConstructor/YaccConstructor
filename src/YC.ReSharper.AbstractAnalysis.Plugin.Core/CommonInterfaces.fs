@@ -34,16 +34,15 @@ type TreeGenerationState<'node> =
     | InProgress of 'node * AstNode list
     | End of 'node
 
-
-exception LexerError of string * obj
+exception LexerException of string * obj
 
 type InjectedLanguageAttribute(language : string) = 
     inherit System.Attribute()
 
-    member this.language = language
+    member this.Language = language
 
 [<Interface>]
-type IInjectedLanguageModule<'br,'range,'node when 'br : equality> =    
+type IInjectedLanguageModule<'br, 'range, 'node when 'br : equality> =
      abstract Name: string
      abstract LexingFinished: IEvent<LexingFinishedArgs<'node>>
      abstract ParsingFinished: IEvent<ParsingFinishedArgs>
@@ -56,7 +55,7 @@ type IInjectedLanguageModule<'br,'range,'node when 'br : equality> =
             ResizeArray<string * 'range> * ResizeArray<string * 'range> * ResizeArray<string * 'range>
 
 
-type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:equality and 'node:null  and 'TokenType : equality
+type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range: equality and 'node: null  and 'TokenType: equality
     (
         tokenize: FSA<char * Position<'br>> -> Test<ParserInputGraph<'TokenType>, array<Symb<char*Position<'br>>>>
         , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string
@@ -147,7 +146,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
                         //sometimes it needs for debugging purposes
                         //printAst tree "result ast.dot"
                         let pSource, lSource, tokToSourceString = semantic.Value
-                        let cfg = new ControlFlow<'TokenType>(tree, pSource, lSource, tree.Tokens, tokToSourceString)
+                        let cfg = new ControlFlow<'TokenType>(tree, pSource, lSource, tokToSourceString)
                         //sometimes it needs for debugging purposes
                         //cfg.PrintToDot "result cfg.dot"
                         let semErrors = cfg.FindUndefVariable()
@@ -176,8 +175,8 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
             let treeNode = this.TranslateToTreeNode nextTree errors
             
             if unproc.IsEmpty
-            then generationState <- End (treeNode)
-            else generationState <- InProgress (treeNode, unproc |> List.map (fun n -> n :> AstNode)) 
+            then generationState <- End(treeNode)
+            else generationState <- InProgress(treeNode, unproc |> List.map (fun n -> n :> AstNode)) 
 
         generationState
 
@@ -194,7 +193,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
         |> List.concat
         |> ResizeArray.ofList
 
-    member this.GetNextTree index =         
+    member this.GetNextTree index =
         let state = getNextTree 0//index
         match state with
         | InProgress (treeNode, _) -> treeNode, false
@@ -212,16 +211,13 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
     member this.GetPairedRanges leftNumber rightNumber range toRight = 
         
         let tokToPos = this.TokenToPos calculatePos
+        let info = new BracketSearchInfo<_>(leftNumber, rightNumber, range, toRight)
         
+        let findPairs (tree : OtherTree<_>) = 
+            tree.FindAllPair info tokenToNumber tokToPos
+
         otherForest
-        |> List.map (fun otherTree -> otherTree.FindAllPair leftNumber rightNumber range toRight tokenToNumber tokToPos)
-        |> List.map 
-            (
-                fun token -> 
-                    token 
-                    |> ResizeArray.map(fun token -> tokToPos token)
-                    |> Seq.concat
-            )
+        |> List.map (findPairs >> ResizeArray.map tokToPos >> Seq.concat)
         |> Seq.concat
         |> ResizeArray.ofSeq
 
@@ -246,7 +242,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br:equality and  'range:e
         
         let addSError tok errorMsg = 
             let name = tok |> (tokenToNumber >> numToString)
-            let data = tokenData tok :?> FSA<char*Position<'br>>
+            let data = tokenData tok :?> FSA<char * Position<'br>>
             data 
             |> calculatePos
             |> Seq.iter (fun br -> semanticErrors.Add <| ((sprintf "%s %s" errorMsg name), br))

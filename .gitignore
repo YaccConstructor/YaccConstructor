@@ -354,6 +354,7 @@ src/GLLAbstractApplication/*.dot
 src/GLLAbstractApplication/*.yrd.fs
 src/GLLApplication/*.yrd.fs
 src/GLLApplication/res.dot
+src/GLLApplication/Lexer2.fs
 src/GLLParser.SimpleTest/*.yrd.fs
 src/GLLParser.SimpleTest/res.dot
 src/GLLParser.SimpleTest/log.txt
@@ -386,4 +387,3 @@ Tests/RNGLR/sppf.dot*
 *log.txt
 **/out
 **/Calc.yrd.fs
-src/GLLApplication/Lexer2.fs

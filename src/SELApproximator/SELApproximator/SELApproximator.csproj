@@ -11,18 +11,13 @@
     <RootNamespace>SELApproximator</RootNamespace>
     <AssemblyName>SELApproximator</AssemblyName>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
-  <Import Project="../../YC.targets" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartAction>Program</StartAction>
-    <DefineConstants>JET_MODE_ASSERT;DEBUG;TRACE</DefineConstants>
-    <StartProgram>$(VsInstallDir)devenv.exe</StartProgram>
-    <StartArguments>/ReSharper.Plugin $(AssemblyName).dll /ReSharper.Internal</StartArguments>
-    <StartWorkingDirectory>$(MSBuildProjectDirectory)\$(OutputPath)</StartWorkingDirectory>
+  <PropertyGroup>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
+  <Import Project="../../YC.targets" />
   <ItemGroup>
     <Reference Include="antlr.runtime">
       <HintPath>..\..\packages\Antlr2.Runtime.2.7.7.02\lib\antlr.runtime.dll</HintPath>
@@ -140,6 +135,7 @@
     <Reference Include="System.Threading">
       <HintPath>..\..\packages\TaskParallelLibrary.1.0.2856.0\lib\Net35\System.Threading.dll</HintPath>
       <Private>True</Private>
+      <Aliases>local</Aliases>
     </Reference>
     <Reference Include="System.Windows.Interactivity">
       <HintPath>..\..\packages\JetBrains.Platform.Lib.System.Windows.Interactivity.2.0.20140318.0\lib\System.Windows.Interactivity.dll</HintPath>

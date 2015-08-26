@@ -1,12 +1,14 @@
 ﻿using System;
+
+using Microsoft.FSharp.Collections;
+
 using JetBrains.Application.Progress;
 using JetBrains.ProjectModel;
-using JetBrains.ReSharper.Feature.Services.Bulbs;
 using JetBrains.ReSharper.Feature.Services.ContextActions;
 using JetBrains.ReSharper.Feature.Services.CSharp.Analyses.Bulbs;
-using JetBrains.ReSharper.Feature.Services.CSharp.Bulbs;
 using JetBrains.TextControl;
 using JetBrains.Util;
+
 using YC.ReSharper.AbstractAnalysis.LanguageApproximation;
 
 namespace SELApproximator
@@ -15,6 +17,7 @@ namespace SELApproximator
     public class BuildFsaForCSharp : ContextActionBase
     {
         private readonly ICSharpContextActionDataProvider _provider;
+        private readonly Hotspot.Hotspot _hotspot = new Hotspot.Hotspot("calc", "Program", "Eval", 0, "void");
 
         public BuildFsaForCSharp(ICSharpContextActionDataProvider provider)
         {
@@ -30,7 +33,11 @@ namespace SELApproximator
         {
             var inputFile = _provider.PsiFile;
             const int recursionMaxLevel = 3; // 0 for top and 3 level down
-            var fsa = ApproximateCsharp.ApproximateFileWithLogging(inputFile, recursionMaxLevel)[0].Item2;
+            
+            var tuple = new Tuple<string, Hotspot.Hotspot>(_hotspot.Language, _hotspot);
+            var temp = new FSharpList<Tuple<string, Hotspot.Hotspot>>(tuple, null);
+
+            var fsa = ApproximateCsharp.ApproximateFileWithLogging(inputFile, recursionMaxLevel, temp)[0].Item2;
             Utils.OutputCSharpResult(Utils.FsaToTestDot(fsa), _provider);
             return null;
         }

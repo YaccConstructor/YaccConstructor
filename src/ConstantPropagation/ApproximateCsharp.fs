@@ -10,7 +10,7 @@ open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi
 open JetBrains.ReSharper.Psi.ControlFlow
 
-open HotspotParser
+open Hotspot
 open Utils
 open ArbitraryOperation
 open ResharperCsharpTreeUtils
@@ -65,8 +65,8 @@ let private buildFsaForMethod methodDecl target recursionMaxLevel fsaParams logg
 /// Finds hotspots in the given file and builds approximation
 /// for them, starting only from enclosing method.
 /// todo: approximation can be built not only for enclosing method
-let ApproximateFileWithParams (file: ICSharpFile) recursionMaxLevel fsaParams logger =
-    let hotspotInfoList = HotspotParser.parseHotspots "..\\..\\..\\..\\ConstantPropagation\\Hotspots.xml"
+let ApproximateFileWithParams (file: ICSharpFile) recursionMaxLevel hotspotInfoList fsaParams logger =
+    //let hotspotInfoList = HotspotParser.parseHotspots "..\\..\\..\\..\\ConstantPropagation\\Hotspots.xml"
     let hotspots = findHotspots file hotspotInfoList
     hotspots
     |> ResizeArray.map 
@@ -80,16 +80,16 @@ let ApproximateFileWithParams (file: ICSharpFile) recursionMaxLevel fsaParams lo
 
 /// Finds hotspots in the given file and builds approximation
 /// for them, starting only from enclosing method. Logs approximation process
-let ApproximateFileWithLogging (file: ICSharpFile) recursionMaxLevel =
+let ApproximateFileWithLogging (file: ICSharpFile) recursionMaxLevel hotspotInfoList =
     let loggerSt = Logger.create Utils.myDebugFilePath true FsaHelper.toDot
-    ApproximateFileWithParams file recursionMaxLevel CharFsa.charFsaParams loggerSt
+    ApproximateFileWithParams file recursionMaxLevel hotspotInfoList CharFsa.charFsaParams loggerSt
 
 /// Finds hotspots in the given file and builds approximation
 /// for them, starting only from enclosing method. Logging is disabled
-let ApproximateFile (file: ICSharpFile) recursionMaxLevel =
+let ApproximateFile (file: ICSharpFile) recursionMaxLevel hotspotInfoList =
     // allMethodsCfgToDot file myDebugFolderPath
     // let loggerSt = Logger.create Utils.myDebugFilePath true FsaHelper.toDot
-    ApproximateFileWithParams file recursionMaxLevel CharFsa.charFsaParams Logger.disabledLogger
+    ApproximateFileWithParams file recursionMaxLevel hotspotInfoList CharFsa.charFsaParams Logger.disabledLogger
 
 // stub
 let private buildInvocationTree (node: IInvocationExpression) =

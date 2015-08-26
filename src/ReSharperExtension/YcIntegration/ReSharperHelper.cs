@@ -110,7 +110,7 @@ namespace ReSharperExtension.YcIntegration
             var parserErrors = new List<ErrorInfo>();
             var semanticErrors = new List<ErrorInfo>();
 
-            var graphs = (new Approximator(file)).Approximate();
+            var graphs = (new Approximator(file)).Approximate(Handler.Hotspots);
 
             foreach (var tuple in graphs)
             {
@@ -135,7 +135,6 @@ namespace ReSharperExtension.YcIntegration
             return Shell.Instance.GetComponents<IReSharperLanguage>();
         }
 
-
         private IReSharperLanguage GetProcessor(string lang)
         {
             List<IReSharperLanguage> processors =  GetAllProcessors().AsList();
@@ -149,8 +148,6 @@ namespace ReSharperExtension.YcIntegration
 
             return res;
         }
-
-        
 
         private ErrorInfo TupleToErrorInfo(Tuple<string, DocumentRange> pair)
         {

@@ -194,6 +194,18 @@
     <Compile Include="Highlighting\Dynamic\JavaScriptBraceHighlighter.cs" />
     <Compile Include="Highlighting\HostLanguageHelper.cs" />
     <Compile Include="LanguageLoader.cs" />
+    <Compile Include="Settings\ConfigurationManager.cs" />
+    <Compile Include="Settings\HighlightingSettings.xaml.cs">
+      <DependentUpon>HighlightingSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Settings\HotspotModelView.cs" />
+    <Compile Include="Settings\HotspotSettingsPage.xaml.cs">
+      <DependentUpon>HotspotSettingsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Settings\YCSettingsPage.xaml.cs">
+      <DependentUpon>YCSettingsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Settings\YCSettingsRoot.cs" />
     <Compile Include="YcIntegration\Constants.cs" />
     <Compile Include="YcIntegration\ErrorInfo.cs" />
     <Compile Include="GraphDefine\Edge.cs" />
@@ -245,6 +257,18 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="AreaControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Settings\HighlightingSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Settings\HotspotSettingsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Settings\YCSettingsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

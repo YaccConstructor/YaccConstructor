@@ -6,22 +6,8 @@ open System
 open System.IO
 open System.Xml
 
-
-type Hotspot = 
-    val Class : string
-    val Method : string
-    val QueryPosition : int 
-    val ReturnType : string
-
-    new (_class, _method, position, returnType) = {
-        Class = _class
-        Method = _method
-        QueryPosition = position
-        ReturnType = returnType
-    }
-    new (full : string array, position, returnType) = 
-        new Hotspot(full.[0], full.[1], position, returnType)
-
+open Hotspot
+(*
 let parseHotspots (fileName : string) = 
     let parseHotspot (hotspot : XmlNode) = 
         let mutable child = hotspot
@@ -60,7 +46,7 @@ let parseHotspots (fileName : string) =
             | "returntype" -> child.InnerText.Trim().ToLowerInvariant()
             | x -> failwithf "Unexpected tag %s. Expected <ReturnType>" x
 
-        language, new Hotspot(methodName, pos, returnType)
+        language, new Hotspot(language, methodName, pos, returnType)
     
     let findFile path = 
         if File.Exists path
@@ -91,4 +77,4 @@ let parseHotspots (fileName : string) =
             | "hotspot" -> 
                 result <- parseHotspot hotNode.FirstChild :: result
             | x -> failwithf "Unexpected tag %A. Expected <Hotspot>" x
-    result
+    result*)

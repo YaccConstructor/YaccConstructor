@@ -62,7 +62,6 @@
 <file src="..\Bin\Release\v40\YC.RNGLRParser.*" target="DotFiles\v9.1\plugins" exclude="**\*.SimpleTest.*" />
 <!-- Plugin itself -->
 <file src="..\Bin\Release\v40\YC.ConstantPropagation.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
-<file src="..\Bin\Release\v40\Hotspots.xml" target="DotFiles\v9.1\plugins" />
 <file src="..\Bin\Release\v40\YC.SEL.SDK.Core.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\ControlFlowGraph.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 <file src="..\Bin\Release\v40\OtherSPPF.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />

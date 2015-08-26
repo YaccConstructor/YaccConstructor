@@ -11,11 +11,26 @@ using ReSharperExtension.Highlighting;
 using ReSharperExtension.Highlighting.Dynamic;
 using ReSharperExtension.YcIntegration;
 using YC.SDK;
+using ReSharperExtension.Settings;
 
 namespace ReSharperExtension
 {
     static class Handler
     {
+        private static List<Hotspot.Hotspot> hotspots;
+
+        public static List<Hotspot.Hotspot> Hotspots
+        {
+            get
+            {
+                if (hotspots == null)
+                {
+                    UpdateHotspots(ConfigurationManager.LoadHotspotData());
+                }
+                return hotspots;
+            } 
+        }
+
         public static HighlightingProcess Process { get; set; }
         private static ReSharperHelper<DocumentRange, ITreeNode> YcProcessor = ReSharperHelper<DocumentRange, ITreeNode>.Instance;
         public static ArrayList DataGraphs;
@@ -122,6 +137,12 @@ namespace ReSharperExtension
         public static void Init()
         {
             
+        }
+
+        internal static void UpdateHotspots(IEnumerable<HotspotModelView> items)
+        {
+            var hotspotItems = items.Select(HotspotModelView.ToHotspot);
+            hotspots = new List<Hotspot.Hotspot>(hotspotItems);
         }
     }
 }

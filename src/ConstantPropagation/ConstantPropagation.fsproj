@@ -34,6 +34,7 @@
   <ItemGroup>
     <Compile Include="Hotspot.fs" />
     <Compile Include="HotspotParser.fs" />
+    <None Include="app.config" />
     <None Include="packages.config" />
     <Compile Include="Utils.fs" />
     <Compile Include="GraphUtils.fs" />

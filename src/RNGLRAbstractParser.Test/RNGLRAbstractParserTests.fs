@@ -723,7 +723,7 @@ type ``RNGLR abstract parser tests`` () =
 
            
 
-[<EntryPoint>]
+//[<EntryPoint>]
 let f x =
     if System.IO.Directory.Exists "dot" 
     then 

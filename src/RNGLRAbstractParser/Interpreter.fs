@@ -161,16 +161,18 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         let print s = out.WriteLine ("    " + s)
         let curNum = ref 0
         print "rankdir=RL"
-        let getAstString (ast : AstNode) =
-            match ast with
-            | :? Terminal as i -> tokens.[i.TokenNumber] |> tokenToNumber |> numToString |> sprintf "%s"    
-            | :? Epsilon as i -> "eps " + numToString (-i.EpsilonNonTerm-1)
-            | :? AST as ast -> 
-                let nonT = 
-                    if ast.first.prod < leftSide.Length then ast.first.prod
-                    else errInd
-                numToString leftSide.[nonT]
-            | _ -> failwith "Unexpected ast"
+        let getAstString astInd =
+            if astInd > 0 
+            then
+                match nodes.[astInd] with
+                | :? Terminal as i -> tokens.[i.TokenNumber] |> tokenToNumber |> numToString |> sprintf "%s"    
+                | :? AST as ast -> 
+                    let nonT = 
+                        if ast.first.prod < leftSide.Length then ast.first.prod
+                        else errInd
+                    numToString leftSide.[nonT]
+                | _ -> failwith "Unexpected ast"
+            else "eps"
 
         let rec dfs (u : Vertex) =
             was.Add (u, !curNum)
@@ -178,7 +180,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 levels.[u.Level] <- [!curNum]
             else
                 levels.[u.Level] <- !curNum :: levels.[u.Level]
-            print <| sprintf "%d [label=\"%d\"]" !curNum u.State
+            print <| sprintf "%d [label=\"%d_%d\"]" !curNum u.Level u.State 
             incr curNum
             u.OutEdges |> ResizeArray.iter (handleEdge u)
             
@@ -187,7 +189,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             let v = e.Dest
             if not <| was.ContainsKey v then
                 dfs v
-            print <| sprintf "%d -> %d [label=\"%s\"]" was.[u] was.[v] (getAstString nodes.[e.Ast])
+            print <| sprintf "%d -> %d [label=\"%s\"]" was.[u] was.[v] (getAstString e.Ast)
 
         for v in initNodes do
             if not <| was.ContainsKey v then

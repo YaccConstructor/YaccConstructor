@@ -35,9 +35,6 @@
     <Compile Include="Hotspot.fs" />
     <Compile Include="HotspotParser.fs" />
     <None Include="packages.config" />
-    <Content Include="Hotspots.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Compile Include="Utils.fs" />
     <Compile Include="GraphUtils.fs" />
     <Compile Include="IControlFlowGraphUtils.fs" />

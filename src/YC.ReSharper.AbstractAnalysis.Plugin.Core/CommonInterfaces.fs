@@ -15,7 +15,7 @@ open YC.FST.GraphBasedFst
 open YC.FSA.FsaApproximation
 open YC.FSA.GraphBasedFsa
 
-type DrawingGraph (vertices : IEnumerable<int>, edges : List<TaggedEdge<int, string>>) =
+type DrawingGraph (vertices : IEnumerable<int>, edges : ResizeArray<TaggedEdge<int, string>>) =
     member this.Vertices = vertices
     member this.Edges = edges
 
@@ -61,7 +61,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
         tokenize: FSA<char * Position<'br>> -> Test<ParserInputGraph<'TokenType>, array<Symb<char*Position<'br>>>>
         , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string
         , tokenData: 'TokenType -> obj, tokenToTreeNode, lang
-        , calculatePos:_->seq<'range>
+        , calculatePos: _ -> seq<'range>
         , getDocumentRange: Position<'br> -> 'range
         , printAst: Tree<'TokenType> -> string -> unit
         , printOtherAst: OtherTree<'TokenType> -> string -> unit

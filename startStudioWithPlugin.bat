@@ -1,3 +1,4 @@
+@echo off
 SET pathToVS12=C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\devenv.exe
 SET pathToVS11=C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\devenv.exe
 

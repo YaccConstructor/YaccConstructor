@@ -32,6 +32,7 @@
   <ItemGroup>
     <None Include="simpleCalc.yrd" />
     <None Include="Lexer.fsl" />
+    <Compile Include="AandB.yrd.fs" />
     <Compile Include="Brackets.yrd.fs" />
     <Compile Include="Calc.yrd.fs" />
     <!--Compile Include="MsParser.fs" /-->

@@ -21,7 +21,7 @@ open Graphviz4Net.Dot
 open QuickGraph
 open NUnit.Framework
 open AbstractAnalysis.Common
-open RNGLR.ParseSimpleCalc
+open RNGLR.SimpleCalc
 open RNGLR.PrettySimpleCalc
 open Yard.Generators.RNGLR.AbstractParser
 open YC.Tests.Helper
@@ -585,6 +585,20 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.StrangeBrackets.buildAstAbstract qGraph 25 24 4 8 1
 
     [<Test>]
+    member this._29_AandB_Linear () =
+        let qGraph = new ParserInputGraph<_>(0, 9)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.AandB.A 0)
+            edg 1 2 (RNGLR.AandB.B 1)
+            edg 2 3 (RNGLR.AandB.A 2)
+            edg 3 4 (RNGLR.AandB.A 3)
+            edg 4 9 (RNGLR.AandB.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.AandB.buildAstAbstract qGraph 19 18 0 8 1
+
+
+    [<Test>]
     member this.``Not Ambigous Simple Calc. Branch. Perf`` i inpLength isLoop =  
         let tpl x =
             [
@@ -709,7 +723,7 @@ type ``RNGLR abstract parser tests`` () =
 
            
 
-//[<EntryPoint>]
+[<EntryPoint>]
 let f x =
     if System.IO.Directory.Exists "dot" 
     then 
@@ -744,7 +758,8 @@ let f x =
 //    t._25_UnambiguousBrackets_BiggerCircle ()
 //    t._26_UnambiguousBrackets_Inf()
 //    t._27_UnambiguousBrackets_WithoutEmptyString()
-    t._28_UnambiguousBrackets_DifferentPathLengths ()
+//    t._28_UnambiguousBrackets_DifferentPathLengths ()
    // t.``TSQL performance test for Alvor`` 2 100 false
-    t.``TSQL performance test 2`` 2 100 false
+    t._29_AandB_Linear ()
+    //t.``TSQL performance test 2`` 2 100 false
     0

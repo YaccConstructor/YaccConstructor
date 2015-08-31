@@ -12,7 +12,6 @@ open Yard.Generators.GLL
 open Yard.Generators.GLL.Parser    
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RNGLR
-//open GLL.SimpleLeftRecursion
 
 open Yard.Generators.GLL
 open Yard.Generators

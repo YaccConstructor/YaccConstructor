@@ -33,7 +33,6 @@
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
     <Compile Include="Hotspot.fs" />
-    <Compile Include="HotspotParser.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />
     <Compile Include="Utils.fs" />

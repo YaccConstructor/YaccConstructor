@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 
 namespace ReSharperExtension.Settings
@@ -76,13 +75,14 @@ namespace ReSharperExtension.Settings
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-        public void OnPropertyChanged(PropertyChangedEventArgs e)
+
+        private void OnPropertyChanged(PropertyChangedEventArgs e)
         {
             if (PropertyChanged != null)
                 PropertyChanged(this, e);
         }
 
-        public static Hotspot.Hotspot ToHotspot(HotspotModelView modelView)
+        internal static Hotspot.Hotspot ToHotspot(HotspotModelView modelView)
         {
             return new Hotspot.Hotspot(modelView.LanguageName, modelView.ClassName, modelView.MethodName,
                 modelView.ArgumentPosition, modelView.ReturnedType);
@@ -128,7 +128,7 @@ namespace ReSharperExtension.Settings
             }
         }
 
-        public bool AmCorrect()
+        internal bool AmCorrect()
         {
             var list = new List<string>{languageName, className, methodName, returnedType};
             return list.TrueForAll(IsCorrectName) && argumentPos >= 0;
@@ -149,13 +149,5 @@ namespace ReSharperExtension.Settings
 
         [XmlIgnore]
         public string Error { get; private set; }
-    }
-
-    [Serializable]
-    [XmlRoot("RootCollection")]
-    public class HotspotWrapperCollection
-    {
-        [XmlArray("Collection"), XmlArrayItem("Item", typeof(HotspotModelView))]
-        public List<HotspotModelView> Collection { get; set; }
     }
 }

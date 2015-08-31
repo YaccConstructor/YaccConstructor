@@ -26,7 +26,7 @@ type TargetLanguage =
 let printTables 
     (grammar : FinalGrammar) head (tables : Tables) (moduleName : string) 
     (tokenType : Map<_,_>) (res : System.Text.StringBuilder) targetLanguage 
-    _class positionType caseSensitive isAbstractParsingMode =
+    _class positionType caseSensitive isAbstractParsingMode isHighlihgtingMode =
     
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
@@ -235,6 +235,14 @@ let printTables
             print "\"%s\";" <| indexator.indexToLiteral i
         print "]"
         printBr ""
+
+        if isHighlihgtingMode
+        then
+            printInd 0 "let getTerminalNames = ["
+            for i = indexator.termsStart to indexator.termsEnd do
+                print "\"%s\";" <| indexator.indexToTerm i
+            print "]"
+            printBr ""
 
         printBr "let mutable private cur = 0"
 

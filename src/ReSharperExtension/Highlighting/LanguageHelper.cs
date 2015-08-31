@@ -1,57 +1,60 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using ReSharperExtension.Settings;
 using ReSharperExtension.YcIntegration;
 
 namespace ReSharperExtension.Highlighting
 {
     static class LanguageHelper
     {
-        private static List<Language> availableLang = new List<Language>();
+        private static List<LanguageWithColorInfo> availableLang = new List<LanguageWithColorInfo>();
 
         public static string GetBrother(string lang, string str, Brother brother)
         {
-            Language language = availableLang.FirstOrDefault(item => item.LanguageName == lang.ToLowerInvariant());
-            if (language == null)
+            LanguageWithColorInfo languageWithColorInfo = availableLang.FirstOrDefault(item => item.LanguageName == lang.ToLowerInvariant());
+            if (languageWithColorInfo == null)
                 return null;
-            return language.GetBrother(str, brother);
+            return languageWithColorInfo.GetBrother(str, brother);
         }
 
-        public static void Update(string lang, Dictionary<string, TokenInfo> tokenInfo)
+        public static void Update(string lang)
         {
             if (!availableLang.Exists(item => item.LanguageName == lang.ToLowerInvariant()))
             {
-                var language = new Language(lang.ToLowerInvariant(), tokenInfo);
+                LanguageSettings settings = ConfigurationManager.LoadLangSettings(lang);
+                Dictionary<string, TokenInfo> tokenInfo = settings.GetFullTokensInfo();
+
+                var language = new LanguageWithColorInfo(lang.ToLowerInvariant(), tokenInfo);
                 availableLang.Add(language);
             }
         }
 
         public static string GetColor(string lang, string token)
         {
-            Language language = availableLang.FirstOrDefault(item => item.LanguageName == lang.ToLowerInvariant());
-            if (language == null)
+            LanguageWithColorInfo languageWithColorInfo = availableLang.FirstOrDefault(item => item.LanguageName == lang.ToLowerInvariant());
+            if (languageWithColorInfo == null)
                 return null;
-            return language.GetColor(token.ToLowerInvariant());
+            return languageWithColorInfo.GetColor(token.ToLowerInvariant());
         }
 
         public static int GetNumberFromYcName(string lang, string ycName)
         {
-            Language language = availableLang.FirstOrDefault(item => item.LanguageName == lang.ToLowerInvariant());
-            if (language == null)
+            LanguageWithColorInfo languageWithColorInfo = availableLang.FirstOrDefault(item => item.LanguageName == lang.ToLowerInvariant());
+            if (languageWithColorInfo == null)
                 return -1;
 
-            return language.GetNumber(ycName);
+            return languageWithColorInfo.GetNumber(ycName);
         }
     }
 
-    class Language
+    class LanguageWithColorInfo
     {
         public string LanguageName { get; private set; }
 
         private Dictionary<string, TokenInfo> tokenInfos = new Dictionary<string, TokenInfo>();
 
-        public Language(string lang, Dictionary<string, TokenInfo> tokenInfos)
+        public LanguageWithColorInfo(string lang, Dictionary<string, TokenInfo> tokenInfos)
         {
             LanguageName = lang;
             this.tokenInfos = tokenInfos;
@@ -95,7 +98,7 @@ namespace ReSharperExtension.Highlighting
         public string Color { get; set; }
     }
 
-    public enum Brother
+    internal enum Brother
     {
         Left,
         Right

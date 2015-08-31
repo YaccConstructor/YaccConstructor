@@ -9,9 +9,9 @@ using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.Tree;
 using ReSharperExtension.Highlighting;
 using ReSharperExtension.Highlighting.Dynamic;
+using ReSharperExtension.Settings;
 using ReSharperExtension.YcIntegration;
 using YC.SDK;
-using ReSharperExtension.Settings;
 
 namespace ReSharperExtension
 {
@@ -60,9 +60,8 @@ namespace ReSharperExtension
             IHighlightingConsumer consumer = Process.Consumer;
             var processor = new TreeNodeProcessor(consumer, Process.File);
 
-            string xmlPath = YcProcessor.GetXmlPath(args.Lang);
-            ColorHelper.ParseFile(xmlPath, args.Lang);
-
+            LanguageHelper.Update(args.Lang);
+            
             Action action =
                 () => args.Tokens.ForEach(node => 
                     processor.ProcessAfterInterior(node as ITreeNode));

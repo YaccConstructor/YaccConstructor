@@ -191,17 +191,15 @@
     <Compile Include="Highlighting\Dynamic\JavaScriptBraceHighlighter.cs" />
     <Compile Include="Highlighting\HostLanguageHelper.cs" />
     <Compile Include="LanguageLoader.cs" />
+    <Compile Include="Settings\ColorModelView.cs" />
     <Compile Include="Settings\ConfigurationManager.cs" />
-    <Compile Include="Settings\HighlightingSettings.xaml.cs">
-      <DependentUpon>HighlightingSettings.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="Settings\ColorHelper.cs" />
+    <Compile Include="Settings\LanguageSettings.cs" />
     <Compile Include="Settings\HotspotModelView.cs" />
-    <Compile Include="Settings\HotspotSettingsPage.xaml.cs">
-      <DependentUpon>HotspotSettingsPage.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Settings\YCSettingsPage.xaml.cs">
       <DependentUpon>YCSettingsPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Settings\TokenInfoModelView.cs" />
     <Compile Include="Settings\YCSettingsRoot.cs" />
     <Compile Include="YcIntegration\Constants.cs" />
     <Compile Include="YcIntegration\ErrorInfo.cs" />
@@ -210,7 +208,6 @@
     <Compile Include="GraphDefine\Graph.cs" />
     <Compile Include="GraphDefine\LogicCore.cs" />
     <Compile Include="GraphDefine\Vertex.cs" />
-    <Compile Include="Highlighting\ColorHelper.cs" />
     <Compile Include="Highlighting\Dynamic\ExistingTreeNodes.cs" />
     <Compile Include="Highlighting\Dynamic\BaseBraceHighlighter.cs" />
     <Compile Include="Highlighting\ErrorWarning.cs" />
@@ -254,14 +251,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="AreaControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Settings\HighlightingSettings.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Settings\HotspotSettingsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

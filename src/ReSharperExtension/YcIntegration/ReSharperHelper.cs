@@ -99,6 +99,11 @@ namespace ReSharperExtension.YcIntegration
             return GetProcessor(lang).GetNextTree(number);
         }
 
+        public IEnumerable<string> GetAvailableTokens(string lang)
+        {
+            return GetProcessor(lang).TokenNames;
+        }
+
         public string GetXmlPath(string lang)
         {
             return GetProcessor(lang).XmlPath;
@@ -133,6 +138,11 @@ namespace ReSharperExtension.YcIntegration
         private IEnumerable<IReSharperLanguage> GetAllProcessors()
         {
             return Shell.Instance.GetComponents<IReSharperLanguage>();
+        }
+
+        public IEnumerable<string> GetAllLanguagesNames()
+        {
+            return GetAllProcessors().Select(processor => processor.Name);
         }
 
         private IReSharperLanguage GetProcessor(string lang)

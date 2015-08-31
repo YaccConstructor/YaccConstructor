@@ -215,7 +215,7 @@ type RNGLR() =
                 | Scala -> scalaHeaders()
 
             printHeaders moduleName fullPath light output targetLanguage
-            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive !isAbstractParsingMode
+            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive !isAbstractParsingMode !needHighlighting
             let res = 
                 if not !needTranslate || targetLanguage = Scala 
                 then tables

@@ -210,14 +210,14 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
 
     member this.GetPairedRanges leftNumber rightNumber range toRight = 
         
-        let tokToPos = this.TokenToPos calculatePos
+        let tokToPos' = this.TokenToPos calculatePos
         let info = new BracketSearchInfo<_>(leftNumber, rightNumber, range, toRight)
         
         let findPairs (tree : OtherTree<_>) = 
-            tree.FindAllPair info tokenToNumber tokToPos
+            tree.FindAllPair info tokenToNumber tokToPos'
 
         otherForest
-        |> List.map (findPairs >> ResizeArray.map tokToPos >> Seq.concat)
+        |> List.map (findPairs >> ResizeArray.map tokToPos' >> Seq.concat)
         |> Seq.concat
         |> ResizeArray.ofSeq
 

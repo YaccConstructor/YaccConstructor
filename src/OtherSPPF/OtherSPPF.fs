@@ -483,7 +483,7 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                             if !count = 0 then res.Add token
                         | :? OtherAST as ast -> processAST ast
                         | :? Epsilon -> ()
-                        | _ -> failwithf "Unexpected node type in OtherSppf: %s" <| node.GetType().ToString()
+                        | _ -> failwithf "Unexpected node type in OtherSppf: %A" <| node.GetType()
         
                     if family.Nodes.Exist ((=) !child)
                     then handleSomeNodes !child family handle 
@@ -502,11 +502,10 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
 
             processFamily parent
             if !count <> 0 then
-                let addContext family = 
-                    contexts.Push <| new Context(family, !child, !count)
-
                 match parent.Parent with
-                | :? OtherAST as ast -> ast.DoForAll addContext
+                | :? OtherAST as ast -> 
+                    ast.Parent.DoForAll(fun family -> contexts.Push <| new Context(family :?> OtherFamily, ast, !count))
+                    
                 | x -> failwithf "Unexpected node: %s" <| x.GetType().ToString()
         res
 

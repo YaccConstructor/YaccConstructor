@@ -111,21 +111,25 @@
             
         </Grid>
         <Grid Row="3">
-            <StackPanel>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
                 <Label>Token to color mapping</Label>
-                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                     <DataGrid x:Name="tokenToColor" Margin="5" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Token" Binding="{Binding TokenName}" IsReadOnly="True" MinWidth="200"></DataGridTextColumn>
 
                             <DataGridComboBoxColumn Header="Color" x:Name="colorColumn" MinWidth="300"
-          SelectedValueBinding="{Binding Path=ColorId}"  SelectedValuePath="ColorId"
-          DisplayMemberPath="ViewName"
-                              ></DataGridComboBoxColumn>
+        SelectedValueBinding="{Binding Path=ColorId}"  SelectedValuePath="ColorId"
+        DisplayMemberPath="ViewName"
+                            ></DataGridComboBoxColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </ScrollViewer>
-            </StackPanel>
+            </Grid>
         </Grid>
     </Grid>
 </UserControl>

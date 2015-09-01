@@ -17,7 +17,7 @@ let tokenToPos (tokenData : _ -> obj) token =
     let t = tokenData token
     match t with
     | :? int as i -> [i] |> Seq.ofList
-    | _ -> failwithf "Unexpected token data: %s" <| t.GetType().ToString()
+    | _ -> failwithf "Unexpected token data: %A" <| t.GetType()
 
 let needPrintToDot = false
 
@@ -203,7 +203,6 @@ type ``Classic case: matching brackets``() =
         let leftSide = RNGLR.ParseSummator.leftSide
 
         otherTree.ToDot indToString tokToNumber leftSide name 
-        
 
     [<Test>]
     member test.``Classic case. Simple test``() =
@@ -400,6 +399,56 @@ type ``Classic case: matching brackets``() =
             let expected = 0
             Assert.AreEqual (expected, actual, errorMessage)
             Assert.Pass "Classic case. Right to left 2: PASSED"
+
+[<TestFixture>]
+type ``Simple case: brackets are located deep``() =
+    let tokToNumber = RNGLR.ParseSummator2.tokenToNumber
+    let leftBraceNumber  = tokToNumber <| RNGLR.ParseSummator2.Token.LBRACE -1
+    let rightBraceNumber = tokToNumber <| RNGLR.ParseSummator2.Token.RBRACE -1
+    let tokToPos = tokenToPos RNGLR.ParseSummator2.tokenData
+    
+    let errorMessage = "Expected bracket wasn't found"
+
+    let notBracketIsFound token = 
+        let tokenName = RNGLR.ParseSummator2.numToString <| tokToNumber token
+        Assert.Fail <| sprintf "%s is found" tokenName
+        -1
+
+    let printToDot (otherTree : OtherTree<_>) name = 
+        let indToString = RNGLR.ParseSummator2.numToString
+        let leftSide = RNGLR.ParseSummator2.leftSide
+
+        otherTree.ToDot indToString tokToNumber leftSide name 
+
+    [<Test>]
+    member test.``Classic case. Simple test with deep brackets``() =
+        let qGraph = new ParserInputGraph<_>(0, 6)
+        
+        let vertexRange = List.init 7 id
+        qGraph.AddVertexRange vertexRange |> ignore
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (RNGLR.ParseSummator2.LBRACE 0)
+                createEdge 1 2 (RNGLR.ParseSummator2.NUMBER 1)
+                createEdge 2 3 (RNGLR.ParseSummator2.PLUS 2)
+                createEdge 3 4 (RNGLR.ParseSummator2.NUMBER 3)
+                createEdge 4 5 (RNGLR.ParseSummator2.RBRACE 4)
+                createEdge 5 6 (RNGLR.ParseSummator2.RNGLR_EOF 5)
+            ] |> ignore
+
+        let parseResult = (new Parser<_>()).Parse  RNGLR.ParseSummator2.buildAstAbstract qGraph
+        
+        match parseResult with 
+        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Parser.Success (mAst) ->
+            let other = new OtherTree<_>(mAst)
+            
+            let bracketInfo = new BracketSearchInfo<_>(leftBraceNumber, rightBraceNumber, 0, true)
+
+            let pairTokens = other.FindAllPair bracketInfo tokToNumber tokToPos
+
+            let expectedPairs = 1
+            Assert.AreEqual (expectedPairs, pairTokens.Count)
 
 [<TestFixture>]
 type ``Abstract case: matching brackets``() =

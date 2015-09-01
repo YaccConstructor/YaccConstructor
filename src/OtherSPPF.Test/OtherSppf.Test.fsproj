@@ -42,6 +42,7 @@
     <Compile Include="Ambiguous.yrd.fs" />
     <Compile Include="Cycles.yrd.fs" />
     <Compile Include="Summator.yrd.fs" />
+    <Compile Include="Summator2.yrd.fs" />
     <Compile Include="OtherSppf.Test.fs" />
     <None Include="packages.config" />
     <None Include="app.config" />

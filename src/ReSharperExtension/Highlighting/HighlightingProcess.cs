@@ -11,12 +11,12 @@ using ReSharperExtension.YcIntegration;
 
 namespace ReSharperExtension.Highlighting
 {
-    public class HighlightingProcess : IDaemonStageProcess
+    internal class HighlightingProcess : IDaemonStageProcess
     {
         private Action<DaemonStageResult> myCommiter;
         private IContextBoundSettingsStore mySettingsStore;
 
-        private static ReSharperHelper<DocumentRange, ITreeNode> YcProcessor = ReSharperHelper<DocumentRange, ITreeNode>.Instance;
+        private static readonly ReSharperHelper<DocumentRange, ITreeNode> YcProcessor = ReSharperHelper<DocumentRange, ITreeNode>.Instance;
 
         public HighlightingProcess(IDaemonProcess process, IContextBoundSettingsStore settingsStore)
         {

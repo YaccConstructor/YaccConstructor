@@ -21,10 +21,10 @@ namespace ReSharperExtension.Settings
     [OptionsPage(Pid, "YaccContructor settings", null, ParentId = EnvironmentPage.Pid)]
     public partial class YCSettingsPage : IOptionsPage
     {
-        public const string Pid = "YCSettings";
+        private const string Pid = "YCSettings";
 
         private static Dictionary<string, LanguageSettings> Cache;
-        private ReSharperHelper<DocumentRange, ITreeNode> helper = ReSharperHelper<DocumentRange, ITreeNode>.Instance;
+        private readonly ReSharperHelper<DocumentRange, ITreeNode> helper = ReSharperHelper<DocumentRange, ITreeNode>.Instance;
         private string currentLang;
 
         public YCSettingsPage()

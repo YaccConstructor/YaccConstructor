@@ -32,7 +32,7 @@ namespace ReSharperExtension
         }
 
         public static HighlightingProcess Process { get; set; }
-        private static ReSharperHelper<DocumentRange, ITreeNode> YcProcessor = ReSharperHelper<DocumentRange, ITreeNode>.Instance;
+        private static readonly ReSharperHelper<DocumentRange, ITreeNode> YcProcessor = ReSharperHelper<DocumentRange, ITreeNode>.Instance;
         public static ArrayList DataGraphs;
         
         static Handler()
@@ -100,12 +100,12 @@ namespace ReSharperExtension
             DataGraphs.Add(dataGraph);
         }
 
+        private static readonly Dictionary<string, int> parsedSppf = new Dictionary<string, int>();
         /// <summary>
         /// Translates sppf to ReSharper trees and stores result. It's need further.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args">Now it contains only language</param>
-        private static Dictionary<string, int> parsedSppf = new Dictionary<string, int>();
         private static void OnParsingFinished(object sender, CommonInterfaces.ParsingFinishedArgs args)
         {
             string lang = args.Lang;

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Xml.Serialization;
+using JetBrains.Util;
 
 namespace ReSharperExtension.Settings
 {
@@ -136,15 +138,10 @@ namespace ReSharperExtension.Settings
 
         private bool IsCorrectName(string input)
         {
-            if (Char.IsDigit(input[0]))
+            if (String.IsNullOrEmpty(input) || Char.IsDigit(input[0]))
                 return false;
 
-            foreach (char symbol in input)
-            {
-                if (!(Char.IsLetterOrDigit(symbol) || symbol == '_'))
-                    return false;
-            }
-            return true;
+            return input.All(symbol => Char.IsLetterOrDigit(symbol) || symbol == '_');
         }
 
         [XmlIgnore]

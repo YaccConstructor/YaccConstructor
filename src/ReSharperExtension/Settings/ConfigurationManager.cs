@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Xml.Serialization;
 using System.IO;
+
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Psi.Tree;
-using ReSharperExtension.Highlighting;
+
 using ReSharperExtension.YcIntegration;
 
 namespace ReSharperExtension.Settings
@@ -13,15 +14,15 @@ namespace ReSharperExtension.Settings
     /// <summary>
     /// Saves and loads configuration information about string-embedded languages. 
     /// </summary>
-    public static class ConfigurationManager
+    internal static class ConfigurationManager
     {
-        private static ReSharperHelper<DocumentRange, ITreeNode> helper = ReSharperHelper<DocumentRange, ITreeNode>.Instance;
+        private static readonly ReSharperHelper<DocumentRange, ITreeNode> helper = ReSharperHelper<DocumentRange, ITreeNode>.Instance;
 
         private const string YcTempFolder = "YCPluginTempFolder";
         private const string hotspotFile = "Hotspots.xml";
         private const string xmlExtension = ".xml";
 
-        private static Dictionary<string, LanguageSettings> LoadToSettings = new Dictionary<string, LanguageSettings>();
+        private static readonly Dictionary<string, LanguageSettings> LoadToSettings = new Dictionary<string, LanguageSettings>();
 
         private static string GetYCFolderPath()
         {
@@ -34,7 +35,7 @@ namespace ReSharperExtension.Settings
             return ycFolderPath;
         }
 
-        public static void SaveHotspotData(IEnumerable<HotspotModelView> hotspots)
+        internal static void SaveHotspotData(IEnumerable<HotspotModelView> hotspots)
         {
             string ycPath = GetYCFolderPath();
 
@@ -49,10 +50,9 @@ namespace ReSharperExtension.Settings
             s.Serialize(fs, collection);
         }
 
-        public static ObservableCollection<HotspotModelView> LoadHotspotData()
+        internal static ObservableCollection<HotspotModelView> LoadHotspotData()
         {
             string ycPath = GetYCFolderPath();
-
             string hotspotFullName = Path.Combine(ycPath, hotspotFile);
 
             if (!File.Exists(hotspotFullName))
@@ -68,45 +68,10 @@ namespace ReSharperExtension.Settings
             return collection;
         }
 
-        private static List<HotspotModelView> defaultHotspot = 
-            new List<HotspotModelView>
-            {
-                new HotspotModelView
-            {
-                LanguageName = "Calc",
-                ClassName = "Program",
-                MethodName = "Eval",
-                ArgumentPosition = 0,
-                ReturnedType = "int",
-            },
-            new HotspotModelView
-            {
-                LanguageName = "TSQL",
-                MethodName = "ExecuteImmediate",
-                ClassName = "Program",
-                ArgumentPosition = 0,
-                ReturnedType = "void",
-            },
-            new HotspotModelView
-            {
-                LanguageName = "ExtCalc",
-                ClassName = "Program",
-                MethodName = "ExtEval",
-                ArgumentPosition = 0,
-                ReturnedType = "int",
-            },
-            }
-            ;
-        private static HotspotModelView GetDefaultHotspot(string lang)
-        {
-            return defaultHotspot.Find(hotspot => hotspot.LanguageName.ToLowerInvariant() == lang.ToLowerInvariant());
-        }
-
-        public static LanguageSettings LoadLangSettings(string lang)
+        internal static LanguageSettings LoadLangSettings(string lang)
         {
             if (LoadToSettings.ContainsKey(lang))
                 return LoadToSettings[lang];
-            
 
             string ycPath = GetYCFolderPath();
             string fileFullPath = Path.Combine(ycPath, String.Format("{0}{1}", lang, xmlExtension));

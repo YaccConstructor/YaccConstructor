@@ -378,132 +378,6 @@ let generateTreeNodeFile folder tokenInfo =
     let text = printTreeNode tokenInfo
     generateFile path text
 
-//Prints .xml file that contains information about token to color mapping.
-let printXML (nameOfNamespace : string) tokens = 
-
-    let printer = new FormatPrinter()
-
-    let availableColors = 
-        [
-            "ANALYSIS_ERROR_ERRORSTRIPE";
-            "ANALYSIS_SUGGESTION_ERRORSTRIPE";
-            "ANALYSIS_WARNING_ERRORSTRIPE";
-            "CONSTANT_IDENTIFIER_ATTRIBUTE";
-            "DEADCODE_ATTRIBUTE";
-            "EVENT_IDENTIFIER_ATTRIBUTE";
-            "EXTENSION_METHOD_IDENTIFIER_ATTRIBUTE";
-            "FIELD_IDENTIFIER_ATTRIBUTE";
-            "FORMAT_STRING_ITEM";
-            "JAVA_SCRIPT_XML_DOC_TAG";
-            "JS_FUNCTION_IDENTIFIER_ATTRIBUTE";
-            "JS_LATEBOUND_IDENTIFIER_ATTRIBUTE";
-            "JS_LOCAL_IDENTIFIER_ATTRIBUTE";
-            "JS_PARAMETER_IDENTIFIER_ATTRIBUTE";
-            "JS_PROPERTY_IDENTIFIER_ATTRIBUTE";
-            "LATE_BOUND_IDENTIFIER_ATTRIBUTE";
-            "LOCAL_VARIABLE_IDENTIFIER_ATTRIBUTE";
-            //"MATCHED_BRACE";
-            "MATCHED_FORMAT_STRING_ITEM";
-            "METHOD_IDENTIFIER_ATTRIBUTE";
-            "MUTABLE_LOCAL_VARIABLE_IDENTIFIER_ATTRIBUTE";
-            "NAMESPACE_IDENTIFIER_ATTRIBUTE";
-            "OPERATOR_IDENTIFIER_ATTRIBUTE";
-            //"OUTLINE_BRACE";
-            "PARAMETER_IDENTIFIER_ATTRIBUTE";
-            "PATH_IDENTIFIER_ATTRIBUTE";
-            "PUBLIC_DEADCODE_ATTRIBUTE";
-            "TODOITEM_ATTRIBUTE";
-            "TODOITEM_ERRORSTRIPE_ATTRIBUTE";
-            "TS_CLASS_IDENTIFIER_ATTRIBUTE";
-            "TS_ENUM_IDENTIFIER_ATTRIBUTE";
-            "TS_INTERFACE_IDENTIFIER_ATTRIBUTE";
-            "TS_MODULE_IDENTIFIER_ATTRIBUTE";
-            "TS_TYPE_PARAMETER_IDENTIFIER_ATTRIBUTE";
-            "TYPE_CLASS_ATTRIBUTE";
-            "TYPE_DELEGATE_ATTRIBUTE";
-            "TYPE_ENUM_ATTRIBUTE";
-            "TYPE_INTERFACE_ATTRIBUTE";
-            "TYPE_PARAMETER_ATTRIBUTE";
-            "TYPE_STATIC_CLASS_ATTRIBUTE";
-            "TYPE_STRUCT_ATTRIBUTE";
-            "UNMATCHED_BRACE";
-            "UNRESOLVED_ERROR_ATTRIBUTE";
-        ]
-
-    printer.PrintBrInd 0 "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
-    printer.PrintBrInd 0 "<!--"
-    printer.PrintBrInd 2 "Available color definitions:"
-
-    availableColors 
-    |> List.iter (fun color -> printer.PrintBrInd 1 "%s" color)
-
-    printer.PrintBr ""
-
-    let availableIcons = 
-        [
-            "CLASS_IS_INHERITED_ATTRIBUTE";
-            "HIDES_ATTRIBUTE";
-            "IMPLEMENTS_AND_HIDES_ATTRIBUTE";
-            "IMPLEMENTS_AND_OVERRIDES_ATTRIBUTE";
-            "IMPLEMENTS_ATTRIBUTE";
-            "INTERFACE_IS_IMPLEMENTED_ATTRIBUTE";
-            "OVERRIDES_ATTRIBUTE";
-            "RECURSION_ATTRIBUTE";
-        ]
-
-    printer.PrintBrInd 2 "Available icons:"
-    availableIcons 
-    |> List.iter (fun icon -> printer.PrintBrInd 1 "%s" icon)
-
-    printer.PrintBr ""
-    let availableUnderlying = 
-        [
-            "ERROR_ATTRIBUTE";
-            "HINT_ATTRIBUTE";
-            "SUGGESTION_ATTRIBUTE";
-            "WARNING_ATTRIBUTE";
-        ]
-
-    printer.PrintBrInd 2 "Available underlying"
-    availableUnderlying
-    |> List.iter (fun underlying -> printer.PrintBrInd 1 "%s" underlying)
-
-    printer.PrintBrInd 0 "-->"
-
-    printer.PrintBrInd 0 "<SyntaxDefinition name=\"%s\">" nameOfNamespace
-    printer.PrintBrInd 1 "<Colors>"
-    printer.PrintBrInd 2 "<Tokens color=\"CONSTANT_IDENTIFIER_ATTRIBUTE\">"
-
-    tokens
-    |> List.iter(fun token -> printer.PrintBrInd 3 "<Token> %s </Token>" token)
-
-    printer.PrintBrInd 2 "</Tokens>"
-    printer.PrintBrInd 1 "</Colors>"
-    
-    printer.PrintBrInd 0 "<!-- Dynamic highlighting:"
-    printer.PrintBrInd 1 "<Matched>"
-    let pair = [
-                "LBRACE", "RBRACE"; 
-                "LEFT_SQUARE_BRACKET", "RIGHT_SQUARE_BRACKET"; 
-                "LEFT_FIGURE_BRACKET", "LEFT_FIGURE_BRACKET"
-               ]
-
-    pair 
-    |> List.iter 
-        (
-            fun (left, right) -> 
-                printer.PrintBrInd 2 "<Pair>"
-                printer.PrintBrInd 3 "<Left> %s </Left>" left
-                printer.PrintBrInd 3 "<Right> %s </Right>" right
-                printer.PrintBrInd 2 "</Pair>"
-        )
-
-    printer.PrintBrInd 1 "</Matched>"
-    printer.PrintBrInd 0 "-->"
-
-    printer.PrintBrInd 0 "</SyntaxDefinition>"
-    printer.GetString()
-
 //prints "tokenToTreeNode" function in parser file. 
 //function "tokenToTreeNode" needs in highlihgting after lexical analysis.
 let printTokenToTreeNode (indexator : Indexator) = 
@@ -544,7 +418,7 @@ let printZoneMarkerText _namespace =
 
     printer.GetString()
 
-let printItemsGroup nameOfClasses xmlName = 
+let printItemsGroup nameOfClasses = 
 
     let printer = new FormatPrinter()
     
@@ -557,10 +431,6 @@ let printItemsGroup nameOfClasses xmlName =
     printer.PrintBrInd 2 "<ExternalCompile Include=\"Properties\AssemblyInfo.cs\" />"
     for className in nameOfClasses do
         printer.PrintBrInd 2 "<ExternalCompile Include=\"%s\" />" className
-
-    printer.PrintBrInd 2 "<Content Include=\"%s%s\">" xmlName xmlExtension
-    printer.PrintBrInd 3 "<CopyToOutputDirectory>Always</CopyToOutputDirectory>"
-    printer.PrintBrInd 2 "</Content>"
 
     printer.PrintBrInd 1 "</ItemGroup>"
     printer.PrintBrInd 1 "</Project>"
@@ -578,7 +448,6 @@ let generate (indexator : Indexator) namespaceName =
     
     generateXML()
 
-    let mutable tokensAndLits = []
     let nameOfClasses = ref [zoneMarker + csExtension]
                 
     for i = 0 to indexator.nonTermCount - 1 do
@@ -602,7 +471,6 @@ let generate (indexator : Indexator) namespaceName =
         let name = indexator.indexToTerm i
                     
         nameOfClasses := name + termSuffix + csExtension :: !nameOfClasses
-        tokensAndLits <- name :: tokensAndLits
         let info : TokenInfo =  
             {
                 _baseClass = baseClass
@@ -619,7 +487,6 @@ let generate (indexator : Indexator) namespaceName =
         let name = toClassName <| indexator.getLiteralName i
                     
         nameOfClasses := name + literalSuffix + csExtension :: !nameOfClasses
-        tokensAndLits <- name :: tokensAndLits
         let info : TokenInfo =  
             {
                 _baseClass = baseClass
@@ -631,17 +498,6 @@ let generate (indexator : Indexator) namespaceName =
             }
 
         generateTreeNodeFile folder info
-                    
-    //generateHotspotXMLFile "Hotspots.xml"
-    tokensAndLits <- tokensAndLits |> List.rev
-    
-    let generateXML name toksAndLits = 
-        let path = folder + name + xmlExtension
-        if not <| File.Exists path
-        then 
-            let text = printXML name toksAndLits
-            generateFile path text
-    generateXML namespaceName tokensAndLits
     
     let generateZoneMarkerFile = 
         let path = folder + zoneMarker + csExtension 
@@ -652,26 +508,7 @@ let generate (indexator : Indexator) namespaceName =
 
     let generateItemGroup() =
         let fileName = folder + "ItemsGroup.target"
-        let text = printItemsGroup <| List.rev (baseClass + csExtension :: !nameOfClasses) <| namespaceName
+        let text = printItemsGroup <| List.rev (baseClass + csExtension :: !nameOfClasses)
         generateFile fileName text
     
     generateItemGroup()
-
-let printHotspotFile() = 
-    
-    let printer = new FormatPrinter()
-
-    printer.PrintBrInd 0 "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
-    printer.PrintBrInd 0 "<Body>"
-    printer.PrintBrInd 0 "<!-- enter name of language. For example, TSQL-->"
-    printer.PrintBrInd 1 "<Language name=\"\">"
-    printer.PrintBrInd 2 "<Hotspot>"
-    printer.PrintBrInd 2 "<!-- Format: \"<Class>.<Method>\". For example, \"Program.Eval\" -->"
-    printer.PrintBrInd 3 "<Fullname></Fullname>"
-    printer.PrintBrInd 3 "<!-- If you call Program.Eval(query, parameters) where variable parameters is parameters of connection, then value ArgumentPosition is 0 (zero-based)-->"
-    printer.PrintBrInd 3 "<ArgumentPosition> 0 </ArgumentPosition>"
-    printer.PrintBrInd 3 "type of result of query: int, string, void etc"
-    printer.PrintBrInd 3 "<ReturnType></ReturnType>"
-    printer.PrintBrInd 2 "</Hotspot>"
-    printer.PrintBrInd 1 "</Language>"
-    printer.GetString()

@@ -104,11 +104,6 @@ namespace ReSharperExtension.YcIntegration
             return GetProcessor(lang).TokenNames;
         }
 
-        public string GetXmlPath(string lang)
-        {
-            return GetProcessor(lang).XmlPath;
-        }
-
         public ProcessErrors Process(IFile file)
         {
             var lexerErrors = new List<ErrorInfo>();

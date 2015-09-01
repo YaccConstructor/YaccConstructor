@@ -60,7 +60,6 @@ type CalcInjectedLanguageModule() =
     let printAstToDot ast name = defaultAstToDot ast name
     
     let langName = "calc"
-    let xmlPath = xmlPath
     let tokenNames = Seq.ofList <| getLiteralNames @ getTerminalNames
         
     let tokenToTreeNode = tokenToTreeNode
@@ -79,7 +78,6 @@ type CalcInjectedLanguageModule() =
         member this.Process graphs = processor.Process graphs
         member this.LexingFinished = processor.LexingFinished
         member this.ParsingFinished = processor.ParsingFinished
-        member this.XmlPath = xmlPath
         member this.TokenNames = tokenNames
         member this.GetNextTree i = processor.GetNextTree i
         member this.GetForestWithToken range = processor.GetForestWithToken range

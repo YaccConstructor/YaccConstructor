@@ -1,4 +1,4 @@
-﻿//This module prints the information that is needed for highlighting
+﻿//This module prints the information needed for highlighting
 
 module PrintTreeNode
 
@@ -15,12 +15,12 @@ type TokenKind =
 
 type TokenInfo = 
     {
-        _namespace : string
-        _name : string
-        _lang : string
-        _type : TokenKind
-        _baseClass : string
-        _number : int
+        NamespaceName : string
+        TokenName : string
+        Language : string
+        TokenType : TokenKind
+        BaseClass : string
+        Number : int
     }
 
 type FormatPrinter() = 
@@ -31,10 +31,10 @@ type FormatPrinter() =
     member this.GetString() = strBuilder.ToString()
         
     member this.Print x = 
-        Printf.kprintf (fun s -> strBuilder.Append s |> ignore) x
+        Printf.kprintf (strBuilder.Append >> ignore) x
 
     member this.PrintBr (x : 'a) =
-        Printf.kprintf (fun s -> strBuilder.Append(s).Append(System.Environment.NewLine) |> ignore) x
+        Printf.kprintf (fun s -> strBuilder.Append(s).Append(Environment.NewLine) |> ignore) x
 
     member this.PrintBrInd num (x : 'a) =
         this.Print "%s" (String.replicate (num <<< 2) " ")
@@ -49,7 +49,7 @@ let csExtension = ".cs"
 let xmlExtension = ".xml"
 let zoneMarker = "ZoneMarker"
 
-let generateFile path text = 
+let private generateFile path text = 
     use out = new StreamWriter(path : string)
     out.WriteLine(text : string)
     out.Close()
@@ -69,8 +69,8 @@ let getSuffix tokenKind =
     | Literal -> literalSuffix
     | NonTerminal -> nonTermSuffix
 
-//Print ITreeNode implementation
-let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : string) = 
+//generates ITreeNode implementation
+let private generateBaseClass fileName nameOfNamespace nameOfClass lang = 
     
     let printer = new FormatPrinter()
 
@@ -305,7 +305,7 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
     printer.PrintBr ""
     printer.PrintBrInd 3 "UserData.PutData(Constants.YcTokenName, ycTokName);"
     printer.PrintBrInd 3 "UserData.PutData(Constants.YcTokNumber, ycTokNumber.ToString());"
-    printer.PrintBrInd 3 "UserData.PutData(Constants.YcLanguage, \"%s\");" <| lang.ToLowerInvariant()
+    printer.PrintBrInd 3 "UserData.PutData(Constants.YcLanguage, \"%s\");" lang
     printer.PrintBrInd 2 "}"
     
     printer.PrintBr ""
@@ -327,9 +327,11 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
 
     printer.PrintBrInd 1 "}"
     printer.PrintBrInd 0 "}"
-    printer.GetString()
+    let text = printer.GetString()
 
-let printTreeNode (tokenInfo : TokenInfo) = 
+    generateFile fileName text
+
+let private printTreeNode (tokenInfo : TokenInfo) = 
     let printer = new FormatPrinter()
 
     printer.PrintBrInd 0 "using System.Collections.Generic;"
@@ -337,26 +339,26 @@ let printTreeNode (tokenInfo : TokenInfo) =
     printer.PrintBrInd 0 "using ReSharperExtension.YcIntegration;"
     printer.PrintBrInd 0 ""
 
-    printer.PrintBrInd 0 "namespace %s" tokenInfo._namespace
+    printer.PrintBrInd 0 "namespace %s" tokenInfo.NamespaceName
     printer.PrintBrInd 0 "{"
 
     let className = 
-        let suffix = getSuffix tokenInfo._type
-        toClassName tokenInfo._name + suffix
+        let suffix = getSuffix tokenInfo.TokenType
+        toClassName tokenInfo.TokenName + suffix
 
-    printer.PrintBrInd 1 "public class %s : %s" className tokenInfo._baseClass
+    printer.PrintBrInd 1 "public class %s : %s" className tokenInfo.BaseClass
     printer.PrintBrInd 1 "{"
 
-    printer.PrintBrInd 2 "private static string ycTokName = \"%s\";" <| tokenInfo._name.ToLowerInvariant()
-    printer.PrintBrInd 2 "private static int ycTokNumber = %d;" <| tokenInfo._number
+    printer.PrintBrInd 2 "private static string ycTokName = \"%s\";" <| tokenInfo.TokenName.ToLowerInvariant()
+    printer.PrintBrInd 2 "private static int ycTokNumber = %d;" <| tokenInfo.Number
     printer.PrintBr ""
     printer.PrintBrInd 2 "public %s (IEnumerable<DocumentRange> positions)" className
     printer.PrintBrInd 3 ": base(ycTokName, ycTokNumber, positions)"
     printer.PrintBrInd 2 "{"
 
-    match tokenInfo._type with
+    match tokenInfo.TokenType with
     | Literal 
-    | Terminal -> printer.PrintBrInd 3 "YcHelper.AddYcItem(ycTokName, ycTokNumber, \"%s\");" <| tokenInfo._lang.ToLowerInvariant()
+    | Terminal -> printer.PrintBrInd 3 "YcHelper.AddYcItem(ycTokName, ycTokNumber, \"%s\");" <| tokenInfo.Language.ToLowerInvariant()
     | _ -> ()
     printer.PrintBrInd 2 "}"
 
@@ -369,12 +371,12 @@ let printTreeNode (tokenInfo : TokenInfo) =
     printer.PrintBrInd 0 "}"
     printer.GetString()
 
-let generateTreeNodeFile folder tokenInfo = 
+let private generateTreeNodeFile folder tokenInfo = 
     let className = 
-        let suffix = getSuffix tokenInfo._type
-        toClassName <| tokenInfo._name + suffix
+        let suffix = getSuffix tokenInfo.TokenType
+        toClassName <| tokenInfo.TokenName + suffix
 
-    let path = folder + className + csExtension
+    let path = sprintf "%s%s%s" folder className csExtension
     let text = printTreeNode tokenInfo
     generateFile path text
 
@@ -388,81 +390,85 @@ let printTokenToTreeNode (indexator : Indexator) =
     printer.PrintBrInd 1 "match token with"
             
     for i = indexator.termsStart to indexator.termsEnd do
-        let termNode = toClassName <| indexator.indexToTerm i
+        let termNode = i |> (indexator.indexToTerm >> toClassName)
         printer.PrintBrInd 1 "| %s data -> " termNode
         printer.PrintBrInd 2 "let ranges = calculatePos data"
         printer.PrintBrInd 2 "new %s%s(ranges) :> ITreeNode" termNode termSuffix
 
     for i = indexator.literalsStart to indexator.literalsEnd do
-        let litNode = toClassName <| indexator.indexToLiteral i
+        let litNode = i |> (indexator.indexToLiteral >> toClassName)
         printer.PrintBrInd 1 "| L_%s data -> " <| indexator.indexToLiteral i
         printer.PrintBrInd 2 "let ranges = calculatePos data"
         printer.PrintBrInd 2 "new %s%s(ranges) :> ITreeNode" litNode literalSuffix
 
     printer.GetString()
 
-let printZoneMarkerText _namespace = 
+let private generateZoneMarkerFile fullPath namespaceName = 
+    let printZoneMarkerText namespaceName = 
     
-    let printer = new FormatPrinter()
+        let printer = new FormatPrinter()
 
-    printer.PrintBr "using JetBrains.Application.BuildScript.Application.Zones;"
-    printer.PrintBr ""
+        printer.PrintBr "using JetBrains.Application.BuildScript.Application.Zones;"
+        printer.PrintBr ""
 
-    printer.PrintBr "namespace %s" _namespace
-    printer.PrintBr "{"
-    printer.PrintBrInd 1 "[ZoneMarker]"
-    printer.PrintBrInd 1 "public class %s" zoneMarker
-    printer.PrintBrInd 1 "{"
-    printer.PrintBrInd 1 "}"
-    printer.PrintBr "}"
+        printer.PrintBr "namespace %s" namespaceName
+        printer.PrintBr "{"
+        printer.PrintBrInd 1 "[ZoneMarker]"
+        printer.PrintBrInd 1 "public class %s" zoneMarker
+        printer.PrintBrInd 1 "{"
+        printer.PrintBrInd 1 "}"
+        printer.PrintBr "}"
 
-    printer.GetString()
-
-let printItemsGroup nameOfClasses = 
-
-    let printer = new FormatPrinter()
+        printer.GetString()
     
-    printer.PrintBrInd 0 "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
-    printer.PrintBrInd 0 "<!-- Generate file must be include in .csproj with help follow strings "
-    printer.PrintBrInd 0 "<Import Project=\"ItemsGroup.target\" />"
-    printer.PrintBrInd 0 "<ItemGroup> <Compile Include=\"@(ExternalCompile)\" /></ItemGroup> -->"
-    printer.PrintBrInd 1 "<Project ToolsVersion=\"4.0\" DefaultTargets=\"Build\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">"
-    printer.PrintBrInd 1 "<ItemGroup>" 
-    printer.PrintBrInd 2 "<ExternalCompile Include=\"Properties\AssemblyInfo.cs\" />"
-    for className in nameOfClasses do
-        printer.PrintBrInd 2 "<ExternalCompile Include=\"%s\" />" className
+    let text = printZoneMarkerText namespaceName
+    generateFile fullPath text
 
-    printer.PrintBrInd 1 "</ItemGroup>"
-    printer.PrintBrInd 1 "</Project>"
-    printer.GetString()
+let private generateItemGroup fileName nameOfClasses =
+    let printItemsGroup nameOfClasses = 
+
+        let printer = new FormatPrinter()
+    
+        printer.PrintBrInd 0 "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+        printer.PrintBrInd 0 "<!-- Generate file must be include in .csproj with help follow strings "
+        printer.PrintBrInd 0 "<Import Project=\"ItemsGroup.target\" />"
+        printer.PrintBrInd 0 "<ItemGroup> <Compile Include=\"@(ExternalCompile)\" /></ItemGroup> -->"
+        printer.PrintBrInd 1 "<Project ToolsVersion=\"4.0\" DefaultTargets=\"Build\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">"
+        printer.PrintBrInd 1 "<ItemGroup>" 
+        printer.PrintBrInd 2 "<ExternalCompile Include=\"Properties\AssemblyInfo.cs\" />"
+        for className in nameOfClasses do
+            printer.PrintBrInd 2 "<ExternalCompile Include=\"%s\" />" className
+
+        printer.PrintBrInd 1 "</ItemGroup>"
+        printer.PrintBrInd 1 "</Project>"
+        printer.GetString()
+
+    let text = printItemsGroup nameOfClasses
+    generateFile fileName text
 
 let generate (indexator : Indexator) namespaceName = 
     let folder = Path.GetFullPath namespaceName + "\\"
-    let langName = namespaceName.Replace ("Highlighting", "")
-    let baseClass = langName + baseClassSuffix
+    let langName = (namespaceName.Replace ("Highlighting", "")).ToLowerInvariant()
+    let baseClass = sprintf "%s%s" langName baseClassSuffix
 
-    let generateXML() = 
-        let fileName = folder + baseClass + csExtension
-        let text = printBaseTreeNode namespaceName baseClass langName 
-        generateFile fileName text
-    
-    generateXML()
+    let fileName = sprintf "%s%s%s" folder baseClass csExtension
+    generateBaseClass fileName namespaceName baseClass langName 
 
     let nameOfClasses = ref [zoneMarker + csExtension]
                 
     for i = 0 to indexator.nonTermCount - 1 do
-        let name = toClassName <| indexator.indexToNonTerm i
+        let name = i |> (indexator.indexToNonTerm >> toClassName)
         if not <| name.Contains ("Highlight_")
         then 
-            nameOfClasses := name + nonTermSuffix + csExtension :: !nameOfClasses
-            let info : TokenInfo =  
+            nameOfClasses := (sprintf "%s%s%s" name nonTermSuffix csExtension) :: !nameOfClasses
+            let info : TokenInfo =
                 {
-                    _baseClass = baseClass
-                    _namespace = namespaceName
-                    _name = name
-                    _type = TokenKind.NonTerminal
-                    _number = i
-                    _lang = langName
+                    BaseClass = baseClass
+                    NamespaceName = namespaceName
+                    TokenName = name
+                    TokenType = TokenKind.NonTerminal
+                    Number = i
+                    Language = langName
                 }
 
             generateTreeNodeFile folder info
@@ -470,45 +476,38 @@ let generate (indexator : Indexator) namespaceName =
     for i = indexator.termsStart to indexator.termsEnd do
         let name = indexator.indexToTerm i
                     
-        nameOfClasses := name + termSuffix + csExtension :: !nameOfClasses
-        let info : TokenInfo =  
+        nameOfClasses := (sprintf "%s%s%s" name termSuffix csExtension) :: !nameOfClasses
+        let info : TokenInfo =
             {
-                _baseClass = baseClass
-                _namespace = namespaceName
-                _name = name
-                _type = TokenKind.Terminal
-                _number = i
-                _lang = langName
+                BaseClass = baseClass
+                NamespaceName = namespaceName
+                TokenName = name
+                TokenType = TokenKind.Terminal
+                Number = i
+                Language = langName
             }
 
         generateTreeNodeFile folder info
                 
     for i = indexator.literalsStart to indexator.literalsEnd do
-        let name = toClassName <| indexator.getLiteralName i
+        let name = i |> (indexator.getLiteralName >> toClassName)
                     
-        nameOfClasses := name + literalSuffix + csExtension :: !nameOfClasses
-        let info : TokenInfo =  
+        nameOfClasses := (sprintf "%s%s%s" name literalSuffix csExtension) :: !nameOfClasses
+        let info : TokenInfo =
             {
-                _baseClass = baseClass
-                _namespace = namespaceName
-                _name = name
-                _type = TokenKind.Literal
-                _number = i
-                _lang = langName
+                BaseClass = baseClass
+                NamespaceName = namespaceName
+                TokenName = name
+                TokenType = TokenKind.Literal
+                Number = i
+                Language = langName
             }
-
         generateTreeNodeFile folder info
     
-    let generateZoneMarkerFile = 
-        let path = folder + zoneMarker + csExtension 
-        let text = printZoneMarkerText namespaceName
-        generateFile path text
+    let path = sprintf "%s%s%s" folder zoneMarker csExtension
+    generateZoneMarkerFile path namespaceName
 
     nameOfClasses := !nameOfClasses |> List.rev
 
-    let generateItemGroup() =
-        let fileName = folder + "ItemsGroup.target"
-        let text = printItemsGroup <| List.rev (baseClass + csExtension :: !nameOfClasses)
-        generateFile fileName text
-    
-    generateItemGroup()
+    let fileName = folder + "ItemsGroup.target"
+    generateItemGroup fileName <| baseClass + csExtension :: !nameOfClasses

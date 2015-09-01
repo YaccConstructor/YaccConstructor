@@ -95,7 +95,7 @@ type RNGLR() =
                         match value with
                         | "LALR" -> LALR
                         | "LR" -> LR
-                        | x -> failwith "Unexpected table type %s" x
+                        | x -> failwithf "Unexpected table type %s" x
                 | "-caseSensitive" -> caseSensitive <- getBoolValue "caseSensitive" value
                 | "-fullpath" -> fullPath <- getBoolValue "fullPath" value
                 | "-translate" -> needTranslate := getBoolValue "translate" value
@@ -220,13 +220,8 @@ type RNGLR() =
                 if not !needTranslate || targetLanguage = Scala 
                 then tables
                 else 
-                    let xmlOpt = 
-                        if !needHighlighting && !namespaceName <> "" 
-                        then Some <| !namespaceName
-                        else None
-                                
                     tables + printTranslator grammar newDefinition.grammar.[0].rules 
-                                    positionType fullPath output dummyPos caseSensitive xmlOpt !isAbstractParsingMode
+                                    positionType fullPath output dummyPos caseSensitive !isAbstractParsingMode !needHighlighting
 
             let res = 
                 match definition.foot with

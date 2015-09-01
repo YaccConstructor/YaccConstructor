@@ -64,7 +64,6 @@ type ExtCalcInjectedLanguageModule() =
         otherAst.ToDot numToString tokenToNumber leftSide name
     
     let langName = "extcalc"
-    let xmlPath = xmlPath
     let tokenNames = Seq.ofList <| getLiteralNames @ getTerminalNames
     let tokenToTreeNode = tokenToTreeNode
     let translate ast errors = translate args ast errors
@@ -103,7 +102,6 @@ type ExtCalcInjectedLanguageModule() =
         member this.Process graphs = processor.Process graphs
         member this.LexingFinished = processor.LexingFinished
         member this.ParsingFinished = processor.ParsingFinished
-        member this.XmlPath = xmlPath
         member this.TokenNames = tokenNames
         member this.GetNextTree i = processor.GetNextTree i
         member this.GetForestWithToken range = processor.GetForestWithToken range

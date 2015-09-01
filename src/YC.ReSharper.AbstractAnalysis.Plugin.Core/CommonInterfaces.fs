@@ -46,7 +46,6 @@ type IInjectedLanguageModule<'br, 'range, 'node when 'br : equality> =
      abstract Name: string
      abstract LexingFinished: IEvent<LexingFinishedArgs<'node>>
      abstract ParsingFinished: IEvent<ParsingFinishedArgs>
-     abstract XmlPath: string
      abstract TokenNames : seq<string>
      abstract GetNextTree: int -> 'node * bool
      abstract GetForestWithToken: 'range -> ResizeArray<'node>

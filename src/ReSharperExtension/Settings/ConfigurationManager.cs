@@ -45,7 +45,7 @@ namespace ReSharperExtension.Settings
             FileStream fs = new FileStream(hotspotFullName, FileMode.CreateNew);
             XmlSerializer s = new XmlSerializer(typeof(ObservableCollection<HotspotModelView>));
 
-            var collection = new List<HotspotModelView>(hotspots);
+            var collection = new ObservableCollection<HotspotModelView>(hotspots);
             s.Serialize(fs, collection);
         }
 
@@ -56,16 +56,15 @@ namespace ReSharperExtension.Settings
             string hotspotFullName = Path.Combine(ycPath, hotspotFile);
 
             if (!File.Exists(hotspotFullName))
-            {
-                return new ObservableCollection<HotspotModelView>(defaultHotspot);
-            }
+                return new ObservableCollection<HotspotModelView>();
 
-            var xmlSerializer = new XmlSerializer(typeof(ObservableCollection<>));
-            
-            var stringReader = new StreamReader(hotspotFullName);
-            ObservableCollection<HotspotModelView> collection = (ObservableCollection<HotspotModelView>)xmlSerializer.Deserialize(stringReader);
-            stringReader.Close();
-            
+            var xmlSerializer = new XmlSerializer(typeof(ObservableCollection<HotspotModelView>));
+
+            ObservableCollection<HotspotModelView> collection;
+            using (var stringReader = new StreamReader(hotspotFullName))
+            {
+                collection = (ObservableCollection<HotspotModelView>)xmlSerializer.Deserialize(stringReader);
+            }
             return collection;
         }
 
@@ -135,9 +134,6 @@ namespace ReSharperExtension.Settings
                     };
                     settings.TokensInfo.Add(tokenModel);
                 }
-                var hotspot = GetDefaultHotspot(lang);
-                if (hotspot != null)
-                    settings.Hotspots.Add(hotspot);
             }
 
             LoadToSettings[lang] = settings;

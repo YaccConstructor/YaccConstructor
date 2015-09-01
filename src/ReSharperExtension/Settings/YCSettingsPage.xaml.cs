@@ -89,6 +89,7 @@ namespace ReSharperExtension.Settings
             {
                 hotspots.AddRange(settings.Hotspots);
             }
+            ConfigurationManager.SaveHotspotData(hotspots);
             Handler.UpdateHotspots(hotspots);
         }
 

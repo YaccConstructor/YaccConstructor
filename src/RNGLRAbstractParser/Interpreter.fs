@@ -162,7 +162,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         let curNum = ref 0
         print "rankdir=RL"
         let getAstString astInd =
-            if astInd > 0 
+            if astInd >= 0 
             then
                 match nodes.[astInd] with
                 | :? Terminal as i -> tokens.[i.TokenNumber] |> tokenToNumber |> numToString |> sprintf "%s"    

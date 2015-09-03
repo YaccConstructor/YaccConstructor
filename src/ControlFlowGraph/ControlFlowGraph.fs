@@ -28,7 +28,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
     let intToToken = fun i -> tree.Tokens.[i]
 
     let isNotEq token = 
-        let eqNumber = langSource.KeywordToInt.[EQ]
+        let eqNumber = langSource.KeywordToInt.[Keyword.EQ]
         parserSource.TokenToNumber token <> eqNumber
 
     let isVariable = 

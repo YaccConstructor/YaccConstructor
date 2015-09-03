@@ -1,5 +1,6 @@
 ﻿module ControlFlowGraph.Common
 
+[<RequireQualifiedAccess>]
 type Keyword = 
     | IF
     | THEN 

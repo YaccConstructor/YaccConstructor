@@ -46,7 +46,7 @@ type ``Control Flow Graph building: Simple cases``() =
 
     let nodeToType = dict ["assign", Assignment;]
         
-    let keywordToInt = dict [SEMICOLON, semicolonNumber;]
+    let keywordToInt = dict [Keyword.SEMICOLON, semicolonNumber;]
 
     let tokToRealString tok = tok |> tokenToNumber |> indToString
     let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
@@ -206,7 +206,7 @@ type ``Control Flow Graph building: Cycles``() =
     let bNumber = tokenToNumber <| RNGLR.ParseSimple.B 0
     let cNumber = tokenToNumber <| RNGLR.ParseSimple.C 0
         
-    let keywordToInt = dict [SEMICOLON, semicolonNumber;]
+    let keywordToInt = dict [Keyword.SEMICOLON, semicolonNumber;]
 
     let tokToRealString tok = tok |> tokenToNumber |> indToString
     let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
@@ -662,11 +662,11 @@ type ``Control Flow Graph building: If statements`` () =
     let tokToRealString tok = tok |> tokenToNumber |> indToString
 
     let keywordToInt = dict [
-                                    SEMICOLON, semicolonNumber;
-                                    IF, ifNumber;
-                                    THEN, thenNumber;
-                                    ELSE, elseNumber;
-                                    ENDIF, endIfNumber; 
+                                    Keyword.SEMICOLON, semicolonNumber;
+                                    Keyword.IF, ifNumber;
+                                    Keyword.THEN, thenNumber;
+                                    Keyword.ELSE, elseNumber;
+                                    Keyword.ENDIF, endIfNumber; 
                             ]
 
     let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
@@ -835,8 +835,8 @@ type ``Find undefined variables`` () =
     let nodeToType = dict["assign", Assignment;]
         
     let keywordToInt = dict [
-                                SEMICOLON, semicolonNumber;
-                                EQ, eqNumber;
+                                Keyword.SEMICOLON, semicolonNumber;
+                                Keyword.EQ, eqNumber;
                             ]
         
     let varsNumbers = 

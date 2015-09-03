@@ -47,11 +47,14 @@ type LanguageSource =
     ///int -> statement type
     member this.GetTempIfDict() = 
         let dict = new Dictionary<_, _>()
-        if this.KeywordToInt.ContainsKey IF
-        then dict.[this.KeywordToInt.[IF]] <- IfStatement
-        if this.KeywordToInt.ContainsKey THEN
-        then dict.[this.KeywordToInt.[THEN]] <- ThenStatement
-        if this.KeywordToInt.ContainsKey ELSE
-        then dict.[this.KeywordToInt.[ELSE]] <- ElseStatement
+        
+        if this.KeywordToInt.ContainsKey Keyword.IF
+        then dict.[this.KeywordToInt.[Keyword.IF]] <- IfStatement
+        
+        if this.KeywordToInt.ContainsKey Keyword.THEN
+        then dict.[this.KeywordToInt.[Keyword.THEN]] <- ThenStatement
+        
+        if this.KeywordToInt.ContainsKey Keyword.ELSE
+        then dict.[this.KeywordToInt.[Keyword.ELSE]] <- ElseStatement
 
         dict

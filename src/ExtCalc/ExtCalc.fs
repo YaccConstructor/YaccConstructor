@@ -77,7 +77,10 @@ type ExtCalcInjectedLanguageModule() =
             n = num2
 
     let nodeToType = dict["assign", Assignment;]
-    let keywordToInt = dict [SEMICOLON, semicolonNumber; ]
+    let keywordToInt = dict [
+                                Keyword.SEMICOLON, semicolonNumber; 
+                                Keyword.EQ, eqNumber;
+                            ]
     let langSource = new LanguageSource(nodeToType, keywordToInt, isVariable)
 
     let tokToSourceString token = 

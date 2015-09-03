@@ -143,12 +143,18 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
 
                     if semantic.IsSome 
                     then
-                        //sometimes it needs for debugging purposes
-                        //printAst tree "result ast.dot"
+                        #if DEBUG
+                            //sometimes it needs for debugging purposes
+                            printAst tree "result ast.dot"
+                        #endif
+                        
                         let pSource, lSource, tokToSourceString = semantic.Value
                         let cfg = new ControlFlow<'TokenType>(tree, pSource, lSource, tokToSourceString)
-                        //sometimes it needs for debugging purposes
-                        //cfg.PrintToDot "result cfg.dot"
+                        
+                        #if DEBUG
+                            //sometimes it needs for debugging purposes
+                            cfg.PrintToDot "result cfg.dot"
+                        #endif
                         let semErrors = cfg.FindUndefVariable()
                         semErrors |> List.iter (fun err -> addSError err "Undefined variable")
                     

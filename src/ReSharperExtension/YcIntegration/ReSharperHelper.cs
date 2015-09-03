@@ -72,7 +72,7 @@ namespace ReSharperExtension.YcIntegration
                     parserEvents = new List<YcParseEvent>();
 
                     foreach (IReSharperLanguage processor in GetAllProcessors())
-                    {                        
+                    {
                         parserEvents.Add(processor.ParsingFinished);
                     }
                 }

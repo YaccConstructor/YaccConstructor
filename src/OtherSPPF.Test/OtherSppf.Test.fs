@@ -35,7 +35,7 @@ type ``AST to otherSPPF translation test`` () =
                 createEdge 1 2 (RNGLR.ParseElementary.B 1)
                 createEdge 2 3 (RNGLR.ParseElementary.C 2)
                 createEdge 3 4 (RNGLR.ParseElementary.D 3)
-                createEdge 4 5 (RNGLR.ParseElementary.RNGLR_EOF 3)
+                createEdge 4 5 (RNGLR.ParseElementary.RNGLR_EOF 4)
              ] |> ignore
 
         let parseResult = (new Parser<_>()).Parse  RNGLR.ParseElementary.buildAstAbstract qGraph
@@ -196,7 +196,6 @@ type ``Classic case: matching brackets``() =
         let tokenName = RNGLR.ParseSummator.numToString <| tokToNumber token
         Assert.Fail <| sprintf "%s is found" tokenName
         -1
-
 
     let printToDot (otherTree : OtherTree<_>) name = 
         let indToString = RNGLR.ParseSummator.numToString

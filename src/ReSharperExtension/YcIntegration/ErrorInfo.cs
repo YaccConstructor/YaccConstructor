@@ -22,5 +22,14 @@ namespace ReSharperExtension.YcIntegration
             ParserErrors = parserErrors;
             SemanticErrors = semanticErrors;
         }
+
+        public List<ErrorInfo> GetAllErrors()
+        {
+            var result = new List<ErrorInfo>();
+            result.AddRange(LexerErrors);
+            result.AddRange(ParserErrors);
+            result.AddRange(SemanticErrors);
+            return result;
+        }
     }
 }

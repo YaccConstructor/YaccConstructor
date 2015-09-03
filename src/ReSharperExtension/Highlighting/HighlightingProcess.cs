@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using JetBrains.Application.Settings;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
@@ -36,8 +36,8 @@ namespace ReSharperExtension.Highlighting
             Handler.Process = this;
 
             ExistingTreeNodes.ClearExistingTree(DaemonProcess.Document);
-            var errors = YcProcessor.Process(File);
-            OnErrors(errors);
+            ProcessErrors errors = YcProcessor.Process(File);
+            HighlightErrors(errors);
             // remove all old highlightings
             //if (DaemonProcess.FullRehighlightingRequired)
             //myCommiter(new DaemonStageResult(EmptyArray<HighlightingInfo>.Instance));
@@ -65,35 +65,15 @@ namespace ReSharperExtension.Highlighting
             myCommiter(result);
         }
 
-        private void OnErrors(ProcessErrors errors)
+        private void HighlightErrors(ProcessErrors errors)
         {
-            var highlightings = new List<HighlightingInfo>();
+            List<ErrorInfo> allErrors = errors.GetAllErrors();
 
-            List<ErrorInfo> parserErrors = errors.ParserErrors;
-            foreach (ErrorInfo error in parserErrors)
-            {
-                var newHighlighting = 
-                    new HighlightingInfo(error.Range, new ErrorWarning(error.Range, String.Format("Syntax error. Unexpected token {0}", error.Message)));
-                highlightings.Add(newHighlighting);
-            }
+            Func<ErrorInfo, HighlightingInfo> toHighlightingInfoFunc =
+                error => new HighlightingInfo(error.Range, new ErrorWarning(error.Range, error.Message));
 
-            List<ErrorInfo> lexerErrors = errors.LexerErrors;
-            foreach (ErrorInfo error in lexerErrors)
-            {
-                var newHighlighting = 
-                    new HighlightingInfo(error.Range, new ErrorWarning(error.Range, String.Format("Unexpected symbol: {0} .", error.Message)));
-                highlightings.Add(newHighlighting);
-            }
+            List<HighlightingInfo> highlightings = allErrors.Select(toHighlightingInfoFunc).ToList();
 
-            List<ErrorInfo> semanticErrors = errors.SemanticErrors;
-            foreach (ErrorInfo error in semanticErrors)
-            {
-                var newHighlighting =
-                    new HighlightingInfo(error.Range, new ErrorWarning(error.Range, error.Message));
-                highlightings.Add(newHighlighting);
-            }
-
-            
             //var highlightings = (from e in errors.Item2 select new HighlightingInfo(e.Item2, new ErrorWarning())).Concat(
             //                    from e in errors.Item1 select new HighlightingInfo(e.Item2, new ErrorWarning("Unexpected symbol: " + e.Item1 + ".")));
             DoHighlighting(new DaemonStageResult(highlightings));

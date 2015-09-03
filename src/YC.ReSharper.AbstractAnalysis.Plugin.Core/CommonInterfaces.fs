@@ -15,6 +15,10 @@ open YC.FST.GraphBasedFst
 open YC.FSA.FsaApproximation
 open YC.FSA.GraphBasedFsa
 
+let lexerErrMsg = "Unexpected symbol: "
+let parserErrMsg = "Syntax error. Unexpected token "
+let undefinedVariableErrMsg = "undefined variable"
+
 type DrawingGraph (vertices : IEnumerable<int>, edges : ResizeArray<TaggedEdge<int, string>>) =
     member this.Vertices = vertices
     member this.Edges = edges
@@ -113,7 +117,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
                 |> Array.map 
                     (
                         function 
-                            Smbl e -> fst e |> string, snd e |> getDocumentRange 
+                            Smbl e -> (sprintf "%s%c" lexerErrMsg <| fst e), snd e |> getDocumentRange 
                             | e -> failwithf "Unexpected tokenization result: %A" e
                     )
                 |> Array.iter addLError 
@@ -156,12 +160,12 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
                             cfg.PrintToDot "result cfg.dot"
                         #endif
                         let semErrors = cfg.FindUndefVariable()
-                        semErrors |> List.iter (fun err -> addSError err "Undefined variable")
+                        semErrors |> List.iter (fun error -> addSError undefinedVariableErrMsg error)
                     
 
-                | Yard.Generators.ARNGLR.Parser.Error(_, tok, _) -> 
-                    if tok <> Unchecked.defaultof<'TokenType>
-                    then tok |> addPError 
+                | Yard.Generators.ARNGLR.Parser.Error(_, token, _) -> 
+                    if token <> Unchecked.defaultof<'TokenType>
+                    then token |> addPError 
             )
 
     let getNextTree index = 
@@ -172,8 +176,8 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
             let mutable curSppf, errors = List.nth forest index
             let unprocessed = 
                 match generationState with
-                | Start ->   List.init curSppf.TokensCount (fun i -> new Terminal(i))
-                | InProgress (_, unproc) -> unproc |> List.map (fun n -> n :?> Terminal) 
+                | Start -> List.init curSppf.TokensCount (fun i -> new Terminal(i))
+                | InProgress (_, unproc) -> unproc |> List.map(fun n -> n :?> Terminal) 
                 | _ -> failwith "Unexpected state in treeGeneration"
                 
             let nextTree, unproc = curSppf.GetNextTree unprocessed (fun _ -> true)
@@ -227,7 +231,6 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
         |> Seq.concat
         |> ResizeArray.ofSeq
 
-
     member this.TranslateToTreeNode nextTree errors = (Seq.head <| translate nextTree errors)
     
     member this.Process (graph : FSA<char * Position<'br>>) = 
@@ -235,23 +238,23 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
         let parserErrors = new ResizeArray<_>()
         let semanticErrors = new ResizeArray<_>()
 
-        let addPError tok =
-            let e tokName (tokenData: FSA<char*Position<'br>>) = 
-                tokenData 
-                |> calculatePos
-                |> Seq.iter
-                    ///TODO!!! Produce user friendly error message!
-                    (fun br -> parserErrors.Add <| ((sprintf "%s" tokName), br))
-            let name = tok |> (tokenToNumber >>  numToString)
-            let tokenData = tokenData tok :?> FSA<char*Position<'br>>
-            e name tokenData
-        
-        let addSError tok errorMsg = 
-            let name = tok |> (tokenToNumber >> numToString)
-            let data = tokenData tok :?> FSA<char * Position<'br>>
-            data 
+        let addParserError errorMsg br tokenName = 
+            parserErrors.Add <| (sprintf "%s" tokenName, br)
+
+        let addSemanticError errorMsg br tokenName  = 
+            semanticErrors.Add <| (sprintf "%s %s" errorMsg tokenName, br)
+
+        let addError updateFun message token = 
+            let tokenName = token |> (tokenToNumber >>  numToString)
+            let tokenData = tokenData token :?> FSA<char * Position<'br>>
+            tokenData 
             |> calculatePos
-            |> Seq.iter (fun br -> semanticErrors.Add <| ((sprintf "%s %s" errorMsg name), br))
+            |> Seq.iter
+                ///TODO!!! Produce user friendly error message!
+                (fun br -> updateFun message br tokenName)
+        
+        let addPError = addError addParserError parserErrMsg
+        let addSError = addError addSemanticError
         
         processLang graph lexerErrors.Add addPError addSError
 

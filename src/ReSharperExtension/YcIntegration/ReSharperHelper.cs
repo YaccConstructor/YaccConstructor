@@ -35,34 +35,28 @@ namespace ReSharperExtension.YcIntegration
             get
             {
                 if (instance == null)
-                {
                     instance = new ReSharperHelper<TRange, TNode>();
-                }
                 return instance;
             }
         }
 
         private List<YcLexEvent> lexerEvents;
-
         public List<YcLexEvent> LexingFinished
         {
             get
             {
                 if (lexerEvents == null)
                 {
-                    var processors = GetAllProcessors();
+                    IEnumerable<IReSharperLanguage> processors = GetAllProcessors();
                     lexerEvents = new List<YcLexEvent>();
                     foreach (IReSharperLanguage proc in processors)
-                    {
                         lexerEvents.Add(proc.LexingFinished);
-                    }
                 }
                 return lexerEvents;
             }
         }
 
         private List<YcParseEvent> parserEvents;
-
         public List<YcParseEvent> ParsingFinished
         {
             get
@@ -72,9 +66,7 @@ namespace ReSharperExtension.YcIntegration
                     parserEvents = new List<YcParseEvent>();
 
                     foreach (IReSharperLanguage processor in GetAllProcessors())
-                    {
                         parserEvents.Add(processor.ParsingFinished);
-                    }
                 }
                 return parserEvents;
             }
@@ -147,9 +139,7 @@ namespace ReSharperExtension.YcIntegration
 
             IReSharperLanguage res =  processors.Find(processor => processor.Name.ToLowerInvariant() == lang);
             if (res == null)
-                throw new Exception(
-                    String.Format("{0} language isn't found. Total loaded: {1}", lang, processors.Count)
-                    );
+                throw new Exception(String.Format("{0} language isn't found. Total loaded: {1}", lang, processors.Count));
 
             return res;
         }

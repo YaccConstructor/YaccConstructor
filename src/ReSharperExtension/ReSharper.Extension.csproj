@@ -215,7 +215,7 @@
     <Compile Include="Highlighting\HighlightingProcess.cs" />
     <Compile Include="Highlighting\HighlightingStage.cs" />
     <Compile Include="Highlighting\LanguageHelper.cs" />
-    <Compile Include="Highlighting\MyFileStructureExplorer.cs" />
+    <Compile Include="YCFileStructureExplorer.cs" />
     <Compile Include="Highlighting\TokenHighlighting.cs" />
     <Compile Include="Highlighting\TreeNodeProcessor.cs" />
     <Compile Include="IReSharperLanguage.cs" />

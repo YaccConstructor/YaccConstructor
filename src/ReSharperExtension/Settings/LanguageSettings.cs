@@ -44,7 +44,7 @@ namespace ReSharperExtension.Settings
                 string tokenName = tokenModel.TokenName.ToLowerInvariant();
                 tokenInfo.Color = tokenModel.ColorId;
 
-                var t = Pairs.FirstOrDefault(pair => pair.LeftTokenName.ToLowerInvariant() == tokenName 
+                PairedTokens t = Pairs.FirstOrDefault(pair => pair.LeftTokenName.ToLowerInvariant() == tokenName 
                                                     || pair.RightTokenName.ToLowerInvariant() == tokenName);
                 if (t != null)
                 {

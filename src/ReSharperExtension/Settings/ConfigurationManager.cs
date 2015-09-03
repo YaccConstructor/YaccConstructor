@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Xml.Serialization;
 using System.IO;
-
+using System.Linq;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Psi.Tree;
-
+using JetBrains.Util;
 using ReSharperExtension.YcIntegration;
 
 namespace ReSharperExtension.Settings
@@ -50,7 +50,7 @@ namespace ReSharperExtension.Settings
             s.Serialize(fs, collection);
         }
 
-        internal static ObservableCollection<HotspotModelView> LoadHotspotData()
+        internal static IEnumerable<HotspotModelView> LoadHotspotData()
         {
             string ycPath = GetYCFolderPath();
             string hotspotFullName = Path.Combine(ycPath, hotspotFile);
@@ -65,7 +65,18 @@ namespace ReSharperExtension.Settings
             {
                 collection = (ObservableCollection<HotspotModelView>)xmlSerializer.Deserialize(stringReader);
             }
-            return collection;
+
+            IEnumerable<string> availableLanguages = helper.GetAllLanguagesNames();
+
+            Func<string, bool> langExists = one =>
+            {
+                return availableLanguages.Any(
+                    langName => String.Equals(one, langName, StringComparison.InvariantCultureIgnoreCase));
+            };
+
+            IEnumerable<HotspotModelView> result = collection.Where(hotspotView => langExists(hotspotView.LanguageName));
+
+            return result;
         }
 
         internal static LanguageSettings LoadLangSettings(string lang)

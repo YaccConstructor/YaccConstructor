@@ -504,7 +504,9 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
             if !count <> 0 then
                 match parent.Parent with
                 | :? OtherAST as ast -> 
-                    ast.Parent.DoForAll(fun family -> contexts.Push <| new Context(family :?> OtherFamily, ast, !count))
+                    if ast.Parent <> Unchecked.defaultof<UsualOne<_>>
+                    then 
+                        ast.Parent.DoForAll(fun family -> contexts.Push <| new Context(family :?> OtherFamily, ast, !count))
                     
                 | x -> failwithf "Unexpected node: %s" <| x.GetType().ToString()
         res

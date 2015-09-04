@@ -14,10 +14,13 @@
 
 module Yard.Generators.RNGLR.Printer
 
-open Yard.Generators.Common.FinalGrammar
 open System.Collections.Generic
+
+open Yard.Generators.Common.FinalGrammar
 open Yard.Generators.RNGLR
 open Yard.Core.IL
+
+open HighlightingPrinter
 
 type TargetLanguage =
     | FSharp
@@ -236,14 +239,6 @@ let printTables
         print "]"
         printBr ""
 
-        if isHighlihgtingMode
-        then
-            printInd 0 "let getTerminalNames = ["
-            for i = indexator.termsStart to indexator.termsEnd do
-                print "\"%s\";" <| indexator.indexToTerm i
-            print "]"
-            printBr ""
-
         printBr "let mutable private cur = 0"
 
         print "let leftSide = "
@@ -304,6 +299,17 @@ let printTables
             printBrInd 1 "buildAst<Token> parserSource"
             printBr ""
 
+        if isHighlihgtingMode 
+        then 
+            printInd 0 "let getTerminalNames = ["
+            for i = indexator.termsStart to indexator.termsEnd do
+                print "\"%s\";" <| indexator.indexToTerm i
+            print "]"
+            printBr ""
+            printBr ""
+            printBr "%s" <| printTokenToTreeNode indexator
+            printBr ""
+            
         res.ToString()
 
     let printTablesToScala () =    

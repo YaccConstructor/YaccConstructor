@@ -51,8 +51,8 @@ type IInjectedLanguageModule<'br, 'range, 'node when 'br : equality> =
      abstract LexingFinished: IEvent<LexingFinishedArgs<'node>>
      abstract ParsingFinished: IEvent<ParsingFinishedArgs>
      abstract TokenNames : seq<string>
-     abstract GetNextTree: int -> 'node * bool
-     abstract GetForestWithToken: 'range -> ResizeArray<'node>
+     //abstract GetNextTree: int -> 'node * bool
+     //abstract GetForestWithToken: 'range -> ResizeArray<'node>
      abstract GetPairedRanges: int -> int -> 'range -> bool -> ResizeArray<'range>
      abstract Process
         : FSA<char * Position<'br>> -> 
@@ -168,7 +168,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
                     then token |> addPError 
             )
 
-    let getNextTree index = 
+    (*let getNextTree index = 
         if forest.Length <= index
         then
             generationState <- End(null)
@@ -189,7 +189,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
             else generationState <- InProgress(treeNode, unproc |> List.map (fun n -> n :> AstNode)) 
 
         generationState
-
+        
     let getForestWithToken range = 
 
         forest
@@ -210,13 +210,13 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
         | End (treeNode) -> 
             generationState <- Start
             treeNode, true
-        | _ -> failwith "Unexpected state in tree generation"
+        | _ -> failwith "Unexpected state in tree generation"*)
 
     member this.TokenToPos calculatePos (token : 'TokenType) = 
         let data (*: FSA<char*Position<'br>>*) = unbox <| tokenData token
         calculatePos data
 
-    member this.GetForestWithToken range = getForestWithToken range
+    //member this.GetForestWithToken range = getForestWithToken range
 
     member this.GetPairedRanges leftNumber rightNumber range toRight = 
         
@@ -231,7 +231,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
         |> Seq.concat
         |> ResizeArray.ofSeq
 
-    member this.TranslateToTreeNode nextTree errors = (Seq.head <| translate nextTree errors)
+    //member this.TranslateToTreeNode nextTree errors = (Seq.head <| translate nextTree errors)
     
     member this.Process (graph : FSA<char * Position<'br>>) = 
         let lexerErrors = new ResizeArray<_>()

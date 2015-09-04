@@ -66,7 +66,7 @@ type ExtCalcInjectedLanguageModule() =
     let langName = "extcalc"
     let tokenNames = Seq.ofList <| getLiteralNames @ getTerminalNames
     let tokenToTreeNode = tokenToTreeNode
-    let translate ast errors = translate args ast errors
+    let translate ast errors = null//translate args ast errors
 
     // variables for some semantic actions
     let semicolonNumber = tokenToNumber <| Token.SEMI (new FSA<_>())
@@ -106,8 +106,8 @@ type ExtCalcInjectedLanguageModule() =
         member this.LexingFinished = processor.LexingFinished
         member this.ParsingFinished = processor.ParsingFinished
         member this.TokenNames = tokenNames
-        member this.GetNextTree i = processor.GetNextTree i
-        member this.GetForestWithToken range = processor.GetForestWithToken range
+        //member this.GetNextTree i = processor.GetNextTree i
+        //member this.GetForestWithToken range = processor.GetForestWithToken range
         member this.GetPairedRanges left right range toRight = processor.GetPairedRanges left right range toRight
 
     interface IReSharperLanguage

@@ -16,10 +16,10 @@ namespace ReSharperExtension.Highlighting.Dynamic
 {
     public class BaseBraceHighlighter : MatchingBraceContextHighlighterBase
     {
-        protected IContextActionDataProvider myProvider;
+        private readonly IContextActionDataProvider myProvider;
         protected ITokenNodeType stringLiteral;
 
-        private ReSharperHelper<DocumentRange, ITreeNode> helper = ReSharperHelper<DocumentRange, ITreeNode>.Instance;
+        private readonly ReSharperHelper<DocumentRange, ITreeNode> helper = ReSharperHelper<DocumentRange, ITreeNode>.Instance;
 
         protected BaseBraceHighlighter(IContextActionDataProvider provider)
         {
@@ -39,7 +39,7 @@ namespace ReSharperExtension.Highlighting.Dynamic
             if (!IsStringLiteral(selectedToken))
                 return;
 
-            if (ExistingTreeNodes.ExistingTrees.Count == 0)
+            if (ExistingRanges.DocumentToRange.Count == 0)
                 return;
 
             DocumentRange lBraceRange = myProvider.DocumentCaret.ExtendRight(1);
@@ -50,7 +50,6 @@ namespace ReSharperExtension.Highlighting.Dynamic
                 return;
 
             string lBrother = node.UserData.GetData(Constants.YcTokenName);
-
             string rBrother = LanguageHelper.GetBrother(lang, lBrother, Brother.Right);
             if (String.IsNullOrEmpty(rBrother))
                 return;
@@ -73,7 +72,7 @@ namespace ReSharperExtension.Highlighting.Dynamic
             if (!IsStringLiteral(selectedToken))
                 return;
 
-            if (ExistingTreeNodes.ExistingTrees.Count == 0)
+            if (ExistingRanges.DocumentToRange.Count == 0)
                 return;
 
             DocumentRange rBraceRange = myProvider.DocumentCaret.ExtendLeft(1);
@@ -124,7 +123,7 @@ namespace ReSharperExtension.Highlighting.Dynamic
         {
             IDocument doc = needRange.Document;
 
-            var treeList = new List<ITreeNode>(ExistingTreeNodes.GetTreeNodes(doc));
+            var treeList = new List<ITreeNode>(ExistingRanges.GetTreeNodes(doc));
             foreach (ITreeNode tree in treeList)
             {
                 List<DocumentRange> treeRanges = tree.UserData.GetData(Constants.Ranges);

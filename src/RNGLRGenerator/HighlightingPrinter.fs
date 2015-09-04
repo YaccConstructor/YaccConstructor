@@ -1,6 +1,5 @@
 ﻿//This module prints the information needed for highlighting
-
-module PrintTreeNode
+module HighlightingPrinter
 
 open System
 open System.IO
@@ -28,7 +27,7 @@ type FormatPrinter() =
 
     do strBuilder <- new StringBuilder()
 
-    member this.GetString() = strBuilder.ToString()
+    override this.ToString() = strBuilder.ToString()
         
     member this.Print x = 
         Printf.kprintf (strBuilder.Append >> ignore) x
@@ -327,7 +326,7 @@ let private generateBaseClass fileName nameOfNamespace nameOfClass lang =
 
     printer.PrintBrInd 1 "}"
     printer.PrintBrInd 0 "}"
-    let text = printer.GetString()
+    let text = printer.ToString()
 
     generateFile fileName text
 
@@ -362,14 +361,19 @@ let private printTreeNode (tokenInfo : TokenInfo) =
     | _ -> ()
     printer.PrintBrInd 2 "}"
 
+    (*match tokenInfo.TokenType with
+    | NonTerminal -> 
+        printer.PrintBrInd 0 ""
+        printer.PrintBrInd 2 "public %s() : base(ycTokName, ycTokNumber)" className
+        printer.PrintBrInd 2 "{"
+        printer.PrintBrInd 2 "}"
+    | _ -> ()*)
+
     printer.PrintBrInd 0 ""
-    printer.PrintBrInd 2 "public %s() : base(ycTokName, ycTokNumber)" className
-    printer.PrintBrInd 2 "{"
-    printer.PrintBrInd 2 "}"
 
     printer.PrintBrInd 1 "}"
     printer.PrintBrInd 0 "}"
-    printer.GetString()
+    printer.ToString()
 
 let private generateTreeNodeFile folder tokenInfo = 
     let className = 
@@ -396,12 +400,12 @@ let printTokenToTreeNode (indexator : Indexator) =
         printer.PrintBrInd 2 "new %s%s(ranges) :> ITreeNode" termNode termSuffix
 
     for i = indexator.literalsStart to indexator.literalsEnd do
-        let litNode = i |> (indexator.indexToLiteral >> toClassName)
-        printer.PrintBrInd 1 "| L_%s data -> " <| indexator.indexToLiteral i
+        let litNode = i |> (indexator.getLiteralName >> toClassName)
+        printer.PrintBrInd 1 "| L_%s data -> " <| indexator.getLiteralName i
         printer.PrintBrInd 2 "let ranges = calculatePos data"
         printer.PrintBrInd 2 "new %s%s(ranges) :> ITreeNode" litNode literalSuffix
 
-    printer.GetString()
+    printer.ToString()
 
 let private generateZoneMarkerFile fullPath namespaceName = 
     let printZoneMarkerText namespaceName = 
@@ -419,7 +423,7 @@ let private generateZoneMarkerFile fullPath namespaceName =
         printer.PrintBrInd 1 "}"
         printer.PrintBr "}"
 
-        printer.GetString()
+        printer.ToString()
     
     let text = printZoneMarkerText namespaceName
     generateFile fullPath text
@@ -441,22 +445,22 @@ let private generateItemGroup fileName nameOfClasses =
 
         printer.PrintBrInd 1 "</ItemGroup>"
         printer.PrintBrInd 1 "</Project>"
-        printer.GetString()
+        printer.ToString()
 
     let text = printItemsGroup nameOfClasses
     generateFile fileName text
 
-let generate (indexator : Indexator) namespaceName = 
+let generateCsFiles (indexator : Indexator) namespaceName = 
     let folder = Path.GetFullPath namespaceName + "\\"
     let langName = (namespaceName.Replace ("Highlighting", "")).ToLowerInvariant()
-    let baseClass = sprintf "%s%s" langName baseClassSuffix
+    let baseClass = sprintf "%s%s" <| toClassName langName <| baseClassSuffix
 
     let fileName = sprintf "%s%s%s" folder baseClass csExtension
     generateBaseClass fileName namespaceName baseClass langName 
 
     let nameOfClasses = ref [zoneMarker + csExtension]
                 
-    for i = 0 to indexator.nonTermCount - 1 do
+    (*for i = 0 to indexator.nonTermCount - 1 do
         let name = i |> (indexator.indexToNonTerm >> toClassName)
         if not <| name.Contains ("Highlight_")
         then 
@@ -471,7 +475,7 @@ let generate (indexator : Indexator) namespaceName =
                     Language = langName
                 }
 
-            generateTreeNodeFile folder info
+            generateTreeNodeFile folder info*)
 
     for i = indexator.termsStart to indexator.termsEnd do
         let name = indexator.indexToTerm i

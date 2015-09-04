@@ -63,7 +63,7 @@ type CalcInjectedLanguageModule() =
     let tokenNames = Seq.ofList <| getLiteralNames @ getTerminalNames
         
     let tokenToTreeNode = tokenToTreeNode
-    let translate ast errors = translate args ast errors
+    let translate ast errors = null//translate args ast errors
 
     let otherAstToDot (otherAst : OtherTree<_>) name = 
         otherAst.ToDot numToString tokenToNumber leftSide name
@@ -79,8 +79,8 @@ type CalcInjectedLanguageModule() =
         member this.LexingFinished = processor.LexingFinished
         member this.ParsingFinished = processor.ParsingFinished
         member this.TokenNames = tokenNames
-        member this.GetNextTree i = processor.GetNextTree i
-        member this.GetForestWithToken range = processor.GetForestWithToken range
+        //member this.GetNextTree i = processor.GetNextTree i
+        //member this.GetForestWithToken range = processor.GetForestWithToken range
         member this.GetPairedRanges left right range toRight = processor.GetPairedRanges left right range toRight
 
     interface IReSharperLanguage

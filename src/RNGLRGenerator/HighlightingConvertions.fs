@@ -1,13 +1,12 @@
 ﻿module HighlightingConvertions
 
 open System
-open System.Text
 
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Generators.Common
 
-open PrintTreeNode
+open HighlightingPrinter
 
 let toClassName (str : string) = 
     let symbols = [| 
@@ -28,7 +27,7 @@ let private getLeafSemanticForTerminal token =
     printer.PrintBr "let ranges = calculatePos pos"
 
     printer.PrintBr "new %s%s(ranges) :> ITreeNode" <| toClassName token <| termSuffix
-    printer.GetString()
+    printer.ToString()
 
 let private getLeafSemanticForLiteral litName litText = 
     let printer = new FormatPrinter()
@@ -37,8 +36,7 @@ let private getLeafSemanticForLiteral litName litText =
     printer.PrintBr "let ranges = calculatePos pos"
 
     printer.PrintBr "new %s%s(ranges) :> ITreeNode"  <| litToClassName litName <| literalSuffix
-
-    printer.GetString()
+    printer.ToString()
                                
 let private getNodeSemantic parent children = 
     let printer = new FormatPrinter()
@@ -46,7 +44,7 @@ let private getNodeSemantic parent children =
     printer.PrintBrInd 0 "let parent = new %s%s()" <| toClassName parent <| nonTermSuffix
     printer.PrintBrInd 0 "let children = %A" children
     printer.PrintBrInd 0 "addSemantic parent children"
-    printer.GetString()
+    printer.ToString()
 
 let private changeRule (oldRule : Rule.t<_,_>) (elemList : elem<Source.t, Source.t> list) (bindings : Source.t list) = 
     let actionCode = getNodeSemantic oldRule.name.text bindings

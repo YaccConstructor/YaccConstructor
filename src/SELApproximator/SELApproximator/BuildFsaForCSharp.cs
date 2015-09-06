@@ -37,7 +37,7 @@ namespace SELApproximator
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
             var inputFile = _provider.PsiFile;
-            const int recursionMaxLevel = 3; // 0 for top and 3 level down
+            const int recursionMaxLevel = 3; // recursive calls executed while recursionMaxLevel >= 0
 
             var automata = ApproximateCsharp.ApproximateFileWithLogging(inputFile, recursionMaxLevel, _hotspotsList);
             if (automata.Count < 1)

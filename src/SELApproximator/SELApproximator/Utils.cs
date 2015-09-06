@@ -31,7 +31,7 @@ namespace SELApproximator
                 };
             var edgesList = fsa.Edges
                 .Select(edge => string.Format(
-                    "{0:D} -> {1:D} [label=\"{2}\"];", 
+                    "{0:D} -> {1:D} [label=\"{2}\"]; ", 
                     edge.Source, edge.Target, tagToStr(edge.Tag)))
                 .ToList();
             return String.Join("\n", edgesList);

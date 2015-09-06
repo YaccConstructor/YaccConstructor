@@ -164,9 +164,7 @@
     <Compile Include="ExecuteCSharpRecursiveFsaTests.cs" />
     <Compile Include="ExecuteCSharpFsaTests.cs" />
     <Compile Include="ExecuteJsFsaTests.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestEnvironment.cs" />
-    <Compile Include="ZoneMarker.cs" />
     <None Include="packages.config" />
     <None Include="test\data\CSharpFsa\Demo2.cs" />
     <None Include="test\data\CSharpFsa\Demo1.cs" />
@@ -252,6 +250,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

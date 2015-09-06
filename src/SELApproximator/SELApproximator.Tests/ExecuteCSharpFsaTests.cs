@@ -16,6 +16,15 @@ namespace SELApproximator.Tests
             get { return "CSharpFsa"; }
         }
 
+        // == better way
+        //[TestCase("SimpleQuery.cs")]
+        //[TestCase("FourVars.cs")]
+        //...
+        //public void TestCases(string testSrc)
+        //{
+        //    DoTestFiles(testSrc);
+        //}
+
         [Test]
         public void TestSimpleQuery()
         {

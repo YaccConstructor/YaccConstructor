@@ -2,7 +2,7 @@
 <package>
 <metadata>
 <id>YC.SEL.Plugins.TSQL</id>
-<version>0.3.0.16</version>
+<version>0.3.0.17</version>
 <title>TSQL plugin for ReSharper</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>

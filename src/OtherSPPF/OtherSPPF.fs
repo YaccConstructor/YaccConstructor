@@ -458,8 +458,8 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
             then family.Nodes.DoForAll f
             else family.Nodes.DoForAllRev f
 
-        let isBrace token = 
-            let tokNumber = tokenToNumber tokens.[token]
+        let isBrace tokenIndex = 
+            let tokNumber = tokenToNumber tokens.[tokenIndex]
             tokNumber = pairNumber || tokNumber = nowNumber
 
         while contexts.Count > 0 do
@@ -474,16 +474,18 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                 then 
                     let handle (node : obj) =
                         match node with 
-                        | :? Terminal as t -> 
+                        | :? Terminal as t when isBrace t.TokenNumber -> 
                             let token = tokens.[t.TokenNumber]
+                            
                             let tokNumber = tokenToNumber token
                             if nowNumber = tokNumber then incr count
                             elif pairNumber = tokNumber then decr count
-            
+                            
                             if !count = 0 then res.Add token
                         | :? OtherAST as ast -> processAST ast
-                        | :? Epsilon -> ()
-                        | _ -> failwithf "Unexpected node type in OtherSppf: %A" <| node.GetType()
+                        | :? Epsilon 
+                        | :? Terminal -> ()
+                        | x -> failwithf "Unexpected node type in OtherSppf: %A" x
         
                     if family.Nodes.Exist ((=) !child)
                     then handleSomeNodes !child family handle 

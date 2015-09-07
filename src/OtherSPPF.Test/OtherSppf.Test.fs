@@ -704,6 +704,115 @@ type ``Abstract case: matching brackets``() =
             Assert.AreEqual (expectedPos, actual, infoAboutError)
             Assert.Pass "Abstract case. Right to left. One parenthesis 1 PASSED"
 
+    [<Test>]
+    member test.``Abstract case. Left brace cycle right brace. Find right brace``() =
+        let qGraph = new ParserInputGraph<_>(0, 4)
+        let vertexRange = List.init 5 id 
+        qGraph.AddVertexRange vertexRange |> ignore
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
+                createEdge 1 2 (RNGLR.ParseSummator.NUMBER 1)
+                createEdge 2 3 (RNGLR.ParseSummator.RBRACE 2)
+                createEdge 2 1 (RNGLR.ParseSummator.PLUS 3)
+                createEdge 3 4 (RNGLR.ParseSummator.RNGLR_EOF 4)
+            ] |> ignore
+
+        let result = parse qGraph
+        
+        match result with
+        | Parser.Error (num, tok, message) -> printErr (num, tok, message)
+        | Parser.Success(mAst) ->
+            
+            let other = new OtherTree<_>(mAst)
+            let bracketInfo = new BracketSearchInfo<_>(leftBraceNumber, rightBraceNumber, 0, true)
+            let pairTokens = other.FindAllPair bracketInfo tokToNumber tokToPos
+            
+            let expectedPairs = 1
+            Assert.AreEqual(expectedPairs, pairTokens.Count)
+
+            let actual = 
+                match pairTokens.[0] with
+                | RNGLR.ParseSummator.RBRACE pos -> pos
+                | _ -> notBracketIsFound pairTokens.[0]
+
+            let expectedPos = 2
+            Assert.AreEqual(expectedPos, actual, infoAboutError)
+            Assert.Pass "Abstract case. Left brace cycle right brace. Find right brace PASSED"
+
+    [<Test>]
+    member test.``Abstract case. Left brace cycle right brace. Find left brace``() =
+        let qGraph = new ParserInputGraph<_>(0, 4)
+        let vertexRange = List.init 5 id 
+        qGraph.AddVertexRange vertexRange |> ignore
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
+                createEdge 1 2 (RNGLR.ParseSummator.NUMBER 1)
+                createEdge 2 3 (RNGLR.ParseSummator.RBRACE 2)
+                createEdge 2 1 (RNGLR.ParseSummator.PLUS 3)
+                createEdge 3 4 (RNGLR.ParseSummator.RNGLR_EOF 4)
+            ] |> ignore
+
+        let result = parse qGraph
+        
+        match result with
+        | Parser.Error (num, tok, message) -> printErr(num, tok, message)
+        | Parser.Success(mAst) ->
+            
+            let other = new OtherTree<_>(mAst)
+            let bracketInfo = new BracketSearchInfo<_>(leftBraceNumber, rightBraceNumber, 2, false)
+            let pairTokens = other.FindAllPair bracketInfo tokToNumber tokToPos
+            
+            let expectedPairs = 1
+            Assert.AreEqual(expectedPairs, pairTokens.Count)
+
+            let actual = 
+                match pairTokens.[0] with
+                | RNGLR.ParseSummator.LBRACE pos -> pos
+                | _ -> notBracketIsFound pairTokens.[0]
+
+            let expectedPos = 0
+            Assert.AreEqual(expectedPos, actual, infoAboutError)
+            Assert.Pass "Abstract case. Left brace cycle right brace. Find right brace PASSED"
+
+    [<Test>]
+    member test.``Abstract case. Braces inside cycle``() =
+        let qGraph = new ParserInputGraph<_>(0, 6)
+        let vertexRange = List.init 7 id 
+        qGraph.AddVertexRange vertexRange |> ignore
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
+                createEdge 1 2 (RNGLR.ParseSummator.LBRACE 1)
+                createEdge 2 3 (RNGLR.ParseSummator.NUMBER 2)
+                createEdge 3 4 (RNGLR.ParseSummator.RBRACE 3)
+                createEdge 4 5 (RNGLR.ParseSummator.RBRACE 4)
+                createEdge 4 1 (RNGLR.ParseSummator.PLUS 5)
+                createEdge 5 6 (RNGLR.ParseSummator.RNGLR_EOF 6)
+            ] |> ignore
+
+        let result = parse qGraph
+        
+        match result with
+        | Parser.Error (num, tok, message) -> printErr(num, tok, message)
+        | Parser.Success(mAst) ->
+            let other = new OtherTree<_>(mAst)
+            let bracketInfo = new BracketSearchInfo<_>(leftBraceNumber, rightBraceNumber, 1, true)
+            let pairTokens = other.FindAllPair bracketInfo tokToNumber tokToPos
+            
+            let expectedPairs = 1
+            Assert.AreEqual(expectedPairs, pairTokens.Count)
+
+            let actual = 
+                match pairTokens.[0] with
+                | RNGLR.ParseSummator.RBRACE pos -> pos
+                | _ -> notBracketIsFound pairTokens.[0]
+
+            let expectedPos = 3
+            Assert.AreEqual(expectedPos, actual, infoAboutError)
+            Assert.Pass "Abstract case. Braces inside cycle PASSED"
+
 //[<EntryPoint>]
 let f x = 
     let elementary = new ``AST to otherSPPF translation test``()

@@ -15,9 +15,9 @@ open YC.FST.GraphBasedFst
 open YC.FSA.FsaApproximation
 open YC.FSA.GraphBasedFsa
 
-let lexerErrMsg = "Unexpected symbol: "
-let parserErrMsg = "Syntax error. Unexpected token "
-let undefinedVariableErrMsg = "undefined variable"
+let lexerErrMsg = "Unexpected symbol:"
+let parserErrMsg = "Syntax error. Unexpected token"
+let undefinedVariableErrMsg = "Undefined variable"
 
 type DrawingGraph (vertices : IEnumerable<int>, edges : ResizeArray<TaggedEdge<int, string>>) =
     member this.Vertices = vertices
@@ -33,10 +33,10 @@ type ParsingFinishedArgs(lang : string) =
     inherit System.EventArgs()
     member this.Lang = lang
 
-type TreeGenerationState<'node> = 
+(*type TreeGenerationState<'node> = 
     | Start
     | InProgress of 'node * AstNode list
-    | End of 'node
+    | End of 'node*)
 
 exception LexerException of string * obj
 
@@ -68,7 +68,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
         , getDocumentRange: Position<'br> -> 'range
         , printAst: Tree<'TokenType> -> string -> unit
         , printOtherAst: OtherTree<'TokenType> -> string -> unit
-        , semantic : _ option) as this =
+        , semantic : _ option) = //as this =
 
     let lexingFinished = new Event<LexingFinishedArgs<'node>>()
     let parsingFinished = new Event<ParsingFinishedArgs>()
@@ -76,7 +76,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
     let mutable forest: list<Tree<'TokenType> * _> = [] 
     let mutable otherForest : list<OtherTree<'TokenType>> = []
 
-    let mutable generationState : TreeGenerationState<'node> = Start
+    //let mutable generationState : TreeGenerationState<'node> = Start
     
     ///creates instance of LexingFinishedArgs
     let prepareToTrigger (graph : ParserInputGraph<'TokenType>) tokenToTreeNode = 
@@ -88,7 +88,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
                 |> Seq.map 
                     (
                         fun edge -> 
-                            let tokenName = edge.Tag |> tokenToNumber |> numToString
+                            let tokenName = edge.Tag |> (tokenToNumber >> numToString)
                             new TaggedEdge<_, _>(edge.Source, edge.Target, tokenName)
                     )
                 |> ResizeArray.ofSeq
@@ -117,7 +117,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
                 |> Array.map 
                     (
                         function 
-                            Smbl e -> (sprintf "%s%c" lexerErrMsg <| fst e), snd e |> getDocumentRange 
+                            Smbl (char, position) -> (sprintf "%s %c" lexerErrMsg char), position |> getDocumentRange 
                             | e -> failwithf "Unexpected tokenization result: %A" e
                     )
                 |> Array.iter addLError 

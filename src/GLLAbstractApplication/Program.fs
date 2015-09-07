@@ -19,30 +19,29 @@ open Yard.Generators.GLL.AbstractParser
 
 let outDir = @"../../../src/GLLAbstractApplication/"
 
-//let run () =
-//    let fe = new Yard.Frontends.YardFrontend.YardFrontend()
-//    let gen = new Yard.Generators.GLL.GLL()
-//    let il = ref <| fe.ParseGrammar(@"C:\Users\User\recursive-ascent\src\GLLAbstractApplication\SimpleAmb.yrd")
-//    for constr in gen.Constraints do
-//        let grammar = il.Value.grammar
-//        if not <| constr.Check grammar then
-//            eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
-//            il := {!il with grammar = constr.Fix grammar}
-//
-//    gen.Generate(!il,"-pos int -token int -abstract true -o SimpleAmb.yrd.fs")
-//
-//run () |> printfn "%A"
+let run () =
+    let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+    let gen = new Yard.Generators.GLL.GLL()
+    let il = ref <| fe.ParseGrammar(@"C:\Users\User\recursive-ascent\src\GLLAbstractApplication\SimpleAmb.yrd")
+    for constr in gen.Constraints do
+        let grammar = il.Value.grammar
+        if not <| constr.Check grammar then
+            eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
+            il := {!il with grammar = constr.Fix grammar}
+
+    gen.Generate(!il,"-pos int -token int -abstract true -o SimpleAmb.yrd.fs")
+
+run () |> printfn "%A"
 
 let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)
 
 let inputGraph =
-    let qGraph = new ParserInputGraph<_>([|0|], [|3|])
+    let qGraph = new ParserInputGraph<_>([|0|], [|1|])
     qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (GLL.SimpleAmb.B  3)
-             edg 1 2 (GLL.SimpleAmb.B  4)
-             edg 2 0 (GLL.SimpleAmb.B  5)
-             edg 0 3 (GLL.SimpleAmb.RNGLR_EOF 8)
+            [
+             edg 0 0 (GLL.SimpleAmb.A 0)
+             edg 0 1 (GLL.SimpleAmb.RNGLR_EOF 2)
              ] |> ignore
 //            [edg 0 1 (GLL.SimpleAmb.NUM  3)
 //             edg 1 2 (GLL.SimpleAmb.PLUS 0)

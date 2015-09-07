@@ -379,7 +379,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     let curSymbol = parser.rules.[rule].[position]
                    // if !currentVertexInInput <> input.FinalState
                    // then
-                    if (parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol)
+                    if parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol
                     then
                         let isEq (sym : int) (elem : ParserEdge<'TokenType>) = sym = parser.TokenToNumber elem.Tag
                         let curEdge = Seq.tryFind (isEq curSymbol) (input.OutEdges !currentVertexInInput)
@@ -392,7 +392,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                 then currentN := getNodeT edge
                                 else currentR := getNodeT edge
                                 currentVertexInInput := edge.Target
-                                currentLabel := packLabel (rule) ((position) + 1)
+                                currentLabel := packLabel rule (position + 1)
                                 if !currentR <> dummy
                                 then 
                                     currentN := getNodeP !currentLabel !currentN !currentR
@@ -404,7 +404,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
                             index <- index + term - parser.NonTermCount
                             index
-                        currentGSSNode := create !currentVertexInInput (packLabel (rule) (position + 1)) !currentGSSNode  !currentN
+                        currentGSSNode := create !currentVertexInInput (packLabel rule (position + 1)) !currentGSSNode  !currentN
                         for edge in input.OutEdges !currentVertexInInput do
                             let curToken = parser.TokenToNumber edge.Tag
 

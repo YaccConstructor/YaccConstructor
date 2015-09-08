@@ -209,8 +209,6 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
             for i = 0 to grammar.indexator.fullCount - 1 do
                 if i <> grammar.indexator.eofIndex then
                     //check that at least one current kernel has new lookaheads
-                    if vertex.label = 941 && i = 209 then
-                        ()
                     let mutable hasNewLookahead = false
                     for j = 0 to mainKernels.Length - 1 do
                         if curSymbol mainKernels.[j] = i && not newMainLookaheads.[j].IsEmpty then hasNewLookahead <- true

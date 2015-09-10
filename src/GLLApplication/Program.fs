@@ -62,7 +62,7 @@ let outDir = @"../../../src/GLLApplication/"
 //
 //for j = 1 to 50 do
 //let str2 = String.init (2000) (fun i -> "A + ( A * B ) ; ") + "B ;"
-let str2 = " "
+let str2 = "B B"
 let parser2 = GLL.SimpleAmb.buildAst
 
 let run2 path astBuilder =
@@ -75,12 +75,12 @@ let r2 = run2 str2 parser2
 let t2 = System.DateTime.Now - start2
 printfn "%d input %A" (100) t2.TotalSeconds 
 
-//match r2 with
-//    | Parser.Error str, _ ->
-//        printfn "%s" "dddd" //str 
-//    | Parser.Success tree, tokens ->
-//        printfn "%s" "sss"
-//        GLL.Calc.defaultAstToDot tree GLL.Calc.tokenToNumber GLL.Calc.tokenData  (outDir + "Calc.dot") 
+match r2 with
+    | Parser.Error str, _ ->
+        printfn "%s" "dddd" //str 
+    | Parser.Success tree, tokens ->
+        printfn "%s" "sss"
+        GLL.SimpleAmb.defaultAstToDot tree GLL.SimpleAmb.tokenToNumber GLL.SimpleAmb.tokenData  (outDir + "Calc.dot") 
 
 
 

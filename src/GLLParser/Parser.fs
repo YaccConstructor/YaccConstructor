@@ -32,8 +32,8 @@ let inline getPosition (packedValue : int<labelMeasure>) = int (int packedValue 
 [<Struct>]
 type Vertex =
     val Level            : int
-    val Label            : int<labelMeasure>
-    new (level, label) = {Level = level; Label = label}
+    val Nonterm          : int
+    new (level, nonterm) = {Level = level; Nonterm = nonterm}
 
 [<Struct>]
 type Context =
@@ -73,43 +73,30 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
     let setU = Array.zeroCreate<IntDictionary<Dictionary<int64<vertexMeasure>, ResizeArray<int<nodeMeasure>>>>> (inputLength + 1)
 
     let currentIndex = ref 0
-    let currentrule = parser.StartRule
-    let currentLabel = ref <| packLabel currentrule 0
-    let dummyGSSNode = new Vertex(!currentIndex, !currentLabel)
+    let currentRule = parser.StartRule
+    let currentLabel = ref <| packLabel currentRule 0
+    let dummyGSSNode = new Vertex(!currentIndex, currentRule)
     let dummyAST = new TerminalNode(-1, packExtension -1 -1)
     let dummy = 0<nodeMeasure>
     let currentN = ref <| dummy
     let currentR = ref <| dummy
 
     let resultAST = ref None
-    let packedNodesReadCount = ref 0
-    let packedNodesWriteCount = ref 0
-    let packedNodesX = Array.zeroCreate<int> (inputLength + 1)
-    let packedNodesY = Array.zeroCreate<int> (inputLength + 1)
-    let packedNodesZ = Array.zeroCreate<int> (inputLength + 1)
     //let packedNodes = Array.zeroCreate<IntDictionary<IntDictionary<int>>> (inputLength + 1)
     let packedNodes = new Dictionary<int, int<nodeMeasure>>()
         //Array.zeroCreate<IntDictionary<IntDictionary<ResizableUsualOne<LblNodePair>>>> (inputLength + 1)
     let inline f x y z = x * (inputLength + 1) * (inputLength + 1) + y * (inputLength + 1) + z
     let inline f4 x y z w = x * parser.Slots.Count * (inputLength + 1) * (inputLength + 1) + y * (inputLength + 1) * (inputLength + 1) + z * (inputLength + 1) + w
-    let nonTerminalNodesReadCount = ref 0
-    let nonTerminalNodesWriteCount = ref 0 
-    let nonterminalNodesX = Array.zeroCreate parser.NonTermCount
-    let nonterminalNodesY = Array.zeroCreate (inputLength + 1)
-    let nonterminalNodesZ = Array.zeroCreate (inputLength + 1)        
     let nonTerminalNodes = new Dictionary<int, int<nodeMeasure>>()
     //let nonTerminalNodes = Array3D.zeroCreate<int<nodeMeasure>> parser.NonTermCount (inputLength + 1) (inputLength + 1)
 
-
-    let intermidiateNodesReadCount = ref 0
-    let intermidiateNodesWriteCount = ref 0
     //we can use dictionary <extension, dict>
     let intermidiateNodes = new Dictionary<int, int<nodeMeasure>>()
  
 //посчитать размерв коллекций
     let edgesReadCount = ref 0
     let edgesWriteCount = ref 0
-    let edges = Array2D.zeroCreate<Dictionary<int64, ResizeArray<int>>> slots.Count (inputLength + 1)
+    let edges = Array2D.zeroCreate<Dictionary<int64, Dictionary<int, ResizeArray<int>>>> parser.NonTermCount (inputLength + 1)
         
     let terminalNodes = new BlockResizeArray<int<nodeMeasure>>()
     let epsilonNode = new TerminalNode(-1, packExtension 0 0)
@@ -154,7 +141,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
     let containsContext index (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
         if index <= inputLength
         then
-            let vertexKey = packVertex vertex.Level vertex.Label
+            let vertexKey = packVertex vertex.Level vertex.Nonterm
             if setU.[index] <> Unchecked.defaultof<_>
             then
                 let cond, current = setU.[index].TryGetValue(int label) 
@@ -300,32 +287,43 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             res * 1<nodeMeasure>
             
                      
-    let containsEdge (b : Vertex) (e : Vertex) (ast : int<nodeMeasure>) =
-        let labelN = slots.[int b.Label]
-        edgesReadCount := !edgesReadCount + 1
-        let dict1 = edges.[labelN, b.Level]
-        let key = pack ast (int e.Label)
+    let containsEdge (b : Vertex) (l : int<labelMeasure>) (e : Vertex) (ast : int<nodeMeasure>) =
+        
+        let dict1 = edges.[b.Nonterm, b.Level]
+        let key = pack ast (int l)
         if dict1 <> Unchecked.defaultof<_>
         then
             let contains, t = dict1.TryGetValue(key)
             if contains
             then
-                if t.Contains(e.Level) then true
-                else 
-                    t.Add(e.Level) 
+                let c2, t2 = t.TryGetValue(e.Nonterm)
+                if c2 
+                then
+                    if t2.Contains(e.Level) then true
+                    else 
+                        t2.Add(e.Level) 
+                        false
+                else
+                    let arr = new ResizeArray<int>()
+                    arr.Add(e.Level) 
+                    t.Add(e.Nonterm, arr)
                     false
             else
+                let newDict = new Dictionary<int, ResizeArray<int>>()
                 let arr = new ResizeArray<int>()
                 arr.Add(e.Level) 
-                dict1.Add(key, arr)
+                newDict.Add(e.Nonterm, arr)
+                dict1.Add(key, newDict)
                 false
         else
-            let newDict = new Dictionary<int64,ResizeArray<int>>()
+            let newDict = new Dictionary<int64, Dictionary<int, ResizeArray<int>>>()
+            let newDict2 = new Dictionary<int, ResizeArray<int>>()
             let newArr = new ResizeArray<int>()
             newArr.Add(e.Level)
-            newDict.Add(key, newArr)
+            newDict2.Add(b.Nonterm, newArr)
+            newDict.Add(key,newDict2)
             edgesWriteCount := !edgesWriteCount + 1
-            edges.[labelN, b.Level] <- newDict
+            edges.[b.Nonterm, b.Level] <- newDict
             false                    
         
     let getTreeExtension (node : int<nodeMeasure>) =
@@ -339,10 +337,10 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             | _ -> failwith "Bad type for tree node"
 
         
-    let create index label (vertex : Vertex) (ast : int<nodeMeasure>) = 
-        let v = new Vertex(index, label)
+    let create index (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) = 
+        let v = new Vertex(index, parser.LeftSide.[getRule label])
         let vertexKey = pack index (int label)
-        let temp = containsEdge v vertex ast
+        let temp = containsEdge v label vertex ast
         if not <| temp //containsEdge v vertex ast
         then
             if setP.ContainsKey(vertexKey)
@@ -357,7 +355,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
     let pop (u : Vertex) (i : int) (z : int<nodeMeasure>) =
         if u <> dummyGSSNode
         then
-            let vertexKey = pack u.Level (int u.Label)
+            let vertexKey = pack u.Level (int u.Nonterm)
             if setP.ContainsKey vertexKey
             then
                 setP.[vertexKey].Add(z)
@@ -365,16 +363,16 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                 let newList = new ResizeArray<int<nodeMeasure>>()
                 newList.Add(z)
                 setP.Add(vertexKey, newList)
-            let outEdges = edges.[slots.[ int u.Label], u.Level]
+            let outEdges = edges.[slots.[ int u.Nonterm], u.Level]
             edgesReadCount := !edgesReadCount + 1
-            for edge in outEdges do
-                let sppfNodeOnEdge = (getLeft edge.Key) * 1<nodeMeasure>
-                let slot = (getRight edge.Key) * 1<labelMeasure>
-                let arr = edge.Value
-                for level in arr do
-                    let resTree = getNodeP u.Label sppfNodeOnEdge z 
-                    let newVertex = new Vertex(level, slot)
-                    addContext i u.Label newVertex resTree
+            for kvp1 in outEdges do
+                let sppfNodeOnEdge = (getLeft kvp1.Key) * 1<nodeMeasure>
+                let slot = (getRight kvp1.Key) * 1<labelMeasure>
+                for kvp2 in kvp1.Value do 
+                    for level in kvp2.Value do
+                        let resTree = getNodeP slot sppfNodeOnEdge z 
+                        let newVertex = new Vertex(level, kvp2.Key)
+                        addContext i slot newVertex resTree
 
     let table = parser.Table
         

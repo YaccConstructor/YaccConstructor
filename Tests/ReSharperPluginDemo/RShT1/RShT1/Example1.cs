@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-
-namespace RShT1
+﻿namespace RShT1
 {
     class TSQLDEmo
     {
         private void Go(int cond)
         {
-            
             var stmt = "drop procedure";
             if (1 == cond)
             {

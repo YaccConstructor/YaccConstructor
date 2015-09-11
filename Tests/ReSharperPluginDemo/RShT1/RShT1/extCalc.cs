@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace RShT1
+﻿namespace RShT1
 {
     class ExtCalc
     {

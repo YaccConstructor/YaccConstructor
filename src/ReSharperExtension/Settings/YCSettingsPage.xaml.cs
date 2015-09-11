@@ -55,6 +55,9 @@ namespace ReSharperExtension.Settings
 
         private void SetDefaultValuesForLang()
         {
+            if (String.IsNullOrEmpty(currentLang))
+                return;
+
             LanguageSettings setting = Cache[currentLang];
             gridHotspots.ItemsSource = setting.Hotspots;
 
@@ -70,7 +73,10 @@ namespace ReSharperExtension.Settings
         private ObservableCollection<string> GetAvailableLangs()
         {
             IEnumerable<string> allLangs = helper.GetAllLanguagesNames();
-            currentLang = allLangs.First();
+            if (allLangs.Any())
+            {
+                currentLang = allLangs.First();
+            }
             return new ObservableCollection<string>(allLangs);
         }
 
@@ -84,12 +90,16 @@ namespace ReSharperExtension.Settings
 
         private void SaveHotspots()
         {
-            List<HotspotModelView> hotspots = new List<HotspotModelView>();
+            var hotspots = new List<HotspotModelView>();
             foreach (LanguageSettings settings in Cache.Values)
             {
                 hotspots.AddRange(settings.Hotspots);
             }
-            ConfigurationManager.SaveHotspotData(hotspots);
+
+            if (hotspots.Any())
+            {
+                ConfigurationManager.SaveHotspotData(hotspots);
+            }
             Handler.UpdateHotspots(hotspots);
         }
 
@@ -117,18 +127,27 @@ namespace ReSharperExtension.Settings
 
         public bool ValidatePage()
         {
+            if (String.IsNullOrEmpty(currentLang))
+                return true;
+
             return Cache[currentLang].Hotspots.All(hotspotModel => hotspotModel.AmCorrect());
         }
         #endregion
 
         private void OnAddHotspotClicked(object sender, RoutedEventArgs e)
         {
+            if (String.IsNullOrEmpty(currentLang))
+                return;
+            
             var newElem = new HotspotModelView {LanguageName = currentLang};
             Cache[currentLang].Hotspots.Add(newElem);
         }
 
         private void OnRemoveHotspotClicked(object sender, RoutedEventArgs e)
         {
+            if (String.IsNullOrEmpty(currentLang))
+                return;
+
             HotspotModelView[] selected = gridHotspots.SelectedItems.SafeOfType<HotspotModelView>().ToArray();
             Cache[currentLang].Hotspots.RemoveRange(selected);
         }
@@ -141,12 +160,18 @@ namespace ReSharperExtension.Settings
 
         private void OnAddPairClicked(object sender, RoutedEventArgs e)
         {
+            if (String.IsNullOrEmpty(currentLang))
+                return;
+
             LanguageSettings settings = Cache[currentLang];
             settings.Pairs.Add(new PairedTokens());
         }
 
         private void OnRemovePairClicked(object sender, RoutedEventArgs e)
         {
+            if (String.IsNullOrEmpty(currentLang))
+                return;
+            
             LanguageSettings settings = Cache[currentLang];
             settings.Pairs.Remove(LeftRightSymbols.SelectedItem as PairedTokens);
         }

@@ -96,7 +96,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
 //посчитать размерв коллекций
     let edgesReadCount = ref 0
     let edgesWriteCount = ref 0
-    let edges = Array2D.zeroCreate<Dictionary<int64, Dictionary<int, ResizeArray<int>>>> parser.NonTermCount (inputLength + 1)
+    let edges = Array2D.zeroCreate<Dictionary<int64, Dictionary<int, ResizeArray<int>>>> parser.NonTermCount + 1 (inputLength + 1)
         
     let terminalNodes = new BlockResizeArray<int<nodeMeasure>>()
     let epsilonNode = new TerminalNode(-1, packExtension 0 0)
@@ -337,12 +337,12 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             | _ -> failwith "Bad type for tree node"
 
         
-    let create index (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) = 
-        let v = new Vertex(index, parser.LeftSide.[getRule label])
+    let create index (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) (nonTerm : int) = 
+        let v = new Vertex(index, parser.LeftSide.[getRule label], nonTerm)
         let vertexKey = pack index (int label)
-        let temp = containsEdge v label vertex ast
-        if not <| temp //containsEdge v vertex ast
-        then
+        //let temp = containsEdge v label vertex ast
+        //if not <| temp //containsEdge v vertex ast
+        //then
             if setP.ContainsKey(vertexKey)
             then
                 let arr = setP.[vertexKey]

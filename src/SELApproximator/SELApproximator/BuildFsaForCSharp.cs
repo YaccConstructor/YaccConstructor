@@ -39,7 +39,7 @@ namespace SELApproximator
             var inputFile = _provider.PsiFile;
             const int recursionMaxLevel = 3; // recursive calls executed while recursionMaxLevel >= 0
 
-            var automata = ApproximateCsharp.ApproximateFileWithLogging(inputFile, recursionMaxLevel, _hotspotsList);
+            var automata = ApproximateCsharp.ApproximateFile(inputFile, recursionMaxLevel, _hotspotsList);
             if (automata.Count < 1)
                 throw new ArgumentException("File under processing contains no hotspots, but at least one expected");
             var fsa = automata[0].Item2;

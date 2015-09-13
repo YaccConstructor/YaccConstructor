@@ -32,29 +32,19 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
-    <Compile Include="Hotspot.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />
-    <Compile Include="Utils.fs" />
-    <Compile Include="GraphUtils.fs" />
+    <Compile Include="CharFsa.fs" />
     <Compile Include="IControlFlowGraphUtils.fs" />
-    <Compile Include="ResharperCsharpTreeUtils.fs" />
-    <Compile Include="ArbitraryOperation.fs" />
-    <Compile Include="GenericGraphs.fs" />
-    <Compile Include="DDG.fs" />
-    <Compile Include="GenericCFG.fs" />
     <Compile Include="ResharperCfgAdditionalInfo.fs" />
     <Compile Include="ResharperCfgToGeneric.fs" />
     <Compile Include="CsharpLoopInfo.fs" />
+    <Compile Include="ResharperCsharpTreeUtils.fs" />
     <Compile Include="CsharpCfgToGeneric.fs" />
     <Compile Include="JsLoopInfo.fs" />
     <Compile Include="JsCfgToGeneric.fs" />
-    <Compile Include="FsaHelper.fs" />
-    <Compile Include="GenerateFsa.fs" />
+    <Compile Include="Hotspot.fs" />
     <Compile Include="CsharpApprxomationUtils.fs" />
-    <Compile Include="Logger.fs" />
-    <Compile Include="CharFsa.fs" />
-    <Compile Include="BuildApproximation.fs" />
     <Compile Include="ApproximateCsharp.fs" />
     <Compile Include="ApproximateJs.fs" />
     <Compile Include="ConstantPropagation.fs" />
@@ -128,6 +118,11 @@
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
       <Name>AbstractAnalysis.Common</Name>
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RegularApproximation\RegularApproximation.fsproj">
+      <Name>RegularApproximation</Name>
+      <Project>{d21242ef-c310-4b89-a9aa-cfd1c2b34531}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

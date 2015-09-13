@@ -58,7 +58,7 @@ let toDot (fsa: FSA<char * 'b>) path =
         sprintf "%c" ch
     fsa.PrintToDOT (path, stateToString)
 
-type FsaParams<'a, 'b, 'c when 'b: equality> = {
+type FsaParams<'a, 'b when 'b: equality> = {
     Alphabet: HashSet<'a>
     NewSymbol: 'a -> Symb<'b>
     GetChar: Symb<'b> -> 'a
@@ -66,7 +66,7 @@ type FsaParams<'a, 'b, 'c when 'b: equality> = {
     SeparatorSmbl1: 'a
     SeparatorSmbl2: 'a }
 
-let anyWordsFsa (fsaParams: FsaParams<_,_,_>) = 
+let anyWordsFsa (fsaParams: FsaParams<_,_>) = 
     let inits = ResizeArray.singleton 0
     let finals = ResizeArray.singleton 0
     let trans = 
@@ -78,7 +78,7 @@ let anyWordsFsa (fsaParams: FsaParams<_,_,_>) =
 /// Checks if the language accepted by FSA a1 is a sublanguage 
 /// of the language accepted by FSA a2. 
 /// Expects any fsa
-let isSubFsa (a1: FSA<_>) (a2: FSA<_>) (fsaParams: FsaParams<_,_,_>)= 
+let isSubFsa (a1: FSA<_>) (a2: FSA<_>) (fsaParams: FsaParams<_,_>)= 
     if a1.IsEmpty
     then true
     elif not <| a2.IsEmpty
@@ -154,7 +154,7 @@ let private subFsaTo (fsa: FSA<_>) q =
 
 /// Checks if q1 from fsa1 is equivalent to q2 from fsa2
 /// in the sense of relation assumed by widening operator 
-let private isEquivalent q1 (fsa1: FSA<_>) q2 (fsa2: FSA<_>) (fsaParams: FsaParams<_,_,_>) =
+let private isEquivalent q1 (fsa1: FSA<_>) q2 (fsa2: FSA<_>) (fsaParams: FsaParams<_,_>) =
     let fsaFromQ1 = subFsaFrom fsa1 q1
     let fsaFromQ2 = subFsaFrom fsa2 q2
     if isSubFsa fsaFromQ1 fsaFromQ2 fsaParams && 
@@ -166,7 +166,7 @@ let private isEquivalent q1 (fsa1: FSA<_>) q2 (fsa2: FSA<_>) (fsaParams: FsaPara
         let intersFsa = FSA.Intersection(fsaToQ1, fsaToQ2, fsaParams.SymbolsAreEqual)
         not <| intersFsa.IsEmpty
 
-let private findRelations (fsa1: FSA<_>) (fsa2: FSA<_>) (fsaParams: FsaParams<_,_,_>) =
+let private findRelations (fsa1: FSA<_>) (fsa2: FSA<_>) (fsaParams: FsaParams<_,_>) =
     let createLoop1 st = 
         let sf = StateFromFsaFuns.fromFsa1 st
         Edge(sf, sf)
@@ -194,7 +194,7 @@ let private findRelations (fsa1: FSA<_>) (fsa2: FSA<_>) (fsaParams: FsaParams<_,
     allRelations, inverseRelations
 
 /// Builds equivalence classees using FSA.isEquivalent function
-let private buildEquivalenceClasses (fsa1: FSA<_>) (fsa2: FSA<_>) (fsaParams: FsaParams<_,_,_>) =
+let private buildEquivalenceClasses (fsa1: FSA<_>) (fsa2: FSA<_>) (fsaParams: FsaParams<_,_>) =
     // find relations
     let relations, inverseRelations = findRelations fsa1 fsa2 fsaParams
     // build relations graph and find connected components
@@ -303,7 +303,7 @@ let private createTransitions (eqClasses: Map<int, EqClass>) (fsa1: FSA<_>) (fsa
     |> Seq.concat
     |> ResizeArray.ofSeq
         
-let widen (fsa1: FSA<_>) (fsa2: FSA<_>) (fsaParams: FsaParams<_,_,_>) =
+let widen (fsa1: FSA<_>) (fsa2: FSA<_>) (fsaParams: FsaParams<_,_>) =
     let dfa1 = fsa1.NfaToDfa
     let dfa2 = fsa2.NfaToDfa
     let eqClasses = buildEquivalenceClasses dfa1 dfa2 fsaParams

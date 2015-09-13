@@ -17,6 +17,9 @@ open ResharperCsharpTreeUtils
 open BuildApproximation
 open ResharperCsharpTreeUtils
 open Microsoft.FSharp.Collections
+open YC.FSA.GraphBasedFsa
+open ResharperCfgToGeneric
+open YC.FSA.FsaApproximation
 
 let private tryDefineLang (node: IInvocationExpression) (hotspotInfoList: list<string * Hotspot>) = 
     let methodName, className, parameters, retType = getMethodSigniture node
@@ -46,6 +49,24 @@ let private findHotspots (file: ICSharpFile) (hotspotInfoList: list<string * Hot
     processor.Process file
     hotspots
 
+let rec approximateCSharp 
+        (functionInfo: ArbitraryOperation<IMethodDeclaration>) 
+        (stack: list<FSA<_>>) 
+        (controlData: ControlData<ITreeNode, char, char * Position<_>>) =
+    let extractLangSpecificCfg (methodInfo: ArbitraryOperationInfo<IMethodDeclaration>) = 
+        nodeToCSharpCfg methodInfo.Info
+    let extractTargetNode (astNode: ITreeNode) (convertInfo: ConvertInfo<_,_>) =
+        Utils.Dictionary.getMappingToOne astNode convertInfo.AstToGenericNodes
+    approximate 
+        extractLangSpecificCfg 
+        CsharpCfgToGeneric.toGenericCfg 
+        extractTargetNode
+        ResharperCsharpTreeUtils.getStringTypedParams
+        CsharpApprxomationUtils.bindArgsToParams
+        functionInfo
+        stack
+        controlData
+
 let private buildFsaForMethod methodDecl target recursionMaxLevel fsaParams logger =
     let stringParamsNum = Seq.length <| getStringTypedParams methodDecl
     let stack = List.replicate stringParamsNum <| FsaHelper.anyWordsFsa fsaParams
@@ -54,10 +75,11 @@ let private buildFsaForMethod methodDecl target recursionMaxLevel fsaParams logg
         TargetFunction = methodName; 
         TargetNode = target; 
         CurRecLevel = recursionMaxLevel
-        LoggerState = logger }
+        LoggerState = logger;
+        FsaParams = fsaParams }
     let fsaForVar = 
-        let functionInfo = { Name = methodName; Info = CsharpArbitraryFun(methodDecl) }
-        approximateCSharp functionInfo stack controlInfo fsaParams
+        let functionInfo = Some { Name = methodName; Info = methodDecl }
+        approximateCSharp functionInfo stack controlInfo
         |> fst
         |> Option.get
     fsaForVar

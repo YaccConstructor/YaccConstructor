@@ -12,7 +12,7 @@ namespace SELApproximator
 {
     public class Utils
     {
-        public static string DdgToTestDot<T>(GenericGraphs.GraphWithSingleEnds<T> ddg)
+        public static string DdgToTestDot<TLit, TOpInfo>(GenericGraphs.GraphWithSingleEnds<TLit, TOpInfo> ddg)
         {
             var edgesList = ddg.Graph.Edges
                 .Select(edge => edge.Source.Id.ToString() + " -> " + edge.Target.Id.ToString())

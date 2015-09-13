@@ -10,26 +10,26 @@ open BidirectGraphFuns
 
 /// Data depencendency graph. DDG's root always has StarNode type
 /// and end has ExitNode type
-type DDG<'Lit> = GraphWithSingleEnds<'Lit>
+type DDG<'Lit, 'OpInfo> = GraphWithSingleEnds<'Lit, 'OpInfo>
 
 /// IsVisited part of the DFS algo specific for DDG
-let ddgIsVisited (n: GraphNode<_>) v = Set.contains n.Id v
+let ddgIsVisited (n: GraphNode<_,_>) v = Set.contains n.Id v
 
 /// MakeVisited part of the DFS algo specific for DDG
-let ddgMakeVisited (n: GraphNode<_>) v = Set.add n.Id v
+let ddgMakeVisited (n: GraphNode<_,_>) v = Set.add n.Id v
 
 let private exitNodeExpectedMsg = "Node of ExitNode type expected"
 let private findTailRecCalls functionName = function
     | { Id = _; Type = ExitNode(preExits) } ->
         let isRecCallNode = function 
             | { Id = _; 
-                Type = Operation(Arbitrary({ Name = operationName; Info = _ }), _) } ->
+                Type = Operation(Arbitrary(Some { Name = operationName; Info = _ }), _) } ->
                 operationName = functionName
             | _ -> false
         preExits |> List.filter isRecCallNode
     | _ -> failwith exitNodeExpectedMsg
 
-let private removeRecCallToExitEdges (ddg: DDG<_>) recCallNodes newExitNodeId =
+let private removeRecCallToExitEdges (ddg: DDG<_,_>) recCallNodes newExitNodeId =
     let recCallNodesSet = 
         recCallNodes 
         |> List.map (fun n -> n.Id)
@@ -55,15 +55,15 @@ let private basicDdgDfsParts preProcess processNode getNextNodes postProcess = {
     GetNextNodes = getNextNodes
     PostProcess = postProcess }
 
-let private showNextNodesStartNode node (graph: BidirectGraph<_>) =
+let private showNextNodesStartNode node (graph: BidirectGraph<_,_>) =
     let nodePreds = preds node graph |> List.ofSeq
     match nodePreds |> List.tryFind (fun n -> n.Type = StartNode) with
     | Some(_) -> []
     | _ -> nodePreds
 
-let private copyBranch (graph: BidirectGraph<_>) (exitBranchEnd: GraphNode<_>) startId =
+let private copyBranch (graph: BidirectGraph<_,_>) (exitBranchEnd: GraphNode<_,_>) startId =
     let state = ([], [], startId)
-    let copyNode (node: GraphNode<_>) (edgesAcc, nodesAcc, lastId) =
+    let copyNode (node: GraphNode<_,_>) (edgesAcc, nodesAcc, lastId) =
         let copyOfNode = { Id = lastId + 1; Type = node.Type }
         copyOfNode, (edgesAcc, nodesAcc, lastId + 1)
     let addEdge succ par (edgesAcc, nodesAcc, lastId) =
@@ -85,7 +85,7 @@ let private copyBranch (graph: BidirectGraph<_>) (exitBranchEnd: GraphNode<_>) s
 
 let private emptyExitBranchMsg = 
     "exit branch has only exit node, graph structure assumption failed"
-let private copyExitBranch (graph: BidirectGraph<_>) (exitBranchEnd: GraphNode<_>) startId =
+let private copyExitBranch (graph: BidirectGraph<_,_>) (exitBranchEnd: GraphNode<_,_>) startId =
     let edges, nodes, lastId = copyBranch graph exitBranchEnd startId
     if List.length nodes = 1 && List.length edges = 0
     then failwith emptyExitBranchMsg
@@ -102,24 +102,24 @@ let private copyExitBranch (graph: BidirectGraph<_>) (exitBranchEnd: GraphNode<_
         let graph = { Graph = graph; Exit = newExit; Roots = roots }
         graph, lastId + 1
 
-let private onlyVisitDdgDfs node (nextNodes: GraphNode<_> -> list<GraphNode<_>>) =
+let private onlyVisitDdgDfs node (nextNodes: GraphNode<_,_> -> list<GraphNode<_,_>>) =
     let doNothing n s = s
     let getNextNodes n s = nextNodes n, s
     let algoParts = basicDdgDfsParts doNothing doNothing getNextNodes doNothing
     fst <| dfs algoParts node Set.empty ()
 
-let private collectNodesDdgDfs node (nextNodes: GraphNode<_> -> list<GraphNode<_>>) =
-    let state: list<GraphNode<_>> = []
+let private collectNodesDdgDfs node (nextNodes: GraphNode<_,_> -> list<GraphNode<_,_>>) =
+    let state: list<GraphNode<_,_>> = []
     let doNothing n s = s
     let processNode = List.cons
     let getNextNodes n s = nextNodes n, s
     let algoParts = basicDdgDfsParts doNothing processNode getNextNodes doNothing
     snd <| dfs algoParts node Set.empty state
 
-let private removeExitBranch (graph: BidirectGraph<_>) exitBranchEnd recBranchEnd =
+let private removeExitBranch (graph: BidirectGraph<_,_>) exitBranchEnd recBranchEnd =
     let getNextNodes node = showNextNodesStartNode node graph
     let recBranchNodes = onlyVisitDdgDfs recBranchEnd getNextNodes
-    let getNextNodes (node: GraphNode<_>) =
+    let getNextNodes (node: GraphNode<_,_>) =
         if Set.contains node.Id recBranchNodes
         then []
         else showNextNodesStartNode node graph
@@ -152,7 +152,7 @@ let private createAssignsChain paramNames startId =
     let chainEnd = Seq.last chainNodes
     { Graph = chainGraph; Root = chainBeg; Exit = chainEnd }, lastId
 
-let private replaceRecCallWithAssigns (recCallBranch: GraphWithSingleRoot<_>) paramNames (startId: int) =
+let private replaceRecCallWithAssigns (recCallBranch: GraphWithSingleRoot<_,_>) paramNames (startId: int) =
     let exitPredsList = 
         recCallBranch.Exits 
         |> Seq.map (fun e -> preds e recCallBranch.Graph |> List.ofSeq)
@@ -178,7 +178,7 @@ let private replaceRecCallWithAssigns (recCallBranch: GraphWithSingleRoot<_>) pa
     let graph = { Graph = recCallBranch.Graph; Root = recCallBranch.Root; Exits = newExits }
     graph, lastId
 
-let private toLoop startId (recCallBranch: GraphWithSingleRoot<_>) (exitBranch: GraphWithSingleExit<_>) =
+let private toLoop startId (recCallBranch: GraphWithSingleRoot<_,_>) (exitBranch: GraphWithSingleExit<_,_>) =
     let resGraph = recCallBranch.Graph
     let resRoot = recCallBranch.Root
     let resExit = exitBranch.Exit
@@ -207,14 +207,14 @@ let private toLoop startId (recCallBranch: GraphWithSingleRoot<_>) (exitBranch: 
     { Graph = resGraph; Root = resRoot; Exit = resExit }
 
 /// Returns true if passed DDG represents tail recursive method or function
-let isTailRecursive functionName (ddg: DDG<_>) =
+let isTailRecursive functionName (ddg: DDG<_,_>) =
     match findTailRecCalls functionName ddg.Exit with
     | [] -> false
     | _ -> true
 
 /// Turns passed tail recursive DDG to DDG with loop. It makes approximation algo able to 
 /// achieve automata building fixpoint (for tail recursive DDG it will not be acheved)
-let tailRecursionToLoop functionName paramNames (ddg: DDG<_>): DDG<_> =
+let tailRecursionToLoop functionName paramNames (ddg: DDG<_,_>): DDG<_,_> =
     match findTailRecCalls functionName ddg.Exit with
     | [] -> failwith "graph is not tail recursive"
     | recCallNodes -> 

@@ -15,12 +15,12 @@ open ResharperCsharpTreeUtils
 open ArbitraryOperation
 open ResharperCfgAdditionalInfo
 
-let private (|LoopCfe|_|) (info: ConvertInfo<_>) (cfe: IControlFlowElement) =
+let private (|LoopCfe|_|) (info: ConvertInfo<_,_>) (cfe: IControlFlowElement) =
     match info.LoopNodes.TryGetValue cfe with
     | true, loopInfo -> Some(loopInfo)
     | _ -> None
 
-let private getGenericNodeId (treeNode: ITreeNode) (info: ConvertInfo<_>) = 
+let private getGenericNodeId (treeNode: ITreeNode) (info: ConvertInfo<_,_>) = 
     let res = Dictionary.getMappingToOne treeNode info.AstToGenericNodes
     res.Id
 
@@ -31,7 +31,7 @@ let private badIRefExprCastMsg =
     "unable to perform cast to IReferenceExpression"
 let private unexpectedInitializerTypeMsg =
     "unexpected initializer type in local variable declaration"
-let private tryExtractNodeTypeInfo (node: ITreeNode) (info: ConvertInfo<_>) =
+let private tryExtractNodeTypeInfo (node: ITreeNode) (info: ConvertInfo<_,_>) =
     match node with
     | :? IAssignmentExpression as assignExpr 
         when (assignExpr.Dest :? IReferenceExpression)
@@ -89,11 +89,9 @@ let private tryExtractNodeTypeInfo (node: ITreeNode) (info: ConvertInfo<_>) =
         if isReplaceMethod methodName (callTargetRefExpr.Type())
         then Some(Operation(Replace, depIDs))
         else
-            let operationInfo =
-                match tryGetMethodDeclaration invocExpr with
-                | Some(methodDecl) -> CsharpArbitraryFun(methodDecl)
-                | _ -> NoInfo
-            let operation = { Name = methodName; Info = operationInfo }
+            let operation = 
+                tryGetMethodDeclaration invocExpr 
+                |> Option.bind (fun methDecl -> Some { Name = methodName; Info = methDecl })
             Some(Operation(Arbitrary(operation), depIDs))
     | :? IReferenceExpression as refExpr ->
         let name = refExpr.NameIdentifier.Name
@@ -107,7 +105,7 @@ let private tryExtractNodeTypeInfo (node: ITreeNode) (info: ConvertInfo<_>) =
     | _ -> None
 
 let private returnStmtExpressionMsg = "unsupported expression in return statement is met"
-let private toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo<_>) = 
+let private toGenericNode (cfe: IControlFlowElement) nodeId (info: ConvertInfo<_,_>) = 
     let nType = 
         match cfe with
         | LoopCfe info _ -> LoopNode

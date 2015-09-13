@@ -8,9 +8,9 @@ open DDG
 
 /// Generic CFG. Contains graph itself and 
 /// the name of a function it represents
-type GenericCFG<'Lit> = {
+type GenericCFG<'Lit, 'OpInfo> = {
     FunctionName: string
-    Graph: BidirectGraph<'Lit> }
+    Graph: BidirectGraph<'Lit, 'OpInfo> }
 
 module GenericCFGFuncs =
     open System.Collections.Generic
@@ -27,21 +27,21 @@ module GenericCFGFuncs =
         FunctionName = name
         Graph = BidirectGraphFuns.create () }
 
-    type private ConvertState<'Lit> = {
+    type private ConvertState<'Lit, 'OpInfo> = {
         Vars: Set<string>
         VisitedForks: Map<int, Set<string>>
         NodesToVisit: Set<int>
-        VisitedNodes: list<GraphNode<'Lit>> }
+        VisitedNodes: list<GraphNode<'Lit, 'OpInfo>> }
 
-    let private cfgToDdg (exitNode: GraphNode<_>) (cfg: GenericCFG<_>) = 
+    let private cfgToDdg (exitNode: GraphNode<_,_>) (cfg: GenericCFG<_,_>) = 
         let wrongCfgNodeTypeMsg = 
             "Cfg node was expected to be of ExitNode type case"
         let getExitVars = function
         | ExitNode(vars) -> vars
         | _ -> failwith wrongCfgNodeTypeMsg 
-        let removeUnreachable (cfg: BidirectGraph<_>) exitNode =
-            let isVisited (n: GraphNode<_>) v = Set.contains n.Id v
-            let makeVisited (n: GraphNode<_>) v = Set.add n.Id v
+        let removeUnreachable (cfg: BidirectGraph<_,_>) exitNode =
+            let isVisited (n: GraphNode<_,_>) v = Set.contains n.Id v
+            let makeVisited (n: GraphNode<_,_>) v = Set.add n.Id v
             let doNothing n s = s
             let getPrevNodes n s = preds n cfg |> List.ofSeq, s
             let dfsParts = {
@@ -56,8 +56,8 @@ module GenericCFGFuncs =
             |> List.ofSeq
             |> List.iter (fun n -> if not <| Set.contains n.Id visited then removeVertex cfg n)
             cfg
-        let rec findDdgNodes (cfg: BidirectGraph<_>) traverser (state: ConvertState<_>) =
-            let makeVisited (node: GraphNode<_>) (state: ConvertState<_>) =
+        let rec findDdgNodes (cfg: BidirectGraph<_,_>) traverser (state: ConvertState<_,_>) =
+            let makeVisited (node: GraphNode<_,_>) (state: ConvertState<_,_>) =
                 { state with VisitedNodes = node :: state.VisitedNodes }
             let node, traverser = nextNode cfg traverser
             let traverser, state =
@@ -113,9 +113,9 @@ module GenericCFGFuncs =
             if isFinishedMode traverser
             then state.VisitedNodes
             else findDdgNodes cfg traverser state
-        let removeNeedlessNodes (ddg: BidirectGraph<_>) (neededNodes: list<GraphNode<_>>) =
+        let removeNeedlessNodes (ddg: BidirectGraph<_,_>) (neededNodes: list<GraphNode<_,_>>) =
             let neededSet = neededNodes |> List.map (fun n -> n.Id) |> Set.ofList
-            let removeIfNotNeeded (node: GraphNode<_>) =
+            let removeIfNotNeeded (node: GraphNode<_,_>) =
                 if not <| Set.contains node.Id neededSet
                 then 
                     let inEdges = ddg.InEdges node
@@ -147,13 +147,13 @@ module GenericCFGFuncs =
         do removeNeedlessNodes ddg neededNodes
         { Graph = ddg; Root = ddgRoot; Exit = ddgExit }
 
-    let private addStartNode nodeId (cfg: GenericCFG<_>) =
+    let private addStartNode nodeId (cfg: GenericCFG<_,_>) =
         let newStartNode = { Id = nodeId; Type = StartNode }
         let curStartNodes = cfg.Graph.Vertices |> Seq.filter (fun v -> cfg.Graph.InDegree(v) = 0) |> List.ofSeq
         do cfg.Graph.AddVertex newStartNode |> ignore
         do curStartNodes |> List.iter (fun n -> cfg.Graph.AddEdge (Edge(newStartNode, n)) |> ignore)
 
-    let private addExitNode nodeId (targetNodes: list<GraphNode<_>>) (cfg: GenericCFG<_>) =
+    let private addExitNode nodeId (targetNodes: list<GraphNode<_,_>>) (cfg: GenericCFG<_,_>) =
         let newExitNode = { Id = nodeId; Type = ExitNode(targetNodes) }
         do cfg.Graph.AddVertex newExitNode |> ignore
         do targetNodes 
@@ -162,7 +162,7 @@ module GenericCFGFuncs =
         do targetNodes |> List.iter (fun n -> cfg.Graph.AddEdge (Edge(n, newExitNode)) |> ignore)
         newExitNode
 
-    let private ddgForNodes (nodes: list<GraphNode<_>>) (cfg: GenericCFG<_>) =
+    let private ddgForNodes (nodes: list<GraphNode<_,_>>) (cfg: GenericCFG<_,_>) =
         let nodeWithMaxId = Seq.maxBy (fun v -> v.Id) cfg.Graph.Vertices
         do addStartNode (nodeWithMaxId.Id + 1) cfg
         let newExitNode = addExitNode (nodeWithMaxId.Id + 2) nodes cfg
@@ -170,12 +170,12 @@ module GenericCFGFuncs =
 
     /// Extracts DDG from passed generic CFG for a given node in CFG as 
     /// a target
-    let ddgForNode (varRef: GraphNode<_>) (cfg: GenericCFG<_>) =
+    let ddgForNode (varRef: GraphNode<_,_>) (cfg: GenericCFG<_,_>) =
         ddgForNodes [varRef] cfg
 
     /// Extracts DDG from passed generic CFG. All the nodes with no
     /// successors are assumed as a target. Useful when DDG is needed for 
     /// method's or function's return statements
-    let ddgForExits (cfg: GenericCFG<_>) = 
+    let ddgForExits (cfg: GenericCFG<_,_>) = 
         let exitNodes = cfg.Graph.Vertices |> Seq.filter (fun v -> cfg.Graph.OutDegree(v) = 0)
         ddgForNodes (List.ofSeq exitNodes) cfg

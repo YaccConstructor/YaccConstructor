@@ -20,7 +20,7 @@ type BuildState<'a when 'a : equality> = {
     UnboundResults: Map<int, FSA<'a>> }
 
 /// Builds FSA for a given DDG.
-let buildAutomaton (ddg: DDG<_>) (initialFsaMap: FSAMap<_>) controlData approximate (fsaParams: FsaParams<_,_,_>) =
+let buildAutomaton (ddg: DDG<_,_>) (initialFsaMap: FSAMap<_>) controlData approximate (fsaParams: FsaParams<_,_>) =
     // exception messages
     let unsupportedCaseMsg = "unsupported case encountered"
     let unexpectedNodeMsg = "unexpected node type is encountered in automaton building"
@@ -48,11 +48,11 @@ let buildAutomaton (ddg: DDG<_>) (initialFsaMap: FSAMap<_>) controlData approxim
         let union fsa1 fsa2 = FSA.Union (fsa1, fsa2)
         mergeTwoFsaMasp union a1 a2
 
-    let widenTwoFsaMaps (a1: FSAMap<_>) (a2: FSAMap<_>) (fsaParams: FsaParams<_,_,_>) =
+    let widenTwoFsaMaps (a1: FSAMap<_>) (a2: FSAMap<_>) (fsaParams: FsaParams<_,_>) =
         let widenWithParams a1 a2 = FsaHelper.widen a1 a2 fsaParams
         mergeTwoFsaMasp widenWithParams a1 a2 
 
-    let fixpointAchieved (oldFsaMap: FSAMap<_>) (widenedFsaMap: FSAMap<_>) (fsaParams: FsaParams<_,_,_>) =
+    let fixpointAchieved (oldFsaMap: FSAMap<_>) (widenedFsaMap: FSAMap<_>) (fsaParams: FsaParams<_,_>) =
         let rec go (oldFsaList: list<string * FSA<_>>) (widenedFsaMap: FSAMap<_>) =
             match oldFsaList with
             | [] -> true
@@ -117,11 +117,11 @@ let buildAutomaton (ddg: DDG<_>) (initialFsaMap: FSAMap<_>) controlData approxim
             else inNodes |> List.map (fun n -> Map.find n.Id state.NodesToVarFsa)
         unionFsaMaps varsFsaList
 
-    let replace orig m r (fp: FsaParams<_,_,_>) =
+    let replace orig m r (fp: FsaParams<_,_>) =
         let args = (orig, m, r, fp.SeparatorSmbl1, fp.SeparatorSmbl2, fp.GetChar, fp.NewSymbol, fp.SymbolsAreEqual)
         FSA.Replace args
 
-    let processNode (node: GraphNode<_>) (varsFsaSoFar: FSAMap<_>) traverser (state: BuildState<_>) =
+    let processNode (node: GraphNode<_,_>) (varsFsaSoFar: FSAMap<_>) traverser (state: BuildState<_>) =
         let operands, curNodeVarsFsa, unboundRes, traverser =
             match node.Type with
             | Literal(value, literalNode) ->
@@ -163,14 +163,14 @@ let buildAutomaton (ddg: DDG<_>) (initialFsaMap: FSAMap<_>) controlData approxim
                     operands', varsFsaSoFar, unboundRes', traverser
                 | Arbitrary(info) -> 
                     let fsa, operands = 
-                        match approximate info state.Operands controlData fsaParams with
+                        match approximate info state.Operands controlData with
                         | Some(fsa), ops -> fsa, ops
                         | _ -> FsaHelper.anyWordsFsa fsaParams, state.Operands
                     let operands' = fsa :: operands
                     let unboundRes' = Map.add node.Id fsa state.UnboundResults
                     operands', varsFsaSoFar, unboundRes', traverser
             | ExitNode(nodes) ->
-                let getPreExitNodeFsa (node: GraphNode<_>) =
+                let getPreExitNodeFsa (node: GraphNode<_,_>) =
                     match node.Type with
                     | VarRef(name) -> Map.find name varsFsaSoFar
                     | Operation(_) 

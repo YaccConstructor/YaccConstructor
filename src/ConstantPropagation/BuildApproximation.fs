@@ -1,19 +1,12 @@
 ﻿/// Main module for building string embedded languages regular approximation
 module BuildApproximation
 
-open JetBrains.ReSharper.Psi.CSharp.ControlFlow
-open JetBrains.ReSharper.Psi.Tree
-
 open ArbitraryOperation
-open CsharpCfgToGeneric
 open GenericGraphs
 open GenericCFG
 open DDG
 open FsaHelper
 open GenerateFsa
-open Utils.Dictionary
-open ResharperCsharpTreeUtils
-open CsharpApprxomationUtils
 open YC.FSA.GraphBasedFsa
 
 /// Contains control info for approximation algo. TargetFunction field
@@ -23,11 +16,12 @@ open YC.FSA.GraphBasedFsa
 /// If CurRecLevel >= 0 algorithm can process current function, and for every subsequent 
 /// recursive call CurRecLevel will be decreased by 1.
 /// LoggerState is used to log the approximation process
-type ControlData<'a when 'a: equality> = {
+type ControlData<'n, 'a, 'b when 'a: equality and 'b: equality> = {
     TargetFunction: string
-    TargetNode: ITreeNode
+    TargetNode: 'n
     CurRecLevel: int
-    LoggerState: Logger.LoggerState<'a> }
+    LoggerState: Logger.LoggerState<'b>
+    FsaParams: FsaParams<'a,'b> }
 
 /// Builds approximation of a given function or method if ControlData.CurRecLevel >= 0
 /// and "functionInfo" argument contains language specific info.
@@ -36,39 +30,43 @@ type ControlData<'a when 'a: equality> = {
 /// otherwise DDG is extracted for return statements of a method. Finally FSA is built for DDG
 /// and returned as a result. FSA building algorithm may lead to recursive call of "approximate" function
 /// if DDG contains other methods calls.
-let rec approximateCSharp (functionInfo: ArbitraryOperation) (stack: list<FSA<_>>) 
-                    (controlData: ControlData<_>) (fsaParams: FsaParams<_,_,_>) =
+let rec approximate
+        (extractLangSpecificCfg: ArbitraryOperationInfo<'OpInfo> -> 'SpecificCfg)
+        (toGenericCfg: 'SpecificCfg -> string -> GenericCFG<_,_> * 'ConvertInfo)
+        (extractTargetNode: 'Node -> 'ConvertInfo -> GraphNode<_,_>)
+        (getStringTypedParams: 'OpInfo -> seq<string>)
+        (bindArgsToParams: 'OpInfo -> list<FSA<_>> -> Map<string, FSA<_>> * list<FSA<_>>)
+        (operation: ArbitraryOperation<'OpInfo>) 
+        (stack: list<FSA<_>>) 
+        (controlData: ControlData<'Node, _, _>) =
     if controlData.CurRecLevel < 0
     then None, stack
     else 
-        match functionInfo.Info with
-        | NoInfo -> None, stack
-        | CsharpArbitraryFun (methodDecl) ->
-            let csharpCfg = nodeToCSharpCfg methodDecl
-            let methodName = methodDecl.NameIdentifier.Name
-            let genericCFG, convertInfo = toGenericCfg csharpCfg methodName
-            do Logger.logGenericCfg genericCFG.Graph methodName controlData.LoggerState
+        match operation with
+        | None -> None, stack
+        | Some (operationInfo) ->
+            let languageSpecificCfg = extractLangSpecificCfg operationInfo
+            let genericCFG, convertInfo = toGenericCfg languageSpecificCfg operationInfo.Name
+            do Logger.logGenericCfg genericCFG.Graph operationInfo.Name controlData.LoggerState
             let ddg =
-                if methodName = controlData.TargetFunction
+                if operationInfo.Name = controlData.TargetFunction
                 then 
-                    let targetNode = getMappingToOne controlData.TargetNode convertInfo.AstToGenericNodes
+                    let targetNode = extractTargetNode controlData.TargetNode convertInfo
                     GenericCFGFuncs.ddgForNode targetNode genericCFG
                 else GenericCFGFuncs.ddgForExits genericCFG
-            do Logger.logPreDdg ddg.Graph methodName controlData.LoggerState
+            do Logger.logPreDdg ddg.Graph operationInfo.Name controlData.LoggerState
             let ddg =
-                if isTailRecursive methodName ddg
+                if isTailRecursive operationInfo.Name ddg
                 then 
-                    let stringParams = getStringTypedParams methodDecl |> List.ofSeq
-                    tailRecursionToLoop methodName stringParams ddg
+                    let stringParams = getStringTypedParams operationInfo.Info |> List.ofSeq
+                    tailRecursionToLoop operationInfo.Name stringParams ddg
                 else ddg
-            do Logger.logDdg ddg.Graph methodName controlData.LoggerState
-            let initFsaMap, restStack = bindArgsToParams methodDecl stack
+            do Logger.logDdg ddg.Graph operationInfo.Name controlData.LoggerState
+            let initFsaMap, restStack = bindArgsToParams operationInfo.Info stack
             let controlData = { controlData with CurRecLevel = controlData.CurRecLevel - 1 }
-            let fsa = buildAutomaton ddg initFsaMap controlData approximateCSharp fsaParams
-            do Logger.logFsa fsa methodName controlData.LoggerState
+            let approimateForRecCall = 
+                approximate 
+                    extractLangSpecificCfg toGenericCfg extractTargetNode getStringTypedParams bindArgsToParams
+            let fsa = buildAutomaton ddg initFsaMap controlData approimateForRecCall controlData.FsaParams
+            do Logger.logFsa fsa operationInfo.Name controlData.LoggerState
             Some(fsa), restStack
-        //| _ -> failwith "wrong operation info type"
-
-let rec approximateJs (functionInfo: ArbitraryOperation) (stack: list<FSA<_>>) 
-                    (controlData: ControlData<_>) (fsaParams: FsaParams<_,_,_>) =
-    None, stack

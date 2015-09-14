@@ -8,7 +8,7 @@
     <ProjectGuid>d21242ef-c310-4b89-a9aa-cfd1c2b34531</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>RegularApproximation</RootNamespace>
-    <AssemblyName>RegularApproximation</AssemblyName>
+    <AssemblyName>YC.RegularApproximation</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>RegularApproximation</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>

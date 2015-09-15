@@ -40,7 +40,6 @@
     <Compile Include="GenericGraphs.fs" />
     <Compile Include="DDG.fs" />
     <Compile Include="GenericCFG.fs" />
-    <Compile Include="FsaHelper.fs" />
     <Compile Include="GenerateFsa.fs" />
     <Compile Include="Logger.fs" />
     <Compile Include="BuildApproximation.fs" />

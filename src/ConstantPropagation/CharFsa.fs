@@ -5,7 +5,6 @@ open Microsoft.FSharp.Collections
 
 open YC.FSA.FsaApproximation
 open YC.FSA.GraphBasedFsa
-open FsaHelper
 open JetBrains.ReSharper.Psi.CSharp.Tree
 
 type FsaState<'Lit> = char * Position<'Lit>
@@ -44,3 +43,10 @@ let charFsaParams = {
     SymbolsAreEqual = symbolsAreEqual
     SeparatorSmbl1 = separatorChar1
     SeparatorSmbl2 = separatorChar2 }
+
+let toDot (fsa: FSA<FsaState<_>>) path =
+    let stateToString (st: char * 'b) =
+        let ch = fst st
+        let p = snd st
+        sprintf "%c" ch
+    fsa.PrintToDOT (path, stateToString)

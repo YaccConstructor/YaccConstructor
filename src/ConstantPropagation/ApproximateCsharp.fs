@@ -69,7 +69,7 @@ let rec approximateCSharp
 
 let private buildFsaForMethod methodDecl target recursionMaxLevel fsaParams logger =
     let stringParamsNum = Seq.length <| getStringTypedParams methodDecl
-    let stack = List.replicate stringParamsNum <| FsaHelper.anyWordsFsa fsaParams
+    let stack = List.replicate stringParamsNum <| FSA<_>.CreateAnyWordsFsa fsaParams
     let methodName = methodDecl.NameIdentifier.Name
     let controlInfo = { 
         TargetFunction = methodName; 
@@ -103,7 +103,7 @@ let ApproximateFileWithParams (file: ICSharpFile) recursionMaxLevel hotspotInfoL
 /// Finds hotspots in the given file and builds approximation
 /// for them, starting only from enclosing method. Logs approximation process
 let ApproximateFileWithLogging (file: ICSharpFile) recursionMaxLevel hotspotInfoList =
-    let loggerSt = Logger.create Utils.myDebugFilePath true FsaHelper.toDot
+    let loggerSt = Logger.create Utils.myDebugFilePath true CharFsa.toDot
     ApproximateFileWithParams file recursionMaxLevel hotspotInfoList CharFsa.charFsaParams loggerSt
 
 /// Finds hotspots in the given file and builds approximation

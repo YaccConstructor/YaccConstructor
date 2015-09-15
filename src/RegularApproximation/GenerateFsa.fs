@@ -10,7 +10,6 @@ open YC.FSA.FsaApproximation
 open Utils
 open GraphUtils.TopoTraverser
 open GenericGraphs.BidirectTopoDownTraverser
-open FsaHelper
 
 type FSAMap<'a when 'a : equality> = Map<string, FSA<'a>>
 
@@ -49,7 +48,7 @@ let buildAutomaton (ddg: DDG<_,_>) (initialFsaMap: FSAMap<_>) controlData approx
         mergeTwoFsaMasp union a1 a2
 
     let widenTwoFsaMaps (a1: FSAMap<_>) (a2: FSAMap<_>) (fsaParams: FsaParams<_,_>) =
-        let widenWithParams a1 a2 = FsaHelper.widen a1 a2 fsaParams
+        let widenWithParams a1 a2 = FSA<_>.Widen (a1, a2, fsaParams)
         mergeTwoFsaMasp widenWithParams a1 a2 
 
     let fixpointAchieved (oldFsaMap: FSAMap<_>) (widenedFsaMap: FSAMap<_>) (fsaParams: FsaParams<_,_>) =
@@ -59,7 +58,7 @@ let buildAutomaton (ddg: DDG<_,_>) (initialFsaMap: FSAMap<_>) controlData approx
             | (varName, oldFsa) :: tl ->
                 match Map.tryFind varName widenedFsaMap with
                 | Some(widenedFsa) -> 
-                    if FsaHelper.isSubFsa widenedFsa oldFsa fsaParams
+                    if FSA<_>.IsSubFsa (widenedFsa, oldFsa, fsaParams)
                     then go tl widenedFsaMap
                     else false
                 | None -> failwith fixpointComputationProblemMsg
@@ -165,7 +164,7 @@ let buildAutomaton (ddg: DDG<_,_>) (initialFsaMap: FSAMap<_>) controlData approx
                     let fsa, operands = 
                         match approximate info state.Operands controlData with
                         | Some(fsa), ops -> fsa, ops
-                        | _ -> FsaHelper.anyWordsFsa fsaParams, state.Operands
+                        | _ -> FSA<_>.CreateAnyWordsFsa fsaParams, state.Operands
                     let operands' = fsa :: operands
                     let unboundRes' = Map.add node.Id fsa state.UnboundResults
                     operands', varsFsaSoFar, unboundRes', traverser

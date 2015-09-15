@@ -5,7 +5,6 @@ open ArbitraryOperation
 open GenericGraphs
 open GenericCFG
 open DDG
-open FsaHelper
 open GenerateFsa
 open YC.FSA.GraphBasedFsa
 

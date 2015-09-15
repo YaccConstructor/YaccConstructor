@@ -79,7 +79,7 @@ let private build (jsCfg: IJsControlFlowGraph) =
     let fsa = buildAutomaton ddg initFsaMap controlData approximateJs CharFsa.charFsaParams
     // for debug
     let path = Utils.myDebugFilePath ("fsa_" + methodName + ".dot")
-    FsaHelper.toDot fsa path
+    CharFsa.toDot fsa path
     // end
     fsa
 

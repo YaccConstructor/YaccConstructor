@@ -9,7 +9,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>RNGLR.EBNF.DFAParser.SimpleTest</RootNamespace>
     <AssemblyName>YC.RNGLR.EBNF.DFAParser.SimpleTest</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
     <Name>RNGLR.EBNF.DFAParser.SimpleTest</Name>
@@ -17,29 +17,7 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <Tailcalls>false</Tailcalls>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\RNGLR.EBNF.DFAParser.SimpleTest.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <Tailcalls>true</Tailcalls>
-    <OutputPath>..\..\Bin\Release\v40\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\RNGLR.EBNF.DFAParser.SimpleTest.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
+  <Import Project="../YC.targets" />
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
@@ -58,6 +36,10 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="LexCommon.fs" />
+    <None Include="App.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="AlternativeInMiddle.yrd" />
     <None Include="CalcEBNF.yrd" />
     <None Include="Choice.yrd" />
     <None Include="ComplexRightNull.yrd" />
@@ -71,6 +53,7 @@
     <None Include="SimpleSome.yrd" />
     <None Include="StackingConflict.yrd" />
     <None Include="TwoEpsilonsMiddle.yrd" />
+    <Compile Include="AlternativeInMiddle.yrd.fs" />
     <Compile Include="CalcEBNF.yrd.fs" />
     <Compile Include="Choice.yrd.fs" />
     <Compile Include="ComplexRightNull.yrd.fs" />
@@ -88,20 +71,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RNGLR.EBNF.DFAParser\RNGLR.EBNF.DFAParser.fsproj">
-      <Name>RNGLR.EBNF.DFAParser</Name>
-      <Project>{b343a9c6-170b-48e9-8296-771f874675dc}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-    <Reference Include="mscorlib" />
-    <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
     <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
       <Name>Common.AST</Name>
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
@@ -112,6 +81,24 @@
       <Project>{e7f2f65a-94bf-4681-8bba-e5b69521e5c3}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\RNGLR.EBNF.DFAParser\RNGLR.EBNF.DFAParser.fsproj">
+      <Name>RNGLR.EBNF.DFAParser</Name>
+      <Project>{b343a9c6-170b-48e9-8296-771f874675dc}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="FSharp.Core">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\FSharp\3.0\Runtime\v4.0\FSharp.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

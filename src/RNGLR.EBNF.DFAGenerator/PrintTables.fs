@@ -447,7 +447,7 @@ let printTablesEBNF
         printBr ""
 
         print "let defaultAstToDot = "
-        printBrInd 0 "(fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)"
+        printBrInd 0 "(fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber None leftSide)"
 
         printBr ""
 

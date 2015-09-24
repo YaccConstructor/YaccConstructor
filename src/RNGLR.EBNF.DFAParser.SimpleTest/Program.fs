@@ -41,6 +41,18 @@ type ``RNGLREBNF parser tests with simple lexer`` () =
 //        wr.Close()
 
     [<Test>]
+    member test.``First alternative in the middle``() =
+        let parser = RNGLR.EBNF.DFAParserAlternativeInMiddle.buildAst
+        let file = "AlternativeInMiddle1.txt"
+        runTest parser file
+
+    [<Test>]
+    member test.``Second alternative in the middle``() =
+        let parser = RNGLR.EBNF.DFAParserAlternativeInMiddle.buildAst
+        let file = "AlternativeInMiddle2.txt"
+        runTest parser file
+    
+    [<Test>]
     member test.``CalcEBNF`` () = 
         let parser = RNGLR.EBNF.DFAParserCalcEBNF.buildAst
         let file = "CalcEBNF.txt"
@@ -246,10 +258,5 @@ type ``RNGLREBNF parser tests with simple lexer`` () =
 
 [<EntryPoint>]
 let main argv = 
-    let parser = RNGLR.EBNF.DFAParserChoice.buildAst
-    let path = dir + "Choice.txt"
-    let start = System.DateTime.Now
-    match run path parser with
-        | Error (num, tok, err, _) -> printErr (num, tok, err)
-        | Success (tree, _) -> printfn "%A" (System.DateTime.Now - start)
+    (new ``RNGLREBNF parser tests with simple lexer``()).``CalcEBNF``();
     0 // return an integer exit code

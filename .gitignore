@@ -441,3 +441,12 @@ Tests/AbstractRNGLR/DOT/_sppf.dot*
 Tests/AbstractRNGLR/Inputs/*.pdf
 Tests/RNGLR/sppf.dot*
 src/RNGLR.EBNFParser.SimpleTest/res.dot
+src/RNGLR.EBNF.DFAParser.SimpleTest/CalcEBNF.yrd.fs
+src/RNGLR.EBNF.DFAParser.SimpleTest/ManyAndOne.yrd.fs
+src/RNGLR.EBNF.DFAParser.SimpleTest/out1.txt
+src/RNGLR.EBNF.DFAParser.SimpleTest/res.dot
+src/RNGLR.EBNF.DFAParser.SimpleTest/RightNull.yrd.fs
+src/RNGLR.EBNF.DFAParser.SimpleTest/SimpleOpt.yrd.fs
+src/RNGLR.EBNF.DFAParser.SimpleTest/SimpleSome.yrd.fs
+src/RNGLR.EBNF.DFAParser.SimpleTest/TwoEpsilonsMiddle.yrd.fs
+src/RNGLR.EBNF.DFAParser.SimpleTest/Choice.yrd.fs

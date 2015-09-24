@@ -244,10 +244,8 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
                             destStates_arr.[!dsIter] <- destState.Key, destState.Value
                             incr dsIter
                         let newVertex : Vertex<_,_> = dfsLALR destStates_arr
-                        //TODO: here's an error - should id edges by symbols on them, not destination
-                        //fix it after find out, why code gives false positive
-                        if not <| wasEdge.[vertex.label].Contains newVertex.label then
-                            wasEdge.[vertex.label] <- wasEdge.[vertex.label].Add newVertex.label
+                        if not <| wasEdge.[vertex.label].Contains i then
+                            wasEdge.[vertex.label] <- wasEdge.[vertex.label].Add i
                             vertex.addEdge <| new Edge<_,_>(newVertex, i)
         decr dfsDepth
         vertex

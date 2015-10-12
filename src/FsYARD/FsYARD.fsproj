@@ -86,12 +86,6 @@
       <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="YC.FsYacc.0.0.6.131-GLLBranch-ci">
-      <HintPath>..\packages\YC.Tools.0.0.6.131-GLLBranch-ci\lib\net40\YC.FsYacc.0.0.6.131-GLLBranch-ci.exe</HintPath>
-    </Reference>
-    <Reference Include="YC.Helper.0.0.6.131-GLLBranch-ci">
-      <HintPath>..\packages\YC.Tools.0.0.6.131-GLLBranch-ci\lib\net40\YC.Helper.0.0.6.131-GLLBranch-ci.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!--UsingTask AssemblyFile="bin/Release/FsYARD.exe" TaskName="FsYard" />

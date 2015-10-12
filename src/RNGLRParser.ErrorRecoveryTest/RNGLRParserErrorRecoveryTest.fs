@@ -26,6 +26,8 @@ let inline translate (f : TranslateArguments<_,_> -> 'b -> 'c) (ast : 'b) =
     }
     f args ast
 
+let needPrintToDot = false
+
 [<TestFixture>]
 type ``RNGLR error recovery tests`` () =
 
@@ -39,7 +41,8 @@ type ``RNGLR error recovery tests`` () =
             printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
             mAst.PrintAst() 
-            RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc error after right brace.dot"
+            if needPrintToDot 
+            then RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc error after right brace.dot"
             
     [<Test>]
     member test.``Calc error inside in braces``() =
@@ -51,7 +54,8 @@ type ``RNGLR error recovery tests`` () =
             printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
             mAst.PrintAst() 
-            RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc error inside in braces.dot"                          
+            if needPrintToDot 
+            then RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc error inside in braces.dot"                          
 
     [<Test>]
     member test.``Calc error inside in braces2``() =
@@ -63,7 +67,8 @@ type ``RNGLR error recovery tests`` () =
             printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
             mAst.PrintAst() 
-            RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc error inside in braces2.dot"
+            if needPrintToDot 
+            then RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc error inside in braces2.dot"
 
     [<Test>]
     member test.``Calc missing left brace``() =
@@ -75,7 +80,8 @@ type ``RNGLR error recovery tests`` () =
             printErr (num, tok, err)
         | Parser.Success (mAst, _ ,_) ->
             mAst.PrintAst() 
-            RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc missing left brace.dot"
+            if needPrintToDot 
+            then RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc missing left brace.dot"
 
     [<Test>]
     member test.``Calc missing operand``() =
@@ -87,7 +93,8 @@ type ``RNGLR error recovery tests`` () =
             printErr (num, tok, err)
         | Parser.Success (mAst, _ ,_) ->
             mAst.PrintAst() 
-            RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc missing operand.dot"
+            if needPrintToDot 
+            then RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc missing operand.dot"
 
     //[<Test>]
     member test.``Calc missing right brace``() = 
@@ -99,7 +106,8 @@ type ``RNGLR error recovery tests`` () =
             printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
             mAst.PrintAst()
-            RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc missing right brace.dot"
+            if needPrintToDot 
+            then RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc missing right brace.dot"
 
     [<Test>]
     member test.``Calc no operand in the end``() = 
@@ -111,7 +119,8 @@ type ``RNGLR error recovery tests`` () =
             printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
             mAst.PrintAst()
-            RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc no operand in the end.dot"
+            if needPrintToDot 
+            then RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc no operand in the end.dot"
         
     [<Test>]
     member test.``Many reductions before error``() = 
@@ -123,7 +132,8 @@ type ``RNGLR error recovery tests`` () =
             printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
             mAst.PrintAst()
-            RNGLR.ParseManyReductions.defaultAstToDot mAst "Many reductions.dot"
+            if needPrintToDot 
+            then RNGLR.ParseManyReductions.defaultAstToDot mAst "Many reductions.dot"
 
     [<Test>]
     member test.``Eps error in the end``() = 
@@ -135,53 +145,9 @@ type ``RNGLR error recovery tests`` () =
             printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
             mAst.PrintAst()
-            RNGLR.ParseErrorToEps.defaultAstToDot mAst "Eps error in the end.dot"
+            if needPrintToDot 
+            then RNGLR.ParseErrorToEps.defaultAstToDot mAst "Eps error in the end.dot"
     
-   // [<Test>]
-    member test.``Error to epsilon translate``() = 
-        let parser = RNGLR.ParseErrorToEpsilonTranslate.buildAst
-        let path = dir + "Error to epsilon translate.txt"
-
-        match run path parser with 
-        | Parser.Error (num, tok, err, debugs, _) -> 
-            printErr (num, tok, err)
-        | Parser.Success (mAst, _, errors) ->
-            mAst.PrintAst()
-            RNGLR.ParseErrorToEpsilonTranslate.defaultAstToDot mAst "Error to epsilon translate.dot"
-            let res = translate RNGLR.ParseErrorToEpsilonTranslate.translate mAst errors
-            printfn "res %A" res
-            Assert.AreEqual([-1], res)
-    
-    [<Test>]
-    member test.``Primitive translate``() = 
-        let parser = RNGLR.ParsePrimitiveErrorTranslate.buildAst
-        let path = dir + "Primitive translate.txt"
-
-        match run path parser with 
-        | Parser.Error (num, tok, err, debugs, _) -> 
-            printErr (num, tok, err)
-        | Parser.Success (mAst, _, errors) ->
-            mAst.PrintAst()
-            RNGLR.ParsePrimitiveErrorTranslate.defaultAstToDot mAst "Eps error in the end.dot"
-            let res = translate RNGLR.ParsePrimitiveErrorTranslate.translate mAst errors
-            printfn "res : %A" res
-            Assert.AreEqual([-1], res)
-
-    (*[<Test>]
-    member test.``Error to epsilon translate``() = 
-        let parser = RNGLR.ParsePrimitiveErrorTranslate.buildAst
-        let path = dir + "Primitive translate2.txt"
-
-        match run path parser with 
-        | Parser.Error (num, tok, err, debugs) ->
-            printErr (num, tok, err)
-        | Parser.Success (mAst, _, errors) ->
-            mAst.PrintAst()
-            RNGLR.ParsePrimitiveErrorTranslate.defaultAstToDot mAst "Error to epsilon translate.dot"
-            let res = translate RNGLR.ParsePrimitiveErrorTranslate.translate mAst errors
-            printfn "res : %A" res
-            Assert.AreEqual([-1], res)*)
-
     [<Test>]
     member test.``Ambiguous``() = 
         let parser = RNGLR.ParseAmbiguous.buildAst
@@ -192,8 +158,12 @@ type ``RNGLR error recovery tests`` () =
             printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
             mAst.PrintAst()
-            RNGLR.ParseAmbiguous.defaultAstToDot mAst "Ambiguous.dot"
+            if needPrintToDot 
+            then RNGLR.ParseAmbiguous.defaultAstToDot mAst "Ambiguous.dot"
 
+[<TestFixture>]
+type ``RNGLR error recovery tests Semantics`` () =
+    
     [<Test>]
     member test.``PrintErrorInfo``() = 
         let parser = RNGLR.ParsePrintErrorInfo.buildAst
@@ -203,7 +173,8 @@ type ``RNGLR error recovery tests`` () =
         | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, errors) ->
            mAst.PrintAst()
-           RNGLR.ParsePrintErrorInfo.defaultAstToDot mAst "PrintErrorInfo.dot"
+           if needPrintToDot 
+           then RNGLR.ParsePrintErrorInfo.defaultAstToDot mAst "PrintErrorInfo.dot"
            let res = translate RNGLR.ParsePrintErrorInfo.translate mAst errors
            Assert.AreEqual([-3], res)
             
@@ -216,9 +187,43 @@ type ``RNGLR error recovery tests`` () =
         | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, errors) ->
            mAst.PrintAst()
-           RNGLR.ParsePrintErrorInfoEOF.defaultAstToDot mAst "PrintErrorInfo.dot"
+           if needPrintToDot 
+           then RNGLR.ParsePrintErrorInfoEOF.defaultAstToDot mAst "PrintErrorInfo.dot"
            let res = translate RNGLR.ParsePrintErrorInfo.translate mAst errors
            Assert.AreEqual([-1], res)
+
+
+    [<Test>]
+    member test.``Primitive translate``() = 
+        let parser = RNGLR.ParsePrimitiveErrorTranslate.buildAst
+        let path = dir + "Primitive translate.txt"
+
+        match run path parser with 
+        | Parser.Error (num, tok, err, debugs, _) -> 
+            printErr (num, tok, err)
+        | Parser.Success (mAst, _, errors) ->
+            mAst.PrintAst()
+            if needPrintToDot 
+            then RNGLR.ParsePrimitiveErrorTranslate.defaultAstToDot mAst "Eps error in the end.dot"
+            let res = translate RNGLR.ParsePrimitiveErrorTranslate.translate mAst errors
+            printfn "res : %A" res
+            Assert.AreEqual([-1], res)
+
+    //[<Test>]
+    member test.``Error to epsilon translate``() = 
+        let parser = RNGLR.ParsePrimitiveErrorTranslate.buildAst
+        let path = dir + "Primitive translate2.txt"
+
+        match run path parser with 
+        | Parser.Error (num, tok, err, debugs, _) ->
+            printErr (num, tok, err)
+        | Parser.Success (mAst, _, errors) ->
+            mAst.PrintAst()
+            if needPrintToDot 
+            then RNGLR.ParsePrimitiveErrorTranslate.defaultAstToDot mAst "Error to epsilon translate.dot"
+            let res = translate RNGLR.ParsePrimitiveErrorTranslate.translate mAst errors
+            printfn "res : %A" res
+            Assert.AreEqual([-1], res)
 
 (*[<EntryPoint>]
 (new ``RNGLR error recovery tests``()).Ambiguous()*)
@@ -226,5 +231,5 @@ type ``RNGLR error recovery tests`` () =
 (*[<EntryPoint>]
 (new ``RNGLR error recovery tests``()).``Calc error inside in braces2``()*)
 
-[<EntryPoint>]
-(new ``RNGLR error recovery tests``()).``PrintErrorInfoEOF``()
+(*[<EntryPoint>]
+(new ``RNGLR error recovery tests``()).``PrintErrorInfo``()*)

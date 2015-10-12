@@ -13,12 +13,9 @@
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Calc.yrd" />
-    <Compile Include="BadLeftRecursion.yrd.fs" />
-    <Compile Include="SimpleLeftRecursion.yrd.fs" />
-    <Compile Include="SimpleRightRecursion.yrd.fs" />
     <Compile Include="SimpleAmb.yrd.fs" />
-    <Compile Include="Mixed.yrd.fs" />
     <Compile Include="LexCommon.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

@@ -26,7 +26,7 @@ type TargetLanguage =
 let printTables 
     (grammar : FinalGrammar) head (tables : Tables) (moduleName : string) 
     (tokenType : Map<_,_>) (res : System.Text.StringBuilder) targetLanguage 
-    _class positionType caseSensitive isAbstractParsingMode =
+    _class positionType caseSensitive isAbstractParsingMode isHighlihgtingMode =
     
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
@@ -236,6 +236,14 @@ let printTables
         print "]"
         printBr ""
 
+        if isHighlihgtingMode
+        then
+            printInd 0 "let getTerminalNames = ["
+            for i = indexator.termsStart to indexator.termsEnd do
+                print "\"%s\";" <| indexator.indexToTerm i
+            print "]"
+            printBr ""
+
         printBr "let mutable private cur = 0"
 
         print "let leftSide = "
@@ -255,11 +263,6 @@ let printTables
 
         printBr "let defaultAstToDot ="
         printBrInd 1 "(fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber %s leftSide)" (if isAbstractParsingMode then "(Some tokenData)" else "None")
-
-        printBr ""
-
-        printBr "let otherAstToDot ="
-        printBrInd 1 "(fun (tree : Yard.Generators.RNGLR.OtherSPPF.OtherTree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)"
 
         printBr ""
 
@@ -293,11 +296,11 @@ let printTables
 
         if isAbstractParsingMode
         then
-            printBr "let buildAstAbstract : (ParserInputGraph<'TokenType> -> Yard.Generators.ARNGLR.Parser.ParseResult<Token>) = "
+            printBr "let buildAstAbstract : (ParserInputGraph<Token> -> Yard.Generators.ARNGLR.Parser.ParseResult<Token>) = "
             printBrInd 1 "buildAstAbstract<Token> parserSource"
             printBr ""
         else
-            printBr "let buildAst : (seq<'TokenType> -> ParseResult<Token>) ="
+            printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
             printBrInd 1 "buildAst<Token> parserSource"
             printBr ""
 

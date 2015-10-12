@@ -3,8 +3,6 @@
 open Yard.Generators.RNGLR
 open Yard.Generators.Common.AST
 open NUnit.Framework
-open Yard.Generators
-open LexCommon
 open Microsoft.FSharp.Collections
 
 let run path astBuilder =
@@ -28,10 +26,10 @@ let inline translate (f : TranslateArguments<_,_> -> 'b -> 'c) (ast : 'b) =
 [<TestFixture>]
 type ``RNGLR parser tests with simple lexer`` () =
 
-    let translateAndCheck toDot (expected:List<_>) (ast:Tree<_>) file errors = 
+    let translateAndCheck toDot translateFunction (expected : List<_>) (ast : Tree<_>) file errors = 
         ast.PrintAst()
         toDot ast (file + ".dot")
-        let res = translate RNGLR.ParseOmit.translate ast errors
+        let res = translate translateFunction ast errors
         printfn "Result: %A" res
         Assert.AreEqual(expected, res)
 
@@ -75,27 +73,32 @@ type ``RNGLR parser tests with simple lexer`` () =
 
     [<Test>]
     member test.``Counter test - simple for translator``() =
-        runTest RNGLR.ParseCounter.buildAst "counter.txt" (translateAndCheck RNGLR.ParseCounter.defaultAstToDot [5])
+        runTest RNGLR.ParseCounter.buildAst "counter.txt" (translateAndCheck RNGLR.ParseCounter.defaultAstToDot RNGLR.ParseCounter.translate [5])
 
     [<Test>]
     member test.``Calc test - simple for translator``() =
-        runTest RNGLR.ParseCalc.buildAst "calc.txt" (translateAndCheck RNGLR.ParseCalc.defaultAstToDot <| List.replicate 8 105)
+        runTest RNGLR.ParseCalc.buildAst "calc.txt" (translateAndCheck RNGLR.ParseCalc.defaultAstToDot RNGLR.ParseCalc.translate <| List.replicate 8 105)
 
     [<Test>]
     member test.``Translate with Attributes``() =
-        runTest RNGLR.ParseAttrs.buildAst "attrs.txt" (translateAndCheck RNGLR.ParseAttrs.defaultAstToDot [48])
+        let processSuccess (mAst : Tree<_>) file errors = 
+            mAst.PrintAst()
+            let res = (translate RNGLR.ParseAttrs.translate mAst errors) 3 : int list
+            printfn "Result: %A" res
+            Assert.AreEqual([48], res)
+        runTest RNGLR.ParseAttrs.buildAst "attrs.txt" processSuccess
 
     [<Test>]
     member test.``Parse empty string``() =
-        runTest RNGLR.ParseEpsilon.buildAst "Epsilon.txt" (translateAndCheck RNGLR.ParseEpsilon.defaultAstToDot [3])
+        runTest RNGLR.ParseEpsilon.buildAst "Epsilon.txt" (translateAndCheck RNGLR.ParseEpsilon.defaultAstToDot RNGLR.ParseEpsilon.translate [3])
 
     [<Test>]
     member test.``If Then Else``() =
-        runTest RNGLR.ParseCond.buildAst "Cond.txt" (translateAndCheck RNGLR.ParseCond.defaultAstToDot [22])
+        runTest RNGLR.ParseCond.buildAst "Cond.txt" (translateAndCheck RNGLR.ParseCond.defaultAstToDot RNGLR.ParseCond.translate [22])
 
     [<Test>]
     member test.``Resolvers``() =
-        runTest RNGLR.ParseResolvers.buildAst "Resolvers.txt" (translateAndCheck RNGLR.ParseResolvers.defaultAstToDot [List.replicate 5 1])
+        runTest RNGLR.ParseResolvers.buildAst "Resolvers.txt" (translateAndCheck RNGLR.ParseResolvers.defaultAstToDot RNGLR.ParseResolvers.translate [List.replicate 5 1])
 
     [<Test>]
     member test.``Calculation order``() =
@@ -206,13 +209,14 @@ type ``RNGLR parser tests with simple lexer`` () =
     member test._Brackets() =
         runTest RNGLR._Brackets.buildAst "_Brackets.txt" printAst
 
-[<EntryPoint>]
+
+//[<EntryPoint>]
 let f x =
     if System.IO.Directory.Exists "dot" 
     then 
         System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
     else System.IO.Directory.CreateDirectory "dot" |> ignore
     let t = new ``RNGLR parser tests with simple lexer`` ()
-    t._Brackets ()
+    t.``Translate with Attributes`` ()
 
     0

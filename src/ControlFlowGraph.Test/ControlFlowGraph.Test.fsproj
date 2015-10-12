@@ -8,8 +8,10 @@
     <ProjectGuid>21e14216-02d5-4107-81b0-c30aaf3571b1</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>ControlFlowGraph.Test</RootNamespace>
-    <AssemblyName>ControlFlowGraph.Test</AssemblyName>
+    <AssemblyName>YC.ControlFlowGraph.Test</AssemblyName>
     <Name>ControlFlowGraph.Test</Name>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <PropertyGroup>
@@ -28,24 +30,49 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
     <Compile Include="ExtendedCalc.yrd.fs" />
     <Compile Include="If.yrd.fs" />
+    <Compile Include="Simple.yrd.fs" />
+    <Compile Include="TestHelper.fs" />
     <Compile Include="ControlFlowGraphTests.fs" />
-    <Content Include="App.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <None Include="packages.config" />
+    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <Reference Include="FSharp.Core">
+      <HintPath>..\packages\FSharp.Core.3.1.2.5\lib\net40\FSharp.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Collections">
+      <HintPath>..\packages\FSharpx.Collections.1.12.1\lib\net40\FSharpx.Collections.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Collections.Experimental">
+      <HintPath>..\packages\FSharpx.Collections.Experimental.1.12.1\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="QuickGraph">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="QuickGraph.Data">
+      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="QuickGraph.Graphviz">
+      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="QuickGraph.Serialization">
+      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Serialization.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -81,6 +108,12 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

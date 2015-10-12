@@ -1,6 +1,6 @@
 ﻿module YC.FST.AbstractLexing.Tests.CommonTestChecker
 
-//open AbstractParser.Tokens
+open AbstractParser.Tokens
 open YC.FST.AbstractLexing.Interpreter
 open YC.FSA.FsaApproximation
 open YC.FSA.GraphBasedFsa
@@ -12,7 +12,7 @@ open Graphviz4Net.Dot.AntlrParser
 open Graphviz4Net.Dot
 open System.IO
 
-let eof = AbstractParser.Tokens.RNGLR_EOF(new FSA<_>())   
+let eof = RNGLR_EOF(new FSA<_>())   
 
 let printTok =
      fun x -> string x  |> (fun s -> s.Split '+' |> Array.rev |> fun a -> a.[0])
@@ -34,46 +34,17 @@ let printBref printSmbString =
              
     fun x ->
         match x with
-            | AbstractParser.Tokens.NUMBER(gr) -> "NUM: " + printGr gr
-            | AbstractParser.Tokens.MINUS(gr) -> "MINUS: " + printGr gr
-            | AbstractParser.Tokens.LBRACE(gr) -> "LBRACE: " + printGr gr
-            | AbstractParser.Tokens.RBRACE(gr) -> "RBRACE: " + printGr gr
-            | AbstractParser.Tokens.DIV(gr) -> "DIV: " + printGr gr
-            | AbstractParser.Tokens.PLUS(gr) -> "PLUS: "  + printGr gr
-            | AbstractParser.Tokens.POW(gr)  -> "POW: "  + printGr gr
-            | AbstractParser.Tokens.MULT(gr) -> "MULT: " + printGr gr
-            | AbstractParser.Tokens.LITERAL(gr) -> "LITERAL: " + printGr gr
+            | NUMBER(gr) -> "NUM: " + printGr gr
+            | MINUS(gr) -> "MINUS: " + printGr gr
+            | LBRACE(gr) -> "LBRACE: " + printGr gr
+            | RBRACE(gr) -> "RBRACE: " + printGr gr
+            | DIV(gr) -> "DIV: " + printGr gr
+            | PLUS(gr) -> "PLUS: "  + printGr gr
+            | POW(gr)  -> "POW: "  + printGr gr
+            | MULT(gr) -> "MULT: " + printGr gr
+            | LITERAL(gr) -> "LITERAL: " + printGr gr
             | x -> string x  |> (fun s -> s.Split '+' |> Array.rev |> fun a -> a.[0])  
 
-let printBrefTSQL printSmbString =       
-    let printGr (gr:FSA<_>) = 
-        let strs = ref ""
-        for edge in gr.Edges do
-            strs := !strs + "[" + edge.Source.ToString() + ", " + 
-                                  "{" + (match edge.Tag with |Smbl x -> printSmbString x |_ -> "") + "}" + edge.Target.ToString() + "] ;"
-        !strs        
-             
-    fun x ->
-        match x with
-            | TSQLParserToken.DEC_NUMBER(gr) -> "NUM: " + printGr gr
-            | TSQLParserToken.L_comma_(gr) -> "COMMA: " + printGr gr
-            | TSQLParserToken.L_equal_(gr) -> "EQUAL: " + printGr gr
-            | TSQLParserToken.L_more_(gr) -> "MORE: " + printGr gr
-            | TSQLParserToken.L_less_(gr) -> "LESS: " + printGr gr
-            | TSQLParserToken.L_colon_(gr) -> "COLON: " + printGr gr
-            | TSQLParserToken.L_left_bracket_(gr) -> "LEFT_BR: " + printGr gr
-            | TSQLParserToken.L_right_bracket_(gr) -> "RIGHT_BR: " + printGr gr
-            | TSQLParserToken.L_plus_(gr) -> "PLUS: " + printGr gr
-            | TSQLParserToken.L_minus_(gr) -> "MINUS: " + printGr gr
-            | TSQLParserToken.L_star_(gr) -> "STAR: " + printGr gr
-            | TSQLParserToken.L_select(gr) -> "SELECT: " + printGr gr
-            | TSQLParserToken.L_from(gr) -> "FROM: " + printGr gr
-            | TSQLParserToken.L_where(gr) -> "WHERE: " + printGr gr
-            | TSQLParserToken.L_and_(gr) -> "AND: " + printGr gr
-            | TSQLParserToken.L_or_(gr) -> "OR: " + printGr gr
-            | TSQLParserToken.IDENT(gr) -> "IDENT: " + printGr gr
-            | TSQLParserToken.RNGLR_EOF(gr) -> "EOF: " + printGr gr
-            | x -> string x  |> (fun s -> s.Split '+' |> Array.rev |> fun a -> a.[0]) 
 
 let path baseInputGraphsPath name = System.IO.Path.Combine(baseInputGraphsPath,name)
 
@@ -106,16 +77,16 @@ let countEdges (parserInputGraph : ParserInputGraph<_>) =
    parserInputGraph.Edges 
     |> Seq.map (fun e -> 
                     match e.Tag with
-                        | AbstractParser.Tokens.NUMBER(gr) 
-                        | AbstractParser.Tokens.MINUS(gr) 
-                        | AbstractParser.Tokens.LBRACE(gr) 
-                        | AbstractParser.Tokens.RBRACE(gr) 
-                        | AbstractParser.Tokens.DIV(gr) 
-                        | AbstractParser.Tokens.PLUS(gr) 
-                        | AbstractParser.Tokens.POW(gr)  
-                        | AbstractParser.Tokens.MULT(gr) 
-                        | AbstractParser.Tokens.LITERAL(gr) -> gr.EdgeCount
-                        | AbstractParser.Tokens.RNGLR_EOF _ -> 0) 
+                        | NUMBER(gr) 
+                        | MINUS(gr) 
+                        | LBRACE(gr) 
+                        | RBRACE(gr) 
+                        | DIV(gr) 
+                        | PLUS(gr) 
+                        | POW(gr)  
+                        | MULT(gr) 
+                        | LITERAL(gr) -> gr.EdgeCount
+                        | RNGLR_EOF _ -> 0) 
     |> Array.ofSeq 
 
 let ToDot (parserInputGraph : ParserInputGraph<_>) filePrintPath toStr =

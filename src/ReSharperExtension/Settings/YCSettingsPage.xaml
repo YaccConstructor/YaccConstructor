@@ -1,0 +1,135 @@
+﻿<UserControl x:Class="ReSharperExtension.Settings.YCSettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+            xmlns:controls="urn:schemas-jetbrains-com:jetbrains-ui-controls"
+             xmlns:common="clr-namespace:JetBrains.UI.Controls.Common;assembly=JetBrains.Platform.UI"
+             xmlns:settings="clr-namespace:ReSharperExtension.Settings"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="500"
+	        
+	        Grid.IsSharedSizeScope="True"
+>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="3*"></RowDefinition>
+        </Grid.RowDefinitions>
+        
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock Margin="5" VerticalAlignment="Center">Choose language:</TextBlock>
+            <ComboBox Grid.Column="1" Margin="5" Width="150" HorizontalAlignment="Left" 
+                  Name="langView" SelectionChanged="langViewSelectionChanged">
+            </ComboBox>
+        </Grid>
+        <Grid Row="1">
+            <StackPanel>
+                <Label> Hotspots definition</Label>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid>
+                        <DataGrid x:Name="gridHotspots" Margin="5" AutoGenerateColumns="False" AddingNewItem="OnEnterClick">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Class" Binding="{Binding ClassName, ValidatesOnDataErrors=True}" MinWidth="100"></DataGridTextColumn>
+                                <DataGridTextColumn Header="Method" Binding="{Binding MethodName, ValidatesOnDataErrors=True}" MinWidth="100"></DataGridTextColumn>
+                                <DataGridTextColumn Header="Argument position" Binding="{Binding ArgumentPosition, ValidatesOnDataErrors=True}" MinWidth="100"></DataGridTextColumn>
+                                <DataGridTextColumn Header="Return value" Binding="{Binding ReturnedType, ValidatesOnDataErrors=True}" MinWidth="100"></DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+
+                    <GridSplitter Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Stretch"
+                           Width="5"></GridSplitter>
+
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Row="1" Margin="5" Click="OnAddHotspotClicked">Add</Button>
+                        <Button Grid.Row="1" Grid.Column="1" Margin="5" Click="OnRemoveHotspotClicked">Remove</Button>
+                    </Grid>
+                </Grid>
+            </StackPanel>
+        </Grid>
+        <Grid Row="2">
+            <StackPanel>
+                <Label> Parenthesis definition</Label>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid>
+                        <DataGrid x:Name="LeftRightSymbols" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+                            <DataGrid.Columns>
+                                <DataGridComboBoxColumn x:Name="LeftElements" Header="Left element" MinWidth="200" 
+      SelectedValueBinding="{Binding Path=LeftTokenName}"  SelectedValuePath="TokenName"
+                                                    DisplayMemberPath="TokenName">
+                                </DataGridComboBoxColumn>
+                                <DataGridComboBoxColumn x:Name="RightElements" Header="Right element" MinWidth="200"
+      SelectedValueBinding="{Binding Path=RightTokenName}"  SelectedValuePath="TokenName"
+      DisplayMemberPath="TokenName">
+                                </DataGridComboBoxColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                    <GridSplitter Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Stretch"
+                           Width="5"></GridSplitter>
+
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Row="1" Margin="5" Click="OnAddPairClicked">Add</Button>
+                        <Button Grid.Row="1" Grid.Column="1" Margin="5" Click="OnRemovePairClicked">Remove</Button>
+
+                    </Grid>
+                </Grid>
+            </StackPanel>
+            
+        </Grid>
+        <Grid Row="3">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Label>Token to color mapping</Label>
+                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <DataGrid x:Name="tokenToColor" Margin="5" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Token" Binding="{Binding TokenName}" IsReadOnly="True" MinWidth="200"></DataGridTextColumn>
+
+                            <DataGridComboBoxColumn Header="Color" x:Name="colorColumn" MinWidth="300"
+        SelectedValueBinding="{Binding Path=ColorId}"  SelectedValuePath="ColorId"
+        DisplayMemberPath="ViewName"
+                            ></DataGridComboBoxColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

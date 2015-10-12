@@ -2,9 +2,11 @@
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Tree;
 
+using YC.SDK;
+
 namespace ReSharperExtension
 {
-    public interface IReSharperLanguage : YC.SDK.CommonInterfaces.IInjectedLanguageModule<ICSharpLiteralExpression, DocumentRange, ITreeNode>
+    public interface IReSharperLanguage : CommonInterfaces.IInjectedLanguageModule<ICSharpLiteralExpression, DocumentRange, ITreeNode>
     {
     }
 }

@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+        Available color definitions:
+    ANALYSIS_ERROR_ERRORSTRIPE
+    ANALYSIS_SUGGESTION_ERRORSTRIPE
+    ANALYSIS_WARNING_ERRORSTRIPE
+    CONSTANT_IDENTIFIER_ATTRIBUTE
+    DEADCODE_ATTRIBUTE
+    EVENT_IDENTIFIER_ATTRIBUTE
+    EXTENSION_METHOD_IDENTIFIER_ATTRIBUTE
+    FIELD_IDENTIFIER_ATTRIBUTE
+    FORMAT_STRING_ITEM
+    JAVA_SCRIPT_XML_DOC_TAG
+    JS_FUNCTION_IDENTIFIER_ATTRIBUTE
+    JS_LATEBOUND_IDENTIFIER_ATTRIBUTE
+    JS_LOCAL_IDENTIFIER_ATTRIBUTE
+    JS_PARAMETER_IDENTIFIER_ATTRIBUTE
+    JS_PROPERTY_IDENTIFIER_ATTRIBUTE
+    LATE_BOUND_IDENTIFIER_ATTRIBUTE
+    LOCAL_VARIABLE_IDENTIFIER_ATTRIBUTE
+    MATCHED_FORMAT_STRING_ITEM
+    METHOD_IDENTIFIER_ATTRIBUTE
+    MUTABLE_LOCAL_VARIABLE_IDENTIFIER_ATTRIBUTE
+    NAMESPACE_IDENTIFIER_ATTRIBUTE
+    OPERATOR_IDENTIFIER_ATTRIBUTE
+    PARAMETER_IDENTIFIER_ATTRIBUTE
+    PATH_IDENTIFIER_ATTRIBUTE
+    PUBLIC_DEADCODE_ATTRIBUTE
+    TODOITEM_ATTRIBUTE
+    TODOITEM_ERRORSTRIPE_ATTRIBUTE
+    TS_CLASS_IDENTIFIER_ATTRIBUTE
+    TS_ENUM_IDENTIFIER_ATTRIBUTE
+    TS_INTERFACE_IDENTIFIER_ATTRIBUTE
+    TS_MODULE_IDENTIFIER_ATTRIBUTE
+    TS_TYPE_PARAMETER_IDENTIFIER_ATTRIBUTE
+    TYPE_CLASS_ATTRIBUTE
+    TYPE_DELEGATE_ATTRIBUTE
+    TYPE_ENUM_ATTRIBUTE
+    TYPE_INTERFACE_ATTRIBUTE
+    TYPE_PARAMETER_ATTRIBUTE
+    TYPE_STATIC_CLASS_ATTRIBUTE
+    TYPE_STRUCT_ATTRIBUTE
+    UNMATCHED_BRACE
+    UNRESOLVED_ERROR_ATTRIBUTE
+
+        Available icons:
+    CLASS_IS_INHERITED_ATTRIBUTE
+    HIDES_ATTRIBUTE
+    IMPLEMENTS_AND_HIDES_ATTRIBUTE
+    IMPLEMENTS_AND_OVERRIDES_ATTRIBUTE
+    IMPLEMENTS_ATTRIBUTE
+    INTERFACE_IS_IMPLEMENTED_ATTRIBUTE
+    OVERRIDES_ATTRIBUTE
+    RECURSION_ATTRIBUTE
+
+        Available underlying
+    ERROR_ATTRIBUTE
+    HINT_ATTRIBUTE
+    SUGGESTION_ATTRIBUTE
+    WARNING_ATTRIBUTE
+-->
+<SyntaxDefinition name="TSQLHighlighting">
+	<Colors>
+		<Tokens color="CONSTANT_IDENTIFIER_ATTRIBUTE">
+			<Token> DOUBLE_COLON </Token>
+			<Token> GLOBALVAR </Token>
+			<Token> RNGLR_EOF </Token>
+			<Token> STOREDPROCEDURE </Token>
+			<Token> STRING_CONST </Token>
+			<Token> WEIGHT </Token>
+			<Token> Absent </Token>
+			<Token> Absolute </Token>
+			<Token> Action </Token>
+			<Token> All </Token>
+			<Token> Allow_page_locks </Token>
+			<Token> Allow_row_locks </Token>
+			<Token> And </Token>
+			<Token> And_ </Token>
+			<Token> And__equal </Token>
+			<Token> And__not </Token>
+			<Token> Ansi_defaults </Token>
+			<Token> Ansi_null_dflt </Token>
+			<Token> Ansi_nulls </Token>
+			<Token> Ansi_padding </Token>
+			<Token> Ansi_warnings </Token>
+			<Token> Any </Token>
+			<Token> As </Token>
+			<Token> Asc </Token>
+			<Token> At </Token>
+			<Token> Auto </Token>
+			<Token> Avg </Token>
+			<Token> Base64 </Token>
+			<Token> Begin </Token>
+			<Token> Between </Token>
+			<Token> Bigint </Token>
+			<Token> Binary </Token>
+			<Token> Bit </Token>
+			<Token> Browse </Token>
+			<Token> Bulk </Token>
+			<Token> By </Token>
+			<Token> Caller </Token>
+			<Token> Cascade </Token>
+			<Token> Case </Token>
+			<Token> Char </Token>
+			<Token> Check </Token>
+			<Token> Class </Token>
+			<Token> Close </Token>
+			<Token> Clustered </Token>
+			<Token> Codepage </Token>
+			<Token> Collate </Token>
+			<Token> Commit </Token>
+			<Token> Compute </Token>
+			<Token> Concat </Token>
+			<Token> Concat_null_yields_null </Token>
+			<Token> Constraint </Token>
+			<Token> Containstable </Token>
+			<Token> Count </Token>
+			<Token> Create </Token>
+			<Token> Cross </Token>
+			<Token> Cube </Token>
+			<Token> Cursor </Token>
+			<Token> Cursor_close_on_commit </Token>
+			<Token> Datetime </Token>
+			<Token> Decimal </Token>
+			<Token> Declare </Token>
+			<Token> Default </Token>
+			<Token> Delete </Token>
+			<Token> Dense_rank </Token>
+			<Token> Desc </Token>
+			<Token> Distinct </Token>
+			<Token> Dot_ </Token>
+			<Token> Drop </Token>
+			<Token> Dynamic </Token>
+			<Token> Elements </Token>
+			<Token> Else </Token>
+			<Token> Enable </Token>
+			<Token> End </Token>
+			<Token> Equal_ </Token>
+			<Token> Errorfile </Token>
+			<Token> Escape </Token>
+			<Token> Except </Token>
+			<Token> Exec </Token>
+			<Token> Execute </Token>
+			<Token> Exists </Token>
+			<Token> Expand </Token>
+			<Token> Explicit </Token>
+			<Token> Extract </Token>
+			<Token> Fast </Token>
+			<Token> Fast_forward </Token>
+			<Token> Fastfirstrow </Token>
+			<Token> Fetch </Token>
+			<Token> Fillfactor </Token>
+			<Token> First </Token>
+			<Token> Firstrow </Token>
+			<Token> Float </Token>
+			<Token> Fmtonly </Token>
+			<Token> For </Token>
+			<Token> Force </Token>
+			<Token> Forced </Token>
+			<Token> Forceplan </Token>
+			<Token> Foreign </Token>
+			<Token> Formatfile </Token>
+			<Token> Formsof </Token>
+			<Token> Forward_only </Token>
+			<Token> Freetexttable </Token>
+			<Token> From </Token>
+			<Token> Full </Token>
+			<Token> Global </Token>
+			<Token> Go </Token>
+			<Token> Group </Token>
+			<Token> Hash </Token>
+			<Token> Hat__equal </Token>
+			<Token> Having </Token>
+			<Token> Hextoraw </Token>
+			<Token> Holdlock </Token>
+			<Token> Hour </Token>
+			<Token> Identity </Token>
+			<Token> If </Token>
+			<Token> Ignore_dup_key </Token>
+			<Token> Implicit_transactions </Token>
+			<Token> In </Token>
+			<Token> Index </Token>
+			<Token> Inflectional </Token>
+			<Token> Inner </Token>
+			<Token> Insert </Token>
+			<Token> Intersect </Token>
+			<Token> Int </Token>
+			<Token> Into </Token>
+			<Token> Io </Token>
+			<Token> Is </Token>
+			<Token> Is_member </Token>
+			<Token> Isabout </Token>
+			<Token> Join </Token>
+			<Token> Keep </Token>
+			<Token> Keepfixed </Token>
+			<Token> Key </Token>
+			<Token> Keyset </Token>
+			<Token> Language </Token>
+			<Token> Last </Token>
+			<Token> Lastrow </Token>
+			<Token> Left </Token>
+			<Token> Left_square_bracket_ </Token>
+			<Token> Less_ </Token>
+			<Token> Like </Token>
+			<Token> Local </Token>
+			<Token> Log </Token>
+			<Token> Login </Token>
+			<Token> Loop </Token>
+			<Token> Lower </Token>
+			<Token> Mark </Token>
+			<Token> Max </Token>
+			<Token> Maxdop </Token>
+			<Token> Maxerrors </Token>
+			<Token> Maxrecursion </Token>
+			<Token> Mdw_control </Token>
+			<Token> Merge </Token>
+			<Token> Min </Token>
+			<Token> Minus_ </Token>
+			<Token> Minus__equal </Token>
+			<Token> Minute </Token>
+			<Token> Money </Token>
+			<Token> More_ </Token>
+			<Token> Nchar </Token>
+			<Token> Near </Token>
+			<Token> Next </Token>
+			<Token> No </Token>
+			<Token> Nocount </Token>
+			<Token> Noexec </Token>
+			<Token> Noexpand </Token>
+			<Token> Nolock </Token>
+			<Token> Nonclustered </Token>
+			<Token> Not </Token>
+			<Token> Nowait </Token>
+			<Token> Ntile </Token>
+			<Token> Null </Token>            
+			<Token> Number_ </Token>
+			<Token> Numeric </Token>
+			<Token> Numeric_roundabort </Token>
+			<Token> Nvarchar </Token>
+			<Token> Of </Token>
+			<Token> Off </Token>
+			<Token> On </Token>
+			<Token> Only </Token>
+			<Token> Open </Token>
+			<Token> Opendatasource </Token>
+			<Token> Openquery </Token>
+			<Token> Openrowset </Token>
+			<Token> Optimistic </Token>
+			<Token> Optimize </Token>
+			<Token> Option </Token>
+			<Token> Or </Token>
+			<Token> Or_ </Token>
+			<Token> Or__equal </Token>
+			<Token> Order </Token>
+			<Token> Out </Token>
+			<Token> Outer </Token>
+			<Token> Output </Token>
+			<Token> Over </Token>
+			<Token> Owner </Token>
+			<Token> Pad_index </Token>
+			<Token> Paglock </Token>
+			<Token> Parameterization </Token>
+			<Token> Parseonly </Token>
+			<Token> Partition </Token>
+			<Token> Path </Token>
+			<Token> Percent </Token>
+			<Token> Percent_ </Token>
+			<Token> Percent__equal </Token>
+			<Token> Persisted </Token>
+			<Token> Pivot </Token>
+			<Token> Plan </Token>
+			<Token> Plus_ </Token>
+			<Token> Plus__equal </Token>
+			<Token> Primary </Token>
+			<Token> Print </Token>
+			<Token> Prior </Token>
+			<Token> Proc </Token>
+			<Token> Procedure </Token>
+			<Token> Profile </Token>
+			<Token> Quoted_identifier </Token>
+			<Token> Raiserror </Token>
+			<Token> Rank </Token>
+			<Token> Raw </Token>
+			<Token> Read </Token>
+			<Token> Read_only </Token>
+			<Token> Readcommitted </Token>
+			<Token> Readcommittedlock </Token>
+			<Token> Readonly </Token>
+			<Token> Readpast </Token>
+			<Token> Readuncommitted </Token>
+			<Token> Real </Token>
+			<Token> Recompile </Token>
+			<Token> References </Token>
+			<Token> Relative </Token>
+			<Token> Remote </Token>
+			<Token> Remote_proc_transactions </Token>
+			<Token> Repeatable </Token>
+			<Token> Repeatableread </Token>
+			<Token> Replication </Token>
+			<Token> Return </Token>
+			<Token> Reverse_slash__quate </Token>
+			<Token> Right </Token>
+			<Token> Right_square_bracket_ </Token>
+			<Token> Robust </Token>
+			<Token> Rollback </Token>
+			<Token> Rollup </Token>
+			<Token> Root </Token>
+			<Token> Row_number </Token>
+			<Token> Rowguidcol </Token>
+			<Token> Rowlock </Token>
+			<Token> Rows </Token>
+			<Token> Rows_per_batch </Token>
+			<Token> Scalar_data_type </Token>
+			<Token> Scroll </Token>
+			<Token> Scroll_locks </Token>
+			<Token> Second </Token>
+			<Token> Select </Token>
+			<Token> Self </Token>
+			<Token> Serializable </Token>
+			<Token> Set </Token>
+			<Token> Seterror </Token>
+			<Token> Showplan_all </Token>
+			<Token> Showplan_text </Token>
+			<Token> Showplan_xml </Token>
+			<Token> Simple </Token>
+			<Token> Single_blob </Token>
+			<Token> Single_clob </Token>
+			<Token> Single_nclob </Token>
+			<Token> Slash_ </Token>
+			<Token> Slash__equal </Token>
+			<Token> Smallint </Token>
+			<Token> Smallmoney </Token>
+			<Token> Some </Token>
+			<Token> Sql_variant </Token>
+			<Token> Star_ </Token>
+			<Token> Star__equal </Token>
+			<Token> State </Token>
+			<Token> Static </Token>
+			<Token> Statistics </Token>
+			<Token> Statistics_norecompute </Token>
+			<Token> Sum </Token>
+			<Token> Sysname </Token>
+			<Token> System </Token>
+			<Token> Table </Token>
+			<Token> Tablesample </Token>
+			<Token> Tablock </Token>
+			<Token> Tablockx </Token>
+			<Token> Textimage_on </Token>
+			<Token> Then </Token>
+			<Token> Thesaurus </Token>
+			<Token> Ties </Token>
+			<Token> Tilda_ </Token>
+			<Token> Time </Token>
+			<Token> Tinyint </Token>
+			<Token> Top </Token>
+			<Token> Tran </Token>
+			<Token> Transaction </Token>
+			<Token> Trunc </Token>
+			<Token> Type </Token>
+			<Token> Type_warning </Token>
+			<Token> Union </Token>
+			<Token> Unique </Token>
+			<Token> Unistr </Token>
+			<Token> Unpivot </Token>
+			<Token> Update </Token>
+			<Token> Updlock </Token>
+			<Token> Use </Token>
+			<Token> User </Token>
+			<Token> Values </Token>
+			<Token> Varbinary </Token>
+			<Token> Varchar </Token>
+			<Token> Varying </Token>
+			<Token> Views </Token>
+			<Token> When </Token>
+			<Token> Where </Token>
+			<Token> While </Token>
+			<Token> With </Token>
+			<Token> Xact_abort </Token>
+			<Token> Xlock </Token>
+			<Token> Xml </Token>
+			<Token> Xmldata </Token>
+			<Token> Xmlschema </Token>
+			<Token> Xsinil </Token>
+		</Tokens>
+		<Tokens color="OPERATOR_IDENTIFIER_ATTRIBUTE">
+			<Token> DEC_NUMBER </Token>
+			<Token> IDENT </Token>
+			<Token> LOCALVAR </Token>
+			<Token> Colon_ </Token>
+			<Token> Comma_ </Token>
+			<Token> Left_bracket_ </Token>
+			<Token> Right_bracket_ </Token>		
+		</Tokens>
+	</Colors>
+	<Matched>
+		<Pair>
+			<Left> Left_bracket_ </Left>
+			<Right> Right_bracket_ </Right>
+		</Pair>
+		<Pair>
+			<Left> Left_square_bracket_ </Left>
+			<Right> Right_square_bracket_ </Right>
+		</Pair>
+	</Matched>
+</SyntaxDefinition>

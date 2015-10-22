@@ -450,3 +450,13 @@ src/RNGLR.EBNF.DFAParser.SimpleTest/SimpleOpt.yrd.fs
 src/RNGLR.EBNF.DFAParser.SimpleTest/SimpleSome.yrd.fs
 src/RNGLR.EBNF.DFAParser.SimpleTest/TwoEpsilonsMiddle.yrd.fs
 src/RNGLR.EBNF.DFAParser.SimpleTest/Choice.yrd.fs
+src/RNGLR.EBNF.DFAParser.SimpleTest/AlternativeInMiddle.yrd.fs
+src/RNGLR.EBNF.DFAParser.SimpleTest/ComplexRightNull.yrd.fs
+src/RNGLR.EBNF.DFAParser.SimpleTest/EpsilonCycle.yrd.fs
+src/RNGLR.EBNF.DFAParser.SimpleTest/ManyAndOpt.yrd.fs
+src/RNGLR.EBNF.DFAParser.SimpleTest/StackingConflict.yrd.fs
+src/RNGLR.EBNF.DFAParser.SimpleTest/SimpleEpsilon.yrd.fs
+src/RNGLR.EBNF.DFAParser.SimpleTest/SimpleRightNull.yrd.fs
+src/RNGLR.EBNF.DFAParser.SimpleTest/SeqOfTwo.yrd.fs
+src/RNGLR.EBNF.DFAParser.SimpleTest/out2.txt
+src/RNGLR.EBNF.DFAParser.SimpleTest/One.yrd.fs

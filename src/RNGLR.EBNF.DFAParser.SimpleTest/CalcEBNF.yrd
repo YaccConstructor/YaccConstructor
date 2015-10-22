@@ -2,4 +2,4 @@
 expr : term (ADD term)* {}
 term : fact (MUL fact)* {}
 fact : num {}
-num : A {} | B{}
+num : A {} | B {}

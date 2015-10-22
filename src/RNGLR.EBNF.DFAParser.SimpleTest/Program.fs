@@ -9,6 +9,9 @@ open LexCommon
 open System.Collections.Generic
 open System.IO
 
+type TestExpectedResult =
+    | TER_Success
+    | TER_Error
 
 let run path astBuilder =
     let tokens = LexCommon.tokens(path)
@@ -29,36 +32,74 @@ type ``RNGLREBNF parser tests with simple lexer`` () =
 //        printfn "Result: %A" res
 //        Assert.AreEqual(expected, res)
 
-    let runTest parser file = 
-//        let pathToLog = @".\res.txt"
-//        let wr = new StreamWriter(pathToLog, true)
+    let runTest parser file expected = 
         let path = dir + file
-//        let start = System.DateTime.Now
-        match run path parser with
-        | Error (num, tok, err, _) -> printErr (num, tok, err)
-        | Success (tree, _) -> printfn "Success"
-//        | Success (tree, _) -> wr.WriteLine(System.DateTime.Now - start)
-//        wr.Close()
+        match run path parser, expected with
+        | Error (num, tok, err, _), TER_Error -> printErr (num, tok, err)
+        | Success (tree, _), TER_Success -> printfn "Success"
+        | Error (num, tok, err, _), TER_Success ->  
+            printErr (num, tok, err)
+            Assert.Fail()
+        | Success (tree, _), TER_Error -> 
+            printfn "Wrong chain was accessed"
+            Assert.Fail()
 
     [<Test>]
-    member test.``First alternative in the middle``() =
-        let parser = RNGLR.EBNF.DFAParserAlternativeInMiddle.buildAst
-        let file = "AlternativeInMiddle1.txt"
-        runTest parser file
+    member test.``1.0 One``() =
+        let parser = RNGLR.EBNF.DFAParserOne.buildAst
+        let file = "One.txt"
+        runTest parser file TER_Success
 
     [<Test>]
-    member test.``Second alternative in the middle``() =
-        let parser = RNGLR.EBNF.DFAParserAlternativeInMiddle.buildAst
-        let file = "AlternativeInMiddle2.txt"
-        runTest parser file
+    member test.``1.1 One wrong1``() =
+        let parser = RNGLR.EBNF.DFAParserOne.buildAst
+        let file = "SeqOfTwoWrong1.txt"
+        runTest parser file TER_Error
+
+    [<Test>]
+    member test.``2.0 SeqOfTwo``() =
+        let parser = RNGLR.EBNF.DFAParserSeqOfTwo.buildAst
+        let file = "SeqOfTwo.txt"
+        runTest parser file TER_Success
+
+    [<Test>]
+    member test.``2.1 SeqOfTwo wrong1``() =
+        let parser = RNGLR.EBNF.DFAParserSeqOfTwo.buildAst
+        let file = "SeqOfTwoWrong1.txt"
+        runTest parser file TER_Error
+
+    [<Test>]
+    member test.``2.2 SeqOfTwo wrong2``() =
+        let parser = RNGLR.EBNF.DFAParserSeqOfTwo.buildAst
+        let file = "SeqOfTwoWrong2.txt"
+        runTest parser file TER_Error
+
+    [<Test>]
+    member test.``2.3 SeqOfTwo wrong3``() =
+        let parser = RNGLR.EBNF.DFAParserSeqOfTwo.buildAst
+        let file = "SeqOfTwoWrong3.txt"
+        runTest parser file TER_Error
+    
     
     [<Test>]
-    member test.``CalcEBNF`` () = 
-        let parser = RNGLR.EBNF.DFAParserCalcEBNF.buildAst
-        let file = "CalcEBNF.txt"
-        runTest parser file
+    member test.``3.0 First alternative in the middle``() =
+        let parser = RNGLR.EBNF.DFAParserAlternativeInMiddle.buildAst
+        let file = "AlternativeInMiddle1.txt"
+        runTest parser file TER_Success
 
     [<Test>]
+    member test.``3.1 Second alternative in the middle``() =
+        let parser = RNGLR.EBNF.DFAParserAlternativeInMiddle.buildAst
+        let file = "AlternativeInMiddle2.txt"
+        runTest parser file TER_Success
+    
+    [<Test>]
+    member test.``4.0 CalcEBNF`` () = 
+        let parser = RNGLR.EBNF.DFAParserCalcEBNF.buildAst
+        let file = "CalcEBNF.txt"
+        runTest parser file TER_Success
+
+    (*[<Test>]
     member test.``Choice`` () = 
         let parser = RNGLR.EBNF.DFAParserChoice.buildAst
         let file = "Choice.txt"
@@ -134,7 +175,7 @@ type ``RNGLREBNF parser tests with simple lexer`` () =
     member test.``TwoEpsilonMiddleWrong`` () = 
         let parser = RNGLR.EBNF.DFAParserTwoEpsilonsMiddle.buildAst
         let file = "TwoEpsilonsMiddleWrong.txt"
-        runTest parser file
+        runTest parser file*)
 
 //    [<Test>]
 //    member test.``Choice_0050000`` () = 
@@ -258,5 +299,5 @@ type ``RNGLREBNF parser tests with simple lexer`` () =
 
 [<EntryPoint>]
 let main argv = 
-    (new ``RNGLREBNF parser tests with simple lexer``()).``CalcEBNF``();
+    (new ``RNGLREBNF parser tests with simple lexer``()).``4.0 CalcEBNF``();
     0 // return an integer exit code

@@ -62,6 +62,8 @@
     <Compile Include="ManyAndOpt.yrd.fs" />
     <Compile Include="RightNull.yrd.fs" />
     <Compile Include="SimpleEpsilon.yrd.fs" />
+    <Compile Include="One.yrd.fs" />
+    <Compile Include="SeqOfTwo.yrd.fs" />
     <Compile Include="SimpleOpt.yrd.fs" />
     <Compile Include="SimpleRightNull.yrd.fs" />
     <Compile Include="SimpleSome.yrd.fs" />

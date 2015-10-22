@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>b98ef513-0a5e-4f8e-bdf0-6a7859a2bd81</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>RNGLR.EBNFParser.SimpleTest</RootNamespace>
     <AssemblyName>YC.RNGLR.EBNFParser.SimpleTest</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
@@ -43,6 +43,7 @@
     <None Include="SimpleSome.yrd" />
     <None Include="StackingConflict.yrd" />
     <None Include="TwoEpsilonsMiddle.yrd" />
+    <Compile Include="AlternativeInMiddle.yrd.fs" />
     <Compile Include="CalcEBNF.yrd.fs" />
     <Compile Include="Choice.yrd.fs" />
     <Compile Include="ComplexRightNull.yrd.fs" />
@@ -57,9 +58,9 @@
     <Compile Include="SimpleSome.yrd.fs" />
     <Compile Include="StackingConflict.yrd.fs" />
     <Compile Include="TwoEpsilonsMiddle.yrd.fs" />
-    <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
+    <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AST.Common\Common.AST.fsproj">

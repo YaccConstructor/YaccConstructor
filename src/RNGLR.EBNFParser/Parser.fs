@@ -122,8 +122,15 @@ let private addEdge (v : Vertex) (s : int * int) (family : Family) (out : Resize
         out.RemoveRange(j+1, i-j-1)
     isCreated, ast
 
+let d = new HashSet<_>()
 /// Check if edge with specified destination and family already exists
 let private containsEdge (v : Vertex) (s : int * int) (f : Family) (out : ResizeArray<Vertex * (int * int) * Family * AST>) =
+    
+    if d.Contains(v,s,f,out)
+    then printfn "true"
+    else 
+        d.Add(v,s,f,out)
+        printfn "false"
     let inline fst4 (x,_,_,_) = x
     let inline snd4 (_,x,_,_) = x
     let mutable i = out.Count - 1
@@ -271,7 +278,6 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
             while reductions.Count > 0 do
                 let vertex, prod, rLabel, edgeOpt = reductions.Pop()
                 let nonTerm = parserSource.LeftSide.[prod]
-                let vertexSet = ref Set.empty
 
                 let handlePath (path : AstNode list) (final : Vertex) =
                     if final = null
@@ -290,7 +296,7 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
                                     for prod in arr do
                                         reductions.Push (newVertex, prod, Reduce, Some (final, stackSets, edgeLabel :> AstNode))
 
-                let rec walk (vertex : Vertex) (stackSets : (int * int)) prod (path : AstNode list) =
+                let rec walk (vertex : Vertex) (stackSets : (int * int)) prod (path : AstNode list) visitedVertexSet =
                     let handle, walkFurther =
                         let dontStackSet, stackSet = stackSets
                         parserSource.StackSets.[stackSet].Contains prod, parserSource.StackSets.[dontStackSet].Contains prod
@@ -299,9 +305,14 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
                     if walkFurther && vertex <> null
                     then
                         let visitVertex (v : Vertex) s a =
-                            if not <| Set.contains (v.Level, v.State) !vertexSet then
-                                vertexSet := Set.add (v.Level, v.State) !vertexSet
-                                walk v s prod (a::path)
+                            let currentLevel, set = visitedVertexSet
+                            //edges are always to not-bigger destinations
+                            if v.Level < currentLevel then
+                                walk v s prod (a::path) (v.Level, Set.ofList [ v.State ])
+                            elif v.Level = currentLevel && set |> Set.contains v.State |> not then
+                                walk v s prod (a::path) (currentLevel, Set.add v.State set)
+                            elif v.Level > currentLevel then
+                                ()
 
                         if vertex.Level <> num then
                             if vertex.OutEdges.other <> null then
@@ -329,8 +340,8 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
                         addSimpleEdge vertex (snd goto) ast simpleEdges.[fst goto]
                 |Reduce ->
                     let path = [trd edgeOpt.Value]
-                    vertexSet := Set.add ((fst3 edgeOpt.Value).Level, (fst3 edgeOpt.Value).State) !vertexSet
-                    walk (fst3 edgeOpt.Value) (snd3 edgeOpt.Value) prod path                    
+                    walk (fst3 edgeOpt.Value) (snd3 edgeOpt.Value) prod path 
+                        ((fst3 edgeOpt.Value).Level, Set.ofList [(fst3 edgeOpt.Value).State])              
 
         let curInd = ref 0
         let isEnd = ref false

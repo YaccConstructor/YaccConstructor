@@ -27,7 +27,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <StartArguments>-i ../../..\src\RNGLR.EBNFParser.SimpleTest\CalcEBNF.yrd -g "RNGLR.EBNFGenerator -pos int -token int -module RNGLR.ParseCalc -translate true -table LALR -o CalcEBNF.yrd.fs"</StartArguments>
     <StartArguments>-i ../../../../../YC.Abstract.SQL-temp\src\TSQL\mssqlNonAbstract.yrd -c Linearize -g "RNGLR.EBNFGenerator -table LALR -o RNGLR.EBNF.sql.yrd.fs"</StartArguments>
-    <StartArguments>-i ..\..\..\src\RNGLR.EBNF.DFAParser.SimpleTest\CalcEBNF.yrd  -c ExpandMeta -g "RNGLR.EBNF.DFAGenerator -pos int -token int -module RNGLR.ParseAlt -translate true -table LALR -o altin.fs"</StartArguments>
+    <StartArguments>-i ..\..\..\src\RNGLR.EBNF.DFAParser.SimpleTest\AlternativeInMiddle.yrd  -c ExpandMeta -g "RNGLR.EBNF.DFAGenerator -pos int -token int -module RNGLR.ParseAlt -translate true -table LALR -o altin.fs"</StartArguments>
     <StartWorkingDirectory>
     </StartWorkingDirectory>
     <StartAction>Project</StartAction>

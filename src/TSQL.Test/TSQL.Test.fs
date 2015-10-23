@@ -181,7 +181,7 @@ type ``Lexer and Parser TSQL Tests`` () =
              edg 14 15 (Yard.Examples.MSParser.RNGLR_EOF(new FSA<_>()))
              ] |> ignore
         
-        test Yard.Examples.MSParser.buildAstAbstract qGraph 201 203 8 15 3
+        test Yard.Examples.MSParser.buildAstAbstract qGraph 201 203 8 15 3  
 
 //[<EntryPoint>]
 //let f x =

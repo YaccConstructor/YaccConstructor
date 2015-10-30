@@ -434,3 +434,4 @@ Tests/RNGLR/sppf.dot*
 Tests/AbstractRNGLR/DOT/gss.dot.pdf
 *.yrd.fs
 *.yrd.fs
+*.dot

@@ -1303,3 +1303,4 @@ src/GLLAbstractApplication/*.yrd.fs
 src/GLLApplication/Lexer2.fs
 Tests/AbstractRNGLR/DOT/*.dot
 *.yrd.fs
+*.yrd.fs

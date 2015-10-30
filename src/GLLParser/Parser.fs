@@ -75,7 +75,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
     let currentIndex = ref 0
     let currentRule = parser.StartRule
     let currentLabel = ref <| packLabel currentRule 0
-    let dummyGSSNode = new Vertex(!currentIndex, currentRule)
+    let dummyGSSNode = new Vertex(-1, currentRule)
     let dummyAST = new TerminalNode(-1, packExtension -1 -1)
     let dummy = 0<nodeMeasure>
     let currentN = ref <| dummy
@@ -93,10 +93,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
     //we can use dictionary <extension, dict>
     let intermidiateNodes = new Dictionary<int, int<nodeMeasure>>()
  
-//посчитать размерв коллекций
-    let edgesReadCount = ref 0
-    let edgesWriteCount = ref 0
-    let edges = Array2D.zeroCreate<Dictionary<int64, Dictionary<int, ResizeArray<int>>>> parser.NonTermCount + 1 (inputLength + 1)
+    let edges = Array2D.zeroCreate<Dictionary<int64, Dictionary<int, ResizeArray<int>>>> parser.NonTermCount (inputLength + 1)
         
     let terminalNodes = new BlockResizeArray<int<nodeMeasure>>()
     let epsilonNode = new TerminalNode(-1, packExtension 0 0)
@@ -288,7 +285,8 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             
                      
     let containsEdge (b : Vertex) (l : int<labelMeasure>) (e : Vertex) (ast : int<nodeMeasure>) =
-        
+        let tempRule = getRule l
+        let tempPos = getPosition l
         let dict1 = edges.[b.Nonterm, b.Level]
         let key = pack ast (int l)
         if dict1 <> Unchecked.defaultof<_>
@@ -320,9 +318,8 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             let newDict2 = new Dictionary<int, ResizeArray<int>>()
             let newArr = new ResizeArray<int>()
             newArr.Add(e.Level)
-            newDict2.Add(b.Nonterm, newArr)
+            newDict2.Add(e.Nonterm, newArr)
             newDict.Add(key,newDict2)
-            edgesWriteCount := !edgesWriteCount + 1
             edges.[b.Nonterm, b.Level] <- newDict
             false                    
         
@@ -337,12 +334,12 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             | _ -> failwith "Bad type for tree node"
 
         
-    let create index (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) (nonTerm : int) = 
-        let v = new Vertex(index, parser.LeftSide.[getRule label], nonTerm)
+    let create index (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) = 
+        let v = new Vertex(index, parser.LeftSide.[getRule label])
         let vertexKey = pack index (int label)
-        //let temp = containsEdge v label vertex ast
-        //if not <| temp //containsEdge v vertex ast
-        //then
+        let temp = containsEdge v label vertex ast
+        if not <| temp //containsEdge v vertex ast
+        then
             if setP.ContainsKey(vertexKey)
             then
                 let arr = setP.[vertexKey]
@@ -363,8 +360,8 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                 let newList = new ResizeArray<int<nodeMeasure>>()
                 newList.Add(z)
                 setP.Add(vertexKey, newList)
-            let outEdges = edges.[slots.[ int u.Nonterm], u.Level]
-            edgesReadCount := !edgesReadCount + 1
+            let outEdges = edges.[u.Nonterm, u.Level]
+            
             for kvp1 in outEdges do
                 let sppfNodeOnEdge = (getLeft kvp1.Key) * 1<nodeMeasure>
                 let slot = (getRight kvp1.Key) * 1<labelMeasure>
@@ -487,21 +484,4 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             //r1.AstToDot parser. parser. tokenToNum tokenData (outputDir + fileName)
             Success (r1)
                     
-//                    for d in packedNodes do
-//                        if d = Unchecked.defaultof<_> then printf "null; " else printf "1; "
-//                    printfn "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-//                    printfn "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-//                    packedNodes |> Array.iter(fun d -> if d <> null then d |> Seq.iter (fun kvp -> if kvp.Value <> null then kvp.Value |> Seq.iter (fun kvp -> kvp.Value.other.Value.Length |> printf "%A; ")))
-//                    let r1 = new Tree<_> (tokens, res, parser.rules)
-//                    let path = @"../../../src/GLLApplication/out1000.txt"
-//                    printfn "PACKED NODES"
-//                    //packedNodes |> Array.iter(fun d -> d |> Seq.iter (fun kvp -> kvp.Value |> Seq.iter (fun kvp -> kvp.Value.other.Value.Length |> printf "%A; ")))
-//                    printfn ""
-//                    printfn "INTERMIDIATE NODES"
-//                    intermidiateNodes  |> Seq.iter (fun kvp -> kvp.Value.Count |> printf "%A; ")
-//                    printfn ""
-//                    printfn "NONTERMINAL NODES"
-//                    nonTerminalNodes |> Seq.iter (fun kvp -> kvp.Count |> printf "%A; ")
-//                    out.Close()
-                       
                             

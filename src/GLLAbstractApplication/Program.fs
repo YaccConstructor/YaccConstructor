@@ -40,7 +40,7 @@ let inputGraph =
     let qGraph = new ParserInputGraph<_>([|0|], [|1|])
     qGraph.AddVerticesAndEdgeRange
             [
-             edg 0 0 (GLL.SimpleAmb.A 0)
+             edg 0 1 (GLL.SimpleAmb.A 0)
              edg 0 1 (GLL.SimpleAmb.RNGLR_EOF 2)
              ] |> ignore
 //            [edg 0 1 (GLL.SimpleAmb.NUM  3)

@@ -16,6 +16,7 @@ open Yard.Generators.RNGLR
 open Yard.Generators.GLL
 open Yard.Generators
 open Lexer2
+//open Yard.
 
 //let run () =
 //    let fe = new Yard.Frontends.YardFrontend.YardFrontend()
@@ -62,7 +63,7 @@ let outDir = @"../../../src/GLLApplication/"
 //
 //for j = 1 to 50 do
 //let str2 = String.init (2000) (fun i -> "A + ( A * B ) ; ") + "B ;"
-let str2 = "B B"
+let str2 = "A A"
 let parser2 = GLL.SimpleAmb.buildAst
 
 let run2 path astBuilder =

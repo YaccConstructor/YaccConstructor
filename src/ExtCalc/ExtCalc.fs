@@ -11,7 +11,7 @@ open JetBrains.ReSharper.Psi.CSharp.Tree
 open ControlFlowGraph.Common
 open ControlFlowGraph.InputStructures
 
-open OtherSPPF
+open Yard.Generators.RNGLR.OtherSPPF
 open ExtCalc.AbstractParser
 open ReSharperExtension
 open Yard.Generators.Common.AST

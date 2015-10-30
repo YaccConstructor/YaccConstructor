@@ -8,7 +8,7 @@ open JetBrains.Application
 open JetBrains.Application.BuildScript.Application.Zones
 open JetBrains.ReSharper.Psi.CSharp.Tree
 
-open OtherSPPF
+open Yard.Generators.RNGLR.OtherSPPF
 open Calc.AbstractParser
 open ReSharperExtension
 open Yard.Generators.Common.AST

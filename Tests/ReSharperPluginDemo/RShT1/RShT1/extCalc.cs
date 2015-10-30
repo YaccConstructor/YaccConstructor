@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace RShT1
+﻿namespace RShT1
 {
     class ExtCalc
     {
@@ -31,8 +29,6 @@ namespace RShT1
 
             query += "w = y + z;";
             Program.ExtEval(query);
-
-
         }
     }
 }

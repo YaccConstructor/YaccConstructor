@@ -112,6 +112,11 @@
       <Project>{e94970c1-26a4-4fa6-bb3b-261b70938ff4}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\OtherSPPF\OtherSPPF.fsproj">
+      <Name>OtherSPPF (SEL.SDK\OtherSPPF\OtherSPPF)</Name>
+      <Project>{f04ea94f-614d-4e58-b214-f328518cbc14}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
       <Name>RNGLRAbstractParser</Name>
       <Project>{1873ea19-fab7-4d5f-b452-67c0b93c8b9b}</Project>

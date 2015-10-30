@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<actions>
-  <insert group-id="ReSharper" position="last">
-    <action-group id="Plugin.ToolWindow" text="Plugin.ToolWindow">
-      <action id="Plugin.ToolWindow.About" text="Show Graph"/>
-      <!-- to break up elements use <separator/> -->
-    </action-group>
-  </insert>
-</actions>

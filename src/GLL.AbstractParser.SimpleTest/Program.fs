@@ -102,7 +102,7 @@ type ``GLL abstract parser tests`` () =
 
     [<Test>]
     member this._01_PrettySimpleCalc_SequenceInput () =
-        let qGraph = new ParserInputGraph<_>(0, 3)
+        let qGraph = new ParserInputGraph<_>(0, 4)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (GLL.PrettySimpleCalc.NUM 1)
              edg 1 2 (GLL.PrettySimpleCalc.PLUS 2)
@@ -110,18 +110,17 @@ type ``GLL abstract parser tests`` () =
              edg 3 4 (GLL.PrettySimpleCalc.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.PrettySimpleCalc.buildAbstractAst qGraph GLL.PrettySimpleCalc.numToString "PrettySimpleCalcSeq.dot" 18 21 4 0 GLL.PrettySimpleCalc.tokenData GLL.PrettySimpleCalc.tokenToNumber
+        test GLL.PrettySimpleCalc.buildAbstractAst qGraph GLL.PrettySimpleCalc.numToString "PrettySimpleCalcSeq.dot" 21 24 5 0 GLL.PrettySimpleCalc.tokenData GLL.PrettySimpleCalc.tokenToNumber
 
     [<Test>]
     member this._06_NotAmbigousSimpleCalc_Loop () =
-        let qGraph = new ParserInputGraph<_>([|0|] , [|5|] )
+        let qGraph = new ParserInputGraph<_>([|0|] , [|4|] )
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (GLL.NotAmbigousSimpleCalc.NUM  1)
              edg 1 2 (GLL.NotAmbigousSimpleCalc.PLUS 2)
              edg 2 3 (GLL.NotAmbigousSimpleCalc.NUM 3)
-             edg 3 4 (GLL.NotAmbigousSimpleCalc.PLUS 4)
-             edg 4 1 (GLL.NotAmbigousSimpleCalc.NUM 5)
-             edg 4 5 (GLL.NotAmbigousSimpleCalc.RNGLR_EOF 0)
+             edg 3 4 (GLL.NotAmbigousSimpleCalc.RNGLR_EOF 4)
+             edg 3 0 (GLL.NotAmbigousSimpleCalc.PLUS 5)
              ] |> ignore
         
         test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc2.dot" 0 0 0 0 GLL.NotAmbigousSimpleCalc.tokenData GLL.NotAmbigousSimpleCalc.tokenToNumber
@@ -276,38 +275,38 @@ type ``GLL abstract parser tests`` () =
 
     [<Test>]
     member this._24_UnambiguousBrackets_Circle () =
-        let qGraph = new ParserInputGraph<_>(0, 9)
+        let qGraph = new ParserInputGraph<_>(0, 2)
         qGraph.AddVerticesAndEdgeRange
            [edg 0 1 (GLL.StrangeBrackets.LBR 0)
             edg 1 0 (GLL.StrangeBrackets.RBR 1)
-            edg 0 9 (GLL.StrangeBrackets.RNGLR_EOF 0)
+            edg 0 2 (GLL.StrangeBrackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets2.dot" 0 0 0 0 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
+        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets2.dot" 19 21 6 1 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
 
     [<Test>]
     member this._25_UnambiguousBrackets_BiggerCircle () =
-        let qGraph = new ParserInputGraph<_>(0, 9)
+        let qGraph = new ParserInputGraph<_>(0, 4)
         qGraph.AddVerticesAndEdgeRange
            [edg 0 1 (GLL.StrangeBrackets.LBR 0)
             edg 1 2 (GLL.StrangeBrackets.RBR 1)
             edg 2 3 (GLL.StrangeBrackets.LBR 2)
             edg 3 0 (GLL.StrangeBrackets.RBR 3)
-            edg 0 9 (GLL.StrangeBrackets.RNGLR_EOF 0)
+            edg 0 4 (GLL.StrangeBrackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets3.dot" 0 0 0 0 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
+        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets3.dot" 30 33 9 1 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
 
     [<Test>]
     member this._26_UnambiguousBrackets_Inf () =
-        let qGraph = new ParserInputGraph<_>(0, 9)
+        let qGraph = new ParserInputGraph<_>(0, 1)
         qGraph.AddVerticesAndEdgeRange
            [edg 0 0 (GLL.StrangeBrackets.LBR 0)
             edg 0 0 (GLL.StrangeBrackets.RBR 1)
-            edg 0 9 (GLL.StrangeBrackets.RNGLR_EOF 0)
+            edg 0 1 (GLL.StrangeBrackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets4.dot" 0 0 0 0 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
+        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets4.dot" 16 18 5 1 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
 
     
     [<Test>]

@@ -123,7 +123,7 @@ type ``GLL abstract parser tests`` () =
              edg 3 0 (GLL.NotAmbigousSimpleCalc.PLUS 5)
              ] |> ignore
         
-        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc2.dot" 0 0 0 0 GLL.NotAmbigousSimpleCalc.tokenData GLL.NotAmbigousSimpleCalc.tokenToNumber
+        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc2.dot" 25 30 6 1 GLL.NotAmbigousSimpleCalc.tokenData GLL.NotAmbigousSimpleCalc.tokenToNumber
 
     [<Test>]
     member this._07_NotAmbigousSimpleCalc_LoopInLoop () =

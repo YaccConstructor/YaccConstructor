@@ -49,6 +49,9 @@
   <PropertyGroup>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="..\YC.GrammarZOO\SQL\TSQL\Lexer.fsl">
+      <Link>Lexer.fsl</Link>
+    </None>
     <None Include="..\YC.GrammarZOO\SQL\TSQL\LexerAbstract.fsl">
       <Link>LexerAbstract.fsl</Link>
     </None>
@@ -94,9 +97,12 @@
     <None Include="..\YC.GrammarZOO\SQL\Common\Common.yrd">
       <Link>Common.yrd</Link>
     </None>
-    <Compile Include="MsParser.fs" />
+    <Compile Include="MSParser.fs" />
     <Compile Include="LexerHelper.fs" />
-    <Compile Include="Lexer_Abstract.fs" />
+    <Compile Include="Lexer.fs" />
+    <Compile Include="RnglrChunkDriver.fs" />
+    <Compile Include="MSParserAbstract.fs" />
+    <Compile Include="LexerAbstract_Abstract.fs" />
     <Compile Include="Driver.fs" />
     <None Include="packages.config" />
     <EmbeddedResource Include="Actions.xml" />

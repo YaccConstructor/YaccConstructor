@@ -163,7 +163,7 @@ let printTableGLL
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %s _ -> %d" (indexator.indexToTerm i) i
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| L_%s _ -> %d" (indexator.indexToLiteral i) i
+            printBrInd 1 "| L_%s _ -> %d" (indexator.getLiteralName i) i
         printBr ""
 
         printBrInd 0 "let isLiteral = function"
@@ -240,7 +240,7 @@ let printTableGLL
         printBr "let rulesCount = %d" grammar.rules.rulesCount
         printBr "let indexEOF = %d" grammar.indexator.eofIndex
         printBr "let nonTermCount = %d" grammar.indexator.nonTermCount
-        printBr "let termCount = %d" grammar.indexator.termCount
+        printBr "let termCount = %d" (grammar.indexator.termCount + grammar.indexator.literalsCount)
         printBr "let termStart = %d" grammar.indexator.termsStart
         printBr "let termEnd = %d" grammar.indexator.termsEnd
         printBr "let literalStart = %d" grammar.indexator.literalsStart

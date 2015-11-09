@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module YC.ReSharper.AbstractAnalysis.Languages.TSQL.RnglrChunkDriver
+module YC.ReSharper.Languages.TSQL.RnglrChunkDriver
 
 open Microsoft.FSharp.Text.Lexing
 open Yard.Examples.MSParser

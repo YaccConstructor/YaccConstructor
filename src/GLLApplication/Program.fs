@@ -6,7 +6,7 @@ open System
 open Microsoft.FSharp.Text
 open Microsoft.FSharp.Reflection
 //packages/yc.tools/lib/net40/fslex.exe file.fsl --unicode
-
+open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL
 
 open Yard.Generators.GLL.Parser    
@@ -77,9 +77,9 @@ let t2 = System.DateTime.Now - start2
 printfn "%d input %A" (100) t2.TotalSeconds 
 
 match r2 with
-    | Parser.Error str, _ ->
+    | ParserCommon.ParseResult.Error str, _ ->
         printfn "%s" "dddd" //str 
-    | Parser.Success tree, tokens ->
+    | ParserCommon.ParseResult.Success tree, tokens ->
         printfn "%s" "sss"
         GLL.SimpleAmb.defaultAstToDot tree GLL.SimpleAmb.tokenToNumber GLL.SimpleAmb.tokenData  (outDir + "Calc.dot") 
 

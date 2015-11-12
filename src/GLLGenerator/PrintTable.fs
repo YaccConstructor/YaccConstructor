@@ -260,10 +260,10 @@ let printTableGLL
         
         if not isAbstract
         then               
-            printBr "let buildAst : (seq<Token> -> ParseResult<_>) ="
+            printBr "let buildAst : (seq<Token> -> ParserCommon.ParseResult<_>) ="
             printBrInd 1 "buildAst<Token> parserSource"
         else
-            printBr "let buildAbstractAst : (AbstractAnalysis.Common.ParserInputGraph<Token> -> ParseResult<_>) ="
+            printBr "let buildAbstractAst : (AbstractAnalysis.Common.ParserInputGraph<Token> -> ParserCommon.ParseResult<_>) ="
             printBrInd 1 "buildAbstractAst<Token> parserSource"
         printBr ""
         res.ToString()

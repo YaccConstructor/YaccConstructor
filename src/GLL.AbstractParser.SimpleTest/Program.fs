@@ -22,6 +22,7 @@ open AbstractAnalysis.Common
 open Yard.Generators.GLL.AbstractParser
 open YC.Tests.Helper
 open Yard.Generators.Common.ASTGLL
+open Yard.Generators.GLL.ParserCommon
 
 open GLL.SimpleRightRecursion
 open GLL.BadLeftRecursion

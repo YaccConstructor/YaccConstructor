@@ -161,6 +161,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BuildFsaForJs.cs" />
     <Compile Include="Utils.cs" />
+    <Compile Include="ZoneMarker.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
@@ -187,6 +188,10 @@
     <ProjectReference Include="..\..\ConstantPropagation\ConstantPropagation.fsproj">
       <Project>{42485bca-665d-48fb-befd-4a0232f2cf0b}</Project>
       <Name>ConstantPropagation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\RegularApproximation\RegularApproximation.fsproj">
+      <Project>{d21242ef-c310-4b89-a9aa-cfd1c2b34531}</Project>
+      <Name>RegularApproximation</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

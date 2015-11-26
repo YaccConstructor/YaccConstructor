@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
-using JetBrains.Application;
 using JetBrains.ReSharper.Feature.Services.CSharp.Analyses.Bulbs;
-using JetBrains.ReSharper.Feature.Services.CSharp.Bulbs;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;
 using JetBrains.ReSharper.Resources.Shell;
@@ -12,12 +10,12 @@ namespace SELApproximator
 {
     public class Utils
     {
-        public static string DdgToTestDot<T>(GenericGraphs.GraphWithSingleEnds<T> ddg)
+        public static string DdgToTestDot<TLit, TOpInfo>(GenericGraphs.GraphWithSingleEnds<TLit, TOpInfo> ddg)
         {
             var edgesList = ddg.Graph.Edges
                 .Select(edge => edge.Source.Id.ToString() + " -> " + edge.Target.Id.ToString())
                 .ToList();
-            return String.Join("\n", edgesList);
+            return string.Join("\n", edgesList);
         }
 
         public static string FsaToTestDot<T>(GraphBasedFsa.FSA<Tuple<char, T>> fsa)
@@ -31,7 +29,7 @@ namespace SELApproximator
                 };
             var edgesList = fsa.Edges
                 .Select(edge => string.Format(
-                    "{0:D} -> {1:D} [label=\"{2}\"];", 
+                    "{0:D} -> {1:D} [label=\"{2}\"]; ", 
                     edge.Source, edge.Target, tagToStr(edge.Tag)))
                 .ToList();
             return String.Join("\n", edgesList);

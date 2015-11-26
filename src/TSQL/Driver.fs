@@ -32,7 +32,7 @@ open JetBrains.Application.BuildScript.Application.Zones
 open LexerHelper
 open ReSharperExtension
 open OtherSPPF
-open Yard.Examples.MSParser
+open Yard.Examples.MSParserAbstract
 open Yard.Generators.Common.AST
 open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation
@@ -88,7 +88,7 @@ type TSQLInjectedLanguageModule() =
     let langName = "TSQL"
     let tokenNames = Seq.ofList <| getLiteralNames @ getTerminalNames
     let tokenToTreeNode = tokenToTreeNode
-    let translate ast errors = translate args ast errors
+    let translate ast errors = null//translate args ast errors
     
     let processor = new Processor<Token, br, range, node>(tokenize, parse, translate, tokenToNumber
                         , numToString, tokenData, tokenToTreeNode, langName, calculatePos
@@ -100,8 +100,8 @@ type TSQLInjectedLanguageModule() =
         member this.LexingFinished = processor.LexingFinished
         member this.ParsingFinished = processor.ParsingFinished
         member this.TokenNames = tokenNames
-        member this.GetNextTree i = processor.GetNextTree i
-        member this.GetForestWithToken range = processor.GetForestWithToken range
+//        member this.GetNextTree i = processor.GetNextTree i
+//        member this.GetForestWithToken range = processor.GetForestWithToken range
         member this.GetPairedRanges left right range toRight = processor.GetPairedRanges left right range toRight
 
     interface IReSharperLanguage

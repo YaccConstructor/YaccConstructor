@@ -15,9 +15,9 @@ open YC.FST.GraphBasedFst
 open YC.FSA.FsaApproximation
 open YC.FSA.GraphBasedFsa
 
-let lexerErrMsg = "Unexpected symbol: "
-let parserErrMsg = "Syntax error. Unexpected token "
-let undefinedVariableErrMsg = "undefined variable"
+let lexerErrMsg = "Unexpected symbol:"
+let parserErrMsg = "Syntax error. Unexpected token"
+let undefinedVariableErrMsg = "Undefined variable"
 
 type DrawingGraph (vertices : IEnumerable<int>, edges : ResizeArray<TaggedEdge<int, string>>) =
     member this.Vertices = vertices
@@ -33,10 +33,10 @@ type ParsingFinishedArgs(lang : string) =
     inherit System.EventArgs()
     member this.Lang = lang
 
-type TreeGenerationState<'node> = 
+(*type TreeGenerationState<'node> = 
     | Start
     | InProgress of 'node * AstNode list
-    | End of 'node
+    | End of 'node*)
 
 exception LexerException of string * obj
 
@@ -51,8 +51,8 @@ type IInjectedLanguageModule<'br, 'range, 'node when 'br : equality> =
      abstract LexingFinished: IEvent<LexingFinishedArgs<'node>>
      abstract ParsingFinished: IEvent<ParsingFinishedArgs>
      abstract TokenNames : seq<string>
-     abstract GetNextTree: int -> 'node * bool
-     abstract GetForestWithToken: 'range -> ResizeArray<'node>
+     //abstract GetNextTree: int -> 'node * bool
+     //abstract GetForestWithToken: 'range -> ResizeArray<'node>
      abstract GetPairedRanges: int -> int -> 'range -> bool -> ResizeArray<'range>
      abstract Process
         : FSA<char * Position<'br>> -> 
@@ -68,7 +68,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
         , getDocumentRange: Position<'br> -> 'range
         , printAst: Tree<'TokenType> -> string -> unit
         , printOtherAst: OtherTree<'TokenType> -> string -> unit
-        , semantic : _ option) as this =
+        , semantic : _ option) = //as this =
 
     let lexingFinished = new Event<LexingFinishedArgs<'node>>()
     let parsingFinished = new Event<ParsingFinishedArgs>()
@@ -76,7 +76,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
     let mutable forest: list<Tree<'TokenType> * _> = [] 
     let mutable otherForest : list<OtherTree<'TokenType>> = []
 
-    let mutable generationState : TreeGenerationState<'node> = Start
+    //let mutable generationState : TreeGenerationState<'node> = Start
     
     ///creates instance of LexingFinishedArgs
     let prepareToTrigger (graph : ParserInputGraph<'TokenType>) tokenToTreeNode = 
@@ -88,7 +88,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
                 |> Seq.map 
                     (
                         fun edge -> 
-                            let tokenName = edge.Tag |> tokenToNumber |> numToString
+                            let tokenName = edge.Tag |> (tokenToNumber >> numToString)
                             new TaggedEdge<_, _>(edge.Source, edge.Target, tokenName)
                     )
                 |> ResizeArray.ofSeq
@@ -117,7 +117,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
                 |> Array.map 
                     (
                         function 
-                            Smbl e -> (sprintf "%s%c" lexerErrMsg <| fst e), snd e |> getDocumentRange 
+                            Smbl (char, position) -> (sprintf "%s %c" lexerErrMsg char), position |> getDocumentRange 
                             | e -> failwithf "Unexpected tokenization result: %A" e
                     )
                 |> Array.iter addLError 
@@ -148,16 +148,16 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
                     if semantic.IsSome 
                     then
                         #if DEBUG
-                            //sometimes it needs for debugging purposes
-                            printAst tree "result ast.dot"
+                        //sometimes it needs for debugging purposes
+                        printAst tree "result ast.dot"
                         #endif
                         
                         let pSource, lSource, tokToSourceString = semantic.Value
                         let cfg = new ControlFlow<'TokenType>(tree, pSource, lSource, tokToSourceString)
                         
                         #if DEBUG
-                            //sometimes it needs for debugging purposes
-                            cfg.PrintToDot "result cfg.dot"
+                        //sometimes it needs for debugging purposes
+                        cfg.PrintToDot "result cfg.dot"
                         #endif
                         let semErrors = cfg.FindUndefVariable()
                         semErrors |> List.iter (fun error -> addSError undefinedVariableErrMsg error)
@@ -168,7 +168,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
                     then token |> addPError 
             )
 
-    let getNextTree index = 
+    (*let getNextTree index = 
         if forest.Length <= index
         then
             generationState <- End(null)
@@ -189,7 +189,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
             else generationState <- InProgress(treeNode, unproc |> List.map (fun n -> n :> AstNode)) 
 
         generationState
-
+        
     let getForestWithToken range = 
 
         forest
@@ -210,13 +210,13 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
         | End (treeNode) -> 
             generationState <- Start
             treeNode, true
-        | _ -> failwith "Unexpected state in tree generation"
+        | _ -> failwith "Unexpected state in tree generation"*)
 
     member this.TokenToPos calculatePos (token : 'TokenType) = 
         let data (*: FSA<char*Position<'br>>*) = unbox <| tokenData token
         calculatePos data
 
-    member this.GetForestWithToken range = getForestWithToken range
+    //member this.GetForestWithToken range = getForestWithToken range
 
     member this.GetPairedRanges leftNumber rightNumber range toRight = 
         
@@ -231,7 +231,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
         |> Seq.concat
         |> ResizeArray.ofSeq
 
-    member this.TranslateToTreeNode nextTree errors = (Seq.head <| translate nextTree errors)
+    //member this.TranslateToTreeNode nextTree errors = (Seq.head <| translate nextTree errors)
     
     member this.Process (graph : FSA<char * Position<'br>>) = 
         let lexerErrors = new ResizeArray<_>()

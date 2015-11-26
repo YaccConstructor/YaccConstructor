@@ -25,7 +25,7 @@ open Yard.Core.IL.Production
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 open Yard.Generators.Common.Epsilon
-open PrintTreeNode
+open HighlightingPrinter
 
 let getPosFromSource fullPath dummyPos (src : Source.t) =
     let file =
@@ -298,12 +298,6 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         funHead @@-- body
 
     //let nowarn = wordL "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
-    let mainHighlightSemantic() = 
-        
-        if isHighlightingMode
-        then wordL <| System.String.Concat [| printTokenToTreeNode (grammar.indexator); System.Environment.NewLine;|] 
-        else wordL ""
-    
-    [ mainHighlightSemantic(); (*nowarn; *)defineEpsilonTrees; (*declareNonTermsArrays;*)rules; funRes]
+    [(*nowarn; *)defineEpsilonTrees; (*declareNonTermsArrays;*)rules; funRes]
     |> aboveListL
     |> Display.layout_to_string(FormatOptions.Default)

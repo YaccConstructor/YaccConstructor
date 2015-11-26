@@ -4,7 +4,6 @@ namespace RShT1
 {
     class SECRDemo
     {
-
         public static void Execute()
         {
             Program.Eval("(1 + 2) * 3");
@@ -34,13 +33,7 @@ namespace RShT1
             Program.ExecuteImmediate(insertQuery);
         }
 
-        public static void LexErrors()
-        {
-            Program.Eval("1 + xyz + 3");
-        }
-
-
-        static int Calculate(bool cond)
+        public static int Calculate(bool cond)
         {
             var expr = "(10";
             for (int i = 0; i < 10; ++i)

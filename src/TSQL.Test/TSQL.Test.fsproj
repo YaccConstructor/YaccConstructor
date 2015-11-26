@@ -39,7 +39,7 @@
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <OutputPath>C:\yc\recursive-ascent\src\..\Bin\Release\v40\</OutputPath>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">
@@ -56,11 +56,11 @@
   <Import Project="$(FSharpTargetsPath)" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
-    <Compile Include="..\TSQL\MsParser.fs">
-      <Link>MsParser.fs</Link>
+    <Compile Include="..\TSQL\MsParserAbstract.fs">
+      <Link>MsParserAbstract.fs</Link>
     </Compile>
-    <Compile Include="..\TSQL\Lexer_Abstract.fs">
-      <Link>Lexer_Abstract.fs</Link>
+    <Compile Include="..\TSQL\LexerAbstract_Abstract.fs">
+      <Link>LexerAbstract_Abstract.fs</Link>
     </Compile>
     <Compile Include="TSQL.Test.fs" />
     <None Include="packages.config" />

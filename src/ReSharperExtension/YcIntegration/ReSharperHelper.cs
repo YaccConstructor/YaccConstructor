@@ -81,15 +81,15 @@ namespace ReSharperExtension.YcIntegration
             return GetProcessor(lang).GetPairedRanges(left, right, range, toRight);
         }
 
-        public List<ITreeNode> GetForestWithToken(string lang, DocumentRange range)
-        {
-            return GetProcessor(lang).GetForestWithToken(range);
-        }
-
-        public Tuple<ITreeNode, bool> GetNextTree(string lang, int number)
-        {
-            return GetProcessor(lang).GetNextTree(number);
-        }
+//        public List<ITreeNode> GetForestWithToken(string lang, DocumentRange range)
+//        {
+//            return GetProcessor(lang).GetForestWithToken(range);
+//        }
+//
+//        public Tuple<ITreeNode, bool> GetNextTree(string lang, int number)
+//        {
+//            return GetProcessor(lang).GetNextTree(number);
+//        }
 
         public IEnumerable<string> GetAvailableTokens(string lang)
         {

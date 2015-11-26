@@ -22,6 +22,8 @@ open Utils.Dictionary
 open BuildApproximation
 open GenerateFsa
 open IControlFlowGraphUtils
+open YC.FSA.GraphBasedFsa
+open ArbitraryOperation
 
 let private serializeJsCfg (cfg: IJsControlFlowGraph) = 
     let name = "JsCfg_" + cfg.GetHashCode().ToString() + ".dot"
@@ -46,6 +48,12 @@ let private getHotspots (cfg: IJsControlFlowGraph) =
                 | _ -> None
         )
 
+let rec approximateJs 
+        (functionInfo: ArbitraryOperation<_>) 
+        (stack: list<FSA<_>>) 
+        (controlData: ControlData<_,_,_>) =
+    None, stack
+
 let private build (jsCfg: IJsControlFlowGraph) =
     let fstHotspot = getHotspots jsCfg |> List.head :> ITreeNode
     let methodName = "main"
@@ -66,11 +74,12 @@ let private build (jsCfg: IJsControlFlowGraph) =
         TargetFunction = methodName; 
         TargetNode = fstHotspot; 
         CurRecLevel = 0;
-        LoggerState = Logger.disabledLogger }
+        LoggerState = Logger.disabledLogger
+        FsaParams = CharFsa.charFsaParams }
     let fsa = buildAutomaton ddg initFsaMap controlData approximateJs CharFsa.charFsaParams
     // for debug
     let path = Utils.myDebugFilePath ("fsa_" + methodName + ".dot")
-    FsaHelper.toDot fsa path
+    CharFsa.toDot fsa path
     // end
     fsa
 

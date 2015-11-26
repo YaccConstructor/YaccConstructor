@@ -38,7 +38,6 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Compile Include="Bugs.cs" />
     <Compile Include="calc.cs" />
     <Compile Include="BracketsHighlighting.cs" />
     <Compile Include="CalcWithCyclesAndCalls.cs" />

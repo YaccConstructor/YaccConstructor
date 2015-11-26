@@ -3,14 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media;
+
 using JetBrains.Application.Threading.Tasks;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.Tree;
+using JetBrains.Util;
+
 using ReSharperExtension.Highlighting;
 using ReSharperExtension.Highlighting.Dynamic;
 using ReSharperExtension.Settings;
 using ReSharperExtension.YcIntegration;
+
 using YC.SDK;
 
 namespace ReSharperExtension
@@ -18,7 +22,6 @@ namespace ReSharperExtension
     static class Handler
     {
         private static List<Hotspot.Hotspot> hotspots;
-
         public static List<Hotspot.Hotspot> Hotspots
         {
             get
@@ -41,6 +44,7 @@ namespace ReSharperExtension
 
             foreach (var lexEvent in YcProcessor.LexingFinished)
             {
+                lexEvent.AddHandler(SaveTokens);
                 lexEvent.AddHandler(HighlightTokens);
                 lexEvent.AddHandler(UpdateDataGraph);
             }
@@ -57,21 +61,40 @@ namespace ReSharperExtension
         /// <param name="args">Contains info about tokens and language</param>
         private static void HighlightTokens<T>(object sender, CommonInterfaces.LexingFinishedArgs<T> args)
         {
-            IHighlightingConsumer consumer = Process.Consumer;
-            var processor = new TreeNodeProcessor(consumer, Process.File);
-
             LanguageHelper.Update(args.Lang);
-            
+            IList<HighlightingInfo> highlightings = new List<HighlightingInfo>();
+
             Action action =
-                () => args.Tokens.ForEach(node => 
-                    processor.ProcessAfterInterior(node as ITreeNode));
+                () => args.Tokens
+                    .ForEach(node => highlightings.AddRange(ToHighlightingInfo(node as ITreeNode)));
 
             using (TaskBarrier fibers = Process.DaemonProcess.CreateFibers())
             {
                 fibers.EnqueueJob(action);
             }
 
-            Process.DoHighlighting(new DaemonStageResult(consumer.Highlightings));
+            Process.DoHighlighting(new DaemonStageResult(highlightings));
+        }
+
+        private static void SaveTokens<T>(object sender, CommonInterfaces.LexingFinishedArgs<T> args)
+        {
+            IEnumerable<ITreeNode> tokens = args.Tokens.Select(node => node as ITreeNode);
+            ExistingRanges.AddRanges(tokens);
+        }
+
+        private static IList<HighlightingInfo> ToHighlightingInfo(ITreeNode node)
+        {
+            if (node == null)
+                return new List<HighlightingInfo>();
+
+            ICollection<DocumentRange> colorConstantRange = node.UserData.GetData(Constants.Ranges);
+            IHighlighting highlighting = new TokenHighlighting(node);
+
+            if (colorConstantRange == null)
+                return new List<HighlightingInfo>();
+
+            return colorConstantRange.Select(
+                range => new HighlightingInfo(range, highlighting, new Severity?())).ToList();
         }
 
         /// <summary>
@@ -110,27 +133,27 @@ namespace ReSharperExtension
         {
             string lang = args.Lang;
 
-            if (!parsedSppf.ContainsKey(lang))
-                parsedSppf.Add(lang, 0);
-            else
-                parsedSppf[lang]++;
+            //if (!parsedSppf.ContainsKey(lang))
+            //    parsedSppf.Add(lang, 0);
+            //else
+            //    parsedSppf[lang]++;
 
-            Action action =
-                () =>
-                {
-                    var isEnd = false;
-                    while (!isEnd)
-                    {
-                        Tuple<ITreeNode, bool> res = YcProcessor.GetNextTree(lang, parsedSppf[lang]);
-                        ExistingTreeNodes.AddTree(res.Item1);
-                        isEnd = res.Item2;
-                    }
-                };
+            //Action action =
+            //    () =>
+            //    {
+            //        var isEnd = false;
+            //        while (!isEnd)
+            //        {
+            //            Tuple<ITreeNode, bool> res = YcProcessor.GetNextTree(lang, parsedSppf[lang]);
+            //            ExistingRanges.AddTree(res.Item1);
+            //            isEnd = res.Item2;
+            //        }
+            //    };
 
-            using (TaskBarrier fibers = Process.DaemonProcess.CreateFibers())
-            {
-                fibers.EnqueueJob(action);
-            }
+            //using (TaskBarrier fibers = Process.DaemonProcess.CreateFibers())
+            //{
+            //    fibers.EnqueueJob(action);
+            //}
         }
 
         public static void Init()
@@ -140,8 +163,7 @@ namespace ReSharperExtension
 
         internal static void UpdateHotspots(IEnumerable<HotspotModelView> items)
         {
-            var hotspotItems = items.Select(HotspotModelView.ToHotspot);
-            hotspots = new List<Hotspot.Hotspot>(hotspotItems);
+            hotspots = items.Select(HotspotModelView.ToHotspot).ToList();
         }
     }
 }

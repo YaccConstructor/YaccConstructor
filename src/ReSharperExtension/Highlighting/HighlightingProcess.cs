@@ -35,7 +35,7 @@ namespace ReSharperExtension.Highlighting
             myCommiter = commiter;
             Handler.Process = this;
 
-            ExistingTreeNodes.ClearExistingTree(DaemonProcess.Document);
+            ExistingRanges.ClearExistingRanges(DaemonProcess.Document);
             ProcessErrors errors = YcProcessor.Process(File);
             HighlightErrors(errors);
             // remove all old highlightings
@@ -49,7 +49,7 @@ namespace ReSharperExtension.Highlighting
             get { return new DefaultHighlightingConsumer(this, mySettingsStore); }
         }
 
-        public IFile File
+        private IFile File
         {
             get { return HostLanguageHelper.GetFile(DaemonProcess.SourceFile); }
         }

@@ -208,7 +208,7 @@
     <Compile Include="GraphDefine\Graph.cs" />
     <Compile Include="GraphDefine\LogicCore.cs" />
     <Compile Include="GraphDefine\Vertex.cs" />
-    <Compile Include="Highlighting\Dynamic\ExistingTreeNodes.cs" />
+    <Compile Include="Highlighting\Dynamic\ExistingRanges.cs" />
     <Compile Include="Highlighting\Dynamic\BaseBraceHighlighter.cs" />
     <Compile Include="Highlighting\ErrorWarning.cs" />
     <Compile Include="Handler.cs" />
@@ -217,7 +217,6 @@
     <Compile Include="Highlighting\LanguageHelper.cs" />
     <Compile Include="YCFileStructureExplorer.cs" />
     <Compile Include="Highlighting\TokenHighlighting.cs" />
-    <Compile Include="Highlighting\TreeNodeProcessor.cs" />
     <Compile Include="IReSharperLanguage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="YcIntegration\ReSharperHelper.cs" />

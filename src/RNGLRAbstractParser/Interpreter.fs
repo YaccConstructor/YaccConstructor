@@ -138,7 +138,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         |> Seq.map (fun e -> new QuickGraph.TaggedEdge<_,_>(verticesMap.[e.Source], verticesMap.[e.Target], e.Tag))
         |> g.AddVerticesAndEdgeRange
         |> ignore
-        verticesMap.[tokens.InitState], verticesMap.[tokens.FinalState], g
+        verticesMap.[tokens.InitStates.[0]], verticesMap.[tokens.FinalStates.[0]], g
     
     let nodes = new BlockResizeArray<AstNode>()
     let terminals = new BlockResizeArray<'TokenType>()

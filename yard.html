@@ -33,9 +33,9 @@
         <div class="span9" id="main">
           
 <h1>YARD</h1>
-YARD is powerful translation specification language. It allow you to use EBNF, metarules and conditional generation. Also YARD support L and S attributed grammars.
+YARD is powerful translation specification language. It allows you to use EBNF, metarules and conditional generation. Also YARD support L and S attributed grammars.
 
-<h2>Syntax in exapmles</h2>
+<h2>Syntax in examples</h2>
 <h3>Grammar</h3>
 <pre>
 grammar: ('{'header'}')? rules ('{'footer'}')?
@@ -63,14 +63,14 @@ s: DECNUMBER|HEXNUMBER;
 s: NUMBER (PLUS|MULT) NUMBER;
 s: { None }|n=NUMBER{Some n};
 </pre>
-Mean that empty branch is epsilon. So s can produce epsilon or NUMBER. It is important that empty branch must have action code. It is necessary for type checking.
+Note that empty branch is an epsilon, so s can produce epsilon or NUMBER. It is important that empty branch must have action code as it is necessary for type checking.
 
-<h3>Zero or More</h3>
+<h3>Zero or more</h3>
 <pre>
 grammar: rule*;
 </pre>
 
-<h3>One ore More</h3>
+<h3>One or more</h3>
 <pre>
 grammar: rule+;
 </pre>
@@ -79,12 +79,12 @@ grammar: rule+;
 <pre>
 s: PLUS?;
 </pre>
-Or
+or
 <pre>
 s: [PLUS];
-</pre>
-Thie syntax useful for big optional subsexpresionns. Instead of 
 
+</pre>
+This syntax is useful for big optional subexpressions. Instead of 
 <pre>
 s: (n PLUS expr)?;
 </pre>
@@ -92,7 +92,7 @@ you can write
 <pre>
 s: [n PLUS expr];
 </pre>
-Grouping and optionality in one.
+which contains grouping and optionality.
 
 <h3>Literal</h3>
 <pre>

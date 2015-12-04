@@ -68,6 +68,13 @@ YARD is powerful translation specification language. It allows you to use EBNF, 
     <td>GNU GPL</td>
   </tr>
   <tr>
+    <td>Output languages</td>
+    <td>F#</td> 
+    <td>C#, Java, Python (ANTLR 4) <br> C, C++, C#, Java & 7 more (ANTLR 3)</td>
+    <td>C + specific language implementations</td>
+    <td>C, C++, Java, XML</td>
+  </tr>
+  <tr>
     <td>Input grammar notation</td>
     <td>EBNF</td> 
     <td>EBNF</td>
@@ -98,7 +105,7 @@ YARD is powerful translation specification language. It allows you to use EBNF, 
   <tr>
     <td>Parametrized rules</td>
     <td>+</td> 
-    <td>+(limited)</td>
+    <td>+(limited) <sup>[1]</sup></td>
     <td>-</td>
     <td>-</td>
   </tr>
@@ -110,7 +117,7 @@ YARD is powerful translation specification language. It allows you to use EBNF, 
     <td>+</td>
   </tr>
   <tr>
-    <td>Named bindings to synthetized attributes</td>
+    <td>Bindings to synthetized attributes</td>
     <td>+</td> 
     <td>+</td>
     <td>-</td>
@@ -125,6 +132,7 @@ YARD is powerful translation specification language. It allows you to use EBNF, 
   </tr>
 </table>
 
+[1] &mdash; in ANTLR rule are specified using the syntax of the generated language, meanwhile YARD can accept RegExps' or other rules too!
 
 <h2>Syntax in examples</h2>
 <h3>Grammar</h3>

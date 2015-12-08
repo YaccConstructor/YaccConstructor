@@ -8,7 +8,7 @@
     <ProjectGuid>e94970c1-26a4-4fa6-bb3b-261b70938ff4</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>ControlFlowGraph</RootNamespace>
-    <AssemblyName>ControlFlowGraph</AssemblyName>
+    <AssemblyName>YC.ControlFlowGraph</AssemblyName>
     <Name>ControlFlowGraph</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>

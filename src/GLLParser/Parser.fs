@@ -26,6 +26,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
     let tokens = seq {yield! tokens; yield parser.EOF}
     let tokens = Seq.toArray tokens
     let inputLength = Seq.length tokens
+    
     let nonTermsCountLimit = 1 + (Array.max parser.LeftSide)
     let currentRule = parser.StartRule
     let structures = new ParserStructures(inputLength, currentRule)
@@ -41,6 +42,17 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
 //            Error ("This grammar does not accept empty input.")     
 //    else
     let slots = parser.Slots
+    
+    let printGrammar =
+        for i = 0 to parser.rulesCount - 1 do
+            let str = 
+                let mutable res = ""
+                for j = 0 to parser.rules.[i].Length - 1 do
+                    res <- res + " " + parser.NumToString parser.rules.[i].[j]
+                res
+            printfn "%d : %A -> %A" i (parser.NumToString parser.LeftSide.[i]) str
+    
+    printGrammar 
        
     //свернуть в 1 инт
     let setU = Array.zeroCreate<Dictionary<int, Dictionary<int64, ResizeArray<int<nodeMeasure>>>>> (inputLength + 1)
@@ -260,6 +272,8 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             currentIndex := currentContext.Value.Index
             currentGSSNode := currentContext.Value.Vertex
             structures.CurrentLabel := currentContext.Value.Label
+            let tmpRule = getRule !structures.CurrentLabel
+            let tmpPos = getPosition !structures.CurrentLabel
             structures.CurrentN := currentContext.Value.Ast 
             structures.CurrentR := structures.Dummy
             condition := false
@@ -348,7 +362,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         | None -> Error ("String was not parsed")
         | Some res -> 
             let r1 = new Tree<_> (tokens, res, parser.rules)
-            //r1.AstToDot parser. parser. tokenToNum tokenData (outputDir + fileName)
+            r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
             Success (r1)
                     
                             

@@ -318,6 +318,7 @@ src/Calc/res.dot
 src/Calc/CalcHighlighting/*
 src/Calc/Lexer_Abstract.fs
 src/Calc/FsYARD/*
+src/Calc/*.yrd.fs
 
 src/ExtCalc/*.yrd.fs
 src/ExtCalc/Lexer.fs
@@ -334,13 +335,16 @@ src/JSON_Parser/FsYARD/*
 
 src/TSQL/out
 src/TSQL/Lexer.fs
-src/TSQL/Lexer_Abstract.fs
 src/TSQL/FsYard.log
 src/TSQL/*.dot
 src/TSQL/log.txt
 src/TSQL/FsYARD/*
 src/TSQL/MsParser.fs
 src/TSQL/TSQLHighlighting/*
+src/TSQL/LexerAbstract.fs
+src/TSQL/Lexer_Abstract.fs
+src/TSQL/LexerAbstract_Abstract.fs
+src/TSQL/MSParserAbstract.fs
 src/TSQLTests.fs/Lexer_Abstract.fs
 
 src/ControlFlowGraph.Test/*.yrd.fs
@@ -381,10 +385,9 @@ Tests/AbstractRNGLR/DOT/errors6.dot.pdf
 Tests/AbstractRNGLR/DOT/errors7.dot.pdf
 Tests/AbstractRNGLR/DOT/errors8.dot.pdf
 Tests/AbstractRNGLR/DOT/errors9.dot.pdf
+Tests/AbstractRNGLR/DOT/gss.dot.pdf
 Tests/Alvor/GenerateTestforAlvor/packages/*
 Tests/RNGLR/sppf.dot*
 
 *log.txt
 **/out
-**/Calc.yrd.fs
-Tests/AbstractRNGLR/DOT/gss.dot.pdf

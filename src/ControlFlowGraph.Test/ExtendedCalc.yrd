@@ -4,7 +4,7 @@
 [<Start>]
 start: assign+
 
-assign: id EQ expr SEMICOLON
+assign: id ASSIGN expr SEMICOLON
 
 calcExpr: expr
 

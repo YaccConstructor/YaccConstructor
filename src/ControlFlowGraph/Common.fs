@@ -7,6 +7,7 @@ type Keyword =
     | ELSE
     | ENDIF
     | EQ
+    | ASSIGN
     | SEMICOLON
     | WHILE
 

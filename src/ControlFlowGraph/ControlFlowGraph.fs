@@ -27,9 +27,9 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
     
     let intToToken = fun i -> tree.Tokens.[i]
 
-    let isNotEq token = 
-        let eqNumber = langSource.KeywordToInt.[Keyword.EQ]
-        parserSource.TokenToNumber token <> eqNumber
+    let isNotAssign token = 
+        let assignNumber = langSource.KeywordToInt.[Keyword.ASSIGN]
+        parserSource.TokenToNumber token <> assignNumber
 
     let isVariable = 
         parserSource.TokenToNumber >> langSource.IsVariable
@@ -159,7 +159,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                 | Assignment -> 
                     let leftPart = 
                          block.Tokens 
-                         |> Seq.takeWhile isNotEq
+                         |> Seq.takeWhile isNotAssign
                          |> List.ofSeq
 
                     if leftPart.Length = 1 
@@ -168,7 +168,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                         newVar <- Some varName
                     
                     block.Tokens
-                    |> Seq.skipWhile isNotEq
+                    |> Seq.skipWhile isNotAssign
                     |> List.ofSeq
                     |> List.tail
                 | _ -> block.Tokens |> List.ofArray

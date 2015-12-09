@@ -86,15 +86,15 @@ type ``Control Flow Graph building: Simple cases``() =
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (RNGLR.ParseExtendedCalc.X 0)
-                createEdge 1 2 (RNGLR.ParseExtendedCalc.EQ 1)
+                createEdge 1 2 (RNGLR.ParseExtendedCalc.ASSIGN 1)
                 createEdge 2 3 (RNGLR.ParseExtendedCalc.ONE 2)
                 createEdge 3 4 (RNGLR.ParseExtendedCalc.SEMICOLON 3)
                 createEdge 4 5 (RNGLR.ParseExtendedCalc.Y 4)
-                createEdge 5 6 (RNGLR.ParseExtendedCalc.EQ 5)
+                createEdge 5 6 (RNGLR.ParseExtendedCalc.ASSIGN 5)
                 createEdge 6 7 (RNGLR.ParseExtendedCalc.TWO 6)
                 createEdge 7 8 (RNGLR.ParseExtendedCalc.SEMICOLON 7)
                 createEdge 8 9 (RNGLR.ParseExtendedCalc.Z 8)
-                createEdge 9 10 (RNGLR.ParseExtendedCalc.EQ 9)
+                createEdge 9 10 (RNGLR.ParseExtendedCalc.ASSIGN 9)
                 createEdge 10 11 (RNGLR.ParseExtendedCalc.THREE 10)
                 createEdge 11 12 (RNGLR.ParseExtendedCalc.SEMICOLON 11)
                 createEdge 12 13 (RNGLR.ParseExtendedCalc.RNGLR_EOF 12)
@@ -122,19 +122,19 @@ type ``Control Flow Graph building: Simple cases``() =
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (RNGLR.ParseExtendedCalc.X 0)
-                createEdge 1 2 (RNGLR.ParseExtendedCalc.EQ 1)
+                createEdge 1 2 (RNGLR.ParseExtendedCalc.ASSIGN 1)
                 createEdge 2 3 (RNGLR.ParseExtendedCalc.ONE 2)
                 createEdge 3 4 (RNGLR.ParseExtendedCalc.SEMICOLON 3)
                 createEdge 4 5 (RNGLR.ParseExtendedCalc.Y 4)
-                createEdge 5 6 (RNGLR.ParseExtendedCalc.EQ 5)
+                createEdge 5 6 (RNGLR.ParseExtendedCalc.ASSIGN 5)
                 createEdge 6 7 (RNGLR.ParseExtendedCalc.TWO 6)
                 createEdge 7 8 (RNGLR.ParseExtendedCalc.SEMICOLON 7)
                 createEdge 4 9 (RNGLR.ParseExtendedCalc.Z 8)
-                createEdge 9 10 (RNGLR.ParseExtendedCalc.EQ 9)
+                createEdge 9 10 (RNGLR.ParseExtendedCalc.ASSIGN 9)
                 createEdge 10 11 (RNGLR.ParseExtendedCalc.THREE 10)
                 createEdge 11 8 (RNGLR.ParseExtendedCalc.SEMICOLON 11)
                 createEdge 8 12 (RNGLR.ParseExtendedCalc.X 8)
-                createEdge 12 13 (RNGLR.ParseExtendedCalc.EQ 9)
+                createEdge 12 13 (RNGLR.ParseExtendedCalc.ASSIGN 9)
                 createEdge 13 14 (RNGLR.ParseExtendedCalc.FOUR 10)
                 createEdge 14 15 (RNGLR.ParseExtendedCalc.SEMICOLON 11)
                 createEdge 15 16 (RNGLR.ParseExtendedCalc.RNGLR_EOF 12)
@@ -160,7 +160,7 @@ type ``Control Flow Graph building: Simple cases``() =
             [
                 createEdge 0 1 (RNGLR.ParseExtendedCalc.X 0)
                 createEdge 0 1 (RNGLR.ParseExtendedCalc.Y 1)
-                createEdge 1 2 (RNGLR.ParseExtendedCalc.EQ 2)
+                createEdge 1 2 (RNGLR.ParseExtendedCalc.ASSIGN 2)
                 createEdge 2 3 (RNGLR.ParseExtendedCalc.FIVE 3)
                 createEdge 3 4 (RNGLR.ParseExtendedCalc.SEMICOLON 4)
                 createEdge 4 5 (RNGLR.ParseExtendedCalc.RNGLR_EOF 5)
@@ -762,13 +762,13 @@ type ``Find undefined variables`` () =
     let tokenData = RNGLR.ParseExtendedCalc.tokenData
 
     let semicolonNumber = tokenToNumber <| RNGLR.ParseExtendedCalc.SEMICOLON 0
-    let eqNumber = tokenToNumber <| RNGLR.ParseExtendedCalc.EQ 0
+    let assignNumber = tokenToNumber <| RNGLR.ParseExtendedCalc.ASSIGN 0
 
     let nodeToType = dict["assign", Assignment;]
         
     let keywordToInt = dict [
                                 Keyword.SEMICOLON, semicolonNumber;
-                                Keyword.EQ, eqNumber;
+                                Keyword.ASSIGN, assignNumber;
                             ]
         
     let varsNumbers = 
@@ -815,11 +815,11 @@ type ``Find undefined variables`` () =
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (RNGLR.ParseExtendedCalc.X 0)
-                createEdge 1 2 (RNGLR.ParseExtendedCalc.EQ 1)
+                createEdge 1 2 (RNGLR.ParseExtendedCalc.ASSIGN 1)
                 createEdge 2 3 (RNGLR.ParseExtendedCalc.Z 2)
                 createEdge 3 4 (RNGLR.ParseExtendedCalc.SEMICOLON 3)
                 createEdge 4 5 (RNGLR.ParseExtendedCalc.Y 4)
-                createEdge 5 6 (RNGLR.ParseExtendedCalc.EQ 5)
+                createEdge 5 6 (RNGLR.ParseExtendedCalc.ASSIGN 5)
                 createEdge 6 7 (RNGLR.ParseExtendedCalc.X 6)
                 createEdge 7 8 (RNGLR.ParseExtendedCalc.SEMICOLON 7)
                 createEdge 8 9 (RNGLR.ParseExtendedCalc.RNGLR_EOF 8)
@@ -835,7 +835,7 @@ type ``Find undefined variables`` () =
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (RNGLR.ParseExtendedCalc.X 0)
-                createEdge 1 2 (RNGLR.ParseExtendedCalc.EQ 1)
+                createEdge 1 2 (RNGLR.ParseExtendedCalc.ASSIGN 1)
                 createEdge 2 3 (RNGLR.ParseExtendedCalc.X 2)
                 createEdge 3 4 (RNGLR.ParseExtendedCalc.SEMICOLON 3)
                 createEdge 4 5 (RNGLR.ParseExtendedCalc.RNGLR_EOF 4)
@@ -854,19 +854,19 @@ type ``Find undefined variables`` () =
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (RNGLR.ParseExtendedCalc.X 0)
-                createEdge 1 2 (RNGLR.ParseExtendedCalc.EQ 1)
+                createEdge 1 2 (RNGLR.ParseExtendedCalc.ASSIGN 1)
                 createEdge 2 3 (RNGLR.ParseExtendedCalc.ONE 2)
                 createEdge 3 4 (RNGLR.ParseExtendedCalc.SEMICOLON 3)
                 createEdge 4 5 (RNGLR.ParseExtendedCalc.Y 4)
-                createEdge 5 6 (RNGLR.ParseExtendedCalc.EQ 5)
+                createEdge 5 6 (RNGLR.ParseExtendedCalc.ASSIGN 5)
                 createEdge 6 7 (RNGLR.ParseExtendedCalc.TWO 6)
                 createEdge 7 8 (RNGLR.ParseExtendedCalc.SEMICOLON 7)
                 createEdge 4 9 (RNGLR.ParseExtendedCalc.Z 8)
-                createEdge 9 10 (RNGLR.ParseExtendedCalc.EQ 9)
+                createEdge 9 10 (RNGLR.ParseExtendedCalc.ASSIGN 9)
                 createEdge 10 11 (RNGLR.ParseExtendedCalc.THREE 10)
                 createEdge 11 8 (RNGLR.ParseExtendedCalc.SEMICOLON 11)
                 createEdge 8 12 (RNGLR.ParseExtendedCalc.X 8)
-                createEdge 12 13 (RNGLR.ParseExtendedCalc.EQ 12)
+                createEdge 12 13 (RNGLR.ParseExtendedCalc.ASSIGN 12)
                 createEdge 13 14 (RNGLR.ParseExtendedCalc.Y 13)
                 createEdge 14 15 (RNGLR.ParseExtendedCalc.MULT 14)
                 createEdge 15 16 (RNGLR.ParseExtendedCalc.Z 15)
@@ -886,16 +886,16 @@ type ``Find undefined variables`` () =
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (RNGLR.ParseExtendedCalc.X 0)
-                createEdge 1 2 (RNGLR.ParseExtendedCalc.EQ 1)
+                createEdge 1 2 (RNGLR.ParseExtendedCalc.ASSIGN 1)
                 createEdge 2 3 (RNGLR.ParseExtendedCalc.ONE 2)
                 createEdge 3 4 (RNGLR.ParseExtendedCalc.SEMICOLON 3)
                 createEdge 4 5 (RNGLR.ParseExtendedCalc.Y 4)
-                createEdge 5 6 (RNGLR.ParseExtendedCalc.EQ 5)
+                createEdge 5 6 (RNGLR.ParseExtendedCalc.ASSIGN 5)
                 createEdge 6 7 (RNGLR.ParseExtendedCalc.TWO 6)
                 createEdge 7 8 (RNGLR.ParseExtendedCalc.SEMICOLON 7)
                 createEdge 4 9 (RNGLR.ParseExtendedCalc.X 8)
                 createEdge 8 9 (RNGLR.ParseExtendedCalc.X 8)
-                createEdge 9 10 (RNGLR.ParseExtendedCalc.EQ 9)
+                createEdge 9 10 (RNGLR.ParseExtendedCalc.ASSIGN 9)
                 createEdge 10 11 (RNGLR.ParseExtendedCalc.Y 10)
                 createEdge 11 12 (RNGLR.ParseExtendedCalc.MULT 11)
                 createEdge 12 13 (RNGLR.ParseExtendedCalc.Z 12)

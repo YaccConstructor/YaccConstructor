@@ -762,7 +762,7 @@ let f x =
 //    t._03_PrettySimpleCalc_BranchedInput ()
 //    t._04_PrettySimpleCalc_LotsOfVariants() 
 //    t._05_NotAmbigousSimpleCalc_LotsOfVariants()
-//    t._06_NotAmbigousSimpleCalc_Loop. ()
+//    t._06_NotAmbigousSimpleCalc_Loop ()
 //    t._07_NotAmbigousSimpleCalc_Loop2. ()
 //    t._08_NotAmbigousSimpleCalc_Loop3. ()
 //    t._09_NotAmbigousSimpleCalc_Loop4. ()
@@ -777,7 +777,7 @@ let f x =
 //    t._18_Stars2_Loop2. () 
 //    t._19_FirstEps ()
 //    t._20_CroppedBrackets ()
-//    t._21_Brackets ()
+    t._21_Brackets ()
 //    t._22_Brackets_BackEdge ()
 //    t._23_UnambiguousBrackets ()
 //    t._24_UnambiguousBrackets_Circle()
@@ -786,6 +786,6 @@ let f x =
 //    t._27_UnambiguousBrackets_WithoutEmptyString()
 //    t._28_UnambiguousBrackets_DifferentPathLengths ()
    // t.``TSQL performance test for Alvor`` 2 100 false
-    t._29_AandB_Circle ()
+//    t._29_AandB_Circle ()
     //t.``TSQL performance test 2`` 2 100 false
     0

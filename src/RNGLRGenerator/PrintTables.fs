@@ -14,10 +14,13 @@
 
 module Yard.Generators.RNGLR.Printer
 
-open Yard.Generators.Common.FinalGrammar
 open System.Collections.Generic
+
+open Yard.Generators.Common.FinalGrammar
 open Yard.Generators.RNGLR
 open Yard.Core.IL
+
+open HighlightingPrinter
 
 type TargetLanguage =
     | FSharp
@@ -26,7 +29,7 @@ type TargetLanguage =
 let printTables 
     (grammar : FinalGrammar) head (tables : Tables) (moduleName : string) 
     (tokenType : Map<_,_>) (res : System.Text.StringBuilder) targetLanguage 
-    _class positionType caseSensitive isAbstractParsingMode =
+    _class positionType caseSensitive isAbstractParsingMode isHighlihgtingMode =
     
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
@@ -258,11 +261,6 @@ let printTables
 
         printBr ""
 
-        printBr "let otherAstToDot ="
-        printBrInd 1 "(fun (tree : Yard.Generators.RNGLR.OtherSPPF.OtherTree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)"
-
-        printBr ""
-
         print2DArrList tables.gotos
             (fun x -> not x.IsEmpty)
             (fun x -> print "%d" x.[0])
@@ -301,6 +299,17 @@ let printTables
             printBrInd 1 "buildAst<Token> parserSource"
             printBr ""
 
+        if isHighlihgtingMode 
+        then 
+            printInd 0 "let getTerminalNames = ["
+            for i = indexator.termsStart to indexator.termsEnd do
+                print "\"%s\";" <| indexator.indexToTerm i
+            print "]"
+            printBr ""
+            printBr ""
+            printBr "%s" <| printTokenToTreeNode indexator
+            printBr ""
+            
         res.ToString()
 
     let printTablesToScala () =    

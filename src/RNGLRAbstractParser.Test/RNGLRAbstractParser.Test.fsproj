@@ -32,6 +32,7 @@
   <ItemGroup>
     <None Include="simpleCalc.yrd" />
     <None Include="Lexer.fsl" />
+    <Compile Include="AandB.yrd.fs" />
     <Compile Include="Brackets.yrd.fs" />
     <Compile Include="Calc.yrd.fs" />
     <!--Compile Include="MsParser.fs" /-->
@@ -83,6 +84,9 @@
     <Reference Include="Graphviz4Net">
       <HintPath>..\..\3rdParty\graphviz4net\Graphviz4Net.dll</HintPath>
     </Reference>
+    <Reference Include="JetBrains.ReSharper.Psi.CSharp">
+      <HintPath>..\packages\JetBrains.Psi.Features.src.102.0.20150522.71619\DotFiles\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
@@ -107,18 +111,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="JetBrains.Platform.ReSharper.Util">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="JetBrains.ReSharper.Psi">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="JetBrains.ReSharper.Psi.CSharp">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Utils.SourceText">
       <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
       <Private>True</Private>

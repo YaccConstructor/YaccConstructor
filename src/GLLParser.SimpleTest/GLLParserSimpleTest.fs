@@ -34,6 +34,7 @@ open GLL.SimpleLeftRecursion
 open GLL.SimpleAmb
 open GLL.SimpleRightRecursion
 open GLL.PrettySimpleCalc
+open Yard.Generators.GLL.ParserCommon
 
 let run path astBuilder =
     let tokens = LexCommon.tokens(path)

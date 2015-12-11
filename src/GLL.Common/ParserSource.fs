@@ -39,7 +39,7 @@ type ParserSourceGLL<'TokenType> (eof                  : 'TokenType
     let _rules = Array.zeroCreate length.Length
     do for i = 0 to length.Length-1 do
         _rules.[i] <- Array.zeroCreate length.[i]
-        for j = 0 to length.[i]-1 do
+        for j = 0 to length.[i] - 1 do
             _rules.[i].[j] <- rules.[rulesStart.[i] + j]
     
                   

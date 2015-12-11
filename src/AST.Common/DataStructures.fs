@@ -22,6 +22,10 @@ type UsualOne<'T> =
     val mutable other : 'T[]
     new (f,o) = {first = f; other = o}    
 
+    member this.DoForAll f = 
+        f this.first
+        this.other |> Array.iter f
+
 [<Struct>]
 type ResizableUsualOne<'T> =
     val mutable first : 'T

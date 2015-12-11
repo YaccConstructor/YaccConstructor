@@ -1,2 +1,2 @@
-[<Start>]                       
-s : s s {1} | A s {1} | s A {1} | A {1} | {1}
+[<Start>]
+start : A B C | NUM PLUS NUM

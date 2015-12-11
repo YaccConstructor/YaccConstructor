@@ -141,6 +141,7 @@ type GLL() =
                     then
                         println "open Yard.Generators.GLL.AbstractParser"
                         println "open AbstractAnalysis.Common"
+                        println "open Yard.Generators.GLL.ParserCommon"
                     else 
                         println "open Yard.Generators.GLL.Parser"
                     println "open Yard.Generators.GLL"

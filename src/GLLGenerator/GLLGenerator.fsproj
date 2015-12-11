@@ -48,6 +48,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Private>True</Private>
+    </Reference>	
     <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
       <Name>Common.AST</Name>
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
@@ -63,9 +66,11 @@
       <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <ProjectReference Include="..\Helper\Helper.fsproj">
+      <Name>Helper</Name>
+      <Project>{fc9a166c-780d-4d15-b366-ca06277c803d}</Project>
       <Private>True</Private>
-    </Reference>
+    </ProjectReference>
     <Reference Include="FSharpx.Core">
       <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
@@ -82,11 +87,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
-      <Name>Common.AST</Name>
-      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>

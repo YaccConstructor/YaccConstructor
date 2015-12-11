@@ -6,14 +6,14 @@ open YC.FSA.FsaApproximation
 include "../../GrammarTemplates/Common.yrd"
 
 tokens {
-    _ of FSA<char*Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>
+    _ of FSA<char*Position<JetBrains.ReSharper.Psi.Tree.ILiteralExpression>>
 }
 
 options {
     translate = true
     module = "JSON.AbstractParser"
     infEpsPath = epsilons
-    pos = "array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>" 
+    pos = "array<Position<JetBrains.ReSharper.Psi.Tree.ILiteralExpression>>" 
 }												   
 
 module Main

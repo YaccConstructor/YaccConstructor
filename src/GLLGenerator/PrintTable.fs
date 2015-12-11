@@ -177,7 +177,8 @@ let printTableGLL
         printBrInd 0 "let isTerminal = function"
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %s _ -> true" <| indexator.indexToTerm i
-        printBrInd 1 "| _ -> false"
+        if indexator.literalsCount > 0
+        then printBrInd 1 "| _ -> false"
         printBr ""
 
         printBrInd 0 "let numIsTerminal = function"
@@ -195,12 +196,6 @@ let printTableGLL
         printBrInd 0 "let numIsLiteral = function"
         for i = indexator.literalsStart to indexator.literalsEnd do
             printBrInd 1 "| %d -> true" <| i
-        printBrInd 1 "| _ -> false"
-        printBr ""
-
-        printBrInd 0 "let isNonTerminal = function"   
-        for i = 0 to indexator.nonTermCount-1 do
-            printBrInd 1 "| %s -> true" <| indexator.indexToNonTerm i
         printBrInd 1 "| _ -> false"
         printBr ""
 
@@ -261,7 +256,7 @@ let printTableGLL
 
         printBr ""
 
-        printBrInd 0 "let private parserSource = new ParserSourceGLL<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon, slots)"
+        printBrInd 0 "let private parserSource = new ParserSourceGLL<Token> (Token.RNGLR_EOF 0, tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon, slots)"
         
         if not isAbstract
         then               

@@ -1,3 +1,2 @@
-[<Start>]
-s : A D B | A d B
-d : D
+[<Start>]                       
+s : B | s B

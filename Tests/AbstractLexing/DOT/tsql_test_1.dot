@@ -1,9 +1,0 @@
-digraph g
-{
-0;1;2;3;4;
-0 -> 1 [label="select ProductID, UnitPrice, ProductName "]
-1 -> 2 [label="from table"]
-2 -> 3 [label="Sold "]
-2 -> 3 [label="OnSale "]
-3 -> 4 [label="where UnitPrice > 1000 "]
-}         

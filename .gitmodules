@@ -6,7 +6,7 @@
 	url = https://github.com/YaccConstructor/YC.FST.git
 [submodule "facio"]
 	path = facio
-	url = git://github.com/emavchun/facio.git
+	url = https://github.com/YaccConstructor/facio.git
 [submodule "src/YC.GrammarZOO"]
 	path = src/YC.GrammarZOO
 	url = https://github.com/YaccConstructor/YC.GrammarZOO.git

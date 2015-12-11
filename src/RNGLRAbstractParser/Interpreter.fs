@@ -27,6 +27,7 @@ open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 open Yard.Generators.Common.DataStructures
 open Yard.Generators.RNGLR
+open FSharpx.Collections.Experimental
 
 type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
@@ -151,6 +152,55 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     for v in innerGraph.Vertices do
         outEdgesInnerGraph.[v.vNum] <- innerGraph.OutEdges v |> Array.ofSeq
     
+    let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide : int[])
+        (initNodes : seq<Vertex>) (numToString : int -> string) (errInd: int) (path : string) =
+        use out = new System.IO.StreamWriter (path)
+        let was = new Dictionary<_,_>()
+        let levels = new Dictionary<_,_>()
+        out.WriteLine "digraph GSS {"
+        let print s = out.WriteLine ("    " + s)
+        let curNum = ref 0
+        print "rankdir=RL"
+        let getAstString astInd =
+            if astInd >= 0 
+            then
+                match nodes.[astInd] with
+                | :? Terminal as i -> tokens.[i.TokenNumber] |> tokenToNumber |> numToString |> sprintf "%s"    
+                | :? AST as ast -> 
+                    let nonT = 
+                        if ast.first.prod < leftSide.Length then ast.first.prod
+                        else errInd
+                    numToString leftSide.[nonT]
+                | _ -> failwith "Unexpected ast"
+            else "eps"
+
+        let rec dfs (u : Vertex) =
+            was.Add (u, !curNum)
+            if not <| levels.ContainsKey u.Level then
+                levels.[u.Level] <- [!curNum]
+            else
+                levels.[u.Level] <- !curNum :: levels.[u.Level]
+            print <| sprintf "%d [label=\"%d_%d\"]" !curNum u.Level u.State 
+            incr curNum
+            u.OutEdges |> ResizeArray.iter (handleEdge u)
+            
+
+        and handleEdge u (e : Edge) =
+            let v = e.Dest
+            if not <| was.ContainsKey v then
+                dfs v
+            print <| sprintf "%d -> %d [label=\"%s\"]" was.[u] was.[v] (getAstString e.Ast)
+
+        for v in initNodes do
+            if not <| was.ContainsKey v then
+                dfs v
+        
+        for level in levels do
+            print <| sprintf "{rank=same; %s}" (level.Value |> List.map (fun (u : int) -> string u) |> String.concat " ")
+
+        out.WriteLine "}"
+        out.Close()
+    
     let customEnqueue (elem : VInfo<_>) =
         if verticesToProcess.Count = 0 || ((verticesToProcess.ElementAt (verticesToProcess.Count - 1)).vNum = elem.vNum |> not)
         then
@@ -210,8 +260,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 if not <| edgesToTerms.ContainsKey e
                 then
                     terminals.Add e.Tag
-                    nodes.Add <| Terminal (terminals.Count - 1)
-                    edgesToTerms.Add(e, nodes.Count - 1)
+                    nodes.Add <| Terminal (terminals.Length - 1)
+                    edgesToTerms.Add(e, nodes.Length - 1)
                 let edge = new Edge(gssVertex, edgesToTerms.[e])
 
                 let ind = tailGssV.FindIndex gssVertex.State gssVertex.Level 
@@ -250,7 +300,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         let ast = 
             match newVertex.FindIndex final.State final.Level with
             | -1 -> 
-                let edge = new Edge(final, nodes.Count)
+                let edge = new Edge(final, nodes.Length)
                 nodes.Add <| new AST (Unchecked.defaultof<_>, null)
                 addEdge  startV isNew newVertex edge (pos > 0)
                 edge.Ast
@@ -258,10 +308,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         if ast >= 0 
         then addChildren nodes.[ast] path prod
         else 
-            let edge = new Edge(final, nodes.Count)
+            let edge = new Edge(final, nodes.Length)
             nodes.Add <| new AST (Unchecked.defaultof<_>, null)
             addEdge  startV isNew newVertex edge (pos > 0)
-            addChildren nodes.[nodes.Count - 1] path prod
+            addChildren nodes.[nodes.Length - 1] path prod
 
     let rec walk remainLength (vertex : Vertex) path startV nonTerm pos prod shouldEnqueueVertex = 
         if remainLength = 0 
@@ -347,7 +397,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             for v in innerGraph.Edges |> Seq.filter (fun e -> e.Target = finalV) |> Seq.collect (fun e -> e.Source.processedGssVertices) do
                 if parserSource.AccStates.[v.State]
                 then
-                    root := Some nodes.Count
+                    root := Some nodes.Length
                     let nonEpsilonEdge = v.OutEdges.FirstOrDefault(fun x -> x.Ast >= 0)
                     if nonEpsilonEdge <> Unchecked.defaultof<_>
                     then
@@ -368,6 +418,11 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 try 
                     let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
                     //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
+
+                    let gssInitVertices = 
+                       innerGraph.Edges |> Seq.filter (fun e -> e.Target = finalV) |> Seq.collect (fun e -> e.Source.processedGssVertices)
+
+                    //drawDot parserSource.TokenToNumber terminals parserSource.LeftSide gssInitVertices parserSource.NumToString parserSource.ErrorIndex "../../../Tests/AbstractRNGLR/DOT/gss.dot"
 
                     Success <| tree
                 with

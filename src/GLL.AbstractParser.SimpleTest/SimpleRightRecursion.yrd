@@ -1,3 +1,2 @@
 [<Start>]
-s : B x B 
-x : A x | A 
+s : B s | B

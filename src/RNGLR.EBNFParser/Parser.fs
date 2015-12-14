@@ -20,6 +20,8 @@ open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
 open Yard.Generators.RNGLR.EBNF
 open Microsoft.FSharp.Collections
+open FSharpx.Collections
+open FSharpx.Collections.Experimental
 
 [<AllowNullLiteral>]
 type Vertex  =
@@ -400,7 +402,7 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
                 simpleEdges.[vertex].Clear()
 
         let shift num =
-            let newAstNode = Terminal (tokens.Count)
+            let newAstNode = Terminal (tokens.Length)
             tokens.Add enum.Current
             if enum.MoveNext() then
                 curToken := enum.Current
@@ -699,7 +701,7 @@ let buildAst<'TokenType> (parserSource : ParserSourceEBNF<'TokenType>) (tokens :
             else*) wasError := true
 
         let lastTokens count =
-            [| for i = max 0 (tokens.Count-count) to tokens.Count-1 do
+            [| for i = max 0 (tokens.Length-count) to tokens.Length-1 do
                 yield tokens.[i]|]
         let debugFuns () =
             let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])

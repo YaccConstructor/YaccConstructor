@@ -209,6 +209,6 @@ type FacioBackend() =
             backendInvoke
             box "3" 
            
-        override this.Constraints = [|noMeta; noEbnf; noInnerAlt; noAlt; noLiterals; noBrackets; needAC; singleModule|]
+        override this.Constraints = [|noMeta; noEbnf; noInnerAlt; noTopLevelAlt; noLiterals; noBrackets; needAC; singleModule|]
         override this.Generate definition = this.Generate (definition, "")
 

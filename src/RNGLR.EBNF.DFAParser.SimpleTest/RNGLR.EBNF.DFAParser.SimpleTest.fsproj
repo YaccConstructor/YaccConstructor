@@ -83,11 +83,6 @@
       <Project>{e7f2f65a-94bf-4681-8bba-e5b69521e5c3}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\RNGLR.EBNF.DFAParser\RNGLR.EBNF.DFAParser.fsproj">
-      <Name>RNGLR.EBNF.DFAParser</Name>
-      <Project>{b343a9c6-170b-48e9-8296-771f874675dc}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">

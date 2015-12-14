@@ -32,7 +32,7 @@ open JetBrains.Application.BuildScript.Application.Zones
 open LexerHelper
 open ReSharperExtension
 open Yard.Generators.RNGLR.OtherSPPF
-open Yard.Examples.MSParser
+open Yard.Examples.MSParserAbstract
 open Yard.Generators.Common.AST
 open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation

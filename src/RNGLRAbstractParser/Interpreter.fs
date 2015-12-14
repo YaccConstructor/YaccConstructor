@@ -227,7 +227,18 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             for prod in arr do
                 innerGraphV.AddReduction(new Reduction(gssVertex, prod, 0, None))
     
-    let (*inline*) addVertex (currentGraphV:VInfo<_>) state (listToAddUnprocessedGssV : ResizeArray<_>) =
+    let mergeList (fromList:ResizeArray<_>) (toList:ResizeArray<_>) = 
+        for it in fromList do
+            if not <| toList.Contains(it) then
+                toList.Add(it)
+
+    let rec copyInfo (fromV:VInfo<_>) (toV:VInfo<_>) state =
+        // mergeList fromV.unprocessedGssVertices toV.unprocessedGssVertices
+        // mergeList fromV.processedGssVertices toV.unprocessedGssVertices
+
+        addVertex toV state toV.unprocessedGssVertices
+
+    and (*inline*) addVertex (currentGraphV:VInfo<_>) state (listToAddUnprocessedGssV : ResizeArray<_>) =
         let mutable v = null
         let mutable isNew = false
         let vOpt = currentGraphV.processedGssVertices |> ResizeArray.tryFind (fun v -> v.State = state)
@@ -242,7 +253,12 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 isNew <- true
                 listToAddUnprocessedGssV.Add v
                 for e in outEdgesInnerGraph.[currentGraphV.vNum] do
-                    addZeroReduction v e.Tag currentGraphV false
+                    match e.Tag with
+                    | None -> 
+                        () //copyInfo currentGraphV e.Target 
+                        |> ignore                        // !!!
+                    | Some (tg) ->
+                        addZeroReduction v tg currentGraphV false
         v, isNew
 
     let addEdge (startV:VInfo<_>) isNew (newVertex:Vertex) edge isNotEps =
@@ -253,20 +269,26 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         if isNotEps
         then
             for e in outEdgesInnerGraph.[startV.vNum] do
-                addNonZeroReduction newVertex e.Tag edge startV
+                match e.Tag with
+                | None -> ()                                // !!!
+                | Some (tg) ->
+                    addNonZeroReduction newVertex tg edge startV
 
     let edgesToTerms = new Dictionary<_,_>()
     let push (currentGraphV:VInfo<_>) (gssVertex : Vertex) =
         let newUnprocessedGssVs = new ResizeArray<_>(2)
         for e in outEdgesInnerGraph.[currentGraphV.vNum] do
-            let push = parserSource.Gotos.[gssVertex.State].[parserSource.TokenToNumber e.Tag]
+            match e.Tag with
+            | None -> ()
+            | Some (tag) ->
+            let push = parserSource.Gotos.[gssVertex.State].[parserSource.TokenToNumber tag]  // !!! 
             if push <> 0 
             then
                 let tailGssV, isNew = addVertex e.Target push (if currentGraphV.vNum = e.Target.vNum then newUnprocessedGssVs else e.Target.unprocessedGssVertices)
 
                 if not <| edgesToTerms.ContainsKey e
                 then
-                    terminals.Add e.Tag
+                    terminals.Add tag                           // !!! 
                     nodes.Add <| Terminal (terminals.Length - 1)
                     edgesToTerms.Add(e, nodes.Length - 1)
                 let edge = new Edge(gssVertex, edgesToTerms.[e])

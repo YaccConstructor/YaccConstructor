@@ -27,7 +27,7 @@ let calcTokenizationTest path eCount vCount countEdgesArray =
     //graphFsa.PrintToDOT("../../../FST/FST/FSA.Tests/DOTfsa/test12FSA.dot", printSmb)
     let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
     //graphFst.PrintToDOT("../../../FST/FST/FSA.Tests/DOTfsa/test12FST.dot", printSmb)
-    let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphFst    
+    let res = YC.FST.AbstractLexing.CalcLexer.tokenize (Some eof) graphFst    
     match res with
     | Success res ->
         //ToDot res @"../../../src/AbstractLexer.Interpreter.Tests/Tests/TestInterpretParserLexer.dot" (printBref printSmbString)

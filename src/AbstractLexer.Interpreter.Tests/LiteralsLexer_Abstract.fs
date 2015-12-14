@@ -59,7 +59,7 @@ let actions () =
    [|
 
       (fun (gr : FSA<_>) ->
-                                   LITERAL(gr) |> Some );
+                                   LITERAL(gr) |> Some |> Some);
 
    |]
 

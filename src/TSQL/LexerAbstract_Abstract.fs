@@ -54,59 +54,59 @@ let actions () =
    [|
 
       (fun (gr : FSA<_>) ->
-                                 DEC_NUMBER(gr)|> Some );
+                                 DEC_NUMBER(gr)|> Some |> Some  );
       (fun (gr : FSA<_>) ->
                                  None );
       (fun (gr : FSA<_>) ->
-                             L_dot_(gr) |> Some );
+                             L_dot_(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                             L_comma_(gr) |> Some );
+                             L_comma_(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                             L_equal_(gr) |> Some );
+                             L_equal_(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                             L_more_(gr) |> Some );
+                             L_more_(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                             L_less_(gr) |> Some );
+                             L_less_(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                             L_colon_(gr) |> Some);
+                             L_colon_(gr) |> Some |> Some );
       (fun (gr : FSA<_>) ->
-                             L_left_bracket_(gr) |> Some);
+                             L_left_bracket_(gr) |> Some |> Some );
       (fun (gr : FSA<_>) ->
-                             L_right_bracket_(gr) |> Some);
+                             L_right_bracket_(gr) |> Some |> Some );
       (fun (gr : FSA<_>) ->
-                            L_plus_(gr) |> Some );
+                            L_plus_(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                            L_minus_(gr) |> Some );
+                            L_minus_(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                            L_star_(gr) |> Some );
+                            L_star_(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                             L_select(gr) |> Some );
+                             L_select(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                           L_join(gr) |> Some );
+                           L_join(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                             L_update(gr) |> Some );
+                             L_update(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                             L_insert(gr) |> Some );
+                             L_insert(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                             L_values(gr) |> Some );
+                             L_values(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                           L_from(gr)|> Some );
+                           L_from(gr)|> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                            L_where(gr)|> Some );
+                            L_where(gr)|> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                          L_and(gr) |> Some );
+                          L_and(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                         L_or(gr) |> Some );
+                         L_or(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                          L_set(gr) |> Some );
+                          L_set(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                         L_on(gr) |> Some );
+                         L_on(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                         L_go(gr) |> Some );
+                         L_go(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                           L_into(gr) |> Some );
+                           L_into(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                          IDENT(gr) |> Some );
+                          IDENT(gr) |> Some |> Some  );
 
    |]
 

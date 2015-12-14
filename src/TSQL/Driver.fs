@@ -64,7 +64,7 @@ type TSQLInjectedLanguageModule() =
         let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
         let graphFst = FST<_,_>.FSAtoFST(lexerInputGraph, transform, smblEOF)
         let eof = RNGLR_EOF(new FSA<_>())    
-        YC.TSQLLexer.tokenize eof graphFst
+        YC.TSQLLexer.tokenize (Some eof) graphFst
 
     let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
 
@@ -87,7 +87,10 @@ type TSQLInjectedLanguageModule() =
 
     let langName = "TSQL"
     let tokenNames = Seq.ofList <| getLiteralNames @ getTerminalNames
-    let tokenToTreeNode = tokenToTreeNode
+    let tokenToTreeNode (token:Token option) = tokenToTreeNode token.Value
+        //match token with
+        //| Some (tk) -> tokenToTreeNode tk
+        //| None -> tokenToTreeNode ...
     let translate ast errors = null//translate args ast errors
     
     let processor = new Processor<Token, br, range, node>(tokenize, parse, translate, tokenToNumber

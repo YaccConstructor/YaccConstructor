@@ -28,11 +28,11 @@ let fstLexer () =
 let actions () =
     [|
         (fun (gr : FSA<_>) ->
-                        PLUS(gr) |> Some );
+                        PLUS(gr) |> Some |> Some  );
         (fun (gr : FSA<_>) ->
-                        POW(gr) |> Some );
+                        POW(gr) |> Some |> Some  );
         (fun (gr : FSA<_>) ->
-                        MULT(gr) |> Some );
+                        MULT(gr) |> Some |> Some  );
 
     |] 
 

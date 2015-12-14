@@ -42,7 +42,7 @@ type CalcInjectedLanguageModule() =
             | _ -> x, Eps
         let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
         let graphFst = FST<_,_>.FSAtoFST(lexerInputGraph, transform, smblEOF)
-        YC.CalcLexer.tokenize eof graphFst
+        YC.CalcLexer.tokenize (Some eof) graphFst
 
     let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
 

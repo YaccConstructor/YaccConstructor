@@ -76,7 +76,7 @@ let checkArr expectedArr actualArr =
 let countEdges (parserInputGraph : ParserInputGraph<_>) =
    parserInputGraph.Edges 
     |> Seq.map (fun e -> 
-                    match e.Tag with
+                    match e.Tag.Value with
                         | NUMBER(gr) 
                         | MINUS(gr) 
                         | LBRACE(gr) 

@@ -15,7 +15,7 @@ open QuickGraph
 
 let needPrint = false
 let threshold = 10
-let createEdge source target label = new ParserEdge<_>(source, target, label)
+let createEdge source target label = new ParserEdge<_>(source, target, Some label)
 
 let inline printErr (num, token : 'a, msg) =
     printfn "Error in position %d on Token %A: %s" num token msg

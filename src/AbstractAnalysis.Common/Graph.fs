@@ -82,7 +82,7 @@ type ParserEdge<'token>(s,e,t)=
     inherit TaggedEdge<int, 'token>(s,e,t)
 
 type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) =
-    inherit AdjacencyGraph<int,ParserEdge<'token>>()
+    inherit AdjacencyGraph<int,ParserEdge<'token option>>()
 
     member val InitState = initialVertices.[0]
     member val FinalState = finalVertices.[0]
@@ -90,7 +90,7 @@ type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) =
     member val InitStates = initialVertices
     member val FinalStates = finalVertices
 
-    member this.PrintToDot name (tokenToString : 'token -> string) = 
+    member this.PrintToDot name (tokenToString : Option<'token> -> string) = 
         use out = new System.IO.StreamWriter (name : string)
         out.WriteLine("digraph AST {")
         out.WriteLine "rankdir=LR"

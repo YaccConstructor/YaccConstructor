@@ -20,7 +20,7 @@ let literalsTokenizationTest path eCount vCount pathPrint =
     let graphAppr = loadDotToQG baseInputGraphsPath path
     let graphFsa = graphAppr.ApprToFSA()
     let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
-    let res = YC.FST.AbstractLexing.LiteralsLexer.tokenize eof graphFst
+    let res = YC.FST.AbstractLexing.LiteralsLexer.tokenize (Some eof) graphFst
     match res with
     | Success res -> checkGraph res eCount vCount  
     | Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" path e)

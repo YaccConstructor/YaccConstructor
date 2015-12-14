@@ -18,7 +18,7 @@ let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
 let TokenizationTest (graphAppr:Appr<_>) eCount vCount  =
     let graphFsa = graphAppr.ApprToFSA()
     let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
-    let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphFst       
+    let res = YC.FST.AbstractLexing.CalcLexer.tokenize (Some eof) graphFst       
     match res with
     | Success res -> 
                 //ToDot res @"../../../src/AbstractLexer.Interpreter.Tests/Tests/TestInterpretParser.dot" (printBref printSmbString)

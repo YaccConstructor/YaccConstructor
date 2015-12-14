@@ -15,7 +15,7 @@ open Yard.Generators.RNGLR.AbstractParser
 let needPrint = false
 let extension = ".dot"
 
-let createEdge source target label = new ParserEdge<_>(source, target, label)
+let createEdge source target label = new ParserEdge<_>(source, target, Some label)
 
 let inline printErr (num, token : 'a, msg) =
     printfn "Error in position %d on Token %A: %s" num token msg
@@ -197,7 +197,7 @@ type ``Control Flow Graph building: Cycles``() =
         
     let keywordToInt = dict [Keyword.SEMICOLON, semicolonNumber;]
 
-    let tokToRealString tok = tok |> tokenToNumber |> indToString
+    let tokToRealString (tok:Option<RNGLR.ParseSimple.Token>) = tok.Value |> tokenToNumber |> indToString
     let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, keywordToInt)
 
@@ -212,8 +212,8 @@ type ``Control Flow Graph building: Cycles``() =
                 let astName = fst printNames
                 RNGLR.ParseSimple.defaultAstToDot mAst astName
 
-            let cfg = ControlFlow (mAst, parserSource, langSource, tokToRealString)
-            
+            let cfg = ControlFlow (mAst, parserSource, langSource, (fun tok -> tok |> tokenToNumber |> indToString)) // tokToRealString
+             
             if needPrint
             then
                 let cfgName = snd printNames

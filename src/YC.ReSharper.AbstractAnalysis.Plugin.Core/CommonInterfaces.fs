@@ -82,13 +82,16 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
     let prepareToTrigger (graph : ParserInputGraph<'TokenType>) tokenToTreeNode = 
         
         /// returns graph which will be later shown to user
-        let createDrawGraph (graph : ParserInputGraph<_>) = 
+        let createDrawGraph (graph : ParserInputGraph<'TokenType>) = 
             let edges = 
                 graph.Edges
                 |> Seq.map 
                     (
                         fun edge -> 
-                            let tokenName = edge.Tag |> (tokenToNumber >> numToString)
+                            let tokenName = 
+                                match edge.Tag with
+                                | Some (tg) -> tg |> (tokenToNumber >> numToString)
+                                | None -> "eps"
                             new TaggedEdge<_, _>(edge.Source, edge.Target, tokenName)
                     )
                 |> ResizeArray.ofSeq

@@ -388,21 +388,21 @@ let actions () =
       (fun (gr : FSA<_>) ->
                               None );
       (fun (gr : FSA<_>) ->
-                                                           NUMBER(gr) |> Some );
+                                                           NUMBER(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                       MINUS(gr) |> Some );
+                       MINUS(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                       LBRACE(gr) |> Some );
+                       LBRACE(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                       RBRACE(gr) |> Some );
+                       RBRACE(gr) |> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                       DIV(gr)|> Some );
+                       DIV(gr)|> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                       PLUS(gr)|> Some );
+                       PLUS(gr)|> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                        POW(gr)|> Some );
+                        POW(gr)|> Some |> Some  );
       (fun (gr : FSA<_>) ->
-                       MULT(gr)|> Some );
+                       MULT(gr)|> Some |> Some  );
 
    |]
 

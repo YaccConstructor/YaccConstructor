@@ -141,6 +141,7 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
     member this.leftSide num = left.[num]
     member this.leftSideArr = left
     member this.rightSide num = right.[num]
+    member this.rightSideArr = right
     member this.numberOfStates num = right.[num].numberOfStates
     member this.state rule pos = right.[rule].stateToVertex.[pos]
     member this.symbol rule pos = 

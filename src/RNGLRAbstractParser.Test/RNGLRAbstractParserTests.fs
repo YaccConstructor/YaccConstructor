@@ -55,11 +55,11 @@ let test buildAstAbstract qGraph nodesCount edgesCount epsilonsCount termsCount 
     | Success(tree) ->
         //tree.PrintAst()
         let n, e, eps, t, amb = tree.CountCounters()
-//        Assert.AreEqual(nodesCount, n, "Nodes count mismatch")
-//        Assert.AreEqual(edgesCount, e, "Edges count mismatch")
-//        Assert.AreEqual(epsilonsCount, eps, "Epsilons count mismatch")
-//        Assert.AreEqual(termsCount, t, "Terms count mismatch")
-//        Assert.AreEqual(ambiguityCount, amb, "Ambiguities count mismatch")
+        Assert.AreEqual(nodesCount, n, "Nodes count mismatch")
+        Assert.AreEqual(edgesCount, e, "Edges count mismatch")
+        Assert.AreEqual(epsilonsCount, eps, "Epsilons count mismatch")
+        Assert.AreEqual(termsCount, t, "Terms count mismatch")
+        Assert.AreEqual(ambiguityCount, amb, "Ambiguities count mismatch")
         Assert.Pass()
 
 let perfTest parse inputLength graph =    
@@ -129,6 +129,43 @@ type ``RNGLR abstract parser tests`` () =
              ] |> ignore
 
         test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 13 12 0 3 0
+
+    [<Test>]
+    member this._01_PrettySimpleCalc_SequenceInput_1 () =
+        let qGraph = new ParserInputGraph<_>([|0|], [|4|])
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
+             edg 1 2 (RNGLR.PrettySimpleCalc.PLUS 2)
+             edg 2 3 (RNGLR.PrettySimpleCalc.NUM 3)
+             edg 3 4 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+
+        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 13 12 0 3 0
+
+    [<Test>]
+    member this._01_PrettySimpleCalc_SequenceInput_MultipleFinalVertices () =
+        let qGraph = new ParserInputGraph<_>([|0|], [|1; 2; 3; 4|])
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
+             edg 1 2 (RNGLR.PrettySimpleCalc.PLUS 2)
+             edg 2 3 (RNGLR.PrettySimpleCalc.NUM 3)
+             edg 3 4 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+
+        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 13 12 0 3 0
+
+    [<Test>]
+    member this._01_PrettySimpleCalc_SequenceInput_MultipleStartAndFinalVertices () =
+        let qGraph = new ParserInputGraph<_>([|0; 2|], [|4; 5|])
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
+             edg 1 2 (RNGLR.PrettySimpleCalc.PLUS 2)
+             edg 1 5 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             edg 2 3 (RNGLR.PrettySimpleCalc.NUM 3)
+             edg 3 4 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+
+        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 20 20 0 4 0
 
     [<Test>]
     member this._02_PrettySimpleCalcSimple_BranchedInput () =
@@ -476,6 +513,30 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
 
     [<Test>]
+    member this._24_UnambiguousBrackets_Circle_MultipleStartVertices () =
+        let qGraph = new ParserInputGraph<_>([|0; 1|], [|9; 10|])
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 0)
+            edg 1 0 (RNGLR.StrangeBrackets.RBR 1)
+            edg 0 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            edg 1 10 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2 // ???
+
+    [<Test>]
+    member this._24_UnambiguousBrackets_Circle_MultipleStartVertices_1 () =
+        let qGraph = new ParserInputGraph<_>([|0; 1|], [|9|])
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 0)
+            edg 1 0 (RNGLR.StrangeBrackets.RBR 1)
+            edg 0 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
+
+
+    [<Test>]
     member this._24_UnambiguousBrackets_Circle_1 () =
         let qGraph = new ParserInputGraph<_>(0, 9)
         qGraph.AddVerticesAndEdgeRange
@@ -786,6 +847,7 @@ let f x =
 //    t._27_UnambiguousBrackets_WithoutEmptyString()
 //    t._28_UnambiguousBrackets_DifferentPathLengths ()
    // t.``TSQL performance test for Alvor`` 2 100 false
-    t._29_AandB_Circle ()
+    //t._29_AandB_Circle ()
     //t.``TSQL performance test 2`` 2 100 false
+    t._24_UnambiguousBrackets_Circle_MultipleStartVertices()
     0

@@ -103,16 +103,7 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
         ruleList
         |> List.map
             (fun rule->
-                let dfaRule : NFARule.t<_,_> =
-                    {
-                        name = rule.name;
-                        args = rule.args;
-                        body = bodyToDFA rule.body;
-                        isStart = rule.isStart;
-                        isPublic = rule.isPublic;
-                        metaArgs = rule.metaArgs
-                    }
-                dfaRule
+                bodyToDFA rule.body
             )
         |> Array.ofList
 
@@ -134,7 +125,7 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
     let symbolAndNextPos =
         let result : (int * int) [][] = Array.zeroCreate rules.Length
         for i in 0..rules.Length-1 do
-            let nfa = right.[i].body
+            let nfa = right.[i]
             result.[i] <- Array.create nfa.numberOfStates (indexator.epsilonIndex, 0)
             for j in 0..nfa.numberOfStates-1 do
                 let rec getSymbol = function
@@ -149,9 +140,9 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
     member this.startSymbol = left.[start]
     member this.leftSide num = left.[num]
     member this.leftSideArr = left
-    member this.rightSide num = right.[num].body
-    member this.numberOfStates num = right.[num].body.numberOfStates
-    member this.state rule pos = right.[rule].body.stateToVertex.[pos]
+    member this.rightSide num = right.[num]
+    member this.numberOfStates num = right.[num].numberOfStates
+    member this.state rule pos = right.[rule].stateToVertex.[pos]
     member this.symbol rule pos = 
         let (symbol, _) = symbolAndNextPos.[rule].[pos]
         symbol

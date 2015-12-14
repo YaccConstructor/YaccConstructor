@@ -53,8 +53,7 @@ let printTableGLL
         for i = 0 to arr.Count - 1 do
             if i <> 0 then print sep
             printer arr.[i]
-        printBr rBr
-        
+        printBr rBr        
 
 
     let printArr (arr : 'a[]) printer = printArr "" "[|" "|]" "; " (arr : 'a[]) printer
@@ -214,11 +213,11 @@ let printTableGLL
         print "let leftSide = "
         printArr leftSide (print "%d")
 
-        print "let table = [| "
-        for arr in table.result do
-            printArr2 arr (print "%d")
-            print ";"
-        print " |]"
+        print "let table = new System.Collections.Generic.Dictionary<int, int[]>(%A)\n" table.result.Count
+        for kvp in table.result do
+            let arr = "[|" + (kvp.Value |> Seq.map string |> String.concat ";") + "|]"                               
+            let str = "table.Add(" + kvp.Key.ToString() + ", " + arr + ")\n" 
+            print "%s" str 
         printBr ""
 
         print "let private rules = "

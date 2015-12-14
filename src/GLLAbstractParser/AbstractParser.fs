@@ -253,13 +253,14 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             let curToken = parser.TokenToNumber edge.Tag
 
                             let index = getIndex curSymbol curToken
-                                
-                            if Array.length table.[index] <> 0 
+                            let key =  int((int32 curSymbol <<< 16) ||| int32 (curToken - parser.NonTermCount  ))    
+                            if table.ContainsKey key
                             then
-                                let a rule = 
+                                for rule in table.[key] do
+                                 
                                     let newLabel = packLabel rule 0
                                     structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy 
-                                table.[index] |>  Array.iter a
+                                
 //                    else
 //                        if Seq.length <| input.OutEdges !currentVertexInInput = 0
 //                        then
@@ -303,7 +304,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             | None -> Error ("String was not parsed")
             | Some res -> 
                     let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
-                    r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
+                    //r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
                     //printfn "%d" !tempCount
                     Success (r1)   
                      

@@ -321,13 +321,14 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                             index
 
                         let index = getIndex curSymbol curToken
+                        let key = int((int32 curSymbol <<< 16) ||| int32 curToken)
                         currentGSSNode := create !currentIndex (packLabel (rule) (position + 1)) !currentGSSNode  !structures.CurrentN
-                        if Array.length table.[index] <> 0 
+                        if table.ContainsKey key 
                         then
-                            let a rule = 
+                            for r in table.[key] do 
                                 let newLabel = packLabel rule 0
                                 structures.AddContext setU !currentIndex newLabel !currentGSSNode structures.Dummy 
-                            table.[index] |>  Array.iter a
+                            
                 else
                     if parser.CanInferEpsilon.[curSymbol]
                     then
@@ -338,13 +339,14 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                             index <- index + term - parser.NonTermCount
                             index
                         let index = getIndex curSymbol curToken
+                        let key = int((int32 curSymbol <<< 16) ||| int32 (curToken - parser.NonTermCount))
                         currentGSSNode := create !currentIndex (packLabel (rule) (position + 1)) !currentGSSNode  !structures.CurrentN
-                        if Array.length table.[index] <> 0 
+                        if table.ContainsKey key
                         then
-                            let a rule = 
+                            for r in table.[key] do 
                                 let newLabel = packLabel rule 0
                                 structures.AddContext setU !currentIndex newLabel !currentGSSNode structures.Dummy 
-                            table.[index] |>  Array.iter a
+                            
                         condition := true
                     condition := true
                                     

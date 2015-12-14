@@ -9,7 +9,7 @@ type ParserSourceGLL<'TokenType> (eof                  : 'TokenType
                                , isLiteral          : 'TokenType -> bool
                                , isTerminal         : 'TokenType -> bool
                                , getLiteralNames    : string list
-                               , table              : int [][]
+                               , table              : System.Collections.Generic.Dictionary<int, int[]>
                                , rules              : array<int>
                                , rulesStart         : array<int>
                                , leftSide           : array<int>

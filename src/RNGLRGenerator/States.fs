@@ -20,6 +20,12 @@ open Yard.Generators.Common
 open Yard.Generators.Common.LR.Kernels
 open Yard.Generators.Common.LR.Linear
 open System.IO
+
+type StatesInterpreter (stateToVertex : Vertex<int,int>[], stateToKernels : Kernel[][], stateToLookahead : Set<int>[][]) =
+    member this.count = stateToVertex.Length
+    member this.vertex i = stateToVertex.[i]
+    member this.kernels i = stateToKernels.[i]
+    member this.lookaheads i = stateToLookahead.[i]
     
 let buildStates outTable (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator) =
     let nextIndex, vertexCount =

@@ -23,9 +23,3 @@ type KernelInterpreterLinear =
                 else Set.union grammar.followSet.[rule].[pos] endLookeheads
             grammar.rules.symbol rule pos, lookAheads
 
-type StatesInterpreter (stateToVertex : Vertex<int,int>[], stateToKernels : Kernel[][], stateToLookahead : Set<int>[][]) =
-    member this.count = stateToVertex.Length
-    member this.vertex i = stateToVertex.[i]
-    member this.kernels i = stateToKernels.[i]
-    member this.lookaheads i = stateToLookahead.[i]
-

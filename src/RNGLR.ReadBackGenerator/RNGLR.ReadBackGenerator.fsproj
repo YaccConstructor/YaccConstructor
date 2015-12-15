@@ -19,6 +19,7 @@
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <ItemGroup>
     <Compile Include="States.fs" />
+    <Compile Include="Tables.fs" />
     <Compile Include="RNGLR.ReadBackGenerator.fs" />
     <None Include="App.config" />
   </ItemGroup>

@@ -1,10 +1,8 @@
-﻿namespace Yard.EBNF.NumberedRules
+﻿namespace Yard.Generators.Common.EBNF
 
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open System.Collections.Generic
-open Yard.EBNF.GrammarWithNFARightSide
-open Yard.EBNF.Indexator
 open Yard.Generators.Common
 
 type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : IndexatorEBNF, caseSensitive) =

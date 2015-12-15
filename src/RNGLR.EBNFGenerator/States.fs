@@ -1,51 +1,12 @@
 ﻿module Yard.Generators.RNGLR.EBNF.States
 
 open System.Collections.Generic
-open Yard.EBNF.FinalGrammar
+open Yard.Generators.Common.EBNF.FinalGrammar
 open Yard.Generators.Common
-open Yard.Generators.RNGLR.States
-open Yard.EBNF.Indexator // DELETE
+open Yard.Generators.Common.LR.Kernels
+open Yard.Generators.Common.LR.NFA
 open System.IO //DELETE
 open System.Threading // DELETE
-
-//type Item = Kernel * Set<int>
-
-type KernelInterpreter =
-    (*static member inline toKernel (prod,pos) = (prod <<< 16) ||| pos
-    static member inline getProd kernel = kernel >>> 16
-    static member inline getPos kernel = kernel &&& ((1 <<< 16) - 1)
-    static member inline unzip kernel = (KernelInterpreter.getProd kernel, KernelInterpreter.getPos kernel)
-    static member inline kernelsOfState = fst
-    static member inline lookAheadsOfState = snd*)
-
-    static member inline nextPos (grammar : FinalGrammarNFA) kernel =
-        let rule = KernelInterpreter.getProd kernel
-        let pos = KernelInterpreter.getPos kernel
-        let nextStates = grammar.nextPositions.[rule].[pos]
-        nextStates |> Set.map (fun x -> KernelInterpreter.toKernel(rule, x))
-
-    static member inline symbol (grammar : FinalGrammarNFA) kernel =
-        let rule = KernelInterpreter.getProd kernel
-        let pos = KernelInterpreter.getPos kernel
-        if pos = grammar.rules.numberOfStates rule - 1 then grammar.indexator.eofIndex
-        else grammar.rules.symbol rule pos
-
-    static member symbolAndLookAheads (grammar : FinalGrammarNFA) (kernel, endLookeheads) =
-        let rule = KernelInterpreter.getProd kernel
-        let pos = KernelInterpreter.getPos kernel
-        if pos = grammar.rules.numberOfStates rule - 1 then
-            grammar.indexator.eofIndex, Set.empty
-        else
-            let lookAheads =
-                let nextPositions = grammar.nextPositions.[rule].[pos]
-                let hasEpsilonTail = ref false
-                let foldFun acc x =
-                     if grammar.hasEpsilonTail.[rule].[x] then hasEpsilonTail := true
-                     Set.union grammar.followSet.[rule].[x] acc
-                nextPositions |> Set.fold foldFun Set.empty
-                |> Set.remove grammar.indexator.epsilonIndex
-                |> fun x -> if !hasEpsilonTail then Set.union x endLookeheads else x
-            grammar.rules.symbol rule pos, lookAheads
 
 type ReduceLabel =
     | Reduce
@@ -105,8 +66,8 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
     let stateToMainLookahead = new ResizeArray<Set<int>[] >()
     let stateToDerivedKernels = new ResizeArray<Kernel[]>()
     let stateToDerivedLookahead = new ResizeArray<Set<int>[] >()
-    let curSymbol kernel = KernelInterpreter.symbol grammar kernel
-    let symbolAndLookAheads (*kernel lookAheads*) = KernelInterpreter.symbolAndLookAheads grammar
+    let curSymbol kernel = KernelInterpreterNFA.symbol grammar kernel
+    let symbolAndLookAheads (*kernel lookAheads*) = KernelInterpreterNFA.symbolAndLookAheads grammar
     let wasEdge = new ResizeArray<Set<int> >()
     let wasNonTerm = Array.zeroCreate grammar.indexator.fullCount
     let wasNTermSymbol : bool[,] = Array2D.zeroCreate grammar.indexator.fullCount grammar.indexator.fullCount
@@ -220,7 +181,7 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
                         let mutable dontStackSet = Set.empty
                         for j = 0 to mainKernels.Length-1 do
                             if curSymbol mainKernels.[j] = i then
-                                let nextKernels = KernelInterpreter.nextPos grammar mainKernels.[j]
+                                let nextKernels = KernelInterpreterNFA.nextPos grammar mainKernels.[j]
                                 dontStackSet <- Set.add (KernelInterpreter.getProd mainKernels.[j]) dontStackSet 
                                 for nextKernel in nextKernels do
                                     if not <| destStates.ContainsKey nextKernel then
@@ -229,7 +190,7 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
                                         destStates.[nextKernel] <- Set.union destStates.[nextKernel] newMainLookaheads.[j]
                         for j = 0 to derivedKernels.Length-1 do
                             if curSymbol derivedKernels.[j] = i then
-                                let nextKernels = KernelInterpreter.nextPos grammar derivedKernels.[j]
+                                let nextKernels = KernelInterpreterNFA.nextPos grammar derivedKernels.[j]
                                 stackSet <- Set.add (KernelInterpreter.getProd derivedKernels.[j]) stackSet 
                                 for nextKernel in nextKernels do
                                     if not <| destStates.ContainsKey nextKernel then
@@ -280,7 +241,7 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
                     let mutable stackSet = Set.empty
                     for j = 0 to mainKernels.Length-1 do
                             if curSymbol mainKernels.[j] = i && not mainLookaheads.[j].IsEmpty then
-                                let nextKernels = KernelInterpreter.nextPos grammar mainKernels.[j]
+                                let nextKernels = KernelInterpreterNFA.nextPos grammar mainKernels.[j]
                                 dontStackSet <- Set.add (KernelInterpreter.getProd mainKernels.[j]) dontStackSet 
                                 for nextKernel in nextKernels do
                                     if not <| destStates.ContainsKey nextKernel then
@@ -289,7 +250,7 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
                                         destStates.[nextKernel] <- Set.union destStates.[nextKernel] mainLookaheads.[j]
                     for j = 0 to derivedKernels.Length-1 do
                             if curSymbol derivedKernels.[j] = i && not derivedLookaheads.[j].IsEmpty then
-                                let nextKernels = KernelInterpreter.nextPos grammar derivedKernels.[j]
+                                let nextKernels = KernelInterpreterNFA.nextPos grammar derivedKernels.[j]
                                 stackSet <- Set.add (KernelInterpreter.getProd derivedKernels.[j]) stackSet
                                 for nextKernel in nextKernels do
                                     if not <| destStates.ContainsKey nextKernel then

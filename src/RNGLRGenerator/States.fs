@@ -17,43 +17,9 @@ module Yard.Generators.RNGLR.States
 open System.Collections.Generic
 open Yard.Generators.Common.FinalGrammar
 open Yard.Generators.Common
+open Yard.Generators.Common.LR.Kernels
+open Yard.Generators.Common.LR.Linear
 open System.IO
-type OutTable = LR | LALR
-
-type Kernel = int
-//type Item = Kernel * Set<int>
-
-type KernelInterpreter =
-    static member inline toKernel (prod,pos) = (prod <<< 16) ||| pos
-    static member inline incPos kernel = kernel + 1
-    static member inline getProd kernel = kernel >>> 16
-    static member inline getPos kernel = kernel &&& ((1 <<< 16) - 1)
-    static member inline unzip kernel = (KernelInterpreter.getProd kernel, KernelInterpreter.getPos kernel)
-    static member inline kernelsOfState = fst
-    static member inline lookAheadsOfState = snd
-
-    static member inline symbol (grammar : FinalGrammar) kernel =
-        let rule = KernelInterpreter.getProd kernel
-        let pos = KernelInterpreter.getPos kernel
-        if grammar.rules.length rule = pos then grammar.indexator.eofIndex
-        else grammar.rules.symbol rule pos
-
-    static member inline symbolAndLookAheads (grammar : FinalGrammar) (kernel, endLookeheads) =
-        let rule = KernelInterpreter.getProd kernel
-        let pos = KernelInterpreter.getPos kernel
-        if grammar.rules.length rule = pos then
-            grammar.indexator.eofIndex, Set.empty
-        else
-            let lookAheads =
-                if grammar.epsilonTailStart.[rule] > pos + 1 then grammar.followSet.[rule].[pos]
-                else Set.union grammar.followSet.[rule].[pos] endLookeheads
-            grammar.rules.symbol rule pos, lookAheads
-
-type StatesInterpreter (stateToVertex : Vertex<int,int>[], stateToKernels : Kernel[][], stateToLookahead : Set<int>[][]) =
-    member this.count = stateToVertex.Length
-    member this.vertex i = stateToVertex.[i]
-    member this.kernels i = stateToKernels.[i]
-    member this.lookaheads i = stateToLookahead.[i]
     
 let buildStates outTable (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator) =
     let nextIndex, vertexCount =
@@ -64,8 +30,8 @@ let buildStates outTable (grammar : FinalGrammar) = //(kernelIndexator : KernelI
     let vertices = new ResizeArray<Vertex<int,int> >()
     let stateToKernels = new ResizeArray<Kernel[]>()
     let stateToLookahead = new ResizeArray<Set<int>[] >()
-    let curSymbol kernel = KernelInterpreter.symbol grammar kernel
-    let symbolAndLookAheads (*kernel lookAheads*) = KernelInterpreter.symbolAndLookAheads grammar
+    let curSymbol kernel = KernelInterpreterLinear.symbol grammar kernel
+    let symbolAndLookAheads (*kernel lookAheads*) = KernelInterpreterLinear.symbolAndLookAheads grammar
     let wasEdge = new ResizeArray<Set<int> >()
     let wasNonTerm = Array.zeroCreate grammar.indexator.fullCount
     let wasNTermSymbol : bool[,] = Array2D.zeroCreate grammar.indexator.fullCount grammar.indexator.fullCount

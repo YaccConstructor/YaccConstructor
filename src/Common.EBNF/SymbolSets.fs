@@ -1,9 +1,7 @@
-﻿module Yard.EBNF.SymbolSets
+﻿module Yard.Generators.Common.EBNF.SymbolSets
 
 open Yard.Generators.Common
-open Yard.EBNF.GrammarWithNFARightSide
-open Yard.EBNF.Indexator
-open Yard.EBNF.NumberedRules
+open Yard.Generators.Common.EBNF
 
 let firstSetNFA (rules : NumberedRulesEBNF) (indexator : IndexatorEBNF) (canInferEpsilon : bool[]) =
     let result : Set<int>[] = Array.create indexator.fullCount Set.empty

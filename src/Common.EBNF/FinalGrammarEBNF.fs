@@ -1,11 +1,10 @@
-﻿namespace Yard.EBNF.FinalGrammar
+﻿namespace Yard.Generators.Common.EBNF.FinalGrammar
 
 open Yard.Core.IL
-open Yard.EBNF.Indexator
-open Yard.EBNF.NumberedRules
-open Yard.EBNF.Epsilon
-open Yard.EBNF.SymbolSets
-open Yard.EBNF.StateSets
+open Yard.Generators.Common.EBNF
+open Yard.Generators.Common.EBNF.Epsilon
+open Yard.Generators.Common.EBNF.SymbolSets
+open Yard.Generators.Common.EBNF.StateSets
 
 type FinalGrammarNFA(ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
     let _indexator = new IndexatorEBNF(ruleList, caseSensitive)

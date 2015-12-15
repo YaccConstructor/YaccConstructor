@@ -6,8 +6,9 @@ open IL
 open Constraints
 //open Yard.Generators.RNGLR
 open Yard.Generators.Common.InitialConvert
-open Yard.EBNF.FinalGrammar
-open Yard.Generators.RNGLR.States
+open Yard.Generators.Common.EBNF.FinalGrammar
+open Yard.Generators.Common.LR.Kernels
+open Yard.Generators.RNGLR.EBNF.States
 open States
 open Printer
 open Yard.Generators.RNGLR.TranslatorPrinter

@@ -15,6 +15,7 @@
 namespace Yard.Generators.RNGLR
 
 open Yard.Generators.Common.FinalGrammar
+open Yard.Generators.Common.LR.Linear
 open Yard.Generators.RNGLR.States
 open Yard.Generators.RNGLR
 
@@ -25,7 +26,7 @@ type Tables (grammar : FinalGrammar, states : StatesInterpreter) =
         let gotos : int list[,] = Array2D.create states.count symbolCount []
         let mutable acc = []
         if grammar.canInferEpsilon.[grammar.rules.leftSide grammar.startRule] then acc <- (*startState*)0::acc
-        let endRule = KernelInterpreter.toKernel (grammar.startRule, grammar.rules.length grammar.startRule)
+        let endRule = KernelInterpreterLinear.toKernel (grammar.startRule, grammar.rules.length grammar.startRule)
         for i = 0 to states.count-1 do
             let vertex = states.vertex i
             for e in vertex.outEdges do
@@ -36,7 +37,7 @@ type Tables (grammar : FinalGrammar, states : StatesInterpreter) =
             let kernels, lookaheads = states.kernels i, states.lookaheads i
             for j = 0 to kernels.Length - 1 do
                 let k, la = kernels.[j], lookaheads.[j]
-                let prod, pos = KernelInterpreter.unzip k
+                let prod, pos = KernelInterpreterLinear.unzip k
                 if k = endRule then acc <- i::acc
                 elif grammar.epsilonTailStart.[prod] <= pos then
                     for symbol in la do 

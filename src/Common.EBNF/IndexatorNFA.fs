@@ -1,4 +1,4 @@
-﻿namespace Yard.EBNF.Indexator
+﻿namespace Yard.Generators.Common.EBNF
 
 open Yard.Core.IL
 open Yard.Core.IL.Production

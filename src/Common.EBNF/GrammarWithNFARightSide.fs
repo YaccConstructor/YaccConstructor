@@ -1,4 +1,4 @@
-﻿namespace Yard.EBNF.GrammarWithNFARightSide
+﻿namespace Yard.Generators.Common.EBNF
 
 open Yard.Core.IL
 open Yard.Generators.Common

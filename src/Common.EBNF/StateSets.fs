@@ -1,8 +1,7 @@
-﻿module Yard.EBNF.StateSets
+﻿module Yard.Generators.Common.EBNF.StateSets
 
 open Yard.Generators.Common
-open Yard.EBNF.Indexator
-open Yard.EBNF.NumberedRules
+open Yard.Generators.Common.EBNF
 
 //only edges with epsilon, not with terminals that can infer epsilon
 let epsilonReachable (rules : NumberedRulesEBNF) (indexator : IndexatorEBNF) =

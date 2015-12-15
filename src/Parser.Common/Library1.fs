@@ -31,6 +31,7 @@ type ParseResult<'TokenType> =
 module CommonFuns = 
 
     let inline pack left right : int64 =  ((int64 left <<< 32) ||| int64 right)
+    let inline pack3 l m r : int64 =  ((int64 l <<< 42) ||| int64 m <<< 21 ||| int64 r)
     let inline getRight (long : int64) = int <| ((int64 long) &&& 0xffffffffL)
     let inline getLeft (long : int64)  = int <| ((int64 long) >>> 32)
 

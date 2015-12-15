@@ -38,7 +38,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         //let packedNodes = Array3D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount) (input.VertexCount) (input.VertexCount)// (fun _ _ _ -> new Dictionary<_,_>())
         let packedNodes = new Dictionary<int64, Dictionary<int<labelMeasure>, int<nodeMeasure>>>()// (fun _ _ _ -> new Dictionary<_,_>())
         
-        let nonTerminalNodes = Array3D.zeroCreate<int<nodeMeasure>> parser.NonTermCount (input.VertexCount) (input.VertexCount)
+        let nonTerminalNodes = new Dictionary<int64,int<nodeMeasure>>()
+        //Array3D.zeroCreate<int<nodeMeasure>> parser.NonTermCount (input.VertexCount) (input.VertexCount)
         let intermidiateNodes = Array2D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount) (input.VertexCount) //убрала +1
         let edges = Array2D.zeroCreate<Dictionary<int<nodeMeasure>, Dictionary<int, ResizeArray<int>>>> slots.Count (input.VertexCount )
         let terminalNodes = Array3D.zeroCreate<int<nodeMeasure>> input.VertexCount input.VertexCount parser.TermCount  
@@ -63,15 +64,15 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             
             if isEnd
             then
-                if nonTerminalNodes.[nTerm, lExt, rExt] = Unchecked.defaultof<int<nodeMeasure>>
+                if not <| nonTerminalNodes.ContainsKey(pack3 nTerm lExt rExt)
                 then
                     let newNode = new NonTerminalNode(nTerm, (packExtension lExt rExt))
                     sppfNodes.Add(newNode)
                     let num = sppfNodes.Length - 1
-                    nonTerminalNodes.[nTerm, lExt, rExt] <- num*1<nodeMeasure>
+                    nonTerminalNodes.Add((pack3 nTerm lExt rExt), num*1<nodeMeasure>)
                     num*1<nodeMeasure>
                 else
-                    nonTerminalNodes.[nTerm, lExt, rExt]
+                    nonTerminalNodes.[pack3 nTerm lExt rExt]
             else
                 if intermidiateNodes.[lExt, rExt] = Unchecked.defaultof<Dictionary<int<labelMeasure>, int<nodeMeasure>>>
                 then

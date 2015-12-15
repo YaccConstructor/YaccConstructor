@@ -76,12 +76,13 @@ let perfTest parse inputLength graph =
         printfn "%0i : %A" x time
 
 let perfTest2 parse graph =    
-    for i = 0 to 100 do
+    for i = 135 to 150 do
         let g = graph (1 + i) 2 
         let start = System.DateTime.Now
         let r = parse g
         let finish = System.DateTime.Now - start
         printfn "%i  : %A" (i+1) finish.TotalSeconds
+        System.GC.Collect()
         match r with
         | Error _ ->
             printfn "Error"     
@@ -774,32 +775,32 @@ type ``RNGLR abstract parser tests`` () =
             let mutable curE = 3
             let chains = Array.zeroCreate 5
             let ra1 = new ResizeArray<_>()
-            ra1.Add(Yard.Examples.MSParser.DEC_NUMBER (new FSA<_>()))
-            ra1.Add(Yard.Examples.MSParser.L_plus_ (new FSA<_>()))
-            ra1.Add(Yard.Examples.MSParser.IDENT (new FSA<_>()))
+            ra1.Add(Yard.Examples.MSParserAbstract.DEC_NUMBER (new FSA<_>()))
+            ra1.Add(Yard.Examples.MSParserAbstract.L_plus_ (new FSA<_>()))
+            ra1.Add(Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))
             let ra2 = new ResizeArray<_>()
-            ra2.Add(Yard.Examples.MSParser.IDENT (new FSA<_>()))
-            ra2.Add(Yard.Examples.MSParser.L_plus_ (new FSA<_>()))
-            ra2.Add(Yard.Examples.MSParser.IDENT (new FSA<_>()))
+            ra2.Add(Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))
+            ra2.Add(Yard.Examples.MSParserAbstract.L_plus_ (new FSA<_>()))
+            ra2.Add(Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))
             let ra3 = new ResizeArray<_>()
-            ra3.Add(Yard.Examples.MSParser.L_left_bracket_ (new FSA<_>()))
-            ra3.Add(Yard.Examples.MSParser.IDENT (new FSA<_>()))
-            ra3.Add(Yard.Examples.MSParser.L_plus_ (new FSA<_>()))
-            ra3.Add(Yard.Examples.MSParser.IDENT (new FSA<_>()))
-            ra3.Add(Yard.Examples.MSParser.L_right_bracket_ (new FSA<_>()))
+            ra3.Add(Yard.Examples.MSParserAbstract.L_left_bracket_ (new FSA<_>()))
+            ra3.Add(Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))
+            ra3.Add(Yard.Examples.MSParserAbstract.L_plus_ (new FSA<_>()))
+            ra3.Add(Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))
+            ra3.Add(Yard.Examples.MSParserAbstract.L_right_bracket_ (new FSA<_>()))
             let ra4 = new ResizeArray<_>()
-            ra4.Add(Yard.Examples.MSParser.L_null (new FSA<_>()))
-            ra4.Add(Yard.Examples.MSParser.L_null (new FSA<_>()))
+            ra4.Add(Yard.Examples.MSParserAbstract.L_null (new FSA<_>()))
+            ra4.Add(Yard.Examples.MSParserAbstract.L_null (new FSA<_>()))
             let ra5 = new ResizeArray<_>()
-            ra5.Add(Yard.Examples.MSParser.STRING_CONST (new FSA<_>()))
-            ra5.Add(Yard.Examples.MSParser.L_plus_ (new FSA<_>()))
-            ra5.Add(Yard.Examples.MSParser.IDENT (new FSA<_>()))
+            ra5.Add(Yard.Examples.MSParserAbstract.STRING_CONST (new FSA<_>()))
+            ra5.Add(Yard.Examples.MSParserAbstract.L_plus_ (new FSA<_>()))
+            ra5.Add(Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))
             chains.[0] <- ra1
             chains.[1] <- ra2
             chains.[2] <- ra3
             chains.[3] <- ra4
             chains.[4] <- ra5    
-            (qGraph.AddVerticesAndEdge <| edg 0 1 (Yard.Examples.MSParser.L_select (new FSA<_>()))) |> ignore
+            (qGraph.AddVerticesAndEdge <| edg 0 1 (Yard.Examples.MSParserAbstract.L_select (new FSA<_>()))) |> ignore
             for blocks = 0 to numberOfBlocks - 1 do
                 for i = 0 to numberOfPath - 1 do
                     let curChain = chains.[i]
@@ -816,25 +817,25 @@ type ``RNGLR abstract parser tests`` () =
                 if blocks <> numberOfBlocks - 1 then
                     b <- e
                     e <- curE               
-                    qGraph.AddVerticesAndEdge <| edg b e (Yard.Examples.MSParser.L_comma_ (new FSA<_>())) |> ignore
+                    qGraph.AddVerticesAndEdge <| edg b e (Yard.Examples.MSParserAbstract.L_comma_ (new FSA<_>())) |> ignore
                     b <- e
                     e <- e + 1
                     curB <- b
                     curE <- e + 1
             b <- e
             e <- curE               
-            qGraph.AddVerticesAndEdge <| edg b e (Yard.Examples.MSParser.L_from (new FSA<_>())) |> ignore
+            qGraph.AddVerticesAndEdge <| edg b e (Yard.Examples.MSParserAbstract.L_from (new FSA<_>())) |> ignore
             b <- e
             e <- e + 1
-            qGraph.AddVerticesAndEdge <| edg b e (Yard.Examples.MSParser.IDENT (new FSA<_>())) |> ignore
+            qGraph.AddVerticesAndEdge <| edg b e (Yard.Examples.MSParserAbstract.IDENT (new FSA<_>())) |> ignore
             b <- e
             e <- e + 1
-            qGraph.AddVerticesAndEdge <| edg b e (Yard.Examples.MSParser.RNGLR_EOF (new FSA<_>())) |> ignore
+            qGraph.AddVerticesAndEdge <| edg b e (Yard.Examples.MSParserAbstract.RNGLR_EOF (new FSA<_>())) |> ignore
             qGraph.FinalStates <- [|e|]
-            qGraph.PrintToDot "input.dot" (Yard.Examples.MSParser.tokenToNumber >> Yard.Examples.MSParser.numToString)
+            //qGraph.PrintToDot "input.dot" (Yard.Examples.MSParserAbstract.tokenToNumber >> Yard.Examples.MSParser.numToString)
             qGraph
 
-        let parse = (new Parser<_>()).Parse Yard.Examples.MSParser.buildAstAbstract
+        let parse = (new Parser<_>()).Parse Yard.Examples.MSParserAbstract.buildAstAbstract
         perfTest2 parse graphGenerator
 
 
@@ -845,7 +846,7 @@ let f x =
         System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
     else System.IO.Directory.CreateDirectory "dot" |> ignore
     let t = new ``RNGLR abstract parser tests`` () 
-
+    System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
 //    t._01_PrettySimpleCalc_SequenceInput ()
 //    t._02_PrettySimpleCalc_SimpleBranchedInput ()
 //    t._03_PrettySimpleCalc_BranchedInput ()

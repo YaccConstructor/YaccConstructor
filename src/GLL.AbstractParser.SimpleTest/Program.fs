@@ -78,6 +78,19 @@ let outputDir = @"../../../src/GLL.AbstractParser.SimpleTest/"
 let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)
 
+let perfTest2 parse graph =    
+    for i = 135 to 150 do
+        let g = graph (1 + i) 2 
+        let start = System.DateTime.Now
+        let r = parse g
+        let finish = System.DateTime.Now - start
+        printfn "%i  : %A" (i+1) finish.TotalSeconds
+        System.GC.Collect()
+        match r with
+        | Error _ ->
+            printfn "Error"     
+        | Success tree->
+            ()//printfn "%s" "sss"
 
 let test buildAbstractAst qGraph (intToString : int -> string) (fileName : string) nodesCount edgesCount termsCount ambiguityCount tokenData tokenToNum = 
 
@@ -96,6 +109,7 @@ let test buildAbstractAst qGraph (intToString : int -> string) (fileName : strin
             Assert.AreEqual(termsCount, t, "Terms count mismatch") 
             Assert.AreEqual(ambiguityCount, amb, "Ambiguities count mismatch")
             Assert.Pass()
+     
 
 
 [<TestFixture>]
@@ -578,4 +592,89 @@ type ``GLL abstract parser tests`` () =
              ] |> ignore
 
         test GLL.ParseSimpleBranch.buildAbstractAst qGraph GLL.ParseSimpleBranch.numToString "SimpleBranch.dot" 14 15 5 1 GLL.ParseSimpleBranch.tokenData GLL.ParseSimpleBranch.tokenToNumber
-     
+
+    [<Test>]
+    member this.``TSQL performance test for GLL`` () =  
+        let graphGenerator numberOfBlocks numberOfPath =
+            let final = 100
+            let qGraph = new ParserInputGraph<_>(0, final)
+            let mutable b = 1
+            let mutable e = 2
+            let mutable curB = 1
+            let mutable curE = 3
+            let chains = Array.zeroCreate 5
+            let ra1 = new ResizeArray<_>()
+            ra1.Add(GLL.MsSqlParser.DEC_NUMBER (0))
+            ra1.Add(GLL.MsSqlParser.L_plus_ (1))
+            ra1.Add(GLL.MsSqlParser.IDENT (2))
+            let ra2 = new ResizeArray<_>()
+            ra2.Add(GLL.MsSqlParser.IDENT (3))
+            ra2.Add(GLL.MsSqlParser.L_plus_ (4))
+            ra2.Add(GLL.MsSqlParser.IDENT (5))
+            let ra3 = new ResizeArray<_>()
+            ra3.Add(GLL.MsSqlParser.L_left_bracket_ (6))
+            ra3.Add(GLL.MsSqlParser.IDENT (7))
+            ra3.Add(GLL.MsSqlParser.L_plus_ (8))
+            ra3.Add(GLL.MsSqlParser.IDENT (9))
+            ra3.Add(GLL.MsSqlParser.L_right_bracket_ (10))
+            let ra4 = new ResizeArray<_>()
+            ra4.Add(GLL.MsSqlParser.L_null (11))
+            ra4.Add(GLL.MsSqlParser.L_null (12))
+            let ra5 = new ResizeArray<_>()
+            ra5.Add(GLL.MsSqlParser.STRING_CONST (13))
+            ra5.Add(GLL.MsSqlParser.L_plus_ (14))
+            ra5.Add(GLL.MsSqlParser.IDENT (15))
+            chains.[0] <- ra1
+            chains.[1] <- ra2
+            chains.[2] <- ra3
+            chains.[3] <- ra4
+            chains.[4] <- ra5    
+            (qGraph.AddVerticesAndEdge <| edg 0 1 (GLL.MsSqlParser.L_select (16))) |> ignore
+            for blocks = 0 to numberOfBlocks - 1 do
+                for i = 0 to numberOfPath - 1 do
+                    let curChain = chains.[i]
+                    for k = 0 to curChain.Count - 1 do
+                        if k <> curChain.Count - 1 then
+                            qGraph.AddVerticesAndEdge <| edg curB curE (curChain.[k]) |> ignore  
+                            curB <- curE
+                            curE <- curE + 1
+                        else
+                            qGraph.AddVerticesAndEdge <| edg curB e (curChain.[k]) |> ignore
+                            if i <> numberOfPath - 1 then
+                                curE <- curE
+                                curB <- b
+                if blocks <> numberOfBlocks - 1 then
+                    b <- e
+                    e <- curE               
+                    qGraph.AddVerticesAndEdge <| edg b e (GLL.MsSqlParser.L_comma_ (17)) |> ignore
+                    b <- e
+                    e <- e + 1
+                    curB <- b
+                    curE <- e + 1
+            b <- e
+            e <- curE               
+            qGraph.AddVerticesAndEdge <| edg b e (GLL.MsSqlParser.L_from (18)) |> ignore
+            b <- e
+            e <- e + 1
+            qGraph.AddVerticesAndEdge <| edg b e (GLL.MsSqlParser.IDENT (19)) |> ignore
+            b <- e
+            e <- e + 1
+            qGraph.AddVerticesAndEdge <| edg b e (GLL.MsSqlParser.RNGLR_EOF (20)) |> ignore
+            qGraph.FinalStates <- [|e|]
+            //qGraph.PrintToDot "input.dot" (GLL.MsSqlParser.tokenToNumber >> GLL.MsSqlParser.numToString)
+            qGraph
+
+        let parse = GLL.MsSqlParser.buildAbstractAst
+        perfTest2 parse graphGenerator
+  
+
+[<EntryPoint>]
+let f x =
+    System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
+    let t = new ``GLL abstract parser tests``()
+    let f () = t.``TSQL performance test for GLL`` ()
+              //_35_Expression() //
+    //let th = new System.Threading.Thread(f, 10000000)
+    //th.Start()
+    f()
+    0

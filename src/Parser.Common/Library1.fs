@@ -31,7 +31,7 @@ type ParseResult<'TokenType> =
 module CommonFuns = 
 
     let inline pack left right : int64 =  ((int64 left <<< 32) ||| int64 right)
-    let inline pack3 l m r : int64 =  ((int64 l <<< 42) ||| int64 m <<< 21 ||| int64 r)
+    let inline pack3 l m r : int64 =  ((int64 l <<< 42) ||| (int64 m <<< 21) ||| int64 r)
     let inline getRight (long : int64) = int <| ((int64 long) &&& 0xffffffffL)
     let inline getLeft (long : int64)  = int <| ((int64 long) >>> 32)
 
@@ -47,9 +47,9 @@ module CommonFuns =
 type ParserStructures (inputLength : int, currentRule : int)=
     let sppfNodes = new BlockResizeArray<INode>()
     let dummyAST = new TerminalNode(-1, packExtension -1 -1)
-    let setP = new Dictionary<int64, ResizeArray<int<nodeMeasure>>> ()
+    let setP = new Dictionary<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<nodeMeasure>>>(500)//list<int<nodeMeasure>>> (500)
     let epsilonNode = new TerminalNode(-1, packExtension 0 0)
-    let setR = new Queue<Context>()  
+    let setR = new Queue<Context>(100)  
     let dummy = 0<nodeMeasure>
     let currentN = ref <| dummy
     let currentR = ref <| dummy

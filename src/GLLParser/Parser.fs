@@ -232,10 +232,10 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             if setP.ContainsKey(vertexKey)
             then
                 let arr = setP.[vertexKey]
-                for tree in arr do
+                arr.DoForAll (fun tree  ->
                     let y = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy label ast tree
                     let index = getRightExtension <| structures.GetTreeExtension y 
-                    structures.AddContext setU index label vertex y 
+                    structures.AddContext setU index label vertex y )
         v
 
     let pop (u : Vertex) (i : int) (z : int<nodeMeasure>) =
@@ -244,11 +244,11 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             let vertexKey = pack u.Level (int u.NontermLabel)
             if setP.ContainsKey vertexKey
             then
-                setP.[vertexKey].Add(z)
+                setP.[vertexKey].Add z
             else
-                let newList = new ResizeArray<int<nodeMeasure>>()
-                newList.Add(z)
-                setP.Add(vertexKey, newList)
+                //let newList = new ResizeArray<int<nodeMeasure>>()
+                //newList.Add(z)
+                setP.Add(vertexKey, new ResizableUsualOne<_>(z))
             let outEdges = edges.[u.NontermLabel, u.Level]
             
             for kvp1 in outEdges do

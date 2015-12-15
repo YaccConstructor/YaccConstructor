@@ -79,7 +79,7 @@ let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)
 
 let perfTest2 parse graph =    
-    for i = 135 to 150 do
+    for i = 11 to 200 do
         let g = graph (1 + i) 2 
         let start = System.DateTime.Now
         let r = parse g

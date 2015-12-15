@@ -76,7 +76,7 @@ let perfTest parse inputLength graph =
         printfn "%0i : %A" x time
 
 let perfTest2 parse graph =    
-    for i = 135 to 150 do
+    for i = 10 to 200 do
         let g = graph (1 + i) 2 
         let start = System.DateTime.Now
         let r = parse g

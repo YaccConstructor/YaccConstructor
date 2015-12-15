@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Generators", "Generators", "{62D91EA2-A776-44C2-8891-2CA45A01A365}"
 EndProject
@@ -24,6 +24,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{862C4B6F-EDF4-40FE-A113-D000D25FA2DB}"
 	ProjectSection(SolutionItems) = preProject
 		Performance1.psess = Performance1.psess
+		Performance3.psess = Performance3.psess
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{F103FFDB-6232-4775-991A-9A072DA890A7}"
@@ -304,5 +305,8 @@ Global
 		{C831D126-E5FC-4681-A316-574C08F83E6D} = {11E0A5E6-3D2D-48CC-91E1-09EF624786A6}
 		{61A3B851-03A0-4A87-B786-D21DFE03B9DD} = {11E0A5E6-3D2D-48CC-91E1-09EF624786A6}
 		{F2E8EDA4-C13F-4F8D-B858-D5EF4FB8A06D} = {11E0A5E6-3D2D-48CC-91E1-09EF624786A6}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

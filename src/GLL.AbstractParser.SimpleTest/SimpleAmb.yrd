@@ -1,14 +1,3 @@
 [<Start>]
 s : A d B | A D B
 d : D
-
-
-
-var condition = true;
-var query = "select ";
-if (condition)
-{
-	query = query + "id names ";
-}
-query = query + "from table1";
-Program.Execute(query);

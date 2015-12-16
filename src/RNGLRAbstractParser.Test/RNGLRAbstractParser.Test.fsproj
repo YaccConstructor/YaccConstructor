@@ -40,6 +40,7 @@
     <!--Compile Include="MsLexer.fs" /-->
     <Compile Include="CroppedBrackets.yrd.fs" />
     <Compile Include="Eps.yrd.fs" />
+    <Compile Include="EpsilonKiller.yrd.fs" />
     <Compile Include="FirstEps.yrd.fs" />
     <Compile Include="List.yrd.fs" />
     <!--Compile Include="calcDemo.yrd.fs" /-->

@@ -432,9 +432,4 @@ Tests/RNGLR/sppf.dot*
 **/out
 **/Calc.yrd.fs
 Tests/AbstractRNGLR/DOT/gss.dot.pdf
-*.yrd.fs
-*.yrd.fs
-*.dot
-src/TSQL/LexerAbstract.fs
-src/TSQL/LexerAbstract_Abstract.fs
-src/TSQL/MSParserAbstract.fs
+Tests/AbstractRNGLR/DOT/gen.cmd

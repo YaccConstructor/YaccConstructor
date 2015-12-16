@@ -11,6 +11,12 @@ open FSharpx.Collections.Experimental
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
 
+[<Struct>]
+type M =
+    val pos : int64
+    val lbl : int<labelMeasure>
+    new (p,l) = {pos = p; lbl = l}
+
 let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : ParserInputGraph<'TokenType>) : ParserCommon.ParseResult<_> = 
     
     if input.EdgeCount = 0 then
@@ -34,12 +40,10 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let dummyGSSNode = new Vertex(!currentVertexInInput, int !structures.CurrentLabel)
         let sppfNodes = structures.SppfNodes
         
-        let tokens = new BlockResizeArray<'TokenType>()
-        //let packedNodes = Array3D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount) (input.VertexCount) (input.VertexCount)// (fun _ _ _ -> new Dictionary<_,_>())
-        let packedNodes = new Dictionary<int64, Dictionary<int<labelMeasure>, int<nodeMeasure>>>()// (fun _ _ _ -> new Dictionary<_,_>())
+        let tokens = new BlockResizeArray<'TokenType>()        
+        let packedNodes = new Dictionary<M, int<nodeMeasure>>()
         
-        let nonTerminalNodes = new Dictionary<int64,int<nodeMeasure>>()
-        //Array3D.zeroCreate<int<nodeMeasure>> parser.NonTermCount (input.VertexCount) (input.VertexCount)
+        let nonTerminalNodes = new Dictionary<int64,int<nodeMeasure>>()        
         let intermidiateNodes = Array2D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount) (input.VertexCount) //убрала +1
         let edges = Array2D.zeroCreate<Dictionary<int<nodeMeasure>, Dictionary<int, ResizeArray<int>>>> slots.Count (input.VertexCount )
         let terminalNodes = Array3D.zeroCreate<int<nodeMeasure>> input.VertexCount input.VertexCount parser.TermCount  
@@ -99,23 +103,16 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             let i = getLeftExtension lExt
             let j = getRightExtension lExt
             let k = getRightExtension rExt
-            let rule = getRule label
-            let d = 
-                if packedNodes.ContainsKey <| pack3 i j k
-                then
-                    packedNodes.[pack3 i j k]
-                else 
-                    let t = new Dictionary<int<labelMeasure>, int<nodeMeasure>>(2)
-                    packedNodes.Add((pack3 i j k), t) 
-                    t
-            if d.ContainsKey label
-            then
-                d.[label] 
-            else 
+            let rule = getRule label            
+            let key = new M (pack3 i j k, label)
+            let flg,res = packedNodes.TryGetValue(key)            
+            if flg
+            then res
+            else
                 let newNode = new PackedNode(rule, left, right)
                 sppfNodes.Add(newNode)
                 let num = (sppfNodes.Length - 1 )*1<nodeMeasure>
-                d.Add(label, num)
+                packedNodes.Add(key, num)
                 match sppfNodes.Item (int symbolNode) with
                 | :? NonTerminalNode as n ->
                     n.AddChild newNode

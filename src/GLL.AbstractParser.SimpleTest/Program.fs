@@ -79,10 +79,12 @@ let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)
 
 let perfTest2 parse graph =    
-    for i = 11 to 200 do
+    for i = 10 to 200 do
         let g = graph (1 + i) 2 
         let start = System.DateTime.Now
+        System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
         let r = parse g
+        System.GC.Collect()        
         let finish = System.DateTime.Now - start
         printfn "%i  : %A" (i+1) finish.TotalSeconds
         System.GC.Collect()
@@ -670,7 +672,7 @@ type ``GLL abstract parser tests`` () =
 
 [<EntryPoint>]
 let f x =
-    System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
+    //System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
     let t = new ``GLL abstract parser tests``()
     let f () = t.``TSQL performance test for GLL`` ()
               //_35_Expression() //

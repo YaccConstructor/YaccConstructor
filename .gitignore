@@ -392,3 +392,5 @@ Tests/AbstractRNGLR/DOT/gen.cmd
 src/TSQL/LexerAbstract.fs
 src/TSQL/LexerAbstract_Abstract.fs
 src/TSQL/MSParserAbstract.fs
+src/RNGLRApplication/Calc.yrd.fs
+src/RNGLRApplication/SimpleAmb.yrd.fs

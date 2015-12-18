@@ -174,6 +174,23 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 13 12 0 3 0
 
     [<Test>]
+    member this._01_PrettySimpleCalc_SequenceInput_SimpleEpsilon_1 () =
+        let qGraph = new ParserInputGraph<_>([|0; 3|], [|7|])
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
+             new ParserEdge<_>(1, 2, None)
+             new ParserEdge<_>(2, 4, None)
+             
+             edg 3 2 (RNGLR.PrettySimpleCalc.NUM 4)
+
+             edg 4 5 (RNGLR.PrettySimpleCalc.PLUS 2)
+             edg 5 6 (RNGLR.PrettySimpleCalc.NUM 3)
+             edg 6 7 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+
+        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 13 12 0 3 0
+
+    [<Test>]
     member this._01_PrettySimpleCalc_SequenceInput_1 () =
         let qGraph = new ParserInputGraph<_>([|0|], [|4|])
         qGraph.AddVerticesAndEdgeRange
@@ -540,6 +557,58 @@ type ``RNGLR abstract parser tests`` () =
             edg 1 2 (RNGLR.StrangeBrackets.RBR 3)
             edg 2 2 (RNGLR.StrangeBrackets.RBR 4)
             edg 2 3 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 20 20 2 8 2
+
+    [<Test>]
+    member this._23_UnambiguousBrackets_SimpleEpsilonSequence () =
+        let qGraph = new ParserInputGraph<_>(0, 5)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 1)
+            edg 1 1 (RNGLR.StrangeBrackets.LBR 2)
+            new ParserEdge<_>(1, 2, None)
+            new ParserEdge<_>(2, 3, None)
+            edg 3 4 (RNGLR.StrangeBrackets.RBR 3)
+            edg 4 4 (RNGLR.StrangeBrackets.RBR 4)
+            edg 4 5 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 20 20 2 8 2
+
+    [<Test>]
+    member this._23_UnambiguousBrackets_SimpleEpsilonCycle () =
+        let qGraph = new ParserInputGraph<_>(0, 6)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 1)
+            edg 1 1 (RNGLR.StrangeBrackets.LBR 2)
+            new ParserEdge<_>(1, 2, None)
+            new ParserEdge<_>(2, 3, None)
+            new ParserEdge<_>(3, 4, None)
+            new ParserEdge<_>(4, 1, None)
+            edg 3 5 (RNGLR.StrangeBrackets.RBR 3)
+            edg 5 5 (RNGLR.StrangeBrackets.RBR 4)
+            edg 5 6 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 20 20 2 8 2
+
+    [<Test>]
+    member this._23_UnambiguousBrackets_SimpleEpsilonCycle_1 () =
+        let qGraph = new ParserInputGraph<_>(0, 6)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 1)
+            edg 1 1 (RNGLR.StrangeBrackets.LBR 2)
+            new ParserEdge<_>(1, 2, None)
+            new ParserEdge<_>(2, 3, None)
+            new ParserEdge<_>(3, 4, None)
+            new ParserEdge<_>(4, 1, None)
+
+            new ParserEdge<_>(4, 5, None)
+
+            edg 3 5 (RNGLR.StrangeBrackets.RBR 3)
+            edg 5 5 (RNGLR.StrangeBrackets.RBR 4)
+            edg 5 6 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
             ] |> ignore
 
         test RNGLR.StrangeBrackets.buildAstAbstract qGraph 20 20 2 8 2

@@ -279,10 +279,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             //mergeList fromV.unprocessedGssVertices toV.unprocessedGssVertices
             //mergeList fromV.processedGssVertices toV.processedGssVertices
             // 2
-            if not <| toV.unprocessedGssVertices.Exists( fun (b:Vertex) -> b.State = unproccessedVertex.State ) then
-                toV.unprocessedGssVertices.Add(unproccessedVertex)
-            // mergeList [unproccessedVertex] toV.unprocessedGssVertices
-
+            //if not <| toV.unprocessedGssVertices.Exists( fun (b:Vertex) -> b.State = unproccessedVertex.State ) then
+            //    toV.unprocessedGssVertices.Add(unproccessedVertex)
+            
             let v = new Vertex(state, toV.vNum)
             
             //verticesToProcess.Enqueue(toV)
@@ -315,7 +314,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 for e in outEdgesInnerGraph.[currentGraphV.vNum] do
                     match e.Tag with
                     | None -> 
-                        copyInfo currentGraphV e.Target state usedVertices v
+                        () //copyInfo currentGraphV e.Target state usedVertices v
                     | Some (tg) ->
                         addZeroReduction v tg currentGraphV false
         v, isNew

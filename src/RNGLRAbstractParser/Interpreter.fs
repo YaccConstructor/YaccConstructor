@@ -144,6 +144,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         g
         //verticesMap.[tokens.InitState], verticesMap.[tokens.FinalState], g
     
+    let tokensVerticesCount = tokens.VertexCount
+
     let nodes = new BlockResizeArray<AstNode>()
     let terminals = new BlockResizeArray<'TokenType>()
     let startState = 0
@@ -159,6 +161,43 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     for v in innerGraph.Vertices do
         outEdgesInnerGraph.[v.vNum] <- innerGraph.OutEdges v |> Array.ofSeq
     
+    let reachableByEpsEdgeV = Array.init (Seq.max tokens.Vertices + 1) (fun _ -> [||])
+    
+    let rec dfs (v:VInfo<_>) (used:bool[]) (r:ResizeArray<_>)= 
+        if used.[v.vNum] = false then
+            used.[v.vNum] <- true
+
+            for e in outEdgesInnerGraph.[v.vNum] do
+                match e.Tag with
+                | None -> 
+                    if used.[e.Target.vNum] = false then
+                        r.Add(e.Target)
+                        dfs e.Target used r
+                | Some (tg) -> ()
+    
+    let newEdges = Array.init (Seq.max tokens.Vertices + 1) (fun _ -> [||])
+
+    for v in innerGraph.Vertices do
+        let used = Array.init (Seq.max tokens.Vertices + 1) (fun _ -> false)
+        let r = new ResizeArray<_>()
+        dfs v used r
+        reachableByEpsEdgeV.[v.vNum] <- r |> Array.ofSeq
+        
+        let edges = new ResizeArray<_>()
+
+        for u in reachableByEpsEdgeV.[v.vNum] do
+            for e in outEdgesInnerGraph.[u.vNum] do
+                match e.Tag with
+                | None -> ()
+                | Some (tg) -> 
+                    //if e.Target.vNum <> v.vNum then
+                    edges.Add(new QuickGraph.TaggedEdge<_,_>(v, e.Target, e.Tag))
+        
+        newEdges.[v.vNum] <- edges |> Array.ofSeq
+
+    for v in innerGraph.Vertices do
+        outEdgesInnerGraph.[v.vNum] <- outEdgesInnerGraph.[v.vNum].Concat(newEdges.[v.vNum]) |> Array.ofSeq
+
     let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide : int[])
         (initNodes : seq<Vertex>) (numToString : int -> string) (errInd: int) (path : string) =
         use out = new System.IO.StreamWriter (path)
@@ -227,18 +266,36 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             for prod in arr do
                 innerGraphV.AddReduction(new Reduction(gssVertex, prod, 0, None))
     
-    let mergeList (fromList:ResizeArray<_>) (toList:ResizeArray<_>) = 
+    let mergeList (fromList:ResizeArray<Vertex>) (toList:ResizeArray<Vertex>) = 
         for it in fromList do
-            if not <| toList.Contains(it) then
+            if not <| toList.Exists( fun (b:Vertex) -> b.State = it.State ) then
                 toList.Add(it)
 
-    let rec copyInfo (fromV:VInfo<_>) (toV:VInfo<_>) state =
-        // mergeList fromV.unprocessedGssVertices toV.unprocessedGssVertices
-        // mergeList fromV.processedGssVertices toV.unprocessedGssVertices
 
-        addVertex toV state toV.unprocessedGssVertices
+    let rec copyInfo (fromV:VInfo<_>) (toV:VInfo<_>) state (usedVertices:bool[]) (unproccessedVertex:Vertex) =
+        if usedVertices.[fromV.vNum] = false then
+            usedVertices.[fromV.vNum] <- true
+            // 1
+            //mergeList fromV.unprocessedGssVertices toV.unprocessedGssVertices
+            //mergeList fromV.processedGssVertices toV.processedGssVertices
+            // 2
+            if not <| toV.unprocessedGssVertices.Exists( fun (b:Vertex) -> b.State = unproccessedVertex.State ) then
+                toV.unprocessedGssVertices.Add(unproccessedVertex)
+            // mergeList [unproccessedVertex] toV.unprocessedGssVertices
 
-    and (*inline*) addVertex (currentGraphV:VInfo<_>) state (listToAddUnprocessedGssV : ResizeArray<_>) =
+            let v = new Vertex(state, toV.vNum)
+            
+            //verticesToProcess.Enqueue(toV)
+
+            for e in outEdgesInnerGraph.[toV.vNum] do
+                match e.Tag with
+                | None -> 
+                    copyInfo toV e.Target state usedVertices v     
+                | Some (tg) ->
+                    addZeroReduction v tg toV false
+        
+
+    let (*inline*) addVertex (currentGraphV:VInfo<_>) state (listToAddUnprocessedGssV : ResizeArray<_>) =
         let mutable v = null
         let mutable isNew = false
         let vOpt = currentGraphV.processedGssVertices |> ResizeArray.tryFind (fun v -> v.State = state)
@@ -252,11 +309,13 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 v <- new Vertex(state, currentGraphV.vNum)
                 isNew <- true
                 listToAddUnprocessedGssV.Add v
+
+                let usedVertices = Array.create tokensVerticesCount false
+
                 for e in outEdgesInnerGraph.[currentGraphV.vNum] do
                     match e.Tag with
                     | None -> 
-                        () //copyInfo currentGraphV e.Target 
-                        |> ignore                        // !!!
+                        copyInfo currentGraphV e.Target state usedVertices v
                     | Some (tg) ->
                         addZeroReduction v tg currentGraphV false
         v, isNew
@@ -474,12 +533,12 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             | Some res -> 
                 try 
                     let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
-//                    tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
-//
-//                    let gssInitVertices = 
-//                       innerGraph.Edges |> Seq.collect (fun e -> e.Source.processedGssVertices)
-//
-//                    drawDot parserSource.TokenToNumber terminals parserSource.LeftSide gssInitVertices parserSource.NumToString parserSource.ErrorIndex "../../../Tests/AbstractRNGLR/DOT/gss.dot"
+                    tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
+
+                    let gssInitVertices = 
+                       innerGraph.Edges |> Seq.collect (fun e -> e.Source.processedGssVertices)
+
+                    drawDot parserSource.TokenToNumber terminals parserSource.LeftSide gssInitVertices parserSource.NumToString parserSource.ErrorIndex "../../../Tests/AbstractRNGLR/DOT/gss.dot"
 
                     Success <| tree
                 with

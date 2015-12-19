@@ -394,3 +394,6 @@ src/TSQL/LexerAbstract_Abstract.fs
 src/TSQL/MSParserAbstract.fs
 src/RNGLRApplication/Calc.yrd.fs
 src/RNGLRApplication/SimpleAmb.yrd.fs
+
+# vim temp files
+*.swp

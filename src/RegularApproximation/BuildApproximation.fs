@@ -6,7 +6,7 @@ open GenericGraphs
 open GenericCFG
 open DDG
 open GenerateFsa
-open YC.FSA.GraphBasedFsa
+open QuickGraph.FSA.GraphBasedFsa
 
 /// Contains control info for approximation algo. TargetFunction field
 /// contains the name of a method or a function where hotspot node is located,

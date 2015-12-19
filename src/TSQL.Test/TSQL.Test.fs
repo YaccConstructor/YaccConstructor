@@ -4,11 +4,11 @@ open NUnit.Framework
 open Microsoft.FSharp.Collections
 open QuickGraph
 open AbstractAnalysis.Common
-open YC.FST.GraphBasedFst
+open QuickGraph.FST.GraphBasedFst
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
-open YC.FSA.GraphBasedFsa
-open YC.FSA.FsaApproximation
+open QuickGraph.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
 open Yard.Examples.MSParserAbstract
 open Graphviz4Net.Dot.AntlrParser
 open Graphviz4Net.Dot
@@ -67,9 +67,9 @@ let TSQLTokenizationTest path eCount vCount =
     let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
     let res = YC.TSQLLexer.tokenize (Yard.Examples.MSParserAbstract.RNGLR_EOF(new FSA<_>())) graphFst
     match res with
-    | YC.FST.GraphBasedFst.Test.Success res -> 
+    | QuickGraph.FST.GraphBasedFst.Test.Success res -> 
         checkGraph res eCount vCount  
-    | YC.FST.GraphBasedFst.Test.Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" path e)
+    | QuickGraph.FST.GraphBasedFst.Test.Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" path e)
 
 let test buildAstAbstract qGraph nodesCount edgesCount epsilonsCount termsCount ambiguityCount = 
     let r = (new Parser<_>()).Parse  buildAstAbstract qGraph
@@ -108,11 +108,11 @@ type ``Lexer and Parser TSQL Tests`` () =
         let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
         let res = YC.TSQLLexer.tokenize (Yard.Examples.MSParserAbstract.RNGLR_EOF(new FSA<_>())) graphFst
         match res with
-        | YC.FST.GraphBasedFst.Test.Success res -> 
+        | QuickGraph.FST.GraphBasedFst.Test.Success res -> 
             //ToDot res @"../../../src/TSQL.Test/DotTSQL/teeeest.dot" printBref
             checkGraph res 9 10
             test  Yard.Examples.MSParserAbstract.buildAstAbstract res 156 159 5 8 4
-        | YC.FST.GraphBasedFst.Test.Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" "test_tsql_1.dot" e)
+        | QuickGraph.FST.GraphBasedFst.Test.Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" "test_tsql_1.dot" e)
 
     [<Test>]
     member this.``TSQL. Parser test 1.`` () =

@@ -5,8 +5,8 @@ open Microsoft.FSharp.Collections
 
 open GenericGraphs
 open DDG
-open YC.FSA.GraphBasedFsa
-open YC.FSA.FsaApproximation
+open QuickGraph.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
 open Utils
 open GraphUtils.TopoTraverser
 open GenericGraphs.BidirectTopoDownTraverser

@@ -7,8 +7,8 @@ open JetBrains.ReSharper.Psi.CSharp.Tree
 open Microsoft.FSharp.Collections
 
 open ReSharperExtension.YcIntegration
-open YC.FSA.GraphBasedFsa
-open YC.FSA.FsaApproximation
+open QuickGraph.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
 
 type br = ICSharpLiteralExpression
 type range = DocumentRange

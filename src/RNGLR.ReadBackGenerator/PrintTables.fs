@@ -1,4 +1,4 @@
-﻿module Yard.Generators.RNGLR.Printer
+﻿module Yard.Generators.RNGLR.ReadBack.Printer
 
 open System.Collections.Generic
 

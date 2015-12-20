@@ -5,7 +5,7 @@ open Yard.Generators.Common.LR.NFA
 open Yard.Generators.RNGLR.ReadBack.States
 open Yard.Generators.Common.EBNF.FinalGrammar
 
-type NFATable =  (int * (int * (int * int) list) list)[]
+type NFATable = (int * (int * (int * int) list) list)[]
 
 type TablesReadBack (grammar : FinalGrammarNFA, states : StatesInterpreter) =
     let _reduces, _zeroReduces, _gotos, _acc =

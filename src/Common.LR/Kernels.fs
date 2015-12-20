@@ -13,7 +13,3 @@ type KernelInterpreter =
     static member inline unzip kernel = (KernelInterpreter.getProd kernel, KernelInterpreter.getPos kernel)
     static member inline kernelsOfState = fst
     static member inline lookAheadsOfState = snd
-
-type RnglrReduceLabel =
-    | Reduce
-    | ZeroReduce

@@ -20,6 +20,7 @@
   <ItemGroup>
     <Compile Include="States.fs" />
     <Compile Include="Tables.fs" />
+    <Compile Include="PrintTables.fs" />
     <Compile Include="RNGLR.ReadBackGenerator.fs" />
     <None Include="App.config" />
   </ItemGroup>

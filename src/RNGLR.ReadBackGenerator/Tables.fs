@@ -1,16 +1,17 @@
 ﻿namespace Yard.Generators.RNGLR.ReadBack
 
 open Yard.Generators.Common
-open Yard.Generators.Common.LR.Kernels
 open Yard.Generators.Common.LR.NFA
 open Yard.Generators.RNGLR.ReadBack.States
 open Yard.Generators.Common.EBNF.FinalGrammar
-open
+
+type NFATable =  (int * (int * (int * int) list) list)[]
 
 type TablesReadBack (grammar : FinalGrammarNFA, states : StatesInterpreter) =
-    let _reduces, _gotos, _acc =
+    let _reduces, _zeroReduces, _gotos, _acc =
         let symbolCount = grammar.indexator.fullCount
-        let reduces : list<int * RnglrReduceLabel>[,] = Array2D.create states.count symbolCount []
+        let reduces : list<int>[,] = Array2D.create states.count symbolCount []
+        let zeroReduces : list<int>[,] = Array2D.create states.count symbolCount []
         let gotos : int list[,] = Array2D.create states.count symbolCount []
         let mutable acc = []
         if grammar.canInferEpsilon.[grammar.rules.leftSide grammar.startRule] then acc <- (*startState*)0::acc
@@ -29,12 +30,11 @@ type TablesReadBack (grammar : FinalGrammarNFA, states : StatesInterpreter) =
                 if k = endRule then acc <- i::acc
                 elif grammar.hasEpsilonTail.[prod].[pos] then
                     for symbol in la do 
-                        let reduceLabel =
-                            if Set.contains pos grammar.startPositions.[prod] then
-                                ZeroReduce
-                            else Reduce
-                        reduces.[i, symbol] <- (prod, reduceLabel)::reduces.[i, symbol]
-        reduces, gotos, acc
+                        if Set.contains pos grammar.startPositions.[prod] then
+                            zeroReduces.[i, symbol] <- prod::zeroReduces.[i, symbol]
+                        else
+                            reduces.[i, symbol] <- prod::reduces.[i, symbol]
+        reduces, zeroReduces, gotos, acc
 
     let _nfas =
         let rec statesAndTransitions = function
@@ -53,6 +53,7 @@ type TablesReadBack (grammar : FinalGrammarNFA, states : StatesInterpreter) =
             (fun x -> x.numberOfStates , (x.stateToVertex |> Array.toList |> statesAndTransitions))
 
     member this.reduces = _reduces
+    member this.zeroReduces = _zeroReduces
     member this.gotos = _gotos
     member this.acc = _acc
     member this.nfas = _nfas

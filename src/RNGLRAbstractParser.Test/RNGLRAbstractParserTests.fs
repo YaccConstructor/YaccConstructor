@@ -131,6 +131,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 13 12 0 3 0
 
     [<Test>]
+        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 22 22 0 4 1
     member this._02_PrettySimpleCalcSimple_BranchedInput () =
         let qGraph = new ParserInputGraph<_>(0, 4)
         qGraph.AddVerticesAndEdgeRange
@@ -704,7 +705,7 @@ let f x =
         System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
     else System.IO.Directory.CreateDirectory "dot" |> ignore
     let t = new ``RNGLR abstract parser tests`` () 
-
+    t._01_PrettySimpleCalc_SequenceInput_MultipleStartAndFinalVertices ()
 //    t._01_PrettySimpleCalc_SequenceInput ()
 //    t._02_PrettySimpleCalc_SimpleBranchedInput ()
 //    t._03_PrettySimpleCalc_BranchedInput ()
@@ -736,5 +737,5 @@ let f x =
    // t.``TSQL performance test for Alvor`` 2 100 false
     //t._29_AandB_Circle ()
     //t.``TSQL performance test 2`` 2 100 false
-//    t.temp ()
+    //t._24_UnambiguousBrackets_Circle_MultipleStartVertices()
     0

@@ -401,8 +401,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         else
             let root = ref None
             let addTreeTop resList =
-                let children = new Family(parserSource.StartRule, new Nodes(resList))
-                new AST(children, null)
+                let children = resList |> Array.map (fun x -> new Family(parserSource.StartRule, new Nodes([|x|])))
+                new AST(children)
 
             let vertices = innerGraph.Edges |> Seq.filter (fun e -> List.exists (fun f -> f = e.Target) finalVList) |> Seq.collect (fun e -> e.Source.processedGssVertices)
             
@@ -415,29 +415,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                                     |> Seq.map (fun e -> e.Ast)
                     for ast in rL do
                         rootList.Add nodes.[ast]
-//                        
-            //assert (rootList.Length = 1) // single acc state
 
             root := Some nodes.Length
             rootList.ToArray() |> addTreeTop |> nodes.Add
-
-//            for ast in rootList do
-//                root := Some nodes.Length
-//                [|ast|]
-//                |> addTreeTop
-//                |> nodes.Add
-
-//            // old
-//            for v in vertices do
-//                if parserSource.AccStates.[v.State]
-//                then
-//                    root := Some nodes.Length //!
-//                    let nonEpsilonEdge = v.OutEdges.FirstOrDefault(fun x -> x.Ast >= 0)
-//                    if nonEpsilonEdge <> Unchecked.defaultof<_>
-//                    then
-//                        [|nodes.[nonEpsilonEdge.Ast]|]
-//                        |> addTreeTop
-//                        |> nodes.Add
 
             match !root with
             | None -> 

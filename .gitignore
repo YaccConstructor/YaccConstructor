@@ -397,3 +397,4 @@ src/RNGLRApplication/SimpleAmb.yrd.fs
 
 # vim temp files
 *.swp
+src/RNGLRApplication/res.dot

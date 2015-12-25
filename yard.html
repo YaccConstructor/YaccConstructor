@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8"/>
-    <title>YaccConstructor. YARD</title>
+    <title>YaccConstructor.YARD</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="description" content="YaccConstructor"/>
     <meta name="author" content="Semyon Grigorev and others"/>
@@ -133,6 +133,71 @@ YARD is powerful translation specification language. It allows you to use EBNF, 
 </table>
 
 [1] &mdash; in ANTLR rule are specified using the syntax of the generated language, meanwhile YARD can accept RegExps' or other rules too!
+
+<h2>Lexing</h2>
+As a lexer, YARD uses a modified version of FsLex, so workflow would be almost the same as in FsLex.
+
+<h2>Grammar structure</h2>
+
+<h3>Grammar definition</h3>
+Definition in its general form looks like this:
+
+<pre>
+  info
+  tokens
+  options    
+  head   
+  grammar 
+  foot
+</pre>
+
+<p>
+Where<br>
+  <b>info</b>:    text that contains some information and would not be used anywhere.<br>
+  <b>tokens</b>:  //TODO ask about it<br>
+  <b>options</b>: //TODO ask about it<br>
+  <b>head</b>:    F# code that will be copied to the beginning of a generated F# file. Usually used for some open-s.<br>
+  <b>grammar</b>: grammar description.<br>
+  <b>foot</b>:    F# code that will be copied to the end of a generated F# file.<br>
+</p>
+
+<h3>Grammar description</h3>
+<p>Basically, grammar description is list of modules. A module in general form looks like this:</p>
+
+<pre>
+  [< AllPublic >]
+  name
+  openings
+  rules
+</pre>
+
+<p>
+Where<br>
+  <b>AllPublic</b>: this annotation makes all rules visible when using this module. By default, all rules are private except the ones explicitly marked public.<br>
+  <b>name</b>:      name of the module.<br>
+  <b>openings</b>:  usage (opening) of another grammars from .yrd files<br>
+  <b>rules</b>:     rules that are present in grammar<br>
+</p>
+
+<h3>Rules</h3>
+<p>A rule in general form looks like this:</p>
+
+<pre>
+  [< Start >]
+  public modifier
+  name
+  args
+  body
+</pre>
+
+<p>
+Where<br>
+  <b>Start</b>:  this annotation makes this rule a starting one.<br>
+  <b>public</b>: this modifier allows rule to be seen from other modules.<br>
+  <b>name</b>:   name of the rule<br>
+  <b>args</b>:   heritable rule's arguments<br>
+  <b>body</b>:   rule's body (production)<br>
+</p>
 
 <h2>Syntax in examples</h2>
 <h3>Grammar</h3>

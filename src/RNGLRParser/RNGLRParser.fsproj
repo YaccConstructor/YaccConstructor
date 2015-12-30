@@ -11,7 +11,6 @@
     <AssemblyName>YC.RNGLRParser</AssemblyName>
     <Name>RNGLRParser</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <Import Project="../YC.targets" />
@@ -28,12 +27,11 @@
       </PropertyGroup>
     </Otherwise>
   </Choose>
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="Parser.fs" />
     <None Include="app.config" />
-    <None Include="packages.config" />
+    <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
@@ -79,4 +77,5 @@
     <Target Name="AfterBuild">
     </Target>
     -->
+  <Import Project="..\.paket\paket.targets" />
 </Project>

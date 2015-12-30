@@ -11,7 +11,6 @@
     <AssemblyName>YC.RNGLRCommon</AssemblyName>
     <Name>RNGLRCommon</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <Import Project="../YC.targets" />
@@ -29,13 +28,12 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
     <!--Compile Include="AstNode.fs" /-->
     <Compile Include="ParserSource.fs" />
     <Compile Include="Helper.fs" />
     <None Include="app.config" />
-    <None Include="packages.config" />
+    <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
@@ -87,4 +85,5 @@
     <Target Name="AfterBuild">
     </Target>
     -->
+  <Import Project="..\.paket\paket.targets" />
 </Project>

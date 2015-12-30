@@ -11,7 +11,6 @@
     <AssemblyName>YC.RNGLRParser.Simple.Test</AssemblyName>
     <Name>RNGLRParser.SimpleTest</Name>
     <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
-    <RestorePackages>true</RestorePackages>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
   </PropertyGroup>
   <Import Project="../YC.targets" />
@@ -59,7 +58,7 @@
     <None Include="Order.yrd" />
     <None Include="LongCycle.yrd" />
     <None Include="LolCalc.yrd" />
-    <None Include="packages.config" />
+    <None Include="paket.references" />
     <None Include="Omit.yrd" />
     <None Include="app.config" />
   </ItemGroup>
@@ -159,7 +158,6 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
          Other similar extension points exist, see Microsoft.Common.targets.
     <Target Name="BeforeBuild">
@@ -167,4 +165,5 @@
     <Target Name="AfterBuild">
     </Target>
     -->
+  <Import Project="..\.paket\paket.targets" />
 </Project>

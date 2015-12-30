@@ -11,7 +11,6 @@
     <AssemblyName>YardPrinter</AssemblyName>
     <Name>YardPrinter</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <Import Project="../YC.targets" />
@@ -29,12 +28,11 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
     <Compile Include="Generator.fs" />
     <Compile Include="YardPrinter.fs" />
     <None Include="app.config" />
-    <None Include="packages.config" />
+    <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharpx.Core">
@@ -87,4 +85,5 @@
         <Target Name="AfterBuild">
         </Target>
         -->
+  <Import Project="..\.paket\paket.targets" />
 </Project>

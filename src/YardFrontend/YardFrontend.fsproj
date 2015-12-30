@@ -12,7 +12,6 @@
     <Name>YardFrontend</Name>
     <UsePartialTypes>false</UsePartialTypes>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -88,7 +87,7 @@
     <Compile Include="Lexer.fs" />
     <Compile Include="Main.fs" />
     <Compile Include="YardFrontend.fs" />
-    <None Include="packages.config" />
+    <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
@@ -137,7 +136,6 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!--PropertyGroup>
     <PreBuildEvent>fslex - -unicode - -light-off -o Lexer.fs $(SolutionDir)YardFrontend\lexer.fsl</PreBuildEvent>
   </PropertyGroup-->
@@ -148,4 +146,5 @@
         <Target Name="AfterBuild">
         </Target>
         -->
+  <Import Project="..\.paket\paket.targets" />
 </Project>

@@ -3,9 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2013 for Windows Desktop
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F35021D6-86E2-4CC9-BEB4-396587334E92}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{D1642BF1-1615-4588-9A46-53D32B2CD61F}"
 	ProjectSection(SolutionItems) = preProject
-		.nuget\packages.config = .nuget\packages.config
+		paket.dependencies = paket.dependencies
+		..\paket.dependencies = ..\paket.dependencies
 	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharp.PowerPack.Build.Tasks", "FSharp.PowerPack.Build.Tasks\FSharp.PowerPack.Build.Tasks.fsproj", "{A9566921-4193-4EC8-83FB-F5A0DC257678}"

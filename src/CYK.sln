@@ -1,6 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2012 for Web
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{CCFC6BF1-F5B7-4533-888D-AA8600E30260}"
+	ProjectSection(SolutionItems) = preProject
+		paket.dependencies = paket.dependencies
+		..\paket.dependencies = ..\paket.dependencies
+	EndProjectSection
+EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CYKOnGPU", "CYKOnGPU\CYKOnGPU.fsproj", "{93FA1948-F76A-4ED1-82B7-542A448C78DC}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CYK", "CYK\CYK.fsproj", "{5B565622-649A-4A65-9761-4980DD3AC648}"

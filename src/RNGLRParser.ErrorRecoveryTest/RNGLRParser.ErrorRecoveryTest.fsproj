@@ -11,7 +11,6 @@
     <AssemblyName>YC.RNGLRParserErrorRecovery.Test</AssemblyName>
     <Name>RNGLRParser.ErrorRecoveryTest</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <PropertyGroup>
@@ -47,7 +46,7 @@
     <None Include="ErrorToEps.yrd" />
     <None Include="ManyReductions.yrd" />
     <None Include="PrimitiveErrorTranslate.yrd" />
-    <None Include="packages.config" />
+    <None Include="paket.references" />
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
@@ -127,7 +126,6 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.
     <Target Name="BeforeBuild">
@@ -135,4 +133,5 @@
     <Target Name="AfterBuild">
     </Target>
     -->
+  <Import Project="..\.paket\paket.targets" />
 </Project>

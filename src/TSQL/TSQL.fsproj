@@ -11,7 +11,6 @@
     <AssemblyName>YC.TSQL</AssemblyName>
     <Name>TSQL</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <PropertyGroup>
@@ -40,7 +39,6 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>$(SolutionDir)..\Bin\Debug\Addins\</OutputPath>
   </PropertyGroup>
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\Plugin.NoReferences.Targets')" />
   <PropertyGroup>
     <PostBuildEvent>
@@ -104,7 +102,7 @@
     <Compile Include="MSParserAbstract.fs" />
     <Compile Include="LexerAbstract_Abstract.fs" />
     <Compile Include="Driver.fs" />
-    <None Include="packages.config" />
+    <None Include="paket.references" />
     <EmbeddedResource Include="Actions.xml" />
     <Compile Include="AboutAction.fs" />
     <None Include="app.config" />
@@ -266,4 +264,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Import Project="..\.paket\paket.targets" />
 </Project>

@@ -8,9 +8,8 @@ Build status:
 <a href="http://teamcity.codebetter.com/viewType.html?buildTypeId=YaccConstructor_Master&guest=1">
 <img src="http://teamcity.codebetter.com/app/rest/builds/buildType:(id:YaccConstructor_Master)/statusIcon"/>
 </a>
-* Dev 
-<a href="http://teamcity.codebetter.com/viewType.html?buildTypeId=YaccConstructor_YcCoreGeneralBuild&guest=1">
-<img src="http://teamcity.codebetter.com/app/rest/builds/buildType:(id:YaccConstructor_YcCoreGeneralBuild)/statusIcon"/>
+* Dev [![Dev build status](https://ci.appveyor.com/api/projects/status/s8myouu45sunv2xh/branch/dev?svg=true)](https://ci.appveyor.com/project/gsvgit/yaccconstructor/branch/dev)
+
 </a>
 
 Develop

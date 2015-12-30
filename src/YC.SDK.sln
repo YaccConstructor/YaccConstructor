@@ -243,6 +243,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "QuickGraph.FST.Tests", "..\
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "QuickGraph.FST", "..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj", "{4B220E23-A7E0-4222-83F5-C785F7C66B33}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AbstractLexer.Interpreter.Performance", "AbstractLexer.Interpreter.Performance\AbstractLexer.Interpreter.Performance.fsproj", "{3B6968A4-E4D1-430C-B7ED-22621FFE8291}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1442,6 +1444,21 @@ Global
 		{4B220E23-A7E0-4222-83F5-C785F7C66B33}.ReleaseContractsReferences|Any CPU.ActiveCfg = Release|Any CPU
 		{4B220E23-A7E0-4222-83F5-C785F7C66B33}.ReleaseContractsReferences|Any CPU.Build.0 = Release|Any CPU
 		{4B220E23-A7E0-4222-83F5-C785F7C66B33}.ReleaseContractsReferences|x86.ActiveCfg = Release|Any CPU
+		{3B6968A4-E4D1-430C-B7ED-22621FFE8291}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B6968A4-E4D1-430C-B7ED-22621FFE8291}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B6968A4-E4D1-430C-B7ED-22621FFE8291}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3B6968A4-E4D1-430C-B7ED-22621FFE8291}.DebugContracts|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B6968A4-E4D1-430C-B7ED-22621FFE8291}.DebugContracts|Any CPU.Build.0 = Debug|Any CPU
+		{3B6968A4-E4D1-430C-B7ED-22621FFE8291}.DebugContracts|x86.ActiveCfg = Debug|Any CPU
+		{3B6968A4-E4D1-430C-B7ED-22621FFE8291}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B6968A4-E4D1-430C-B7ED-22621FFE8291}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B6968A4-E4D1-430C-B7ED-22621FFE8291}.Release|x86.ActiveCfg = Release|Any CPU
+		{3B6968A4-E4D1-430C-B7ED-22621FFE8291}.Release20|Any CPU.ActiveCfg = Release|Any CPU
+		{3B6968A4-E4D1-430C-B7ED-22621FFE8291}.Release20|Any CPU.Build.0 = Release|Any CPU
+		{3B6968A4-E4D1-430C-B7ED-22621FFE8291}.Release20|x86.ActiveCfg = Release|Any CPU
+		{3B6968A4-E4D1-430C-B7ED-22621FFE8291}.ReleaseContractsReferences|Any CPU.ActiveCfg = Release|Any CPU
+		{3B6968A4-E4D1-430C-B7ED-22621FFE8291}.ReleaseContractsReferences|Any CPU.Build.0 = Release|Any CPU
+		{3B6968A4-E4D1-430C-B7ED-22621FFE8291}.ReleaseContractsReferences|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1545,6 +1562,7 @@ Global
 		{3BF3542B-4034-429F-9105-197A60625CA3} = {22937B93-4129-4F68-AB14-F7AFE020BA8F}
 		{6B141FDE-F5DF-4DFD-B21F-C076BC87CCAF} = {22937B93-4129-4F68-AB14-F7AFE020BA8F}
 		{4B220E23-A7E0-4222-83F5-C785F7C66B33} = {2E664E5C-14E3-4AA2-A336-7209544C78F0}
+		{3B6968A4-E4D1-430C-B7ED-22621FFE8291} = {5B143652-115D-4240-BCB3-C9DFE79ECE8B}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = QuickGraph1.vsmdi

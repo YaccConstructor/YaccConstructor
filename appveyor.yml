@@ -3,7 +3,7 @@ init:
 install:
   - git submodule update --init --recursive
 before_build:
-  - cmd: C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6 Tools\gacutil.exe /i "lib\FS\FSharp.Core.dll"
+  - cmd: install.cmd
   - cmd: msiexec.exe /i "lib\Pex\pex.academic.x86.msi" /quiet /norestart
 build_script:
   - cmd: build.cmd

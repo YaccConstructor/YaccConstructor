@@ -4,6 +4,7 @@ install:
   - git submodule update --init --recursive
 before_build:
   - cmd: msiexec.exe /i "lib\Pex\pex.academic.x86.msi" /quiet /norestart
+  - cmd: gacutil.exe /i "lib\FS\FSharp.Core.dll"
 build_script:
   - cmd: build.cmd
 test: off

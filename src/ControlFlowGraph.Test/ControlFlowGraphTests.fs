@@ -580,6 +580,58 @@ type ``Control Flow Graph building: Cycles``() =
             "`Cycle inside cycle ((AB)+C)+ cfg"
         runTest qGraph expectedBlocks expectedNodes checkEntryNode' checkExitNode' printNames
 
+[<TestFixture>]
+type ``Control Flow Graph building: Cycles inside expressions``() = 
+    let buildAbstractAst = RNGLR.ParseExtendedCalc.buildAstAbstract
+    let tokenToNumber = RNGLR.ParseExtendedCalc.tokenToNumber
+    let leftSides = RNGLR.ParseExtendedCalc.leftSide
+    let indToString = RNGLR.ParseExtendedCalc.numToString
+    let tokenData = RNGLR.ParseExtendedCalc.tokenData
+
+    let semicolon = RNGLR.ParseExtendedCalc.SEMICOLON 0
+    let semicolonNumber = tokenToNumber semicolon
+    let nodeToType = dict["assign", Assignment;]
+
+    let keywordToInt = dict [Keyword.SEMICOLON, semicolonNumber;]
+
+    let tokToRealString tok = tok |> tokenToNumber |> indToString
+    let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
+    let langSource = new LanguageSource(nodeToType, keywordToInt)
+
+    let runTest qGraph printNames = 
+        match buildAbstractAst qGraph with
+        | Yard.Generators.ARNGLR.Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Yard.Generators.ARNGLR.Parser.Success tree ->
+            if needPrint
+            then
+                let astName = fst printNames
+                RNGLR.ParseExtendedCalc.defaultAstToDot tree <| sprintf "%s%s" astName extension
+
+            let cfg = ControlFlow(tree, parserSource, langSource, tokToRealString)
+            
+            if needPrint
+            then
+                let cfgName = snd printNames
+                cfg.PrintToDot <| sprintf "%s%s" cfgName extension
+                
+    [<Test>]
+    member this.``X = Y [+1]*``() = 
+        let qGraph = new ParserInputGraph<_>(0, 6)
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (RNGLR.ParseExtendedCalc.X 0)
+                createEdge 1 2 (RNGLR.ParseExtendedCalc.ASSIGN 1)
+                createEdge 2 3 (RNGLR.ParseExtendedCalc.Y 2)
+                createEdge 3 4 (RNGLR.ParseExtendedCalc.PLUS 3)
+                createEdge 4 3 (RNGLR.ParseExtendedCalc.ONE 4)
+                createEdge 3 5 (RNGLR.ParseExtendedCalc.SEMICOLON 5)
+                createEdge 5 6 (RNGLR.ParseExtendedCalc.RNGLR_EOF 6)
+            ] |> ignore
+
+        let printNames = "`X = Y [+1] ast", "`X = Y [+1] cfg"
+        
+        runTest qGraph printNames
+
 
 [<TestFixture>]
 type ``Control Flow Graph building: If statements`` () =

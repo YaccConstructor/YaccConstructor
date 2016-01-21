@@ -6,6 +6,8 @@ open System.Collections.Generic
 open ControlFlowGraph.Common
 open ControlFlowGraph.CfgElements
 open ControlFlowGraph.InnerGraph
+open ControlFlowGraph.CfgTokensGraph
+open ControlFlowGraph.Printers
 
 /// <summary>
 /// Contains entry and exit blocks of some part CFG
@@ -93,38 +95,22 @@ let private mergeNodes (nodes : (InterNode<_> * InterNode<_> list) list) =
 
     commonEntry, commonExit
 
-let private processAssignmentGraph (graph : CfgBlocksGraph<_>) = 
-    
-    let processEdge (edge : BlockEdge<_>) = 
-        match edge.Tag with
-        | Simple toks -> 
-            let tokens = toks |> List.toArray 
-            AssignmentBlock.Create tokens
-        | x -> failwithf "Unexpected edge type in Assignment: %s" <| x.GetType().ToString()
+let private processAssignmentGraph (graph : CfgTokensGraph<_>) = 
 
-    let start = graph.FirstVertex
     let assigns = 
         let getEntryExit (block : Block<_>) = 
             //all assign blocks have only one child at this point
             new EntryExit<_>(block.Parent, block.Children.Head)
 
-        graph.OutEdges(start)
-        |> Seq.map (processEdge >> getEntryExit)
-        |> List.ofSeq
-
-    let one = assigns.Head
-
+        AssignmentBlock.Create graph
+        |> getEntryExit
     assigns
-    |> List.tail
-    |> List.map (fun two -> EntryExit<_>.MergeTwoNodes one two)
-    |> ignore
-    one
 
 let private processConditionGraph (graph : CfgBlocksGraph<_>) = 
     
     let processEdge (edge : BlockEdge<_>) = 
         match edge.Tag with
-        | Simple toks -> ConditionBlock.Create <| List.toArray toks
+        | Simple (_, toksGraph) -> ConditionBlock.Create toksGraph
         | x -> failwithf "Unexpected edge type in Condition: %A" x
 
     let start = graph.FirstVertex
@@ -225,12 +211,24 @@ and processSeq (graph : CfgBlocksGraph<_>) =
             let oldValue = getOldValue vertex
 
             match edge.Tag with
+            | Simple (block, tokensGraph) -> 
+                let nodes = 
+                    match block with
+                    | Assignment -> processAssignmentGraph tokensGraph
+                    | x -> failwithf "Now this statement type isn't supported: %A"x
+
+                let newData = 
+                    match oldValue with
+                    | Some oldNodes -> EntryExit<_>.ConcatNodes oldNodes nodes
+                    | None -> nodes
+
+                addToDictionary edge.Target newData
+                
             | Complicated (block, innerGraph) ->
                 let nodes = 
                     match block with
                     | IfStatement -> processIfGraph innerGraph
-                    | Assignment -> processAssignmentGraph innerGraph
-                    | x -> failwithf "Now this statement type isn't supported: %s" <| x.GetType().ToString()
+                    | x -> failwithf "Now this statement type isn't supported: %A"x
 
                 let newData = 
                     match oldValue with
@@ -243,8 +241,6 @@ and processSeq (graph : CfgBlocksGraph<_>) =
                 match oldValue with
                 | Some oldNodes -> addToDictionary edge.Target oldNodes
                 | None -> failwith "Unexpected state during cfg building"
-
-            | x -> failwithf "Unexpected edge tag: %s" <| x.GetType().ToString()
 
         graph.OutEdges(vertex)
         |> Seq.iter processEdge

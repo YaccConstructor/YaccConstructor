@@ -1,17 +1,19 @@
 ﻿module ControlFlowGraph.CfgElements
 
 open ControlFlowGraph.Common
+open ControlFlowGraph.CfgTokensGraph
+open ControlFlowGraph.Printers
 
 /// <summary>
 /// Control flow graph blocks.
 /// </summary>
-type Block<'TokenType>(blockType, toks) = 
+type Block<'TokenType>(blockType, graph : CfgTokensGraph<'TokenType>) = 
     let mutable blockType = blockType
-    let mutable tokens = toks
+    let mutable tokensGraph = graph
     let mutable parent = new InterNode<'TokenType>()
     let mutable children = []
 
-    member this.Tokens = tokens
+    member this.TokensGraph = tokensGraph
     member this.Parent 
         with get() = parent
         and set(value) = parent <- value
@@ -39,13 +41,17 @@ type Block<'TokenType>(blockType, toks) =
         let typeStr = BlockType.BlockTypeToString blockType
 
         let strValues = 
-            this.Tokens
-            |> Array.map tokToString
-            |> String.concat " "
+            this.TokensGraph.GetAvailableTokens()
+            |> Seq.fold (fun acc elem -> sprintf "%s %A" acc elem) ""
+        
+        sprintf "%s\n available tokens: %s\n" typeStr strValues
 
-        sprintf "%s\n tokens: %s\n" typeStr strValues
+    member this.GetDotCluster tokToString (shift : int -> int) prefix = 
+        let graph = this.TokensGraph
+        getDotCluster graph tokToString shift prefix
 
-    static member AttachParentAndChild (newBlock : Block<'TokenType>)= 
+
+    static member AttachParentAndChild (newBlock : Block<'TokenType>) = 
         let parent = new InterNode<_>()
         parent.AddChild newBlock
         newBlock.ReplaceParent parent
@@ -146,23 +152,23 @@ and InterNode<'TokenType>(children : list<_>, parents : list<_>) =
 type AssignmentBlock<'TokenType>(tokens) =
     inherit Block<'TokenType>(Assignment, tokens)
 
-    static member Create tokens = 
-        let assignBlock = new AssignmentBlock<'TokenType>(tokens) :> Block<'TokenType>
+    static member Create (graph : CfgTokensGraph<_>) = 
+        let assignBlock = new AssignmentBlock<'TokenType>(graph) :> Block<'TokenType>
 
         let res = Block.AttachParentAndChild assignBlock
-        res :?> AssignmentBlock<'TokenType>
+        res/// :?> AssignmentBlock<'TokenType>
 
 type ConditionBlock<'TokenType>(tokens) =
     inherit Block<'TokenType>(Condition, tokens)
 
-    static member Create tokens = 
-        let condBlock = new ConditionBlock<'TokenType>(tokens) :> Block<'TokenType>
+    static member Create (graph : CfgTokensGraph<_>) = 
+        let condBlock = new ConditionBlock<'TokenType>(graph) :> Block<'TokenType>
 
         let res = Block.AttachParentAndChild condBlock
         
-        //conditional block has two exit nodes (for 'true' and 'false' cases)
+        //conditional block has two exit nodes (for 'then' and 'else' branches)
         let sndChild = new InterNode<'TokenType>()
         res.AddChild sndChild
         sndChild.AddParent res
 
-        res :?> ConditionBlock<'TokenType>
+        res ///:?> ConditionBlock<'TokenType>

@@ -8,16 +8,18 @@ open System.Collections.Generic
 open QuickGraph
 
 open ControlFlowGraph.Common
+open ControlFlowGraph.CfgTokensGraph
+open System.Text
 
 type EdgeType<'TokenType> = 
-| Simple of list<'TokenType>
+| Simple of BlockType * CfgTokensGraph<'TokenType> //list<'TokenType>
 | Complicated of BlockType * CfgBlocksGraph<'TokenType>
 | EmptyEdge
     
     static member ToString edge = 
         match edge with
         | EmptyEdge -> "Empty edge"
-        | Simple tokens -> tokens.ToString()// "Simple edge"
+        | Simple (blockType, graph) -> BlockType.BlockTypeToString blockType// "Simple edge"
         | Complicated (blockType, _) -> BlockType.BlockTypeToString blockType
 
 and BlockEdge<'TokenType>(source, target, tag) = 
@@ -78,56 +80,6 @@ and CfgBlocksGraph<'TokenType>() =
 
         !needRemove
         |> List.iter (this.RemoveEdge >> ignore)
-
-    /// <summary>
-    /// Prints graph to .dot file. 
-    /// Each complicated edge (except ASSIGNMENT) contains edgeType only
-    /// </summary>
-    /// <param name="name">Name of .dot file</param>
-    /// <param name="tokenToStringOpt">Token to string mapping option</param>
-    member this.RelaxedPrintToDot (name : string) (tokenToStringOpt : _ option)= 
-        use out = new StreamWriter (name : string)
-        out.WriteLine("digraph AST {")
-        out.WriteLine "rankdir=LR"
-        this.Vertices
-        |> Seq.iter (sprintf "%d ;" >> string >> out.Write)
-        out.WriteLine()
-
-        let getSuffix (tag : EdgeType<_>) = 
-            match tokenToStringOpt with
-            | None -> ""
-            | Some tokenToString ->
-                match tag with
-                | Complicated (_, graph) -> 
-                    if graph.LastVertex = 1 
-                    then 
-                        let edges = graph.Edges |> Seq.toList
-                        edges 
-                        |> List.map 
-                            (
-                                fun edge -> 
-                                    match edge.Tag with
-                                    | Simple tokens -> 
-                                        tokens 
-                                        |> List.map tokenToString
-                                        |> String.concat " "
-                                    | _ -> ""
-                            )
-                        |> String.concat " or \n"
-                    else "complicated"
-                | _ -> ""
-
-        this.Edges
-        |> Seq.iter
-            (
-                fun edge ->
-                    let prefix = EdgeType<_>.ToString edge.Tag
-                    let suffix = getSuffix edge.Tag
-                    let tagName = sprintf "%s [%s]" prefix suffix
-                    out.WriteLine (sprintf "%d -> %d [label=\" %s \"]" edge.Source edge.Target tagName)
-            )
-        out.WriteLine("}")
-        out.Close()
 
 /// <summary>
 /// Builds CfgBlocksGraph.

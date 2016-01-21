@@ -11,12 +11,6 @@ open TokensExtractor
 /// <param name="intToToken">Mapping from position in input to token</param>
 /// <param name="family">AST node that would be processed</param>
 /// </summary>
-let processAssignment intToToken (family : Family) = 
-    let toksGraph = extractNodesFromFamily family
-    let assignmentGraph = new GraphConstructor<_>()
-
-    toksGraph.CollectAllTokens()
-    |> List.map (List.map intToToken)
-    |> List.iter (Simple >> assignmentGraph.AddEdge)
-    
-    Complicated(Assignment, assignmentGraph.Graph)
+let processAssignment intToToken tokenToString (family : Family) = 
+    let toksGraph = extractNodesFromFamily intToToken tokenToString family
+    Simple(Assignment, toksGraph)

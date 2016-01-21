@@ -32,10 +32,11 @@ let private createIfGraph condGraph thenGraph (elseGraph : _ option) =
 /// </summary>
 /// <param name="intToToken">Position in input to token mapping</param>
 /// <param name="tokenToNumber">Token to int mapping</param>
+/// <param name="tokenToString">Token to string mapping</param>
 /// <param name="tempDict">Key is non-terminal number, value is block type of cfg</param>
 /// <param name="family">AST node that would be processed</param>
 /// <param name="processSeq">This function will be  then и else branches</param>
-let processIf intToToken tokenToNumber (tempDict : Dictionary<int, _>) (family : Family) processSeq = 
+let processIf (intToToken : int -> 'TokenType) tokenToNumber (tokenToString : 'TokenType -> string) (tempDict : Dictionary<int, _>) (family : Family) processSeq = 
     let blockType = ref IfStatement
                         
     let condGraph = new GraphConstructor<_>()
@@ -53,17 +54,9 @@ let processIf intToToken tokenToNumber (tempDict : Dictionary<int, _>) (family :
         | :? AST as ast -> 
             match !blockType with
             | IfStatement -> 
-                let condToksGraphs = extractNodesFromAST ast
-
+                let condToksGraphs = extractNodesFromAST ast intToToken tokenToString
                 condToksGraphs
-                |> Array.map 
-                    (
-                        fun graph -> 
-                            graph.CollectAllTokens()
-                            |> List.concat
-                            |> List.map intToToken
-                    )
-                |> Array.iter(Simple >> condGraph.AddEdge)
+                |> Array.iter(fun graph -> condGraph.AddEdge <| Simple(Condition, graph))
                 blockType := ThenStatement
                                         
             | ThenStatement -> 
@@ -75,11 +68,11 @@ let processIf intToToken tokenToNumber (tempDict : Dictionary<int, _>) (family :
                 processSeq ast elseGraph
                 elseGraphOpt := Some <| elseGraph.Graph
 
-            | x -> failwithf "Unexpected type in 'if' construction: %s" <| x.ToString()
+            | x -> failwithf "Unexpected type in 'if' construction: %A" x
                                     
-        | x -> failwithf "Unexpected AST node type: %s" <| x.ToString()
+        | x -> failwithf "Unexpected AST node type: %A" x
 
     family.nodes.doForAll processNode
     
     let ifGraph = createIfGraph condGraph.Graph thenGraph.Graph !elseGraphOpt
-    Complicated (IfStatement, ifGraph)
+    Complicated(IfStatement, ifGraph)

@@ -13,6 +13,7 @@ open ControlFlowGraph.GraphInterpreter
 
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
+open Printers
 
 type private StartEndVertices = 
     val mutable Start : int
@@ -34,7 +35,8 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
     let isVariable = 
         parserSource.TokenToNumber >> langSource.IsVariable
 
-    let processIf' = processIf intToToken parserSource.TokenToNumber <| langSource.GetTempIfDict()
+    let processIf' = processIf intToToken parserSource.TokenToNumber tokToSourceString <| langSource.GetTempIfDict()
+    let processAssignment' = processAssignment intToToken tokToSourceString 
 
     let entry, exit = 
         let familyToVertices = new Dictionary<_, StartEndVertices>()
@@ -63,7 +65,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                         let edge = 
                             match langSource.NodeToType.[familyName] with
                             | IfStatement -> processIf' family handleNode
-                            | Assignment -> processAssignment intToToken family
+                            | Assignment -> processAssignment' family
                             | x -> failwithf "This construction isn't supported now: %A" x
                     
                         currentGraph.AddEdge edge
@@ -99,7 +101,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                 
                     currentGraph.UpdateVertex()
                     
-            | x -> failwithf "Unexpected node type: %s" <| x.GetType().ToString()
+            | x -> failwithf "Unexpected node type: %A" x
 
         let graphInfo = new GraphConstructor<_>()
         handleNode tree.Root graphInfo
@@ -158,20 +160,24 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                 match block.BlockType with 
                 | Assignment -> 
                     let leftPart = 
-                         block.Tokens 
-                         |> Seq.takeWhile isNotAssign
-                         |> List.ofSeq
+                        block.TokensGraph.GetAvailableTokens()
+                        |> Seq.takeWhile isNotAssign
+                        |> List.ofSeq
+//                         block.Tokens 
+//                         |> Seq.takeWhile isNotAssign
+//                         |> List.ofSeq
 
                     if leftPart.Length = 1 
                     then
                         let varName = leftPart.Head |> tokToSourceString
                         newVar <- Some varName
                     
-                    block.Tokens
+                    block.TokensGraph.GetAvailableTokens()
                     |> Seq.skipWhile isNotAssign
                     |> List.ofSeq
                     |> List.tail
-                | _ -> block.Tokens |> List.ofArray
+//                | _ -> block.Tokens |> List.ofArray
+                | _ -> block.TokensGraph.GetAvailableTokens() |> List.ofSeq
 
             let isUndefinedVariable token = 
                 let varName = token |> tokToSourceString
@@ -225,13 +231,13 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
 
     member this.FindUndefVariable() = findUndefVariable()
 
-    member this.PrintToDot name = 
+    member this.PrintToDot (name : string) = 
         let count = ref -1
         
         let blockToNumber = new Dictionary<_, _>()
         let interNodeToNumber = new Dictionary<_, _>()
         
-        use out = new StreamWriter (name : string)
+        use out = new StreamWriter(name)
         out.WriteLine("digraph AST {")
 
         let rec printBlock parentNumber block = 

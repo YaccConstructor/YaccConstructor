@@ -5,8 +5,9 @@ open System.Collections.Generic
 open ControlFlowGraph.CfgElements
 
 let getTokens tokenToNumber (block : Block<_>) = 
-    block.Tokens 
-    |> Array.map tokenToNumber 
+    block.TokensGraph.GetAvailableTokens() 
+    |> Seq.map tokenToNumber 
+    |> Array.ofSeq
 
 let commonCheck (tokenToNumber : _ -> int) (blockToChildren : IDictionary<_, _>) getBlocks (blocks : Block<_> array) = 
     

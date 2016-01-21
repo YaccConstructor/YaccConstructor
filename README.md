@@ -9,6 +9,9 @@ Build status:
 <img src="http://teamcity.codebetter.com/app/rest/builds/buildType:(id:YaccConstructor_Master)/statusIcon"/>
 </a>
 * Dev [![Dev build status](https://ci.appveyor.com/api/projects/status/s8myouu45sunv2xh/branch/dev?svg=true)](https://ci.appveyor.com/project/gsvgit/yaccconstructor/branch/dev)
+* 371_15 [![371_15 build status](https://ci.appveyor.com/api/projects/status/s8myouu45sunv2xh/branch/371_15?svg=true)](https://ci.appveyor.com/project/gsvgit/yaccconstructor/branch/371_15)
+* GLL [![GLL build status](https://ci.appveyor.com/api/projects/status/s8myouu45sunv2xh/branch/GLLBranch?svg=true)](https://ci.appveyor.com/project/gsvgit/yaccconstructor/branch/GLLBranch)
+
 
 </a>
 

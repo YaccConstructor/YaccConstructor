@@ -222,6 +222,176 @@ type ``Simple cases``() =
         runTest qGraph expectedBlocks expectedNodes  printNames myChecks
 
 [<TestFixture>]
+type ``If statements`` () =
+    let buildAbstractAst = Test.IfParser.buildAstAbstract
+    let tokenToNumber = Test.IfParser.tokenToNumber
+    let leftSides = Test.IfParser.leftSide
+    let indToString = Test.IfParser.numToString
+    let tokenData = Test.IfParser.tokenData
+
+    let semicolonNumber = tokenToNumber <| Test.IfParser.SEMICOLON 0
+    let ifNumber = tokenToNumber <| Test.IfParser.IF 0
+    let thenNumber = tokenToNumber <| Test.IfParser.THEN 0
+    let elseNumber = tokenToNumber <| Test.IfParser.ELSE 0
+    let endIfNumber = tokenToNumber <| Test.IfParser.ENDIF 0
+    
+    let nodeToType = dict[
+                                "simple_statement", Assignment;
+                                "if_statement", IfStatement;
+                          ]
+    
+
+    let tokToRealString tok = tok |> tokenToNumber |> indToString
+
+    let keywordToInt = dict [
+                                    Keyword.SEMICOLON, semicolonNumber;
+                                    Keyword.IF, ifNumber;
+                                    Keyword.THEN, thenNumber;
+                                    Keyword.ELSE, elseNumber;
+                                    Keyword.ENDIF, endIfNumber; 
+                            ]
+
+    let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
+    let langSource = new LanguageSource(nodeToType, keywordToInt)
+
+    let runTest graph expectedBlocksCount expectedNodesCount printNames = 
+        let parseResult = (new Parser<_>()).Parse buildAbstractAst graph
+        
+        match parseResult with 
+        | Yard.Generators.ARNGLR.Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Yard.Generators.ARNGLR.Parser.Success (mAst) ->
+            
+            if needPrint
+            then
+                let astName = fst printNames
+                Test.IfParser.defaultAstToDot mAst astName
+            
+            let cfg = ControlFlow (mAst, parserSource, langSource, tokToRealString)
+            
+            if needPrint
+            then
+                let cfgName = snd printNames
+                cfg.PrintToDot cfgName
+            
+            Assert.IsTrue(cfg.Entry.Parents.IsEmpty, "Entry node has parent node!")
+            Assert.IsTrue(cfg.Exit.Children.IsEmpty, "Exit node has child node!")
+
+            Assert.AreEqual(expectedBlocksCount, cfg.Blocks.Length, "Blocks count isn't equal expected one")
+            Assert.AreEqual(expectedNodesCount, cfg.Nodes.Length, "Intermediate nodes count isn't equal expected one")
+
+
+    [<Test>]
+    member test.``Simple If test``() =
+        let qGraph = new ParserInputGraph<_>(0, 12)
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (Test.IfParser.IF 0)
+                createEdge 1 2 (Test.IfParser.A 1)
+                createEdge 2 3 (Test.IfParser.THEN 2)
+                createEdge 3 4 (Test.IfParser.B 3)
+                createEdge 4 5 (Test.IfParser.SEMICOLON 4)
+                createEdge 5 6 (Test.IfParser.ELSE 5)
+                createEdge 6 7 (Test.IfParser.C 6)
+                createEdge 7 8 (Test.IfParser.SEMICOLON 7)
+                createEdge 8 9 (Test.IfParser.ENDIF 8)
+                createEdge 9 10 (Test.IfParser.D 9)
+                createEdge 10 11 (Test.IfParser.SEMICOLON 10)
+                createEdge 11 12 (Test.IfParser.RNGLR_EOF 11)
+            ] |> ignore
+
+        let printNames = "`simple if ast.dot", "`simple if cfg.dot"
+        let expectedBlocksCount = 4
+        let expectedNodesCount = 5
+        runTest qGraph expectedBlocksCount expectedNodesCount printNames
+
+    [<Test>]
+    member test.``Big If test``() =
+        let qGraph = new ParserInputGraph<_>(0, 16)
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (Test.IfParser.IF 0)
+                createEdge 1 2 (Test.IfParser.A 1)
+                createEdge 2 3 (Test.IfParser.THEN 2)
+                createEdge 3 4 (Test.IfParser.B 3)
+                createEdge 4 5 (Test.IfParser.SEMICOLON 4)
+                createEdge 5 6 (Test.IfParser.C 5)
+                createEdge 6 7 (Test.IfParser.SEMICOLON 6)
+                createEdge 7 8 (Test.IfParser.ELSE 7)
+                createEdge 8 9 (Test.IfParser.D 8)
+                createEdge 9 10 (Test.IfParser.SEMICOLON 9)
+                createEdge 10 11 (Test.IfParser.E 10)
+                createEdge 11 12 (Test.IfParser.SEMICOLON 11)
+                createEdge 12 13 (Test.IfParser.ENDIF 12)
+                createEdge 13 14 (Test.IfParser.F 13)
+                createEdge 14 15 (Test.IfParser.SEMICOLON 14)
+                createEdge 15 16 (Test.IfParser.RNGLR_EOF 15)
+            ] |> ignore
+
+        let printNames = "`big if ast.dot", "`big if cfg.dot"
+        let expectedBlocksCount = 6
+        let expectedNodesCount = 7
+        runTest qGraph expectedBlocksCount expectedNodesCount printNames
+
+    [<Test>]
+    member test.``If without else test``() =
+        let qGraph = new ParserInputGraph<_>(0, 11)
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (Test.IfParser.IF 0)
+                createEdge 1 2 (Test.IfParser.A 1)
+                createEdge 2 3 (Test.IfParser.THEN 2)
+                createEdge 3 4 (Test.IfParser.B 3)
+                createEdge 4 5 (Test.IfParser.SEMICOLON 4)
+                createEdge 5 6 (Test.IfParser.C 5)
+                createEdge 6 7 (Test.IfParser.SEMICOLON 6)
+                createEdge 7 8 (Test.IfParser.ENDIF 7)
+                createEdge 8 9 (Test.IfParser.D 8)
+                createEdge 9 10 (Test.IfParser.SEMICOLON 9)
+                createEdge 10 11 (Test.IfParser.RNGLR_EOF 10)
+            ] |> ignore
+
+        let printNames = "`if-without-else ast.dot", "`if-without-else cfg.dot"
+        let expectedBlocksCount = 4
+        let expectedNodesCount = 5
+        runTest qGraph expectedBlocksCount expectedNodesCount printNames
+            
+    [<Test>]
+    member test.``Inner if``() =
+        let qGraph = new ParserInputGraph<_>(0, 24)
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1  (Test.IfParser.IF 0)
+                createEdge 1 2  (Test.IfParser.A 1)
+                createEdge 2 3  (Test.IfParser.THEN 2)
+                createEdge 3 4  (Test.IfParser.IF 3)
+                createEdge 4 5  (Test.IfParser.B 4)
+                createEdge 5 6  (Test.IfParser.THEN 5)
+                createEdge 6 7  (Test.IfParser.C 6)
+                createEdge 7 8  (Test.IfParser.SEMICOLON 7)
+                createEdge 8 9  (Test.IfParser.ELSE 8)
+                createEdge 9 10 (Test.IfParser.D 9)
+                createEdge 10 11(Test.IfParser.SEMICOLON 10)
+                createEdge 11 12(Test.IfParser.ENDIF 11)
+                createEdge 12 13(Test.IfParser.ELSE 12)
+                createEdge 13 14(Test.IfParser.IF 13)
+                createEdge 14 15(Test.IfParser.E 14)
+                createEdge 15 16(Test.IfParser.THEN 15)
+                createEdge 16 17(Test.IfParser.F 16)
+                createEdge 17 18(Test.IfParser.SEMICOLON 17)
+                createEdge 18 19(Test.IfParser.ELSE 18)
+                createEdge 19 20(Test.IfParser.G 19)
+                createEdge 20 21(Test.IfParser.SEMICOLON 20)
+                createEdge 21 22(Test.IfParser.ENDIF 21)
+                createEdge 22 23(Test.IfParser.ENDIF 22)
+                createEdge 23 24(Test.IfParser.RNGLR_EOF 23)
+            ] |> ignore
+
+        let printNames = "`inner if ast.dot", "`inner if cfg.dot"
+        let expectedBlocksCount = 7
+        let expectedNodesCount = 8
+        runTest qGraph expectedBlocksCount expectedNodesCount printNames
+
+[<TestFixture>]
 type ``Cycles``() = 
     let buildAbstractAst = Test.SimpleParser.buildAstAbstract
     let tokenToNumber = Test.SimpleParser.tokenToNumber
@@ -755,175 +925,7 @@ type ``Cycles inside expressions``() =
         
         runTest qGraph 8 printNames
 
-[<TestFixture>]
-type ``If statements`` () =
-    let buildAbstractAst = Test.IfParser.buildAstAbstract
-    let tokenToNumber = Test.IfParser.tokenToNumber
-    let leftSides = Test.IfParser.leftSide
-    let indToString = Test.IfParser.numToString
-    let tokenData = Test.IfParser.tokenData
 
-    let semicolonNumber = tokenToNumber <| Test.IfParser.SEMICOLON 0
-    let ifNumber = tokenToNumber <| Test.IfParser.IF 0
-    let thenNumber = tokenToNumber <| Test.IfParser.THEN 0
-    let elseNumber = tokenToNumber <| Test.IfParser.ELSE 0
-    let endIfNumber = tokenToNumber <| Test.IfParser.ENDIF 0
-    
-    let nodeToType = dict[
-                                "simple_statement", Assignment;
-                                "if_statement", IfStatement;
-                          ]
-    
-
-    let tokToRealString tok = tok |> tokenToNumber |> indToString
-
-    let keywordToInt = dict [
-                                    Keyword.SEMICOLON, semicolonNumber;
-                                    Keyword.IF, ifNumber;
-                                    Keyword.THEN, thenNumber;
-                                    Keyword.ELSE, elseNumber;
-                                    Keyword.ENDIF, endIfNumber; 
-                            ]
-
-    let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
-    let langSource = new LanguageSource(nodeToType, keywordToInt)
-
-    let runTest graph expectedBlocksCount expectedNodesCount printNames = 
-        let parseResult = (new Parser<_>()).Parse buildAbstractAst graph
-        
-        match parseResult with 
-        | Yard.Generators.ARNGLR.Parser.Error (num, tok, err) -> printErr (num, tok, err)
-        | Yard.Generators.ARNGLR.Parser.Success (mAst) ->
-            
-            if needPrint
-            then
-                let astName = fst printNames
-                Test.IfParser.defaultAstToDot mAst astName
-            
-            let cfg = ControlFlow (mAst, parserSource, langSource, tokToRealString)
-            
-            if needPrint
-            then
-                let cfgName = snd printNames
-                cfg.PrintToDot cfgName
-            
-            Assert.IsTrue(cfg.Entry.Parents.IsEmpty, "Entry node has parent node!")
-            Assert.IsTrue(cfg.Exit.Children.IsEmpty, "Exit node has child node!")
-
-            Assert.AreEqual(expectedBlocksCount, cfg.Blocks.Length, "Blocks count isn't equal expected one")
-            Assert.AreEqual(expectedNodesCount, cfg.Nodes.Length, "Intermediate nodes count isn't equal expected one")
-
-
-    [<Test>]
-    member test.``Simple If test``() =
-        let qGraph = new ParserInputGraph<_>(0, 12)
-        qGraph.AddVerticesAndEdgeRange
-            [
-                createEdge 0 1 (Test.IfParser.IF 0)
-                createEdge 1 2 (Test.IfParser.A 1)
-                createEdge 2 3 (Test.IfParser.THEN 2)
-                createEdge 3 4 (Test.IfParser.B 3)
-                createEdge 4 5 (Test.IfParser.SEMICOLON 4)
-                createEdge 5 6 (Test.IfParser.ELSE 5)
-                createEdge 6 7 (Test.IfParser.C 6)
-                createEdge 7 8 (Test.IfParser.SEMICOLON 7)
-                createEdge 8 9 (Test.IfParser.ENDIF 8)
-                createEdge 9 10 (Test.IfParser.D 9)
-                createEdge 10 11 (Test.IfParser.SEMICOLON 10)
-                createEdge 11 12 (Test.IfParser.RNGLR_EOF 11)
-            ] |> ignore
-
-        let printNames = "`simple if ast.dot", "`simple if cfg.dot"
-        let expectedBlocksCount = 4
-        let expectedNodesCount = 5
-        runTest qGraph expectedBlocksCount expectedNodesCount printNames
-
-    [<Test>]
-    member test.``Big If test``() =
-        let qGraph = new ParserInputGraph<_>(0, 16)
-        qGraph.AddVerticesAndEdgeRange
-            [
-                createEdge 0 1 (Test.IfParser.IF 0)
-                createEdge 1 2 (Test.IfParser.A 1)
-                createEdge 2 3 (Test.IfParser.THEN 2)
-                createEdge 3 4 (Test.IfParser.B 3)
-                createEdge 4 5 (Test.IfParser.SEMICOLON 4)
-                createEdge 5 6 (Test.IfParser.C 5)
-                createEdge 6 7 (Test.IfParser.SEMICOLON 6)
-                createEdge 7 8 (Test.IfParser.ELSE 7)
-                createEdge 8 9 (Test.IfParser.D 8)
-                createEdge 9 10 (Test.IfParser.SEMICOLON 9)
-                createEdge 10 11 (Test.IfParser.E 10)
-                createEdge 11 12 (Test.IfParser.SEMICOLON 11)
-                createEdge 12 13 (Test.IfParser.ENDIF 12)
-                createEdge 13 14 (Test.IfParser.F 13)
-                createEdge 14 15 (Test.IfParser.SEMICOLON 14)
-                createEdge 15 16 (Test.IfParser.RNGLR_EOF 15)
-            ] |> ignore
-
-        let printNames = "`big if ast.dot", "`big if cfg.dot"
-        let expectedBlocksCount = 6
-        let expectedNodesCount = 7
-        runTest qGraph expectedBlocksCount expectedNodesCount printNames
-
-    [<Test>]
-    member test.``If without else test``() =
-        let qGraph = new ParserInputGraph<_>(0, 11)
-        qGraph.AddVerticesAndEdgeRange
-            [
-                createEdge 0 1 (Test.IfParser.IF 0)
-                createEdge 1 2 (Test.IfParser.A 1)
-                createEdge 2 3 (Test.IfParser.THEN 2)
-                createEdge 3 4 (Test.IfParser.B 3)
-                createEdge 4 5 (Test.IfParser.SEMICOLON 4)
-                createEdge 5 6 (Test.IfParser.C 5)
-                createEdge 6 7 (Test.IfParser.SEMICOLON 6)
-                createEdge 7 8 (Test.IfParser.ENDIF 7)
-                createEdge 8 9 (Test.IfParser.D 8)
-                createEdge 9 10 (Test.IfParser.SEMICOLON 9)
-                createEdge 10 11 (Test.IfParser.RNGLR_EOF 10)
-            ] |> ignore
-
-        let printNames = "`if-without-else ast.dot", "`if-without-else cfg.dot"
-        let expectedBlocksCount = 4
-        let expectedNodesCount = 5
-        runTest qGraph expectedBlocksCount expectedNodesCount printNames
-            
-    [<Test>]
-    member test.``Inner if``() =
-        let qGraph = new ParserInputGraph<_>(0, 24)
-        qGraph.AddVerticesAndEdgeRange
-            [
-                createEdge 0 1  (Test.IfParser.IF 0)
-                createEdge 1 2  (Test.IfParser.A 1)
-                createEdge 2 3  (Test.IfParser.THEN 2)
-                createEdge 3 4  (Test.IfParser.IF 3)
-                createEdge 4 5  (Test.IfParser.B 4)
-                createEdge 5 6  (Test.IfParser.THEN 5)
-                createEdge 6 7  (Test.IfParser.C 6)
-                createEdge 7 8  (Test.IfParser.SEMICOLON 7)
-                createEdge 8 9  (Test.IfParser.ELSE 8)
-                createEdge 9 10 (Test.IfParser.D 9)
-                createEdge 10 11(Test.IfParser.SEMICOLON 10)
-                createEdge 11 12(Test.IfParser.ENDIF 11)
-                createEdge 12 13(Test.IfParser.ELSE 12)
-                createEdge 13 14(Test.IfParser.IF 13)
-                createEdge 14 15(Test.IfParser.E 14)
-                createEdge 15 16(Test.IfParser.THEN 15)
-                createEdge 16 17(Test.IfParser.F 16)
-                createEdge 17 18(Test.IfParser.SEMICOLON 17)
-                createEdge 18 19(Test.IfParser.ELSE 18)
-                createEdge 19 20(Test.IfParser.G 19)
-                createEdge 20 21(Test.IfParser.SEMICOLON 20)
-                createEdge 21 22(Test.IfParser.ENDIF 21)
-                createEdge 22 23(Test.IfParser.ENDIF 22)
-                createEdge 23 24(Test.IfParser.RNGLR_EOF 23)
-            ] |> ignore
-
-        let printNames = "`inner if ast.dot", "`inner if cfg.dot"
-        let expectedBlocksCount = 7
-        let expectedNodesCount = 8
-        runTest qGraph expectedBlocksCount expectedNodesCount printNames
 
 //[<EntryPoint>]
 let f x = 

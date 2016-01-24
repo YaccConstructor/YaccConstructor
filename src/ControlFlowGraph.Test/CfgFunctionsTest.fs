@@ -20,7 +20,7 @@ let inline printErr (num, token : 'a, msg) =
     Assert.Fail(sprintf "Error in position %d on Token %A: %s" num token msg)
 
 [<TestFixture>]
-type ``Find undefined variables`` () =
+type ``Find undefined variables``() =
     
     let buildAbstractAst = Test.ExtendedCalcParser.buildAstAbstract
     let tokenToNumber = Test.ExtendedCalcParser.tokenToNumber
@@ -181,3 +181,30 @@ type ``Find undefined variables`` () =
             "`cfg undefined variables ast ambiguous2.dot", 
             "`cfg undefined variables cfg ambiguous2.dot"
         runTest qGraph expected printNames
+
+    [<Test>]
+    member this.``Cycle inside expression``() = 
+        let qGraph = new ParserInputGraph<_>(0, 6)
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (Test.ExtendedCalcParser.X 0)
+                createEdge 1 2 (Test.ExtendedCalcParser.ASSIGN 1)
+                createEdge 2 3 (Test.ExtendedCalcParser.NUMBER 2)
+                createEdge 3 4 (Test.ExtendedCalcParser.PLUS 3)
+                createEdge 4 3 (Test.ExtendedCalcParser.Z 4)
+                createEdge 3 5 (Test.ExtendedCalcParser.SEMICOLON 5)
+                createEdge 5 6 (Test.ExtendedCalcParser.RNGLR_EOF 6)
+            ] |> ignore
+        
+        let printNames = 
+            //"`cfg cycle inside expression input.dot", 
+            "`cfg cycle inside expression ast.dot", 
+            "`cfg cycle inside expression cfg.dot"
+        let expected = 1
+        runTest qGraph expected printNames
+
+//[<EntryPoint>]
+let f x = 
+    let functions =  ``Find undefined variables``()
+    functions.``Cycle inside expression``()
+    1

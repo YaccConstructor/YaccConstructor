@@ -1,4 +1,13 @@
-﻿[<Start>]
+﻿{
+open YC.FSA.GraphBasedFsa
+open YC.FSA.FsaApproximation
+}
+
+tokens {
+    _ of int (*FSA<char*int>*)
+}
+
+[<Start>]
 start: assign+
 
 assign: id SEMICOLON

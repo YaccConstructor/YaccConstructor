@@ -1,15 +1,29 @@
-﻿[<Start>]
+﻿{
+open YC.FSA.GraphBasedFsa
+open YC.FSA.FsaApproximation
+}
+
+tokens {
+    _ of int(*FSA<char*Position<string>>*)
+}
+
+options {
+    module = "Calc.AbstractParser"
+    infEpsPath = epsilons
+    pos = uint64
+}
+
+
+[<Start>]
 start: assign+
 
 assign: id ASSIGN expr SEMICOLON
 
 expr: expr op expr
-	 | number 
+	 | NUMBER 
 	 | id
          | LBRACE expr RBRACE
 
 op: PLUS | MINUS | MULT | DIV
 
 id: X | Y | Z
-
-number: ONE | TWO | THREE | FOUR | FIVE | SIX | SEVEN | EIGHT | NINE

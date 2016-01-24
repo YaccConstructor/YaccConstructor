@@ -67,7 +67,7 @@ let extractNodesFromFamily intToToken tokenToString (fam : Family) =
             Some <| tokensGraph.CurrentVertex
             
     fam.nodes.doForAll(fun node -> collectTokens node)
-    CfgTokensGraphPrinter.ToDot tokensGraph tokenToString "`afterExtraction.dot"
+    //CfgTokensGraphPrinter.ToDot tokensGraph tokenToString "`afterExtraction.dot"
     tokensGraph
 
 /// <summary>

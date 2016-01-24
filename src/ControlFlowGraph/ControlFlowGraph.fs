@@ -232,7 +232,12 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
     member this.FindUndefVariable() = findUndefVariable()
 
     member this.PrintToDot (name : string) = 
+        let prefix = "_"
         let count = ref -1
+        let clustersCount = ref 0
+
+        let innerVertices = ref 0
+        let shift num = num + !innerVertices
         
         let blockToNumber = new Dictionary<_, _>()
         let interNodeToNumber = new Dictionary<_, _>()
@@ -250,12 +255,25 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                     
                     let blockString = block.BlockToString parserSource.TokenToString
                     out.WriteLine (sprintf "%d [label=\"%s\",shape=box]" !count blockString)
+                    
                     blockToNumber.[block] <- !count
                     !count, true
 
             let nodeNumber, isNew = getBlockNumber block
             
+            let needCluster = false
+            if needCluster 
+            then
+                let dotString, dotIn, dotOut = block.GetDotCluster tokToSourceString shift prefix
+            
+                let clusterString = getClusterDotString <| sprintf "cluster_%d" nodeNumber <| dotString
+                out.WriteLine clusterString
+                out.WriteLine (sprintf ("%d -> %s") nodeNumber dotIn)
+                out.WriteLine (sprintf ("%s -> %d") dotOut nodeNumber)
+            
+
             out.WriteLine (sprintf ("%d -> %d") parentNumber nodeNumber)
+            //out.WriteLine (sprintf ("%d -> %d") parentNumber nodeNumber)
 
             if isNew 
             then

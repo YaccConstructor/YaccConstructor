@@ -256,5 +256,5 @@ and processSeq (graph : CfgBlocksGraph<_>) =
 let graphToCfg (graph : CfgBlocksGraph<_>) tokenToString = 
     graph.RemoveDuplicateEpsilons()
     graph.RemoveEpsilonLoopEdges()
-    //graph.RelaxedPrintToDot "``input.dot" tokenToString
+    //InnerGraphPrinter.RelaxedPrintToDot graph "``input.dot" tokenToString
     processSeq graph

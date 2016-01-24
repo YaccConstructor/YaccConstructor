@@ -1,4 +1,13 @@
-﻿[<Start>]
+﻿{
+open YC.FSA.GraphBasedFsa
+open YC.FSA.FsaApproximation
+}
+
+tokens {
+    _ of int(*FSA<char*int>*)
+}
+
+[<Start>]
 start: statement+
 statement: if_statement | simple_statement
 if_statement: IF cond THEN statement+ (ELSE statement+)? ENDIF

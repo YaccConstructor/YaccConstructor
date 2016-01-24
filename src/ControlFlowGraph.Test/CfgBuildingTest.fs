@@ -640,21 +640,30 @@ type ``Cycles inside expressions``() =
     let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, keywordToInt)
 
-    let runTest qGraph printNames = 
+    let fst3 (a, _, _) = a
+    let snd3 (_, b, _) = b
+    let thr3 (_, _, c) = c
+
+    let runTest (qGraph : ParserInputGraph<_>) expectedTokensCount printNames = 
+        if needPrint
+        then qGraph.PrintToDot <| fst3 printNames <| tokToRealString
+        
         match buildAbstractAst qGraph with
         | Yard.Generators.ARNGLR.Parser.Error (num, tok, err) -> printErr (num, tok, err)
         | Yard.Generators.ARNGLR.Parser.Success tree ->
             if needPrint
             then
-                let astName = fst printNames
-                Test.ExtendedCalcParser.defaultAstToDot tree astName
+                Test.ExtendedCalcParser.defaultAstToDot tree <| snd3 printNames
 
             let cfg = ControlFlow(tree, parserSource, langSource, tokToRealString)
             
             if needPrint
-            then
-                let cfgName = snd printNames
-                cfg.PrintToDot cfgName
+            then cfg.PrintToDot <| thr3 printNames
+
+            Assert.AreEqual(1, cfg.Blocks.Length)
+            let innerGraph = cfg.Blocks.[0].TokensGraph
+            let toksCount = innerGraph.GetAvailableTokens() |> Seq.length
+            Assert.AreEqual(expectedTokensCount, toksCount)
                 
     [<Test>]
     member this.``X = Y [+1]*``() = 
@@ -670,10 +679,81 @@ type ``Cycles inside expressions``() =
                 createEdge 5 6 (Test.ExtendedCalcParser.RNGLR_EOF 6)
             ] |> ignore
 
-        let printNames = "`X = Y [+1] ast.dot", "`X = Y [+1] cfg.dot"
+        let printNames = 
+            "`X = Y [+1] input.dot", 
+            "`X = Y [+1] ast.dot", 
+            "`X = Y [+1] cfg.dot"
         
-        runTest qGraph printNames
+        runTest qGraph 6 printNames
 
+    [<Test>]
+    member this.``X = Y [+1]* - Z``() = 
+        let qGraph = new ParserInputGraph<_>(0, 8)
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (Test.ExtendedCalcParser.X 0)
+                createEdge 1 2 (Test.ExtendedCalcParser.ASSIGN 1)
+                createEdge 2 3 (Test.ExtendedCalcParser.Y 2)
+                createEdge 3 4 (Test.ExtendedCalcParser.PLUS 3)
+                createEdge 4 3 (Test.ExtendedCalcParser.NUMBER 4)
+                createEdge 3 5 (Test.ExtendedCalcParser.MINUS 5)
+                createEdge 5 6 (Test.ExtendedCalcParser.Z 6)
+                createEdge 6 7 (Test.ExtendedCalcParser.SEMICOLON 7)
+                createEdge 7 8 (Test.ExtendedCalcParser.RNGLR_EOF 8)
+            ] |> ignore
+
+        let printNames = 
+            "`X = Y [+1] - Z input.dot", 
+            "`X = Y [+1] - Z ast.dot", 
+            "`X = Y [+1] - Z cfg.dot"
+        
+        runTest qGraph 8 printNames
+
+    [<Test>]
+    member this.``X = Y [+1[-Z]*]*``() = 
+        let qGraph = new ParserInputGraph<_>(0, 7)
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (Test.ExtendedCalcParser.X 0)
+                createEdge 1 2 (Test.ExtendedCalcParser.ASSIGN 1)
+                createEdge 2 3 (Test.ExtendedCalcParser.Y 2)
+                createEdge 3 4 (Test.ExtendedCalcParser.PLUS 3)
+                createEdge 4 3 (Test.ExtendedCalcParser.NUMBER 4)
+                createEdge 4 5 (Test.ExtendedCalcParser.Z 5)
+                createEdge 5 4 (Test.ExtendedCalcParser.MINUS 6)
+                createEdge 3 6 (Test.ExtendedCalcParser.SEMICOLON 7)
+                createEdge 6 7 (Test.ExtendedCalcParser.RNGLR_EOF 8)
+            ] |> ignore
+
+        let printNames = 
+            "`X = Y [+1[-Z]] input.dot",
+            "`X = Y [+1[-Z]] ast.dot", 
+            "`X = Y [+1[-Z]] cfg.dot"
+        
+        runTest qGraph 8 printNames
+
+    [<Test>]
+    member this.``X = Y [(+1) | (-Z)]*``() = 
+        let qGraph = new ParserInputGraph<_>(0, 7)
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (Test.ExtendedCalcParser.X 0)
+                createEdge 1 2 (Test.ExtendedCalcParser.ASSIGN 1)
+                createEdge 2 3 (Test.ExtendedCalcParser.Y 2)
+                createEdge 3 4 (Test.ExtendedCalcParser.PLUS 3)
+                createEdge 4 3 (Test.ExtendedCalcParser.NUMBER 4)
+                createEdge 3 5 (Test.ExtendedCalcParser.MINUS 5)
+                createEdge 5 3 (Test.ExtendedCalcParser.Z 6)
+                createEdge 3 6 (Test.ExtendedCalcParser.SEMICOLON 7)
+                createEdge 6 7 (Test.ExtendedCalcParser.RNGLR_EOF 8)
+            ] |> ignore
+
+        let printNames = 
+            "`X = Y [(+1) | (-Z)] input.dot",
+            "`X = Y [+1[-Z]] ast.dot", 
+            "`X = Y [+1[-Z]] cfg.dot"
+        
+        runTest qGraph 8 printNames
 
 [<TestFixture>]
 type ``If statements`` () =

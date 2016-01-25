@@ -25,3 +25,6 @@ rule token = parse
 | '*' { MULT(gr) |> Some }
 | '=' { ASSIGN(gr) |> Some }
 | ';' { SEMICOLON(gr) |> Some }
+| 'x' { X(gr) |> Some }
+| 'y' { Y(gr) |> Some }
+| 'z' { Z(gr) |> Some }

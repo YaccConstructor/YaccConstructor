@@ -33,11 +33,12 @@
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
     <Compile Include="ExtendedCalc.yrd.fs" />
+    <Compile Include="Lexer_Abstract.fs" />
     <Compile Include="If.yrd.fs" />
     <Compile Include="Simple.yrd.fs" />
     <Compile Include="TestHelper.fs" />
-    <Compile Include="CfgBuildingTest.fs" />
     <Compile Include="CfgFunctionsTest.fs" />
+    <Compile Include="CfgBuildingTest.fs" />
     <None Include="packages.config" />
     <None Include="app.config" />
   </ItemGroup>

@@ -4,7 +4,7 @@ open YC.FSA.FsaApproximation
 }
 
 tokens {
-    _ of int(*FSA<char*Position<string>>*)
+    _ of (*int*)FSA<char*Position<string>>
 }
 
 options {

@@ -625,6 +625,20 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.AandB.buildAstAbstract qGraph 19 18 0 8 1
 
     [<Test>]
+    member this.aSA () =
+        let qGraph = new ParserInputGraph<_>(0, 4)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.aSA.A 0)
+            edg 1 2 (RNGLR.aSA.A 1)
+            edg 2 3 (RNGLR.aSA.A 2)
+            edg 2 1 (RNGLR.aSA.A 3)
+            edg 3 4 (RNGLR.aSA.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.aSA.buildAstAbstract qGraph 19 18 0 8 1
+
+
+    [<Test>]
     member this.``Not Ambigous Simple Calc. Branch. Perf`` i inpLength isLoop =  
         let tpl x =
             [
@@ -749,7 +763,7 @@ type ``RNGLR abstract parser tests`` () =
 
            
 
-//[<EntryPoint>]
+[<EntryPoint>]
 let f x =
     if System.IO.Directory.Exists "dot" 
     then 
@@ -757,9 +771,10 @@ let f x =
     else System.IO.Directory.CreateDirectory "dot" |> ignore
     let t = new ``RNGLR abstract parser tests`` () 
 
+
 //    t._01_PrettySimpleCalc_SequenceInput ()
-//    t._02_PrettySimpleCalc_SimpleBranchedInput ()
-//    t._03_PrettySimpleCalc_BranchedInput ()
+//    t._02_PrettySimpleCalcSimple_BranchedInput ()
+    //t._03_PrettySimpleCalc_BranchedInput ()
 //    t._04_PrettySimpleCalc_LotsOfVariants() 
 //    t._05_NotAmbigousSimpleCalc_LotsOfVariants()
 //    t._06_NotAmbigousSimpleCalc_Loop. ()
@@ -788,4 +803,5 @@ let f x =
    // t.``TSQL performance test for Alvor`` 2 100 false
     t._29_AandB_Circle ()
     //t.``TSQL performance test 2`` 2 100 false
+    //t.aSA ()
     0

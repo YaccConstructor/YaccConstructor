@@ -91,8 +91,10 @@ and [<AllowNullLiteral>]
 
     let compare (x : AstNode) (y : AstNode) = 
         match x with
-        | :? Epsilon as x' -> match y with | :? Epsilon as y' -> x'.EpsilonNonTerm = y'.EpsilonNonTerm | _ -> false
-        | :? Terminal as x' -> match y with | :? Terminal as y' -> x'.TokenNumber = y'.TokenNumber | _ -> false
+        | :? Epsilon as x' -> match y with | :? Epsilon as y' -> x'.EpsilonNonTerm = y'.EpsilonNonTerm 
+                                           | _ -> false
+        | :? Terminal as x' -> match y with | :? Terminal as y' -> x'.TokenNumber = y'.TokenNumber 
+                                            | _ -> false
         | :? AST as xast -> match y with | :? AST as yast -> 
                                                 xast.pos = yast.pos 
                                                 && xast = yast 
@@ -206,7 +208,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         then
             verticesToProcess.Enqueue(elem)
 
-    let addNonZeroReduction (gssVertex : Vertex) token gssEdge (innerGraphV : VInfo<_>)=
+    let addNonZeroReduction (gssVertex : Vertex) token gssEdge (innerGraphV : VInfo<_>) =
         let arr = parserSource.Reduces.[gssVertex.State].[parserSource.TokenToNumber token]
         if arr <> null 
         then
@@ -383,9 +385,16 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         else Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string")
     else
         let _,_ = addVertex startV startState startV.unprocessedGssVertices
+        let gssInitVertices = 
+                       innerGraph.Edges |> Seq.filter (fun e -> e.Target = finalV) |> Seq.collect (fun e -> e.Source.processedGssVertices)
+        let i = ref 0
         while errorIndex = -1 && verticesToProcess.Count > 0 do
             let curV = verticesToProcess.Dequeue()
             processVertex curV
+            incr i
+            drawDot parserSource.TokenToNumber terminals parserSource.LeftSide 
+              (if Seq.isEmpty gssInitVertices then Seq.ofArray(curV.processedGssVertices.ToArray()) else gssInitVertices )
+              parserSource.NumToString parserSource.ErrorIndex (sprintf "../../../Tests/AbstractRNGLR/DOT/gss%i.dot" !i) 
 
         if errorIndex <> -1 then
             Error (errorIndex - 1, Unchecked.defaultof<'TokenType>, "Parse error")

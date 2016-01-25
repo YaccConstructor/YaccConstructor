@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Parser.Common</RootNamespace>
     <AssemblyName>Parser.Common</AssemblyName>
-    <Name>Parser.Common</Name>
+    <Name>GLLParsers.Common</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
@@ -73,7 +73,8 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
-    <Compile Include="Library1.fs" />
+    <Compile Include="ParserSource.fs" />
+    <Compile Include="FunsAndStructs.fs" />
     <Content Include="packages.config" />
     <Content Include="app.config" />
   </ItemGroup>

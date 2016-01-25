@@ -1,4 +1,4 @@
-﻿namespace Yard.Generators.GLL
+﻿namespace Yard.Generators.GLL.ParserCommon
 open System.Collections.Generic
        
 type ParserSourceGLL<'TokenType> (eof                  : 'TokenType

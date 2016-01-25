@@ -1,7 +1,6 @@
 ﻿{
-open YC.FSA.GraphBasedFsa
-open YC.FSA.FsaApproximation
-}
+open QuickGraph.FST.GraphBasedFst
+open QuickGraph.FSA.GraphBasedFsa}
 
 tokens {
     _ of int(*FSA<char*int>*)

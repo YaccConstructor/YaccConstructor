@@ -14,9 +14,9 @@ open ControlFlowGraph.TestHelper
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AbstractParser
 
-open YC.FSA.GraphBasedFsa
-open YC.FSA.FsaApproximation
-open YC.FST.GraphBasedFst
+open QuickGraph.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
+open QuickGraph.FST.GraphBasedFst
 open YC.Tests.Helper
 
 let needPrint = false
@@ -35,38 +35,38 @@ let tokenToPos (tokenData : _ -> obj) token =
 
 let baseInputGraphsPath = "../../../Tests/ControlFlowGraph/"
 
-//let private quickGraphToFST (lexerInputGraph : AdjacencyGraph<int, TaggedEdge<_,string>>)= 
-//    let initialStates = ResizeArray.singleton 0
-//    let finishStates = ResizeArray.singleton <| lexerInputGraph.VertexCount - 1
-//
-//    let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
-//    let transform = 
-//        let count = ref -1
-//        fun x ->
-//            incr count
-//            match x with
-//            | Smbl(y, _) -> (x, (Smbl !count))
-//            | _ -> (x, Eps)
-//
-//    let transitions = new ResizeArray<_>()
-//    lexerInputGraph.Edges
-//    |> Seq.iter(fun edge -> transitions.Add(edge.Source, (edge.Tag, edge.Tag), edge.Target))
-//
-//    let appr = new Appr<_>(initialStates, finishStates, transitions)
-//    let fsa = appr.ApprToFSA()
-//    FST<_, int>.FSAtoFST(fsa, transform, smblEOF)
-//
-//let createParserInputGraph name =     
-//    let fstInput = quickGraphToFST <| loadDotToQG baseInputGraphsPath name
-//
-//    let eof = Test.ExtendedCalcParser.RNGLR_EOF <| new FSA<_>()
-//    let lexResult = YC.RNGLR.ExtendedCalcLexer.tokenize eof fstInput
-//
-//    match lexResult with
-//    | Success parserInput -> parserInput
-//    | Error e -> 
-//        Assert.Fail("Lexer error")
-//        failwithf "Lexer error"
+let private quickGraphToFST (lexerInputGraph : AdjacencyGraph<int, TaggedEdge<_,string>>)= 
+    let initialStates = ResizeArray.singleton 0
+    let finishStates = ResizeArray.singleton <| lexerInputGraph.VertexCount - 1
+
+    let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
+    let transform = 
+        let count = ref -1
+        fun x ->
+            incr count
+            match x with
+            | Smbl(y, _) -> (x, (Smbl !count))
+            | _ -> (x, Eps)
+
+    let transitions = new ResizeArray<_>()
+    lexerInputGraph.Edges
+    |> Seq.iter(fun edge -> transitions.Add(edge.Source, (edge.Tag, edge.Tag), edge.Target))
+
+    let appr = new Appr<_>(initialStates, finishStates, transitions)
+    let fsa = appr.ApprToFSA().NfaToDfa()
+    FST<_, int>.FSAtoFST(fsa, transform, smblEOF)
+
+let createParserInputGraph name =     
+    let fstInput = quickGraphToFST <| loadDotToQG baseInputGraphsPath name
+
+    let eof = Test.ExtendedCalcParser.RNGLR_EOF <| new FSA<_>()
+    let lexResult = YC.RNGLR.ExtendedCalcLexer.tokenize eof fstInput
+
+    match lexResult with
+    | Success parserInput -> parserInput
+    | Error e -> 
+        Assert.Fail("Lexer error")
+        failwithf "Lexer error"
 
 [<TestFixture>]
 type ``Simple cases``() =
@@ -76,11 +76,12 @@ type ``Simple cases``() =
     let indToString = Test.ExtendedCalcParser.numToString
     let tokenData = Test.ExtendedCalcParser.tokenData
 
-    let semicolon = Test.ExtendedCalcParser.SEMICOLON 0
+    let fsa = new FSA<_>()
+    let semicolon = Test.ExtendedCalcParser.SEMICOLON fsa
     let semicolonNumber = tokenToNumber semicolon
-    let xNumber = tokenToNumber <| Test.ExtendedCalcParser.X 0
-    let yNumber = tokenToNumber <| Test.ExtendedCalcParser.Y 0
-    let zNumber = tokenToNumber <| Test.ExtendedCalcParser.Z 0
+    let xNumber = tokenToNumber <| Test.ExtendedCalcParser.X fsa
+    let yNumber = tokenToNumber <| Test.ExtendedCalcParser.Y fsa
+    let zNumber = tokenToNumber <| Test.ExtendedCalcParser.Z fsa
 
     let nodeToType = dict ["assign", Assignment;]
         
@@ -123,7 +124,7 @@ type ``Simple cases``() =
             
     [<Test>]
     member test.``Elementary test``() =
-        let qGraph = new ParserInputGraph<_>(0, 13)
+        (*let qGraph = new ParserInputGraph<_>(0, 13)
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (Test.ExtendedCalcParser.X 0)
@@ -139,9 +140,9 @@ type ``Simple cases``() =
                 createEdge 10 11 (Test.ExtendedCalcParser.NUMBER 10)
                 createEdge 11 12 (Test.ExtendedCalcParser.SEMICOLON 11)
                 createEdge 12 13 (Test.ExtendedCalcParser.RNGLR_EOF 12)
-            ] |> ignore
-        //let qGraph = createParserInputGraph "Seq.dot"
-        //qGraph.PrintToDot "see.dot" tokToRealString
+            ] |> ignore*)
+        let qGraph : ParserInputGraph<_>= createParserInputGraph "Seq.dot"
+        qGraph.PrintToDot "see.dot" tokToRealString
         let nodeToChildren = dict [xNumber, [yNumber]; yNumber, [zNumber]; zNumber, [];]
         let myChildrenCheck = checkChildren tokenToNumber nodeToChildren
 
@@ -155,7 +156,7 @@ type ``Simple cases``() =
         let printNames = "`elementary ast.dot", "`elementary cfg.dot"
         runTest qGraph expectedBlocks expectedNodes printNames myConds
 
-    [<Test>]
+    (*[<Test>]
     member test.``Ambiguous test``() =
         let qGraph = new ParserInputGraph<_>(0, 16)
         //          -> Y = 2;
@@ -220,7 +221,7 @@ type ``Simple cases``() =
 
         let printNames = "`ambiguous2 ast.dot", "`ambiguous2 cfg.dot"
         runTest qGraph expectedBlocks expectedNodes  printNames myChecks
-
+        *)
 [<TestFixture>]
 type ``If statements`` () =
     let buildAbstractAst = Test.IfParser.buildAstAbstract
@@ -792,7 +793,7 @@ type ``Cycles``() =
             "`Cycle inside cycle ((AB)+C)+ cfg.dot"
         runTest qGraph expectedBlocks expectedNodes checkEntryNode' checkExitNode' printNames
 
-[<TestFixture>]
+(*[<TestFixture>]
 type ``Cycles inside expressions``() = 
     let buildAbstractAst = Test.ExtendedCalcParser.buildAstAbstract
     let tokenToNumber = Test.ExtendedCalcParser.tokenToNumber
@@ -922,8 +923,8 @@ type ``Cycles inside expressions``() =
         runTest qGraph 8 printNames
 
 
-
-//[<EntryPoint>]
+        *)
+[<EntryPoint>]
 let f x = 
     //let cycleInsideExpress = new ``Control Flow Graph building: Cycles inside expressions``()
     //cycleInsideExpress.``X = Y [+1]*``()

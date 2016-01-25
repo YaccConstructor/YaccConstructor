@@ -9,6 +9,8 @@ open ControlFlowGraph
 open ControlFlowGraph.Common
 open ControlFlowGraph.InputStructures
 
+open TestHelper
+
 open Yard.Generators.RNGLR.AbstractParser
 
 let createEdge source target label = new ParserEdge<_>(source, target, label)
@@ -49,7 +51,11 @@ type ``Find undefined variables``() =
     let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, keywordToInt, isVariable)
 
-    let runTest qGraph expected printNames = 
+    let runTest (qGraph : ParserInputGraph<_>) expected printNames = 
+        
+        if needPrint 
+        then qGraph.PrintToDot <| fst3 printNames <| tokToRealName
+        
         let parseResult = (new Parser<_>()).Parse buildAbstractAst qGraph
         
         match parseResult with 
@@ -57,15 +63,12 @@ type ``Find undefined variables``() =
         | Yard.Generators.ARNGLR.Parser.Success (mAst) ->
             if needPrint
             then
-                let astName = fst printNames
-                Test.ExtendedCalcParser.defaultAstToDot mAst astName
+                Test.ExtendedCalcParser.defaultAstToDot mAst <| snd3 printNames
 
             let cfg = ControlFlow (mAst, parserSource, langSource, tokToRealName)
             
             if needPrint
-            then
-                let cfgName = snd printNames
-                cfg.PrintToDot cfgName
+            then cfg.PrintToDot <| thr3 printNames
             
             let errorList = cfg.FindUndefVariable()
             
@@ -94,6 +97,7 @@ type ``Find undefined variables``() =
 
         let expected = 1
         let printNames = 
+            "`cfg undefined variables input elementary.dot", 
             "`cfg undefined variables ast elementary.dot", 
             "`cfg undefined variables cfg elementary.dot"
         runTest qGraph expected printNames
@@ -112,6 +116,7 @@ type ``Find undefined variables``() =
 
         let expected = 1
         let printNames = 
+            "`cfg undefined variables input X = X.dot", 
             "`cfg undefined variables ast X = X.dot", 
             "`cfg undefined variables cfg X = X.dot"
         runTest qGraph expected printNames
@@ -147,6 +152,7 @@ type ``Find undefined variables``() =
 
         let expected = 2
         let printNames = 
+            "`cfg undefined variables input.dot", 
             "`cfg undefined variables ast ambiguous1.dot", 
             "`cfg undefined variables cfg ambiguous1.dot"
         runTest qGraph expected printNames
@@ -178,6 +184,7 @@ type ``Find undefined variables``() =
 
         let expected = 2
         let printNames = 
+            "`cfg undefined variables input.dot", 
             "`cfg undefined variables ast ambiguous2.dot", 
             "`cfg undefined variables cfg ambiguous2.dot"
         runTest qGraph expected printNames
@@ -197,7 +204,7 @@ type ``Find undefined variables``() =
             ] |> ignore
         
         let printNames = 
-            //"`cfg cycle inside expression input.dot", 
+            "`cfg cycle inside expression input.dot", 
             "`cfg cycle inside expression ast.dot", 
             "`cfg cycle inside expression cfg.dot"
         let expected = 1

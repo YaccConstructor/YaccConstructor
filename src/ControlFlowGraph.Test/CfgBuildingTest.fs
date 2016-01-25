@@ -810,10 +810,6 @@ type ``Cycles inside expressions``() =
     let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, keywordToInt)
 
-    let fst3 (a, _, _) = a
-    let snd3 (_, b, _) = b
-    let thr3 (_, _, c) = c
-
     let runTest (qGraph : ParserInputGraph<_>) expectedTokensCount printNames = 
         if needPrint
         then qGraph.PrintToDot <| fst3 printNames <| tokToRealString

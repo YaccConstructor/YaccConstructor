@@ -4,6 +4,10 @@ open System.Collections.Generic
 
 open ControlFlowGraph.CfgElements
 
+let fst3 (a, _, _) = a
+let snd3 (_, b, _) = b
+let thr3 (_, _, c) = c
+
 let getTokens tokenToNumber (block : Block<_>) = 
     block.TokensGraph.GetAvailableTokens() 
     |> Seq.map tokenToNumber 

@@ -117,8 +117,9 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="PresentationCore" />
-    <Reference Include="QuickGraph">
+    <Reference Include="QuickGraph, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
       <HintPath>..\..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="QuickGraph.Data">
       <HintPath>..\..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Data.dll</HintPath>
@@ -164,6 +165,7 @@
     <Compile Include="ZoneMarker.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
@@ -173,13 +175,18 @@
     <EmbeddedResource Include="Actions.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\FST\FST\FSA\FSA.fsproj">
-      <Project>{b48cfdcc-86f7-4c3a-a5a2-8170950dd2ab}</Project>
-      <Name>FSA</Name>
+    <ProjectReference Include="..\..\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj">
+      <Project>{bd5d18de-1c9d-4314-a777-21aa683eeace}</Project>
+      <Name>QuickGraph.FSA</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\FST\FST\FST\FST.fsproj">
-      <Project>{bcf4793c-e8b4-4fd5-9723-3c08859066c5}</Project>
-      <Name>FST</Name>
+    <ProjectReference Include="..\..\..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj">
+      <Project>{4b220e23-a7e0-4222-83f5-c785f7c66b33}</Project>
+      <Name>QuickGraph.FST</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\QuickGraph\src\QuickGraph\QuickGraph.csproj">
+      <Project>{a9a5c115-0680-44b3-a87e-5ecf4c93814e}</Project>
+      <Name>QuickGraph</Name>
+      <Aliases>YCQuickGraph</Aliases>
     </ProjectReference>
     <ProjectReference Include="..\..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>

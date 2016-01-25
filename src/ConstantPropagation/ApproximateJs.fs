@@ -22,7 +22,7 @@ open Utils.Dictionary
 open BuildApproximation
 open GenerateFsa
 open IControlFlowGraphUtils
-open YC.FSA.GraphBasedFsa
+open QuickGraph.FSA.GraphBasedFsa
 open ArbitraryOperation
 
 let private serializeJsCfg (cfg: IJsControlFlowGraph) = 

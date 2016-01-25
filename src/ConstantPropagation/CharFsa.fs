@@ -3,8 +3,8 @@
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 
-open YC.FSA.FsaApproximation
-open YC.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
+open QuickGraph.FSA.GraphBasedFsa
 open JetBrains.ReSharper.Psi.CSharp.Tree
 
 type FsaState<'Lit> = char * Position<'Lit>

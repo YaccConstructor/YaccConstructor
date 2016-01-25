@@ -235,9 +235,14 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\FST\FST\FSA\FSA.fsproj">
-      <Project>{b48cfdcc-86f7-4c3a-a5a2-8170950dd2ab}</Project>
-      <Name>FSA</Name>
+    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj">
+      <Project>{bd5d18de-1c9d-4314-a777-21aa683eeace}</Project>
+      <Name>QuickGraph.FSA</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph\QuickGraph.csproj">
+      <Project>{a9a5c115-0680-44b3-a87e-5ecf4c93814e}</Project>
+      <Name>QuickGraph</Name>
+      <Aliases>YCQuickGraph</Aliases>
     </ProjectReference>
     <ProjectReference Include="..\ConstantPropagation\ConstantPropagation.fsproj">
       <Project>{42485bca-665d-48fb-befd-4a0232f2cf0b}</Project>

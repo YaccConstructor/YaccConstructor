@@ -95,15 +95,6 @@ type GLL() =
                 |> List.map (String.concat " <- ")
                 |> List.iter (eprintfn "%s")
                 eprintfn ""
-//                if printInfiniteEpsilonPath <> ""
-//                then
-//                    System.IO.Directory.CreateDirectory printInfiniteEpsilonPath |> ignore
-//                    for cycle in grammar.EpsilonCyclicNonTerms do
-//                        let nonTerm = List.head cycle
-//                        grammar.epsilonTrees.[grammar.indexator.nonTermToIndex nonTerm].AstToDot
-//                            grammar.indexator.indexToNonTerm (fun _ -> 0) grammar.rules.leftSideArr
-//                            (System.IO.Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot"))
-//                //grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
 
             let table = new Table(grammar)
             use out = new System.IO.StreamWriter (output)

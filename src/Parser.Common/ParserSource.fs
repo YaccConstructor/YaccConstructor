@@ -41,6 +41,20 @@ type ParserSourceGLL<'TokenType> (eof                  : 'TokenType
         _rules.[i] <- Array.zeroCreate length.[i]
         for j = 0 to length.[i] - 1 do
             _rules.[i].[j] <- rules.[rulesStart.[i] + j]
+
+    let printrules () =
+                
+                printfn "\nrules:"
+                for i = 0 to rulesCount - 1 do
+                    printf "%4d: %s = " i <| numToString (leftSide.[i])
+                    for j = 0 to _rules.[i].Length - 1 do
+                        printf "%s " <| numToString (_rules.[i].[j])
+                    printfn ""
+
+
+
+    do printrules()
+   
     
                   
                                

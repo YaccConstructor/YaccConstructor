@@ -135,7 +135,7 @@ YARD is powerful translation specification language. It allows you to use EBNF, 
 [1] &mdash; in ANTLR rule are specified using the syntax of the generated language, meanwhile YARD can accept RegExps' or other rules too!
 
 <h2>Lexing</h2>
-As a lexer, YARD uses a modified version of FsLex, so workflow would be almost the same as in FsLex.
+Basically, you can use anything as a lexer and then transform it into suitable form. If you do not want things to get complicated, you can use modified version of FsLex that is bundled with YaccConstructor.
 
 <h2>Grammar structure</h2>
 
@@ -153,19 +153,19 @@ Definition in its general form looks like this:
 
 <p>
 Where<br>
-  <b>info</b>:    text that contains some information and would not be used anywhere.<br>
-  <b>tokens</b>:  //TODO ask about it<br>
-  <b>options</b>: //TODO ask about it<br>
-  <b>head</b>:    F# code that will be copied to the beginning of a generated F# file. Usually used for some open-s.<br>
-  <b>grammar</b>: grammar description.<br>
-  <b>foot</b>:    F# code that will be copied to the end of a generated F# file.<br>
+  &emsp;<b>info</b>:    text that contains some information and would not be used anywhere.<br>
+  &emsp;<b>tokens</b>:  tokens type specification<br>
+  &emsp;<b>options</b>: command-line arguments can be written here instead of being passed in command line<br>
+  &emsp;<b>head</b>:    F# code that will be copied to the beginning of a generated F# file. Usually used for some open-s.<br>
+  &emsp;<b>grammar</b>: grammar description.<br>
+  &emsp;<b>foot</b>:    F# code that will be copied to the end of a generated F# file.<br>
 </p>
 
 <h3>Grammar description</h3>
 <p>Basically, grammar description is list of modules. A module in general form looks like this:</p>
 
 <pre>
-  [< AllPublic >]
+  [&lt;AllPublic&gt;]
   name
   openings
   rules
@@ -173,17 +173,17 @@ Where<br>
 
 <p>
 Where<br>
-  <b>AllPublic</b>: this annotation makes all rules visible when using this module. By default, all rules are private except the ones explicitly marked public.<br>
-  <b>name</b>:      name of the module.<br>
-  <b>openings</b>:  usage (opening) of another grammars from .yrd files<br>
-  <b>rules</b>:     rules that are present in grammar<br>
+  &emsp;<b>AllPublic</b>: this annotation makes all rules visible when using this module. By default, all rules are private except the ones explicitly marked public.<br>
+  &emsp;<b>name</b>:      name of the module.<br>
+  &emsp;<b>openings</b>:  usage (opening) of another grammars from .yrd files<br>
+  &emsp;<b>rules</b>:     rules that are present in grammar<br>
 </p>
 
 <h3>Rules</h3>
 <p>A rule in general form looks like this:</p>
 
 <pre>
-  [< Start >]
+  [&lt;Start&gt;]
   public modifier
   name
   args
@@ -192,11 +192,11 @@ Where<br>
 
 <p>
 Where<br>
-  <b>Start</b>:  this annotation makes this rule a starting one.<br>
-  <b>public</b>: this modifier allows rule to be seen from other modules.<br>
-  <b>name</b>:   name of the rule<br>
-  <b>args</b>:   heritable rule's arguments<br>
-  <b>body</b>:   rule's body (production)<br>
+  &emsp;<b>Start</b>:  this annotation makes this rule a starting one.<br>
+  &emsp;<b>public</b>: this modifier allows rule to be seen from other modules.<br>
+  &emsp;<b>name</b>:   name of the rule<br>
+  &emsp;<b>args</b>:   heritable rule's arguments<br>
+  &emsp;<b>body</b>:   rule's body (production)<br>
 </p>
 
 <h2>Syntax in examples</h2>
@@ -246,7 +246,6 @@ s: PLUS?;
 or
 <pre>
 s: [PLUS];
-
 </pre>
 This syntax is useful for big optional subexpressions. Instead of 
 <pre>

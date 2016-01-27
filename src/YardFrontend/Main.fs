@@ -33,7 +33,10 @@ let private tokenFun f = function
     | GREAT st
     | DLABEL st
     | NUMBER st
+    | POSITIVEINT st
     | LESS st
+    | STARTREPEAT st
+    | ENDREPEAT st
     | EOF st
     //| ERROR st
     | EQUAL st

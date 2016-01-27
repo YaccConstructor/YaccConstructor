@@ -1,4 +1,3 @@
-
 del log.txt
 
 for %%i in (Epsilon, Longest, InfEpsilon) do (
@@ -8,12 +7,16 @@ for %%i in (Epsilon, Longest, InfEpsilon) do (
         -g "RNGLRGenerator -pos int -token int -module RNGLR.Parse%%i -o %%i.yrd.fs" >> log.txt
 )
 
-for %%i in (Order,Cond,Attrs,Calc,Counter,Cycle,LongCycle,Resolvers, LolCalc, Omit) do (
+for %%i in (Order,Cond,Attrs,Counter,Cycle,LongCycle,Resolvers, LolCalc, Omit) do (
     echo . >> log.txt
     echo %%i >> log.txt
     ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i %%i.yrd ^
         -g "RNGLRGenerator -pos int -token int -module RNGLR.Parse%%i -o %%i.yrd.fs" >> log.txt
 )
+
+echo Calc.yrd >> log.txt
+    ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i ..\..\src\YC.GrammarZOO\Tests\Calc.yrd ^
+        -g "RNGLRGenerator -pos int -token int -module RNGLR.ParseCalc -o Calc.yrd.fs" >> log.txt
 
 for %%i in (ComplexRightNull,Expr,First,List,SimpleRightNull) do (
     echo . >> log.txt

@@ -27,7 +27,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             Error ("This grammar does not accept empty input.")     
     else
         let slots = parser.Slots
-        let errors = new Dictionary<int64, Dictionary<int<nodeMeasure>, Vertex>>()   
+        let errors = new Dictionary<int64, Dictionary<int<nodeMeasure>, Vertex*int>>()   
         let setU = Array.zeroCreate<Dictionary<int, Dictionary<int64, ResizeArray<int<nodeMeasure>>>>> (input.VertexCount )///1
         let structures = new ParserStructures(input.VertexCount, parser.StartRule)
         let setR = structures.SetR
@@ -35,14 +35,19 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let setP = structures.SetP
         let tempCount = ref 0
         let currentVertexInInput = ref 0
+        let currentPath = ref <| List.Empty
         let currentrule = parser.StartRule
+
+        let finalPaths = new ResizeArray<list<int>>()
+        let errorPaths = new ResizeArray<list<int>>()
+
          //packLabel without int
         let dummyGSSNode = new Vertex(!currentVertexInInput, int !structures.CurrentLabel)
         let sppfNodes = structures.SppfNodes
         
         let tokens = new BlockResizeArray<'TokenType>()        
         let packedNodes = new Dictionary<M, int<nodeMeasure>>()
-        
+        //let 
         let nonTerminalNodes = new Dictionary<int64,int<nodeMeasure>>()        
         let intermidiateNodes = Array2D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount) (input.VertexCount) //убрала +1
         let edges = Array2D.zeroCreate<Dictionary<int<nodeMeasure>, Dictionary<int, ResizeArray<int>>>> slots.Count (input.VertexCount )
@@ -160,7 +165,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     arr.DoForAll (fun tree  ->
                         let y = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy label ast tree
                         let index = getRightExtension <| structures.GetTreeExtension y 
-                        structures.AddContext setU index label vertex y )
+                        structures.AddContext setU index label vertex y !currentPath)
             v
                 
         let pop (u : Vertex) (i : int) (z : int<nodeMeasure>) =
@@ -182,27 +187,28 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                          for level in slotLevels.Value do
                             let resTree = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy (u.NontermLabel*1<labelMeasure>) sppfNodeOnEdge z 
                             let newVertex = new Vertex(level, slot)
-                            structures.AddContext setU i (u.NontermLabel*1<labelMeasure>) newVertex resTree
+                            structures.AddContext setU i (u.NontermLabel*1<labelMeasure>) newVertex resTree !currentPath
 
         let table = parser.Table
         
         let condition = ref false 
         let stop = ref false
 
-        let containsError index label vertex ast = 
+        let containsError index label vertex ast currentPath = 
             let key = pack index label 
             let c, d = errors.TryGetValue(key)
             if c then
                 let c1, d1 = d.TryGetValue(ast)
-                if c1 then true
-                else
-                    d.Add(ast, vertex)
-                    false
+                if not c1 
+                then 
+                    errorPaths.Add currentPath
+                    d.Add(ast, (vertex, (errorPaths.Count - 1)))
+                
             else
-                let d = new Dictionary<int<nodeMeasure>, Vertex>()
+                let d = new Dictionary<int<nodeMeasure>, Vertex*int>()
+                errorPaths.Add currentPath
+                d.Add(ast, (vertex, (errorPaths.Count - 1)))
                 errors.Add(key, d)
-                false
-
             
 
         let rec dispatcher () =
@@ -214,6 +220,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 structures.CurrentLabel := currentContext.Value.Label
                 structures.CurrentN := currentContext.Value.Ast 
                 structures.CurrentR := structures.Dummy
+                currentPath := currentContext.Value.Path
                 condition := false
             else 
                 stop := true  
@@ -245,7 +252,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                         | Some edge ->
                             snd edge.Tag := true
                             let curToken = parser.TokenToNumber (fst edge.Tag)
-                            
+                            currentPath := edge.Target :: currentPath.Value
                             if !structures.CurrentN = structures.Dummy
                             then 
                                 structures.CurrentN := getNodeT edge
@@ -260,8 +267,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             condition := false
                         | 
                             None _ -> 
-                                containsError !currentVertexInInput !structures.CurrentLabel !currentGSSNode !structures.CurrentN
-                                ()
+                                containsError !currentVertexInInput !structures.CurrentLabel !currentGSSNode !structures.CurrentN !currentPath
+                                
                     else 
                         let getIndex nTerm term = 
                             let mutable index = nTerm
@@ -279,16 +286,19 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                 for rule in table.[key] do
                                  
                                     let newLabel = packLabel rule 0
-                                    structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy 
+                                    structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy !currentPath
                             else 
                                 for kvp in table do
                                     if int kvp.Key >>> 16 = curSymbol then
                                         for r in kvp.Value do
                                             let newLabel = packLabel r 0
-                                            containsError !currentVertexInInput newLabel !currentGSSNode structures.Dummy
-                                            ()
+                                            containsError !currentVertexInInput newLabel !currentGSSNode structures.Dummy !currentPath
+                                            
                 else
                     let curRight =  sppfNodes.Item (int !structures.CurrentN) 
+                    let r = curRight.getExtension ()
+                    if Array.exists (fun a -> a = r) finalExtensions then finalPaths.Add !currentPath
+                        
                     structures.FinalMatching
                         curRight 
                         parser.LeftSide.[parser.StartRule]
@@ -298,7 +308,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                         currentGSSNode
                         currentVertexInInput
                         pop
-
+                  
                     
         let control () =
              while not !stop do
@@ -313,15 +323,39 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 
                 Error ("String was not parsed")
             | Some res -> 
-                    let t =  
-                        if errors.Count <> 0 then
-                        for e in errors do
-                            printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16) 
+//                    let t =  
+//                        if errors.Count <> 0 then
+//                        for e in errors do
+//                            printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16) 
                             
                     let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
                     //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
                     r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
-                    
+                    for e in errors do
+                        for p in e.Value do
+                            let path = List.rev errorPaths.[snd p.Value]
+                            let mutable c = false
+                            let mutable f = 0
+                            let mutable pos = 0
+                            while not c do
+                                if f >= finalPaths.Count
+                                then
+                                    c <- true 
+                                    printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16)
+                                else
+                                    let fp = List.rev finalPaths.[f]
+
+                                    while (pos < path.Length) do
+                                        if path.[pos] = fp.[pos] 
+                                        then
+                                            pos <- pos + 1
+                                            if pos = path.Length 
+                                            then 
+                                                c <- true  
+                                        else 
+                                            pos <- path.Length
+                                            f <- f + 1
+                                
                     
                     Success (r1)   
                      

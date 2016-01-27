@@ -91,6 +91,8 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
 %token <Range> RPAREN
 %token GREAT
 %token LESS
+%token STARTREPEAT
+%token ENDREPEAT
 %token COMMUT
 %token INCLUDE
 %token SET
@@ -235,6 +237,8 @@ rule: start_rule_sign_opt access_modifier_opt LIDENT formal_meta_param_opt param
                 }
             }
 
+rule_delim: COLON {$1} | EQUAL {$1}
+
 start_rule_sign_opt: {false} | START_RULE_SIGN {true}
 
 access_modifier_opt: PUBLIC { true } | PRIVATE { false } | { !allPublic }
@@ -269,7 +273,9 @@ no_lbl_seq: seq_elem seq_elem_list action_opt { PSeq ($1::$2, $3, None)}
 lbl_seq : DLABEL weight_opt LPAREN no_lbl_seq RPAREN     { makeNewSeq $4 $1 $2 }
         | DLABEL weight_opt no_lbl_seq RPAREN            { errorexception " '(' is missing " parserRange }
     
-seq_elem_list: { [] } | seq_elem seq_elem_list {$1::$2}
+comma_opt: { None } | COMMA {Some $1}
+
+seq_elem_list: { [] } | comma_opt seq_elem seq_elem_list {$2::$3}
 
 seq_elem: omit_opt bound predicate_opt { { $2 with checker = $3; omit = $1 } }
 
@@ -281,7 +287,6 @@ predicate_opt: { None } | PREDICATE { Some $1 }
 
 bound: patt EQUAL prim { createSeqElem (Some $1) false $3 None }
      | prim            { createSeqElem None false $1 None }   
-
 
 patt: LIDENT {$1} | ACTION {$1}
 

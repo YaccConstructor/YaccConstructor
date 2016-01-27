@@ -9,6 +9,6 @@ for %%i in (AandB, SimpleCalc, EpsilonKiller, simpleCalc_with_Nterms, simpleCalc
         -g "RNGLRGenerator -pos int -token int -module RNGLR.%%i -translate false -o %%i.yrd.fs -abstract true" >> log.txt
 )
 
-echo calc_r.yrd >> log.txt
-	..\..\Bin\Release\v40\YC.YaccConstructor.exe -i ..\..\src\YC.GrammarZOO\Calc\calc_r.yrd ^
-        -g "RNGLRGenerator -pos int -token int -module RNGLR.Calc -translate false -o Calc.yrd.fs -abstract true" >> log.txt
+echo calc.yrd >> log.txt
+	..\..\Bin\Release\v40\YC.YaccConstructor.exe -i ..\..\src\YC.GrammarZOO\Calc\calc.yrd ^
+        -g "RNGLRGenerator -pos int -token int -module RNGLR.Calc -translate false -o Calc.yrd.fs -abstract true" -D rt >> log.txt

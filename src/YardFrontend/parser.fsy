@@ -282,6 +282,7 @@ predicate_opt: { None } | PREDICATE { Some $1 }
 bound: patt EQUAL prim { createSeqElem (Some $1) false $3 None }
      | prim            { createSeqElem None false $1 None }   
 
+
 patt: LIDENT {$1} | ACTION {$1}
 
 parens : LPAREN alts RPAREN      {$2}
@@ -318,4 +319,4 @@ call: UIDENT {PToken $1}
             | Some x -> PMetaRef ($1,$3,x)
         }
 
-tada_rule : SHARPLINE {} | EOF {} 
+tada_rule : SHARPLINE {} | EOF {}

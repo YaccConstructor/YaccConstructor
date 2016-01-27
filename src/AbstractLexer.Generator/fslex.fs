@@ -47,6 +47,7 @@ let out = ref None
 let inputCodePage = ref None
 let light = ref None
 let abstractLexer = ref false
+let caseInsensitive = ref false
 
 let mutable lexlib = "Microsoft.FSharp.Text.Lexing"
 
@@ -58,6 +59,7 @@ let usage =
     ArgInfo ("--lexlib", ArgType.String (fun s ->  lexlib <- s), "Specify the namespace for the implementation of the lexer table interperter (default Microsoft.FSharp.Text.Lexing)");
     ArgInfo ("--unicode", ArgType.Set unicode, "Produce a lexer for use with 16-bit unicode characters.");
     ArgInfo ("--abstract", ArgType.Unit (fun () -> abstractLexer := true), "Lexer is based on FST.");  
+    ArgInfo ("--case-insensitive", ArgType.Unit (fun () -> caseInsensitive := true), "For case insensitive grammar.");
   ]
 
 let _ = ArgParser.Parse(usage, (fun x -> match !input with Some _ -> failwith "more than one input given" | None -> input := Some x), "fslex <filename>")
@@ -73,9 +75,59 @@ let sentinel = 255 * 256 + 255
 let lineCount = ref 0
 let cfprintfn (os: #TextWriter) fmt = Printf.kfprintf (fun () -> incr lineCount; os.WriteLine()) os fmt
 
+let FileParse (filename:string) =
+    let streamReader = new StreamReader(filename)
+    let keywords = new Collections.Generic.List<string>()
+    let mutable readrules = false
+    let strings = new Collections.Generic.List<string>()
+    let rules = new Collections.Generic.List<string>()
+    while not streamReader.EndOfStream do
+        let line = streamReader.ReadLine()
+        if line.Contains("rule") then
+            readrules <- true
+        if not readrules then
+            strings.Add(line)
+        else
+            if line.Contains("\'") || line.Contains("\"") then
+                let line = line.Replace("[", "")
+                let line = line.Replace("]", "")
+                let x = line.Split('\'', '\"')
+                let mutable genline = ""
+                for i in 0..x.Length-1 do
+                    if i%2 = 0 then
+                        genline <- String.Concat(genline, x.[i])
+                    else
+                        let mutable word = x.[i]
+                        word <- word.ToLower()
+                        if (System.Text.RegularExpressions.Regex.IsMatch(word, "[a-z]+")) then
+                            if keywords.Contains(word) then
+                                genline <- String.Concat(genline, "(" + word + ")")
+                            else
+                                genline <- String.Concat(genline, "(" + word + ")")
+                                keywords.Add(word)
+                                let mutable genregexp = "let " + word + " = "
+                                
+                                for j = 0 to word.Length-1 do
+                                    genregexp <- genregexp + "['" + word.[j].ToString() + "'" + "'" + Char.ToUpper(word.[j]).ToString() + "']"
+                                strings.Add(genregexp)
+                        else
+                            if word.Length = 1 then
+                                genline <- String.Concat(genline, "[\'"+  word + "\']")
+                            else
+                                genline <- String.Concat(genline, "\""+  word + "\"")
+                rules.Add(genline)
+            else
+                rules.Add(line)
+    System.IO.File.WriteAllLines("ci" + filename, strings)
+    System.IO.File.AppendAllLines("ci" + filename, rules)
+    "ci" + filename
+        
+
 let main() = 
   try 
-    let filename = (match !input with Some x -> x | None -> failwith "no input given") 
+    let mutable filename = (match !input with Some x -> x | None -> failwith "no input given") 
+    if (!caseInsensitive) then
+        filename <- FileParse(filename)
     let domain = if !unicode then "Unicode" else "Ascii" 
     let spec = 
       let stream,reader,lexbuf = UnicodeFileAsLexbuf(filename, !inputCodePage) 

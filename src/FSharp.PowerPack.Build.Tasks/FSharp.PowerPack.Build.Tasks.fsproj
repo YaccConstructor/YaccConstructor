@@ -36,6 +36,8 @@
       <Link>assemblyinfo.FSharp.PowerPack.Build.Tasks.dll.fs</Link>
     </Compile>
     <Compile Include="CompilerLocationUtils.fs" />
+    <Compile Include="FSLex.Build.fsi" />
+    <Compile Include="FSLex.Build.fs" />
     <Compile Include="FSYacc.Build.fsi" />
     <Compile Include="FSYacc.Build.fs" />
     <None Include="FSharp.PowerPack.targets">

@@ -248,6 +248,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "NDRAGenerator", "NDRAGenera
 		{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08} = {10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}
 	EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Unger", "Unger\Unger.fsproj", "{37DD371F-283F-4243-A701-62594BD38966}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1467,6 +1469,21 @@ Global
 		{219DD6FA-AD2F-4B05-9AD8-E9629B41E5EE}.ReleaseContractsReferences|Any CPU.Build.0 = Release|Any CPU
 		{219DD6FA-AD2F-4B05-9AD8-E9629B41E5EE}.ReleaseContractsReferences|x86.ActiveCfg = Release|Any CPU
 		{219DD6FA-AD2F-4B05-9AD8-E9629B41E5EE}.ReleaseContractsReferences|x86.Build.0 = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.DebugContracts|Any CPU.ActiveCfg = Debug|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.DebugContracts|Any CPU.Build.0 = Debug|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.DebugContracts|x86.ActiveCfg = Debug|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Release|x86.ActiveCfg = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Release20|Any CPU.ActiveCfg = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Release20|Any CPU.Build.0 = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Release20|x86.ActiveCfg = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.ReleaseContractsReferences|Any CPU.ActiveCfg = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.ReleaseContractsReferences|Any CPU.Build.0 = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.ReleaseContractsReferences|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1571,6 +1588,7 @@ Global
 		{4B220E23-A7E0-4222-83F5-C785F7C66B33} = {2E664E5C-14E3-4AA2-A336-7209544C78F0}
 		{3B6968A4-E4D1-430C-B7ED-22621FFE8291} = {5B143652-115D-4240-BCB3-C9DFE79ECE8B}
 		{219DD6FA-AD2F-4B05-9AD8-E9629B41E5EE} = {55F8552B-A06B-4D28-8681-6358E5EA2E3F}
+		{37DD371F-283F-4243-A701-62594BD38966} = {55F8552B-A06B-4D28-8681-6358E5EA2E3F}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = QuickGraph1.vsmdi

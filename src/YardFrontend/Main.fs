@@ -33,7 +33,10 @@ let private tokenFun f = function
     | GREAT st
     | DLABEL st
     | NUMBER st
+    | POSITIVEINT st
     | LESS st
+    | STARTREPEAT st
+    | ENDREPEAT st
     | EOF st
     //| ERROR st
     | EQUAL st
@@ -160,7 +163,7 @@ let private parse buf userDefs =
             (GrammarParser.translate args ast dict : Definition.t<Source.t, Source.t> list).Head
         with
         | ParseError (src, msg) ->
-            failwithf "Parse error on position %s: %s. %s: %s" src.file
+            failwithf "Parse error on position %s:%s. %s: %s" src.file
                         (rangeToString (src.startPos, src.endPos)) msg src.text
     | Parser.Error (_, token, msg, debugs, _) -> 
         debugs.drawGSSDot "res.dot"
@@ -186,7 +189,7 @@ let ParseText (s:string) path =
     with
         Lexer.Lexical_error (msg, pos) ->
             let line,col = posTo2D s pos
-            failwith <| sprintf "\nLexical error in line %d position %d: %s\n" line col msg
+            failwith <| sprintf "Lexical error in line %d position %d: %s" line col msg
 
 let rec ParseFile (args:string) =
     Yard.Frontends.YardFrontend.GrammarParser.parseFile := ParseFile
@@ -206,7 +209,7 @@ let rec ParseFile (args:string) =
     with
     | Lexer.Lexical_error (msg, pos) ->
         let pos2D = posTo2D pos
-        failwith <| sprintf "\nLexical error in line %d position %d: %s\n" (fst pos2D) (snd pos2D) msg
+        failwith <| sprintf "Lexical error in line %d position %d: %s" (fst pos2D) (snd pos2D) msg
       
 let LexString string =
     Lexer.currentFileContent := string;

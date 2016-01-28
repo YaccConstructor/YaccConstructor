@@ -1,4 +1,4 @@
-namespace LLKParser.AssemblyInfo
+﻿namespace LLKParser.AssemblyInfo
 
 open System.Reflection
 open System.Runtime.CompilerServices
@@ -9,10 +9,10 @@ open System.Runtime.InteropServices
 // associated with an assembly.
 [<assembly: AssemblyTitle("LLKParser")>]
 [<assembly: AssemblyDescription("")>]
-[<assembly: AssemblyConfiguration("Release")>]
+[<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("")>]
 [<assembly: AssemblyProduct("LLKParser")>]
-[<assembly: AssemblyCopyright("Copyright �  2016")>]
+[<assembly: AssemblyCopyright("Copyright ©  2016")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]
 
@@ -33,9 +33,9 @@ open System.Runtime.InteropServices
 // 
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-// [<assembly: AssemblyVersion("0.3.0.27")>]
-[<assembly: AssemblyVersion("0.3.0.27")>]
-[<assembly: AssemblyFileVersion("0.3.0.27")>]
+// [<assembly: AssemblyVersion("1.0.*")>]
+[<assembly: AssemblyVersion("1.0.0.0")>]
+[<assembly: AssemblyFileVersion("1.0.0.0")>]
 
 do
     ()

@@ -36,12 +36,12 @@ do()
 let eol = System.Environment.NewLine
 
 let log (e:System.Exception) msg =
-    printfn "ERROR!"
-    "Stack trace: " + e.StackTrace
+    printfn "\nERROR!"
+    "\nStack trace:\n" + e.StackTrace
     |> printfn "%s"
-    "Internal message: " + e.Message
+    "\nInternal message:\n  " + e.Message
     |> printfn "%s"
-    "Message: " + msg
+    "\nMessage:\n  " + msg
     |> printfn "%s"
 
 let () =
@@ -279,7 +279,8 @@ List of available frontends, generators and conversions can be obtained by -af -
     | :? System.IO.IOException as e -> 
         "Could not read input file.\n"
         |> log e
-    | x -> "Unrecognized error." |> log x
+    | x -> "Correct this or above construction. Pay attention to the punctuation.\n" 
+        |> log x
 
 
 
@@ -304,4 +305,3 @@ List of available frontends, generators and conversions can be obtained by -af -
 //YaccConstructor.exe -g YardPrinter -c "BuildAST typed"-i ../../../../Tests/Conversions/buildast_1.yrd
 //YaccConstructor.exe -g YardPrinter -c MergeAlter -i ../../../../Tests/Conversions/mergealter_1.yrd
 //YaccConstructor.exe -g FsYaccPrinter -c ExpandMeta -c ExpandEbnfStrict -c ExpandBrackets -c AddEOF -i ../../../../Tests/Conversions/expandbrackets_1.yrd
-

@@ -3,6 +3,9 @@
 open LanguagePrimitives
 open Yard.Generators.Common.FinalGrammar
 open System.IO
+open System.Collections
+open System.Collections.Generic
+
 
 type ProductionRule (leftHandSides : int, rightHandSides : int[]) = 
        
@@ -72,37 +75,16 @@ type Grammar(grammarPath : string) =
     member this.getStartSymbol = startSymbol
     member this.isNonTerminal (symbol : int) = List.exists (fun x-> x = symbol) nonTerms
 
-
-
-type Stack<'T when 'T: equality>( st : list<'T>) = 
-     
-    let mutable st = st
-    let popEl stk =
-        match stk with
-        |[] -> []
-        |_::tl -> tl
-
-    new() = new Stack<'T>([])
-
-    member this.peek() = 
-        match st with
-        |[] -> None
-        |hd :: _ -> Some(hd)
-   
-    member this.push(a) = st <- a :: st
-   
-    member this.pop() =st <- popEl st
-
-    member this.toList = st  
-    member this.Length() = st.Length
-    member this.Empty() = if st = [] then true else false
-
 type Parser(grammar : Grammar)=
-    let mutable operationalStack  = new Stack<_>()
-    let mutable derivationStack = new Stack<_>()
-    let mutable parsingForest = []
+
+    let mutable operationalStack  = new Stack<OperationTuple>()
+    let mutable derivationStack = new Stack<ProductionRule>()
+    let mutable parsingForest : ProductionRule[] list = []
+
+
     let mutable grammar : Grammar = grammar
-    let mutable word : List<int> = []
+    let mutable word : List<int> = List[]
+
     let eor : int = -100
 
     let copy input =
@@ -125,8 +107,8 @@ type Parser(grammar : Grammar)=
             l <- List.append l [convertSymbolToString lst.[i]] 
         l 
     
-    //convert parsingForest ProductionRules from int to string
-    let pfs (parsingForest :List<ProductionRule> list) =
+    // convert parsingForest ProductionRules from int to string
+    let pfs (parsingForest : ProductionRule[] list) =
         let mutable parsingForestString = []
         let su = (parsingForest.Length) - 1
         for i in 0..su do
@@ -137,27 +119,26 @@ type Parser(grammar : Grammar)=
             parsingForestString <- List.append parsingForestString [uns]
         parsingForestString    
         
-    member this.parse(inpWord : List<string>) =
+    member this.parse(inpWord : string[]) =
         let wordConvert =
-            let mutable w = []
+            let mutable w : List<int>= new List<int>()
             for i in 0..inpWord.Length-1 do
                 try 
-                      w <- List.append w [grammar.retgr.indexator.literalToIndex inpWord.[i]] 
+                       w.Add(grammar.retgr.indexator.literalToIndex inpWord.[i]) 
                 with
                      | :? System.Collections.Generic.KeyNotFoundException ->
                             try
-                                w <- List.append w [grammar.retgr.indexator.termToIndex inpWord.[i]]
+                                w.Add(grammar.retgr.indexator.termToIndex inpWord.[i])
                             with
                                 | :? System.Collections.Generic.KeyNotFoundException -> ()
             w
         grammar.Grammar()
         word <- wordConvert
-        this.tryAllRulesFor(grammar.getStartSymbol,0,word.Length)
+        this.tryAllRulesFor(grammar.getStartSymbol,0,word.Count)
         let mutable ret = true
         let  parsingForestString = pfs parsingForest
 
-        if parsingForest.Length = 0 then ret <- false 
-
+        
         parsingForestString
          
     member this.tryAllRulesFor(symbol : int, position : int, lenght : int) = 
@@ -171,41 +152,44 @@ type Parser(grammar : Grammar)=
         let goal : Goal = new Goal(rule, position, lenght)
 
         if (not (this.isToBeAvoided(goal)) ) then
-            operationalStack.push(new OperationTuple(goal , -1, 0))
-            derivationStack.push(rule)
+            operationalStack.Push(new OperationTuple(goal , -1, 0))
+            derivationStack.Push(rule)
             this.doTopOfStack()
-            derivationStack.pop()
-            operationalStack.pop()
-    
+            derivationStack.Pop() |> ignore
+            operationalStack.Pop() |> ignore
+ 
+
     member this.doTopOfStack()=
-        let  s : OperationTuple = operationalStack.peek().Value
+        let  s : OperationTuple = operationalStack.Peek()
         let goal : Goal  = s.getGoal()
         let nextRhsSymbol : int = goal.getRule().getRightHandSide().[s.getRhsPosition() + 1]
         if (nextRhsSymbol = eor) then
             if (s.getInRec() = goal.getLength()) then
                 this.doNextOnStack()
-        else if ((s.getInRec() <  goal.getLength()) && (nextRhsSymbol = word.[goal.getPosition() + s.getInRec()])) then
+        elif ((s.getInRec() <  goal.getLength()) && (nextRhsSymbol = word.[goal.getPosition() + s.getInRec()])) then
             s.incrementRhsPosition(1)
             s.incrementInRec(1)
             this.doTopOfStack()
             s.decrementRhsPosition(1)
             s.decrementInRec(1)
-        else if (grammar.isNonTerminal(nextRhsSymbol)) then
+        elif (grammar.isNonTerminal(nextRhsSymbol)) then
             this.tryAllLengthsFor(nextRhsSymbol, goal.getPosition() + s.getInRec(), goal.getLength() - s.getInRec())
 
     member this.doNextOnStack()=
-        let s : OperationTuple = operationalStack.peek().Value
-        operationalStack.pop()
-        if (operationalStack.Empty()) then
-            parsingForest <-  parsingForest @ [(copy (derivationStack.toList))]
+        let s : OperationTuple = operationalStack.Peek()
+        operationalStack.Pop() |> ignore
+        if (operationalStack.Count = 0 ) then
+            parsingForest <- derivationStack.ToArray() :: parsingForest
+
+
         else 
-            let s1 : OperationTuple = operationalStack.peek().Value
+            let s1 : OperationTuple = operationalStack.Peek()
             s1.incrementRhsPosition(1)
             s1.incrementInRec(s.getGoal().getLength())
             this.doTopOfStack()
             s1.decrementInRec(s.getGoal().getLength())
             s1.decrementRhsPosition(1)
-        operationalStack.push(s)
+        operationalStack.Push(s)
 
     
     member this.tryAllLengthsFor(nonTerminal : int, position :  int , length : int )=
@@ -215,9 +199,10 @@ type Parser(grammar : Grammar)=
     
     member this.isToBeAvoided(goal : Goal)=
         let mutable k = false
-        for i in 0..(operationalStack.Length()-1) do
-            if (operationalStack.toList.[i].getGoal().equals(goal) = true) then  k <- true
+        for i in 0..(operationalStack.Count-1) do
+            if (operationalStack.ToArray().[i].getGoal().equals(goal) = true) then  k <- true
         k
+
 
 
    

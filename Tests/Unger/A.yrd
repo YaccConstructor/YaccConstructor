@@ -1,0 +1,9 @@
+[<Start>]
+a: e;
+e: e '+' t;
+e: t;
+t: t '*' f;
+t: f;
+f: NUM;
+f: '(' e ')'
+	

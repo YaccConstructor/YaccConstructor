@@ -1,2 +1,4 @@
 [<Start>]
-e: A e;
+s: x y;
+s: NUM;
+y: PLUS;

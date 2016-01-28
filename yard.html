@@ -220,6 +220,10 @@ let helperFunction2 x y = x*y
 <pre>
 s: e PLUS e;
 </pre>
+or in EBNF-like notation you can use
+<pre>
+s = e, PLUS, e;
+</pre>
 
 <h3>Alternative</h3>
 <pre>
@@ -232,6 +236,10 @@ Note that empty branch is an epsilon, so s can produce epsilon or NUMBER. It is 
 <h3>Zero or more</h3>
 <pre>
 grammar: rule*;
+</pre>
+or in EBNF-like notation you can use
+<pre>
+grammar = (: rule :);
 </pre>
 
 <h3>One or more</h3>
@@ -247,7 +255,7 @@ or
 <pre>
 s: [PLUS];
 </pre>
-This syntax is useful for big optional subexpressions. Instead of 
+Square-bracketed syntax is useful for big optional subexpressions. Instead of 
 <pre>
 s: (n PLUS expr)?;
 </pre>
@@ -318,6 +326,16 @@ LBRACE LITERAL RBRACE
 s: x (@l1(y z)| @l2(a b)) g;
 </pre>
 Where @l1 and @l2 are labels. Labels are used for working with dialects.
+
+<h2>Experimental syntax</h2>
+<h3>Syntactic factor</h3>
+Note that though syntactic factor is implemented in YARD, it is currently not supported by generators.
+
+<pre>
+  strict_rule = 5 * " ";
+</pre>
+
+
 
 </div>
         <div class="span3">

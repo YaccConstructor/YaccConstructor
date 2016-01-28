@@ -60,56 +60,46 @@
       <HintPath>..\packages\FSharpx.Text.StructuredFormat.1.8.41\lib\40\FSharpx.Text.StructuredFormat.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="JetBrains.Platform.ReSharper.ComponentModel">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.ComponentModel.dll</HintPath>
+    <Reference Include="JetBrains.Platform.ComponentModel">
+      <HintPath>..\packages\JetBrains.Platform.Core.Shell.102.0.20150522.70022\DotFiles\JetBrains.Platform.ComponentModel.dll</HintPath>
     </Reference>
-    <Reference Include="JetBrains.Platform.ReSharper.DocumentManager">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.DocumentManager.dll</HintPath>
+    <Reference Include="JetBrains.Platform.DocumentModel">
+      <HintPath>..\packages\JetBrains.Platform.Core.Text.102.0.20150522.70700\DotFiles\JetBrains.Platform.DocumentModel.dll</HintPath>
     </Reference>
-    <Reference Include="JetBrains.Platform.ReSharper.DocumentManager">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.DocumentModel.dll</HintPath>
+    <Reference Include="JetBrains.Platform.Shell">
+      <HintPath>..\packages\JetBrains.Platform.Core.Shell.102.0.20150522.70022\DotFiles\JetBrains.Platform.Shell.dll</HintPath>
     </Reference>
-    <Reference Include="JetBrains.Platform.ReSharper.Shell">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Shell.dll</HintPath>
-    </Reference>
-    <Reference Include="JetBrains.Platform.ReSharper.Shell.Extensions">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Shell.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="JetBrains.Platform.ReSharper.Util">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
+    <Reference Include="JetBrains.Platform.Util">
+      <HintPath>..\packages\JetBrains.Platform.Core.Shell.102.0.20150522.70022\DotFiles\JetBrains.Platform.Util.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.ReSharper.Psi.dll</HintPath>
+      <HintPath>..\packages\JetBrains.Psi.Features.src.102.0.20150522.71619\DotFiles\JetBrains.ReSharper.Psi.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi.CSharp">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
+      <HintPath>..\packages\JetBrains.Psi.Features.src.102.0.20150522.71619\DotFiles\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Addins">
       <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="QuickGraph">
-      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
-    </Reference>
-    <Reference Include="QuickGraph.Data">
-      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Data.dll</HintPath>
-    </Reference>
-    <Reference Include="QuickGraph.Graphviz">
-      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\FST\FST\FSA\FSA.fsproj">
-      <Name>FSA</Name>
-      <Project>{b48cfdcc-86f7-4c3a-a5a2-8170950dd2ab}</Project>
+    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj">
+      <Name>QuickGraph.FSA</Name>
+      <Project>{bd5d18de-1c9d-4314-a777-21aa683eeace}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\FST\FST\FST\FST.fsproj">
-      <Name>FST</Name>
-      <Project>{bcf4793c-e8b4-4fd5-9723-3c08859066c5}</Project>
+    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj">
+      <Name>QuickGraph.FST</Name>
+      <Project>{4b220e23-a7e0-4222-83f5-c785f7c66b33}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph\QuickGraph.csproj">
+      <Name>QuickGraph</Name>
+      <Project>{a9a5c115-0680-44b3-a87e-5ecf4c93814e}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
@@ -152,9 +142,14 @@
       <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\ReSharperExtension\ReSharperExtension.csproj">
-      <Name>ReSharperExtension</Name>
-      <Project>{70133fea-83f5-416a-8869-0e745ef37778}</Project>
+    <ProjectReference Include="..\OtherSPPF\OtherSPPF.fsproj">
+      <Name>OtherSPPF (SEL.SDK\OtherSPPF\OtherSPPF)</Name>
+      <Project>{f04ea94f-614d-4e58-b214-f328518cbc14}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\ReSharperExtension\ReSharper.Extension.csproj">
+      <Name>ReSharper.Extension</Name>
+      <Project>{740981f9-878c-4e96-ac6d-8ce178c28c38}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
@@ -188,7 +183,6 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\Plugin.NoReferences.Targets')" />
   <PropertyGroup>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

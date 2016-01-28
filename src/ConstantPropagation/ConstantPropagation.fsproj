@@ -31,87 +31,87 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
   <ItemGroup>
-    <Compile Include="XMLParser.fs" />
-    <Compile Include="ConstantPropagation.fs" />
+    <None Include="app.config" />
     <None Include="packages.config" />
-    <Content Include="Hotspots.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Compile Include="Utils.fs" />
-    <Compile Include="DataDependencyGraph.fs" />
-    <Compile Include="ApproximationBuilderCSharp.fs" />
-    <Compile Include="Approximator.fs" />
+    <Compile Include="CharFsa.fs" />
+    <Compile Include="IControlFlowGraphUtils.fs" />
+    <Compile Include="ResharperCfgAdditionalInfo.fs" />
+    <Compile Include="ResharperCfgToGeneric.fs" />
+    <Compile Include="CsharpLoopInfo.fs" />
+    <Compile Include="ResharperCsharpTreeUtils.fs" />
+    <Compile Include="CsharpCfgToGeneric.fs" />
+    <Compile Include="JsLoopInfo.fs" />
+    <Compile Include="JsCfgToGeneric.fs" />
+    <Compile Include="Hotspot.fs" />
+    <Compile Include="CsharpApprxomationUtils.fs" />
+    <Compile Include="ApproximateCsharp.fs" />
+    <Compile Include="ApproximateJs.fs" />
+    <Compile Include="ConstantPropagation.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
+    <Reference Include="FSharpx.Collections">
+      <HintPath>..\packages\FSharpx.Collections.1.12.1\lib\net40\FSharpx.Collections.dll</HintPath>
+    </Reference>
     <Reference Include="FSharpx.Core">
       <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="JetBrains.Platform.ReSharper.DocumentModel">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.DocumentModel.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="JetBrains.Platform.DocumentModel">
+      <HintPath>..\packages\JetBrains.Platform.Core.Text.102.0.20150522.70700\DotFiles\JetBrains.Platform.DocumentModel.dll</HintPath>
     </Reference>
-    <Reference Include="JetBrains.Platform.ReSharper.ProjectModel">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.ProjectModel.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="JetBrains.Platform.ProjectModel">
+      <HintPath>..\packages\JetBrains.Platform.Core.Ide.102.0.20150522.70700\DotFiles\JetBrains.Platform.ProjectModel.dll</HintPath>
     </Reference>
-    <Reference Include="JetBrains.Platform.ReSharper.Util">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="JetBrains.Platform.Util">
+      <HintPath>..\packages\JetBrains.Platform.Core.Shell.102.0.20150522.70022\DotFiles\JetBrains.Platform.Util.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\JetBrains.Psi.Features.src.102.0.20150522.71619\DotFiles\JetBrains.ReSharper.Psi.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi.CSharp">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\JetBrains.Psi.Features.src.102.0.20150522.71619\DotFiles\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.ReSharper.Psi.JavaScript">
+      <HintPath>..\packages\JetBrains.Psi.Features.src.102.0.20150522.71619\DotFiles\JetBrains.ReSharper.Psi.JavaScript.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Addins">
       <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="QuickGraph">
-      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="QuickGraph.Data">
-      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Data.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="QuickGraph.Graphviz">
-      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="QuickGraph.Serialization">
-      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Serialization.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\FST\FST\FSA\FSA.fsproj">
-      <Name>FSA</Name>
-      <Project>{b48cfdcc-86f7-4c3a-a5a2-8170950dd2ab}</Project>
+    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj">
+      <Name>QuickGraph.FSA</Name>
+      <Project>{bd5d18de-1c9d-4314-a777-21aa683eeace}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\FST\FST\FST\FST.fsproj">
-      <Name>FST</Name>
-      <Project>{bcf4793c-e8b4-4fd5-9723-3c08859066c5}</Project>
+    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj">
+      <Name>QuickGraph.FST</Name>
+      <Project>{4b220e23-a7e0-4222-83f5-c785f7c66b33}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph\QuickGraph.csproj">
+      <Name>QuickGraph (SEL.SDK\AbstractLexing\QuickGraph\Core\QuickGraph)</Name>
+      <Project>{a9a5c115-0680-44b3-a87e-5ecf4c93814e}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
       <Name>AbstractAnalysis.Common</Name>
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RegularApproximation\RegularApproximation.fsproj">
+      <Name>RegularApproximation</Name>
+      <Project>{d21242ef-c310-4b89-a9aa-cfd1c2b34531}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

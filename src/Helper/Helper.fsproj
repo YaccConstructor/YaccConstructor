@@ -44,7 +44,6 @@
       </PropertyGroup>
     </Otherwise>
   </Choose>
-  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <Compile Include="Helper.fs" />
     <None Include="packages.config" />
@@ -61,21 +60,26 @@
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="QuickGraph">
-      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Generator.0.0.6.5\tools\QuickGraph.dll</HintPath>
-    </Reference>
-    <Reference Include="QuickGraph.Data">
-      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Generator.0.0.6.5\tools\QuickGraph.Data.dll</HintPath>
-    </Reference>
-    <Reference Include="QuickGraph.Graphviz">
-      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Generator.0.0.6.5\tools\QuickGraph.Graphviz.dll</HintPath>
-    </Reference>
-    <Reference Include="QuickGraph.Serialization">
-      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Generator.0.0.6.5\tools\QuickGraph.Serialization.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph.Data\QuickGraph.Data.csproj">
+      <Name>QuickGraph.Data</Name>
+      <Project>{960c14d1-edbd-40e5-8ae6-25e311551b87}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj">
+      <Name>QuickGraph.Graphviz</Name>
+      <Project>{595d6322-637a-4a36-97f1-d53f3f9ecea7}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph\QuickGraph.csproj">
+      <Name>QuickGraph (SEL.SDK\AbstractLexing\QuickGraph\Core\QuickGraph)</Name>
+      <Project>{a9a5c115-0680-44b3-a87e-5ecf4c93814e}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.

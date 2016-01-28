@@ -11,10 +11,10 @@ open Internal.Utilities.Text.Lexing
 open System
 open System.Collections.Generic
 open System.IO
-open YC.FST.GraphBasedFst
+open QuickGraph.FST.GraphBasedFst
 open Microsoft.FSharp.Collections 
 open QuickGraph
-open YC.FSA.GraphBasedFsa
+open QuickGraph.FSA.GraphBasedFsa
 
 //------------------------------------------------------------------
 // This code is duplicated from Microsoft.FSharp.Compiler.UnicodeLexing

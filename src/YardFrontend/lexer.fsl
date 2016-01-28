@@ -126,6 +126,7 @@ and  main = parse
        blank  { main lexbuf }
      | '\n' { newline lexbuf; main lexbuf }
      | ['-']?digit+('.'digit+)?(['e''E']digit+)? { NUMBER <| lex2source lexbuf }
+	 | digit+ {POSITIVEINT <| lex2source lexbuf }
      | '-'  {MINUS <| lex2source lexbuf}
      | ':'  {COLON <| lex2source lexbuf}
      | ';'  {SEMICOLON <| lex2source lexbuf}
@@ -185,6 +186,8 @@ and  main = parse
        }
     | "<"  {LESS <| lex2source lexbuf}
     | ">"  {GREAT <| lex2source lexbuf}
+	| "(:" {STARTREPEAT <| lex2source lexbuf}
+	| ":)" {ENDREPEAT <| lex2source lexbuf}
     | '"'
       { reset_string_buffer();
         let string_start = lexbuf.StartPos in

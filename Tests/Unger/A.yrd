@@ -1,0 +1,7 @@
+[<Start>]
+num: mul;
+num: num '+' mul;
+mul: 'a';
+mul: mul '*' 'a';
+
+	

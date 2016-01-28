@@ -209,7 +209,6 @@ module_header : ALL_PUBLIC MODULE
                   allPublic := true; true
                 }
               | MODULE      { allPublic := false; false }
-              | ALL_PUBLIC  { errorexception " 'MODULE' expected " parserRange  }
 
 openings :                      { [] } 
          | OPEN ident open_list { $2::$3 }

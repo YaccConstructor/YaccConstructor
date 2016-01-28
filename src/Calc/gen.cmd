@@ -1,1 +1,1 @@
-..\..\Bin\Release\v40\AbstractLexer.Generator.exe Lexer.fsl -o Lexer.fs --abstract
+..\..\Bin\Release\v40\AbstractLexer.Generator.exe Lexer.fsl -o Lexer.fs --abstract --case-insensitive

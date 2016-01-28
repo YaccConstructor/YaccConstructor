@@ -1,4 +1,4 @@
-// (c) Microsoft Corporation 2005-2009.  
+﻿// (c) Microsoft Corporation 2005-2009.  
 
 module internal FSharp.PowerPack.FsLex.Driver 
 
@@ -44,6 +44,7 @@ let UnicodeFileAsLexbuf (filename,codePage : int option) : FileStream * StreamRe
 
 let input = ref None
 let out = ref None
+let outp = ref None
 let inputCodePage = ref None
 let light = ref None
 let abstractLexer = ref false
@@ -59,7 +60,9 @@ let usage =
     ArgInfo ("--lexlib", ArgType.String (fun s ->  lexlib <- s), "Specify the namespace for the implementation of the lexer table interperter (default Microsoft.FSharp.Text.Lexing)");
     ArgInfo ("--unicode", ArgType.Set unicode, "Produce a lexer for use with 16-bit unicode characters.");
     ArgInfo ("--abstract", ArgType.Unit (fun () -> abstractLexer := true), "Lexer is based on FST.");  
-    ArgInfo ("--case-insensitive", ArgType.Unit (fun () -> caseInsensitive := true), "For case insensitive grammar.");
+    ArgInfo ("--case-insensitive", ArgType.Unit (fun () -> let filename = (match !input with Some x -> x | None -> failwith "no input given")
+                                                           caseInsensitive := true
+                                                           outp := Some (Path.Combine (Path.GetDirectoryName filename,Path.GetFileNameWithoutExtension(filename)) + ".fs")), "For case insensitive grammar.");
   ]
 
 let _ = ArgParser.Parse(usage, (fun x -> match !input with Some _ -> failwith "more than one input given" | None -> input := Some x), "fslex <filename>")
@@ -91,6 +94,8 @@ let FileParse (filename:string) =
             if line.Contains("\'") || line.Contains("\"") then
                 let line = line.Replace("[", "")
                 let line = line.Replace("]", "")
+                let line = line.Replace("\\\'", "‘")
+                let line = line.Replace("\\\"", "“")
                 let x = line.Split('\'', '\"')
                 let mutable genline = ""
                 for i in 0..x.Length-1 do
@@ -111,6 +116,8 @@ let FileParse (filename:string) =
                                     genregexp <- genregexp + "['" + word.[j].ToString() + "'" + "'" + Char.ToUpper(word.[j]).ToString() + "']"
                                 strings.Add(genregexp)
                         else
+                            if word = "‘" then word <- "\\\'"
+                            if word = "“" then word <- "\\\""
                             if word.Length = 1 then
                                 genline <- String.Concat(genline, "[\'"+  word + "\']")
                             else
@@ -149,10 +156,16 @@ let main() =
     printfn "writing output"; 
     
     let output = 
-        match !out with 
-        | Some x -> x 
-        | _ -> 
-            Path.Combine (Path.GetDirectoryName filename,Path.GetFileNameWithoutExtension(filename)) + ".fs"
+        if !caseInsensitive then
+            match !outp with
+            | Some x -> x
+            | _ -> 
+                Path.Combine (Path.GetDirectoryName filename,Path.GetFileNameWithoutExtension(filename)) + ".fs"
+        else
+            match !out with 
+            | Some x -> x 
+            | _ -> 
+                Path.Combine (Path.GetDirectoryName filename,Path.GetFileNameWithoutExtension(filename)) + ".fs"
     use os = System.IO.File.CreateText output
 
     if (!light = Some(false)) || (!light = None && (Path.HasExtension(output) && Path.GetExtension(output) = ".ml")) then

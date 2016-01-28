@@ -257,6 +257,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RAGenerator", "RAGenerator\
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RAGenerator.Test", "RAGenerator.Test\RAGenerator.Test.fsproj", "{4FFEF1EF-D679-4BD5-8F70-320030BB98EA}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Unger", "Unger\Unger.fsproj", "{37DD371F-283F-4243-A701-62594BD38966}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1561,6 +1563,21 @@ Global
 		{4FFEF1EF-D679-4BD5-8F70-320030BB98EA}.ReleaseContractsReferences|Any CPU.ActiveCfg = Release|Any CPU
 		{4FFEF1EF-D679-4BD5-8F70-320030BB98EA}.ReleaseContractsReferences|Any CPU.Build.0 = Release|Any CPU
 		{4FFEF1EF-D679-4BD5-8F70-320030BB98EA}.ReleaseContractsReferences|x86.ActiveCfg = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.DebugContracts|Any CPU.ActiveCfg = Debug|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.DebugContracts|Any CPU.Build.0 = Debug|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.DebugContracts|x86.ActiveCfg = Debug|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Release|x86.ActiveCfg = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Release20|Any CPU.ActiveCfg = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Release20|Any CPU.Build.0 = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.Release20|x86.ActiveCfg = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.ReleaseContractsReferences|Any CPU.ActiveCfg = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.ReleaseContractsReferences|Any CPU.Build.0 = Release|Any CPU
+		{37DD371F-283F-4243-A701-62594BD38966}.ReleaseContractsReferences|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -76,6 +76,7 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
     res
 %}
 
+%token POSITIVEINT
 %token COLON
 %token <Range> SEMICOLON
 %token COMMA

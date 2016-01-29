@@ -202,8 +202,3 @@ type Parser(grammar : Grammar)=
         for i in 0..(operationalStack.Count-1) do
             if (operationalStack.ToArray().[i].getGoal().equals(goal) = true) then  k <- true
         k
-
-
-
-   
-

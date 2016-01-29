@@ -1,7 +1,7 @@
 ﻿module Yard.Generators.GLL.AbstractParser 
 open Yard.Generators.GLL 
 open System 
-open System.Collections.Generic
+
 open Yard.Generators.GLL
 open Yard.Generators.Common.ASTGLL
 open Yard.Generators.Common.DataStructures
@@ -10,6 +10,8 @@ open AbstractAnalysis.Common
 open FSharpx.Collections.Experimental
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
+
+type SysDict<'k,'v> = System.Collections.Generic.Dictionary<'k,'v>
 
 [<Struct>]
 type M =
@@ -27,33 +29,33 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             Error ("This grammar does not accept empty input.")     
     else
         let slots = parser.Slots
-        let errors = new Dictionary<int64, Dictionary<int<nodeMeasure>, Vertex*int>>()   
-        let setU = Array.zeroCreate<Dictionary<int, Dictionary<int64, ResizeArray<int<nodeMeasure>>>>> (input.VertexCount )///1
-        let structures = new ParserStructures(input.VertexCount, parser.StartRule)
+        let errors = new SysDict<int64, SysDict<int<nodeMeasure>, Vertex*int>>()   
+        let setU = Array.zeroCreate<SysDict<int, SysDict<int64, ResizeArray<int<nodeMeasure>>>>> (input.VertexCount )///1
+        let structures = new ParserStructures<'TokenType>(input.VertexCount, parser.StartRule)
         let setR = structures.SetR
         let epsilonNode = structures.EpsilonNode
         let setP = structures.SetP
         let tempCount = ref 0
         let currentVertexInInput = ref 0
-        let currentPath = ref <| List.Empty
+        let currentPath = ref <| List.empty<ParserEdge<'TokenType*ref<bool>>>
         let currentrule = parser.StartRule
 
-        let finalPaths = new ResizeArray<list<int>>()
-        let errorPaths = new ResizeArray<list<int>>()
+        let finalPaths = new ResizeArray<list<ParserEdge<'TokenType*ref<bool>>>>()
+        let errorPaths = new ResizeArray<list<ParserEdge<'TokenType*ref<bool>>>>()
 
          //packLabel without int
         let dummyGSSNode = new Vertex(!currentVertexInInput, int !structures.CurrentLabel)
         let sppfNodes = structures.SppfNodes
         
         let tokens = new BlockResizeArray<'TokenType>()        
-        let packedNodes = new Dictionary<M, int<nodeMeasure>>()
+        let packedNodes = new SysDict<M, int<nodeMeasure>>()
         //let 
-        let nonTerminalNodes = new Dictionary<int64,int<nodeMeasure>>()        
-        let intermidiateNodes = Array2D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount) (input.VertexCount) //убрала +1
-        let edges = Array2D.zeroCreate<Dictionary<int<nodeMeasure>, Dictionary<int, ResizeArray<int>>>> slots.Count (input.VertexCount )
+        let nonTerminalNodes = new SysDict<int64,int<nodeMeasure>>()        
+        let intermidiateNodes = Array2D.zeroCreate<SysDict<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount) (input.VertexCount) //убрала +1
+        let edges = Array2D.zeroCreate<SysDict<int<nodeMeasure>, SysDict<int, ResizeArray<int>>>> slots.Count (input.VertexCount )
         let terminalNodes = Array3D.zeroCreate<int<nodeMeasure>> input.VertexCount input.VertexCount parser.TermCount  
         let currentGSSNode = ref <| dummyGSSNode
-        let currentContext = ref <| new Context(!currentVertexInInput, !structures.CurrentLabel, !currentGSSNode, structures.Dummy) //without *1<labelMeasure>
+        let currentContext = ref <| new Context<_>(!currentVertexInInput, !structures.CurrentLabel, !currentGSSNode, structures.Dummy) //without *1<labelMeasure>
         
         let finalExtensions =
             let len = input.FinalStates.Length
@@ -83,9 +85,9 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 else
                     nonTerminalNodes.[pack3 nTerm lExt rExt]
             else
-                if intermidiateNodes.[lExt, rExt] = Unchecked.defaultof<Dictionary<int<labelMeasure>, int<nodeMeasure>>>
+                if intermidiateNodes.[lExt, rExt] = Unchecked.defaultof<SysDict<int<labelMeasure>, int<nodeMeasure>>>
                 then
-                    let d = new Dictionary<int<labelMeasure>, int<nodeMeasure>>(2)
+                    let d = new SysDict<int<labelMeasure>, int<nodeMeasure>>(2)
                     let newNode = new IntermidiateNode(int label, (packExtension lExt rExt))
                     sppfNodes.Add(newNode)
                     let num = (sppfNodes.Length - 1)*1<nodeMeasure>
@@ -205,7 +207,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     d.Add(ast, (vertex, (errorPaths.Count - 1)))
                 
             else
-                let d = new Dictionary<int<nodeMeasure>, Vertex*int>()
+                let d = new SysDict<int<nodeMeasure>, Vertex*int>()
                 errorPaths.Add currentPath
                 d.Add(ast, (vertex, (errorPaths.Count - 1)))
                 errors.Add(key, d)
@@ -246,13 +248,21 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     if parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol
                     then
                         let isEq (sym : int) (elem : ParserEdge<'TokenType*ref<bool>>) = sym = parser.TokenToNumber (fst elem.Tag)
-
-                        let curEdge = Seq.tryFind (isEq curSymbol) (input.OutEdges !currentVertexInInput)
+                        
+                        let curEdge = 
+                            let mutable  c = false
+                            let mutable res = None
+                            for oe in input.OutEdges !currentVertexInInput do
+                                if isEq curSymbol oe then
+                                    res <- Some oe  
+                                else
+                                    containsError !currentVertexInInput !structures.CurrentLabel !currentGSSNode !structures.CurrentN !currentPath
+                            res
                         match curEdge with
                         | Some edge ->
                             snd edge.Tag := true
                             let curToken = parser.TokenToNumber (fst edge.Tag)
-                            currentPath := edge.Target :: currentPath.Value
+                            currentPath := edge :: currentPath.Value
                             if !structures.CurrentN = structures.Dummy
                             then 
                                 structures.CurrentN := getNodeT edge

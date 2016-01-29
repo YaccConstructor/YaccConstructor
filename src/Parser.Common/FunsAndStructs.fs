@@ -1,8 +1,12 @@
-﻿namespace Yard.Generators.GLL.ParserCommon
+﻿
 
-open System.Collections.Generic
+namespace Yard.Generators.GLL.ParserCommon
+
+open AbstractAnalysis.Common
 open Yard.Generators.Common.ASTGLL
 open FSharpx.Collections.Experimental
+
+
 
 [<Measure>] type vertexMeasure
 [<Measure>] type nodeMeasure
@@ -15,12 +19,14 @@ type Vertex =
     new (level, nonterm) = {Level = level; NontermLabel = nonterm}
 
 [<Struct>]
-type Context =
+type Context<'TokenType> =
     val Index         : int
     val Label         : int<labelMeasure>
     val Vertex        : Vertex
     val Ast           : int<nodeMeasure>
-    new (index, label, vertex, ast) = {Index = index; Label = label; Vertex = vertex; Ast = ast}
+    val Path          : List<ParserEdge<'TokenType*ref<bool>>>
+    new (index, label, vertex, ast) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Path = List.empty<ParserEdge<'TokenType*ref<bool>>>}
+    new (index, label, vertex, ast, path) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Path = path}
 
 
 type ParseResult<'TokenType> =
@@ -44,12 +50,12 @@ module CommonFuns =
     let inline getRule (packedValue : int<labelMeasure>)  = int packedValue >>> 16
     let inline getPosition (packedValue : int<labelMeasure>) = int (int packedValue &&& 0xffff)
 
-type ParserStructures (inputLength : int, currentRule : int)=
+type ParserStructures<'TokenType> (inputLength : int, currentRule : int)=
     let sppfNodes = new BlockResizeArray<INode>()
     let dummyAST = new TerminalNode(-1, packExtension -1 -1)
-    let setP = new Dictionary<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<nodeMeasure>>>(500)//list<int<nodeMeasure>>> (500)
+    let setP = new System.Collections.Generic.Dictionary<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<nodeMeasure>>>(500)//list<int<nodeMeasure>>> (500)
     let epsilonNode = new TerminalNode(-1, packExtension 0 0)
-    let setR = new Queue<Context>(100)  
+    let setR = new System.Collections.Generic.Queue<Context<'TokenType>>(100)  
     let dummy = 0<nodeMeasure>
     let currentN = ref <| dummy
     let currentR = ref <| dummy
@@ -92,7 +98,7 @@ type ParserStructures (inputLength : int, currentRule : int)=
                 ignore <| findSppfPackedNode y label rightExt rightExt dummyAST currentRight 
                 y
                                  
-    let containsContext (setU : Dictionary<_, Dictionary<_, ResizeArray<_>>>[]) inputIndex (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
+    let containsContext (setU : System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>[]) inputIndex (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
         if inputIndex <= inputLength
         then
             let vertexKey = CommonFuns.pack vertex.Level vertex.NontermLabel
@@ -114,16 +120,16 @@ type ParserStructures (inputLength : int, currentRule : int)=
                         current.Add(vertexKey, arr)                    
                         false
                 else 
-                    let dict = new Dictionary<_, ResizeArray<_>>()
+                    let dict = new System.Collections.Generic.Dictionary<_, ResizeArray<_>>()
                     setU.[inputIndex].Add(int label, dict)
                     let arr = new ResizeArray<int<nodeMeasure>>()
                     arr.Add(ast)
                     dict.Add(vertexKey, arr) 
                     false
             else 
-                let dict1 =  new Dictionary<_, _>()
+                let dict1 =  new System.Collections.Generic.Dictionary<_, _>()
                 setU.[inputIndex] <- dict1
-                let dict2 = new Dictionary<_, ResizeArray<_>>()
+                let dict2 = new System.Collections.Generic.Dictionary<_, ResizeArray<_>>()
                 dict1.Add(int label, dict2)
                 let arr = new ResizeArray<int<nodeMeasure>>()
                 arr.Add(ast)
@@ -131,12 +137,12 @@ type ParserStructures (inputLength : int, currentRule : int)=
                 false
         else true
 
-    let addContext (setU : Dictionary<_, Dictionary<_, ResizeArray<_>>>[]) (inputVertex : int) (label : int<labelMeasure>) vertex ast =
+    let addContext (setU : System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>[]) (inputVertex : int) (label : int<labelMeasure>) vertex ast currentPath =
         if not <| containsContext setU inputVertex label vertex ast
         then
-            setR.Enqueue(new Context(inputVertex, label, vertex, ast))
+            setR.Enqueue(new Context<_>(inputVertex, label, vertex, ast, currentPath))
 
-    let containsEdge (dict1 : Dictionary<int<nodeMeasure>, Dictionary<int, ResizeArray<int>>>) ast (e : Vertex) =
+    let containsEdge (dict1 : System.Collections.Generic.Dictionary<int<nodeMeasure>, System.Collections.Generic.Dictionary<int, ResizeArray<int>>>) ast (e : Vertex) =
         if dict1 <> Unchecked.defaultof<_>
             then
                 if dict1.ContainsKey(ast)
@@ -155,15 +161,15 @@ type ParserStructures (inputLength : int, currentRule : int)=
                         dict2.Add(e.NontermLabel, arr)
                         false, None
                 else
-                    let d = new Dictionary<int, ResizeArray<int>>()
+                    let d = new System.Collections.Generic.Dictionary<int, ResizeArray<int>>()
                     dict1.Add(ast, d)
                     let l = new ResizeArray<int>()
                     l.Add(e.Level)
                     d.Add(e.NontermLabel, l)
                     false, None
             else
-                let newDict1 = new Dictionary<int<nodeMeasure>, Dictionary<int, ResizeArray<int>>>()
-                let newDict2 = new Dictionary<int, ResizeArray<int>>()
+                let newDict1 = new System.Collections.Generic.Dictionary<int<nodeMeasure>, System.Collections.Generic.Dictionary<int, ResizeArray<int>>>()
+                let newDict2 = new System.Collections.Generic.Dictionary<int, ResizeArray<int>>()
                 let newArr = new ResizeArray<int>()
                 newArr.Add(e.Level)
                 newDict2.Add(e.NontermLabel, newArr)
@@ -180,7 +186,7 @@ type ParserStructures (inputLength : int, currentRule : int)=
                 n.Extension
             | _ -> failwith "Bad type for tree node"   
 
-    let finalMatching (curRight : INode) nontermName finalExtensions findSppfNode findSppfPackedNode currentGSSNode currentVertexInInput (pop : Vertex -> int -> int<nodeMeasure> -> unit) = 
+    let finalMatching (curRight : INode) nontermName finalExtensions findSppfNode findSppfPackedNode currentGSSNode currentVertexInInput (pop : Vertex -> int -> int<nodeMeasure> -> unit)  = 
         match curRight with
         | :? TerminalNode as t ->
             currentN := getNodeP findSppfNode findSppfPackedNode dummy !currentLabel !currentR !currentN
@@ -190,9 +196,11 @@ type ParserStructures (inputLength : int, currentRule : int)=
             if (r.Name = nontermName) && (Array.exists (fun a -> a = r.Extension) finalExtensions)
             then 
                 match !resultAST with
-                    | None -> resultAST := Some r
+                    | None ->  
+                        resultAST := Some r
                     | Some a -> 
                          a.AddChild r.First
+                
                          
             pop !currentGSSNode !currentVertexInInput !currentN
         | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()

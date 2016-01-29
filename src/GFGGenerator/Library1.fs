@@ -43,13 +43,13 @@ module gr =
     let  mutable starts = ""
     let mutable vertex:string list = []
     let mutable edge:(string*string*string) list = []    
+    let mutable outPath = ""
 
 type FileDotEngine()  =
     interface IDotEngine with
         member this.Run(imageType, dot:string, outputFileName: string) = 
-            let output = Path.GetFullPath("result.dot");
-            File.WriteAllText(Path.GetFullPath("result.dot"), dot);
-            output
+            File.WriteAllText(gr.outPath, dot);
+            (gr.outPath)
 
 
 [<assembly:Addin>]
@@ -67,10 +67,9 @@ type GrammarFlowGraph() =
             let pairs = Array.zeroCreate <| args.Length / 2
             for i = 0 to pairs.Length-1 do
                 pairs.[i] <- args.[i * 2], args.[i * 2 + 1]
-            let mutable output = ""
             for opt, value in pairs do
                 match opt with
-                | "-o" -> if value.Trim() <> "" then output <- value
+                | "-o" -> if value.Trim() <> "" then gr.outPath <- value
                 | _ -> failwithf "Unknown option %A" opt
             //Some types using in program
 

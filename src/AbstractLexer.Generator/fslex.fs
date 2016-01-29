@@ -1,4 +1,4 @@
-// (c) Microsoft Corporation 2005-2009.  
+﻿// (c) Microsoft Corporation 2005-2009.  
 
 module internal FSharp.PowerPack.FsLex.Driver 
 
@@ -44,9 +44,11 @@ let UnicodeFileAsLexbuf (filename,codePage : int option) : FileStream * StreamRe
 
 let input = ref None
 let out = ref None
+let outp = ref None
 let inputCodePage = ref None
 let light = ref None
 let abstractLexer = ref false
+let caseInsensitive = ref false
 
 let mutable lexlib = "Microsoft.FSharp.Text.Lexing"
 
@@ -58,6 +60,9 @@ let usage =
     ArgInfo ("--lexlib", ArgType.String (fun s ->  lexlib <- s), "Specify the namespace for the implementation of the lexer table interperter (default Microsoft.FSharp.Text.Lexing)");
     ArgInfo ("--unicode", ArgType.Set unicode, "Produce a lexer for use with 16-bit unicode characters.");
     ArgInfo ("--abstract", ArgType.Unit (fun () -> abstractLexer := true), "Lexer is based on FST.");  
+    ArgInfo ("--case-insensitive", ArgType.Unit (fun () -> let filename = (match !input with Some x -> x | None -> failwith "no input given")
+                                                           caseInsensitive := true
+                                                           outp := Some (Path.Combine (Path.GetDirectoryName filename,Path.GetFileNameWithoutExtension(filename)) + ".fs")), "For case insensitive grammar.");
   ]
 
 let _ = ArgParser.Parse(usage, (fun x -> match !input with Some _ -> failwith "more than one input given" | None -> input := Some x), "fslex <filename>")
@@ -73,9 +78,116 @@ let sentinel = 255 * 256 + 255
 let lineCount = ref 0
 let cfprintfn (os: #TextWriter) fmt = Printf.kfprintf (fun () -> incr lineCount; os.WriteLine()) os fmt
 
+let FileParse (filename:string) =
+    let streamReader = new StreamReader(filename)
+    let keywords = new Collections.Generic.List<string>()
+    let mutable readrules = false
+    let strings = new Collections.Generic.List<string>()
+    let rules = new Collections.Generic.List<string>()
+    let mutable str = ""
+    let mutable prod = ""
+    while not streamReader.EndOfStream do
+        let line = streamReader.ReadLine()
+        if line.Contains("rule") then
+            readrules <- true
+        if not readrules then
+            strings.Add(line)
+        else
+            if line.Contains(" '{'") then
+                System.Console.Write("ddd")
+            let line = line.Replace("'{'", "'╝'")
+            let line = line.Replace(" {", "☺")
+            let line = line.Replace("\t{", "☺")
+            let prsp = line.Split('☺')
+            let line = line.Replace("'╝'", "'{'")
+            let line = line.Replace("☺", " {")
+            if prsp.Length > 1 then
+                str <- prsp.[0]
+                str <- str.Replace("'╝'", "'{'")
+                str <- str.Replace("☺", " {")
+                prod <- " {"+prsp.[1]
+                prod <- prod.Replace("'╝'", "'{'")
+                prod <- prod.Replace("☺", " {")
+            else
+                str <- ""
+                prod <- line
+                prod <- prod.Replace("'╝'", "'{'")
+                prod <- prod.Replace("☺", " {")
+            if str.Contains("\'") || str.Contains("\"") then
+                if str.Contains("^") then
+                    rules.Add(line)
+                else
+                    let str = str.Replace("\\\'", "‘")
+                    let str = str.Replace("\\\"", "“")
+                    let str = str.Replace("N\'", "ʘ")
+                    let str = str.Replace("\'\'", "][")
+                    let x = str.Split('\'', '\"')
+                    let mutable deleteb = false
+                    let mutable genline = ""
+                    for i in 0..x.Length-1 do
+                        if i%2 = 0 then
+                            let mutable dlb = x.[i]
+                            if deleteb then
+                                dlb <- dlb.Remove(0, 1)
+                                deleteb <- false
+                            genline <- String.Concat(genline, dlb)
+                        else
+                            let mutable word = x.[i]
+                            word <- word.ToLower()
+                            let mutable key = ""
+                            if (System.Text.RegularExpressions.Regex.IsMatch(word, "[a-z]+")) then
+                                for j in word do
+                                    if (System.Text.RegularExpressions.Regex.IsMatch(j.ToString(), "[a-z]+")) then
+                                        key <- key + j.ToString()
+                                if keywords.Contains(key) then
+                                    if genline.Length <> 0 && genline.[genline.Length-1] = '[' && i+1 < x.Length-1 && x.[i+1].[0] = ']' then
+                                        genline <- genline.Remove(genline.Length-1, 1)
+                                        deleteb <- true
+                                    genline <- String.Concat(genline, "(" + key + ")")
+                                else
+                                    keywords.Add(key)
+                                    let mutable genregexp = "let " + key + " = "
+                                    if genline.Length <> 0 && genline.[genline.Length-1] = '[' && i+1 < x.Length && x.[i+1].[0] = ']' then
+                                        genline <- genline.Remove(genline.Length-1, 1)
+                                        deleteb <- true
+                                    genline <- String.Concat(genline, "(" + key + ")")
+                                    for j = 0 to word.Length-1 do
+                                        if (System.Text.RegularExpressions.Regex.IsMatch(word.[j].ToString(), "[a-z]+")) then
+                                            genregexp <- genregexp + "['" + word.[j].ToString() + "' " + "'" + Char.ToUpper(word.[j]).ToString() + "']"
+                                        else
+                                            if word.[j] = '\\' then
+                                                genregexp <- genregexp + "['\\\\']"
+                                            else
+                                                genregexp <- genregexp + "['" + word.[j].ToString() + "']"
+                                    strings.Add(genregexp)
+                            else
+                                if word = "‘" then word <- "\\\'"
+                                if word = "“" then word <- "\\\""
+                                if word = "ʘ" then word <- "N\'"
+                                if word = "/*" then
+                                    ()
+                                if word.Equals("][") then
+                                    word <- "\'\'"
+                                if word.Length = 1 then
+                                    genline <- String.Concat(genline, "\'"+  word + "\'")
+                                else
+                                    genline <- String.Concat(genline, "\""+  word + "\"")
+                    rules.Add(genline + prod)
+                    System.Console.WriteLine(genline + prod)
+            else
+                rules.Add(line)
+                System.Console.WriteLine(line)
+
+    System.IO.File.WriteAllLines("ci" + filename, strings)
+    System.IO.File.AppendAllLines("ci" + filename, rules)
+    "ci" + filename
+        
+
 let main() = 
   try 
-    let filename = (match !input with Some x -> x | None -> failwith "no input given") 
+    let mutable filename = (match !input with Some x -> x | None -> failwith "no input given") 
+    if (!caseInsensitive) then
+        filename <- FileParse(filename)
     let domain = if !unicode then "Unicode" else "Ascii" 
     let spec = 
       let stream,reader,lexbuf = UnicodeFileAsLexbuf(filename, !inputCodePage) 
@@ -97,10 +209,16 @@ let main() =
     printfn "writing output"; 
     
     let output = 
-        match !out with 
-        | Some x -> x 
-        | _ -> 
-            Path.Combine (Path.GetDirectoryName filename,Path.GetFileNameWithoutExtension(filename)) + ".fs"
+        if !caseInsensitive then
+            match !outp with
+            | Some x -> x
+            | _ -> 
+                Path.Combine (Path.GetDirectoryName filename,Path.GetFileNameWithoutExtension(filename)) + ".fs"
+        else
+            match !out with 
+            | Some x -> x 
+            | _ -> 
+                Path.Combine (Path.GetDirectoryName filename,Path.GetFileNameWithoutExtension(filename)) + ".fs"
     use os = System.IO.File.CreateText output
 
     if (!light = Some(false)) || (!light = None && (Path.HasExtension(output) && Path.GetExtension(output) = ".ml")) then

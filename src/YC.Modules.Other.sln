@@ -20,6 +20,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsYaccPrinter", "FsYaccPrin
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardPrinter", "YardPrinter\YardPrinter.fsproj", "{3148144C-1649-440E-A9B4-1D5C41677262}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "HTMLGenerator", "HTMLGenerator\HTMLGenerator.fsproj", "{4148144C-1649-440E-A9B4-1D5C41677262}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

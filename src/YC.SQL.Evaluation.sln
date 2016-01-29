@@ -61,6 +61,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Conversions.Test", "Convers
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardPrinter", "YardPrinter\YardPrinter.fsproj", "{3148144C-1649-440E-A9B4-1D5C41677262}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "HTMLGenerator", "HTMLGenerator\HTMLGenerator.fsproj", "{4148144C-1649-440E-A9B4-1D5C41677262}"
+EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TreeDump", "TreeDump\TreeDump.fsproj", "{99DFB4E9-46C5-4767-9646-BA49B2B6A664}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AbstractLexer.Interpreter", "AbstractLexer.Interpreter\AbstractLexer.Interpreter.fsproj", "{0A44967A-F233-4D77-8ABB-D165AF90075A}"

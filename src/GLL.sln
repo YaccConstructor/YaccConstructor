@@ -38,6 +38,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Helper", "Helper\Helper.fsp
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardPrinter", "YardPrinter\YardPrinter.fsproj", "{3148144C-1649-440E-A9B4-1D5C41677262}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "HTMLGenerator", "HTMLGenerator\HTMLGenerator.fsproj", "{4148144C-1649-440E-A9B4-1D5C41677262}"
+EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common", "Common\Common.fsproj", "{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Constraints", "Constraints\Constraints.fsproj", "{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}"

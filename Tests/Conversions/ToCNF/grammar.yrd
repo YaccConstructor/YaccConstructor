@@ -1,0 +1,5 @@
+[<Start>]
+s: A x B x| A z
+x: A y| B y| {[]}
+y: x| CC
+z: z x

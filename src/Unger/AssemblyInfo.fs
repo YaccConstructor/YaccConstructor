@@ -1,41 +1,41 @@
-namespace Unger.AssemblyInfo
+﻿namespace Unger.AssemblyInfo
 
 open System.Reflection
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
+// Общие сведения о сборке можно задать с помощью следующего 
+// набора атрибутов. Отредактируйте эти значения атрибутов, чтобы изменить сведения,
+// связанные с этой сборкой.
 [<assembly: AssemblyTitle("Unger")>]
 [<assembly: AssemblyDescription("")>]
-[<assembly: AssemblyConfiguration("Release")>]
+[<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("")>]
 [<assembly: AssemblyProduct("Unger")>]
-[<assembly: AssemblyCopyright("Copyright �  2016")>]
+[<assembly: AssemblyCopyright("Copyright ©  2016")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]
 
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
-// COM, set the ComVisible attribute to true on that type.
+// При установке значения False в атрибуте ComVisible типы в этой сборке становятся невидимыми 
+// для COM-компонентов.  Если требуется обратиться к типу в этой сборке через 
+// COM, задайте для атрибута ComVisible значение True для этого типа.
 [<assembly: ComVisible(false)>]
 
-// The following GUID is for the ID of the typelib if this project is exposed to COM
-[<assembly: Guid("da08b26c-e706-4edb-9805-70b51fa656fd")>]
+// Следующий GUID служит для идентификации библиотеки типов, если этот проект видим для COM
+[<assembly: Guid("37dd371f-283f-4243-a701-62594bd38966")>]
 
-// Version information for an assembly consists of the following four values:
+// Сведения о версии сборки состоят из следующих четырех значений:
 // 
-//       Major Version
-//       Minor Version 
-//       Build Number
-//       Revision
+//       Основной номер версии
+//       Дополнительный номер версии 
+//       Номер сборки
+//      Редакция
 // 
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-// [<assembly: AssemblyVersion("0.3.0.27")>]
-[<assembly: AssemblyVersion("0.3.0.27")>]
-[<assembly: AssemblyFileVersion("0.3.0.27")>]
+// Можно задать все значения или принять номера сборки и редакции по умолчанию 
+// используя "*", как показано ниже:
+// [<сборка: AssemblyVersion("1.0.*")>]
+[<assembly: AssemblyVersion("1.0.0.0")>]
+[<assembly: AssemblyFileVersion("1.0.0.0")>]
 
 do
     ()

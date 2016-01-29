@@ -1,4 +1,3 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.21005.1
@@ -143,8 +142,6 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TSQL.Test", "TSQL.Test\TSQL
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Helper", "Helper\Helper.fsproj", "{FC9A166C-780D-4D15-B366-CA06277C803D}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsLex", "FsLex\FsLex.fsproj", "{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}"
-EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsYaccFrontend", "FsYaccFrontend\FsYaccFrontend.fsproj", "{17103A48-DB90-4101-92EE-7B2719DB2CF0}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GrahamBackend", "GrahamBackend\GrahamBackend.fsproj", "{8229C806-85DA-4336-8CFD-5EB846C0FFFA}"
@@ -247,7 +244,12 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "QuickGraph.FST", "..\QuickG
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AbstractLexer.Interpreter.Performance", "AbstractLexer.Interpreter.Performance\AbstractLexer.Interpreter.Performance.fsproj", "{3B6968A4-E4D1-430C-B7ED-22621FFE8291}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ConsoleApplication1", "ConsoleApplication1\ConsoleApplication1.fsproj", "{2D7B772A-53BD-40F9-8C41-8EB9A5A96EA1}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "NDRAGenerator", "NDRAGenerator\NDRAGenerator.fsproj", "{219DD6FA-AD2F-4B05-9AD8-E9629B41E5EE}"
+       ProjectSection(ProjectDependencies) = postProject
+               {10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08} = {10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}
+       EndProjectSection
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Unger", "Unger\Unger.fsproj", "{37DD371F-283F-4243-A701-62594BD38966}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

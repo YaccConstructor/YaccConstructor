@@ -1,0 +1,40 @@
+﻿%{
+
+
+%}
+
+// The start token becomes a parser function in the compiled code:
+%start start
+
+// Regular tokens
+%token INT
+%token FLOAT
+%token PI
+%token E
+%token SIN
+%token COS
+%token TAN
+%token PLUS
+%token DASH
+%token ASTERISK
+%token SLASH
+%token CARET
+%token LPAREN
+%token RPAREN
+
+// Misc tokens
+%token EOF
+
+// This is the type of the data produced by a successful reduction of the 'start'
+// symbol:
+%type < int > start
+
+%%
+
+// These are the rules of the grammar along with the F# code of the 
+// actions executed as rules are reduced.  
+start: File EOF { $1 }
+
+File:
+	| SIN						{ 1 }
+	| E PI				    { 2 }

@@ -105,7 +105,7 @@ type ``CNF tests`` () =
             let expected = defaultDefinition rules
             expected |> treeDump.Generate |> string |> printfn "%s"
             printfn "%s" "************************"
-            result |> treeDump.Generate |> string |> printfn "%s"
+           // result |> treeDump.Generate |> string |> printfn "%s"
             Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
 
     [<Test>]
@@ -134,7 +134,7 @@ type ``CNF tests`` () =
         let expected = defaultDefinition rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
-        result |> treeDump.Generate |> string |> printfn "%s"
+       // result |> treeDump.Generate |> string |> printfn "%s"
         Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
 
     [<Test>]
@@ -270,7 +270,7 @@ type ``CNF tests`` () =
                                       metaArgs = []};]
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
-        result |> treeDump.Generate |> string |> printfn "%s"
+       // result |> treeDump.Generate |> string |> printfn "%s"
         Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
 
     [<Test>]
@@ -307,7 +307,7 @@ type ``CNF tests`` () =
         let expected = defaultDefinition rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
-        result |> treeDump.Generate |> string |> printfn "%s"
+      //  result |> treeDump.Generate |> string |> printfn "%s"
         Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
     
     [<Test>]
@@ -358,7 +358,7 @@ type ``CNF tests`` () =
         let expected = defaultDefinition rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
-        result |> treeDump.Generate |> string |> printfn "%s"
+      //  result |> treeDump.Generate |> string |> printfn "%s"
         Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
 
     [<Test>]
@@ -391,7 +391,7 @@ type ``CNF tests`` () =
         let expected = defaultDefinition rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
-        result |> treeDump.Generate |> string |> printfn "%s"
+      //  result |> treeDump.Generate |> string |> printfn "%s"
         Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
 
     [<Test>]
@@ -401,7 +401,7 @@ type ``CNF tests`` () =
         let result = loadIL |> applyConversion conversionExpandTLAlt |> applyConversion conversionCNF
         let l = result.grammar.Head.rules.Length
         printfn "%s" "************************"
-        result |> treeDump.Generate |> string |> printfn "%s"
+      //  result |> treeDump.Generate |> string |> printfn "%s"
         Assert.IsTrue((l = 15))
        
 
@@ -570,7 +570,7 @@ type ``CNF tests`` () =
         let expected = defaultDefinition rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
-        result |> treeDump.Generate |> string |> printfn "%s"
+       // result |> treeDump.Generate |> string |> printfn "%s"
         Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
         
         

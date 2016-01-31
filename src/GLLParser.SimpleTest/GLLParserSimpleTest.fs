@@ -115,12 +115,12 @@ type ``GLL parser tests with simple lexer`` () =
     [<Test>]
     member test.``Eps``() =
         let parser = GLL.Eps.buildAst
-        runTest parser "Eps.txt" GLL.Eps.numToString "Eps.dot" 19 21 5 0 GLL.Eps.tokenToNumber GLL.Eps.tokenData
+        runTest parser "Eps.txt" GLL.Eps.numToString "Eps.dot" 25 30 6 1 GLL.Eps.tokenToNumber GLL.Eps.tokenData
 
     [<Test>]
     member test.``Eps2``() =
         let parser = GLL.Eps2.buildAst
-        runTest parser "Eps2.txt" GLL.Eps2.numToString "Eps2.dot" 26 30 6 0 GLL.Eps2.tokenToNumber GLL.Eps2.tokenData
+        runTest parser "Eps2.txt" GLL.Eps2.numToString "Eps2.dot" 36 45 8 2 GLL.Eps2.tokenToNumber GLL.Eps2.tokenData
 
     [<Test>]
     member test.``Epsilon``() =
@@ -203,4 +203,5 @@ type ``GLL parser tests with simple lexer`` () =
         let parser = GLL.PrettySimpleCalc.buildAst
         runTest parser "PrettyCalc1.txt" GLL.PrettySimpleCalc.numToString "PrettySimpleCalc1.dot" 21 24 5 0 GLL.PrettySimpleCalc.tokenToNumber GLL.PrettySimpleCalc.tokenData
 
-   
+//[<EntryPoint>]
+//(new ``YardFrontend syntax tests`` ()).``Option seq test`` ()   

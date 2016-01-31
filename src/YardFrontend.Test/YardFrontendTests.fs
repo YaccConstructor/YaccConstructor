@@ -62,8 +62,8 @@ let lexerTest str lexemsListCorrect =
         with _ -> false
     Assert.IsTrue (areEqual lexemsListCorrect lexemsList)
 
-let preprocessorTest path (expectedIL : t<Source.t,Source.t>) =
-    let currentIL = {Main.ParseFile path with info = {fileName =""}}
+let preprocessorTest (path : string) (expectedIL : t<Source.t,Source.t>) =
+    let currentIL = {Main.ParseFile (path : string) with info = {fileName =""}}
 
     printfn "ilDef = %A" currentIL
     printfn "ilDefCorrect = %A" expectedIL
@@ -155,7 +155,7 @@ type ``Yard frontend preprocessor tests`` () =
                     checker = None
                 }]
         let expected = defaultDefinition rules
-        preprocessorTest (cp "test_0.yrd" + "%ora") expected
+        preprocessorTest (cp "test_0.yrd" + "%ora") (expected)
 
     [<Test>]
     member test.``if_else_end. No user defs.`` () =
@@ -342,7 +342,7 @@ type ``YardFrontend syntax tests`` () =
                 checker = None
             }]
             |> (fun seq -> PSeq(seq, None, None))
-            |> POpt
+            |> POpt |> POpt
             |> simpleRules "s"
         parserTest
             "[<Start>]s: [A B]" 
@@ -503,7 +503,8 @@ type ``Yardfrontend label tests`` () =
         with 
         | ex ->
             //let expected = "Parse error on position (0,17) on token q: illegal weight. Number expected."
-            let expected = "Parse error on position ((0,17)-(0,18)) on token [|LIDENT q|]: Parse Error"
+            //let expected = "Parse error on position ((0,17)-(0,18)) on token [|LIDENT q|]: Parse Error"
+            let expected = "Parse error on position :((0,0)-(0,23)). \n  Incorrect construction! Closed bracket is not found!: "
             let actual = ex.Message
             printfn "%s" ex.Message
             Assert.AreEqual(expected, actual)
@@ -527,6 +528,5 @@ type ``Yardfrontend token tests`` () =
         let correct = Map.empty
         Assert.AreEqual (correct, currentDefinition.tokens)
 
-
 //[<EntryPoint>]
-//(new ``Yardfrontend label tests`` ()).``weight test incorrect input`` ()
+//(new ``YardFrontend syntax tests`` ()).``Option seq test`` ()

@@ -412,7 +412,7 @@ type ``RNGLR abstract parser tests`` () =
             edg 3 4 (RNGLR.FirstEps.RNGLR_EOF 0)
             ] |> ignore
 
-        test RNGLR.FirstEps.buildAstAbstract qGraph 16 15 2 2 0
+        test RNGLR.FirstEps.buildAstAbstract qGraph 14 13 2 2 0
     
     [<Test>]
     member this._20_CroppedBrackets () =
@@ -703,9 +703,9 @@ let f x =
     then 
         System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
     else System.IO.Directory.CreateDirectory "dot" |> ignore
-    let t = new ``RNGLR abstract parser tests`` ()
+    let t = new ``RNGLR abstract parser tests`` () 
 
- //   t._01_PrettySimpleCalc_SequenceInput ()
+//    t._01_PrettySimpleCalc_SequenceInput ()
 //    t._02_PrettySimpleCalc_SimpleBranchedInput ()
 //    t._03_PrettySimpleCalc_BranchedInput ()
 //    t._04_PrettySimpleCalc_LotsOfVariants() 

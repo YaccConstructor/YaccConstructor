@@ -186,7 +186,7 @@ let ParseText (s:string) path =
     with
         Lexer.Lexical_error (msg, pos) ->
             let line,col = posTo2D s pos
-            failwith <| sprintf "\nLexical error in line %d position %d: %s\n" line col msg
+            failwith <| sprintf "Lexical error in line %d position %d: %s" line col msg
 
 let rec ParseFile (args:string) =
     Yard.Frontends.YardFrontend.GrammarParser.parseFile := ParseFile
@@ -206,7 +206,7 @@ let rec ParseFile (args:string) =
     with
     | Lexer.Lexical_error (msg, pos) ->
         let pos2D = posTo2D pos
-        failwith <| sprintf "\nLexical error in line %d position %d: %s\n" (fst pos2D) (snd pos2D) msg
+        failwith <| sprintf "Lexical error in line %d position %d: %s" (fst pos2D) (snd pos2D) msg
       
 let LexString string =
     Lexer.currentFileContent := string;

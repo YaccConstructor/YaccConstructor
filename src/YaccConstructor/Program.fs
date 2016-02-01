@@ -37,11 +37,11 @@ let eol = System.Environment.NewLine
 
 let log (e:System.Exception) msg =
     printfn "ERROR!"
-    "\nStack trace:\n " + e.StackTrace
+    "Stack trace: " + e.StackTrace
     |> printfn "%s"
-    "\nInternal message:\n  " + e.Message
+    "Internal message: " + e.Message
     |> printfn "%s"
-    "\nMessage:\n  " + msg
+    "Message: " + msg
     |> printfn "%s"
 
 let () =
@@ -279,8 +279,8 @@ List of available frontends, generators and conversions can be obtained by -af -
     | :? System.IO.IOException as e -> 
         "Could not read input file.\n"
         |> log e
-    | x -> "Correct this or above construction. Pay attention to the punctuation.\n"
-        |> log x
+    | x -> "Unrecognized error." |> log x
+
 
 
 //Tests. Please do not remove

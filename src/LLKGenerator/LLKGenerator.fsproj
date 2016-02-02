@@ -9,8 +9,6 @@
     <OutputType>Library</OutputType>
     <RootNamespace>LLKGenerator</RootNamespace>
     <AssemblyName>LLKGenerator</AssemblyName>
-    <!--TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion-->
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Name>LLKGenerator</Name>
   </PropertyGroup>

@@ -256,7 +256,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                 if isEq curSymbol oe then
                                     res <- Some oe  
                                 else
-                                    containsError !currentVertexInInput !structures.CurrentLabel !currentGSSNode !structures.CurrentN !currentPath
+                                    let p = oe :: !currentPath
+                                    containsError !currentVertexInInput !structures.CurrentLabel !currentGSSNode !structures.CurrentN p
                             res
                         match curEdge with
                         | Some edge ->
@@ -276,8 +277,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                 structures.CurrentN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy !structures.CurrentLabel !structures.CurrentN !structures.CurrentR
                             condition := false
                         | 
-                            None _ -> 
-                                containsError !currentVertexInInput !structures.CurrentLabel !currentGSSNode !structures.CurrentN !currentPath
+                            None _ -> ()
+                                //containsError !currentVertexInInput !structures.CurrentLabel !currentGSSNode !structures.CurrentN !currentPath
                                 
                     else 
                         let getIndex nTerm term = 
@@ -307,8 +308,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 else
                     let curRight =  sppfNodes.Item (int !structures.CurrentN) 
                     let r = curRight.getExtension ()
-                    if Array.exists (fun a -> a = r) finalExtensions then finalPaths.Add !currentPath
-                        
+                    if Array.exists ((=) r) finalExtensions then finalPaths.Add !currentPath
                     structures.FinalMatching
                         curRight 
                         parser.LeftSide.[parser.StartRule]
@@ -339,32 +339,17 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
 //                            printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16) 
                             
                     let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
+                    let isSubpath l1 l2 =
+                        List.length l1 <= List.length l2 
+                        && Seq.forall2 (=) l1 (Seq.take (List.length l1) l2)
                     //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
                     r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
                     for e in errors do
                         for p in e.Value do
-                            let path = List.rev errorPaths.[snd p.Value]
-                            let mutable c = false
-                            let mutable f = 0
-                            let mutable pos = 0
-                            while not c do
-                                if f >= finalPaths.Count
-                                then
-                                    c <- true 
-                                    printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16)
-                                else
-                                    let fp = List.rev finalPaths.[f]
-
-                                    while (pos < path.Length) do
-                                        if path.[pos] = fp.[pos] 
-                                        then
-                                            pos <- pos + 1
-                                            if pos = path.Length 
-                                            then 
-                                                c <- true  
-                                        else 
-                                            pos <- path.Length
-                                            f <- f + 1
+                            let path = List.rev errorPaths.[snd p.Value]                            
+                                
+                            if finalPaths |> ResizeArray.exists (fun fp -> isSubpath path (List.rev fp)) |> not
+                            then printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16)                            
                                 
                     
                     Success (r1)   

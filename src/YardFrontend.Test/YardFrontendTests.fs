@@ -503,7 +503,8 @@ type ``Yardfrontend label tests`` () =
         with 
         | ex ->
             //let expected = "Parse error on position (0,17) on token q: illegal weight. Number expected."
-            let expected = "Parse error on position ((0,17)-(0,18)) on token [|LIDENT q|]: Parse Error"
+            //let expected = "Parse error on position ((0,17)-(0,18)) on token [|LIDENT q|]: Parse Error"
+            let expected = "Parse error on position :((0,0)-(0,23)). \n  Incorrect construction! Closed bracket is not found!: "
             let actual = ex.Message
             printfn "%s" ex.Message
             Assert.AreEqual(expected, actual)
@@ -529,4 +530,4 @@ type ``Yardfrontend token tests`` () =
 
 
 //[<EntryPoint>]
-//(new ``Yardfrontend label tests`` ()).``weight test incorrect input`` ()
+//(new ``YardFrontend syntax tests`` ()).``Option seq test`` ()

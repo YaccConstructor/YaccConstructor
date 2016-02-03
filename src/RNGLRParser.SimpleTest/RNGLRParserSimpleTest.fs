@@ -27,7 +27,7 @@ let inline translate (f : TranslateArguments<_,_> -> 'b -> 'c) (ast : 'b) =
 type ``RNGLR parser tests with simple lexer`` () =
 
     let translateAndCheck toDot translateFunction (expected : List<_>) (ast : Tree<_>) file errors = 
-        ast.PrintAst()
+        //ast.PrintAst()
         toDot ast (file + ".dot")
         let res = translate translateFunction ast errors
         printfn "Result: %A" res
@@ -82,7 +82,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``Translate with Attributes``() =
         let processSuccess (mAst : Tree<_>) file errors = 
-            mAst.PrintAst()
+            //mAst.PrintAst()
             let res = (translate RNGLR.ParseAttrs.translate mAst errors) 3 : int list
             printfn "Result: %A" res
             Assert.AreEqual([48], res)

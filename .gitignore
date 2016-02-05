@@ -441,3 +441,7 @@ src/RNGLRApplication/SimpleAmb.yrd.fs
 src/GLL.AbstractParser.SimpleTest/*.dot
 src/GLLApplication/*.dot
 src/RNGLRApplication/*.dot
+
+# vim temp files
+*.swp
+src/RNGLRApplication/res.dot

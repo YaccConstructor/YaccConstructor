@@ -11,9 +11,9 @@ open Yard.Generators.RNGLR.OtherSPPF
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 
-open YC.FST.GraphBasedFst
-open YC.FSA.FsaApproximation
-open YC.FSA.GraphBasedFsa
+open QuickGraph.FST.GraphBasedFst
+open QuickGraph.FSA.FsaApproximation
+open QuickGraph.FSA.GraphBasedFsa
 
 let lexerErrMsg = "Unexpected symbol:"
 let parserErrMsg = "Syntax error. Unexpected token"

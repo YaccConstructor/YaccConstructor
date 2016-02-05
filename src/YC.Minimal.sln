@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{ADFB2D79-F895-4FAC-AD8B-232D80BD542C}"
 	ProjectSection(SolutionItems) = preProject
@@ -41,8 +41,6 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common.Generators", "Generators.Common\Common.Generators.fsproj", "{F46A55CF-A97F-4DFC-9483-340C631C80FE}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLLParser", "GLLParser\GLLParser.fsproj", "{1548A831-3A8D-489D-8592-DDA12FBC3EA4}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FST", "..\FST\FST\FST\FST.fsproj", "{BCF4793C-E8B4-4FD5-9723-3C08859066C5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -154,12 +152,6 @@ Global
 		{1548A831-3A8D-489D-8592-DDA12FBC3EA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1548A831-3A8D-489D-8592-DDA12FBC3EA4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1548A831-3A8D-489D-8592-DDA12FBC3EA4}.Release|x86.ActiveCfg = Release|Any CPU
-		{BCF4793C-E8B4-4FD5-9723-3C08859066C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BCF4793C-E8B4-4FD5-9723-3C08859066C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BCF4793C-E8B4-4FD5-9723-3C08859066C5}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{BCF4793C-E8B4-4FD5-9723-3C08859066C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BCF4793C-E8B4-4FD5-9723-3C08859066C5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BCF4793C-E8B4-4FD5-9723-3C08859066C5}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,6 +1,6 @@
 ﻿module Logger
 
-open YC.FSA.GraphBasedFsa
+open QuickGraph.FSA.GraphBasedFsa
 open GenericGraphs
 
 type LoggerState<'a when 'a: equality> = {

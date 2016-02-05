@@ -41,30 +41,23 @@ type SetUp()=
 [<TestFixture>]
 type ``Conversions expand metarules tests`` () =
     
-    let basePath = System.IO.Path.Combine(conversionTestPath, "Meta")    
-
-    let frontend = getFrontend "YardFrontend"    
-
-    let applyConversion loadIL = 
-        {
-            loadIL
-                with grammar = (new Conversions.ExpandMeta.ExpandMeta()).ConvertGrammar (loadIL.grammar, [||])                               
-        }
+    let basePath = System.IO.Path.Combine(conversionTestPath, "Meta")
+    let applyConversion = applyConversion expandMeta
 
     let runMetaTest srcFile =
         let srcPathFile = System.IO.Path.Combine(basePath, srcFile)                                         
-        let ilTree = frontend.ParseGrammar srcPathFile                
+        let ilTree = fe.ParseGrammar srcPathFile                
         Namer.initNamer ilTree.grammar
         let ilTreeConverted = applyConversion ilTree 
         let expected =
             try
-                srcPathFile + ".ans" |> frontend.ParseGrammar
+                srcPathFile + ".ans" |> fe.ParseGrammar
             with
             | e -> printfn "%s" e.Message
                    failwith e.Message
         
-        treeDump.Generate expected |> string |> printfn "%s"
-        treeDump.Generate ilTreeConverted |> string |> printfn "%s"
+        //treeDump.Generate expected |> string |> printfn "%s"
+        //treeDump.Generate ilTreeConverted |> string |> printfn "%s"
         if not <| ILComparators.GrammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar then
             let text = (new Yard.Generators.YardPrinter.YardPrinter()).Generate { ilTree with grammar=ilTreeConverted.grammar }
             Directory.CreateDirectory "out" |> ignore

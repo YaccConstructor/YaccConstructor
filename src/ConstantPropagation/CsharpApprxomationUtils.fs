@@ -4,7 +4,7 @@ module CsharpApprxomationUtils
 open JetBrains.ReSharper.Psi.CSharp.Tree
 
 open ResharperCsharpTreeUtils
-open YC.FSA.GraphBasedFsa
+open QuickGraph.FSA.GraphBasedFsa
 
 /// Binds passed method's string typed parameners to top elements of given stack.
 /// If method has N string typed parameters top N elements will be poped and 

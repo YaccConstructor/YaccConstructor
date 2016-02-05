@@ -34,10 +34,10 @@ open ReSharperExtension
 open Yard.Generators.RNGLR.OtherSPPF
 open Yard.Examples.MSParserAbstract
 open Yard.Generators.Common.AST
-open YC.FSA.GraphBasedFsa
-open YC.FSA.FsaApproximation
+open QuickGraph.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
 open YC.FST.AbstractLexing.Interpreter
-open YC.FST.GraphBasedFst
+open QuickGraph.FST.GraphBasedFst
 open YC.SDK.CommonInterfaces
 open YC.SDK.ReSharper.Helper
 

@@ -1,0 +1,7 @@
+[<Start>]
+a: c 'x' a;
+a: {[]};
+b: 'x' c 'y';
+b: 'x' c;
+c: 'x' b 'x';
+c: 'z'

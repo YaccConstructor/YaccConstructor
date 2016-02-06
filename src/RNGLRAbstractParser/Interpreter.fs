@@ -393,54 +393,26 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         else
             let ch = ref Unchecked.defaultof<_>
             let root = new ResizeArray<_>()
-            let addTreeTop res =
-                let children = new Family(parserSource.StartRule, new Nodes(res))
-                ch := children
-                new AST(children, null)
+            let addTreeTop (res:array<_>) =                
+                let makeChildren n = new Family(parserSource.StartRule, new Nodes([|n|]))
+                ch := new AST(makeChildren res.[0] , res.[1..] |> Array.map makeChildren)
+                (!ch)
             innerGraph.Edges |> Seq.collect (fun e -> e.Source.processedGssVertices)
             |> Seq.filter (fun v -> parserSource.AccStates.[v.State])
-            |> Seq.filter (fun v -> v.OutEdges.FirstOrDefault(fun x -> x.Ast >= 0) <> Unchecked.defaultof<_>)
-            |> Seq.map (fun v -> nodes.[v.OutEdges.FirstOrDefault(fun x -> x.Ast >= 0).Ast])
+            |> Seq.collect (fun v -> v.OutEdges.FindAll(fun x -> x.Ast >= 0))
+            |> Seq.map (fun v -> v.Ast)
+            |> Set.ofSeq
+            |> Seq.map (fun v -> nodes.[v])
             |> Array.ofSeq
-            |> addTreeTop
-            |> nodes.Add
-//            for v in innerGraph.Edges (*|> Seq.filter (fun e -> e.Target = finalV)*) |> Seq.collect (fun e -> e.Source.processedGssVertices) do
-//                if parserSource.AccStates.[v.State]
-//                then
-//                    root.Add nodes.Length
-//                    let nonEpsilonEdge = v.OutEdges.FirstOrDefault(fun x -> x.Ast >= 0)
-//                    if nonEpsilonEdge <> Unchecked.defaultof<_>
-//                    then
-//                        nodes.[nonEpsilonEdge.Ast]
-//                        |> addTreeTop
-//                        |> nodes.Add
-            (*match !root with
-            | None -> 
-                let states = 
-                    innerGraph.Vertices 
-                    |> Seq.filter (fun v -> innerGraph.OutEdges(v) 
-                                            |> Seq.exists(fun e -> e.Target.processedGssVertices.Count = 0 (*&& e.Target.unprocessedGssVertices.Count = 0*)
-                                                                   && v.processedGssVertices.Count <> 0 (*&& v.unprocessedGssVertices.Count <> 0*)))
-                    |> Seq.map (fun v -> string v.vNum)
-                    |> String.concat "; "
-                Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state. Possible errors: (" + states + ")")*)
-            ResizeArray.singleton (nodes.Length-1)
-            |> ResizeArray.mapi
-                (fun i res  ->
-                    let n = nodes.[res]
-                    let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
+            |> addTreeTop            
+            |> fun n  ->                    
+                    let tree = new Tree<_>(terminals.ToArray(), n, parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
                     
-                    sprintf "../../../Tests/AbstractRNGLR/DOT/sppf%A.dot" i
+                    sprintf "../../../Tests/AbstractRNGLR/DOT/sppf.dot" 
                     |> tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide 
-                    let ts = tree.getStructuredTokensFromFamily(!ch)
+                    let ts = tree.GetTokens(!ch)
                     printfn "%A" ts
                     tree                   
-//
-//                    let gssInitVertices = 
-//                       innerGraph.Edges |> Seq.collect (fun e -> e.Source.processedGssVertices)
-//
-//                    drawDot parserSource.TokenToNumber terminals parserSource.LeftSide gssInitVertices parserSource.NumToString parserSource.ErrorIndex "../../../Tests/AbstractRNGLR/DOT/gss.dot"
-                 )
-            |> (fun r -> Success r.[0])
+            |> Success 
                 (*with
                 e -> Error (-1, Unchecked.defaultof<'TokenType>, e.Message)*)

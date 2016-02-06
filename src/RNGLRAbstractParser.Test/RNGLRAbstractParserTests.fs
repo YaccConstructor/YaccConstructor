@@ -697,7 +697,35 @@ type ``RNGLR abstract parser tests`` () =
         seq{for i in 0..inpLength -> graph i}
         |> fun s -> System.IO.File.WriteAllLines("sql_perf.txt",s)
 
-//[<EntryPoint>]
+    [<Test>]
+    member this.bio1 () =
+        let qGraph = new ParserInputGraph<_>(0, 10)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.bio1.C 0)
+            edg 1 2 (RNGLR.bio1.B 1)
+            edg 2 3 (RNGLR.bio1.A 2)
+            edg 3 4 (RNGLR.bio1.B 3)
+            edg 4 1 (RNGLR.bio1.C 4)
+            edg 1 9 (RNGLR.bio1.C 5)
+            edg 1 5 (RNGLR.bio1.D 6)
+            edg 5 6 (RNGLR.bio1.B 7)
+            edg 6 7 (RNGLR.bio1.A 8)
+            edg 7 8 (RNGLR.bio1.D 9)
+            edg 6 3 (RNGLR.bio1.B 10)
+            edg 8 10 (RNGLR.bio1.RNGLR_EOF 0)
+            edg 9 10 (RNGLR.bio1.RNGLR_EOF 0)
+            edg 1 10 (RNGLR.bio1.RNGLR_EOF 0)
+            edg 2 10 (RNGLR.bio1.RNGLR_EOF 0)
+            edg 3 10 (RNGLR.bio1.RNGLR_EOF 0)
+            edg 4 10 (RNGLR.bio1.RNGLR_EOF 0)
+            edg 5 10 (RNGLR.bio1.RNGLR_EOF 0)
+            edg 6 10 (RNGLR.bio1.RNGLR_EOF 0)
+            edg 7 10 (RNGLR.bio1.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.bio1.buildAstAbstract qGraph 25 24 4 8 1
+
+[<EntryPoint>]
 let f x =
     if System.IO.Directory.Exists "dot" 
     then 
@@ -736,5 +764,5 @@ let f x =
    // t.``TSQL performance test for Alvor`` 2 100 false
     //t._29_AandB_Circle ()
     //t.``TSQL performance test 2`` 2 100 false
-//    t.temp ()
+    t.bio1()
     0

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontends", "Frontends", "{020587D2-50BA-4E6D-9BD5-1059EBCC13D7}"
 EndProject
@@ -1706,6 +1706,7 @@ Global
 		{F7FA6D60-9A01-43B0-B5FA-5E1D8E92DC5F} = {E592CD66-2A63-4A24-96C4-8E6947885101}
 		{B7BA8F5C-CAE6-486F-B6C6-E82FA4882227} = {55F8552B-A06B-4D28-8681-6358E5EA2E3F}
 		{4FFEF1EF-D679-4BD5-8F70-320030BB98EA} = {55F8552B-A06B-4D28-8681-6358E5EA2E3F}
+		{B66C6609-E1BF-47AD-A022-996303500039} = {55F8552B-A06B-4D28-8681-6358E5EA2E3F}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = QuickGraph1.vsmdi

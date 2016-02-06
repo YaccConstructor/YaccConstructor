@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{b1d8c4fb-23e7-46ff-81b0-4ea3cd6e716e}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>RNGLRAbstractParser.Tests</RootNamespace>
     <AssemblyName>YC.RNGLRAbstractParser.Test</AssemblyName>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -57,6 +57,7 @@
     <Compile Include="Stars.yrd.fs" />
     <!--Compile Include="Epsilons2.yrd.fs" /-->
     <Compile Include="Stars2.yrd.fs" />
+    <Compile Include="bio1.yrd.fs" />
     <Compile Include="StrangeBrackets.yrd.fs" />
     <Compile Include="RNGLRAbstractParserTests.fs" />
     <None Include="packages.config" />

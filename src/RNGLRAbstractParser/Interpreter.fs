@@ -145,8 +145,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     let startState = 0
     let inline getEpsilon i = new Epsilon(-1-i)
     let startNonTerm = parserSource.LeftSide.[parserSource.StartRule]
-    let verticesToProcess = new Queue<_>()
-    verticesToProcess.Enqueue (startV)
+    let verticesToProcess = new Queue<VInfo<_>>()    
     let mutable errorIndex = -1
     let outEdgesInnerGraph = Array.init (Seq.max tokens.Vertices + 1) (fun _ -> [||])
     for v in innerGraph.Vertices do
@@ -382,7 +381,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         then new Tree<_>([||], getEpsilon startNonTerm, parserSource.Rules) |> Success
         else Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string")
     else
-        let _,_ = addVertex startV startState startV.unprocessedGssVertices
+        for v in innerGraph.Vertices do
+            let _,_ = addVertex v startState v.unprocessedGssVertices
+            verticesToProcess.Enqueue (v)
         while errorIndex = -1 && verticesToProcess.Count > 0 do
             let curV = verticesToProcess.Dequeue()
             processVertex curV
@@ -390,21 +391,28 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         if errorIndex <> -1 then
             Error (errorIndex - 1, Unchecked.defaultof<'TokenType>, "Parse error")
         else
-            let root = ref None
+            let root = new ResizeArray<_>()
             let addTreeTop res =
-                let children = new Family(parserSource.StartRule, new Nodes([|res|]))
+                let children = new Family(parserSource.StartRule, new Nodes(res))
                 new AST(children, null)
-            for v in innerGraph.Edges |> Seq.filter (fun e -> e.Target = finalV) |> Seq.collect (fun e -> e.Source.processedGssVertices) do
-                if parserSource.AccStates.[v.State]
-                then
-                    root := Some nodes.Length
-                    let nonEpsilonEdge = v.OutEdges.FirstOrDefault(fun x -> x.Ast >= 0)
-                    if nonEpsilonEdge <> Unchecked.defaultof<_>
-                    then
-                        nodes.[nonEpsilonEdge.Ast]
-                        |> addTreeTop
-                        |> nodes.Add
-            match !root with
+            innerGraph.Edges |> Seq.collect (fun e -> e.Source.processedGssVertices)
+            |> Seq.filter (fun v -> parserSource.AccStates.[v.State])
+            |> Seq.filter (fun v -> v.OutEdges.FirstOrDefault(fun x -> x.Ast >= 0) <> Unchecked.defaultof<_>)
+            |> Seq.map (fun v -> nodes.[v.OutEdges.FirstOrDefault(fun x -> x.Ast >= 0).Ast])
+            |> Array.ofSeq
+            |> addTreeTop
+            |> nodes.Add
+//            for v in innerGraph.Edges (*|> Seq.filter (fun e -> e.Target = finalV)*) |> Seq.collect (fun e -> e.Source.processedGssVertices) do
+//                if parserSource.AccStates.[v.State]
+//                then
+//                    root.Add nodes.Length
+//                    let nonEpsilonEdge = v.OutEdges.FirstOrDefault(fun x -> x.Ast >= 0)
+//                    if nonEpsilonEdge <> Unchecked.defaultof<_>
+//                    then
+//                        nodes.[nonEpsilonEdge.Ast]
+//                        |> addTreeTop
+//                        |> nodes.Add
+            (*match !root with
             | None -> 
                 let states = 
                     innerGraph.Vertices 
@@ -413,17 +421,22 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                                                                    && v.processedGssVertices.Count <> 0 (*&& v.unprocessedGssVertices.Count <> 0*)))
                     |> Seq.map (fun v -> string v.vNum)
                     |> String.concat "; "
-                Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state. Possible errors: (" + states + ")")
-            | Some res -> 
-                try 
+                Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state. Possible errors: (" + states + ")")*)
+            ResizeArray.singleton (nodes.Length-1)
+            |> ResizeArray.mapi
+                (fun i res  ->
+                    let n = nodes.[res]
                     let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
-//                    tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
+                    
+                    sprintf "../../../Tests/AbstractRNGLR/DOT/sppf%A.dot" i
+                    |> tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide 
+                    tree                   
 //
 //                    let gssInitVertices = 
 //                       innerGraph.Edges |> Seq.collect (fun e -> e.Source.processedGssVertices)
 //
 //                    drawDot parserSource.TokenToNumber terminals parserSource.LeftSide gssInitVertices parserSource.NumToString parserSource.ErrorIndex "../../../Tests/AbstractRNGLR/DOT/gss.dot"
-
-                    Success <| tree
-                with
-                e -> Error (-1, Unchecked.defaultof<'TokenType>, e.Message)
+                 )
+            |> (fun r -> Success r.[0])
+                (*with
+                e -> Error (-1, Unchecked.defaultof<'TokenType>, e.Message)*)

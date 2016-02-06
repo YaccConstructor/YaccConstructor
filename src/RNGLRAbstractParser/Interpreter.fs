@@ -391,9 +391,11 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         if errorIndex <> -1 then
             Error (errorIndex - 1, Unchecked.defaultof<'TokenType>, "Parse error")
         else
+            let ch = ref Unchecked.defaultof<_>
             let root = new ResizeArray<_>()
             let addTreeTop res =
                 let children = new Family(parserSource.StartRule, new Nodes(res))
+                ch := children
                 new AST(children, null)
             innerGraph.Edges |> Seq.collect (fun e -> e.Source.processedGssVertices)
             |> Seq.filter (fun v -> parserSource.AccStates.[v.State])
@@ -430,6 +432,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     
                     sprintf "../../../Tests/AbstractRNGLR/DOT/sppf%A.dot" i
                     |> tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide 
+                    let ts = tree.getStructuredTokensFromFamily(!ch)
+                    printfn "%A" ts
                     tree                   
 //
 //                    let gssInitVertices = 

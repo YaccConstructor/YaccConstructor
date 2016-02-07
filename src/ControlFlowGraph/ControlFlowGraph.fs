@@ -16,12 +16,6 @@ open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 open Printers
 
-type private StartEndVertices = 
-    val mutable Start : int
-    val mutable Finish : int option
-
-    new(start) = {Start = start; Finish = None}
-
 type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                             , parserSource : CfgParserSource<'TokenType>
                             , langSource : LanguageSource
@@ -40,25 +34,33 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
     let processAssignment' = processAssignment intToToken tokToSourceString 
 
     let entry, exit = 
-        let familyToVertices = new Dictionary<_, StartEndVertices>()
+        let familyToVertices = new Dictionary<_, ASTProcessingState>()
 
-        let getEndVertex family = familyToVertices.[family].Finish
-
-        let rec handleNode (node : obj) (currentGraph : GraphConstructor<_>) = 
-            let handleFamily (family : Family) = 
+        let rec handleNode (node : obj) (graph : GraphConstructor<_>) = 
+            let handleFamily (family : Family) startVertex = 
+                graph.CurrentVertex <- startVertex
                 if familyToVertices.ContainsKey family 
                 then 
-                    let target = familyToVertices.[family].Start
-                    currentGraph.AddEdgeFromTo EmptyEdge currentGraph.CurrentVertex target
-                    
-                    match getEndVertex family with
-                    | Some n -> currentGraph.CurrentVertex <- n
-                    | None -> 
-                        let newEndVertex = currentGraph.FindLastVertex target
-                        newEndVertex
-                        |> Option.iter(fun n -> currentGraph.CurrentVertex <- n)
+                    match familyToVertices.[family] with
+                    | Processed (source, target) -> 
+                        if graph.CurrentVertex <> source 
+                        then 
+                            graph.AddEdgeFromTo EmptyEdge graph.CurrentVertex source
+                        
+                        graph.CurrentVertex <- target
+                        graph.LastVertex <- target
+                        Some target
+                    | InProgress start -> 
+                        graph.AddEdgeFromTo EmptyEdge startVertex start
+                        match graph.TryFindLastVertex start with
+                        | Some vertex ->  
+                            familyToVertices.[family] <- Processed(start, vertex)
+                            graph.CurrentVertex <- vertex
+                            graph.LastVertex <- vertex
+                            Some vertex
+                        | None -> None
                 else
-                    familyToVertices.[family] <- new StartEndVertices(currentGraph.CurrentVertex)
+                    familyToVertices.[family] <- InProgress(graph.CurrentVertex)
                     let familyName = parserSource.LeftSides.[family.prod] |> parserSource.NumToString
 
                     if langSource.NodeToType.ContainsKey familyName 
@@ -69,43 +71,52 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                             | Assignment -> processAssignment' family
                             | x -> failwithf "This construction isn't supported now: %A" x
                     
-                        currentGraph.AddEdge edge
-                        currentGraph.UpdateVertex()
+                        graph.AddEdge edge
+                        graph.UpdateVertex()
+                        familyToVertices.[family] <- Processed(startVertex, graph.CurrentVertex)
+                        Some graph.CurrentVertex
                     else 
-                        family.nodes.doForAll (fun node -> handleNode node currentGraph)
-                    familyToVertices.[family].Finish <- Some currentGraph.CurrentVertex
-                getEndVertex family
+                        family.nodes.doForAll (fun node -> handleNode node graph)
+                        familyToVertices.[family] <- Processed(startVertex, graph.CurrentVertex)
+                        Some graph.CurrentVertex
 
             match node with 
             | :? Epsilon 
             | :? Terminal -> ()
             | :? AST as ast ->
-                let commonStart = currentGraph.CurrentVertex
-                let endNumbersRef = ref []
-                
-                let setStartAndHandle family = 
-                    currentGraph.CurrentVertex <- commonStart
-                    let endNum = handleFamily family
-                    endNumbersRef := endNum :: !endNumbersRef
-                
-                ast.doForAllFamilies setStartAndHandle
-                let endNumbers = !endNumbersRef |> List.choose id
+                let commonStart = graph.CurrentVertex
+                let endNumbers = 
+                    ast.map (fun family -> handleFamily family commonStart)
+                    |> Seq.distinct
+                    |> Seq.fold 
+                        (
+                            fun acc numOpt -> 
+                                match numOpt with 
+                                | Some num -> num :: acc
+                                | None -> acc
+                        ) []
+                    |> Array.ofSeq
                 
                 if endNumbers.Length = 1
                 then 
-                    currentGraph.CurrentVertex <- endNumbers.Head
-                elif endNumbers.Length >= 2 
-                then 
-                    let commonFinish = currentGraph.CreateNewVertex()
+                    graph.UpdateVertex()
+                elif endNumbers.Length > 1
+                then
+                    let commonEndVertex = graph.CreateNewVertex()
+
                     endNumbers
-                    |> Seq.iter (fun num -> currentGraph.AddEdgeFromTo EmptyEdge num commonFinish)
-                
-                    currentGraph.UpdateVertex()
+                    |> Array.iter(fun num -> graph.AddEdgeFromTo EmptyEdge num commonEndVertex)
+                    graph.UpdateVertex()
                     
             | x -> failwithf "Unexpected node type: %A" x
 
         let graphInfo = new GraphConstructor<_>()
         handleNode tree.Root graphInfo
+
+        match graphInfo.TryFindLastVertex graphInfo.CurrentVertex with
+        | Some _ -> ()
+        | None -> graphInfo.AddEdge EmptyEdge
+
         graphToCfg graphInfo.Graph <| Some parserSource.TokenToString
 
     let blocks = 
@@ -164,9 +175,6 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                         block.TokensGraph.GetAvailableTokens()
                         |> Seq.takeWhile isNotAssign
                         |> List.ofSeq
-//                         block.Tokens 
-//                         |> Seq.takeWhile isNotAssign
-//                         |> List.ofSeq
 
                     if leftPart.Length = 1 
                     then

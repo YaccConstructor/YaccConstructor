@@ -2,17 +2,15 @@
 
 open Microsoft.FSharp.Collections
 
-open System.IO
 open System.Collections.Generic
 
 open QuickGraph
 
 open ControlFlowGraph.Common
 open ControlFlowGraph.CfgTokensGraph
-open System.Text
 
 type EdgeType<'TokenType> = 
-| Simple of BlockType * CfgTokensGraph<'TokenType> //list<'TokenType>
+| Simple of BlockType * CfgTokensGraph<'TokenType>
 | Complicated of BlockType * CfgBlocksGraph<'TokenType>
 | EmptyEdge
     
@@ -39,7 +37,18 @@ and CfgBlocksGraph<'TokenType>() =
         | _ -> false
 
     member this.FirstVertex = 0
-    member this.LastVertex = Seq.max this.Vertices
+    
+    //vertex that has't out edges
+    member this.LastVertex = 
+        
+        let stockVertices = 
+            this.Vertices
+            |> Seq.filter(fun vertex -> this.OutDegree vertex = 0)
+            |> List.ofSeq
+
+        match stockVertices with
+        | [head] -> head
+        | _ -> failwith "Incorrect inner graph was built: only one stock vertices must be" 
 
     member this.AddEdgeForced (e : BlockEdge<'TokenType>) =
         this.AddVertex e.Source |> ignore
@@ -87,9 +96,9 @@ and CfgBlocksGraph<'TokenType>() =
 type GraphConstructor<'TokenType> = 
     val Graph : CfgBlocksGraph<'TokenType>
     val mutable CurrentVertex : int
-    val mutable private LastCreatedVertex : int
+    val mutable LastVertex : int
 
-    new (g, s, e) = {Graph = g; CurrentVertex = s; LastCreatedVertex = e}
+    new (g, s, e) = {Graph = g; CurrentVertex = s; LastVertex = e}
     new (g : CfgBlocksGraph<_>) = new GraphConstructor<_>(g, g.FirstVertex, g.FirstVertex)
     new () = new GraphConstructor<_>(new CfgBlocksGraph<_>())
 
@@ -97,8 +106,8 @@ type GraphConstructor<'TokenType> =
     /// Creates new vertex.
     /// </summary>
     member this.CreateNewVertex() = 
-        this.LastCreatedVertex <- this.LastCreatedVertex + 1
-        this.LastCreatedVertex
+        this.LastVertex <- if this.Graph.VertexCount > 0 then this.Graph.VertexCount else 1
+        this.LastVertex
 
     /// <summary>
     ///<para>Adds edge with edgeTag to graph.</para><br />
@@ -120,14 +129,14 @@ type GraphConstructor<'TokenType> =
     /// <summary>
     /// CurrentVertex becomes equal to number of last created vertex.
     /// </summary>
-    member this.UpdateVertex() = this.CurrentVertex <- this.LastCreatedVertex
+    member this.UpdateVertex() = this.CurrentVertex <- this.LastVertex
 
     /// <summary>
     /// Does BFS from start vertex. Returns the vertex that has out degree = 0.
     /// If such vertices are few or none, then None will be returned.
     /// </summary>
     /// <param name="start">First vertex for BFS</param>
-    member this.FindLastVertex start = 
+    member this.TryFindLastVertex start = 
         
         let queue = new Queue<_>()
         let addEdge = 
@@ -152,6 +161,6 @@ type GraphConstructor<'TokenType> =
                 this.Graph.OutEdges(edge.Target)
                 |> Seq.iter addEdge
 
-        if res.Length = 1
-        then Some <| res.Head
-        else None
+        match res with
+        | [ head ] -> Some head
+        | _ -> None

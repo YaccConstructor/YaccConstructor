@@ -6,9 +6,13 @@ open Yard.Generators.Common.AstNode
 open CfgTokensGraph
 open ControlFlowGraph.Printers
 
-type private ASTProcessingState = 
+type ASTProcessingState = 
 | Processed of int * int
 | InProgress of int
+
+type private EpsilonEdge(source, target) = 
+    member this.Source with get() = source
+    member this.Target with get() = target
 
 /// <summary>
 ///<para>Takes family and builds graph.
@@ -17,58 +21,78 @@ type private ASTProcessingState =
 ///Otherwise it'll contain branches.</para><br />
 /// </summary>
 let extractNodesFromFamily intToToken tokenToString (fam : Family) = 
-    let tokensGraph = new CfgTokensGraph<_>()
+    let graph = new CfgTokensGraph<_>()
     let cache = new Dictionary<Family, ASTProcessingState>()
-            
+    //hack against duplicated epsilon edges
+    let addEpsilonEdge = 
+        let epsEdges = new ResizeArray<_>()
+        fun source target ->
+            if source <> target 
+            then 
+                let epsilon = new EpsilonEdge(source, target)
+                if not <| epsEdges.Contains epsilon
+                then
+                    graph.AddEdgeFromTo None source target
+                    epsEdges.Add epsilon
+
     let rec collectTokens (node : obj) = 
             
         match node with 
         | :? Terminal as t -> 
             let tag = Some <| intToToken t.TokenNumber
-            tokensGraph.AddEdge tag
-            tokensGraph.UpdateVertex()
+            graph.AddEdge tag
+            graph.UpdateVertex()
 
         | :? AST as ast -> 
-            let commonStartVertex = tokensGraph.CurrentVertex
+            let commonStartVertex = graph.CurrentVertex
             let allEndVertex = 
                 ast.map (fun fam -> processFamily commonStartVertex fam)
                 |> Array.filter Option.isSome
                 |> Array.map Option.get
 
-            let commonEndVertex = allEndVertex |> Array.max
+            if allEndVertex.Length > 0
+            then 
+                let commonEndVertex = allEndVertex |> Array.max
 
-            allEndVertex
-            |> Array.filter ((<>) commonEndVertex)
-            |> Array.iter (fun num -> tokensGraph.AddEdgeFromTo None num commonEndVertex)
+                allEndVertex
+                |> Array.filter ((<>) commonEndVertex)
+                |> Array.iter (fun num -> addEpsilonEdge num commonEndVertex)
 
-            tokensGraph.UpdateVertex()
+                graph.UpdateVertex()
 
         | _ -> failwith "Unexpected AST node type in Control-Flow construction"
 
     and processFamily startVertex fam = 
-        tokensGraph.CurrentVertex <- startVertex
+        graph.CurrentVertex <- startVertex
 
         if cache.ContainsKey fam
         then
             match cache.[fam] with
             | Processed (source, target) -> 
-                if tokensGraph.CurrentVertex <> source
-                then
-                    tokensGraph.AddEdgeFromTo None tokensGraph.CurrentVertex source
-                tokensGraph.CurrentVertex <- target
-                tokensGraph.LastVertex <- target
+                addEpsilonEdge graph.CurrentVertex source
+                graph.CurrentVertex <- target
+                graph.NextVertex <- target
                 Some target
-            | InProgress _ -> None
+            | InProgress start -> 
+
+                addEpsilonEdge startVertex start
+                match graph.TryFindLastVertex start with
+                | Some vertex -> 
+                    cache.[fam] <- Processed(start, vertex)
+                    graph.CurrentVertex <- vertex
+                    graph.NextVertex <- vertex
+                    Some vertex
+                | None -> None
         else
             cache.[fam] <- InProgress(startVertex)
-            fam.nodes.doForAll (fun node -> collectTokens node)
-            cache.[fam] <- Processed(startVertex, tokensGraph.CurrentVertex)
+            fam.nodes.doForAll collectTokens
+            cache.[fam] <- Processed(startVertex, graph.CurrentVertex)
             
-            Some <| tokensGraph.CurrentVertex
+            Some <| graph.CurrentVertex
             
-    fam.nodes.doForAll(fun node -> collectTokens node)
-    //CfgTokensGraphPrinter.ToDot tokensGraph tokenToString "`afterExtraction.dot"
-    tokensGraph
+    fam.nodes.doForAll collectTokens
+    CfgTokensGraphPrinter.ToDot graph tokenToString "`afterExtraction.dot"
+    graph
 
 /// <summary>
 ///<para>Takes AST and builds graph.

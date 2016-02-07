@@ -96,16 +96,16 @@ let commonCheck (tokenToNumber : _ -> int) (blockToChildren : IDictionary<_, _>)
 
     let condition expected tokenSet = 
         expected
-        |> List.fold(fun acc num -> acc || tokenSet |> Array.exists((=) num)) false
+        |> List.exists(fun num -> tokenSet |> Array.exists((=) num))
         
-    let foldArray acc pair = 
+    let foldArray pair = 
         let key, children = pair
         let expected = blockToChildren.[key]
         let res = 
             children
             |> List.map getTokens'
             |> List.forall (fun tokenSet -> condition expected tokenSet)
-        res && acc
+        res
 
     blocks
     |> Array.map
@@ -117,15 +117,14 @@ let commonCheck (tokenToNumber : _ -> int) (blockToChildren : IDictionary<_, _>)
                 | None -> None
         )
     |> Array.choose id
-    |> Array.fold foldArray true
+    |> Array.forall foldArray
 
 let checkParent (tokenToNumber : _ -> int) (blockToChildren : IDictionary<_, _>) (blocks : Block<_> array) = 
     let getPrevBlocks(block : Block<_>) = 
         block.Parent.Parents
-    
+
     commonCheck tokenToNumber blockToChildren getPrevBlocks blocks
     
-
 let checkChildren (tokenToNumber : _ -> int) (blockToChildren : IDictionary<_, _>) (blocks : Block<_> array) = 
     let getNextBlocks(block : Block<_>) = 
         block.Children
@@ -136,21 +135,21 @@ let checkChildren (tokenToNumber : _ -> int) (blockToChildren : IDictionary<_, _
 let checkEntryNode tokenToNumber condition (entryNode : InterNode<_>) = 
     let getTokens' = getTokens tokenToNumber
     
-    if not <| entryNode.Parents.IsEmpty
+    if entryNode.Parents.IsEmpty
     then 
-        false
-    else
         entryNode.Children
         |> List.map getTokens'
         |> List.forall condition
+    else 
+        false
 
 let checkExitNode tokenToNumber condition (exitNode : InterNode<_>) = 
     let getTokens' = getTokens tokenToNumber
     
-    if not <| exitNode.Children.IsEmpty
+    if exitNode.Children.IsEmpty
     then 
-        false
-    else
         exitNode.Parents
         |> List.map getTokens'
         |> List.forall condition
+    else
+        false

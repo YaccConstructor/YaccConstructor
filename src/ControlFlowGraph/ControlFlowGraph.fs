@@ -10,6 +10,7 @@ open ControlFlowGraph.CfgElements
 open ControlFlowGraph.InnerGraph
 open ControlFlowGraph.InputStructures
 open ControlFlowGraph.GraphInterpreter
+open ControlFlowGraph.TokensExtractor
 
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode

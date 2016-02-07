@@ -42,7 +42,7 @@ type Block<'TokenType>(blockType, graph : CfgTokensGraph<'TokenType>) =
 
         let strValues = 
             this.TokensGraph.GetAvailableTokens()
-            |> Seq.fold (fun acc elem -> sprintf "%s %A" acc elem) ""
+            |> Seq.fold (fun acc elem -> sprintf "%s %s" acc <| tokToString elem) ""
         
         sprintf "%s\n available tokens: %s\n" typeStr strValues
 

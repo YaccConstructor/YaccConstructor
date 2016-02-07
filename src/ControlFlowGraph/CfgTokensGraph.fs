@@ -1,9 +1,6 @@
 ﻿module ControlFlowGraph.CfgTokensGraph
 
-open System.IO
-
 open QuickGraph
-open System.Text
 
 type TokensEdge<'TokenType>(source, target, tag) = 
     inherit TaggedEdge<int, 'TokenType option>(source, target, tag)
@@ -62,5 +59,10 @@ type CfgTokensGraph<'TokenType>() =
 
     member this.GetAvailableTokens() = 
         this.Edges
-        |> Seq.filter (fun edge -> Option.isSome edge.Tag)
-        |> Seq.map (fun edge -> edge.Tag.Value)
+        |> Seq.fold 
+            (
+                fun acc edge -> 
+                    match edge.Tag with
+                    | Some token -> token :: acc
+                    | None -> acc
+            ) []

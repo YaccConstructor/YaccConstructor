@@ -12,7 +12,7 @@ let getTokens tokenToNumber (block : Block<_>) =
     |> Seq.map tokenToNumber 
     |> Array.ofSeq
 
-let commonCheck (tokenToNumber : _ -> int) (blockToChildren : IDictionary<_, _>) getBlocks (blocks : Block<_> array) = 
+let commonCheck (tokenToNumber : _ -> int) (blockToChildren : IDictionary<_, _>) getBlocks (blocks : Block<_> seq) = 
     
     let getTokens' = getTokens tokenToNumber
     let tryFindKey tokenSet = 
@@ -24,7 +24,7 @@ let commonCheck (tokenToNumber : _ -> int) (blockToChildren : IDictionary<_, _>)
         expected
         |> List.exists(fun num -> tokenSet |> Array.exists((=) num))
         
-    let foldArray pair = 
+    let foldFunction pair = 
         let key, children = pair
         let expected = blockToChildren.[key]
         let res = 
@@ -34,7 +34,7 @@ let commonCheck (tokenToNumber : _ -> int) (blockToChildren : IDictionary<_, _>)
         res
 
     blocks
-    |> Array.map
+    |> Seq.map
         (
             fun block -> 
                 let tokens = block |> getTokens'
@@ -42,16 +42,16 @@ let commonCheck (tokenToNumber : _ -> int) (blockToChildren : IDictionary<_, _>)
                 | Some key -> Some <| (key, getBlocks block)
                 | None -> None
         )
-    |> Array.choose id
-    |> Array.forall foldArray
+    |> Seq.choose id
+    |> Seq.forall foldFunction
 
-let checkParent (tokenToNumber : _ -> int) (blockToChildren : IDictionary<_, _>) (blocks : Block<_> array) = 
+let checkParent (tokenToNumber : _ -> int) (blockToChildren : IDictionary<_, _>) (blocks : Block<_> seq) = 
     let getPrevBlocks(block : Block<_>) = 
         block.Parent.Parents
 
     commonCheck tokenToNumber blockToChildren getPrevBlocks blocks
     
-let checkChildren (tokenToNumber : _ -> int) (blockToChildren : IDictionary<_, _>) (blocks : Block<_> array) = 
+let checkChildren (tokenToNumber : _ -> int) (blockToChildren : IDictionary<_, _>) (blocks : Block<_> seq) = 
     let getNextBlocks(block : Block<_>) = 
         block.Children
         |> List.fold (fun acc child -> List.append child.Children acc) []

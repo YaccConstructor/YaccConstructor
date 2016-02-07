@@ -6,6 +6,7 @@ open System.Collections.Generic
 open ControlFlowGraph.Common
 open ControlFlowGraph.IfHelper
 open ControlFlowGraph.AssignmentHelper
+open ControlFlowGraph.CfgBuilder
 open ControlFlowGraph.CfgElements
 open ControlFlowGraph.InnerGraph
 open ControlFlowGraph.InputStructures
@@ -13,7 +14,7 @@ open ControlFlowGraph.GraphInterpreter
 open ControlFlowGraph.TokensExtractor
 
 open Yard.Generators.Common.AST
-open Yard.Generators.Common.AstNode
+
 open Printers
 
 type ControlFlow<'TokenType> (tree : Tree<'TokenType>
@@ -30,134 +31,44 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
     let isVariable = 
         parserSource.TokenToNumber >> langSource.IsVariable
 
-    let processIf' = processIf intToToken parserSource.TokenToNumber tokToSourceString <| langSource.GetTempIfDict()
-    let processAssignment' = processAssignment intToToken tokToSourceString 
-
-    let entry, exit = 
-        let familyToVertices = new Dictionary<_, ASTProcessingState>()
-
-        let rec handleNode (node : obj) (graph : GraphConstructor<_>) = 
-            let handleFamily (family : Family) startVertex = 
-                graph.CurrentVertex <- startVertex
-                if familyToVertices.ContainsKey family 
-                then 
-                    match familyToVertices.[family] with
-                    | Processed (source, target) -> 
-                        if graph.CurrentVertex <> source 
-                        then 
-                            graph.AddEdgeFromTo EmptyEdge graph.CurrentVertex source
-                        
-                        graph.CurrentVertex <- target
-                        graph.LastVertex <- target
-                        Some target
-                    | InProgress start -> 
-                        graph.AddEdgeFromTo EmptyEdge startVertex start
-                        match graph.TryFindLastVertex start with
-                        | Some vertex ->  
-                            familyToVertices.[family] <- Processed(start, vertex)
-                            graph.CurrentVertex <- vertex
-                            graph.LastVertex <- vertex
-                            Some vertex
-                        | None -> None
-                else
-                    familyToVertices.[family] <- InProgress(graph.CurrentVertex)
-                    let familyName = parserSource.LeftSides.[family.prod] |> parserSource.NumToString
-
-                    if langSource.NodeToType.ContainsKey familyName 
-                    then 
-                        let edge = 
-                            match langSource.NodeToType.[familyName] with
-                            | IfStatement -> processIf' family handleNode
-                            | Assignment -> processAssignment' family
-                            | x -> failwithf "This construction isn't supported now: %A" x
-                    
-                        graph.AddEdge edge
-                        graph.UpdateVertex()
-                        familyToVertices.[family] <- Processed(startVertex, graph.CurrentVertex)
-                        Some graph.CurrentVertex
-                    else 
-                        family.nodes.doForAll (fun node -> handleNode node graph)
-                        familyToVertices.[family] <- Processed(startVertex, graph.CurrentVertex)
-                        Some graph.CurrentVertex
-
-            match node with 
-            | :? Epsilon 
-            | :? Terminal -> ()
-            | :? AST as ast ->
-                let commonStart = graph.CurrentVertex
-                let endNumbers = 
-                    ast.map (fun family -> handleFamily family commonStart)
-                    |> Seq.distinct
-                    |> Seq.fold 
-                        (
-                            fun acc numOpt -> 
-                                match numOpt with 
-                                | Some num -> num :: acc
-                                | None -> acc
-                        ) []
-                    |> Array.ofSeq
-                
-                if endNumbers.Length = 1
-                then 
-                    graph.UpdateVertex()
-                elif endNumbers.Length > 1
-                then
-                    let commonEndVertex = graph.CreateNewVertex()
-
-                    endNumbers
-                    |> Array.iter(fun num -> graph.AddEdgeFromTo EmptyEdge num commonEndVertex)
-                    graph.UpdateVertex()
-                    
-            | x -> failwithf "Unexpected node type: %A" x
-
-        let graphInfo = new GraphConstructor<_>()
-        handleNode tree.Root graphInfo
-
-        match graphInfo.TryFindLastVertex graphInfo.CurrentVertex with
-        | Some _ -> ()
-        | None -> graphInfo.AddEdge EmptyEdge
-
-        graphToCfg graphInfo.Graph <| Some parserSource.TokenToString
+    let entry, exit = buildCfg tree parserSource langSource tokToSourceString
 
     let blocks = 
-        let markedBlocks = new ResizeArray<_>()
-        let queue = new Queue<_>()
-
-        let processNode (node : InterNode<_>) = 
-            let processBlock block = 
-                if not <| markedBlocks.Contains block
-                then
-                    markedBlocks.Add block
-                    queue.Enqueue block
         
-            node.Children 
-            |> List.iter processBlock
-    
-        processNode entry
-        while queue.Count > 0 do
-            let block = queue.Dequeue()
-            block.Children
-            |> List.iter processNode
+        let rec func acc (queue : Block<_> list) = 
+            match queue with
+            | [] -> acc
+            | head :: tail -> 
+                if acc |> List.exists ((=) head)
+                then 
+                    func acc tail
+                else
+                    let children = 
+                        head.Children
+                        |> List.map(fun node -> node.Children)
+                        |> List.concat
+                    func (head :: acc) <| List.append tail children
 
-        markedBlocks.ToArray()
-
+        func [] entry.Children
+        |> List.rev
+        
     let nodes = 
-        let markedNodes = new ResizeArray<_>()
-        let queue = new Queue<_>()
-        
-        let processNode node = 
-            if not <| markedNodes.Contains node
-            then
-                markedNodes.Add node
-                queue.Enqueue node
+        let rec func acc queue = 
+            match queue with
+            | [] -> acc
+            | (head : InterNode<_>) :: tail -> 
+                if acc |> List.exists ((=) head)
+                then 
+                    func acc tail
+                else 
+                    let children = 
+                        head.Children
+                        |> List.map (fun block -> block.Children)
+                        |> List.concat
+                    func (head :: acc) <| List.append tail children
 
-        processNode entry
-        while queue.Count > 0 do
-            let node = queue.Dequeue()
-            node.Children
-            |> List.iter(fun block -> block.Children |> List.iter processNode)
-
-        markedNodes.ToArray()
+        func [] [entry]
+        |> List.rev
 
     let findUndefVariable() = 
         let blockToVars = new Dictionary<_, _>()

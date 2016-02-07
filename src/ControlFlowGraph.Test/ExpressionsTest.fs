@@ -45,8 +45,8 @@ let assertCfg tokenToNumber (cfg : ControlFlow<_>) (expected : PreviousAndNext l
         |> List.iter (processExpected graph)
             
     cfg.Blocks
-    |> Array.map(fun block -> block.TokensGraph)
-    |> Array.iter processExpression
+    |> Seq.map(fun block -> block.TokensGraph)
+    |> Seq.iter processExpression
 
 [<TestFixture>]
 type ``Cycles inside expressions``() = 

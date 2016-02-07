@@ -1,0 +1,6 @@
+digraph g
+{
+rankdir=LR;
+0;1;
+0 -> 1 [label="IF a THEN {b;c;} ELSE {d;e;} f;"]
+}

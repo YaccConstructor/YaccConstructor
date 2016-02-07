@@ -1,0 +1,9 @@
+digraph g
+{
+rankdir=LR;
+0;1;2;3;
+0 -> 1 [label="x = "]
+1 -> 2 [label="1"]
+2 -> 2 [label="+ y"]
+2 -> 3 [label=";"]
+}

@@ -5,11 +5,10 @@ open QuickGraph.FSA.FsaApproximation
 }
 
 tokens {
-    _ of (*int*)FSA<char*Position<string>>
+    _ of FSA<char*Position<string>>
 }
 
 options {
-    module = "Calc.AbstractParser"
     infEpsPath = epsilons
     pos = uint64
 }

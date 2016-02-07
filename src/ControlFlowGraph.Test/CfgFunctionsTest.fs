@@ -1,7 +1,6 @@
 ﻿module CfgFunctionsTest
 
 open NUnit.Framework
-open QuickGraph
 
 open AbstractAnalysis.Common
 
@@ -9,29 +8,27 @@ open ControlFlowGraph
 open ControlFlowGraph.Common
 open ControlFlowGraph.InputStructures
 
+open QuickGraph
+open QuickGraph.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
+open QuickGraph.FST.GraphBasedFst
 open TestHelper
-
 open Yard.Generators.RNGLR.AbstractParser
-
-let createEdge source target label = new ParserEdge<_>(source, target, label)
-
-let needPrint = false
-
-let inline printErr (num, token : 'a, msg) =
-    printfn "Error in position %d on Token %A: %s" num token msg
-    Assert.Fail(sprintf "Error in position %d on Token %A: %s" num token msg)
 
 [<TestFixture>]
 type ``Find undefined variables``() =
     
-    let buildAbstractAst = Test.ExtendedCalcParser.buildAstAbstract
-    let tokenToNumber = Test.ExtendedCalcParser.tokenToNumber
-    let leftSides = Test.ExtendedCalcParser.leftSide
-    let indToString = Test.ExtendedCalcParser.numToString
-    let tokenData = Test.ExtendedCalcParser.tokenData
+    let parse = ExtendedCalcTest.Parser.buildAstAbstract
+    let tokenToNumber = ExtendedCalcTest.Parser.tokenToNumber
+    let leftSides = ExtendedCalcTest.Parser.leftSide
+    let indToString = ExtendedCalcTest.Parser.numToString
+    let tokenData = ExtendedCalcTest.Parser.tokenData
+    let astToDot = ExtendedCalcTest.Parser.defaultAstToDot
 
-    let semicolonNumber = tokenToNumber <| Test.ExtendedCalcParser.SEMICOLON 0
-    let assignNumber = tokenToNumber <| Test.ExtendedCalcParser.ASSIGN 0
+    let fsa = new FSA<_>()
+    let RNGLR_EOF = ExtendedCalcTest.Parser.RNGLR_EOF fsa
+    let semicolonNumber = tokenToNumber <| ExtendedCalcTest.Parser.SEMICOLON fsa
+    let assignNumber = tokenToNumber <| ExtendedCalcTest.Parser.ASSIGN fsa
 
     let nodeToType = dict["assign", Assignment;]
         
@@ -41,175 +38,96 @@ type ``Find undefined variables``() =
                             ]
         
     let varsNumbers = 
-        [Test.ExtendedCalcParser.X 0; Test.ExtendedCalcParser.Y 0; Test.ExtendedCalcParser.Z 0]
+        [ExtendedCalcTest.Parser.X fsa; ExtendedCalcTest.Parser.Y fsa; ExtendedCalcTest.Parser.Z fsa]
         |> List.map tokenToNumber
 
     let isVariable tok = varsNumbers |> List.exists ((=) tok) 
 
     let tokToRealName = tokenToNumber >> indToString
+
+    let x = ExtendedCalcTest.Parser.X fsa |> tokToRealName
+    let y = ExtendedCalcTest.Parser.Y fsa |> tokToRealName
+    let z = ExtendedCalcTest.Parser.Z fsa |> tokToRealName
         
     let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, keywordToInt, isVariable)
 
-    let runTest (qGraph : ParserInputGraph<_>) expected printNames = 
-        
-        if needPrint 
-        then qGraph.PrintToDot <| fst3 printNames <| tokToRealName
-        
-        let parseResult = (new Parser<_>()).Parse buildAbstractAst qGraph
-        
-        match parseResult with 
-        | Yard.Generators.ARNGLR.Parser.Error (num, tok, err) -> printErr (num, tok, err)
-        | Yard.Generators.ARNGLR.Parser.Success (mAst) ->
-            if needPrint
-            then
-                Test.ExtendedCalcParser.defaultAstToDot mAst <| snd3 printNames
+    let createParserInput' = createParserInputGraph ExtendedCalcTest.Lexer.tokenize RNGLR_EOF
+    let createCfg tree = ControlFlow(tree, parserSource, langSource, tokToRealName)
 
-            let cfg = ControlFlow (mAst, parserSource, langSource, tokToRealName)
-            
-            if needPrint
-            then cfg.PrintToDot <| thr3 printNames
-            
-            let errorList = cfg.FindUndefVariable()
-            
-            if needPrint
-            then
-                printfn "%A" errorList
-                printfn "Expected: %d. Actual: %d." expected errorList.Length 
-            
-            Assert.AreEqual(expected, errorList.Length)
+    let runTest (cfg : ControlFlow<_>) (expected : string list) prefix = 
+        let errorList = 
+            cfg.FindUndefVariable()
+            |> List.map tokToRealName
+        
+        printfn "%A" errorList
+        printfn "Expected: %d. Actual: %d." expected.Length errorList.Length 
+        Assert.AreEqual(expected.Length, errorList.Length)
+        
+        (*let res =     
+            expected
+            |> List.forall(fun var -> errorList |> List.exists ((=) var)
+
+        Assert.True(res, "")*)
 
     [<Test>]
     member test.``Elementary``() = 
-        let qGraph = new ParserInputGraph<_>(0, 9)
-        qGraph.AddVerticesAndEdgeRange
-            [
-                createEdge 0 1 (Test.ExtendedCalcParser.X 0)
-                createEdge 1 2 (Test.ExtendedCalcParser.ASSIGN 1)
-                createEdge 2 3 (Test.ExtendedCalcParser.Z 2)
-                createEdge 3 4 (Test.ExtendedCalcParser.SEMICOLON 3)
-                createEdge 4 5 (Test.ExtendedCalcParser.Y 4)
-                createEdge 5 6 (Test.ExtendedCalcParser.ASSIGN 5)
-                createEdge 6 7 (Test.ExtendedCalcParser.X 6)
-                createEdge 7 8 (Test.ExtendedCalcParser.SEMICOLON 7)
-                createEdge 8 9 (Test.ExtendedCalcParser.RNGLR_EOF 8)
-            ] |> ignore
+        let qGraph = createParserInput' "X = Z; Y = X.dot"
 
-        let expected = 1
-        let printNames = 
-            "`cfg undefined variables input elementary.dot", 
-            "`cfg undefined variables ast elementary.dot", 
-            "`cfg undefined variables cfg elementary.dot"
-        runTest qGraph expected printNames
+        let expected = [z]
+        let prefix = "`cfg undefined variables elementary"
+        //act
+        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealName prefix
+        //assert
+        runTest cfg expected prefix
 
     [<Test>]
     member test.``X = X``() = 
-        let qGraph = new ParserInputGraph<_>(0, 5)
-        qGraph.AddVerticesAndEdgeRange
-            [
-                createEdge 0 1 (Test.ExtendedCalcParser.X 0)
-                createEdge 1 2 (Test.ExtendedCalcParser.ASSIGN 1)
-                createEdge 2 3 (Test.ExtendedCalcParser.X 2)
-                createEdge 3 4 (Test.ExtendedCalcParser.SEMICOLON 3)
-                createEdge 4 5 (Test.ExtendedCalcParser.RNGLR_EOF 4)
-            ] |> ignore
+        let qGraph = createParserInput' "X = X.dot"
 
-        let expected = 1
-        let printNames = 
-            "`cfg undefined variables input X = X.dot", 
-            "`cfg undefined variables ast X = X.dot", 
-            "`cfg undefined variables cfg X = X.dot"
-        runTest qGraph expected printNames
+        let expected = [x]
+        let prefix = "`cfg undefined variables X = X"
+
+        //act
+        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealName prefix
+        //assert
+        runTest cfg expected prefix
 
     [<Test>]
     member test.``Undef: ambiguous``() =
-        let qGraph = new ParserInputGraph<_>(0, 18)
-        //          -> Y = 2;
-        // X = 1;                -> X = Y * Z;
-        //          -> Z = 3;
-        qGraph.AddVerticesAndEdgeRange
-            [
-                createEdge 0 1 (Test.ExtendedCalcParser.X 0)
-                createEdge 1 2 (Test.ExtendedCalcParser.ASSIGN 1)
-                createEdge 2 3 (Test.ExtendedCalcParser.NUMBER 2)
-                createEdge 3 4 (Test.ExtendedCalcParser.SEMICOLON 3)
-                createEdge 4 5 (Test.ExtendedCalcParser.Y 4)
-                createEdge 5 6 (Test.ExtendedCalcParser.ASSIGN 5)
-                createEdge 6 7 (Test.ExtendedCalcParser.NUMBER 6)
-                createEdge 7 8 (Test.ExtendedCalcParser.SEMICOLON 7)
-                createEdge 4 9 (Test.ExtendedCalcParser.Z 8)
-                createEdge 9 10 (Test.ExtendedCalcParser.ASSIGN 9)
-                createEdge 10 11 (Test.ExtendedCalcParser.NUMBER 10)
-                createEdge 11 8 (Test.ExtendedCalcParser.SEMICOLON 11)
-                createEdge 8 12 (Test.ExtendedCalcParser.X 8)
-                createEdge 12 13 (Test.ExtendedCalcParser.ASSIGN 12)
-                createEdge 13 14 (Test.ExtendedCalcParser.Y 13)
-                createEdge 14 15 (Test.ExtendedCalcParser.MULT 14)
-                createEdge 15 16 (Test.ExtendedCalcParser.Z 15)
-                createEdge 16 17 (Test.ExtendedCalcParser.SEMICOLON 16)
-                createEdge 17 18 (Test.ExtendedCalcParser.RNGLR_EOF 17)
-            ] |> ignore
-
-        let expected = 2
-        let printNames = 
-            "`cfg undefined variables input.dot", 
-            "`cfg undefined variables ast ambiguous1.dot", 
-            "`cfg undefined variables cfg ambiguous1.dot"
-        runTest qGraph expected printNames
+        let qGraph = createParserInput' "Ambiguous.dot"
+        
+        let expected = [y; z]
+        let prefix = "`cfg undefined variables ambiguous"
+            
+        //act
+        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealName prefix
+        //assert
+        runTest cfg expected prefix
             
     [<Test>]
     member test.``Undef: ambiguous 2``() =
-        let qGraph = new ParserInputGraph<_>(0, 15)
-        //        ---> Y = 2; ---> 
-        // X = 1; ---------------> X = Y * Z;
-        qGraph.AddVerticesAndEdgeRange
-            [
-                createEdge 0 1 (Test.ExtendedCalcParser.X 0)
-                createEdge 1 2 (Test.ExtendedCalcParser.ASSIGN 1)
-                createEdge 2 3 (Test.ExtendedCalcParser.NUMBER 2)
-                createEdge 3 4 (Test.ExtendedCalcParser.SEMICOLON 3)
-                createEdge 4 5 (Test.ExtendedCalcParser.Y 4)
-                createEdge 5 6 (Test.ExtendedCalcParser.ASSIGN 5)
-                createEdge 6 7 (Test.ExtendedCalcParser.NUMBER 6)
-                createEdge 7 8 (Test.ExtendedCalcParser.SEMICOLON 7)
-                createEdge 4 9 (Test.ExtendedCalcParser.X 8)
-                createEdge 8 9 (Test.ExtendedCalcParser.X 8)
-                createEdge 9 10 (Test.ExtendedCalcParser.ASSIGN 9)
-                createEdge 10 11 (Test.ExtendedCalcParser.Y 10)
-                createEdge 11 12 (Test.ExtendedCalcParser.MULT 11)
-                createEdge 12 13 (Test.ExtendedCalcParser.Z 12)
-                createEdge 13 14 (Test.ExtendedCalcParser.SEMICOLON 13)
-                createEdge 14 15 (Test.ExtendedCalcParser.RNGLR_EOF 14)
-            ] |> ignore
-
-        let expected = 2
-        let printNames = 
-            "`cfg undefined variables input.dot", 
-            "`cfg undefined variables ast ambiguous2.dot", 
-            "`cfg undefined variables cfg ambiguous2.dot"
-        runTest qGraph expected printNames
+        let qGraph = createParserInput' "Ambiguous3.dot"
+        
+        let expected = [y]
+        let prefix = "`cfg undefined variables ambiguous2"
+        //act
+        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealName prefix
+        //assert
+        runTest cfg expected prefix
 
     [<Test>]
     member this.``Cycle inside expression``() = 
-        let qGraph = new ParserInputGraph<_>(0, 6)
-        qGraph.AddVerticesAndEdgeRange
-            [
-                createEdge 0 1 (Test.ExtendedCalcParser.X 0)
-                createEdge 1 2 (Test.ExtendedCalcParser.ASSIGN 1)
-                createEdge 2 3 (Test.ExtendedCalcParser.NUMBER 2)
-                createEdge 3 4 (Test.ExtendedCalcParser.PLUS 3)
-                createEdge 4 3 (Test.ExtendedCalcParser.Z 4)
-                createEdge 3 5 (Test.ExtendedCalcParser.SEMICOLON 5)
-                createEdge 5 6 (Test.ExtendedCalcParser.RNGLR_EOF 6)
-            ] |> ignore
+        let qGraph = createParserInput' "X = 1 [+Y].dot"
         
-        let printNames = 
-            "`cfg cycle inside expression input.dot", 
-            "`cfg cycle inside expression ast.dot", 
-            "`cfg cycle inside expression cfg.dot"
-        let expected = 1
-        runTest qGraph expected printNames
+        let prefix = "`cfg cycle inside expression"
 
+        let expected = [y]
+        //act
+        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealName prefix
+        //assert
+        runTest cfg expected prefix
+        
 //[<EntryPoint>]
 let f x = 
     let functions =  ``Find undefined variables``()

@@ -401,3 +401,7 @@ src/RNGLRApplication/SimpleAmb.yrd.fs
 # vim temp files
 *.swp
 src/RNGLRApplication/res.dot
+src/ControlFlowGraph.Test/Lexer_Abstract.fs
+src/ControlFlowGraph.Test/Lexer_Abstract.fs
+src/ControlFlowGraph.Test/*.Lexer_Abstract.fs
+src/ControlFlowGraph.Test/*.Lexer.fs

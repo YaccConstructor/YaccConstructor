@@ -1,10 +1,11 @@
 ﻿{
 open QuickGraph.FST.GraphBasedFst
 open QuickGraph.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
 }
 
 tokens {
-    _ of int (*FSA<char*int>*)
+    _ of FSA<char*Position<string>>
 }
 
 [<Start>]

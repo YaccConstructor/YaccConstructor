@@ -1,0 +1,31 @@
+﻿{
+module IfTest.Lexer
+
+open Microsoft.FSharp.Collections
+open QuickGraph.FST.GraphBasedFst
+open QuickGraph.FSA.GraphBasedFsa
+open YC.FST.AbstractLexing.Interpreter
+open AbstractAnalysis.Common
+open IfTest.Parser
+open System.Collections.Generic
+//open YC.SDK.CommonInterfaces
+}
+
+let whitespace = [' ' '\t' '\r' '\n']
+
+rule token = parse
+| whitespace { None }
+| '{' { L_left_figure_bracket_(gr) |> Some }
+| '}' { L_right_figure_bracket_(gr) |> Some }
+| 'A' { A(gr) |> Some }
+| 'B' { B(gr) |> Some }
+| 'C' { C(gr) |> Some }
+| 'D' { D(gr) |> Some }
+| 'E' { E(gr) |> Some }
+| 'F' { F(gr) |> Some }
+| 'G' { G(gr) |> Some }
+| 'H' { H(gr) |> Some }
+| ';' { SEMICOLON(gr) |> Some }
+| "IF" { IF(gr) |> Some }
+| "THEN" { THEN(gr) |> Some }
+| "ELSE" { ELSE(gr) |> Some }

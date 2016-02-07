@@ -1,13 +1,12 @@
 ﻿{
-module YC.RNGLR.ExtendedCalcLexer
+module ExtendedCalcTest.Lexer
 
 open Microsoft.FSharp.Collections
 open QuickGraph.FST.GraphBasedFst
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
 open YC.FST.AbstractLexing.Interpreter
 open AbstractAnalysis.Common
-open Test.ExtendedCalcParser
+open ExtendedCalcTest.Parser
 open System.Collections.Generic
 //open YC.SDK.CommonInterfaces
 }
@@ -24,8 +23,8 @@ rule token = parse
 | '/' { DIV(gr) |> Some }
 | '+' { PLUS(gr) |> Some }
 | '*' { MULT(gr) |> Some }
-| '=' { ASSIGN(gr) |> Some }
-| ';' { SEMICOLON(gr) |> Some }
 | 'x' { X(gr) |> Some }
 | 'y' { Y(gr) |> Some }
 | 'z' { Z(gr) |> Some }
+| '=' { ASSIGN(gr) |> Some }
+| ';' { SEMICOLON(gr) |> Some }

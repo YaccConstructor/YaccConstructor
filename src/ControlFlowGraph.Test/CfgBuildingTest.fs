@@ -12,14 +12,11 @@ open QuickGraph.FSA.GraphBasedFsa
 
 let returnTrue = fun _ -> true
 
-let runTest (cfg : ControlFlow<_>) expectedBlocksCount expectedNodesCount checkEntry checkExit checks = 
+let runTest (cfg : ControlFlow<_>) checkEntry checkExit checks = 
             
     Assert.IsTrue(checkEntry cfg.Entry, "Incorrect entry node!")
     Assert.IsTrue(checkExit cfg.Exit, "Incorrect exit node")
             
-    Assert.AreEqual(expectedBlocksCount, cfg.Blocks.Length, "Blocks count isn't equal expected one")
-    Assert.AreEqual(expectedNodesCount, cfg.Nodes.Length, "Intermediate nodes count isn't equal expected one")
-
     let checkCondition condition = 
         let res = condition cfg.Blocks
         Assert.True(res, "Incorrect cfg was built")
@@ -59,6 +56,10 @@ type ``Simple cases``() =
     [<Test>]
     member test.``Elementary test``() =
         let qGraph = createParserInput' "Seq.dot"
+
+        let checkEntry' = checkEntryNode tokToRealString returnTrue
+        let checkExit' = checkExitNode tokToRealString returnTrue
+
         let nodeToChildren = dict [xNumber, [yNumber]; yNumber, [zNumber]; zNumber, [];]
         let myChildrenCheck = checkChildren tokenToNumber nodeToChildren
 
@@ -67,21 +68,19 @@ type ``Simple cases``() =
 
         let myConds = [myChildrenCheck; myParentsCheck]
         
-        let expectedNodes = 4
-        let expectedBlocks = 3
         let prefix = "`elementary"
 
         //act 
         let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
         //assert
-        runTest cfg expectedBlocks expectedNodes returnTrue returnTrue myConds
+        runTest cfg checkEntry' checkExit' myConds
 
     [<Test>]
     member test.``Ambiguous test``() =
         let qGraph = createParserInput' "Ambiguous.dot"
 
-        let expectedNodes = 4
-        let expectedBlocks = 4
+        let checkEntry' = checkEntryNode tokToRealString returnTrue
+        let checkExit' = checkExitNode tokToRealString returnTrue
 
         let blockToChildren = dict [yNumber, [xNumber]; zNumber, [xNumber];]
         let checkChildren' = checkChildren tokenToNumber blockToChildren
@@ -95,14 +94,14 @@ type ``Simple cases``() =
         //act 
         let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
         //assert
-        runTest cfg expectedBlocks expectedNodes returnTrue returnTrue myChecks
+        runTest cfg checkEntry' checkExit' myChecks
         
     [<Test>]
     member this.``Ambiguous2 test``() = 
         let qGraph = createParserInput' "Ambiguous2.dot"
 
-        let expectedNodes = 2
-        let expectedBlocks = 2
+        let checkEntry' = checkEntryNode tokToRealString returnTrue
+        let checkExit' = checkExitNode tokToRealString returnTrue
 
         let blockToChildren = dict [yNumber, []; zNumber, [];]
         let checkChildren' = checkChildren tokenToNumber blockToChildren
@@ -115,7 +114,7 @@ type ``Simple cases``() =
         //act 
         let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
         //assert
-        runTest cfg expectedBlocks expectedNodes returnTrue returnTrue myChecks
+        runTest cfg checkEntry' checkExit' myChecks
         
 [<TestFixture>]
 type ``If statements`` () =
@@ -158,50 +157,54 @@ type ``If statements`` () =
     member test.``Simple If test``() =
         let qGraph = createParserInput' "Simple if.dot"
 
-        let prefix = "`simple if"
-        let expectedBlocksCount = 4
-        let expectedNodesCount = 5
+        let checkEntry' = checkEntryNode tokenToString returnTrue
+        let checkExit' = checkExitNode tokenToString returnTrue
 
+        let prefix = "`simple if"
+        
         //act
         let cfg = buildCfg qGraph parse createCfg astToDot tokenToString prefix
         //assert
-        runTest cfg expectedBlocksCount expectedNodesCount returnTrue returnTrue []
+        runTest cfg checkEntry' checkExit' []
 
     [<Test>]
     member test.``Big If test``() =
         let qGraph = createParserInput' "Big if.dot"
 
+        let checkEntry' = checkEntryNode tokenToString returnTrue
+        let checkExit' = checkExitNode tokenToString returnTrue
         let prefix = "`big if"
-        let expectedBlocksCount = 6
-        let expectedNodesCount = 7
+        
         //act
         let cfg = buildCfg qGraph parse createCfg astToDot tokenToString prefix
         //assert
-        runTest cfg expectedBlocksCount expectedNodesCount returnTrue returnTrue []
+        runTest cfg checkEntry' checkExit' []
 
     [<Test>]
     member test.``If without else test``() =
         let qGraph = createParserInput' "If without else.dot"
 
+        let checkEntry' = checkEntryNode tokenToString returnTrue
+        let checkExit' = checkExitNode tokenToString returnTrue
+
         let prefix = "`if without else"
-        let expectedBlocksCount = 4
-        let expectedNodesCount = 5
         //act
         let cfg = buildCfg qGraph parse createCfg astToDot tokenToString prefix
         //assert
-        runTest cfg expectedBlocksCount expectedNodesCount returnTrue returnTrue []
+        runTest cfg checkEntry' checkExit' []
             
     [<Test>]
     member test.``Inner if``() =
         let qGraph = createParserInput' "Inner if.dot"
 
+        let checkEntry' = checkEntryNode tokenToString returnTrue
+        let checkExit' = checkExitNode tokenToString returnTrue
         let prefix = "`inner if"
-        let expectedBlocksCount = 7
-        let expectedNodesCount = 8
+        
         //act
         let cfg = buildCfg qGraph parse createCfg astToDot tokenToString prefix
         //assert
-        runTest cfg expectedBlocksCount expectedNodesCount returnTrue returnTrue []
+        runTest cfg checkEntry' checkExit' []
         
 [<TestFixture>]
 type ``Cycles``() = 
@@ -231,7 +234,7 @@ type ``Cycles``() =
 
     let createCfg tree = ControlFlow(tree, parserSource, langSource, tokToRealString)
 
-    //At least One token from the expected set must exist in the tokenSet set
+    //At least one token from the expected set must exist in the tokenSet set
     let myCond expected tokenSet = 
         expected
         |> Array.exists(fun num -> tokenSet |> Array.exists ((=) num))
@@ -239,9 +242,6 @@ type ``Cycles``() =
     [<Test>]
     member this.``Cycle A+``() = 
         let qGraph = createParserInput' "A+.dot"
-
-        let expectedNodes = 3
-        let expectedBlocks = 2
 
         let checkEntryNode' = checkEntryNode tokenToNumber returnTrue
         let checkExitNode' = checkExitNode tokenToNumber returnTrue
@@ -258,14 +258,11 @@ type ``Cycles``() =
         //action
         let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
         //asserts
-        runTest cfg expectedBlocks expectedNodes checkEntryNode' checkExitNode' myChecks
+        runTest cfg checkEntryNode' checkExitNode' myChecks
 
     [<Test>]
     member this.``Cycle A B*``() = 
         let qGraph = createParserInput' "A B(asteriks).dot"
-
-        let expectedNodes = 3
-        let expectedBlocks = 2
 
         let entryCond = myCond [|aNumber|]
         let checkEntryNode' = checkEntryNode tokenToNumber entryCond
@@ -285,14 +282,11 @@ type ``Cycles``() =
         //action
         let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
         //asserts
-        runTest cfg expectedBlocks expectedNodes checkEntryNode' checkExitNode' myChecks
+        runTest cfg checkEntryNode' checkExitNode' myChecks
 
     [<Test>]
     member this.``Cycle A B* C``() = 
         let qGraph = createParserInput' "A B(asteriks) C.dot"
-
-        let expectedNodes = 3
-        let expectedBlocks = 3
 
         let entryCond = myCond [|aNumber|]
         let checkEntryNode' = checkEntryNode tokenToNumber entryCond
@@ -319,14 +313,11 @@ type ``Cycles``() =
         //action
         let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
         //asserts
-        runTest cfg expectedBlocks expectedNodes checkEntryNode' checkExitNode' myChecks
+        runTest cfg checkEntryNode' checkExitNode' myChecks
 
     [<Test>]
     member this.``Cycle (A | B)+``() = 
         let qGraph = createParserInput' "(A or B)+.dot"
-
-        let expectedNodes = 3
-        let expectedBlocks = 4
 
         //first block has two childs: A and B
         let entryCond = myCond [| aNumber; bNumber |]
@@ -353,14 +344,11 @@ type ``Cycles``() =
         //action
         let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
         //asserts
-        runTest cfg expectedBlocks expectedNodes checkEntryNode' checkExitNode' myChecks
+        runTest cfg checkEntryNode' checkExitNode' myChecks
 
     [<Test>]
     member this.``Cycle A (B+ | C+)``() = 
         let qGraph = createParserInput' "A (B+ or C+).dot"
-
-        let expectedNodes = 4
-        let expectedBlocks = 6
 
         //first block has only one child: A
         let entryCond = myCond [|aNumber|]
@@ -388,15 +376,13 @@ type ``Cycles``() =
         //action
         let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
         //asserts
-        runTest cfg expectedBlocks expectedNodes checkEntryNode' checkExitNode' myChecks
+        runTest cfg checkEntryNode' checkExitNode' myChecks
 
 
     [<Test>]
     member this.``Cycle (AB)+``() = 
         let qGraph = createParserInput' "(AB)+.dot"
 
-        let expectedNodes = 4
-        let expectedBlocks = 3
         //first block has only one child: A
         let entryCond = myCond [|aNumber|]
         let checkEntryNode' = checkEntryNode tokenToNumber entryCond
@@ -422,14 +408,11 @@ type ``Cycles``() =
         //action
         let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
         //asserts
-        runTest cfg expectedBlocks expectedNodes checkEntryNode' checkExitNode' myChecks
+        runTest cfg checkEntryNode' checkExitNode' myChecks
 
     [<Test>]
     member this.``Cycle (AB)+C``() = 
         let qGraph = createParserInput' "(AB)+C.dot"
-
-        let expectedNodes = 4
-        let expectedBlocks = 4
 
         //first block has only one child: A
         let entryCond = myCond [|aNumber|]
@@ -457,7 +440,7 @@ type ``Cycles``() =
         //action
         let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
         //asserts
-        runTest cfg expectedBlocks expectedNodes checkEntryNode' checkExitNode' myChecks
+        runTest cfg checkEntryNode' checkExitNode' myChecks
 
     [<Test>]
     member this.``Cycle after cycle A+B+``() = 
@@ -484,13 +467,12 @@ type ``Cycles``() =
         let checkParents' = checkParent tokenToNumber blockToParents
         let myChecks = [checkChildren'; checkParents']
 
-        let expectedNodes = 4
-        let expectedBlocks = 4
+        
         let prefix = "`Cycle after cycle A+B+"
         //action
         let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
         //asserts
-        runTest cfg expectedBlocks expectedNodes checkEntryNode' checkExitNode' myChecks
+        runTest cfg checkEntryNode' checkExitNode' myChecks
 
     [<Test>]
     member this.``Cycle inside cycle (A+B)+``() = 
@@ -501,9 +483,6 @@ type ``Cycles``() =
 
         let exitCond = myCond [|bNumber|]
         let checkExitNode' = checkExitNode tokenToNumber exitCond
-
-        let expectedNodes = 4
-        let expectedBlocks = 4
 
         let blockToChildren = dict [
                                     aNumber, [aNumber; bNumber;];
@@ -523,7 +502,7 @@ type ``Cycles``() =
         //action
         let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
         //asserts
-        runTest cfg expectedBlocks expectedNodes checkEntryNode' checkExitNode' myChecks
+        runTest cfg checkEntryNode' checkExitNode' myChecks
 
     [<Test>]
     member this.``Cycle inside cycle ((AB)+C)+``() = 
@@ -551,14 +530,11 @@ type ``Cycles``() =
         let checkParents' = checkParent tokenToNumber blockToParents
         let myChecks = [checkChildren'; checkParents']
 
-        let expectedNodes = 5
-        let expectedBlocks = 5
         let prefix = "`Cycle inside cycle ((AB)+C)+"
         //action
         let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
         //asserts
-        runTest cfg expectedBlocks expectedNodes checkEntryNode' checkExitNode' myChecks
-
+        runTest cfg checkEntryNode' checkExitNode' myChecks
 
 //[<EntryPoint>]
 let f x = 

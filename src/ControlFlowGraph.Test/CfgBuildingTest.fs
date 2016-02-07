@@ -1,22 +1,14 @@
-﻿module CfgBuildingTest
-
-open System
+﻿module ControlFlowGraph.Test.CfgBuildingTest
 
 open NUnit.Framework
-
-open AbstractAnalysis.Common
 
 open ControlFlowGraph
 open ControlFlowGraph.Common
 open ControlFlowGraph.InputStructures
-open ControlFlowGraph.TestHelper
+open ControlFlowGraph.Test.CommonHelper
+open ControlFlowGraph.Test.BlockHelper
 
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
-open QuickGraph.FST.GraphBasedFst
-
-open Yard.Generators.RNGLR
-open Yard.Generators.RNGLR.AbstractParser
 
 let returnTrue = fun _ -> true
 
@@ -222,7 +214,6 @@ type ``Cycles``() =
 
     let fsa = new FSA<_>()
     let RNGLR_EOF = SimpleTest.Parser.RNGLR_EOF <| new FSA<_>()
-    
 
     let aNumber = tokenToNumber <| SimpleTest.Parser.A fsa
     let bNumber = tokenToNumber <| SimpleTest.Parser.B fsa
@@ -568,105 +559,16 @@ type ``Cycles``() =
         //asserts
         runTest cfg expectedBlocks expectedNodes checkEntryNode' checkExitNode' myChecks
 
-[<TestFixture>]
-type ``Cycles inside expressions``() = 
-    let parse = ExtendedCalcTest.Parser.buildAstAbstract
-    let tokenToNumber = ExtendedCalcTest.Parser.tokenToNumber
-    let leftSides = ExtendedCalcTest.Parser.leftSide
-    let indToString = ExtendedCalcTest.Parser.numToString
-    let tokenData = ExtendedCalcTest.Parser.tokenData
-    let astToDot = ExtendedCalcTest.Parser.defaultAstToDot
 
-    let fsa = new FSA<_>()
-    let RNGLR_EOF = ExtendedCalcTest.Parser.RNGLR_EOF <| fsa
-    let createParserInput' = createParserInputGraph ExtendedCalcTest.Lexer.tokenize RNGLR_EOF
-
-    let semicolonNumber = tokenToNumber <| ExtendedCalcTest.Parser.SEMICOLON fsa
-    let nodeToType = dict["assign", Assignment;]
-
-    let keywordToInt = dict [Keyword.SEMICOLON, semicolonNumber;]
-
-    let tokToRealString = tokenToNumber >> indToString
-    let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
-    let langSource = new LanguageSource(nodeToType, keywordToInt)
-
-    let createCfg tree = ControlFlow(tree, parserSource, langSource, tokToRealString)
-
-    let runTest (cfg : ControlFlow<_>) expectedTokensCount prefix = 
-
-        Assert.AreEqual(1, cfg.Blocks.Length)
-        let innerGraph = cfg.Blocks.[0].TokensGraph
-        let toksCount = innerGraph.GetAvailableTokens() |> Seq.length
-        Printers.CfgTokensGraphPrinter.ToDot
-            <| innerGraph
-            <| tokToRealString
-            <| sprintf "`%s.dot" prefix 
-        Assert.AreEqual(expectedTokensCount, toksCount)
-                
-    [<Test>]
-    member this.``X = 1 [+Y]*``() = 
-        let qGraph = createParserInput' "X = 1 [+Y].dot"
-
-        let prefix = "`X = 1 [+Y]"
-        //act
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
-        //assert
-        match cfg.Blocks.Length with
-        | 2 ->
-            let toksCount = 
-                cfg.Blocks
-                |> Array.map(fun block -> block.TokensGraph.GetAvailableTokens() |> Seq.length)
-            Assert.AreEqual([|4; 7|], toksCount)
-        | 1 -> 
-            let toksCount = cfg.Blocks.[0].TokensGraph.GetAvailableTokens() |> Seq.length
-            Assert.AreEqual(7, toksCount)
-        | x -> Assert.Fail(sprintf "Incorrect blocks count: expected 1 or 2, but %d was" x)
-            
-        
-        //runTest cfg 6 prefix
-
-    [<Test>]
-    member this.``X = Y [+1]* - Z``() = 
-        let qGraph = createParserInput' "X = Y [+1] - Z.dot"
-
-        let prefix = "`X = Y [+1] - Z"
-        //act
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
-        //assert
-        runTest cfg 8 prefix
-
-    [<Test>]
-    member this.``X = Y [+1[-Z]*]*``() = 
-        let qGraph = createParserInput' "X = Y [+1[-Z]].dot"
-
-        let prefix = "`X = Y [+1[-Z]]"
-        //act
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
-        //assert
-        runTest cfg 8 prefix
-
-    [<Test>]
-    member this.``X = Y [(+1) | (-Z)]*``() = 
-        let qGraph = createParserInput' "X = Y [(+1) or (-Z)].dot"
-
-        let prefix = "`X = Y [(+1) or (-Z)]"
-        //act
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
-        //assert
-        runTest cfg 8 prefix
-
-[<EntryPoint>]
+//[<EntryPoint>]
 let f x = 
-    //let cycleInsideExpress = new ``Control Flow Graph building: Cycles inside expressions``()
-    //cycleInsideExpress.``X = Y [+1]*``()
-
     //let cfgBuilding = new ``Simple cases``()
     //cfgBuilding.``Ambiguous test``()
     //cfgBuilding.``Ambiguous2 test``()
     
-    let cycleBuilding = new ``Cycles``()
+    //let cycleBuilding = new ``Cycles``()
     //cycleBuilding.``Cycle (A | B)+``()
-    cycleBuilding.``Cycle (AB)+C``()
+    //cycleBuilding.``Cycle (AB)+C``()
     //cycleBuilding.``Simple Cycle``()
     //cycleBuilding.Cycle()
 //    cfgBuilding.``Ambiguous test``()

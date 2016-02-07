@@ -1,4 +1,4 @@
-﻿module CfgFunctionsTest
+﻿module ControlFlowGraph.Test.CfgFunctionsTest
 
 open NUnit.Framework
 
@@ -7,13 +7,9 @@ open AbstractAnalysis.Common
 open ControlFlowGraph
 open ControlFlowGraph.Common
 open ControlFlowGraph.InputStructures
+open ControlFlowGraph.Test.CommonHelper
 
-open QuickGraph
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
-open QuickGraph.FST.GraphBasedFst
-open TestHelper
-open Yard.Generators.RNGLR.AbstractParser
 
 [<TestFixture>]
 type ``Find undefined variables``() =
@@ -64,11 +60,11 @@ type ``Find undefined variables``() =
         printfn "Expected: %d. Actual: %d." expected.Length errorList.Length 
         Assert.AreEqual(expected.Length, errorList.Length)
         
-        (*let res =     
+        let res =
             expected
-            |> List.forall(fun var -> errorList |> List.exists ((=) var)
+            |> List.forall (fun var -> errorList |> List.exists ((=) var))
 
-        Assert.True(res, "")*)
+        Assert.True(res, "Not all expected variables are found")
 
     [<Test>]
     member test.``Elementary``() = 
@@ -131,5 +127,5 @@ type ``Find undefined variables``() =
 //[<EntryPoint>]
 let f x = 
     let functions =  ``Find undefined variables``()
-    functions.``Cycle inside expression``()
+    functions.Elementary()
     1

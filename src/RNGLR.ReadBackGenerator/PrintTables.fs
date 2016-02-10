@@ -240,7 +240,7 @@ let printTables
             "gotos"
         print2DArrList tables.reduces
             (fun l -> not l.IsEmpty)
-            (fun l -> printListAsArray l (fun x -> print "%d" x))
+            (fun l -> printListAsArray l (fun (x, y) -> print "%d,%d" x y))
             "reduces"
 
         print2DArrList tables.zeroReduces
@@ -259,7 +259,7 @@ let printTables
     
         printBrInd 0 "let errorIndex = %d" grammar.errorIndex
         
-        printBrInd 0 "let private parserSource = new ParserSourceReadBack<Token> (gotos, reduces, zeroReduces, accStates, nfas, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex)"
+        printBrInd 0 "let private parserSource = new ParserSourceReadBack<Token> (gotos, reduces, zeroReduces, accStates, nfas, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex)"
 
         printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
         printBrInd 1 "buildAst<Token> parserSource"

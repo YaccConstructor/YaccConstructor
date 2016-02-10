@@ -1,8 +1,8 @@
 ﻿namespace Yard.Generators.RNGLR.ReadBack
 
-open Yard.Generators.RNGLR.ReadBack
 open Yard.Generators.Common
 open Yard.Generators.Common.EBNF
+open System.Collections.Generic
 
 [<AllowNullLiteral>]
 type VertexWithBackTrack<'VertexLabel, 'EdgeLabel>(label : 'VertexLabel) =
@@ -20,7 +20,6 @@ type ParserSourceReadBack<'TokenType> (gotos : int[][]
                                , zeroReduces : int[][][]
                                , accStates : bool[]
                                , nfas : NFATable
-                               , rulesStart : int[]
                                , leftSide : int[]
                                , startRule : int
                                , eofIndex : int
@@ -45,8 +44,7 @@ type ParserSourceReadBack<'TokenType> (gotos : int[][]
                     setAllTransitions ats
                 | [] -> ()
             setAllTransitions allTransitions
-            let graphNfa : NFAProduction.t = {numberOfStates = numberOfStates; startState = stateToVertex.[0]; stateToVertex = stateToVertex |> Array.map (fun x -> x :> Vertex<_,_>)}
-            graphNfa
+            numberOfStates, stateToVertex
 
         nfas |> Array.map openNfa
 
@@ -55,7 +53,6 @@ type ParserSourceReadBack<'TokenType> (gotos : int[][]
     member this.Gotos = gotos
     member this.AccStates = accStates
     member this.RightSideNFA = _nfas
-    member this.RulesStart = rulesStart
     member this.LeftSide = leftSide
     member this.StartRule = startRule
     member this.EofIndex = eofIndex

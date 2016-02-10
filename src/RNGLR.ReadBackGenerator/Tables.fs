@@ -10,7 +10,7 @@ type NFATable = (int * (int * (int * int) list) list)[]
 type TablesReadBack (grammar : FinalGrammarNFA, states : StatesInterpreter) =
     let _reduces, _zeroReduces, _gotos, _acc =
         let symbolCount = grammar.indexator.fullCount
-        let reduces : list<int>[,] = Array2D.create states.count symbolCount []
+        let reduces : list<int * int>[,] = Array2D.create states.count symbolCount []
         let zeroReduces : list<int>[,] = Array2D.create states.count symbolCount []
         let gotos : int list[,] = Array2D.create states.count symbolCount []
         let mutable acc = []
@@ -32,8 +32,7 @@ type TablesReadBack (grammar : FinalGrammarNFA, states : StatesInterpreter) =
                     for symbol in la do 
                         if Set.contains pos grammar.startPositions.[prod] then
                             zeroReduces.[i, symbol] <- prod::zeroReduces.[i, symbol]
-                        else
-                            reduces.[i, symbol] <- prod::reduces.[i, symbol]
+                        reduces.[i, symbol] <- (prod, pos)::reduces.[i, symbol]
         reduces, zeroReduces, gotos, acc
 
     let _nfas =

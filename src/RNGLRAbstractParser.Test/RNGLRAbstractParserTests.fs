@@ -45,8 +45,9 @@ let loadLexerInputGraph gFile =
     lexerInputG
 
 let test buildAstAbstract qGraph nodesCount edgesCount epsilonsCount termsCount ambiguityCount = 
+    let start = System.DateTime.Now
     let r = (new Parser<_>()).Parse  buildAstAbstract qGraph
-    printfn "%A" r
+    printfn "REsult = %A \n Time = %A" r (System.DateTime.Now - start)
     match r with
     | Error (num, tok, message) ->
         let msg = sprintf "Error in position %d on Token %A: %s" num tok message
@@ -697,6 +698,23 @@ type ``RNGLR abstract parser tests`` () =
         seq{for i in 0..inpLength -> graph i}
         |> fun s -> System.IO.File.WriteAllLines("sql_perf.txt",s)
 
+
+    [<Test>]
+    member this.bio2 () =
+        let final = 1000 
+        let qGraph = new ParserInputGraph<_>(0, final)
+        let rand = new System.Random()
+        let getSmb i = 
+            match rand.Next(0,3) with
+            | 0 -> RNGLR.bio1.A i
+            | 1 -> RNGLR.bio1.B i
+            | 2 -> RNGLR.bio1.C i
+            | 3 -> RNGLR.bio1.D i
+        [for i in 0 .. (final-1) do yield! [edg i (i + 1) (getSmb i); edg (i+1) final (RNGLR.bio1.RNGLR_EOF i)]]
+        |> qGraph.AddVerticesAndEdgeRange
+        |> ignore
+        test RNGLR.bio1.buildAstAbstract qGraph 25 24 4 8 1
+
     [<Test>]
     member this.bio1 () =
         let qGraph = new ParserInputGraph<_>(0, 10)
@@ -764,5 +782,5 @@ let f x =
    // t.``TSQL performance test for Alvor`` 2 100 false
     //t._29_AandB_Circle ()
     //t.``TSQL performance test 2`` 2 100 false
-    t.bio1()
+    t.bio2()
     0

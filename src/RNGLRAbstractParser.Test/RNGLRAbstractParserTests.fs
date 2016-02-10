@@ -165,7 +165,7 @@ type ``RNGLR abstract parser tests`` () =
              edg 3 4 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
              ] |> ignore
 
-        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 20 20 0 4 0
+        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 22 22 0 4 1
 
     [<Test>]
     member this._02_PrettySimpleCalcSimple_BranchedInput () =

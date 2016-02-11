@@ -372,7 +372,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         then
             handlePassingReductions customEnqueue v
     let main () =
-        let threads = 7
+        let threads = 1
         let verticesToProcess = [| for i in 0..threads -> new Queue<VInfo<_>>()|]
         let customEnqueue (verticesToProcess:Queue<VInfo<_>>) (elem : VInfo<_>) =
             if verticesToProcess.Count = 0 || ((verticesToProcess.ElementAt (verticesToProcess.Count - 1)).vNum = elem.vNum |> not)
@@ -388,7 +388,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 let curV = verticesToProcess.Dequeue()
                 processVertex (customEnqueue verticesToProcess) curV
 
-        verticesToProcess |> Array.Parallel.iter _do
+        verticesToProcess |> Array.iter _do
 
     if tokens.EdgeCount = 0
     then
@@ -407,7 +407,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 let makeChildren n = new Family(parserSource.StartRule, new Nodes([|n|]))
                 ch := new AST(makeChildren res.[0] , res.[1..] |> Array.map makeChildren)
                 (!ch)
-            innerGraph.Edges |> Seq.collect (fun e -> e.Source.processedGssVertices)
+            innerGraph.Edges 
+            |> Seq.filter (fun e -> finalV = e.Target)
+            |> Seq.collect (fun e -> e.Source.processedGssVertices)
             |> Seq.filter (fun v -> parserSource.AccStates.[v.State])
             |> Seq.collect (fun v -> v.OutEdges.FindAll(fun x -> x.Ast >= 0))
             |> Seq.map (fun v -> v.Ast)
@@ -418,8 +420,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             |> fun n  ->                    
                     let tree = new Tree<_>(terminals.ToArray(), n, parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
                     
-                    //sprintf "../../../Tests/AbstractRNGLR/DOT/sppf.dot" 
-                    //|> tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide 
+                    sprintf "../../../Tests/AbstractRNGLR/DOT/sppf.dot" 
+                    |> tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide 
                     let ts = tree.GetTokens(!ch)
                     //printfn "%A" ts
                     tree                   

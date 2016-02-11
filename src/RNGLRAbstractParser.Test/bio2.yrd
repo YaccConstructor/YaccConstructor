@@ -1,0 +1,12 @@
+[<Start>]
+start : s
+s: A s U s
+ | U s A s
+ | C s G s
+ | G s C s
+ | {None}
+ | e
+ 
+e: (A|U|G|C) e
+ | (A|U|G|C)
+  

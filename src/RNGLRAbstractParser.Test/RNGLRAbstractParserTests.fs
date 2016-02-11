@@ -700,7 +700,7 @@ type ``RNGLR abstract parser tests`` () =
 
 
     [<Test>]
-    member this.bio2 () =
+    member this.bio1_2 () =
         let final = 1000 
         let qGraph = new ParserInputGraph<_>(0, final)
         let rand = new System.Random()
@@ -714,6 +714,52 @@ type ``RNGLR abstract parser tests`` () =
         |> qGraph.AddVerticesAndEdgeRange
         |> ignore
         test RNGLR.bio1.buildAstAbstract qGraph 25 24 4 8 1
+
+
+    [<Test>]
+    member this.bio2_4 () =
+        let bp = @"C:\gsv\projects\infernal-1.1.1\testsuite\"
+        let file = 
+            "t.fa"
+            //"tremitted-Plant_SRP.fa"
+            //"1k-4.fa"
+        let textData =             
+            File.ReadAllLines(Path.Combine(bp,file))
+            |> Seq.skip 1
+            |> Seq.takeWhile (fun s -> not <| s.StartsWith">")
+            |> Seq.collect(fun s -> s.ToCharArray())
+        let i = ref 0
+        let getSmb ch i = 
+            match ch with
+            | 'A' -> RNGLR.bio2.A i
+            | 'U' -> RNGLR.bio2.U i
+            | 'C' -> RNGLR.bio2.C i
+            | 'G' -> RNGLR.bio2.G i
+        let edges = 
+            textData
+            |> Seq.mapi(fun i ch -> edg i (i+1) (getSmb ch i))
+            |> Array.ofSeq
+        let l = edges |> Array.length
+        let qGraph = new ParserInputGraph<_>(0, l + 1)
+        qGraph.AddVerticesAndEdgeRange edges |> ignore
+        qGraph.AddVerticesAndEdgeRange [edg l (l+1) (RNGLR.bio2.RNGLR_EOF 0)] 
+        test RNGLR.bio2.buildAstAbstract qGraph 25 24 4 8 1
+
+    [<Test>]
+    member this.bio2_3 () =
+        let final = 300 
+        let qGraph = new ParserInputGraph<_>(0, final)
+        let rand = new System.Random()
+        let getSmb i = 
+            match rand.Next(0,3) with
+            | 0 -> RNGLR.bio2.A i
+            | 1 -> RNGLR.bio2.U i
+            | 2 -> RNGLR.bio2.C i
+            | 3 -> RNGLR.bio2.G i
+        [yield! [for i in 0 .. (final-1) -> edg i (i + 1) (getSmb i)]; yield edg (final-1) final (RNGLR.bio2.RNGLR_EOF 0)]
+        |> qGraph.AddVerticesAndEdgeRange
+        |> ignore
+        test RNGLR.bio2.buildAstAbstract qGraph 25 24 4 8 1
 
     [<Test>]
     member this.bio1 () =
@@ -742,6 +788,67 @@ type ``RNGLR abstract parser tests`` () =
             ] |> ignore
 
         test RNGLR.bio1.buildAstAbstract qGraph 25 24 4 8 1
+
+
+    [<Test>]
+    member this.bio2 () =
+        let qGraph = new ParserInputGraph<_>(0, 10)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.bio2.C 0)
+            edg 1 2 (RNGLR.bio2.U 1)
+            edg 2 3 (RNGLR.bio2.A 2)
+            edg 3 4 (RNGLR.bio2.U 3)
+            edg 4 1 (RNGLR.bio2.C 4)
+            edg 1 9 (RNGLR.bio2.C 5)
+            edg 1 5 (RNGLR.bio2.G 6)
+            edg 5 6 (RNGLR.bio2.U 7)
+            edg 6 7 (RNGLR.bio2.A 8)
+            edg 7 8 (RNGLR.bio2.G 9)
+            edg 6 3 (RNGLR.bio2.U 10)
+            edg 8 10 (RNGLR.bio2.RNGLR_EOF 0)
+            edg 9 10 (RNGLR.bio2.RNGLR_EOF 0)
+            //edg 1 10 (RNGLR.bio2.RNGLR_EOF 0)
+            //edg 2 10 (RNGLR.bio2.RNGLR_EOF 0)
+//            edg 3 10 (RNGLR.bio2.RNGLR_EOF 0)
+//            edg 4 10 (RNGLR.bio2.RNGLR_EOF 0)
+//            edg 5 10 (RNGLR.bio2.RNGLR_EOF 0)
+//            edg 6 10 (RNGLR.bio2.RNGLR_EOF 0)
+//            edg 7 10 (RNGLR.bio2.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.bio2.buildAstAbstract qGraph 25 24 4 8 1
+
+    [<Test>]
+    member this.bio2_2 () =
+        let qGraph = new ParserInputGraph<_>(0, 17)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.bio2.C 0)
+            edg 1 2 (RNGLR.bio2.A 1)
+            edg 2 3 (RNGLR.bio2.U 2)
+            edg 3 4 (RNGLR.bio2.C 3)
+            edg 4 5 (RNGLR.bio2.G 4)
+            edg 5 6 (RNGLR.bio2.C 5)
+            edg 6 7 (RNGLR.bio2.A 6)
+            edg 7 8 (RNGLR.bio2.A 7)
+            edg 8 9 (RNGLR.bio2.C 8)
+            edg 9 10 (RNGLR.bio2.C 9)
+            edg 10 11 (RNGLR.bio2.G 10)
+            edg 11 12 (RNGLR.bio2.C 10)
+            edg 12 13 (RNGLR.bio2.G 10)
+            edg 13 14 (RNGLR.bio2.A 10)
+            edg 14 15 (RNGLR.bio2.U 10)
+            edg 15 16 (RNGLR.bio2.G 10)
+            edg 16 17 (RNGLR.bio2.RNGLR_EOF 0)            
+            //edg 1 10 (RNGLR.bio2.RNGLR_EOF 0)
+            //edg 2 10 (RNGLR.bio2.RNGLR_EOF 0)
+//            edg 3 10 (RNGLR.bio2.RNGLR_EOF 0)
+//            edg 4 10 (RNGLR.bio2.RNGLR_EOF 0)
+//            edg 5 10 (RNGLR.bio2.RNGLR_EOF 0)
+//            edg 6 10 (RNGLR.bio2.RNGLR_EOF 0)
+//            edg 7 10 (RNGLR.bio2.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.bio2.buildAstAbstract qGraph 25 24 4 8 1
 
 [<EntryPoint>]
 let f x =
@@ -782,5 +889,5 @@ let f x =
    // t.``TSQL performance test for Alvor`` 2 100 false
     //t._29_AandB_Circle ()
     //t.``TSQL performance test 2`` 2 100 false
-    t.bio2()
+    t.bio2_4()
     0

@@ -16,9 +16,23 @@ end
 type Grammar(grammarPath : string) = 
     let ilParser = new Yard.Frontends.YardFrontend.YardFrontend()
     let il = ilParser.ParseGrammar(grammarPath)
-    let converter = Yard.Core.Conversions.ExpandTopLevelAlt.ExpandTopLevelAlt()
-    let grammar = converter.ConvertGrammar(il.grammar)
+
+    let convTopAlt = Yard.Core.Conversions.ExpandTopLevelAlt.ExpandTopLevelAlt()
+    let convInnerAlt = Yard.Core.Conversions.ExpandInnerAlt.ExpandInnerAlt()
+    let convEBNF = Yard.Core.Conversions.ExpandEbnfStrict.ExpandEbnf()
+    let convLin = Yard.Core.Conversions.Linearize.Linearize()
+    let convMeta = Yard.Core.Conversions.ExpandMeta.ExpandMeta()
+    let convLiterals = Yard.Core.Conversions.ReplaceLiterals.ReplaceLiterals()
+    let convBrackets = Yard.Core.Conversions.ExpandBrackets.ExpandBrackets()
     
+    let grammar = convBrackets.ConvertGrammar(
+                   convTopAlt.ConvertGrammar(
+                    convLiterals.ConvertGrammar(
+                     convInnerAlt.ConvertGrammar(
+                      convMeta.ConvertGrammar(
+                       convLin.ConvertGrammar(
+                        convEBNF.ConvertGrammar(il.grammar)))))))
+                        
     member this.getGrammar = grammar.Head.rules
     member this.getIL = il
 
@@ -41,15 +55,19 @@ type Recognizer(grammar : Grammar) =
                 let newItem = new EarleyItem(prediction, 0, !currentPosition)
                 if not (stateSet.[!currentPosition].Contains(newItem)) then
                     stateSet.[!currentPosition].Add(newItem)
-            
-        let scan (item : EarleyItem) terminal =
-            if !currentPosition < input.Length && terminal = input.[!currentPosition] then 
-                stateSet.[(!currentPosition + 1)].Add(new EarleyItem(item.Rule, item.DotPosition + 1, item.StartPosition))
+        
+        let scan (item : EarleyItem) (terminalSequence : string) =
+            let len = terminalSequence.Length
+            if !currentPosition + len <= input.Length && System.String.Equals(terminalSequence, input.[!currentPosition..(!currentPosition + len - 1)], System.StringComparison.CurrentCultureIgnoreCase) then 
+                stateSet.[(!currentPosition + len)].Add(new EarleyItem(item.Rule, item.DotPosition + 1, item.StartPosition))
            
         let completion (item : EarleyItem) =
             let startOfPartialParse = item.StartPosition
             let parsedNonTerminal = item.Rule.name.text
-            for previousItem in stateSet.[startOfPartialParse] do
+            let mutable pointer = 0
+            while pointer < stateSet.[startOfPartialParse].Count do
+                let previousItem = stateSet.[startOfPartialParse].[pointer]
+                pointer <- pointer + 1
                 let rightSideOfARule = getRightSide(previousItem.Rule)
                 if previousItem.DotPosition < rightSideOfARule.Length then
                     match rightSideOfARule.[previousItem.DotPosition].rule with
@@ -65,20 +83,23 @@ type Recognizer(grammar : Grammar) =
             else
                 match rightSideOfARule.[item.DotPosition].rule with
                 | PToken(terminal) -> 
-                    scan item terminal.text.[0]
+                    if terminal.text.Length = 1 then
+                        scan item (string(terminal.text))
+                    else
+                        scan item terminal.text
                 | PRef(nonTerminal, _) -> 
                     prediction item nonTerminal
-                | _ -> 
-                    raise (System.ArgumentException("Right side of a rule contains unsupported items"))
-
+                | x ->
+                    raise (System.ArgumentException("Right side of a rule contains unsupported item " + x.ToString()))
+                    
         let satisfiesSuccessfulParse (item : EarleyItem) = 
             let rule = item.Rule
             let ruleLength = getRightSide(rule).Length
             rule.isStart && item.StartPosition = 0 && ruleLength = item.DotPosition
-            
+                 
         // initialize
         stateSet.[0] <- new ResizeArray<EarleyItem>([for rule in grammar do if rule.isStart then yield new EarleyItem(rule, 0, 0)])
-        
+
         // main body: 2 loops
         for _ in 0..input.Length do
             let state = stateSet.[!currentPosition]

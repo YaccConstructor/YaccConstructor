@@ -5,14 +5,14 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>7da3ab09-0cde-4580-abda-480c18f0993c</ProjectGuid>
+    <ProjectGuid>3bb07288-b759-4032-a56a-8dba735e5c48</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Earley</RootNamespace>
-    <AssemblyName>Earley</AssemblyName>
+    <RootNamespace>Earley.Tests</RootNamespace>
+    <AssemblyName>Earley.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
-    <Name>Earley</Name>
+    <Name>Earley.Tests</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
@@ -25,7 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\Earley.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\Earley.Tests.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -36,10 +36,11 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\Earley.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\Earley.Tests.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Moles.NUnit, Version=0.94.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
@@ -54,6 +55,10 @@
     </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.3.0.1\lib\net45\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="nunit.framework.testcasestorage">
+      <HintPath>..\packages\Nunit.Framework.TestCaseStorage.1.0.1\lib\nunit.framework.testcasestorage.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="nunit.util">
@@ -71,7 +76,6 @@
   <ItemGroup>
     <Compile Include="Program.fs" />
     <None Include="App.config" />
-    <Compile Include="EarleyTests.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -88,6 +92,11 @@
     <ProjectReference Include="..\Conversions\Conversions.fsproj">
       <Name>Conversions</Name>
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Earley\Earley.fsproj">
+      <Name>Earley</Name>
+      <Project>{7da3ab09-0cde-4580-abda-480c18f0993c}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\FsYacc\FsYacc.fsproj">

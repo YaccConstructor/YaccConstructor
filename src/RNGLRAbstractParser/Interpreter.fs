@@ -86,49 +86,18 @@ and [<Struct>]
     val edge : Edge option
     new (_gssVertex, _prod, _pos, _edge) = {gssVertex = _gssVertex; prod = _prod; pos = _pos; edge = _edge}
 
-and [<AllowNullLiteral>]
-    Path (head : AstNode, tail : Path, length : int) = 
 
-    let compare (x : AstNode) (y : AstNode) = 
-        match x with
-        | :? Epsilon as x' -> match y with | :? Epsilon as y' -> x'.EpsilonNonTerm = y'.EpsilonNonTerm | _ -> false
-        | :? Terminal as x' -> match y with | :? Terminal as y' -> x'.TokenNumber = y'.TokenNumber | _ -> false
-        | :? AST as xast -> match y with | :? AST as yast -> 
-                                                xast.pos = yast.pos 
-                                                && xast = yast 
-                                         | _ -> false
-        | _ -> false
-
-    member this.Head = head
-    member this.Tail = tail
-    member this.Length = length
-
-
-    member this.AddEdge edge =
-        new Path(edge, this, this.Length + 1)
+and [<Struct>]
+    Reduction2<'TokenType> =    
+    val prod : int
+    val remainLength: int
+    val path : list<AstNode>
+    val nonTerm: int
+    val pos : int    
+    new (_prod, _remainLength, _path, _nonTerm, _pos) = {prod = _prod; remainLength = _remainLength; path = _path; nonTerm = _nonTerm; pos = _pos}
     
-    member this.IsEqual (other : Path) =
-        if this = null && other <> null || this <> null && other = null
-        then false
-        else 
-            this = null && other = null || compare this.Head other.Head && this.Tail.IsEqual(other.Tail)
-
-    member this.IsEqual (nodes : Nodes) = 
-        nodes.Length = this.Length 
-        && let h = ref this in nodes.isForAll(fun x -> let res = compare x h.Value.Head
-                                                       h := h.Value.Tail
-                                                       res )
-
-    member this.ToArray() =
-        let p = ref this
-        Array.init this.Length (fun _ -> let cur = p.Value.Head
-                                         p := p.Value.Tail
-                                         cur)
-       
-    new (head, tail) = new Path(head, tail, if tail = null then 1 else tail.Length + 1)
-    new (edge) = new Path (edge, null, 1)
-
-let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : ParserInputGraph<'TokenType>) =
+let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : ParserInputGraph<'TokenType>) =    
+    
     let startV, finalV, innerGraph =
         let verticesMap = Array.zeroCreate (Seq.max tokens.Vertices + 1)            
         for i in tokens.Vertices do
@@ -220,7 +189,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             for prod in arr do
                 innerGraphV.AddReduction(new Reduction(gssVertex, prod, 0, None))
     
-    let (*inline*) addVertex (currentGraphV:VInfo<_>) state (listToAddUnprocessedGssV : ResizeArray<_>) =
+    let inline addVertex (currentGraphV:VInfo<_>) state (listToAddUnprocessedGssV : ResizeArray<_>) =
         let mutable v = null
         let mutable isNew = false
         let vOpt = currentGraphV.processedGssVertices |> ResizeArray.tryFind (fun v -> v.State = state)
@@ -268,7 +237,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 if ind = -1 || (tailGssV.Edge ind).Ast <> edgesToTerms.[e]
                 then addEdge e.Target isNew tailGssV edge true
                
-
         if not <| currentGraphV.processedGssVertices.Contains(gssVertex)
         then 
             currentGraphV.processedGssVertices.Add(gssVertex)
@@ -276,13 +244,28 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
     let verticesToRecalc = new ResizeArray<_> (10)
 
-    let (*inline*) addChildren node (path : Path) prod =
+    let inline comparePaths (p1:list<_>) (p2:Nodes) =
+        let compare (x : AstNode) (y : AstNode) = 
+            match x with
+            | :? Epsilon as x' -> match y with | :? Epsilon as y' -> x'.EpsilonNonTerm = y'.EpsilonNonTerm | _ -> false
+            | :? Terminal as x' -> match y with | :? Terminal as y' -> x'.TokenNumber = y'.TokenNumber | _ -> false
+            | :? AST as xast -> match y with | :? AST as yast -> 
+                                                    xast.pos = yast.pos 
+                                                    && xast = yast 
+                                             | _ -> false
+            | _ -> false
+        p1.Length = p2.Length
+        && let h = ref p1 in p2.isForAll(fun x -> let res = compare x h.Value.Head
+                                                  h := h.Value.Tail
+                                                  res )
+
+    let inline addChildren node path prod =
         let ast = getFamily node
         let familyOpt = 
-            ast.findFamily (function family -> family.prod = prod && path.IsEqual(family.nodes))
+            ast.findFamily (function family -> family.prod = prod && (comparePaths path family.nodes))
         match familyOpt with 
         | None -> 
-            let newFamily = new Family (prod, new Nodes(path.ToArray()))
+            let newFamily = new Family (prod, new Nodes(path |> List.toArray))
             if ast.first = Unchecked.defaultof<_> 
             then ast.first <- newFamily 
             else
@@ -291,18 +274,17 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 else ast.other <- Array.append ast.other [|newFamily|]
         | Some _ -> ()
 
-    let handlePath (path : Path) (final : Vertex) startV nonTerm pos prod shouldEnqueueVertex =
+    let inline handlePath path (final : Vertex) startV nonTerm pos prod shouldEnqueueVertex =
         let state = parserSource.Gotos.[final.State].[nonTerm]
         let newVertex, isNew = addVertex startV state startV.unprocessedGssVertices
         if shouldEnqueueVertex && isNew 
-        then
-            verticesToRecalc.Add startV
+        then verticesToRecalc.Add startV
         let ast = 
             match newVertex.FindIndex final.State final.Level with
             | -1 -> 
                 let edge = new Edge(final, nodes.Length)
-                nodes.Add <| new AST (Unchecked.defaultof<_>, null)
-                addEdge  startV isNew newVertex edge (pos > 0)
+                nodes.Add <| new AST (Unchecked.defaultof<_>, null) 
+                addEdge startV isNew newVertex edge (pos > 0)
                 edge.Ast
             | x -> (newVertex.Edge x).Ast 
         if ast >= 0 
@@ -313,24 +295,17 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             addEdge  startV isNew newVertex edge (pos > 0)
             addChildren nodes.[nodes.Length - 1] path prod
 
-    let rec walk remainLength (vertex : Vertex) path startV nonTerm pos prod shouldEnqueueVertex = 
-        if remainLength = 0 
-        then handlePath path vertex startV nonTerm pos prod shouldEnqueueVertex
-        else
-            if not (*ResizeArray.exists 
-                       (fun (_prod, _remainLength, _path : Path, _nonTerm, _pos, _startV) ->
-                            prod = _prod 
-                            && remainLength = _remainLength                             
-                            && nonTerm = _nonTerm 
-                            && pos = _pos 
-                            && startV = _startV
-                            && path.IsEqual(_path)*)
-                       (vertex.PassingReductions.Contains((prod, remainLength, path, nonTerm, pos, startV)))
-            then vertex.PassingReductions.Add ((prod, remainLength, path, nonTerm, pos, startV)) |> ignore
-            vertex.OutEdges |> ResizeArray.iter
-                (fun e ->
-                    let newPath = path.AddEdge(if e.Ast < 0 then new Epsilon(e.Ast) :> AstNode else nodes.[e.Ast])
-                    walk (remainLength - 1) e.Dest newPath startV nonTerm pos prod shouldEnqueueVertex)
+    let walk remainLength (vertex : Vertex) path startV nonTerm pos prod shouldEnqueueVertex = 
+        let rec _go remainLength (vertex : Vertex) path = 
+            if remainLength = 0 
+            then handlePath path vertex startV nonTerm pos prod shouldEnqueueVertex
+            else
+                vertex.PassingReductions.Add (new Reduction2<_>(prod, remainLength, path, nonTerm, pos)) |> ignore
+                vertex.OutEdges |> ResizeArray.iter
+                    (fun e ->
+                        let newPath = (if e.Ast < 0 then new Epsilon(e.Ast) :> AstNode else nodes.[e.Ast])::path
+                        _go (remainLength - 1) e.Dest newPath )
+        _go remainLength (vertex : Vertex) path
 
     let makeSingleReduction currentGraphV (reduction : Reduction) =
         let nonTerm = parserSource.LeftSide.[reduction.prod]
@@ -343,7 +318,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 let edge = new Edge(reduction.gssVertex, -parserSource.LeftSide.[reduction.prod]-1)
                 addEdge currentGraphV isNew newVertex edge false
         else 
-            let path = new Path(nodes.[reduction.edge.Value.Ast])
+            let path = [nodes.[reduction.edge.Value.Ast]]
             walk (reduction.pos - 1) (reduction.edge.Value : Edge).Dest path currentGraphV nonTerm reduction.pos reduction.prod false
 
     let makeReductions (currentGraphV : VInfo<_>) =
@@ -356,9 +331,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         let copyPR = ResizeArray.copy(graphV.passingReductions)
         for (v, e) in copyPR do
             let passingReductions = v.PassingReductions
-            for prod, remainLength, path, nonTerm, pos, startV in passingReductions do
-                let newPath = path.AddEdge(if e.Ast < 0 then new Epsilon(e.Ast) :> AstNode else nodes.[e.Ast])
-                walk (remainLength - 1) e.Dest newPath startV nonTerm pos prod true
+            for p in passingReductions do
+                let newPath = (if e.Ast < 0 then new Epsilon(e.Ast) :> AstNode else nodes.[e.Ast])::p.path
+                walk (p.remainLength - 1) e.Dest newPath startV p.nonTerm p.pos p.prod true
             graphV.passingReductions.Remove((v, e)) |> ignore
 
     let processVertex v = 

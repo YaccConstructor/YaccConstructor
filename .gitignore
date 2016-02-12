@@ -398,3 +398,6 @@ src/RNGLRApplication/SimpleAmb.yrd.fs
 # vim temp files
 *.swp
 src/RNGLRApplication/res.dot
+src/GLL.AbstractParser.SimpleTest/*.dot
+src/GLLApplication/*.dot
+src/RNGLR.OtherSppfTest/*.yrd.fs

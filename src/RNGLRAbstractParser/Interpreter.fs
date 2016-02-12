@@ -139,7 +139,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         |> Seq.map (fun e -> new QuickGraph.TaggedEdge<_,_>(verticesMap.[e.Source], verticesMap.[e.Target], e.Tag))
         |> g.AddVerticesAndEdgeRange
         |> ignore
-        [ for initS in tokens.InitStates -> verticesMap.[initS] ],
+        verticesMap.[tokens.InitStates.[0]], verticesMap.[tokens.FinalStates.[0]], g
         [ for finalS in tokens.FinalStates -> verticesMap.[finalS] ],
         g
         //verticesMap.[tokens.InitState], verticesMap.[tokens.FinalState], g

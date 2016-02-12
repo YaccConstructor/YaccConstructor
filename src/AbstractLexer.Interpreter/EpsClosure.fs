@@ -105,7 +105,7 @@ let NfaToDfa (inGraph: ParserInputGraph<_>)=
         moves
 
     let acc = new NfaNodeIdSetBuilder(HashIdentity.Structural)
-    EClosure1 acc inGraph.InitState
+    EClosure1 acc inGraph.InitStates.[0]
     let nfaSet0 = new NfaNodeIdSet(acc)
 
     let dfaNodes = ref (Map.empty<NfaNodeIdSet,DfaNode<_>>)
@@ -118,8 +118,8 @@ let NfaToDfa (inGraph: ParserInputGraph<_>)=
                 { Id= newDfaNodeId()
                   Name = nfaSet.Fold (fun s nid -> string nid + "-" + s) ""
                   Transitions=[]
-                  IsFinal= nfaSet.Fold (fun s nid -> s || inGraph.FinalState = nid) false
-                  IsStart = nfaSet.Fold (fun s nid -> s || inGraph.InitState = nid) false
+                  IsFinal= nfaSet.Fold (fun s nid -> s || inGraph.FinalStates.[0] = nid) false
+                  IsStart = nfaSet.Fold (fun s nid -> s || inGraph.InitStates.[0] = nid) false
                              }
             //Printf.printfn "id = %d" dfaNode.Id;
 

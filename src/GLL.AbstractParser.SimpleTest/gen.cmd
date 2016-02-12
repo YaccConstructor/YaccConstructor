@@ -74,3 +74,6 @@ for %%i in (Attrs,Cond,Counter,Cycle,Eps2,Epsilon,Expr,First,ListEps,LolCalc,Lon
         -g "GLLGenerator -pos int -token int -abstract true -module GLL.Parse%%i -o %%i.yrd.fs" >> log.txt
 )
 
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i "..\YC.GrammarZOO\SQL\TSQL\mssql_abstract.yrd" -c ExpandEbnf -c Linearize -c ExpandMeta ^
+        -g "GLLGenerator -pos int -token int -abstract true -module GLL.MsSqlParser -o MsSqlParser.yrd.fs " >> log.txt
+

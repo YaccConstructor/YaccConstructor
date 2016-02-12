@@ -7,7 +7,7 @@ open QuickGraph
 
 open AbstractAnalysis.Common
 open ControlFlowGraph
-open OtherSPPF
+open Yard.Generators.RNGLR.OtherSPPF
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 

@@ -1,6 +1,4 @@
-﻿
-
-namespace Yard.Generators.GLL.ParserCommon
+﻿namespace Yard.Generators.GLL.ParserCommon
 
 open AbstractAnalysis.Common
 open Yard.Generators.Common.ASTGLL
@@ -137,7 +135,7 @@ type ParserStructures<'TokenType> (inputLength : int, currentRule : int)=
                 false
         else true
 
-    let addContext (setU : System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>[]) (inputVertex : int) (label : int<labelMeasure>) vertex ast currentPath =
+    let addContext (setU : System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>[]) (inputVertex : int) (label : int<labelMeasure>) vertex ast currentPath=
         if not <| containsContext setU inputVertex label vertex ast
         then
             setR.Enqueue(new Context<_>(inputVertex, label, vertex, ast, currentPath))

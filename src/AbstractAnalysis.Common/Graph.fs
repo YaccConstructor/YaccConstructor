@@ -82,7 +82,7 @@ type ParserEdge<'token>(s, e, t)=
     inherit TaggedEdge<int, 'token>(s,e,t)
     
 type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) = 
-    inherit AdjacencyGraph<int,ParserEdge<'token * ref<bool>>>()
+    inherit AdjacencyGraph<int,ParserEdge<'token>>()
 
     member val InitStates = initialVertices 
     member val FinalStates = finalVertices with get, set
@@ -97,7 +97,7 @@ type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) =
         for i in this.Vertices do
             let edges = this.OutEdges i
             for e in edges do
-                let tokenName = fst e.Tag |> tokenToString
+                let tokenName = e.Tag |> tokenToString
                 out.WriteLine (e.Source.ToString() + " -> " + e.Target.ToString() + "[label=\"" + tokenName + "\"]")
         out.WriteLine("}")
         out.Close()      

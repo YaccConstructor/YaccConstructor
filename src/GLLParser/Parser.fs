@@ -9,6 +9,8 @@ open Microsoft.FSharp.Collections
 open FSharpx.Collections.Experimental
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
+open AbstractAnalysis.Common
+
 
 let inline packExtension left right : int64<extension> =  LanguagePrimitives.Int64WithMeasure ((int64 left <<< 32) ||| int64 right)
 let inline getRightExtension (long : int64<extension>) = int <| ((int64 long) &&& 0xffffffffL)
@@ -29,7 +31,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
     
     let nonTermsCountLimit = 1 + (Array.max parser.LeftSide)
     let currentRule = parser.StartRule
-    let structures = new ParserStructures(inputLength, currentRule)
+    let structures = new ParserStructures<'TokenType>(inputLength, currentRule)
     let setP = structures.SetP
     let epsilonNode = structures.EpsilonNode
     let setR = structures.SetR
@@ -80,7 +82,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
 
 
     let currentGSSNode = ref <| dummyGSSNode
-    let currentContext = ref <| new Context(!currentIndex, !structures.CurrentLabel, !currentGSSNode, structures.Dummy)
+    let currentContext = ref <| new Context<'TokenType>(!currentIndex, !structures.CurrentLabel, !currentGSSNode, structures.Dummy)
         
     let finalExtension = packExtension 0 (inputLength)
 
@@ -223,6 +225,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             edges.[b.NontermLabel, b.Level] <- newDict
             false                    
         
+    
     let create index (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) = 
         let v = new Vertex(index, parser.LeftSide.[getRule label])
         let vertexKey = pack index (int label)
@@ -235,8 +238,10 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                 arr.DoForAll (fun tree  ->
                     let y = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy label ast tree
                     let index = getRightExtension <| structures.GetTreeExtension y 
-                    structures.AddContext setU index label vertex y )
+                    
+                    structures.AddContext setU index label vertex y List.empty<ParserEdge<'TokenType*ref<bool>>>)
         v
+
 
     let pop (u : Vertex) (i : int) (z : int<nodeMeasure>) =
         if u <> dummyGSSNode
@@ -366,5 +371,3 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             let r1 = new Tree<_> (tokens, res, parser.rules)
             r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
             Success (r1)
-                    
-                            

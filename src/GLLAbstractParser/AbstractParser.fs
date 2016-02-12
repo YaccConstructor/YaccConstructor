@@ -20,6 +20,11 @@ type M =
     new (p,l) = {pos = p; lbl = l}
 
 let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : ParserInputGraph<'TokenType>) : ParserCommon.ParseResult<_> = 
+    let input = input
+    let input = 
+        let h = input.Edges |> Seq.map (fun e -> new ParserEdge<'TokenType * ref<bool>>(e.Source, e.Target, (e.Tag , ref false)))
+        let g = new ParserInputGraph<'TokenType * ref<bool>>((input.InitStates : int[]), (input.FinalStates : int[]))
+        g
     
     if input.EdgeCount = 0 then
       //  if parser.AcceptEmptyInput then

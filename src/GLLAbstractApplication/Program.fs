@@ -110,14 +110,13 @@ let edg f t l = new ParserEdge<_>(f,t,lbl l)
     
 
 let inputGraph =
-    let qGraph = new ParserInputGraph<_>([|0|], [|3|])
+    let qGraph = new ParserInputGraph<_>([|0|], [|2|])
     qGraph.AddVerticesAndEdgeRange
             [
-             edg 0 1 (GLL.SimpleAmb.A 0,ref false)
-             edg 0 1 (GLL.SimpleAmb.C 0,ref false)
-             edg 1 2 (GLL.SimpleAmb.B 0,ref false)
-             edg 1 2 (GLL.SimpleAmb.D 0,ref false)
-             edg 2 3 (GLL.SimpleAmb.RNGLR_EOF 0,ref false)
+             edg 0 0 (GLL.SimpleAmb.A 0,ref false)
+             edg 0 1 (GLL.SimpleAmb.B 0,ref false)
+             edg 1 0 (GLL.SimpleAmb.C 0,ref false)
+             edg 0 2 (GLL.SimpleAmb.RNGLR_EOF 0,ref false)
              ] |> ignore
     qGraph
 let parser = GLL.SimpleAmb.buildAbstractAst

@@ -1,0 +1,23 @@
+digraph graph_picture {
+node[fontname=<Courier> ,penwidth=<1.8> ,shape=<plaintext> ]
+vertex_56106_56107[label=<<TABLE BORDER="1" CELLSPACING="0" >
+<TR><TD BORDER="0" PORT = "port_56107_in" color="white" bgcolor="white" ></TD><TD BORDER="0" color="white" bgcolor="white" >56107</TD><TD BORDER="0" PORT = "port_56107_out" color="white" bgcolor="white" ></TD></TR>
+<TR><TD BORDER="0" PORT = "port_56106_out" color="white" bgcolor="white" ></TD><TD BORDER="0" color="white" bgcolor="white" >56106</TD><TD BORDER="0" PORT = "port_56106_in" color="white" bgcolor="white" ></TD></TR>
+</TABLE>> ,color=<black> ,URL=</vertex/56107.svg> ]
+vertex_59612_59613[label=<<TABLE BORDER="1" CELLSPACING="0" >
+<TR><TD BORDER="0" PORT = "port_59612_in" color="yellow" bgcolor="yellow" ></TD><TD BORDER="0" color="yellow" bgcolor="yellow" >59612</TD><TD BORDER="0" PORT = "port_59612_out" color="yellow" bgcolor="yellow" ></TD></TR>
+<TR><TD BORDER="0" PORT = "port_59613_out" color="white" bgcolor="white" ></TD><TD BORDER="0" color="white" bgcolor="white" >59613</TD><TD BORDER="0" PORT = "port_59613_in" color="white" bgcolor="white" ></TD></TR>
+</TABLE>> ,color=<black> ,URL=</vertex/59612.svg> ]
+vertex_69418_69419[label=<<TABLE BORDER="1" CELLSPACING="0" >
+<TR><TD BORDER="0" PORT = "port_69418_in" color="white" bgcolor="white" ></TD><TD BORDER="0" color="white" bgcolor="white" >69418</TD><TD BORDER="0" PORT = "port_69418_out" color="white" bgcolor="white" ></TD></TR>
+<TR><TD BORDER="0" PORT = "port_69419_out" color="white" bgcolor="white" ></TD><TD BORDER="0" color="white" bgcolor="white" >69419</TD><TD BORDER="0" PORT = "port_69419_in" color="white" bgcolor="white" ></TD></TR>
+</TABLE>> ,color=<black> ,URL=</vertex/69418.svg> ]
+vertex_85754_85755[label=<<TABLE BORDER="1" CELLSPACING="0" >
+<TR><TD BORDER="0" PORT = "port_85754_in" color="yellow" bgcolor="yellow" ></TD><TD BORDER="0" color="yellow" bgcolor="yellow" >85754</TD><TD BORDER="0" PORT = "port_85754_out" color="yellow" bgcolor="yellow" ></TD></TR>
+<TR><TD BORDER="0" PORT = "port_85755_out" color="white" bgcolor="white" ></TD><TD BORDER="0" color="white" bgcolor="white" >85755</TD><TD BORDER="0" PORT = "port_85755_in" color="white" bgcolor="white" ></TD></TR>
+</TABLE>> ,color=<black> ,URL=</vertex/85754.svg> ]
+vertex_56106_56107:port_56107_out->vertex_69418_69419:port_69418_in[label="Id 104660 (29)\nPositions:\nLen(cov): 29(290.241)" ,color=<black> ]
+vertex_59612_59613:port_59612_out->vertex_56106_56107:port_56107_in[label="Id 111223 (72049)\nPositions:\nLen(cov): 72049(215.55)" ,color=<black> ]
+vertex_69418_69419:port_69418_out->vertex_85754_85755:port_85754_in[label="Id 112758 (46097)\nPositions:\nLen(cov): 46097(213.05)" ,color=<black> ]
+vertex_69418_69419:port_69418_out->vertex_56106_56107:port_56107_in[label="Id 112760 (56)\nPositions:\nLen(cov): 56(162.125)" ,color=<black> ]
+}

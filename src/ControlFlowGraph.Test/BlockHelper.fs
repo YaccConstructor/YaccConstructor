@@ -79,3 +79,15 @@ let checkExitNode tokenToNumber condition (exitNode : InterNode<_>) =
         |> List.forall condition
     else
         false
+
+let checkExistence tokenToNumber expected (blocks : Block<_> list) = 
+
+    let blocksTokens = 
+        blocks
+        |> List.map (fun block -> getTokens tokenToNumber block)
+        |> Seq.concat
+
+
+    //one of the expected tokens must be in block
+    expected
+    |> List.forall(fun num -> blocksTokens |> Seq.exists ((=) num))

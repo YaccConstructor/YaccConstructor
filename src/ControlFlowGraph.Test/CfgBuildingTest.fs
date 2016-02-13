@@ -339,7 +339,9 @@ type ``Cycles``() =
                                     bNumber, [aNumber; bNumber];
                                 ]
         let checkParents' = checkParent tokenToNumber blockToParents
-        let myChecks = [checkChildren'; checkParents']
+        let checkExistence' = checkExistence tokenToNumber [aNumber; bNumber;]
+
+        let myChecks = [checkExistence'; checkChildren'; checkParents';]
         let prefix = "`Cycle (A or B)+"
         //action
         let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
@@ -369,8 +371,12 @@ type ``Cycles``() =
                                     bNumber, [aNumber; bNumber];
                                     cNumber, [aNumber; cNumber];
                                 ]
+        
         let checkParents' = checkParent tokenToNumber blockToParents
-        let myChecks = [checkChildren'; checkParents']
+
+        let checkExistence' = checkExistence tokenToNumber [aNumber; bNumber; cNumber;]
+
+        let myChecks = [checkExistence'; checkChildren'; checkParents';]
 
         let prefix = "`Cycle A (B+ or C+)"
         //action
@@ -434,7 +440,8 @@ type ``Cycles``() =
                                     cNumber, [bNumber;];
                                 ]
         let checkParents' = checkParent tokenToNumber blockToParents
-        let myChecks = [checkChildren'; checkParents']
+
+        let myChecks = [checkChildren'; checkParents';]
 
         let prefix = "`Cycle (AB)+C"
         //action
@@ -528,7 +535,8 @@ type ``Cycles``() =
                                     cNumber, [bNumber;];
                                 ]
         let checkParents' = checkParent tokenToNumber blockToParents
-        let myChecks = [checkChildren'; checkParents']
+        
+        let myChecks = [checkChildren'; checkParents';]
 
         let prefix = "`Cycle inside cycle ((AB)+C)+"
         //action

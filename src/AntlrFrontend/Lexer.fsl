@@ -39,15 +39,17 @@ let identifier lexeme =
   | "grammar" -> T_GRAMMAR
   | "options" -> T_OPTIONS
   | "fragment" -> T_FRAGMENT
-  | "scope" -> T_SCOPE
+  | "skip" | "more" | "popMode" -> T_COMMAND 
   | s when System.Char.IsUpper s.[0]-> TERMINAL(lexeme)
   | s (*when System.Char.IsLower s.[0]*)-> IDENTIFIER(lexeme)
+
 }
 
 let eol = "\r\n" | '\n'
 let lowerchar = ['a'-'z']
 let upperchar = ['A'-'Z']
 let identchar =  ['A'-'Z' 'a'-'z' '_' '-' '\192'-'\214' '\216'-'\246' '\248'-'\255' '0'-'9']
+let regexpchar = identchar | ['[' ']' '\\']
 
 rule main = parse
   | "{" { lexeme_start := lexbuf.EndPos; comment_depth := 1; action_code lexbuf }
@@ -56,22 +58,30 @@ rule main = parse
   | "/*" { lexeme_start := lexbuf.EndPos; comment_depth := 1; multiline_comment lexbuf }
   | "//" { lexeme_start := lexbuf.EndPos; singleline_comment lexbuf }
   | '\'' { lexeme_start := lexbuf.EndPos; literal lexbuf }
-  | '"' { lexeme_start := lexbuf.EndPos; literal2 lexbuf }
+  | '\\' regexpchar { LITERAL(make_lexeme(lexbuf.StartPos, lexbuf.EndPos)) }
+  | '"' { LITERAL(make_lexeme(lexbuf.StartPos, lexbuf.EndPos)) }
   | identchar* { identifier(make_lexeme(lexbuf.StartPos, lexbuf.EndPos)) }
+  | ("mode" | "pushMode" | "type" | "channel") '(' identchar* ')' { T_COMMAND }
+  | "->" { ARROW }
   | '(' { LPAREN }
   | ')' { RPAREN }
   | '|' { BAR }
-  | "=>" { HENCE }
   | '=' { EQUAL }
-  | '*' { STAR }
-  | '+' { PLUS }
+  | '*' | "*?" { STAR }
+  | '+' | "+?" { PLUS }
   | ':' { COLON }
   | ';' { SEMICOLON }
-  | '?' { QUESTION }
+  | '?' | "??" { QUESTION }
   | '!' { EXCLAMATION }
   | '~' { TILDE }
   | ".." { DOUBLE_DOT }
   | '.' { TERMINAL(make_lexeme(lexbuf.StartPos, lexbuf.EndPos)) }
+  | '[' { SQR_LBR }
+  | ']' { SQR_RBR }
+  | '<' identchar* '=' identchar* '>' { main lexbuf } 
+  | (identchar+)(' ')*'=' { main lexbuf }
+  | (identchar+)(' ')*"+=" { main lexbuf }
+  | '#'(' ')*(identchar+) { main lexbuf }
   | eof { EOF }
   | _ { main lexbuf }
 and multiline_comment = parse

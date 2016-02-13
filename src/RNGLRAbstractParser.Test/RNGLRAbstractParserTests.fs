@@ -863,7 +863,7 @@ let f x =
 //    t._03_PrettySimpleCalc_BranchedInput ()
 //    t._04_PrettySimpleCalc_LotsOfVariants() 
 //    t._05_NotAmbigousSimpleCalc_LotsOfVariants()
-//    t._06_NotAmbigousSimpleCalc_Loop. ()
+   // t._06_NotAmbigousSimpleCalc_Loop()
 //    t._07_NotAmbigousSimpleCalc_Loop2. ()
 //    t._08_NotAmbigousSimpleCalc_Loop3. ()
 //    t._09_NotAmbigousSimpleCalc_Loop4. ()

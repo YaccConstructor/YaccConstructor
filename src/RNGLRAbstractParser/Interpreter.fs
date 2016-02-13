@@ -296,16 +296,23 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             addChildren nodes.[nodes.Length - 1] path prod
 
     let walk remainLength (vertex : Vertex) path startV nonTerm pos prod shouldEnqueueVertex = 
-        let rec _go remainLength (vertex : Vertex) path = 
-            if remainLength = 0 
-            then handlePath path vertex startV nonTerm pos prod shouldEnqueueVertex
-            else
-                vertex.PassingReductions.Add (new Reduction2<_>(prod, remainLength, path, nonTerm, pos)) |> ignore
-                vertex.OutEdges |> ResizeArray.iter
-                    (fun e ->
-                        let newPath = (if e.Ast < 0 then new Epsilon(e.Ast) :> AstNode else nodes.[e.Ast])::path
-                        _go (remainLength - 1) e.Dest newPath )
-        _go remainLength (vertex : Vertex) path
+        let rec _go (buf:list<_>) = 
+            match buf with
+            | [] -> ()
+            | (remainLength,(vertex : Vertex),path) :: tl ->                
+                let newBuf = 
+                    if remainLength = 0 
+                    then
+                        handlePath path vertex startV nonTerm pos prod shouldEnqueueVertex
+                        tl
+                    else
+                        vertex.PassingReductions.Add (new Reduction2<_>(prod, remainLength, path, nonTerm, pos)) |> ignore
+                        vertex.OutEdges |> ResizeArray.fold
+                            (fun buf e ->
+                                let newPath = (if e.Ast < 0 then new Epsilon(e.Ast) :> AstNode else nodes.[e.Ast])::path
+                                ((remainLength - 1), e.Dest, newPath) :: buf) tl
+                _go newBuf
+        _go [remainLength, vertex, path]
 
     let makeSingleReduction currentGraphV (reduction : Reduction) =
         let nonTerm = parserSource.LeftSide.[reduction.prod]
@@ -398,7 +405,12 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 //                       innerGraph.Edges |> Seq.collect (fun e -> e.Source.processedGssVertices)
 //
 //                    drawDot parserSource.TokenToNumber terminals parserSource.LeftSide gssInitVertices parserSource.NumToString parserSource.ErrorIndex "../../../Tests/AbstractRNGLR/DOT/gss.dot"
-
+                    
+                    (*let orderedNodes = tree.Order
+                    printfn "O = %A" orderedNodes.Length
+                    orderedNodes
+                    |> Array.iter (fun n -> 
+                        n)*)
                     Success <| tree
                 with
                 e -> Error (-1, Unchecked.defaultof<'TokenType>, e.Message)

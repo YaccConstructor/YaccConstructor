@@ -384,7 +384,7 @@ type ``Cycles``() =
         //asserts
         runTest cfg checkEntryNode' checkExitNode' myChecks
 
-    [<Test>]
+    //[<Test>]
     member this.``Cycle A (B+ | C+)``() = 
         let qGraph = createParserInput' "A (B+ or C+).dot"
 

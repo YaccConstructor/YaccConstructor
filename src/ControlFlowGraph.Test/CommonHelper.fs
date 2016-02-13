@@ -29,7 +29,7 @@ let private quickGraphToFST (lexerInputGraph : AdjacencyGraph<int, TaggedEdge<_,
 
     let transform x = 
         match x with 
-        | Smbl(y : char, _) when y <> (char 65535) -> x, Smbl(int <| Convert.ToUInt32(y)) 
+        | Smbl(y : char, _) when y <> (char 65535) -> x, Smbl(int <| uint32 y)
         | Smbl(y : char, _) when y =  (char 65535) -> x, Smbl 65535 
         | _ -> x, Eps
     let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)

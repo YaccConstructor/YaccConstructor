@@ -12,14 +12,21 @@ open QuickGraph.FSA.GraphBasedFsa
 
 let returnTrue = fun _ -> true
 
+let incorrectChildMsg = "At least one block has incorrect child"
+let incorrectParentMsg = "At least one block has incorrect parent"
+let missingBlockMsg = "Some blocks are lost"
+let incorrectEntryMsg = "Incorrect entry node"
+let incorrectExitMsg = "Incorrect entry node"
+
 let runTest (cfg : ControlFlow<_>) checkEntry checkExit checks = 
             
-    Assert.IsTrue(checkEntry cfg.Entry, "Incorrect entry node!")
-    Assert.IsTrue(checkExit cfg.Exit, "Incorrect exit node")
+    Assert.IsTrue(checkEntry cfg.Entry, incorrectEntryMsg)
+    Assert.IsTrue(checkExit cfg.Exit, incorrectExitMsg)
             
     let checkCondition condition = 
-        let res = condition cfg.Blocks
-        Assert.True(res, "Incorrect cfg was built")
+        let func, msg = condition
+        let res = func cfg.Blocks
+        Assert.True(res, msg)
 
     checks
     |> Seq.iter checkCondition
@@ -34,7 +41,7 @@ type ``Simple cases``() =
     let astToDot = ExtendedCalcTest.Parser.defaultAstToDot 
 
     let fsa = new FSA<_>()
-    let RNGLR_EOF = ExtendedCalcTest.Parser.RNGLR_EOF <| new FSA<_>()
+    let RNGLR_EOF = ExtendedCalcTest.Parser.RNGLR_EOF fsa
 
     let xNumber = tokenToNumber <| ExtendedCalcTest.Parser.X fsa
     let yNumber = tokenToNumber <| ExtendedCalcTest.Parser.Y fsa
@@ -66,7 +73,11 @@ type ``Simple cases``() =
         let nodeToParents = dict [xNumber, []; yNumber, [xNumber]; zNumber, [yNumber];]
         let myParentsCheck = checkParent tokenToNumber nodeToParents
 
-        let myConds = [myChildrenCheck; myParentsCheck]
+        let myConds = 
+            [
+                myChildrenCheck, incorrectChildMsg; 
+                myParentsCheck, incorrectParentMsg;
+            ]
         
         let prefix = "`elementary"
 
@@ -88,7 +99,11 @@ type ``Simple cases``() =
         let blockToParents = dict[xNumber, [yNumber; zNumber]]
             //dict [(*yNumber, [xNumber]; zNumber, [xNumber];*)]
         let checkParents' = checkParent tokenToNumber blockToParents
-        let myChecks = [checkChildren'; checkParents';]
+        let myChecks = 
+            [
+                checkChildren', incorrectChildMsg; 
+                checkParents', incorrectParentMsg;
+            ]
 
         let prefix = "`ambiguous"
         //act 
@@ -108,7 +123,11 @@ type ``Simple cases``() =
 
         let blockToParents = dict [yNumber, []; zNumber, [];]
         let checkParents' = checkParent tokenToNumber blockToParents
-        let myChecks = [checkChildren'; checkParents']
+        let myChecks = 
+            [
+                checkChildren', incorrectChildMsg; 
+                checkParents', incorrectParentMsg;
+            ]
 
         let prefix = "`ambiguous2"
         //act 
@@ -252,7 +271,11 @@ type ``Cycles``() =
         let blockToParents = dict [aNumber, [aNumber];]
         let checkParents' = checkParent tokenToNumber blockToParents
 
-        let myChecks = [checkChildren'; checkParents']
+        let myChecks = 
+            [
+                checkChildren', incorrectChildMsg; 
+                checkParents', incorrectParentMsg;
+            ]
 
         let prefix = "`Cycle A+"
         //action
@@ -276,7 +299,11 @@ type ``Cycles``() =
         let blockToParents = dict [bNumber, [aNumber; bNumber];]
         let checkParents' = checkParent tokenToNumber blockToParents
 
-        let myChecks = [checkChildren'; checkParents']
+        let myChecks = 
+            [
+                checkChildren', incorrectChildMsg; 
+                checkParents', incorrectParentMsg;
+            ]
 
         let prefix = "`Cycle A B asteriks"
         //action
@@ -307,7 +334,11 @@ type ``Cycles``() =
                                 ]
         let checkParents' = checkParent tokenToNumber blockToParents
 
-        let myChecks = [checkChildren'; checkParents']
+        let myChecks = 
+            [
+                checkChildren', incorrectChildMsg; 
+                checkParents', incorrectParentMsg;
+            ]
 
         let prefix = "`Cycle A B asteriks C"
         //action
@@ -341,7 +372,12 @@ type ``Cycles``() =
         let checkParents' = checkParent tokenToNumber blockToParents
         let checkExistence' = checkExistence tokenToNumber [aNumber; bNumber;]
 
-        let myChecks = [checkExistence'; checkChildren'; checkParents';]
+        let myChecks = 
+            [
+                checkExistence', missingBlockMsg;
+                checkChildren', incorrectChildMsg; 
+                checkParents', incorrectParentMsg;
+            ]
         let prefix = "`Cycle (A or B)+"
         //action
         let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
@@ -376,7 +412,12 @@ type ``Cycles``() =
 
         let checkExistence' = checkExistence tokenToNumber [aNumber; bNumber; cNumber;]
 
-        let myChecks = [checkExistence'; checkChildren'; checkParents';]
+        let myChecks = 
+            [
+                checkExistence', missingBlockMsg;
+                checkChildren', incorrectChildMsg; 
+                checkParents', incorrectParentMsg;
+            ]
 
         let prefix = "`Cycle A (B+ or C+)"
         //action
@@ -408,7 +449,12 @@ type ``Cycles``() =
                                     bNumber, [aNumber;];
                                 ]
         let checkParents' = checkParent tokenToNumber blockToParents
-        let myChecks = [checkChildren'; checkParents']
+        
+        let myChecks = 
+            [
+                checkChildren', incorrectChildMsg; 
+                checkParents', incorrectParentMsg;
+            ]
 
         let prefix = "`Cycle (AB)+"
         //action
@@ -441,7 +487,11 @@ type ``Cycles``() =
                                 ]
         let checkParents' = checkParent tokenToNumber blockToParents
 
-        let myChecks = [checkChildren'; checkParents';]
+        let myChecks = 
+            [
+                checkChildren', incorrectChildMsg; 
+                checkParents', incorrectParentMsg;
+            ]
 
         let prefix = "`Cycle (AB)+C"
         //action
@@ -472,8 +522,12 @@ type ``Cycles``() =
                                     bNumber, [aNumber; bNumber;];
                                 ]
         let checkParents' = checkParent tokenToNumber blockToParents
-        let myChecks = [checkChildren'; checkParents']
-
+        
+        let myChecks = 
+            [
+                checkChildren', incorrectChildMsg; 
+                checkParents', incorrectParentMsg;
+            ]
         
         let prefix = "`Cycle after cycle A+B+"
         //action
@@ -503,7 +557,12 @@ type ``Cycles``() =
                                     bNumber, [aNumber;];
                                 ]
         let checkParents' = checkParent tokenToNumber blockToParents
-        let myChecks = [checkChildren'; checkParents']
+        
+        let myChecks = 
+            [
+                checkChildren', incorrectChildMsg; 
+                checkParents', incorrectParentMsg;
+            ]
 
         let prefix = "`Cycle inside cycle (A+B)+"
         //action
@@ -536,7 +595,11 @@ type ``Cycles``() =
                                 ]
         let checkParents' = checkParent tokenToNumber blockToParents
         
-        let myChecks = [checkChildren'; checkParents';]
+        let myChecks = 
+            [
+                checkChildren', incorrectChildMsg; 
+                checkParents', incorrectParentMsg;
+            ]
 
         let prefix = "`Cycle inside cycle ((AB)+C)+"
         //action

@@ -18,21 +18,30 @@ type TablesReadBack (grammar : FinalGrammarNFA, states : StatesInterpreter) =
         let endRule = KernelInterpreterNFA.toKernel (grammar.startRule, grammar.rules.numberOfStates grammar.startRule - 1)
         for i = 0 to states.count-1 do
             let vertex = states.vertex i
+            let mainKernels, mainLookaheads = states.mainKernels i, states.mainLookaheads i
+            let derivedKernels, derivedLookaheads = states.derivedKernels i, states.derivedLookaheads i
+
             for e in vertex.outEdges do
                 let symbol = e.label
                 gotos.[i, symbol] <- e.dest.label::gotos.[i, symbol]
                 if gotos.[i, symbol].Length > 1 then
                     eprintfn "Several gotos form state %d on symbol %d: %A" i symbol gotos.[i, symbol]
-            let kernels, lookaheads = states.kernels i, states.lookaheads i
-            for j = 0 to kernels.Length - 1 do
-                let k, la = kernels.[j], lookaheads.[j]
+
+            for j = 0 to mainKernels.Length - 1 do
+                let k, la = mainKernels.[j], mainLookaheads.[j]
                 let prod, pos = KernelInterpreterNFA.unzip k
                 if k = endRule then acc <- i::acc
                 elif grammar.hasEpsilonTail.[prod].[pos] then
                     for symbol in la do 
-                        if Set.contains pos grammar.startPositions.[prod] then
-                            zeroReduces.[i, symbol] <- prod::zeroReduces.[i, symbol]
                         reduces.[i, symbol] <- (prod, pos)::reduces.[i, symbol]
+            
+            for j = 0 to derivedKernels.Length - 1 do
+                let k, la = derivedKernels.[j], derivedLookaheads.[j]
+                let prod, pos = KernelInterpreterNFA.unzip k
+                if k = endRule then acc <- i::acc
+                elif grammar.hasEpsilonTail.[prod].[pos] then
+                    for symbol in la do 
+                        zeroReduces.[i, symbol] <- prod::zeroReduces.[i, symbol]
         reduces, zeroReduces, gotos, acc
 
     let _nfas =

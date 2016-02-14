@@ -3,7 +3,7 @@
 type OutTable = LR | LALR
 
 type Kernel = int
-//type Item = Kernel * Set<int>
+type Item = Kernel * Set<int>
 
 type KernelInterpreter =
     static member inline toKernel (prod,pos) = (prod <<< 16) ||| pos

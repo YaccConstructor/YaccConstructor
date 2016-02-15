@@ -16,11 +16,11 @@ type Block<'TokenType>(blockType, graph : CfgTokensGraph<'TokenType>) =
     member this.TokensGraph = tokensGraph
     member this.Parent 
         with get() = parent
-        and set(value) = parent <- value
+        and set value = parent <- value
     
     member this.Children 
         with get() = children
-        and set(value) = children <- value
+        and set value = children <- value
 
     member this.BlockType = blockType
 
@@ -46,7 +46,7 @@ type Block<'TokenType>(blockType, graph : CfgTokensGraph<'TokenType>) =
         
         sprintf "%s\n available tokens: %s\n" typeStr strValues
 
-    member this.GetDotCluster tokToString (shift : int -> int) prefix = 
+    member this.GetDotCluster tokToString shift prefix = 
         let graph = this.TokensGraph
         getDotCluster graph tokToString shift prefix
 
@@ -73,11 +73,11 @@ and InterNode<'TokenType>(children : list<_>, parents : list<_>) =
 
     member this.Parents 
         with get() = parents
-        and set(value) = parents <- value
+        and set value = parents <- value
     
     member this.Children 
         with get() = children
-        and set(value) = children <- value
+        and set value = children <- value
 
     member this.AddChild (block : Block<'TokenType>) : unit = 
         if children.IsEmpty

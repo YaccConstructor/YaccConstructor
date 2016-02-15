@@ -120,7 +120,8 @@ let private processConditionGraph (graph : CfgBlocksGraph<_>) =
     let start = graph.FirstVertex
     let conds = 
         let getParentAndChildren (cond : Block<_>) = cond.Parent, cond.Children
-        graph.OutEdges(start)
+        
+        graph.OutEdges start
         |> Seq.map (processEdge >> getParentAndChildren)
         |> List.ofSeq
         

@@ -19,7 +19,7 @@ let getClusterDotString clasterName body =
     append "color=lightgrey"
     append body
     append "}"
-    strBuilder.Value.ToString()
+    string !strBuilder
 
 type CfgTokensGraphPrinter private() = 
     
@@ -40,7 +40,7 @@ type CfgTokensGraphPrinter private() =
                         | None -> "eps"
                     strBuilder := (!strBuilder).AppendLine (sprintf "%s -> %s [label=\"%s\"]" src trg lbl)
             )
-        (!strBuilder).ToString()
+        string !strBuilder
 
     static member ToDot (graph : CfgTokensGraph<'TokenType>) tokenToString (name : string) = 
         use out = new StreamWriter(name)
@@ -60,7 +60,7 @@ type InnerGraphPrinter private() =
     /// </summary>
     /// <param name="name">Name of .dot file</param>
     /// <param name="tokenToStringOpt">Token to string mapping option</param>
-    static member RelaxedPrintToDot (graph : CfgBlocksGraph<_>) (name : string) (tokenToStringOpt : _ option)= 
+    static member RelaxedPrintToDot (graph : CfgBlocksGraph<_>) (name : string) (tokenToStringOpt : _ option) =
         use out = new StreamWriter(name)
         out.WriteLine "digraph AST {"
         out.WriteLine "rankdir=LR"
@@ -114,6 +114,6 @@ let getDotCluster (graph : AdjacencyGraph<_, _>) tokenToString shift prefix =
             CfgTokensGraphPrinter.GetDotString tokensGraph tokenToString shift prefix
         //| :? CfgBlocksGraph<_> as blocksGraph -> 
           //  InnerGraphPrinter.
-        | x -> failwith "This graph type isn't supported now: %A" x
+        | x -> failwithf "This graph type isn't supported now: %A" x
 
     dotString, startVertexName, finishVertexName

@@ -103,28 +103,32 @@ type GraphConstructor<'TokenType> =
     /// <param name="start">First vertex for BFS</param>
     member this.TryFindLastVertex start = 
         
-        let queue = new Queue<_>()
-        let addEdge = 
-            let markedEdges = new ResizeArray<_>()
-            fun edge -> 
-                if not <| markedEdges.Contains edge
-                then
-                    queue.Enqueue edge
-                    markedEdges.Add edge
+        let getEdges vertex = 
+            this.Graph.OutEdges vertex
+            |> Seq.toList
 
-        this.Graph.OutEdges start
-        |> Seq.iter addEdge
+        let rec func acc processed (queue : BlockEdge<_> list) = 
+            
+            match queue with
+            | [] -> acc
+            | head :: tail -> 
+                let target = head.Target
+                
+                if processed |> List.exists ((=) target)
+                then 
+                    func acc processed tail
+                else
+                    if this.Graph.OutDegree target = 0
+                    then 
+                        func (target :: acc) processed tail
+                    else
+                        let newQueue = 
+                            tail
+                            |> List.append <| getEdges target
 
-        let mutable res = []
+                        func acc (target :: processed) newQueue
 
-        while queue.Count > 0 do
-            let edge = queue.Dequeue()
-            if this.Graph.OutDegree edge.Target = 0
-            then 
-                res <- edge.Target :: res
-            else 
-                this.Graph.OutEdges(edge.Target)
-                |> Seq.iter addEdge
+        let res = func [] [] <| getEdges start
 
         match res with
         | [ head ] -> Some head

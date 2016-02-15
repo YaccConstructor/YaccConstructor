@@ -96,7 +96,6 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                     |> Seq.skipWhile isNotAssign
                     |> List.ofSeq
                     |> List.tail
-//                | _ -> block.Tokens |> List.ofArray
                 | _ -> block.TokensGraph.GetAvailableTokens() |> List.ofSeq
 
             let isUndefinedVariable token = 

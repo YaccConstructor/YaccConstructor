@@ -29,7 +29,7 @@ type EntryExit<'T> =
 
     new (entry, exit) = {Entry = entry; Exit = exit}
 
-    ///Links two nodes: exit from first node is entry for second one
+    ///Links two nodes: exit from the first node is entry for the second one
     static member ConcatNodes (first : EntryExit<_>) (second : EntryExit<_>) = 
         let entry, oldExit = first.Entry, first.Exit
         let oldEntry, exit = second.Entry, second.Exit
@@ -143,9 +143,9 @@ let rec processIfGraph (ifGraph : CfgBlocksGraph<_>) =
             | Condition -> condBlock := processConditionGraph innerGraph
             | ThenStatement -> thenBlock := processSeq innerGraph
             | ElseStatement -> elseBlockOpt := Some <| processSeq innerGraph
-            | x -> failwithf "Unexpected statement type in ifStatement: %A" x
+            | x -> invalidArg "block" <| sprintf "Unexpected statement type in ifStatement: %A" x
         | EmptyEdge -> ()
-        | x -> failwithf "Unexpected edge type in IfStatement: %A" x
+        | x -> invalidArg "edge.Tag" <| sprintf "Unexpected edge type in IfStatement: %A" x
 
     while ifQueue.Count > 0 do
         let vertex = ifQueue.Dequeue()
@@ -193,8 +193,10 @@ and processSeq (graph : CfgBlocksGraph<_>) =
             vertexToInterNode.[key] <- value
 
     let getOldValue target = 
-        if vertexToInterNode.ContainsKey target
-        then Some vertexToInterNode.[target]
+        
+        let entryExitRef = ref Unchecked.defaultof<_>
+        if vertexToInterNode.TryGetValue(target, entryExitRef)
+        then Some !entryExitRef//vertexToInterNode.[target]
         else None
 
     let updateQueue = 
@@ -219,7 +221,7 @@ and processSeq (graph : CfgBlocksGraph<_>) =
                 let nodes = 
                     match block with
                     | Assignment -> processAssignmentGraph tokensGraph
-                    | x -> failwithf "Now this statement type isn't supported: %A"x
+                    | x -> invalidOp <| sprintf "Now this statement type isn't supported: %A"x
 
                 let newData = 
                     match oldValue with
@@ -232,7 +234,7 @@ and processSeq (graph : CfgBlocksGraph<_>) =
                 let nodes = 
                     match block with
                     | IfStatement -> processIfGraph innerGraph
-                    | x -> failwithf "Now this statement type isn't supported: %A"x
+                    | x -> invalidOp <| sprintf "Now this statement type isn't supported: %A"x
 
                 let newData = 
                     match oldValue with
@@ -246,7 +248,7 @@ and processSeq (graph : CfgBlocksGraph<_>) =
                 | Some oldNodes -> addToDictionary edge.Target oldNodes
                 | None -> failwith "Unexpected state during cfg building"
 
-        graph.OutEdges(vertex)
+        graph.OutEdges vertex
         |> Seq.iter processEdge
     
     let entry = vertexToInterNode.[graph.LastVertex].Entry

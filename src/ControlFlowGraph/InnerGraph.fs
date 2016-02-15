@@ -61,9 +61,9 @@ and CfgBlocksGraph<'TokenType>() =
 type GraphConstructor<'TokenType> = 
     val Graph : CfgBlocksGraph<'TokenType>
     val mutable CurrentVertex : int
-    val mutable LastVertex : int
+    val mutable NextVertex : int
 
-    new (g, s, e) = {Graph = g; CurrentVertex = s; LastVertex = e}
+    new (g, s, e) = {Graph = g; CurrentVertex = s; NextVertex = e}
     new (g : CfgBlocksGraph<_>) = new GraphConstructor<_>(g, g.FirstVertex, g.FirstVertex)
     new () = new GraphConstructor<_>(new CfgBlocksGraph<_>())
 
@@ -71,8 +71,8 @@ type GraphConstructor<'TokenType> =
     /// Creates new vertex.
     /// </summary>
     member this.CreateNewVertex() = 
-        this.LastVertex <- if this.Graph.VertexCount > 0 then this.Graph.VertexCount else 1
-        this.LastVertex
+        this.NextVertex <- if this.Graph.VertexCount > 0 then this.Graph.VertexCount else 1
+        this.NextVertex
 
     /// <summary>
     ///<para>Adds edge with edgeTag to graph.</para><br />
@@ -94,7 +94,7 @@ type GraphConstructor<'TokenType> =
     /// <summary>
     /// CurrentVertex becomes equal to number of last created vertex.
     /// </summary>
-    member this.UpdateVertex() = this.CurrentVertex <- this.LastVertex
+    member this.UpdateVertex() = this.CurrentVertex <- this.NextVertex
 
     /// <summary>
     /// Does BFS from start vertex. Returns the vertex that has out degree = 0.

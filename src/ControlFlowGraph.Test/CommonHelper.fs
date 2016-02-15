@@ -23,7 +23,7 @@ let inputName = sprintf "%s input.dot"
 let astName = sprintf "%s ast.dot"
 let cfgName = sprintf "%s cfg.dot"
 
-let private quickGraphToFST (lexerInputGraph : AdjacencyGraph<int, TaggedEdge<_,string>>)= 
+let private quickGraphToFST (lexerInputGraph : AdjacencyGraph<int, TaggedEdge<_, string>>)= 
     let initialStates = ResizeArray.singleton 0
     let finishStates = ResizeArray.singleton <| lexerInputGraph.VertexCount - 1
 

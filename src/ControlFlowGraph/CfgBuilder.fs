@@ -49,7 +49,7 @@ let buildCfg (tree : Tree<'TokenType>)
                     addEpsilonEdge graph graph.CurrentVertex source
                     
                     graph.CurrentVertex <- target
-                    graph.LastVertex <- target
+                    graph.NextVertex <- target
                     Some target
                 | InProgress start -> 
                     addEpsilonEdge graph startVertex start
@@ -57,7 +57,7 @@ let buildCfg (tree : Tree<'TokenType>)
                     | Some vertex ->  
                         familyToVertices.[family] <- Processed(start, vertex)
                         graph.CurrentVertex <- vertex
-                        graph.LastVertex <- vertex
+                        graph.NextVertex <- vertex
                         Some vertex
                     | None -> None
             else
@@ -81,7 +81,7 @@ let buildCfg (tree : Tree<'TokenType>)
                     familyToVertices.[family] <- Processed(startVertex, graph.CurrentVertex)
                     Some graph.CurrentVertex
 
-        match node with 
+        match node with
         | :? Epsilon 
         | :? Terminal -> ()
         | :? AST as ast ->

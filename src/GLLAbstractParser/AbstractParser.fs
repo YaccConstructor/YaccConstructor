@@ -270,11 +270,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             let curToken = parser.TokenToNumber ( edge.Tag)
                             //currentPath := edge :: currentPath.Value
                             if !structures.CurrentN = structures.Dummy
-                            then 
-                                structures.CurrentN := getNodeT edge
-                                    
-                            else 
-                                structures.CurrentR := getNodeT edge
+                            then structures.CurrentN := getNodeT edge
+                            else structures.CurrentR := getNodeT edge
                             currentVertexInInput := edge.Target
                             structures.CurrentLabel := packLabel rule (position + 1)
                             if !structures.CurrentR <> structures.Dummy
@@ -293,14 +290,13 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             index
                         currentGSSNode := create !currentVertexInInput (packLabel rule (position + 1)) !currentGSSNode  !structures.CurrentN
                         for edge in input.OutEdges !currentVertexInInput do
-                            let curToken = parser.TokenToNumber ( edge.Tag)
+                            let curToken = parser.TokenToNumber edge.Tag
 
                             let index = getIndex curSymbol curToken
-                            let key =  int((int32 curSymbol <<< 16) ||| int32 (curToken - parser.NonTermCount  ))    
+                            let key =  int((int32 curSymbol <<< 16) ||| int32 (curToken - parser.NonTermCount))    
                             if table.ContainsKey key
                             then
                                 for rule in table.[key] do
-                                 
                                     let newLabel = packLabel rule 0
                                     structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy //!currentPath
                             (*else 

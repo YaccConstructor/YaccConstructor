@@ -388,3 +388,4 @@ Tests/RNGLR/sppf.dot*
 **/out
 **/Calc.yrd.fs
 Tests/AbstractRNGLR/DOT/gss.dot.pdf
+Tests/AbstractRNGLR/DOT/gen.cmd

@@ -9,6 +9,17 @@ open ControlFlowGraph.InnerGraph
 open ControlFlowGraph.CfgTokensGraph
 open ControlFlowGraph.Printers
 
+let private addExitNode (exitNode : InterNode<_>) = 
+    let newExitNode = new InterNode<_>()
+    exitNode.Parents
+    |> List.iter 
+        (
+            fun parent -> 
+                parent.AddChild newExitNode
+                newExitNode.AddParent parent
+        )
+    newExitNode
+
 /// <summary>
 /// Contains entry and exit blocks of some part CFG
 /// </summary>
@@ -48,20 +59,13 @@ type EntryExit<'T> =
                 one.Exit.ReplaceMeForParentsOn two.Exit
                 one.Exit <- two.Exit
             else
-                failwithf "Finish nodes have children!"
+                commonEnd <- addExitNode one.Exit
+                let tempEnd = addExitNode two.Exit
+
+                tempEnd.ReplaceMeForParentsOn commonEnd
+                //failwithf "Finish nodes have children!"
                 
         new EntryExit<_>(commonStart, commonEnd)
-
-let private addExitNode (exitNode : InterNode<_>) = 
-    let newExitNode = new InterNode<_>()
-    exitNode.Parents
-    |> List.iter 
-        (
-            fun parent -> 
-                parent.AddChild newExitNode
-                newExitNode.AddParent parent
-        )
-    newExitNode
 
 //Sets common parent and common children for nodes
 let private mergeNodes (nodes : (InterNode<_> * InterNode<_> list) list) = 

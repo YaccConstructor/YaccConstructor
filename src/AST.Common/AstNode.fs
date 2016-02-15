@@ -54,12 +54,6 @@ type AST =
             for i = 0 to this.other.Length-1 do
                 res.[i+1] <- f this.other.[i]
         res
-    new (fs : array<_>) = 
-        let other = 
-            if fs.Length > 1 
-            then Array.init (fs.Length - 1) (fun i -> fs.[i+1]) 
-            else null
-        {pos = -1; first = fs.[0]; other = other}
 
     new (fs : array<_>) = 
         let other = 

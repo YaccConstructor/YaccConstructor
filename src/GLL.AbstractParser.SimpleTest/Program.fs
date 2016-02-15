@@ -669,14 +669,49 @@ type ``GLL abstract parser tests`` () =
         let parse = GLL.MsSqlParser.buildAbstractAst
         perfTest2 parse graphGenerator
   
+    [<Test>]
+    member this.bio2_4 () =
+        let bp = @"C:\gsv\projects\infernal-1.1.1\testsuite\"
+        let file = 
+            "t.fa"
+            //"tremitted-Plant_SRP.fa"
+            //"1k-4.fa"
+        let textData =             
+            File.ReadAllLines(Path.Combine(bp,file))
+            |> Seq.skip 1
+            |> Seq.takeWhile (fun s -> not <| s.StartsWith">")
+            |> Seq.collect(fun s -> s.ToCharArray())
+        let i = ref 0
+        let getSmb ch i = 
+            match ch with
+            | 'A' -> GLL.Bio2.A i
+            | 'U' -> GLL.Bio2.U i
+            | 'C' -> GLL.Bio2.C i
+            | 'G' -> GLL.Bio2.G i
+        let edges = 
+            textData
+            |> Seq.mapi(fun i ch -> edg i (i+1) (getSmb ch i))
+            |> Array.ofSeq
+        let l = edges |> Array.length
+        let qGraph = new ParserInputGraph<_>(0, l + 1)
+        qGraph.AddVerticesAndEdgeRange edges |> ignore
+        qGraph.AddVerticesAndEdgeRange [edg l (l+1) (GLL.Bio2.RNGLR_EOF 0)] 
+        let start = System.DateTime.Now
+        let res = GLL.Bio2.buildAbstractAst qGraph
+        match res with
+        | Success ast -> 
+            //ast.AstToDot GLL.Bio2.numToString GLL.Bio2.tokenToNumber GLL.Bio2.tokenData "bioAST.dot"
+            printfn "Success!"
+            printfn "Time = %A"  (System.DateTime.Now - start)
+        | Error _ -> printfn "Error!"
 
 [<EntryPoint>]
 let f x =
     //System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
     let t = new ``GLL abstract parser tests``()
-    let f () = t.``TSQL performance test for GLL`` ()
+    //let f () = t.``TSQL performance test for GLL`` ()
               //_35_Expression() //
     //let th = new System.Threading.Thread(f, 10000000)
     //th.Start()
-    f()
+    t.bio2_4()
     0

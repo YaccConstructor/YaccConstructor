@@ -78,17 +78,14 @@ type LexerInnerGraph<'br> (g:LexerInputGraph<'br>) as this =
 
     do convert()
 
-type ParserEdge<'token>(s,e,t)=
+type ParserEdge<'token>(s, e, t)=
     inherit TaggedEdge<int, 'token>(s,e,t)
-
-type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) =
+    
+type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) = 
     inherit AdjacencyGraph<int,ParserEdge<'token>>()
 
-    member val InitState = initialVertices.[0]
-    member val FinalState = finalVertices.[0]
-
-    member val InitStates = initialVertices
-    member val FinalStates = finalVertices
+    member val InitStates = initialVertices 
+    member val FinalStates = finalVertices with get, set
 
     member this.PrintToDot name (tokenToString : 'token -> string) = 
         use out = new System.IO.StreamWriter (name : string)
@@ -103,7 +100,7 @@ type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) =
                 let tokenName = e.Tag |> tokenToString
                 out.WriteLine (e.Source.ToString() + " -> " + e.Target.ToString() + "[label=\"" + tokenName + "\"]")
         out.WriteLine("}")
-        out.Close()
+        out.Close()      
 
     new (initial : int, final : int) = 
         ParserInputGraph<_>([|initial|], [|final|])

@@ -146,7 +146,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         [ for initS in tokens.InitStates -> verticesMap.[initS] ],
         [ for finalS in tokens.FinalStates -> verticesMap.[finalS] ],
         g        
-    
+            
     let nodes = new BlockResizeArray<AstNode>()
     let terminals = new BlockResizeArray<'TokenType>()
     let startState = 0

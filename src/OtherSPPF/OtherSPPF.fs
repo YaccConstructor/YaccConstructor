@@ -1,4 +1,4 @@
-﻿module OtherSPPF
+﻿module Yard.Generators.RNGLR.OtherSPPF
 
 open System.Collections.Generic
 open System.IO

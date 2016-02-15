@@ -5,9 +5,5 @@ s: A s U s
  | C s G s
  | G s C s
  | {None}
- | s e
- | e s
- 
-e: (A|U|G|C) e
- | (A|U|G|C)
-  
+ | s (A|U|G|C)
+ | (A|U|G|C) s

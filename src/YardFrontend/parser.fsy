@@ -45,17 +45,21 @@ let trd_ (_,_,x) = x
 let joinMaps (p:Map<'a,'b>) (q:Map<'a,'b>) = 
     Map(Seq.concat [ (Map.toSeq p) ; (Map.toSeq q) ])
 
-let makeNewSeq seq (lbl:Source.t) (w:Option<Source.t>) = 
-    match seq,w with 
-     | PSeq(els,ac,_),_ -> match w with
-                           | None -> PSeq (els,ac,Some {label=lbl.text; weight=None})
-                           | _ -> let wVal = w.Value
-                                  try
-                                      PSeq (els,ac,Some {label=lbl.text; weight = Some (float wVal.text)})
-                                  with 
-                                  | :? System.FormatException as ex ->
-                                      failwithf "Parse error on position (%i,%i) on token %s: %s" wVal.startPos.line wVal.startPos.column wVal.text "illegal weight. Number expected."
-     | x,_ -> x
+let makeNewSeq seq (lbl:Option<Source.t>) (w:Option<Source.t>) = 
+    match seq with 
+     | PSeq(els,ac,_) -> let lblName = 
+                            match lbl with
+                            | Some s -> s.text
+                            | None -> "dummy_lbl"
+                         match w with
+                         | None -> PSeq (els,ac,Some {label=lblName; weight=None})
+                         | _ -> let wVal = w.Value
+                                try
+                                    PSeq (els,ac,Some {label=lblName; weight = Some (float wVal.text)})
+                                with 
+                                | :? System.FormatException as ex ->
+                                    failwithf "Parse error on position (%i,%i) on token %s: %s" wVal.startPos.line wVal.startPos.column wVal.text "illegal weight. Number expected."
+     | x -> x
 
 let errorexception msg parserRange = raise <| ParseError ( new Source.t("", fst parserRange, snd parserRange, !currentFilename), msg ) 
 let createSeqElem bnd omitted r check =
@@ -250,10 +254,7 @@ param_opt : { None } | PARAM   { Some $1 }
 param_list : { [] } | PARAM param_list { $1::$2 }
 
 weight_opt :                        { None } 
-           | SQR_LBR NUMBER SQR_RBR { Some $2}
-           | SQR_LBR SQR_RBR        { errorexception "Incorrect construction! Expected 'NUMBER' among '[' and ']'" parserRange }
-           | NUMBER SQR_RBR         { errorexception "'[' is missing" parserRange }  
-           | SQR_LBR NUMBER         { errorexception "']' is missing" parserRange }
+           | SQR_LBR NUMBER SQR_RBR { Some $2}          
 
 alts: seq { $1 } | seq bar_seq_nlist {PAlt ($1,$2)}
 
@@ -265,8 +266,10 @@ seq: lbl_seq {$1} | no_lbl_seq {$1}
 no_lbl_seq: seq_elem seq_elem_list action_opt { PSeq ($1::$2, $3, None) }
           | ACTION                            { PSeq ([], Some $1, None) }
 
-lbl_seq : DLABEL weight_opt LPAREN no_lbl_seq RPAREN     { makeNewSeq $4 $1 $2 }
-        | DLABEL weight_opt no_lbl_seq RPAREN            { errorexception " '(' is missing " parserRange }
+lbl_opt : DLABEL {Some $1} 
+        | {None}
+
+lbl_seq : lbl_opt weight_opt LPAREN no_lbl_seq RPAREN     { makeNewSeq $4 $1 $2 }        
 
 seq_elem_list: { [] } | seq_elem seq_elem_list {$1::$2}
 

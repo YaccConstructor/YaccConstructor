@@ -41,7 +41,7 @@ type Vertex (state : int, level : int) =
     member this.OutEdges = out
     member this.State = state
     member this.PassingReductions = passingReductions
-    member val prefixes = new ResizeArray<Path>(4) with get
+    member val prefixes = new ResizeArray<Prefix>() with get    //in reverse order
 
     member this.addEdge (edge : Edge) =
         let mutable i = out.Count - 1
@@ -86,6 +86,35 @@ and [<Struct>]
     val pos : int
     val edge : Edge option
     new (_gssVertex, _prod, _pos, _edge) = {gssVertex = _gssVertex; prod = _prod; pos = _pos; edge = _edge}
+
+and [<AllowNullLiteral>]
+    Prefix (head : QuickGraph.TaggedEdge<VInfo<obj>, obj>, tail : ResizeArray<Prefix>, height : int) = 
+
+    member this.Head = head
+    member this.Tail = tail
+    member this.Height = height
+
+    member this.AddEdge edge =
+        new Prefix(edge, this)
+
+    new (head, prefix : Prefix) =
+        let curLevel = new ResizeArray<Prefix>()
+        curLevel.Add(prefix)
+        new Prefix (head, curLevel, prefix.Height + 1)
+
+    new (head, tail : ResizeArray<Prefix>) =
+        if ResizeArray.isEmpty(tail)
+        then new Prefix (head, tail, 1)
+        else
+            let mutable maxHeight = 0
+            let heights = ResizeArray.map (fun (prefix:Prefix) -> if prefix = null then 0 else prefix.Height) tail
+            for h in heights do
+                if h > maxHeight
+                then maxHeight <- h
+
+            new Prefix (head, tail, maxHeight + 1)
+
+    new (edge) = new Prefix (edge, new ResizeArray<Prefix>(), 1)
 
 and [<AllowNullLiteral>]
     Path (head : AstNode, tail : Path, length : int) = 
@@ -181,10 +210,11 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 levels.[u.Level] <- [!curNum]
             else
                 levels.[u.Level] <- !curNum :: levels.[u.Level]
-            //print prefixes
+            print <| sprintf "%d [label=\"%d_%d\"]" !curNum u.Level u.State 
+            (*//print prefixes
             let mutable prString = "Prefixes: "
-            let rec printPath (path:Path) (prevStr : string) =
-                if path = null then prevStr + "]"
+            let rec printPath (pr:Prefix) (prevStr : string) =
+                if pr = null then prevStr + "]"
                 else 
                     match path.Head with
                     | :? Epsilon -> printPath path.Tail (prevStr + "->Epsilon")
@@ -193,7 +223,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     | _ -> failwith "Unexpected ast"
             for prefix in u.prefixes do
                 prString <-  prString + printPath prefix "["
-            print <| sprintf "%d [label=\"%d_%d_%s\"]" !curNum u.Level u.State prString
+            print <| sprintf "%d [label=\"%d_%d_%s\"]" !curNum u.Level u.State prString*)
             incr curNum
             u.OutEdges |> ResizeArray.iter (handleEdge u)
             
@@ -251,21 +281,39 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     addZeroReduction v e.Tag currentGraphV false
         v, isNew
 
-    //return old prefixes with terminal on end
-    let newPrefixes (oldPrefixes : ResizeArray<Path>) (terminal : Terminal) =
-        oldPrefixes |> ResizeArray.map (fun prefix -> new Path(terminal, prefix))
+    //return old prefixes with new edge on end
+    let newPrefix (oldPrefixes:ResizeArray<Prefix>) edge =
+        new Prefix(edge, oldPrefixes)
+
+    //add prefix to list of prefixes
+    let rec addPrefix (curLevel:ResizeArray<Prefix>) (prefixToAdd:Prefix) = 
+        if prefixToAdd = null   //null used for marking the ends of prefix
+        then
+            if not (ResizeArray.exists
+                        (fun (prefix:Prefix) -> prefix = null)
+                        curLevel)
+            then curLevel.Add(null)     //adding null if need
+        else
+            let nextCommon = ResizeArray.tryFind
+                                (fun (pr:Prefix) -> pr <> null && pr.Head = prefixToAdd.Head)
+                                curLevel
+            match nextCommon with
+            | Some oldPrefix -> if ResizeArray.isEmpty(prefixToAdd.Tail)
+                                then
+                                    addPrefix oldPrefix.Tail null
+                                else
+                                    for newPrefix in prefixToAdd.Tail do
+                                        addPrefix oldPrefix.Tail newPrefix
+            | None -> curLevel.Add(prefixToAdd)     //prefixToAdd - new prefix for curLevel
 
 
-    let addEdge (startV:VInfo<_>) isNew (newVertex:Vertex) edge isNotEps (prefixesToAdd : ResizeArray<Path>) =
+    let addEdge (startV:VInfo<_>) isNew (newVertex:Vertex) edge isNotEps (prefixesToAdd:ResizeArray<Prefix>) =
         if not isNew && newVertex.PassingReductions.Count > 0
         then startV.passingReductions.Add((newVertex, edge))
         customEnqueue(startV)
         newVertex.addEdge edge
         for prefixToAdd in prefixesToAdd do
-            if not (ResizeArray.exists 
-                       (fun (path : Path) -> path.IsEqual prefixToAdd)
-                       newVertex.prefixes)
-            then newVertex.prefixes.Add(prefixToAdd)
+            addPrefix newVertex.prefixes prefixToAdd //add new prefix to vertex
 
         if isNotEps
         then
@@ -291,7 +339,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 let ind = tailGssV.FindIndex gssVertex.State gssVertex.Level 
                 if ind = -1 || (tailGssV.Edge ind).Ast <> edgesToTerms.[e]
                 then
-                    let prefixesToAdd = newPrefixes gssVertex.prefixes (Terminal edge.Ast)
+                    let prefixesToAdd = new ResizeArray<Prefix>()
+                    prefixesToAdd.Add(newPrefix gssVertex.prefixes e)           //or edge?
                     addEdge e.Target isNew tailGssV edge true prefixesToAdd    //push case
 
         if not <| currentGraphV.processedGssVertices.Contains(gssVertex)
@@ -408,7 +457,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         else Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string")
     else
         let startGssV,_ = addVertex startV startState startV.unprocessedGssVertices
-        startGssV.prefixes.Add(null)
         while errorIndex = -1 && verticesToProcess.Count > 0 do
             let curV = verticesToProcess.Dequeue()
             processVertex curV

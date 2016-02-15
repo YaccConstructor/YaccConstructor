@@ -38,7 +38,7 @@ type Block<'TokenType>(blockType, graph : CfgTokensGraph<'TokenType>) =
         children <- children @ newChildren
 
     member this.BlockToString (tokToString : 'TokenType -> string) = 
-        let typeStr = BlockType.BlockTypeToString blockType
+        let typeStr = blockType.ToString()
 
         let strValues = 
             this.TokensGraph.GetAvailableTokens()

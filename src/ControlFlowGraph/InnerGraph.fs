@@ -17,8 +17,8 @@ type EdgeType<'TokenType> =
     static member ToString edge = 
         match edge with
         | EmptyEdge -> "Empty edge"
-        | Simple (blockType, graph) -> BlockType.BlockTypeToString blockType// "Simple edge"
-        | Complicated (blockType, _) -> BlockType.BlockTypeToString blockType
+        | Simple (blockType, _)
+        | Complicated (blockType, _) -> blockType.ToString()
 
 and BlockEdge<'TokenType>(source, target, tag) = 
     inherit TaggedEdge<int, EdgeType<'TokenType>>(source, target, tag)

@@ -24,8 +24,8 @@ type BlockType =
     | Entry
     | NoneBlock 
 
-    static member BlockTypeToString block = 
-        match block with
+    override this.ToString()= 
+        match this with
         | Assignment -> "Assignment"
         | Condition -> "Condition"
         | Declaration -> "Declaration"

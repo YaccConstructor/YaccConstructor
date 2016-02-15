@@ -20,11 +20,11 @@ type M =
     new (p,l) = {pos = p; lbl = l}
 
 let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : ParserInputGraph<'TokenType>) : ParserCommon.ParseResult<_> = 
-    let input = input
+    (*let input = input
     let input = 
         let h = input.Edges |> Seq.map (fun e -> new ParserEdge<'TokenType * ref<bool>>(e.Source, e.Target, (e.Tag , ref false)))
         let g = new ParserInputGraph<'TokenType * ref<bool>>((input.InitStates : int[]), (input.FinalStates : int[]))
-        g
+        g*)
     
     if input.EdgeCount = 0 then
       //  if parser.AcceptEmptyInput then
@@ -133,16 +133,16 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 | _ -> ()
                 num
                   
-        let getNodeT (edge : ParserEdge<'TokenType*ref<bool>>) =
+        let getNodeT (edge : ParserEdge<'TokenType>) =
             let beginVertix = edge.Source
             let endVertix = edge.Target
             let tag = edge.Tag
-            let i = (parser.TokenToNumber (fst tag)) - parser.NonTermCount
+            let i = (parser.TokenToNumber ( tag)) - parser.NonTermCount
             if terminalNodes.[beginVertix, endVertix, i] <> Unchecked.defaultof<int<nodeMeasure>>
             then
                 terminalNodes.[beginVertix, endVertix, i]
             else
-                tokens.Add (fst tag)
+                tokens.Add ( tag)
                 let t = new TerminalNode(tokens.Length - 1, packExtension beginVertix endVertix)
                 sppfNodes.Add t
                 let res = sppfNodes.Length - 1
@@ -252,7 +252,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                    // then
                     if parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol
                     then
-                        let isEq (sym : int) (elem : ParserEdge<'TokenType*ref<bool>>) = sym = parser.TokenToNumber (fst elem.Tag)
+                        let isEq (sym : int) (elem : ParserEdge<'TokenType>) = sym = parser.TokenToNumber (elem.Tag)
                         
                         let curEdge = 
                             let mutable  c = false
@@ -266,8 +266,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             res
                         match curEdge with
                         | Some edge ->
-                            snd edge.Tag := true
-                            let curToken = parser.TokenToNumber (fst edge.Tag)
+                            //snd edge.Tag := true
+                            let curToken = parser.TokenToNumber ( edge.Tag)
                             //currentPath := edge :: currentPath.Value
                             if !structures.CurrentN = structures.Dummy
                             then 
@@ -293,7 +293,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             index
                         currentGSSNode := create !currentVertexInInput (packLabel rule (position + 1)) !currentGSSNode  !structures.CurrentN
                         for edge in input.OutEdges !currentVertexInInput do
-                            let curToken = parser.TokenToNumber (fst edge.Tag)
+                            let curToken = parser.TokenToNumber ( edge.Tag)
 
                             let index = getIndex curSymbol curToken
                             let key =  int((int32 curSymbol <<< 16) ||| int32 (curToken - parser.NonTermCount  ))    

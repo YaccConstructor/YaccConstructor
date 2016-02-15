@@ -17,14 +17,14 @@ type Vertex =
     new (level, nonterm) = {Level = level; NontermLabel = nonterm}
 
 [<Struct>]
-type Context<'TokenType> =
+type Context(*<'TokenType>*) =
     val Index         : int
     val Label         : int<labelMeasure>
     val Vertex        : Vertex
     val Ast           : int<nodeMeasure>
-    val Path          : List<ParserEdge<'TokenType*ref<bool>>>
-    new (index, label, vertex, ast) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Path = List.empty<ParserEdge<'TokenType*ref<bool>>>}
-    new (index, label, vertex, ast, path) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Path = path}
+    //val Path          : List<ParserEdge<'TokenType*ref<bool>>>
+    new (index, label, vertex, ast) = {Index = index; Label = label; Vertex = vertex; Ast = ast } // Path = List.empty<ParserEdge<'TokenType*ref<bool>>>
+    //new (index, label, vertex, ast, path) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Path = path}
 
 
 type ParseResult<'TokenType> =
@@ -53,7 +53,7 @@ type ParserStructures<'TokenType> (inputLength : int, currentRule : int)=
     let dummyAST = new TerminalNode(-1, packExtension -1 -1)
     let setP = new System.Collections.Generic.Dictionary<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<nodeMeasure>>>(500)//list<int<nodeMeasure>>> (500)
     let epsilonNode = new TerminalNode(-1, packExtension 0 0)
-    let setR = new System.Collections.Generic.Queue<Context<'TokenType>>(100)  
+    let setR = new System.Collections.Generic.Queue<Context(*<'TokenType>*)>(100)  
     let dummy = 0<nodeMeasure>
     let currentN = ref <| dummy
     let currentR = ref <| dummy
@@ -135,10 +135,10 @@ type ParserStructures<'TokenType> (inputLength : int, currentRule : int)=
                 false
         else true
 
-    let addContext (setU : System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>[]) (inputVertex : int) (label : int<labelMeasure>) vertex ast currentPath=
+    let addContext (setU : System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>[]) (inputVertex : int) (label : int<labelMeasure>) vertex ast (*currentPath*) =
         if not <| containsContext setU inputVertex label vertex ast
         then
-            setR.Enqueue(new Context<_>(inputVertex, label, vertex, ast, currentPath))
+            setR.Enqueue(new Context(inputVertex, label, vertex, ast (*, currentPath*)))
 
     let containsEdge (dict1 : System.Collections.Generic.Dictionary<int<nodeMeasure>, System.Collections.Generic.Dictionary<int, ResizeArray<int>>>) ast (e : Vertex) =
         if dict1 <> Unchecked.defaultof<_>

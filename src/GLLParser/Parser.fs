@@ -82,7 +82,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
 
 
     let currentGSSNode = ref <| dummyGSSNode
-    let currentContext = ref <| new Context<'TokenType>(!currentIndex, !structures.CurrentLabel, !currentGSSNode, structures.Dummy)
+    let currentContext = ref <| new Context(*<'TokenType>*)(!currentIndex, !structures.CurrentLabel, !currentGSSNode, structures.Dummy)
         
     let finalExtension = packExtension 0 (inputLength)
 
@@ -239,7 +239,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                     let y = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy label ast tree
                     let index = getRightExtension <| structures.GetTreeExtension y 
                     
-                    structures.AddContext setU index label vertex y List.empty<ParserEdge<'TokenType*ref<bool>>>)
+                    structures.AddContext setU index label vertex y (*List.empty<ParserEdge<'TokenType*ref<bool>>>*))
         v
 
 

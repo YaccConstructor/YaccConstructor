@@ -25,6 +25,19 @@ let buildCfg (tree : Tree<'TokenType>)
     
     let familyToVertices = new Dictionary<_, ASTProcessingState>()
 
+    //hack against duplicated epsilon edges
+    let addEpsilonEdge = 
+        let epsEdges = new ResizeArray<_>()
+        fun (graph : GraphConstructor<_>) source target ->
+            if source <> target 
+            then 
+                let epsilon = (source, target)
+                if not <| epsEdges.Contains epsilon
+                then
+                    graph.AddEdgeFromTo EmptyEdge source target
+                    epsEdges.Add epsilon
+
+
     let rec handleNode (node : obj) (graph : GraphConstructor<_>) = 
         let handleFamily (family : Family) startVertex = 
             graph.CurrentVertex <- startVertex
@@ -32,15 +45,14 @@ let buildCfg (tree : Tree<'TokenType>)
             then 
                 match familyToVertices.[family] with
                 | Processed (source, target) -> 
-                    if graph.CurrentVertex <> source 
-                    then 
-                        graph.AddEdgeFromTo EmptyEdge graph.CurrentVertex source
-                        
+                    
+                    addEpsilonEdge graph graph.CurrentVertex source
+                    
                     graph.CurrentVertex <- target
                     graph.LastVertex <- target
                     Some target
                 | InProgress start -> 
-                    graph.AddEdgeFromTo EmptyEdge startVertex start
+                    addEpsilonEdge graph startVertex start
                     match graph.TryFindLastVertex start with
                     | Some vertex ->  
                         familyToVertices.[family] <- Processed(start, vertex)
@@ -94,7 +106,7 @@ let buildCfg (tree : Tree<'TokenType>)
                 let commonEndVertex = graph.CreateNewVertex()
 
                 endNumbers
-                |> Array.iter(fun num -> graph.AddEdgeFromTo EmptyEdge num commonEndVertex)
+                |> Array.iter(fun num -> addEpsilonEdge graph num commonEndVertex)
                 graph.UpdateVertex()
                     
         | x -> failwithf "Unexpected node type: %A" x

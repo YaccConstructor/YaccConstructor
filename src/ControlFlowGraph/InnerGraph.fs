@@ -55,41 +55,6 @@ and CfgBlocksGraph<'TokenType>() =
         this.AddVertex e.Target |> ignore
         this.AddEdge e |> ignore
 
-    member this.RemoveDuplicateEpsilons() = 
-        
-        let isTheSame (edge1 : BlockEdge<_>) (edge2 : BlockEdge<_>) = 
-            edge1.Source = edge2.Source && edge1.Target = edge2.Target
-
-        let needRemove = ref []
-
-        this.Edges
-        |> Seq.filter isEpsilonEdge
-        |> Seq.fold
-            (
-                fun acc edge -> 
-                    if acc |> List.exists (isTheSame edge)
-                    then 
-                        needRemove := edge :: !needRemove
-                        acc
-                    else edge :: acc
-            ) []
-        |> ignore
-
-        !needRemove
-        |> List.iter (this.RemoveEdge >> ignore)
-
-    member this.RemoveEpsilonLoopEdges() = 
-        
-        let needRemove = ref []
-
-        this.Edges
-        |> Seq.filter isEpsilonEdge
-        |> Seq.filter (fun edge -> edge.Source = edge.Target)
-        |> Seq.iter (fun edge -> needRemove := edge :: !needRemove)
-
-        !needRemove
-        |> List.iter (this.RemoveEdge >> ignore)
-
 /// <summary>
 /// Builds CfgBlocksGraph.
 /// </summary>

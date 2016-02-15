@@ -26,7 +26,7 @@ type BioGraphEdge(s,e,t) =
     inherit QuickGraph.TaggedEdge<int, BioGraphEdgeLbl>(s,e,t)
     new (s,e,str,l) = BioGraphEdge(s,e,new BioGraphEdgeLbl(str,l))
 
-let lodGraph fileWithoutExt =
+let loadGraphFormFileToQG fileWithoutExt =
     let lblsExt = ".sqn"
     let graphStrauctureExt = ".grp"
     let lbls = 
@@ -50,5 +50,4 @@ let lodGraph fileWithoutExt =
     |> qGraph.AddVerticesAndEdgeRange
     |> ignore
     qGraph
-
 

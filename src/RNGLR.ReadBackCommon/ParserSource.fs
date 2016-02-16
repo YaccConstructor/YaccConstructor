@@ -4,15 +4,14 @@ open Yard.Generators.Common
 open Yard.Generators.Common.EBNF
 open System.Collections.Generic
 
-[<AllowNullLiteral>]
 type VertexWithBackTrack<'VertexLabel, 'EdgeLabel>(label : 'VertexLabel) =
     inherit Vertex<'VertexLabel, 'EdgeLabel>(label)
     let _in = new ResizeArray<Edge<'VertexLabel, 'EdgeLabel>>(4)
+    member private this.addBackTrackEdge edge =
+        _in.Add edge
     member this.addEdgeWithBackTrack edge = 
         this.addEdge edge
-        let backTrack = new Edge<_,_>(this, edge.label)
-        edge.dest.addEdge backTrack
-        _in.Add backTrack
+        (edge.dest :?> VertexWithBackTrack<_,_>).addBackTrackEdge (new Edge<_,_>(this, edge.label))
     member this.inEdges = _in
 
 type ParserSourceReadBack<'TokenType> (gotos : int[][]
@@ -26,6 +25,7 @@ type ParserSourceReadBack<'TokenType> (gotos : int[][]
                                , tokenToNumber : 'TokenType -> int
                                , acceptEmptyInput : bool
                                , numToString : int -> string
+                               , epsilonIndex : int
                                , errorIndex : int) =
     
     let _nfas =
@@ -44,7 +44,7 @@ type ParserSourceReadBack<'TokenType> (gotos : int[][]
                     setAllTransitions ats
                 | [] -> ()
             setAllTransitions allTransitions
-            numberOfStates, stateToVertex
+            stateToVertex
 
         nfas |> Array.map openNfa
 
@@ -59,4 +59,5 @@ type ParserSourceReadBack<'TokenType> (gotos : int[][]
     member this.TokenToNumber = tokenToNumber
     member this.AcceptEmptyInput = acceptEmptyInput
     member this.NumToString = numToString
+    member this.EpsilonIndex = epsilonIndex
     member this.ErrorIndex = errorIndex

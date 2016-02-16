@@ -256,10 +256,12 @@ let printTables
         printBrInd 2 "accStates.[i] <- List.exists ((=) i) small_acc"
 
         printBrInd 0 "let eofIndex = %d" grammar.indexator.eofIndex
+
+        printBrInd 0 "let epsilonIndex = %d" grammar.indexator.epsilonIndex
     
         printBrInd 0 "let errorIndex = %d" grammar.errorIndex
         
-        printBrInd 0 "let private parserSource = new ParserSourceReadBack<Token> (gotos, reduces, zeroReduces, accStates, nfas, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex)"
+        printBrInd 0 "let private parserSource = new ParserSourceReadBack<Token> (gotos, reduces, zeroReduces, accStates, nfas, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, epsilonIndex, errorIndex)"
 
         printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
         printBrInd 1 "buildAst<Token> parserSource"

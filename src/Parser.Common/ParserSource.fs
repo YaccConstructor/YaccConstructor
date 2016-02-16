@@ -30,6 +30,7 @@ type ParserSourceGLL<'TokenType> (eof                  : 'TokenType
                                , numIsLiteral       : int -> bool
                                , canInferEpsilon    : bool array
                                , slots              : IDictionary<int,int>
+                               , probabilities      : array<float>
                                ) =
     let length =
         let res = Array.zeroCreate <| (rulesStart.Length - 1)
@@ -87,4 +88,5 @@ type ParserSourceGLL<'TokenType> (eof                  : 'TokenType
     member this.NumIsLiteral       = numIsLiteral
     member this.CanInferEpsilon    = canInferEpsilon
     member this.Slots              = slots
+    member this.Probabilities      = probabilities
     member this.EOF                = eof

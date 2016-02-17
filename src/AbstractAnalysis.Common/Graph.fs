@@ -104,3 +104,11 @@ type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) =
 
     new (initial : int, final : int) = 
         ParserInputGraph<_>([|initial|], [|final|])
+       
+type BioParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) = 
+    inherit ParserInputGraph<'token []>(initialVertices, finalVertices)
+    new (initial : int, final : int) = 
+        BioParserInputGraph<_>([|initial|], [|final|])
+
+
+

@@ -205,8 +205,6 @@ Examples/RNGLR/MSSql/log.txt
 Examples/yc/*
 Examples/CYK/DialectsCYKDemo/SQLSelectDemo/SelectDemo.fs
 Examples/CYK/DialectsCYKDemo/SQLSelectDemo/SelectDemo.yrd.CYK.fs
-src/YardFrontend/Lexer.fs
-src/YardFrontend/log.txt
 Examples/RNGLR/MSSql/out
 Examples/RNGLR/MSSql/epsilons/*
 Examples/Calc/yc/AntlrFrontend.dll
@@ -235,7 +233,6 @@ demo_picts/*
 demo_picts_bu/*
 Examples/RNGLR/PLSql/*.pdf
 Examples/RNGLR/PLSql/FsYard.log
-src/YardFrontend/out
 Examples/RNGLR/PLSql/MsParser.fs
 Examples/RNGLR/PLSql/MsParser.fs
 Examples/RNGLR/PLSql.Test/*.pdf
@@ -252,15 +249,12 @@ Examples/AbstractAnalysis/SQL/LogsTrees/*
 src/packages/*
 Examples/AbstractAnalysis/SQL/*.dot
 Examples/AbstractAnalysis/SQL/*.pdf
-src/YardFrontend/out
 src/out
 Examples/AbstractAnalysis/SQL/tests/results/*
 Examples/AbstractAnalysis/AbstractAnalysisTests/*.ast.dot*
 Examples/AbstractAnalysis/SQL/result/*
 Tests/SimpleHTMLGenerator/*.html
-src/YardFrontend/Parser.fs
 Examples/AbstractAnalysis/SQL/tests/*.dot.pdf
-src/FsYaccFrontend/Parser.fs
 *.userprefs
 Examples/Calc/Calc/FsYARD/*
 Examples/Calc/packages/*
@@ -291,20 +285,20 @@ src/AbstractLexer.Test/*.dot
 src/AbstractLexer.Test/*.dot.pdf
 src/AbstractLexer.Interpreter.Tests/Tests/*
 
+src/RNGLRApplication/Calc.yrd.fs
+src/RNGLRApplication/SimpleAmb.yrd.fs
+
 src/RNGLRAbstractParser.Test/out
 src/RNGLRAbstractParser.Test/Lexer.fs
 src/RNGLRAbstractParser.Test/log.txt
-src/RNGLRAbstractParser.Test/res.dot
 src/RNGLRAbstractParser.Test/*.yrd.fs
 
 src/RNGLRParser.ErrorRecoveryTest/*.yrd.fs
-src/RNGLRParser.ErrorRecoveryTest/res.dot
 src/RNGLRParser.ErrorRecoveryTest/*.txt
 
 src/RNGLRParser.SimpleTest/*.yrd.fs
 src/RNGLRParser.SimpleTest/log.txt
 src/RNGLRParser.SimpleTest/*.dot
-src/RNGLRParser.SimpleTest/gen.cmd
 src/RNGLRParser.SimpleTest/out
 
 src/RNGLR.EBNFParser.SimpleTest/*.yrd.fs
@@ -330,7 +324,6 @@ src/ExtCalc/ExtCalcHighlighting/*.target
 
 src/JSON_Parser/JSONHighlighting/*
 src/JSON_Parser/JSONParser.fs
-src/JSON_Parser/res.dot
 src/JSON_Parser/FsYARD/*
 
 src/TSQL/out
@@ -347,8 +340,12 @@ src/TSQL/LexerAbstract_Abstract.fs
 src/TSQL/MSParserAbstract.fs
 src/TSQLTests.fs/Lexer_Abstract.fs
 
+
 src/ControlFlowGraph.Test/*.yrd.fs
 src/ControlFlowGraph.Test/*.dot
+src/ControlFlowGraph.Test/Lexer_Abstract.fs
+src/ControlFlowGraph.Test/*.Lexer_Abstract.fs
+src/ControlFlowGraph.Test/*.Lexer.fs
 
 src/OtherSPPF.Test/*.yrd.fs
 src/OtherSPPF.Test/*.dot
@@ -357,12 +354,17 @@ src/GLL.AbstractParser.SimpleTest/*.yrd.fs
 src/GLLAbstractApplication/*.dot
 src/GLLAbstractApplication/*.yrd.fs
 src/GLLApplication/*.yrd.fs
-src/GLLApplication/res.dot
 src/GLLApplication/Lexer2.fs
 src/GLLParser.SimpleTest/*.yrd.fs
-src/GLLParser.SimpleTest/res.dot
 src/GLLParser.SimpleTest/log.txt
 src/GLLParser.SimpleTest/*.dot
+
+src/FsYaccFrontend/Parser.fs
+
+src/YardFrontend/Lexer.fs
+src/YardFrontend/log.txt
+src/YardFrontend/Parser.fs
+src/YardFrontend/out
 
 Tests/AbstractRNGLR/DOT/sppf.dot*
 Tests/AbstractRNGLR/DOT/_sppf.dot*
@@ -392,16 +394,6 @@ Tests/RNGLR/sppf.dot*
 *log.txt
 **/out
 Tests/AbstractRNGLR/DOT/gen.cmd
-src/TSQL/LexerAbstract.fs
-src/TSQL/LexerAbstract_Abstract.fs
-src/TSQL/MSParserAbstract.fs
-src/RNGLRApplication/Calc.yrd.fs
-src/RNGLRApplication/SimpleAmb.yrd.fs
 
-# vim temp files
 *.swp
-src/RNGLRApplication/res.dot
-src/ControlFlowGraph.Test/Lexer_Abstract.fs
-src/ControlFlowGraph.Test/Lexer_Abstract.fs
-src/ControlFlowGraph.Test/*.Lexer_Abstract.fs
-src/ControlFlowGraph.Test/*.Lexer.fs
+res.dot

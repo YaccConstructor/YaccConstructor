@@ -63,6 +63,7 @@ type ParserSourceReadBack<'TokenType> (gotos : int[][]
     member this.StartRule = startRule
     member this.EofIndex = eofIndex
     member this.TokenToNumber = tokenToNumber
+    member this.indexToSymbolType = indexToSymbolType
     member this.AcceptEmptyInput = acceptEmptyInput
     member this.NumToString = numToString
     member this.EpsilonIndex = epsilonIndex

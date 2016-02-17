@@ -202,6 +202,18 @@ let printTables
             printBrInd 1 "| L_%s _ -> %d" (indexator.getLiteralName i) i
         printBr ""
 
+        printBrInd 0 "let indexToSymbolType = function"
+        printBrInd 1 "| i when i >= 0 && i < %d ->" indexator.nonTermCount
+        printBrInd 2 "SymbolType.Nonterminal"
+        printBrInd 1 "| i when i >= %d && i <= %d ->" indexator.termsStart indexator.termsEnd
+        printBrInd 2 "SymbolType.Terminal"
+        printBrInd 1 "| i when i >= %d && i <= %d ->" indexator.literalsStart indexator.literalsEnd
+        printBrInd 2 "SymbolType.Terminal"
+        printBrInd 1 "| i when i = %d ->" indexator.epsilonIndex
+        printBrInd 2 "SymbolType.Epsilon"
+        printBrInd 1 "| _ ->" 
+        printBrInd 2 "invalidArg \"index\" \"\" |> raise"
+
         printBrInd 0 "let isLiteral = function"
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %s _ -> false" <| indexator.indexToTerm i
@@ -261,7 +273,7 @@ let printTables
     
         printBrInd 0 "let errorIndex = %d" grammar.errorIndex
         
-        printBrInd 0 "let private parserSource = new ParserSourceReadBack<Token> (gotos, reduces, zeroReduces, accStates, nfas, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, epsilonIndex, errorIndex)"
+        printBrInd 0 "let private parserSource = new ParserSourceReadBack<Token> (gotos, reduces, zeroReduces, accStates, nfas, leftSide, startRule, eofIndex, tokenToNumber, indexToSymbolType, acceptEmptyInput, numToString, epsilonIndex, errorIndex)"
 
         printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
         printBrInd 1 "buildAst<Token> parserSource"

@@ -14,6 +14,11 @@ type VertexWithBackTrack<'VertexLabel, 'EdgeLabel>(label : 'VertexLabel) =
         (edge.dest :?> VertexWithBackTrack<_,_>).addBackTrackEdge (new Edge<_,_>(this, edge.label))
     member this.inEdges = _in
 
+type SymbolType =
+    | Nonterminal
+    | Terminal
+    | Epsilon
+
 type ParserSourceReadBack<'TokenType> (gotos : int[][]
                                , reduces : (int * int)[][][]
                                , zeroReduces : int[][][]
@@ -23,6 +28,7 @@ type ParserSourceReadBack<'TokenType> (gotos : int[][]
                                , startRule : int
                                , eofIndex : int
                                , tokenToNumber : 'TokenType -> int
+                               , indexToSymbolType: int -> SymbolType
                                , acceptEmptyInput : bool
                                , numToString : int -> string
                                , epsilonIndex : int

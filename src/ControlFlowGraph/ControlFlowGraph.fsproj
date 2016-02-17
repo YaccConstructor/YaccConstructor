@@ -31,8 +31,10 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
+    <Compile Include="SeqEx.fs" />
     <Compile Include="Common.fs" />
     <Compile Include="InputStructures.fs" />
+    <Compile Include="GraphConstructor.fs" />
     <Compile Include="CfgTokensGraph.fs" />
     <Compile Include="InnerGraph.fs" />
     <Compile Include="Printers.fs" />

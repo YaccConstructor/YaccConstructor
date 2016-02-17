@@ -4,6 +4,7 @@ open System.IO
 open System.Text
 
 open QuickGraph
+
 open ControlFlowGraph.CfgTokensGraph
 open ControlFlowGraph.InnerGraph
 
@@ -85,7 +86,7 @@ type InnerGraphPrinter private() =
             
 
         let printEdge (edge : BlockEdge<'TokenType>) = 
-            let blockTypeStr = EdgeType<_>.ToString edge.Tag
+            let blockTypeStr = string edge.Tag
             
             match edge.Tag, tokenToStringOpt with
             | Simple (_, graph), Some tok2Str -> 

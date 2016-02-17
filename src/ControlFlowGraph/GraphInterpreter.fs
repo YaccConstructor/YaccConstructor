@@ -133,11 +133,7 @@ let rec processIfGraph (ifGraph : CfgBlocksGraph<_>) =
     let thenBlock = ref Unchecked.defaultof<_>
     let elseBlockOpt = ref None
 
-    let ifQueue = new Queue<_>()
-    ifQueue.Enqueue ifGraph.FirstVertex
-
     let processEdge (edge : BlockEdge<_>)=
-        ifQueue.Enqueue edge.Target
         match edge.Tag with
         | Complicated (block, innerGraph) -> 
             match block with
@@ -148,11 +144,21 @@ let rec processIfGraph (ifGraph : CfgBlocksGraph<_>) =
         | EmptyEdge -> ()
         | x -> invalidArg "edge.Tag" <| sprintf "Unexpected edge type in IfStatement: %A" x
 
-    while ifQueue.Count > 0 do
-        let vertex = ifQueue.Dequeue()
-                
-        ifGraph.OutEdges(vertex)
-        |> Seq.iter processEdge
+    let rec func queue = 
+        match queue with
+        | [] -> ()
+        | head :: tail -> 
+            let outEdges = ifGraph.OutEdges head 
+            outEdges
+            |> Seq.iter processEdge
+
+            let outVertices = 
+                outEdges 
+                |> Seq.map (fun edge -> edge.Target)
+                |> List.ofSeq
+            func <| List.append tail outVertices
+
+    func [ifGraph.FirstVertex]
 
     let exits = snd !condBlock
     exits.Head.ReplaceMeForParentsOn <| fst !thenBlock
@@ -183,74 +189,71 @@ let rec processIfGraph (ifGraph : CfgBlocksGraph<_>) =
 and processSeq (graph : CfgBlocksGraph<_>) = 
 
     let vertexToInterNode = new Dictionary<_, EntryExit<_>>()
-    let queue = new Queue<_>()
 
     let addToDictionary key value = 
-        if vertexToInterNode.ContainsKey key 
-        then
-            let oldData = vertexToInterNode.[key]
-            vertexToInterNode.[key] <- EntryExit<_>.MergeTwoNodes oldData value
-        else
-            vertexToInterNode.[key] <- value
-
-    let getOldValue target = 
         
-        let entryExitRef = ref Unchecked.defaultof<_>
-        if vertexToInterNode.TryGetValue(target, entryExitRef)
-        then Some !entryExitRef//vertexToInterNode.[target]
-        else None
+        vertexToInterNode.[key] <-
+            match vertexToInterNode.TryGetValue key with
+            | true, data -> 
+                EntryExit<_>.MergeTwoNodes data value
+            | false, _ -> value
 
-    let updateQueue = 
-        let processed = new ResizeArray<_>()
-        fun vertex -> 
-            if not <| processed.Contains vertex
-            then 
-                processed.Add vertex
-                queue.Enqueue vertex
-
-    updateQueue graph.FirstVertex
-    while queue.Count > 0 do
-        let vertex = queue.Dequeue()
-
-        let processEdge (edge : BlockEdge<_>) = 
-            updateQueue edge.Target
+    let processEdge vertex (edge : BlockEdge<_>) = 
                     
-            let oldValue = getOldValue vertex
+        let oldValue = vertexToInterNode.TryGetValue vertex
 
-            match edge.Tag with
-            | Simple (block, tokensGraph) -> 
-                let nodes = 
-                    match block with
-                    | Assignment -> processAssignmentGraph tokensGraph
-                    | x -> invalidOp <| sprintf "Now this statement type isn't supported: %A"x
+        match edge.Tag with
+        | Simple (block, tokensGraph) -> 
+            let nodes = 
+                match block with
+                | Assignment -> processAssignmentGraph tokensGraph
+                | x -> invalidOp <| sprintf "Now this statement type isn't supported: %A"x
 
-                let newData = 
-                    match oldValue with
-                    | Some oldNodes -> EntryExit<_>.ConcatNodes oldNodes nodes
-                    | None -> nodes
-
-                addToDictionary edge.Target newData
-                
-            | Complicated (block, innerGraph) ->
-                let nodes = 
-                    match block with
-                    | IfStatement -> processIfGraph innerGraph
-                    | x -> invalidOp <| sprintf "Now this statement type isn't supported: %A"x
-
-                let newData = 
-                    match oldValue with
-                    | Some oldNodes -> EntryExit<_>.ConcatNodes oldNodes nodes
-                    | None -> nodes
-
-                addToDictionary edge.Target newData
-
-            | EmptyEdge -> 
+            let newData = 
                 match oldValue with
-                | Some oldNodes -> addToDictionary edge.Target oldNodes
-                | None -> failwith "Unexpected state during cfg building"
+                | true,  oldNodes -> EntryExit<_>.ConcatNodes oldNodes nodes
+                | false, _ -> nodes
 
-        graph.OutEdges vertex
-        |> Seq.iter processEdge
+            addToDictionary edge.Target newData
+                
+        | Complicated (block, innerGraph) ->
+            let nodes = 
+                match block with
+                | IfStatement -> processIfGraph innerGraph
+                | x -> invalidOp <| sprintf "Now this statement type isn't supported: %A"x
+
+            let newData = 
+                match oldValue with
+                | true, oldNodes -> EntryExit<_>.ConcatNodes oldNodes nodes
+                | false, _ -> nodes
+
+            addToDictionary edge.Target newData
+
+        | EmptyEdge -> 
+            match oldValue with
+            | true, oldNodes -> addToDictionary edge.Target oldNodes
+            | false, _ -> failwith "Unexpected state during cfg building"
+
+    let rec func processed queue = 
+        match queue with
+        | [] -> ()
+        | head :: tail -> 
+            if processed |> List.exists ((=) head)
+            then
+                func processed tail
+            else
+                let newQueue = 
+                    graph.OutEdges head
+                    |> Seq.map(fun edge -> edge.Target)
+                    |> List.ofSeq
+                    |> List.append tail
+
+                graph.OutEdges head
+                |> Seq.iter (processEdge head)
+
+                func (head :: processed) newQueue
+
+    func [] [graph.FirstVertex]
     
     let entry = vertexToInterNode.[graph.LastVertex].Entry
     let mutable exit = vertexToInterNode.[graph.LastVertex].Exit

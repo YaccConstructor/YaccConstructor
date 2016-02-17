@@ -4,6 +4,13 @@ open ControlFlowGraph.Common
 open ControlFlowGraph.CfgTokensGraph
 open ControlFlowGraph.Printers
 
+//if acc doesn't contain elem 
+//then elem will be added to acc
+let addIfNew acc elem = 
+    if acc |> List.forall ((<>) elem)
+    then elem :: acc
+    else acc
+
 /// <summary>
 /// Control flow graph blocks.
 /// </summary>
@@ -26,19 +33,18 @@ type Block<'TokenType>(blockType, graph : CfgTokensGraph<'TokenType>) =
 
     member this.ReplaceParent parent = this.Parent <- parent
     
-    member this.AddChild (child : InterNode<_>) = 
-        if children.IsEmpty 
-        then children <- [child]
-        //checks if it's new child
-        elif children |> List.forall ((<>) child)
-        then children <- children @ [child]
+    member this.AddChild child = 
+        
+        children <- addIfNew children child
 
     member this.ReplaceChild oldChild newChildren = 
         children <- children |> List.filter ((<>) oldChild)
-        children <- children @ newChildren
+        children <- 
+            newChildren
+            |> List.foldBack (fun elem acc -> elem :: acc) children
 
-    member this.BlockToString (tokToString : 'TokenType -> string) = 
-        let typeStr = blockType.ToString()
+    member this.BlockToString tokToString = 
+        let typeStr = string blockType
 
         let strValues = 
             this.TokensGraph.GetAvailableTokens()
@@ -65,7 +71,7 @@ type Block<'TokenType>(blockType, graph : CfgTokensGraph<'TokenType>) =
 /// <summary>
 /// Intermediate nodes between Blocks. 
 /// </summary>
-and InterNode<'TokenType>(children : list<_>, parents : list<_>) =
+and InterNode<'TokenType>(children : Block<'TokenType> list, parents : Block<'TokenType> list) =
     let mutable parents  = parents
     let mutable children = children
    
@@ -79,63 +85,47 @@ and InterNode<'TokenType>(children : list<_>, parents : list<_>) =
         with get() = children
         and set value = children <- value
 
-    member this.AddChild (block : Block<'TokenType>) : unit = 
-        if children.IsEmpty
-        then children <- [block]
-        elif children |> List.forall ((<>) block)
-        then children <- children @ [block]
+    member this.AddChild (newChild : Block<'TokenType>) : unit = 
+        
+        children <- addIfNew children newChild 
 
-    member this.AddParent (parent : Block<'TokenType>) : unit = 
-        if parents.IsEmpty
-        then parents <- [parent]
-        else parents <- parents @ [parent]
+    member this.AddParent (newParent : Block<'TokenType>) : unit = 
+        
+        parents <- addIfNew parents newParent
 
     /// <summary>
     /// <para>Replaces exit node on some other node.</para><br />
     /// <para>Possible duplicated are ignored.</para>
     /// </summary>
-    member this.ReplaceMeForParentsOn (node : InterNode<_>) = 
+    member this.ReplaceMeForParentsOn (newNode : InterNode<_>) = 
         
-        if node <> this
+        if newNode <> this
         then
             let temp = 
                 this.Parents
-                |> List.fold
-                    (
-                        fun acc parent ->
-                            if acc |> List.forall ((<>) parent)
-                            then acc @ [parent]
-                            else acc
-                    ) 
-                    node.Parents
+                |> List.foldBack (fun elem acc -> addIfNew acc elem) newNode.Parents
             
-            node.Parents <- temp
+            newNode.Parents <- temp
 
             this.Parents
-            |> List.iter (fun block -> block.ReplaceChild this [node])
+            |> List.iter (fun block -> block.ReplaceChild this [newNode])
 
     /// <summary>
     /// <para>Replaces entry node on some other node.</para><br />
     /// <para>Possible duplicated are ignored.</para>
     /// </summary>
-    member this.ReplaceMeForChildrenOn (node : InterNode<_>) = 
+    member this.ReplaceMeForChildrenOn (newNode : InterNode<_>) = 
 
-        if node <> this
+        if newNode <> this
         then
             let temp = 
                 this.Children
-                |> List.fold
-                    (
-                        fun acc child -> 
-                            if acc |> List.forall ((<>) child)
-                            then acc @ [child]
-                            else acc
-                    ) node.Children
+                |> List.foldBack (fun elem acc -> addIfNew acc elem) newNode.Children
 
-            node.Children <- temp
+            newNode.Children <- temp
             
             this.Children
-            |> List.iter (fun block -> block.ReplaceParent node)
+            |> List.iter (fun block -> block.ReplaceParent newNode)
 
     member this.IsEmpty = this.Parents.IsEmpty && this.Children.IsEmpty 
 

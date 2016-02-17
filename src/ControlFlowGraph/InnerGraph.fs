@@ -2,23 +2,22 @@
 
 open Microsoft.FSharp.Collections
 
-open System.Collections.Generic
-
 open QuickGraph
 
 open ControlFlowGraph.Common
 open ControlFlowGraph.CfgTokensGraph
+open ControlFlowGraph.GraphConstructor
 
 type EdgeType<'TokenType> = 
 | Simple of BlockType * CfgTokensGraph<'TokenType>
 | Complicated of BlockType * CfgBlocksGraph<'TokenType>
 | EmptyEdge
     
-    static member ToString edge = 
-        match edge with
+    override this.ToString() = 
+        match this with
         | EmptyEdge -> "Empty edge"
         | Simple (blockType, _)
-        | Complicated (blockType, _) -> blockType.ToString()
+        | Complicated (blockType, _) -> string blockType
 
 and BlockEdge<'TokenType>(source, target, tag) = 
     inherit TaggedEdge<int, EdgeType<'TokenType>>(source, target, tag)
@@ -30,11 +29,6 @@ and BlockEdge<'TokenType>(source, target, tag) =
 /// </summary>
 and CfgBlocksGraph<'TokenType>() = 
     inherit AdjacencyGraph<int, BlockEdge<'TokenType>>()
-
-    let isEpsilonEdge (edge : BlockEdge<_>) = 
-        match edge.Tag with
-        | EmptyEdge -> true
-        | _ -> false
 
     member this.FirstVertex = 0
     
@@ -49,87 +43,40 @@ and CfgBlocksGraph<'TokenType>() =
         match stockVertices with
         | [head] -> head
         | _ -> failwith "Incorrect inner graph was built: only one stock vertices must be" 
+    
+    member this.AddEdgeForced (edge : BlockEdge<_>) = 
+        this.AddVertex edge.Source |> ignore
+        this.AddVertex edge.Target |> ignore
+        this.AddEdge edge |> ignore
+    
+type BlocksGraphBuilder<'TokenType>() = 
+    let builder = new GraphConstructor<_, _>(new CfgBlocksGraph<'TokenType>(), 0, 0)
+    
+    let createEdge source target tag = 
+        new BlockEdge<'TokenType>(source, target, tag)
 
-    member this.AddEdgeForced (e : BlockEdge<'TokenType>) =
-        this.AddVertex e.Source |> ignore
-        this.AddVertex e.Target |> ignore
-        this.AddEdge e |> ignore
+    member this.CurrentVertex 
+        with get() = builder.CurrentVertex
+        and set value = builder.CurrentVertex <- value
+    
+    member this.NextVertex 
+        with get() = builder.NextVertex
+        and set value = builder.NextVertex <- value    
 
-/// <summary>
-/// Builds CfgBlocksGraph.
-/// </summary>
-type GraphConstructor<'TokenType> = 
-    val Graph : CfgBlocksGraph<'TokenType>
-    val mutable CurrentVertex : int
-    val mutable NextVertex : int
-
-    new (g, s, e) = {Graph = g; CurrentVertex = s; NextVertex = e}
-    new (g : CfgBlocksGraph<_>) = new GraphConstructor<_>(g, g.FirstVertex, g.FirstVertex)
-    new () = new GraphConstructor<_>(new CfgBlocksGraph<_>())
-
-    /// <summary>
-    /// Creates new vertex.
-    /// </summary>
     member this.CreateNewVertex() = 
-        this.NextVertex <- if this.Graph.VertexCount > 0 then this.Graph.VertexCount else 1
-        this.NextVertex
+        builder.CreateNewVertex()
 
-    /// <summary>
-    ///<para>Adds edge with edgeTag to graph.</para><br />
-    ///<para>Source vertex is CurrentVertex.</para><br />
-    ///<para>Target vertex is new created vertex.</para><br />
-    /// </summary>
     member this.AddEdge edgeTag = 
-        let target = this.CreateNewVertex()
-        let edge = new BlockEdge<_>(this.CurrentVertex, target, edgeTag)
-        this.Graph.AddEdgeForced edge
+        builder.AddEdge createEdge edgeTag
 
-    /// <summary>
-    ///<para>Adds edge with edgeTag from source vertex to target vertex</para><br />
-    /// </summary>
     member this.AddEdgeFromTo edgeTag source target = 
-        let edge = new BlockEdge<_>(source, target, edgeTag)
-        this.Graph.AddEdgeForced edge
+        builder.AddEdgeFromTo createEdge edgeTag source target
 
-    /// <summary>
-    /// CurrentVertex becomes equal to number of last created vertex.
-    /// </summary>
-    member this.UpdateVertex() = this.CurrentVertex <- this.NextVertex
-
-    /// <summary>
-    /// Does BFS from start vertex. Returns the vertex that has out degree = 0.
-    /// If such vertices are few or none, then None will be returned.
-    /// </summary>
-    /// <param name="start">First vertex for BFS</param>
+    member this.UpdateVertex() =
+        builder.UpdateVertex()
+    
     member this.TryFindLastVertex start = 
-        
-        let getEdges vertex = 
-            this.Graph.OutEdges vertex
-            |> Seq.toList
+        builder.TryFindLastVertex start
 
-        let rec func acc processed (queue : BlockEdge<_> list) = 
-            
-            match queue with
-            | [] -> acc
-            | head :: tail -> 
-                let target = head.Target
-                
-                if processed |> List.exists ((=) target)
-                then 
-                    func acc processed tail
-                else
-                    if this.Graph.OutDegree target = 0
-                    then 
-                        func (target :: acc) processed tail
-                    else
-                        let newQueue = 
-                            tail
-                            |> List.append <| getEdges target
-
-                        func acc (target :: processed) newQueue
-
-        let res = func [] [] <| getEdges start
-
-        match res with
-        | [ head ] -> Some head
-        | _ -> None
+    member this.Build() = 
+        builder.Graph :?> CfgBlocksGraph<'TokenType>

@@ -7,28 +7,31 @@ open ControlFlowGraph.Common
 open ControlFlowGraph.GraphInterpreter
 open ControlFlowGraph.IfHelper
 open ControlFlowGraph.InnerGraph
+open ControlFlowGraph.InputStructures
 open ControlFlowGraph.TokensExtractor
+
+open SeqExtension
 
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
-open InputStructures
+
 
 let buildCfg (tree : Tree<'TokenType>) 
             (parserSource : CfgParserSource<'TokenType>) 
             (langSource : LanguageSource) 
             tokToString = 
 
-    let intToToken = fun i -> tree.Tokens.[i]
+    let intToToken i = tree.Tokens.[i]
     
     let processIf' = processIf intToToken parserSource.TokenToNumber tokToString <| langSource.GetTempIfDict()
     let processAssignment' = processAssignment intToToken tokToString 
     
-    let familyToVertices = new Dictionary<_, ASTProcessingState>()
+    let familyToState = new Dictionary<_, ASTProcessingState>()
 
     //hack against duplicated epsilon edges
     let addEpsilonEdge = 
         let epsEdges = new ResizeArray<_>()
-        fun (graph : GraphConstructor<_>) source target ->
+        fun (graph : BlocksGraphBuilder<_>) source target ->
             if source <> target 
             then 
                 let epsilon = (source, target)
@@ -37,15 +40,15 @@ let buildCfg (tree : Tree<'TokenType>)
                     graph.AddEdgeFromTo EmptyEdge source target
                     epsEdges.Add epsilon
 
-
-    let rec handleNode (node : obj) (graph : GraphConstructor<_>) = 
-        let handleFamily (family : Family) startVertex = 
+    let rec handleNode (graph : BlocksGraphBuilder<_>) (node : obj) = 
+        let handleFamily startVertex (family : Family) =
             graph.CurrentVertex <- startVertex
-            if familyToVertices.ContainsKey family 
-            then 
-                match familyToVertices.[family] with
-                | Processed (source, target) -> 
-                    
+            
+            match familyToState.TryGetValue family with
+            | true, state ->
+            
+                match state with
+                | Processed (source, target) ->                     
                     addEpsilonEdge graph graph.CurrentVertex source
                     
                     graph.CurrentVertex <- target
@@ -53,33 +56,33 @@ let buildCfg (tree : Tree<'TokenType>)
                     Some target
                 | InProgress start -> 
                     addEpsilonEdge graph startVertex start
+                    
                     match graph.TryFindLastVertex start with
                     | Some vertex ->  
-                        familyToVertices.[family] <- Processed(start, vertex)
+                        familyToState.[family] <- Processed(start, vertex)
                         graph.CurrentVertex <- vertex
                         graph.NextVertex <- vertex
                         Some vertex
                     | None -> None
-            else
-                familyToVertices.[family] <- InProgress(graph.CurrentVertex)
+            | false, _ -> 
+                familyToState.[family] <- InProgress(graph.CurrentVertex)
                 let familyName = parserSource.LeftSides.[family.prod] |> parserSource.NumToString
 
                 if langSource.NodeToType.ContainsKey familyName 
                 then 
                     let edge = 
                         match langSource.NodeToType.[familyName] with
-                        | IfStatement -> processIf' family handleNode
+                        | IfStatement -> processIf' handleNode family
                         | Assignment -> processAssignment' family
-                        | x -> failwithf "This construction isn't supported now: %A" x
+                        | x -> invalidOp <| sprintf "This construction isn't supported now: %A" x
                     
                     graph.AddEdge edge
                     graph.UpdateVertex()
-                    familyToVertices.[family] <- Processed(startVertex, graph.CurrentVertex)
-                    Some graph.CurrentVertex
                 else 
-                    family.nodes.doForAll (fun node -> handleNode node graph)
-                    familyToVertices.[family] <- Processed(startVertex, graph.CurrentVertex)
-                    Some graph.CurrentVertex
+                    family.nodes.doForAll (handleNode graph)
+                
+                familyToState.[family] <- Processed(startVertex, graph.CurrentVertex)
+                Some graph.CurrentVertex
 
         match node with
         | :? Epsilon 
@@ -87,36 +90,27 @@ let buildCfg (tree : Tree<'TokenType>)
         | :? AST as ast ->
             let commonStart = graph.CurrentVertex
             let endNumbers = 
-                ast.map (fun family -> handleFamily family commonStart)
+                ast.map (handleFamily commonStart)
                 |> Seq.distinct
-                |> Seq.fold 
-                    (
-                        fun acc numOpt -> 
-                            match numOpt with 
-                            | Some num -> num :: acc
-                            | None -> acc
-                    ) []
-                |> Array.ofSeq
+                |> Seq.filterAndMap Option.isSome Option.get
                 
-            if endNumbers.Length = 1
-            then 
-                graph.UpdateVertex()
-            elif endNumbers.Length > 1
-            then
+            match Seq.length endNumbers with
+            | 0 -> ()
+            | 1 -> graph.UpdateVertex()
+            | _ -> 
                 let commonEndVertex = graph.CreateNewVertex()
 
                 endNumbers
-                |> Array.iter(fun num -> addEpsilonEdge graph num commonEndVertex)
+                |> Seq.iter(fun num -> addEpsilonEdge graph num commonEndVertex)
                 graph.UpdateVertex()
                     
         | x -> failwithf "Unexpected node type: %A" x
 
-    let graphInfo = new GraphConstructor<_>()
-    handleNode tree.Root graphInfo
+    let graphInfo = new BlocksGraphBuilder<_>()
+    handleNode graphInfo tree.Root 
 
     match graphInfo.TryFindLastVertex graphInfo.CurrentVertex with
     | Some _ -> ()
     | None -> graphInfo.AddEdge EmptyEdge
 
-    graphToCfg graphInfo.Graph <| Some parserSource.TokenToString
-
+    graphToCfg <| graphInfo.Build() <| Some parserSource.TokenToString

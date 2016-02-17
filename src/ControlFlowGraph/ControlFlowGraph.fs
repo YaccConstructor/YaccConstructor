@@ -4,14 +4,11 @@ open System.IO
 open System.Collections.Generic
 
 open ControlFlowGraph.Common
-open ControlFlowGraph.IfHelper
-open ControlFlowGraph.AssignmentHelper
 open ControlFlowGraph.CfgBuilder
 open ControlFlowGraph.CfgElements
-open ControlFlowGraph.InnerGraph
 open ControlFlowGraph.InputStructures
-open ControlFlowGraph.GraphInterpreter
-open ControlFlowGraph.TokensExtractor
+
+open SeqExtension
 
 open Yard.Generators.Common.AST
 
@@ -22,7 +19,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                             , langSource : LanguageSource
                             , tokToSourceString : _ -> string) = 
     
-    let intToToken = fun i -> tree.Tokens.[i]
+    let intToToken i = tree.Tokens.[i]
 
     let isNotAssign token = 
         let assignNumber = langSource.KeywordToInt.[Keyword.ASSIGN]
@@ -117,29 +114,27 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
             |> Option.iter (fun varName -> defVars := varName :: !defVars)
                 
             block.Children 
-            |> List.iter (fun child -> processInterNode child !defVars)
+            |> List.iter (processInterNode !defVars)
 
-        and processInterNode node defVars = 
+        and processInterNode defVars node = 
             let processChild child = 
-                if blockToVars.ContainsKey child 
-                then
-                    let intersect one two = 
-                        one |> List.filter (fun elem1 -> List.exists ((=) elem1) two)
-                    let oldVars = blockToVars.[child]
-                    let commonVars = intersect oldVars defVars
+                match blockToVars.TryGetValue child with
+                | true, vars -> 
+                    let commonVars = List.intersect vars defVars
 
                     //Does list change?
-                    if oldVars.Length <> commonVars.Length
+                    if vars.Length <> commonVars.Length
                     then
                         blockToVars.[child] <- commonVars
                         processBlock child
-                else
+                | false, _ ->
                     blockToVars.[child] <- defVars
                     processBlock child
+            
             node.Children 
             |> List.iter processChild
 
-        processInterNode entry []
+        processInterNode [] entry 
         !errorList
 
     member this.Entry = entry
@@ -166,10 +161,10 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
 
         let rec printBlock parentNumber block = 
             let getBlockNumber (block : Block<'TokenType>) = 
-                if blockToNumber.ContainsKey block 
-                then 
-                    blockToNumber.[block], false
-                else
+                
+                match blockToNumber.TryGetValue block with
+                | true, num -> num, false
+                | false, _ -> 
                     incr count
                     
                     let blockString = block.BlockToString parserSource.TokenToString
@@ -189,10 +184,8 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                 out.WriteLine clusterString
                 out.WriteLine (sprintf ("%d -> %s") nodeNumber dotIn)
                 out.WriteLine (sprintf ("%s -> %d") dotOut nodeNumber)
-            
 
             out.WriteLine (sprintf ("%d -> %d") parentNumber nodeNumber)
-            //out.WriteLine (sprintf ("%d -> %d") parentNumber nodeNumber)
 
             if isNew 
             then
@@ -203,10 +196,10 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
         and printInterNode parentNumber interNode =
             
             let getNodeNumber (node : InterNode<_>) = 
-                if interNodeToNumber.ContainsKey node 
-                then
-                    interNodeToNumber.[node], false
-                else
+                
+                match interNodeToNumber.TryGetValue node with
+                | true, num -> num, false
+                | false, _ -> 
                     incr count
                     let label = node.ToString()
                     let color =

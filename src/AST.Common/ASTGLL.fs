@@ -117,6 +117,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
         let used = new Dictionary<_,_>()
         let num = ref -1
         nodeQueue.Enqueue(new NumNode(!num, root))
+        let isDummy (n:INode) = match n with :? TerminalNode as t -> t.Extension = packExtension -1 -1 | _ -> false
         while nodeQueue.Count <> 0 do
             let currentPair = nodeQueue.Dequeue()
             let key = ref 0
@@ -131,27 +132,27 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                     used.Add(currentPair.Node, !num)
                     match currentPair.Node with 
                     | :? NonTerminalNode as a -> 
-                        if a.Others <> Unchecked.defaultof<_>
+                        if a.Others <> null
                         then
                             createNode !num true NonTerminal (indToString a.Name)
                         else    
                             createNode !num false NonTerminal (indToString a.Name)
                         createEdge currentPair.Num !num false ""
                         nodeQueue.Enqueue(new NumNode(!num, a.First))
-                        if a.Others <> Unchecked.defaultof<_>
+                        if a.Others <> null
                         then
                             for n in a.Others do
                                 nodeQueue.Enqueue(new NumNode(!num, n))
                     | :? PackedNode as p ->
                         createNode !num false Packed ""
                         createEdge currentPair.Num !num false ""
-                        nodeQueue.Enqueue(new NumNode(!num, p.Left))
-                        nodeQueue.Enqueue(new NumNode(!num, p.Right))
+                        if not <| isDummy p.Left then nodeQueue.Enqueue(new NumNode(!num, p.Left))
+                        if not <| isDummy p.Right then nodeQueue.Enqueue(new NumNode(!num, p.Right))
                     | :? IntermidiateNode as i ->
                         createNode !num false Intermidiate ((getRule i.Slot).ToString() + " " + (getPosition i.Slot).ToString())
                         createEdge currentPair.Num !num false ""
                         nodeQueue.Enqueue(new NumNode(!num, i.First))
-                        if i.Others <> Unchecked.defaultof<ResizeArray<PackedNode>>
+                        if i.Others <> null
                         then
                             for nodes in i.Others do
                                 nodeQueue.Enqueue(new NumNode(!num, nodes))
@@ -166,8 +167,10 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                                 createNode !num false Terminal ("epsilon")
                                 createEdge currentPair.Num !num false ""
                         else
-                            createNode !num false Terminal ("dummy")
-                            createEdge currentPair.Num !num false ""
+                            ()
+//                            createNode !num false Terminal ("dummy")
+//                            createEdge currentPair.Num !num false ""
+
                     | null -> ()
                     | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
             else

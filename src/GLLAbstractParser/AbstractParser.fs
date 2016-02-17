@@ -42,6 +42,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let setP = structures.SetP
         let tempCount = ref 0
         let currentVertexInInput = ref 0
+        let mutable currentProb = 1.0
         //let currentPath = ref <| List.empty<ParserEdge<'TokenType*ref<bool>>>
         let currentrule = parser.StartRule
 
@@ -60,7 +61,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let edges = Array2D.zeroCreate<SysDict<int<nodeMeasure>, SysDict<int, ResizeArray<int>>>> slots.Count (input.VertexCount )
         let terminalNodes = Array3D.zeroCreate<int<nodeMeasure>> input.VertexCount input.VertexCount parser.TermCount  
         let currentGSSNode = ref <| dummyGSSNode
-        let currentContext = ref <| new Context(*<_>*)(!currentVertexInInput, !structures.CurrentLabel, !currentGSSNode, structures.Dummy) //without *1<labelMeasure>
+        let currentContext = ref <| new Context(!currentVertexInInput, !structures.CurrentLabel, !currentGSSNode, structures.Dummy) //without *1<labelMeasure>
         
         let finalExtensions =
             let len = input.FinalStates.Length
@@ -160,7 +161,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             cond
         
         
-        let create (inputVertex : int) (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) = 
+        let create (inputVertex : int) (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) (*prob sLength*) = 
             let v = new Vertex(inputVertex, int label)
             let vertexKey = pack inputVertex (int label)
             let temp = containsEdge v vertex ast
@@ -172,10 +173,10 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     arr.DoForAll (fun tree  ->
                         let y = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy label ast tree
                         let index = getRightExtension <| structures.GetTreeExtension y 
-                        structures.AddContext setU index label vertex y (*!currentPath*))
+                        structures.AddContext setU index label vertex y (*prob sLength !currentPath*))
             v
                 
-        let pop (u : Vertex) (i : int) (z : int<nodeMeasure>) =
+        let pop (u : Vertex) (i : int) (z : int<nodeMeasure>) (*prob sLength*) =
             if u <> dummyGSSNode
             then
                 let vertexKey = pack u.Level (int u.NontermLabel)
@@ -183,18 +184,17 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 then
                     setP.[vertexKey].Add z
                 else
-                    let newList = new ResizableUsualOne<_>(z) //new ResizeArray<int<nodeMeasure>>([|z|])
-                    //newList.Add(z)
+                    let newList = new ResizableUsualOne<_>(z)
                     setP.Add(vertexKey, newList)
                 let outEdges = edges.[slots.[int u.NontermLabel], u.Level]
                 for edge in outEdges do
                     let sppfNodeOnEdge = edge.Key
-                    for slotLevels in edge.Value do   
+                    for slotLevels in edge.Value do
                          let slot = slotLevels.Key
                          for level in slotLevels.Value do
                             let resTree = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy (u.NontermLabel*1<labelMeasure>) sppfNodeOnEdge z 
                             let newVertex = new Vertex(level, slot)
-                            structures.AddContext setU i (u.NontermLabel*1<labelMeasure>) newVertex resTree //!currentPath
+                            structures.AddContext setU i (u.NontermLabel*1<labelMeasure>) newVertex resTree //prob sLength //!currentPath
 
         let table = parser.Table
         
@@ -219,14 +219,21 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             
 
         let rec dispatcher () =
+            let rec get () =
+                let c = setR.Dequeue()
+                if currentContext.contents.SLength > 100
+                then
+                  get()   //currentContext.contents.Probability < (0.1e-200) then get()
+                else c
             if setR.Count <> 0
             then
-                currentContext := setR.Dequeue()
+                currentContext :=  get ()
                 currentVertexInInput := currentContext.Value.Index
                 currentGSSNode := currentContext.Value.Vertex
                 structures.CurrentLabel := currentContext.Value.Label
                 structures.CurrentN := currentContext.Value.Ast 
                 structures.CurrentR := structures.Dummy
+                //currentProb <- currentContext.contents.Probability
                 //currentPath := currentContext.Value.Path
                 condition := false
             else 
@@ -243,7 +250,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
               let res = sppfNodes.Length - 1
               structures.CurrentR := res * 1<nodeMeasure>
               structures.CurrentN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy !structures.CurrentLabel !structures.CurrentN !structures.CurrentR  
-              pop !currentGSSNode !currentVertexInInput !structures.CurrentN 
+              pop !currentGSSNode !currentVertexInInput !structures.CurrentN //prob sLength
             else
                 if Array.length parser.rules.[rule] <> position
                 then
@@ -267,7 +274,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                         match curEdge with
                         | Some edge ->
                             //snd edge.Tag := true
-                            let curToken = parser.TokenToNumber ( edge.Tag)
+                            let curToken = parser.TokenToNumber edge.Tag
                             //currentPath := edge :: currentPath.Value
                             if !structures.CurrentN = structures.Dummy
                             then structures.CurrentN := getNodeT edge
@@ -288,17 +295,18 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
                             index <- index + term - parser.NonTermCount
                             index
-                        currentGSSNode := create !currentVertexInInput (packLabel rule (position + 1)) !currentGSSNode  !structures.CurrentN
+                        currentGSSNode := create !currentVertexInInput (packLabel rule (position + 1)) !currentGSSNode  !structures.CurrentN //prob sLength
                         for edge in input.OutEdges !currentVertexInInput do
                             let curToken = parser.TokenToNumber edge.Tag
 
                             let index = getIndex curSymbol curToken
                             let key =  int((int32 curSymbol <<< 16) ||| int32 (curToken - parser.NonTermCount))    
-                            if table.ContainsKey key
-                            then
-                                for rule in table.[key] do
+                            let flg,rules = table.TryGetValue key
+                            if flg then
+                                for rule in rules do
                                     let newLabel = packLabel rule 0
-                                    structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy //!currentPath
+                                    //let pr = currentProb * parser.Probabilities.[rule]
+                                    structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy //pr 1 !currentPath
                             (*else 
                                 for kvp in table do
                                     if int kvp.Key >>> 16 = curSymbol then
@@ -338,13 +346,106 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
 //                        if errors.Count <> 0 then
 //                        for e in errors do
 //                            printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16) 
-                            
+                                                
+                    let rec filter (node:INode) = 
+                        match node with
+                        | :? NonTerminalNode as n ->
+                            let fst = 
+                                if n.Others <> null && n.Others.Count > 0
+                                then                             
+                                    n.Others.Add n.First
+                                    n.Others |> ResizeArray.toList |> List.maxBy(fun p -> parser.Probabilities.[p.Production])
+                                else n.First
+                            let otehrs = n.Others
+                            n.First <- fst
+                            n.Others <- null
+                            filter fst
+                        | :? IntermidiateNode as n -> 
+                            let fst = 
+                                if n.Others <> null && n.Others.Count > 0
+                                then                             
+                                    n.Others.Add n.First
+                                    n.Others |> ResizeArray.toList |> List.maxBy(fun p -> parser.Probabilities.[p.Production])
+                                else n.First
+                            let otehrs = n.Others
+                            n.First <- fst
+                            n.Others <- null
+                            filter fst
+                        | :? PackedNode as n -> 
+                            filter n.Left
+                            filter n.Right
+                        | _ -> ()
+                    
+                    let visited = new System.Collections.Generic.Dictionary<_,_>()
+
+                    let rec filter2 prob (node:INode)   = 
+                        match node with
+                        | :? NonTerminalNode as n ->
+                            let p1 = filter2 prob n.First 
+                            let p2 = if n.Others <> null then n.Others |> ResizeArray.map (filter2 prob) |> ResizeArray.toList else []
+                                
+                            let f = List.zip (p1::p2) (n.First :: (if n.Others <> null then n.Others |> ResizeArray.toList else []))
+                                    |> List.maxBy fst                            
+                            n.First <- snd f
+                            n.Others <- null
+                            fst f
+                        | :? IntermidiateNode as n -> 
+                            let p1 = filter2 prob n.First 
+                            let p2 = if n.Others <> null then n.Others |> ResizeArray.map (filter2 prob) |> ResizeArray.toList else []
+                            let f = List.zip (p1::p2) (n.First :: (if n.Others <> null then n.Others |> ResizeArray.toList else []))
+                                    |> List.maxBy fst                            
+                            n.First <- snd f
+                            n.Others <- null
+                            fst f
+                        | :? PackedNode as n ->
+                            let f,r = visited.TryGetValue n 
+                            if f 
+                            then
+                                //printfn "!!!" 
+                                r 
+                            else
+                                let p1 = filter2 (prob) n.Left
+                                let p2 = filter2 (prob) n.Right
+                                let r = parser.Probabilities.[n.Production] * p1 * p2
+                                visited.Add(n,r)
+                                r
+                        | _ -> prob
+
+                    let newFirstOther first other f =
+                        let l1 = f first
+                        let l2 = if other <> null 
+                                    then other |> ResizeArray.fold (fun l n  -> l @ (f n)) l1
+                                    else l1
+                        l2.Head,(match l2.Tail with [] -> null | t -> ResizeArray.ofList t)                        
+
+//                    let rec replacePacked (node:INode) = 
+//                        match node with
+//                        | :? NonTerminalNode as n ->
+//                            let f,o = newFirstOther n.First n.Others replacePacked
+//                            n.First <- f
+//                            n.Others <- o
+//                            [n :> INode]
+//                        | :? IntermidiateNode as n -> 
+//                            let f,o = newFirstOther n.First n.Others replacePacked
+//                            n.First <- f
+//                            n.Others <- o
+//                            [n]
+//                        | :? PackedNode as n -> 
+//                            (replacePacked n.Left)
+//                            @ (replacePacked n.Right)
+//                        | n -> [n]
+
+                    
+                    //replacePacked res
+
+                    filter2 1.0 res
+
                     let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
-                    (*let isSubpath l1 l2 =
+                                            (*let isSubpath l1 l2 =
                         List.length l1 <= List.length l2 
                         && Seq.forall2 (=) l1 (Seq.take (List.length l1) l2)*)
                     //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
-                    //r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
+                    r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
                     (*for e in errors do
                         for p in e.Value do
                             let path = List.rev errorPaths.[snd p.Value]                            

@@ -796,7 +796,8 @@ type ``RNGLR abstract parser tests`` () =
     member this.bio2_4 () =
         let bp = @"C:\gsv\projects\infernal-1.1.1\testsuite\"
         let file = 
-            "t.fa"
+            //"t.fa"
+            "t1.fa"
             //"tremitted-Plant_SRP.fa"
             //"1k-4.fa"
         let textData =             

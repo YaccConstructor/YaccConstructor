@@ -51,7 +51,9 @@ type ``Find undefined variables``() =
     let createParserInput' = createParserInputGraph ExtendedCalcTest.Lexer.tokenize RNGLR_EOF
     let createCfg tree = ControlFlow(tree, parserSource, langSource, tokToRealName)
 
-    let runTest (cfg : ControlFlow<_>) (expected : string list) prefix = 
+    let buildCfg' = buildCfg parse createCfg astToDot tokToRealName
+
+    let runTest (cfg : ControlFlow<_>) (expected : string list) = 
         let errorList = 
             cfg.FindUndefVariable()
             |> List.map tokToRealName
@@ -73,9 +75,9 @@ type ``Find undefined variables``() =
         let expected = [z]
         let prefix = "`cfg undefined variables elementary"
         //act
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealName prefix
+        let cfg = buildCfg' qGraph prefix
         //assert
-        runTest cfg expected prefix
+        runTest cfg expected
 
     [<Test>]
     member test.``X = X``() = 
@@ -85,9 +87,9 @@ type ``Find undefined variables``() =
         let prefix = "`cfg undefined variables X = X"
 
         //act
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealName prefix
+        let cfg = buildCfg' qGraph prefix
         //assert
-        runTest cfg expected prefix
+        runTest cfg expected
 
     [<Test>]
     member test.``Undef: ambiguous``() =
@@ -97,9 +99,9 @@ type ``Find undefined variables``() =
         let prefix = "`cfg undefined variables ambiguous"
             
         //act
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealName prefix
+        let cfg = buildCfg' qGraph prefix
         //assert
-        runTest cfg expected prefix
+        runTest cfg expected
             
     [<Test>]
     member test.``Undef: ambiguous 2``() =
@@ -108,9 +110,9 @@ type ``Find undefined variables``() =
         let expected = [y]
         let prefix = "`cfg undefined variables ambiguous2"
         //act
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealName prefix
+        let cfg = buildCfg' qGraph prefix
         //assert
-        runTest cfg expected prefix
+        runTest cfg expected
 
     [<Test>]
     member this.``Cycle inside expression``() = 
@@ -120,9 +122,9 @@ type ``Find undefined variables``() =
 
         let expected = [y]
         //act
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealName prefix
+        let cfg = buildCfg' qGraph prefix
         //assert
-        runTest cfg expected prefix
+        runTest cfg expected
         
 //[<EntryPoint>]
 let f x = 

@@ -81,6 +81,8 @@ type ``Cycles inside expressions``() =
 
     let createCfg tree = ControlFlow(tree, parserSource, langSource, tokToRealString)
                 
+    let buildCfg' = buildCfg parse createCfg astToDot tokToRealString
+
     [<Test>]
     member this.``X = 1 [+Y]*``() = 
         let qGraph = createParserInput' "X = 1 [+Y].dot"
@@ -94,7 +96,7 @@ type ``Cycles inside expressions``() =
             ]
 
         //act
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
+        let cfg = buildCfg' qGraph prefix
         //assert
         assertCfg tokenToNumber cfg expected
         
@@ -112,7 +114,7 @@ type ``Cycles inside expressions``() =
 
         let prefix = "`X = Y [+1] - Z"
         //act
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
+        let cfg = buildCfg' qGraph prefix
         //assert
         assertCfg tokenToNumber cfg expected
 
@@ -129,7 +131,7 @@ type ``Cycles inside expressions``() =
 
         let prefix = "`X = Y [+1[-Z]]"
         //act
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
+        let cfg = buildCfg' qGraph prefix
         //assert
         assertCfg tokenToNumber cfg expected
 
@@ -146,7 +148,7 @@ type ``Cycles inside expressions``() =
 
         let prefix = "`X = Y [(+1) or (-Z)]"
         //act
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
+        let cfg = buildCfg' qGraph prefix
         //assert
         assertCfg tokenToNumber cfg expected
 

@@ -58,7 +58,7 @@ let inline printErr (num, token : 'a, msg) =
     printfn "Error in position %d on Token %A: %s" num token msg
     Assert.Fail(sprintf "Error in position %d on Token %A: %s" num token msg)
 
-let buildCfg (graph : ParserInputGraph<_>) parse createCfg astToDot tokToString prefix = 
+let buildCfg parse createCfg astToDot tokToString (graph : ParserInputGraph<_>) prefix = 
     if needPrint 
     then graph.PrintToDot <| inputName prefix <| tokToString
         

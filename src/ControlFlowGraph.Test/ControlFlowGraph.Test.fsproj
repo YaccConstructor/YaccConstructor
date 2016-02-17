@@ -39,11 +39,11 @@
     <Compile Include="Simple.yrd.fs" />
     <Compile Include="SimpleTest.Lexer_Abstract.fs" />
     <Compile Include="CommonHelper.fs" />
-    <Compile Include="CfgFunctionsTest.fs" />
     <Compile Include="BlockHelper.fs" />
-    <Compile Include="CfgBuildingTest.fs" />
     <Compile Include="ExpressionHelper.fs" />
+    <Compile Include="CfgFunctionsTest.fs" />
     <Compile Include="ExpressionsTest.fs" />
+    <Compile Include="CfgBuildingTest.fs" />
     <None Include="packages.config" />
     <None Include="app.config" />
   </ItemGroup>

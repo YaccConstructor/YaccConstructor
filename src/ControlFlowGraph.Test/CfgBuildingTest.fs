@@ -60,6 +60,8 @@ type ``Simple cases``() =
     
     let createCfg tree = ControlFlow(tree, parserSource, langSource, tokToRealString)
         
+    let buildCfg' = buildCfg parse createCfg astToDot tokToRealString
+
     [<Test>]
     member test.``Elementary test``() =
         let qGraph = createParserInput' "Seq.dot"
@@ -82,7 +84,7 @@ type ``Simple cases``() =
         let prefix = "`elementary"
 
         //act 
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
+        let cfg = buildCfg' qGraph prefix
         //assert
         runTest cfg checkEntry' checkExit' myConds
 
@@ -107,7 +109,7 @@ type ``Simple cases``() =
 
         let prefix = "`ambiguous"
         //act 
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
+        let cfg = buildCfg' qGraph prefix
         //assert
         runTest cfg checkEntry' checkExit' myChecks
         
@@ -131,7 +133,7 @@ type ``Simple cases``() =
 
         let prefix = "`ambiguous2"
         //act 
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
+        let cfg = buildCfg' qGraph prefix
         //assert
         runTest cfg checkEntry' checkExit' myChecks
         
@@ -172,6 +174,8 @@ type ``If statements`` () =
     let createParserInput' = createParserInputGraph IfTest.Lexer.tokenize RNGLR_EOF
     let createCfg tree = ControlFlow (tree, parserSource, langSource, tokenToString)
 
+    let buildCfg' = buildCfg parse createCfg astToDot tokenToString
+
     [<Test>]
     member test.``Simple If test``() =
         let qGraph = createParserInput' "Simple if.dot"
@@ -182,7 +186,7 @@ type ``If statements`` () =
         let prefix = "`simple if"
         
         //act
-        let cfg = buildCfg qGraph parse createCfg astToDot tokenToString prefix
+        let cfg = buildCfg' qGraph prefix
         //assert
         runTest cfg checkEntry' checkExit' []
 
@@ -195,7 +199,7 @@ type ``If statements`` () =
         let prefix = "`big if"
         
         //act
-        let cfg = buildCfg qGraph parse createCfg astToDot tokenToString prefix
+        let cfg = buildCfg' qGraph prefix
         //assert
         runTest cfg checkEntry' checkExit' []
 
@@ -208,7 +212,7 @@ type ``If statements`` () =
 
         let prefix = "`if without else"
         //act
-        let cfg = buildCfg qGraph parse createCfg astToDot tokenToString prefix
+        let cfg = buildCfg' qGraph prefix
         //assert
         runTest cfg checkEntry' checkExit' []
             
@@ -221,7 +225,7 @@ type ``If statements`` () =
         let prefix = "`inner if"
         
         //act
-        let cfg = buildCfg qGraph parse createCfg astToDot tokenToString prefix
+        let cfg = buildCfg' qGraph prefix
         //assert
         runTest cfg checkEntry' checkExit' []
         
@@ -253,6 +257,8 @@ type ``Cycles``() =
 
     let createCfg tree = ControlFlow(tree, parserSource, langSource, tokToRealString)
 
+    let buildCfg' = buildCfg parse createCfg astToDot tokToRealString
+
     //At least one token from the expected set must exist in the tokenSet set
     let myCond expected tokenSet = 
         expected
@@ -279,7 +285,7 @@ type ``Cycles``() =
 
         let prefix = "`Cycle A+"
         //action
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
+        let cfg = buildCfg' qGraph prefix
         //asserts
         runTest cfg checkEntryNode' checkExitNode' myChecks
 
@@ -307,7 +313,7 @@ type ``Cycles``() =
 
         let prefix = "`Cycle A B asteriks"
         //action
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
+        let cfg = buildCfg' qGraph prefix
         //asserts
         runTest cfg checkEntryNode' checkExitNode' myChecks
 
@@ -342,7 +348,7 @@ type ``Cycles``() =
 
         let prefix = "`Cycle A B asteriks C"
         //action
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
+        let cfg = buildCfg' qGraph prefix
         //asserts
         runTest cfg checkEntryNode' checkExitNode' myChecks
 
@@ -380,7 +386,7 @@ type ``Cycles``() =
             ]
         let prefix = "`Cycle (A or B)+"
         //action
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
+        let cfg = buildCfg' qGraph prefix
         //asserts
         runTest cfg checkEntryNode' checkExitNode' myChecks
 
@@ -421,7 +427,7 @@ type ``Cycles``() =
 
         let prefix = "`Cycle A (B+ or C+)"
         //action
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
+        let cfg = buildCfg' qGraph prefix
         //asserts
         runTest cfg checkEntryNode' checkExitNode' myChecks
 
@@ -458,7 +464,7 @@ type ``Cycles``() =
 
         let prefix = "`Cycle (AB)+"
         //action
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
+        let cfg = buildCfg' qGraph prefix
         //asserts
         runTest cfg checkEntryNode' checkExitNode' myChecks
 
@@ -495,7 +501,7 @@ type ``Cycles``() =
 
         let prefix = "`Cycle (AB)+C"
         //action
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
+        let cfg = buildCfg' qGraph prefix
         //asserts
         runTest cfg checkEntryNode' checkExitNode' myChecks
 
@@ -531,7 +537,7 @@ type ``Cycles``() =
         
         let prefix = "`Cycle after cycle A+B+"
         //action
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
+        let cfg = buildCfg' qGraph prefix
         //asserts
         runTest cfg checkEntryNode' checkExitNode' myChecks
 
@@ -566,7 +572,7 @@ type ``Cycles``() =
 
         let prefix = "`Cycle inside cycle (A+B)+"
         //action
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
+        let cfg = buildCfg' qGraph prefix
         //asserts
         runTest cfg checkEntryNode' checkExitNode' myChecks
 
@@ -603,7 +609,7 @@ type ``Cycles``() =
 
         let prefix = "`Cycle inside cycle ((AB)+C)+"
         //action
-        let cfg = buildCfg qGraph parse createCfg astToDot tokToRealString prefix
+        let cfg = buildCfg' qGraph prefix
         //asserts
         runTest cfg checkEntryNode' checkExitNode' myChecks
 

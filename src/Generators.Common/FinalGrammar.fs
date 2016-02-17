@@ -29,7 +29,7 @@ type FinalGrammar (ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
                 | Some w -> w
                 | None -> 1.0
             | Production.PSeq (_,_,None) -> 1.0
-            | _ -> failwith "Incorrect right part of production."
+            | _ -> 1.0 //failwith "Incorrect right part of production."
 
         ruleList
         |> List.map (fun r -> getProb r.body)

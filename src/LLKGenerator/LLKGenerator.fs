@@ -336,7 +336,9 @@ type LLKGeneratorImpl () =
              +
              grammarInfo.termDict.Aggregate("", 
                 fun ac el -> ac + "    | \"" + el.Key.ToString() + "\" -> " + el.Value.ToString() + "\n"
-                )
+             )
+             +
+             "    | _ -> failwith \"Unexpected token\"\n"
         
         let isTerminal =
             "let isTerminal = function \n"
@@ -383,7 +385,8 @@ type LLKGeneratorImpl () =
         let parser =
             "let parser = new Parser(tokenToNumber, isTerminal, table, " +
             "startNT, numIsTerminal, k, chainToNum, rules)"
-        let code = header + 
+        let code = 
+            header + 
             tokenToNumber + 
             isTerminal + 
             startRule + 

@@ -207,7 +207,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : INode, rules : int[][]) 
         out.WriteLine("}")
         out.Close()
 
-    member this.ReduceTree (tree : NonTerminalNode) (indToString : int -> string) : ReducedTree =
+    member this.ReduceTree (tokenToNumber : 'TokenType -> int) (indToString : int -> string) : ReducedTree =
         let rec cleanTree (st : INode)  =
              
             match st with 
@@ -216,7 +216,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : INode, rules : int[][]) 
             | :? TerminalNode as t ->
                 if t.Name <> -1 
                 then 
-                    seq { yield (ReducedTree.Term(indToString t.Name, t))}
+                    seq { yield (ReducedTree.Term((indToString <| (tokenToNumber this.tokens.[t.Name])), t))}
                 else    
                     Seq.empty
             | :? PackedNode as p ->
@@ -225,9 +225,9 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : INode, rules : int[][]) 
                 let child = cleanTree n.First
                 seq{yield ReducedTree.NonTerm(indToString n.Name, n, Seq.toArray child )}
             | _ -> failwith "Unexpected node type."
-        Seq.head <| (cleanTree tree)
+        Seq.head <| (cleanTree root)
 
-    member this.ReducedTreeToDot (tree : ReducedTree) (indToString : int -> string) (tokenToNumber : 'TokenType -> int) (tokenData : 'TokenType -> obj) (path : string) =
+    member this.ReducedTreeToDot (tree : ReducedTree)  (tokenData : 'TokenType -> obj) (path : string) =
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
 
@@ -239,7 +239,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : INode, rules : int[][]) 
             let shape =
                 match nodeType with
                 | Terminal -> ",shape=box"
-                | NonTerminal -> ",shape=oval"
+                | NonTerminal -> ",shape=point"
             let color = ""
             out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + color + shape + "]")
 
@@ -275,7 +275,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : INode, rules : int[][]) 
                     | Term(name, tnode) ->
                         if tnode.Name <> -1
                         then
-                            createNode !num false Terminal ("t " +  name + " " + string(tokenData this.tokens.[tnode.Name]))
+                            createNode !num false Terminal (name )
                             createEdge currentPair.Num !num false ""
                         else
                             createNode !num false Terminal ("epsilon")
@@ -292,10 +292,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : INode, rules : int[][]) 
                 | _ -> ()
         out.WriteLine("}")
         out.Close()
-        
-
-                
-            
+      
 
     member this.ExtractFinalPaths =
         let nodeQueue = new Queue<NumNode<_>>()

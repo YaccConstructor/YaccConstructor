@@ -88,11 +88,10 @@ and [<Struct>]
     new (_gssVertex, _prod, _pos, _edge) = {gssVertex = _gssVertex; prod = _prod; pos = _pos; edge = _edge}
 
 and [<AllowNullLiteral>]
-    Prefix (head : QuickGraph.TaggedEdge<VInfo<obj>, obj>, tail : ResizeArray<Prefix>, height : int) = 
+    Prefix (head : Edge, tail : ResizeArray<Prefix>) = 
 
     member this.Head = head
     member this.Tail = tail
-    member this.Height = height
 
     member this.AddEdge edge =
         new Prefix(edge, this)
@@ -100,21 +99,9 @@ and [<AllowNullLiteral>]
     new (head, prefix : Prefix) =
         let curLevel = new ResizeArray<Prefix>()
         curLevel.Add(prefix)
-        new Prefix (head, curLevel, prefix.Height + 1)
+        new Prefix (head, curLevel)
 
-    new (head, tail : ResizeArray<Prefix>) =
-        if ResizeArray.isEmpty(tail)
-        then new Prefix (head, tail, 1)
-        else
-            let mutable maxHeight = 0
-            let heights = ResizeArray.map (fun (prefix:Prefix) -> if prefix = null then 0 else prefix.Height) tail
-            for h in heights do
-                if h > maxHeight
-                then maxHeight <- h
-
-            new Prefix (head, tail, maxHeight + 1)
-
-    new (edge) = new Prefix (edge, new ResizeArray<Prefix>(), 1)
+    new (edge) = new Prefix (edge, new ResizeArray<Prefix>())
 
 and [<AllowNullLiteral>]
     Path (head : AstNode, tail : Path, length : int) = 
@@ -340,7 +327,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 if ind = -1 || (tailGssV.Edge ind).Ast <> edgesToTerms.[e]
                 then
                     let prefixesToAdd = new ResizeArray<Prefix>()
-                    prefixesToAdd.Add(newPrefix gssVertex.prefixes e)           //or edge?
+                    prefixesToAdd.Add(newPrefix gssVertex.prefixes edge)           //or edge?
                     addEdge e.Target isNew tailGssV edge true prefixesToAdd    //push case
 
         if not <| currentGraphV.processedGssVertices.Contains(gssVertex)

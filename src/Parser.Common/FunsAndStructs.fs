@@ -50,9 +50,9 @@ module CommonFuns =
 
 type ParserStructures<'TokenType> (inputLength : int, currentRule : int)=
     let sppfNodes = new BlockResizeArray<INode>()
-    let dummyAST = new TerminalNode(-1, packExtension -1 -1)
+    let dummyAST = new TerminalNode(-1, packExtension -1 -1, 0)
     let setP = new System.Collections.Generic.Dictionary<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<nodeMeasure>>>(500)//list<int<nodeMeasure>>> (500)
-    let epsilonNode = new TerminalNode(-1, packExtension 0 0)
+    let epsilonNode = new TerminalNode(-1, packExtension 0 0, 0)
     let setR = new System.Collections.Generic.Queue<Context(*<'TokenType>*)>(100)  
     let dummy = 0<nodeMeasure>
     let currentN = ref <| dummy

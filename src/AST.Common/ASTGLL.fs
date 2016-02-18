@@ -10,12 +10,14 @@ open Yard.Generators.Common.DataStructures
 type INode = 
     interface
     abstract member getExtension : unit -> int64<extension>
+    abstract member getLength : unit -> int
     end
 
 [<AllowNullLiteral>]
 type NonTerminalNode =
     val Extension : int64<extension>
     val Name      : int
+    val mutable Length    : int
     val mutable First     : PackedNode 
     val mutable Others    : ResizeArray<PackedNode> 
     member this.AddChild (child : PackedNode) : unit = 
@@ -30,31 +32,43 @@ type NonTerminalNode =
         else this.First <- child
     interface INode with
         member this.getExtension () = this.Extension
+        member this.getLength () = this.Length
     
-    new (name, extension) = {Name = name; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
+    member this.SetLength l =
+        this.Length <- l
+
+    new (name, extension, len) = {Name = name; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>; Length = len}
     
 and TerminalNode =
     val Name : int
     val Extension : int64<extension>
+    val Length : int
     interface INode with
         member this.getExtension () = this.Extension
-    new (name, extension) = {Name = name; Extension = extension}
+        member this.getLength () = this.Length
+    new (name, extension, len) = {Name = name; Extension = extension; Length = len}
 
 and PackedNode =    
     val Production : int
     val Left : INode
     val Right : INode
+    val mutable Length : int 
     interface INode with
         member this.getExtension () = this.Right.getExtension ()
-    new (p, l, r) = {Production = p; Left = l; Right = r}
+        member this.getLength () = this.Length
+    member this.SetLength l =
+        this.Length <- l
+    new (p, l, r, len) = {Production = p; Left = l; Right = r; Length = len}
 
 and IntermidiateNode = 
     val Slot      : int
     val Extension : int64<extension>
     val mutable First     : PackedNode
     val mutable Others    : ResizeArray<PackedNode>
+    val mutable Length    : int
     interface INode with
         member this.getExtension () = this.Extension
+        member this.getLength () = this.Length
     member this.AddChild (child : PackedNode) : unit = 
         if this.First <> Unchecked.defaultof<_>
         then 
@@ -65,7 +79,9 @@ and IntermidiateNode =
                 this.Others <- new ResizeArray<PackedNode>()
                 this.Others.Add child
         else this.First <- child
-    new (slot, extension) = {Slot = slot; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
+    member this.SetLength l =
+        this.Length <- l
+    new (slot, extension, len) = {Slot = slot; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>; Length = len}
     
 
 type private DotNodeType = Packed | NonTerminal | Intermidiate | Terminal

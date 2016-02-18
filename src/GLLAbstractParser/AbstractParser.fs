@@ -19,7 +19,7 @@ type M =
     val lbl : int<labelMeasure>
     new (p,l) = {pos = p; lbl = l}
 
-let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : ParserInputGraph<'TokenType>) : ParserCommon.ParseResult<_> = 
+let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : ParserInputGraph<'TokenType>) (maxLen : int) : ParserCommon.ParseResult<_> = 
     (*let input = input
     let input = 
         let h = input.Edges |> Seq.map (fun e -> new ParserEdge<'TokenType * ref<bool>>(e.Source, e.Target, (e.Tag , ref false)))
@@ -175,7 +175,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     arr.DoForAll (fun tree  ->
                         let y = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy label ast tree
                         let index = getRightExtension <| structures.GetTreeExtension y 
-                        structures.AddContext setU index label vertex y (*!currentPath*))
+                        structures.AddContext setU index label vertex y maxLen (*!currentPath*))
             v
                 
         let pop (u : Vertex) (i : int) (z : int<nodeMeasure>) =
@@ -197,7 +197,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                          for level in slotLevels.Value do
                             let resTree = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy (u.NontermLabel*1<labelMeasure>) sppfNodeOnEdge z 
                             let newVertex = new Vertex(level, slot)
-                            structures.AddContext setU i (u.NontermLabel*1<labelMeasure>) newVertex resTree //!currentPath
+                            structures.AddContext setU i (u.NontermLabel*1<labelMeasure>) newVertex resTree maxLen //!currentPath
 
         let table = parser.Table
         
@@ -301,7 +301,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             then
                                 for rule in table.[key] do
                                     let newLabel = packLabel rule 0
-                                    structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy //!currentPath
+                                    structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy maxLen //!currentPath
                             (*else 
                                 for kvp in table do
                                     if int kvp.Key >>> 16 = curSymbol then

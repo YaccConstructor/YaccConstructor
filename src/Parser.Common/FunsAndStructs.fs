@@ -135,10 +135,13 @@ type ParserStructures<'TokenType> (inputLength : int, currentRule : int)=
                 false
         else true
 
-    let addContext (setU : System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>[]) (inputVertex : int) (label : int<labelMeasure>) vertex ast (*currentPath*) =
-        if not <| containsContext setU inputVertex label vertex ast
+    let addContext (setU : System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>[]) (inputVertex : int) (label : int<labelMeasure>) vertex ast len(*currentPath*) =
+        let l = sppfNodes.[int ast].getLength ()
+        if l < len
         then
-            setR.Enqueue(new Context(inputVertex, label, vertex, ast (*, currentPath*)))
+            if not <| containsContext setU inputVertex label vertex ast
+            then
+                setR.Enqueue(new Context(inputVertex, label, vertex, ast (*, currentPath*)))
 
     let containsEdge (dict1 : System.Collections.Generic.Dictionary<int<nodeMeasure>, System.Collections.Generic.Dictionary<int, ResizeArray<int>>>) ast (e : Vertex) =
         if dict1 <> Unchecked.defaultof<_>

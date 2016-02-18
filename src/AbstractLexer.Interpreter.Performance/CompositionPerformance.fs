@@ -1,4 +1,5 @@
 ﻿open System
+open System.IO
 open System.Diagnostics
 open System.Collections.Generic
 open YC.FST.AbstractLexing.Interpreter
@@ -59,7 +60,20 @@ let main argv =
             printfn "Processing manually created FSTs"
             printfn "Average time for compose: %A" (benchmark (fun () -> compose fst1 fst2 alphabet) 100)
             printfn "Average time for optimal compose: %A" (benchmark (fun () -> optimalCompose fst1 fst2 alphabet) 100)
-    runLangTests calcTests getCalcFST calcCompose calcOptimalCompose
-    runLangTests TSQLTests getTSQLFST TSQLCompose TSQLOptimalCompose
-    runManuallyCreatedTests manuallyCreatedTests
+    if Array.exists (fun arg -> arg.Equals "-d") argv then
+        runLangTests calcTests getCalcFST calcCompose calcOptimalCompose
+        runLangTests TSQLTests getTSQLFST TSQLCompose TSQLOptimalCompose
+        runManuallyCreatedTests manuallyCreatedTests
+    if Array.exists (fun arg -> arg.Equals "-f") argv then
+        try 
+            let path = argv.[Array.findIndex (fun x -> x.Equals("-f")) argv + 1]
+            let folder = new DirectoryInfo(path)
+            let getTSQLFST = path |> getFST
+            let externalTSQLTests = [for x in folder.GetFiles() do if x.Extension.Equals(".dot") then yield x.Name]
+            try
+                runLangTests externalTSQLTests getTSQLFST TSQLCompose TSQLOptimalCompose
+            with
+                | _ -> printfn ".dot files in the folder are not TSQL compliant!"
+        with
+            | _ -> printfn "Wrong folder!"
     0

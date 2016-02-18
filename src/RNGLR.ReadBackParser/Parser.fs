@@ -4,6 +4,7 @@ open Yard.Generators.Common
 open Yard.Generators.RNGLR.ReadBack
 open Yard.Generators.RNGLR.ReadBack.Graphs
 open System.Collections.Generic
+open Microsoft.FSharp.Collections
 open FSharpx.Collections.Experimental
 
 type ParserDebugFuns<'TokenType> = {
@@ -45,8 +46,8 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
         let statesCount = parserSource.Gotos.Length
         // New edges can be created only from last level.
         /// Temporary storage for edges data (after all reductions real edges will be created).
-        let edges = Array.init statesCount (fun _ -> new ResizeArray<GssVertex * ReductionTemp>())
-        let simpleEdges = Array.init statesCount (fun _ -> new ResizeArray<GssVertex * SppfLabel>())
+        //let edges = Array.init statesCount (fun _ -> new ResizeArray<GssVertex * ReductionTemp>())
+        let notAttachedEdges = Array.init statesCount (fun _ -> new ResizeArray<GssVertex * SppfLabel>())
         let currentReductions : (ReductionTemp option)[] = Array.init parserSource.RightSideNFA.Length (fun _ -> None)
 
         let pushes = new Stack<_> (statesCount * 2 + 10)
@@ -84,50 +85,105 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
         let makeReductions num recovery =
             while reductions.Count > 0 do
                 
-                let vertex, prod, pos, edgeOpt = reductions.Pop()
+                let gssVertex, prod, pos, edgeOpt = reductions.Pop()
                 if pos = 0 then
-                    let state = parserSource.Gotos.[vertex.State].[nonTerm]
+                    let nonTerm = parserSource.LeftSide.[prod]
+                    let state = parserSource.Gotos.[gssVertex.State].[nonTerm]
                     let newVertex = addVertex state num None
                     let ast = getEpsilon parserSource.LeftSide.[prod]
-                    if not <| containsSimpleEdge vertex ast simpleEdges.[state] then
-                        addSimpleEdge vertex ast simpleEdges.[state]
+                    if not <| containsSimpleEdge gssVertex ast notAttachedEdges.[state] then
+                        addSimpleEdge gssVertex ast notAttachedEdges.[state]
                 else 
                     let nfa = parserSource.RightSideNFA.[prod]
-                    let reductionTemp, rightEnd =
+                    let reductionTemp =
                         match currentReductions.[prod] with
-                        | Some x ->
-                            match x.TryGetAlreadyVisited nfa.[pos] vertex with
-                            | Some y -> x, y
-                            | None -> 
-                                let y = new VertexWithBackTrack<_,_>((nfa.[pos], vertex))
-                                x.AddRightEnd y
-                                x, y
+                        | Some x -> x
                         | None ->         
-                            let y = new VertexWithBackTrack<_,_>((nfa.[pos], vertex))                    
-                            let x = new ReductionTemp(prod, nfa.Length, y)
-                            currentReductions.[prod] <- x
-                            x, y
+                            let x = new ReductionTemp(prod, nfa.Length)
+                            currentReductions.[prod] <- Some x
+                            x
                     
-                    //TODO:move
+                    //vertex is already in reductionTemp, get epsilon-closure of it, put vertices on the way to reductionTemp
+                    let epsilonClose (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) =
+                        let nfaInitVertex, gssVertex = vertex.label
+                        let dict = Array.init nfa.Length (fun _ -> None)
+                        let count = ref 1
+                        dict.[nfaInitVertex.label] <- Some vertex
+                        let rec epsilonClose (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) =
+                            let nfaVertex, _ = vertex.label
+                            for edge in nfaVertex.inEdges do
+                                if parserSource.indexToSymbolType edge.label = SymbolType.Epsilon && dict.[edge.dest.label].IsNone then
+                                    let prevVertex =
+                                        match reductionTemp.TryGetAlreadyVisited (edge.dest :?> VertexWithBackTrack<_,_>) gssVertex with
+                                        | Some pv -> pv
+                                        | None -> 
+                                            let pv = new Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>((edge.dest :?> VertexWithBackTrack<_,_>, gssVertex))
+                                            reductionTemp.AddVisited pv
+                                            pv
+                                    dict.[edge.dest.label] <- Some prevVertex
+                                    incr count
+                                    epsilonClose prevVertex
+                        dict |> Array.choose (fun x -> x)
 
-                    //vertex is already in reductionTemp, put there and return it's epsilon closure
-                    //NOT SAFE: does not check, if vertex has already been epsilon-closed
-                    let rec epsilonClose (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) (closure : ResizeArray<_>) =
-                        closure.Add vertex
+                    //vertex is already in reductionTemp, put there it's predecessors
+                    //NOT SAFE: does not check, if vertex has already been processed
+                    let rec reductionDfs (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) =
                         let nfaVertex, gssVertex = vertex.label
                         for edge in nfaVertex.inEdges do
-                            if edge.label = parserSource.EpsilonIndex then
-                                let prevVertex, goForward =
-                                    match reductionTemp.TryGetAlreadyVisited edge.dest gssVertex with
-                                    | Some pv -> pv, false
-                                    | None -> 
-                                        let pv = new Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>((edge.dest, gssVertex))
-                                        reductionTemp.AddVisited pv
-                                        pv, true
-                                prevVertex.addEdge (new Edge<_,_>(vertex, SppfLabel.Epsilon))
-                                epsilonClose prevVertex closure
+                            if parserSource.indexToSymbolType edge.label = SymbolType.Epsilon then
+                                reductionStep (edge.dest :?> VertexWithBackTrack<_,_>) gssVertex vertex SppfLabel.Epsilon
+                            else
+                                let f (leftGssVertex, label) = 
+                                    if matchNfaAndGssEdgeLabels edge label then
+                                        reductionStep (edge.dest :?> VertexWithBackTrack<_,_>) leftGssVertex vertex label
+                                if gssVertex.Level <> num then
+                                    let f (gssEdge : GssEdge) = f (gssEdge.Dest, gssEdge.Label)
+                                    if gssVertex.firstOutEdge.IsSome then
+                                        f gssVertex.firstOutEdge.Value
+                                        if gssVertex.otherOutEdges != null then
+                                            gssVertex.otherOutEdges |> Array.iter f
+                                else
+                                    notAttachedEdges.[gssVertex.State] |> ResizeArray.iter f
 
-                    let handlePath (path : AstNode[]) (final : Vertex) =
+                    and matchNfaAndGssEdgeLabels nfaEdge sppfLabel =
+                        match parserSource.indexToSymbolType nfaEdge.label, sppfLabel with
+                        | SymbolType.Nonterminal, SppfLabel.Reduction (prod,_)
+                        | SymbolType.Nonterminal, SppfLabel.EpsilonReduction prod ->
+                            nfaEdge.label = parserSource.LeftSide.[prod]
+                        | SymbolType.Terminal, SppfLabel.Terminal term ->
+                            nfaEdge.label = term
+                        | _ -> false
+
+                    and reductionStep (leftNfaVertex : VertexWithBackTrack<int, int>) leftGssVertex rightVertex sppfLabel =
+                        let prevVertex =
+                            match reductionTemp.TryGetAlreadyVisited leftNfaVertex leftGssVertex with
+                            | Some pv -> pv
+                            | None -> 
+                                let pv = new Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>((leftNfaVertex, leftGssVertex))
+                                reductionTemp.AddVisited pv                              
+                        //TODO: maybe we should check and return, if we have reached left end of a handle, and add edge only in positive case
+                        //this automaticaly would save us from useless hanging edges and subsequent search...
+                        //But we can entrust this to GC
+                                reductionDfs pv
+                                pv
+                        prevVertex.addEdge (new Edge<_,_>(rightVertex, sppfLabel))
+
+                    let rightEnd =
+                        match reductionTemp.TryGetAlreadyVisited nfa.[pos] gssVertex with
+                        | Some x -> x
+                        | None -> 
+                                let x = new Vertex<_,_>((nfa.[pos], gssVertex))
+                                reductionTemp.AddRightEnd x
+                                x
+                    let rightEndClosure = epsilonClose rightEnd
+                    for vertex in rightEndClosure do
+                        let nfaVertex, gssVertex = vertex.label
+                        let prevGssVertex, sppfLabel = edgeOpt.Value
+                        for edge in nfaVertex.inEdges do
+                            if matchNfaAndGssEdgeLabels edge sppfLabel then
+                                reductionStep (edge.dest :?> VertexWithBackTrack<_,_>) prevGssVertex vertex sppfLabel
+                    
+                    //let handle() =
                         if final = null
                         then recovery()//pushes.Clear()
                         else
@@ -143,44 +199,6 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                                     if arr <> null then
                                         for (prod, pos) in arr do
                                             reductions.Push (newVertex, prod, pos, edgeOpt)
-
-                    let rec walk remainLength (vertex : Vertex) path =
-                        if remainLength = 0 then handlePath path vertex
-                        elif vertex <> null
-                        then
-                            if vertex.Level <> num then
-                                if vertex.OutEdges.other <> null then
-                                    vertex.OutEdges.other |> Array.iter
-                                        (fun e ->
-                                            path.[remainLength - 1] <- e.Ast
-                                            walk (remainLength - 1) e.Dest path)
-                                path.[remainLength - 1] <- vertex.OutEdges.first.Ast
-                                walk (remainLength - 1) vertex.OutEdges.first.Dest path
-                            else
-                                simpleEdges.[vertex.State] |> ResizeArray.iter(fun (v,a) ->
-                                        path.[remainLength - 1] <- a
-                                        walk (remainLength - 1) v path)
-                            
-                                let mutable i = 0
-                                let edges = edges.[vertex.State]
-                                let mutable count = 0
-                                while i < edges.Count do
-                                    let (v,_,a) = edges.[i]
-                                    let mutable j = i+1
-                                    path.[remainLength - 1] <- a :> AstNode
-                                    walk (remainLength - 1) v path
-                                    while j < edges.Count && trd edges.[j] = a do
-                                        j <- j + 1
-                                    i <- j
-                        else recovery() //pushes.Clear()
-
-                    //TODO: написать функцию замыкания
-                    //TODO: проверить, есть ли уже такая редукция
-                    //TODO: добавление и проверка существания дуг - в редукции
-                    let nextVertex = new VertexWithBackTrack<_,_>(
-                    let firstEdge = new Edge<_,_>(fst edgeOpt.Value, snd edgeOpt.Value)
-                    path.[pos - 1] <- snd edgeOpt.Value
-                    walk (pos - 1) (fst edgeOpt.Value) path
 
         let curInd = ref 0
         let isEnd = ref false

@@ -2,7 +2,6 @@
 
 open Yard.Generators.RNGLR.ReadBack
 open Yard.Generators.Common
-open Yard.Generators.Common.DataStructures
 open System.Collections.Generic
 
 //Sppf is a intersection of a production automaton and Gss, which, in its turn, has edges labelled with Sppf
@@ -15,12 +14,13 @@ and SppfLabel =
     | Epsilon //used only in SPPF, while others may be used in GSS as well
 
 and GssVertex  =
-    val mutable OutEdges : UsualOne<GssEdge>
+    val firstOutEdge : GssEdge option
+    val otherOutEdges : GssEdge[]
     /// Number of token, processed when the vertex was created
     val Level : int
     /// Usual LALR state
     val State : int
-    new (state, level) = {OutEdges = Unchecked.defaultof<_>; State = state; Level = level}
+    new (state, level) = {firstOutEdge = None; otherOutEdges = null; State = state; Level = level}
 
 and GssEdge =
     struct
@@ -32,19 +32,13 @@ and GssEdge =
     end
 
 //for reductions that goes from level being processed
-type ReductionTemp(prod : int, numberOfStates : int,
-                    rightEnd : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) =
+type ReductionTemp(prod : int, numberOfStates : int) =
     let prod = prod
     let leftEnds = new ResizeArray<Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>()
-    let rightEnds =
-        let x = new ResizeArray<Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>()
-        x.Add rightEnd
-        x
+    let rightEnds = new ResizeArray<Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>()
     let visitedVertices =
     //TODO: PERFORMANCE
-        let x =  Array.init numberOfStates (fun i -> new ResizeArray<Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>())
-        x.[(fst rightEnd.label).label].Add(rightEnd)
-        x
+        Array.init numberOfStates (fun i -> new ResizeArray<Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>())
     
     member this.AddVisited (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) =
         let i = (fst vertex.label).label

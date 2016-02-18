@@ -309,7 +309,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                 for rule in rules do
                                     let newLabel = packLabel rule 0
                                     structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy maxLen //!currentPath
-                                    structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy //pr 1 !currentPath
+                                    
                             (*else 
                                 for kvp in table do
                                     if int kvp.Key >>> 16 = curSymbol then

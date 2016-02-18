@@ -54,9 +54,9 @@ module CommonFuns =
 
 type ParserStructures<'TokenType> (inputLength : int, currentRule : int)=
     let sppfNodes = new BlockResizeArray<INode>()
-    let dummyAST = new TerminalNode(-1, packExtension -1 -1)
+    let dummyAST = new TerminalNode(-1, packExtension -1 -1, 0)
     let setP = new Dictionary<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<nodeMeasure>>>(500)//list<int<nodeMeasure>>> (500)
-    let epsilonNode = new TerminalNode(-1, packExtension 0 0)
+    let epsilonNode = new TerminalNode(-1, packExtension 0 0, 0)
     let setR = new System.Collections.Generic. Queue<Context>(100)  
     let dummy = 0<nodeMeasure>
     let currentN = ref <| dummy
@@ -144,9 +144,13 @@ type ParserStructures<'TokenType> (inputLength : int, currentRule : int)=
                 false
         else true
 
-    let addContext setU inputVertex (label : int<labelMeasure>) vertex ast (*prob sLength*)(*currentPath*) =
-        if not <| containsContext setU inputVertex label vertex ast
-        then setR.Enqueue(new Context(inputVertex, label, vertex, ast(*, prob, sLength*) (*, currentPath*)))
+    let addContext (setU : System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>[]) (inputVertex : int) (label : int<labelMeasure>) vertex ast len(*currentPath*) =
+        let l = sppfNodes.[int ast].getLength ()
+        if l < len
+        then
+            if not <| containsContext setU inputVertex label vertex ast
+            then
+                setR.Enqueue(new Context(inputVertex, label, vertex, ast (*, currentPath*)))
 
     let containsEdge (dict1 : Dictionary<_, Dictionary<_, ResizeArray<_>>>) ast (e : Vertex) =
         if dict1 <> Unchecked.defaultof<_>

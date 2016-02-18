@@ -19,7 +19,7 @@ type M =
     val lbl : int<labelMeasure>
     new (p,l) = {pos = p; lbl = l}
 
-let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : ParserInputGraph<'TokenType>) : ParserCommon.ParseResult<_> = 
+let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : ParserInputGraph<'TokenType>) (maxLen : int) : ParserCommon.ParseResult<_> = 
     (*let input = input
     let input = 
         let h = input.Edges |> Seq.map (fun e -> new ParserEdge<'TokenType * ref<bool>>(e.Source, e.Target, (e.Tag , ref false)))
@@ -83,7 +83,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             then
                 if not <| nonTerminalNodes.ContainsKey(pack3 nTerm lExt rExt)
                 then
-                    let newNode = new NonTerminalNode(nTerm, (packExtension lExt rExt))
+                    let newNode = new NonTerminalNode(nTerm, (packExtension lExt rExt), 0)
                     sppfNodes.Add(newNode)
                     let num = sppfNodes.Length - 1
                     nonTerminalNodes.Add((pack3 nTerm lExt rExt), num*1<nodeMeasure>)
@@ -94,7 +94,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 if intermidiateNodes.[lExt, rExt] = Unchecked.defaultof<SysDict<int<labelMeasure>, int<nodeMeasure>>>
                 then
                     let d = new SysDict<int<labelMeasure>, int<nodeMeasure>>(2)
-                    let newNode = new IntermidiateNode(int label, (packExtension lExt rExt))
+                    let newNode = new IntermidiateNode(int label, (packExtension lExt rExt), 0)
                     sppfNodes.Add(newNode)
                     let num = (sppfNodes.Length - 1)*1<nodeMeasure>
                     d.Add(label, num)
@@ -106,7 +106,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     then
                         dict.[label]
                     else
-                        let newNode = new IntermidiateNode(int label, (packExtension lExt rExt))
+                        let newNode = new IntermidiateNode(int label, (packExtension lExt rExt), 0)
                         sppfNodes.Add(newNode)
                         let num = (sppfNodes.Length - 1)*1<nodeMeasure>
                         dict.Add(label, num)
@@ -116,21 +116,24 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             let i = getLeftExtension lExt
             let j = getRightExtension lExt
             let k = getRightExtension rExt
-            let rule = getRule label            
+            let rule = getRule label      
+            let length = left.getLength() + right.getLength()      
             let key = new M (pack3 i j k, label)
             let flg,res = packedNodes.TryGetValue(key)            
             if flg
             then res
             else
-                let newNode = new PackedNode(rule, left, right)
+                let newNode = new PackedNode(rule, left, right, length)
                 sppfNodes.Add(newNode)
                 let num = (sppfNodes.Length - 1 )*1<nodeMeasure>
                 packedNodes.Add(key, num)
                 match sppfNodes.Item (int symbolNode) with
                 | :? NonTerminalNode as n ->
                     n.AddChild newNode
+                    if n.Length <> 0 && n.Length > length then n.SetLength length
                 | :? IntermidiateNode as i ->
                     i.AddChild newNode
+                    if i.Length <> 0 && i.Length > length then i.SetLength length
                 | _ -> ()
                 num
                   
@@ -144,7 +147,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 terminalNodes.[beginVertix, endVertix, i]
             else
                 tokens.Add ( tag)
-                let t = new TerminalNode(tokens.Length - 1, packExtension beginVertix endVertix)
+                let t = new TerminalNode(tokens.Length - 1, packExtension beginVertix endVertix, 1)
                 sppfNodes.Add t
                 let res = sppfNodes.Length - 1
                 terminalNodes.[beginVertix, endVertix, i] <- ((sppfNodes.Length - 1)*1<nodeMeasure>)
@@ -173,7 +176,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     arr.DoForAll (fun tree  ->
                         let y = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy label ast tree
                         let index = getRightExtension <| structures.GetTreeExtension y 
-                        structures.AddContext setU index label vertex y (*prob sLength !currentPath*))
+                        structures.AddContext setU index label vertex y maxLen (*!currentPath*))
             v
                 
         let pop (u : Vertex) (i : int) (z : int<nodeMeasure>) (*prob sLength*) =
@@ -194,7 +197,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                          for level in slotLevels.Value do
                             let resTree = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy (u.NontermLabel*1<labelMeasure>) sppfNodeOnEdge z 
                             let newVertex = new Vertex(level, slot)
-                            structures.AddContext setU i (u.NontermLabel*1<labelMeasure>) newVertex resTree //prob sLength //!currentPath
+                            structures.AddContext setU i (u.NontermLabel*1<labelMeasure>) newVertex resTree maxLen //!currentPath
 
         let table = parser.Table
         
@@ -245,7 +248,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             let position = getPosition !structures.CurrentLabel
             if Array.length parser.rules.[rule] = 0 
             then
-              let t = new TerminalNode(-1, packExtension !currentVertexInInput !currentVertexInInput)
+              let t = new TerminalNode(-1, packExtension !currentVertexInInput !currentVertexInInput, 0)
               sppfNodes.Add t
               let res = sppfNodes.Length - 1
               structures.CurrentR := res * 1<nodeMeasure>
@@ -305,7 +308,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             if flg then
                                 for rule in rules do
                                     let newLabel = packLabel rule 0
-                                    //let pr = currentProb * parser.Probabilities.[rule]
+                                    structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy maxLen //!currentPath
                                     structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy //pr 1 !currentPath
                             (*else 
                                 for kvp in table do

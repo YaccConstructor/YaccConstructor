@@ -674,8 +674,8 @@ type ``GLL abstract parser tests`` () =
         let bp = @"C:\gsv\projects\infernal-1.1.1\testsuite\"
         let file = 
             //"t.fa"
-            "t1.fa"
-            //"tremitted-Plant_SRP.fa"
+            //"t1.fa"
+            "tremitted-Plant_SRP.fa"
             //"1k-4.fa"
         let textData =             
             File.ReadAllLines(Path.Combine(bp,file))
@@ -694,7 +694,7 @@ type ``GLL abstract parser tests`` () =
             |> Seq.mapi(fun i ch -> edg i (i+1) (getSmb ch i))
             |> Array.ofSeq
         let l = edges |> Array.length
-        let qGraph = new ParserInputGraph<_>(0, l + 1)
+        let qGraph = new ParserInputGraph<_>([|0..l-60|], [|l + 1|])
         qGraph.AddVerticesAndEdgeRange edges |> ignore
         qGraph.AddVerticesAndEdgeRange [edg l (l+1) (GLL.Bio2.RNGLR_EOF 0)] 
         let start = System.DateTime.Now

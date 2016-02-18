@@ -129,10 +129,10 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 match sppfNodes.Item (int symbolNode) with
                 | :? NonTerminalNode as n ->
                     n.AddChild newNode
-                    n.SetLength length
+                    if n.Length <> 0 && n.Length > length then n.SetLength length
                 | :? IntermidiateNode as i ->
                     i.AddChild newNode
-                    i.SetLength length
+                    if i.Length <> 0 && i.Length > length then i.SetLength length
                 | _ -> ()
                 num
                   

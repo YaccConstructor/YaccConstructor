@@ -520,13 +520,16 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                         |> Array.map (fun (p,n) -> 
                             let ts = getAllTokens n |> List.filter ((<>)null)
                             let l = ts.Length
-                            if l > 45
-                            then
-                                printf "p=%A L=%A  " p l
-                                ts |> List.iter (printf "%A; ")
-                                printfn ""
+//                            if l > 45
+//                            then
+//                                printf "p=%A L=%A  " p l
+//                                ts |> List.iter (printf "%A; ")
+//                                printfn ""
                             (n,(p,l)))
-                        |> Array.filter (fun (_,(_,l)) -> l > 45)
+                        |> Array.filter (fun (_,(_,l)) -> l > 50)
+                        |> fun a -> 
+                            printfn "Pissible variants count: %A" a.Length
+                            a
                         //|> Seq.head                        
                         |> Seq.maxBy (fun (n,(p,l)) -> l)
                         |> fst

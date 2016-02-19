@@ -564,6 +564,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     //printfn "prob=%A" t
 
                     let r1 = new Tree<_> (tokensArr, res, parser.rules)
+                    r1.ReducedTreeToDot (r1.ReduceTree parser.TokenToNumber parser.NumToString) parser.TokenData "AST123456_r.dot"
                                             (*let isSubpath l1 l2 =
                         List.length l1 <= List.length l2 
                         && Seq.forall2 (=) l1 (Seq.take (List.length l1) l2)*)

@@ -49,7 +49,7 @@ let runTest parser input (intToString : int -> string) (fileName : string) nodes
     match r with
         | Error _ ->
             printfn "Error"
-            Assert.Fail("")
+            Assert.Fail("Parsing finished with error!")
         | Success tree ->
             let n, e, t, a = tree.CountCounters 
             printfn "%d %d %d %d" n e t a

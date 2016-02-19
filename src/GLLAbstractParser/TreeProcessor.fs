@@ -13,7 +13,6 @@ type TreeProcessor () =
             printfn "Name is: %s" msg.Name
             return! messageLoop  
             }
-
         messageLoop 
         )
 

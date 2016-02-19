@@ -47,7 +47,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let mutable currentProb = 1.0
         let treeProc = new TreeProcessor()
         let o = treeProc.printerAgent
-        o.Start()
+        //o.Start()
         
         
         //let currentPath = ref <| List.empty<ParserEdge<'TokenType*ref<bool>>>

@@ -233,7 +233,7 @@ let printTableGLL
 
         print "let private rulesStart = "
         printArr rulesStart (print "%d")
-        
+        printArr grammar.probability (print "%A")
         printBr "let startRule = %d" grammar.startRule
         printBr "let indexatorFullCount = %d" indexator.fullCount
         printBr "let rulesCount = %d" grammar.rules.rulesCount

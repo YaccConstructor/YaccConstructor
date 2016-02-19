@@ -51,8 +51,9 @@ let makeNewSeq seq (lbl:Option<Source.t>) (w:Option<Source.t>) =
                             match lbl with
                             | Some s -> s.text
                             | None -> "dummy_lbl"
-                         match w with
-                         | None -> PSeq (els,ac,Some {label=lblName; weight=None})
+                         match w,lbl with
+                         | None, None -> PSeq (els,ac,None)
+                         | None, (Some _) -> PSeq (els,ac,Some {label=lblName; weight=None})
                          | _ -> let wVal = w.Value
                                 try
                                     PSeq (els,ac,Some {label=lblName; weight = Some (float wVal.text)})

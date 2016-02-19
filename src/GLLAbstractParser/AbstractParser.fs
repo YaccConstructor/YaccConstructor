@@ -1,6 +1,7 @@
 ﻿module Yard.Generators.GLL.AbstractParser 
 open Yard.Generators.GLL 
 open System 
+open TreeProcessor
 
 open Yard.Generators.GLL
 open Yard.Generators.Common.ASTGLL
@@ -33,6 +34,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
      //   else
             Error ("This grammar does not accept empty input.")     
     else
+        let parser = parser
         let slots = parser.Slots
         let errors = new SysDict<int64, SysDict<int<nodeMeasure>, Vertex*int>>()   
         let setU = Array.zeroCreate<SysDict<int, SysDict<int64, ResizeArray<int<nodeMeasure>>>>> (input.VertexCount )///1
@@ -43,6 +45,11 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let tempCount = ref 0
         let currentVertexInInput = ref 0
         let mutable currentProb = 1.0
+        let treeProc = new TreeProcessor()
+        let o = treeProc.printerAgent
+        o.Start()
+        
+        
         //let currentPath = ref <| List.empty<ParserEdge<'TokenType*ref<bool>>>
         let currentrule = parser.StartRule
 
@@ -175,6 +182,10 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     let arr = setP.[vertexKey]
                     arr.DoForAll (fun tree  ->
                         let y = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy label ast tree
+                        if slotIsEnd label 
+                        then 
+                            let name = parser.NumToString <| parser.LeftSide.[getRule label]
+                            o.Post(new Message(sppfNodes.[int y] :?> NonTerminalNode  , name))
                         let index = getRightExtension <| structures.GetTreeExtension y 
                         structures.AddContext setU index label vertex y maxLen (*!currentPath*))
             v
@@ -196,6 +207,10 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                          let slot = slotLevels.Key
                          for level in slotLevels.Value do
                             let resTree = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy (u.NontermLabel*1<labelMeasure>) sppfNodeOnEdge z 
+                            if slotIsEnd (u.NontermLabel*1<labelMeasure>) 
+                            then 
+                                let name = parser.NumToString <| parser.LeftSide.[getRule (u.NontermLabel*1<labelMeasure>)]
+                                o.Post(new Message(sppfNodes.[int resTree] :?> NonTerminalNode  , name))
                             let newVertex = new Vertex(level, slot)
                             structures.AddContext setU i (u.NontermLabel*1<labelMeasure>) newVertex resTree maxLen //!currentPath
 
@@ -287,6 +302,10 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             if !structures.CurrentR <> structures.Dummy
                             then 
                                 structures.CurrentN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy !structures.CurrentLabel !structures.CurrentN !structures.CurrentR
+                                if slotIsEnd !structures.CurrentLabel
+                                then 
+                                    let name = parser.NumToString <| parser.LeftSide.[getRule !structures.CurrentLabel]
+                                    o.Post(new Message(sppfNodes.[int !structures.CurrentN] :?> NonTerminalNode  , name))
                             condition := false
                         | 
                             None _ -> ()

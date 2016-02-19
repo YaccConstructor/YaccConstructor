@@ -84,16 +84,17 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
         let inline trd (_,_,x) = x
         let makeReductions num recovery =
             while reductions.Count > 0 do
-                
                 let gssVertex, prod, pos, edgeOpt = reductions.Pop()
+                let nonTermLeftSide = parserSource.LeftSide.[prod]
                 if pos = 0 then
-                    let nonTerm = parserSource.LeftSide.[prod]
-                    let state = parserSource.Gotos.[gssVertex.State].[nonTerm]
+                    let state = parserSource.Gotos.[gssVertex.State].[nonTermLeftSide]
                     let newVertex = addVertex state num None
-                    let ast = getEpsilon parserSource.LeftSide.[prod]
-                    if not <| containsSimpleEdge gssVertex ast notAttachedEdges.[state] then
-                        addSimpleEdge gssVertex ast notAttachedEdges.[state]
+                    let ast = getEpsilon prod
+                    if not <| containsEdge gssVertex ast notAttachedEdges.[state] then
+                        addEdge gssVertex ast notAttachedEdges.[state]
                 else 
+                    //TODO: PERFORMANCE REVIEW
+                    //all this downcasts can be no good
                     let nfa = parserSource.RightSideNFA.[prod]
                     let reductionTemp =
                         match currentReductions.[prod] with
@@ -146,11 +147,13 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                                     notAttachedEdges.[gssVertex.State] |> ResizeArray.iter f
 
                     and matchNfaAndGssEdgeLabels nfaEdge sppfLabel =
-                        match parserSource.indexToSymbolType nfaEdge.label, sppfLabel with
-                        | SymbolType.Nonterminal, SppfLabel.Reduction (prod,_)
-                        | SymbolType.Nonterminal, SppfLabel.EpsilonReduction prod ->
+                        match sppfLabel with
+                        | SppfLabel.Reduction (prod,_)
+                        | SppfLabel.EpsilonReduction prod ->
                             nfaEdge.label = parserSource.LeftSide.[prod]
-                        | SymbolType.Terminal, SppfLabel.Terminal term ->
+                        | SppfLabel.TemporaryReduction rt ->
+                            nfaEdge.label = parserSource.LeftSide.[rt.Production]
+                        | SppfLabel.Terminal term ->
                             nfaEdge.label = term
                         | _ -> false
 
@@ -183,22 +186,19 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                             if matchNfaAndGssEdgeLabels edge sppfLabel then
                                 reductionStep (edge.dest :?> VertexWithBackTrack<_,_>) prevGssVertex vertex sppfLabel
                     
-                    //let handle() =
-                        if final = null
-                        then recovery()//pushes.Clear()
-                        else
-                            let state = parserSource.Gotos.[final.State].[nonTerm]
-                            let newVertex = addVertex state num None
-                    
-                            let family = new Family(prod, new Nodes(Array.copy path))
-                            if not <| containsEdge final family edges.[state] then
-                                let isCreated, edgeLabel = addEdge final family edges.[state] false
-                                if pos > 0 && isCreated && not (isEpsilon edgeLabel) then
-                                    let arr = parserSource.Reduces.[state].[!curNum]
-                                    let edgeOpt = Some (final, edgeLabel :> AstNode)
-                                    if arr <> null then
-                                        for (prod, pos) in arr do
-                                            reductions.Push (newVertex, prod, pos, edgeOpt)
+                    //handle
+                    for leftEnd in reductionTemp.NotHandledLeftEnds do
+                        let gssVertex = snd leftEnd.label
+                        let state = parserSource.Gotos.[gssVertex.State].[nonTermLeftSide]
+                        let newVertex = addVertex state num None
+                        let sppfLabel = SppfLabel.TemporaryReduction reductionTemp
+                        
+                        addEdge gssVertex sppfLabel notAttachedEdges.[state]
+                        let arr = parserSource.Reduces.[state].[!curNum]
+                        let edgeOpt = Some (gssVertex, sppfLabel)
+                        if arr <> null then
+                            for (prod, pos) in arr do
+                                reductions.Push (newVertex, prod, pos, edgeOpt)
 
         let curInd = ref 0
         let isEnd = ref false
@@ -280,7 +280,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
 
             for (vertex, state) in oldPushes do
                 let newVertex = addVertex state num <| Some (vertex, newAstNode)
-                addSimpleEdge vertex newAstNode simpleEdges.[state]
+                addEdge vertex newAstNode notAttachedEdges.[state]
         
         let recovery() = ()
 

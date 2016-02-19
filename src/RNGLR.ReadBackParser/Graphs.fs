@@ -12,6 +12,7 @@ and SppfLabel =
     | Reduction of int * Sppf
     | EpsilonReduction of int
     | Epsilon //used only in SPPF, while others may be used in GSS as well
+    | TemporaryReduction of ReductionTemp // only for currently processing reductions
 
 and GssVertex  =
     val firstOutEdge : GssEdge option
@@ -32,9 +33,9 @@ and GssEdge =
     end
 
 //for reductions that goes from level being processed
-type ReductionTemp(prod : int, numberOfStates : int) =
+and ReductionTemp(prod : int, numberOfStates : int) =
     let prod = prod
-    let leftEnds = new ResizeArray<Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>()
+    let notHandledLeftEnds = new Queue<Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>()
     let rightEnds = new ResizeArray<Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>()
     let visitedVertices =
     //TODO: PERFORMANCE
@@ -44,11 +45,15 @@ type ReductionTemp(prod : int, numberOfStates : int) =
         let i = (fst vertex.label).label
         visitedVertices.[i].Add (vertex)
         if i = 0 then
-            leftEnds.Add vertex
+            notHandledLeftEnds.Enqueue vertex
     
     member this.AddRightEnd rE =
         this.AddVisited(rE)
         rightEnds.Add rE
+
+    member this.NotHandledLeftEnds = notHandledLeftEnds
+
+    member this.Production = prod
 
     member this.TryGetAlreadyVisited (nfaVertex : VertexWithBackTrack<int, int>) (gssVertex : GssVertex) =
         visitedVertices.[nfaVertex.label] |> Seq.tryFind 
@@ -69,19 +74,21 @@ let inline lblCoincidence s' s =
     | Terminal v', Terminal v -> v' = v
     | Reduction (v',_), Reduction (v,_) -> v' = v
     | EpsilonReduction v', EpsilonReduction v -> v' = v
+    | TemporaryReduction tr', TemporaryReduction tr ->
+        tr'.Production = tr.Production
     //|Epsilon, Epsilon
     | _ -> false
 
 /// Add edges, what must be unique (after shift or epsilon-edges, Terminal and EpsilonReduction edges respectively).
 /// All edges are sorted by destination ascending.
-let addSimpleEdge (v : GssVertex) (lbl : SppfLabel) (out : ResizeArray<GssVertex * SppfLabel>) =
+let addEdge (v : GssVertex) (lbl : SppfLabel) (out : ResizeArray<GssVertex * SppfLabel>) =
     let mutable i = out.Count - 1
     while i >= 0 && vxLess (fst out.[i]) v do
         i <- i - 1
     out.Insert (i+1, (v, lbl))
 
 /// Check if edge with specified destination and AST already exists (both simple and not)
-let containsSimpleEdge (v : GssVertex) (lbl : SppfLabel) (out : ResizeArray<GssVertex * SppfLabel>) =
+let containsEdge (v : GssVertex) (lbl : SppfLabel) (out : ResizeArray<GssVertex * SppfLabel>) =
     let mutable i = out.Count - 1
     while i >= 0 && vxLess (fst out.[i]) v do
         i <- i - 1

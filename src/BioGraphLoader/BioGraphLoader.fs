@@ -1,6 +1,7 @@
 ﻿module YC.BIO.BioGraphLoader
 
 open System.IO
+open AbstractAnalysis.Common
 
 module Seq =
 
@@ -51,3 +52,24 @@ let loadGraphFormFileToQG fileWithoutExt =
     |> ignore
     qGraph
 
+
+let loadGraphFormFileToOarserInputGraph fileWithoutExt tokenizer eof =
+    let edg f t l = new ParserEdge<_>(f,t,l)    
+    let g = loadGraphFormFileToQG fileWithoutExt    
+    let finalV = System.Int32.MaxValue
+    let parserInputGraph = new ParserInputGraph<_>(g.Vertices |> Array.ofSeq, [|finalV|])
+    let cnt = ref (g.Vertices |> Seq.max |> ((+)1))
+    g.Edges
+    |> Seq.collect (fun e -> e.Tag.str.ToCharArray()
+                             |> Array.mapi (fun i ch -> edg (if i = 0 then e.Source else (incr cnt ; !cnt)) (if i = e.Tag.str.Length - 1 then e.Target else (incr cnt ; !cnt)) (tokenizer ch) ))
+    |> parserInputGraph.AddVerticesAndEdgeRange
+    |> ignore
+
+    g.Vertices 
+    |> Seq.map (fun v -> edg v finalV eof)
+    |> parserInputGraph.AddVerticesAndEdgeRange
+    |> ignore
+
+    printfn "Vert Count = %A" (!cnt)
+    parserInputGraph
+    

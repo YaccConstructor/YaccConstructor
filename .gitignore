@@ -449,3 +449,10 @@ src/RNGLRApplication/res.dot
 src/GLL.AbstractParser.SimpleTest/*.dot
 src/GLLApplication/*.dot
 src/RNGLR.OtherSppfTest/*.yrd.fs
+Tests/sbt/tmp/*.dot
+Tests/sbt/graphs/ms/*.dot
+Tests/AbstractPerformance/TSQL/8/*.dot
+Tests/sbt/graphs_old/ms/*.dot
+Tests/sbt/graphs_old/pl/*.dot
+Tests/sbt/ready/*.dot
+Tests/AbstractPerformance/TSQL/*/*.dot

@@ -7,6 +7,7 @@ let tokenToNumber = function
     | "C" -> 8
     | "D" -> 10
     | "B" -> 11
+    | _   -> failwith "Unexpected token"
 let isTerminal = function 
     | "A" -> true
     | "C" -> true

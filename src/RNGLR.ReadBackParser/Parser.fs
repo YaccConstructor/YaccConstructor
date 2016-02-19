@@ -48,6 +48,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
         /// Temporary storage for edges data (after all reductions real edges will be created).
         //let edges = Array.init statesCount (fun _ -> new ResizeArray<GssVertex * ReductionTemp>())
         let notAttachedEdges = Array.init statesCount (fun _ -> new ResizeArray<GssVertex * SppfLabel>())
+        let temporarySppfEdges = new Stack<_>()
         let currentReductions : (ReductionTemp option)[] = Array.init parserSource.RightSideNFA.Length (fun _ -> None)
 
         let pushes = new Stack<_> (statesCount * 2 + 10)
@@ -125,10 +126,21 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                                     incr count
                                     epsilonClose prevVertex
                         dict |> Array.choose (fun x -> x)
+                        
+                    let matchNfaAndGssEdgeLabels (nfaEdge : Edge<_,_>) = function
+                        | SppfLabel.Reduction (prod,_)
+                        | SppfLabel.EpsilonReduction prod ->
+                            nfaEdge.label = parserSource.LeftSide.[prod]
+                        | SppfLabel.TemporaryReduction rt ->
+                            nfaEdge.label = parserSource.LeftSide.[rt.Production]
+                        | SppfLabel.Terminal term ->
+                            nfaEdge.label = term
+                        | _ -> false
 
                     //vertex is already in reductionTemp, put there it's predecessors
                     //NOT SAFE: does not check, if vertex has already been processed
                     let rec reductionDfs (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) =
+                        
                         let nfaVertex, gssVertex = vertex.label
                         for edge in nfaVertex.inEdges do
                             if parserSource.indexToSymbolType edge.label = SymbolType.Epsilon then
@@ -146,17 +158,6 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                                 else
                                     notAttachedEdges.[gssVertex.State] |> ResizeArray.iter f
 
-                    and matchNfaAndGssEdgeLabels nfaEdge sppfLabel =
-                        match sppfLabel with
-                        | SppfLabel.Reduction (prod,_)
-                        | SppfLabel.EpsilonReduction prod ->
-                            nfaEdge.label = parserSource.LeftSide.[prod]
-                        | SppfLabel.TemporaryReduction rt ->
-                            nfaEdge.label = parserSource.LeftSide.[rt.Production]
-                        | SppfLabel.Terminal term ->
-                            nfaEdge.label = term
-                        | _ -> false
-
                     and reductionStep (leftNfaVertex : VertexWithBackTrack<int, int>) leftGssVertex rightVertex sppfLabel =
                         let prevVertex =
                             match reductionTemp.TryGetAlreadyVisited leftNfaVertex leftGssVertex with
@@ -169,7 +170,11 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                         //But we can entrust this to GC
                                 reductionDfs pv
                                 pv
-                        prevVertex.addEdge (new Edge<_,_>(rightVertex, sppfLabel))
+                        let edge = new Edge<_,_>(rightVertex, sppfLabel)
+                        match sppfLabel with
+                        | SppfLabel.TemporaryReduction _ -> temporarySppfEdges.Push(edge)
+                        | _ -> ()
+                        prevVertex.addEdge edge
 
                     let rightEnd =
                         match reductionTemp.TryGetAlreadyVisited nfa.[pos] gssVertex with
@@ -203,59 +208,32 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
         let curInd = ref 0
         let isEnd = ref false
         let attachEdges () =
-            ()
-            (*let inline snd3 (_,x,_) = x
-            for vertex in usedStates do
-                let mutable i = 0
-                let edges = edges.[vertex]
-                let mutable count = -1
-                while i < edges.Count do
-                    let k = trd edges.[i]
-                    let mutable j = i+1
-                    while j < edges.Count && trd edges.[j] = k do
-                        j <- j + 1
-                    i <- j
-                    count <- count + 1
-                count <- count + simpleEdges.[vertex].Count
-                let vEdges =
-                    if count > 0 then Array.zeroCreate count
-                    else null
-                let mutable first = Unchecked.defaultof<_>
-                i <- 0
-                count <- -1
-                while i < edges.Count do
-                    let (v,_,a) = edges.[i]
-                    let mutable j = i+1
-                    while j < edges.Count && trd edges.[j] = a do
-                        j <- j + 1
-                    let other = 
-                        if j <> i + 1 then
-                            let res = Array.zeroCreate (j - i - 1)
-                            for k = i + 1 to j-1 do
-                                res.[k-i-1] <- snd3 edges.[k]
-                            res
-                        else
-                            null
-                    if count >= 0 then
-                        vEdges.[count] <- new GssEdge(v, a)
-                    else
-                        first <- new Edge(v, a)
-                    count <- count + 1
-                    a.first <- snd3 edges.[i]
-                    a.other <- other
-                    i <- j
-
-                for i = 0 to simpleEdges.[vertex].Count - 1 do
-                    let v, a = simpleEdges.[vertex].[i]
-                    if count >= 0 then
-                        vEdges.[count] <- new Edge(v, a)
-                    else
-                        first <- new Edge(v, a)
-                    count <- count + 1
-
-                stateToVertex.[vertex].OutEdges <- UsualOne<_>(first, vEdges)
+            for state in usedStates do
+                let edges = notAttachedEdges.[state]
+                let count = edges.Count
+                let toEdge (gssVertex : GssVertex, sppfLabel) =
+                    let sppfLabel =
+                        match sppfLabel with
+                        | TemporaryReduction rt ->
+                            SppfLabel.Reduction (rt.Production, rt.getLeftEnd gssVertex.Level gssVertex.State)
+                        | _ -> sppfLabel
+                    new GssEdge(gssVertex, sppfLabel)
+                let edges = edges |> ResizeArray.map toEdge
+                if count > 0 then
+                    stateToVertex.[state].Value.firstOutEdge <- Some edges.[0]
+                    if count > 1 then
+                        stateToVertex.[state].Value.otherOutEdges <- ResizeArray.sub edges 1 (count - 1) |> ResizeArray.toArray
                 edges.Clear()
-                simpleEdges.[vertex].Clear()*)
+            while temporarySppfEdges.Count > 0 do
+                let edge = temporarySppfEdges.Pop()
+                let sppfLabel = 
+                    match edge.label with
+                    | TemporaryReduction rt ->
+                        SppfLabel.Reduction (rt.Production, edge.dest)
+                    | _ -> edge.label
+                edge.setLabel sppfLabel
+            for i = 0 to currentReductions.Length - 1 do
+                currentReductions.[i] <- None
 
         let shift num =
             let newAstNode = Terminal(tokens.Length)
@@ -328,7 +306,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
         
         if !wasError 
         then 
-            Error (!curInd , [|!curToken|] , "Parse Error", debugFuns (), errDict)
+            Error (!curInd , [|!curToken|] , "Parse Error", debugFuns ())
         else
             let root = ref None
             let addTreeTop res =

@@ -15,8 +15,8 @@ and SppfLabel =
     | TemporaryReduction of ReductionTemp // only for currently processing reductions
 
 and GssVertex  =
-    val firstOutEdge : GssEdge option
-    val otherOutEdges : GssEdge[]
+    val mutable firstOutEdge : GssEdge option
+    val mutable otherOutEdges : GssEdge[]
     /// Number of token, processed when the vertex was created
     val Level : int
     /// Usual LALR state
@@ -36,6 +36,7 @@ and GssEdge =
 and ReductionTemp(prod : int, numberOfStates : int) =
     let prod = prod
     let notHandledLeftEnds = new Queue<Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>()
+    let leftEndsDict = new Dictionary<int * int, Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>()
     let rightEnds = new ResizeArray<Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>()
     let visitedVertices =
     //TODO: PERFORMANCE
@@ -45,11 +46,15 @@ and ReductionTemp(prod : int, numberOfStates : int) =
         let i = (fst vertex.label).label
         visitedVertices.[i].Add (vertex)
         if i = 0 then
+            let gssVertex = snd vertex.label
+            leftEndsDict.[(gssVertex.Level, gssVertex.State)] <- vertex
             notHandledLeftEnds.Enqueue vertex
     
     member this.AddRightEnd rE =
         this.AddVisited(rE)
         rightEnds.Add rE
+
+    member this.getLeftEnd level state = leftEndsDict.[(level, state)]
 
     member this.NotHandledLeftEnds = notHandledLeftEnds
 

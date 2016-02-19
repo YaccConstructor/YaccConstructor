@@ -105,6 +105,8 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                             currentReductions.[prod] <- Some x
                             x
                     
+                    let dfsStack = new Stack<_>(20)
+
                     //vertex is already in reductionTemp, get epsilon-closure of it, put vertices on the way to reductionTemp
                     let epsilonClose (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) =
                         let nfaInitVertex, gssVertex = vertex.label
@@ -137,6 +139,24 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                             nfaEdge.label = term
                         | _ -> false
 
+                    let reductionStep (leftNfaVertex : VertexWithBackTrack<int, int>) leftGssVertex rightVertex sppfLabel =
+                        let prevVertex =
+                            match reductionTemp.TryGetAlreadyVisited leftNfaVertex leftGssVertex with
+                            | Some pv -> pv
+                            | None -> 
+                                let pv = new Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>((leftNfaVertex, leftGssVertex))
+                                reductionTemp.AddVisited pv                              
+                        //TODO: maybe we should check and return, if we have reached left end of a handle, and add edge only in positive case
+                        //this automaticaly would save us from useless hanging edges and subsequent search...
+                        //But we can entrust this to GC
+                                dfsStack.Push(pv)
+                                pv
+                        let edge = new Edge<_,_>(rightVertex, sppfLabel)
+                        match sppfLabel with
+                        | SppfLabel.TemporaryReduction _ -> temporarySppfEdges.Push(edge)
+                        | _ -> ()
+                        prevVertex.addEdge edge
+
                     //vertex is already in reductionTemp, put there it's predecessors
                     //NOT SAFE: does not check, if vertex has already been processed
                     let rec reductionDfs (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) =
@@ -158,24 +178,6 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                                 else
                                     notAttachedEdges.[gssVertex.State] |> ResizeArray.iter f
 
-                    and reductionStep (leftNfaVertex : VertexWithBackTrack<int, int>) leftGssVertex rightVertex sppfLabel =
-                        let prevVertex =
-                            match reductionTemp.TryGetAlreadyVisited leftNfaVertex leftGssVertex with
-                            | Some pv -> pv
-                            | None -> 
-                                let pv = new Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>((leftNfaVertex, leftGssVertex))
-                                reductionTemp.AddVisited pv                              
-                        //TODO: maybe we should check and return, if we have reached left end of a handle, and add edge only in positive case
-                        //this automaticaly would save us from useless hanging edges and subsequent search...
-                        //But we can entrust this to GC
-                                reductionDfs pv
-                                pv
-                        let edge = new Edge<_,_>(rightVertex, sppfLabel)
-                        match sppfLabel with
-                        | SppfLabel.TemporaryReduction _ -> temporarySppfEdges.Push(edge)
-                        | _ -> ()
-                        prevVertex.addEdge edge
-
                     let rightEnd =
                         match reductionTemp.TryGetAlreadyVisited nfa.[pos] gssVertex with
                         | Some x -> x
@@ -190,6 +192,9 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                         for edge in nfaVertex.inEdges do
                             if matchNfaAndGssEdgeLabels edge sppfLabel then
                                 reductionStep (edge.dest :?> VertexWithBackTrack<_,_>) prevGssVertex vertex sppfLabel
+
+                    while dfsStack.Count > 0 do
+                        dfsStack.Pop() |> reductionDfs
                     
                     //handle
                     for leftEnd in reductionTemp.NotHandledLeftEnds do

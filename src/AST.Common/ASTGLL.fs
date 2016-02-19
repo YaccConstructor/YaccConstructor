@@ -292,11 +292,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : INode, rules : int[][]) 
                 | _ -> ()
         out.WriteLine("}")
         out.Close()
-        
-
                 
-            
-
     member this.ExtractFinalPaths =
         let nodeQueue = new Queue<NumNode<_>>()
         let visitedNodes = new Dictionary<_, Dictionary<_,_>>()
@@ -329,9 +325,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : INode, rules : int[][]) 
             | :? TerminalNode as term ->
                 seq{yield seq{yield term}}
             | x -> failwith "Error"
-        ()
-             
-        
+        ()                     
     
     member this.CountCounters  =
          

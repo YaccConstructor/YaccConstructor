@@ -88,7 +88,7 @@ type private DotNodeType = Packed | NonTerminal | Intermidiate | Terminal
 
 type ReducedTree = 
     Term of string * TerminalNode
-    | NonTerm of string * NonTerminalNode * ReducedTree[]
+    | NonTerm of string * NonTerminalNode * list<ReducedTree>
 
 let inline packExtension left right : int64<extension> =  LanguagePrimitives.Int64WithMeasure ((int64 left <<< 32) ||| int64 right)
 let inline getRightExtension (long : int64<extension>) = int <| ((int64 long) &&& 0xffffffffL)
@@ -208,8 +208,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : INode, rules : int[][]) 
         out.Close()
 
     member this.ReduceTree (tokenToNumber : 'TokenType -> int) (indToString : int -> string) : ReducedTree =
-        let rec cleanTree (st : INode)  =
-             
+        let rec cleanTree (st : INode)  =             
             match st with 
             | :? IntermidiateNode as i ->
                 cleanTree i.First   
@@ -223,7 +222,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : INode, rules : int[][]) 
                 Seq.append (cleanTree p.Left) (cleanTree p.Right)
             | :? NonTerminalNode as n ->
                 let child = cleanTree n.First
-                seq{yield ReducedTree.NonTerm(indToString n.Name, n, Seq.toArray child )}
+                seq{yield ReducedTree.NonTerm(indToString n.Name, n, Seq.toList child )}
             | _ -> failwith "Unexpected node type."
         Seq.head <| (cleanTree root)
 

@@ -78,9 +78,9 @@ let runTest inputFile conversion expectedResult =
     Namer.initNamer loadIL.grammar
     let result = loadIL |> applyConversion conversion
     let expected = defaultDefinition expectedResult
-    //expected |> treeDump.Generate |> string |> printfn "%s"
-    //printfn "%s" "************************"
-    //result |> treeDump.Generate |> string |> printfn "%s"
+    expected |> treeDump.Generate |> string |> printfn "%s"
+    printfn "%s" "************************"
+    result |> treeDump.Generate |> string |> printfn "%s"
     Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
 
 [<TestFixture>]

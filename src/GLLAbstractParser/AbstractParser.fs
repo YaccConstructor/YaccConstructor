@@ -1,14 +1,16 @@
 ﻿module Yard.Generators.GLL.AbstractParser 
-open Yard.Generators.GLL 
-open System 
-open TreeProcessor
 
+open System 
+open Microsoft.FSharp.Collections
+
+open FSharpx.Collections.Experimental
+
+open Yard.Generators.GLL 
+open YC.TreeProcessor
 open Yard.Generators.GLL
 open Yard.Generators.Common.ASTGLL
 open Yard.Generators.Common.DataStructures
-open Microsoft.FSharp.Collections
 open AbstractAnalysis.Common
-open FSharpx.Collections.Experimental
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
 
@@ -43,10 +45,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let epsilonNode = structures.EpsilonNode
         let setP = structures.SetP
         let tempCount = ref 0
-        let currentVertexInInput = ref 0
-        let mutable currentProb = 1.0
-        let treeProc = new TreeProcessor()
-        let o = treeProc.printerAgent
+        let currentVertexInInput = ref input.InitStates.[0]
+        let mutable currentProb = 1.0        
         //o.Start()
         
         
@@ -60,9 +60,12 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let dummyGSSNode = new Vertex(!currentVertexInInput, int !structures.CurrentLabel)
         let sppfNodes = structures.SppfNodes
         
-        let tokens = new BlockResizeArray<'TokenType>()        
+        let tokens = new BlockResizeArray<'TokenType>()             
         let packedNodes = new SysDict<M, int<nodeMeasure>>()
-        //let 
+        
+        let treeProc = new TreeProcessor<_>(parser, tokens)
+        let o = treeProc.printerAgent
+
         let nonTerminalNodes = new SysDict<int64,int<nodeMeasure>>()        
         let intermidiateNodes = Array2D.zeroCreate<SysDict<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount) (input.VertexCount) //убрала +1
         let edges = Array2D.zeroCreate<SysDict<int<nodeMeasure>, SysDict<int, ResizeArray<int>>>> slots.Count (input.VertexCount )
@@ -185,7 +188,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                         if slotIsEnd label 
                         then 
                             let name = parser.NumToString <| parser.LeftSide.[getRule label]
-                            o.Post(new Message(sppfNodes.[int y] :?> NonTerminalNode  , name))
+                            o.Post(new Message(sppfNodes.[int y]))
                         let index = getRightExtension <| structures.GetTreeExtension y 
                         structures.AddContext setU index label vertex y maxLen (*!currentPath*))
             v
@@ -210,7 +213,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             if slotIsEnd (u.NontermLabel*1<labelMeasure>) 
                             then 
                                 let name = parser.NumToString <| parser.LeftSide.[getRule (u.NontermLabel*1<labelMeasure>)]
-                                o.Post(new Message(sppfNodes.[int resTree] :?> NonTerminalNode  , name))
+                                o.Post(new Message(sppfNodes.[int resTree]))
                             let newVertex = new Vertex(level, slot)
                             structures.AddContext setU i (u.NontermLabel*1<labelMeasure>) newVertex resTree maxLen //!currentPath
 
@@ -304,8 +307,9 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                 structures.CurrentN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy !structures.CurrentLabel !structures.CurrentN !structures.CurrentR
                                 if slotIsEnd !structures.CurrentLabel
                                 then 
-                                    let name = parser.NumToString <| parser.LeftSide.[getRule !structures.CurrentLabel]
-                                    o.Post(new Message(sppfNodes.[int !structures.CurrentN] :?> NonTerminalNode  , name))
+                                    //let name = parser.NumToString <| parser.LeftSide.[getRule !structures.CurrentLabel]
+                                    let node = sppfNodes.[int !structures.CurrentN]
+                                    o.Post(new Message(node))
                             condition := false
                         | 
                             None _ -> ()
@@ -396,43 +400,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                         | :? PackedNode as n -> 
                             filter n.Left
                             filter n.Right
-                        | _ -> ()
-                    
-                    let visited = new System.Collections.Generic.Dictionary<_,_>()
-
-                    let rec filter2 prob (node:INode)   = 
-                        match node with
-                        | :? NonTerminalNode as n ->
-                            let p1 = filter2 prob n.First 
-                            let p2 = if n.Others <> null then n.Others |> ResizeArray.map (filter2 prob) |> ResizeArray.toList else []
-                                
-                            let f = List.zip (p1::p2) (n.First :: (if n.Others <> null then n.Others |> ResizeArray.toList else []))
-                                    |> List.maxBy fst                            
-                            n.First <- snd f
-                            n.Others <- null
-                            fst f
-                        | :? IntermidiateNode as n -> 
-                            let p1 = filter2 prob n.First 
-                            let p2 = if n.Others <> null then n.Others |> ResizeArray.map (filter2 prob) |> ResizeArray.toList else []
-                            let f = List.zip (p1::p2) (n.First :: (if n.Others <> null then n.Others |> ResizeArray.toList else []))
-                                    |> List.maxBy fst                            
-                            n.First <- snd f
-                            n.Others <- null
-                            fst f
-                        | :? PackedNode as n ->
-                            let f,r = visited.TryGetValue n 
-                            if f 
-                            then
-                                //printfn "!!!" 
-                                r 
-                            else
-                                let p1 = filter2 (prob) n.Left
-                                let p2 = filter2 (prob) n.Right
-                                let r = parser.Probabilities.[n.Production] * p1 * p2
-                                visited.Add(n,r)
-                                r
-                        | _ -> prob
-
+                        | _ -> ()                                        
 
                     let visited2 = new System.Collections.Generic.Dictionary<_,_>()
 
@@ -478,117 +446,19 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                     else l1
                         l2.Head,(match l2.Tail with [] -> null | t -> ResizeArray.ofList t)                        
 
-//                    let rec replacePacked (node:INode) = 
-//                        match node with
-//                        | :? NonTerminalNode as n ->
-//                            let f,o = newFirstOther n.First n.Others replacePacked
-//                            n.First <- f
-//                            n.Others <- o
-//                            [n :> INode]
-//                        | :? IntermidiateNode as n -> 
-//                            let f,o = newFirstOther n.First n.Others replacePacked
-//                            n.First <- f
-//                            n.Others <- o
-//                            [n]
-//                        | :? PackedNode as n -> 
-//                            (replacePacked n.Left)
-//                            @ (replacePacked n.Right)
-//                        | n -> [n]
-
-                    
-                    //replacePacked res
-
                     //let qprob=7.885753842e-225
-                    let qprob=1.261723138e-203
+                   // let qprob=1.261723138e-203
 
-                    let tokensArr = tokens.ToArray()
-
-                    let rec getAllTokens (node:INode) =
-                        match node with
-                        | :? TerminalNode as t -> if t.Name <> -1 then [parser.TokenData tokensArr.[t.Name]] else [Unchecked.defaultof<_>]
-                        | :? NonTerminalNode as n -> getAllTokens n.First
-                        | :? IntermidiateNode as n -> getAllTokens n.First
-                        | :? PackedNode as p -> 
-                            let l = if p.Left <> null then getAllTokens p.Left else []
-                            let r = if p.Right <> null then getAllTokens p.Right else []
-                            l @ r
-
-                    let res =
-                        seq {for kvp in nonTerminalNodes -> sppfNodes.[int kvp.Value]} 
-                        |> Seq.filter (fun n -> (n :? NonTerminalNode) && parser.NumToString (n :?> NonTerminalNode).Name =  "folded")
-                        |> Seq.map (fun n -> (filter2 1.0 n),n)
-//                        |> Seq.map(fun n -> 
-//                            let rec count (n:INode) = 
-//                                match n with
-//                                | :? PackedNode as n ->
-//                                    let s1,s2 = if n.Left <> null then count n.Left else 0,0
-//                                    let s3,s4 = if n.Right <> null then count n.Right else 0,0
-//                                    s1+s3, s2 + s4
-//                                | :? IntermidiateNode as n -> count n.First
-//                                | :? NonTerminalNode as n -> 
-//                                    let s1,s2 = count n.First
-//                                    if (parser.NumToString (n.Name)).Contains "stem_2" then s1 + 1 else s1
-//                                    , if (parser.NumToString (n.Name)).Contains "stem_1" then s2 + 1 else s2
-//                                | _ -> 0,0
-//                            (count n),n)
-//                        |> Seq.filter(fun ((s1,s2,s3),n) -> s1 + s2 > 15 &&  s3 < 35)
-//                        |> Seq.sortBy(fun ((s1,s2,s3),n) -> s1 + s2 - s3)
-//                        |> Seq.map (fun n -> (filter2 1.0 n),n)
-//                        |> Seq.filter (fun (p,n) ->  (qprob / 2.0) < p && p < (qprob * 10.0))
-                        |> Array.ofSeq
-                        |> Array.map (fun (p,n) -> 
-                            let ts = getAllTokens n |> List.filter ((<>)null)
-                            let l = ts.Length
-//                            if l > 45
-//                            then
-//                                printf "p=%A L=%A  " p l
-//                                ts |> List.iter (printf "%A; ")
-//                                printfn ""
-                            (n,(p,l)))
-                        |> Array.filter (fun (_,(_,l)) -> l > 50)
-                        |> fun a -> 
-                            printfn "Pissible variants count: %A" a.Length
-                            a
-                        //|> Seq.head                        
-                        |> Seq.maxBy (fun (n,(p,l)) -> l)
-                        |> fst
+                    //let tokensArr = tokens.ToArray()
 
 
-//                    let rec getAllFolded (node:INode) =                         
-//                        match node with
-//                        | :? NonTerminalNode as n ->
-//                            let name = parser.NumToString n.Name
-//                            if name = "folded"
-//                            then node
-//                            else getAllFolded
-//                            filter fst
-//                        | :? IntermidiateNode as n -> 
-//                            let fst = 
-//                                if n.Others <> null && n.Others.Count > 0
-//                                then                             
-//                                    n.Others.Add n.First
-//                                    n.Others |> ResizeArray.toList |> List.maxBy(fun p -> parser.Probabilities.[p.Production])
-//                                else n.First
-//                            let otehrs = n.Others
-//                            n.First <- fst
-//                            n.Others <- null
-//                            filter fst
-//                        | :? PackedNode as n -> 
-//                            filter n.Left
-//                            filter n.Right
-//                        | _ -> ()
-
-                    //let t = filter2 1.0 res
-
-                    //printfn "prob=%A" t
-
-                    let r1 = new Tree<_> (tokensArr, res, parser.rules)
-                    r1.ReducedTreeToDot (r1.ReduceTree parser.TokenToNumber parser.NumToString) parser.TokenData "AST123456_r.dot"
+                    let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
+                    //r1.ReducedTreeToDot (r1.ReduceTree parser.TokenToNumber parser.NumToString) parser.TokenData "AST123456_r.dot"
                                             (*let isSubpath l1 l2 =
                         List.length l1 <= List.length l2 
                         && Seq.forall2 (=) l1 (Seq.take (List.length l1) l2)*)
                     //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
-                    r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
+                    //r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
                     (*for e in errors do
                         for p in e.Value do
                             let path = List.rev errorPaths.[snd p.Value]                            

@@ -685,7 +685,8 @@ type ``GLL abstract parser tests`` () =
         let basePath = "../../../Tests/bio/"
         let path = Path.Combine(basePath,"biodata_1/saves/00_before_repeat_resolution/graph")
         let start = System.DateTime.Now
-        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToOarserInputGraph path getSmb (GLL.Bio2.RNGLR_EOF 0)       
+        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToOarserInputGraph path 500 getSmb (GLL.Bio2.RNGLR_EOF 0) 
+        graph.PrintToDot "input.dot" (GLL.Bio2.tokenToNumber >> GLL.Bio2.numToString)       
         let res = GLL.Bio2.buildAbstractAst graph 100
         match res with
         | Success ast -> 
@@ -699,9 +700,10 @@ type ``GLL abstract parser tests`` () =
         let bp = @"C:\gsv\projects\infernal-1.1.1\testsuite\"
         let file = 
             //"t.fa"
-            "t1.fa"
+            //"t1.fa"
             //"tremitted-Plant_SRP.fa"
-            //"1k-4.fa"
+            "1k-4.fa"
+            //"10k-tRNA.fa"
         let textData =             
             File.ReadAllLines(Path.Combine(bp,file))
             |> Seq.skip 1
@@ -740,5 +742,5 @@ let f x =
               //_35_Expression() //
     //let th = new System.Threading.Thread(f, 10000000)
     //th.Start()
-    t.bio2_4()
+    t.bio2_5()
     0

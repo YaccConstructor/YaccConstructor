@@ -67,11 +67,10 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let o = treeProc.printerAgent
 
         let nonTerminalNodes = new SysDict<int64,int<nodeMeasure>>()        
-        let intermidiateNodes = Array2D.zeroCreate<SysDict<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount) (input.VertexCount) //убрала +1
-        let edges = Array2D.zeroCreate<SysDict<int<nodeMeasure>, SysDict<int, ResizeArray<int>>>> slots.Count (input.VertexCount )
+        let intermidiateNodes = Array.init input.VertexCount (fun _ -> Array.zeroCreate<SysDict<int<labelMeasure>, int<nodeMeasure>>> input.VertexCount)
+        let edges = Array.init input.VertexCount (fun _ -> Array.zeroCreate<SysDict<int<nodeMeasure>, SysDict<int, ResizeArray<int>>>> slots.Count)
         let terminalNodes = 
-            Array.init input.VertexCount (fun i -> Array.init input.VertexCount (fun i -> Array.zeroCreate<int<nodeMeasure>> parser.TermCount) ) 
-            //Array3D.zeroCreate<int<nodeMeasure>> input.VertexCount input.VertexCount parser.TermCount  
+            Array.init input.VertexCount (fun i -> Array.init input.VertexCount (fun i -> Array.zeroCreate<int<nodeMeasure>> parser.TermCount))
         let currentGSSNode = ref <| dummyGSSNode
         let currentContext = ref <| new Context(!currentVertexInInput, !structures.CurrentLabel, !currentGSSNode, structures.Dummy) //without *1<labelMeasure>
         
@@ -103,17 +102,17 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 else
                     nonTerminalNodes.[pack3 nTerm lExt rExt]
             else
-                if intermidiateNodes.[lExt, rExt] = Unchecked.defaultof<SysDict<int<labelMeasure>, int<nodeMeasure>>>
+                if intermidiateNodes.[lExt].[rExt] = Unchecked.defaultof<SysDict<int<labelMeasure>, int<nodeMeasure>>>
                 then
                     let d = new SysDict<int<labelMeasure>, int<nodeMeasure>>(2)
                     let newNode = new IntermidiateNode(int label, (packExtension lExt rExt), 0)
                     sppfNodes.Add(newNode)
                     let num = (sppfNodes.Length - 1)*1<nodeMeasure>
                     d.Add(label, num)
-                    intermidiateNodes.[lExt, rExt] <- d 
+                    intermidiateNodes.[lExt].[rExt] <- d 
                     num
                 else
-                    let dict = intermidiateNodes.[lExt, rExt] 
+                    let dict = intermidiateNodes.[lExt].[rExt] 
                     if dict.ContainsKey label
                     then
                         dict.[label]
@@ -170,9 +169,9 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             let labelN = slots.[int b.NontermLabel]
             let beginLevel = int b.Level
             let endLevel = int e.Level
-            let dict1 = edges.[labelN, beginLevel]
+            let dict1 = edges.[labelN].[beginLevel]
             let cond, dict = structures.ContainsEdge dict1 ast e
-            if dict.IsSome then edges.[labelN, beginLevel] <- dict.Value
+            if dict.IsSome then edges.[labelN].[beginLevel] <- dict.Value
             cond
         
         
@@ -205,7 +204,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 else
                     let newList = new ResizableUsualOne<_>(z)
                     setP.Add(vertexKey, newList)
-                let outEdges = edges.[slots.[int u.NontermLabel], u.Level]
+                let outEdges = edges.[slots.[int u.NontermLabel]].[u.Level]
                 for edge in outEdges do
                     let sppfNodeOnEdge = edge.Key
                     for slotLevels in edge.Value do

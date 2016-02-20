@@ -69,7 +69,9 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let nonTerminalNodes = new SysDict<int64,int<nodeMeasure>>()        
         let intermidiateNodes = Array2D.zeroCreate<SysDict<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount) (input.VertexCount) //убрала +1
         let edges = Array2D.zeroCreate<SysDict<int<nodeMeasure>, SysDict<int, ResizeArray<int>>>> slots.Count (input.VertexCount )
-        let terminalNodes = Array3D.zeroCreate<int<nodeMeasure>> input.VertexCount input.VertexCount parser.TermCount  
+        let terminalNodes = 
+            Array.init input.VertexCount (fun i -> Array.init input.VertexCount (fun i -> Array.zeroCreate<int<nodeMeasure>> parser.TermCount) ) 
+            //Array3D.zeroCreate<int<nodeMeasure>> input.VertexCount input.VertexCount parser.TermCount  
         let currentGSSNode = ref <| dummyGSSNode
         let currentContext = ref <| new Context(!currentVertexInInput, !structures.CurrentLabel, !currentGSSNode, structures.Dummy) //without *1<labelMeasure>
         
@@ -152,15 +154,15 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             let endVertix = edge.Target
             let tag = edge.Tag
             let i = (parser.TokenToNumber ( tag)) - parser.NonTermCount
-            if terminalNodes.[beginVertix, endVertix, i] <> Unchecked.defaultof<int<nodeMeasure>>
+            if terminalNodes.[beginVertix].[endVertix].[i] <> Unchecked.defaultof<int<nodeMeasure>>
             then
-                terminalNodes.[beginVertix, endVertix, i]
+                terminalNodes.[beginVertix].[endVertix].[i]
             else
                 tokens.Add ( tag)
                 let t = new TerminalNode(tokens.Length - 1, packExtension beginVertix endVertix, 1)
                 sppfNodes.Add t
                 let res = sppfNodes.Length - 1
-                terminalNodes.[beginVertix, endVertix, i] <- ((sppfNodes.Length - 1)*1<nodeMeasure>)
+                terminalNodes.[beginVertix].[endVertix].[i] <- ((sppfNodes.Length - 1)*1<nodeMeasure>)
                 res * 1<nodeMeasure>
             
                      

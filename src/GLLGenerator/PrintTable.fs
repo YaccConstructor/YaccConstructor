@@ -53,8 +53,7 @@ let printTableGLL
         for i = 0 to arr.Count - 1 do
             if i <> 0 then print sep
             printer arr.[i]
-        printBr rBr
-        
+        printBr rBr        
 
 
     let printArr (arr : 'a[]) printer = printArr "" "[|" "|]" "; " (arr : 'a[]) printer
@@ -163,7 +162,7 @@ let printTableGLL
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %s _ -> %d" (indexator.indexToTerm i) i
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| L_%s _ -> %d" (indexator.indexToLiteral i) i
+            printBrInd 1 "| L_%s _ -> %d" (indexator.getLiteralName i) i
         printBr ""
 
         printBrInd 0 "let isLiteral = function"
@@ -214,11 +213,11 @@ let printTableGLL
         print "let leftSide = "
         printArr leftSide (print "%d")
 
-        print "let table = [| "
-        for arr in table.result do
-            printArr2 arr (print "%d")
-            print ";"
-        print " |]"
+        print "let table = new System.Collections.Generic.Dictionary<int, int[]>(%A)\n" table.result.Count
+        for kvp in table.result do
+            let arr = "[|" + (kvp.Value |> Seq.map string |> String.concat ";") + "|]"                               
+            let str = "table.Add(" + kvp.Key.ToString() + ", " + arr + ")\n" 
+            print "%s" str 
         printBr ""
 
         print "let private rules = "
@@ -234,13 +233,13 @@ let printTableGLL
 
         print "let private rulesStart = "
         printArr rulesStart (print "%d")
-        
+        printArr grammar.probability (print "%A")
         printBr "let startRule = %d" grammar.startRule
         printBr "let indexatorFullCount = %d" indexator.fullCount
         printBr "let rulesCount = %d" grammar.rules.rulesCount
         printBr "let indexEOF = %d" grammar.indexator.eofIndex
         printBr "let nonTermCount = %d" grammar.indexator.nonTermCount
-        printBr "let termCount = %d" grammar.indexator.termCount
+        printBr "let termCount = %d" (grammar.indexator.termCount + grammar.indexator.literalsCount)
         printBr "let termStart = %d" grammar.indexator.termsStart
         printBr "let termEnd = %d" grammar.indexator.termsEnd
         printBr "let literalStart = %d" grammar.indexator.literalsStart
@@ -260,10 +259,10 @@ let printTableGLL
         
         if not isAbstract
         then               
-            printBr "let buildAst : (seq<Token> -> ParseResult<_>) ="
+            printBr "let buildAst : (seq<Token> -> ParserCommon.ParseResult<_>) ="
             printBrInd 1 "buildAst<Token> parserSource"
         else
-            printBr "let buildAbstractAst : (AbstractAnalysis.Common.ParserInputGraph<Token> -> ParseResult<_>) ="
+            printBr "let buildAbstractAst : (AbstractAnalysis.Common.ParserInputGraph<Token> -> ParserCommon.ParseResult<_>) ="
             printBrInd 1 "buildAbstractAst<Token> parserSource"
         printBr ""
         res.ToString()

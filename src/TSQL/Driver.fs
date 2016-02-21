@@ -31,7 +31,7 @@ open JetBrains.Application.BuildScript.Application.Zones
 
 open LexerHelper
 open ReSharperExtension
-open OtherSPPF
+open Yard.Generators.RNGLR.OtherSPPF
 open Yard.Examples.MSParserAbstract
 open Yard.Generators.Common.AST
 open QuickGraph.FSA.GraphBasedFsa

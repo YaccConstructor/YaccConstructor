@@ -1,2 +1,3 @@
-[<Start>]                       
-s : B | s B
+[<Start>]
+s : (A A B C)+ 
+ 

@@ -1,4 +1,4 @@
-﻿namespace Yard.Generators.GLL
+﻿namespace Yard.Generators.GLL.ParserCommon
 open System.Collections.Generic
        
 type ParserSourceGLL<'TokenType> (eof                  : 'TokenType
@@ -9,7 +9,7 @@ type ParserSourceGLL<'TokenType> (eof                  : 'TokenType
                                , isLiteral          : 'TokenType -> bool
                                , isTerminal         : 'TokenType -> bool
                                , getLiteralNames    : string list
-                               , table              : int [][]
+                               , table              : System.Collections.Generic.Dictionary<int, int[]>
                                , rules              : array<int>
                                , rulesStart         : array<int>
                                , leftSide           : array<int>
@@ -39,8 +39,22 @@ type ParserSourceGLL<'TokenType> (eof                  : 'TokenType
     let _rules = Array.zeroCreate length.Length
     do for i = 0 to length.Length-1 do
         _rules.[i] <- Array.zeroCreate length.[i]
-        for j = 0 to length.[i]-1 do
+        for j = 0 to length.[i] - 1 do
             _rules.[i].[j] <- rules.[rulesStart.[i] + j]
+
+    let printrules () =
+                
+                printfn "\nrules:"
+                for i = 0 to rulesCount - 1 do
+                    printf "%4d: %s = " i <| numToString (leftSide.[i])
+                    for j = 0 to _rules.[i].Length - 1 do
+                        printf "%s " <| numToString (_rules.[i].[j])
+                    printfn ""
+
+
+
+    do printrules()
+   
     
                   
                                

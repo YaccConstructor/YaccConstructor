@@ -22,6 +22,7 @@ type GLL() =
         override this.Name = "GLLGenerator"
         override this.Constraints = [|noEbnf; noMeta; noInnerAlt; noInnerAlt; noBrackets; needAC; singleModule|]
         override this.Generate (definition, args) =
+            
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
             let pairs = Array.zeroCreate <| args.Length / 2
@@ -95,15 +96,6 @@ type GLL() =
                 |> List.map (String.concat " <- ")
                 |> List.iter (eprintfn "%s")
                 eprintfn ""
-//                if printInfiniteEpsilonPath <> ""
-//                then
-//                    System.IO.Directory.CreateDirectory printInfiniteEpsilonPath |> ignore
-//                    for cycle in grammar.EpsilonCyclicNonTerms do
-//                        let nonTerm = List.head cycle
-//                        grammar.epsilonTrees.[grammar.indexator.nonTermToIndex nonTerm].AstToDot
-//                            grammar.indexator.indexToNonTerm (fun _ -> 0) grammar.rules.leftSideArr
-//                            (System.IO.Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot"))
-//                //grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
 
             let table = new Table(grammar)
             use out = new System.IO.StreamWriter (output)
@@ -145,6 +137,7 @@ type GLL() =
                         println "open Yard.Generators.GLL.Parser"
                     println "open Yard.Generators.GLL"
                     println "open Yard.Generators.Common.ASTGLL"
+                    println "open Yard.Generators.GLL.ParserCommon"
 
                     match definition.head with
                     | None -> ()

@@ -5,7 +5,8 @@ open Yard.Generators.Common
 open System.Collections.Generic
 
 //Sppf is a intersection of a production automaton and Gss, which, in its turn, has edges labelled with Sppf
-type Sppf = Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>
+type Sppf = Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel> * int * Set<int>
+    //(start vertex, end level, accepting nfa states)
 
 and SppfLabel =
     | Terminal of int
@@ -33,15 +34,18 @@ and GssEdge =
     end
 
 //for reductions that goes from level being processed
-and ReductionTemp(prod : int, numberOfStates : int) =
+and ReductionTemp(prod : int, numberOfStates : int, endLevel : int) =
     let prod = prod
     let notHandledLeftEnds = new Queue<Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>()
     let leftEndsDict = new Dictionary<int * int, Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>()
-    let rightEnds = new ResizeArray<Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>()
+    let acceptingNfaStates = ref Set.empty
     let visitedVertices =
     //TODO: PERFORMANCE
         Array.init numberOfStates (fun i -> new ResizeArray<Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>())
+    let endLevel = endLevel
     
+    member this.AcceptingNfaStates = !acceptingNfaStates
+
     member this.AddVisited (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) =
         let i = (fst vertex.label).label
         visitedVertices.[i].Add (vertex)
@@ -52,7 +56,9 @@ and ReductionTemp(prod : int, numberOfStates : int) =
     
     member this.AddRightEnd rE =
         this.AddVisited(rE)
-        rightEnds.Add rE
+        acceptingNfaStates := Set.add (fst rE.label).label !acceptingNfaStates
+    
+    member this.EndLevel = endLevel
 
     member this.getLeftEnd level state = leftEndsDict.[(level, state)]
 

@@ -14,7 +14,7 @@ type ParserDebugFuns<'TokenType> = {
 }
 
 type ParseReadBackResult<'TokenType> =
-    | Success of array<'TokenType>
+    | Success of Sppf * array<'TokenType>
     | Error of int * array<'TokenType> * string * ParserDebugFuns<'TokenType>
 
 let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType>) (tokens : seq<'TokenType>) =
@@ -29,7 +29,18 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
     if not <| enum.MoveNext() || parserSource.EofIndex = parserSource.TokenToNumber enum.Current then
         if parserSource.AcceptEmptyInput 
         then
-            Success [||]
+            let emptyParse =
+                let start = 
+                    let gssStart = new GssVertex(0, 0)
+                    let nfaStart = new VertexWithBackTrack<int, int>(0)
+                    new Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel> (nfaStart, gssStart)
+                let final =
+                    let gssFinal = new GssVertex(1, 0)
+                    let nfaFinal = new VertexWithBackTrack<int, int>(0)
+                    new Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel> (nfaFinal, gssFinal)
+                start.addEdge(new Edge<_,_>(final, SppfLabel.EpsilonReduction -1))
+                start, 0, Set.ofArray [|0|]
+            Success (emptyParse, [||])
         else
             Error (0, [||], "This grammar cannot accept empty string",
                     {
@@ -101,7 +112,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                         match currentReductions.[prod] with
                         | Some x -> x
                         | None ->         
-                            let x = new ReductionTemp(prod, nfa.Length)
+                            let x = new ReductionTemp(prod, nfa.Length, num)
                             currentReductions.[prod] <- Some x
                             x
                     
@@ -153,7 +164,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                                 pv
                         let edge = new Edge<_,_>(rightVertex, sppfLabel)
                         match sppfLabel with
-                        | SppfLabel.TemporaryReduction _ -> temporarySppfEdges.Push(edge)
+                        | SppfLabel.TemporaryReduction _ -> temporarySppfEdges.Push(prevVertex, edge)
                         | _ -> ()
                         prevVertex.addEdge edge
 
@@ -173,7 +184,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                                     let f (gssEdge : GssEdge) = f (gssEdge.Dest, gssEdge.Label)
                                     if gssVertex.firstOutEdge.IsSome then
                                         f gssVertex.firstOutEdge.Value
-                                        if gssVertex.otherOutEdges != null then
+                                        if gssVertex.otherOutEdges <> null then
                                             gssVertex.otherOutEdges |> Array.iter f
                                 else
                                     notAttachedEdges.[gssVertex.State] |> ResizeArray.iter f
@@ -220,7 +231,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                     let sppfLabel =
                         match sppfLabel with
                         | TemporaryReduction rt ->
-                            SppfLabel.Reduction (rt.Production, rt.getLeftEnd gssVertex.Level gssVertex.State)
+                            SppfLabel.Reduction (rt.Production, (rt.getLeftEnd gssVertex.Level gssVertex.State, rt.EndLevel, rt.AcceptingNfaStates))
                         | _ -> sppfLabel
                     new GssEdge(gssVertex, sppfLabel)
                 let edges = edges |> ResizeArray.map toEdge
@@ -230,11 +241,11 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                         stateToVertex.[state].Value.otherOutEdges <- ResizeArray.sub edges 1 (count - 1) |> ResizeArray.toArray
                 edges.Clear()
             while temporarySppfEdges.Count > 0 do
-                let edge = temporarySppfEdges.Pop()
+                let source, edge = temporarySppfEdges.Pop()
                 let sppfLabel = 
                     match edge.label with
                     | TemporaryReduction rt ->
-                        SppfLabel.Reduction (rt.Production, edge.dest)
+                        SppfLabel.Reduction (rt.Production, (source, rt.EndLevel, rt.AcceptingNfaStates))
                     | _ -> edge.label
                 edge.setLabel sppfLabel
             for i = 0 to currentReductions.Length - 1 do
@@ -292,20 +303,21 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
         // if finish isn't accepting state then error
         if !isEnd && usedStates.Count > 0 && not <| isAcceptState() 
         then
-            if errorRuleExist 
+            (*if errorRuleExist 
             then 
                  recovery()
                  makeReductions (!curInd + 1) recovery
                  attachEdges()
-            else wasError := true
+            else*) wasError := true
 
         let lastTokens count =
             [| for i = max 0 (tokens.Length-count) to tokens.Length-1 do
                 yield tokens.[i]|]
+        
         let debugFuns () =
             let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])
             {
-                drawGSSDot = drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
+                drawGSSDot = fun _ -> () (*drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex*)
                 lastTokens = lastTokens
             }
         
@@ -313,21 +325,17 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
         then 
             Error (!curInd , [|!curToken|] , "Parse Error", debugFuns ())
         else
-            let root = ref None
-            let addTreeTop res =
-                let children = new Family(parserSource.StartRule,  new Nodes(res, null, null))
-                new AST(children, null)
+            let resSppf = ref None
             for vertex in usedStates do
                 if parserSource.AccStates.[vertex] 
                 then
-                    root :=
-                        stateToVertex.[vertex].OutEdges.first.Ast
-                        |> addTreeTop
-                        |> Some
-            match !root with
-            | None -> Error (!curInd, [|!curToken|], "Input was fully processed, but it's not complete correct string.", debugFuns (), errDict)
+                    resSppf :=
+                        match stateToVertex.[vertex].Value.firstOutEdge.Value.Label with
+                        | SppfLabel.Reduction (_, sppf) -> Some sppf
+                        | _ -> None
+            match !resSppf with
+            | None -> Error (!curInd, [|!curToken|], "Input was fully processed, but it's not complete correct string.", debugFuns ())
             | Some res -> 
                 debugFuns().drawGSSDot "res.dot"
-                let tree = new Tree<_> (tokens.ToArray(), res :> AstNode, parserSource.Rules)
                 //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber None parserSource.LeftSide "../../../Tests/RNGLR/sppf.dot"
-                Success (tree, [||], errDict)
+                Success (res, [||])

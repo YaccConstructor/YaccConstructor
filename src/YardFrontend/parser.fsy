@@ -287,17 +287,10 @@ bound: patt EQUAL prim { createSeqElem (Some $1) false $3 None }
 
 patt: LIDENT {$1} | ACTION {$1}
 
-parens : LPAREN alts RPAREN      { $2 }
-       | LPAREN RPAREN           { errorexception "Incorrect construction! Expected 'params' among '(' and ')'" parserRange }
-       | alts RPAREN             { errorexception "'(' is missing" parserRange }
-
-sqrbrdrs : SQR_LBR alts SQR_RBR    { $2 }
-         | SQR_LBR SQR_RBR         { errorexception "Incorrect construction! Expected 'params' among '[' and ']'" parserRange }
-         | alts SQR_RBR            { errorexception "'[' is missing" parserRange }
-
 prim: prim STAR            {PMany $1}
 	| STARTREPEAT prim ENDREPEAT {PMany $2} 
 	| POSITIVEINT STAR prim           {PRepet ($3, (Some 0), (Yard.Core.IL.Source.toString $1) |> int |> Some)}
+	| prim LPAREN POSITIVEINT COLON POSITIVEINT RPAREN {PRepet ($1, (Yard.Core.IL.Source.toString $3) |> int |> Some, (Yard.Core.IL.Source.toString $5) |> int |> Some)}
     | prim PLUS            {PSome $1}
     | prim QUESTION        {POpt $1}
     | SQR_LBR alts SQR_RBR {POpt $2}

@@ -32,8 +32,7 @@ let private tokenFun f = function
     | COMMA st
     | GREAT st
     | DLABEL st
-    | NUMBER st
-    | POSITIVEINT st
+    | NUMBER st    
     | LESS st
     | STARTREPEAT st
     | ENDREPEAT st
@@ -67,7 +66,8 @@ let private tokenFun f = function
     | BLOCK_END st
     | TOKENS_BLOCK st
     | LITERAL st
-    | OPTIONS_START st ->
+    | OPTIONS_START st
+    | DOUBLEDOT st ->
         f st
     //| OPTION_BLOCK _ -> failwith "Unexpected OPTION_BLOCK"
 
@@ -146,8 +146,8 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
 let private parse buf userDefs =
     let rangeToString (b : Source.Position, e : Source.Position) =
         sprintf "((%d,%d)-(%d,%d))" b.line b.column e.line e.column
-    //let tokens = List.ofSeq (filterByDefs buf userDefs)
-    //tokens |> Seq.iter (fun t -> printfn "%A: %A" t (rangeToString <| tokenToRange t))
+    let tokens = List.ofSeq (filterByDefs buf userDefs)
+    tokens |> Seq.iter (fun t -> printfn "%A: %A" t (rangeToString <| tokenToRange t))
     match GrammarParser.buildAst (filterByDefs buf userDefs) with
     | Parser.Success (ast, _, dict) ->
         ast.collectWarnings tokenToRange

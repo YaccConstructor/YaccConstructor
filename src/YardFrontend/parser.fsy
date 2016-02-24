@@ -290,10 +290,14 @@ bound: patt EQUAL prim { createSeqElem (Some $1) false $3 None }
 
 patt: LIDENT {$1} | ACTION {$1}
 
+int_opt : 
+    {None}
+	| NUMBER {(Yard.Core.IL.Source.toString $1) |> int |> Some}
+
 prim: prim STAR            {PMany $1}
 	| STARTREPEAT prim ENDREPEAT {PMany $2} 
-	| POSITIVEINT STAR prim           {PRepet ($3, (Some 0), (Yard.Core.IL.Source.toString $1) |> int |> Some)}
-	| prim LPAREN POSITIVEINT COLON POSITIVEINT RPAREN {PRepet ($1, (Yard.Core.IL.Source.toString $3) |> int |> Some, (Yard.Core.IL.Source.toString $5) |> int |> Some)}
+	| NUMBER STAR prim           {PRepet ($3, (Some 0), (Yard.Core.IL.Source.toString $1) |> int |> Some)}
+	| prim STAR SQR_LBR int_opt DOUBLEDOT int_opt SQR_RBR {PRepet ($1,$4,$6)}
     | prim PLUS            {PSome $1}
     | prim QUESTION        {POpt $1}
     | SQR_LBR alts SQR_RBR {POpt $2}

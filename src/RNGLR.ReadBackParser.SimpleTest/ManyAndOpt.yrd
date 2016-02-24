@@ -1,0 +1,4 @@
+[<Start>]
+root_rule: (a B?)* {}
+
+a : A {}

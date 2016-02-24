@@ -41,7 +41,6 @@ type Vertex (state : int, level : int) =
     member this.OutEdges = out
     member this.State = state
     member this.PassingReductions = passingReductions
-    member val prefixes = new ResizeArray<Prefix>() with get    //in reverse order
 
     member this.addEdge (edge : Edge) =
         let mutable i = out.Count - 1
@@ -88,20 +87,20 @@ and [<Struct>]
     new (_gssVertex, _prod, _pos, _edge) = {gssVertex = _gssVertex; prod = _prod; pos = _pos; edge = _edge}
 
 and [<AllowNullLiteral>]
-    Prefix (head : Edge, tail : ResizeArray<Prefix>) = 
+    Prefix<'TokenType> (head : QuickGraph.TaggedEdge<_,'TokenType>, tail : ResizeArray<Prefix<_>>) = 
 
     member this.Head = head
     member this.Tail = tail
 
     member this.AddEdge edge =
-        new Prefix(edge, this)
+        new Prefix<_>(edge, this)
 
-    new (head, prefix : Prefix) =
-        let curLevel = new ResizeArray<Prefix>()
+    new (head, prefix : Prefix<_>) =
+        let curLevel = new ResizeArray<Prefix<_>>()
         curLevel.Add(prefix)
-        new Prefix (head, curLevel)
+        new Prefix<_> (head, curLevel)
 
-    new (edge) = new Prefix (edge, new ResizeArray<Prefix>())
+    new (edge) = new Prefix<_> (edge, new ResizeArray<Prefix<_>>())
 
 and [<AllowNullLiteral>]
     Path (head : AstNode, tail : Path, length : int) = 
@@ -160,7 +159,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     let nodes = new BlockResizeArray<AstNode>()
     let terminals = new BlockResizeArray<'TokenType>()
     let startState = 0
-    let inline getEpsilon i = new Epsilon(-1-i)
+    let (*inline*) getEpsilon i = new Epsilon(-1-i)
     let startNonTerm = parserSource.LeftSide.[parserSource.StartRule]
     let verticesToProcess = new Queue<_>()
     verticesToProcess.Enqueue (startV)
@@ -168,6 +167,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     let outEdgesInnerGraph = Array.init (Seq.max tokens.Vertices + 1) (fun _ -> [||])
     for v in innerGraph.Vertices do
         outEdgesInnerGraph.[v.vNum] <- innerGraph.OutEdges v |> Array.ofSeq
+    let gssVertexesToPrefixes = new Dictionary<_,_>()
     
     let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide : int[])
         (initNodes : seq<Vertex>) (numToString : int -> string) (errInd: int) (path : string) =
@@ -197,20 +197,19 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 levels.[u.Level] <- [!curNum]
             else
                 levels.[u.Level] <- !curNum :: levels.[u.Level]
-            print <| sprintf "%d [label=\"%d_%d\"]" !curNum u.Level u.State 
-            (*//print prefixes
-            let mutable prString = "Prefixes: "
-            let rec printPath (pr:Prefix) (prevStr : string) =
-                if pr = null then prevStr + "]"
-                else 
-                    match path.Head with
-                    | :? Epsilon -> printPath path.Tail (prevStr + "->Epsilon")
-                    | :? Terminal as x' -> printPath path.Tail (prevStr + "->" + (x'.TokenNumber.ToString()))
-                    | :? AST -> printPath path.Tail (prevStr + "->Ast")
-                    | _ -> failwith "Unexpected ast"
-            for prefix in u.prefixes do
-                prString <-  prString + printPath prefix "["
-            print <| sprintf "%d [label=\"%d_%d_%s\"]" !curNum u.Level u.State prString*)
+            //print <| sprintf "%d [label=\"%d_%d\"]" !curNum u.Level u.State 
+            let rec printPrefixes (prefixes:ResizeArray<Prefix<_>>) (prevStr : string) =
+                let mutable curStr = prevStr + "["
+                if ResizeArray.isEmpty(prefixes) then curStr + "]"
+                else
+                    for prefix in prefixes do
+                        if prefix <> null
+                        then
+                            curStr <- curStr + prefix.Head.Tag.ToString() + ":"
+                            curStr <- printPrefixes prefix.Tail curStr
+                    curStr
+                        
+            print <| sprintf "%d [label=\"%d_%d_%s\"]" !curNum u.Level u.State (printPrefixes gssVertexesToPrefixes.[u] "Prefixes:")
             incr curNum
             u.OutEdges |> ResizeArray.iter (handleEdge u)
             
@@ -269,20 +268,20 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         v, isNew
 
     //return old prefixes with new edge on end
-    let newPrefix (oldPrefixes:ResizeArray<Prefix>) edge =
-        new Prefix(edge, oldPrefixes)
+    let newPrefix (oldPrefixes:ResizeArray<Prefix<_>>) edge =
+        new Prefix<_>(edge, oldPrefixes)
 
     //add prefix to list of prefixes
-    let rec addPrefix (curLevel:ResizeArray<Prefix>) (prefixToAdd:Prefix) = 
+    let rec addPrefix (curLevel:ResizeArray<Prefix<_>>) (prefixToAdd:Prefix<_>) = 
         if prefixToAdd = null   //null used for marking the ends of prefix
         then
             if not (ResizeArray.exists
-                        (fun (prefix:Prefix) -> prefix = null)
+                        (fun (prefix:Prefix<_>) -> prefix = null)
                         curLevel)
             then curLevel.Add(null)     //adding null if need
         else
             let nextCommon = ResizeArray.tryFind
-                                (fun (pr:Prefix) -> pr <> null && pr.Head = prefixToAdd.Head)
+                                (fun (pr:Prefix<_>) -> pr <> null && pr.Head = prefixToAdd.Head)
                                 curLevel
             match nextCommon with
             | Some oldPrefix -> if ResizeArray.isEmpty(prefixToAdd.Tail)
@@ -294,13 +293,16 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             | None -> curLevel.Add(prefixToAdd)     //prefixToAdd - new prefix for curLevel
 
 
-    let addEdge (startV:VInfo<_>) isNew (newVertex:Vertex) edge isNotEps (prefixesToAdd:ResizeArray<Prefix>) =
+    let addEdge (startV:VInfo<_>) isNew (newVertex:Vertex) edge isNotEps (prefixesToAdd:ResizeArray<Prefix<_>>) =
         if not isNew && newVertex.PassingReductions.Count > 0
         then startV.passingReductions.Add((newVertex, edge))
         customEnqueue(startV)
         newVertex.addEdge edge
+        if not <| gssVertexesToPrefixes.ContainsKey newVertex
+                then gssVertexesToPrefixes.Add(newVertex, new ResizeArray<Prefix<_>>())
+        let prefixes = gssVertexesToPrefixes.[newVertex]
         for prefixToAdd in prefixesToAdd do
-            addPrefix newVertex.prefixes prefixToAdd //add new prefix to vertex
+            addPrefix prefixes prefixToAdd //add new prefix to vertex
 
         if isNotEps
         then
@@ -326,8 +328,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 let ind = tailGssV.FindIndex gssVertex.State gssVertex.Level 
                 if ind = -1 || (tailGssV.Edge ind).Ast <> edgesToTerms.[e]
                 then
-                    let prefixesToAdd = new ResizeArray<Prefix>()
-                    prefixesToAdd.Add(newPrefix gssVertex.prefixes edge)           //or edge?
+                    let prefixesToAdd = new ResizeArray<Prefix<_>>()
+
+                    prefixesToAdd.Add(newPrefix gssVertexesToPrefixes.[gssVertex] e)
                     addEdge e.Target isNew tailGssV edge true prefixesToAdd    //push case
 
         if not <| currentGraphV.processedGssVertices.Contains(gssVertex)
@@ -363,7 +366,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             | -1 -> 
                 let edge = new Edge(final, nodes.Length)
                 nodes.Add <| new AST (Unchecked.defaultof<_>, null)
-                addEdge  startV isNew newVertex edge (pos > 0) startGssV.prefixes
+                addEdge  startV isNew newVertex edge (pos > 0) gssVertexesToPrefixes.[startGssV]
                 edge.Ast
             | x -> (newVertex.Edge x).Ast 
         if ast >= 0 
@@ -371,7 +374,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         else 
             let edge = new Edge(final, nodes.Length)
             nodes.Add <| new AST (Unchecked.defaultof<_>, null)
-            addEdge  startV isNew newVertex edge (pos > 0) startGssV.prefixes
+            addEdge  startV isNew newVertex edge (pos > 0) gssVertexesToPrefixes.[startGssV]
             addChildren nodes.[nodes.Length - 1] path prod
 
     let rec walk remainLength (vertex : Vertex) path startV nonTerm pos prod shouldEnqueueVertex (startGssV : Vertex) = 
@@ -402,7 +405,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             if newVertex.FindIndex reduction.gssVertex.State reduction.gssVertex.Level = -1 
             then
                 let edge = new Edge(reduction.gssVertex, -parserSource.LeftSide.[reduction.prod]-1)
-                addEdge currentGraphV isNew newVertex edge false reduction.gssVertex.prefixes
+                addEdge currentGraphV isNew newVertex edge false gssVertexesToPrefixes.[reduction.gssVertex]
         else 
             let path = new Path(nodes.[reduction.edge.Value.Ast])
             walk (reduction.pos - 1) (reduction.edge.Value : Edge).Dest path currentGraphV nonTerm reduction.pos reduction.prod false reduction.gssVertex

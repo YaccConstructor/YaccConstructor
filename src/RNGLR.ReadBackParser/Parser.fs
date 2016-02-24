@@ -138,6 +138,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                                     dict.[edge.dest.label] <- Some prevVertex
                                     incr count
                                     epsilonClose prevVertex
+                        epsilonClose vertex
                         dict |> Array.choose (fun x -> x)
                         
                     let matchNfaAndGssEdgeLabels (nfaEdge : Edge<_,_>) = function
@@ -146,8 +147,8 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                             nfaEdge.label = parserSource.LeftSide.[prod]
                         | SppfLabel.TemporaryReduction rt ->
                             nfaEdge.label = parserSource.LeftSide.[rt.Production]
-                        | SppfLabel.Terminal term ->
-                            nfaEdge.label = term
+                        | SppfLabel.Terminal token ->
+                            nfaEdge.label = parserSource.TokenToNumber tokens.[token]
                         | _ -> false
 
                     let reductionStep (leftNfaVertex : VertexWithBackTrack<int, int>) leftGssVertex rightVertex sppfLabel =

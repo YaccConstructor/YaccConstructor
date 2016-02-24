@@ -130,7 +130,7 @@ let printTables
 
         let printNfas (nfas : NFATable) =
             printArr nfas 
-                (fun x -> printPair x (fun x -> print "%d" x) (fun x -> printListAsArray x (fun x -> printPair x (fun x -> print "%d" x) (fun x -> printListAsArray x (fun x -> printPair x (fun x -> print "%d" x) (fun x -> print "%d" x))))))
+                (fun x -> printPair x (fun x -> print "%d" x) (fun x -> printList x (fun x -> printPair x (fun x -> print "%d" x) (fun x -> printList x (fun x -> printPair x (fun x -> print "%d" x) (fun x -> print "%d" x))))))
 
         printBr "type Token ="
         let indexator = grammar.indexator
@@ -275,8 +275,8 @@ let printTables
         
         printBrInd 0 "let private parserSource = new ParserSourceReadBack<Token> (gotos, reduces, zeroReduces, accStates, nfas, leftSide, startRule, eofIndex, tokenToNumber, indexToSymbolType, acceptEmptyInput, numToString, epsilonIndex, errorIndex)"
 
-        printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
-        printBrInd 1 "buildAst<Token> parserSource"
+        printBr "let buildAst : (seq<Token> -> ParseReadBackResult<Token>) ="
+        printBrInd 1 "buildAstReadBack<Token> parserSource"
         printBr ""
     
         res.ToString()

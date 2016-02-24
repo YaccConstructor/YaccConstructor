@@ -9,7 +9,7 @@ type Sppf = Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel> * int *
     //(start vertex, end level, accepting nfa states)
 
 and SppfLabel =
-    | Terminal of int
+    | Terminal of int //number in tokens array
     | Reduction of int * Sppf
     | EpsilonReduction of int
     | Epsilon //used only in SPPF, while others may be used in GSS as well

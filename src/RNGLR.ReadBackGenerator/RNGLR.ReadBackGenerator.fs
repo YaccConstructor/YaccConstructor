@@ -180,8 +180,6 @@ type RNGLR() =
                     println "open Yard.Generators.RNGLR.ReadBack.Parser"
                     
                     println "open Yard.Generators.RNGLR.ReadBack"
-                    println "open Yard.Generators.Common.AST"
-                    println "open Yard.Generators.Common.AstNode"
 
                     (*if !needHighlighting
                     then 

@@ -1,4 +1,5 @@
 ﻿open System
+open System.IO
 open System.Diagnostics
 open System.Collections.Generic
 open YC.FST.AbstractLexing.Interpreter
@@ -45,12 +46,15 @@ let manuallyCreatedTests = [fstCompos1, fstCompos2; fstCompos12, fstCompos22; fs
 
 [<EntryPoint>]
 let main argv = 
-    let runLangTests tests getFST compose optimalCompose =
+    let runLangTests lang tests getFST compose optimalCompose =
         for test in tests do
-            let fst = getFST test
-            printfn "Processing %A" test
-            printfn "Average time for compose: %A" (benchmark (fun () -> compose fst) 100)
-            printfn "Average time for optimal compose: %A" (benchmark (fun () -> optimalCompose fst) 100)
+            try
+                let fst = getFST test
+                printfn "Processing %A" test
+                printfn "Average time for compose: %A" (benchmark (fun () -> compose fst) 10)
+                printfn "Average time for optimal compose: %A" (benchmark (fun () -> optimalCompose fst) 10)
+            with
+                | _ -> printfn"%s is not %s compliant!" test lang
     let runManuallyCreatedTests (tests : list<FST<_,_>*FST<_,_>>) = 
         for (fst1, fst2) in tests do
             let alphabet = new HashSet<_>()
@@ -59,7 +63,17 @@ let main argv =
             printfn "Processing manually created FSTs"
             printfn "Average time for compose: %A" (benchmark (fun () -> compose fst1 fst2 alphabet) 100)
             printfn "Average time for optimal compose: %A" (benchmark (fun () -> optimalCompose fst1 fst2 alphabet) 100)
-    runLangTests calcTests getCalcFST calcCompose calcOptimalCompose
-    runLangTests TSQLTests getTSQLFST TSQLCompose TSQLOptimalCompose
-    runManuallyCreatedTests manuallyCreatedTests
+    if Array.exists (fun arg -> arg.Equals "-d") argv then
+        runLangTests "Calc" calcTests getCalcFST calcCompose calcOptimalCompose
+        runLangTests "TSQL" TSQLTests getTSQLFST TSQLCompose TSQLOptimalCompose
+        runManuallyCreatedTests manuallyCreatedTests
+    if Array.exists (fun arg -> arg.Equals "-f") argv then
+        try 
+            let path = argv.[Array.findIndex (fun x -> x.Equals("-f")) argv + 1]
+            let folder = new DirectoryInfo(path)
+            let getTSQLFST = path |> getFST
+            let externalTSQLTests = [for x in folder.GetFiles() do if x.Extension.Equals(".dot") then yield x.Name]
+            runLangTests "TSQL" externalTSQLTests getTSQLFST TSQLCompose TSQLOptimalCompose
+        with
+            | _ -> printfn "Wrong folder!"
     0

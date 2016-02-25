@@ -67,7 +67,7 @@
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i StrangeBrackets.yrd -c ExpandEbnf -c ExpandMeta ^
         -g "GLLGenerator -pos int -token int -module GLL.StrangeBrackets -translate false -o StrangeBrackets.yrd.fs -abstract true" >> log.txt
 
-for %%i in (Attrs,Cond,Counter,Cycle,Eps2,Epsilon,Expr,First,ListEps,LolCalc,LongCycle,LongCycle_BAD,Longest,Mixed,Omit,Order) do (
+for %%i in (Attrs, Cond, Counter, Cycle, Eps2, Epsilon, Expr, First, ListEps, LolCalc, LongCycle, LongCycle_BAD, Longest, Mixed, Omit, Order) do (
     echo . >> log.txt
     echo %%i >> log.txt
     ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i %%i.yrd ^
@@ -76,4 +76,3 @@ for %%i in (Attrs,Cond,Counter,Cycle,Eps2,Epsilon,Expr,First,ListEps,LolCalc,Lon
 
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i "..\YC.GrammarZOO\SQL\TSQL\mssql_abstract.yrd" -c ExpandEbnf -c Linearize -c ExpandMeta ^
         -g "GLLGenerator -pos int -token int -abstract true -module GLL.MsSqlParser -o MsSqlParser.yrd.fs " >> log.txt
-

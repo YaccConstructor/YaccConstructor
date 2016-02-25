@@ -197,17 +197,20 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 levels.[u.Level] <- [!curNum]
             else
                 levels.[u.Level] <- !curNum :: levels.[u.Level]
-            //print <| sprintf "%d [label=\"%d_%d\"]" !curNum u.Level u.State 
             let rec printPrefixes (prefixes:ResizeArray<Prefix<_>>) (prevStr : string) =
                 let mutable curStr = prevStr + "["
                 if ResizeArray.isEmpty(prefixes) then curStr + "]"
                 else
                     for prefix in prefixes do
-                        if prefix <> null
+                        if prefix = null
                         then
-                            curStr <- curStr + prefix.Head.Tag.ToString() + ":"
-                            curStr <- printPrefixes prefix.Tail curStr
-                    curStr
+                            curStr <- curStr + "NULL, "
+                        else
+                            let tokenStr = tokenToNumber prefix.Head.Tag |> parserSource.NumToString
+                            let tokenData = match parserSource.TokenData with | None -> "" | Some f -> f prefix.Head.Tag|> string
+                            curStr <- curStr + tokenStr + tokenData + ":"
+                            curStr <- printPrefixes prefix.Tail curStr + ", "
+                    curStr + "]"
                         
             print <| sprintf "%d [label=\"%d_%d_%s\"]" !curNum u.Level u.State (printPrefixes gssVertexesToPrefixes.[u] "Prefixes:")
             incr curNum
@@ -262,13 +265,14 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             | None ->
                 v <- new Vertex(state, currentGraphV.vNum)
                 isNew <- true
+                gssVertexesToPrefixes.Add(v, new ResizeArray<Prefix<_>>())
                 listToAddUnprocessedGssV.Add v
                 for e in outEdgesInnerGraph.[currentGraphV.vNum] do
                     addZeroReduction v e.Tag currentGraphV false
         v, isNew
 
     //return old prefixes with new edge on end
-    let newPrefix (oldPrefixes:ResizeArray<Prefix<_>>) edge =
+    let extPrefix (oldPrefixes:ResizeArray<Prefix<_>>) edge =
         new Prefix<_>(edge, oldPrefixes)
 
     //add prefix to list of prefixes
@@ -298,8 +302,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         then startV.passingReductions.Add((newVertex, edge))
         customEnqueue(startV)
         newVertex.addEdge edge
-        if not <| gssVertexesToPrefixes.ContainsKey newVertex
-                then gssVertexesToPrefixes.Add(newVertex, new ResizeArray<Prefix<_>>())
         let prefixes = gssVertexesToPrefixes.[newVertex]
         for prefixToAdd in prefixesToAdd do
             addPrefix prefixes prefixToAdd //add new prefix to vertex
@@ -330,7 +332,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 then
                     let prefixesToAdd = new ResizeArray<Prefix<_>>()
 
-                    prefixesToAdd.Add(newPrefix gssVertexesToPrefixes.[gssVertex] e)
+                    prefixesToAdd.Add(extPrefix gssVertexesToPrefixes.[gssVertex] e)
                     addEdge e.Target isNew tailGssV edge true prefixesToAdd    //push case
 
         if not <| currentGraphV.processedGssVertices.Contains(gssVertex)
@@ -483,10 +485,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
 //                    tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
 //
-//                    let gssInitVertices = 
-//                       innerGraph.Edges |> Seq.collect (fun e -> e.Source.processedGssVertices)
-//
-//                    drawDot parserSource.TokenToNumber terminals parserSource.LeftSide gssInitVertices parserSource.NumToString parserSource.ErrorIndex "../../../Tests/AbstractRNGLR/DOT/gss.dot"
+                    let gssInitVertices = 
+                       innerGraph.Edges |> Seq.collect (fun e -> e.Source.processedGssVertices)
+
+                    drawDot parserSource.TokenToNumber terminals parserSource.LeftSide gssInitVertices parserSource.NumToString parserSource.ErrorIndex "../../../Tests/AbstractRNGLR/DOT/gss.dot"
 
                     Success <| tree
                 with

@@ -49,15 +49,18 @@ let simpleRules nonTerm body : Rule.t<_,_> list =
         metaArgs = []
     }]
 
-let simpleNotStartRules nonTerm body : Rule.t<_,_> list =
+let metaRules nonTerm body args : Rule.t<_,_> list = 
     [{
         name = Source.t nonTerm
         args = []
         body = body
         isStart = false
         isPublic = false
-        metaArgs = []
+        metaArgs = args
     }]
+
+let simpleNotStartRules nonTerm body : Rule.t<_,_> list =
+    metaRules nonTerm body []
 
 let verySimpleRules nonTerm seq : Rule.t<_,_> list =
     simpleRules nonTerm <| PSeq(seq, None, None)

@@ -45,20 +45,25 @@ let trd_ (_,_,x) = x
 let joinMaps (p:Map<'a,'b>) (q:Map<'a,'b>) = 
     Map(Seq.concat [ (Map.toSeq p) ; (Map.toSeq q) ])
 
-let makeNewSeq seq (lbl:Option<Source.t>) (w:Option<Source.t>) = 
+let mkLbl (lbl:Option<Source.t>) (w:Option<Source.t>) = 
+    let lblName = 
+        match lbl with
+        | Some s -> s.text
+        | None -> "dummy_lbl"
+    match (w, lbl) with
+    | None,None -> None
+    | (None, Some s) -> Some {label=s.text; weight=None}
+    | _ ->
+        let wVal = w.Value
+        try
+            Some {label=lblName; weight = Some (float wVal.text)}
+        with 
+        | :? System.FormatException as ex ->
+            failwithf "Parse error on position (%i,%i) on token %s: %s" wVal.startPos.line wVal.startPos.column wVal.text "illegal weight. Number expected."
+
+let makeNewSeq seq lbl = 
     match seq with 
-     | PSeq(els,ac,_) -> let lblName = 
-                            match lbl with
-                            | Some s -> s.text
-                            | None -> "dummy_lbl"
-                         match w with
-                         | None -> PSeq (els,ac,Some {label=lblName; weight=None})
-                         | _ -> let wVal = w.Value
-                                try
-                                    PSeq (els,ac,Some {label=lblName; weight = Some (float wVal.text)})
-                                with 
-                                | :? System.FormatException as ex ->
-                                    failwithf "Parse error on position (%i,%i) on token %s: %s" wVal.startPos.line wVal.startPos.column wVal.text "illegal weight. Number expected."
+     | PSeq(els,ac,_) -> PSeq (els,ac,lbl)
      | x -> x
 
 let errorexception msg parserRange = raise <| ParseError ( new Source.t("", fst parserRange, snd parserRange, !currentFilename), msg ) 
@@ -255,8 +260,6 @@ param_opt : { None } | PARAM   { Some $1 }
 
 param_list : { [] } | PARAM param_list { $1::$2 }
 
-weight_opt :                        { None } 
-           | SQR_LBR NUMBER SQR_RBR { Some $2}          
 
 alts: seq { $1 } | seq bar_seq_nlist {PAlt ($1,$2)}
 
@@ -267,11 +270,12 @@ seq: lbl_seq {$1} | no_lbl_seq {$1}
 
 no_lbl_seq: seq_elem seq_elem_list action_opt { PSeq ($1::$2, $3, None) }
           | ACTION                            { PSeq ([], Some $1, None) }
+          
+lbl : DLABEL {mkLbl (Some $1) None} 
+    | SQR_LBR NUMBER SQR_RBR {mkLbl None (Some $2)}
+    | DLABEL SQR_LBR NUMBER SQR_RBR {mkLbl (Some $1) (Some $3)} 
 
-lbl_opt : DLABEL {Some $1} 
-        | {None}
-
-lbl_seq : lbl_opt weight_opt LPAREN no_lbl_seq RPAREN     { makeNewSeq $4 $1 $2 }        
+lbl_seq : lbl LPAREN no_lbl_seq RPAREN { makeNewSeq $3 $1 }
 
 comma_opt: { None } | COMMA {Some $1}
 
@@ -292,12 +296,12 @@ patt: LIDENT {$1} | ACTION {$1}
 
 int_opt : 
     {None}
-	| NUMBER {(Yard.Core.IL.Source.toString $1) |> int |> Some}
+    | NUMBER {(Yard.Core.IL.Source.toString $1) |> int |> Some}
 
 prim: prim STAR            {PMany $1}
-	| STARTREPEAT prim ENDREPEAT {PMany $2} 
-	| NUMBER STAR prim           {PRepet ($3, (Some 0), (Yard.Core.IL.Source.toString $1) |> int |> Some)}
-	| prim STAR SQR_LBR int_opt DOUBLEDOT int_opt SQR_RBR {PRepet ($1,$4,$6)}
+    | STARTREPEAT prim ENDREPEAT {PMany $2} 
+    | NUMBER STAR prim           {PRepet ($3, (Some 0), (Yard.Core.IL.Source.toString $1) |> int |> Some)}
+    | prim STAR SQR_LBR int_opt DOUBLEDOT int_opt SQR_RBR {PRepet ($1,$4,$6)}
     | prim PLUS            {PSome $1}
     | prim QUESTION        {POpt $1}
     | SQR_LBR alts SQR_RBR {POpt $2}

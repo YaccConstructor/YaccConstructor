@@ -22,25 +22,24 @@ type M =
     val lbl : int<labelMeasure>
     new (p,l) = {pos = p; lbl = l}
 
-let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : ParserInputGraph<'TokenType>) (maxLen : int) : ParserCommon.ParseResult<_> = 
-    (*let input = input
-    let input = 
-        let h = input.Edges |> Seq.map (fun e -> new ParserEdge<'TokenType * ref<bool>>(e.Source, e.Target, (e.Tag , ref false)))
-        let g = new ParserInputGraph<'TokenType * ref<bool>>((input.InitStates : int[]), (input.FinalStates : int[]))
-        g*)
+let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserEdge<'TokenType>[]) (startVertecies : int[]) vertexCount (maxLen : int) : ParserCommon.ParseResult<_> = 
     
-    if input.EdgeCount = 0 then
+    if input.Length = 0 then
       //  if parser.AcceptEmptyInput then
       //      let eps = new Nonnte
             //Success (new Tree<_>(null, getEpsilon startNonTerm, null))
      //   else
             Error ("This grammar does not accept empty input.")     
     else
+
+        let outEdges = Array.init<BioParserEdge<'TokenType>[]> vertexCount (fun i -> (Array.filter (fun e -> input.[i].End = e.Start) input))
+
+
         let parser = parser
         let slots = parser.Slots
         let errors = new SysDict<int64, SysDict<int<nodeMeasure>, Vertex*int>>()   
-        let setU = Array.zeroCreate<SysDict<int, SysDict<int64, ResizeArray<int<nodeMeasure>>>>> (input.VertexCount )///1
-        let structures = new ParserStructures<'TokenType>(input.VertexCount, parser.StartRule)
+        let setU = new SysDict<int, SysDict<int, SysDict<int64, ResizeArray<int<nodeMeasure>>>>>()
+        let structures = new ParserStructures<'TokenType>(parser.StartRule)
         let setR = structures.SetR
         let epsilonNode = structures.EpsilonNode
         let setP = structures.SetP

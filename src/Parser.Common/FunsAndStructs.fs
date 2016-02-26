@@ -52,7 +52,7 @@ module CommonFuns =
     let inline getRule (packedValue : int<labelMeasure>)  = int packedValue >>> 16
     let inline getPosition (packedValue : int<labelMeasure>) = int (int packedValue &&& 0xffff)
 
-type ParserStructures<'TokenType> (inputLength : int, currentRule : int)=
+type ParserStructures<'TokenType> (currentRule : int)=
     let sppfNodes = new BlockResizeArray<INode>()
     let dummyAST = new TerminalNode(-1, packExtension -1 -1, 0)
     let setP = new Dictionary<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<nodeMeasure>>>(500)//list<int<nodeMeasure>>> (500)
@@ -104,45 +104,45 @@ type ParserStructures<'TokenType> (inputLength : int, currentRule : int)=
                 y
                                  
     let containsContext (setU : Dictionary<_, Dictionary<_, ResizeArray<_>>>[]) inputIndex (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
-        if inputIndex <= inputLength
+        //if inputIndex <= inputLength
+        //then
+        let vertexKey = CommonFuns.pack vertex.Level vertex.NontermLabel
+        if setU.[inputIndex] <> Unchecked.defaultof<_>
         then
-            let vertexKey = CommonFuns.pack vertex.Level vertex.NontermLabel
-            if setU.[inputIndex] <> Unchecked.defaultof<_>
+            let cond, current = setU.[inputIndex].TryGetValue(int label) 
+            if  cond
             then
-                let cond, current = setU.[inputIndex].TryGetValue(int label) 
-                if  cond
+                if current.ContainsKey vertexKey
                 then
-                    if current.ContainsKey vertexKey
-                    then
-                        let trees = current.[vertexKey]
-                        if not <| trees.Contains ast
-                        then 
-                            trees.Add ast
-                            false
-                        else
-                            true
-                    else 
-                        let arr = new ResizeArray<int<nodeMeasure>>()
-                        arr.Add ast
-                        current.Add(vertexKey, arr)                    
+                    let trees = current.[vertexKey]
+                    if not <| trees.Contains ast
+                    then 
+                        trees.Add ast
                         false
+                    else
+                        true
                 else 
-                    let dict = new Dictionary<_, ResizeArray<_>>()
-                    setU.[inputIndex].Add(int label, dict)
                     let arr = new ResizeArray<int<nodeMeasure>>()
                     arr.Add ast
-                    dict.Add(vertexKey, arr) 
+                    current.Add(vertexKey, arr)                    
                     false
             else 
-                let dict1 = new Dictionary<_, _>()
-                setU.[inputIndex] <- dict1
-                let dict2 = new Dictionary<_, ResizeArray<_>>()
-                dict1.Add(int label, dict2)
+                let dict = new Dictionary<_, ResizeArray<_>>()
+                setU.[inputIndex].Add(int label, dict)
                 let arr = new ResizeArray<int<nodeMeasure>>()
                 arr.Add ast
-                dict2.Add(vertexKey, arr)
+                dict.Add(vertexKey, arr) 
                 false
-        else true
+        else 
+            let dict1 = new Dictionary<_, _>()
+            setU.[inputIndex] <- dict1
+            let dict2 = new Dictionary<_, ResizeArray<_>>()
+            dict1.Add(int label, dict2)
+            let arr = new ResizeArray<int<nodeMeasure>>()
+            arr.Add ast
+            dict2.Add(vertexKey, arr)
+            false
+        //else true
 
     let addContext (setU : System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>[]) (inputVertex : int) (label : int<labelMeasure>) vertex ast len(*currentPath*) =
         let l = sppfNodes.[int ast].getLength ()

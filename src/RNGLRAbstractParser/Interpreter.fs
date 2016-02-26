@@ -29,9 +29,6 @@ open Yard.Generators.Common.DataStructures
 open Yard.Generators.RNGLR
 open FSharpx.Collections.Experimental
 
-type ParseResult<'TokenType> =
-    | Success of Tree<'TokenType>
-    | Error of int * 'TokenType * string
 
 [<AllowNullLiteral>]
 type Vertex (state : int, level : int) =
@@ -144,6 +141,11 @@ and [<AllowNullLiteral>]
     new (head, tail) = new Path(head, tail, if tail = null then 1 else tail.Length + 1)
     new (edge) = new Path (edge, null, 1)
 
+type ParseResult<'TokenType> =
+    | Success of Tree<'TokenType> * Dictionary<string,ResizeArray<Prefix<'TokenType>>>
+    | Error of Dictionary<string,ResizeArray<Prefix<'TokenType>>>
+
+
 let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : ParserInputGraph<'TokenType>) =
     let startV, finalV, innerGraph =
         let verticesMap = Array.zeroCreate (Seq.max tokens.Vertices + 1)            
@@ -168,10 +170,24 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     for v in innerGraph.Vertices do
         outEdgesInnerGraph.[v.vNum] <- innerGraph.OutEdges v |> Array.ofSeq
     let gssVertexesToPrefixes = new Dictionary<_,_>()
+    let vertexesToPrefixes = new Dictionary<_,_>()
+    for v in innerGraph.Vertices do
+        vertexesToPrefixes.Add(v, new ResizeArray<Prefix<'TokenType>>())
+    let edgesToPrefixes = new Dictionary<_,ResizeArray<Prefix<'TokenType>>>()
+    for v in innerGraph.Vertices do
+        for e in outEdgesInnerGraph.[v.vNum] do
+            edgesToPrefixes.Add(e, new ResizeArray<Prefix<'TokenType>>())
+    let errorEdges = new Dictionary<QuickGraph.TaggedEdge<_,_>,_>()
     
     let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide : int[])
         (initNodes : seq<Vertex>) (numToString : int -> string) (errInd: int) (path : string) =
         use out = new System.IO.StreamWriter (path)
+        use outErrors = new System.IO.StreamWriter ("../../../Tests/AbstractRNGLR/DOT/errors.txt")
+        for e in errorEdges.Keys do
+            let tokenStr = tokenToNumber e.Tag |> parserSource.NumToString
+            let tokenData = match parserSource.TokenData with | None -> "" | Some f -> f e.Tag|> string
+            outErrors.WriteLine (tokenStr + tokenData)
+        outErrors.Close()
         let was = new Dictionary<_,_>()
         let levels = new Dictionary<_,_>()
         out.WriteLine "digraph GSS {"
@@ -197,7 +213,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 levels.[u.Level] <- [!curNum]
             else
                 levels.[u.Level] <- !curNum :: levels.[u.Level]
-            let rec printPrefixes (prefixes:ResizeArray<Prefix<_>>) (prevStr : string) =
+            (*let rec printPrefixes (prefixes:ResizeArray<Prefix<_>>) (prevStr : string) =
                 let mutable curStr = prevStr + "["
                 if ResizeArray.isEmpty(prefixes) then curStr + "]"
                 else
@@ -212,7 +228,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                             curStr <- printPrefixes prefix.Tail curStr + ", "
                     curStr + "]"
                         
-            print <| sprintf "%d [label=\"%d_%d_%s\"]" !curNum u.Level u.State (printPrefixes gssVertexesToPrefixes.[u] "Prefixes:")
+            print <| sprintf "%d [label=\"%d_%d_%s\"]" !curNum u.Level u.State (printPrefixes gssVertexesToPrefixes.[u] "Prefixes:")*)
+            print <| sprintf "%d [label=\"%d_%d\"]" !curNum u.Level u.State 
             incr curNum
             u.OutEdges |> ResizeArray.iter (handleEdge u)
             
@@ -304,7 +321,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         newVertex.addEdge edge
         let prefixes = gssVertexesToPrefixes.[newVertex]
         for prefixToAdd in prefixesToAdd do
-            addPrefix prefixes prefixToAdd //add new prefix to vertex
+            addPrefix prefixes prefixToAdd //add new prefix to gss vertex
+            addPrefix vertexesToPrefixes.[startV] prefixToAdd //add new prefix to inner graph vertex
 
         if isNotEps
         then
@@ -318,6 +336,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             let push = parserSource.Gotos.[gssVertex.State].[parserSource.TokenToNumber e.Tag]
             if push <> 0 
             then
+                for gssPrefix in gssVertexesToPrefixes.[gssVertex] do
+                    addPrefix edgesToPrefixes.[e] gssPrefix
                 let tailGssV, isNew = addVertex e.Target push (if currentGraphV.vNum = e.Target.vNum then newUnprocessedGssVs else e.Target.unprocessedGssVertices)
 
                 if not <| edgesToTerms.ContainsKey e
@@ -427,12 +447,32 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 walk (remainLength - 1) e.Dest newPath startV nonTerm pos prod true v
             graphV.passingReductions.Remove((v, e)) |> ignore
 
+    let checkEdges (v:VInfo<_>) =
+        for e in edgesToPrefixes.Keys do
+            if e.Source.vNum = v.vNum
+            then
+                let passedPrefixes = edgesToPrefixes.[e]
+                for vertexPrefix in vertexesToPrefixes.[v] do
+                    if not <| passedPrefixes.Contains(vertexPrefix)
+                    then
+                        if not <| errorEdges.ContainsKey(e)
+                        then errorEdges.Add(e, new ResizeArray<Prefix<'TokenType>>())
+                        addPrefix errorEdges.[e] vertexPrefix
+
+    let buildErrors (errdict:Dictionary<QuickGraph.TaggedEdge<_,_>,ResizeArray<Prefix<'TokenType>>>) =
+        let outErrors = new Dictionary<string,ResizeArray<Prefix<'TokenType>>>()
+        for e in errdict.Keys do
+            let tokenStr = parserSource.TokenToNumber e.Tag |> parserSource.NumToString
+            let tokenData = match parserSource.TokenData with | None -> "" | Some f -> f e.Tag|> string
+            outErrors.Add(tokenStr + tokenData, errdict.[e])
+        outErrors
     let processVertex v = 
         makeReductions v
 
         let newGssVs = new ResizeArray<_>(2)
         for gssVertex in v.unprocessedGssVertices do 
             newGssVs.AddRange(push v gssVertex)
+        checkEdges v
         v.unprocessedGssVertices.Clear()
         if newGssVs.Count > 0 
         then
@@ -445,8 +485,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     if tokens.EdgeCount = 0
     then
         if parserSource.AcceptEmptyInput
-        then new Tree<_>([||], getEpsilon startNonTerm, parserSource.Rules) |> Success
-        else Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string")
+        then (new Tree<_>([||], getEpsilon startNonTerm, parserSource.Rules), buildErrors errorEdges) |> Success
+        else Error (buildErrors errorEdges)
     else
         let startGssV,_ = addVertex startV startState startV.unprocessedGssVertices
         while errorIndex = -1 && verticesToProcess.Count > 0 do
@@ -454,7 +494,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             processVertex curV
 
         if errorIndex <> -1 then
-            Error (errorIndex - 1, Unchecked.defaultof<'TokenType>, "Parse error")
+            Error (buildErrors errorEdges)
         else
             let root = ref None
             let addTreeTop res =
@@ -479,7 +519,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                                                                    && v.processedGssVertices.Count <> 0 (*&& v.unprocessedGssVertices.Count <> 0*)))
                     |> Seq.map (fun v -> string v.vNum)
                     |> String.concat "; "
-                Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state. Possible errors: (" + states + ")")
+                Error (buildErrors errorEdges)
             | Some res -> 
                 try 
                     let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
@@ -490,6 +530,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
                     drawDot parserSource.TokenToNumber terminals parserSource.LeftSide gssInitVertices parserSource.NumToString parserSource.ErrorIndex "../../../Tests/AbstractRNGLR/DOT/gss.dot"
 
-                    Success <| tree
+                    Success <| (tree, buildErrors errorEdges)
                 with
-                e -> Error (-1, Unchecked.defaultof<'TokenType>, e.Message)
+                e -> Error (buildErrors errorEdges)

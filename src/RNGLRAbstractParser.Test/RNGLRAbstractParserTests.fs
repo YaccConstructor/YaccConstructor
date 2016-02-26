@@ -17,6 +17,7 @@ module RNGLRAbstractParserTests
 
 open Graphviz4Net.Dot.AntlrParser
 open System.IO
+open System.Collections.Generic
 open Graphviz4Net.Dot
 open QuickGraph
 open NUnit.Framework
@@ -44,15 +45,20 @@ let loadLexerInputGraph gFile =
     for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, e.Tag)))
     lexerInputG
 
+let getStringErrors (errDict:Dictionary<_,_>) =
+    let mutable errStr = "Errors: "
+    for tknStr in errDict.Keys do
+        errStr <- errStr + tknStr + ", "
+    errStr
+
 let test buildAstAbstract qGraph nodesCount edgesCount epsilonsCount termsCount ambiguityCount = 
     let r = (new Parser<_>()).Parse  buildAstAbstract qGraph
-    printfn "%A" r
     match r with
-    | Error (num, tok, message) ->
-        let msg = sprintf "Error in position %d on Token %A: %s" num tok message
+    | Error (errDict) ->
+        let msg = getStringErrors errDict
         printfn "%A" msg
         Assert.Fail msg
-    | Success(tree) ->
+    | Success(tree, errDict) ->
         //tree.PrintAst()
         let n, e, eps, t, amb = tree.CountCounters()
         Assert.AreEqual(nodesCount, n, "Nodes count mismatch")
@@ -60,6 +66,8 @@ let test buildAstAbstract qGraph nodesCount edgesCount epsilonsCount termsCount 
         Assert.AreEqual(epsilonsCount, eps, "Epsilons count mismatch")
         Assert.AreEqual(termsCount, t, "Terms count mismatch")
         Assert.AreEqual(ambiguityCount, amb, "Ambiguities count mismatch")
+        let msg = getStringErrors errDict
+        printfn "%A" msg
         Assert.Pass()
 
 let perfTest parse inputLength graph =    
@@ -69,7 +77,7 @@ let perfTest parse inputLength graph =
         for y in 0..9 do
             match parse qGraph with
             | Success _ -> ()
-            | Error (i, t, msg) -> failwithf "Performance test failed wit message:%A" msg
+            | Error (errDict) -> failwithf "Performance test failed wit message:%A" errDict
 
         let time = (System.DateTime.Now - start).TotalMilliseconds / 10.0
         System.GC.Collect()
@@ -129,6 +137,16 @@ type ``RNGLR abstract parser tests`` () =
              ] |> ignore
 
         test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 13 12 0 3 0
+
+
+    [<Test>]
+    member this._00_Simple () =
+        let qGraph = new ParserInputGraph<_>(0, 2)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.PrettySimpleCalc.PLUS 1)
+             edg 1 2 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 15 14 0 4 1
 
     [<Test>]
     member this._02_PrettySimpleCalcSimple_BranchedInput () =
@@ -697,7 +715,7 @@ type ``RNGLR abstract parser tests`` () =
         seq{for i in 0..inpLength -> graph i}
         |> fun s -> System.IO.File.WriteAllLines("sql_perf.txt",s)
 
-//[<EntryPoint>]
+[<EntryPoint>]
 let f x =
     if System.IO.Directory.Exists "dot" 
     then 
@@ -711,7 +729,7 @@ let f x =
 //    t._04_PrettySimpleCalc_LotsOfVariants() 
 //    t._05_NotAmbigousSimpleCalc_LotsOfVariants()
 //    t._06_NotAmbigousSimpleCalc_Loop ()
-//    t._07_NotAmbigousSimpleCalc_Loop2. ()
+//    t._07_NotAmbigousSimpleCalc_Loop2 ()
 //    t._08_NotAmbigousSimpleCalc_Loop3. ()
 //    t._09_NotAmbigousSimpleCalc_Loop4. ()
 //    t._10_NotAmbigousSimpleCalc_Loop5. ()
@@ -719,13 +737,13 @@ let f x =
 //    t._12_NotAmbigousSimpleCalc_Loop7. ()
 //    t._13_NotAmbigousSimpleCalc_Loop8. ()
 //    t._14_NotAmbigousSimpleCalcWith2Ops_Loop. ()
-//    t._15_NotAmbigousSimpleCalcWith2Ops_Loops. ()
+    t._15_NotAmbigousSimpleCalcWith2Ops_Loops ()
 //    t._16_Stars_Loop. () 
 //    t._17_Stars2_Loop. () 
 //    t._18_Stars2_Loop2. () 
 //    t._19_FirstEps ()
 //    t._20_CroppedBrackets ()
-    t._21_Brackets ()
+//    t._21_Brackets ()
 //    t._22_Brackets_BackEdge ()
 //    t._23_UnambiguousBrackets ()
 //    t._24_UnambiguousBrackets_Circle()

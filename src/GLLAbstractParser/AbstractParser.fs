@@ -22,8 +22,12 @@ type M =
     val lbl : int<labelMeasure>
     new (p,l) = {pos = p; lbl = l}
 
+type CompressedArray<'t>(l1 : int, l2 : int[]) =
+    let a = Array.init l1 (fun )
+    member this.Item(x) =
+        
+
 let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserEdge<'TokenType>[]) (startVertecies : int[]) vertexCount (maxLen : int) : ParserCommon.ParseResult<_> = 
-    
     if input.Length = 0 then
       //  if parser.AcceptEmptyInput then
       //      let eps = new Nonnte
@@ -31,10 +35,10 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
      //   else
             Error ("This grammar does not accept empty input.")     
     else
-
-        let outEdges = Array.init<BioParserEdge<'TokenType>[]> vertexCount (fun i -> (Array.filter (fun e -> input.[i].End = e.Start) input))
-
-
+        let outEdges = 
+            let r = Array.init<List<int>> vertexCount (fun _ -> List<int>.Empty)
+            for i in 0..input.Length - 1 do
+                r.[input.[i].Start] <- i :: r.[input.[i].Start]
         let parser = parser
         let slots = parser.Slots
         let errors = new SysDict<int64, SysDict<int<nodeMeasure>, Vertex*int>>()   
@@ -44,7 +48,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let epsilonNode = structures.EpsilonNode
         let setP = structures.SetP
         let tempCount = ref 0
-        let currentVertexInInput = ref input.InitStates.[0]
+
+        let currentVertexInInput = ref 0
         let mutable currentProb = 1.0        
         //o.Start()
         
@@ -71,6 +76,10 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let terminalNodes = 
             Array.init input.VertexCount (fun i -> Array.init input.VertexCount (fun i -> Array.zeroCreate<int<nodeMeasure>> parser.TermCount))
         let currentGSSNode = ref <| dummyGSSNode
+        for v in startVertecies do
+            let oEdges = outEdges.[v]
+            for e in oEdges do
+                setR.Enqueue(new Context(pack32 e 0, !structures.CurrentLabel, !currentGSSNode, structures.Dummy)) 
         let currentContext = ref <| new Context(!currentVertexInInput, !structures.CurrentLabel, !currentGSSNode, structures.Dummy) //without *1<labelMeasure>
         
         let finalExtensions =
@@ -219,7 +228,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
 
         let table = parser.Table
         
-        let condition = ref false 
+        let condition = ref true 
         let stop = ref false
 
         (*let containsError index label vertex ast currentPath = 

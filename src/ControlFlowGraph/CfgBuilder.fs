@@ -92,7 +92,8 @@ let buildCfg (tree : Tree<'TokenType>)
             let endNumbers = 
                 ast.map (handleFamily commonStart)
                 |> Seq.distinct
-                |> Seq.filterAndMap Option.isSome Option.get
+                |> Seq.filter Option.isSome 
+                |> Seq.map Option.get
                 
             match Seq.length endNumbers with
             | 0 -> ()

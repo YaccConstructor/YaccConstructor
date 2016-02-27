@@ -19,16 +19,9 @@ type CfgTokensGraph<'TokenType>() =
 
     member this.GetAvailableTokens() = 
         
-        let filter (edge : TokensEdge<_>) = 
-            edge.Tag
-            |> Option.isSome
-            
-        let map (edge : TokensEdge<_>) = 
-            edge.Tag 
-            |> Option.get
-        
         this.Edges
-        |> Seq.filterAndMap filter map
+        |> Seq.filter (fun edge -> edge.Tag |> Option.isSome)
+        |> Seq.map (fun edge -> edge.Tag |> Option.get)
 
 type TokensGraphBuilder<'TokenType>() = 
     

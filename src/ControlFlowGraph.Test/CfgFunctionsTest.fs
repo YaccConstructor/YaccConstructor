@@ -95,7 +95,7 @@ type ``Find undefined variables``() =
         runTest' cfg expected
 
     [<Test>]
-    member test.``Undef: ambiguous``() =
+    member test.``Ambiguous``() =
         let qGraph = createParserInput' "Ambiguous.dot"
         
         let expected = [y; z]
@@ -107,7 +107,7 @@ type ``Find undefined variables``() =
         runTest' cfg expected
             
     [<Test>]
-    member test.``Undef: ambiguous 2``() =
+    member test.``Ambiguous 2``() =
         let qGraph = createParserInput' "Ambiguous3.dot"
         
         let expected = [y]

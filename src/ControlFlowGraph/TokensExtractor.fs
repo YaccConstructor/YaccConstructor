@@ -50,7 +50,8 @@ let extractNodesFromFamily intToToken tokenToString (fam : Family) =
             let commonStartVertex = builder.CurrentVertex
             let allEndVertex = 
                 ast.map (processFamily commonStartVertex)
-                |> Seq.filterAndMap Option.isSome Option.get
+                |> Seq.filter Option.isSome 
+                |> Seq.map Option.get
 
             if not <| Seq.isEmpty allEndVertex
             then 
@@ -67,9 +68,9 @@ let extractNodesFromFamily intToToken tokenToString (fam : Family) =
     and processFamily startVertex fam : int option = 
         builder.CurrentVertex <- startVertex
 
-        if cache.ContainsKey fam
-        then
-            match cache.[fam] with
+        match cache.TryGetValue fam with
+        | true, value ->
+            match value with
             | Processed (source, target) -> 
                 addEpsilonEdge builder.CurrentVertex source
                 builder.CurrentVertex <- target
@@ -85,7 +86,7 @@ let extractNodesFromFamily intToToken tokenToString (fam : Family) =
                     builder.NextVertex <- vertex
                     Some vertex
                 | None -> None
-        else
+        | false, _ ->
             cache.[fam] <- InProgress(startVertex)
             fam.nodes.doForAll collectTokens
             cache.[fam] <- Processed(startVertex, builder.CurrentVertex)
@@ -93,8 +94,10 @@ let extractNodesFromFamily intToToken tokenToString (fam : Family) =
             Some <| builder.CurrentVertex
             
     fam.nodes.doForAll collectTokens
-    //CfgTokensGraphPrinter.ToDot graph tokenToString "`afterExtraction.dot"
-    builder.Build()
+    let graph = builder.Build()
+    CfgTokensGraphPrinter.ToDot graph tokenToString "`afterExtraction.dot"
+    graph
+    //builder.Build()
 
 /// <summary>
 ///<para>Takes AST and builds graph.

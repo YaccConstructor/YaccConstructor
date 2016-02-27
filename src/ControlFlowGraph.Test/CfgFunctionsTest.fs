@@ -11,6 +11,21 @@ open ControlFlowGraph.Test.CommonHelper
 
 open QuickGraph.FSA.GraphBasedFsa
 
+let runTest tokToRealName (cfg : ControlFlow<_>) (expected : string list) = 
+    let errorList = 
+        cfg.FindUndefVariable()
+        |> List.map tokToRealName
+        
+    printfn "%A" errorList
+    printfn "Expected: %d. Actual: %d." expected.Length errorList.Length 
+    Assert.AreEqual(expected.Length, errorList.Length)
+        
+    let res =
+        expected
+        |> List.forall (fun var -> errorList |> List.exists ((=) var))
+
+    Assert.True(res, "Not all expected variables are found")
+
 [<TestFixture>]
 type ``Find undefined variables``() =
     
@@ -53,20 +68,8 @@ type ``Find undefined variables``() =
 
     let buildCfg' = buildCfg parse createCfg astToDot tokToRealName
 
-    let runTest (cfg : ControlFlow<_>) (expected : string list) = 
-        let errorList = 
-            cfg.FindUndefVariable()
-            |> List.map tokToRealName
-        
-        printfn "%A" errorList
-        printfn "Expected: %d. Actual: %d." expected.Length errorList.Length 
-        Assert.AreEqual(expected.Length, errorList.Length)
-        
-        let res =
-            expected
-            |> List.forall (fun var -> errorList |> List.exists ((=) var))
-
-        Assert.True(res, "Not all expected variables are found")
+    let runTest' (cfg : ControlFlow<_>) (expected : string list) = 
+        runTest tokToRealName cfg expected
 
     [<Test>]
     member test.``Elementary``() = 
@@ -77,7 +80,7 @@ type ``Find undefined variables``() =
         //act
         let cfg = buildCfg' qGraph prefix
         //assert
-        runTest cfg expected
+        runTest' cfg expected
 
     [<Test>]
     member test.``X = X``() = 
@@ -89,7 +92,7 @@ type ``Find undefined variables``() =
         //act
         let cfg = buildCfg' qGraph prefix
         //assert
-        runTest cfg expected
+        runTest' cfg expected
 
     [<Test>]
     member test.``Undef: ambiguous``() =
@@ -101,7 +104,7 @@ type ``Find undefined variables``() =
         //act
         let cfg = buildCfg' qGraph prefix
         //assert
-        runTest cfg expected
+        runTest' cfg expected
             
     [<Test>]
     member test.``Undef: ambiguous 2``() =
@@ -112,7 +115,7 @@ type ``Find undefined variables``() =
         //act
         let cfg = buildCfg' qGraph prefix
         //assert
-        runTest cfg expected
+        runTest' cfg expected
 
     [<Test>]
     member this.``Cycle inside expression``() = 
@@ -124,7 +127,85 @@ type ``Find undefined variables``() =
         //act
         let cfg = buildCfg' qGraph prefix
         //assert
-        runTest cfg expected
+        runTest' cfg expected
+     
+type ``Scope test``() = 
+    let parse = LetTest.Parser.buildAstAbstract
+    let tokenToNumber = LetTest.Parser.tokenToNumber
+    let leftSides = LetTest.Parser.leftSide
+    let indToString = LetTest.Parser.numToString
+    let tokenData = LetTest.Parser.tokenData
+    let astToDot = LetTest.Parser.defaultAstToDot
+
+    let fsa = new FSA<_>()
+    let RNGLR_EOF = LetTest.Parser.RNGLR_EOF fsa
+    let semicolonNumber = tokenToNumber <| LetTest.Parser.SEMICOLON fsa
+    let assignNumber = tokenToNumber <| LetTest.Parser.ASSIGN fsa
+
+    let nodeToType = dict["let_expr", Assignment;]
+        
+    let keywordToInt = dict [
+                                Keyword.SEMICOLON, semicolonNumber;
+                                Keyword.ASSIGN, assignNumber;
+                            ]
+        
+    let varsNumbers = 
+        [LetTest.Parser.X fsa; LetTest.Parser.Y fsa; LetTest.Parser.Z fsa]
+        |> List.map tokenToNumber
+
+    let isVariable tok = varsNumbers |> List.exists ((=) tok) 
+
+    let tokToRealName = tokenToNumber >> indToString
+
+    let x = LetTest.Parser.X fsa |> tokToRealName
+    let y = LetTest.Parser.Y fsa |> tokToRealName
+    let z = LetTest.Parser.Z fsa |> tokToRealName
+        
+    let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
+    let langSource = new LanguageSource(nodeToType, keywordToInt, isVariable)
+
+    let createParserInput' = createParserInputGraph LetTest.Lexer.tokenize RNGLR_EOF
+    let createCfg tree = ControlFlow(tree, parserSource, langSource, tokToRealName)
+
+    let buildCfg' = buildCfg parse createCfg astToDot tokToRealName
+
+    
+     
+    [<Test>]
+    member this.``Scope1``() = 
+        let qGraph = createParserInput' "Scope.dot"
+        
+        let prefix = "`scope"
+
+        let expected = [y]
+        //act
+        let cfg = buildCfg' qGraph prefix
+        //assert
+        runTest tokToRealName cfg expected
+    
+    [<Test>]
+    member this.``Scope2``() = 
+        let qGraph = createParserInput' "Scope2.dot"
+        
+        let prefix = "`scope2"
+
+        let expected = []
+        //act
+        let cfg = buildCfg' qGraph prefix
+        //assert
+        runTest tokToRealName cfg expected
+
+    [<Test>]
+    member this.``Scope3``() = 
+        let qGraph = createParserInput' "Scope3.dot"
+        
+        let prefix = "`scope3"
+
+        let expected = []
+        //act
+        let cfg = buildCfg' qGraph prefix
+        //assert
+        runTest tokToRealName cfg expected
         
 //[<EntryPoint>]
 let f x = 

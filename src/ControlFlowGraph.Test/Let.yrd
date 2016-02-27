@@ -1,0 +1,21 @@
+﻿{
+open QuickGraph.FST.GraphBasedFst
+open QuickGraph.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
+}
+
+tokens {
+    _ of FSA<char*Position<string>>
+}
+
+[<Start>]
+start: (let_expr SEMICOLON)* expr
+let_expr: LET id ASSIGN (let_expr SEMICOLON)* expr
+
+expr: expr op expr
+	 | NUMBER 
+	 | id
+
+op: PLUS | MINUS | MULT | DIV
+
+id: X | Y | Z

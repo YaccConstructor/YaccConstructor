@@ -38,6 +38,8 @@
     <Compile Include="IfTest.Lexer_Abstract.fs" />
     <Compile Include="Simple.yrd.fs" />
     <Compile Include="SimpleTest.Lexer_Abstract.fs" />
+    <Compile Include="Let.yrd.fs" />
+    <Compile Include="LetTest.Lexer_Abstract.fs" />
     <Compile Include="CommonHelper.fs" />
     <Compile Include="BlockHelper.fs" />
     <Compile Include="ExpressionHelper.fs" />

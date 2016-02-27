@@ -57,7 +57,10 @@ let private expandRepet (ruleList: Rule.t<_,_> list) =
         | PSome x -> PSome(expandBody attrs x)
         | POpt x ->  POpt(expandBody attrs x)
         | PRepet (r, a, b) as x -> 
-            handleRepeat <| PRepet ((expandBody attrs r), a, b)
+            let newName = Namer.newName Namer.Names.repeat
+            toExpand.Enqueue({name = dummyPos newName; args=attrs; body=r;
+                                isStart=false; isPublic=false; metaArgs=[]})                                                             
+            handleRepeat <| PRepet (PRef(dummyPos newName, list2opt <| createParams attrs), a, b)
         | PToken _ | PLiteral _  | PRef _  as x -> x
         | PPerm _ -> failwith "Unsupported rule in Repetion!"        
         | PMetaRef (src, args, metas) as x -> 

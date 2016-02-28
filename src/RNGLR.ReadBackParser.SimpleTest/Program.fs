@@ -1,8 +1,6 @@
 ﻿module RNGLRReadBackParserSimpleTest
 
-//open Yard.Generators.Common.AST
 open Yard.Generators.RNGLR.ReadBack.Parser
-//open Yard.Generators.RNGLR.EBNF
 open NUnit.Framework
 open LexCommon
 

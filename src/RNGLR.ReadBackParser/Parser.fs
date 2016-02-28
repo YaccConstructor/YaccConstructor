@@ -209,7 +209,8 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                         dfsStack.Pop() |> reductionDfs
                     
                     //handle
-                    for leftEnd in reductionTemp.NotHandledLeftEnds do
+                    while reductionTemp.NotHandledLeftEnds.Count > 0 do
+                        let leftEnd = reductionTemp.NotHandledLeftEnds.Dequeue()
                         let gssVertex = snd leftEnd.label
                         let state = parserSource.Gotos.[gssVertex.State].[nonTermLeftSide]
                         let newVertex = addVertex state num None

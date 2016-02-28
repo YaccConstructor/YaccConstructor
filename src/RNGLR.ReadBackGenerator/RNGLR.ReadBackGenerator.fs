@@ -28,6 +28,8 @@ open Yard.Generators.Common.EBNF.FinalGrammar
 open Yard.Generators.RNGLR.ReadBack.States
 open Yard.Generators.RNGLR.ReadBack.Printer
 
+open Yard.Generators.RNGLR.TranslatorPrinter
+
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YaccConstructor", "1.0")>]
 do()
@@ -168,7 +170,7 @@ type RNGLR() =
                         | s -> "RNGLR",s
             let printHeaders moduleName fullPath light output targetLanguage =
                 let fsHeaders() = 
-                    //println "%s" <| getPosFromSource fullPath dummyPos (defaultSource output)
+                    println "%s" <| getPosFromSource fullPath dummyPos (defaultSource output)
                     println "module %s"
                     <|  match moduleName with
                         | "" -> "RNGLR.Parse"
@@ -187,11 +189,11 @@ type RNGLR() =
                         println "open JetBrains.ReSharper.Psi.Tree"
                         println "open %s" !namespaceName*)
                         
-                    (*match definition.head with
+                    match definition.head with
                     | None -> ()
                     | Some (s : Source.t) ->
                         println "%s" <| getPosFromSource fullPath dummyPos s
-                        println "%s" <| s.text + getPosFromSource fullPath dummyPos (defaultSource output)*)
+                        println "%s" <| s.text + getPosFromSource fullPath dummyPos (defaultSource output)
 
                 //Scala really not supported
                 let scalaHeaders () =

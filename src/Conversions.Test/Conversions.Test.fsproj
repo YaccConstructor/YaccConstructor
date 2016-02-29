@@ -38,6 +38,7 @@
     <Compile Include="ReplaceInlineTests.fs" />
     <Compile Include="EliminateLeftRecursionTests.fs" />
     <Compile Include="ToCNFTests.fs" />
+    <Compile Include="ExpandRepeatTests.fs" />
     <None Include="packages.config" />
     <None Include="App.config" />
   </ItemGroup>

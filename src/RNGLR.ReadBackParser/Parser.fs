@@ -151,7 +151,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                             nfaEdge.label = parserSource.TokenToNumber tokens.[token]
                         | _ -> false
 
-                    let reductionStep (leftNfaVertex : VertexWithBackTrack<int, int>) leftGssVertex rightVertex sppfLabel =
+                    let reductionStep (leftNfaVertex : VertexWithBackTrack<int, int>) (leftGssVertex : GssVertex) rightVertex sppfLabel =
                         let prevVertex =
                             match reductionTemp.TryGetAlreadyVisited leftNfaVertex leftGssVertex with
                             | Some pv -> pv
@@ -216,6 +216,9 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                         let newVertex = addVertex state num None
                         let sppfLabel = SppfLabel.TemporaryReduction reductionTemp
                         
+                        //if containsEdge gssVertex sppfLabel notAttachedEdges.[state] then
+                        //    printf "heh"
+
                         addEdge gssVertex sppfLabel notAttachedEdges.[state]
                         let arr = parserSource.Reduces.[state].[!curNum]
                         let edgeOpt = Some (gssVertex, sppfLabel)
@@ -236,11 +239,11 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                             SppfLabel.Reduction (rt.Production, (rt.getLeftEnd gssVertex.Level gssVertex.State, rt.EndLevel, rt.AcceptingNfaStates))
                         | _ -> sppfLabel
                     new GssEdge(gssVertex, sppfLabel)
-                let edges = edges |> ResizeArray.map toEdge
+                let gssEdges = edges |> ResizeArray.map toEdge
                 if count > 0 then
-                    stateToVertex.[state].Value.firstOutEdge <- Some edges.[0]
+                    stateToVertex.[state].Value.firstOutEdge <- Some gssEdges.[0]
                     if count > 1 then
-                        stateToVertex.[state].Value.otherOutEdges <- ResizeArray.sub edges 1 (count - 1) |> ResizeArray.toArray
+                        stateToVertex.[state].Value.otherOutEdges <- ResizeArray.sub gssEdges 1 (count - 1) |> ResizeArray.toArray
                 edges.Clear()
             while temporarySppfEdges.Count > 0 do
                 let source, edge = temporarySppfEdges.Pop()

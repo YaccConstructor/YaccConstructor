@@ -11,10 +11,7 @@ open ControlFlowGraph.Test.CommonHelper
 
 open QuickGraph.FSA.GraphBasedFsa
 
-let runTest tokToRealName (cfg : ControlFlow<_>) (expected : string list) = 
-    let errorList = 
-        cfg.FindUndefinedVariables()
-        |> List.map tokToRealName
+let assertResult (errorList : _ list) (expected : _ list) = 
         
     printfn "%A" errorList
     printfn "Expected: %d. Actual: %d." expected.Length errorList.Length 
@@ -73,19 +70,21 @@ type ``Find undefined variables``() =
 
     let buildCfg' = buildCfg parse createCfg astToDot tokToRealName
 
-    let runTest' (cfg : ControlFlow<_>) (expected : string list) = 
-        runTest tokToRealName cfg expected
-
     [<Test>]
-    member test.``Elementary``() = 
+    member test.``X = Z; Y = X;``() = 
         let qGraph = createParserInput' "X = Z; Y = X.dot"
 
         let expected = [z]
-        let prefix = "`cfg undefined variables elementary"
+        let prefix = "`cfg undefined variables X = Z; Y = X"
+        
         //act
         let cfg = buildCfg' qGraph prefix
+        let errorList = 
+            cfg.FindUndefinedVariables()
+            |> List.map tokToRealName
+        
         //assert
-        runTest' cfg expected
+        assertResult errorList expected
 
     [<Test>]
     member test.``X = X``() = 
@@ -96,8 +95,13 @@ type ``Find undefined variables``() =
 
         //act
         let cfg = buildCfg' qGraph prefix
+        let errorList = 
+            cfg.FindUndefinedVariables()
+            |> List.map tokToRealName
+        
         //assert
-        runTest' cfg expected
+        assertResult errorList expected
+
 
     [<Test>]
     member test.``Ambiguous``() =
@@ -108,8 +112,13 @@ type ``Find undefined variables``() =
             
         //act
         let cfg = buildCfg' qGraph prefix
+        let errorList = 
+            cfg.FindUndefinedVariables()
+            |> List.map tokToRealName
+        
         //assert
-        runTest' cfg expected
+        assertResult errorList expected
+
             
     [<Test>]
     member test.``Ambiguous 2``() =
@@ -117,10 +126,16 @@ type ``Find undefined variables``() =
         
         let expected = [y]
         let prefix = "`cfg undefined variables ambiguous2"
+
         //act
         let cfg = buildCfg' qGraph prefix
+        let errorList = 
+            cfg.FindUndefinedVariables()
+            |> List.map tokToRealName
+        
         //assert
-        runTest' cfg expected
+        assertResult errorList expected
+
 
     [<Test>]
     member this.``Cycle inside expression``() = 
@@ -129,10 +144,15 @@ type ``Find undefined variables``() =
         let prefix = "`cfg cycle inside expression"
 
         let expected = [y]
+
         //act
         let cfg = buildCfg' qGraph prefix
+        let errorList = 
+            cfg.FindUndefinedVariables()
+            |> List.map tokToRealName
+        
         //assert
-        runTest' cfg expected
+        assertResult errorList expected
      
 type ``Scope test``() = 
     let parse = LetTest.Parser.buildAstAbstract
@@ -183,10 +203,15 @@ type ``Scope test``() =
         let prefix = "`scope"
 
         let expected = [y]
+        
         //act
         let cfg = buildCfg' qGraph prefix
+        let errorList = 
+            cfg.FindUndefinedVariables()
+            |> List.map tokToRealName
+        
         //assert
-        runTest tokToRealName cfg expected
+        assertResult errorList expected
     
     [<Test>]
     member this.``Scope2``() = 
@@ -195,10 +220,15 @@ type ``Scope test``() =
         let prefix = "`scope2"
 
         let expected = []
+        
         //act
         let cfg = buildCfg' qGraph prefix
+        let errorList = 
+            cfg.FindUndefinedVariables()
+            |> List.map tokToRealName
+        
         //assert
-        runTest tokToRealName cfg expected
+        assertResult errorList expected
 
     [<Test>]
     member this.``Scope3``() = 
@@ -207,13 +237,20 @@ type ``Scope test``() =
         let prefix = "`scope3"
 
         let expected = []
+        
         //act
         let cfg = buildCfg' qGraph prefix
+        let errorList = 
+            cfg.FindUndefinedVariables()
+            |> List.map tokToRealName
+        
         //assert
-        runTest tokToRealName cfg expected
+        assertResult errorList expected
         
 //[<EntryPoint>]
 let f x = 
     let functions =  ``Find undefined variables``()
-    functions.Elementary()
+    functions.``X = Z; Y = X;``()
+    (*let scopeTest = ``Scope test``()
+    scopeTest.Scope1()*)
     1

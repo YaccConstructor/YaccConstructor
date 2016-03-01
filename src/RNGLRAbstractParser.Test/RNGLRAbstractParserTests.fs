@@ -796,8 +796,8 @@ type ``RNGLR abstract parser tests`` () =
     member this.bio2_4 () =
         let bp = @"C:\gsv\projects\infernal-1.1.1\testsuite\"
         let file = 
-            //"t.fa"
-            "t1.fa"
+            "t.fa"
+            //"t1.fa"
             //"tremitted-Plant_SRP.fa"
             //"1k-4.fa"
         let textData =             
@@ -817,9 +817,10 @@ type ``RNGLR abstract parser tests`` () =
             |> Seq.mapi(fun i ch -> edg i (i+1) (getSmb ch i))
             |> Array.ofSeq
         let l = edges |> Array.length
-        let qGraph = new ParserInputGraph<_>(0, l + 1)
+        
+        let qGraph = new ParserInputGraph<_>([|0..l|], [|l + 1|])
         qGraph.AddVerticesAndEdgeRange edges |> ignore
-        qGraph.AddVerticesAndEdgeRange [edg l (l+1) (RNGLR.bio2.RNGLR_EOF 0)] 
+        qGraph.AddVerticesAndEdgeRange [for i in 0..l -> edg i (l+1) (RNGLR.bio2.RNGLR_EOF 0)] 
         test RNGLR.bio2.buildAstAbstract qGraph 25 24 4 8 1
 
     [<Test>]

@@ -62,13 +62,16 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         
         let tokens = new BlockResizeArray<'TokenType>()             
         let packedNodes = new SysDict<M, int<nodeMeasure>>()
-        
+
+        let isEnd = ref false
         let treeProc = new TreeProcessor<_>(parser, tokens)
-        let o = treeProc.printerAgent
+        let o = treeProc.printerAgent (fun x -> 
+            printfn "Ranges = %A" x
+            isEnd := true)
 
         let nonTerminalNodes = new SysDict<int64,int<nodeMeasure>>()        
         let intermidiateNodes = Array.init input.VertexCount (fun _ -> Array.zeroCreate<SysDict<int<labelMeasure>, int<nodeMeasure>>> input.VertexCount)
-        let edges = Array.init input.VertexCount (fun _ -> Array.zeroCreate<SysDict<int<nodeMeasure>, SysDict<int, ResizeArray<int>>>> slots.Count)
+        let edges = Array.init slots.Count (fun _ -> Array.zeroCreate<SysDict<int<nodeMeasure>, SysDict<int, ResizeArray<int>>>> input.VertexCount)
         let terminalNodes = 
             Array.init input.VertexCount (fun i -> Array.init input.VertexCount (fun i -> Array.zeroCreate<int<nodeMeasure>> parser.TermCount))
         let currentGSSNode = ref <| dummyGSSNode
@@ -188,8 +191,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                         let y = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy label ast tree
                         if slotIsEnd label 
                         then 
-                            let name = parser.NumToString <| parser.LeftSide.[getRule label]
-                            o.Post(new Message(sppfNodes.[int y]))
+                            //let name = parser.NumToString <| parser.LeftSide.[getRule label]
+                            o.Post(NodeToProcess(sppfNodes.[int y]))
                         let index = getRightExtension <| structures.GetTreeExtension y 
                         structures.AddContext setU index label vertex y maxLen (*!currentPath*))
             v
@@ -198,6 +201,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             if u <> dummyGSSNode
             then
                 let vertexKey = pack u.Level (int u.NontermLabel)
+                //let f,v = setP.TryGetValue vert
                 if setP.ContainsKey vertexKey
                 then
                     setP.[vertexKey].Add z
@@ -213,8 +217,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             let resTree = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy (u.NontermLabel*1<labelMeasure>) sppfNodeOnEdge z 
                             if slotIsEnd (u.NontermLabel*1<labelMeasure>) 
                             then 
-                                let name = parser.NumToString <| parser.LeftSide.[getRule (u.NontermLabel*1<labelMeasure>)]
-                                o.Post(new Message(sppfNodes.[int resTree]))
+                                //let name = parser.NumToString <| parser.LeftSide.[getRule (u.NontermLabel*1<labelMeasure>)]
+                                o.Post(NodeToProcess(sppfNodes.[int resTree]))
                             let newVertex = new Vertex(level, slot)
                             structures.AddContext setU i (u.NontermLabel*1<labelMeasure>) newVertex resTree maxLen //!currentPath
 
@@ -310,7 +314,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                 then 
                                     //let name = parser.NumToString <| parser.LeftSide.[getRule !structures.CurrentLabel]
                                     let node = sppfNodes.[int !structures.CurrentN]
-                                    o.Post(new Message(node))
+                                    o.Post(NodeToProcess(node))
                             condition := false
                         | 
                             None _ -> ()
@@ -466,8 +470,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                 
                             if finalPaths |> ResizeArray.exists (fun fp -> isSubpath path (List.rev fp)) |> not
                             then printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16)      *)                      
-                                
-                    
+                    o.Post End     
+                    while not !isEnd do()
                     Success (r1)   
                      
                         

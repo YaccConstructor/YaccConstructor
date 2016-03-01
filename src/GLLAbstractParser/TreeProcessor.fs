@@ -9,8 +9,9 @@ open Yard.Generators.GLL.ParserCommon
 
 #nowarn "40"
 
-type Message(node : INode) =
-    member this.Node = node    
+type Message =
+    | NodeToProcess of INode
+    | End
     
 type TreeProcessor<'TokenType> (parser : ParserSourceGLL<'TokenType>, tokens:BlockResizeArray<'TokenType>) =
 
@@ -50,29 +51,61 @@ type TreeProcessor<'TokenType> (parser : ParserSourceGLL<'TokenType>, tokens:Blo
         let p, t = go 1.0 node
         p, List.head t
 
-    let rec getAllTokens tree =
+    let getAllTokens tree =
         //let isFirst = ref true
-        match tree with
-        | NonTerm (_,_,chlds) -> List.collect getAllTokens chlds
-        | Term (s, n) -> 
-//            if !isFirst
-//            then
-//                tokens.[n.Name] |> parser.TokenData |> printfn "%A"
-//                isFirst := false
-            [s]
+        let s = ref 0
+        let rec go tree =
+            match tree with
+            | NonTerm (n,_,chlds) -> 
+                if n.Contains "stem_28" then incr s
+                List.collect go chlds
+            | Term (s, n) -> 
+                //tokens.[n.Name] |> parser.TokenData |> printfn "%A"
+    //            if !isFirst
+    //            then
+    //                tokens.[n.Name] |> parser.TokenData |> printfn "%A"
+    //                isFirst := false
+                [(s,tokens.[n.Name] |> parser.TokenData)]
+        go tree, !s
 
-    member this.printerAgent = MailboxProcessor<Message>.Start(fun inbox -> 
+    member this.printerAgent onEnd = MailboxProcessor<Message>.Start(fun inbox ->
+        let curLeft = ref 0
+        let curRight = ref 0 
+        let curP = ref 0.0
+        let ranges = new ResizeArray<_>()
         let rec messageLoop = async{
-            let! msg = inbox.Receive() 
-            let nodeName = parser.NumToString (msg.Node :?> NonTerminalNode).Name           
-            if nodeName = "folded"
-            then 
-                let p, tree = getMostSuitableTree msg.Node
-                let str = getAllTokens tree
-                if str.Length > 50
-                then printfn "L = %A; prob: %A" str.Length p 
-                ()
-            return! messageLoop  
+            let! msg = inbox.Receive()
+            match msg with
+            | NodeToProcess n ->
+                let nodeName = parser.NumToString (n :?> NonTerminalNode).Name           
+                //printfn "name=%A" nodeName
+                if nodeName = "folded"
+                then 
+                    let p, tree = getMostSuitableTree n
+                    let str,nt = getAllTokens tree
+                    //printfn "LL=%A" str.Length
+                    if str.Length > 60 //&& nt > 5// && nt < 9
+                    then 
+                        let left = snd str.Head |> string |> int
+                        let right = List.rev str |> List.head |> snd |> string |> int
+                        printfn "L = %A; prob: %A; f %A t %A" str.Length p left right
+                        if !curRight < left
+                        then 
+                            ranges.Add (!curLeft,!curRight, !curP)
+                            curLeft := left
+                            curRight := right
+                            curP := p
+                        else
+                            curLeft := min !curLeft left
+                            curRight := max !curRight right
+                            curP := max !curP p
+                    ()
+                return! messageLoop  
+            | End -> 
+                ranges.[0] <- (!curLeft,!curRight, !curP)
+                ranges.ToArray()
+                |> Array.sortBy (fun(_,_,x) -> -1.0 * x)
+                |> onEnd
             }
         messageLoop 
         )

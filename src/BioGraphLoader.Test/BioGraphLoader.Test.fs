@@ -11,6 +11,6 @@ type ``Biology graph loader tests``() =
     [<Test>]
     member this.``From file to QuickGraph``() = 
         let path = Path.Combine(basePath,"biodata_1/saves/00_before_repeat_resolution/graph")        
-        let g = loadGraphFormFileToQG path
+        let g = loadGraphFormFileToQG path 1000
         Assert.AreEqual(597,g.VertexCount,"Nodes count mismatch")
         Assert.AreEqual(910,g.EdgeCount,"Edges count mismatch")

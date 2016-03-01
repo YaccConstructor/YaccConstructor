@@ -40,18 +40,19 @@ let private expandRepet (ruleList: Rule.t<_,_> list) =
            
     let rec expandBody attrs = function
         | PSeq(elements, actionCode, l) -> 
-            elements |> List.fold (fun (res, attrs) elem ->
-                match elem.rule with
-                | PRepet _ | PSeq _ |PAlt _ | PMany _ |PSome _ |POpt _ | PMetaRef _ as x -> 
-                    let newName = Namer.newName Namer.Names.repeat
-                    toExpand.Enqueue({name = dummyPos newName; args=attrs; body=elem.rule;
-                                        isStart=false; isPublic=false; metaArgs=[]})                    
-                    { elem with rule = PRef(dummyPos newName, list2opt <| createParams attrs) }
-                | _ -> elem
-                |> fun newElem -> newElem::res, if elem.binding.IsSome then attrs@[elem.binding.Value] else attrs
-                 ) ([], attrs)
-                |> fst |> List.rev
-                |> fun elems -> PSeq (elems, actionCode, l)
+            PSeq(elements |>List.map (fun e -> {e with rule = expandBody attrs e.rule}) , actionCode, l)
+//            elements |> List.fold (fun (res, attrs) elem ->
+//                match elem.rule with
+////                | PRepet _ | PSeq _ |PAlt _ | PMany _ |PSome _ |POpt _ | PMetaRef _ as x -> 
+////                    let newName = Namer.newName Namer.Names.repeat
+////                    toExpand.Enqueue({name = dummyPos newName; args=attrs; body=elem.rule;
+////                                        isStart=false; isPublic=false; metaArgs=[]})                    
+////                    { elem with rule = PRef(dummyPos newName, list2opt <| createParams attrs) }
+//                | _ -> elem
+//                |> fun newElem -> newElem::res, if elem.binding.IsSome then attrs@[elem.binding.Value] else attrs
+//                 ) ([], attrs)
+//                |> fst |> List.rev
+//                |> fun elems -> PSeq (elems, actionCode, l)
         | PAlt(left, right) -> PAlt(expandBody attrs left, expandBody attrs right)
         | PMany x -> PMany(expandBody attrs x)
         | PSome x -> PSome(expandBody attrs x)

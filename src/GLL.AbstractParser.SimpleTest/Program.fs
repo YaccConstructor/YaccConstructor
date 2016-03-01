@@ -701,9 +701,11 @@ type ``GLL abstract parser tests`` () =
         let file = 
             //"t.fa"
             //"t1.fa"
+            "1k-tRNA.fa"
             //"tremitted-Plant_SRP.fa"
-            "1k-4.fa"
+            //"1k-4.fa"
             //"10k-tRNA.fa"
+            //"t10k1.fa"
         let textData =             
             File.ReadAllLines(Path.Combine(bp,file))
             |> Seq.skip 1
@@ -722,17 +724,18 @@ type ``GLL abstract parser tests`` () =
             |> Seq.mapi(fun i ch -> edg i (i+1) (getSmb ch i))
             |> Array.ofSeq
         let l = edges |> Array.length
-        let qGraph = new ParserInputGraph<_>([|0..l-60|], [|l + 1|])
+        let qGraph = new ParserInputGraph<_>([|0|], [|l + 1|])
         qGraph.AddVerticesAndEdgeRange edges |> ignore
-        qGraph.AddVerticesAndEdgeRange [edg l (l+1) (GLL.Bio2.RNGLR_EOF 0)] 
+        qGraph.AddVerticesAndEdgeRange [for i in 0..l -> edg i (l+1) (GLL.Bio2.RNGLR_EOF 0)] 
         let start = System.DateTime.Now
         let res = GLL.Bio2.buildAbstractAst qGraph 100
         match res with
         | Success ast -> 
             //ast.AstToDot GLL.Bio2.numToString GLL.Bio2.tokenToNumber GLL.Bio2.tokenData "bioAST.dot"
             printfn "Success!"
-            printfn "Time = %A"  (System.DateTime.Now - start)
+            printfn "Time = %A"  (System.DateTime.Now - start)            
         | Error _ -> printfn "Error!"
+        //System.Threading.Thread.Sleep(50000)
 
 [<EntryPoint>]
 let f x =
@@ -742,5 +745,5 @@ let f x =
               //_35_Expression() //
     //let th = new System.Threading.Thread(f, 10000000)
     //th.Start()
-    t.bio2_5()
+    t.bio2_4()
     0

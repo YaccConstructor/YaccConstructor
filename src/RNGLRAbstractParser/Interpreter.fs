@@ -170,13 +170,12 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     for v in innerGraph.Vertices do
         outEdgesInnerGraph.[v.vNum] <- innerGraph.OutEdges v |> Array.ofSeq
     let gssVertexesToPrefixes = new Dictionary<_,_>()
-    let vertexesToPrefixes = new Dictionary<_,_>()
-    for v in innerGraph.Vertices do
-        vertexesToPrefixes.Add(v, new ResizeArray<Prefix<'TokenType>>())
-    let edgesToPrefixes = new Dictionary<_,ResizeArray<Prefix<'TokenType>>>()
+    let passedPrefixes = new Dictionary<_,ResizeArray<Prefix<'TokenType>>>()
+    let notPassedPrefixes = new Dictionary<_,ResizeArray<Prefix<'TokenType>>>()
     for v in innerGraph.Vertices do
         for e in outEdgesInnerGraph.[v.vNum] do
-            edgesToPrefixes.Add(e, new ResizeArray<Prefix<'TokenType>>())
+            passedPrefixes.Add(e, new ResizeArray<Prefix<'TokenType>>())
+            notPassedPrefixes.Add(e, new ResizeArray<Prefix<'TokenType>>())
     let errorEdges = new Dictionary<QuickGraph.TaggedEdge<_,_>,_>()
     
     let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide : int[])
@@ -323,7 +322,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         let prefixes = gssVertexesToPrefixes.[newVertex]
         for prefixToAdd in prefixesToAdd do
             addPrefix prefixes prefixToAdd //add new prefix to gss vertex
-            addPrefix vertexesToPrefixes.[startV] prefixToAdd //add new prefix to inner graph vertex
 
         if isNotEps
         then
@@ -338,7 +336,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             if push <> 0 
             then
                 for gssPrefix in gssVertexesToPrefixes.[gssVertex] do
-                    addPrefix edgesToPrefixes.[e] gssPrefix
+                    addPrefix passedPrefixes.[e] gssPrefix
                 let tailGssV, isNew = addVertex e.Target push (if currentGraphV.vNum = e.Target.vNum then newUnprocessedGssVs else e.Target.unprocessedGssVertices)
 
                 if not <| edgesToTerms.ContainsKey e
@@ -355,6 +353,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
                     prefixesToAdd.Add(extPrefix gssVertexesToPrefixes.[gssVertex] e)
                     addEdge e.Target isNew tailGssV edge true prefixesToAdd    //push case
+            else
+                for gssPrefix in gssVertexesToPrefixes.[gssVertex] do
+                    addPrefix notPassedPrefixes.[e] gssPrefix
 
         if not <| currentGraphV.processedGssVertices.Contains(gssVertex)
         then 
@@ -449,16 +450,16 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             graphV.passingReductions.Remove((v, e)) |> ignore
 
     let checkEdges (v:VInfo<_>) =
-        for e in edgesToPrefixes.Keys do
-            if e.Source.vNum = v.vNum
-            then
-                let passedPrefixes = edgesToPrefixes.[e]
-                for vertexPrefix in vertexesToPrefixes.[v] do
-                    if not <| passedPrefixes.Contains(vertexPrefix)
+       for e in outEdgesInnerGraph.[v.vNum] do
+            for npprefix in notPassedPrefixes.[e] do
+                if not <| passedPrefixes.[e].Contains(npprefix)
+                then
+                    if not <| errorEdges.ContainsKey(e)
                     then
-                        if not <| errorEdges.ContainsKey(e)
-                        then errorEdges.Add(e, new ResizeArray<Prefix<'TokenType>>())
-                        addPrefix errorEdges.[e] vertexPrefix
+                        errorEdges.Add(e, new ResizeArray<Prefix<'TokenType>>())
+                    addPrefix errorEdges.[e] npprefix
+            passedPrefixes.[e].Clear()
+            notPassedPrefixes.[e].Clear()
 
     let buildErrors (errdict:Dictionary<QuickGraph.TaggedEdge<_,_>,ResizeArray<Prefix<'TokenType>>>) =
         let outErrors = new Dictionary<string,ResizeArray<Prefix<'TokenType>>>()
@@ -467,13 +468,15 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             let tokenData = match parserSource.TokenData with | None -> "" | Some f -> f e.Tag|> string
             outErrors.Add(tokenStr + tokenData, errdict.[e])
         outErrors
-    let processVertex v = 
+    let processVertex v =
         makeReductions v
 
         let newGssVs = new ResizeArray<_>(2)
         for gssVertex in v.unprocessedGssVertices do 
             newGssVs.AddRange(push v gssVertex)
-        checkEdges v
+        if not <| ResizeArray.isEmpty(v.unprocessedGssVertices)
+        then
+            checkEdges v
         v.unprocessedGssVertices.Clear()
         if newGssVs.Count > 0 
         then

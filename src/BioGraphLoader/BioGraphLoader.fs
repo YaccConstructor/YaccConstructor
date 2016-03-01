@@ -8,14 +8,29 @@ module Seq =
     /// Returns a sequence that yields chunks of length n.
     /// Each chunk is returned as a list.
     let split length (xs: seq<'T>) =
+        let l = ref <| Seq.length xs
         let rec loop xs =
-            [
-                yield Seq.truncate length xs |> Seq.toList
-                match Seq.length xs <= length with
-                | false -> yield! loop (Seq.skip length xs)
-                | true -> ()
-            ]
+            seq{
+                yield Seq.truncate length xs |> Seq.toList                
+                if not (!l <= length)
+                then 
+                    l := !l - length
+                    yield! loop (Seq.skip length xs)
+            }
         loop xs
+
+module Array =
+
+    /// Returns a sequence that yields chunks of length n.
+    /// Each chunk is returned as a list.
+    let split length (a: array<'T>) =
+        let l = ref 0
+        [|
+            while !l < a.Length do
+                yield Array.sub a !l (min length (a.Length - !l))
+                l := !l + length 
+        |]
+
 
 [<Struct>]
 type BioGraphEdgeLbl=
@@ -31,9 +46,10 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
     let lblsExt = ".sqn"
     let graphStrauctureExt = ".grp"
     let lbls = 
-        File.ReadAllLines(fileWithoutExt + lblsExt) 
-        |> Seq.split 2
-        |> Seq.map (fun a -> a.[0].Trim().TrimStart('>') |> int,a.[1].Trim())
+        File.ReadAllLines(fileWithoutExt + lblsExt)
+        |> Array.ofSeq
+        |> Array.split 2
+        |> Array.Parallel.map (fun a -> a.[0].Trim().TrimStart('>') |> int,a.[1].Trim())
         |> dict
 
     let loadGraphStrucureFile repl =
@@ -43,37 +59,46 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
     let vertices = 
         loadGraphStrucureFile "Vertex"
         |> Seq.collect (fun a -> [a.[0].Trim() |> int; a.[1].Trim() |> int])
+        |> Set.ofSeq
+        |> Array.ofSeq
+    printfn "Vertices load: %A" vertices.Length
     let edges = 
         loadGraphStrucureFile "Edge"
         |> Seq.map (fun a -> 
             let x = (a.[1].Split '>')
             a.[0].Trim() |> int
-            , x.[1].Trim([|' '; '-'|]) |> int
+            , x.[0].Trim([|' '; '-'|]) |> int
             , x.[1].Trim() |> int
             , (a.[2].Split '=').[1].Trim() |> int)
+        |> Array.ofSeq
+    printfn "Edges load: %A" edges.Length
     let qGraph = new QuickGraph.AdjacencyGraph<_,_>()
-    let cnt = ref (vertices |> Seq.max |> ((+)1))
+    let cnt = ref (vertices |> Array.max |> ((+)1))
+    let leCount = ref 0
     let edgs = 
         edges 
-        |> Seq.map (fun (id,s,e,l) -> new BioGraphEdge(s,e,lbls.[id],l))
-        |> Seq.collect 
+        |> Array.Parallel.map (fun (id,s,e,l) -> new BioGraphEdge(s,e,lbls.[id],l))
+        |> Array.collect 
             (fun e -> 
-                if e.Tag.length <= 2 * templateLengthHightLimit
+                if e.Tag.length <= templateLengthHightLimit
                 then 
-                    printfn "%A" e.Tag.length
-                    [e]
+                    //printfn "%A" e.Tag.length
+                    [|e|]
                 else 
+                    incr leCount
                     let str1 = e.Tag.str.Substring(0,templateLengthHightLimit)
                     let str2 = e.Tag.str.Substring(e.Tag.str.Length-1-templateLengthHightLimit)
                     incr cnt
                     let newE = !cnt
                     incr cnt
                     let newS = !cnt
-                    [new BioGraphEdge(e.Source,newE,str1,templateLengthHightLimit);BioGraphEdge(newS,e.Target,str2,templateLengthHightLimit)]
+                    [|new BioGraphEdge(e.Source,newE,str1,templateLengthHightLimit);BioGraphEdge(newS,e.Target,str2,templateLengthHightLimit)|]
             )
         |> Array.ofSeq
     //|> qGraph.AddVerticesAndEdgeRange
     //|> ignore    
+
+    printfn "long edges %A" !leCount
 
     let ug = new QuickGraph.UndirectedGraph<_,_>(true)
     ug.AddVerticesAndEdgeRange edgs
@@ -82,11 +107,23 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
     a.Compute()    
     a.ComponentCount |> printfn "Connected=%A"
     let components = 
-        a.Components
-        |> Seq.groupBy(fun kvp -> kvp.Value)
-        |> Seq.map (fun (x,s) -> x, s |> Seq.map (fun kvp -> kvp.Key))
-        |> Seq.sortBy (snd >> Seq.length >> ((*)-1))
-        |> Seq.map (fun (_,vs) -> edgs |> Array.filter (fun e -> Seq.exists (fun v -> e.Source = v || e.Target = v) vs))
+        let x =
+            a.Components
+            |> Seq.groupBy(fun kvp -> kvp.Value)
+            |> Array.ofSeq
+            |> Array.Parallel.map (fun (x,s) -> s |> Seq.map (fun kvp -> kvp.Key) |> Array.ofSeq)
+            |> Array.filter(fun a -> a.Length > 1)
+            |> Array.sortBy (Array.length >> ((*)-1))
+            
+        x
+        |> Array.Parallel.map (fun vs -> vs |> Array.collect (fun v -> ug.AdjacentEdges v |> Array.ofSeq) |> (fun c -> new System.Collections.Generic.HashSet<_>(c)) |> Array.ofSeq )
+        //|> Array.Parallel.map (fun vs -> edgs |> Array.filter (fun e -> Array.exists (fun v -> e.Source = v || e.Target = v) vs))
+    
+    let avgl = components |> Array.map (fun c -> c |> Array.averageBy (fun x -> float x.Tag.length))
+    let suml = components |> Array.map (fun c -> c |> Array.sumBy (fun x -> x.Tag.length))
+            
+    printfn "Avg %A" (avgl)
+    printfn "Sum %A" (suml)
 
     printfn "L %A" (Seq.length components)
     components
@@ -118,7 +155,8 @@ let loadGraphFormFileToOarserInputGraph fileWithoutExt templateLengthHightLimit 
         |> dict
 
     let finalV = newVMap |> Seq.length
-    let parserInputGraph = new ParserInputGraph<_>(newVMap.[53072], finalV)
+    //53072
+    let parserInputGraph = new ParserInputGraph<_>(0, finalV)
 
     edgs
     |> Array.map

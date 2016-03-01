@@ -33,6 +33,14 @@ let dummyToken s = PToken <| new Source.t(s)
 
 exception FEError of string
 
+[<assembly:AddinRoot ("YaccConstructor", "1.0")>]
+do()
+
+[<SetUp>]
+let f () = 
+    AddinManager.Initialize()    
+    AddinManager.Registry.Update(null)
+
 let ConversionsManager = AddinManager.GetExtensionObjects (typeof<Conversion>) |> Seq.cast<Conversion>
 let FrontendsManager = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
 
@@ -57,6 +65,7 @@ let expandBrackets = new Conversions.ExpandBrackets.ExpandBrackets()
 let expandMeta = new Conversions.ExpandMeta.ExpandMeta()
 let expandEbnf = new Conversions.ExpandEbnfStrict.ExpandEbnf()
 let expandInnerAlt = new Conversions.ExpandInnerAlt.ExpandInnerAlt()
+let expandRepeat = new Conversions.ExpandRepet.ExpandExpand()
 let expandTopLevelAlt = new Conversions.ExpandTopLevelAlt.ExpandTopLevelAlt()
 let expandSubSeq = new Conversions.ExpandBrackets.ExpandBrackets()
 let eliminateLeftRecursion = new Conversions.EliminateLeftRecursion.EliminateLeftRecursion()
@@ -78,9 +87,11 @@ let runTest inputFile conversion expectedResult =
     Namer.initNamer loadIL.grammar
     let result = loadIL |> applyConversion conversion
     let expected = defaultDefinition expectedResult
+#if DEBUG    
     expected |> treeDump.Generate |> string |> printfn "%s"
     printfn "%s" "************************"
     result |> treeDump.Generate |> string |> printfn "%s"
+#endif
     Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
 
 [<TestFixture>]

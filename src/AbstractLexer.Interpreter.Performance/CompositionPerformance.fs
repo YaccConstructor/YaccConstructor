@@ -46,12 +46,15 @@ let manuallyCreatedTests = [fstCompos1, fstCompos2; fstCompos12, fstCompos22; fs
 
 [<EntryPoint>]
 let main argv = 
-    let runLangTests tests getFST compose optimalCompose =
+    let runLangTests lang tests getFST compose optimalCompose =
         for test in tests do
-            let fst = getFST test
-            printfn "Processing %A" test
-            printfn "Average time for compose: %A" (benchmark (fun () -> compose fst) 100)
-            printfn "Average time for optimal compose: %A" (benchmark (fun () -> optimalCompose fst) 100)
+            try
+                let fst = getFST test
+                printfn "Processing %A" test
+                printfn "Average time for compose: %A" (benchmark (fun () -> compose fst) 10)
+                printfn "Average time for optimal compose: %A" (benchmark (fun () -> optimalCompose fst) 10)
+            with
+                | e -> printfn"%s is not %s compliant! Error: %A" test lang e.Message
     let runManuallyCreatedTests (tests : list<FST<_,_>*FST<_,_>>) = 
         for (fst1, fst2) in tests do
             let alphabet = new HashSet<_>()
@@ -61,8 +64,8 @@ let main argv =
             printfn "Average time for compose: %A" (benchmark (fun () -> compose fst1 fst2 alphabet) 100)
             printfn "Average time for optimal compose: %A" (benchmark (fun () -> optimalCompose fst1 fst2 alphabet) 100)
     if Array.exists (fun arg -> arg.Equals "-d") argv then
-        runLangTests calcTests getCalcFST calcCompose calcOptimalCompose
-        runLangTests TSQLTests getTSQLFST TSQLCompose TSQLOptimalCompose
+        runLangTests "Calc" calcTests getCalcFST calcCompose calcOptimalCompose
+        runLangTests "TSQL" TSQLTests getTSQLFST TSQLCompose TSQLOptimalCompose
         runManuallyCreatedTests manuallyCreatedTests
     if Array.exists (fun arg -> arg.Equals "-f") argv then
         try 
@@ -70,10 +73,7 @@ let main argv =
             let folder = new DirectoryInfo(path)
             let getTSQLFST = path |> getFST
             let externalTSQLTests = [for x in folder.GetFiles() do if x.Extension.Equals(".dot") then yield x.Name]
-            try
-                runLangTests externalTSQLTests getTSQLFST TSQLCompose TSQLOptimalCompose
-            with
-                | _ -> printfn ".dot files in the folder are not TSQL compliant!"
+            runLangTests "TSQL" externalTSQLTests getTSQLFST TSQLCompose TSQLOptimalCompose
         with
             | _ -> printfn "Wrong folder!"
     0

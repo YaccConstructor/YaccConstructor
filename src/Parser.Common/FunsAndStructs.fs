@@ -30,7 +30,6 @@ type Context(*<'TokenType>*) =
     new (index, label, vertex, ast) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Probability = 1.0; SLength = 1}
     //new (index, label, vertex, ast, path) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Path = path}
 
-
 type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
     | Error of string
@@ -48,9 +47,21 @@ module CommonFuns =
     let inline getIndex2Vertex (long : int64<vertexMeasure>)       = int <| ((int64 long) >>> 32)
  
 
-    let inline packLabel rule position = ((int rule <<< 16) ||| int position)*1<labelMeasure>
-    let inline getRule (packedValue : int<labelMeasure>)  = int packedValue >>> 16
-    let inline getPosition (packedValue : int<labelMeasure>) = int (int packedValue &&& 0xffff)
+    let inline pack2to32 rule position = ((int rule <<< 16) ||| int position)
+    let inline getLeft32 packedValue   = int packedValue >>> 16
+    let inline getRight32 packedValue = int (int packedValue &&& 0xffff)
+
+type CompressedArray<'t>(l : int[], f : _ -> 't) =
+    let a = Array.init l.Length (fun i -> Array.init l.[i] f)
+    member this.Item         
+        with get (i:int) = 
+            let edg = (CommonFuns.getLeft32 i)
+            let pos = (CommonFuns.getRight32 i)
+            a.[edg].[pos]
+        and set i v = a.[(CommonFuns.getLeft32 i)].[(CommonFuns.getRight32 i)] <- v
+       
+    
+
 
 type ParserStructures<'TokenType> (currentRule : int)=
     let sppfNodes = new BlockResizeArray<INode>()
@@ -66,11 +77,11 @@ type ParserStructures<'TokenType> (currentRule : int)=
         sppfNodes.Add dummyAST
         sppfNodes.Add epsilonNode
 
-    let currentLabel = ref <| CommonFuns.packLabel currentRule 0
+    let currentLabel = ref <| (CommonFuns.pack2to32 currentRule 0) * 1<labelMeasure>
     
     let getNodeP 
         findSppfNode 
-        (findSppfPackedNode : int<nodeMeasure> -> int<labelMeasure> -> int64<extension> -> int64<extension> -> INode -> INode -> int<nodeMeasure>) 
+        (findSppfPackedNode : _ -> _ -> _ -> _ -> INode -> INode -> int<nodeMeasure>) 
         dummy (label : int<labelMeasure>) (left : int<nodeMeasure>) (right : int<nodeMeasure>) : int<nodeMeasure> =
             let currentRight = sppfNodes.Item (int right)
             let rightExt = 
@@ -103,7 +114,7 @@ type ParserStructures<'TokenType> (currentRule : int)=
                 ignore <| findSppfPackedNode y label rightExt rightExt dummyAST currentRight 
                 y
                                  
-    let containsContext (setU : Dictionary<_, Dictionary<_, ResizeArray<_>>>[]) inputIndex (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
+    let containsContext (setU : CompressedArray<Dictionary<_, Dictionary<_, ResizeArray<_>>>>) inputIndex (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
         //if inputIndex <= inputLength
         //then
         let vertexKey = CommonFuns.pack vertex.Level vertex.NontermLabel
@@ -144,7 +155,7 @@ type ParserStructures<'TokenType> (currentRule : int)=
             false
         //else true
 
-    let addContext (setU : System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>[]) (inputVertex : int) (label : int<labelMeasure>) vertex ast len(*currentPath*) =
+    let addContext (setU : CompressedArray<System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>>) (inputVertex : int) (label : int<labelMeasure>) vertex ast len(*currentPath*) =
         let l = sppfNodes.[int ast].getLength ()
         if l < len
         then

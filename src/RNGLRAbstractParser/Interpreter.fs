@@ -300,7 +300,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         (fun (prefix:Prefix<_>) -> prefix = null)
                         curLevel)
             then curLevel.Add(null)     //adding null if need
-        else
+        else if not <| curLevel.Contains(prefixToAdd)
+        then
             let nextCommon = ResizeArray.tryFind
                                 (fun (pr:Prefix<_>) -> pr <> null && pr.Head = prefixToAdd.Head)
                                 curLevel

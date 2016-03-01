@@ -456,4 +456,4 @@ Tests/sbt/graphs_old/ms/*.dot
 Tests/sbt/graphs_old/pl/*.dot
 Tests/sbt/ready/*.dot
 Tests/AbstractPerformance/TSQL/*/*.dot
-src/RNGLRApplication/res.dot
+src/RNGLRApplication/*.dot

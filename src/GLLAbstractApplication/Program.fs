@@ -110,17 +110,11 @@ let edg f t l = new ParserEdge<_>(f,t,lbl l)
     
 
 let inputGraph =
-    let qGraph = new ParserInputGraph<_>([|0|], [|2|])
-    qGraph.AddVerticesAndEdgeRange
-            [
-             edg 0 0 (GLL.SimpleAmb.A 0,ref false)
-             edg 0 1 (GLL.SimpleAmb.B 0,ref false)
-             edg 1 0 (GLL.SimpleAmb.C 0,ref false)
-             edg 0 2 (GLL.SimpleAmb.RNGLR_EOF 0,ref false)
-             ] |> ignore
+    let edges = [|new BioParserEdge<GLL.SimpleAmb.Token>(0, 1, [|3;3;3|]);new BioParserEdge<GLL.SimpleAmb.Token>(1, 2, [|4|])|]
+    let qGraph = new BioParserInputGraph<GLL.SimpleAmb.Token>([|0|], 2, [|4;2|], edges, 3)
     qGraph
 let parser = GLL.SimpleAmb.buildAbstractAst
-let r = parser inputGraph
+let r = parser inputGraph 10
 match r with
 | ParserCommon.ParseResult.Error _ ->
     printfn "Error"     

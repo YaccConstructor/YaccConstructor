@@ -2,6 +2,7 @@
 open System
 open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
+open AbstractAnalysis.Common
 
 [<Measure>] type extension
 
@@ -106,8 +107,8 @@ type NumNode<'vtype> =
 
 
 [<AllowNullLiteral>]
-type Tree<'TokenType> (toks : array<'TokenType>, root : INode, rules : int[][]) =
-    member this.tokens = toks
+type Tree<'TokenType> (graph : BioParserInputGraph<'TokenType>, root : INode, rules : int[][]) =
+    member this.graph = graph
     member this.AstToDot (indToString : int -> string) (tokenToNumber : 'TokenType -> int) (tokenData : 'TokenType -> obj) (path : string) =
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
@@ -183,7 +184,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : INode, rules : int[][]) 
                         then
                             if t.Name <> -1
                             then
-                                createNode !num false Terminal ("t " +  (indToString <| (tokenToNumber this.tokens.[t.Name])) + " " + string(tokenData this.tokens.[t.Name]))
+                                createNode !num false Terminal ("t " +  (indToString <| (this.graph.Edges.[(t.Name >>> 16)].Tokens.[t.Name &&& 0xffff]))) 
                                 createEdge currentPair.Num !num false ""
                             else
                                 createNode !num false Terminal ("epsilon")
@@ -215,7 +216,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : INode, rules : int[][]) 
             | :? TerminalNode as t ->
                 if t.Name <> -1 
                 then 
-                    seq { yield (ReducedTree.Term((indToString <| (tokenToNumber this.tokens.[t.Name])), t))}
+                    seq { yield (ReducedTree.Term((indToString <| (this.graph.Edges.[(t.Name >>> 16)].Tokens.[t.Name &&& 0xffff])), t))}
                 else    
                     Seq.empty
             | :? PackedNode as p ->

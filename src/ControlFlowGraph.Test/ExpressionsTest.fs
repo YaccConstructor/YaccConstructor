@@ -71,7 +71,12 @@ type ``Cycles inside expressions``() =
     let mult = tokenToNumber <| ExtendedCalcTest.Parser.MULT fsa;
     let semi = tokenToNumber <| ExtendedCalcTest.Parser.SEMICOLON fsa
 
-    let nodeToType = dict["assign", Assignment;]
+    let nodeToType = dict
+                        [
+                            "assign", Assignment;
+                            "id", Identificator;
+                            "expr", Expression;
+                        ]
 
     let keywordToInt = dict [Keyword.SEMICOLON, semi;]
 

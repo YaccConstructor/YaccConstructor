@@ -48,7 +48,12 @@ type ``Simple cases``() =
     let zNumber = tokenToNumber <| ExtendedCalcTest.Parser.Z fsa
     let semicolonNumber = tokenToNumber <| ExtendedCalcTest.Parser.SEMICOLON fsa
 
-    let nodeToType = dict ["assign", Assignment;]
+    let nodeToType = dict 
+                        [
+                            "assign", Assignment;
+                            "id", Identificator;
+                            "expr", Expression;
+                        ]
         
     let keywordToInt = dict [Keyword.SEMICOLON, semicolonNumber;]
 
@@ -157,6 +162,7 @@ type ``If statements`` () =
     let nodeToType = dict[
                                 "simple_statement", Assignment;
                                 "if_statement", IfStatement;
+                                "cond", Identificator;
                           ]
     
     let tokenToString = tokenToNumber >> indToString
@@ -246,7 +252,11 @@ type ``Cycles``() =
     let cNumber = tokenToNumber <| SimpleTest.Parser.C fsa
     let semicolonNumber = tokenToNumber <| SimpleTest.Parser.SEMICOLON fsa
         
-    let nodeToType = dict["assign", Assignment;]
+    let nodeToType = dict
+                        [
+                            "assign", Assignment;
+                            "id", Identificator;
+                        ]
     let keywordToInt = dict [Keyword.SEMICOLON, semicolonNumber;]
 
     let tokToRealString = tokenToNumber >> indToString

@@ -13,7 +13,7 @@ open QuickGraph.FSA.GraphBasedFsa
 
 let runTest tokToRealName (cfg : ControlFlow<_>) (expected : string list) = 
     let errorList = 
-        cfg.FindUndefVariable()
+        cfg.FindUndefinedVariables()
         |> List.map tokToRealName
         
     printfn "%A" errorList
@@ -41,7 +41,12 @@ type ``Find undefined variables``() =
     let semicolonNumber = tokenToNumber <| ExtendedCalcTest.Parser.SEMICOLON fsa
     let assignNumber = tokenToNumber <| ExtendedCalcTest.Parser.ASSIGN fsa
 
-    let nodeToType = dict["assign", Assignment;]
+    let nodeToType = dict
+                        [
+                            "assign", Assignment; 
+                            "id", Identificator; 
+                            "expr", Expression
+                        ]
         
     let keywordToInt = dict [
                                 Keyword.SEMICOLON, semicolonNumber;
@@ -142,7 +147,7 @@ type ``Scope test``() =
     let semicolonNumber = tokenToNumber <| LetTest.Parser.SEMICOLON fsa
     let assignNumber = tokenToNumber <| LetTest.Parser.ASSIGN fsa
 
-    let nodeToType = dict["let_expr", Assignment;]
+    let nodeToType = dict["let_expr", Assignment; "id", Identificator; "expr", Expression]
         
     let keywordToInt = dict [
                                 Keyword.SEMICOLON, semicolonNumber;

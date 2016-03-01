@@ -10,14 +10,18 @@ open ControlFlowGraph.GraphConstructor
 
 type EdgeType<'TokenType> = 
 | Simple of BlockType * CfgTokensGraph<'TokenType>
+//blockType * graph for id * graph for right part
+| AssignmentEdge of BlockType * CfgTokensGraph<'TokenType> * CfgBlocksGraph<'TokenType> option
 | Complicated of BlockType * CfgBlocksGraph<'TokenType>
 | EmptyEdge
     
-    override this.ToString() = 
+    override this.ToString() =
         match this with
         | EmptyEdge -> "Empty edge"
+        | AssignmentEdge (blockType, _, _)
         | Simple (blockType, _)
         | Complicated (blockType, _) -> string blockType
+
 
 and BlockEdge<'TokenType>(source, target, tag) = 
     inherit TaggedEdge<int, EdgeType<'TokenType>>(source, target, tag)

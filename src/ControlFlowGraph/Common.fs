@@ -16,7 +16,9 @@ type BlockType =
     | Condition
     | Declaration 
     | Definition
+    | Expression
     | IfStatement 
+    | Identificator
     | ThenStatement 
     | ElseStatement 
     | ForStatement 
@@ -30,6 +32,8 @@ type BlockType =
         | Condition -> "Condition"
         | Declaration -> "Declaration"
         | Definition -> "Definition"
+        | Expression -> "Expression"
+        | Identificator -> "Identificator"
         | IfStatement -> "IfStatement"
         | ThenStatement -> "ThenStatement"
         | ElseStatement -> "ElseStatement"
@@ -43,7 +47,9 @@ type BlockType =
         | Assignment, Assignment
         | Condition, Condition 
         | Declaration, Declaration 
-        | Definition, Definition 
+        | Definition, Definition
+        | Expression, Expression
+        | Identificator, Identificator 
         | IfStatement, IfStatement 
         | ThenStatement, ThenStatement
         | ElseStatement, ElseStatement 

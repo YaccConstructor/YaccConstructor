@@ -67,50 +67,65 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
         func [] [entry]
         |> List.rev
 
-    let findUndefVariable() = 
+    let checkExpression definedVariables (expressionBlock : ExpressionBlock<_>)= 
+
+        (*let printTokenAndReturnID token = 
+            printf "%s " <| tokToSourceString token
+            token*)
+
+        let isUndefinedVariable token = 
+            let varName = token |> tokToSourceString
+            definedVariables 
+            |> List.forall ((<>) varName)
+        
+        expressionBlock.TokensGraph.GetAvailableTokens()
+        |> Seq.filter isVariable
+        |> Seq.filter isUndefinedVariable
+        |> List.ofSeq
+
+    let rec findUndefinedVariables externVariables start =
         let blockToVars = new Dictionary<_, _>()
         let errorList = ref []
         
         let rec processBlock (block : Block<_>) = 
             let prevVars = blockToVars.[block]
             let defVars = ref prevVars
-            let mutable newVar = None
 
-            let tokens = 
+            let newVariable, errors = 
                 match block.BlockType with 
+                | Expression -> 
+                    let expressionBlock = block :?> ExpressionBlock<_>
+                    None, checkExpression !defVars expressionBlock
                 | Assignment -> 
+                    let assignBlock = block :?> AssignmentBlock<_>
                     let leftPart = 
-                        block.TokensGraph.GetAvailableTokens()
-                        |> Seq.takeWhile isNotAssign
+                        assignBlock.Id.GetAvailableTokens()
                         |> List.ofSeq
 
-                    if leftPart.Length = 1 
-                    then
-                        let varName = leftPart.Head |> tokToSourceString
-                        newVar <- Some varName
-                    
-                    block.TokensGraph.GetAvailableTokens()
-                    |> Seq.skipWhile isNotAssign
-                    |> List.ofSeq
-                    |> List.tail
-                | _ -> block.TokensGraph.GetAvailableTokens() |> List.ofSeq
+                    //TODO remove this hack
+                    let newVar = 
+                        if leftPart.Length = 1 
+                        then
+                            let varName = leftPart.Head |> tokToSourceString
+                            Some varName
+                        else 
+                            None
+                    let newErrors = findUndefinedVariables !defVars <| fst assignBlock.RightPart
 
-            let isUndefinedVariable token = 
-                let varName = token |> tokToSourceString
-                !defVars |> List.forall ((<>) varName)
-            
+                    newVar, newErrors
+                    
+                | x -> invalidOp <| sprintf "%A block isn't supported now" x
+
             let isNewError token = 
                 let tokData = parserSource.TokenToData token
                 !errorList
                 |> List.forall (fun t -> parserSource.TokenToData t <> tokData) 
 
-            tokens
-            |> List.filter isVariable
-            |> List.filter isUndefinedVariable
+            errors
             |> List.filter isNewError
             |> List.iter (fun token -> errorList := token :: !errorList)
 
-            newVar
+            newVariable
             |> Option.iter (fun varName -> defVars := varName :: !defVars)
                 
             block.Children 
@@ -122,7 +137,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                 | true, vars -> 
                     let commonVars = List.intersect vars defVars
 
-                    //Does list change?
+                    //Will the defined variables list change?
                     if vars.Length <> commonVars.Length
                     then
                         blockToVars.[child] <- commonVars
@@ -134,7 +149,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
             node.Children 
             |> List.iter processChild
 
-        processInterNode [] entry 
+        processInterNode externVariables start 
         !errorList
 
     member this.Entry = entry
@@ -143,7 +158,8 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
     member this.Blocks = blocks
     member this.Nodes = nodes
 
-    member this.FindUndefVariable() = findUndefVariable()
+    member this.FindUndefinedVariables() = 
+        findUndefinedVariables [] entry
 
     member this.PrintToDot (name : string) = 
         let prefix = "_"
@@ -175,7 +191,8 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
 
             let nodeNumber, isNew = getBlockNumber block
             
-            let needCluster = false
+            //sometimes this code is needed for debug purposes
+            (*let needCluster = false
             if needCluster 
             then
                 let dotString, dotIn, dotOut = block.GetDotCluster tokToSourceString shift prefix
@@ -184,7 +201,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                 out.WriteLine clusterString
                 out.WriteLine (sprintf ("%d -> %s") nodeNumber dotIn)
                 out.WriteLine (sprintf ("%s -> %d") dotOut nodeNumber)
-
+                *)
             out.WriteLine (sprintf ("%d -> %d") parentNumber nodeNumber)
 
             if isNew 

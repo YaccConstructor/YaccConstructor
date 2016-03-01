@@ -99,16 +99,16 @@ let private mergeNodes (nodes : (InterNode<_> * InterNode<_> list) list) =
 
     commonEntry, commonExit
 
-let private processAssignmentGraph (graph : CfgTokensGraph<_>) = 
+let private processExpressionGraph (graph : CfgTokensGraph<_>) = 
 
-    let assigns = 
+    let expressions = 
         let getEntryExit (block : Block<_>) = 
-            //all assign blocks have only one child at this point
+            //all expression blocks have only one child at this point
             new EntryExit<_>(block.Parent, block.Children.Head)
 
-        AssignmentBlock.Create graph
+        ExpressionBlock.Create graph
         |> getEntryExit
-    assigns
+    expressions
 
 let private processConditionGraph (graph : CfgBlocksGraph<_>) = 
     
@@ -186,6 +186,23 @@ let rec processIfGraph (ifGraph : CfgBlocksGraph<_>) =
 
     new EntryExit<_>(fst !condBlock, exitNode)
 
+and processAssignmentGraph idGraph (rightPartGraphOpt : CfgBlocksGraph<_> option) = 
+
+    let nodes = 
+        match rightPartGraphOpt with
+        | Some rightPart -> processSeq rightPart
+        | None -> new InterNode<_>(), new InterNode<_>()
+    
+    let assignBlock = 
+        let getEntryExit (block : Block<_>) = 
+            //all assign blocks have only one child at this point
+            new EntryExit<_>(block.Parent, block.Children.Head)
+        
+        AssignmentBlock.Create idGraph nodes
+        |> getEntryExit
+
+    assignBlock
+
 and processSeq (graph : CfgBlocksGraph<_>) = 
 
     let vertexToInterNode = new Dictionary<_, EntryExit<_>>()
@@ -194,8 +211,7 @@ and processSeq (graph : CfgBlocksGraph<_>) =
         
         vertexToInterNode.[key] <-
             match vertexToInterNode.TryGetValue key with
-            | true, data -> 
-                EntryExit<_>.MergeTwoNodes data value
+            | true, data -> EntryExit<_>.MergeTwoNodes data value
             | false, _ -> value
 
     let processEdge vertex (edge : BlockEdge<_>) = 
@@ -206,12 +222,24 @@ and processSeq (graph : CfgBlocksGraph<_>) =
         | Simple (block, tokensGraph) -> 
             let nodes = 
                 match block with
-                | Assignment -> processAssignmentGraph tokensGraph
+                | Expression -> processExpressionGraph tokensGraph
                 | x -> invalidOp <| sprintf "Now this statement type isn't supported: %A"x
 
             let newData = 
                 match oldValue with
                 | true,  oldNodes -> EntryExit<_>.ConcatNodes oldNodes nodes
+                | false, _ -> nodes
+
+            addToDictionary edge.Target newData
+
+        | AssignmentEdge(block, idGraph, rightPartGraphOpt) -> 
+            
+            let nodes = 
+                processAssignmentGraph idGraph rightPartGraphOpt
+
+            let newData = 
+                match oldValue with
+                | true, oldNodes -> EntryExit<_>.ConcatNodes oldNodes nodes
                 | false, _ -> nodes
 
             addToDictionary edge.Target newData

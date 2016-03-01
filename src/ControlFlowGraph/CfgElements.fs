@@ -139,14 +139,29 @@ and InterNode<'TokenType>(children : Block<'TokenType> list, parents : Block<'To
             then "Exit Node"
             else "Node"
 
-type AssignmentBlock<'TokenType>(tokens) =
+type AssignmentBlock<'TokenType>(tokens, leftPart, rightPart) =
     inherit Block<'TokenType>(Assignment, tokens)
 
-    static member Create (graph : CfgTokensGraph<_>) = 
-        let assignBlock = new AssignmentBlock<'TokenType>(graph) :> Block<'TokenType>
+    member this.Id = leftPart
+
+    member this.RightPart = rightPart
+
+    static member Create (leftPart : CfgTokensGraph<_>) (rightPart : InterNode<'TokenType> * InterNode<'TokenType>) = 
+        
+        //create a normal implemetation
+        let assignBlock = new AssignmentBlock<'TokenType>(leftPart, leftPart, rightPart) :> Block<'TokenType>
 
         let res = Block.AttachParentAndChild assignBlock
-        res/// :?> AssignmentBlock<'TokenType>
+        res
+
+type ExpressionBlock<'TokenType>(tokens) =
+    inherit Block<'TokenType>(Expression, tokens)
+
+    static member Create (graph : CfgTokensGraph<_>) = 
+        let expressionBlock = new ExpressionBlock<'TokenType>(graph) :> Block<'TokenType>
+
+        let res = Block.AttachParentAndChild expressionBlock
+        res
 
 type ConditionBlock<'TokenType>(tokens) =
     inherit Block<'TokenType>(Condition, tokens)

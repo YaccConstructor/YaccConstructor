@@ -10,8 +10,6 @@ open ControlFlowGraph.InnerGraph
 open ControlFlowGraph.InputStructures
 open ControlFlowGraph.TokensExtractor
 
-open SeqExtension
-
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 
@@ -22,9 +20,17 @@ let buildCfg (tree : Tree<'TokenType>)
             tokToString = 
 
     let intToToken i = tree.Tokens.[i]
+
+    let familyToBlockTypeOption (family : Family) = 
+        let familyName = parserSource.LeftSides.[family.prod] |> parserSource.NumToString
+
+        match langSource.NodeToType.TryGetValue familyName with
+        | true, value -> Some value
+        | false, _ -> None
     
     let processIf' = processIf intToToken parserSource.TokenToNumber tokToString <| langSource.GetTempIfDict()
-    let processAssignment' = processAssignment intToToken tokToString 
+    let processAssignment' = processAssignment familyToBlockTypeOption intToToken tokToString 
+    let processExpression' = processExpression intToToken tokToString
     
     let familyToState = new Dictionary<_, ASTProcessingState>()
 
@@ -66,19 +72,19 @@ let buildCfg (tree : Tree<'TokenType>)
                     | None -> None
             | false, _ -> 
                 familyToState.[family] <- InProgress(graph.CurrentVertex)
-                let familyName = parserSource.LeftSides.[family.prod] |> parserSource.NumToString
-
-                if langSource.NodeToType.ContainsKey familyName 
-                then 
+                
+                match familyToBlockTypeOption family with
+                | Some blockType -> 
                     let edge = 
-                        match langSource.NodeToType.[familyName] with
+                        match blockType with
                         | IfStatement -> processIf' handleNode family
                         | Assignment -> processAssignment' family
+                        | Expression -> processExpression' family
                         | x -> invalidOp <| sprintf "This construction isn't supported now: %A" x
                     
                     graph.AddEdge edge
                     graph.UpdateVertex()
-                else 
+                | None ->
                     family.nodes.doForAll (handleNode graph)
                 
                 familyToState.[family] <- Processed(startVertex, graph.CurrentVertex)

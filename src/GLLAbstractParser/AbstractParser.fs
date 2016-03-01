@@ -71,7 +71,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
 
         let nonTerminalNodes = new SysDict<int64,int<nodeMeasure>>()        
         let intermidiateNodes = new CompressedArray<_>(input.ChainLength, (fun _ -> new CompressedArray<_>(input.ChainLength, fun _ -> Unchecked.defaultof<SysDict<int<labelMeasure>, int<nodeMeasure>>>)))
-        let edges = new CompressedArray<_>(input.ChainLength, (fun _ -> Array.zeroCreate<SysDict<int<nodeMeasure>, SysDict<int, ResizeArray<int>>>> slots.Count))
+        //let edges = new CompressedArray<_>(input.ChainLength, (fun _ -> Array.zeroCreate<SysDict<int<nodeMeasure>, SysDict<int, ResizeArray<int>>>> slots.Count))
+        let edges = Array.init slots.Count (fun _ -> new CompressedArray<_> (input.ChainLength, (fun _ -> null)))
         let terminalNodes = new CompressedArray<_>(input.ChainLength, (fun _ -> 0 * 1<nodeMeasure> ))
         let currentGSSNode = ref <| dummyGSSNode
         for v in input.InitialVertices do
@@ -86,9 +87,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             for i = 0 to len - 1 do
                 let oE = outEdges.[input.InitialVertices.[i]]
                 for e in oE do
-                    let lExt = pack2to32 e 0
-                    let rExt = pack2to32 (input.Edges.Length - 1) 1 
-                    arr.[i] <- packExtension lExt rExt          
+                    arr.[i] <- packExtension (pack2to32 e 0) (pack2to32 (input.Edges.Length - 1) 1)          
             arr
 
         let slotIsEnd (label : int<labelMeasure>) =
@@ -338,9 +337,10 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                     if curSymbol = input.Edges.[oe].Tokens.[0] then
                                         res <- Some oe  
                                 res
-                            currentIndex := (pack2to32 curEdge.Value 0)
+                            
                             match curEdge with
                             | Some edge ->
+                                currentIndex := (pack2to32 curEdge.Value 0)
                                 let curToken = input.Edges.[edge].Tokens.[0]
                                 if !structures.CurrentN = structures.Dummy
                                 then structures.CurrentN := getNodeT !currentIndex
@@ -370,7 +370,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                         let cE = CommonFuns.getLeft32 !currentIndex
                         let cP = CommonFuns.getRight32 !currentIndex
                         let chainLen = input.ChainLength.[cE]
-                        if cP < chainLen
+                        if cP < chainLen - 1
                         then
                             let curToken = input.Edges.[cE].Tokens.[cP]
                             let index = getIndex curSymbol curToken

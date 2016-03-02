@@ -493,6 +493,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         else Error (buildErrors errorEdges)
     else
         let startGssV,_ = addVertex startV startState startV.unprocessedGssVertices
+        gssVertexesToPrefixes.[startGssV].Add(null)   //null - begin of all prefixes
         while errorIndex = -1 && verticesToProcess.Count > 0 do
             let curV = verticesToProcess.Dequeue()
             processVertex curV

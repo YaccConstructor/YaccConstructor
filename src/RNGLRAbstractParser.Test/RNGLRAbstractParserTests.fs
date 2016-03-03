@@ -45,8 +45,9 @@ let loadLexerInputGraph gFile =
     for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, e.Tag)))
     lexerInputG
 
+//generate log message
 let getStringErrors (errDict:Dictionary<_,_>) =
-    let mutable errStr = "Errors: "
+    let mutable errStr = "Error tokens: "
     for tknStr in errDict.Keys do
         errStr <- errStr + tknStr + ", "
     errStr
@@ -69,6 +70,41 @@ let test buildAstAbstract qGraph nodesCount edgesCount epsilonsCount termsCount 
         let msg = getStringErrors errDict
         printfn "%A" msg
         Assert.Pass()
+
+//check equality of dictionary keys and given list
+let checkEqualErrors (errorDict:Dictionary<_,_>) (testErrors:ResizeArray<_>) =
+    if errorDict.Keys.Count = testErrors.Count
+    then
+        let r = testErrors |> Seq.tryFind (fun error -> not <| errorDict.ContainsKey(error))
+        match r with
+        | None -> true
+        | Some x -> false
+     else
+        false
+
+//test: check result type (success or error) and compare error dictionary with testErrors
+let errorTest buildAstAbstract qGraph shouldBeSuccess testErrors =
+    let r = (new Parser<_>()).Parse  buildAstAbstract qGraph
+    match r with
+    | Error (errDict) ->
+        let msg = getStringErrors errDict
+        if shouldBeSuccess
+        then
+            Assert.Fail(sprintf "Test should produce success parsing result but its fully failed. " + msg) 
+        else
+            Assert.True(checkEqualErrors errDict testErrors)
+            printfn "%A" msg
+            Assert.Pass()
+    | Success(tree, errDict) ->
+        let msg = getStringErrors errDict
+        if shouldBeSuccess
+        then
+            Assert.True(checkEqualErrors errDict testErrors)
+            printfn "%A" msg
+            Assert.Pass()
+        else
+            Assert.Fail(sprintf "Test should produce success parsing result but its fully failed. " + msg) 
+
 
 let perfTest parse inputLength graph =    
     for x in 0..inputLength do
@@ -137,16 +173,6 @@ type ``RNGLR abstract parser tests`` () =
              ] |> ignore
 
         test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 13 12 0 3 0
-
-
-    [<Test>]
-    member this._00_Simple () =
-        let qGraph = new ParserInputGraph<_>(0, 2)
-        qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (RNGLR.PrettySimpleCalc.PLUS 1)
-             edg 1 2 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
-             ] |> ignore
-        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 15 14 0 4 1
 
     [<Test>]
     member this._02_PrettySimpleCalcSimple_BranchedInput () =
@@ -596,6 +622,18 @@ type ``RNGLR abstract parser tests`` () =
 
         test RNGLR.AandB.buildAstAbstract qGraph 23 22 0 11 1
 
+    [<Test>]
+    member this._30_Errors_PrettySimpleCalc_FirstEdge () =
+        let qGraph = new ParserInputGraph<_>(0, 2)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.PrettySimpleCalc.PLUS 1)
+             edg 1 2 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+        let testErrors = new ResizeArray<string>()
+        testErrors.Add("PLUS1")
+
+        errorTest RNGLR.PrettySimpleCalc.buildAstAbstract qGraph false testErrors
+
     member this.``Not Ambigous Simple Calc. Branch. Perf`` i inpLength isLoop =  
         let tpl x =
             [
@@ -737,8 +775,8 @@ let f x =
 //    t._12_NotAmbigousSimpleCalc_Loop7. ()
 //    t._13_NotAmbigousSimpleCalc_Loop8. ()
 //    t._14_NotAmbigousSimpleCalcWith2Ops_Loop. ()
-    t._15_NotAmbigousSimpleCalcWith2Ops_Loops ()
-//    t._16_Stars_Loop. () 
+//    t._15_NotAmbigousSimpleCalcWith2Ops_Loops ()
+//    t._16_Stars_Loop () 
 //    t._17_Stars2_Loop. () 
 //    t._18_Stars2_Loop2. () 
 //    t._19_FirstEps ()
@@ -751,8 +789,9 @@ let f x =
 //    t._26_UnambiguousBrackets_Inf()
 //    t._27_UnambiguousBrackets_WithoutEmptyString()
 //    t._28_UnambiguousBrackets_DifferentPathLengths ()
-   // t.``TSQL performance test for Alvor`` 2 100 false
-    //t._29_AandB_Circle ()
-    //t.``TSQL performance test 2`` 2 100 false
+//    t.``TSQL performance test for Alvor`` 2 100 false
+//    t._29_AandB_Circle ()
+//    t._30_Errors_PrettySimpleCalc_FirstEdge ()
+//    t.``TSQL performance test 2`` 2 100 false
 //    t.temp ()
     0

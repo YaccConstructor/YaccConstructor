@@ -681,19 +681,21 @@ type ``GLL abstract parser tests`` () =
                 | 'C' -> GLL.Bio2.C i
                 | 'G' -> GLL.Bio2.G i
                 | _ ->   GLL.Bio2.G i
+                |> GLL.Bio2.tokenToNumber
 
         let basePath = "../../../Tests/bio/"
         let path = Path.Combine(basePath,"biodata_1/saves/00_before_repeat_resolution/graph")
         let start = System.DateTime.Now
-        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToOarserInputGraph path 500 getSmb (GLL.Bio2.RNGLR_EOF 0) 
-        graph.PrintToDot "input.dot" (GLL.Bio2.tokenToNumber >> GLL.Bio2.numToString)       
-        let res = GLL.Bio2.buildAbstractAst graph 100
-        match res with
-        | Success ast -> 
-            //ast.AstToDot GLL.Bio2.numToString GLL.Bio2.tokenToNumber GLL.Bio2.tokenData "bioAST.dot"
-            printfn "Success!"
-            printfn "Time = %A"  (System.DateTime.Now - start)
-        | Error _ -> printfn "Error!"
+//        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToOarserInputGraph path 500 getSmb (GLL.Bio2.RNGLR_EOF 0) 
+//        graph.PrintToDot "input.dot" (GLL.Bio2.tokenToNumber >> GLL.Bio2.numToString)       
+//        let res = GLL.Bio2.buildAbstractAst graph 100
+//        match res with
+//        | Success ast -> 
+//            //ast.AstToDot GLL.Bio2.numToString GLL.Bio2.tokenToNumber GLL.Bio2.tokenData "bioAST.dot"
+//            printfn "Success!"
+//            printfn "Time = %A"  (System.DateTime.Now - start)
+//        | Error _ -> printfn "Error!"
+        0
 
     [<Test>]
     member this.bio2_4 () =
@@ -705,6 +707,7 @@ type ``GLL abstract parser tests`` () =
             //"tremitted-Plant_SRP.fa"
             //"1k-4.fa"
             //"10k-tRNA.fa"
+            //"10.5k-tRNA.fa"
             //"t10k1.fa"
         let textData =             
             File.ReadAllLines(Path.Combine(bp,file))
@@ -719,14 +722,18 @@ type ``GLL abstract parser tests`` () =
             | 'C' -> GLL.Bio2.C i
             | 'G' -> GLL.Bio2.G i
             | _ -> GLL.Bio2.G i
+            |> GLL.Bio2.tokenToNumber
         let edges = 
-            textData
-            |> Seq.mapi(fun i ch -> edg i (i+1) (getSmb ch i))
-            |> Array.ofSeq
-        let l = edges |> Array.length
-        let qGraph = new ParserInputGraph<_>([|0|], [|l + 1|])
-        qGraph.AddVerticesAndEdgeRange edges |> ignore
-        qGraph.AddVerticesAndEdgeRange [for i in 0..l -> edg i (l+1) (GLL.Bio2.RNGLR_EOF 0)] 
+            let e = 
+                textData
+                |> Seq.mapi(fun i ch -> (getSmb ch i))
+                |> Array.ofSeq
+            [|new BioParserEdge<_>(0,1,e); new BioParserEdge<_>(1,2,[|26|]) |]
+        //let l = edges |> Array.length
+
+        let qGraph = new BioParserInputGraph<_>([|0|], 2, [|Seq.length textData + 1 ;2|], edges, 3)
+        //qGraph.AddVerticesAndEdgeRange edges |> ignore
+        //qGraph.AddVerticesAndEdgeRange [for i in 0..l -> edg i (l+1) (GLL.Bio2.RNGLR_EOF 0)] 
         let start = System.DateTime.Now
         let res = GLL.Bio2.buildAbstractAst qGraph 100
         match res with

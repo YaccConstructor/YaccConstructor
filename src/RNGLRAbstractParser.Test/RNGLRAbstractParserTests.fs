@@ -45,7 +45,6 @@ let loadLexerInputGraph gFile =
     for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, e.Tag)))
     lexerInputG
 
-//generate log message
 let getStringErrors (errDict:Dictionary<_,_>) =
     let mutable errStr = "Error tokens: "
     for tknStr in errDict.Keys do
@@ -71,7 +70,6 @@ let test buildAstAbstract qGraph nodesCount edgesCount epsilonsCount termsCount 
         printfn "%A" msg
         Assert.Pass()
 
-//check equality of dictionary keys and given list
 let checkEqualErrors (errorDict:Dictionary<_,_>) (testErrors:ResizeArray<_>) =
     if errorDict.Keys.Count = testErrors.Count
     then
@@ -82,7 +80,6 @@ let checkEqualErrors (errorDict:Dictionary<_,_>) (testErrors:ResizeArray<_>) =
      else
         false
 
-//test: check result type (success or error) and compare error dictionary with testErrors
 let errorTest buildAstAbstract qGraph shouldBeSuccess testErrors =
     let r = (new Parser<_>()).Parse  buildAstAbstract qGraph
     match r with
@@ -634,6 +631,106 @@ type ``RNGLR abstract parser tests`` () =
 
         errorTest RNGLR.PrettySimpleCalc.buildAstAbstract qGraph false testErrors
 
+    [<Test>]
+    member this._31_Errors_PrettySimpleCalc_FirstEdge2 () =
+        let qGraph = new ParserInputGraph<_>(0, 3)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.PrettySimpleCalc.PLUS 1)
+             edg 1 2 (RNGLR.PrettySimpleCalc.NUM 2)
+             edg 2 3 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+        let testErrors = new ResizeArray<string>()
+        testErrors.Add("PLUS1")
+
+        errorTest RNGLR.PrettySimpleCalc.buildAstAbstract qGraph false testErrors
+
+    [<Test>]
+    member this._32_Errors_PrettySimpleCalc_FirstEdge3 () =
+        let qGraph = new ParserInputGraph<_>(0, 2)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
+             edg 0 1 (RNGLR.PrettySimpleCalc.PLUS 2)
+             edg 1 2 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+        let testErrors = new ResizeArray<string>()
+        testErrors.Add("PLUS2")
+
+        errorTest RNGLR.PrettySimpleCalc.buildAstAbstract qGraph true testErrors
+
+    [<Test>]
+    member this._33_Errors_PrettySimpleCalc_SimpleBranchError () =
+        let qGraph = new ParserInputGraph<_>(0, 4)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
+             edg 1 2 (RNGLR.PrettySimpleCalc.PLUS 2)
+             edg 1 2 (RNGLR.PrettySimpleCalc.NUM 3)
+             edg 2 3 (RNGLR.PrettySimpleCalc.NUM 4)
+             edg 3 4 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+        let testErrors = new ResizeArray<string>()
+        testErrors.Add("NUM3")
+
+        errorTest RNGLR.PrettySimpleCalc.buildAstAbstract qGraph true testErrors
+
+    [<Test>]
+    member this._34_Errors_PrettySimpleCalc_SimpleBranchError2 () =
+        let qGraph = new ParserInputGraph<_>(0, 3)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
+             edg 1 2 (RNGLR.PrettySimpleCalc.PLUS 2)
+             edg 1 2 (RNGLR.PrettySimpleCalc.NUM 3)
+             edg 2 3 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+        let testErrors = new ResizeArray<string>()
+        testErrors.Add("NUM3")
+        testErrors.Add("RNGLR_EOF0")
+
+        errorTest RNGLR.PrettySimpleCalc.buildAstAbstract qGraph false testErrors
+
+    [<Test>]
+    member this._35_Errors_PrettySimpleCalc_ComplexBranchError () =
+        let qGraph = new ParserInputGraph<_>(0, 5)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
+             edg 1 2 (RNGLR.PrettySimpleCalc.PLUS 2)
+             edg 1 3 (RNGLR.PrettySimpleCalc.NUM 3)
+             edg 2 3 (RNGLR.PrettySimpleCalc.NUM 4)
+             edg 2 4 (RNGLR.PrettySimpleCalc.NUM 5)
+             edg 3 4 (RNGLR.PrettySimpleCalc.PLUS 6)
+             edg 4 5 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+        let testErrors = new ResizeArray<string>()
+        testErrors.Add("NUM3")
+        testErrors.Add("RNGLR_EOF0")
+
+        errorTest RNGLR.PrettySimpleCalc.buildAstAbstract qGraph true testErrors
+
+    [<Test>]
+    member this._36_Errors_PrettySimpleCalc_ComplexBranchError2 () =
+        let qGraph = new ParserInputGraph<_>(0, 11)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
+             edg 1 2 (RNGLR.PrettySimpleCalc.PLUS 2)
+             edg 1 3 (RNGLR.PrettySimpleCalc.NUM 3)
+             edg 1 4 (RNGLR.PrettySimpleCalc.PLUS 4)
+             edg 1 5 (RNGLR.PrettySimpleCalc.PLUS 5)
+             edg 2 6 (RNGLR.PrettySimpleCalc.NUM 6)
+             edg 3 7 (RNGLR.PrettySimpleCalc.PLUS 7)
+             edg 4 8 (RNGLR.PrettySimpleCalc.NUM 8)
+             edg 5 9 (RNGLR.PrettySimpleCalc.PLUS 9)
+             edg 6 7 (RNGLR.PrettySimpleCalc.PLUS 10)
+             edg 8 7 (RNGLR.PrettySimpleCalc.NUM 11)
+             edg 9 7 (RNGLR.PrettySimpleCalc.PLUS 12)
+             edg 7 10 (RNGLR.PrettySimpleCalc.NUM 13)
+             edg 10 11 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+        let testErrors = new ResizeArray<string>()
+        testErrors.Add("NUM3")
+        testErrors.Add("NUM11")
+        testErrors.Add("PLUS9")
+
+        errorTest RNGLR.PrettySimpleCalc.buildAstAbstract qGraph true testErrors
+
     member this.``Not Ambigous Simple Calc. Branch. Perf`` i inpLength isLoop =  
         let tpl x =
             [
@@ -792,6 +889,12 @@ let f x =
 //    t.``TSQL performance test for Alvor`` 2 100 false
 //    t._29_AandB_Circle ()
 //    t._30_Errors_PrettySimpleCalc_FirstEdge ()
+//    t._31_Errors_PrettySimpleCalc_FirstEdge2 ()
+//    t._32_Errors_PrettySimpleCalc_FirstEdge3 ()
+//    t._33_Errors_PrettySimpleCalc_SimpleBranchError ()
+//    t._34_Errors_PrettySimpleCalc_SimpleBranchError2 ()
+//    t._35_Errors_PrettySimpleCalc_ComplexBranchError ()
+//    t._36_Errors_PrettySimpleCalc_ComplexBranchError2 ()
 //    t.``TSQL performance test 2`` 2 100 false
 //    t.temp ()
     0

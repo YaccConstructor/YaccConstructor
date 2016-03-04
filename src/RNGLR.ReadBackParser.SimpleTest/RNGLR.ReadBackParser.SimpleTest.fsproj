@@ -51,6 +51,8 @@
     <Compile Include="SimpleSome.yrd.fs" />
     <Compile Include="StackingConflict.yrd.fs" />
     <Compile Include="TwoEpsilonsMiddle.yrd.fs" />
+    <Compile Include="TwoManyNonTerms.yrd.fs" />
+    <Compile Include="TwoManyTerms.yrd.fs" />
     <Compile Include="Program.fs" />
     <None Include="packages.config" />
   </ItemGroup>

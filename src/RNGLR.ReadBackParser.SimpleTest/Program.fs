@@ -3,6 +3,7 @@
 open Yard.Generators.RNGLR.ReadBack.Parser
 open NUnit.Framework
 open LexCommon
+open Yard.Generators.RNGLR.ReadBack.Printers
 
 type TestExpectedResult =
     | TER_Success
@@ -27,11 +28,14 @@ type ``RNGLRReadBack parser tests with simple lexer`` () =
 //        printfn "Result: %A" res
 //        Assert.AreEqual(expected, res)
 
-    let runTest parser file expected = 
+    let runTest parser parserSource file expected = 
         let path = dir + file
         match run path parser, expected with
         | Error (num, tok, err, _), TER_Error -> printErr (num, tok, err)
-        | Success (tree, _), TER_Success -> printfn "Success"
+        | Success (tree, tokens), TER_Success -> 
+            printfn "Success"
+            let leftSide, tokenToNumber, numberToToken = parserSource
+            sppfToDot tokens tree leftSide tokenToNumber numberToToken "C:/temp/res.dot"
         | Error (num, tok, err, _), TER_Success ->  
             printErr (num, tok, err)
             Assert.Fail()
@@ -42,57 +46,73 @@ type ``RNGLRReadBack parser tests with simple lexer`` () =
     [<Test>]
     member test.``1.0 One``() =
         let parser = RNGLR.ReadBackParser.One.buildAst
+        let parserSource = RNGLR.ReadBackParser.One.leftSide, RNGLR.ReadBackParser.One.tokenToNumber, RNGLR.ReadBackParser.One.numToString
         let file = "One.txt"
-        runTest parser file TER_Success
+        runTest parser parserSource file TER_Success
 
     [<Test>]
     member test.``1.1 One wrong1``() =
         let parser = RNGLR.ReadBackParser.One.buildAst
+        let parserSource = RNGLR.ReadBackParser.One.leftSide, RNGLR.ReadBackParser.One.tokenToNumber, RNGLR.ReadBackParser.One.numToString
         let file = "SeqOfTwoWrong1.txt"
-        runTest parser file TER_Error
+        runTest parser parserSource file TER_Error
 
     [<Test>]
     member test.``2.0 SeqOfTwo``() =
         let parser = RNGLR.ReadBackParser.SeqOfTwo.buildAst
+        let parserSource = RNGLR.ReadBackParser.SeqOfTwo.leftSide, RNGLR.ReadBackParser.SeqOfTwo.tokenToNumber, RNGLR.ReadBackParser.SeqOfTwo.numToString
         let file = "SeqOfTwo.txt"
-        runTest parser file TER_Success
+        runTest parser parserSource file TER_Success
 
     [<Test>]
     member test.``2.1 SeqOfTwo wrong1``() =
         let parser = RNGLR.ReadBackParser.SeqOfTwo.buildAst
+        let parserSource = RNGLR.ReadBackParser.SeqOfTwo.leftSide, RNGLR.ReadBackParser.SeqOfTwo.tokenToNumber, RNGLR.ReadBackParser.SeqOfTwo.numToString
         let file = "SeqOfTwoWrong1.txt"
-        runTest parser file TER_Error
+        runTest parser parserSource file TER_Error
 
     [<Test>]
     member test.``2.2 SeqOfTwo wrong2``() =
         let parser = RNGLR.ReadBackParser.SeqOfTwo.buildAst
+        let parserSource = RNGLR.ReadBackParser.SeqOfTwo.leftSide, RNGLR.ReadBackParser.SeqOfTwo.tokenToNumber, RNGLR.ReadBackParser.SeqOfTwo.numToString
         let file = "SeqOfTwoWrong2.txt"
-        runTest parser file TER_Error
+        runTest parser parserSource file TER_Error
 
     [<Test>]
     member test.``2.3 SeqOfTwo wrong3``() =
         let parser = RNGLR.ReadBackParser.SeqOfTwo.buildAst
+        let parserSource = RNGLR.ReadBackParser.SeqOfTwo.leftSide, RNGLR.ReadBackParser.SeqOfTwo.tokenToNumber, RNGLR.ReadBackParser.SeqOfTwo.numToString
         let file = "SeqOfTwoWrong3.txt"
-        runTest parser file TER_Error
+        runTest parser parserSource file TER_Error
     
     
     [<Test>]
     member test.``3.0 First alternative in the middle``() =
         let parser = RNGLR.ReadBackParser.AlternativeInMiddle.buildAst
+        let parserSource = RNGLR.ReadBackParser.AlternativeInMiddle.leftSide, RNGLR.ReadBackParser.AlternativeInMiddle.tokenToNumber, RNGLR.ReadBackParser.AlternativeInMiddle.numToString
         let file = "AlternativeInMiddle1.txt"
-        runTest parser file TER_Success
+        runTest parser parserSource file TER_Success
 
     [<Test>]
     member test.``3.1 Second alternative in the middle``() =
         let parser = RNGLR.ReadBackParser.AlternativeInMiddle.buildAst
+        let parserSource = RNGLR.ReadBackParser.AlternativeInMiddle.leftSide, RNGLR.ReadBackParser.AlternativeInMiddle.tokenToNumber, RNGLR.ReadBackParser.AlternativeInMiddle.numToString
         let file = "AlternativeInMiddle2.txt"
-        runTest parser file TER_Success
+        runTest parser parserSource file TER_Success
     
     [<Test>]
-    member test.``4.0 CalcEBNF`` () = 
+    member test.``4.0 Two many nonterminals`` () = 
+        let parser = RNGLR.ReadBackParser.TwoManyNonTerms.buildAst
+        let parserSource = RNGLR.ReadBackParser.TwoManyNonTerms.leftSide, RNGLR.ReadBackParser.TwoManyNonTerms.tokenToNumber, RNGLR.ReadBackParser.TwoManyNonTerms.numToString
+        let file = "SeqOfThree.txt"
+        runTest parser parserSource file TER_Success
+    
+    [<Test>]
+    member test.``5.0 CalcEBNF`` () = 
         let parser = RNGLR.ReadBackParser.CalcEBNF.buildAst
+        let parserSource = RNGLR.ReadBackParser.CalcEBNF.leftSide, RNGLR.ReadBackParser.CalcEBNF.tokenToNumber, RNGLR.ReadBackParser.CalcEBNF.numToString
         let file = "CalcEBNF.txt"
-        runTest parser file TER_Success
+        runTest parser parserSource file TER_Success
 
     (*[<Test>]
     member test.``Choice`` () = 
@@ -294,5 +314,5 @@ type ``RNGLRReadBack parser tests with simple lexer`` () =
 
 [<EntryPoint>]
 let main argv = 
-    (new ``RNGLRReadBack parser tests with simple lexer``()).``4.0 CalcEBNF``();
+    (new ``RNGLRReadBack parser tests with simple lexer``()).``4.0 Two many nonterminals``();
     0 // return an integer exit code

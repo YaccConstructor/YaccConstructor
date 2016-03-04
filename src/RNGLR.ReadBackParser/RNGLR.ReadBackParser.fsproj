@@ -20,6 +20,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <Compile Include="Graphs.fs" />
+    <Compile Include="Printers.fs" />
     <Compile Include="Parser.fs" />
   </ItemGroup>
   <ItemGroup>

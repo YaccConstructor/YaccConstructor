@@ -25,6 +25,10 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
     let getEpsilon =
         let epsilons = Array.init parserSource.LeftSide.Length (fun i -> SppfLabel.EpsilonReduction(i))
         fun i -> epsilons.[i]
+
+    //DEBUG
+    let timeStart = System.DateTime.Now
+
     // If input stream is empty or consists only of RNGLR_EOF token
     if not <| enum.MoveNext() || parserSource.EofIndex = parserSource.TokenToNumber enum.Current then
         if parserSource.AcceptEmptyInput 
@@ -39,7 +43,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                     let nfaFinal = new VertexWithBackTrack<int, int>(0)
                     new Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel> (nfaFinal, gssFinal)
                 start.addEdge(new Edge<_,_>(final, SppfLabel.EpsilonReduction -1))
-                start, 0, Set.ofArray [|0|]
+                start, 1, 0, Set.ofArray [|0|]
             Success (emptyParse, [||])
         else
             Error (0, [||], "This grammar cannot accept empty string",
@@ -66,6 +70,14 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
         /// Stores states, used on current level. Instead statesCount must be number of non-terminals, but doesn't matter
         let usedStates = new Stack<_>(statesCount)
         let stateToVertex : (GssVertex option)[] = Array.zeroCreate statesCount
+        //DEBUG
+        let maxReductionDepth = ref 0
+        let checkAndPrintMaxReductionDepth prod startLevel finalLevel finalState =
+            if startLevel - finalLevel > !maxReductionDepth then
+                maxReductionDepth := startLevel - finalLevel
+                let nonTerm = parserSource.NumToString parserSource.LeftSide.[prod]
+                printfn "Prod: %d (%s), start level : %d, final level: %d, final state: % d" prod nonTerm startLevel finalLevel finalState
+
 
         let addVertex state level (edgeOpt : option<GssVertex * SppfLabel>) =
             let dict = stateToVertex
@@ -77,7 +89,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                     dict.[state] <- Some v
                     let push = parserSource.Gotos.[state].[!curNum]
                     // Push to init state is impossible
-                    if push <> 0 then
+                    if push <> startState then
                         pushes.Push (v, push)
                     let arr = parserSource.ZeroReduces.[state].[!curNum]
                     if arr <> null then
@@ -100,10 +112,12 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                 let nonTermLeftSide = parserSource.LeftSide.[prod]
                 if pos = 0 then
                     let state = parserSource.Gotos.[gssVertex.State].[nonTermLeftSide]
-                    let newVertex = addVertex state num None
-                    let ast = getEpsilon prod
-                    if not <| containsEdge gssVertex ast notAttachedEdges.[state] then
-                        addEdge gssVertex ast notAttachedEdges.[state]
+                    // goto init state is impossible
+                    if state <> startState then
+                        let newVertex = addVertex state num None
+                        let ast = getEpsilon prod
+                        if not <| containsEdge gssVertex ast notAttachedEdges.[state] then
+                            addEdge gssVertex ast notAttachedEdges.[state]
                 else 
                     //TODO: PERFORMANCE REVIEW
                     //all this downcasts can be no good
@@ -124,21 +138,24 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                         let dict = Array.init nfa.Length (fun _ -> None)
                         let count = ref 1
                         dict.[nfaInitVertex.label] <- Some vertex
-                        let rec epsilonClose (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) =
+                        let rec epsilonClose (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) alreadyVisited =
                             let nfaVertex, _ = vertex.label
                             for edge in nfaVertex.inEdges do
                                 if parserSource.indexToSymbolType edge.label = SymbolType.Epsilon && dict.[edge.dest.label].IsNone then
-                                    let prevVertex =
+                                    let prevVertex, prevAlreadyVisited =
                                         match reductionTemp.TryGetAlreadyVisited (edge.dest :?> VertexWithBackTrack<_,_>) gssVertex with
-                                        | Some pv -> pv
+                                        | Some pv -> pv, true
                                         | None -> 
                                             let pv = new Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>((edge.dest :?> VertexWithBackTrack<_,_>, gssVertex))
                                             reductionTemp.AddVisited pv
-                                            pv
+                                            pv, false
+                                    if not alreadyVisited then
+                                        prevVertex.addEdge(new Edge<_,_>(vertex, SppfLabel.Epsilon))
                                     dict.[edge.dest.label] <- Some prevVertex
                                     incr count
-                                    epsilonClose prevVertex
-                        epsilonClose vertex
+                                    epsilonClose prevVertex prevAlreadyVisited
+                                
+                        epsilonClose vertex false
                         dict |> Array.choose (fun x -> x)
                         
                     let matchNfaAndGssEdgeLabels (nfaEdge : Edge<_,_>) = function
@@ -213,18 +230,22 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                         let leftEnd = reductionTemp.NotHandledLeftEnds.Dequeue()
                         let gssVertex = snd leftEnd.label
                         let state = parserSource.Gotos.[gssVertex.State].[nonTermLeftSide]
-                        let newVertex = addVertex state num None
-                        let sppfLabel = SppfLabel.TemporaryReduction reductionTemp
+                        // goto init state is impossible
+                        if state <> startState then
+                            let newVertex = addVertex state num None
+                            let sppfLabel = SppfLabel.TemporaryReduction reductionTemp
                         
-                        //if containsEdge gssVertex sppfLabel notAttachedEdges.[state] then
-                        //    printf "heh"
+                            //if containsEdge gssVertex sppfLabel notAttachedEdges.[state] then
+                            //    printf "heh"
 
-                        addEdge gssVertex sppfLabel notAttachedEdges.[state]
-                        let arr = parserSource.Reduces.[state].[!curNum]
-                        let edgeOpt = Some (gssVertex, sppfLabel)
-                        if arr <> null then
-                            for (prod, pos) in arr do
-                                reductions.Push (newVertex, prod, pos, edgeOpt)
+                            addEdge gssVertex sppfLabel notAttachedEdges.[state]
+                            let arr = parserSource.Reduces.[state].[!curNum]
+                            let edgeOpt = Some (gssVertex, sppfLabel)
+                            if arr <> null then
+                                for (prod, pos) in arr do
+                                    reductions.Push (newVertex, prod, pos, edgeOpt)
+                            //DEBUG
+                            //checkAndPrintMaxReductionDepth prod num gssVertex.Level gssVertex.State
 
         let curInd = ref 0
         let isEnd = ref false
@@ -236,7 +257,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                     let sppfLabel =
                         match sppfLabel with
                         | TemporaryReduction rt ->
-                            SppfLabel.Reduction (rt.Production, (rt.getLeftEnd gssVertex.Level gssVertex.State, rt.EndLevel, rt.AcceptingNfaStates))
+                            SppfLabel.Reduction (rt.Production, (rt.getLeftEnd gssVertex.Level gssVertex.State, parserSource.RightSideNFA.[rt.Production].Length, rt.EndLevel, rt.AcceptingNfaStates))
                         | _ -> sppfLabel
                     new GssEdge(gssVertex, sppfLabel)
                 let gssEdges = edges |> ResizeArray.map toEdge
@@ -250,7 +271,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                 let sppfLabel = 
                     match edge.label with
                     | TemporaryReduction rt ->
-                        SppfLabel.Reduction (rt.Production, (source, rt.EndLevel, rt.AcceptingNfaStates))
+                        SppfLabel.Reduction (rt.Production, (source, parserSource.RightSideNFA.[rt.Production].Length, rt.EndLevel, rt.AcceptingNfaStates))
                     | _ -> edge.label
                 edge.setLabel sppfLabel
             for i = 0 to currentReductions.Length - 1 do
@@ -262,6 +283,9 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
             if enum.MoveNext() then
                 curToken := enum.Current
                 curNum := parserSource.TokenToNumber enum.Current
+                //DEBUG
+                if !curNum = parserSource.EofIndex then
+                    printfn "EOF time: %A" (System.DateTime.Now - timeStart)
             else
                 curNum := parserSource.EofIndex
             for vertex in usedStates do
@@ -341,6 +365,6 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
             match !resSppf with
             | None -> Error (!curInd, [|!curToken|], "Input was fully processed, but it's not complete correct string.", debugFuns ())
             | Some res -> 
-                debugFuns().drawGSSDot "res.dot"
+                //debugFuns().drawGSSDot "res.dot"
                 //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber None parserSource.LeftSide "../../../Tests/RNGLR/sppf.dot"
                 Success (res, [||])

@@ -5,8 +5,8 @@ open Yard.Generators.Common
 open System.Collections.Generic
 
 //Sppf is a intersection of a production automaton and Gss, which, in its turn, has edges labelled with Sppf
-type Sppf = Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel> * int * Set<int>
-    //(start vertex, end level, accepting nfa states)
+type Sppf = Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel> * int * int * Set<int>
+    //(start vertex, number of nfa states, end level, accepting nfa states)
 
 and SppfLabel =
     | Terminal of int //number in tokens array

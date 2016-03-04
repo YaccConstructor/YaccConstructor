@@ -30,8 +30,18 @@ type Context(*<'TokenType>*) =
     new (index, label, vertex, ast) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Probability = 1.0; SLength = 1}
     //new (index, label, vertex, ast, path) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Path = path}
 
+[<Struct>]
+type Context2 =
+    val Index         : int
+    val Label         : int<labelMeasure>
+    val Vertex        : Vertex
+    val Extension     : int64<extension>
+    new (index, label, vertex, ext) = {Index = index; Label = label; Vertex = vertex; Extension = ext}
+    
+
 type ParseResult<'TokenType> =
-    | Success of Tree<'TokenType>
+    | Success of Tree<'TokenType> 
+    | Success1 of ResizeArray<'TokenType>
     | Error of string
 
 

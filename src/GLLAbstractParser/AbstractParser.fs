@@ -275,6 +275,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             then
                 currentContext :=  get ()
                 currentIndex := currentContext.Value.Index
+                let t = CommonFuns.getLeft32 !currentIndex
+                let t2 = CommonFuns.getRight32 !currentIndex
                 currentGSSNode := currentContext.Value.Vertex
                 structures.CurrentLabel := currentContext.Value.Label
                 structures.CurrentN := currentContext.Value.Ast 

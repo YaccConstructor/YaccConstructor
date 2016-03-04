@@ -33,6 +33,32 @@ and GssEdge =
         new (d,l) = {Dest = d; Label = l}
     end
 
+and SppfSearchDictionary<'ValueType>(numberOfNfaStates : int) =
+    //three levels of indexing - nfa state, gss level, lr state
+    let firstLevelArray = Array.init numberOfNfaStates (fun _ ->  new Dictionary<int, (int * 'ValueType) list ref>())
+
+    member this.Add (key : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) (value : 'ValueType) =
+        let nfaState, gssLevel, lrState = 
+            let nfaVertex, gssVertex = key.label 
+            nfaVertex.label, gssVertex.Level, gssVertex.State
+        let levelDict = firstLevelArray.[nfaState]
+        if levelDict.ContainsKey gssLevel then
+            let lrValueRecord = levelDict.[gssLevel]
+            lrValueRecord := (lrState, value) :: !lrValueRecord
+        else
+            levelDict.[gssLevel] <- ref [(lrState, value)]
+
+    member this.TryGet nfaState gssLevel lrState =
+        let levelDict = firstLevelArray.[nfaState]
+        if levelDict.ContainsKey gssLevel then
+            let lrValueRecord = !levelDict.[gssLevel]
+            let x = lrValueRecord |> List.tryFind (fun (lrState', _) -> lrState' = lrState) 
+            match x with
+            | Some (_, value) -> Some value
+            | None -> None
+        else
+            None
+
 //for reductions that goes from level being processed
 and ReductionTemp(prod : int, numberOfStates : int, endLevel : int) =
     let prod = prod

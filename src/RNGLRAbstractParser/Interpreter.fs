@@ -544,12 +544,12 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             | Some res -> 
                 try 
                     let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
-                    tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
+//                    tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
 //
-                    let gssInitVertices = 
-                       innerGraph.Edges |> Seq.collect (fun e -> e.Source.processedGssVertices)
-
-                    drawDot parserSource.TokenToNumber terminals parserSource.LeftSide gssInitVertices parserSource.NumToString parserSource.ErrorIndex "../../../Tests/AbstractRNGLR/DOT/gss.dot"
+//                    let gssInitVertices = 
+//                       innerGraph.Edges |> Seq.collect (fun e -> e.Source.processedGssVertices)
+//
+//                    drawDot parserSource.TokenToNumber terminals parserSource.LeftSide gssInitVertices parserSource.NumToString parserSource.ErrorIndex "../../../Tests/AbstractRNGLR/DOT/gss.dot"
 
                     Success <| (tree, buildErrors errorEdges)
                 with

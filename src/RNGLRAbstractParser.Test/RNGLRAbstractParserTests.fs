@@ -731,6 +731,60 @@ type ``RNGLR abstract parser tests`` () =
 
         errorTest RNGLR.PrettySimpleCalc.buildAstAbstract qGraph true testErrors
 
+    [<Test>]
+    member this._37_Errors_StrangeBrackets_Inf () =
+        let qGraph = new ParserInputGraph<_>(0, 9)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 0 (RNGLR.StrangeBrackets.LBR 0)
+            edg 0 0 (RNGLR.StrangeBrackets.RBR 1)
+            edg 0 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+        let testErrors = new ResizeArray<string>()
+
+        errorTest RNGLR.StrangeBrackets.buildAstAbstract qGraph true testErrors
+
+    [<Test>]
+    member this._38_Errors_StrangeBrackets_SequenceInput () =
+        let qGraph = new ParserInputGraph<_>(0, 9)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 1)
+            edg 1 0 (RNGLR.StrangeBrackets.RBR 2)
+            edg 1 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+        let testErrors = new ResizeArray<string>()
+        testErrors.Add("RNGLR_EOF0")
+
+        errorTest RNGLR.StrangeBrackets.buildAstAbstract qGraph false testErrors
+
+    [<Test>]
+    member this._39_Errors_StrangeBrackets_SequenceInput2 () =
+        let qGraph = new ParserInputGraph<_>(0, 9)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 1)
+            edg 1 2 (RNGLR.StrangeBrackets.LBR 2)
+            edg 2 3 (RNGLR.StrangeBrackets.RBR 3)
+            edg 3 4 (RNGLR.StrangeBrackets.RBR 4)
+            edg 4 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+        let testErrors = new ResizeArray<string>()
+        testErrors.Add("RNGLR_EOF0")
+
+        errorTest RNGLR.StrangeBrackets.buildAstAbstract qGraph true testErrors
+
+    [<Test>]
+    member this._40_Errors_StrangeBrackets_SimpleLoop () =
+        let qGraph = new ParserInputGraph<_>(0, 9)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 1)
+            edg 1 1 (RNGLR.StrangeBrackets.LBR 2)
+            edg 1 2 (RNGLR.StrangeBrackets.RBR 3)
+            edg 2 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+        let testErrors = new ResizeArray<string>()
+        testErrors.Add("RNGLR_EOF0")
+
+        errorTest RNGLR.StrangeBrackets.buildAstAbstract qGraph true testErrors
+
     member this.``Not Ambigous Simple Calc. Branch. Perf`` i inpLength isLoop =  
         let tpl x =
             [
@@ -883,7 +937,7 @@ let f x =
 //    t._23_UnambiguousBrackets ()
 //    t._24_UnambiguousBrackets_Circle()
 //    t._25_UnambiguousBrackets_BiggerCircle ()
-//    t._26_UnambiguousBrackets_Inf()
+//    t._26_UnambiguousBrackets_Inf ()
 //    t._27_UnambiguousBrackets_WithoutEmptyString()
 //    t._28_UnambiguousBrackets_DifferentPathLengths ()
 //    t.``TSQL performance test for Alvor`` 2 100 false
@@ -895,6 +949,11 @@ let f x =
 //    t._34_Errors_PrettySimpleCalc_SimpleBranchError2 ()
 //    t._35_Errors_PrettySimpleCalc_ComplexBranchError ()
 //    t._36_Errors_PrettySimpleCalc_ComplexBranchError2 ()
+//    t._37_Errors_StrangeBrackets_Inf ()
+//    t._38_Errors_StrangeBrackets_SequenceInput ()
+//    t._39_Errors_StrangeBrackets_SequenceInput2 ()
+//    t._40_Errors_StrangeBrackets_SimpleLoop ()
+//    t._25_UnambiguousBrackets_temp () 
 //    t.``TSQL performance test 2`` 2 100 false
 //    t.temp ()
     0

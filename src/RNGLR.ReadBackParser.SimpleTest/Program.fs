@@ -106,9 +106,17 @@ type ``RNGLRReadBack parser tests with simple lexer`` () =
         let parserSource = RNGLR.ReadBackParser.TwoManyNonTerms.leftSide, RNGLR.ReadBackParser.TwoManyNonTerms.tokenToNumber, RNGLR.ReadBackParser.TwoManyNonTerms.numToString
         let file = "SeqOfThree.txt"
         runTest parser parserSource file TER_Success
+
+        
+    [<Test>]
+    member test.``5.0 Two many terminals`` () = 
+        let parser = RNGLR.ReadBackParser.TwoManyTerms.buildAst
+        let parserSource = RNGLR.ReadBackParser.TwoManyTerms.leftSide, RNGLR.ReadBackParser.TwoManyTerms.tokenToNumber, RNGLR.ReadBackParser.TwoManyTerms.numToString
+        let file = "SeqOfThree.txt"
+        runTest parser parserSource file TER_Success
     
     [<Test>]
-    member test.``5.0 CalcEBNF`` () = 
+    member test.``6.0 CalcEBNF`` () = 
         let parser = RNGLR.ReadBackParser.CalcEBNF.buildAst
         let parserSource = RNGLR.ReadBackParser.CalcEBNF.leftSide, RNGLR.ReadBackParser.CalcEBNF.tokenToNumber, RNGLR.ReadBackParser.CalcEBNF.numToString
         let file = "CalcEBNF.txt"

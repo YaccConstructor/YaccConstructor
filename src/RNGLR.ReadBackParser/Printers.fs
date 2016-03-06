@@ -19,6 +19,7 @@ let sppfToDot<'TokenType> (tokens : 'TokenType[]) (sppf : Sppf)
     
     use out = new StreamWriter(file)
     out.WriteLine("digraph SPPF{")
+    out.WriteLine("    rankdir=LR")
 
     let printVertex num isStart isAccepting =
         let str = ref <| sprintf "    %d [label = \"\", shape = circle" num

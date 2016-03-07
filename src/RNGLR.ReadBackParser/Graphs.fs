@@ -67,15 +67,14 @@ and ReductionTemp(prod : int, numberOfStates : int, endLevel : int) =
     let acceptingNfaStates = ref Set.empty
     let visitedVertices =
     //TODO: PERFORMANCE
-        Array.init numberOfStates (fun i -> new ResizeArray<Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>())
+        new SppfSearchDictionary<Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>(numberOfStates)
     let endLevel = endLevel
     
     member this.AcceptingNfaStates = !acceptingNfaStates
 
     member this.AddVisited (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) =
-        let i = (fst vertex.label).label
-        visitedVertices.[i].Add (vertex)
-        if i = 0 then
+        visitedVertices.Add vertex vertex
+        if (fst vertex.label).label = 0 then
             let gssVertex = snd vertex.label
             leftEndsDict.[(gssVertex.Level, gssVertex.State)] <- vertex
             notHandledLeftEnds.Enqueue vertex
@@ -93,9 +92,7 @@ and ReductionTemp(prod : int, numberOfStates : int, endLevel : int) =
     member this.Production = prod
 
     member this.TryGetAlreadyVisited (nfaVertex : VertexWithBackTrack<int, int>) (gssVertex : GssVertex) =
-        visitedVertices.[nfaVertex.label] |> Seq.tryFind 
-                (fun x -> 
-                    (snd x.label).Level = gssVertex.Level && (snd x.label).State = gssVertex.State)
+        visitedVertices.TryGet nfaVertex.label gssVertex.Level gssVertex.State
 
 let inline isEpsilonReduction x =
     match x with

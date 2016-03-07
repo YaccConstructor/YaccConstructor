@@ -138,7 +138,8 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                         let dict = Array.init nfa.Length (fun _ -> None)
                         let count = ref 1
                         dict.[nfaInitVertex.label] <- Some vertex
-                        let rec epsilonClose (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) alreadyVisited =
+                        let searchStack = new Stack<_>(20)
+                        let f (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) alreadyVisited =
                             let nfaVertex, _ = vertex.label
                             for edge in nfaVertex.inEdges do
                                 if parserSource.indexToSymbolType edge.label = SymbolType.Epsilon && dict.[edge.dest.label].IsNone then
@@ -153,9 +154,12 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                                         prevVertex.addEdge(new Edge<_,_>(vertex, SppfLabel.Epsilon))
                                     dict.[edge.dest.label] <- Some prevVertex
                                     incr count
-                                    epsilonClose prevVertex prevAlreadyVisited
+                                    searchStack.Push (prevVertex, prevAlreadyVisited)
                                 
-                        epsilonClose vertex false
+                        searchStack.Push (vertex, false)
+                        while searchStack.Count > 0 do
+                            let vertex, alreadyVisited = searchStack.Pop()
+                            f vertex alreadyVisited
                         dict |> Array.choose (fun x -> x)
                         
                     let matchNfaAndGssEdgeLabels (nfaEdge : Edge<_,_>) = function

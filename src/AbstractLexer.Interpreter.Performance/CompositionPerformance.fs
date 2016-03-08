@@ -22,10 +22,11 @@ let benchmark func iterations =
     double(sw.ElapsedMilliseconds) / double(iterations)
 
 let getFST path =
+    let dot = File.ReadAllText(path)
     let f1 = Func<string, (string*string)[], int>(fun v attrs -> int v)
     let f2 = Func<string, string, (string*string)[], TaggedEdge<_,_>>(fun v1 v2 attr -> 
         new TaggedEdge<_,_>(int v1, int v2, (snd attr.[0], snd attr.[0])))
-    let graph = BidirectionalGraph.LoadDotFromFile(path, f1, f2)
+    let graph = BidirectionalGraph.LoadDot(dot, f1, f2)
     let graphAppr = new Appr<_>()
     graphAppr.InitState <- ResizeArray.singleton 0
     for e in graph.Edges do
@@ -59,19 +60,22 @@ let main argv =
         for test in tests do
             try
                 let fst = getFST test
-                printfn "Processing %A" test
-                printfn "Average time for compose: %A" (benchmark (fun () -> compose fst) 10)
-                printfn "Average time for optimal compose: %A" (benchmark (fun () -> optimalCompose fst) 10)
+                try
+                    printfn "Processing %A:" test
+                    printfn "Average time for compose: %A" (benchmark (fun () -> compose fst) 10)
+                    printfn "Average time for optimal compose: %A\n" (benchmark (fun () -> optimalCompose fst) 10)
+                with
+                    | _ -> printfn"%s is not %s compliant!\n" test lang
             with
-                | _ -> printfn"%s is not %s compliant!" test lang
+                | e -> printfn"%s is not a valid .dot file! Full error: %A\n" test e
     let runManuallyCreatedTests (tests : list<FST<_,_>*FST<_,_>>) = 
         for (fst1, fst2) in tests do
             let alphabet = new HashSet<_>()
             for edge in fst2.Edges do
                 alphabet.Add(fst edge.Tag) |> ignore
-            printfn "Processing manually created FSTs"
+            printfn "Processing manually created FSTs:"
             printfn "Average time for compose: %A" (benchmark (fun () -> compose fst1 fst2 alphabet) 100)
-            printfn "Average time for optimal compose: %A" (benchmark (fun () -> optimalCompose fst1 fst2 alphabet) 100)
+            printfn "Average time for optimal compose: %A\n" (benchmark (fun () -> optimalCompose fst1 fst2 alphabet) 100)
     if Array.exists (fun arg -> arg.Equals "-d") argv then
         runLangTests "Calc" calcTests calcCompose calcOptimalCompose
         runLangTests "TSQL" TSQLTests TSQLCompose TSQLOptimalCompose
@@ -80,7 +84,7 @@ let main argv =
         try 
             let path = argv.[Array.findIndex (fun x -> x.Equals("-f")) argv + 1]
             let folder = new DirectoryInfo(path)
-            let externalTSQLTests = [for x in folder.GetFiles() do if x.Extension.Equals(".dot") then yield x.Name]
+            let externalTSQLTests = [for x in folder.GetFiles() do if x.Extension.Equals(".dot") then yield x.FullName]
             runLangTests "TSQL" externalTSQLTests TSQLCompose TSQLOptimalCompose
         with
             | _ -> printfn "Wrong folder!"

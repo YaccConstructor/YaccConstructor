@@ -2,9 +2,11 @@
 open System.IO
 open System.Diagnostics
 open System.Collections.Generic
+open Microsoft.FSharp.Collections 
 open YC.FST.AbstractLexing.Interpreter
-open YC.FST.AbstractLexing.Tests.CommonTestChecker
 open YC.FST.AbstractLexing.Tests.Calc
+open YC.FST.AbstractLexing.Tests.CommonTestChecker
+open QuickGraph
 open QuickGraph.FST.GraphBasedFst
 open QuickGraph.FSA.GraphBasedFsa
 open QuickGraph.FSA.FsaApproximation
@@ -19,13 +21,17 @@ let benchmark func iterations =
     sw.Stop()
     double(sw.ElapsedMilliseconds) / double(iterations)
 
-let getFST basePath path =
-    let graphAppr = loadDotToQG basePath path
-    let graphFsa = graphAppr.ApprToFSA()
-    FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
-
-let getCalcFST = "../../../../Tests/AbstractLexing/DOT" |> getFST
-let getTSQLFST = "../../../TSQL.Test/DotTSQL" |> getFST
+let getFST path =
+    let f1 = Func<string, (string*string)[], int>(fun v attrs -> int v)
+    let f2 = Func<string, string, (string*string)[], TaggedEdge<_,_>>(fun v1 v2 attr -> 
+        new TaggedEdge<_,_>(int v1, int v2, (snd attr.[0], snd attr.[0])))
+    let graph = BidirectionalGraph.LoadDotFromFile(path, f1, f2)
+    let graphAppr = new Appr<_>()
+    graphAppr.InitState <- ResizeArray.singleton 0
+    for e in graph.Edges do
+        e |> graphAppr.AddVerticesAndEdge |> ignore
+    graphAppr.FinalState <- ResizeArray.singleton (Seq.max graphAppr.Vertices)
+    FST<_,_>.FSAtoFST(graphAppr.ApprToFSA(), transform, smblEOF)
 
 let calcLexer = YC.FST.AbstractLexing.CalcLexer.fstLexer()
 let calcAlphabet = YC.FST.AbstractLexing.CalcLexer.alphabet()
@@ -40,13 +46,16 @@ let calcOptimalCompose graphFST = optimalCompose graphFST calcLexer calcAlphabet
 let TSQLCompose graphFST = compose graphFST TSQLLexer TSQLAlphabet
 let TSQLOptimalCompose graphFST = optimalCompose graphFST TSQLLexer TSQLAlphabet
 
-let calcTests = ["test_0.dot"; "test_1.dot"; "test_2.dot"; "test_3.dot"]
-let TSQLTests = ["test_tsql_1.dot"; "test_tsql_2.dot"]
+let getTests path fileList =
+    [for x in fileList do yield path + "/" + x]
+
+let calcTests = getTests "../../../../Tests/AbstractLexing/DOT" ["test_0.dot"; "test_1.dot"; "test_2.dot"; "test_3.dot"]
+let TSQLTests = getTests "../../../TSQL.Test/DotTSQL" ["test_tsql_1.dot"; "test_tsql_2.dot"]
 let manuallyCreatedTests = [fstCompos1, fstCompos2; fstCompos12, fstCompos22; fstCompos13, fstCompos22]
 
 [<EntryPoint>]
 let main argv = 
-    let runLangTests lang tests getFST compose optimalCompose =
+    let runLangTests lang tests compose optimalCompose =
         for test in tests do
             try
                 let fst = getFST test
@@ -64,16 +73,15 @@ let main argv =
             printfn "Average time for compose: %A" (benchmark (fun () -> compose fst1 fst2 alphabet) 100)
             printfn "Average time for optimal compose: %A" (benchmark (fun () -> optimalCompose fst1 fst2 alphabet) 100)
     if Array.exists (fun arg -> arg.Equals "-d") argv then
-        runLangTests "Calc" calcTests getCalcFST calcCompose calcOptimalCompose
-        runLangTests "TSQL" TSQLTests getTSQLFST TSQLCompose TSQLOptimalCompose
+        runLangTests "Calc" calcTests calcCompose calcOptimalCompose
+        runLangTests "TSQL" TSQLTests TSQLCompose TSQLOptimalCompose
         runManuallyCreatedTests manuallyCreatedTests
     if Array.exists (fun arg -> arg.Equals "-f") argv then
         try 
             let path = argv.[Array.findIndex (fun x -> x.Equals("-f")) argv + 1]
             let folder = new DirectoryInfo(path)
-            let getTSQLFST = path |> getFST
             let externalTSQLTests = [for x in folder.GetFiles() do if x.Extension.Equals(".dot") then yield x.Name]
-            runLangTests "TSQL" externalTSQLTests getTSQLFST TSQLCompose TSQLOptimalCompose
+            runLangTests "TSQL" externalTSQLTests TSQLCompose TSQLOptimalCompose
         with
             | _ -> printfn "Wrong folder!"
     0

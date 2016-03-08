@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RNGLR", "RNGLR", "{319C1C63-44C0-4A68-A028-222D72029FE8}"
 EndProject
@@ -156,6 +156,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontends", "Frontends", "{40573E74-9292-4216-AFB1-9B041A431D43}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLLAbstractApplication", "GLLAbstractApplication\GLLAbstractApplication.fsproj", "{C831D126-E5FC-4681-A316-574C08F83E6D}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CYKMatrix", "CYKMatrix\CYKMatrix.fsproj", "{484BA235-43B9-4105-86E8-0E8053CF07B0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -866,6 +868,21 @@ Global
 		{C831D126-E5FC-4681-A316-574C08F83E6D}.ReleaseContractsReferences|Any CPU.Build.0 = Release|Any CPU
 		{C831D126-E5FC-4681-A316-574C08F83E6D}.ReleaseContractsReferences|x86.ActiveCfg = Release|Any CPU
 		{C831D126-E5FC-4681-A316-574C08F83E6D}.ReleaseContractsReferences|x86.Build.0 = Release|Any CPU
+		{484BA235-43B9-4105-86E8-0E8053CF07B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{484BA235-43B9-4105-86E8-0E8053CF07B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{484BA235-43B9-4105-86E8-0E8053CF07B0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{484BA235-43B9-4105-86E8-0E8053CF07B0}.DebugContracts|Any CPU.ActiveCfg = Debug|Any CPU
+		{484BA235-43B9-4105-86E8-0E8053CF07B0}.DebugContracts|Any CPU.Build.0 = Debug|Any CPU
+		{484BA235-43B9-4105-86E8-0E8053CF07B0}.DebugContracts|x86.ActiveCfg = Debug|Any CPU
+		{484BA235-43B9-4105-86E8-0E8053CF07B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{484BA235-43B9-4105-86E8-0E8053CF07B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{484BA235-43B9-4105-86E8-0E8053CF07B0}.Release|x86.ActiveCfg = Release|Any CPU
+		{484BA235-43B9-4105-86E8-0E8053CF07B0}.Release20|Any CPU.ActiveCfg = Release|Any CPU
+		{484BA235-43B9-4105-86E8-0E8053CF07B0}.Release20|Any CPU.Build.0 = Release|Any CPU
+		{484BA235-43B9-4105-86E8-0E8053CF07B0}.Release20|x86.ActiveCfg = Release|Any CPU
+		{484BA235-43B9-4105-86E8-0E8053CF07B0}.ReleaseContractsReferences|Any CPU.ActiveCfg = Release|Any CPU
+		{484BA235-43B9-4105-86E8-0E8053CF07B0}.ReleaseContractsReferences|Any CPU.Build.0 = Release|Any CPU
+		{484BA235-43B9-4105-86E8-0E8053CF07B0}.ReleaseContractsReferences|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

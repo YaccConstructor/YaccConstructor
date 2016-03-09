@@ -750,17 +750,23 @@ type ``GLL abstract parser tests`` () =
                 |> Array.ofSeq
             [|new BioParserEdge<_>(0,1,e); new BioParserEdge<_>(1,2,[|26|]) |]
         //let l = edges |> Array.length
-
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, [|Seq.length textData + 1 ;2|], edges, 3)
+        let inline pack2to32 rule position = ((int rule <<< 16) ||| int position)
+        let initialVs = [|for i in 0..edges.[0].Tokens.Length - 70 -> pack2to32 0 i |]
+        let qGraph = new BioParserInputGraph<_>(initialVs, 2, [|Seq.length textData + 1 ;2|], edges, 3)
         //qGraph.AddVerticesAndEdgeRange edges |> ignore
         //qGraph.AddVerticesAndEdgeRange [for i in 0..l -> edg i (l+1) (GLL.Bio2.RNGLR_EOF 0)] 
         let start = System.DateTime.Now
-        let res = GLL.Bio2.buildAbstractAst qGraph 100
+        let res = GLL.Bio2.buildAbstract qGraph 100 2
         match res with
         | Success ast -> 
             //ast.AstToDot GLL.Bio2.numToString GLL.Bio2.tokenToNumber GLL.Bio2.tokenData "bioAST.dot"
             printfn "Success!"
-            printfn "Time = %A"  (System.DateTime.Now - start)            
+            printfn "Time = %A"  (System.DateTime.Now - start)  
+        | Success1 x -> 
+            let x = x |> Set.ofSeq
+            printfn "%A" x
+            printfn "Success!"
+            printfn "Time = %A"  (System.DateTime.Now - start)        
         | Error _ -> printfn "Error!"
 [<EntryPoint>]
 let fs x =

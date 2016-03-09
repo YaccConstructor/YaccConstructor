@@ -57,11 +57,11 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let input = input           
         let edges = Array.init slots.Count (fun _ -> new CompressedArray<SysDict<int64<extension>, SysDict<int, ResizeArray<int>>>> (input.ChainLength, (fun _ -> null)))          
         let currentGSSNode = ref <| dummyGSSNode
-        for v in input.InitialVertices do
-            let oEdges = outEdges.[v]
-            for e in oEdges do
-                let ext = packExtension (pack2to32 e 0) (pack2to32 e 0)
-                setR.Enqueue(new Context2(pack2to32 e 0, !currentLabel, !currentGSSNode, ext)) 
+        
+        for e in input.InitialVertices do
+            let ext = packExtension e e
+            setR.Enqueue(new Context2(e, !currentLabel, !currentGSSNode, ext)) 
+
         let currentContext = ref <| new Context2(!currentIndex, !currentLabel, !currentGSSNode, !currentExtension)
         
         let slotIsEnd (label : int<labelMeasure>) =

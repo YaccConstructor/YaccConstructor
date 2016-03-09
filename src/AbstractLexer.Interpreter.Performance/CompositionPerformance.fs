@@ -65,7 +65,7 @@ let main argv =
                     printfn "Average time for compose: %A" (benchmark (fun () -> compose fst) 10)
                     printfn "Average time for optimal compose: %A\n" (benchmark (fun () -> optimalCompose fst) 10)
                 with
-                    | _ -> printfn"%s is not %s compliant! Error: %A\n" test lang e.Message
+                    | e -> printfn"%s is not %s compliant! Error: %A\n" test lang e.Message
             with
                 | e -> printfn"%s is not a valid .dot file! Full error: %A\n" test e
     let runManuallyCreatedTests (tests : list<FST<_,_>*FST<_,_>>) = 

@@ -31,7 +31,7 @@ type ResultStruct =
     val nterm : string
     new (l,l1, r, r1, n) = {le = l; lpos = l1; re = r; rpos = r1; nterm = n}
 
-let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph<'TokenType>) maxLen = 
+let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph<'TokenType>) maxLen condNonTerm = 
     if input.EdgeCount = 0 then
       Error ("This grammar does not accept empty input.")     
     else
@@ -42,6 +42,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             r
         let parser = parser
         let slots = parser.Slots
+        let condNonTermRules = Seq.toArray <| seq{for i in 0..parser.LeftSide.Length - 1 do if parser.LeftSide.[i] = condNonTerm then yield i}
         let setU = new CompressedArray<SysDict<int, SysDict<int64, ResizeArray<int64<extension>>>>>(input.ChainLength, (fun _ -> null )) 
         let setP = new SysDict<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int64<extension>>>(500)
         let setR = new System.Collections.Generic. Queue<Context2>(100)  
@@ -281,15 +282,15 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                                         let newLabel = 1<labelMeasure> * pack2to32 rule 0
                                         addContext t newLabel !currentGSSNode (packExtension !currentIndex !currentIndex)                              
                 else
-                    if parser.StartRule = rule
+                    if Array.exists (fun e -> e = rule) condNonTermRules
                     then
                         match !r with
                             | None ->  
                                 let t = new ResizeArray<_>()
-                                let t1 = new ResultStruct((getLeft32 <| getLeftExtension !currentExtension), (getLeft32 <| getRightExtension !currentExtension), (getRight32 <| getLeftExtension !currentExtension), (getRight32 <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule])
+                                let t1 = new ResultStruct((getLeft32 <| getLeftExtension !currentExtension), (getRight32 <| getLeftExtension !currentExtension), (getLeft32 <| getRightExtension !currentExtension), (getRight32 <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule])
                                 t.Add t1
                                 r := Some t 
-                            | Some a -> a.Add(new ResultStruct((getLeft32 <| getLeftExtension !currentExtension), (getLeft32 <| getRightExtension !currentExtension), (getRight32 <| getLeftExtension !currentExtension), (getRight32 <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule]))
+                            | Some a -> a.Add(new ResultStruct((getLeft32 <| getLeftExtension !currentExtension), (getRight32 <| getLeftExtension !currentExtension), (getLeft32 <| getRightExtension !currentExtension), (getRight32 <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule]))
                         
                     pop !currentGSSNode !currentIndex !currentExtension
                     

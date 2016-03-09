@@ -683,9 +683,14 @@ type ``GLL abstract parser tests`` () =
                 | _ ->   GLL.Bio2.G i
 
         let basePath = "../../../Tests/bio/"
-        let path = Path.Combine(basePath,"biodata_1/saves/00_before_repeat_resolution/graph")
+        let p1 = 
+            //@"biodata_1/saves/00_before_repeat_resolution/graph"
+            @"mix_1/late_pair_info_count"
+            //@"synth_1/graph"
+            //@"smallTest/late_pair_info_count"
+        let path = Path.Combine(basePath,p1)
         let start = System.DateTime.Now
-        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToOarserInputGraph path 500 getSmb (GLL.Bio2.RNGLR_EOF 0) 
+        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToOarserInputGraph path 2000 getSmb (GLL.Bio2.RNGLR_EOF 0) 
         graph.PrintToDot "input.dot" (GLL.Bio2.tokenToNumber >> GLL.Bio2.numToString)       
         let res = GLL.Bio2.buildAbstractAst graph 100
         match res with

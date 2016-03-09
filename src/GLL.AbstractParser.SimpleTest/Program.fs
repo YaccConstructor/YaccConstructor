@@ -723,10 +723,11 @@ type ``GLL abstract parser tests`` () =
         let file = 
             //"t.fa"
             //"t1.fa"
-            "1k-tRNA.fa"
+            //"1k-tRNA.fa"
             //"tremitted-Plant_SRP.fa"
             //"1k-4.fa"
             //"10k-tRNA.fa"
+            "100k-4.fa"
             //"10.5k-tRNA.fa"
             //"t10k1.fa"
         let textData =             
@@ -756,15 +757,33 @@ type ``GLL abstract parser tests`` () =
         //qGraph.AddVerticesAndEdgeRange edges |> ignore
         //qGraph.AddVerticesAndEdgeRange [for i in 0..l -> edg i (l+1) (GLL.Bio2.RNGLR_EOF 0)] 
         let start = System.DateTime.Now
-        let res = GLL.Bio2.buildAbstract qGraph 100 2
+        let res = GLL.Bio2.buildAbstract qGraph 100 3
         match res with
         | Success ast -> 
             //ast.AstToDot GLL.Bio2.numToString GLL.Bio2.tokenToNumber GLL.Bio2.tokenData "bioAST.dot"
             printfn "Success!"
             printfn "Time = %A"  (System.DateTime.Now - start)  
-        | Success1 x -> 
-            let x = x |> Set.ofSeq
-            printfn "%A" x
+        | Success1 x ->
+            let ranges = new ResizeArray<_>()
+            let curLeft = ref 0
+            let curRight = ref 0  
+            let x = 
+                x |> Set.ofSeq
+                |> Seq.filter (fun s -> s.rpos - s.lpos > 65)
+                |> Seq.iter(fun s ->
+                    if !curRight < s.lpos
+                    then 
+                        ranges.Add (!curLeft,!curRight)
+                        curLeft := s.lpos
+                        curRight := s.rpos                        
+                    else
+                        curLeft := min !curLeft s.lpos
+                        curRight := max !curRight s.rpos
+                        )
+                ranges.Add(!curLeft,!curRight)
+            printfn ""
+            ranges |> Seq.iter (printf "%A; ")
+            printfn ""
             printfn "Success!"
             printfn "Time = %A"  (System.DateTime.Now - start)        
         | Error _ -> printfn "Error!"

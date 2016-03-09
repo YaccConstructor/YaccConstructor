@@ -183,6 +183,8 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                     for slotLevels in edge.Value do
                          let slot = slotLevels.Key
                          for level in slotLevels.Value do
+                            let tt = getLeftExtension extOnEdge
+                            let ttt = (getRightExtension extension)
                             let ext = packExtension (getLeftExtension extOnEdge) (getRightExtension extension)
                             let newVertex = new Vertex(level, slot)
                             addContext i (u.NontermLabel*1<labelMeasure>) newVertex ext
@@ -202,7 +204,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 let t2 = CommonFuns.getRight32 !currentIndex
                 currentGSSNode := currentContext.Value.Vertex
                 currentLabel := currentContext.Value.Label
-                
+                currentExtension := currentContext.Value.Extension
                 condition := false
             else 
                 stop := true  

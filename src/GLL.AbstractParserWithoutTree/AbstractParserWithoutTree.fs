@@ -288,7 +288,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                                 let t = new ResizeArray<_>()
                                 let t1 = new ResultStruct((getLeft32 <| getLeftExtension !currentExtension), (getLeft32 <| getRightExtension !currentExtension), (getRight32 <| getLeftExtension !currentExtension), (getRight32 <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule])
                                 t.Add t1
-                                r  := Some t 
+                                r := Some t 
                             | Some a -> a.Add(new ResultStruct((getLeft32 <| getLeftExtension !currentExtension), (getLeft32 <| getRightExtension !currentExtension), (getRight32 <| getLeftExtension !currentExtension), (getRight32 <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule]))
                         
                     pop !currentGSSNode !currentIndex !currentExtension

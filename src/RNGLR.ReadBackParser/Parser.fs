@@ -232,24 +232,27 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                     //handle
                     while reductionTemp.NotHandledLeftEnds.Count > 0 do
                         let leftEnd = reductionTemp.NotHandledLeftEnds.Dequeue()
-                        let gssVertex = snd leftEnd.label
-                        let state = parserSource.Gotos.[gssVertex.State].[nonTermLeftSide]
-                        // goto init state is impossible
-                        if state <> startState then
-                            let newVertex = addVertex state num None
-                            let sppfLabel = SppfLabel.TemporaryReduction reductionTemp
+                        let leftEndGss = snd leftEnd.label
                         
-                            //if containsEdge gssVertex sppfLabel notAttachedEdges.[state] then
-                            //    printf "heh"
+                        //it's not a zero reduction
+                        if not <| vxEq gssVertex leftEndGss then
+                            let state = parserSource.Gotos.[leftEndGss.State].[nonTermLeftSide]
+                            // goto init state is impossible
+                            if state <> startState then
+                                let newVertex = addVertex state num None
+                                let sppfLabel = SppfLabel.TemporaryReduction reductionTemp
+                        
+    //                            if containsEdge gssVertex sppfLabel notAttachedEdges.[state] then
+    //                                printf "heh"
 
-                            addEdge gssVertex sppfLabel notAttachedEdges.[state]
-                            let arr = parserSource.Reduces.[state].[!curNum]
-                            let edgeOpt = Some (gssVertex, sppfLabel)
-                            if arr <> null then
-                                for (prod, pos) in arr do
-                                    reductions.Push (newVertex, prod, pos, edgeOpt)
-                            //DEBUG
-                            //checkAndPrintMaxReductionDepth prod num gssVertex.Level gssVertex.State
+                                addEdge leftEndGss sppfLabel notAttachedEdges.[state]
+                                let arr = parserSource.Reduces.[state].[!curNum]
+                                let edgeOpt = Some (leftEndGss, sppfLabel)
+                                if arr <> null then
+                                    for (prod, pos) in arr do
+                                        reductions.Push (newVertex, prod, pos, edgeOpt)
+                                //DEBUG
+                                //checkAndPrintMaxReductionDepth prod num gssVertex.Level gssVertex.State
 
         let curInd = ref 0
         let isEnd = ref false
@@ -320,6 +323,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
             else
                 makeReductions !curInd recovery
                 attachEdges()
+
                 if !curNum = parserSource.EofIndex then isEnd := true
                 elif pushes.Count = 0 then 
                     (*if errorRuleExist 

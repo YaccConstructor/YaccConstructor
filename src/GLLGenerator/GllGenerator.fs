@@ -46,7 +46,8 @@ type GLL() =
             let mutable needTranslate = getBoolOption "translate" true
             let mutable light = getBoolOption "light" true
             let mutable printInfiniteEpsilonPath = getOption "infEpsPath" "" id
-            let mutable isAbstract = getBoolOption "abstract" true
+            let mutable isAbstract = getBoolOption "abstract" false
+            let withoutTree = ref <| getBoolOption "withoutTree" true
             let mutable caseSensitive = getBoolOption "caseSensitive" false
             let mutable output =
                 let fstVal = getOption "output" (definition.info.fileName + ".fs") id
@@ -69,6 +70,7 @@ type GLL() =
                 | "-light" -> light <- getBoolValue "light" value
                 | "-infEpsPath" -> printInfiniteEpsilonPath <- value
                 | "-abstract" -> isAbstract <- getBoolValue "abstract" value
+                | "-withoutTree" -> isAbstract <- getBoolValue "withoutTree" value
                 | value -> failwithf "Unexpected %s option" value
                  
             let newDefinition = initialConvert definition
@@ -133,8 +135,13 @@ type GLL() =
                     then
                         println "open Yard.Generators.GLL.AbstractParser"
                         println "open AbstractAnalysis.Common"
-                    else 
-                        println "open Yard.Generators.GLL.Parser"
+                    else
+                        if !withoutTree
+                        then
+                            println "open Yard.Generators.GLL.AbstractParserWithoutTree"
+                            println "open AbstractAnalysis.Common"
+                        else
+                            println "open Yard.Generators.GLL.Parser"
                     println "open Yard.Generators.GLL"
                     println "open Yard.Generators.Common.ASTGLL"
                     println "open Yard.Generators.GLL.ParserCommon"
@@ -148,7 +155,7 @@ type GLL() =
                 fsHeaders()
                 
             printHeaders moduleName fullPath light output isAbstract
-            let table = printTableGLL grammar table moduleName tokenType res _class positionType caseSensitive isAbstract
+            let table = printTableGLL grammar table moduleName tokenType res _class positionType caseSensitive isAbstract !withoutTree
             let res =  table
             let res = 
                 match definition.foot with

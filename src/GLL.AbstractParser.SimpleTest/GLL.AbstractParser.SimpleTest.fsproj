@@ -150,6 +150,11 @@
       <Project>{ffbc56cc-6fa9-40fa-bf23-5404fd5e2d4a}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\GLL.AbstractParserWithoutTree\GLL.AbstractParserWithoutTree.fsproj">
+      <Name>GLL.AbstractParserWithoutTree</Name>
+      <Project>{735767d7-801f-4674-a663-5f8552de98b4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\GLLAbstractParser\GLLAbstractParser.fsproj">
       <Name>GLLAbstractParser</Name>
       <Project>{bd40477e-7ceb-4ff4-b53f-05316f3bb6d8}</Project>

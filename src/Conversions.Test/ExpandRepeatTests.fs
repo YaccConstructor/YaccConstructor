@@ -14,7 +14,7 @@ type ``Expand repeat tests`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "ExpandRepeat")
     let path f = System.IO.Path.Combine(basePath, f)
 
-    [<Test>]                                                                                            
+    //[<Test>]                                                                                            
     member test.``Simple repeat 1`` () =
         (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t("yard_repeat_1"),None)}]
@@ -27,7 +27,7 @@ type ``Expand repeat tests`` () =
         |> runTest (path "repeat1.yrd") expandRepeat          
 
 
-    [<Test>]                                                                                            
+   // [<Test>]                                                                                            
     member test.``Repeat with meta rule`` () =
         ( metaRules "do"  (PSeq ([{dummyRule with rule = PRef (Source.t("yard_repeat_1"),None)}],None,None)) [Source.t("a"); Source.t("b")]
         ) @ (
@@ -49,7 +49,7 @@ type ``Expand repeat tests`` () =
         )       
         |> runTest (path "repeat2.yrd") expandRepeat       
 
-    [<Test>]                                                                                            
+   // [<Test>]                                                                                            
     member test.``Repeat with many rule`` () =
         (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t("yard_repeat_1"),None)}]
@@ -65,7 +65,7 @@ type ``Expand repeat tests`` () =
              )       
         |> runTest (path "repeat3.yrd") expandRepeat   
 
-    [<Test>]                                                                                            
+   // [<Test>]                                                                                            
     member test.``Repeat with inner repeat`` () =
         (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t("yard_repeat_1"),None)}]
@@ -82,7 +82,7 @@ type ``Expand repeat tests`` () =
              )       
         |> runTest (path "repeat4.yrd") expandRepeat   
 
-    [<Test>]                                                                                            
+   // [<Test>]                                                                                            
     member test.``Repeat without upper bound`` () =
         (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t("yard_repeat_1"),None)}]

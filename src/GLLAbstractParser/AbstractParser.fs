@@ -65,9 +65,12 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let tokens = new BlockResizeArray<'TokenType>()  
         let input = input           
         let packedNodes = new SysDict<int, SysDict<M, int<nodeMeasure>>>()
-        
+
+        let isEnd = ref false
         let treeProc = new TreeProcessor<_>(parser, tokens)
-        let o = treeProc.printerAgent
+        let o = treeProc.printerAgent (fun x -> 
+            printfn "Ranges = %A" x
+            isEnd := true)
 
         let nonTerminalNodes = new SysDict<int64,int<nodeMeasure>>()        
         let intermidiateNodes = new CompressedArray<_>(input.ChainLength, (fun _ -> new CompressedArray<_>(input.ChainLength, fun _ -> Unchecked.defaultof<SysDict<int<labelMeasure>, int<nodeMeasure>>>)))
@@ -107,6 +110,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     sppfNodes.Add(newNode)
                     let num = sppfNodes.Length - 1
                     nonTerminalNodes.Add((pack3 nTerm lExt rExt), num*1<nodeMeasure>)
+                    if parser.NumToString newNode.Name = "folded" then o.Post(NodeToProcess(newNode))
                     num*1<nodeMeasure>
                 else
                     nonTerminalNodes.[pack3 nTerm lExt rExt]
@@ -184,9 +188,9 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 let ext = packExtension index (pack2to32 (getLeft32 index) (1 + getRight32 index))
                 let t = new TerminalNode(index, ext, 1)
                 sppfNodes.Add t
-                let res = sppfNodes.Length - 1
-                terminalNodes.[index] <- ((sppfNodes.Length - 1)*1<nodeMeasure>)
-                res * 1<nodeMeasure>
+                let res = (sppfNodes.Length - 1) * 1<nodeMeasure>
+                terminalNodes.[index] <- res
+                res
             
                      
         let containsEdge (b : Vertex) (e : Vertex) ast =
@@ -210,10 +214,10 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     let arr = setP.[vertexKey]
                     arr.DoForAll (fun tree  ->
                         let y = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy label ast tree
-                        if slotIsEnd label 
-                        then 
-                            let name = parser.NumToString <| parser.LeftSide.[getRule label]
-                            o.Post(new Message(sppfNodes.[int y]))
+//                        if slotIsEnd label 
+//                        then 
+//                            //let name = parser.NumToString <| parser.LeftSide.[getRule label]
+//                            o.Post(NodeToProcess(sppfNodes.[int y]))
                         let index = getRightExtension <| structures.GetTreeExtension y 
                         structures.AddContext setU index label vertex y maxLen (*!currentPath*))
             v
@@ -222,6 +226,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             if u <> dummyGSSNode
             then
                 let vertexKey = pack u.Level (int u.NontermLabel)
+                //let f,v = setP.TryGetValue vert
                 if setP.ContainsKey vertexKey
                 then
                     setP.[vertexKey].Add z
@@ -235,10 +240,10 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                          let slot = slotLevels.Key
                          for level in slotLevels.Value do
                             let resTree = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy (u.NontermLabel*1<labelMeasure>) sppfNodeOnEdge z 
-                            if slotIsEnd (u.NontermLabel*1<labelMeasure>) 
-                            then 
-                                let name = parser.NumToString <| parser.LeftSide.[getRule (u.NontermLabel*1<labelMeasure>)]
-                                o.Post(new Message(sppfNodes.[int resTree]))
+//                            if slotIsEnd (u.NontermLabel*1<labelMeasure>) 
+//                            then 
+                                //let name = parser.NumToString <| parser.LeftSide.[getRule (u.NontermLabel*1<labelMeasure>)]
+                                //o.Post(NodeToProcess(sppfNodes.[int resTree]))
                             let newVertex = new Vertex(level, slot)
                             structures.AddContext setU i (u.NontermLabel*1<labelMeasure>) newVertex resTree maxLen //!currentPath
 
@@ -275,6 +280,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             then
                 currentContext :=  get ()
                 currentIndex := currentContext.Value.Index
+                let t = CommonFuns.getLeft32 !currentIndex
+                let t2 = CommonFuns.getRight32 !currentIndex
                 currentGSSNode := currentContext.Value.Vertex
                 structures.CurrentLabel := currentContext.Value.Label
                 structures.CurrentN := currentContext.Value.Ast 
@@ -322,11 +329,6 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                 if !structures.CurrentR <> structures.Dummy
                                 then 
                                     structures.CurrentN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy !structures.CurrentLabel !structures.CurrentN !structures.CurrentR
-                                    if slotIsEnd !structures.CurrentLabel
-                                    then 
-                                        //let name = parser.NumToString <| parser.LeftSide.[getRule !structures.CurrentLabel]
-                                        let node = sppfNodes.[int !structures.CurrentN]
-                                        o.Post(new Message(node))
                                 condition := false
                                 
                         else   
@@ -350,11 +352,11 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                 if !structures.CurrentR <> structures.Dummy
                                 then 
                                     structures.CurrentN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy !structures.CurrentLabel !structures.CurrentN !structures.CurrentR
-                                    if slotIsEnd !structures.CurrentLabel
-                                    then 
-                                        //let name = parser.NumToString <| parser.LeftSide.[getRule !structures.CurrentLabel]
-                                        let node = sppfNodes.[int !structures.CurrentN]
-                                        o.Post(new Message(node))
+//                                    if slotIsEnd !structures.CurrentLabel
+//                                    then 
+//                                        //let name = parser.NumToString <| parser.LeftSide.[getRule !structures.CurrentLabel]
+//                                        let node = sppfNodes.[int !structures.CurrentN]
+//                                        o.Post(NodeToProcess(node))
                                 condition := false
                             | 
                                 None _ -> ()
@@ -423,92 +425,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 
                 Error ("String was not parsed")
             | Some res -> 
-//                    let t =  
-//                        if errors.Count <> 0 then
-//                        for e in errors do
-//                            printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16) 
-                                                
-                    let rec filter (node:INode) = 
-                        match node with
-                        | :? NonTerminalNode as n ->
-                            let fst = 
-                                if n.Others <> null && n.Others.Count > 0
-                                then                             
-                                    n.Others.Add n.First
-                                    n.Others |> ResizeArray.toList |> List.maxBy(fun p -> parser.Probabilities.[p.Production])
-                                else n.First
-                            let otehrs = n.Others
-                            n.First <- fst
-                            n.Others <- null
-                            filter fst
-                        | :? IntermidiateNode as n -> 
-                            let fst = 
-                                if n.Others <> null && n.Others.Count > 0
-                                then                             
-                                    n.Others.Add n.First
-                                    n.Others |> ResizeArray.toList |> List.maxBy(fun p -> parser.Probabilities.[p.Production])
-                                else n.First
-                            let otehrs = n.Others
-                            n.First <- fst
-                            n.Others <- null
-                            filter fst
-                        | :? PackedNode as n -> 
-                            filter n.Left
-                            filter n.Right
-                        | _ -> ()                                        
-
-                    let visited2 = new System.Collections.Generic.Dictionary<_,_>()
-
-                    let rec filter3 (node:INode)   = 
-                        match node with
-                        | :? NonTerminalNode as n ->
-                            let p1 = filter3 n.First 
-                            let p2 = if n.Others <> null then n.Others |> ResizeArray.map (filter3) |> ResizeArray.toList else []
-                                
-                            let f = List.zip (p1::p2) (n.First :: (if n.Others <> null then n.Others |> ResizeArray.toList else []))
-                                    |> List.maxBy (fun ((s1,s2,s3),n) -> s1 + s2 - s3)
-                            n.First <- snd f
-                            n.Others <- null
-                            let s1,s2,s3 = fst f
-                            if (parser.NumToString (n.Name)).Contains "stem_3" then s1 + 1 else s1
-                            , if (parser.NumToString (n.Name)).Contains "stem_1" || (parser.NumToString (n.Name)).Contains "stem_2" then s2 + 1 else s2
-                            , if (parser.NumToString (n.Name)).Contains "any" then s3 + 1 else s3
-                        | :? IntermidiateNode as n -> 
-                            let p1 = filter3 n.First 
-                            let p2 = if n.Others <> null then n.Others |> ResizeArray.map filter3 |> ResizeArray.toList else []
-                            let f = List.zip (p1::p2) (n.First :: (if n.Others <> null then n.Others |> ResizeArray.toList else []))
-                                    |> List.maxBy (fun ((s1,s2,s3),n) -> s1 + s2 - s3)                            
-                            n.First <- snd f
-                            n.Others <- null
-                            fst f
-                        | :? PackedNode as n ->
-                            let f,r = visited2.TryGetValue n 
-                            if f 
-                            then                                
-                                r 
-                            else
-                                let s1,s2,s5 = if n.Left <> null then filter3 n.Left else 0,0,0
-                                let s3,s4,s6 = if n.Right <> null then filter3 n.Right else 0,0,0
-                                let r = s1+s3, s2 + s4, s5+s6
-                                visited2.Add(n,r)
-                                r
-                        | _ -> (0,0,0)
-
-                    let newFirstOther first other f =
-                        let l1 = f first
-                        let l2 = if other <> null 
-                                    then other |> ResizeArray.fold (fun l n  -> l @ (f n)) l1
-                                    else l1
-                        l2.Head,(match l2.Tail with [] -> null | t -> ResizeArray.ofList t)                        
-
-                    //let qprob=7.885753842e-225
-                   // let qprob=1.261723138e-203
-
-                    //let tokensArr = tokens.ToArray()
-
-
                     let r1 = new Tree<_> (input, res, parser.rules)
-                    r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
+                    //r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
                                             (*let isSubpath l1 l2 =
                         List.length l1 <= List.length l2 
                         && Seq.forall2 (=) l1 (Seq.take (List.length l1) l2)*)
@@ -520,8 +438,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                 
                             if finalPaths |> ResizeArray.exists (fun fp -> isSubpath path (List.rev fp)) |> not
                             then printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16)      *)                      
-                                
-                    
+                    o.Post End     
+                    while not !isEnd do()
                     Success (r1)   
                      
                         

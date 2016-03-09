@@ -108,11 +108,23 @@ let edg f t l = new ParserEdge<_>(f,t,lbl l)
 //    qGraph.PrintToDot "input.dot" (GLL.SimpleAmb.tokenToNumber >> GLL.SimpleAmb.numToString)
 //    qGraph
     
+let f arr tokenToNumber = Array.map (fun e -> tokenToNumber e) arr
+let len (edges : BioParserEdge<'token>[]) : int[] = edges |> Array.map (fun e -> e.Tokens.Length + 1) 
+let edgB b e t = new BioParserEdge<_>(b, e, t) 
 
 let inputGraph =
-    let edges = [|new BioParserEdge<GLL.SimpleAmb.Token>(0, 1, [|3;3;3|]);new BioParserEdge<GLL.SimpleAmb.Token>(1, 2, [|4|])|]
-    let qGraph = new BioParserInputGraph<GLL.SimpleAmb.Token>([|0|], 2, [|4;2|], edges, 3)
-    qGraph
+    
+        let a1 = f [|GLL.SimpleAmb.A 1|] GLL.SimpleAmb.tokenToNumber
+        let a2 = f [|GLL.SimpleAmb.C 1|] GLL.SimpleAmb.tokenToNumber
+        let a3 = f [|GLL.SimpleAmb.B 1|] GLL.SimpleAmb.tokenToNumber
+        let a4 = f [|GLL.SimpleAmb.RNGLR_EOF 2|] GLL.SimpleAmb.tokenToNumber
+        let edges = [|
+            edgB 0 1 a1;
+            edgB 1 2 a2;
+            edgB 1 2 a3;
+            edgB 2 3 a4|] 
+        let qGraph = new BioParserInputGraph<_>([|0|], 3, len edges, edges, 4)
+        qGraph
 let parser = GLL.SimpleAmb.buildAbstractAst
 let r = parser inputGraph 10
 match r with

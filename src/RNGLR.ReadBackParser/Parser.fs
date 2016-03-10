@@ -37,12 +37,12 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                 let start = 
                     let gssStart = new GssVertex(0, 0)
                     let nfaStart = new VertexWithBackTrack<int, int>(0)
-                    new Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel> (nfaStart, gssStart)
+                    new SppfVertex (nfaStart, gssStart)
                 let final =
                     let gssFinal = new GssVertex(1, 0)
                     let nfaFinal = new VertexWithBackTrack<int, int>(0)
-                    new Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel> (nfaFinal, gssFinal)
-                start.addEdge(new Edge<_,_>(final, SppfLabel.EpsilonReduction -1))
+                    new SppfVertex(nfaFinal, gssFinal)
+                start.addEdge(new SppfEdge(final, SppfLabel.EpsilonReduction -1))
                 start, 1, 0, Set.ofArray [|0|]
             Success (emptyParse, [||])
         else
@@ -133,25 +133,25 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                     let dfsStack = new Stack<_>(20)
 
                     //vertex is already in reductionTemp, get epsilon-closure of it, put vertices on the way to reductionTemp
-                    let epsilonClose (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) =
-                        let nfaInitVertex, gssVertex = vertex.label
+                    let epsilonClose (vertex : SppfVertex) =
+                        let nfaInitVertex, gssVertex = vertex.nfaVertex, vertex.gssVertex
                         let dict = Array.init nfa.Length (fun _ -> None)
                         let count = ref 1
                         dict.[nfaInitVertex.label] <- Some vertex
                         let searchStack = new Stack<_>(20)
-                        let f (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) alreadyVisited =
-                            let nfaVertex, _ = vertex.label
+                        let f (vertex : SppfVertex) alreadyVisited =
+                            let nfaVertex = vertex.nfaVertex
                             for edge in nfaVertex.inEdges do
                                 if parserSource.indexToSymbolType edge.label = SymbolType.Epsilon && dict.[edge.dest.label].IsNone then
                                     let prevVertex, prevAlreadyVisited =
                                         match reductionTemp.TryGetAlreadyVisited (edge.dest :?> VertexWithBackTrack<_,_>) gssVertex with
                                         | Some pv -> pv, true
                                         | None -> 
-                                            let pv = new Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>((edge.dest :?> VertexWithBackTrack<_,_>, gssVertex))
+                                            let pv = new SppfVertex((edge.dest :?> VertexWithBackTrack<_,_>, gssVertex))
                                             reductionTemp.AddVisited pv
                                             pv, false
                                     if not alreadyVisited then
-                                        prevVertex.addEdge(new Edge<_,_>(vertex, SppfLabel.Epsilon))
+                                        prevVertex.addEdge(new SppfEdge(vertex, SppfLabel.Epsilon))
                                     dict.[edge.dest.label] <- Some prevVertex
                                     incr count
                                     searchStack.Push (prevVertex, prevAlreadyVisited)
@@ -177,14 +177,14 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                             match reductionTemp.TryGetAlreadyVisited leftNfaVertex leftGssVertex with
                             | Some pv -> pv
                             | None -> 
-                                let pv = new Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>((leftNfaVertex, leftGssVertex))
+                                let pv = new SppfVertex((leftNfaVertex, leftGssVertex))
                                 reductionTemp.AddVisited pv                              
                         //TODO: maybe we should check and return, if we have reached left end of a handle, and add edge only in positive case
                         //this automaticaly would save us from useless hanging edges and subsequent search...
                         //But we can entrust this to GC
                                 dfsStack.Push(pv)
                                 pv
-                        let edge = new Edge<_,_>(rightVertex, sppfLabel)
+                        let edge = new SppfEdge(rightVertex, sppfLabel)
                         match sppfLabel with
                         | SppfLabel.TemporaryReduction _ -> temporarySppfEdges.Push(prevVertex, edge)
                         | _ -> ()
@@ -192,9 +192,9 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
 
                     //vertex is already in reductionTemp, put there it's predecessors
                     //NOT SAFE: does not check, if vertex has already been processed
-                    let rec reductionDfs (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) =
+                    let rec reductionDfs (vertex : SppfVertex) =
                         
-                        let nfaVertex, gssVertex = vertex.label
+                        let nfaVertex, gssVertex = vertex.nfaVertex, vertex.gssVertex
                         for edge in nfaVertex.inEdges do
                             if parserSource.indexToSymbolType edge.label = SymbolType.Epsilon then
                                 reductionStep (edge.dest :?> VertexWithBackTrack<_,_>) gssVertex vertex SppfLabel.Epsilon
@@ -215,12 +215,12 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                         match reductionTemp.TryGetAlreadyVisited nfa.[pos] gssVertex with
                         | Some x -> x
                         | None -> 
-                                let x = new Vertex<_,_>((nfa.[pos], gssVertex))
+                                let x = new SppfVertex((nfa.[pos], gssVertex))
                                 reductionTemp.AddRightEnd x
                                 x
                     let rightEndClosure = epsilonClose rightEnd
                     for vertex in rightEndClosure do
-                        let nfaVertex, gssVertex = vertex.label
+                        let nfaVertex, gssVertex = vertex.nfaVertex, vertex.gssVertex
                         let prevGssVertex, sppfLabel = edgeOpt.Value
                         for edge in nfaVertex.inEdges do
                             if matchNfaAndGssEdgeLabels edge sppfLabel then
@@ -232,7 +232,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                     //handle
                     while reductionTemp.NotHandledLeftEnds.Count > 0 do
                         let leftEnd = reductionTemp.NotHandledLeftEnds.Dequeue()
-                        let leftEndGss = snd leftEnd.label
+                        let leftEndGss = leftEnd.gssVertex
                         
                         //it's not a zero reduction
                         if not <| vxEq gssVertex leftEndGss then
@@ -276,10 +276,10 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
             while temporarySppfEdges.Count > 0 do
                 let source, edge = temporarySppfEdges.Pop()
                 let sppfLabel = 
-                    match edge.label with
+                    match edge.Label with
                     | TemporaryReduction rt ->
                         SppfLabel.Reduction (rt.Production, (source, parserSource.RightSideNFA.[rt.Production].Length, rt.EndLevel, rt.AcceptingNfaStates))
-                    | _ -> edge.label
+                    | _ -> edge.Label
                 edge.setLabel sppfLabel
             for i = 0 to currentReductions.Length - 1 do
                 currentReductions.[i] <- None

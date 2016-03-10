@@ -1,11 +1,11 @@
 ﻿module Yard.Generators.RNGLR.ReadBack.Graphs
 
 open Yard.Generators.RNGLR.ReadBack
-open Yard.Generators.Common
+//open Yard.Generators.Common
 open System.Collections.Generic
 
 //Sppf is a intersection of a production automaton and Gss, which, in its turn, has edges labelled with Sppf
-type Sppf = Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel> * int * int * Set<int>
+type Sppf = SppfVertex * int * int * Set<int>
     //(start vertex, number of nfa states, end level, accepting nfa states)
 
 and SppfLabel =
@@ -33,13 +33,32 @@ and GssEdge =
         new (d,l) = {Dest = d; Label = l}
     end
 
+and SppfVertex =
+    val nfaVertex : VertexWithBackTrack<int, int>
+    val gssVertex : GssVertex
+
+    //val outEdgesCount : int
+    
+    val mutable outEdges : SppfEdge list
+    new (nv, gv) = {nfaVertex = nv; gssVertex = gv; (*outEdgesCount = 0;*) outEdges = []}
+    member this.addEdge edge =
+        this.outEdges <- edge :: this.outEdges
+
+and SppfEdge (dest : SppfVertex, label : SppfLabel) =
+        let dest = dest
+        let mutable label = label
+        member this.Dest = dest
+        member this.Label = label
+        member this.setLabel label' = 
+            label <- label'
+
 and SppfSearchDictionary<'ValueType>(numberOfNfaStates : int) =
     //three levels of indexing - nfa state, gss level, lr state
     let firstLevelArray = Array.init numberOfNfaStates (fun _ ->  new Dictionary<int, (int * 'ValueType) list ref>())
 
-    member this.Add (key : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) (value : 'ValueType) =
+    member this.Add (key : SppfVertex) (value : 'ValueType) =
         let nfaState, gssLevel, lrState = 
-            let nfaVertex, gssVertex = key.label 
+            let nfaVertex, gssVertex = key.nfaVertex, key.gssVertex 
             nfaVertex.label, gssVertex.Level, gssVertex.State
         let levelDict = firstLevelArray.[nfaState]
         if levelDict.ContainsKey gssLevel then
@@ -62,26 +81,26 @@ and SppfSearchDictionary<'ValueType>(numberOfNfaStates : int) =
 //for reductions that goes from level being processed
 and ReductionTemp(prod : int, numberOfStates : int, endLevel : int) =
     let prod = prod
-    let notHandledLeftEnds = new Queue<Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>()
-    let leftEndsDict = new Dictionary<int * int, Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>()
+    let notHandledLeftEnds = new Queue<SppfVertex>()
+    let leftEndsDict = new Dictionary<int * int, SppfVertex>()
     let acceptingNfaStates = ref Set.empty
     let visitedVertices =
     //TODO: PERFORMANCE
-        new SppfSearchDictionary<Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>>(numberOfStates)
+        new SppfSearchDictionary<SppfVertex>(numberOfStates)
     let endLevel = endLevel
     
     member this.AcceptingNfaStates = !acceptingNfaStates
 
-    member this.AddVisited (vertex : Vertex<VertexWithBackTrack<int, int> * GssVertex, SppfLabel>) =
+    member this.AddVisited (vertex : SppfVertex) =
         visitedVertices.Add vertex vertex
-        if (fst vertex.label).label = 0 then
-            let gssVertex = snd vertex.label
+        if vertex.nfaVertex.label = 0 then
+            let gssVertex = vertex.gssVertex
             leftEndsDict.[(gssVertex.Level, gssVertex.State)] <- vertex
             notHandledLeftEnds.Enqueue vertex
     
     member this.AddRightEnd rE =
         this.AddVisited(rE)
-        acceptingNfaStates := Set.add (fst rE.label).label !acceptingNfaStates
+        acceptingNfaStates := Set.add rE.nfaVertex.label !acceptingNfaStates
     
     member this.EndLevel = endLevel
 

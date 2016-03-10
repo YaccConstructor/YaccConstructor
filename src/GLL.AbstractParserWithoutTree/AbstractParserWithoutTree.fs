@@ -41,6 +41,8 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 r.[input.Edges.[i].Start] <- i :: r.[input.Edges.[i].Start]
             r
         let parser = parser
+        let mutable reused = 0
+        let mutable descriptorNumber = 0
         let slots = parser.Slots
         let condNonTermRules = Seq.toArray <| seq{for i in 0..parser.LeftSide.Length - 1 do if parser.LeftSide.[i] = condNonTerm then yield i}
         let setU = new CompressedArray<SysDict<int, SysDict<int64, ResizeArray<int64<extension>>>>>(input.ChainLength, (fun _ -> null )) 
@@ -110,7 +112,10 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             if not <| containsContext inputVertex label vertex extension 
             then
                 setR.Enqueue(new Context2(inputVertex, label, vertex, extension))
-              
+                descriptorNumber <- descriptorNumber + 1
+            else
+              reused <- reused + 1
+
         let containsEdge (b : Vertex) (e : Vertex) extension =
             let labelN = slots.[int b.NontermLabel]
             let beginLevel = int b.Level
@@ -198,9 +203,9 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 c
             if setR.Count <> 0
             then
-                currentContext :=  get ()
                 currentIndex := currentContext.Value.Index
                 let t = CommonFuns.getLeft32 !currentIndex
+                currentContext :=  get ()
                 let t2 = CommonFuns.getRight32 !currentIndex
                 currentGSSNode := currentContext.Value.Vertex
                 currentLabel := currentContext.Value.Label
@@ -306,4 +311,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             | None -> 
                 Error ("String was not parsed")
             | Some res -> 
-                Success1 (res)                   
+                printfn "Reused descriptors %d" reused
+                printfn "All descriptors %d" descriptorNumber
+                Success1 (res) 
+                                  

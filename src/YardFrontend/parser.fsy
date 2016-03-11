@@ -105,6 +105,7 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
 %token COMMUT
 %token INCLUDE
 %token SET
+%token AND
 %token <IL.Source.t> EOF
 %token <IL.Source.t> STRING LIDENT UIDENT
 %token <IL.Source.t> PREDICATE ACTION
@@ -260,11 +261,17 @@ param_opt : { None } | PARAM   { Some $1 }
 
 param_list : { [] } | PARAM param_list { $1::$2 }
 
+alts: conjunction                       { $1 }
+    | conjunction bar_conjunction_nlist { PAlt ($1,$2) }
 
-alts: seq { $1 } | seq bar_seq_nlist {PAlt ($1,$2)}
+bar_conjunction_nlist : BAR conjunction bar_conjunction_nlist { PAlt ($2,$3) }  
+                      | BAR conjunction                       { $2 }
 
-bar_seq_nlist : BAR seq bar_seq_nlist { PAlt($2,$3) }  
-              | BAR seq               { $2 }
+conjunction: seq               { $1 }
+           | seq and_seq_nlist { PConj ($1,$2) }
+
+and_seq_nlist : AND seq and_seq_nlist { PConj ($2,$3) }  
+              | AND seq               { $2 }
 
 seq: lbl_seq {$1} | no_lbl_seq {$1} 
 

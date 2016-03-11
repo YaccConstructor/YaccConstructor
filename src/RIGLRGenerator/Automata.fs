@@ -8,51 +8,70 @@ open QuickGraph
 
 type RCAEdge =
     | Sh of int
-    | Ri of int
+    | R of int
     | Push of int
- 
-let constructRIA (grammar : FinalGrammar) =  
+
+let constructIRIA (grammar : FinalGrammar) =
     let statesToItems = new Dictionary<int, int*int>(100)
-    let itemsToStates = new Dictionary<int*int, ResizeArray<int>>(100)
-    let primaryParent = new Dictionary<int, int>(100)
-    let dealtWith = new HashSet<int>()
+    let inEdges = new Dictionary<int, ResizeArray<EdgeFSA<RCAEdge>>>(100)
+    let primaryEpsEdges = new HashSet<int*int>()
     let reductionStates = new ResizeArray<int>(10)
-    let nextState = ref 1   
+    let dealtWith = new HashSet<int>()
+    let nextState = ref 1
 
-    let IRIA = new FSA<RCAEdge>()         
-    
-    let addState state item parent edgeTag =
-        IRIA.AddVerticesAndEdge (new EdgeFSA<RCAEdge>(parent, state, edgeTag)) |> ignore
-        primaryParent.Add (state, parent)
-        statesToItems.Add (state, item)
-        if itemsToStates.ContainsKey item
-        then itemsToStates.[item].Add state
-        else itemsToStates.Add (item, new ResizeArray<int>([state]))
-        incr nextState
-
-    let rec findTargetStateOnPath (targetStates: ResizeArray<int>) curState =
-        if curState = 0
-        then None
-        elif targetStates.Contains curState
-        then Some curState
-        else findTargetStateOnPath targetStates primaryParent.[curState]
-    
-//    let rec isLabeledPathExist src dest labels =
-//        if src = dest && labels = []
-//        then true
-//        else
-            
-//    let findReductionTarget nonTerm rule =
-//        let targets = new ResizeArray<int>()
-//        for i in 0 .. grammar.rules.rulesCount do
-//            grammar.rules.rightSide i 
-//            |> Array.iteri (fun x j -> if x = nonTerm then targets.Add (i, j))
-        
-    IRIA.AddVertex 0 |> ignore
+    let IRIA = new FSA<RCAEdge>( new ResizeArray<_>([0]), new ResizeArray<_>(),
+                                 new ResizeArray<_>() )
     statesToItems.Add (0, (grammar.startRule, 0))
-    itemsToStates.Add ((grammar.startRule, 0), new ResizeArray<int>([0]))
-    IRIA.InitState.Add 0
 
+    let addState state item parent edgeTag =
+        let newEdge = new EdgeFSA<RCAEdge>(parent, state, edgeTag)
+        IRIA.AddVerticesAndEdge newEdge |> ignore
+        inEdges.Add (state, new ResizeArray<_>([newEdge]))
+        statesToItems.Add (state, item)
+        if edgeTag = Eps 
+        then primaryEpsEdges.Add (parent, state) |> ignore        
+        incr nextState
+    
+    let addEdge source target tag =
+        let newEdge = new EdgeFSA<RCAEdge>(source, target, tag)
+        IRIA.AddEdge newEdge |> ignore
+        inEdges.[target].Add newEdge
+        
+    let isPrimaryEdge (edge: EdgeFSA<RCAEdge>) =
+        match edge.Tag with
+        | Smbl(Sh x) -> true
+        | Eps -> primaryEpsEdges.Contains (edge.Source, edge.Target)
+        | _ -> failwith "Unexpected edge tag"
+    
+    let findPrimaryEdge edges = Seq.find (fun e -> isPrimaryEdge e) edges    
+    
+    let primaryParent state = (findPrimaryEdge inEdges.[state]).Source    
+    let primaryDescendant state = (findPrimaryEdge (IRIA.OutEdges state)).Target
+     
+    let findRecursionStates nonTerm state =
+        let targetRules = grammar.rules.rulesWithLeftSide nonTerm
+        let rec findStates curState result =
+            if curState = 0
+            then result
+            else
+                let item = statesToItems.[curState]
+                let nextState = primaryParent curState
+                if Array.exists ((=) (fst item)) targetRules && snd item = 0
+                then findStates nextState ((curState, fst item) :: result)
+                else findStates nextState result
+        findStates state []
+    
+    let rec retraceAlongPath startState path resultSet =
+        match path with
+        | [] -> startState :: resultSet
+        | h :: t -> 
+            let predecessors = inEdges.[startState] 
+                               |> Seq.where (fun e -> e.Tag = h)
+                               |> Seq.map (fun e -> e.Source)
+            predecessors
+            |> Seq.map (fun s -> retraceAlongPath s t resultSet)
+            |> Seq.concat |> Seq.toList
+            
     while IRIA.VertexCount > dealtWith.Count do
         let curState = IRIA.Vertices 
                        |> Seq.find (fun x -> not (dealtWith.Contains x))
@@ -64,29 +83,68 @@ let constructRIA (grammar : FinalGrammar) =
             addState !nextState (rule, pos + 1) curState (Smbl(Sh(nextSymbol)))
             if grammar.indexator.isNonTerm nextSymbol 
             then
-                if nextSymbol <> grammar.rules.leftSide rule || pos <> 0  //maybe xor
+                if nextSymbol <> grammar.rules.leftSide rule || pos <> 0  //they want xor
                 then
-                    for nextSymbolRule in grammar.rules.rulesWithLeftSide nextSymbol do
-                        if itemsToStates.ContainsKey (nextSymbolRule, 0)
-                        then
-                            let targetStates = itemsToStates.[(nextSymbolRule, 0)]
-                            match findTargetStateOnPath targetStates curState with
-                            | Some x -> IRIA.AddEdge (new EdgeFSA<RCAEdge>(curState, x, Eps)) |> ignore
-                            | None -> addState !nextState (nextSymbolRule, 0) curState Eps
-                        else addState !nextState (nextSymbolRule, 0) curState Eps
+                    let recursionStates = findRecursionStates nextSymbol curState
+                    for rule in grammar.rules.rulesWithLeftSide nextSymbol do
+                        match List.tryFind (fun (s, r) -> rule = r) recursionStates with
+                        | Some (s, r) -> addEdge curState s Eps
+                        | None -> addState !nextState (rule, 0) curState Eps
                 elif curState <> 0
                 then
-                    primaryParent.[curState]
-                    |> IRIA.OutEdges                    
+                    primaryParent curState
+                    |> IRIA.OutEdges
                     |> Seq.filter (fun x -> x.Tag = Eps)
-                    |> Seq.iter 
-                           (
-                               fun x -> 
-                                   IRIA.AddEdge (new EdgeFSA<RCAEdge>(curState, x.Target, Eps))
-                                   |> ignore
-                           )
+                    |> Seq.iter (fun x -> addEdge curState x.Target Eps)
         else reductionStates.Add curState |> ignore  
         dealtWith.Add curState |> ignore
-//    for state in Seq.toList reductionStates |> List.tail do
-//        let nonTerm = fst statesToItems.[state] |> grammar.rules.leftSide                    
+    for state in reductionStates |> Seq.toList |> List.tail do
+        let rule = fst statesToItems.[state]
+        let pathForRetrace = rule
+                             |> grammar.rules.rightSide
+                             |> Array.map (fun x -> Smbl(Sh(x)))
+                             |> Array.toList
+        let reductionTargets = retraceAlongPath state (Eps :: pathForRetrace |> List.rev) []
+                               |> List.map (fun s -> primaryDescendant s)
+        reductionTargets |> List.iter (fun t -> addEdge state t (Smbl(R(rule))))
+    
+    IRIA.FinalState.Add 1
     IRIA
+
+let constructRIA (grammar: FinalGrammar) =
+    let IRIA = constructIRIA grammar
+    let RIA = new FSA<RCAEdge>()
+    IRIA.Edges 
+    |> Seq.iter
+          (
+              fun edge ->
+                  match edge.Tag with
+                  | Smbl(Sh(n)) -> 
+                        if not (grammar.indexator.isNonTerm n)
+                        then RIA.AddVerticesAndEdge (edge) |> ignore
+                  | _ -> RIA.AddVerticesAndEdge (edge) |> ignore
+          )
+    RIA.InitState <- IRIA.InitState
+    RIA.FinalState <- IRIA.FinalState
+    RIA.NfaToDfa()
+    
+//    let nonTermEdges = IRIA.Edges 
+//                       |> Seq.filter 
+//                             (
+//                                 fun edge ->
+//                                     match edge.Tag with
+//                                     | Smbl(Sh(n)) -> grammar.indexator.isNonTerm n
+//                                     | _ -> false
+//                             )
+//                       |> Seq.map (fun e -> new EdgeFSA<RCAEdge>(e.Source, e.Target, e.Tag))
+//    Seq.iter (fun edge -> IRIA.RemoveEdge edge |> ignore) nonTermEdges   lie
+//    IRIA.NfaToDfa()
+
+let constructRCA (grammar: FinalGrammar) =    
+    //TODO
+    let removeEmbeddedRecursion grammar = ()  
+
+    //TODO
+    let joinAutomata automata = ()
+
+    printfn "I <3 embedded recursion"

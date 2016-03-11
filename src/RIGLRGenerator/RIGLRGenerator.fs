@@ -20,7 +20,8 @@ type RIGLR() =
         override this.Generate (definition, args) = 
             let mutable newDefinition = initialConvert definition
             let grammar = new FinalGrammar(newDefinition.grammar.[0].rules, true)
-            let automaton = constructRIA grammar
+            let automaton = constructRIA grammar  
+            automaton.PrintToDOT("dot.dot", (fun x -> x.ToString())) |> ignore          
             let x = automaton.Edges
             printfn "%A" <| x
             box ()

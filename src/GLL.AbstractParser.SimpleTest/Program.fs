@@ -119,503 +119,503 @@ let edgB b e t = new BioParserEdge<_>(b, e, t)
 [<TestFixture>]
 type ``GLL abstract parser tests`` () =
 
-    [<Test>]
-    member this._01_PrettySimpleCalc_SequenceInput () =
-        
-        let a1 = f [|GLL.PrettySimpleCalc.NUM 0|] GLL.PrettySimpleCalc.tokenToNumber
-        let a2 = f [|GLL.PrettySimpleCalc.PLUS 2|] GLL.PrettySimpleCalc.tokenToNumber
-        let a3 = f [|GLL.PrettySimpleCalc.NUM 3|] GLL.PrettySimpleCalc.tokenToNumber
-        let a4 = f [|GLL.PrettySimpleCalc.RNGLR_EOF 0|] GLL.PrettySimpleCalc.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1; 
-            edgB 1 2 a2; 
-            edgB 2 3 a3;
-            edgB 3 4 a4|]
-         
-        let qGraph = new BioParserInputGraph<GLL.PrettySimpleCalc.Token>([|0|], 4, len edges, edges, 5)
-        test GLL.PrettySimpleCalc.buildAbstractAst qGraph 100 GLL.PrettySimpleCalc.numToString "PrettySimpleCalcSeq.dot" 21 24 5 0 GLL.PrettySimpleCalc.tokenData GLL.PrettySimpleCalc.tokenToNumber
-
-    [<Test>]
-    member this._06_NotAmbigousSimpleCalc_Loop () =
-        let a1 = f [|GLL.NotAmbigousSimpleCalc.NUM 0|] GLL.NotAmbigousSimpleCalc.tokenToNumber
-        let a2 = f [|GLL.NotAmbigousSimpleCalc.PLUS 2|] GLL.NotAmbigousSimpleCalc.tokenToNumber
-        let a3 = f [|GLL.NotAmbigousSimpleCalc.NUM 3|] GLL.NotAmbigousSimpleCalc.tokenToNumber
-        let a4 = f [|GLL.NotAmbigousSimpleCalc.RNGLR_EOF 0|] GLL.NotAmbigousSimpleCalc.tokenToNumber
-        let a5 = f [|GLL.NotAmbigousSimpleCalc.PLUS 0|] GLL.NotAmbigousSimpleCalc.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1; 
-            edgB 1 2 a2; 
-            edgB 2 3 a3;
-            edgB 3 4 a4;
-            edgB 3 0 a5|]
-        let qGraph = new BioParserInputGraph<GLL.NotAmbigousSimpleCalc.Token>([|0|], 4, len edges, edges, 5)
-        
-        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph 100 GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc2.dot" 25 30 6 1 GLL.NotAmbigousSimpleCalc.tokenData GLL.NotAmbigousSimpleCalc.tokenToNumber
-
-    [<Test>]
-    member this._07_NotAmbigousSimpleCalc_LoopInLoop () =
-        let a1 = f [|GLL.NotAmbigousSimpleCalc.NUM 0|] GLL.NotAmbigousSimpleCalc.tokenToNumber
-        let a2 = f [|GLL.NotAmbigousSimpleCalc.PLUS 2|] GLL.NotAmbigousSimpleCalc.tokenToNumber
-        let a3 = f [|GLL.NotAmbigousSimpleCalc.NUM 3|] GLL.NotAmbigousSimpleCalc.tokenToNumber
-        let a4 = f [|GLL.NotAmbigousSimpleCalc.PLUS 2|] GLL.NotAmbigousSimpleCalc.tokenToNumber
-        let a5 = f [|GLL.NotAmbigousSimpleCalc.NUM 3|] GLL.NotAmbigousSimpleCalc.tokenToNumber
-        let a6 = f [|GLL.NotAmbigousSimpleCalc.PLUS 2|] GLL.NotAmbigousSimpleCalc.tokenToNumber
-        let a7 = f [|GLL.NotAmbigousSimpleCalc.STAR 3|] GLL.NotAmbigousSimpleCalc.tokenToNumber
-        let a8 = f [|GLL.NotAmbigousSimpleCalc.RNGLR_EOF 0|] GLL.NotAmbigousSimpleCalc.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1; 
-            edgB 1 2 a2; 
-            edgB 2 3 a3;
-            edgB 3 4 a4;
-            edgB 4 5 a5;
-            edgB 5 0 a6;
-            edgB 5 2 a7;
-            edgB 5 6 a8|]
-        let qGraph = new BioParserInputGraph<GLL.NotAmbigousSimpleCalc.Token>([|0|], 6, len edges, edges, 7)
-        test  
-            GLL.NotAmbigousSimpleCalc.buildAbstractAst 
-            qGraph 
-            100
-            GLL.NotAmbigousSimpleCalc.numToString 
-            "NotAmbigousSimpleCalcLoopLoop.dot" 
-            39 48 9 2 
-            GLL.NotAmbigousSimpleCalc.tokenData
-            GLL.NotAmbigousSimpleCalc.tokenToNumber
-
+//    [<Test>]
+//    member this._01_PrettySimpleCalc_SequenceInput () =
+//        
+//        let a1 = f [|GLL.PrettySimpleCalc.NUM 0|] GLL.PrettySimpleCalc.tokenToNumber
+//        let a2 = f [|GLL.PrettySimpleCalc.PLUS 2|] GLL.PrettySimpleCalc.tokenToNumber
+//        let a3 = f [|GLL.PrettySimpleCalc.NUM 3|] GLL.PrettySimpleCalc.tokenToNumber
+//        let a4 = f [|GLL.PrettySimpleCalc.RNGLR_EOF 0|] GLL.PrettySimpleCalc.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1; 
+//            edgB 1 2 a2; 
+//            edgB 2 3 a3;
+//            edgB 3 4 a4|]
+//         
+//        let qGraph = new BioParserInputGraph<GLL.PrettySimpleCalc.Token>([|0|], 4, len edges, edges, 5)
+//        test GLL.PrettySimpleCalc.buildAbstractAst qGraph 100 GLL.PrettySimpleCalc.numToString "PrettySimpleCalcSeq.dot" 21 24 5 0 GLL.PrettySimpleCalc.tokenData GLL.PrettySimpleCalc.tokenToNumber
 //
 //    [<Test>]
-//    member this._14_NotAmbigousSimpleCalcWith2Ops_Loop () =
-//        let qGraph = new ParserInputGraph<_>(0, 7)
-//        qGraph.AddVerticesAndEdgeRange
-//            [edg 0 1 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM  1)
-//             edg 1 2 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 2)
-//             edg 2 3 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 3)
-//             edg 3 4 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 4)
-//             edg 4 5 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 5)
-//             edg 5 2 (GLL.NotAmbigousSimpleCalcWith2Ops.MULT 6)
-//             edg 4 6 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 7)
-//             edg 6 7 (GLL.NotAmbigousSimpleCalcWith2Ops.RNGLR_EOF 0)
-//             ] |> ignore
+//    member this._06_NotAmbigousSimpleCalc_Loop () =
+//        let a1 = f [|GLL.NotAmbigousSimpleCalc.NUM 0|] GLL.NotAmbigousSimpleCalc.tokenToNumber
+//        let a2 = f [|GLL.NotAmbigousSimpleCalc.PLUS 2|] GLL.NotAmbigousSimpleCalc.tokenToNumber
+//        let a3 = f [|GLL.NotAmbigousSimpleCalc.NUM 3|] GLL.NotAmbigousSimpleCalc.tokenToNumber
+//        let a4 = f [|GLL.NotAmbigousSimpleCalc.RNGLR_EOF 0|] GLL.NotAmbigousSimpleCalc.tokenToNumber
+//        let a5 = f [|GLL.NotAmbigousSimpleCalc.PLUS 0|] GLL.NotAmbigousSimpleCalc.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1; 
+//            edgB 1 2 a2; 
+//            edgB 2 3 a3;
+//            edgB 3 4 a4;
+//            edgB 3 0 a5|]
+//        let qGraph = new BioParserInputGraph<GLL.NotAmbigousSimpleCalc.Token>([|0|], 4, len edges, edges, 5)
 //        
-//        test GLL.NotAmbigousSimpleCalcWith2Ops.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalcWith2Ops.numToString "NotAmbigousSimpleCalcWith2Ops.dot" 0 0 0 0
+//        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph 100 GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc2.dot" 25 30 6 1 GLL.NotAmbigousSimpleCalc.tokenData GLL.NotAmbigousSimpleCalc.tokenToNumber
 //
 //    [<Test>]
-//    member this._15_NotAmbigousSimpleCalcWith2Ops_Loops () =
-//        let qGraph = new ParserInputGraph<_>(0, 8)
-//        qGraph.AddVerticesAndEdgeRange
-//            [edg 0 1 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM  1)
-//             edg 1 2 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 2)
-//             edg 2 3 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 3)
-//             edg 2 4 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 4)
-//             edg 3 4 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 5)
-//             edg 4 5 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 6)
-//             edg 5 2 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 7)
-//             edg 4 6 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 8)
-//             edg 6 7 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 9)
-//             edg 7 8 (GLL.NotAmbigousSimpleCalcWith2Ops.RNGLR_EOF 0)
-//             ] |> ignore
-//        
-//        test GLL.NotAmbigousSimpleCalcWith2Ops.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalcWith2Ops.numToString "NotAmbigousSimpleCalcWith2Ops2.dot" 0 0 0 0
+//    member this._07_NotAmbigousSimpleCalc_LoopInLoop () =
+//        let a1 = f [|GLL.NotAmbigousSimpleCalc.NUM 0|] GLL.NotAmbigousSimpleCalc.tokenToNumber
+//        let a2 = f [|GLL.NotAmbigousSimpleCalc.PLUS 2|] GLL.NotAmbigousSimpleCalc.tokenToNumber
+//        let a3 = f [|GLL.NotAmbigousSimpleCalc.NUM 3|] GLL.NotAmbigousSimpleCalc.tokenToNumber
+//        let a4 = f [|GLL.NotAmbigousSimpleCalc.PLUS 2|] GLL.NotAmbigousSimpleCalc.tokenToNumber
+//        let a5 = f [|GLL.NotAmbigousSimpleCalc.NUM 3|] GLL.NotAmbigousSimpleCalc.tokenToNumber
+//        let a6 = f [|GLL.NotAmbigousSimpleCalc.PLUS 2|] GLL.NotAmbigousSimpleCalc.tokenToNumber
+//        let a7 = f [|GLL.NotAmbigousSimpleCalc.STAR 3|] GLL.NotAmbigousSimpleCalc.tokenToNumber
+//        let a8 = f [|GLL.NotAmbigousSimpleCalc.RNGLR_EOF 0|] GLL.NotAmbigousSimpleCalc.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1; 
+//            edgB 1 2 a2; 
+//            edgB 2 3 a3;
+//            edgB 3 4 a4;
+//            edgB 4 5 a5;
+//            edgB 5 0 a6;
+//            edgB 5 2 a7;
+//            edgB 5 6 a8|]
+//        let qGraph = new BioParserInputGraph<GLL.NotAmbigousSimpleCalc.Token>([|0|], 6, len edges, edges, 7)
+//        test  
+//            GLL.NotAmbigousSimpleCalc.buildAbstractAst 
+//            qGraph 
+//            100
+//            GLL.NotAmbigousSimpleCalc.numToString 
+//            "NotAmbigousSimpleCalcLoopLoop.dot" 
+//            39 48 9 2 
+//            GLL.NotAmbigousSimpleCalc.tokenData
+//            GLL.NotAmbigousSimpleCalc.tokenToNumber
 //
-    [<Test>]
-    member this._16_Stars_Loop () =
-        let a1 = f [|GLL.Stars.STAR 0|] GLL.Stars.tokenToNumber
-        let a2 = f [|GLL.Stars.SEMI 2|] GLL.Stars.tokenToNumber
-        let a3 = f [|GLL.Stars.RNGLR_EOF 3|] GLL.Stars.tokenToNumber
-        let edges = [|
-            edgB 0 0 a1; 
-            edgB 0 1 a2; 
-            edgB 1 2 a3|]
-        let qGraph = new BioParserInputGraph<GLL.Stars.Token>([|0|], 2, len edges, edges, 3)
-        test
-            GLL.Stars.buildAbstractAst 
-            qGraph 
-            100
-            GLL.Stars.numToString 
-            "Stars_Loop.dot" 
-            19 24 4 1 
-            GLL.Stars.tokenData
-            GLL.Stars.tokenToNumber
-
-    [<Test>]
-    member this._17_Stars2_Loop () =
-        let a1 = f [|GLL.Stars2.STAR 0|] GLL.Stars2.tokenToNumber
-        let a2 = f [|GLL.Stars2.RNGLR_EOF 3|] GLL.Stars2.tokenToNumber
-        let edges = [|
-            edgB 0 0 a1; 
-            edgB 0 1 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 1, len edges, edges, 2)
-        
-        test 
-            GLL.Stars2.buildAbstractAst 
-            qGraph 
-            100
-            GLL.Stars2.numToString 
-            "Stars2.dot" 
-            23 33 3 2
-            GLL.Stars2.tokenData
-            GLL.Stars2.tokenToNumber
-
-    [<Test>]
-    member this._19_FirstEps () =
-        let a1 = f [|GLL.FirstEps.Z 1|] GLL.FirstEps.tokenToNumber
-        let a2 = f [|GLL.FirstEps.N 2|] GLL.FirstEps.tokenToNumber
-        let a3 = f [|GLL.FirstEps.RNGLR_EOF 3|] GLL.FirstEps.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2; 
-            edgB 2 3 a3|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 3, len edges, edges, 4)
-        
-        test 
-            GLL.FirstEps.buildAbstractAst
-            qGraph
-            100
-            GLL.FirstEps.numToString 
-            "FirstEps.dot" 
-            26 30 6 0
-            GLL.FirstEps.tokenData
-            GLL.FirstEps.tokenToNumber
-    
-    [<Test>]
-    member this._20_CroppedBrackets () =
-        let a1 = f [|GLL.CroppedBrackets.LBR 1|] GLL.CroppedBrackets.tokenToNumber
-        let a2 = f [|GLL.CroppedBrackets.NUM 2|] GLL.CroppedBrackets.tokenToNumber
-        let a3 = f [|GLL.CroppedBrackets.RBR 3|] GLL.CroppedBrackets.tokenToNumber
-        let a4 = f [|GLL.CroppedBrackets.RNGLR_EOF 4|] GLL.CroppedBrackets.tokenToNumber
-        let edges = [|
-            edgB 0 0 a1;
-            edgB 0 1 a2;
-            edgB 1 1 a3; 
-            edgB 1 2 a4;|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-        
-        test GLL.CroppedBrackets.buildAbstractAst qGraph 100 GLL.CroppedBrackets.numToString "CroppedBrackets.dot" 14 15 5 1 GLL.CroppedBrackets.tokenData GLL.CroppedBrackets.tokenToNumber
-
-    [<Test>]
-    member this._21_Brackets () =
-        let a1 = f [|GLL.Brackets.LBR 1|] GLL.Brackets.tokenToNumber
-        let a2 = f [|GLL.Brackets.NUM 2|] GLL.Brackets.tokenToNumber
-        let a3 = f [|GLL.Brackets.RBR 3|] GLL.Brackets.tokenToNumber
-        let a4 = f [|GLL.Brackets.RNGLR_EOF 4|] GLL.Brackets.tokenToNumber
-        let edges = [|
-            edgB 0 0 a1;
-            edgB 0 1 a2;
-            edgB 1 1 a3; 
-            edgB 1 2 a4;|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-        
-        test GLL.Brackets.buildAbstractAst qGraph 100 GLL.Brackets.numToString "Brackets.dot" 14 15 5 1 GLL.Brackets.tokenData GLL.Brackets.tokenToNumber
-
-    [<Test>]
-    member this._22_Brackets_BackEdge () =
-        let a1 = f [|GLL.Brackets.LBR 1|] GLL.Brackets.tokenToNumber
-        let a2 = f [|GLL.Brackets.NUM 2|] GLL.Brackets.tokenToNumber
-        let a3 = f [|GLL.Brackets.RBR 3|] GLL.Brackets.tokenToNumber
-        let a4 = f [|GLL.Brackets.NUM 2|] GLL.Brackets.tokenToNumber
-        let a5 = f [|GLL.Brackets.RNGLR_EOF 4|] GLL.Brackets.tokenToNumber
-        let edges = [|
-            edgB 0 0 a1;
-            edgB 0 1 a2;
-            edgB 1 1 a3; 
-            edgB 1 0 a4;
-            edgB 1 2 a5;|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-        
-        test GLL.Brackets.buildAbstractAst qGraph 100 GLL.Brackets.numToString "Brackets_backEdge.dot" 35 54 6 4 GLL.Brackets.tokenData GLL.Brackets.tokenToNumber
-
-    [<Test>]
-    member this._24_UnambiguousBrackets_Circle () =
-        let a1 = f [|GLL.StrangeBrackets.LBR 1|] GLL.StrangeBrackets.tokenToNumber
-        let a2 = f [|GLL.StrangeBrackets.RBR 3|] GLL.StrangeBrackets.tokenToNumber
-        let a3 = f [|GLL.StrangeBrackets.RNGLR_EOF 4|] GLL.StrangeBrackets.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 0 a2;
-            edgB 0 2 a3;|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-        
-        test GLL.StrangeBrackets.buildAbstractAst qGraph 100 GLL.StrangeBrackets.numToString "StrangeBrackets2.dot" 19 21 6 1 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
-
-    [<Test>]
-    member this._25_UnambiguousBrackets_BiggerCircle () =
-        let a1 = f [|GLL.StrangeBrackets.LBR 1|] GLL.StrangeBrackets.tokenToNumber
-        let a2 = f [|GLL.StrangeBrackets.RBR 3|] GLL.StrangeBrackets.tokenToNumber
-        let a3 = f [|GLL.StrangeBrackets.LBR 1|] GLL.StrangeBrackets.tokenToNumber
-        let a4 = f [|GLL.StrangeBrackets.RBR 3|] GLL.StrangeBrackets.tokenToNumber
-        let a5 = f [|GLL.StrangeBrackets.RNGLR_EOF 4|] GLL.StrangeBrackets.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2;
-            edgB 2 3 a3;
-            edgB 3 0 a4;
-            edgB 0 4 a5;|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 4, len edges, edges, 5)
-        
-        test GLL.StrangeBrackets.buildAbstractAst qGraph 100 GLL.StrangeBrackets.numToString "StrangeBrackets3.dot" 30 33 9 1 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
-
-    [<Test>]
-    member this._26_UnambiguousBrackets_Inf () =
-        let a1 = f [|GLL.StrangeBrackets.LBR 1|] GLL.StrangeBrackets.tokenToNumber
-        let a2 = f [|GLL.StrangeBrackets.RBR 3|] GLL.StrangeBrackets.tokenToNumber
-        let a3 = f [|GLL.StrangeBrackets.RNGLR_EOF 4|] GLL.StrangeBrackets.tokenToNumber
-        let edges = [|
-            edgB 0 0 a1;
-            edgB 0 0 a2;
-            edgB 0 1 a3;|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 1, len edges, edges, 2)
-
-        test GLL.StrangeBrackets.buildAbstractAst qGraph 100 GLL.StrangeBrackets.numToString "StrangeBrackets4.dot" 16 18 5 1 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
-
-    
-    [<Test>]
-    member this._29_Attrs () =
-        let a1 = f [|GLL.ParseAttrs.A 1; GLL.ParseAttrs.A 1; GLL.ParseAttrs.A 1; GLL.ParseAttrs.A 1; GLL.ParseAttrs.A 1|] GLL.ParseAttrs.tokenToNumber
-        let a2 = f [|GLL.ParseAttrs.RNGLR_EOF 2|] GLL.ParseAttrs.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-        
-        test GLL.ParseAttrs.buildAbstractAst qGraph 100 GLL.ParseAttrs.numToString "Attrs.dot" 29 33 7 0 GLL.ParseAttrs.tokenData GLL.ParseAttrs.tokenToNumber
-
-    [<Test>]
-    member this._30_Condition () =
-        let a1 = f [|GLL.ParseCond.IF 1; GLL.ParseCond.IF 1; GLL.ParseCond.A 3; GLL.ParseCond.ELSE 4; GLL.ParseCond.A 5|] GLL.ParseCond.tokenToNumber
-        let a2 = f [|GLL.ParseCond.RNGLR_EOF 2|] GLL.ParseCond.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-
-        test GLL.ParseCond.buildAbstractAst qGraph 100 GLL.ParseCond.numToString "Cond.dot" 44 57 7 1 GLL.ParseCond.tokenData GLL.ParseCond.tokenToNumber
-
-    [<Test>]
-    member this._31_Counter () =
-        let a1 = f [|GLL.ParseCounter.A 1; GLL.ParseCounter.A 1; GLL.ParseCounter.A 3; GLL.ParseCounter.A 4; GLL.ParseCounter.A 5|] GLL.ParseCounter.tokenToNumber
-        let a2 = f [|GLL.ParseCounter.RNGLR_EOF 2|] GLL.ParseCounter.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-
-        test GLL.ParseCounter.buildAbstractAst qGraph 100 GLL.ParseCounter.numToString "Counter.dot" 21 21 7 0 GLL.ParseCounter.tokenData GLL.ParseCounter.tokenToNumber
-    
-    [<Test>]
-    member this._32_Cycle () =
-        let a1 = f [|GLL.ParseCycle.A 1; GLL.ParseCycle.B 1|] GLL.ParseCycle.tokenToNumber
-        let a2 = f [|GLL.ParseCycle.RNGLR_EOF 2|] GLL.ParseCycle.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-
-        test GLL.ParseCycle.buildAbstractAst qGraph 100 GLL.ParseCycle.numToString "Cycle.dot" 15 18 4 1 GLL.ParseCycle.tokenData GLL.ParseCycle.tokenToNumber
-         
-    [<Test>]
-    member this._33_Epsilon2_with_eps2_yrd () =
-        let a1 = f [|GLL.ParseEps2.Z 1; GLL.ParseEps2.N 1|] GLL.ParseEps2.tokenToNumber
-        let a2 = f [|GLL.ParseEps2.RNGLR_EOF 2|] GLL.ParseEps2.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-        
-        test GLL.ParseEps2.buildAbstractAst qGraph 100 GLL.ParseEps2.numToString "Eps2.dot" 26 30 6 0 GLL.ParseEps2.tokenData GLL.ParseEps2.tokenToNumber
-
-    [<Test>]
-    member this._34_Epsilon () =
-        let a1 = f [|GLL.ParseEpsilon.RNGLR_EOF 2|] GLL.ParseEpsilon.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 1, len edges, edges, 2)
-        
-        test GLL.ParseEpsilon.buildAbstractAst qGraph 100 GLL.ParseEpsilon.numToString "Epsilon.dot" 21 24 5 0 GLL.ParseEpsilon.tokenData GLL.ParseEpsilon.tokenToNumber
-        
-    [<Test>]
-    member this._35_Expression () =
-        let a1 = f [|GLL.ParseExpr.N 1; GLL.ParseExpr.P 1; GLL.ParseExpr.N 3; GLL.ParseExpr.P 4; GLL.ParseExpr.N 5|] GLL.ParseExpr.tokenToNumber
-        let a2 = f [|GLL.ParseExpr.RNGLR_EOF 2|] GLL.ParseExpr.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-        
-        test GLL.ParseExpr.buildAbstractAst qGraph 100 GLL.ParseExpr.numToString "Expr.dot" 36 45 7 1 GLL.ParseExpr.tokenData GLL.ParseExpr.tokenToNumber
-
-    [<Test>]
-    member this._36_First () =
-        let a1 = f [|GLL.ParseFirst.A 1; GLL.ParseFirst.A 1; GLL.ParseFirst.A 3; GLL.ParseFirst.A 4; GLL.ParseFirst.B 5|] GLL.ParseFirst.tokenToNumber
-        let a2 = f [|GLL.ParseFirst.RNGLR_EOF 2|] GLL.ParseFirst.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-       
-        test GLL.ParseFirst.buildAbstractAst qGraph 100 GLL.ParseFirst.numToString "First.dot" 21 21 7 0 GLL.ParseFirst.tokenData GLL.ParseFirst.tokenToNumber
-
-    [<Test>]
-    member this._37_ListEps () =
-        let a1 = f [|GLL.ParseListEps.NUM 1; GLL.ParseListEps.NUM 1|] GLL.ParseListEps.tokenToNumber
-        let a2 = f [|GLL.ParseListEps.RNGLR_EOF 2|] GLL.ParseListEps.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-
-        test GLL.ParseListEps.buildAbstractAst qGraph 100 GLL.ParseListEps.numToString "ListEps.dot" 72 93 13 3 GLL.ParseListEps.tokenData GLL.ParseListEps.tokenToNumber
+////
+////    [<Test>]
+////    member this._14_NotAmbigousSimpleCalcWith2Ops_Loop () =
+////        let qGraph = new ParserInputGraph<_>(0, 7)
+////        qGraph.AddVerticesAndEdgeRange
+////            [edg 0 1 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM  1)
+////             edg 1 2 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 2)
+////             edg 2 3 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 3)
+////             edg 3 4 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 4)
+////             edg 4 5 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 5)
+////             edg 5 2 (GLL.NotAmbigousSimpleCalcWith2Ops.MULT 6)
+////             edg 4 6 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 7)
+////             edg 6 7 (GLL.NotAmbigousSimpleCalcWith2Ops.RNGLR_EOF 0)
+////             ] |> ignore
+////        
+////        test GLL.NotAmbigousSimpleCalcWith2Ops.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalcWith2Ops.numToString "NotAmbigousSimpleCalcWith2Ops.dot" 0 0 0 0
+////
+////    [<Test>]
+////    member this._15_NotAmbigousSimpleCalcWith2Ops_Loops () =
+////        let qGraph = new ParserInputGraph<_>(0, 8)
+////        qGraph.AddVerticesAndEdgeRange
+////            [edg 0 1 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM  1)
+////             edg 1 2 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 2)
+////             edg 2 3 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 3)
+////             edg 2 4 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 4)
+////             edg 3 4 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 5)
+////             edg 4 5 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 6)
+////             edg 5 2 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 7)
+////             edg 4 6 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 8)
+////             edg 6 7 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 9)
+////             edg 7 8 (GLL.NotAmbigousSimpleCalcWith2Ops.RNGLR_EOF 0)
+////             ] |> ignore
+////        
+////        test GLL.NotAmbigousSimpleCalcWith2Ops.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalcWith2Ops.numToString "NotAmbigousSimpleCalcWith2Ops2.dot" 0 0 0 0
+////
+//    [<Test>]
+//    member this._16_Stars_Loop () =
+//        let a1 = f [|GLL.Stars.STAR 0|] GLL.Stars.tokenToNumber
+//        let a2 = f [|GLL.Stars.SEMI 2|] GLL.Stars.tokenToNumber
+//        let a3 = f [|GLL.Stars.RNGLR_EOF 3|] GLL.Stars.tokenToNumber
+//        let edges = [|
+//            edgB 0 0 a1; 
+//            edgB 0 1 a2; 
+//            edgB 1 2 a3|]
+//        let qGraph = new BioParserInputGraph<GLL.Stars.Token>([|0|], 2, len edges, edges, 3)
+//        test
+//            GLL.Stars.buildAbstractAst 
+//            qGraph 
+//            100
+//            GLL.Stars.numToString 
+//            "Stars_Loop.dot" 
+//            19 24 4 1 
+//            GLL.Stars.tokenData
+//            GLL.Stars.tokenToNumber
+//
+//    [<Test>]
+//    member this._17_Stars2_Loop () =
+//        let a1 = f [|GLL.Stars2.STAR 0|] GLL.Stars2.tokenToNumber
+//        let a2 = f [|GLL.Stars2.RNGLR_EOF 3|] GLL.Stars2.tokenToNumber
+//        let edges = [|
+//            edgB 0 0 a1; 
+//            edgB 0 1 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 1, len edges, edges, 2)
+//        
+//        test 
+//            GLL.Stars2.buildAbstractAst 
+//            qGraph 
+//            100
+//            GLL.Stars2.numToString 
+//            "Stars2.dot" 
+//            23 33 3 2
+//            GLL.Stars2.tokenData
+//            GLL.Stars2.tokenToNumber
+//
+//    [<Test>]
+//    member this._19_FirstEps () =
+//        let a1 = f [|GLL.FirstEps.Z 1|] GLL.FirstEps.tokenToNumber
+//        let a2 = f [|GLL.FirstEps.N 2|] GLL.FirstEps.tokenToNumber
+//        let a3 = f [|GLL.FirstEps.RNGLR_EOF 3|] GLL.FirstEps.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2; 
+//            edgB 2 3 a3|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 3, len edges, edges, 4)
+//        
+//        test 
+//            GLL.FirstEps.buildAbstractAst
+//            qGraph
+//            100
+//            GLL.FirstEps.numToString 
+//            "FirstEps.dot" 
+//            26 30 6 0
+//            GLL.FirstEps.tokenData
+//            GLL.FirstEps.tokenToNumber
 //    
 //    [<Test>]
-//    member this._38_LolCalc () =
-//        let qGraph = new ParserInputGraph<_>(0, 12)
-//        qGraph.AddVerticesAndEdgeRange
-//           [edg 0 1 (GLL.ParseLolCalc.A 1)
-//            edg 1 2 (GLL.ParseLolCalc.MUL 2)
-//            edg 2 3 (GLL.ParseLolCalc.B 3)
-//            edg 3 4 (GLL.ParseLolCalc.ADD 4)
-//            edg 4 5 (GLL.ParseLolCalc.A 5)
-//            edg 5 6 (GLL.ParseLolCalc.MUL 6)
-//            edg 6 7 (GLL.ParseLolCalc.B 7)
-//            edg 7 8 (GLL.ParseLolCalc.ADD 8)
-//            edg 8 9 (GLL.ParseLolCalc.B 9)
-//            edg 9 10 (GLL.ParseLolCalc.MUL 10)
-//            edg 10 11 (GLL.ParseLolCalc.A 11)
-//            edg 11 12 (GLL.ParseLolCalc.RNGLR_EOF 0)
-//            ] |> ignore
+//    member this._20_CroppedBrackets () =
+//        let a1 = f [|GLL.CroppedBrackets.LBR 1|] GLL.CroppedBrackets.tokenToNumber
+//        let a2 = f [|GLL.CroppedBrackets.NUM 2|] GLL.CroppedBrackets.tokenToNumber
+//        let a3 = f [|GLL.CroppedBrackets.RBR 3|] GLL.CroppedBrackets.tokenToNumber
+//        let a4 = f [|GLL.CroppedBrackets.RNGLR_EOF 4|] GLL.CroppedBrackets.tokenToNumber
+//        let edges = [|
+//            edgB 0 0 a1;
+//            edgB 0 1 a2;
+//            edgB 1 1 a3; 
+//            edgB 1 2 a4;|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//        
+//        test GLL.CroppedBrackets.buildAbstractAst qGraph 100 GLL.CroppedBrackets.numToString "CroppedBrackets.dot" 14 15 5 1 GLL.CroppedBrackets.tokenData GLL.CroppedBrackets.tokenToNumber
 //
-//        test GLL.ParseLolCalc.buildAbstractAst qGraph GLL.ParseLolCalc.numToString "LolCalc.dot" 0 0 0 0
-//    
-    [<Test>]
-    member this._39_LongCycle () =
-        let a1 = f [|GLL.ParseLongCycle.A 1|] GLL.ParseLongCycle.tokenToNumber
-        let a2 = f [|GLL.ParseLongCycle.RNGLR_EOF 2|] GLL.ParseLongCycle.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-        
-        test GLL.ParseLongCycle.buildAbstractAst qGraph 100 GLL.ParseLongCycle.numToString "LongCycle.dot" 14 18 3 1 GLL.ParseLongCycle.tokenData GLL.ParseLongCycle.tokenToNumber
-    
-    [<Test>]
-    member this._41_Longest () =
-        let a1 = f [|GLL.ParseLongest.A 1; GLL.ParseLongest.A 1; GLL.ParseLongest.A 3; GLL.ParseLongest.A 4; GLL.ParseLongest.A 5|] GLL.ParseLongest.tokenToNumber
-        let a2 = f [|GLL.ParseLongest.RNGLR_EOF 2|] GLL.ParseLongest.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-       
-        test GLL.ParseLongest.buildAbstractAst qGraph 100 GLL.ParseLongest.numToString "Longest.dot" 91 123 14 1 GLL.ParseLongest.tokenData GLL.ParseLongest.tokenToNumber
-         
-    [<Test>]
-    member this._42_Mixed () =
-        let a1 = f [|GLL.ParseMixed.B 1; GLL.ParseMixed.A 1; GLL.ParseMixed.B 3; GLL.ParseMixed.A 4|] GLL.ParseMixed.tokenToNumber
-        let a2 = f [|GLL.ParseMixed.RNGLR_EOF 2|] GLL.ParseMixed.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-
-        test GLL.ParseMixed.buildAbstractAst qGraph 100 GLL.ParseMixed.numToString "Mixed.dot" 24 27 6 0 GLL.ParseMixed.tokenData GLL.ParseMixed.tokenToNumber
-    
-    [<Test>]
-    member this._43_Omit () =
-        let a1 = f [|GLL.ParseOmit.A 1; GLL.ParseOmit.B 1; GLL.ParseOmit.A 3|] GLL.ParseOmit.tokenToNumber
-        let a2 = f [|GLL.ParseOmit.RNGLR_EOF 2|] GLL.ParseOmit.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-        
-        test GLL.ParseOmit.buildAbstractAst qGraph 100 GLL.ParseOmit.numToString "Omit.dot" 26 30 6 0 GLL.ParseOmit.tokenData GLL.ParseOmit.tokenToNumber
-    
 //    [<Test>]
-//    member this._44_Order () =
-//        let qGraph = new ParserInputGraph<_>(0, 9)
-//        qGraph.AddVerticesAndEdgeRange
-//           [edg 0 1 (GLL.ParseOrder.A 1)
-//            edg 1 2 (GLL.ParseOrder.A 2)
-//            edg 2 3 (GLL.ParseOrder.A 3)
-//            edg 3 4 (GLL.ParseOrder.A 4)
-//            edg 4 5 (GLL.ParseOrder.A 5)
-//            edg 5 6 (GLL.ParseOrder.A 6)
-//            edg 6 7 (GLL.ParseOrder.A 7)
-//            edg 7 8 (GLL.ParseOrder.A 8)
-//            edg 8 9 (GLL.ParseOrder.RNGLR_EOF 0)
-//            ] |> ignore
+//    member this._21_Brackets () =
+//        let a1 = f [|GLL.Brackets.LBR 1|] GLL.Brackets.tokenToNumber
+//        let a2 = f [|GLL.Brackets.NUM 2|] GLL.Brackets.tokenToNumber
+//        let a3 = f [|GLL.Brackets.RBR 3|] GLL.Brackets.tokenToNumber
+//        let a4 = f [|GLL.Brackets.RNGLR_EOF 4|] GLL.Brackets.tokenToNumber
+//        let edges = [|
+//            edgB 0 0 a1;
+//            edgB 0 1 a2;
+//            edgB 1 1 a3; 
+//            edgB 1 2 a4;|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//        
+//        test GLL.Brackets.buildAbstractAst qGraph 100 GLL.Brackets.numToString "Brackets.dot" 14 15 5 1 GLL.Brackets.tokenData GLL.Brackets.tokenToNumber
 //
-//        test GLL.ParseOrder.buildAbstractAst qGraph GLL.ParseOrder.numToString "Order.dot"
-
-    [<Test>]
-    member this._45_SimpleRightRecursion () =
-        let a1 = f [|GLL.SimpleRightRecursion.B 1; GLL.SimpleRightRecursion.B 1; GLL.SimpleRightRecursion.B 3|] GLL.SimpleRightRecursion.tokenToNumber
-        let a2 = f [|GLL.SimpleRightRecursion.RNGLR_EOF 2|] GLL.SimpleRightRecursion.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-        
-        test GLL.SimpleRightRecursion.buildAbstractAst qGraph 100 GLL.SimpleRightRecursion.numToString "SimpleRightRecursion.dot" 15 15 5 0 GLL.SimpleRightRecursion.tokenData GLL.SimpleRightRecursion.tokenToNumber
-
-    [<Test>]
-    member this._46_BadLeftRecursion () =
-        let a1 = f [|GLL.BadLeftRecursion.B 1; GLL.BadLeftRecursion.B 1; GLL.BadLeftRecursion.B 3|] GLL.BadLeftRecursion.tokenToNumber
-        let a2 = f [|GLL.BadLeftRecursion.RNGLR_EOF 2|] GLL.BadLeftRecursion.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-        
-        test GLL.BadLeftRecursion.buildAbstractAst qGraph 100 GLL.BadLeftRecursion.numToString "BadLeftRecursion.dot" 33 45 5 1 GLL.BadLeftRecursion.tokenData GLL.BadLeftRecursion.tokenToNumber
-
-    [<Test>]
-    member this._47_SimpleAmb () =
-        let a1 = f [|GLL.SimpleAmb.A 1; GLL.SimpleAmb.D 1; GLL.SimpleAmb.B 3|] GLL.SimpleAmb.tokenToNumber
-        let a2 = f [|GLL.SimpleAmb.RNGLR_EOF 2|] GLL.SimpleAmb.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-        
-        test GLL.SimpleAmb.buildAbstractAst qGraph 100 GLL.SimpleAmb.numToString "SimpleAmb.dot" 18 21 5 1 GLL.SimpleAmb.tokenData GLL.SimpleAmb.tokenToNumber
-    
-    [<Test>]
-    member this._48_SimpleRightNull () =
-        let a1 = f [|GLL.SimpleRightNull.A 1; GLL.SimpleRightNull.A 1|] GLL.SimpleRightNull.tokenToNumber
-        let a2 = f [|GLL.SimpleRightNull.RNGLR_EOF 2|] GLL.SimpleRightNull.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-        
-        test GLL.SimpleRightNull.buildAbstractAst qGraph 100 GLL.SimpleRightNull.numToString "SimpleRightNull.dot" 22 24 6 0 GLL.SimpleRightNull.tokenData GLL.SimpleRightNull.tokenToNumber
-
-    [<Test>]
-    member this._49_SimpleLeftRecursion () =
-        let a1 = f [|GLL.SimpleLeftRecursion.B 1; GLL.SimpleLeftRecursion.B 1; GLL.SimpleLeftRecursion.B 3|] GLL.SimpleLeftRecursion.tokenToNumber
-        let a2 = f [|GLL.SimpleLeftRecursion.RNGLR_EOF 2|] GLL.SimpleLeftRecursion.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
-        
-        test GLL.SimpleLeftRecursion.buildAbstractAst qGraph 100 GLL.SimpleLeftRecursion.numToString "SimpleLeftRecursion.dot" 19 21 5 0 GLL.SimpleLeftRecursion.tokenData GLL.SimpleLeftRecursion.tokenToNumber
-
-    [<Test>]
-    member this._50_SimpleBranch () =
-        let a1 = f [|GLL.ParseSimpleBranch.A 1|] GLL.ParseSimpleBranch.tokenToNumber
-        let a2 = f [|GLL.ParseSimpleBranch.C 1|] GLL.ParseSimpleBranch.tokenToNumber
-        let a3 = f [|GLL.ParseSimpleBranch.B 1|] GLL.ParseSimpleBranch.tokenToNumber
-        let a4 = f [|GLL.ParseSimpleBranch.RNGLR_EOF 2|] GLL.ParseSimpleBranch.tokenToNumber
-        let edges = [|
-            edgB 0 1 a1;
-            edgB 1 2 a2;
-            edgB 1 2 a3;
-            edgB 2 3 a4|] 
-        let qGraph = new BioParserInputGraph<_>([|0|], 3, len edges, edges, 4)
-        
-
-        test GLL.ParseSimpleBranch.buildAbstractAst qGraph 100 GLL.ParseSimpleBranch.numToString "SimpleBranch.dot" 14 15 5 1 GLL.ParseSimpleBranch.tokenData GLL.ParseSimpleBranch.tokenToNumber
+//    [<Test>]
+//    member this._22_Brackets_BackEdge () =
+//        let a1 = f [|GLL.Brackets.LBR 1|] GLL.Brackets.tokenToNumber
+//        let a2 = f [|GLL.Brackets.NUM 2|] GLL.Brackets.tokenToNumber
+//        let a3 = f [|GLL.Brackets.RBR 3|] GLL.Brackets.tokenToNumber
+//        let a4 = f [|GLL.Brackets.NUM 2|] GLL.Brackets.tokenToNumber
+//        let a5 = f [|GLL.Brackets.RNGLR_EOF 4|] GLL.Brackets.tokenToNumber
+//        let edges = [|
+//            edgB 0 0 a1;
+//            edgB 0 1 a2;
+//            edgB 1 1 a3; 
+//            edgB 1 0 a4;
+//            edgB 1 2 a5;|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//        
+//        test GLL.Brackets.buildAbstractAst qGraph 100 GLL.Brackets.numToString "Brackets_backEdge.dot" 35 54 6 4 GLL.Brackets.tokenData GLL.Brackets.tokenToNumber
+//
+//    [<Test>]
+//    member this._24_UnambiguousBrackets_Circle () =
+//        let a1 = f [|GLL.StrangeBrackets.LBR 1|] GLL.StrangeBrackets.tokenToNumber
+//        let a2 = f [|GLL.StrangeBrackets.RBR 3|] GLL.StrangeBrackets.tokenToNumber
+//        let a3 = f [|GLL.StrangeBrackets.RNGLR_EOF 4|] GLL.StrangeBrackets.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 0 a2;
+//            edgB 0 2 a3;|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//        
+//        test GLL.StrangeBrackets.buildAbstractAst qGraph 100 GLL.StrangeBrackets.numToString "StrangeBrackets2.dot" 19 21 6 1 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
+//
+//    [<Test>]
+//    member this._25_UnambiguousBrackets_BiggerCircle () =
+//        let a1 = f [|GLL.StrangeBrackets.LBR 1|] GLL.StrangeBrackets.tokenToNumber
+//        let a2 = f [|GLL.StrangeBrackets.RBR 3|] GLL.StrangeBrackets.tokenToNumber
+//        let a3 = f [|GLL.StrangeBrackets.LBR 1|] GLL.StrangeBrackets.tokenToNumber
+//        let a4 = f [|GLL.StrangeBrackets.RBR 3|] GLL.StrangeBrackets.tokenToNumber
+//        let a5 = f [|GLL.StrangeBrackets.RNGLR_EOF 4|] GLL.StrangeBrackets.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2;
+//            edgB 2 3 a3;
+//            edgB 3 0 a4;
+//            edgB 0 4 a5;|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 4, len edges, edges, 5)
+//        
+//        test GLL.StrangeBrackets.buildAbstractAst qGraph 100 GLL.StrangeBrackets.numToString "StrangeBrackets3.dot" 30 33 9 1 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
+//
+//    [<Test>]
+//    member this._26_UnambiguousBrackets_Inf () =
+//        let a1 = f [|GLL.StrangeBrackets.LBR 1|] GLL.StrangeBrackets.tokenToNumber
+//        let a2 = f [|GLL.StrangeBrackets.RBR 3|] GLL.StrangeBrackets.tokenToNumber
+//        let a3 = f [|GLL.StrangeBrackets.RNGLR_EOF 4|] GLL.StrangeBrackets.tokenToNumber
+//        let edges = [|
+//            edgB 0 0 a1;
+//            edgB 0 0 a2;
+//            edgB 0 1 a3;|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 1, len edges, edges, 2)
+//
+//        test GLL.StrangeBrackets.buildAbstractAst qGraph 100 GLL.StrangeBrackets.numToString "StrangeBrackets4.dot" 16 18 5 1 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
+//
+//    
+//    [<Test>]
+//    member this._29_Attrs () =
+//        let a1 = f [|GLL.ParseAttrs.A 1; GLL.ParseAttrs.A 1; GLL.ParseAttrs.A 1; GLL.ParseAttrs.A 1; GLL.ParseAttrs.A 1|] GLL.ParseAttrs.tokenToNumber
+//        let a2 = f [|GLL.ParseAttrs.RNGLR_EOF 2|] GLL.ParseAttrs.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//        
+//        test GLL.ParseAttrs.buildAbstractAst qGraph 100 GLL.ParseAttrs.numToString "Attrs.dot" 29 33 7 0 GLL.ParseAttrs.tokenData GLL.ParseAttrs.tokenToNumber
+//
+//    [<Test>]
+//    member this._30_Condition () =
+//        let a1 = f [|GLL.ParseCond.IF 1; GLL.ParseCond.IF 1; GLL.ParseCond.A 3; GLL.ParseCond.ELSE 4; GLL.ParseCond.A 5|] GLL.ParseCond.tokenToNumber
+//        let a2 = f [|GLL.ParseCond.RNGLR_EOF 2|] GLL.ParseCond.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//
+//        test GLL.ParseCond.buildAbstractAst qGraph 100 GLL.ParseCond.numToString "Cond.dot" 44 57 7 1 GLL.ParseCond.tokenData GLL.ParseCond.tokenToNumber
+//
+//    [<Test>]
+//    member this._31_Counter () =
+//        let a1 = f [|GLL.ParseCounter.A 1; GLL.ParseCounter.A 1; GLL.ParseCounter.A 3; GLL.ParseCounter.A 4; GLL.ParseCounter.A 5|] GLL.ParseCounter.tokenToNumber
+//        let a2 = f [|GLL.ParseCounter.RNGLR_EOF 2|] GLL.ParseCounter.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//
+//        test GLL.ParseCounter.buildAbstractAst qGraph 100 GLL.ParseCounter.numToString "Counter.dot" 21 21 7 0 GLL.ParseCounter.tokenData GLL.ParseCounter.tokenToNumber
+//    
+//    [<Test>]
+//    member this._32_Cycle () =
+//        let a1 = f [|GLL.ParseCycle.A 1; GLL.ParseCycle.B 1|] GLL.ParseCycle.tokenToNumber
+//        let a2 = f [|GLL.ParseCycle.RNGLR_EOF 2|] GLL.ParseCycle.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//
+//        test GLL.ParseCycle.buildAbstractAst qGraph 100 GLL.ParseCycle.numToString "Cycle.dot" 15 18 4 1 GLL.ParseCycle.tokenData GLL.ParseCycle.tokenToNumber
+//         
+//    [<Test>]
+//    member this._33_Epsilon2_with_eps2_yrd () =
+//        let a1 = f [|GLL.ParseEps2.Z 1; GLL.ParseEps2.N 1|] GLL.ParseEps2.tokenToNumber
+//        let a2 = f [|GLL.ParseEps2.RNGLR_EOF 2|] GLL.ParseEps2.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//        
+//        test GLL.ParseEps2.buildAbstractAst qGraph 100 GLL.ParseEps2.numToString "Eps2.dot" 26 30 6 0 GLL.ParseEps2.tokenData GLL.ParseEps2.tokenToNumber
+//
+//    [<Test>]
+//    member this._34_Epsilon () =
+//        let a1 = f [|GLL.ParseEpsilon.RNGLR_EOF 2|] GLL.ParseEpsilon.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 1, len edges, edges, 2)
+//        
+//        test GLL.ParseEpsilon.buildAbstractAst qGraph 100 GLL.ParseEpsilon.numToString "Epsilon.dot" 21 24 5 0 GLL.ParseEpsilon.tokenData GLL.ParseEpsilon.tokenToNumber
+//        
+//    [<Test>]
+//    member this._35_Expression () =
+//        let a1 = f [|GLL.ParseExpr.N 1; GLL.ParseExpr.P 1; GLL.ParseExpr.N 3; GLL.ParseExpr.P 4; GLL.ParseExpr.N 5|] GLL.ParseExpr.tokenToNumber
+//        let a2 = f [|GLL.ParseExpr.RNGLR_EOF 2|] GLL.ParseExpr.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//        
+//        test GLL.ParseExpr.buildAbstractAst qGraph 100 GLL.ParseExpr.numToString "Expr.dot" 36 45 7 1 GLL.ParseExpr.tokenData GLL.ParseExpr.tokenToNumber
+//
+//    [<Test>]
+//    member this._36_First () =
+//        let a1 = f [|GLL.ParseFirst.A 1; GLL.ParseFirst.A 1; GLL.ParseFirst.A 3; GLL.ParseFirst.A 4; GLL.ParseFirst.B 5|] GLL.ParseFirst.tokenToNumber
+//        let a2 = f [|GLL.ParseFirst.RNGLR_EOF 2|] GLL.ParseFirst.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//       
+//        test GLL.ParseFirst.buildAbstractAst qGraph 100 GLL.ParseFirst.numToString "First.dot" 21 21 7 0 GLL.ParseFirst.tokenData GLL.ParseFirst.tokenToNumber
+//
+//    [<Test>]
+//    member this._37_ListEps () =
+//        let a1 = f [|GLL.ParseListEps.NUM 1; GLL.ParseListEps.NUM 1|] GLL.ParseListEps.tokenToNumber
+//        let a2 = f [|GLL.ParseListEps.RNGLR_EOF 2|] GLL.ParseListEps.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//
+//        test GLL.ParseListEps.buildAbstractAst qGraph 100 GLL.ParseListEps.numToString "ListEps.dot" 72 93 13 3 GLL.ParseListEps.tokenData GLL.ParseListEps.tokenToNumber
+////    
+////    [<Test>]
+////    member this._38_LolCalc () =
+////        let qGraph = new ParserInputGraph<_>(0, 12)
+////        qGraph.AddVerticesAndEdgeRange
+////           [edg 0 1 (GLL.ParseLolCalc.A 1)
+////            edg 1 2 (GLL.ParseLolCalc.MUL 2)
+////            edg 2 3 (GLL.ParseLolCalc.B 3)
+////            edg 3 4 (GLL.ParseLolCalc.ADD 4)
+////            edg 4 5 (GLL.ParseLolCalc.A 5)
+////            edg 5 6 (GLL.ParseLolCalc.MUL 6)
+////            edg 6 7 (GLL.ParseLolCalc.B 7)
+////            edg 7 8 (GLL.ParseLolCalc.ADD 8)
+////            edg 8 9 (GLL.ParseLolCalc.B 9)
+////            edg 9 10 (GLL.ParseLolCalc.MUL 10)
+////            edg 10 11 (GLL.ParseLolCalc.A 11)
+////            edg 11 12 (GLL.ParseLolCalc.RNGLR_EOF 0)
+////            ] |> ignore
+////
+////        test GLL.ParseLolCalc.buildAbstractAst qGraph GLL.ParseLolCalc.numToString "LolCalc.dot" 0 0 0 0
+////    
+//    [<Test>]
+//    member this._39_LongCycle () =
+//        let a1 = f [|GLL.ParseLongCycle.A 1|] GLL.ParseLongCycle.tokenToNumber
+//        let a2 = f [|GLL.ParseLongCycle.RNGLR_EOF 2|] GLL.ParseLongCycle.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//        
+//        test GLL.ParseLongCycle.buildAbstractAst qGraph 100 GLL.ParseLongCycle.numToString "LongCycle.dot" 14 18 3 1 GLL.ParseLongCycle.tokenData GLL.ParseLongCycle.tokenToNumber
+//    
+//    [<Test>]
+//    member this._41_Longest () =
+//        let a1 = f [|GLL.ParseLongest.A 1; GLL.ParseLongest.A 1; GLL.ParseLongest.A 3; GLL.ParseLongest.A 4; GLL.ParseLongest.A 5|] GLL.ParseLongest.tokenToNumber
+//        let a2 = f [|GLL.ParseLongest.RNGLR_EOF 2|] GLL.ParseLongest.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//       
+//        test GLL.ParseLongest.buildAbstractAst qGraph 100 GLL.ParseLongest.numToString "Longest.dot" 91 123 14 1 GLL.ParseLongest.tokenData GLL.ParseLongest.tokenToNumber
+//         
+//    [<Test>]
+//    member this._42_Mixed () =
+//        let a1 = f [|GLL.ParseMixed.B 1; GLL.ParseMixed.A 1; GLL.ParseMixed.B 3; GLL.ParseMixed.A 4|] GLL.ParseMixed.tokenToNumber
+//        let a2 = f [|GLL.ParseMixed.RNGLR_EOF 2|] GLL.ParseMixed.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//
+//        test GLL.ParseMixed.buildAbstractAst qGraph 100 GLL.ParseMixed.numToString "Mixed.dot" 24 27 6 0 GLL.ParseMixed.tokenData GLL.ParseMixed.tokenToNumber
+//    
+//    [<Test>]
+//    member this._43_Omit () =
+//        let a1 = f [|GLL.ParseOmit.A 1; GLL.ParseOmit.B 1; GLL.ParseOmit.A 3|] GLL.ParseOmit.tokenToNumber
+//        let a2 = f [|GLL.ParseOmit.RNGLR_EOF 2|] GLL.ParseOmit.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//        
+//        test GLL.ParseOmit.buildAbstractAst qGraph 100 GLL.ParseOmit.numToString "Omit.dot" 26 30 6 0 GLL.ParseOmit.tokenData GLL.ParseOmit.tokenToNumber
+//    
+////    [<Test>]
+////    member this._44_Order () =
+////        let qGraph = new ParserInputGraph<_>(0, 9)
+////        qGraph.AddVerticesAndEdgeRange
+////           [edg 0 1 (GLL.ParseOrder.A 1)
+////            edg 1 2 (GLL.ParseOrder.A 2)
+////            edg 2 3 (GLL.ParseOrder.A 3)
+////            edg 3 4 (GLL.ParseOrder.A 4)
+////            edg 4 5 (GLL.ParseOrder.A 5)
+////            edg 5 6 (GLL.ParseOrder.A 6)
+////            edg 6 7 (GLL.ParseOrder.A 7)
+////            edg 7 8 (GLL.ParseOrder.A 8)
+////            edg 8 9 (GLL.ParseOrder.RNGLR_EOF 0)
+////            ] |> ignore
+////
+////        test GLL.ParseOrder.buildAbstractAst qGraph GLL.ParseOrder.numToString "Order.dot"
+//
+//    [<Test>]
+//    member this._45_SimpleRightRecursion () =
+//        let a1 = f [|GLL.SimpleRightRecursion.B 1; GLL.SimpleRightRecursion.B 1; GLL.SimpleRightRecursion.B 3|] GLL.SimpleRightRecursion.tokenToNumber
+//        let a2 = f [|GLL.SimpleRightRecursion.RNGLR_EOF 2|] GLL.SimpleRightRecursion.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//        
+//        test GLL.SimpleRightRecursion.buildAbstractAst qGraph 100 GLL.SimpleRightRecursion.numToString "SimpleRightRecursion.dot" 15 15 5 0 GLL.SimpleRightRecursion.tokenData GLL.SimpleRightRecursion.tokenToNumber
+//
+//    [<Test>]
+//    member this._46_BadLeftRecursion () =
+//        let a1 = f [|GLL.BadLeftRecursion.B 1; GLL.BadLeftRecursion.B 1; GLL.BadLeftRecursion.B 3|] GLL.BadLeftRecursion.tokenToNumber
+//        let a2 = f [|GLL.BadLeftRecursion.RNGLR_EOF 2|] GLL.BadLeftRecursion.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//        
+//        test GLL.BadLeftRecursion.buildAbstractAst qGraph 100 GLL.BadLeftRecursion.numToString "BadLeftRecursion.dot" 33 45 5 1 GLL.BadLeftRecursion.tokenData GLL.BadLeftRecursion.tokenToNumber
+//
+//    [<Test>]
+//    member this._47_SimpleAmb () =
+//        let a1 = f [|GLL.SimpleAmb.A 1; GLL.SimpleAmb.D 1; GLL.SimpleAmb.B 3|] GLL.SimpleAmb.tokenToNumber
+//        let a2 = f [|GLL.SimpleAmb.RNGLR_EOF 2|] GLL.SimpleAmb.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//        
+//        test GLL.SimpleAmb.buildAbstractAst qGraph 100 GLL.SimpleAmb.numToString "SimpleAmb.dot" 18 21 5 1 GLL.SimpleAmb.tokenData GLL.SimpleAmb.tokenToNumber
+//    
+//    [<Test>]
+//    member this._48_SimpleRightNull () =
+//        let a1 = f [|GLL.SimpleRightNull.A 1; GLL.SimpleRightNull.A 1|] GLL.SimpleRightNull.tokenToNumber
+//        let a2 = f [|GLL.SimpleRightNull.RNGLR_EOF 2|] GLL.SimpleRightNull.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//        
+//        test GLL.SimpleRightNull.buildAbstractAst qGraph 100 GLL.SimpleRightNull.numToString "SimpleRightNull.dot" 22 24 6 0 GLL.SimpleRightNull.tokenData GLL.SimpleRightNull.tokenToNumber
+//
+//    [<Test>]
+//    member this._49_SimpleLeftRecursion () =
+//        let a1 = f [|GLL.SimpleLeftRecursion.B 1; GLL.SimpleLeftRecursion.B 1; GLL.SimpleLeftRecursion.B 3|] GLL.SimpleLeftRecursion.tokenToNumber
+//        let a2 = f [|GLL.SimpleLeftRecursion.RNGLR_EOF 2|] GLL.SimpleLeftRecursion.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 2, len edges, edges, 3)
+//        
+//        test GLL.SimpleLeftRecursion.buildAbstractAst qGraph 100 GLL.SimpleLeftRecursion.numToString "SimpleLeftRecursion.dot" 19 21 5 0 GLL.SimpleLeftRecursion.tokenData GLL.SimpleLeftRecursion.tokenToNumber
+//
+//    [<Test>]
+//    member this._50_SimpleBranch () =
+//        let a1 = f [|GLL.ParseSimpleBranch.A 1|] GLL.ParseSimpleBranch.tokenToNumber
+//        let a2 = f [|GLL.ParseSimpleBranch.C 1|] GLL.ParseSimpleBranch.tokenToNumber
+//        let a3 = f [|GLL.ParseSimpleBranch.B 1|] GLL.ParseSimpleBranch.tokenToNumber
+//        let a4 = f [|GLL.ParseSimpleBranch.RNGLR_EOF 2|] GLL.ParseSimpleBranch.tokenToNumber
+//        let edges = [|
+//            edgB 0 1 a1;
+//            edgB 1 2 a2;
+//            edgB 1 2 a3;
+//            edgB 2 3 a4|] 
+//        let qGraph = new BioParserInputGraph<_>([|0|], 3, len edges, edges, 4)
+//        
+//
+//        test GLL.ParseSimpleBranch.buildAbstractAst qGraph 100 GLL.ParseSimpleBranch.numToString "SimpleBranch.dot" 14 15 5 1 GLL.ParseSimpleBranch.tokenData GLL.ParseSimpleBranch.tokenToNumber
 
 //    [<Test>]
 //    member this.``TSQL performance test for GLL`` () =  
@@ -691,28 +691,29 @@ type ``GLL abstract parser tests`` () =
 //        let parse = GLL.MsSqlParser.buildAbstractAst
 //        perfTest2 parse graphGenerator
 //  
-//    [<Test>]
-//    member this.bio2_5 () =
-//        let getSmb  = 
-//            let cnt = ref 0
-//            fun ch ->
-//                let i = incr cnt; !cnt 
-//                match ch with
-//                | 'A' -> GLL.Bio2.A i
-//                | 'T' -> GLL.Bio2.U i
-//                | 'C' -> GLL.Bio2.C i
-//                | 'G' -> GLL.Bio2.G i
-//                | _ ->   GLL.Bio2.G i
-//                |> GLL.Bio2.tokenToNumber
-//        let basePath = "../../../Tests/bio/"
+    [<Test>]
+    member this.bio2_5 () =
+        let getSmb  = 
+            let cnt = ref 0
+            fun ch ->
+                let i = incr cnt; !cnt 
+                match ch with
+                | 'A' -> GLL.Bio2.A i
+                | 'T' -> GLL.Bio2.U i
+                | 'C' -> GLL.Bio2.C i
+                | 'G' -> GLL.Bio2.G i
+                | _ ->   GLL.Bio2.G i
+                //|> GLL.Bio2.tokenToNumber
+        let basePath = "../../../Tests/bio/"
         let p1 = 
             //@"biodata_1/saves/00_before_repeat_resolution/graph"
             @"mix_1/late_pair_info_count"
             //@"synth_1/graph"
             //@"smallTest/late_pair_info_count"
         let path = Path.Combine(basePath,p1)
-//        | Success ast -> 
-        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToOarserInputGraph path 2000 getSmb (GLL.Bio2.RNGLR_EOF 0) 
+        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToOarserInputGraph path 2000 getSmb (GLL.Bio2.RNGLR_EOF 0)
+        0
+//        | Success ast ->  
 //            printfn "Success!"
 //            printfn "Time = %A"  (System.DateTime.Now - start)
 //        | Error _ -> printfn "Error!"
@@ -795,5 +796,5 @@ let fs x =
               //_35_Expression() //
     //let th = new System.Threading.Thread(f, 10000000)
     //th.Start()
-    t.bio2_4()
+    t.bio2_5()
     0

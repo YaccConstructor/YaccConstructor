@@ -713,14 +713,17 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         then startV.passingReductions.Add((newVertex, edge))
         customEnqueue(startV)
         newVertex.addEdge edge
-        let prefixes = gssVertexesToPrefixes.[newVertex]
-        for prefixToAdd in prefixesToAdd do
-            addPrefix prefixes prefixToAdd
+        
 
         if isNotEps
         then
+            let prefixes = gssVertexesToPrefixes.[newVertex]
+            for prefixToAdd in prefixesToAdd do
+                addPrefix prefixes prefixToAdd
             for e in outEdgesInnerGraph.[startV.vNum] do
                 addNonZeroReduction newVertex e.Tag edge startV
+        else
+            gssVertexesToPrefixes.[newVertex] <- prefixesToAdd
 
     let edgesToTerms = new Dictionary<_,_>()
     let push (currentGraphV:VInfo<_>) (gssVertex : Vertex) =

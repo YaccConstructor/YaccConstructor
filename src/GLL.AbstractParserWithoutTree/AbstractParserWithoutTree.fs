@@ -31,7 +31,7 @@ type ResultStruct =
     val nterm : string
     new (l,l1, r, r1, n) = {le = l; lpos = l1; re = r; rpos = r1; nterm = n}
 
-let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph<'TokenType>) maxLen condNonTerm = 
+let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph<'TokenType>) maxLen condNonTerm shift = 
     if input.EdgeCount = 0 then
       Error ("This grammar does not accept empty input.")     
     else
@@ -60,9 +60,11 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let edges = Array.init slots.Count (fun _ -> new CompressedArray<SysDict<int64<extension>, SysDict<int, ResizeArray<int>>>> (input.ChainLength, (fun _ -> null)))          
         let currentGSSNode = ref <| dummyGSSNode
         
-        for e in input.InitialVertices do
-            let ext = packExtension e e
-            setR.Enqueue(new Context2(e, !currentLabel, !currentGSSNode, ext)) 
+        for v in input.InitialVertices do
+            for e in outEdges.[v] do 
+                let ext = packExtension e 0
+                let index = pack2to32 e (-shift)
+                setR.Enqueue(new Context2(index, !currentLabel, !currentGSSNode, ext)) 
 
         let currentContext = ref <| new Context2(!currentIndex, !currentLabel, !currentGSSNode, !currentExtension)
         
@@ -203,7 +205,8 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 c
             if setR.Count <> 0
             then
-                currentIndex := currentContext.Value.Index
+                let cI = pack2to32 (getLeft32 currentContext.Value.Index) ((getRight32 currentContext.Value.Index) + shift)
+                currentIndex := cI
                 let t = CommonFuns.getLeft32 !currentIndex
                 currentContext :=  get ()
                 let t2 = CommonFuns.getRight32 !currentIndex

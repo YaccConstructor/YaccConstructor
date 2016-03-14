@@ -41,8 +41,8 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 r.[input.Edges.[i].Start] <- i :: r.[input.Edges.[i].Start]
             r
         let parser = parser
-        let mutable reused = 0
-        let mutable descriptorNumber = 0
+        let reused = ref 0
+        let descriptorNumber = ref 0
         let slots = parser.Slots
         let condNonTermRules = Seq.toArray <| seq{for i in 0..parser.LeftSide.Length - 1 do if parser.LeftSide.[i] = condNonTerm then yield i}
         let setU = new CompressedArray<SysDict<int, SysDict<int64, ResizeArray<int64<extension>>>>>(input.ChainLength, (fun _ -> null )) 
@@ -112,9 +112,9 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             if not <| containsContext inputVertex label vertex extension 
             then
                 setR.Enqueue(new Context2(inputVertex, label, vertex, extension))
-                descriptorNumber <- descriptorNumber + 1
+                incr descriptorNumber
             else
-              reused <- reused + 1
+              incr reused
 
         let containsEdge (b : Vertex) (e : Vertex) extension =
             let labelN = slots.[int b.NontermLabel]
@@ -311,7 +311,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             | None -> 
                 Error ("String was not parsed")
             | Some res -> 
-                printfn "Reused descriptors %d" reused
-                printfn "All descriptors %d" descriptorNumber
+                printfn "Reused descriptors %d" !reused
+                printfn "All descriptors %d" !descriptorNumber
                 Success1 (res) 
                                   

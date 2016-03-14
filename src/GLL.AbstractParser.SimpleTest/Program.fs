@@ -694,13 +694,14 @@ type ``GLL abstract parser tests`` () =
 //  
     [<Test>]
     member this.bio2_5 () =
-        let getSmb  = 
+        let getSmb = 
             let cnt = ref 0
             fun ch ->
                 let i = incr cnt; !cnt 
                 match ch with
                 | 'A' -> GLL.Bio2.A i
                 | 'T' -> GLL.Bio2.U i
+                | 'U' -> GLL.Bio2.U i
                 | 'C' -> GLL.Bio2.C i
                 | 'G' -> GLL.Bio2.G i
                 | _ ->   GLL.Bio2.G i
@@ -718,6 +719,26 @@ type ``GLL abstract parser tests`` () =
 //            printfn "Success!"
 //            printfn "Time = %A"  (System.DateTime.Now - start)
 //        | Error _ -> printfn "Error!"
+//860-930
+    member this.``1000: trna`` file =
+        let getSmb =
+            let cnt = ref 0
+            fun ch ->
+                let i = incr cnt; !cnt 
+                match ch with
+                | 'A' -> GLL.Bio2.A i                
+                | 'U' -> GLL.Bio2.U i
+                | 'C' -> GLL.Bio2.C i
+                | 'G' -> GLL.Bio2.G i
+                | _ ->   GLL.Bio2.G i                
+        let basePath = "../../../Tests/bio/"
+        let path = Path.Combine(basePath, file)
+        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToParserInputGraph path 1001 getSmb (GLL.Bio2.RNGLR_EOF 0) 
+        0
+
+    [<Test>]
+    member this.``1000: trna in 860-930`` () =
+        this.``1000: trna`` """simple_tRNA1\g"""
 
     [<Test>]
     member this.bio2_4 () =
@@ -759,7 +780,7 @@ type ``GLL abstract parser tests`` () =
         //qGraph.AddVerticesAndEdgeRange edges |> ignore
         //qGraph.AddVerticesAndEdgeRange [for i in 0..l -> edg i (l+1) (GLL.Bio2.RNGLR_EOF 0)] 
         let start = System.DateTime.Now
-        let res = GLL.Bio2.buildAbstract qGraph 100 6
+        let res = GLL.Bio2.buildAbstract qGraph 100 3 0
         match res with
         | Success ast -> 
             //ast.AstToDot GLL.Bio2.numToString GLL.Bio2.tokenToNumber GLL.Bio2.tokenData "bioAST.dot"
@@ -798,5 +819,6 @@ let fs x =
               //_35_Expression() //
     //let th = new System.Threading.Thread(f, 10000000)
     //th.Start()
-    t.bio2_4()
+    //t.bio2_4()
+    t.``1000: trna in 860-930``()
     0

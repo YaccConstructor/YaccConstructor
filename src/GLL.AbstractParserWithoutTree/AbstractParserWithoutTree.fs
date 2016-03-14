@@ -47,7 +47,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let condNonTermRules = Seq.toArray <| seq{for i in 0..parser.LeftSide.Length - 1 do if parser.LeftSide.[i] = condNonTerm then yield i}
         let setU = new CompressedArray<SysDict<int, SysDict<int64, ResizeArray<int64<extension>>>>>(input.ChainLength, (fun _ -> null )) 
         let setP = new SysDict<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int64<extension>>>(500)
-        let setR = new System.Collections.Generic. Queue<Context2>(100)  
+        let setR = new System.Collections.Generic.Queue<Context2>(100)  
         let currentRule = parser.StartRule
         let currentLabel = ref <| (CommonFuns.pack2to32 currentRule 0) * 1<labelMeasure>
         let tempCount = ref 0
@@ -60,11 +60,15 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let edges = Array.init slots.Count (fun _ -> new CompressedArray<SysDict<int64<extension>, SysDict<int, ResizeArray<int>>>> (input.ChainLength, (fun _ -> null)))          
         let currentGSSNode = ref <| dummyGSSNode
         
-        for v in input.InitialVertices do
-            for e in outEdges.[v] do 
-                let ext = packExtension e 0
-                let index = pack2to32 e (-shift)
-                setR.Enqueue(new Context2(index, !currentLabel, !currentGSSNode, ext)) 
+//        for v in input.InitialVertices do
+//            for e in outEdges.[v] do 
+//                let ext = packExtension e 0
+//                let index = pack2to32 e (-shift)
+//                setR.Enqueue(new Context2(index, !currentLabel, !currentGSSNode, ext)) 
+
+        for e in input.InitialVertices do
+            let ext = packExtension e e
+            setR.Enqueue(new Context2(e, !currentLabel, !currentGSSNode, ext))
 
         let currentContext = ref <| new Context2(!currentIndex, !currentLabel, !currentGSSNode, !currentExtension)
         

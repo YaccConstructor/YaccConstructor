@@ -20,7 +20,7 @@ do()
 type GLL() = 
     inherit Generator()
         override this.Name = "GLLGenerator"
-        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; noBrackets; needAC; singleModule|]
+        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; noBrackets; needAC; singleModule; (new Constraint("inline", (fun _ -> false), Conversions.ExpandInline.ReplaceInline()))|]
         override this.Generate (definition, args) =
             
             let start = System.DateTime.Now
@@ -70,7 +70,7 @@ type GLL() =
                 | "-light" -> light <- getBoolValue "light" value
                 | "-infEpsPath" -> printInfiniteEpsilonPath <- value
                 | "-abstract" -> isAbstract <- getBoolValue "abstract" value
-                | "-withoutTree" -> isAbstract <- getBoolValue "withoutTree" value
+                | "-withoutTree" -> withoutTree := getBoolValue "withoutTree" value
                 | value -> failwithf "Unexpected %s option" value
                  
             let newDefinition = initialConvert definition

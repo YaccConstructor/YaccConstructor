@@ -28,27 +28,35 @@ let recognize (strToParse: string)
               (nonterminals : NonTerminal [])
               S = 
 
-    let n = String.length strToParse
+    let stringSize = String.length strToParse
 
+    let strSizeExponent = (System.Math.Log (double stringSize)) / (System.Math.Log 2.) |> System.Math.Ceiling |> int
+    let roundedSize = (1 <<< strSizeExponent) - 1
+
+
+    // left-bottom triangle and diagonal of tMatrix and pMatrix are not used
     let tMatrix = new Map<NonTerminal, double [,]>(
                             nonterminals 
-                            |> Seq.map (fun x -> (x, Array2D.init (n + 1) (n + 1) (fun x y -> 0.))))
+                            |> Seq.map (fun x -> (x, Array2D.init (stringSize + 1) (stringSize + 1) (fun x y -> 0.))))
 
     let pMatrix = new Map<NonTerminal * NonTerminal, double [,]>(
                             crl.Keys
-                            |> Seq.map (fun x -> (x, Array2D.init (n + 1) (n + 1) (fun x y -> 0.)))) 
+                            |> Seq.map (fun x -> (x, Array2D.init (stringSize + 1) (stringSize + 1) (fun x y -> 0.)))) 
 
     let addToP nts (matrix: double [,]) (l1, m1, l2, m2) =
         let where = pMatrix.[nts]
         for i in [l1..m1-1] do
-            for j in [l2..m2-1] do
+            let rightBound = min m2 (stringSize + 1)
+            for j in [l2..rightBound-1] do
                 where.[i, j] <- (where.[i, j] + matrix.[i-l1, j-l2])         
 
     let subMatrixMult (matrixA: double [,]) (matrixB: double [,]) (al1, am1, al2, am2) (bl1, bm1, bl2, bm2) = 
-        let n = am1 - al1
+        let aHight = am1 - al1
+        let aLength = aHight
         let calcCell i j =
-            [0..n-1] |> List.fold (fun acc k -> acc + matrixA.[i + al1, k + al2] * matrixB.[k + bl1, j + bl2]) 0. 
-        Array2D.init n n calcCell                    
+            [0..aLength-1] |> List.fold (fun acc k -> acc + matrixA.[i + al1, k + al2] * matrixB.[k + bl1, j + bl2]) 0. 
+        let bUpperBound = min bm2 (stringSize + 1)
+        Array2D.init aHight (bUpperBound - bl2) calcCell                    
                                     
     let completeP where from1 from2 = 
         let completeOnePair (nt1, nt2) =
@@ -57,11 +65,13 @@ let recognize (strToParse: string)
 
     
     let rec compute l m =
-        let mid = (l + m) / 2
+        let mid = int (l + m) / 2
         if m - l >= 4 then 
             compute l mid |> ignore
-            compute mid m |> ignore
-        completeT (l, mid, mid, m)
+            if mid < stringSize + 1 then
+                compute mid m |> ignore
+        if mid < stringSize + 1 then
+            completeT (l, mid, mid, m)
 
     and completeT (l1, m1, l2, m2) =
         assert (m1 - l1 = m2 - l2)
@@ -84,23 +94,29 @@ let recognize (strToParse: string)
         else if m1 - l1 > 1 then
             let mid1: int = int (l1 + m1) / 2
             let mid2: int = int (l2 + m2) / 2
+
             let b1 = (l1, mid1, mid1, m1)
-            let b2 = (l2, mid2, mid2, m2)
+
             let c  = (mid1, m1, l2, mid2)
             let d1 = (l1, mid1, l2, mid2)
+            
+            let b2 = (l2, mid2, mid2, m2)
             let d2 = (mid1, m1, mid2, m2)
             let  e = (l1, mid1, mid2, m2)
+
             completeT c |> ignore
             completeP d1 b1 c |> ignore
             completeT d1 |> ignore
-            completeP d2 c b2 |> ignore
-            completeT d2 |> ignore
-            completeP e b1 d2 |> ignore
-            completeP e d1 b2 |> ignore
-            completeT e  |> ignore
 
-    compute 0 (n + 1) |> ignore
-    (tMatrix.Item S).[0,n]
+            if mid2 <= stringSize then
+                completeP d2 c b2 |> ignore
+                completeT d2 |> ignore
+                completeP e b1 d2 |> ignore
+                completeP e d1 b2 |> ignore
+                completeT e  |> ignore
+
+    compute 0 (roundedSize + 1) |> ignore
+    (tMatrix.Item S).[0, stringSize]
 
 
 [<EntryPoint>]
@@ -139,5 +155,5 @@ let main args =
     check "aaabbcc" 0.0000524288 |> ignore
 
 
-    System.Console.ReadLine() |> ignore
+//    System.Console.ReadLine() |> ignore
     0

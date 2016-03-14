@@ -1,3 +1,4 @@
 *.sqn filter=lfs diff=lfs merge=lfs -text
 *.grp filter=lfs diff=lfs merge=lfs -text
 *.cvr filter=lfs diff=lfs merge=lfs -text
+*.fa filter=lfs diff=lfs merge=lfs -text

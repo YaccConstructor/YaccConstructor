@@ -133,7 +133,46 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
     qGraph
 
 
-let loadGraphFormFileToOarserInputGraph fileWithoutExt templateLengthHightLimit tokenizer eof =
+let loadGraphFormFileToParserInputGraph fileWithoutExt templateLengthHightLimit tokenizer eof =
+    let edg f t l = new ParserEdge<_>(f,t,l)    
+    let g = loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit    
+    let cnt = ref (g.Vertices |> Seq.max |> ((+)1))
+    let edgs = 
+        g.Edges    
+        |> Seq.collect (fun e -> e.Tag.str.ToCharArray()
+                                 |> Array.mapi (fun i ch -> edg (if i = 0 then e.Source else (!cnt)) (if i = e.Tag.str.Length - 1 then e.Target else (incr cnt ; !cnt)) (tokenizer ch) ))
+        |> Array.ofSeq
+
+    let newVMap =    
+        edgs 
+        |> Array.fold
+            (fun l e ->
+              e.Source :: e.Target :: l  )
+            []
+        |> Set.ofList
+        |> Set.toArray
+        |> Array.mapi(fun i s -> (s,i))
+        |> dict
+
+    let finalV = newVMap |> Seq.length
+    //53072
+    let parserInputGraph = new ParserInputGraph<_>(0, finalV)
+
+    edgs
+    |> Array.map
+        (fun e -> edg newVMap.[e.Source] newVMap.[e.Target] e.Tag)
+    |> parserInputGraph.AddVerticesAndEdgeRange
+    |> ignore
+
+    g.Vertices 
+    |> Seq.map (fun v -> edg v finalV eof)
+    |> parserInputGraph.AddVerticesAndEdgeRange
+    |> ignore    
+
+    printfn "Vert Count = %A" (!cnt)
+    parserInputGraph
+    
+let loadGraphFormFileToBioParserInputGraph fileWithoutExt templateLengthHightLimit tokenizer eof =
     let edg f t l = new ParserEdge<_>(f,t,l)    
     let g = loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit    
     let cnt = ref (g.Vertices |> Seq.max |> ((+)1))

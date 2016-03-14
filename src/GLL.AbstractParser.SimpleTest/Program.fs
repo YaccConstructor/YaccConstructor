@@ -701,77 +701,98 @@ type ``GLL abstract parser tests`` () =
                 match ch with
                 | 'A' -> GLL.Bio2.A i
                 | 'T' -> GLL.Bio2.U i
+                | 'U' -> GLL.Bio2.U i
                 | 'C' -> GLL.Bio2.C i
                 | 'G' -> GLL.Bio2.G i
                 | _ ->   GLL.Bio2.G i
                 //|> GLL.Bio2.tokenToNumber
         let basePath = "../../../Tests/bio/"
-        let p1 = 
-            //@"biodata_1/saves/00_before_repeat_resolution/graph"
-            @"mix_1/late_pair_info_count"
-            //@"synth_1/graph"
-            //@"smallTest/late_pair_info_count"
-        let path = Path.Combine(basePath,p1)
+        let path = Path.Combine(basePath,"""mix_1\late_pair_info_count""")
+        let start = System.DateTime.Now
+        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToParserInputGraph path 150 getSmb (GLL.Bio2.RNGLR_EOF 0 (*|> GLL.Bio2.tokenToNumber*)) 
+        //graph.PrintToDot "input.dot" (GLL.Bio2.tokenToNumber >> GLL.Bio2.numToString)       
+        0
+//        let res = GLL.Bio2.buildAbstract graph 100 3
         let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToOarserInputGraph path 2000 getSmb (GLL.Bio2.RNGLR_EOF 0)
         0
 //        | Success ast ->  
 //            printfn "Success!"
 //            printfn "Time = %A"  (System.DateTime.Now - start)
 //        | Error _ -> printfn "Error!"
-//
-//    [<Test>]
-//    member this.bio2_4 () =
-//        let bp = @"C:\gsv\projects\infernal-1.1.1\testsuite\"
-//        let file = 
-//            //"t.fa"
-//            //"t1.fa"
-            //"1k-tRNA.fa"
-//            //"tremitted-Plant_SRP.fa"
-//            //"1k-4.fa"
-//            //"10k-tRNA.fa"
-            "100k-4.fa"
-//            //"t10k1.fa"
-//        let textData =             
-//            File.ReadAllLines(Path.Combine(bp,file))
-//            |> Seq.skip 1
-//            |> Seq.takeWhile (fun s -> not <| s.StartsWith">")
-//            |> Seq.collect(fun s -> s.ToCharArray())
-//        let i = ref 0
-//        let getSmb ch i = 
-//            match ch with
-//            | 'A' -> GLL.Bio2.A i
-//            | 'U' -> GLL.Bio2.U i
-//            | 'C' -> GLL.Bio2.C i
-//            | 'G' -> GLL.Bio2.G i
-//            | _ -> GLL.Bio2.G i
-//            |> GLL.Bio2.tokenToNumber
-//        let edges = 
-//            let e = 
-//                textData
-//                |> Seq.mapi(fun i ch -> (getSmb ch i))
-//                |> Array.ofSeq
-//            [|new BioParserEdge<_>(0,1,e); new BioParserEdge<_>(1,2,[|26|]) |]
-//        //let l = edges |> Array.length
-//        let inline pack2to32 rule position = ((int rule <<< 16) ||| int position)
-//        let initialVs = [|for i in 0..edges.[0].Tokens.Length - 70 -> pack2to32 0 i |]
-//        let qGraph = new BioParserInputGraph<_>(initialVs, 2, [|Seq.length textData + 1 ;2|], edges, 3)
-//        //qGraph.AddVerticesAndEdgeRange edges |> ignore
-//        //qGraph.AddVerticesAndEdgeRange [for i in 0..l -> edg i (l+1) (GLL.Bio2.RNGLR_EOF 0)] 
-//        let start = System.DateTime.Now
-//        let res = GLL.Bio2.buildAbstract qGraph 100 2
-        let res = GLL.Bio2.buildAbstract qGraph 100 3
-//        | Success ast -> 
-//            //ast.AstToDot GLL.Bio2.numToString GLL.Bio2.tokenToNumber GLL.Bio2.tokenData "bioAST.dot"
-//            printfn "Success!"
-//            printfn "Time = %A"  (System.DateTime.Now - start)  
-//        | Success1 x -> 
+//860-930
+    member this.``1000: trna`` file =
+        let getSmb =
+            let cnt = ref 0
+            fun ch ->
+                let i = incr cnt; !cnt 
+                match ch with
+                | 'A' -> GLL.Bio2.A i                
+                | 'U' -> GLL.Bio2.U i
+                | 'C' -> GLL.Bio2.C i
+                | 'G' -> GLL.Bio2.G i
+                | _ ->   GLL.Bio2.G i                
+        let basePath = "../../../Tests/bio/"
+        let path = Path.Combine(basePath, file)
+        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToParserInputGraph path 1001 getSmb (GLL.Bio2.RNGLR_EOF 0) 
+        0
+
+    [<Test>]
+    member this.``1000: trna in 860-930`` () =
+        this.``1000: trna`` """simple_tRNA1\g"""
+
+    [<Test>]
+    member this.bio2_4 () =
+        let bp = @"../../../Tests\bio\infernal "
+        let file = 
+            //"t.fa"
+            //"t1.fa"
+            "1k-tRNA.fa"
+            //"tremitted-Plant_SRP.fa"
+            //"1k-4.fa"
+            //"10k-tRNA.fa"
+            //"100k-4.fa"
+            //"10.5k-tRNA.fa"
+            //"t10k1.fa"
+        let textData =             
+            File.ReadAllLines(Path.Combine(bp,file))
+            |> Seq.skip 1
+            |> Seq.takeWhile (fun s -> not <| s.StartsWith">")
+            |> Seq.collect(fun s -> s.ToCharArray())
+        let i = ref 0
+        let getSmb ch i = 
+            match ch with
+            | 'A' -> GLL.Bio2.A i
+            | 'U' -> GLL.Bio2.U i
+            | 'C' -> GLL.Bio2.C i
+            | 'G' -> GLL.Bio2.G i
+            | _ -> GLL.Bio2.G i
+            |> GLL.Bio2.tokenToNumber
+        let edges = 
+            let e = 
+                textData
+                |> Seq.mapi(fun i ch -> (getSmb ch i))
+                |> Array.ofSeq
+            [|new BioParserEdge<_>(0,1,e); new BioParserEdge<_>(1,2,[|26|]) |]
+        //let l = edges |> Array.length
+        let inline pack2to32 rule position = ((int rule <<< 16) ||| int position)
+        let initialVs = [|for i in 0..edges.[0].Tokens.Length - 70 -> pack2to32 0 i |]
+        let qGraph = new BioParserInputGraph<_>(initialVs, 2, [|Seq.length textData + 1 ;2|], edges, 3)
+        //qGraph.AddVerticesAndEdgeRange edges |> ignore
+        //qGraph.AddVerticesAndEdgeRange [for i in 0..l -> edg i (l+1) (GLL.Bio2.RNGLR_EOF 0)] 
+        let start = System.DateTime.Now
+        let res = GLL.Bio2.buildAbstract qGraph 100 3 0
+        match res with
+        | Success ast -> 
+            //ast.AstToDot GLL.Bio2.numToString GLL.Bio2.tokenToNumber GLL.Bio2.tokenData "bioAST.dot"
+            printfn "Success!"
+            printfn "Time = %A"  (System.DateTime.Now - start)  
         | Success1 x ->
             let ranges = new ResizeArray<_>()
             let curLeft = ref 0
             let curRight = ref 0  
             let x = 
                 x |> Set.ofSeq
-                |> Seq.filter (fun s -> s.rpos - s.lpos > 65)
+                |> Seq.filter (fun s -> s.rpos - s.lpos > 200)
                 |> Seq.iter(fun s ->
                     if !curRight < s.lpos
                     then 
@@ -786,6 +807,10 @@ type ``GLL abstract parser tests`` () =
             printfn ""
             ranges |> Seq.iter (printf "%A; ")
             printfn ""
+            printfn "Success!"
+            printfn "Time = %A"  (System.DateTime.Now - start)        
+        | Error _ -> printfn "Error!"
+        
 [<EntryPoint>]
 let fs x =
     //System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
@@ -795,4 +820,5 @@ let fs x =
     //let th = new System.Threading.Thread(f, 10000000)
     //th.Start()
     t.bio2_5()
+    t.``1000: trna in 860-930``()
     0

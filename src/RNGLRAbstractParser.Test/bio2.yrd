@@ -5,11 +5,7 @@ folded: stem<(any*[1..3] stem<any*[7..10]> any*[2..3] stem<any*[5..7]> any*[3..5
 full: any folded 
 *)
 
-[<Start>]
-full: any+ folded 
-folded: stem<(any*[1..3] stem<any*[7..10]> any*[1..2] stem<any*[5..8]> any*[3..6] stem<any*[5..8]>)>
-
-(*stem<s>: 
+stem<s>: 
       A stem<s> U
     | U stem<s> A
     | C stem<s> G
@@ -17,9 +13,44 @@ folded: stem<(any*[1..3] stem<any*[7..10]> any*[1..2] stem<any*[5..8]> any*[3..6
     | G stem<s> U
     | U stem<s> G
     | s
-  *)
- any: A | U | G | C
 
+any: A | U | G | C
+
+
+[<Start>]
+full: (*any+*) folded 
+
+(*folded: stem1 stem2 any*[1..3] stem1
+
+stem1: stem<(any*[1..10] stem<any*[3..16]> any*[1..10])>
+
+stem2: stem<(any*[1..3] stem1 any*[1..3])>
+*)
+
+(*a1 : any*[1..2]
+a2 : any*[2..4]
+a3 : any*[3..5]
+a4 : any*[5..7]
+
+folded: stem<( a4 stem1 stem2 a2 stem3)>
+
+stem1: stem<(a2 stem<(a3 stem4 a2)> a1)>
+
+stem4: stem<(a1 stem5 a4 stem<a3> a3 stem6 a1)>
+
+stem5: stem <any*[35..40]>
+
+stem6: stem <any*[20..30]>
+
+stem2: stem<(a1 stem<(a1 stem<any*[6..10]> any?)> a2)>
+
+stem3: stem<( any? stem<a4> a2 )>
+*)
+
+folded: stem<(any*[1..3] stem<any*[7..10]> any*[1..2] stem<any*[5..8]> any*[3..6] stem<any*[5..8]>)>
+
+
+(*
 
  stem<s>: 
       [0.24749975](A stem<s> U)
@@ -29,3 +60,4 @@ folded: stem<(any*[1..3] stem<any*[7..10]> any*[1..2] stem<any*[5..8]> any*[3..6
     | [0.005](G stem<s> U)
     | [0.005](U stem<s> G)
     | [0.000001](s)
+*)

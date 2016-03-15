@@ -692,26 +692,25 @@ type ``GLL abstract parser tests`` () =
 //        let parse = GLL.MsSqlParser.buildAbstractAst
 //        perfTest2 parse graphGenerator
 //  
-    [<Test>]
-    member this.bio2_5 () =
+//    [<Test>]
+//    member this.bio2_5 () =
         let getSmb = 
-            let cnt = ref 0
-            fun ch ->
-                let i = incr cnt; !cnt 
-                match ch with
-                | 'A' -> GLL.Bio2.A i
-                | 'T' -> GLL.Bio2.U i
+//            let cnt = ref 0
+//            fun ch ->
+//                let i = incr cnt; !cnt 
+//                match ch with
+//                | 'A' -> GLL.Bio2.A i
+//                | 'T' -> GLL.Bio2.U i
                 | 'U' -> GLL.Bio2.U i
-                | 'C' -> GLL.Bio2.C i
-                | 'G' -> GLL.Bio2.G i
-                | _ ->   GLL.Bio2.G i
+//                | 'G' -> GLL.Bio2.G i
+//                | _ ->   GLL.Bio2.G i
+//                //|> GLL.Bio2.tokenToNumber
                 |> GLL.Bio2.tokenToNumber
-        let basePath = "../../../Tests/bio/"
-        let path = Path.Combine(basePath,"""mix_1\late_pair_info_count""")
-        let start = System.DateTime.Now
+//        let path = Path.Combine(basePath,"""mix_1\late_pair_info_count""")
+//        let start = System.DateTime.Now
+//        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToParserInputGraph path 150 getSmb (GLL.Bio2.RNGLR_EOF 0 (*|> GLL.Bio2.tokenToNumber*)) 
         let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 150 getSmb (GLL.Bio2.RNGLR_EOF 0 (*|> GLL.Bio2.tokenToNumber*)) 
-        //graph.PrintToDot "input.dot" (GLL.Bio2.tokenToNumber >> GLL.Bio2.numToString)       
-        0
+//        0
 //        let res = GLL.Bio2.buildAbstract graph 100 3
         let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 2000 getSmb (GLL.Bio2.RNGLR_EOF 0)
         0

@@ -111,16 +111,36 @@ type BioParserEdge(s : int, e : int, l : int, t : int[]) =
     member this.RealLenght = l
     member this.Tokens = t 
       
-type BioParserInputGraph(edges : BioParserEdge[]) =
-    let 
-    let edgs =  
-    member val Edges = [] with get, private set
-//    member this.MapToOriginalGraph = 
-//    member this.InitialVertices = initialVertices
-//    member this.FinalVertex = finalVertex
-//    member this.ChainLength = chainLen
-//    member this.EdgeCount = edges.Length
-//    member this.VertexCount = vertexCount
-//    member this.Shift = 
+type BioParserInputGraph(edges : BioParserEdge[]) =    
+    let edgs = Array.zeroCreate edges.Length
+    let shift = ref -1
+    let vertexCount = ref 0
+    let chainLen = Array.zeroCreate edges.Length
+    let initialVertices = ref [||]
+    let finalVertex = ref 0
+    do
+        let cnt = ref 0
+        let vMap = new System.Collections.Generic.Dictionary<_,_>()
+        let getV x = 
+            let f,v = vMap.TryGetValue x
+            if f 
+            then v
+            else 
+                let newV = !cnt
+                incr cnt
+                vMap.Add(x,newV)
+                newV
+        edges
+        |> Array.iteri (fun i e -> 
+            let edg = new BioParserEdge(getV e.Start, getV e.End, e.RealLenght, e.Tokens)
+            edgs.[i] <- edg
+            chainLen.[i] <- e.Tokens.Length)
+    member val Edges = edges with get
+    member val InitialVertices = !initialVertices with get
+    member val FinalVertex = !finalVertex with get
+    member val ChainLength = chainLen with get
+    member val EdgeCount = edgs.Length with get
+    member val VertexCount = !vertexCount with get
+    member val Shift = !shift with get
 
 

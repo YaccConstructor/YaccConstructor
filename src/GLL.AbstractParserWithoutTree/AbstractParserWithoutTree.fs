@@ -31,7 +31,7 @@ type ResultStruct =
     val nterm : string
     new (l,l1, r, r1, n) = {le = l; lpos = l1; re = r; rpos = r1; nterm = n}
 
-let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph<'TokenType>) maxLen condNonTerm shift = 
+let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph) maxLen condNonTerm shift = 
     if input.EdgeCount = 0 then
       Error ("This grammar does not accept empty input.")     
     else

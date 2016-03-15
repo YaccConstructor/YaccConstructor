@@ -126,7 +126,8 @@ let loadGraphFormFileToBioParserInputGraph fileWithoutExt templateLengthHightLim
                 fun e -> 
                     let tag = e.Tag.str.ToCharArray() |> Array.map tokenizer
                     new BioParserEdge(e.Source, e.Target, e.Tag.length, tag)
-        )
+            )
+            |> Array.ofSeq
         new BioParserInputGraph(edges)
 
     let gs,longEdges = loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit

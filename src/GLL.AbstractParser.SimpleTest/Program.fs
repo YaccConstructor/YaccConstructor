@@ -114,8 +114,8 @@ let test buildAbstractAst qGraph l (intToString : int -> string) (fileName : str
             Assert.Pass()
      
 let f arr tokenToNumber = Array.map (fun e -> tokenToNumber e) arr
-let len (edges : BioParserEdge<'token>[]) : int[] = edges |> Array.map (fun e -> e.Tokens.Length + 1) 
-let edgB b e t = new BioParserEdge<_>(b, e, t) 
+let len (edges : BioParserEdge[]) : int[] = edges |> Array.map (fun e -> e.Tokens.Length + 1) 
+//let edgB b e t = new BioParserEdge(b, e, t) 
 
 [<TestFixture>]
 type ``GLL abstract parser tests`` () =
@@ -705,15 +705,15 @@ type ``GLL abstract parser tests`` () =
                 | 'C' -> GLL.Bio2.C i
                 | 'G' -> GLL.Bio2.G i
                 | _ ->   GLL.Bio2.G i
-                //|> GLL.Bio2.tokenToNumber
+                |> GLL.Bio2.tokenToNumber
         let basePath = "../../../Tests/bio/"
         let path = Path.Combine(basePath,"""mix_1\late_pair_info_count""")
         let start = System.DateTime.Now
-        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToParserInputGraph path 150 getSmb (GLL.Bio2.RNGLR_EOF 0 (*|> GLL.Bio2.tokenToNumber*)) 
+        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 150 getSmb (GLL.Bio2.RNGLR_EOF 0 (*|> GLL.Bio2.tokenToNumber*)) 
         //graph.PrintToDot "input.dot" (GLL.Bio2.tokenToNumber >> GLL.Bio2.numToString)       
         0
 //        let res = GLL.Bio2.buildAbstract graph 100 3
-        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToOarserInputGraph path 2000 getSmb (GLL.Bio2.RNGLR_EOF 0)
+        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 2000 getSmb (GLL.Bio2.RNGLR_EOF 0)
         0
 //        | Success ast ->  
 //            printfn "Success!"
@@ -730,10 +730,11 @@ type ``GLL abstract parser tests`` () =
                 | 'U' -> GLL.Bio2.U i
                 | 'C' -> GLL.Bio2.C i
                 | 'G' -> GLL.Bio2.G i
-                | _ ->   GLL.Bio2.G i                
+                | _ ->   GLL.Bio2.G i
+                |> GLL.Bio2.tokenToNumber                
         let basePath = "../../../Tests/bio/"
         let path = Path.Combine(basePath, file)
-        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToParserInputGraph path 1001 getSmb (GLL.Bio2.RNGLR_EOF 0) 
+        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 1001 getSmb (GLL.Bio2.RNGLR_EOF 0) 
         let res = GLL.Bio2.buildAbstract graph 100 3 0
         0
 

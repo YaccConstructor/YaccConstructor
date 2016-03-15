@@ -205,10 +205,11 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 c
             if setR.Count <> 0
             then
+                currentContext :=  get ()
                 let cI = pack2to32 (getLeft32 currentContext.Value.Index) ((getRight32 currentContext.Value.Index) + shift)
                 currentIndex := cI
                 let t = CommonFuns.getLeft32 !currentIndex
-                currentContext :=  get ()
+                
                 let t2 = CommonFuns.getRight32 !currentIndex
                 currentGSSNode := currentContext.Value.Vertex
                 currentLabel := currentContext.Value.Label

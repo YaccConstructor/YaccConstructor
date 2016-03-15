@@ -57,18 +57,23 @@ module CommonFuns =
     let inline getIndex2Vertex (long : int64<vertexMeasure>)       = int <| ((int64 long) >>> 32)
  
 
-    let inline pack2to32 rule position = ((int rule <<< 16) ||| int position)
-    let inline getLeft32 packedValue   = int packedValue >>> 16
-    let inline getRight32 packedValue = int (int packedValue &&& 0xffff)
+    let inline packEdgePos edge position = ((int position <<< 16) ||| int edge)                               
+    let inline getEdge packedValue   = int (int packedValue &&& 0xffff)
+    let inline getPosOnEdge packedValue = int packedValue >>> 16 
 
-type CompressedArray<'t>(l : int[], f : _ -> 't) =
+    let inline packLabelNew rule position = ((int rule <<< 16) ||| int position)                               
+    let inline getRuleNew packedValue   = int packedValue >>> 16
+    let inline getPositionNew packedValue = int (int packedValue &&& 0xffff)
+
+
+type CompressedArray<'t>(l : int[], f : _ -> 't, shift) =
     let a = Array.init l.Length (fun i -> Array.init l.[i] f)
     member this.Item         
         with get (i:int) = 
-            let edg = (CommonFuns.getLeft32 i)
-            let pos = (CommonFuns.getRight32 i)
-            a.[edg].[pos]
-        and set i v = a.[(CommonFuns.getLeft32 i)].[(CommonFuns.getRight32 i)] <- v
+            let edg = (CommonFuns.getEdge i)
+            let pos = (CommonFuns.getPosOnEdge i)
+            a.[edg].[shift + pos]
+        and set i v = a.[(CommonFuns.getEdge i)].[shift + (CommonFuns.getPosOnEdge i)] <- v
        
     
 
@@ -87,7 +92,7 @@ type ParserStructures<'TokenType> (currentRule : int)=
         sppfNodes.Add dummyAST
         sppfNodes.Add epsilonNode
 
-    let currentLabel = ref <| (CommonFuns.pack2to32 currentRule 0) * 1<labelMeasure>
+    let currentLabel = ref <| (CommonFuns.packLabelNew currentRule 0) * 1<labelMeasure>
     
     let getNodeP 
         findSppfNode 

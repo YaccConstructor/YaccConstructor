@@ -693,33 +693,64 @@ type ``GLL abstract parser tests`` () =
 //        perfTest2 parse graphGenerator
 //  
 //    [<Test>]
-//    member this.bio2_5 () =
-        let getSmb = 
-//            let cnt = ref 0
-//            fun ch ->
-//                let i = incr cnt; !cnt 
-//                match ch with
-//                | 'A' -> GLL.Bio2.A i
-//                | 'T' -> GLL.Bio2.U i
-                | 'U' -> GLL.Bio2.U i
-//                | 'G' -> GLL.Bio2.G i
-//                | _ ->   GLL.Bio2.G i
-//                //|> GLL.Bio2.tokenToNumber
-                |> GLL.Bio2.tokenToNumber
-//        let path = Path.Combine(basePath,"""mix_1\late_pair_info_count""")
-//        let start = System.DateTime.Now
-//        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToParserInputGraph path 150 getSmb (GLL.Bio2.RNGLR_EOF 0 (*|> GLL.Bio2.tokenToNumber*)) 
-        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 150 getSmb (GLL.Bio2.RNGLR_EOF 0 (*|> GLL.Bio2.tokenToNumber*)) 
+////    member this.bio2_5 () =
+//        let getSmb = 
+////            let cnt = ref 0
+////            fun ch ->
+////                let i = incr cnt; !cnt 
+////                match ch with
+////                | 'A' -> GLL.Bio2.A i
+////                | 'T' -> GLL.Bio2.U i
+//                //| 'U' -> GLL.Bio2.U i
+////                | 'G' -> GLL.Bio2.G i
+////                | _ ->   GLL.Bio2.G i
+////                //|> GLL.Bio2.tokenToNumber
+//                |> GLL.Bio2.tokenToNumber
+////        let path = Path.Combine(basePath,"""mix_1\late_pair_info_count""")
+////        let start = System.DateTime.Now
+////        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToParserInputGraph path 150 getSmb (GLL.Bio2.RNGLR_EOF 0 (*|> GLL.Bio2.tokenToNumber*)) 
+//        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 150 getSmb (GLL.Bio2.RNGLR_EOF 0 (*|> GLL.Bio2.tokenToNumber*)) 
+////        0
+////        let res = GLL.Bio2.buildAbstract graph 100 3
+//        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 2000 getSmb (GLL.Bio2.RNGLR_EOF 0)
 //        0
-//        let res = GLL.Bio2.buildAbstract graph 100 3
-        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 2000 getSmb (GLL.Bio2.RNGLR_EOF 0)
-        0
-//        | Success ast ->  
-//            printfn "Success!"
-//            printfn "Time = %A"  (System.DateTime.Now - start)
-//        | Error _ -> printfn "Error!"
-//860-930
+////        | Success ast ->  
+////            printfn "Success!"
+////            printfn "Time = %A"  (System.DateTime.Now - start)
+////        | Error _ -> printfn "Error!"
+////860-930
     member this.``1000: trna`` file =
+        let start = System.DateTime.Now
+        let processRes (res:ParseResult<ResultStruct>) = 
+            match res with
+            | Success ast -> 
+                //ast.AstToDot GLL.Bio2.numToString GLL.Bio2.tokenToNumber GLL.Bio2.tokenData "bioAST.dot"
+                printfn "Success!"
+                printfn "Time = %A"  (System.DateTime.Now - start)  
+            | Success1 x ->
+                let ranges = new ResizeArray<_>()
+                let curLeft = ref 0
+                let curRight = ref 0  
+                let x = 
+                    x |> Set.ofSeq
+                    |> Seq.filter (fun s -> s.rpos - s.lpos > 60)
+                    |> Seq.iter(fun s ->
+                        if !curRight < s.lpos
+                        then 
+                            ranges.Add (!curLeft,!curRight)
+                            curLeft := s.lpos
+                            curRight := s.rpos                        
+                        else
+                            curLeft := min !curLeft s.lpos
+                            curRight := max !curRight s.rpos
+                            )
+                    ranges.Add(!curLeft,!curRight)
+                printfn ""
+                ranges |> Seq.iter (printf "%A; ")
+                printfn ""
+                printfn "Success!"
+                printfn "Time = %A"  (System.DateTime.Now - start)        
+            | Error _ -> printfn "Error!"
         let getSmb =
             let cnt = ref 0
             fun ch ->
@@ -727,18 +758,25 @@ type ``GLL abstract parser tests`` () =
                 match ch with
                 | 'A' -> GLL.Bio2.A i                
                 | 'U' -> GLL.Bio2.U i
+                | 'T' -> GLL.Bio2.U i
                 | 'C' -> GLL.Bio2.C i
-                | 'G' -> GLL.Bio2.G i
+                | 'G' -> GLL.Bio2.G i                
                 | _ ->   GLL.Bio2.G i
                 |> GLL.Bio2.tokenToNumber                
         let basePath = "../../../Tests/bio/"
         let path = Path.Combine(basePath, file)
-        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 1001 getSmb (GLL.Bio2.RNGLR_EOF 0) 
+        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 120 getSmb (GLL.Bio2.RNGLR_EOF 0) 
         let res = 
             graphs
             |> Array.ofSeq
-            |> Array.map (fun graph -> GLL.Bio2.buildAbstract graph 100 3)
-        printfn "%A" res
+            |> Array.mapi 
+                (fun i graph -> 
+                    printfn "%A" i
+                    GLL.Bio2.buildAbstract graph 100 3
+                )
+            |> Array.iter processRes
+        ()
+        //printfn "%A" res
 
     [<Test>]
     member this.``1000: trna in 860-930`` () =
@@ -751,6 +789,10 @@ type ``GLL abstract parser tests`` () =
     [<Test>]
     member this.``1000: trna in 133-204`` () =
         this.``1000: trna`` """simple_tRNA3\g"""
+
+    [<Test>]
+    member this.``First big for tRNA`` () =
+        this.``1000: trna`` """mix_1\late_pair_info_count"""
 
 //    [<Test>]
 //    member this.bio2_4 () =
@@ -833,5 +875,6 @@ let fs x =
     //th.Start()
     //t.bio2_5()
     //t.bio2_4()
-    t.``1000: trna in 860-930``()
+    //t.``1000: trna in 133-204``()
+    t.``First big for tRNA``()
     0

@@ -734,8 +734,10 @@ type ``GLL abstract parser tests`` () =
                 |> GLL.Bio2.tokenToNumber                
         let basePath = "../../../Tests/bio/"
         let path = Path.Combine(basePath, file)
-        let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 1001 getSmb (GLL.Bio2.RNGLR_EOF 0) 
-        let res = GLL.Bio2.buildAbstract graph 100 3 0
+        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 1001 getSmb (GLL.Bio2.RNGLR_EOF 0) 
+        let res = 
+            graphs
+            |> Seq.map (fun graph -> GLL.Bio2.buildAbstract graph 100 3)
         0
 
     [<Test>]
@@ -743,75 +745,83 @@ type ``GLL abstract parser tests`` () =
         this.``1000: trna`` """simple_tRNA1\g"""
 
     [<Test>]
-    member this.bio2_4 () =
-        let bp = @"../../../Tests\bio\infernal "
-        let file = 
-            //"t.fa"
-            //"t1.fa"
-            "1k-tRNA.fa"
-            //"tremitted-Plant_SRP.fa"
-            //"1k-4.fa"
-            //"10k-tRNA.fa"
-            //"100k-4.fa"
-            //"10.5k-tRNA.fa"
-            //"t10k1.fa"
-        let textData =             
-            File.ReadAllLines(Path.Combine(bp,file))
-            |> Seq.skip 1
-            |> Seq.takeWhile (fun s -> not <| s.StartsWith">")
-            |> Seq.collect(fun s -> s.ToCharArray())
-        let i = ref 0
-        let getSmb ch i = 
-            match ch with
-            | 'A' -> GLL.Bio2.A i
-            | 'U' -> GLL.Bio2.U i
-            | 'C' -> GLL.Bio2.C i
-            | 'G' -> GLL.Bio2.G i
-            | _ -> GLL.Bio2.G i
-            |> GLL.Bio2.tokenToNumber
-        let edges = 
-            let e = 
-                textData
-                |> Seq.mapi(fun i ch -> (getSmb ch i))
-                |> Array.ofSeq
-            [|new BioParserEdge<_>(0,1,e); new BioParserEdge<_>(1,2,[|26|]) |]
-        //let l = edges |> Array.length
-        let inline pack2to32 rule position = ((int rule <<< 16) ||| int position)
-        let initialVs = [|for i in 0..edges.[0].Tokens.Length - 70 -> pack2to32 0 i |]
-        let qGraph = new BioParserInputGraph<_>(initialVs, 2, [|Seq.length textData + 1 ;2|], edges, 3)
-        //qGraph.AddVerticesAndEdgeRange edges |> ignore
-        //qGraph.AddVerticesAndEdgeRange [for i in 0..l -> edg i (l+1) (GLL.Bio2.RNGLR_EOF 0)] 
-        let start = System.DateTime.Now
-        let res = GLL.Bio2.buildAbstract qGraph 100 3 0
-        match res with
-        | Success ast -> 
-            //ast.AstToDot GLL.Bio2.numToString GLL.Bio2.tokenToNumber GLL.Bio2.tokenData "bioAST.dot"
-            printfn "Success!"
-            printfn "Time = %A"  (System.DateTime.Now - start)  
-        | Success1 x ->
-            let ranges = new ResizeArray<_>()
-            let curLeft = ref 0
-            let curRight = ref 0  
-            let x = 
-                x |> Set.ofSeq
-                |> Seq.filter (fun s -> s.rpos - s.lpos > 200)
-                |> Seq.iter(fun s ->
-                    if !curRight < s.lpos
-                    then 
-                        ranges.Add (!curLeft,!curRight)
-                        curLeft := s.lpos
-                        curRight := s.rpos                        
-                    else
-                        curLeft := min !curLeft s.lpos
-                        curRight := max !curRight s.rpos
-                        )
-                ranges.Add(!curLeft,!curRight)
-            printfn ""
-            ranges |> Seq.iter (printf "%A; ")
-            printfn ""
-            printfn "Success!"
-            printfn "Time = %A"  (System.DateTime.Now - start)        
-        | Error _ -> printfn "Error!"
+    member this.``1000: trna in 629-699`` () =
+        this.``1000: trna`` """simple_tRNA2\g"""
+
+    [<Test>]
+    member this.``1000: trna in 133-204`` () =
+        this.``1000: trna`` """simple_tRNA3\g"""
+
+//    [<Test>]
+//    member this.bio2_4 () =
+//        let bp = @"../../../Tests\bio\infernal "
+//        let file = 
+//            //"t.fa"
+//            //"t1.fa"
+//            "1k-tRNA.fa"
+//            //"tremitted-Plant_SRP.fa"
+//            //"1k-4.fa"
+//            //"10k-tRNA.fa"
+//            //"100k-4.fa"
+//            //"10.5k-tRNA.fa"
+//            //"t10k1.fa"
+//        let textData =             
+//            File.ReadAllLines(Path.Combine(bp,file))
+//            |> Seq.skip 1
+//            |> Seq.takeWhile (fun s -> not <| s.StartsWith">")
+//            |> Seq.collect(fun s -> s.ToCharArray())
+//        let i = ref 0
+//        let getSmb ch i = 
+//            match ch with
+//            | 'A' -> GLL.Bio2.A i
+//            | 'U' -> GLL.Bio2.U i
+//            | 'C' -> GLL.Bio2.C i
+//            | 'G' -> GLL.Bio2.G i
+//            | _ -> GLL.Bio2.G i
+//            |> GLL.Bio2.tokenToNumber
+//        let edges = 
+//            let e = 
+//                textData
+//                |> Seq.mapi(fun i ch -> (getSmb ch i))
+//                |> Array.ofSeq
+//            [|new BioParserEdge<_>(0,1,e); new BioParserEdge<_>(1,2,[|26|]) |]
+//        //let l = edges |> Array.length
+//        let inline pack2to32 rule position = ((int rule <<< 16) ||| int position)
+//        let initialVs = [|for i in 0..edges.[0].Tokens.Length - 70 -> pack2to32 0 i |]
+//        let qGraph = new BioParserInputGraph<_>(initialVs, 2, [|Seq.length textData + 1 ;2|], edges, 3)
+//        //qGraph.AddVerticesAndEdgeRange edges |> ignore
+//        //qGraph.AddVerticesAndEdgeRange [for i in 0..l -> edg i (l+1) (GLL.Bio2.RNGLR_EOF 0)] 
+//        let start = System.DateTime.Now
+//        let res = GLL.Bio2.buildAbstract qGraph 100 3 0
+//        match res with
+//        | Success ast -> 
+//            //ast.AstToDot GLL.Bio2.numToString GLL.Bio2.tokenToNumber GLL.Bio2.tokenData "bioAST.dot"
+//            printfn "Success!"
+//            printfn "Time = %A"  (System.DateTime.Now - start)  
+//        | Success1 x ->
+//            let ranges = new ResizeArray<_>()
+//            let curLeft = ref 0
+//            let curRight = ref 0  
+//            let x = 
+//                x |> Set.ofSeq
+//                |> Seq.filter (fun s -> s.rpos - s.lpos > 200)
+//                |> Seq.iter(fun s ->
+//                    if !curRight < s.lpos
+//                    then 
+//                        ranges.Add (!curLeft,!curRight)
+//                        curLeft := s.lpos
+//                        curRight := s.rpos                        
+//                    else
+//                        curLeft := min !curLeft s.lpos
+//                        curRight := max !curRight s.rpos
+//                        )
+//                ranges.Add(!curLeft,!curRight)
+//            printfn ""
+//            ranges |> Seq.iter (printf "%A; ")
+//            printfn ""
+//            printfn "Success!"
+//            printfn "Time = %A"  (System.DateTime.Now - start)        
+//        | Error _ -> printfn "Error!"
         
 [<EntryPoint>]
 let fs x =

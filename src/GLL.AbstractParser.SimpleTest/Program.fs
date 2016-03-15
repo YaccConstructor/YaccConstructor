@@ -734,6 +734,7 @@ type ``GLL abstract parser tests`` () =
         let basePath = "../../../Tests/bio/"
         let path = Path.Combine(basePath, file)
         let graph = YC.BIO.BioGraphLoader.loadGraphFormFileToParserInputGraph path 1001 getSmb (GLL.Bio2.RNGLR_EOF 0) 
+        let res = GLL.Bio2.buildAbstract graph 100 3 0
         0
 
     [<Test>]

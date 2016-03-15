@@ -3,22 +3,6 @@
 open System.IO
 open AbstractAnalysis.Common
 
-module Seq =
-
-    /// Returns a sequence that yields chunks of length n.
-    /// Each chunk is returned as a list.
-    let split length (xs: seq<'T>) =
-        let l = ref <| Seq.length xs
-        let rec loop xs =
-            seq{
-                yield Seq.truncate length xs |> Seq.toList                
-                if not (!l <= length)
-                then 
-                    l := !l - length
-                    yield! loop (Seq.skip length xs)
-            }
-        loop xs
-
 module Array =
 
     /// Returns a sequence that yields chunks of length n.
@@ -31,16 +15,16 @@ module Array =
                 l := !l + length 
         |]
 
-
 [<Struct>]
 type BioGraphEdgeLbl=
     val str: string
     val length : int
-    new (_s,_l) = {str=_s;length=_l}
+    val id: int
+    new (_s,_l, _id) = {str=_s;length=_l;id=_id}
 
 type BioGraphEdge(s,e,t) =
     inherit QuickGraph.TaggedEdge<int, BioGraphEdgeLbl>(s,e,t)
-    new (s,e,str,l) = BioGraphEdge(s,e,new BioGraphEdgeLbl(str,l))
+    new (s,e,str,l,id) = BioGraphEdge(s,e,new BioGraphEdgeLbl(str,l,id))
 
 let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
     let lblsExt = ".sqn"
@@ -72,12 +56,12 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
             , (a.[2].Split '=').[1].Trim() |> int)
         |> Array.ofSeq
     printfn "Edges load: %A" edges.Length
-    let qGraph = new QuickGraph.AdjacencyGraph<_,_>()
     let cnt = ref (vertices |> Array.max |> ((+)1))
     let leCount = ref 0
+    let longEdges = new ResizeArray<_>()
     let edgs = 
         edges 
-        |> Array.Parallel.map (fun (id,s,e,l) -> new BioGraphEdge(s,e,lbls.[id],l))
+        |> Array.Parallel.map (fun (id,s,e,l) -> new BioGraphEdge(s,e,lbls.[id],l,id))
         |> Array.collect 
             (fun e -> 
                 if e.Tag.length <= templateLengthHightLimit
@@ -85,19 +69,18 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
                     //printfn "%A" e.Tag.length
                     [|e|]
                 else 
+                    longEdges.Add e
                     incr leCount
                     let str1 = e.Tag.str.Substring(0,templateLengthHightLimit)
-                    let str2 = e.Tag.str.Substring(e.Tag.str.Length-1-templateLengthHightLimit)
+                    let str2 = e.Tag.str.Substring(e.Tag.str.Length - 1 - templateLengthHightLimit)
                     incr cnt
                     let newE = !cnt
                     incr cnt
                     let newS = !cnt
-                    [|new BioGraphEdge(e.Source,newE,str1,templateLengthHightLimit);BioGraphEdge(newS,e.Target,str2,templateLengthHightLimit)|]
+                    [|new BioGraphEdge(e.Source,newE,str1,templateLengthHightLimit, e.Tag.id);BioGraphEdge(newS,e.Target,str2,templateLengthHightLimit, e.Tag.id)|]
             )
         |> Array.ofSeq
-    //|> qGraph.AddVerticesAndEdgeRange
-    //|> ignore    
-
+   
     printfn "long edges %A" !leCount
 
     let ug = new QuickGraph.UndirectedGraph<_,_>(true)
@@ -117,7 +100,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
             
         x
         |> Array.Parallel.map (fun vs -> vs |> Array.collect (fun v -> ug.AdjacentEdges v |> Array.ofSeq) |> (fun c -> new System.Collections.Generic.HashSet<_>(c)) |> Array.ofSeq )
-        //|> Array.Parallel.map (fun vs -> edgs |> Array.filter (fun e -> Array.exists (fun v -> e.Source = v || e.Target = v) vs))
+        |> Array.filter (fun x -> x.Length > 1)
     
     let avgl = components |> Array.map (fun c -> c |> Array.averageBy (fun x -> float x.Tag.length))
     let suml = components |> Array.map (fun c -> c |> Array.sumBy (fun x -> x.Tag.length))
@@ -127,48 +110,26 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
 
     printfn "L %A" (Seq.length components)
     components
-    |> Seq.head
-    |> qGraph.AddVerticesAndEdgeRange 
-    |> ignore
-    qGraph
+    |> Seq.map
+       (fun edges -> 
+         let qGraph = new QuickGraph.AdjacencyGraph<_,_>()
+         qGraph.AddVerticesAndEdgeRange 
+         |> ignore
+         qGraph) 
+    , longEdges
+            
+let loadGraphFormFileToBioParserInputGraph fileWithoutExt templateLengthHightLimit tokenizer eof =
+    let convert (g:QuickGraph.AdjacencyGraph<_,BioGraphEdge>) =
+        let edges = 
+            g.Edges 
+            |> Seq.map(
+                fun e -> 
+                    let tag = e.Tag.str.ToCharArray() |> Array.map tokenizer
+                    new BioParserEdge(e.Source, e.Target, e.Tag.length, tag)
+            )
+            |> Array.ofSeq
+        new BioParserInputGraph(edges)
 
-
-let loadGraphFormFileToOarserInputGraph fileWithoutExt templateLengthHightLimit tokenizer eof =
-    let edg f t l = new ParserEdge<_>(f,t,l)    
-    let g = loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit    
-    let cnt = ref (g.Vertices |> Seq.max |> ((+)1))
-    let edgs = 
-        g.Edges    
-        |> Seq.collect (fun e -> e.Tag.str.ToCharArray()
-                                 |> Array.mapi (fun i ch -> edg (if i = 0 then e.Source else (!cnt)) (if i = e.Tag.str.Length - 1 then e.Target else (incr cnt ; !cnt)) (tokenizer ch) ))
-        |> Array.ofSeq
-
-    let newVMap =    
-        edgs 
-        |> Array.fold
-            (fun l e ->
-              e.Source :: e.Target :: l  )
-            []
-        |> Set.ofList
-        |> Set.toArray
-        |> Array.mapi(fun i s -> (s,i))
-        |> dict
-
-    let finalV = newVMap |> Seq.length
-    //53072
-    let parserInputGraph = new ParserInputGraph<_>(0, finalV)
-
-    edgs
-    |> Array.map
-        (fun e -> edg newVMap.[e.Source] newVMap.[e.Target] e.Tag)
-    |> parserInputGraph.AddVerticesAndEdgeRange
-    |> ignore
-
-    g.Vertices 
-    |> Seq.map (fun v -> edg v finalV eof)
-    |> parserInputGraph.AddVerticesAndEdgeRange
-    |> ignore    
-
-    printfn "Vert Count = %A" (!cnt)
-    parserInputGraph
-    
+    let gs,longEdges = loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit
+    gs |> Seq.map convert
+    ,longEdges

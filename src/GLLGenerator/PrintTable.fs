@@ -263,13 +263,10 @@ let printTableGLL
             printBr "let buildAst : (seq<Token> -> ParserCommon.ParseResult<_>) ="
             printBrInd 1 "buildAst<Token> parserSource"
         else
-            if not withoutTree
-            then
-                printBr "let buildAbstractAst : (AbstractAnalysis.Common.BioParserInputGraph<Token> -> int -> ParserCommon.ParseResult<_>) ="
-                printBrInd 1 "buildAbstractAst<Token> parserSource"
-            else
-                printBr "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph<Token> -> int -> int -> ParserCommon.ParseResult<_>) ="
-                printBrInd 1 "buildAbstract<Token> parserSource"
+                printBr "let buildAbstractAst : (AbstractAnalysis.Common.BioParserInputGraph -> int -> ParserCommon.ParseResult<_>) ="
+                printBrInd 1 "Yard.Generators.GLL.AbstractParser.buildAbstractAst<Token> parserSource"            
+                printBr "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> int -> int -> ParserCommon.ParseResult<_>) ="
+                printBrInd 1 "Yard.Generators.GLL.AbstractParserWithoutTree.buildAbstract<Token> parserSource"
         printBr ""
         res.ToString()
     printTable ()

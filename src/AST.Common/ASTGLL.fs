@@ -107,7 +107,7 @@ type NumNode<'vtype> =
 
 
 [<AllowNullLiteral>]
-type Tree<'TokenType> (graph : BioParserInputGraph<'TokenType>, root : INode, rules : int[][]) =
+type Tree<'TokenType> (graph : BioParserInputGraph, root : INode, rules : int[][]) =
     member this.graph = graph
     member this.AstToDot (indToString : int -> string) (tokenToNumber : 'TokenType -> int) (tokenData : 'TokenType -> obj) (path : string) =
         use out = new System.IO.StreamWriter (path : string)

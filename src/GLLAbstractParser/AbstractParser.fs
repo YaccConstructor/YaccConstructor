@@ -24,7 +24,7 @@ type M =
     new (p,l) = {pos = p; lbl = l}
         
 
-let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph<'TokenType>) maxLen : ParserCommon.ParseResult<_> = 
+let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph) maxLen : ParserCommon.ParseResult<_> = 
     if input.EdgeCount = 0 then
       //  if parser.AcceptEmptyInput then
       //      let eps = new Nonnte

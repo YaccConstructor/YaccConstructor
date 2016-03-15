@@ -31,7 +31,8 @@ type ResultStruct =
     val nterm : string
     new (l,l1, r, r1, n) = {le = l; lpos = l1; re = r; rpos = r1; nterm = n}
 
-let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph<'TokenType>) maxLen condNonTerm shift = 
+let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph) maxLen condNonTerm = 
+    let shift = input.Shift
     if input.EdgeCount = 0 then
       Error ("This grammar does not accept empty input.")     
     else
@@ -41,13 +42,13 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 r.[input.Edges.[i].Start] <- i :: r.[input.Edges.[i].Start]
             r
         let parser = parser
-        let mutable reused = 0
-        let mutable descriptorNumber = 0
+        let reused = ref 0
+        let descriptorNumber = ref 0
         let slots = parser.Slots
         let condNonTermRules = Seq.toArray <| seq{for i in 0..parser.LeftSide.Length - 1 do if parser.LeftSide.[i] = condNonTerm then yield i}
         let setU = new CompressedArray<SysDict<int, SysDict<int64, ResizeArray<int64<extension>>>>>(input.ChainLength, (fun _ -> null )) 
         let setP = new SysDict<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int64<extension>>>(500)
-        let setR = new System.Collections.Generic. Queue<Context2>(100)  
+        let setR = new System.Collections.Generic.Queue<Context2>(100)  
         let currentRule = parser.StartRule
         let currentLabel = ref <| (CommonFuns.pack2to32 currentRule 0) * 1<labelMeasure>
         let tempCount = ref 0
@@ -60,11 +61,15 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let edges = Array.init slots.Count (fun _ -> new CompressedArray<SysDict<int64<extension>, SysDict<int, ResizeArray<int>>>> (input.ChainLength, (fun _ -> null)))          
         let currentGSSNode = ref <| dummyGSSNode
         
-        for v in input.InitialVertices do
-            for e in outEdges.[v] do 
-                let ext = packExtension e 0
-                let index = pack2to32 e (-shift)
-                setR.Enqueue(new Context2(index, !currentLabel, !currentGSSNode, ext)) 
+//        for v in input.InitialVertices do
+//            for e in outEdges.[v] do 
+//                let ext = packExtension e 0
+//                let index = pack2to32 e (-shift)
+//                setR.Enqueue(new Context2(index, !currentLabel, !currentGSSNode, ext)) 
+
+        for e in input.InitialVertices do
+            let ext = packExtension e e
+            setR.Enqueue(new Context2(e, !currentLabel, !currentGSSNode, ext))
 
         let currentContext = ref <| new Context2(!currentIndex, !currentLabel, !currentGSSNode, !currentExtension)
         
@@ -114,9 +119,9 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             if not <| containsContext inputVertex label vertex extension 
             then
                 setR.Enqueue(new Context2(inputVertex, label, vertex, extension))
-                descriptorNumber <- descriptorNumber + 1
+                incr descriptorNumber
             else
-              reused <- reused + 1
+              incr reused
 
         let containsEdge (b : Vertex) (e : Vertex) extension =
             let labelN = slots.[int b.NontermLabel]
@@ -315,7 +320,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             | None -> 
                 Error ("String was not parsed")
             | Some res -> 
-                printfn "Reused descriptors %d" reused
-                printfn "All descriptors %d" descriptorNumber
+                printfn "Reused descriptors %d" !reused
+                printfn "All descriptors %d" !descriptorNumber
                 Success1 (res) 
                                   

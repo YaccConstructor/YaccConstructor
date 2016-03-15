@@ -133,12 +133,12 @@ type GLL() =
                     println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
                     if isAbstract
                     then
-                        println "open Yard.Generators.GLL.AbstractParser"
+                        //println "open Yard.Generators.GLL.AbstractParser"
                         println "open AbstractAnalysis.Common"
                     else
                         if !withoutTree
                         then
-                            println "open Yard.Generators.GLL.AbstractParserWithoutTree"
+                            //println "open Yard.Generators.GLL.AbstractParserWithoutTree"
                             println "open AbstractAnalysis.Common"
                         else
                             println "open Yard.Generators.GLL.Parser"

@@ -105,18 +105,22 @@ type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) =
     new (initial : int, final : int) = 
         ParserInputGraph<_>([|initial|], [|final|])
  
-type BioParserEdge<'token>(s : int, e : int, t : int[]) =
+type BioParserEdge(s : int, e : int, l : int, t : int[]) =
     member this.Start = s
     member this.End = e
+    member this.RealLenght = l
     member this.Tokens = t 
       
-type BioParserInputGraph<'token>(initialVertices : int[], finalVertex : int, chainLen : int[], edges : BioParserEdge<'token>[], vertexCount : int) = 
-    member this.Edges = edges
-    member this.InitialVertices = initialVertices
-    member this.FinalVertex = finalVertex
-    member this.ChainLength = chainLen
-    member this.EdgeCount = edges.Length
-    member this.VertexCount = vertexCount
-
+type BioParserInputGraph(edges : BioParserEdge[]) =
+    let 
+    let edgs =  
+    member val Edges = [] with get, private set
+//    member this.MapToOriginalGraph = 
+//    member this.InitialVertices = initialVertices
+//    member this.FinalVertex = finalVertex
+//    member this.ChainLength = chainLen
+//    member this.EdgeCount = edges.Length
+//    member this.VertexCount = vertexCount
+//    member this.Shift = 
 
 

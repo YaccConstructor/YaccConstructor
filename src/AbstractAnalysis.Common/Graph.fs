@@ -119,16 +119,14 @@ type BioParserInputGraph(edges : BioParserEdge[]) =
     let chainLen = Array.zeroCreate edges.Length
     let initialVertices = new ResizeArray<_>()
     let finalVertex = ref 0
-    do
-        printfn "!!!!!!!!!"
+    do        
         let cnt = ref 0
         let vMap = new System.Collections.Generic.Dictionary<_,_>()
         let getV x = 
             let f,v = vMap.TryGetValue x
             if f 
             then v
-            else 
-                printfn "cnt=%A" !cnt
+            else       
                 let newV = !cnt                
                 vMap.Add(x,newV)
                 incr cnt
@@ -139,7 +137,7 @@ type BioParserInputGraph(edges : BioParserEdge[]) =
             edgs.[i] <- edg
             chainLen.[i] <- e.Tokens.Length
             shift := e.Tokens.Length - e.RealLenght
-            for j in 0..e.Tokens.Length do
+            for j in 0..e.Tokens.Length - 2 do
                 initialVertices.Add(pack2to32 i (j - !shift)))
         vertexCount := vMap.Count
     member this.Edges  with get () = edgs

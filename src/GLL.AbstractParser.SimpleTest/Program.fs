@@ -737,8 +737,9 @@ type ``GLL abstract parser tests`` () =
         let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 1001 getSmb (GLL.Bio2.RNGLR_EOF 0) 
         let res = 
             graphs
-            |> Seq.map (fun graph -> GLL.Bio2.buildAbstract graph 100 3)
-        0
+            |> Array.ofSeq
+            |> Array.map (fun graph -> GLL.Bio2.buildAbstract graph 100 3)
+        printfn "%A" res
 
     [<Test>]
     member this.``1000: trna in 860-930`` () =
@@ -831,7 +832,7 @@ let fs x =
               //_35_Expression() //
     //let th = new System.Threading.Thread(f, 10000000)
     //th.Start()
-    t.bio2_5()
+    //t.bio2_5()
     //t.bio2_4()
     t.``1000: trna in 860-930``()
     0

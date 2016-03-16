@@ -112,39 +112,40 @@ type BioParserEdge(s : int, e : int, l : int, t : int[]) =
     member this.Tokens = t 
       
 type BioParserInputGraph(edges : BioParserEdge[]) =        
-    let pack2to32 rule position = ((int rule <<< 16) ||| int position)    
+    let pack2to32 rule position = ((int position <<< 16) ||| int rule)    
     let edgs = Array.zeroCreate edges.Length
     let shift = ref -1
     let vertexCount = ref 0
     let chainLen = Array.zeroCreate edges.Length
     let initialVertices = new ResizeArray<_>()
     let finalVertex = ref 0
-    do
+    do        
         let cnt = ref 0
         let vMap = new System.Collections.Generic.Dictionary<_,_>()
         let getV x = 
             let f,v = vMap.TryGetValue x
             if f 
             then v
-            else 
-                let newV = !cnt
-                incr cnt
+            else       
+                let newV = !cnt                
                 vMap.Add(x,newV)
+                incr cnt
                 newV
         edges
         |> Array.iteri (fun i e -> 
             let edg = new BioParserEdge(getV e.Start, getV e.End, e.RealLenght, e.Tokens)
             edgs.[i] <- edg
-            chainLen.[i] <- e.Tokens.Length
-            shift := e.Tokens.Length - e.RealLenght
-            for j in 0..e.Tokens.Length do
+            chainLen.[i] <- e.Tokens.Length + 1
+            shift := max !shift (e.Tokens.Length - e.RealLenght)
+            for j in 0..e.Tokens.Length - 1 do
                 initialVertices.Add(pack2to32 i (j - !shift)))
-    member val Edges = edges with get
-    member val InitialVertices = initialVertices.ToArray() with get
-    member val FinalVertex = !finalVertex with get
-    member val ChainLength = chainLen with get
-    member val EdgeCount = edgs.Length with get
-    member val VertexCount = !vertexCount with get
-    member val Shift = !shift with get
+        vertexCount := vMap.Count
+    member this.Edges  with get () = edgs
+    member this.InitialVertices with get () = initialVertices.ToArray()
+    member this.FinalVertex with get () = !finalVertex
+    member this.ChainLength with get () = chainLen
+    member this.EdgeCount with get () = edgs.Length
+    member this.VertexCount with get () = !vertexCount
+    member this.Shift with get () = !shift
 
 

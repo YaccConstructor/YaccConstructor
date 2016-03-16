@@ -100,7 +100,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
             
         x
         |> Array.Parallel.map (fun vs -> vs |> Array.collect (fun v -> ug.AdjacentEdges v |> Array.ofSeq) |> (fun c -> new System.Collections.Generic.HashSet<_>(c)) |> Array.ofSeq )
-        |> Array.filter (fun x -> x.Length > 1)
+        //|> Array.filter (fun x -> x.Length > 1)
     
     let avgl = components |> Array.map (fun c -> c |> Array.averageBy (fun x -> float x.Tag.length))
     let suml = components |> Array.map (fun c -> c |> Array.sumBy (fun x -> x.Tag.length))
@@ -110,10 +110,10 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
 
     printfn "L %A" (Seq.length components)
     components
-    |> Seq.map
+    |> Array.map
        (fun edges -> 
          let qGraph = new QuickGraph.AdjacencyGraph<_,_>()
-         qGraph.AddVerticesAndEdgeRange 
+         qGraph.AddVerticesAndEdgeRange edges
          |> ignore
          qGraph) 
     , longEdges
@@ -131,5 +131,5 @@ let loadGraphFormFileToBioParserInputGraph fileWithoutExt templateLengthHightLim
         new BioParserInputGraph(edges)
 
     let gs,longEdges = loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit
-    gs |> Seq.map convert
+    gs |> Array.map convert
     ,longEdges

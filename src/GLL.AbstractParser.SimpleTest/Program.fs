@@ -115,6 +115,62 @@ let test buildAbstractAst qGraph l (intToString : int -> string) (fileName : str
      
 let f arr tokenToNumber = Array.map (fun e -> tokenToNumber e) arr
 let len (edges : BioParserEdge[]) : int[] = edges |> Array.map (fun e -> e.Tokens.Length + 1) 
+
+let filterRnaParsingResult res expectedRange lengthLimit =
+    match res:ParseResult<ResultStruct> with
+    | Success ast -> Assert.Fail "Result is success but it is unrxpectrd success"
+    | Success1 x ->
+        let ranges = new ResizeArray<_>()
+        let curLeft = ref 0
+        let curRight = ref 0                  
+        let x = 
+            let onOneEdg, other =
+                x |> Set.ofSeq
+                |> Array.ofSeq
+                |> Array.filter (fun s -> s.rpos - s.lpos > lengthLimit || s.le <> s.re)
+                |> Array.partition (fun s -> 
+                    Assert.IsTrue(s.le >= 0, "Edge number could not be negative!")
+                    Assert.IsTrue(s.re >= 0, "Edge number could not be negative!")
+                    Assert.IsTrue(s.le < 65535, "Strange edge number.")
+                    Assert.IsTrue(s.re < 65535, "Strange edge number.")
+                    s.le = s.re)
+                    
+            let curEdg = ref 0
+            onOneEdg
+            |> Array.iter(fun s ->
+                curEdg := s.le
+                if !curRight < s.lpos
+                then 
+                    ranges.Add ((s.le,!curLeft),(s.re,!curRight))
+                    curLeft := s.lpos
+                    curRight := s.rpos                        
+                else
+                    curLeft := min !curLeft s.lpos
+                    curRight := max !curRight s.rpos
+                    )
+            ranges.Add((!curEdg,!curLeft),(!curEdg,!curRight))
+            other
+            |> Seq.groupBy(fun s -> s.le,s.re)
+            |> Seq.map snd
+            |> Seq.iter(fun s ->
+                let left = s |> Seq.minBy (fun s -> s.lpos)
+                let right = s |> Seq.maxBy (fun s -> s.rpos)                        
+                ranges.Add((left.le,left.lpos),(right.re,right.rpos)))
+        printfn "Expected: %A" expectedRange
+        ranges |> Seq.iter (printfn "%A; ")
+        printfn ""
+        printfn "Success!"        
+        Assert.IsTrue 
+            (ranges 
+                |> Seq.exists 
+                (fun (a,b) -> 
+                    let intersection = Set.intersect (Set.ofArray [|snd a..snd b|]) (Set.ofArray [|fst expectedRange |> snd..snd expectedRange |> snd|]) |> Set.count  
+                    intersection < 150 && intersection >= 60
+                    && fst a = (expectedRange |> fst |> fst)
+                    && fst b = (expectedRange |> snd |> fst)))
+    | Error e -> 
+        sprintf "Input parsing failed: %A" e
+        |> Assert.Fail
 //let edgB b e t = new BioParserEdge(b, e, t) 
 
 [<TestFixture>]
@@ -694,82 +750,34 @@ type ``GLL abstract parser tests`` () =
 //  
     member this.``1000: trna`` file lengthLimit expectedRange =
         let start = System.DateTime.Now
-        let processRes (res:ParseResult<ResultStruct>) = 
-            match res with
-            | Success ast -> Assert.Fail "Result is success but it is unrxpectrd success"
-            | Success1 x ->
-                let ranges = new ResizeArray<_>()
-                let curLeft = ref 0
-                let curRight = ref 0                  
-                let x = 
-                    let onOneEdg, other =
-                        x |> Set.ofSeq
-                        |> Array.ofSeq
-                        |> Array.filter (fun s -> s.rpos - s.lpos > 60 || s.le <> s.re)
-                        |> Array.partition (fun s -> s.le = s.re)
-                    
-                    let curEdg = ref 0
-                    onOneEdg
-                    |> Array.iter(fun s ->
-                        curEdg := s.le
-                        if !curRight < s.lpos
-                        then 
-                            ranges.Add ((s.le,!curLeft),(s.re,!curRight))
-                            curLeft := s.lpos
-                            curRight := s.rpos                        
-                        else
-                            curLeft := min !curLeft s.lpos
-                            curRight := max !curRight s.rpos
-                            )
-                    ranges.Add((!curEdg,!curLeft),(!curEdg,!curRight))
-                    other
-                    |> Seq.groupBy(fun s -> s.le,s.re)
-                    |> Seq.map snd
-                    |> Seq.iter(fun s ->
-                        let left = s |> Seq.minBy (fun s -> s.lpos)
-                        let right = s |> Seq.maxBy (fun s -> s.rpos)                        
-                        ranges.Add((left.le,left.lpos),(right.re,right.rpos)))
-                printfn "Expected: %A" expectedRange
-                ranges |> Seq.iter (printfn "%A; ")
-                printfn ""
-                printfn "Success!"
-                printfn "Time = %A"  (System.DateTime.Now - start)        
-                Assert.IsTrue 
-                    (ranges 
-                     |> Seq.exists 
-                        (fun (a,b) -> 
-                            let intersection = Set.intersect (Set.ofArray [|snd a..snd b|]) (Set.ofArray [|fst expectedRange |> snd..snd expectedRange |> snd|]) |> Set.count  
-                            intersection < 150 && intersection >= 60
-                            && fst a = (expectedRange |> fst |> fst)
-                            && fst b = (expectedRange |> snd |> fst)))
-            | Error e -> 
-                sprintf "Input parsing failed: %A" e
-                |> Assert.Fail
+        let processRes res = 
+            filterRnaParsingResult res expectedRange 60        
 
         let getSmb =
             let cnt = ref 0
             fun ch ->
                 let i = incr cnt; !cnt 
                 match ch with
-                | 'A' -> GLL.Bio2.A i                
-                | 'U' -> GLL.Bio2.U i
-                | 'T' -> GLL.Bio2.U i
-                | 'C' -> GLL.Bio2.C i
-                | 'G' -> GLL.Bio2.G i                
+                | 'A' -> GLL.tRNA.A i                
+                | 'U' -> GLL.tRNA.U i
+                | 'T' -> GLL.tRNA.U i
+                | 'C' -> GLL.tRNA.C i
+                | 'G' -> GLL.tRNA.G i                
                 | x ->   failwithf "Strange symbol in input: %A" x
-                |> GLL.Bio2.tokenToNumber                
+                |> GLL.tRNA.tokenToNumber                
         let basePath = "../../../Tests/bio/"
         let path = Path.Combine(basePath, file)
-        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.Bio2.RNGLR_EOF 0)
+        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.tRNA.RNGLR_EOF 0)
 
         graphs
         |> Array.ofSeq
         |> Array.mapi 
             (fun i graph -> 
                 printfn "%A" i
-                GLL.Bio2.buildAbstract graph 100 3
+                GLL.tRNA.buildAbstract graph 100 3
             )
         |> Array.iter processRes
+        printfn "Time = %A" (System.DateTime.Now - start)
 
     [<Test>]
     member this.``1000: trna in 860-930`` () =
@@ -782,6 +790,38 @@ type ``GLL abstract parser tests`` () =
     [<Test>]
     member this.``1000: trna in 133-204`` () =
         this.``1000: trna`` """simple_tRNA3\g""" 1001 ((0,133),(0,204))
+
+    [<Test>]
+    member this.``Problem with shift. Big`` () =
+        this.``1000: trna`` """simple_tRNA5\g""" 1001 ((0,34),(0,99))
+
+    [<Test>]
+    member this.``Problem with shift. Small`` () =
+        let file = """problem_with_shift\g""" 
+        let lengthLimit = 1001 
+        let expectedRange = ((0,0),(0,4))
+        let getSmb =
+            let cnt = ref 0
+            fun ch ->
+                let i = incr cnt; !cnt 
+                match ch with
+                | 'A' -> GLL.shiftProblem.A i                
+                | 'C' -> GLL.shiftProblem.C i
+                | 'G' -> GLL.shiftProblem.G i                
+                | x ->   failwithf "Strange symbol in input: %A" x
+                |> GLL.shiftProblem.tokenToNumber                
+        let basePath = "../../../Tests/bio/"
+        let path = Path.Combine(basePath, file)
+        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.shiftProblem.RNGLR_EOF 0)
+
+        graphs
+        |> Array.ofSeq
+        |> Array.mapi 
+            (fun i graph -> 
+                printfn "%A" i
+                GLL.shiftProblem.buildAbstract graph 100 1
+            )
+        |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 60)        
     
     [<Test>]
     member this.``1000 as graph 49 + 5: trna in 133-204`` () =
@@ -803,6 +843,7 @@ let fs x =
     //t.bio2_5()
     //t.bio2_4()
     //t.``1000: trna in 133-204``()
-    //t.``Big for tRNA 1``()
-    t.``1000 as graph 49 + 5: trna in 133-204``()
+    //t.``1000: trna in 133-204``()
+    t.``Problem with shift. Small``()
+    //t.``1000 as graph 49 + 5: trna in 133-204``()
     0

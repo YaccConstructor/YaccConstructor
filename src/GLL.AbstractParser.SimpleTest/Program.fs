@@ -692,7 +692,7 @@ type ``GLL abstract parser tests`` () =
 //        let parse = GLL.MsSqlParser.buildAbstractAst
 //        perfTest2 parse graphGenerator
 //  
-    member this.``1000: trna`` file expectedRange =
+    member this.``1000: trna`` file lengthLimit expectedRange =
         let start = System.DateTime.Now
         let processRes (res:ParseResult<ResultStruct>) = 
             match res with
@@ -700,23 +700,37 @@ type ``GLL abstract parser tests`` () =
             | Success1 x ->
                 let ranges = new ResizeArray<_>()
                 let curLeft = ref 0
-                let curRight = ref 0  
+                let curRight = ref 0                  
                 let x = 
-                    x |> Set.ofSeq
-                    |> Seq.filter (fun s -> s.rpos - s.lpos > 60)
-                    |> Seq.iter(fun s ->
+                    let onOneEdg, other =
+                        x |> Set.ofSeq
+                        |> Array.ofSeq
+                        |> Array.filter (fun s -> s.rpos - s.lpos > 60 || s.le <> s.re)
+                        |> Array.partition (fun s -> s.le = s.re)
+                    
+                    let curEdg = ref 0
+                    onOneEdg
+                    |> Array.iter(fun s ->
+                        curEdg := s.le
                         if !curRight < s.lpos
                         then 
-                            ranges.Add (!curLeft,!curRight)
+                            ranges.Add ((s.le,!curLeft),(s.re,!curRight))
                             curLeft := s.lpos
                             curRight := s.rpos                        
                         else
                             curLeft := min !curLeft s.lpos
                             curRight := max !curRight s.rpos
                             )
-                    ranges.Add(!curLeft,!curRight)
+                    ranges.Add((!curEdg,!curLeft),(!curEdg,!curRight))
+                    other
+                    |> Seq.groupBy(fun s -> s.le,s.re)
+                    |> Seq.map snd
+                    |> Seq.iter(fun s ->
+                        let left = s |> Seq.minBy (fun s -> s.lpos)
+                        let right = s |> Seq.maxBy (fun s -> s.rpos)                        
+                        ranges.Add((left.le,left.lpos),(right.re,right.rpos)))
                 printfn "Expected: %A" expectedRange
-                ranges |> Seq.iter (printf "%A; ")
+                ranges |> Seq.iter (printfn "%A; ")
                 printfn ""
                 printfn "Success!"
                 printfn "Time = %A"  (System.DateTime.Now - start)        
@@ -724,8 +738,10 @@ type ``GLL abstract parser tests`` () =
                     (ranges 
                      |> Seq.exists 
                         (fun (a,b) -> 
-                            let intersection = Set.intersect (Set.ofArray [|a..b|]) (Set.ofArray [|fst expectedRange..snd expectedRange|]) |> Set.count  
-                            intersection < 150 && intersection >= 60))
+                            let intersection = Set.intersect (Set.ofArray [|snd a..snd b|]) (Set.ofArray [|fst expectedRange |> snd..snd expectedRange |> snd|]) |> Set.count  
+                            intersection < 150 && intersection >= 60
+                            && fst a = (expectedRange |> fst |> fst)
+                            && fst b = (expectedRange |> snd |> fst)))
             | Error e -> 
                 sprintf "Input parsing failed: %A" e
                 |> Assert.Fail
@@ -740,11 +756,11 @@ type ``GLL abstract parser tests`` () =
                 | 'T' -> GLL.Bio2.U i
                 | 'C' -> GLL.Bio2.C i
                 | 'G' -> GLL.Bio2.G i                
-                | _ ->   GLL.Bio2.G i
+                | x ->   failwithf "Strange symbol in input: %A" x
                 |> GLL.Bio2.tokenToNumber                
         let basePath = "../../../Tests/bio/"
         let path = Path.Combine(basePath, file)
-        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 1001 getSmb (GLL.Bio2.RNGLR_EOF 0)
+        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.Bio2.RNGLR_EOF 0)
 
         graphs
         |> Array.ofSeq
@@ -757,19 +773,23 @@ type ``GLL abstract parser tests`` () =
 
     [<Test>]
     member this.``1000: trna in 860-930`` () =
-        this.``1000: trna`` """simple_tRNA1\g""" (860,930)
+        this.``1000: trna`` """simple_tRNA1\g""" 1001 ((0,860),(0,930))
 
     [<Test>]
     member this.``1000: trna in 629-699`` () =
-        this.``1000: trna`` """simple_tRNA2\g""" (629,699)
+        this.``1000: trna`` """simple_tRNA2\g""" 1001 ((0,629),(0,699))
 
     [<Test>]
     member this.``1000: trna in 133-204`` () =
-        this.``1000: trna`` """simple_tRNA3\g""" (133,204)
+        this.``1000: trna`` """simple_tRNA3\g""" 1001 ((0,133),(0,204))
+    
+    [<Test>]
+    member this.``1000 as graph 49 + 5: trna in 133-204`` () =
+        this.``1000: trna`` """simple_tRNA4\g""" 120 ((0,133),(0,204))
 
    // [<Test>]
     member this.``Big for tRNA 1`` () =
-        this.``1000: trna`` """mix_1\late_pair_info_count""" (860,930)
+        this.``1000: trna`` """mix_1\late_pair_info_count""" 120 ((0,860),(0,930))
 
         
 [<EntryPoint>]
@@ -783,5 +803,6 @@ let fs x =
     //t.bio2_5()
     //t.bio2_4()
     //t.``1000: trna in 133-204``()
-    t.``Big for tRNA 1``()
+    //t.``Big for tRNA 1``()
+    t.``1000 as graph 49 + 5: trna in 133-204``()
     0

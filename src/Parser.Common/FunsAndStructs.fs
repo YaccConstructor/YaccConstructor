@@ -75,9 +75,6 @@ type CompressedArray<'t>(l : int[], f : _ -> 't, shift) =
             a.[edg].[shift + pos]
         and set i v = a.[(CommonFuns.getEdge i)].[shift + (CommonFuns.getPosOnEdge i)] <- v
        
-    
-
-
 type ParserStructures<'TokenType> (currentRule : int)=
     let sppfNodes = new BlockResizeArray<INode>()
     let dummyAST = new TerminalNode(-1, packExtension -1 -1, 0)
@@ -94,33 +91,26 @@ type ParserStructures<'TokenType> (currentRule : int)=
 
     let currentLabel = ref <| (CommonFuns.packLabelNew currentRule 0) * 1<labelMeasure>
     
+    let getTreeExtension (node : int<nodeMeasure>) =
+        match sppfNodes.Item (int node) with
+        | :? TerminalNode as t ->
+            t.Extension
+        | :? IntermidiateNode as i ->
+            i.Extension
+        | :? NonTerminalNode as n ->
+            n.Extension
+        | _ -> failwith "Bad type for tree node"   
+
     let getNodeP 
         findSppfNode 
         (findSppfPackedNode : _ -> _ -> _ -> _ -> INode -> INode -> int<nodeMeasure>) 
         dummy (label : int<labelMeasure>) (left : int<nodeMeasure>) (right : int<nodeMeasure>) : int<nodeMeasure> =
-            let currentRight = sppfNodes.Item (int right)
-            let rightExt = 
-                match currentRight with                    
-                | :? NonTerminalNode as nonTerm ->
-                    nonTerm.Extension
-                | :? IntermidiateNode as interm ->
-                    interm.Extension
-                | :? TerminalNode as term ->
-                    term.Extension   
-                | _ -> failwith "Smth strange, Nastya"             
+            let currentRight = sppfNodes.Item (int right)  
+            let rightExt = getTreeExtension right           
             if left <> dummy
             then
                 let currentLeft = sppfNodes.Item (int left)
-                let leftExt =
-                    match currentLeft with                    
-                    | :? NonTerminalNode as nonTerm ->
-                        nonTerm.Extension
-                    | :? IntermidiateNode as interm ->
-                        interm.Extension
-                    | :? TerminalNode as term ->
-                        term.Extension 
-                    | _ -> failwith "Smth strange, Nastya" 
-                    
+                let leftExt = getTreeExtension left
                 let y = findSppfNode label (getLeftExtension leftExt) (getRightExtension rightExt)
                 ignore <| findSppfPackedNode y label leftExt rightExt currentLeft currentRight
                 y
@@ -130,8 +120,6 @@ type ParserStructures<'TokenType> (currentRule : int)=
                 y
                                  
     let containsContext (setU : CompressedArray<Dictionary<_, Dictionary<_, ResizeArray<_>>>>) inputIndex (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
-        //if inputIndex <= inputLength
-        //then
         let vertexKey = CommonFuns.pack vertex.Level vertex.NontermLabel
         if setU.[inputIndex] <> Unchecked.defaultof<_>
         then
@@ -212,16 +200,6 @@ type ParserStructures<'TokenType> (currentRule : int)=
                 newDict2.Add(e.NontermLabel, newArr)
                 newDict1.Add(ast, newDict2)
                 false, Some newDict1   
-                
-    let getTreeExtension (node : int<nodeMeasure>) =
-        match sppfNodes.Item (int node) with
-        | :? TerminalNode as t ->
-            t.Extension
-        | :? IntermidiateNode as i ->
-            i.Extension
-        | :? NonTerminalNode as n ->
-            n.Extension
-        | _ -> failwith "Bad type for tree node"   
 
     let finalMatching (curRight : INode) nontermName finalExtensions findSppfNode findSppfPackedNode currentGSSNode currentVertexInInput (pop : Vertex -> int -> int<nodeMeasure> -> unit)  = 
         match curRight with

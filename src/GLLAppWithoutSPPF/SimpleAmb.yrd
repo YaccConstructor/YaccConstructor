@@ -1,4 +1,5 @@
 [<Start>]
-s : A (B | C)
+s : A B cd cd A
+cd : C D
 
  

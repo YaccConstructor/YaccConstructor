@@ -265,7 +265,7 @@ let printTableGLL
         else
                 printBr "let buildAbstractAst : (AbstractAnalysis.Common.BioParserInputGraph -> int -> ParserCommon.ParseResult<_>) ="
                 printBrInd 1 "Yard.Generators.GLL.AbstractParser.buildAbstractAst<Token> parserSource"            
-                printBr "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> int -> int -> ParserCommon.ParseResult<_>) ="
+                printBr "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> int -> ParserCommon.ParseResult<_>) ="
                 printBrInd 1 "Yard.Generators.GLL.AbstractParserWithoutTree.buildAbstract<Token> parserSource"
         printBr ""
         res.ToString()

@@ -48,7 +48,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let condNonTermRules = Seq.toArray <| seq{for i in 0..parser.LeftSide.Length - 1 do if parser.LeftSide.[i] = condNonTerm then yield i}
         let setU = new CompressedArray<SysDict<int, SysDict<int64, ResizeArray<int64<extension>>>>>(input.ChainLength, (fun _ -> null ),shift) 
         let setP = new SysDict<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int64<extension>>>(500)
-        let setR = new System.Collections.Generic.Queue<Context2>(100)  
+        let setR = new System.Collections.Generic.Stack<Context2>(100)  
         let currentRule = parser.StartRule
         let currentLabel = ref <| (CommonFuns.packLabelNew currentRule 0) * 1<labelMeasure>
         let tempCount = ref 0
@@ -69,7 +69,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
 
         for e in input.InitialVertices do
             let ext = packExtension e e
-            setR.Enqueue(new Context2(e, !currentLabel, !currentGSSNode, ext))
+            setR.Push(new Context2(e, !currentLabel, !currentGSSNode, ext))
 
         let currentContext = ref <| new Context2(!currentIndex, !currentLabel, !currentGSSNode, !currentExtension)
         
@@ -118,7 +118,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let addContext (inputVertex : int) (label : int<labelMeasure>) vertex extension =
             if not <| containsContext inputVertex label vertex extension 
             then
-                setR.Enqueue(new Context2(inputVertex, label, vertex, extension))
+                setR.Push(new Context2(inputVertex, label, vertex, extension))
                 incr descriptorNumber
             else
               incr reused
@@ -206,7 +206,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let stop = ref false
         let rec dispatcher () =
             let rec get () =
-                let c = setR.Dequeue()
+                let c = setR.Pop()
                 c
             if setR.Count <> 0
             then
@@ -319,7 +319,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             | None -> 
                 Error ("String was not parsed")
             | Some res -> 
-                printfn "Reused descriptors %d" !reused
-                printfn "All descriptors %d" !descriptorNumber
+                //printfn "Reused descriptors %d" !reused
+                //printfn "All descriptors %d" !descriptorNumber
                 Success1 (res) 
                                   

@@ -60,14 +60,10 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let input = input           
         let edges = Array.init slots.Count (fun _ -> new CompressedArray<SysDict<int64<extension>, SysDict<int, ResizeArray<int>>>> (input.ChainLength, (fun _ -> null),shift))          
         let currentGSSNode = ref <| dummyGSSNode
-        
-//        for v in input.InitialVertices do
-//            for e in outEdges.[v] do 
-//                let ext = packExtension e 0
-//                let index = pack2to32 e (-shift)
-//                setR.Enqueue(new Context2(index, !currentLabel, !currentGSSNode, ext)) 
-
+     
         for e in input.InitialVertices do
+            let t = getEdge e
+            let tt = getPosOnEdge e 
             let ext = packExtension e e
             setR.Enqueue(new Context2(e, !currentLabel, !currentGSSNode, ext))
 
@@ -208,8 +204,10 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 c
             if setR.Count <> 0
             then
-                currentContext :=  get ()
+                currentContext :=  get () 
                 currentIndex := currentContext.Value.Index
+                let t = getEdge !currentIndex
+                let tt = getPosOnEdge !currentIndex
                 currentGSSNode := currentContext.Value.Vertex
                 currentLabel := currentContext.Value.Label
                 currentExtension := currentContext.Value.Extension
@@ -221,7 +219,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             condition := true
             let rule = getRuleNew !currentLabel
             let position = getPositionNew !currentLabel
-            let eatTerm =
+            let eatTerm () =
                 currentIndex := packEdgePos (getEdge !currentIndex) (1 + getPosOnEdge !currentIndex)
                 currentExtension := packExtension (getLeftExtension !currentExtension) !currentIndex
                 currentLabel := 1<labelMeasure> * packLabelNew rule (position + 1)
@@ -230,6 +228,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             then
               pop !currentGSSNode !currentIndex !currentExtension
             else
+                setR.Count
                 if Array.length parser.rules.[rule] <> position
                 then
                     let curSymbol = parser.rules.[rule].[position]
@@ -244,7 +243,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                             let curToken = input.Edges.[cE].Tokens.[cP] 
                             if curToken = curSymbol
                             then
-                                eatTerm
+                                eatTerm ()
                         else   
                             let curEdge = 
                                 let oEdges = outEdges.[input.Edges.[cE].End]
@@ -257,7 +256,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                             match curEdge with
                             | Some edge ->
                                 currentIndex := (packEdgePos curEdge.Value 0)
-                                eatTerm 
+                                eatTerm ()
                             | None _ -> ()
                     else 
                         let getIndex nTerm term = 
@@ -274,13 +273,14 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                             if flg then
                                 for rule in rules do
                                     let newLabel = 1<labelMeasure> * packLabelNew rule 0
-                                    addContext i newLabel !currentGSSNode (packExtension !currentIndex !currentIndex)      
+                                    addContext i newLabel !currentGSSNode (packExtension !currentIndex !currentIndex)    
                         if cP < chainLen - 1
                         then
-                            addCntxtForNonTerm cP cP !currentIndex   
+                            addCntxtForNonTerm cE cP !currentIndex   
                         else
                             for oE in outEdges.[input.Edges.[cE].End] do
-                                addCntxtForNonTerm oE shift (packEdgePos oE 0)                              
+                                addCntxtForNonTerm oE shift (packEdgePos oE 0)
+                                                      
                 else
                     if Array.exists (fun e -> e = rule) condNonTermRules
                     then

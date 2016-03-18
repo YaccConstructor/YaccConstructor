@@ -1,0 +1,21 @@
+digraph GSS {
+    rankdir=RL
+    0 [label="164"]
+    1 [label="0"]
+    0 -> 1 [label="file"]
+    2 [label="160"]
+    3 [label="159"]
+    4 [label="158"]
+    5 [label="138"]
+    6 [label="34"]
+    7 [label="1"]
+    7 -> 1 [label="eps action_opt"]
+    6 -> 7 [label="eps includes_or_options_or_tokens"]
+    5 -> 6 [label="unnamed_module_opt"]
+    4 -> 5 [label="eps modules"]
+    3 -> 4 [label="eps foot_opt"]
+    2 -> 3 [label="EOF"]
+    {rank=same; 2 0}
+    {rank=same; 7 6 1}
+    {rank=same; 5 4 3}
+}

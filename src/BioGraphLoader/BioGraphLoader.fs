@@ -94,7 +94,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
             a.Components
             |> Seq.groupBy(fun kvp -> kvp.Value)
             |> Array.ofSeq
-            |> Array.Parallel.map (fun (x,s) -> s |> Seq.map (fun kvp -> kvp.Key) |> Array.ofSeq)
+            |> Array.map (fun (x,s) -> s |> Array.ofSeq |> Array.map (fun kvp -> kvp.Key) )
             |> Array.filter(fun a -> a.Length > 1)
             |> Array.sortBy (Array.length >> ((*)-1))
             
@@ -102,33 +102,35 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
         |> Array.Parallel.map (fun vs -> vs |> Array.collect (fun v -> ug.AdjacentEdges v |> Array.ofSeq) |> (fun c -> new System.Collections.Generic.HashSet<_>(c)) |> Array.ofSeq )
         |> Array.filter (fun x -> x.Length > 1)
     
-    let avgl = components |> Array.map (fun c -> c |> Array.averageBy (fun x -> float x.Tag.length))
-    let suml = components |> Array.map (fun c -> c |> Array.sumBy (fun x -> x.Tag.length))
-            
-    printfn "Avg %A" (avgl)
-    printfn "Sum %A" (suml)
+//    let avgl = components |> Array.map (fun c -> c |> Array.averageBy (fun x -> float x.Tag.length))
+//    let suml = components |> Array.map (fun c -> c |> Array.sumBy (fun x -> x.Tag.length))
+//            
+//    printfn "Avg %A" (avgl)
+//    printfn "Sum %A" (suml)
 
     printfn "L %A" (Seq.length components)
     components
-    |> Seq.map
+    |> Array.Parallel.map
        (fun edges -> 
          let qGraph = new QuickGraph.AdjacencyGraph<_,_>()
-         qGraph.AddVerticesAndEdgeRange 
+         qGraph.AddVerticesAndEdgeRange edges
          |> ignore
-         qGraph) 
+         qGraph)
     , longEdges
             
 let loadGraphFormFileToBioParserInputGraph fileWithoutExt templateLengthHightLimit tokenizer eof =
     let convert (g:QuickGraph.AdjacencyGraph<_,BioGraphEdge>) =
         let edges = 
             g.Edges 
-            |> Seq.map(
+            |> Array.ofSeq
+            |> Array.Parallel.map(
                 fun e -> 
                     let tag = e.Tag.str.ToCharArray() |> Array.map tokenizer
                     new BioParserEdge(e.Source, e.Target, e.Tag.length, tag)
-        )
+            )
+            
         new BioParserInputGraph(edges)
 
     let gs,longEdges = loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit
-    gs |> Seq.map convert
+    gs |> Array.Parallel.map convert
     ,longEdges

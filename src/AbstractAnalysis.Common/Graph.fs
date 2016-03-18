@@ -111,16 +111,41 @@ type BioParserEdge(s : int, e : int, l : int, t : int[]) =
     member this.RealLenght = l
     member this.Tokens = t 
       
-type BioParserInputGraph(edges : BioParserEdge[]) =
-    let 
-    let edgs =  
-    member val Edges = [] with get, private set
-//    member this.MapToOriginalGraph = 
-//    member this.InitialVertices = initialVertices
-//    member this.FinalVertex = finalVertex
-//    member this.ChainLength = chainLen
-//    member this.EdgeCount = edges.Length
-//    member this.VertexCount = vertexCount
-//    member this.Shift = 
+type BioParserInputGraph(edges : BioParserEdge[]) =        
+    let pack2to32 rule position = ((int position <<< 16) ||| int rule)    
+    let edgs = Array.zeroCreate edges.Length
+    let shift = ref -1
+    let vertexCount = ref 0
+    let chainLen = Array.zeroCreate edges.Length
+    let initialVertices = new ResizeArray<_>()
+    let finalVertex = ref 0
+    do        
+        let cnt = ref 0
+        let vMap = new System.Collections.Generic.Dictionary<_,_>()
+        let getV x = 
+            let f,v = vMap.TryGetValue x
+            if f 
+            then v
+            else       
+                let newV = !cnt                
+                vMap.Add(x,newV)
+                incr cnt
+                newV
+        edges
+        |> Array.iteri (fun i e -> 
+            let edg = new BioParserEdge(getV e.Start, getV e.End, e.RealLenght, e.Tokens)
+            edgs.[i] <- edg
+            chainLen.[i] <- e.Tokens.Length + 1
+            shift := max !shift (e.Tokens.Length - e.RealLenght)
+            for j in 0..e.Tokens.Length - 1 do
+                initialVertices.Add(pack2to32 i (j - !shift)))
+        vertexCount := vMap.Count
+    member this.Edges  with get () = edgs
+    member this.InitialVertices with get () = initialVertices.ToArray()
+    member this.FinalVertex with get () = !finalVertex
+    member this.ChainLength with get () = chainLen
+    member this.EdgeCount with get () = edgs.Length
+    member this.VertexCount with get () = !vertexCount
+    member this.Shift with get () = !shift
 
 

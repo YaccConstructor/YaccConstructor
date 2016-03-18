@@ -31,7 +31,8 @@ type ResultStruct =
     val nterm : string
     new (l,l1, r, r1, n) = {le = l; lpos = l1; re = r; rpos = r1; nterm = n}
 
-let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph<'TokenType>) maxLen condNonTerm shift = 
+let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph) condNonTerm = 
+    let shift = input.Shift
     if input.EdgeCount = 0 then
       Error ("This grammar does not accept empty input.")     
     else
@@ -45,11 +46,11 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let descriptorNumber = ref 0
         let slots = parser.Slots
         let condNonTermRules = Seq.toArray <| seq{for i in 0..parser.LeftSide.Length - 1 do if parser.LeftSide.[i] = condNonTerm then yield i}
-        let setU = new CompressedArray<SysDict<int, SysDict<int64, ResizeArray<int64<extension>>>>>(input.ChainLength, (fun _ -> null )) 
+        let setU = new CompressedArray<SysDict<int, SysDict<int64, ResizeArray<int64<extension>>>>>(input.ChainLength, (fun _ -> null ),shift) 
         let setP = new SysDict<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int64<extension>>>(500)
-        let setR = new System.Collections.Generic.Queue<Context2>(100)  
+        let setR = new System.Collections.Generic.Stack<Context2>(100)  
         let currentRule = parser.StartRule
-        let currentLabel = ref <| (CommonFuns.pack2to32 currentRule 0) * 1<labelMeasure>
+        let currentLabel = ref <| (CommonFuns.packLabelNew currentRule 0) * 1<labelMeasure>
         let tempCount = ref 0
         let r = ref None  
         let currentIndex = ref 0 
@@ -57,23 +58,19 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let currentExtension = ref 0L<extension>
         let dummyGSSNode = new Vertex(!currentIndex, int !currentLabel)
         let input = input           
-        let edges = Array.init slots.Count (fun _ -> new CompressedArray<SysDict<int64<extension>, SysDict<int, ResizeArray<int>>>> (input.ChainLength, (fun _ -> null)))          
+        let edges = Array.init slots.Count (fun _ -> new CompressedArray<SysDict<int64<extension>, SysDict<int, ResizeArray<int>>>> (input.ChainLength, (fun _ -> null),shift))          
         let currentGSSNode = ref <| dummyGSSNode
-        
-//        for v in input.InitialVertices do
-//            for e in outEdges.[v] do 
-//                let ext = packExtension e 0
-//                let index = pack2to32 e (-shift)
-//                setR.Enqueue(new Context2(index, !currentLabel, !currentGSSNode, ext)) 
-
+     
         for e in input.InitialVertices do
+            let t = getEdge e
+            let tt = getPosOnEdge e 
             let ext = packExtension e e
-            setR.Enqueue(new Context2(e, !currentLabel, !currentGSSNode, ext))
+            setR.Push(new Context2(e, !currentLabel, !currentGSSNode, ext))
 
         let currentContext = ref <| new Context2(!currentIndex, !currentLabel, !currentGSSNode, !currentExtension)
         
         let slotIsEnd (label : int<labelMeasure>) =
-            (getRight32 label) = Array.length (parser.rules.[getRule label])
+            (getPositionNew label) = Array.length (parser.rules.[getRuleNew label])
          
         let containsContext  inputIndex (label : int<labelMeasure>) (vertex : Vertex) extension =
   
@@ -117,7 +114,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let addContext (inputVertex : int) (label : int<labelMeasure>) vertex extension =
             if not <| containsContext inputVertex label vertex extension 
             then
-                setR.Enqueue(new Context2(inputVertex, label, vertex, extension))
+                setR.Push(new Context2(inputVertex, label, vertex, extension))
                 incr descriptorNumber
             else
               incr reused
@@ -194,8 +191,6 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                     for slotLevels in edge.Value do
                          let slot = slotLevels.Key
                          for level in slotLevels.Value do
-                            let tt = getLeftExtension extOnEdge
-                            let ttt = (getRightExtension extension)
                             let ext = packExtension (getLeftExtension extOnEdge) (getRightExtension extension)
                             let newVertex = new Vertex(level, slot)
                             addContext i (u.NontermLabel*1<labelMeasure>) newVertex ext
@@ -205,15 +200,14 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let stop = ref false
         let rec dispatcher () =
             let rec get () =
-                let c = setR.Dequeue()
+                let c = setR.Pop()
                 c
             if setR.Count <> 0
             then
-                let cI = pack2to32 (getLeft32 currentContext.Value.Index) ((getRight32 currentContext.Value.Index) + shift)
-                currentIndex := cI
-                let t = CommonFuns.getLeft32 !currentIndex
-                currentContext :=  get ()
-                let t2 = CommonFuns.getRight32 !currentIndex
+                currentContext :=  get () 
+                currentIndex := currentContext.Value.Index
+                let t = getEdge !currentIndex
+                let tt = getPosOnEdge !currentIndex
                 currentGSSNode := currentContext.Value.Vertex
                 currentLabel := currentContext.Value.Label
                 currentExtension := currentContext.Value.Extension
@@ -223,46 +217,46 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                               
         and processing () =  
             condition := true
-            let rule = getRule !currentLabel
-            let position = getRight32 !currentLabel
+            let rule = getRuleNew !currentLabel
+            let position = getPositionNew !currentLabel
+            let eatTerm () =
+                currentIndex := packEdgePos (getEdge !currentIndex) (1 + getPosOnEdge !currentIndex)
+                currentExtension := packExtension (getLeftExtension !currentExtension) !currentIndex
+                currentLabel := 1<labelMeasure> * packLabelNew rule (position + 1)
+                condition := false
             if Array.length parser.rules.[rule] = 0 
             then
               pop !currentGSSNode !currentIndex !currentExtension
             else
+                setR.Count
                 if Array.length parser.rules.[rule] <> position
                 then
                     let curSymbol = parser.rules.[rule].[position]
+                    let cE = CommonFuns.getEdge !currentIndex
+                    let cP = CommonFuns.getPosOnEdge !currentIndex + shift
                     if parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol
                     then
-                        let cE = CommonFuns.getLeft32 !currentIndex
-                        let cP = CommonFuns.getRight32 !currentIndex
+                        
                         let chainLen = input.ChainLength.[cE]
                         if cP < chainLen - 1 
                         then    
                             let curToken = input.Edges.[cE].Tokens.[cP] 
                             if curToken = curSymbol
                             then
-                                currentIndex := pack2to32 (getLeft32 !currentIndex) (1 + getRight32 !currentIndex)
-                                currentExtension := packExtension (getLeftExtension !currentExtension) !currentIndex
-                                currentLabel := 1<labelMeasure> * pack2to32 rule (position + 1)
-                                condition := false       
+                                eatTerm ()
                         else   
                             let curEdge = 
                                 let oEdges = outEdges.[input.Edges.[cE].End]
                                 let mutable res = None
                                 for oe in oEdges do
-                                    if curSymbol = input.Edges.[oe].Tokens.[0] then
+                                    if curSymbol = input.Edges.[oe].Tokens.[shift] then
                                         res <- Some oe  
                                 res
                             
                             match curEdge with
                             | Some edge ->
-                                currentIndex := (pack2to32 curEdge.Value 0)
-                                let curToken = input.Edges.[edge].Tokens.[0]
-                                currentIndex := pack2to32 (getLeft32 !currentIndex) (1 + getRight32 !currentIndex)
-                                currentExtension := packExtension (getLeftExtension !currentExtension) !currentIndex
-                                currentLabel := 1<labelMeasure> * pack2to32 rule (position + 1)
-                                condition := false
+                                currentIndex := (packEdgePos curEdge.Value 0)
+                                eatTerm ()
                             | None _ -> ()
                     else 
                         let getIndex nTerm term = 
@@ -270,41 +264,33 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                             index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
                             index <- index + term - parser.NonTermCount
                             index
-                        currentGSSNode := create !currentIndex (1<labelMeasure>  * pack2to32 rule (position + 1)) !currentGSSNode !currentExtension
-                        let cE = CommonFuns.getLeft32 !currentIndex
-                        let cP = CommonFuns.getRight32 !currentIndex
+                        currentGSSNode := create !currentIndex (1<labelMeasure>  * packLabelNew rule (position + 1)) !currentGSSNode !currentExtension
                         let chainLen = input.ChainLength.[cE]
-                        if cP < chainLen - 1
-                        then
-                            let curToken = input.Edges.[cE].Tokens.[cP]
-                            let index = getIndex curSymbol curToken
-                            let key =  int((int32 curSymbol <<< 16) ||| int32 (curToken - parser.NonTermCount))    
+                        let addCntxtForNonTerm e pos i = 
+                            let curToken = input.Edges.[e].Tokens.[pos]
+                            let key = int(( curSymbol  <<< 16) ||| (curToken - parser.NonTermCount))
                             let flg,rules = table.TryGetValue key
                             if flg then
                                 for rule in rules do
-                                    let newLabel = 1<labelMeasure> * pack2to32 rule 0
-                                    addContext !currentIndex newLabel !currentGSSNode (packExtension !currentIndex !currentIndex)
+                                    let newLabel = 1<labelMeasure> * packLabelNew rule 0
+                                    addContext i newLabel !currentGSSNode (packExtension !currentIndex !currentIndex)    
+                        if cP < chainLen - 1
+                        then
+                            addCntxtForNonTerm cE cP !currentIndex   
                         else
                             for oE in outEdges.[input.Edges.[cE].End] do
-                                let curToken = input.Edges.[oE].Tokens.[0]
-                                let index = getIndex curSymbol curToken
-                                let key =  int((int32 curSymbol <<< 16) ||| int32 (curToken - parser.NonTermCount))    
-                                let flg,rules = table.TryGetValue key
-                                if flg then
-                                    let t = pack2to32 oE 0
-                                    for rule in rules do
-                                        let newLabel = 1<labelMeasure> * pack2to32 rule 0
-                                        addContext t newLabel !currentGSSNode (packExtension !currentIndex !currentIndex)                              
+                                addCntxtForNonTerm oE shift (packEdgePos oE 0)
+                                                      
                 else
                     if Array.exists (fun e -> e = rule) condNonTermRules
                     then
                         match !r with
                             | None ->  
                                 let t = new ResizeArray<_>()
-                                let t1 = new ResultStruct((getLeft32 <| getLeftExtension !currentExtension), (getRight32 <| getLeftExtension !currentExtension), (getLeft32 <| getRightExtension !currentExtension), (getRight32 <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule])
+                                let t1 = new ResultStruct((getEdge <| getLeftExtension !currentExtension), (getPosOnEdge <| getLeftExtension !currentExtension), (getEdge <| getRightExtension !currentExtension), (getPosOnEdge <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule])
                                 t.Add t1
                                 r := Some t 
-                            | Some a -> a.Add(new ResultStruct((getLeft32 <| getLeftExtension !currentExtension), (getRight32 <| getLeftExtension !currentExtension), (getLeft32 <| getRightExtension !currentExtension), (getRight32 <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule]))
+                            | Some a -> a.Add(new ResultStruct((getEdge <| getLeftExtension !currentExtension), (getPosOnEdge <| getLeftExtension !currentExtension), (getEdge <| getRightExtension !currentExtension), (getPosOnEdge <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule]))
                         
                     pop !currentGSSNode !currentIndex !currentExtension
                     
@@ -318,7 +304,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             | None -> 
                 Error ("String was not parsed")
             | Some res -> 
-                printfn "Reused descriptors %d" !reused
-                printfn "All descriptors %d" !descriptorNumber
+                //printfn "Reused descriptors %d" !reused
+                //printfn "All descriptors %d" !descriptorNumber
                 Success1 (res) 
                                   

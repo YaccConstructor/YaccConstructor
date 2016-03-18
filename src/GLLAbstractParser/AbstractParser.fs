@@ -24,7 +24,7 @@ type M =
     new (p,l) = {pos = p; lbl = l}
         
 
-let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph<'TokenType>) maxLen : ParserCommon.ParseResult<_> = 
+let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph) maxLen : ParserCommon.ParseResult<_> = 
     if input.EdgeCount = 0 then
       //  if parser.AcceptEmptyInput then
       //      let eps = new Nonnte
@@ -40,7 +40,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let parser = parser
         let slots = parser.Slots
         let errors = new SysDict<int64, SysDict<int<nodeMeasure>, Vertex*int>>()   
-        let setU = new CompressedArray<SysDict<int, SysDict<int64, ResizeArray<int<nodeMeasure>>>>>(input.ChainLength, (fun _ -> null ))
+        let setU = new CompressedArray<SysDict<int, SysDict<int64, ResizeArray<int<nodeMeasure>>>>>(input.ChainLength, (fun _ -> null ),0)
         let structures = new ParserStructures<'TokenType>(parser.StartRule)
         let setR = structures.SetR
         let epsilonNode = structures.EpsilonNode
@@ -73,15 +73,15 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             isEnd := true)
 
         let nonTerminalNodes = new SysDict<int64,int<nodeMeasure>>()        
-        let intermidiateNodes = new CompressedArray<_>(input.ChainLength, (fun _ -> new CompressedArray<_>(input.ChainLength, fun _ -> Unchecked.defaultof<SysDict<int<labelMeasure>, int<nodeMeasure>>>)))
+        let intermidiateNodes = new CompressedArray<_>(input.ChainLength, (fun _ -> new CompressedArray<_>(input.ChainLength, (fun _ -> Unchecked.defaultof<SysDict<int<labelMeasure>, int<nodeMeasure>>>),0)),0)
         //let edges = new CompressedArray<_>(input.ChainLength, (fun _ -> Array.zeroCreate<SysDict<int<nodeMeasure>, SysDict<int, ResizeArray<int>>>> slots.Count))
-        let edges = Array.init slots.Count (fun _ -> new CompressedArray<_> (input.ChainLength, (fun _ -> null)))
-        let terminalNodes = new CompressedArray<_>(input.ChainLength, (fun _ -> 0 * 1<nodeMeasure> ))
+        let edges = Array.init slots.Count (fun _ -> new CompressedArray<_> (input.ChainLength, (fun _ -> null),0))
+        let terminalNodes = new CompressedArray<_>(input.ChainLength, (fun _ -> 0 * 1<nodeMeasure> ),0)
         let currentGSSNode = ref <| dummyGSSNode
         for v in input.InitialVertices do
             let oEdges = outEdges.[v]
             for e in oEdges do
-                setR.Enqueue(new Context(pack2to32 e 0, !structures.CurrentLabel, !currentGSSNode, structures.Dummy)) 
+                setR.Enqueue(new Context(packEdgePos e 0, !structures.CurrentLabel, !currentGSSNode, structures.Dummy)) 
         let currentContext = ref <| new Context(!currentIndex, !structures.CurrentLabel, !currentGSSNode, structures.Dummy) //without *1<labelMeasure>
         
         let finalExtensions =
@@ -90,11 +90,11 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             for i = 0 to len - 1 do
                 let oE = outEdges.[input.InitialVertices.[i]]
                 for e in oE do
-                    arr.[i] <- packExtension (pack2to32 e 0) (pack2to32 (input.Edges.Length - 1) 1)          
+                    arr.[i] <- packExtension (packEdgePos e 0) (packEdgePos (input.Edges.Length - 1) 1)          
             arr
 
         let slotIsEnd (label : int<labelMeasure>) =
-            (getRight32 label) = Array.length (parser.rules.[getRule label])
+            (getPositionNew label) = Array.length (parser.rules.[getRule label])
 
         let findSppfNode (label : int<labelMeasure>) lExt rExt : int<nodeMeasure> =
             let isEnd = slotIsEnd <| label
@@ -185,7 +185,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             then
                 terminalNodes.[index]
             else
-                let ext = packExtension index (pack2to32 (getLeft32 index) (1 + getRight32 index))
+                let ext = packExtension index (packEdgePos (getEdge index) (1 + getPosOnEdge index))
                 let t = new TerminalNode(index, ext, 1)
                 sppfNodes.Add t
                 let res = (sppfNodes.Length - 1) * 1<nodeMeasure>
@@ -280,8 +280,6 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             then
                 currentContext :=  get ()
                 currentIndex := currentContext.Value.Index
-                let t = CommonFuns.getLeft32 !currentIndex
-                let t2 = CommonFuns.getRight32 !currentIndex
                 currentGSSNode := currentContext.Value.Vertex
                 structures.CurrentLabel := currentContext.Value.Label
                 structures.CurrentN := currentContext.Value.Ast 
@@ -294,8 +292,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                               
         and processing () =  
             condition := true
-            let rule = getRule !structures.CurrentLabel
-            let position = getRight32 !structures.CurrentLabel
+            let rule = getRuleNew !structures.CurrentLabel
+            let position = getPositionNew !structures.CurrentLabel
             if Array.length parser.rules.[rule] = 0 
             then
               let t = new TerminalNode(-1, packExtension !currentIndex !currentIndex, 0)
@@ -313,8 +311,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     if parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol
                     then
                         let isEq (sym : int) (elem : ParserEdge<'TokenType>) = sym = parser.TokenToNumber (elem.Tag)
-                        let cE = CommonFuns.getLeft32 !currentIndex
-                        let cP = CommonFuns.getRight32 !currentIndex
+                        let cE = CommonFuns.getEdge !currentIndex
+                        let cP = CommonFuns.getPosOnEdge !currentIndex
                         let chainLen = input.ChainLength.[cE]
                         if cP < chainLen - 1 
                         then    
@@ -324,8 +322,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                 if !structures.CurrentN = structures.Dummy
                                 then structures.CurrentN := getNodeT !currentIndex
                                 else structures.CurrentR := getNodeT !currentIndex
-                                currentIndex := pack2to32 (getLeft32 !currentIndex) (1 + getRight32 !currentIndex)
-                                structures.CurrentLabel := 1<labelMeasure> * pack2to32 rule (position + 1)
+                                currentIndex := packEdgePos (getEdge !currentIndex) (1 + getPosOnEdge !currentIndex)
+                                structures.CurrentLabel := 1<labelMeasure> * packLabelNew rule (position + 1)
                                 if !structures.CurrentR <> structures.Dummy
                                 then 
                                     structures.CurrentN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy !structures.CurrentLabel !structures.CurrentN !structures.CurrentR
@@ -342,13 +340,13 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             
                             match curEdge with
                             | Some edge ->
-                                currentIndex := (pack2to32 curEdge.Value 0)
+                                currentIndex := (packEdgePos curEdge.Value 0)
                                 let curToken = input.Edges.[edge].Tokens.[0]
                                 if !structures.CurrentN = structures.Dummy
                                 then structures.CurrentN := getNodeT !currentIndex
                                 else structures.CurrentR := getNodeT !currentIndex
-                                currentIndex := pack2to32 (getLeft32 !currentIndex) (1 + getRight32 !currentIndex)
-                                structures.CurrentLabel := 1<labelMeasure> * pack2to32 rule (position + 1)
+                                currentIndex := packEdgePos (getEdge !currentIndex) (1 + getPosOnEdge !currentIndex)
+                                structures.CurrentLabel := 1<labelMeasure> * packLabelNew rule (position + 1)
                                 if !structures.CurrentR <> structures.Dummy
                                 then 
                                     structures.CurrentN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy !structures.CurrentLabel !structures.CurrentN !structures.CurrentR
@@ -368,9 +366,9 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
                             index <- index + term - parser.NonTermCount
                             index
-                        currentGSSNode := create !currentIndex (1<labelMeasure>  * pack2to32 rule (position + 1)) !currentGSSNode  !structures.CurrentN //prob sLength
-                        let cE = CommonFuns.getLeft32 !currentIndex
-                        let cP = CommonFuns.getRight32 !currentIndex
+                        currentGSSNode := create !currentIndex (1<labelMeasure>  * packLabelNew rule (position + 1)) !currentGSSNode  !structures.CurrentN //prob sLength
+                        let cE = CommonFuns.getEdge !currentIndex
+                        let cP = CommonFuns.getPosOnEdge !currentIndex
                         let chainLen = input.ChainLength.[cE]
                         if cP < chainLen - 1
                         then
@@ -380,7 +378,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             let flg,rules = table.TryGetValue key
                             if flg then
                                 for rule in rules do
-                                    let newLabel = 1<labelMeasure> * pack2to32 rule 0
+                                    let newLabel = 1<labelMeasure> * packLabelNew rule 0
                                     structures.AddContext setU !currentIndex newLabel !currentGSSNode structures.Dummy maxLen 
                         else
                             for oE in outEdges.[input.Edges.[cE].End] do
@@ -389,9 +387,9 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                 let key =  int((int32 curSymbol <<< 16) ||| int32 (curToken - parser.NonTermCount))    
                                 let flg,rules = table.TryGetValue key
                                 if flg then
-                                    let t = pack2to32 oE 0
+                                    let t = packEdgePos oE 0
                                     for rule in rules do
-                                        let newLabel = 1<labelMeasure> * pack2to32 rule 0
+                                        let newLabel = 1<labelMeasure> * packLabelNew rule 0
                                         structures.AddContext setU t newLabel !currentGSSNode structures.Dummy maxLen 
                             
                                     

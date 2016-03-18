@@ -908,7 +908,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             outErrors.Add(tokenStr + tokenData, errdict.[e])
         outErrors
 
-(*    let rec isEqualPrefixes (p1:Prefix<_>) (p2:Prefix<_>) =
+    let rec isEqualPrefixes (p1:Prefix<_>) (p2:Prefix<_>) =
         if p1 = null || p2 = null
         then
             p1 = null && p2 = null
@@ -916,7 +916,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             if p1 = p2
             then true
             else
-                if (not <| (p1.Head = p2.Head)) || (not <| (p1.Tail.Count = p2.Tail.Count))
+                if (not <| (p1.Head = p2.Head)) (*|| (not <| (p1.Tail.Count = p2.Tail.Count))*)
                 then
                     false
                 else
@@ -928,7 +928,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     res
 
     let isContainPrefix (prefixes:ResizeArray<Prefix<_>>) (prefix:Prefix<_>) =
-        prefixes.Any(fun pr -> isEqualPrefixes prefix pr)*)
+        prefixes.Any(fun pr -> isEqualPrefixes prefix pr)
 
     let collectErrors (starts:ResizeArray<VInfo<_>>)=
         let was = new ResizeArray<_>()
@@ -947,9 +947,14 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             collectPrefixes v
             for e in outEdgesInnerGraph.[v.vNum] do
                 collectPrefixes e.Target
-                let targetPrefixes = vertexesToPrefixes.[e.Target] |> Seq.filter(fun pr -> if pr = null then false else pr.Head = e) |> Seq.collect(fun pr -> pr.Tail)
+                let targetPrefixes = new ResizeArray<_>()
+                for pr in (vertexesToPrefixes.[e.Target] |> Seq.filter(fun pr -> if pr = null then false else pr.Head = e)) do
+                    for tailPrefix in pr.Tail do
+                        if not <| targetPrefixes.Contains(tailPrefix)
+                        then
+                            targetPrefixes.Add(tailPrefix)
                 for prefix in vertexesToPrefixes.[v] do
-                    if not <| targetPrefixes.Contains(prefix) then      //wrong compare
+                    if not <| (isContainPrefix targetPrefixes prefix) then      //wrong compare
                         if not <| errorEdges.ContainsKey(e) then
                             errorEdges.Add(e, new ResizeArray<_>())
                         addPrefix errorEdges.[e] prefix
@@ -968,12 +973,14 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 if parserSource.AccStates.[gssVertex.State]
                 then
                     for gssPrefix in gssVertexesToPrefixes.[gssVertex] do
-                        addPrefix accPrefixes gssPrefix
+                        if not <| accPrefixes.Contains(gssPrefix) then
+                            accPrefixes.Add(gssPrefix)
                 else
                     for gssPrefix in gssVertexesToPrefixes.[gssVertex] do
-                        addPrefix notAccPrefixes gssPrefix
-            for naprefix in notAccPrefixes do
-               if not <| accPrefixes.Contains(naprefix)     //wrong compare
+                        if not <| notAccPrefixes.Contains(gssPrefix) then
+                            notAccPrefixes.Add(gssPrefix)
+            for naprefix in notAccPrefixes do       //case when naprefix have accPrefix
+               if not <| (isContainPrefix accPrefixes naprefix)     //wrong compare
                 then
                     if not <| errorEdges.ContainsKey(e)
                     then
@@ -1047,10 +1054,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
 //                    tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
 //
-//                    let gssInitVertices = 
-//                       innerGraph.Edges |> Seq.collect (fun e -> e.Source.processedGssVertices)
+                    let gssInitVertices = 
+                       innerGraph.Edges |> Seq.collect (fun e -> e.Source.processedGssVertices)
 //
-//                    drawDot parserSource.TokenToNumber terminals parserSource.LeftSide gssInitVertices parserSource.NumToString parserSource.ErrorIndex "../../../Tests/AbstractRNGLR/DOT/gss.dot"
+                    drawDot parserSource.TokenToNumber terminals parserSource.LeftSide gssInitVertices parserSource.NumToString parserSource.ErrorIndex "../../../Tests/AbstractRNGLR/DOT/gss.dot"
 
                     Success <| (tree, errorsDict)
                 with

@@ -74,6 +74,11 @@ open GLL.ParseMixed
 open GLL.ParseOmit
 //open GLL.ParseOrder
 
+type msg =
+    | Data of int*BioParserInputGraph
+    | End of bool ref
+    | Die of AsyncReplyChannel<unit>
+
 let outputDir = @"../../../src/GLL.AbstractParser.SimpleTest/"
 
 let lbl tokenId = tokenId
@@ -129,13 +134,14 @@ let filterRnaParsingResult res expectedRange lengthLimit =
                 |> Array.ofSeq
                 |> Array.filter (fun s -> s.rpos - s.lpos > lengthLimit || s.le <> s.re)
                 |> Array.partition (fun s -> 
-                    Assert.IsTrue(s.le >= 0, "Edge number could not be negative!")
-                    Assert.IsTrue(s.re >= 0, "Edge number could not be negative!")
-                    Assert.IsTrue(s.le < 65535, "Strange edge number.")
-                    Assert.IsTrue(s.re < 65535, "Strange edge number.")
+                    //Assert.IsTrue(s.le >= 0, "Edge number could not be negative!")
+                    //Assert.IsTrue(s.re >= 0, "Edge number could not be negative!")
+                    //Assert.IsTrue(s.le < 65535, "Strange edge number.")
+                    //Assert.IsTrue(s.re < 65535, "Strange edge number.")
                     s.le = s.re)
                     
             let curEdg = ref 0
+            //printfn ""
             onOneEdg
             |> Array.iter(fun s ->
                 curEdg := s.le
@@ -156,18 +162,19 @@ let filterRnaParsingResult res expectedRange lengthLimit =
                 let left = s |> Seq.minBy (fun s -> s.lpos)
                 let right = s |> Seq.maxBy (fun s -> s.rpos)                        
                 ranges.Add((left.le,left.lpos),(right.re,right.rpos)))
-        printfn "Expected: %A" expectedRange
-        ranges |> Seq.iter (printfn "%A; ")
-        printfn ""
-        printfn "Success!"        
-        Assert.IsTrue 
-            (ranges 
-                |> Seq.exists 
-                (fun (a,b) -> 
-                    let intersection = Set.intersect (Set.ofArray [|snd a..snd b|]) (Set.ofArray [|fst expectedRange |> snd..snd expectedRange |> snd|]) |> Set.count  
-                    intersection < 150 && intersection >= 60
-                    && fst a = (expectedRange |> fst |> fst)
-                    && fst b = (expectedRange |> snd |> fst)))
+        //printfn "Expected: %A" expectedRange
+        //ranges |> Seq.iter (printfn "%A; ")
+        printfn "Total ranges: %A" ranges.Count
+        //printfn ""
+        //printfn "Success!"        
+//        Assert.IsTrue 
+//            (ranges 
+//                |> Seq.exists 
+//                (fun (a,b) -> 
+//                    let intersection = Set.intersect (Set.ofArray [|snd a..snd b|]) (Set.ofArray [|fst expectedRange |> snd..snd expectedRange |> snd|]) |> Set.count  
+//                    intersection < 150 && intersection >= 60
+//                    && fst a = (expectedRange |> fst |> fst)
+//                    && fst b = (expectedRange |> snd |> fst)))
     | Error e -> 
         sprintf "Input parsing failed: %A" e
         |> Assert.Fail
@@ -769,14 +776,60 @@ type ``GLL abstract parser tests`` () =
         let path = Path.Combine(basePath, file)
         let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.tRNA.RNGLR_EOF 0)
 
+        let agent name  =
+            MailboxProcessor.Start(fun inbox ->
+                let rec loop n =
+                    async {
+                            let! msg = inbox.Receive()
+                            match msg with
+                            | Data (i,graph) ->
+                                printfn "%A: %A" name i
+                                try
+                                 GLL.tRNA.buildAbstract graph 3
+                                 |> processRes                 
+                                with
+                                | e -> ()
+                                return! loop n
+                            | End f -> f := true
+                            | Die ch -> ch.Reply()
+                            }
+                loop 0)                
+        
+        let a1 = agent "a"
+        let a2 = agent "b"
+        let a3 = agent "c"
+        let a4 = agent "d"
+        let a5 = agent "e"
+
+        let f1 = ref false
+        let f2 = ref false
+        let f3 = ref false
+
         graphs
+        //|> Seq.skip 15
+        //|> Seq.take 20
+        //|> fun x -> [|x|]
         |> Array.ofSeq
-        |> Array.mapi 
+        //|> fun a -> a.[15..20]
+        |> Array.iteri 
             (fun i graph -> 
-                printfn "%A" i
-                GLL.tRNA.buildAbstract graph 100 3
+                Data (i,graph) 
+                |>
+                    match i % 5 with
+                    | 0 -> a1.Post
+                    | 1 -> a2.Post
+                    | 2 -> a3.Post
+                    | 3 -> a4.Post
+                    | _ -> a5.Post
             )
-        |> Array.iter processRes
+        //|> Array.Parallel.choose id
+        //|> Array.iter processRes
+        a1.PostAndReply (Die)
+        a2.PostAndReply (Die)
+        a3.PostAndReply (Die)
+        a4.PostAndReply (Die)
+        a5.PostAndReply (Die)
+        //while not (!f1 && !f2 && !f3) do ()
         printfn "Time = %A" (System.DateTime.Now - start)
 
     [<Test>]
@@ -819,7 +872,7 @@ type ``GLL abstract parser tests`` () =
         |> Array.mapi 
             (fun i graph -> 
                 printfn "%A" i
-                GLL.shiftProblem.buildAbstract graph 100 1
+                GLL.shiftProblem.buildAbstract graph 1
             )
         |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 60)        
     
@@ -830,6 +883,9 @@ type ``GLL abstract parser tests`` () =
    // [<Test>]
     member this.``Big for tRNA 1`` () =
         this.``1000: trna`` """mix_1\late_pair_info_count""" 120 ((0,860),(0,930))
+
+    member this.``Big for tRNA 2`` () =
+        this.``1000: trna`` """synth_1\graph""" 120 ((0,860),(0,930))
 
         
 [<EntryPoint>]
@@ -844,6 +900,7 @@ let fs x =
     //t.bio2_4()
     //t.``1000: trna in 133-204``()
     //t.``1000: trna in 133-204``()
-    t.``Problem with shift. Small``()
-    //t.``1000 as graph 49 + 5: trna in 133-204``()
+    //t.``Problem with shift. Small``()
+    t.``1000 as graph 49 + 5: trna in 133-204``()
+    //t.``Big for tRNA 2``()
     0

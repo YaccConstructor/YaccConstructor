@@ -579,6 +579,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     for v in innerGraph.Vertices do
         outEdgesInnerGraph.[v.vNum] <- innerGraph.OutEdges v |> Array.ofSeq
     let gssVertexesToPrefixes = new Dictionary<_,_>()
+    let nonTermsAstToPrefixes = new Dictionary<AST,Prefix<_>>()
     
     let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide : int[])
         (initNodes : seq<Vertex>) (numToString : int -> string) (errInd: int) (path : string) =
@@ -713,7 +714,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         then startV.passingReductions.Add((newVertex, edge))
         customEnqueue(startV)
         newVertex.addEdge edge
-        
 
         if isNotEps
         then
@@ -771,9 +771,64 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 else ast.other <- Array.append ast.other [|newFamily|]
         | Some _ -> ()
 
+    let copyWalkPrefix (walkPrefix:Prefix<_>) =
+        if walkPrefix = null
+        then
+            (null, null)
+        else
+            let newPrefix = new Prefix<_>(walkPrefix.Head, new ResizeArray<_>())
+            let mutable curLevel = walkPrefix.Tail
+            let mutable curLevelNewPrefix = newPrefix.Tail
+            while not <| (curLevel.First() = null) do
+                curLevelNewPrefix.Add(new Prefix<_>(curLevel.First().Head, new ResizeArray<_>()))
+                curLevel <- curLevel.First().Tail
+                curLevelNewPrefix <- curLevelNewPrefix.First().Tail
+            (newPrefix, curLevelNewPrefix)
+
+    let rec pathToPrefix (path:Path) (tailPrefix:Prefix<_>) =
+        if path = null || path.Length = 0
+        then
+            tailPrefix
+        else
+            let curAst = path.Head
+            match curAst with
+            | :? Epsilon -> pathToPrefix path.Tail tailPrefix
+            | :? Terminal as t ->
+                let curEdge = edgesToTerms.Keys.First(fun e -> match nodes.[edgesToTerms.[e]] with
+                                                               | :? Terminal as t1 -> t1.TokenNumber =  t.TokenNumber
+                                                               | _ -> false)
+                pathToPrefix path.Tail (new Prefix<_>(curEdge, tailPrefix))
+            | :? AST as ast ->
+                let newPrefix, lastLevelNewPrefix = copyWalkPrefix nonTermsAstToPrefixes.[ast]
+                lastLevelNewPrefix.Add(tailPrefix)
+                pathToPrefix path.Tail newPrefix
+
+            | _ -> null     //what case?
+
+    let cutWalkPrefix (prefixes:ResizeArray<Prefix<_>>) (walkPrefix:Prefix<_>) =
+        if walkPrefix = null
+        then prefixes
+        else
+            let newPrefix, lastLevelNewPrefix = copyWalkPrefix walkPrefix
+            let mutable curLevelNew = newPrefix
+            let mutable curLevel = prefixes
+            while not <| ResizeArray.isEmpty(curLevelNew.Tail) do
+                let curEdge = curLevelNew.Head
+                curLevel <- curLevel.Find(fun pr -> pr.Head = curEdge).Tail
+                curLevelNew <- curLevelNew.Tail.First()
+            let curEdge = curLevelNew.Head
+            curLevel <- curLevel.Find(fun pr -> pr.Head = curEdge).Tail
+            curLevelNew.Tail.AddRange(curLevel)
+            let newPrefixes = new ResizeArray<_>()
+            newPrefixes.Add(newPrefix)
+            newPrefixes
+
+
     let handlePath (path : Path) (final : Vertex) startV nonTerm pos prod shouldEnqueueVertex (startGssV : Vertex) =
         let state = parserSource.Gotos.[final.State].[nonTerm]
         let newVertex, isNew = addVertex startV state startV.unprocessedGssVertices
+        let walkPrefix = pathToPrefix path null
+
         if shouldEnqueueVertex && isNew 
         then
             verticesToRecalc.Add startV
@@ -781,16 +836,20 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             match newVertex.FindIndex final.State final.Level with
             | -1 -> 
                 let edge = new Edge(final, nodes.Length)
-                nodes.Add <| new AST (Unchecked.defaultof<_>, null)
-                addEdge  startV isNew newVertex edge (pos > 0) gssVertexesToPrefixes.[startGssV]
+                let newAst = new AST (Unchecked.defaultof<_>, null)
+                nodes.Add <| newAst
+                nonTermsAstToPrefixes.Add(newAst, walkPrefix)
+                addEdge  startV isNew newVertex edge (pos > 0) (cutWalkPrefix gssVertexesToPrefixes.[startGssV] walkPrefix)
                 edge.Ast
             | x -> (newVertex.Edge x).Ast 
         if ast >= 0 
         then addChildren nodes.[ast] path prod
         else 
             let edge = new Edge(final, nodes.Length)
-            nodes.Add <| new AST (Unchecked.defaultof<_>, null)
-            addEdge  startV isNew newVertex edge (pos > 0) gssVertexesToPrefixes.[startGssV]
+            let newAst = new AST (Unchecked.defaultof<_>, null)
+            nodes.Add <| newAst
+            nonTermsAstToPrefixes.Add(newAst, walkPrefix)
+            addEdge  startV isNew newVertex edge (pos > 0) (cutWalkPrefix gssVertexesToPrefixes.[startGssV] walkPrefix)
             addChildren nodes.[nodes.Length - 1] path prod
 
     let rec walk remainLength (vertex : Vertex) path startV nonTerm pos prod shouldEnqueueVertex (startGssV : Vertex) = 
@@ -849,6 +908,28 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             outErrors.Add(tokenStr + tokenData, errdict.[e])
         outErrors
 
+(*    let rec isEqualPrefixes (p1:Prefix<_>) (p2:Prefix<_>) =
+        if p1 = null || p2 = null
+        then
+            p1 = null && p2 = null
+        else
+            if p1 = p2
+            then true
+            else
+                if (not <| (p1.Head = p2.Head)) || (not <| (p1.Tail.Count = p2.Tail.Count))
+                then
+                    false
+                else
+                    let mutable res = true
+                    for nextP1 in p1.Tail do
+                        if not <| p2.Tail.Any(fun pr -> isEqualPrefixes nextP1 pr)
+                        then
+                            res <- false
+                    res
+
+    let isContainPrefix (prefixes:ResizeArray<Prefix<_>>) (prefix:Prefix<_>) =
+        prefixes.Any(fun pr -> isEqualPrefixes prefix pr)*)
+
     let collectErrors (starts:ResizeArray<VInfo<_>>)=
         let was = new ResizeArray<_>()
         let vertexesToPrefixes = new Dictionary<_,_>()
@@ -868,7 +949,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 collectPrefixes e.Target
                 let targetPrefixes = vertexesToPrefixes.[e.Target] |> Seq.filter(fun pr -> if pr = null then false else pr.Head = e) |> Seq.collect(fun pr -> pr.Tail)
                 for prefix in vertexesToPrefixes.[v] do
-                    if not <| targetPrefixes.Contains(prefix) then
+                    if not <| targetPrefixes.Contains(prefix) then      //wrong compare
                         if not <| errorEdges.ContainsKey(e) then
                             errorEdges.Add(e, new ResizeArray<_>())
                         addPrefix errorEdges.[e] prefix
@@ -892,7 +973,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     for gssPrefix in gssVertexesToPrefixes.[gssVertex] do
                         addPrefix notAccPrefixes gssPrefix
             for naprefix in notAccPrefixes do
-               if not <| accPrefixes.Contains(naprefix)
+               if not <| accPrefixes.Contains(naprefix)     //wrong compare
                 then
                     if not <| errorEdges.ContainsKey(e)
                     then

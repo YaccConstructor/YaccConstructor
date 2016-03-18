@@ -964,10 +964,10 @@ let f x =
 //    t._34_Errors_PrettySimpleCalc_SimpleBranchError2 ()
 //    t._35_Errors_PrettySimpleCalc_ComplexBranchError ()
 //    t._36_Errors_PrettySimpleCalc_ComplexBranchError2 ()
-//    t._37_Errors_StrangeBrackets_Inf ()   //result: [rbr1] instead [rbr1, eof]
+//    t._37_Errors_StrangeBrackets_Inf ()   //result: runtime error instead [rbr1, eof]
 //    t._38_Errors_StrangeBrackets_SequenceInput ()
 //    t._39_Errors_StrangeBrackets_SimpleLoop ()
-//    t._40_Errors_StrangeBrackets_SimpleLoop2 ()    //result [rbr3] instead [eof]
+    t._40_Errors_StrangeBrackets_SimpleLoop2 ()
 //    t._41_Errors_StrangeBrackets_SequenceInput3 ()
 //    t._25_UnambiguousBrackets_temp () 
 //    t.``TSQL performance test 2`` 2 100 false

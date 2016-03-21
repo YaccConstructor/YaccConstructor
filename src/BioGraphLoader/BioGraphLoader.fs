@@ -100,7 +100,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
             
         x
         |> Array.Parallel.map (fun vs -> vs |> Array.collect (fun v -> ug.AdjacentEdges v |> Array.ofSeq) |> (fun c -> new System.Collections.Generic.HashSet<_>(c)) |> Array.ofSeq )
-        |> Array.filter (fun x -> x.Length > 1)
+        //|> Array.filter (fun x -> x.Length > 1)
     
 //    let avgl = components |> Array.map (fun c -> c |> Array.averageBy (fun x -> float x.Tag.length))
 //    let suml = components |> Array.map (fun c -> c |> Array.sumBy (fun x -> x.Tag.length))

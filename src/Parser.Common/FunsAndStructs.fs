@@ -58,7 +58,7 @@ module CommonFuns =
  
 
     let inline packEdgePos edge position = ((int position <<< 16) ||| int edge)                               
-    let inline getEdge packedValue   = int (int packedValue &&& 0xffff)
+    let inline getEdge packedValue = int (int packedValue &&& 0xffff)
     let inline getPosOnEdge packedValue = int packedValue >>> 16 
 
     let inline packLabelNew rule position = ((int rule <<< 16) ||| int position)                               

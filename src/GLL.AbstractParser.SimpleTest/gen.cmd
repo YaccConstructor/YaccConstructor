@@ -77,5 +77,6 @@ for %%i in (Attrs, Cond, Counter, Cycle, Eps2, Epsilon, Expr, First, ListEps, Lo
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i "..\YC.GrammarZOO\SQL\TSQL\mssql_abstract.yrd" -c ExpandEbnf -c Linearize -c ExpandMeta ^
         -g "GLLGenerator -pos int -token int -abstract true -module GLL.MsSqlParser -o MsSqlParser.yrd.fs " >> log.txt
 
-..\..\Bin\Release\v40\YC.YaccConstructor.exe -i ..\YC.GrammarZOO\Bio\tRNA.yrd  -c ExpandEbnf -c ExpandMeta -g "GLLGenerator -pos int -token int -module GLL.tRNA -o tRNA.yrd.fs -abstract true" >> log.txt
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i ..\YC.GrammarZOO\Bio\tRNA.yrd -c ExpandRepeat -c ExpandEbnf -c ExpandMeta -g "GLLGenerator -pos int -token int -module GLL.tRNA -o tRNA.yrd.fs -abstract true" >> log.txt
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i ..\YC.GrammarZOO\Bio\tests\shift_problem.yrd  -c ExpandEbnf -c ExpandMeta -g "GLLGenerator -pos int -token int -module GLL.shiftProblem -o shift_problem.yrd.fs -abstract true" >> log.txt
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i ..\YC.GrammarZOO\Bio\tests\multiple_edges_problem.yrd  -c ExpandEbnf -c ExpandMeta -g "GLLGenerator -pos int -token int -module GLL.multipleEdgesProblem -o multiple_edges_problem.yrd.fs -abstract true" >> log.txt

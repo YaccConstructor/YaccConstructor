@@ -123,6 +123,7 @@
     <Compile Include="MsSqlParser.yrd.fs" />
     <Compile Include="shift_problem.yrd.fs" />
     <Compile Include="tRNA.yrd.fs" />
+    <Compile Include="multiple_edges_problem.yrd.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

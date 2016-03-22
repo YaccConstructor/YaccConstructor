@@ -3,6 +3,7 @@
 open Yard.Generators.RNGLR.ReadBack
 //open Yard.Generators.Common
 open System.Collections.Generic
+open Microsoft.FSharp.Collections
 
 //Sppf is a intersection of a production automaton and Gss, which, in its turn, has edges labelled with Sppf
 type Sppf = SppfVertex * int * int * Set<int>
@@ -56,29 +57,33 @@ and SppfSearchDictionary<'ValueType>(numberOfNfaStates : int) =
     //three levels of indexing - nfa state, gss level, lr state
     let firstLevelArray = Array.init numberOfNfaStates (fun _ ->  new Dictionary<int, (int * 'ValueType) list ref>())
 
+    //DEBUG
+    let count = ref 0
+
     member this.Add (key : SppfVertex) (value : 'ValueType) =
-        let nfaState, gssLevel, lrState = 
-            let nfaVertex, gssVertex = key.nfaVertex, key.gssVertex 
-            nfaVertex.label, gssVertex.Level, gssVertex.State
+        let nfaState = key.nfaVertex.label
+        let gssLevel, lrState = key.gssVertex.Level, key.gssVertex.State
         let levelDict = firstLevelArray.[nfaState]
-        if levelDict.ContainsKey gssLevel then
-            let lrValueRecord = levelDict.[gssLevel]
-            lrValueRecord := (lrState, value) :: !lrValueRecord
+        let containsLrStateDict, lrStateDict = levelDict.TryGetValue(gssLevel)
+        if containsLrStateDict then
+            lrStateDict := (lrState, value) :: !lrStateDict
         else
-            levelDict.[gssLevel] <- ref [(lrState, value)]
+            levelDict.[gssLevel] <- ref [(lrState, value)] 
+        incr count               
 
     member this.TryGet nfaState gssLevel lrState =
         let levelDict = firstLevelArray.[nfaState]
-        if levelDict.ContainsKey gssLevel then
-            let lrValueRecord = !levelDict.[gssLevel]
-            let x = lrValueRecord |> List.tryFind (fun (lrState', _) -> lrState' = lrState) 
-            match x with
-            | Some (_, value) -> Some value
+        let containsLrStateDict, lrStateDict = levelDict.TryGetValue(gssLevel)
+        if containsLrStateDict then
+            match List.tryFind (fun (x, _) -> x = lrState) !lrStateDict with
+            | Some (_, y) -> Some y
             | None -> None
         else
             None
-
-//for reductions that goes from level being processed
+    
+    member this.Count = !count
+ 
+ //for reductions that goes from level being processed
 and ReductionTemp(prod : int, numberOfStates : int, endLevel : int) =
     let prod = prod
     let notHandledLeftEnds = new Queue<SppfVertex>()
@@ -87,19 +92,20 @@ and ReductionTemp(prod : int, numberOfStates : int, endLevel : int) =
     let visitedVertices =
     //TODO: PERFORMANCE
         new SppfSearchDictionary<SppfVertex>(numberOfStates)
-    let endLevel = endLevel
-    
+            
     member this.AcceptingNfaStates = !acceptingNfaStates
 
     member this.AddVisited (vertex : SppfVertex) =
+        //let leftEndsRef = record.leftEndsRef
         visitedVertices.Add vertex vertex
         if vertex.nfaVertex.label = 0 then
             let gssVertex = vertex.gssVertex
             leftEndsDict.[(gssVertex.Level, gssVertex.State)] <- vertex
+            //leftEndsRef := [vertex]
             notHandledLeftEnds.Enqueue vertex
     
     member this.AddRightEnd rE =
-        this.AddVisited(rE)
+        this.AddVisited rE
         acceptingNfaStates := Set.add rE.nfaVertex.label !acceptingNfaStates
     
     member this.EndLevel = endLevel
@@ -110,8 +116,13 @@ and ReductionTemp(prod : int, numberOfStates : int, endLevel : int) =
 
     member this.Production = prod
 
+    member this.TryGetAlreadyVisited' nfaNum gssLevel lrState =
+        visitedVertices.TryGet nfaNum gssLevel lrState
+
     member this.TryGetAlreadyVisited (nfaVertex : VertexWithBackTrack<int, int>) (gssVertex : GssVertex) =
         visitedVertices.TryGet nfaVertex.label gssVertex.Level gssVertex.State
+
+    member this.VisitedVerticesCount = visitedVertices.Count
 
 let inline isEpsilonReduction x =
     match x with
@@ -121,6 +132,9 @@ let inline isEpsilonReduction x =
 /// Compare vertex like a pair: (level, state)
 let inline vxLess (v' : GssVertex) (v : GssVertex) = v'.Level < v.Level || (v'.Level = v.Level && v'.State < v.State)
 let inline vxEq (v' : GssVertex) (v : GssVertex) = v'.Level = v.Level && v'.State = v.State
+
+let inline sppfVertexEq (v' : SppfVertex) (v : SppfVertex) =
+    v'.nfaVertex = v.nfaVertex && vxEq v'.gssVertex v.gssVertex
 
 let inline lblCoincidence s' s =
     match s', s with
@@ -148,31 +162,3 @@ let containsEdge (v : GssVertex) (lbl : SppfLabel) (out : ResizeArray<GssVertex 
     while i >= 0 && (let v',lbl' = out.[i] in vxEq v' v && not (lblCoincidence lbl lbl')) do
         i <- i - 1
     i >= 0 && (let v',lbl' = out.[i] in vxEq v' v && (lblCoincidence lbl lbl'))
-
-(*/// Add or extend edge with specified destination and family.
-/// All edges are sorted by destination ascending.
-let addEdge (v : GssVertex) (family : ReductionTemp) (out : ResizeArray<GssVertex * ReductionTemp>) isError =
-    let mutable i = out.Count - 1
-    while i >= 0 && vxLess (fst out.[i]) v do
-        i <- i - 1
-
-    let isCreated = not (i >= 0 && vxEq (fst out.[i]) v)
-
-    let ast = 
-        if isError
-        then new AST(family, null)
-        else 
-            if not isCreated 
-            then let _,_,n = out.[i] in n
-            else new AST (Unchecked.defaultof<_>, null)
-    let newVal = v, family, ast
-    if isCreated || family.prod = (snd3 out.[i]).prod then
-        out.Insert (i+1, newVal)
-    elif family.prod < (snd3 out.[i]).prod then
-        out.[i] <- newVal
-        let mutable j = i-1
-        while j >= 0 && eq (fst3 out.[j])  (fst3 out.[i]) do
-            j <- j-1
-
-        out.RemoveRange(j+1, i-j-1)
-    isCreated, ast*)

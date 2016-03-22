@@ -3,6 +3,7 @@
 open Yard.Generators.Common.FinalGrammar
 open QuickGraph.FSA.GraphBasedFsa
 open System.Collections.Generic
+open ProductionGraph
 open QuickGraph.Algorithms
 open QuickGraph
 
@@ -10,6 +11,11 @@ type RCAEdge =
     | Sh of int
     | R of int
     | Push of int
+    override this.ToString() = 
+        match this with                               
+        | Sh x -> "Sh" + x.ToString()
+        | R x  -> "R" + x.ToString()
+        | Push x -> "Push" + x.ToString()
 
 let constructIRIA (grammar : FinalGrammar) =
     let statesToItems = new Dictionary<int, int*int>(100)
@@ -145,6 +151,8 @@ let constructRCA (grammar: FinalGrammar) =
     let removeEmbeddedRecursion grammar = ()  
 
     //TODO
-    let joinAutomata automata = ()
+    let joinAutomata automata = ()    
+
+    let x = new ProductionGraph(grammar)
 
     printfn "I <3 embedded recursion"

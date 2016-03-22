@@ -30,6 +30,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ProductionGraph.fs" />
     <Compile Include="Automata.fs" />
     <Compile Include="RIGLRGenerator.fs" />
     <None Include="Script.fsx" />

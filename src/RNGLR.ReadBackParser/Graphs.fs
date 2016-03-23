@@ -96,13 +96,14 @@ and ReductionTemp(prod : int, numberOfStates : int, endLevel : int) =
     member this.AcceptingNfaStates = !acceptingNfaStates
 
     member this.AddVisited (vertex : SppfVertex) =
-        //let leftEndsRef = record.leftEndsRef
         visitedVertices.Add vertex vertex
-        if vertex.nfaVertex.label = 0 then
-            let gssVertex = vertex.gssVertex
-            leftEndsDict.[(gssVertex.Level, gssVertex.State)] <- vertex
-            //leftEndsRef := [vertex]
-            notHandledLeftEnds.Enqueue vertex
+
+    member this.AddLeftEnd lE =
+        this.AddVisited lE
+
+        let gssVertex = lE.gssVertex
+        leftEndsDict.[(gssVertex.Level, gssVertex.State)] <- lE
+        notHandledLeftEnds.Enqueue lE
     
     member this.AddRightEnd rE =
         this.AddVisited rE

@@ -36,6 +36,7 @@
     <Compile Include="LexCommon.fs" />
     <None Include="App.config" />
     <Compile Include="AlternativeInMiddle.yrd.fs" />
+    <Compile Include="CachedReduction.yrd.fs" />
     <Compile Include="CalcEBNF.yrd.fs" />
     <Compile Include="Choice.yrd.fs" />
     <Compile Include="ComplexRightNull.yrd.fs" />

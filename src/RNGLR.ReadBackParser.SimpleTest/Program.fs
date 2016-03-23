@@ -34,9 +34,10 @@ type ``RNGLRReadBack parser tests with simple lexer`` () =
         | Error (num, tok, err, _), TER_Error -> printErr (num, tok, err)
         | Success (tree, tokens), TER_Success -> 
             printfn "Success"
-            let leftSide, tokenToNumber, numberToToken = parserSource
-            sppfToDot tokens tree leftSide tokenToNumber numberToToken "C:/temp/res.dot"
-        | Error (num, tok, err, _), TER_Success ->  
+//            let leftSide, tokenToNumber, numberToToken = parserSource
+//            sppfToDot tokens tree leftSide tokenToNumber numberToToken "C:/temp/res.dot"
+        | Error (num, tok, err, debugFuns), TER_Success ->  
+            debugFuns.drawGSSDot "errorGss.dot"
             printErr (num, tok, err)
             Assert.Fail()
         | Success (tree, _), TER_Error -> 
@@ -112,6 +113,13 @@ type ``RNGLRReadBack parser tests with simple lexer`` () =
     member test.``5.0 Two many terminals`` () = 
         let parser = RNGLR.ReadBackParser.TwoManyTerms.buildAst
         let parserSource = RNGLR.ReadBackParser.TwoManyTerms.leftSide, RNGLR.ReadBackParser.TwoManyTerms.tokenToNumber, RNGLR.ReadBackParser.TwoManyTerms.numToString
+        let file = "SeqOfThree.txt"
+        runTest parser parserSource file TER_Success
+
+    [<Test>]
+    member test.``6.0 Cached reduction`` () = 
+        let parser = RNGLR.ReadBackParser.CachedReduction.buildAst
+        let parserSource = RNGLR.ReadBackParser.CachedReduction.leftSide, RNGLR.ReadBackParser.CachedReduction.tokenToNumber, RNGLR.ReadBackParser.CachedReduction.numToString
         let file = "SeqOfThree.txt"
         runTest parser parserSource file TER_Success
     
@@ -322,5 +330,5 @@ type ``RNGLRReadBack parser tests with simple lexer`` () =
 
 [<EntryPoint>]
 let main argv = 
-    (new ``RNGLRReadBack parser tests with simple lexer``()).``4.0 Two many nonterminals``();
+    (new ``RNGLRReadBack parser tests with simple lexer``()).``6.0 Cached reduction``();
     0 // return an integer exit code

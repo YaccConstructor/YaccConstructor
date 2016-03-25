@@ -30,41 +30,36 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
 
     let entry, exit = buildCfg tree parserSource langSource tokToSourceString
 
+    let rec func' getNext acc (queue : _ list) = 
+        
+        match queue with
+        | [] -> acc
+        | head :: tail -> 
+            if acc |> List.exists ((=) head)
+            then 
+                func' getNext acc tail
+            else
+                let children = getNext head
+                func' getNext (head :: acc) <| List.append tail children
+
     let blocks = 
         
-        let rec func acc (queue : Block<_> list) = 
-            match queue with
-            | [] -> acc
-            | head :: tail -> 
-                if acc |> List.exists ((=) head)
-                then 
-                    func acc tail
-                else
-                    let children = 
-                        head.Children
-                        |> List.map(fun node -> node.Children)
-                        |> List.concat
-                    func (head :: acc) <| List.append tail children
+        let getNext (block : Block<_>)= 
+            block.Children
+            |> List.map (fun node -> node.Children)
+            |> List.concat
 
-        func [] entry.Children
+        func' getNext [] entry.Children
         |> List.rev
         
     let nodes = 
-        let rec func acc queue = 
-            match queue with
-            | [] -> acc
-            | (head : InterNode<_>) :: tail -> 
-                if acc |> List.exists ((=) head)
-                then 
-                    func acc tail
-                else 
-                    let children = 
-                        head.Children
-                        |> List.map (fun block -> block.Children)
-                        |> List.concat
-                    func (head :: acc) <| List.append tail children
+        
+        let getNext (node : InterNode<_>) = 
+            node.Children
+            |> List.map (fun block -> block.Children)
+            |> List.concat
 
-        func [] [entry]
+        func' getNext [] [entry]
         |> List.rev
 
     let checkExpression definedVariables (expressionBlock : ExpressionBlock<_>)= 

@@ -1,0 +1,2 @@
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i ..\YC.GrammarZOO\Bio\tests\shift_problem.yrd  -c ExpandEbnf -c ExpandMeta -g "GLLGenerator -pos int -token int -module GLL.shiftProblem -o shift_problem.yrd.fs -abstract true" >> log.txt

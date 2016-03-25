@@ -75,7 +75,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let containsContext  inputIndex (label : int<labelMeasure>) (vertex : Vertex) extension =
   
             let vertexKey = CommonFuns.pack vertex.Level vertex.NontermLabel
-            if setU.[inputIndex] <> Unchecked.defaultof<_>
+            if setU.[inputIndex] <> null
             then
                 let cond, current = setU.[inputIndex].TryGetValue(int label) 
                 if  cond

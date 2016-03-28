@@ -45,17 +45,26 @@ let trd_ (_,_,x) = x
 let joinMaps (p:Map<'a,'b>) (q:Map<'a,'b>) = 
     Map(Seq.concat [ (Map.toSeq p) ; (Map.toSeq q) ])
 
-let makeNewSeq seq (lbl:Source.t) (w:Option<Source.t>) = 
-    match seq,w with 
-     | PSeq(els,ac,_),_ -> match w with
-                           | None -> PSeq (els,ac,Some {label=lbl.text; weight=None})
-                           | _ -> let wVal = w.Value
-                                  try
-                                      PSeq (els,ac,Some {label=lbl.text; weight = Some (float wVal.text)})
-                                  with 
-                                  | :? System.FormatException as ex ->
-                                      failwithf "Parse error on position (%i,%i) on token %s: %s" wVal.startPos.line wVal.startPos.column wVal.text "illegal weight. Number expected."
-     | x,_ -> x
+let mkLbl (lbl:Option<Source.t>) (w:Option<Source.t>) = 
+    let lblName = 
+        match lbl with
+        | Some s -> s.text
+        | None -> "dummy_lbl"
+    match (w, lbl) with
+    | None,None -> None
+    | (None, Some s) -> Some {label=s.text; weight=None}
+    | _ ->
+        let wVal = w.Value
+        try
+            Some {label=lblName; weight = Some (float wVal.text)}
+        with 
+        | :? System.FormatException as ex ->
+            failwithf "Parse error on position (%i,%i) on token %s: %s" wVal.startPos.line wVal.startPos.column wVal.text "illegal weight. Number expected."
+
+let makeNewSeq seq lbl = 
+    match seq with 
+     | PSeq(els,ac,_) -> PSeq (els,ac,lbl)
+     | x -> x
 
 let errorexception msg parserRange = raise <| ParseError ( new Source.t("", fst parserRange, snd parserRange, !currentFilename), msg ) 
 let createSeqElem bnd omitted r check =
@@ -96,6 +105,7 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
 %token COMMUT
 %token INCLUDE
 %token SET
+%token AND
 %token <IL.Source.t> EOF
 %token <IL.Source.t> STRING LIDENT UIDENT
 %token <IL.Source.t> PREDICATE ACTION
@@ -222,7 +232,9 @@ foot_opt : { None } | SEMICOLON ACTION { Some $2 }
 
 rule_nlist: rule semi_opt rule_nlist { $1::$3 } | { [] }
 
-rule: start_rule_sign_opt access_modifier_opt LIDENT formal_meta_param_opt param_list COLON alts
+rule_delim: COLON {$1} | EQUAL {$1}
+
+rule: start_rule_sign_opt access_modifier_opt LIDENT formal_meta_param_opt param_list rule_delim alts
             { 
                 {
                     Rule.isStart = $1
@@ -249,26 +261,32 @@ param_opt : { None } | PARAM   { Some $1 }
 
 param_list : { [] } | PARAM param_list { $1::$2 }
 
-weight_opt :                        { None } 
-           | SQR_LBR NUMBER SQR_RBR { Some $2}
-           | SQR_LBR SQR_RBR        { errorexception "Incorrect construction! Expected 'NUMBER' among '[' and ']'" parserRange }
-           | NUMBER SQR_RBR         { errorexception "'[' is missing" parserRange }  
-           | SQR_LBR NUMBER         { errorexception "']' is missing" parserRange }
+alts: conjunction                       { $1 }
+    | conjunction bar_conjunction_nlist { PAlt ($1,$2) }
 
-alts: seq { $1 } | seq bar_seq_nlist {PAlt ($1,$2)}
+bar_conjunction_nlist : BAR conjunction bar_conjunction_nlist { PAlt ($2,$3) }  
+                      | BAR conjunction                       { $2 }
 
-bar_seq_nlist : BAR seq bar_seq_nlist { PAlt($2,$3) }  
-              | BAR seq               { $2 }
+conjunction: seq               { $1 }
+           | seq and_seq_nlist { PConj ($1,$2) }
+
+and_seq_nlist : AND seq and_seq_nlist { PConj ($2,$3) }  
+              | AND seq               { $2 }
 
 seq: lbl_seq {$1} | no_lbl_seq {$1} 
 
 no_lbl_seq: seq_elem seq_elem_list action_opt { PSeq ($1::$2, $3, None) }
           | ACTION                            { PSeq ([], Some $1, None) }
+          
+lbl : DLABEL {mkLbl (Some $1) None} 
+    | SQR_LBR NUMBER SQR_RBR {mkLbl None (Some $2)}
+    | DLABEL SQR_LBR NUMBER SQR_RBR {mkLbl (Some $1) (Some $3)} 
 
-lbl_seq : DLABEL weight_opt LPAREN no_lbl_seq RPAREN     { makeNewSeq $4 $1 $2 }
-        | DLABEL weight_opt no_lbl_seq RPAREN            { errorexception " '(' is missing " parserRange }
+lbl_seq : lbl LPAREN no_lbl_seq RPAREN { makeNewSeq $3 $1 }
 
-seq_elem_list: { [] } | seq_elem seq_elem_list {$1::$2}
+comma_opt: { None } | COMMA {Some $1}
+
+seq_elem_list: { [] } | comma_opt seq_elem seq_elem_list {$2::$3}
 
 seq_elem: omit_opt bound predicate_opt { { $2 with checker = $3; omit = $1 } }
 
@@ -283,22 +301,21 @@ bound: patt EQUAL prim { createSeqElem (Some $1) false $3 None }
 
 patt: LIDENT {$1} | ACTION {$1}
 
-parens : LPAREN alts RPAREN      { $2 }
-       | LPAREN RPAREN           { errorexception "Incorrect construction! Expected 'params' among '(' and ')'" parserRange }
-       | alts RPAREN             { errorexception "'(' is missing" parserRange }
+int_opt : 
+    {None}
+    | NUMBER {(Yard.Core.IL.Source.toString $1) |> int |> Some}
 
-sqrbrdrs : SQR_LBR alts SQR_RBR    { $2 }
-         | SQR_LBR SQR_RBR         { errorexception "Incorrect construction! Expected 'params' among '[' and ']'" parserRange }
-         | alts SQR_RBR            { errorexception "'[' is missing" parserRange }
-
-prim: prim STAR                 { PMany $1 }
-    | prim PLUS                 { PSome $1 }
-    | prim QUESTION             { POpt $1 }
-    | sqrbrdrs                  { POpt $1 }
-    | parens                    { $1 }
-    | call                      { $1 }
-    | lbl_seq                   { $1 }
-    | LITERAL                   { PLiteral $1 } 
+prim: prim STAR            {PMany $1}
+    | STARTREPEAT prim ENDREPEAT {PMany $2} 
+    | NUMBER STAR prim           {PRepet ($3, (Some 0), (Yard.Core.IL.Source.toString $1) |> int |> Some)}
+    | prim STAR SQR_LBR int_opt DOUBLEDOT int_opt SQR_RBR {PRepet ($1,$4,$6)}
+    | prim PLUS            {PSome $1}
+    | prim QUESTION        {POpt $1}
+    | SQR_LBR alts SQR_RBR {POpt $2}
+    | LPAREN alts RPAREN   {$2}
+    | call                 {$1}
+    | lbl_seq              {$1}
+    | LITERAL              {PLiteral $1}
 
 meta_param  : prim {$1}
 

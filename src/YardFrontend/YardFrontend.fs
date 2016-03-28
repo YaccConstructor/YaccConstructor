@@ -28,7 +28,7 @@ type YardFrontend() =
         override this.ParseGrammar t = 
             match t with
             | (:? System.String as s) -> Main.ParseFile s
-            | _ -> failwithf "File name expacted as argumnet for YardFrontend.ParseGrammar, but get: %A" t
+            | _ -> failwithf "File name expected as argumnet for YardFrontend.ParseGrammar, but got: %A" t
         override this.ProductionTypes =
             List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
             |> List.map (fun unionCase -> unionCase.Name)

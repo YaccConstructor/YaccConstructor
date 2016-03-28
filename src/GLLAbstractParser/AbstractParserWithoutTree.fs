@@ -75,7 +75,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let containsContext  inputIndex (label : int<labelMeasure>) (vertex : Vertex) extension =
   
             let vertexKey = CommonFuns.pack vertex.Level vertex.NontermLabel
-            if setU.[inputIndex] <> Unchecked.defaultof<_>
+            if setU.[inputIndex] <> null
             then
                 let cond, current = setU.[inputIndex].TryGetValue(int label) 
                 if  cond
@@ -125,7 +125,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             let endLevel = int e.Level
             let dict1 = edges.[labelN].[beginLevel]
             let cond, dict = 
-                if dict1 <> Unchecked.defaultof<_>
+                if dict1 <> null
                 then
                     if dict1.ContainsKey(extension)
                     then

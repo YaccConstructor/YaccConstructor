@@ -1,6 +1,8 @@
 ﻿module ControlFlowGraph.Test.CfgFunctionsTest
 
 open NUnit.Framework
+open Microsoft.FSharp.Collections
+open System.Collections.Generic
 
 open AbstractAnalysis.Common
 
@@ -10,6 +12,36 @@ open ControlFlowGraph.InputStructures
 open ControlFlowGraph.Test.CommonHelper
 
 open QuickGraph.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
+
+//lexer stuff
+let alphabet = 
+    ['a' .. 'z']
+    |> List.append ['A' .. 'Z']
+    |> List.append ['0'..'9']
+    |> List.append [' '; '\t'; '\r'; '\n']
+    |> List.append ['+'; '='; '-'; '*'; '/'; '('; ')'; '['; ']'; ]
+    |> List.append [';'; ':'; '.'; ',';]
+
+let getChar (x : Symb<char * Position<_>>) = 
+    match x with
+    | Smbl (y, _) -> y
+    | _ -> invalidArg "x" "Unexpected symb in alphabet of FSA!"
+
+let createNewSymbol x = Smbl(x, Unchecked.defaultof<_>)
+
+let areSymbolsEqual one two = 
+    (fst one) = (fst two)
+
+let fsaInfo : FsaParams<char, char * Position<_>> =
+                    {
+                        Alphabet = new HashSet<_>(alphabet);
+                        NewSymbol = createNewSymbol;
+                        GetChar = getChar;
+                        SymbolsAreEqual = areSymbolsEqual;
+                        SeparatorSmbl1 = '~';
+                        SeparatorSmbl2 = '^';
+                    }
 
 let assertResult (errorList : _ list) (expected : _ list) = 
         
@@ -61,14 +93,16 @@ type ``Find undefined variables``() =
     let x = ExtendedCalcTest.Parser.X fsa |> tokToRealName
     let y = ExtendedCalcTest.Parser.Y fsa |> tokToRealName
     let z = ExtendedCalcTest.Parser.Z fsa |> tokToRealName
-        
-    let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
+    
+    let parserSource = new GeneratedStuffSource<_, string>(tokenToNumber, indToString, leftSides, tokenData, fsaInfo)
     let langSource = new LanguageSource(nodeToType, keywordToInt, isVariable)
 
     let createParserInput' = createParserInputGraph ExtendedCalcTest.Lexer.tokenize RNGLR_EOF
     let createCfg tree = ControlFlow(tree, parserSource, langSource, tokToRealName)
 
     let buildCfg' = buildCfg parse createCfg astToDot tokToRealName
+
+    
 
     [<Test>]
     member test.``X = Z; Y = X;``() = 
@@ -136,7 +170,6 @@ type ``Find undefined variables``() =
         //assert
         assertResult errorList expected
 
-
     [<Test>]
     member this.``Cycle inside expression``() = 
         let qGraph = createParserInput' "X = 1 [+Y].dot"
@@ -186,7 +219,7 @@ type ``Scope test``() =
     let y = LetTest.Parser.Y fsa |> tokToRealName
     let z = LetTest.Parser.Z fsa |> tokToRealName
         
-    let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
+    let parserSource = new GeneratedStuffSource<_, string>(tokenToNumber, indToString, leftSides, tokenData, fsaInfo)
     let langSource = new LanguageSource(nodeToType, keywordToInt, isVariable)
 
     let createParserInput' = createParserInputGraph LetTest.Lexer.tokenize RNGLR_EOF
@@ -194,8 +227,6 @@ type ``Scope test``() =
 
     let buildCfg' = buildCfg parse createCfg astToDot tokToRealName
 
-    
-     
     [<Test>]
     member this.``Scope1``() = 
         let qGraph = createParserInput' "Scope.dot"

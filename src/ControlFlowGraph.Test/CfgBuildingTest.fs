@@ -16,9 +16,9 @@ let incorrectChildMsg = "At least one block has incorrect child"
 let incorrectParentMsg = "At least one block has incorrect parent"
 let missingBlockMsg = "Some blocks are lost"
 let incorrectEntryMsg = "Incorrect entry node"
-let incorrectExitMsg = "Incorrect entry node"
+let incorrectExitMsg = "Incorrect exit node"
 
-let runTest (cfg : ControlFlow<_>) checkEntry checkExit checks = 
+let runTest (cfg : ControlFlow<_, _>) checkEntry checkExit checks = 
             
     Assert.IsTrue(checkEntry cfg.Entry, incorrectEntryMsg)
     Assert.IsTrue(checkExit cfg.Exit, incorrectExitMsg)
@@ -58,7 +58,7 @@ type ``Simple cases``() =
     let keywordToInt = dict [Keyword.SEMICOLON, semicolonNumber;]
 
     let tokToRealString tok = tok |> tokenToNumber |> indToString
-    let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
+    let parserSource = new GeneratedStuffSource<_, _>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, keywordToInt)
 
     let createParserInput' = createParserInputGraph ExtendedCalcTest.Lexer.tokenize RNGLR_EOF
@@ -174,7 +174,7 @@ type ``If statements`` () =
                                     Keyword.ELSE, elseNumber;
                             ]
 
-    let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
+    let parserSource = new GeneratedStuffSource<_, _>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, keywordToInt)
 
     let createParserInput' = createParserInputGraph IfTest.Lexer.tokenize RNGLR_EOF
@@ -260,7 +260,7 @@ type ``Cycles``() =
     let keywordToInt = dict [Keyword.SEMICOLON, semicolonNumber;]
 
     let tokToRealString = tokenToNumber >> indToString
-    let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
+    let parserSource = new GeneratedStuffSource<_, _>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, keywordToInt)
     
     let createParserInput' = createParserInputGraph SimpleTest.Lexer.tokenize RNGLR_EOF
@@ -629,7 +629,8 @@ let f x =
     //cfgBuilding.``Ambiguous test``()
     //cfgBuilding.``Ambiguous2 test``()
     
-    //let cycleBuilding = new ``Cycles``()
+    let cycleBuilding = new ``Cycles``()
+    cycleBuilding.``Cycle A+``()
     //cycleBuilding.``Cycle (A | B)+``()
     //cycleBuilding.``Cycle (AB)+C``()
     //cycleBuilding.``Simple Cycle``()

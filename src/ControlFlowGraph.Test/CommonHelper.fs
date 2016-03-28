@@ -72,7 +72,7 @@ let buildCfg parse createCfg astToDot tokToString (graph : ParserInputGraph<_>) 
         if needPrint
         then astToDot mAst <| astName prefix
 
-        let cfg : ControlFlow<_> = createCfg mAst
+        let cfg : ControlFlow<_, _> = createCfg mAst
             
         if needPrint
         then cfg.PrintToDot <| cfgName prefix

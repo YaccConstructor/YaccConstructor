@@ -153,7 +153,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
                         #endif
                         
                         let pSource, lSource, tokToSourceString = semantic.Value
-                        let cfg = new ControlFlow<'TokenType>(tree, pSource, lSource, tokToSourceString)
+                        let cfg = new ControlFlow<'TokenType, 'br>(tree, pSource, lSource, tokToSourceString)
                         
                         #if DEBUG
                         //sometimes it needs for debugging purposes

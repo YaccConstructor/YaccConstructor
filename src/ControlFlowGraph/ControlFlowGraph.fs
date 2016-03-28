@@ -8,14 +8,15 @@ open ControlFlowGraph.CfgBuilder
 open ControlFlowGraph.CfgElements
 open ControlFlowGraph.InputStructures
 
-open SeqExtension
-
+open QuickGraph.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
 open Yard.Generators.Common.AST
 
 open Printers
 
-type ControlFlow<'TokenType> (tree : Tree<'TokenType>
-                            , parserSource : CfgParserSource<'TokenType>
+type ControlFlow<'TokenType, 'BackReference when 'BackReference : equality> 
+                            (tree : Tree<'TokenType>
+                            , generatedStuff : GeneratedStuffSource<'TokenType, 'BackReference>
                             , langSource : LanguageSource
                             , tokToSourceString : _ -> string) = 
     
@@ -23,12 +24,12 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
 
     let isNotAssign token = 
         let assignNumber = langSource.KeywordToInt.[Keyword.ASSIGN]
-        parserSource.TokenToNumber token <> assignNumber
+        generatedStuff.TokenToNumber token <> assignNumber
 
     let isVariable = 
-        parserSource.TokenToNumber >> langSource.IsVariable
+        generatedStuff.TokenToNumber >> langSource.IsVariable
 
-    let entry, exit = buildCfg tree parserSource langSource tokToSourceString
+    let entry, exit = buildCfg tree generatedStuff langSource tokToSourceString
 
     let rec func' getNext acc (queue : _ list) = 
         
@@ -62,16 +63,39 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
         func' getNext [] [entry]
         |> List.rev
 
-    let checkExpression definedVariables (expressionBlock : ExpressionBlock<_>)= 
+    let intersectFsa one two = 
+        match generatedStuff.FsaInfo with
+        | Some info -> FSA.Intersection(one, two, info.SymbolsAreEqual)
+        | None -> raise <| invalidOp "Missing FsaInfo"
 
-        (*let printTokenAndReturnID token = 
-            printf "%s " <| tokToSourceString token
+    let isSubFsa one two = 
+        
+        match generatedStuff.FsaInfo with
+        | Some info -> not <| FSA.IsSubFsa(one, two, info)
+        | None -> raise <| invalidOp "Missing FsaInfo"
+
+    let checkExpression definedVariables (expressionBlock : ExpressionBlock<_>)= 
+        
+        (*let printToken token = 
+            printfn "%s " <| tokToSourceString token
+            token
+            *)
+        (*let printVariable token = 
+            printfn "variable %s" <| tokToSourceString token
             token*)
 
         let isUndefinedVariable token = 
-            let varName = token |> tokToSourceString
-            definedVariables 
-            |> List.forall ((<>) varName)
+            let tokenFsa = 
+                (generatedStuff.TokenToData token) :?> FSA<char * Position<_>>
+            
+            match definedVariables with
+            | [] -> true
+            | _ ->
+                let definedFsa = 
+                    definedVariables
+                    |> List.reduce (fun fsa1 fsa2 -> FSA.Union(fsa1, fsa2))
+            
+                isSubFsa tokenFsa definedFsa
         
         expressionBlock.TokensGraph.GetAvailableTokens()
         |> Seq.filter isVariable
@@ -97,24 +121,25 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                         assignBlock.Id.GetAvailableTokens()
                         |> List.ofSeq
 
-                    //TODO remove this hack
                     let newVar = 
-                        if leftPart.Length = 1 
-                        then
-                            let varName = leftPart.Head |> tokToSourceString
-                            Some varName
-                        else 
-                            None
-                    let newErrors = findUndefinedVariables !defVars <| fst assignBlock.RightPart
+                        leftPart
+                        |> List.tryFind isVariable
+                        |> Option.map
+                                (
+                                    fun token -> 
+                                        let fsa = generatedStuff.TokenToData token
+                                        fsa :?> FSA<char * Position<'BackReference>>
+                                )
 
+                    let newErrors = findUndefinedVariables !defVars <| fst assignBlock.RightPart
                     newVar, newErrors
                     
                 | x -> invalidOp <| sprintf "%A block isn't supported now" x
 
             let isNewError token = 
-                let tokData = parserSource.TokenToData token
+                let tokData = generatedStuff.TokenToData token
                 !errorList
-                |> List.forall (fun t -> parserSource.TokenToData t <> tokData) 
+                |> List.forall (fun t -> generatedStuff.TokenToData t <> tokData) 
 
             errors
             |> List.filter isNewError
@@ -130,10 +155,32 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
             let processChild child = 
                 match blockToVars.TryGetValue child with
                 | true, vars -> 
-                    let commonVars = List.intersect vars defVars
+                    let intersectFsaLists one two = 
+                        match one, two with
+                        | [], _ 
+                        | _, [] -> []
+                        | _ -> 
+                            let oneCommon = one |> List.reduce (fun one two -> FSA.Union (one, two))
+                            let twoCommon = two |> List.reduce (fun one two -> FSA.Union (one, two))
+                            let res = intersectFsa oneCommon twoCommon
+                            [res]
+                    
+                    // checks if {was} is subset {now}
+                    let isFsaChanged was now = 
+                        match was, now with
+                        | [], [] -> false
+                        | _ , [] -> true
+                        | [], _ -> invalidOp "Unexpected state in undefined variables finding"
+                        | _ -> 
+                            let newVars = List.head now
+                            let oldVars = was |> List.reduce (fun one two -> FSA.Union (one, two))
 
-                    //Will the defined variables list change?
-                    if vars.Length <> commonVars.Length
+                            isSubFsa oldVars newVars
+
+                    let commonVars = intersectFsaLists vars defVars
+
+                    //checks if variables set are changed
+                    if isFsaChanged vars commonVars
                     then
                         blockToVars.[child] <- commonVars
                         processBlock child
@@ -178,7 +225,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                 | false, _ -> 
                     incr count
                     
-                    let blockString = block.BlockToString parserSource.TokenToString
+                    let blockString = block.BlockToString generatedStuff.TokenToString
                     out.WriteLine (sprintf "%d [label=\"%s\",shape=box]" !count blockString)
                     
                     blockToNumber.[block] <- !count

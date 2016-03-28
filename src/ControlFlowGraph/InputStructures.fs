@@ -4,13 +4,26 @@ open System.Collections.Generic
 
 open ControlFlowGraph.Common
 
-///Contains information about parser generated stuff:
+open QuickGraph.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
+
+///Contains information about lexer and parser generated stuff:
 ///number to string mapping, token to number mapping etc.
-type CfgParserSource<'TokenType> = 
+type GeneratedStuffSource<'TokenType, 'BackReference when 'BackReference : equality> = 
     val TokenToNumber : 'TokenType -> int
     val LeftSides : array<int>
     val TokenToData : 'TokenType -> obj
     val NumToString : int -> string
+    val FsaInfo : FsaParams<char, char * Position<'BackReference>> option
+
+    new (tokenToNumber, numToString, leftSides, tokenData, fsaInfo) =
+        {
+            TokenToNumber = tokenToNumber;
+            NumToString = numToString;
+            LeftSides = leftSides;
+            TokenToData = tokenData;
+            FsaInfo = Some fsaInfo;
+        }
 
     new (tokenToNumber, numToString, leftSides, tokenData) =
         {
@@ -18,7 +31,10 @@ type CfgParserSource<'TokenType> =
             NumToString = numToString;
             LeftSides = leftSides;
             TokenToData = tokenData;
+            FsaInfo = None;
         }
+
+    
 
     member this.TokenToString = this.TokenToNumber >> this.NumToString
         

@@ -15,7 +15,7 @@ open Yard.Generators.Common.AstNode
 
 
 let buildCfg (tree : Tree<'TokenType>) 
-            (parserSource : CfgParserSource<'TokenType>) 
+            (parserSource : GeneratedStuffSource<'TokenType, 'BackReference>) 
             (langSource : LanguageSource) 
             tokToString = 
 

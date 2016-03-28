@@ -16,7 +16,7 @@ type PreviousAndNext(key : int, previous : int list, next : int list) =
     member this.Previous = previous
     member this.Next = next
 
-let assertCfg tokenToNumber (cfg : ControlFlow<_>) (expected : PreviousAndNext list) = 
+let assertCfg tokenToNumber (cfg : ControlFlow<_, _>) (expected : PreviousAndNext list) = 
     
     let processExpected graph (conf : PreviousAndNext) = 
         let inTags = getInTags tokenToNumber graph conf.Key
@@ -81,7 +81,7 @@ type ``Cycles inside expressions``() =
     let keywordToInt = dict [Keyword.SEMICOLON, semi;]
 
     let tokToRealString = tokenToNumber >> indToString
-    let parserSource = new CfgParserSource<_>(tokenToNumber, indToString, leftSides, tokenData)
+    let parserSource = new GeneratedStuffSource<_, _>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, keywordToInt)
 
     let createCfg tree = ControlFlow(tree, parserSource, langSource, tokToRealString)

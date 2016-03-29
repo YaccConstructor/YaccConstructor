@@ -753,28 +753,28 @@ type ``GLL abstract parser tests`` () =
 //        let parse = GLL.MsSqlParser.buildAbstractAst
 //        perfTest2 parse graphGenerator
 //  
-    member this.``1000: trna`` file lengthLimit expectedRange =
-        let start = System.DateTime.Now
-        let processRes res = 
-            filterRnaParsingResult res expectedRange 60        
-
+//    member this.``1000: trna`` file lengthLimit expectedRange =
+//        let start = System.DateTime.Now
+//        let processRes res = 
+//            filterRnaParsingResult res expectedRange 60        
+//
         0
-        let getSmb =
-            let cnt = ref 0
-            fun ch ->
-                let i = incr cnt; !cnt 
-                match ch with
-                | 'A' -> GLL.tRNA.A i                
-                | 'U' -> GLL.tRNA.U i
-                | 'T' -> GLL.tRNA.U i
-                | 'C' -> GLL.tRNA.C i
-                | 'G' -> GLL.tRNA.G i                
-                | x ->   failwithf "Strange symbol in input: %A" x
-                |> GLL.tRNA.tokenToNumber                
-        let basePath = "../../../Tests/bio/"
-        let path = Path.Combine(basePath, file)
-        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.tRNA.RNGLR_EOF 0)
-
+//            let cnt = ref 0
+//            fun ch ->
+//                let i = incr cnt; !cnt 
+//                match ch with
+//                | 'A' -> GLL.tRNA.A i                
+//                | 'U' -> GLL.tRNA.U i
+//                | 'T' -> GLL.tRNA.U i
+//                | 'C' -> GLL.tRNA.C i
+//                | 'G' -> GLL.tRNA.G i                
+//                | x ->   failwithf "Strange symbol in input: %A" x
+//                |> GLL.tRNA.tokenToNumber                
+//        let basePath = "../../../Tests/bio/"
+//        let path = Path.Combine(basePath, file)
+//        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.tRNA.RNGLR_EOF 0)
+//
+//        graphs
         let agent name  =
             MailboxProcessor.Start(fun inbox ->
                 let rec loop n =
@@ -804,14 +804,11 @@ type ``GLL abstract parser tests`` () =
         let f2 = ref false
         let f3 = ref false
 
-        graphs
         //|> Seq.skip 15
         //|> Seq.take 20
         //|> fun x -> [|x|]
-        |> Array.ofSeq
         |> fun a -> a.[15..20]
         |> Array.iteri 
-            (fun i graph -> 
                 Data (i,graph) 
                 |>
                     match i % 2 with
@@ -820,7 +817,6 @@ type ``GLL abstract parser tests`` () =
 //                    | 2 -> a3.Post
 //                    | 3 -> a4.Post
 //                    | _ -> a5.Post
-            )
         //|> Array.Parallel.choose id
         //|> Array.iter processRes
         a1.PostAndReply (Die)
@@ -829,23 +825,6 @@ type ``GLL abstract parser tests`` () =
 //        a4.PostAndReply (Die)
 //        a5.PostAndReply (Die)
         //while not (!f1 && !f2 && !f3) do ()
-        printfn "Time = %A" (System.DateTime.Now - start)
-
-    [<Test>]
-    member this.``1000: trna in 860-930`` () =
-        this.``1000: trna`` """simple_tRNA1\g""" 1001 ((0,860),(0,930))
-
-    [<Test>]
-    member this.``1000: trna in 629-699`` () =
-        this.``1000: trna`` """simple_tRNA2\g""" 1001 ((0,629),(0,699))
-
-    [<Test>]
-    member this.``1000: trna in 133-204`` () =
-        this.``1000: trna`` """simple_tRNA3\g""" 1001 ((0,133),(0,204))
-
-    [<Test>]
-    member this.``Problem with shift. Big`` () =
-        this.``1000: trna`` """simple_tRNA5\g""" 1001 ((0,34),(0,99))
 
     [<Test>]
     member this.``Problem with shift. Small`` () =
@@ -931,13 +910,14 @@ type ``GLL abstract parser tests`` () =
             )
         |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 5)        
 
-    [<Test>]
-    member this.``1000 as graph 49 + 5: trna in 133-204`` () =
         this.``1000: trna`` """simple_tRNA6\g""" 120 ((0,133),(0,204))
-
-   // [<Test>]
-    member this.``Big for tRNA 1`` () =
-        this.``1000: trna`` """mix_1\late_pair_info_count""" 120 ((0,860),(0,930))
+//    [<Test>]
+//    member this.``1000 as graph 49 + 5: trna in 133-204`` () =
+//        this.``1000: trna`` """simple_tRNA4\g""" 120 ((0,133),(0,204))
+//
+//   // [<Test>]
+//    member this.``Big for tRNA 1`` () =
+//        this.``1000: trna`` """mix_1\late_pair_info_count""" 120 ((0,860),(0,930))
 
     member this.``Big for tRNA 2`` () =
         this.``1000: trna`` """synth_1\graph""" 120 ((0,860),(0,930))

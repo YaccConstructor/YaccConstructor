@@ -109,7 +109,7 @@ let literalsCount = 0
 let slots = dict <| [|(-1, 0); (3, 1); (4, 2); (65537, 3)|]
 
 let private parserSource = new ParserSourceGLL<Token> (Token.RNGLR_EOF 0, tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon, slots, probabilities)
-let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph<Token> -> int -> int -> int -> ParserCommon.ParseResult<_>) =
+let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> int -> ParserCommon.ParseResult<_>) =
     buildAbstract<Token> parserSource
 
 

@@ -796,9 +796,9 @@ type ``GLL abstract parser tests`` () =
         
         let a1 = agent "a"
         let a2 = agent "b"
-        let a3 = agent "c"
-        let a4 = agent "d"
-        let a5 = agent "e"
+//        let a3 = agent "c"
+//        let a4 = agent "d"
+//        let a5 = agent "e"
 
         let f1 = ref false
         let f2 = ref false
@@ -809,25 +809,25 @@ type ``GLL abstract parser tests`` () =
         //|> Seq.take 20
         //|> fun x -> [|x|]
         |> Array.ofSeq
-        //|> fun a -> a.[15..20]
+        |> fun a -> a.[15..20]
         |> Array.iteri 
             (fun i graph -> 
                 Data (i,graph) 
                 |>
-                    match i % 5 with
+                    match i % 2 with
                     | 0 -> a1.Post
                     | 1 -> a2.Post
-                    | 2 -> a3.Post
-                    | 3 -> a4.Post
-                    | _ -> a5.Post
+//                    | 2 -> a3.Post
+//                    | 3 -> a4.Post
+//                    | _ -> a5.Post
             )
         //|> Array.Parallel.choose id
         //|> Array.iter processRes
         a1.PostAndReply (Die)
         a2.PostAndReply (Die)
-        a3.PostAndReply (Die)
-        a4.PostAndReply (Die)
-        a5.PostAndReply (Die)
+//        a3.PostAndReply (Die)
+//        a4.PostAndReply (Die)
+//        a5.PostAndReply (Die)
         //while not (!f1 && !f2 && !f3) do ()
         printfn "Time = %A" (System.DateTime.Now - start)
 
@@ -955,7 +955,7 @@ let fs x =
     //t.``1000: trna in 133-204``()
     //t.``1000: trna in 133-204``()
     //t.``Problem with shift. Small 2``()
-    t.``1000 as graph 49 + 5: trna in 133-204``()
+    //t.``1000 as graph 49 + 5: trna in 133-204``()
     //t.``Problem with multiple edges. Small``()
-    //t.``Big for tRNA 2``()
+    t.``Big for tRNA 2``()
     0

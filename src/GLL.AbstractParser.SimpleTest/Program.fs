@@ -957,5 +957,5 @@ let fs x =
     //t.``Problem with shift. Small 2``()
     //t.``1000 as graph 49 + 5: trna in 133-204``()
     //t.``Problem with multiple edges. Small``()
-    //t.``Big for tRNA 2``()
+    t.``Big for tRNA 2``()
     0

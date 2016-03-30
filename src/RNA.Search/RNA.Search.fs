@@ -53,10 +53,12 @@ let filterRnaParsingResult lengthLimit res  =
             ranges.Add((!curEdg,!curLeft),(!curEdg,!curRight))
             other
             |> Seq.groupBy(fun s -> s.le,s.re)
-            |> Seq.map snd
-            |> Seq.iter(fun s ->
-                let left = s |> Seq.minBy (fun s -> s.lpos)
-                let right = s |> Seq.maxBy (fun s -> s.rpos)                        
+            |> Array.ofSeq
+            |> Array.map snd
+            |> Array.iter(fun s ->
+                let s = s |> Array.ofSeq
+                let left = s |> Array.minBy (fun s -> s.lpos)
+                let right = s |> Array.maxBy (fun s -> s.rpos)                        
                 ranges.Add((left.le,left.lpos),(right.re,right.rpos)))
         
         //printfn "Expected: %A" expectedRange
@@ -71,6 +73,7 @@ let filterRnaParsingResult lengthLimit res  =
 
 
 let search graphs agentsCount =
+    let start = System.DateTime.Now
     let agent name  =
         MailboxProcessor.Start(fun inbox ->
             let rec loop n =
@@ -80,10 +83,10 @@ let search graphs agentsCount =
                         | Data (i,graph) ->
                             printfn "%A: %A" name i
                             try
-                                GLL.tRNA.buildAbstract graph 3                                
+                                GLL.tRNA.buildAbstract graph 4                                
                                 |> filterRnaParsingResult 60
                             with
-                            | e -> ()
+                            | e -> printfn "ERROR! %A" e.Message
                             return! loop n         
                         | Die ch -> ch.Reply()
                         }
@@ -91,16 +94,18 @@ let search graphs agentsCount =
 
     let agents = Array.init agentsCount (fun i -> agent (sprintf "searchAgent%A" i))
     graphs
-    |> Array.ofSeq        
+    |> Array.ofSeq  
+    |> fun a -> a.[10000..10100]
     |> Array.iteri 
         (fun i graph -> 
             Data (i, graph) 
             |> agents.[i % agentsCount].Post
         )
     agents |> Array.iter (fun a -> a.PostAndReply Die)
+    printfn "Total time = %A" (System.DateTime.Now - start)
     0
 
-let searchTRNA path =
+let searchTRNA path agentsCount =
     let lengthLimit = 120
 
     let getSmb =
@@ -117,6 +122,8 @@ let searchTRNA path =
             |> GLL.tRNA.tokenToNumber
 
     let graphs, longEdges = loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.tRNA.RNGLR_EOF 0)
+    search graphs agentsCount
+    |> printfn "%A"
     ()
 
 [<EntryPoint>]
@@ -130,5 +137,5 @@ let main argv =
         args.GetResult <@Input@>
         |> (fun s ->
                 System.IO.Path.Combine(System.IO.Path.GetDirectoryName s, System.IO.Path.GetFileNameWithoutExtension s))
-    searchTRNA inputGraphPath
+    searchTRNA inputGraphPath agentsCount
     0

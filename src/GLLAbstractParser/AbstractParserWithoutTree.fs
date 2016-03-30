@@ -52,7 +52,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let currentRule = parser.StartRule
         let currentLabel = ref <| (CommonFuns.packLabelNew currentRule 0) * 1<labelMeasure>
         let tempCount = ref 0
-        let r = ref None  
+        let r = new System.Collections.Generic.HashSet<_>()
         let currentIndex = ref 0 
         let currentrule = parser.StartRule
         let currentExtension = ref 0L<extension>
@@ -306,13 +306,8 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 else
                     if Array.exists (fun e -> e = rule) condNonTermRules
                     then
-                        match !r with
-                            | None ->  
-                                let t = new ResizeArray<_>()
-                                let t1 = new ResultStruct((getEdge <| getLeftExtension !currentExtension), (getPosOnEdge <| getLeftExtension !currentExtension), (getEdge <| getRightExtension !currentExtension), (getPosOnEdge <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule])
-                                t.Add t1
-                                r := Some t 
-                            | Some a -> a.Add(new ResultStruct((getEdge <| getLeftExtension !currentExtension), (getPosOnEdge <| getLeftExtension !currentExtension), (getEdge <| getRightExtension !currentExtension), (getPosOnEdge <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule]))
+                        r.Add(new ResultStruct((getEdge <| getLeftExtension !currentExtension), (getPosOnEdge <| getLeftExtension !currentExtension), (getEdge <| getRightExtension !currentExtension), (getPosOnEdge <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule]))
+                        |> ignore
                         
                     pop !currentGSSNode !currentIndex !currentExtension
                     
@@ -322,11 +317,11 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 if !condition then dispatcher() else processing()
         control()
                  
-        match !r with
-            | None -> 
+        match r.Count with
+            | 0 -> 
                 Error ("String was not parsed")
-            | Some res -> 
+            | _ -> 
                 //printfn "Reused descriptors %d" !reused
                 //printfn "All descriptors %d" !descriptorNumber
-                Success1 (res) 
+                Success1 (Array.ofSeq r) 
                                   

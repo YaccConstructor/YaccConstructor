@@ -41,7 +41,7 @@ type Context2 =
 
 type ParseResult<'TokenType> =
     | Success of Tree<'TokenType> 
-    | Success1 of ResizeArray<'TokenType>
+    | Success1 of array<'TokenType>
     | Error of string
 
 

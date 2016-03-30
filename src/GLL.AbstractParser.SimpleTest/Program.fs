@@ -124,13 +124,13 @@ let filterRnaParsingResult res expectedRange lengthLimit =
     match res:ParseResult<ResultStruct> with
     | Success ast -> Assert.Fail "Result is success but it is unrxpectrd success"
     | Success1 x ->
+        printfn "%A" x.Length
         let ranges = new ResizeArray<_>()
         let curLeft = ref 0
         let curRight = ref 0                  
         let x = 
             let onOneEdg, other =
-                x |> Set.ofSeq
-                |> Array.ofSeq
+                x
                 |> Array.filter (fun s -> s.rpos - s.lpos >= lengthLimit || s.le <> s.re)
                 |> Array.partition (fun s -> 
                     //Assert.IsTrue(s.le >= 0, "Edge number could not be negative!")
@@ -758,7 +758,6 @@ type ``GLL abstract parser tests`` () =
         let processRes res = 
             filterRnaParsingResult res expectedRange 60        
 
-        0
         let getSmb =
             let cnt = ref 0
             fun ch ->
@@ -775,60 +774,13 @@ type ``GLL abstract parser tests`` () =
         let path = Path.Combine(basePath, file)
         let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.tRNA.RNGLR_EOF 0)
 
-        let agent name  =
-            MailboxProcessor.Start(fun inbox ->
-                let rec loop n =
-                    async {
-                            let! msg = inbox.Receive()
-                            match msg with
-                            | Data (i,graph) ->
-                                printfn "%A: %A" name i
-                                try
-                                 GLL.tRNA.buildAbstract graph 3
-                                 |> processRes                 
-                                with
-                                | e -> ()
-                                return! loop n
-                            | End f -> f := true
-                            | Die ch -> ch.Reply()
-                            }
-                loop 0)                
-        
-        let a1 = agent "a"
-        let a2 = agent "b"
-//        let a3 = agent "c"
-//        let a4 = agent "d"
-//        let a5 = agent "e"
-
-        let f1 = ref false
-        let f2 = ref false
-        let f3 = ref false
-
-        graphs
-        //|> Seq.skip 15
-        //|> Seq.take 20
-        //|> fun x -> [|x|]
-        |> Array.ofSeq
-        |> fun a -> a.[15..20]
-        |> Array.iteri 
+        graphs        
+        |> Array.ofSeq        
+        |> Array.mapi 
             (fun i graph -> 
-                Data (i,graph) 
-                |>
-                    match i % 2 with
-                    | 0 -> a1.Post
-                    | 1 -> a2.Post
-//                    | 2 -> a3.Post
-//                    | 3 -> a4.Post
-//                    | _ -> a5.Post
+                GLL.tRNA.buildAbstract graph 4
             )
-        //|> Array.Parallel.choose id
-        //|> Array.iter processRes
-        a1.PostAndReply (Die)
-        a2.PostAndReply (Die)
-//        a3.PostAndReply (Die)
-//        a4.PostAndReply (Die)
-//        a5.PostAndReply (Die)
-        //while not (!f1 && !f2 && !f3) do ()
+        |> Array.iter processRes
         printfn "Time = %A" (System.DateTime.Now - start)
 
     [<Test>]
@@ -871,7 +823,7 @@ type ``GLL abstract parser tests`` () =
         |> Array.mapi 
             (fun i graph -> 
                 printfn "%A" i
-                GLL.shiftProblem.buildAbstract graph 1
+                GLL.shiftProblem.buildAbstract graph 2
             )
         |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 5)        
     
@@ -899,7 +851,7 @@ type ``GLL abstract parser tests`` () =
         |> Array.mapi 
             (fun i graph -> 
                 printfn "%A" i
-                GLL.shiftProblem.buildAbstract graph 1
+                GLL.shiftProblem.buildAbstract graph 2
             )
         |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 5)        
 
@@ -952,10 +904,12 @@ let fs x =
     //let th = new System.Threading.Thread(f, 10000000)
     //th.Start()
     //t.bio2_5()
-    t.``1000: trna in 860-930``()
+    //t.``1000: trna in 860-930``()
+    //t.``Problem with shift. Big`` ()
     //t.``1000: trna in 133-204``()
     //t.``Problem with shift. Small 2``()
     //t.``1000 as graph 49 + 5: trna in 133-204``()
     //t.``Problem with multiple edges. Small``()
-    t.``Big for tRNA 2``()
+    //t.``Big for tRNA 2``()
+    t.``Problem with shift. Small``()
     0

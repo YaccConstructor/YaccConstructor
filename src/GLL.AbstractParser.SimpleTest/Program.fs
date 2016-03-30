@@ -121,64 +121,9 @@ let test buildAbstractAst qGraph l (intToString : int -> string) (fileName : str
 let f arr tokenToNumber = Array.map (fun e -> tokenToNumber e) arr
 let len (edges : BioParserEdge[]) : int[] = edges |> Array.map (fun e -> e.Tokens.Length + 1) 
 let filterRnaParsingResult res expectedRange lengthLimit =
-    match res:ParseResult<ResultStruct> with
-    | Success ast -> Assert.Fail "Result is success but it is unrxpectrd success"
-    | Success1 x ->
-        printfn "%A" x.Length
-        let ranges = new ResizeArray<_>()
-        let curLeft = ref 0
-        let curRight = ref 0                  
-        let x = 
-            let onOneEdg, other =
-                x
-                |> Array.filter (fun s -> s.rpos - s.lpos >= lengthLimit || s.le <> s.re)
-                |> Array.partition (fun s -> 
-                    //Assert.IsTrue(s.le >= 0, "Edge number could not be negative!")
-                    //Assert.IsTrue(s.re >= 0, "Edge number could not be negative!")
-                    //Assert.IsTrue(s.le < 65535, "Strange edge number.")
-                    //Assert.IsTrue(s.re < 65535, "Strange edge number.")
-                    s.le = s.re)
-                    
-            let curEdg = ref 0
-            //printfn ""
-            onOneEdg
-            |> Array.iter(fun s ->
-                curEdg := s.le
-                if !curRight < s.lpos
-                then 
-                    ranges.Add ((s.le,!curLeft),(s.re,!curRight))
-                    curLeft := s.lpos
-                    curRight := s.rpos                        
-                else
-                    curLeft := min !curLeft s.lpos
-                    curRight := max !curRight s.rpos
-                    )
-            ranges.Add((!curEdg,!curLeft),(!curEdg,!curRight))
-            other
-            |> Seq.groupBy(fun s -> s.le,s.re)
-            |> Seq.map snd
-            |> Seq.iter(fun s ->
-                let left = s |> Seq.minBy (fun s -> s.lpos)
-                let right = s |> Seq.maxBy (fun s -> s.rpos)                        
-                ranges.Add((left.le,left.lpos),(right.re,right.rpos)))
-        Assert.IsTrue(ranges.Count > 0, "Ranges collection is empty after filtretion.")
-        //printfn "Expected: %A" expectedRange
-        ranges |> Seq.iter (printfn "%A; ")
-        printfn "Total ranges: %A" ranges.Count
-        //printfn ""
-        //printfn "Success!"        
-        Assert.IsTrue 
-            (ranges 
-                |> Seq.exists 
-                (fun (a,b) -> 
-                    let intersection = Set.intersect (Set.ofArray [|snd a..snd b|]) (Set.ofArray [|fst expectedRange |> snd..snd expectedRange |> snd|]) |> Set.count  
-                    intersection < lengthLimit * 2 && intersection >= lengthLimit
-                    && fst a = (expectedRange |> fst |> fst)
-                    && fst b = (expectedRange |> snd |> fst)))
-    | Error e -> 
-        sprintf "Input parsing failed: %A" e
-        |> Assert.Fail
-//let edgB b e t = new BioParserEdge(b, e, t) 
+    let ranges = YC.Bio.RNA.Search.filterRnaParsingResult lengthLimit res
+    Assert.IsTrue(ranges |> Microsoft.FSharp.Collections.ResizeArray.exists ((=) expectedRange))
+
 [<TestFixture>]
 type ``GLL abstract parser tests`` () =
 //    [<Test>]

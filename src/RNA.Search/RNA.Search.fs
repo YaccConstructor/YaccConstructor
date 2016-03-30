@@ -24,15 +24,15 @@ type msg =
 
 let filterRnaParsingResult lengthLimit res  =
     match res:ParseResult<ResultStruct> with
-    | Success ast -> printfn "Result is success but it is unrxpectrd success"
+    | Success ast -> 
+        failwith "Result is success but it is unrxpectrd success"
     | Success1 x ->
         let ranges = new ResizeArray<_>()
         let curLeft = ref 0
         let curRight = ref 0                  
         let x = 
             let onOneEdg, other =
-                x |> Set.ofSeq
-                |> Array.ofSeq
+                x
                 |> Array.filter (fun s -> s.rpos - s.lpos >= lengthLimit || s.le <> s.re)
                 |> Array.partition (fun s -> s.le = s.re)
                     
@@ -59,21 +59,18 @@ let filterRnaParsingResult lengthLimit res  =
                 let s = s |> Array.ofSeq
                 let left = s |> Array.minBy (fun s -> s.lpos)
                 let right = s |> Array.maxBy (fun s -> s.rpos)                        
-                ranges.Add((left.le,left.lpos),(right.re,right.rpos)))
-        
-        //printfn "Expected: %A" expectedRange
-        ranges |> Seq.iter (printfn "%A; ")
-        printfn "Total ranges: %A" ranges.Count
-        //printfn ""
-        //printfn "Success!"        
+                ranges.Add((left.le,left.lpos),(right.re,right.rpos)))        
+        ranges     
         
     | Error e -> 
-        printfn "Input parsing failed: %A" e
+        failwith "Input parsing failed: %A" e
         
 
 
 let search graphs agentsCount =
     let start = System.DateTime.Now
+    let processRanges (ranges:ResizeArray<_>) =
+        ranges.Count |> printfn "Total ranges: %A"
     let agent name  =
         MailboxProcessor.Start(fun inbox ->
             let rec loop n =
@@ -85,6 +82,7 @@ let search graphs agentsCount =
                             try
                                 GLL.tRNA.buildAbstract graph 4                                
                                 |> filterRnaParsingResult 60
+                                |> processRanges
                             with
                             | e -> printfn "ERROR! %A" e.Message
                             return! loop n         

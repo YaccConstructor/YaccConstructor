@@ -100,7 +100,7 @@ let perfTest2 parse graph =
         | Success tree->
             ()//printfn "%s" "sss"
 
-let test buildAbstractAst qGraph l (intToString : int -> string) (fileName : string) nodesCount edgesCount termsCount ambiguityCount tokenData tokenToNum = 
+let test buildAbstractAst qGraph l (intToString : int -> string) (fileName : string) nodesCount edgesCount termsCount ambiguityCount (tokenData : 'TokenType -> obj) (tokenToNum : 'TokenType -> int) = 
 
     let r = buildAbstractAst qGraph l
     printfn "%A" r
@@ -178,9 +178,9 @@ let filterRnaParsingResult res expectedRange lengthLimit =
     | Error e -> 
         sprintf "Input parsing failed: %A" e
         |> Assert.Fail
-//let edgB b e t = new BioParserEdge(b, e, t) 
-[<TestFixture>]
-type ``GLL abstract parser tests`` () =
+//let edgB b e l t = new BioParserEdge(b, e, l, t) 
+//[<TestFixture>]
+//type ``GLL abstract parser tests`` () =
 //    [<Test>]
 //    member this._01_PrettySimpleCalc_SequenceInput () =
 //        
@@ -189,14 +189,14 @@ type ``GLL abstract parser tests`` () =
 //        let a3 = f [|GLL.PrettySimpleCalc.NUM 3|] GLL.PrettySimpleCalc.tokenToNumber
 //        let a4 = f [|GLL.PrettySimpleCalc.RNGLR_EOF 0|] GLL.PrettySimpleCalc.tokenToNumber
 //        let edges = [|
-//            edgB 0 1 a1; 
-//            edgB 1 2 a2; 
-//            edgB 2 3 a3;
-//            edgB 3 4 a4|]
+//            edgB 0 1 1 a1; 
+//            edgB 1 2 1 a2; 
+//            edgB 2 3 1 a3;
+//            edgB 3 4 1 a4|]
 //         
-//        let qGraph = new BioParserInputGraph<GLL.PrettySimpleCalc.Token>([|0|], 4, len edges, edges, 5)
+//        let qGraph = new BioParserInputGraph(edges)
 //        test GLL.PrettySimpleCalc.buildAbstractAst qGraph 100 GLL.PrettySimpleCalc.numToString "PrettySimpleCalcSeq.dot" 21 24 5 0 GLL.PrettySimpleCalc.tokenData GLL.PrettySimpleCalc.tokenToNumber
-//
+
 //    [<Test>]
 //    member this._06_NotAmbigousSimpleCalc_Loop () =
 //        let a1 = f [|GLL.NotAmbigousSimpleCalc.NUM 0|] GLL.NotAmbigousSimpleCalc.tokenToNumber
@@ -758,7 +758,7 @@ type ``GLL abstract parser tests`` () =
 //        let processRes res = 
 //            filterRnaParsingResult res expectedRange 60        
 //
-        0
+//        
 //            let cnt = ref 0
 //            fun ch ->
 //                let i = incr cnt; !cnt 
@@ -775,142 +775,142 @@ type ``GLL abstract parser tests`` () =
 //        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.tRNA.RNGLR_EOF 0)
 //
 //        graphs
-        let agent name  =
-            MailboxProcessor.Start(fun inbox ->
-                let rec loop n =
-                    async {
-                            let! msg = inbox.Receive()
-                            match msg with
-                            | Data (i,graph) ->
-                                printfn "%A: %A" name i
-                                try
-                                 GLL.tRNA.buildAbstract graph 3
-                                 |> processRes                 
-                                with
-                                | e -> ()
-                                return! loop n
-                            | End f -> f := true
-                            | Die ch -> ch.Reply()
-                            }
-                loop 0)                
-        
-        let a1 = agent "a"
-        let a2 = agent "b"
-        let a3 = agent "c"
-        let a4 = agent "d"
-        let a5 = agent "e"
-
-        let f1 = ref false
-        let f2 = ref false
-        let f3 = ref false
-
-        //|> Seq.skip 15
-        //|> Seq.take 20
-        //|> fun x -> [|x|]
-        //|> fun a -> a.[15..20]
-        |> Array.iteri 
-                Data (i,graph) 
-                |>
-                    match i % 5 with
-                    | 0 -> a1.Post
-                    | 1 -> a2.Post
-                    | 2 -> a3.Post
-                    | 3 -> a4.Post
-                    | _ -> a5.Post
-        //|> Array.Parallel.choose id
-        //|> Array.iter processRes
-        a1.PostAndReply (Die)
-        a2.PostAndReply (Die)
-        a3.PostAndReply (Die)
-        a4.PostAndReply (Die)
-        a5.PostAndReply (Die)
-        //while not (!f1 && !f2 && !f3) do ()
-
-    [<Test>]
-    member this.``Problem with shift. Small`` () =
-        let file = """problem_with_shift\g""" 
-        let lengthLimit = 1001 
-        let expectedRange = ((0,0),(0,4))
-        let getSmb =
-            let cnt = ref 0
-            fun ch ->
-                let i = incr cnt; !cnt 
-                match ch with
-                | 'A' -> GLL.shiftProblem.A i                
-                | 'C' -> GLL.shiftProblem.C i
-                | 'G' -> GLL.shiftProblem.G i                
-                | x ->   failwithf "Strange symbol in input: %A" x
-                |> GLL.shiftProblem.tokenToNumber                
-        let basePath = "../../../Tests/bio/"
-        let path = Path.Combine(basePath, file)
-        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.shiftProblem.RNGLR_EOF 0)
-
-        graphs
-        |> Array.ofSeq
-        |> Array.mapi 
-            (fun i graph -> 
-                printfn "%A" i
-                GLL.shiftProblem.buildAbstract graph 1
-            )
-        |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 5)        
-    
-    [<Test>]
-    member this.``Problem with shift. Small 2`` () =
-        let file = """problem_with_shift_2\g""" 
-        let lengthLimit = 1001 
-        let expectedRange = ((0,0),(0,4))
-        let getSmb =
-            let cnt = ref 0
-            fun ch ->
-                let i = incr cnt; !cnt 
-                match ch with
-                | 'A' -> GLL.shiftProblem.A i                
-                | 'C' -> GLL.shiftProblem.C i
-                | 'G' -> GLL.shiftProblem.G i                
-                | x ->   failwithf "Strange symbol in input: %A" x
-                |> GLL.shiftProblem.tokenToNumber                
-        let basePath = "../../../Tests/bio/"
-        let path = Path.Combine(basePath, file)
-        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.shiftProblem.RNGLR_EOF 0)
-
-        graphs
-        |> Array.ofSeq
-        |> Array.mapi 
-            (fun i graph -> 
-                printfn "%A" i
-                GLL.shiftProblem.buildAbstract graph 1
-            )
-        |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 5)        
-
-
-    [<Test>]
-    member this.``Problem with multiple edges. Small`` () =
-        let file = """problem_with_multiple_edges\g""" 
-        let lengthLimit = 1001 
-        let expectedRange = ((0,0),(0,4))
-        let getSmb =
-            let cnt = ref 0
-            fun ch ->
-                let i = incr cnt; !cnt 
-                match ch with
-                | 'A' -> GLL.multipleEdgesProblem.A i                
-                | 'C' -> GLL.multipleEdgesProblem.C i            
-                | x ->   failwithf "Strange symbol in input: %A" x
-                |> GLL.multipleEdgesProblem.tokenToNumber                
-        let basePath = "../../../Tests/bio/"
-        let path = Path.Combine(basePath, file)
-        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.multipleEdgesProblem.RNGLR_EOF 0)
-
-        graphs
-        |> Array.ofSeq
-        |> Array.mapi 
-            (fun i graph -> 
-                printfn "%A" i
-                GLL.multipleEdgesProblem.buildAbstract graph 1
-            )
-        |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 5)        
-
-        this.``1000: trna`` """simple_tRNA6\g""" 120 ((0,133),(0,204))
+//        let agent name  =
+//            MailboxProcessor.Start(fun inbox ->
+//                let rec loop n =
+//                    async {
+//                            let! msg = inbox.Receive()
+//                            match msg with
+//                            | Data (i,graph) ->
+//                                printfn "%A: %A" name i
+//                                try
+//                                 GLL.tRNA.buildAbstract graph 3
+//                                 |> processRes                 
+//                                with
+//                                | e -> ()
+//                                return! loop n
+//                            | End f -> f := true
+//                            | Die ch -> ch.Reply()
+//                            }
+//                loop 0)                
+//        
+//        let a1 = agent "a"
+//        let a2 = agent "b"
+//        let a3 = agent "c"
+//        let a4 = agent "d"
+//        let a5 = agent "e"
+//
+//        let f1 = ref false
+//        let f2 = ref false
+//        let f3 = ref false
+//
+//        //|> Seq.skip 15
+//        //|> Seq.take 20
+//        //|> fun x -> [|x|]
+//        //|> fun a -> a.[15..20]
+//        |> Array.iteri 
+//                Data (i,graph) 
+//                |>
+//                    match i % 5 with
+//                    | 0 -> a1.Post
+//                    | 1 -> a2.Post
+//                    | 2 -> a3.Post
+//                    | 3 -> a4.Post
+//                    | _ -> a5.Post
+//        //|> Array.Parallel.choose id
+//        //|> Array.iter processRes
+//        a1.PostAndReply (Die)
+//        a2.PostAndReply (Die)
+//        a3.PostAndReply (Die)
+//        a4.PostAndReply (Die)
+//        a5.PostAndReply (Die)
+//        //while not (!f1 && !f2 && !f3) do ()
+//
+//    [<Test>]
+//    member this.``Problem with shift. Small`` () =
+//        let file = """problem_with_shift\g""" 
+//        let lengthLimit = 1001 
+//        let expectedRange = ((0,0),(0,4))
+//        let getSmb =
+//            let cnt = ref 0
+//            fun ch ->
+//                let i = incr cnt; !cnt 
+//                match ch with
+//                | 'A' -> GLL.shiftProblem.A i                
+//                | 'C' -> GLL.shiftProblem.C i
+//                | 'G' -> GLL.shiftProblem.G i                
+//                | x ->   failwithf "Strange symbol in input: %A" x
+//                |> GLL.shiftProblem.tokenToNumber                
+//        let basePath = "../../../Tests/bio/"
+//        let path = Path.Combine(basePath, file)
+//        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.shiftProblem.RNGLR_EOF 0)
+//
+//        graphs
+//        |> Array.ofSeq
+//        |> Array.mapi 
+//            (fun i graph -> 
+//                printfn "%A" i
+//                GLL.shiftProblem.buildAbstract graph 1
+//            )
+//        |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 5)        
+//    
+//    [<Test>]
+//    member this.``Problem with shift. Small 2`` () =
+//        let file = """problem_with_shift_2\g""" 
+//        let lengthLimit = 1001 
+//        let expectedRange = ((0,0),(0,4))
+//        let getSmb =
+//            let cnt = ref 0
+//            fun ch ->
+//                let i = incr cnt; !cnt 
+//                match ch with
+//                | 'A' -> GLL.shiftProblem.A i                
+//                | 'C' -> GLL.shiftProblem.C i
+//                | 'G' -> GLL.shiftProblem.G i                
+//                | x ->   failwithf "Strange symbol in input: %A" x
+//                |> GLL.shiftProblem.tokenToNumber                
+//        let basePath = "../../../Tests/bio/"
+//        let path = Path.Combine(basePath, file)
+//        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.shiftProblem.RNGLR_EOF 0)
+//
+//        graphs
+//        |> Array.ofSeq
+//        |> Array.mapi 
+//            (fun i graph -> 
+//                printfn "%A" i
+//                GLL.shiftProblem.buildAbstract graph 1
+//            )
+//        |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 5)        
+//
+//
+//    [<Test>]
+//    member this.``Problem with multiple edges. Small`` () =
+//        let file = """problem_with_multiple_edges\g""" 
+//        let lengthLimit = 1001 
+//        let expectedRange = ((0,0),(0,4))
+//        let getSmb =
+//            let cnt = ref 0
+//            fun ch ->
+//                let i = incr cnt; !cnt 
+//                match ch with
+//                | 'A' -> GLL.multipleEdgesProblem.A i                
+//                | 'C' -> GLL.multipleEdgesProblem.C i            
+//                | x ->   failwithf "Strange symbol in input: %A" x
+//                |> GLL.multipleEdgesProblem.tokenToNumber                
+//        let basePath = "../../../Tests/bio/"
+//        let path = Path.Combine(basePath, file)
+//        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.multipleEdgesProblem.RNGLR_EOF 0)
+//
+//        graphs
+//        |> Array.ofSeq
+//        |> Array.mapi 
+//            (fun i graph -> 
+//                printfn "%A" i
+//                GLL.multipleEdgesProblem.buildAbstract graph 1
+//            )
+//        |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 5)        
+//
+//        this.``1000: trna`` """simple_tRNA6\g""" 120 ((0,133),(0,204))
 //    [<Test>]
 //    member this.``1000 as graph 49 + 5: trna in 133-204`` () =
 //        this.``1000: trna`` """simple_tRNA4\g""" 120 ((0,133),(0,204))
@@ -919,14 +919,14 @@ type ``GLL abstract parser tests`` () =
 //    member this.``Big for tRNA 1`` () =
 //        this.``1000: trna`` """mix_1\late_pair_info_count""" 120 ((0,860),(0,930))
 
-    member this.``Big for tRNA 2`` () =
-        this.``1000: trna`` """synth_1\graph""" 120 ((0,860),(0,930))
+//    member this.``Big for tRNA 2`` () =
+//        this.``1000: trna`` """synth_1\graph""" 120 ((0,860),(0,930))
 
         
 [<EntryPoint>]
 let fs x =
     //System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
-    let t = new ``GLL abstract parser tests``()
+    //let t = new ``GLL abstract parser tests``()
     //let f () = t.``TSQL performance test for GLL`` ()
               //_35_Expression() //
     //let th = new System.Threading.Thread(f, 10000000)
@@ -935,7 +935,7 @@ let fs x =
     //t.``1000: trna in 133-204``()
     //t.``1000: trna in 133-204``()
     //t.``Problem with shift. Small 2``()
-    t.``1000 as graph 49 + 5: trna in 133-204``()
+    //t.``1000 as graph 49 + 5: trna in 133-204``()
     //t.``Problem with multiple edges. Small``()
     //t.``Big for tRNA 2``()
     0

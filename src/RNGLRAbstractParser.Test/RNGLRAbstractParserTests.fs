@@ -800,6 +800,20 @@ type ``RNGLR abstract parser tests`` () =
 
         errorTest RNGLR.StrangeBrackets.buildAstAbstract qGraph true testErrors
 
+    [<Test>]
+    member this._42_Errors_AB_SimpleBranch () =
+        let qGraph = new ParserInputGraph<_>(0, 9)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.AB.A 1)
+            edg 0 1 (RNGLR.AB.C 1)
+            edg 1 2 (RNGLR.AB.D 1)
+            edg 2 3 (RNGLR.AB.B 1)
+            edg 3 9 (RNGLR.AB.RNGLR_EOF 0)
+            ] |> ignore
+        let testErrors = new ResizeArray<string>()
+
+        errorTest RNGLR.AB.buildAstAbstract qGraph true testErrors
+
     member this.``Not Ambigous Simple Calc. Branch. Perf`` i inpLength isLoop =  
         let tpl x =
             [
@@ -969,6 +983,7 @@ let f x =
 //    t._39_Errors_StrangeBrackets_SequenceInput2 ()
 //    t._40_Errors_StrangeBrackets_SimpleLoop ()
 //    t._41_Errors_StrangeBrackets_SimpleLoop2 ()
+//    t._42_Errors_AB_SimpleBranch ()
 //    t._25_UnambiguousBrackets_temp () 
 //    t.``TSQL performance test 2`` 2 100 false
 //    t.temp ()

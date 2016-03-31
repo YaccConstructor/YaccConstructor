@@ -83,21 +83,29 @@ and [<Struct>]
     val edge : Edge option
     new (_gssVertex, _prod, _pos, _edge) = {gssVertex = _gssVertex; prod = _prod; pos = _pos; edge = _edge}
 
-and [<AllowNullLiteral>]
-    Prefix<'TokenType> (head : QuickGraph.TaggedEdge<_,'TokenType>, tail : ResizeArray<Prefix<_>>) = 
+and LabledPrefix<'TokenType> =
+    |End
+    |NontermEnd of AstNode * ResizeArray<LabledPrefix<'TokenType>>
+    |NontermStart of AstNode * ResizeArray<LabledPrefix<'TokenType>>
+    |Pref of Prefix<'TokenType>
+
+and Prefix<'TokenType> (head : QuickGraph.TaggedEdge<_,'TokenType>, tail : ResizeArray<LabledPrefix<_>>) = 
 
     member this.Head = head
     member this.Tail = tail
 
     member this.AddEdge edge =
-        new Prefix<_>(edge, this)
+        new Prefix<_>(edge, Pref this)
 
-    new (head, prefix : Prefix<_>) =
-        let curLevel = new ResizeArray<Prefix<_>>()
-        curLevel.Add(prefix)
+    new (head, lprefix : LabledPrefix<_>) =
+        let curLevel = new ResizeArray<LabledPrefix<_>>()
+        curLevel.Add(lprefix)
         new Prefix<_> (head, curLevel)
 
-    new (edge) = new Prefix<_> (edge, new ResizeArray<Prefix<_>>())
+    new (edge) = 
+        let level = new ResizeArray<LabledPrefix<_>>()
+        level.Add(End)
+        new Prefix<_> (edge, level)
 
 and [<AllowNullLiteral>]
     Path (head : AstNode, tail : Path, length : int) = 
@@ -142,8 +150,8 @@ and [<AllowNullLiteral>]
     new (edge) = new Path (edge, null, 1)
 
 type ParseResult<'TokenType> =
-    | Success of Tree<'TokenType> * Dictionary<string,ResizeArray<Prefix<'TokenType>>>
-    | Error of Dictionary<string,ResizeArray<Prefix<'TokenType>>>
+    | Success of Tree<'TokenType> * Dictionary<string,ResizeArray<LabledPrefix<'TokenType>>>
+    | Error of Dictionary<string,ResizeArray<LabledPrefix<'TokenType>>>
 
 
 (*let buildAstAbstractOnline<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : ParserInputGraph<'TokenType>) =
@@ -578,8 +586,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     let outEdgesInnerGraph = Array.init (Seq.max tokens.Vertices + 1) (fun _ -> [||])
     for v in innerGraph.Vertices do
         outEdgesInnerGraph.[v.vNum] <- innerGraph.OutEdges v |> Array.ofSeq
-    let gssVertexesToPrefixes = new Dictionary<_,_>()
-    let nonTermsAstToPrefixes = new Dictionary<AST,Prefix<_>>()
+    let gssVertexesToPrefixes = new Dictionary<_,ResizeArray<LabledPrefix<_>>>()
+    let nonTermsAstToPrefixes = new Dictionary<AstNode,ResizeArray<LabledPrefix<_>>>()
     
     let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide : int[])
         (initNodes : seq<Vertex>) (numToString : int -> string) (errInd: int) (path : string) =
@@ -678,38 +686,68 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             | None ->
                 v <- new Vertex(state, currentGraphV.vNum)
                 isNew <- true
-                gssVertexesToPrefixes.Add(v, new ResizeArray<Prefix<_>>())
+                gssVertexesToPrefixes.Add(v, new ResizeArray<LabledPrefix<_>>())
                 listToAddUnprocessedGssV.Add v
                 for e in outEdgesInnerGraph.[currentGraphV.vNum] do
                     addZeroReduction v e.Tag currentGraphV false
         v, isNew
 
-    let extPrefix (oldPrefixes:ResizeArray<Prefix<_>>) edge =
-        new Prefix<_>(edge, oldPrefixes)
+    let extPrefix (oldPrefixes:ResizeArray<LabledPrefix<_>>) edge =
+        Pref (new Prefix<_>(edge, oldPrefixes))
 
-    let rec addPrefix (curLevel:ResizeArray<Prefix<_>>) (prefixToAdd:Prefix<_>) = 
-        if prefixToAdd = null
-        then
+    let rec addPrefix (curLevel:ResizeArray<LabledPrefix<_>>) (lprefixToAdd:LabledPrefix<_>) =
+        match lprefixToAdd with
+        |End ->
             if not (ResizeArray.exists
-                        (fun (prefix:Prefix<_>) -> prefix = null)
+                        (fun (lprefix:LabledPrefix<_>) -> match lprefix with
+                                                            |End -> true
+                                                            | _ -> false)
                         curLevel)
-            then curLevel.Add(null)
-        else if not <| curLevel.Contains(prefixToAdd)
-        then
-            let nextCommon = ResizeArray.tryFind
-                                (fun (pr:Prefix<_>) -> pr <> null && pr.Head = prefixToAdd.Head)
-                                curLevel
-            match nextCommon with
-            | Some oldPrefix -> if ResizeArray.isEmpty(prefixToAdd.Tail)
-                                then
-                                    addPrefix oldPrefix.Tail null
-                                else
-                                    for newPrefix in prefixToAdd.Tail do
-                                        addPrefix oldPrefix.Tail newPrefix
-            | None -> curLevel.Add(prefixToAdd)
+            then curLevel.Add(End)
+
+        |NontermEnd (ast, astTailPrefixes) ->
+            if not (ResizeArray.exists
+                        (fun (lpr:LabledPrefix<_>) -> match lpr with
+                                                            |NontermEnd (nonT, _) -> nonT = ast
+                                                            | _ -> false)
+                        curLevel)
+            then curLevel.Add(NontermEnd (ast, astTailPrefixes))
+
+        |NontermStart (ast, astPrefixes) ->
+            if not (ResizeArray.exists
+                        (fun (lprefix:LabledPrefix<_>) -> match lprefix with
+                                                            |NontermStart (xast, xastPrefixes) -> ast = xast
+                                                            | _ -> false)
+                        curLevel)
+            then curLevel.Add(NontermStart (ast, astPrefixes))
+
+        |Pref prefixToAdd -> 
+            if not (ResizeArray.exists
+                        (fun (lpr:LabledPrefix<_>) -> match lpr with
+                                                            |Pref pr -> pr = prefixToAdd
+                                                            | _ -> false)
+                        curLevel)
+            then 
+                let nextCommon = ResizeArray.tryFind
+                                    (fun (lpr:LabledPrefix<_>) -> match lpr with
+                                                                  |Pref pr -> pr.Head = prefixToAdd.Head
+                                                                  | _ -> false)
+                                    curLevel
+                match nextCommon with
+                | Some oldLPrefix ->
+                                    match oldLPrefix with
+                                    |Pref oldPrefix ->
+                                        if ResizeArray.isEmpty(prefixToAdd.Tail)
+                                        then
+                                            addPrefix oldPrefix.Tail End
+                                        else
+                                            for newPrefix in prefixToAdd.Tail do
+                                                addPrefix oldPrefix.Tail newPrefix
+                                    |_ -> ignore() //assert
+                | None -> curLevel.Add(lprefixToAdd)
 
 
-    let addEdge (startV:VInfo<_>) isNew (newVertex:Vertex) edge isNotEps (prefixesToAdd:ResizeArray<Prefix<_>>) =
+    let addEdge (startV:VInfo<_>) isNew (newVertex:Vertex) edge isNotEps (lprefixesToAdd:ResizeArray<LabledPrefix<_>>) =
         if not isNew && newVertex.PassingReductions.Count > 0
         then startV.passingReductions.Add((newVertex, edge))
         customEnqueue(startV)
@@ -718,12 +756,12 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         if isNotEps
         then
             let prefixes = gssVertexesToPrefixes.[newVertex]
-            for prefixToAdd in prefixesToAdd do
-                addPrefix prefixes prefixToAdd
+            for lprefixToAdd in lprefixesToAdd do
+                addPrefix prefixes lprefixToAdd
             for e in outEdgesInnerGraph.[startV.vNum] do
                 addNonZeroReduction newVertex e.Tag edge startV
         else
-            gssVertexesToPrefixes.[newVertex] <- prefixesToAdd
+            gssVertexesToPrefixes.[newVertex] <- lprefixesToAdd
 
     let edgesToTerms = new Dictionary<_,_>()
     let push (currentGraphV:VInfo<_>) (gssVertex : Vertex) =
@@ -744,7 +782,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 let ind = tailGssV.FindIndex gssVertex.State gssVertex.Level 
                 if ind = -1 || (tailGssV.Edge ind).Ast <> edgesToTerms.[e]
                 then
-                    let prefixesToAdd = new ResizeArray<Prefix<_>>()
+                    let prefixesToAdd = new ResizeArray<LabledPrefix<_>>()
 
                     prefixesToAdd.Add(extPrefix gssVertexesToPrefixes.[gssVertex] e)
                     addEdge e.Target isNew tailGssV edge true prefixesToAdd
@@ -771,64 +809,65 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 else ast.other <- Array.append ast.other [|newFamily|]
         | Some _ -> ()
 
-    let copyWalkPrefix (walkPrefix:Prefix<_>) (tail:ResizeArray<Prefix<_>>) =
-        if walkPrefix = null
-        then
-            null
-        else
-            if ResizeArray.isEmpty(walkPrefix.Tail) || walkPrefix.Tail.First() = null
-            then
-                let newPrefix = new Prefix<_>(walkPrefix.Head, tail)
-                newPrefix
-            else
-                let newPrefix = new Prefix<_>(walkPrefix.Head, new ResizeArray<_>())
-                let mutable curLevel = walkPrefix.Tail
-                let mutable curLevelNewPrefix = newPrefix.Tail
-                while (not <| ((ResizeArray.isEmpty(curLevel) || (curLevel.First() = null)))) do
-                    if ResizeArray.isEmpty(curLevel.First().Tail) || curLevel.First().Tail.First() = null
-                    then
-                        curLevelNewPrefix.Add(new Prefix<_>(curLevel.First().Head, tail))
-                    else
-                        curLevelNewPrefix.Add(new Prefix<_>(curLevel.First().Head, new ResizeArray<_>()))
-                    curLevel <- curLevel.First().Tail
-                    curLevelNewPrefix <- curLevelNewPrefix.First().Tail
-                newPrefix
+    let rec addToNonTermEnds (curLevel:ResizeArray<LabledPrefix<_>>) (ast:AstNode) (tailLPrefixes:ResizeArray<LabledPrefix<_>>) (was:ResizeArray<ResizeArray<LabledPrefix<_>>>) =   //to do
+        //dfs, was array
+        was.Add(curLevel)
+        for curLPrefix in curLevel do
+            match curLPrefix with
+            |Pref pr ->
+                if not <| was.Contains(pr.Tail)
+                then
+                    addToNonTermEnds pr.Tail ast tailLPrefixes was
 
-    let rec pathToPrefix (path:Path) (tailPrefix:Prefix<_>) =
+            |NontermStart (_, astPrefixes) ->
+                if not <| was.Contains(astPrefixes)
+                then
+                    addToNonTermEnds astPrefixes ast tailLPrefixes was
+
+            |_ -> ignore()  //what with NontermEnd another ast?
+
+        if curLevel.Exists(fun lpr -> match lpr with
+                                      | NontermEnd (xast, _) -> xast = ast
+                                      | _ -> false)
+        then
+            for tailLPrefix in tailLPrefixes do
+                if not <| curLevel.Contains(tailLPrefix)
+                then
+                    curLevel.Add(tailLPrefix)       //addPrefix function?
+
+        
+
+
+    let rec pathToPrefixes (path:Path) (tailLPrefixes:ResizeArray<LabledPrefix<_>>) =
         if path = null || path.Length = 0
         then
-            tailPrefix
+            tailLPrefixes
         else
             let curAst = path.Head
             match curAst with
-            | :? Epsilon -> pathToPrefix path.Tail tailPrefix
-            | :? Terminal as t ->
-                let curEdge = edgesToTerms.Keys.First(fun e -> match nodes.[edgesToTerms.[e]] with
-                                                               | :? Terminal as t1 -> t1.TokenNumber =  t.TokenNumber
-                                                               | _ -> false)
-                pathToPrefix path.Tail (new Prefix<_>(curEdge, tailPrefix))
+            | :? Epsilon -> pathToPrefixes path.Tail tailLPrefixes
+            | :? Terminal as t ->   //what if t in nonTermsAstToPrefixes?
+                if nonTermsAstToPrefixes.ContainsKey(curAst)
+                then
+                    new ResizeArray<LabledPrefix<_>>()    //to do
+                else
+                    let curEdge = edgesToTerms.Keys.First(fun e -> match nodes.[edgesToTerms.[e]] with
+                                                                    | :? Terminal as t1 -> t1.TokenNumber =  t.TokenNumber
+                                                                    | _ -> false)
+                    let newLevel = new ResizeArray<LabledPrefix<_>>()
+                    newLevel.Add(Pref (new Prefix<_>(curEdge, tailLPrefixes)))
+                    pathToPrefixes path.Tail newLevel
             | :? AST as ast ->
-                let lastLevel = new ResizeArray<Prefix<_>>()
-                lastLevel.Add(tailPrefix)
-                let newPrefix = copyWalkPrefix nonTermsAstToPrefixes.[ast] lastLevel
-                pathToPrefix path.Tail newPrefix
-
-            | _ -> null     //what case?
-
-    let addWalkPrefix (prefixes:ResizeArray<Prefix<_>>) (walkPrefix:Prefix<_>) =
-        if walkPrefix = null
-        then prefixes
-        else
-            let newPrefix = copyWalkPrefix walkPrefix prefixes
-            let newPrefixes = new ResizeArray<Prefix<_>>()
-            newPrefixes.Add(newPrefix)
-            newPrefixes
-
+                addToNonTermEnds nonTermsAstToPrefixes.[ast] ast tailLPrefixes (new ResizeArray<ResizeArray<LabledPrefix<_>>>())
+                let newStartLevel = new ResizeArray<_>()
+                newStartLevel.Add(NontermStart (ast, nonTermsAstToPrefixes.[ast]))
+                pathToPrefixes path.Tail (newStartLevel)
+                //pathToPrefixes path.Tail nonTermsAstToPrefixes.[ast] - without NontermStart lable
+            | _ -> new ResizeArray<LabledPrefix<_>>()     //assert
 
     let handlePath (path : Path) (final : Vertex) startV nonTerm pos prod shouldEnqueueVertex (startGssV : Vertex) =
         let state = parserSource.Gotos.[final.State].[nonTerm]
         let newVertex, isNew = addVertex startV state startV.unprocessedGssVertices
-        let walkPrefix = pathToPrefix path null
 
         if shouldEnqueueVertex && isNew 
         then
@@ -839,18 +878,43 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 let edge = new Edge(final, nodes.Length)
                 let newAst = new AST (Unchecked.defaultof<_>, null)
                 nodes.Add <| newAst
-                nonTermsAstToPrefixes.Add(newAst, walkPrefix)
-                addEdge  startV isNew newVertex edge (pos > 0) (addWalkPrefix gssVertexesToPrefixes.[final] walkPrefix)
+                let nonTermEndLevel = new ResizeArray<LabledPrefix<_>>()
+                nonTermEndLevel.Add(NontermEnd (newAst, gssVertexesToPrefixes.[final]))
+                let walkPrefixes = pathToPrefixes path nonTermEndLevel
+                nonTermsAstToPrefixes.Add(newAst, walkPrefixes)
+                let nonTermStartLevel = new ResizeArray<LabledPrefix<_>>()
+                nonTermStartLevel.Add(NontermStart (newAst, nonTermsAstToPrefixes.[newAst]))
+                addEdge  startV isNew newVertex edge (pos > 0) nonTermStartLevel
                 edge.Ast
-            | x -> (newVertex.Edge x).Ast       //add non term prefix
+            | x ->
+                let curAst = (newVertex.Edge x).Ast
+                if curAst >= 0
+                then
+                    let curNode = nodes.[curAst]
+                    let nonTermEndLevel = new ResizeArray<LabledPrefix<_>>()
+                    nonTermEndLevel.Add(NontermEnd (curNode, gssVertexesToPrefixes.[final]))
+                    let walkPrefixes = pathToPrefixes path nonTermEndLevel
+                    if not <| nonTermsAstToPrefixes.ContainsKey(curNode)
+                    then
+                        nonTermsAstToPrefixes.Add(curNode, walkPrefixes)
+                    else
+                        for walkPrefix in walkPrefixes do
+                            addPrefix nonTermsAstToPrefixes.[curNode] walkPrefix
+                    addPrefix gssVertexesToPrefixes.[newVertex] (NontermStart (curNode, nonTermsAstToPrefixes.[curNode]))
+                curAst
         if ast >= 0 
         then addChildren nodes.[ast] path prod
         else 
             let edge = new Edge(final, nodes.Length)
             let newAst = new AST (Unchecked.defaultof<_>, null)
             nodes.Add <| newAst
-            nonTermsAstToPrefixes.Add(newAst, walkPrefix)
-            addEdge  startV isNew newVertex edge (pos > 0) (addWalkPrefix gssVertexesToPrefixes.[final] walkPrefix)
+            let nonTermEndLevel = new ResizeArray<LabledPrefix<_>>()
+            nonTermEndLevel.Add(NontermEnd (newAst, gssVertexesToPrefixes.[final]))
+            let walkPrefixes = pathToPrefixes path nonTermEndLevel
+            nonTermsAstToPrefixes.Add(newAst, walkPrefixes)
+            let nonTermStartLevel = new ResizeArray<LabledPrefix<_>>()
+            nonTermStartLevel.Add(NontermStart (newAst, nonTermsAstToPrefixes.[newAst]))
+            addEdge  startV isNew newVertex edge (pos > 0) nonTermStartLevel
             addChildren nodes.[nodes.Length - 1] path prod
 
     let rec walk remainLength (vertex : Vertex) path startV nonTerm pos prod shouldEnqueueVertex (startGssV : Vertex) = 
@@ -901,66 +965,211 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 walk (remainLength - 1) e.Dest newPath startV nonTerm pos prod true v
             graphV.passingReductions.Remove((v, e)) |> ignore
 
-    let buildErrors (errdict:Dictionary<QuickGraph.TaggedEdge<_,_>,ResizeArray<Prefix<'TokenType>>>) =
-        let outErrors = new Dictionary<string,ResizeArray<Prefix<'TokenType>>>()
+    let buildErrors (errdict:Dictionary<QuickGraph.TaggedEdge<_,_>,ResizeArray<LabledPrefix<'TokenType>>>) =
+        let outErrors = new Dictionary<string,ResizeArray<LabledPrefix<'TokenType>>>()
         for e in errdict.Keys do
             let tokenStr = parserSource.TokenToNumber e.Tag |> parserSource.NumToString
             let tokenData = match parserSource.TokenData with | None -> "" | Some f -> f e.Tag|> string
             outErrors.Add(tokenStr + tokenData, errdict.[e])
         outErrors
 
-    let rec isHavePrefix (p1:Prefix<_>) (p2:Prefix<_>) =
-        if p1 = null || p2 = null
-        then
-            p1 = null && p2 = null
-        else
-            if p1 = p2
-            then true
-            else
-                if (not <| (p1.Head = p2.Head))
-                then
-                    false
-                else
-                    let mutable res = true
-                    for nextP2 in p2.Tail do
-                        if not <| p1.Tail.Any(fun pr -> isHavePrefix pr nextP2 )
-                        then
-                            res <- false
-                    res
+    let getNewAst (oldAst:AstNode option) (newAst:AstNode) =
+        match oldAst with
+        |Some old -> oldAst
+        |None -> Some newAst
 
-    let isContainPrefix (prefixes:ResizeArray<Prefix<_>>) (prefix:Prefix<_>) =
-        prefixes.Any(fun pr -> isHavePrefix pr prefix)
+    let rec isContainPref (ast:AstNode option) (curAstPrefix:LabledPrefix<_>) (findAst:AstNode option) (findPrefix:LabledPrefix<_>) =    //to do
+        if curAstPrefix = findPrefix
+        then
+            true
+        else
+            match (curAstPrefix, findPrefix) with
+            |(Pref astPref, Pref findPref) ->
+                if astPref.Head = findPref.Head
+                then
+                    findPref.Tail.All(fun findTail -> astPref.Tail.Any(fun astTail -> isContainPref ast astTail findAst findTail))
+                else
+                    false
+            |(Pref astPref, NontermStart (curFindAst, findAstPrefixes)) ->
+                let nextFindAst = getNewAst findAst curFindAst
+                findAstPrefixes.All(fun findAstPrefix -> isContainPref ast curAstPrefix nextFindAst findAstPrefix)
+            |(Pref astPref, NontermEnd (curFindAst, findAstPrefixes)) ->
+                match findAst with
+                |Some fast ->
+                    if fast = curFindAst
+                    then
+                        findAstPrefixes.All(fun findAstPrefix -> isContainPref ast curAstPrefix None findAstPrefix)
+                    else
+                        true
+                |None ->
+                    true
+            |(Pref astPref, End) ->
+                false
+            |(NontermStart (newAst, newAstPrefixes), Pref findPref) ->
+                let nextAst = getNewAst ast newAst
+                newAstPrefixes.Any(fun newAstPrefix -> isContainPref nextAst newAstPrefix findAst findPrefix)
+            |(NontermStart (newAst, newAstPrefixes), NontermStart (curFindAst, findAstPrefixes)) ->
+                let nextFindAst = getNewAst findAst curFindAst
+                let nextAst = getNewAst ast newAst
+                findAstPrefixes.All(fun findAstPrefix -> newAstPrefixes.Any(fun newAstPrefix -> isContainPref nextAst newAstPrefix nextFindAst findAstPrefix))
+            |(NontermStart (newAst, newAstPrefixes), NontermEnd (curFindAst, findAstPrefixes)) ->
+                let nextAst = getNewAst ast newAst
+                match findAst with
+                |Some fast ->
+                    if fast = curFindAst
+                    then
+                        findAstPrefixes.All(fun findAstPrefix -> newAstPrefixes.Any(fun newAstPrefix -> isContainPref nextAst newAstPrefix None findAstPrefix))
+                    else 
+                        true
+                |None ->
+                    true
+            |(NontermStart (newAst, newAstPrefixes), End) ->
+                false //what if newAst - contain empty path?
+            |(NontermEnd (newAst, newAstPrefixes), Pref findPref) ->
+                match ast with
+                |Some xast ->
+                    if xast = newAst
+                    then
+                        newAstPrefixes.Any(fun newAstPrefix -> isContainPref None newAstPrefix findAst findPrefix)
+                    else
+                        false
+                |None ->
+                    false
+            |(NontermEnd (newAst, newAstPrefixes), NontermStart (curFindAst, findAstPrefixes)) ->
+                let nextFindAst = getNewAst findAst curFindAst
+                match ast with
+                |Some xast ->
+                    if xast = newAst
+                    then
+                        findAstPrefixes.All(fun findAstPrefix -> newAstPrefixes.Any(fun newAstPrefix -> isContainPref None newAstPrefix nextFindAst findAstPrefix))
+                    else
+                        false
+                |None ->
+                    false
+            |(NontermEnd (newAst, newAstPrefixes), NontermEnd (curFindAst, findAstPrefixes)) ->
+                match (ast, findAst) with
+                |(Some xast, Some fast) ->
+                    if xast = newAst
+                    then
+                        if fast = curFindAst
+                        then
+                            findAstPrefixes.All(fun findAstPrefix -> newAstPrefixes.Any(fun newAstPrefix -> isContainPref None newAstPrefix None findAstPrefix))
+                        else
+                            true
+                    else
+                        if fast = curFindAst
+                        then
+                            false
+                        else
+                            true
+
+                |(Some xast, None) ->
+                    true
+                |(None, Some fast) ->
+                    if fast = curFindAst
+                    then
+                        false
+                    else
+                        true
+                |(None , None) ->
+                    true
+            |(NontermEnd (newAst, newAstPrefixes), End) ->
+                match ast with
+                |Some xast ->
+                    if xast = newAst
+                    then
+                        newAstPrefixes.Contains(End)
+                    else
+                        false
+                |None ->
+                    false
+            |(End, Pref findPref) ->
+                false
+            |(End, NontermStart (curFindAst, findAstPrefixes)) ->
+                false // what if curFindAst - contain empty path?
+            |(End, NontermEnd (curFindAst, findAstPrefixes)) ->
+                match findAst with
+                |Some fast ->
+                    if fast = curFindAst
+                    then
+                        findAstPrefixes.Contains(End)
+                    else
+                        true
+                |None ->
+                    true
+            |(End, End) ->
+                true
 
     let collectErrors (starts:ResizeArray<VInfo<_>>)=
         let was = new ResizeArray<_>()
-        let vertexesToPrefixes = new Dictionary<_,_>()
+        let vertexesToPrefs = new Dictionary<_,ResizeArray<LabledPrefix<_>>>()
+        let vertexesToNontStarts = new Dictionary<_,_>()
         let errorEdges = new Dictionary<QuickGraph.TaggedEdge<_,_>,_>()
 
         let collectPrefixes (v:VInfo<_>) =
-            if not <| vertexesToPrefixes.ContainsKey(v) then
-                vertexesToPrefixes.Add(v, new ResizeArray<_>())
+            if not <| vertexesToPrefs.ContainsKey(v) then
+                vertexesToPrefs.Add(v, new ResizeArray<_>())
+                vertexesToNontStarts.Add(v, new ResizeArray<AstNode>())
                 for gssV in v.processedGssVertices do
                     for gssPrefix in gssVertexesToPrefixes.[gssV] do
-                        addPrefix vertexesToPrefixes.[v] gssPrefix
+                        match gssPrefix with
+                        |Pref pr ->
+                            if not <| vertexesToPrefs.[v].Contains(gssPrefix)
+                            then
+                                vertexesToPrefs.[v].Add(gssPrefix)
+                        |NontermStart (ast,_) ->
+                            if not <| vertexesToNontStarts.[v].Contains(ast)
+                            then
+                                vertexesToNontStarts.[v].Add(ast)
+                        |End ->
+                            if not <| vertexesToPrefs.[v].Contains(End)
+                            then
+                                vertexesToPrefs.[v].Add(gssPrefix)
+                        |_ -> ignore()
 
         let rec dfs (v:VInfo<_>) =
             was.Add(v)
             collectPrefixes v
             for e in outEdgesInnerGraph.[v.vNum] do
                 collectPrefixes e.Target
-                let targetPrefixes = new ResizeArray<Prefix<_>>()
-                for commonPrefix in vertexesToPrefixes.[e.Target] |> Seq.filter(fun pr -> if pr = null then false else pr.Head = e) do
-                    for commonTail in commonPrefix.Tail do
-                        if not <| targetPrefixes.Contains(commonTail)
-                        then
-                            targetPrefixes.Add(commonTail)
-                for prefix in vertexesToPrefixes.[v] do
-                    if not <| (isContainPrefix targetPrefixes prefix)
-                        then
-                            if not <| errorEdges.ContainsKey(e)
+                let commonNonterms = new ResizeArray<AstNode>()
+                let targetPrefs = new ResizeArray<LabledPrefix<_>>()
+                for commonPrefix in vertexesToPrefs.[e.Target] |> Seq.filter(fun pr -> match pr with
+                                                                                       |Pref prefix -> prefix.Head = e
+                                                                                       |_ -> false) do
+                    match commonPrefix with
+                    |Pref commonpr ->
+                        for commonTail in commonpr.Tail do
+                            match commonTail with
+                            |Pref pr ->
+                                if not <| targetPrefs.Contains(commonTail)
+                                then
+                                    targetPrefs.Add(commonTail)
+                            |NontermStart (ast,_) ->
+                                if (not <| commonNonterms.Contains(ast)) && (vertexesToNontStarts.[v].Contains(ast))
+                                then
+                                    commonNonterms.Add(ast)
+                            |End ->
+                                if not <| targetPrefs.Contains(End)
+                                then
+                                    targetPrefs.Add(commonTail)
+                            |_ -> ignore()
+                    |_ -> ignore()
+
+                let notPushedPrefs = new ResizeArray<LabledPrefix<_>>()
+
+                for pref in vertexesToPrefs.[v] do
+                    if (not <| targetPrefs.Contains(pref)) && (not <| notPushedPrefs.Contains(pref))
+                    then
+                        notPushedPrefs.Add(pref)
+
+                for notPushedPref in notPushedPrefs do
+                    if not <| commonNonterms.Any(fun ast -> nonTermsAstToPrefixes.[ast].Any(fun astPrefix -> isContainPref (Some ast) astPrefix None notPushedPref))
+                    then
+                        if not <| errorEdges.ContainsKey(e)
                             then
                                 errorEdges.Add(e, new ResizeArray<_>())
-                            addPrefix errorEdges.[e] prefix
+                        addPrefix errorEdges.[e] notPushedPref
 
                 if not <| was.Contains(e.Target) then
                     dfs(e.Target)
@@ -970,32 +1179,39 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
         for e in innerGraph.Edges |> Seq.filter (fun e -> e.Target = finalV) do
             errorEdges.Remove(e) |> ignore
-            let accPrefixes = new ResizeArray<_>()
-            let notAccPrefixes = new ResizeArray<_>()
+            let accPrefs = new ResizeArray<_>()
+            let notAccPrefs = new ResizeArray<_>()
+            let accNonterms = new ResizeArray<AstNode>()
             for gssVertex in e.Source.processedGssVertices do
                 if parserSource.AccStates.[gssVertex.State]
                 then
                     for gssPrefix in gssVertexesToPrefixes.[gssVertex] do
-                        if not <| notAccPrefixes.Contains(gssPrefix)
-                        then
-                            accPrefixes.Add(gssPrefix)
+                        match gssPrefix with
+                        |Pref gsspref ->
+                            if not <| accPrefs.Contains(gssPrefix)
+                            then
+                                accPrefs.Add(gssPrefix)
+                        |NontermStart (ast, _) ->
+                            if not <| accNonterms.Contains(ast)
+                            then
+                                accNonterms.Add(ast)
+                        |_ -> ignore()
                 else
                     for gssPrefix in gssVertexesToPrefixes.[gssVertex] do
-                        if not <| notAccPrefixes.Contains(gssPrefix)
-                        then
-                            notAccPrefixes.Add(gssPrefix)
-            for naprefix in notAccPrefixes do
-               if not <| accPrefixes.Contains(naprefix)     //wrong compare
+                        match gssPrefix with
+                        |Pref gssPref ->
+                            if not <| notAccPrefs.Contains(gssPrefix)
+                            then
+                                notAccPrefs.Add(gssPrefix)
+                        |_ -> ignore()
+
+            for napref in notAccPrefs do
+                if not <| accPrefs.Contains(napref)
                 then
-                    let naprefixArr = new ResizeArray<Prefix<_>>()
-                    naprefixArr.Add(naprefix)
-                    let haveAcc = accPrefixes.Any(fun pr -> isContainPrefix naprefixArr pr)
-                    if not <| haveAcc
+                    if not <| accNonterms.Any(fun ast -> nonTermsAstToPrefixes.[ast].Any(fun astPrefix -> isContainPref (Some ast) astPrefix None napref))
                     then
-                        if not <| errorEdges.ContainsKey(e)
-                        then
-                            errorEdges.Add(e, new ResizeArray<Prefix<'TokenType>>())
-                        addPrefix errorEdges.[e] naprefix
+                        errorEdges.Add(e, new ResizeArray<_>())
+                        addPrefix errorEdges.[e] napref
 
         buildErrors errorEdges
 
@@ -1021,7 +1237,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         else Error (new Dictionary<_,_>())
     else
         let startGssV,_ = addVertex startV startState startV.unprocessedGssVertices
-        gssVertexesToPrefixes.[startGssV].Add(null)
+        gssVertexesToPrefixes.[startGssV].Add(End)
         while errorIndex = -1 && verticesToProcess.Count > 0 do
             let curV = verticesToProcess.Dequeue()
             processVertex curV

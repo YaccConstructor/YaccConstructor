@@ -194,6 +194,18 @@ type ``RNGLR abstract parser tests`` () =
              ] |> ignore
         test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 15 14 0 4 1
 
+
+    [<Test>]
+    member this._0_02_PrettySimpleCalcSimple_BranchedInput () =
+        let qGraph = new ParserInputGraph<_>(0, 4)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM 1)
+             edg 1 2 (RNGLR.NotAmbigousSimpleCalc.PLUS 2)
+             edg 2 3 (RNGLR.NotAmbigousSimpleCalc.NUM 3)
+             edg 3 4 (RNGLR.NotAmbigousSimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+        test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph 15 14 0 4 1
+
     [<Test>]
     member this._03_PrettySimpleCalc_BranchedInput () =
         let qGraph = new ParserInputGraph<_>(2, 9)
@@ -848,7 +860,7 @@ type ``RNGLR abstract parser tests`` () =
 //        let parse = (new Parser<_>()).Parse Yard.Examples.MSParserAbstract.buildAstAbstract
 //        perfTest2 parse graphGenerator
 
-
+[<EntryPoint>]
 let f x =
     if System.IO.Directory.Exists "dot" 
     then 
@@ -857,11 +869,12 @@ let f x =
     let t = new ``RNGLR abstract parser tests`` () 
     System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
 //    t._01_PrettySimpleCalc_SequenceInput ()
-//    t._02_PrettySimpleCalc_SimpleBranchedInput ()
+//    t._02_PrettySimpleCalcSimple_BranchedInput ()
+//    t._0_02_PrettySimpleCalcSimple_BranchedInput ()
 //    t._03_PrettySimpleCalc_BranchedInput ()
 //    t._04_PrettySimpleCalc_LotsOfVariants() 
 //    t._05_NotAmbigousSimpleCalc_LotsOfVariants()
-//    t._06_NotAmbigousSimpleCalc_Loop. ()
+    t._06_NotAmbigousSimpleCalc_Loop ()
 //    t._07_NotAmbigousSimpleCalc_Loop2. ()
 //    t._08_NotAmbigousSimpleCalc_Loop3. ()
 //    t._09_NotAmbigousSimpleCalc_Loop4. ()
@@ -882,7 +895,7 @@ let f x =
 //    t._24_UnambiguousBrackets_Circle()
 //    t._25_UnambiguousBrackets_BiggerCircle ()
 //    t._26_UnambiguousBrackets_Inf()
-//    t._27_UnambiguousBrackets_WithoutEmptyString()
+//    t._27_UnambiguousBrackets_WithoutEmptyString ()
 //    t._28_UnambiguousBrackets_DifferentPathLengths ()
     //t.``TSQL performance test for GLL`` ()
     //t._29_AandB_Circle ()

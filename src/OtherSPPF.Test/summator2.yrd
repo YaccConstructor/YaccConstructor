@@ -1,0 +1,4 @@
+﻿[<Start>]
+expr: NUMBER (PLUS expr)*| lbrace  expr rbrace
+lbrace: LBRACE
+rbrace: RBRACE

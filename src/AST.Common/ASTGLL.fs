@@ -169,6 +169,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                             createNode !num false Terminal ("dummy")
                             createEdge currentPair.Num !num false ""
                     | null -> ()
+                    | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
             else
                 let a = currentPair.Node :?> NonTerminalNode
                 num := !num + 1
@@ -181,6 +182,47 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
         out.WriteLine("}")
         out.Close()
 
+    member this.ExtractFinalPaths =
+        let nodeQueue = new Queue<NumNode>()
+        let visitedNodes = new Dictionary<_, Dictionary<_,_>>()
+        let createdPaths = new Dictionary<_,_>()
+
+        let cartesianProduct seq1 seq2 = 
+            seq1 |> Seq.collect(fun x -> Seq.map (fun y -> seq{yield! x; yield! y}) seq2)
+
+        let rec getSubtree (tree : INode) = 
+            match tree with
+            | :? NonTerminalNode as nTerm ->
+                let c, v = visitedNodes. TryGetValue(nTerm.Name)
+                if c then
+                    let c2, v2 = v.TryGetValue(nTerm.Extension)
+                    if c2 then
+                        Seq.empty<_>
+                    else
+                        v.Add(nTerm.Extension, true)
+                        getSubtree nTerm.First
+                else
+                    let d = new Dictionary<_,_>()
+                    d.Add(nTerm.Extension, true)
+                    visitedNodes.Add(nTerm.Name, d)
+                    getSubtree nTerm.First
+                        
+            | :? PackedNode as pNode ->
+                getSubtree pNode.Left 
+                
+
+            | :? IntermidiateNode as iNode ->
+                getSubtree iNode.First
+
+            | :? TerminalNode as term ->
+                seq{yield seq{yield term}}
+                    
+                
+            | x -> failwith "Error"
+        ()
+             
+        
+    
     member this.CountCounters  =
          
         let nodesCount = ref 0
@@ -237,6 +279,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                             incr nodesCount
                             incr edgesCount
                     | null -> ()
+                    | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
             else
                 let a = currentPair.Node :?> NonTerminalNode
                 num := !num + 1

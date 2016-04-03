@@ -2,7 +2,7 @@
 <package>
 <metadata>
 <id>YC.SEL.Plugins.Calc</id>
-<version>0.3.0.16</version>
+<version>0.3.0.27</version>
 <title>Calc plugin for ReSharper</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>
@@ -15,12 +15,13 @@
 <copyright>Copyright 2013, 2014</copyright>
 <tags>Parsing Reengineering YaccConstructor YC Tool Grammarware .NET F# FSharp</tags>
 <dependencies>
-<dependency id="ReSharper" version="8.1" />
+<dependency id="ReSharper" version="9.1" />
+<dependency id="Wave" version="[1.0, 2.0]" />
 <dependency id="YC.SEL.Plugins.Core" />
 </dependencies>
 </metadata>
 <files>
-<file src="..\Bin\Release\v40\YC.Calc.*" target="ReSharper\v8.1\plugins" exclude="**\*.Test.*" />
-<file src="..\Bin\Release\v40\CalcHighlighting.*" target="ReSharper\v8.1\plugins" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\YC.Calc.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
+<file src="..\Bin\Release\v40\CalcHighlighting.*" target="DotFiles\v9.1\plugins" exclude="**\*.Test.*" />
 </files>
 </package>

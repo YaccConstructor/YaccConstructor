@@ -272,7 +272,7 @@ type CommonAstTest () =
         Assert.IsTrue(typeOfExpr <> null && typeOfExpr.Length = 0)
         
 
-[<EntryPoint>]
+//[<EntryPoint>]
 let f x =
     if not <| System.IO.Directory.Exists directoryPath
     then 

@@ -4,7 +4,7 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
-    <rshVer>8.1.555</rshVer>
+    <rshVer>9.1.20150522.81235</rshVer>
     <NuGetNetNum Condition=" '$(TargetFrameworkVersion)' == 'v4.5' ">45</NuGetNetNum>
     <NuGetNetNum Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">40</NuGetNetNum>
     <TargetFSharpCoreVersion Condition=" '$(TargetFrameworkVersion)' == 'v4.5' ">4.3.0.0</TargetFSharpCoreVersion>

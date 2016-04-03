@@ -45,19 +45,28 @@ let trd_ (_,_,x) = x
 let joinMaps (p:Map<'a,'b>) (q:Map<'a,'b>) = 
     Map(Seq.concat [ (Map.toSeq p) ; (Map.toSeq q) ])
 
-let makeNewSeq seq (lbl:Source.t) (w:Option<Source.t>) = 
-    match seq,w with 
-     | PSeq(els,ac,_),_ -> match w with
-                           | None -> PSeq (els,ac,Some {label=lbl.text; weight=None})
-                           | _ -> let wVal = w.Value
-                                  try
-                                      PSeq (els,ac,Some {label=lbl.text; weight = Some (float wVal.text)})
-                                  with 
-                                  | :? System.FormatException as ex ->
-                                      failwithf "Parse error on position (%i,%i) on token %s: %s" wVal.startPos.line wVal.startPos.column wVal.text "illegal weight. Number expected."
-     | x,_ -> x
+let mkLbl (lbl:Option<Source.t>) (w:Option<Source.t>) = 
+    let lblName = 
+        match lbl with
+        | Some s -> s.text
+        | None -> "dummy_lbl"
+    match (w, lbl) with
+    | None,None -> None
+    | (None, Some s) -> Some {label=s.text; weight=None}
+    | _ ->
+        let wVal = w.Value
+        try
+            Some {label=lblName; weight = Some (float wVal.text)}
+        with 
+        | :? System.FormatException as ex ->
+            failwithf "Parse error on position (%i,%i) on token %s: %s" wVal.startPos.line wVal.startPos.column wVal.text "illegal weight. Number expected."
 
-let missing name = System.Console.WriteLine("Missing " + name)
+let makeNewSeq seq lbl = 
+    match seq with 
+     | PSeq(els,ac,_) -> PSeq (els,ac,lbl)
+     | x -> x
+
+let errorexception msg parserRange = raise <| ParseError ( new Source.t("", fst parserRange, snd parserRange, !currentFilename), msg ) 
 let createSeqElem bnd omitted r check =
     { binding = bnd; omit = omitted; rule = r; checker = check }
 
@@ -91,6 +100,8 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
 %token <Range> RPAREN
 %token GREAT
 %token LESS
+%token STARTREPEAT
+%token ENDREPEAT
 %token COMMUT
 %token INCLUDE
 %token SET
@@ -114,16 +125,18 @@ file: action_opt
       modules
       foot_opt
       EOF
-      { 
-        {
-            info = { fileName = !currentFilename }
-            head = $1
-            grammar = fst_ $2 @ $3 @ $4
-            foot = $5
-            options = snd_ $2
-            tokens = trd_ $2
+        { 
+            {
+                info = { fileName = !currentFilename }
+                head = $1
+                grammar = fst_ $2 @ $3 @ $4
+                foot = $5
+                options = snd_ $2
+                tokens = trd_ $2
+            }
         }
-      }
+    | error    
+        { errorexception "\n  Incorrect construction! Closed bracket is not found!" parserRange }    
 
 includes_or_options_or_tokens : 
     /* rules, options,   tokens   */
@@ -163,12 +176,14 @@ include_:
             eprintfn "Error %s: Grammar in included files must be inside modules" $2.text
         grammar
     } 
-
-option_block: OPTIONS_START opts BLOCK_END { Map.ofList $2 : Map<_,_>}
+    
+option_block: OPTIONS_START opts BLOCK_END      { Map.ofList $2 : Map<_,_> }
+            | opts BLOCK_END                    { errorexception "'{' is missing" parserRange }
 
 opts: option opts { $1::$2 } | { [] }
 
-option: option_l_value EQUAL option_value { ($1 : Source.t).text, ($3 : Source.t).text }
+option : option_l_value EQUAL option_value  { ($1 : Source.t).text, ($3 : Source.t).text }
+       | option_l_value option_value        { errorexception " Incorrect construction! '=' expected. " parserRange }
 
 option_value: ident { $1 } | STRING { $1 } | kw { $1 }
 
@@ -184,78 +199,89 @@ unnamed_module_opt : rule_nlist
 modules : module_ modules { $1 :: $2 } | { [] }
 
 module_ : module_header ident openings rule_nlist
-    {
-        {
-            allPublic = $1
-            name = Some $2
-            openings = $3
-            rules = $4
-        }
-    }
+            {
+                {
+                    allPublic = $1
+                    name = Some $2
+                    openings = $3
+                    rules = $4
+                }
+            }
 
 ident : UIDENT { $1 } | LIDENT { $1 }
 
-
-module_header : ALL_PUBLIC MODULE {
+module_header : ALL_PUBLIC MODULE 
+                {
                   (* It's important the word "module" is here. It guaranties, that it won't be an epsilon-tree, so allPublic will be evaluated before rules *)
                   allPublic := true; true
                 }
-              | MODULE { allPublic := false; false }
+              | MODULE      { allPublic := false; false }
 
-openings :  { [] } | OPEN ident open_list { $2::$3 }
+openings :                      { [] } 
+         | OPEN ident open_list { $2::$3 }
+         | ident open_list      { errorexception " 'OPEN' expected, but 'ident' found " parserRange  }
 
-open_list : COMMA ident open_list { $2::$3 } | { [] }
+open_list :                         { [] }
+          | COMMA ident open_list   { $2::$3 }
+          | ident open_list         { errorexception " ',' expected, but 'ident' found " parserRange } 
 
-action_opt: { None } | ACTION { Some $1 }
+action_opt : { None } | ACTION { Some $1 }
 
-foot_opt: { None } | SEMICOLON ACTION { Some $2 }
+foot_opt : { None } | SEMICOLON ACTION { Some $2 }
 
-rule_nlist: rule semi_opt rule_nlist 
-      { $1::$3 }
-    | { [] }
+rule_nlist: rule semi_opt rule_nlist { $1::$3 } | { [] }
 
-rule: start_rule_sign_opt access_modifier_opt LIDENT formal_meta_param_opt param_list COLON alts
-    { 
-        {
-            Rule.isStart = $1
-            Rule.isPublic = $2
-            Rule.name = $3
-            Rule.metaArgs = getList $4
-            Rule.body = $7
-            Rule.args = $5
-        }
-    }
+rule_delim: COLON {$1} | EQUAL {$1}
+
+rule: start_rule_sign_opt access_modifier_opt LIDENT formal_meta_param_opt param_list rule_delim alts
+            { 
+                {
+                    Rule.isStart = $1
+                    Rule.isPublic = $2
+                    Rule.name = $3
+                    Rule.metaArgs = getList $4
+                    Rule.body = $7
+                    Rule.args = $5
+                }
+            }
 
 start_rule_sign_opt: {false} | START_RULE_SIGN {true}
 
 access_modifier_opt: PUBLIC { true } | PRIVATE { false } | { !allPublic }
 
-formal_meta_param_opt: { None } | LESS formal_meta_list GREAT {Some $2}
+formal_meta_param_opt :                                     { None } 
+                      | LESS formal_meta_list GREAT         { Some $2 }
+                      | LESS GREAT                          { errorexception "Incorrect construction! 'formal_meta_list' expected among '<' and '>'" parserRange }
+                      | formal_meta_list GREAT              { errorexception "'<' is missing" parserRange }
 
-formal_meta_list: LIDENT {[$1]}
-                | LIDENT formal_meta_list {$1::$2}
+formal_meta_list: LIDENT { [$1] } | LIDENT formal_meta_list   { $1::$2 }
 
-param_opt: { None } | PARAM {Some $1}
+param_opt : { None } | PARAM   { Some $1 }
 
-param_list: { [] } | PARAM param_list {$1::$2}
+param_list : { [] } | PARAM param_list { $1::$2 }
 
-weight_opt: { None } | SQR_LBR NUMBER SQR_RBR { Some $2}
 
 alts: seq { $1 } | seq bar_seq_nlist {PAlt ($1,$2)}
 
-bar_seq_nlist : BAR seq bar_seq_nlist {PAlt($2,$3) }  
-              | BAR seq {$2}
+bar_seq_nlist : BAR seq bar_seq_nlist { PAlt($2,$3) }  
+              | BAR seq               { $2 }
 
-seq: lbl_seq {$1} | no_lbl_seq {$1}
+seq: lbl_seq {$1} | no_lbl_seq {$1} 
 
-no_lbl_seq: seq_elem seq_elem_list action_opt { PSeq ($1::$2, $3, None)}
-          | ACTION { PSeq([], Some $1, None) }
+no_lbl_seq: seq_elem seq_elem_list action_opt { PSeq ($1::$2, $3, None) }
+          | ACTION                            { PSeq ([], Some $1, None) }
+          
+lbl : DLABEL {mkLbl (Some $1) None} 
+    | SQR_LBR NUMBER SQR_RBR {mkLbl None (Some $2)}
+    | DLABEL SQR_LBR NUMBER SQR_RBR {mkLbl (Some $1) (Some $3)} 
 
-lbl_seq: DLABEL weight_opt LPAREN no_lbl_seq RPAREN {makeNewSeq $4 $1 $2}
+lbl_seq : lbl LPAREN no_lbl_seq RPAREN { makeNewSeq $3 $1 }
 
-seq_elem_list: { [] } | seq_elem seq_elem_list {$1::$2}
+comma_opt: { None } | COMMA {Some $1}
 
-seq_elem: omit_opt bound predicate_opt {{$2 with checker = $3; omit = $1 }}
+seq_elem_list: { [] } | comma_opt seq_elem seq_elem_list {$2::$3}
+
+seq_elem: omit_opt bound predicate_opt { { $2 with checker = $3; omit = $1 } }
 
 omit_opt: { false } | MINUS { true }
 
@@ -264,11 +290,18 @@ semi_opt : { false } | SEMICOLON {true}
 predicate_opt: { None } | PREDICATE { Some $1 }
 
 bound: patt EQUAL prim { createSeqElem (Some $1) false $3 None }
-     | prim            { createSeqElem None false $1 None      }
+     | prim            { createSeqElem None false $1 None }   
 
 patt: LIDENT {$1} | ACTION {$1}
 
+int_opt : 
+    {None}
+    | NUMBER {(Yard.Core.IL.Source.toString $1) |> int |> Some}
+
 prim: prim STAR            {PMany $1}
+    | STARTREPEAT prim ENDREPEAT {PMany $2} 
+    | NUMBER STAR prim           {PRepet ($3, (Some 0), (Yard.Core.IL.Source.toString $1) |> int |> Some)}
+    | prim STAR SQR_LBR int_opt DOUBLEDOT int_opt SQR_RBR {PRepet ($1,$4,$6)}
     | prim PLUS            {PSome $1}
     | prim QUESTION        {POpt $1}
     | SQR_LBR alts SQR_RBR {POpt $2}
@@ -277,18 +310,21 @@ prim: prim STAR            {PMany $1}
     | lbl_seq              {$1}
     | LITERAL              {PLiteral $1}
 
-meta_param: prim {$1}
+meta_param  : prim {$1}
 
-meta_params: meta_param {[$1]}
-           | meta_param meta_params {$1 :: $2}
+meta_params : meta_param                 {[$1]}
+            | meta_param meta_params     {$1 :: $2}
 
-meta_param_opt: { None } | LESS meta_params GREAT {Some $2}
+meta_param_opt  :                            { None } 
+                | LESS meta_params GREAT     { Some $2 }
+                | LESS GREAT                 { errorexception "Incorrect construction! Expected 'params' among '<' and '>'" parserRange }
+                | meta_params GREAT          { errorexception "'<' is missing" parserRange }
 
 call: UIDENT {PToken $1}
     | LIDENT meta_param_opt param_opt  
-      { match $2 with
-        | None -> PRef  ($1, $3)
-        | Some x -> PMetaRef ($1,$3,x)
-      }
+        { match $2 with
+            | None -> PRef  ($1, $3)
+            | Some x -> PMetaRef ($1,$3,x)
+        }
 
-tada_rule : SHARPLINE {} | EOF {} 
+tada_rule : SHARPLINE {} | EOF {}

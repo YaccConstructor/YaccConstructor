@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace RShT1
+﻿namespace RShT1
 {
     class BracketsHighlighting
     {
@@ -26,7 +21,7 @@ namespace RShT1
             string insertQuery = "insert  into y(x";
 
             if (cond)
-                insertQuery += ", v) ";
+                insertQuery += ", v)";
             else
                 insertQuery = insertQuery + ", u)";
             insertQuery += " values (1, 2)";

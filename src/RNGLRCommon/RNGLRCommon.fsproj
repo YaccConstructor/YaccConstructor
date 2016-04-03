@@ -32,7 +32,6 @@
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
     <!--Compile Include="AstNode.fs" /-->
-    <Compile Include="OtherSPPF.fs" />
     <Compile Include="ParserSource.fs" />
     <Compile Include="Helper.fs" />
     <None Include="app.config" />

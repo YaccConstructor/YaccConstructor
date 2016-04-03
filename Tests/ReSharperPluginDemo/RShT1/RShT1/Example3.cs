@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace RShT1
+﻿namespace RShT1
 {
-    class Example4
+    class Example3
     {
         private void Go(int cond)
         {

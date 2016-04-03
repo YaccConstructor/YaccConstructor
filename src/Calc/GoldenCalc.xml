@@ -2,16 +2,16 @@
 <SyntaxDefinition name="CalcHighlighting">
     <Colors>
         <Tokens color="CONSTANT_IDENTIFIER_ATTRIBUTE">
-            <Token>  NUMBER  </Token>
+            <Token> NUMBER </Token>
         </Tokens>
         <Tokens color="OPERATOR_IDENTIFIER_ATTRIBUTE">
-            <Token >DIV  </Token>
-            <Token>MINUS              </Token>
-            <Token>            MULT</Token>
-            <Token>PLUS</Token>
-            <Token>POW</Token>
-	    <Token >RBRACE</Token>
-            <Token>LBRACE</Token>
+            <Token> DIV	</Token>
+            <Token> MINUS </Token>
+            <Token> MULT </Token>
+            <Token> PLUS </Token>
+            <Token> POW </Token>
+			<Token> RBRACE </Token>
+            <Token> LBRACE </Token>
         </Tokens>	
     </Colors>
     <Matched>

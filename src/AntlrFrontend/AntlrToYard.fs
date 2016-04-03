@@ -41,7 +41,7 @@ let ParseFile fileName : t<Source.t, Source.t> =
 
 let run () =
     let testPath = ref @"..\..\..\..\Tests\ANTLR"
-    let testFile = ref "test.g"
+    let testFile = ref "calc.g4"
 
     let commandLineSpecs =
         ["--testpath", ArgType.String (fun s -> testPath := s), "Directory where test files are placed"
@@ -55,11 +55,12 @@ let run () =
     Lexer.source := content
     let reader = new System.IO.StringReader(content)
     let lexbuf = LexBuffer<_>.FromTextReader reader//LexBuffer<_>.FromChars  ("abc/* def */foo".ToCharArray())
-//    let lexems = seq { 
-//                       while not lexbuf.IsPastEndOfStream do
-//                             yield Lexer.main lexbuf  
-//                      }
-//    lexems |> Seq.iter (fun x -> printf "%A\n" x)
+(*  let lexems = seq { 
+                       while not lexbuf.IsPastEndOfStream do
+                             yield Lexer.main lexbuf  
+                      }
+    lexems |> Seq.iter (fun x -> printf "%A\n" x) *) 
     let (a,b) = ParseAntlr Lexer.main lexbuf
+    //printfn "%A" a
     b |> Seq.iter (fun x -> printf "%A\n" x)
     ()

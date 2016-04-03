@@ -14,6 +14,10 @@
 
 namespace Yard.Generators.RNGLR
 
+open System
+open System.IO
+open System.Text
+
 open Mono.Addins
 open Yard.Core
 open IL
@@ -26,7 +30,7 @@ open States
 open Printer
 open TranslatorPrinter
 open Option
-open PrintTreeNode
+open HighlightingPrinter
 open HighlightingConvertions
 
 [<assembly:Addin>]
@@ -39,7 +43,7 @@ type RNGLR() =
         override this.Name = "RNGLRGenerator"
         override this.Constraints = [|noEbnf; noMeta; noInnerAlt; (*noLiterals;*) noInnerAlt; noBrackets; needAC; singleModule|]
         override this.Generate (definition, args) =
-            let start = System.DateTime.Now
+            let start = DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
             let pairs = Array.zeroCreate <| args.Length / 2
             for i = 0 to pairs.Length-1 do
@@ -95,7 +99,7 @@ type RNGLR() =
                         match value with
                         | "LALR" -> LALR
                         | "LR" -> LR
-                        | x -> failwith "Unexpected table type %s" x
+                        | x -> failwithf "Unexpected table type %s" x
                 | "-caseSensitive" -> caseSensitive <- getBoolValue "caseSensitive" value
                 | "-fullpath" -> fullPath <- getBoolValue "fullPath" value
                 | "-translate" -> needTranslate := getBoolValue "translate" value
@@ -114,17 +118,15 @@ type RNGLR() =
                 | _ -> failwithf "Unknown option %A" opt
             let mutable newDefinition = initialConvert definition
             
-            if !needHighlighting 
-            then
-                newDefinition <- highlightingConvertions newDefinition
+//            if !needHighlighting 
+//            then newDefinition <- highlightingConvertions newDefinition
 
             let grammar = new FinalGrammar(newDefinition.grammar.[0].rules, caseSensitive)
 
-            if !needHighlighting && !needTranslate
-            then
-                generate grammar.indexator !namespaceName
+            if !needHighlighting
+            then generateCsFiles grammar.indexator !namespaceName
 
-            let printRules () =
+            let printRules() =
                 let printSymbol (symbol : int) =
                     if symbol < grammar.indexator.nonTermCount 
                     then grammar.indexator.indexToNonTerm symbol
@@ -147,18 +149,18 @@ type RNGLR() =
                 eprintfn ""
                 if printInfiniteEpsilonPath <> "" 
                 then
-                    System.IO.Directory.CreateDirectory printInfiniteEpsilonPath |> ignore
+                    Directory.CreateDirectory printInfiniteEpsilonPath |> ignore
                     for cycle in grammar.EpsilonCyclicNonTerms do
                         let nonTerm = List.head cycle
                         grammar.epsilonTrees.[grammar.indexator.nonTermToIndex nonTerm].AstToDot
                             grammar.indexator.indexToNonTerm (fun _ -> 0) None grammar.rules.leftSideArr
-                            (System.IO.Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot"))
+                            (Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot"))
                 grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
             
             let statesInterpreter = buildStates table grammar
             let tables = new Tables(grammar, statesInterpreter)
-            use out = new System.IO.StreamWriter (output)
-            let res = new System.Text.StringBuilder()
+            use out = new StreamWriter(output)
+            let res = new StringBuilder()
             let dummyPos = char 0
             let println (x : 'a) =
                 Printf.kprintf (fun s -> res.Append(s).Append "\n" |> ignore) x
@@ -191,7 +193,7 @@ type RNGLR() =
                     println "open Yard.Generators.Common.AST"
                     println "open Yard.Generators.Common.AstNode"
 
-                    if !needHighlighting && !needTranslate
+                    if !needHighlighting
                     then 
                         println "open YC.SDK.ReSharper.Helper"
                         println "open JetBrains.ReSharper.Psi.Tree"
@@ -215,18 +217,13 @@ type RNGLR() =
                 | Scala -> scalaHeaders()
 
             printHeaders moduleName fullPath light output targetLanguage
-            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive !isAbstractParsingMode
+            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive !isAbstractParsingMode !needHighlighting
             let res = 
                 if not !needTranslate || targetLanguage = Scala 
                 then tables
                 else 
-                    let xmlOpt = 
-                        if !needHighlighting && !namespaceName <> "" 
-                        then Some <| !namespaceName
-                        else None
-                                
                     tables + printTranslator grammar newDefinition.grammar.[0].rules 
-                                    positionType fullPath output dummyPos caseSensitive xmlOpt !isAbstractParsingMode
+                                    positionType fullPath output dummyPos caseSensitive !isAbstractParsingMode !needHighlighting
 
             let res = 
                 match definition.foot with
@@ -239,10 +236,10 @@ type RNGLR() =
                 | FSharp ->
                     let init = res.Replace("\r\n", "\n")
                     let curLine = ref 1// Must be 2, but there are (maybe) some problems with F# compiler, causing to incorrect warning
-                    let res = new System.Text.StringBuilder(init.Length * 2)
+                    let res = new StringBuilder(init.Length * 2)
                     for c in init do
                         match c with
-                        | '\n' -> incr curLine; res.Append System.Environment.NewLine
+                        | '\n' -> incr curLine; res.Append Environment.NewLine
                         | c when c = dummyPos -> res.Append (string !curLine)
                         | x -> res.Append x
                         |> ignore
@@ -250,7 +247,7 @@ type RNGLR() =
                 | Scala -> res + "\n}"
             out.WriteLine res
             out.Close()
-            eprintfn "Generation time: %A" <| System.DateTime.Now - start
+            eprintfn "Generation time: %A" <| DateTime.Now - start
             //(new YardPrinter()).Generate newDefinition
             box ()
         override this.Generate definition = this.Generate (definition, "")

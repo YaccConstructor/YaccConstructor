@@ -1,8 +1,8 @@
 ﻿module YC.FST.AbstractLexing.FstLexer
 
 open Microsoft.FSharp.Collections
-open YC.FST.GraphBasedFst
-open YC.FSA.GraphBasedFsa
+open QuickGraph.FST.GraphBasedFst
+open QuickGraph.FSA.GraphBasedFsa
 open YC.FST.AbstractLexing.Interpreter
 open AbstractAnalysis.Common
 open AbstractParser.Tokens

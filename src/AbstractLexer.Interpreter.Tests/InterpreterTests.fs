@@ -4,12 +4,12 @@ open NUnit.Framework
 open Microsoft.FSharp.Collections
 open QuickGraph
 open AbstractAnalysis.Common
-open YC.FST.GraphBasedFst
+open QuickGraph.FST.GraphBasedFst
 open YC.FST.AbstractLexing.Interpreter
 open AbstractParser.Tokens
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
-open YC.FSA.FsaApproximation
-open YC.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
+open QuickGraph.FSA.GraphBasedFsa
 open System
 
 let transform x = (x, match x with |Smbl(y:char, _) when y <> (char 65535) -> Smbl(int y) |Smbl(y:char, _) when y = (char 65535) -> Smbl 65535 |_ -> Eps)

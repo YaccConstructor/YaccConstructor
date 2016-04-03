@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace RShT1
+﻿namespace RShT1
 {
     class Program
     {
@@ -30,6 +25,10 @@ namespace RShT1
 
         static void Main(string[] args)
         {
+            SECRDemo.Execute();
+            SECRDemo.Go(true);
+            SECRDemo.Insert(false);
+            int res = SECRDemo.Calculate(false);
         }
     }
 }

@@ -1,0 +1,8 @@
+﻿{caret}/*
+0 -> 1 [label="a"]; 
+1 -> 2 [label="b"]; 
+2 -> 4 [label="d"]; 
+2 -> 3 [label="c"]; 
+4 -> 5 [label="e"]; 
+3 -> 5 [label="e"]; 
+*/

@@ -2,8 +2,8 @@
 
 open AbstractParser.Tokens
 open YC.FST.AbstractLexing.Interpreter
-open YC.FSA.FsaApproximation
-open YC.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
+open QuickGraph.FSA.GraphBasedFsa
 open NUnit.Framework
 open Microsoft.FSharp.Collections 
 open QuickGraph 
@@ -96,12 +96,12 @@ let ToDot (parserInputGraph : ParserInputGraph<_>) filePrintPath toStr =
         "digraph G {\n" 
         + "rankdir = LR\n"
         + "node [shape = circle]\n"
-        + sprintf "%i[style=filled, fillcolor=green]\n" parserInputGraph.InitState 
-        + sprintf "%i[shape = doublecircle, style=filled, fillcolor=red]\n" parserInputGraph.FinalState
-        + rank "same" parserInputGraph.InitState
-        + rank "min" parserInputGraph.InitState  
-        + rank "same" parserInputGraph.FinalState 
-        + rank "max" parserInputGraph.FinalState
+        + sprintf "%i[style=filled, fillcolor=green]\n" parserInputGraph.InitStates.[0]
+        + sprintf "%i[shape = doublecircle, style=filled, fillcolor=red]\n" parserInputGraph.FinalStates.[0]
+        + rank "same" parserInputGraph.InitStates.[0]
+        + rank "min" parserInputGraph.InitStates.[0]
+        + rank "same" parserInputGraph.FinalStates.[0] 
+        + rank "max" parserInputGraph.FinalStates.[0]
     
     let strs =
             parserInputGraph.Edges

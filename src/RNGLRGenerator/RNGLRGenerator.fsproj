@@ -32,8 +32,8 @@
   <ItemGroup>
     <Compile Include="States.fs" />
     <Compile Include="Tables.fs" />
+    <Compile Include="HighlightingPrinter.fs" />
     <Compile Include="PrintTables.fs" />
-    <Compile Include="PrintTreeNode.fs" />
     <Compile Include="PrintTranslator.fs" />
     <Compile Include="HighlightingConvertions.fs" />
     <Compile Include="RNGLRGenerator.fs" />

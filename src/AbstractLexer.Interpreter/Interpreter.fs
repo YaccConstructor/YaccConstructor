@@ -1,12 +1,12 @@
 ﻿module YC.FST.AbstractLexing.Interpreter
 
-open YC.FST.GraphBasedFst
+open QuickGraph.FST.GraphBasedFst
 open AbstractAnalysis.Common
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 open QuickGraph
-open YC.FSA.FsaApproximation
-open YC.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
+open QuickGraph.FSA.GraphBasedFsa
 
 //let printSmbString (x:char*Position<_>) = 
 //        (fst x).ToString() + "_br: " + (snd x).back_ref + "(" + (snd x).start_offset.ToString() + "," + (snd x).end_offset.ToString() + ")"

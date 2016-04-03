@@ -31,6 +31,14 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
+    <Compile Include="Common.fs" />
+    <Compile Include="InputStructures.fs" />
+    <Compile Include="TokensExtractor.fs" />
+    <Compile Include="CfgElements.fs" />
+    <Compile Include="InnerGraph.fs" />
+    <Compile Include="GraphInterpreter.fs" />
+    <Compile Include="IfHelper.fs" />
+    <Compile Include="AssignmentHelper.fs" />
     <Compile Include="ControlFlowGraph.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />
@@ -49,12 +57,14 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="QuickGraph">
-      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph\QuickGraph.csproj">
+      <Name>QuickGraph</Name>
+      <Project>{a9a5c115-0680-44b3-a87e-5ecf4c93814e}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
       <Name>AbstractAnalysis.Common</Name>
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>

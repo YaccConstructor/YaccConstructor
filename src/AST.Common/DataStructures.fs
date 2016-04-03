@@ -15,6 +15,7 @@
 module Yard.Generators.Common.DataStructures
 
 open System
+open Microsoft.FSharp.Collections
         
 [<Struct>]
 type UsualOne<'T> =
@@ -22,18 +23,27 @@ type UsualOne<'T> =
     val mutable other : 'T[]
     new (f,o) = {first = f; other = o}    
 
+    member this.DoForAll f = 
+        f this.first
+        this.other |> Array.iter f
+
 [<Struct>]
 type ResizableUsualOne<'T> =
     val mutable first : 'T
-    val other : ref<list<'T>>
-    new (f,o) = {first = f; other = ref o}
-    new (f) = {first = f; other = ref []}
+    val other : ref<ResizeArray<'T>>
+    new (f,o) = {first = f; other = o}
+    new (f) = {first = f; other = ref null}
     member this.Add x =        
-        this.other := x :: !this.other
+        if !this.other = null
+        then this.other := new ResizeArray<_>()
+        (!this.other).Add x
     member this.TryFind f =
         if f this.first
         then Some this.first
-        else List.tryFind f !this.other
+        else ResizeArray.tryFind f !this.other
+    member this.DoForAll f = 
+        f this.first
+        if !this.other <> null then !this.other |> ResizeArray.iter f
 
 [<Struct>]
 type ResizableUsualFive<'T when 'T:equality> =

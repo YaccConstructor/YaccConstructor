@@ -49,17 +49,12 @@
     <Compile Include="RemoveAC.fs" />
     <Compile Include="ReplaceInline.fs" />
     <Compile Include="Linearize.fs" />
+    <Compile Include="ExpandRepet.fs" />
     <Compile Include="ToCNF.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FsYacc">
-      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\FsYacc.exe</HintPath>
-    </Reference>
-    <Reference Include="Helper">
-      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\Helper.dll</HintPath>
-    </Reference>
     <Reference Include="Mono.Addins">
       <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
     </Reference>

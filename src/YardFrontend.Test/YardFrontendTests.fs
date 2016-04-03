@@ -47,11 +47,11 @@ let lexerTest str lexemsListCorrect =
     } 
     let lexemsList = Seq.toList lexemsSeq
 
-    printfn "%A" lexemsList
+    //printfn "%A" lexemsList
    
-    printfn "%s" "*************************"
+    //printfn "%s" "*************************"
 
-    printfn "%A" lexemsListCorrect
+    //printfn "%A" lexemsListCorrect
 
     let areEqual lexemsListCorrect lexemsList =
         try 
@@ -65,16 +65,16 @@ let lexerTest str lexemsListCorrect =
 let preprocessorTest path (expectedIL : t<Source.t,Source.t>) =
     let currentIL = {Main.ParseFile path with info = {fileName =""}}
 
-    printfn "ilDef = %A" currentIL
-    printfn "ilDefCorrect = %A" expectedIL
+    //printfn "ilDef = %A" currentIL
+    //printfn "ilDefCorrect = %A" expectedIL
 
     Assert.IsTrue(Yard.Core.ILComparators.GrammarEqualsWithoutLineNumbers expectedIL.grammar currentIL.grammar)
 
 let parserTest str (ilDefCorrect: t<Source.t,Source.t>) =
     let ilDef = { Main.ParseText str "" with info = {fileName =""}}
 
-    printfn "ilDef = %A" ilDef
-    printfn "ilDefCorrect = %A" ilDefCorrect
+    //printfn "ilDef = %A" ilDef
+    //printfn "ilDefCorrect = %A" ilDefCorrect
     if not <| Yard.Core.ILComparators.GrammarEqualsWithoutLineNumbers ilDef.grammar ilDefCorrect.grammar then
         //printfn "Expected:\n %s" ((new Yard.Generators.YardPrinter.YardPrinter()).Generate ilDefCorrect :?> string)
         //printfn "Given:\n %s" ((new Yard.Generators.YardPrinter.YardPrinter()).Generate ilDef :?> string)
@@ -503,7 +503,8 @@ type ``Yardfrontend label tests`` () =
         with 
         | ex ->
             //let expected = "Parse error on position (0,17) on token q: illegal weight. Number expected."
-            let expected = "Parse error on position ((0,17)-(0,18)) on token [|LIDENT q|]: Parse Error"
+            //let expected = "Parse error on position ((0,17)-(0,18)) on token [|LIDENT q|]: Parse Error"
+            let expected = "Parse error on position :((0,0)-(0,23)). \n  Incorrect construction! Closed bracket is not found!: "
             let actual = ex.Message
             printfn "%s" ex.Message
             Assert.AreEqual(expected, actual)
@@ -529,4 +530,4 @@ type ``Yardfrontend token tests`` () =
 
 
 //[<EntryPoint>]
-//(new ``Yardfrontend label tests`` ()).``weight test incorrect input`` ()
+//(new ``YardFrontend syntax tests`` ()).``Option seq test`` ()

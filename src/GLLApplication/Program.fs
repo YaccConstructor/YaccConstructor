@@ -6,7 +6,7 @@ open System
 open Microsoft.FSharp.Text
 open Microsoft.FSharp.Reflection
 //packages/yc.tools/lib/net40/fslex.exe file.fsl --unicode
-
+open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL
 
 open Yard.Generators.GLL.Parser    
@@ -16,6 +16,7 @@ open Yard.Generators.RNGLR
 open Yard.Generators.GLL
 open Yard.Generators
 open Lexer2
+//open Yard.
 
 //let run () =
 //    let fe = new Yard.Frontends.YardFrontend.YardFrontend()
@@ -62,7 +63,7 @@ let outDir = @"../../../src/GLLApplication/"
 //
 //for j = 1 to 50 do
 //let str2 = String.init (2000) (fun i -> "A + ( A * B ) ; ") + "B ;"
-let str2 = " "
+let str2 = "A A"
 let parser2 = GLL.SimpleAmb.buildAst
 
 let run2 path astBuilder =
@@ -75,12 +76,12 @@ let r2 = run2 str2 parser2
 let t2 = System.DateTime.Now - start2
 printfn "%d input %A" (100) t2.TotalSeconds 
 
-//match r2 with
-//    | Parser.Error str, _ ->
-//        printfn "%s" "dddd" //str 
-//    | Parser.Success tree, tokens ->
-//        printfn "%s" "sss"
-//        GLL.Calc.defaultAstToDot tree GLL.Calc.tokenToNumber GLL.Calc.tokenData  (outDir + "Calc.dot") 
+match r2 with
+    | ParserCommon.ParseResult.Error str, _ ->
+        printfn "%s" "dddd" //str 
+    | ParserCommon.ParseResult.Success tree, tokens ->
+        printfn "%s" "sss"
+        GLL.SimpleAmb.defaultAstToDot tree GLL.SimpleAmb.tokenToNumber GLL.SimpleAmb.tokenData  (outDir + "Calc.dot") 
 
 
 

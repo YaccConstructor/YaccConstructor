@@ -1,7 +1,7 @@
 module AbstractParser.Tokens
 
-open YC.FSA.GraphBasedFsa
-open YC.FSA.FsaApproximation
+open QuickGraph.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
 
 type Token =
     | NUMBER of FSA<char*Position<string>>

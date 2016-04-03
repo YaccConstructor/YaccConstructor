@@ -101,10 +101,8 @@ and [<AllowNullLiteral>]
 
     let compare (x : AstNode) (y : AstNode) = 
         match x with
-        | :? Epsilon as x' -> match y with | :? Epsilon as y' -> x'.EpsilonNonTerm = y'.EpsilonNonTerm 
-                                           | _ -> false
-        | :? Terminal as x' -> match y with | :? Terminal as y' -> x'.TokenNumber = y'.TokenNumber 
-                                            | _ -> false
+        | :? Epsilon as x' -> match y with | :? Epsilon as y' -> x'.EpsilonNonTerm = y'.EpsilonNonTerm | _ -> false
+        | :? Terminal as x' -> match y with | :? Terminal as y' -> x'.TokenNumber = y'.TokenNumber | _ -> false
         | :? AST as xast -> match y with | :? AST as yast -> 
                                                 xast.pos = yast.pos 
                                                 && xast = yast 
@@ -224,7 +222,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         then
             verticesToProcess.Enqueue(elem)
 
-    let addNonZeroReduction (gssVertex : Vertex) token gssEdge (innerGraphV : VInfo<_>) =
+    let addNonZeroReduction (gssVertex : Vertex) token gssEdge (innerGraphV : VInfo<_>)=
         if gssVertex.IsState ()
         then
             let arr = parserSource.Reduces.[gssVertex.GetState()].[parserSource.TokenToNumber token]
@@ -445,14 +443,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         for startV in startVList do
             addVertex startV (State startState) startV.unprocessedGssVertices |> ignore
 
-        let i = ref 0
         while errorIndex = -1 && verticesToProcess.Count > 0 do
             let curV = verticesToProcess.Dequeue()
             processVertex curV
-            incr i
-            drawDot parserSource.TokenToNumber terminals parserSource.LeftSide 
-              (if Seq.isEmpty gssInitVertices then Seq.ofArray(curV.processedGssVertices.ToArray()) else gssInitVertices )
-              parserSource.NumToString parserSource.ErrorIndex (sprintf "../../../Tests/AbstractRNGLR/DOT/gss%i.dot" !i) 
 
         if errorIndex <> -1 then
             Error (errorIndex - 1, Unchecked.defaultof<'TokenType>, "Parse error")

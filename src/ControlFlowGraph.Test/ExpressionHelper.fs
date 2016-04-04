@@ -31,21 +31,20 @@ let private getTags (graph : CfgTokensGraph<_>) getEdges vertex =
 
     handle [] [] <| getEdges vertex
 
-let private findEdges tokenToNumber (graph : CfgTokensGraph<_>) tokenNumber = 
+let private findEdges areEqualTokens (graph : CfgTokensGraph<_>) needToken = 
     let checkEdge (edge : TokensEdge<_>) = 
         match edge.Tag with
-        | Some token -> 
-            let num = tokenToNumber token 
-            num = tokenNumber
+        | Some foundToken -> 
+            areEqualTokens foundToken needToken
         | None -> false
     
     graph.Edges
     |> Seq.filter checkEdge
 
-let getOutTags tokenToNumber graph tag = 
+let getOutTags areEqualTokens graph needToken = 
     
     let vertices = 
-        findEdges tokenToNumber graph tag
+        findEdges areEqualTokens graph needToken
         |> Seq.map (fun edge -> edge.Target)
 
     let getNext' = getNextEdges graph
@@ -54,12 +53,12 @@ let getOutTags tokenToNumber graph tag =
     |> Seq.map (fun vertex -> getTags graph getNext' vertex)
     |> Seq.concat
     |> Seq.distinct
-    |> Seq.map tokenToNumber
+    //|> Seq.map tokenToFSA
 
-let getInTags tokenToNumber graph tag = 
+let getInTags areEqualTokens graph needToken = 
     
     let vertices = 
-        findEdges tokenToNumber graph tag
+        findEdges areEqualTokens graph needToken
         |> Seq.map (fun edge -> edge.Source)
 
     let getPrev' = getPrevEdges graph
@@ -68,4 +67,4 @@ let getInTags tokenToNumber graph tag =
     |> Seq.map (fun vertex -> getTags graph getPrev' vertex)
     |> Seq.concat
     |> Seq.distinct
-    |> Seq.map tokenToNumber
+    //|> Seq.map tokenToFSA

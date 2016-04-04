@@ -1,6 +1,8 @@
 ﻿module ControlFlowGraph.Test.ExpressionTests
 
+open Microsoft.FSharp.Collections
 open NUnit.Framework
+open System.Collections.Generic
 
 open ControlFlowGraph
 open ControlFlowGraph.Common
@@ -10,16 +12,51 @@ open ControlFlowGraph.Test.CommonHelper
 open ControlFlowGraph.Test.ExpressionHelper
 
 open QuickGraph.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
 
-type PreviousAndNext(key : int, previous : int list, next : int list) =
+type PreviousAndNext<'a>(key : 'a, previous : 'a list, next : 'a list) =
     member this.Key = key
     member this.Previous = previous
     member this.Next = next
 
-let assertCfg tokenToNumber (cfg : ControlFlow<_, _>) (expected : PreviousAndNext list) = 
+//lexer stuff
+let alphabet = 
+    ['a' .. 'z']
+    |> List.append ['A' .. 'Z']
+    |> List.append ['0'..'9']
+    |> List.append [' '; '\t'; '\r'; '\n']
+    |> List.append ['+'; '='; '-'; '*'; '/'; '('; ')'; '['; ']'; ]
+    |> List.append [';'; ':'; '.'; ',';]
+
+let getChar (x : Symb<char * Position<_>>) = 
+    match x with
+    | Smbl (y, _) -> y
+    | _ -> invalidArg "x" "Unexpected symb in alphabet of FSA!"
+
+let createNewSymbol x = Smbl(x, Unchecked.defaultof<_>)
+
+let areSymbolsEqual one two = (fst one) = (fst two)
+
+let fsaInfo : FsaParams<char, char * Position<string>> =
+                {
+                    Alphabet = new HashSet<_>(alphabet);
+                    NewSymbol = createNewSymbol;
+                    GetChar = getChar;
+                    SymbolsAreEqual = areSymbolsEqual;
+                    SeparatorSmbl1 = '~';
+                    SeparatorSmbl2 = '^';
+                }
+
+let assertCfg tokenToFSA (cfg : ControlFlow<_, _>) (expected : PreviousAndNext<_> list) = 
     
-    let processExpected graph (conf : PreviousAndNext) = 
-        let inTags = getInTags tokenToNumber graph conf.Key
+    let processExpected graph (conf : PreviousAndNext<_>) = 
+        
+        let areEqualTokens one two =
+            let fsa1 = tokenToFSA one
+            let fsa2 = tokenToFSA two
+            areEqualFSA fsa1 fsa2 fsaInfo
+        
+        let inTags = getInTags areEqualTokens graph conf.Key
 
         let checkInEdges = 
             if Seq.isEmpty inTags 
@@ -27,17 +64,17 @@ let assertCfg tokenToNumber (cfg : ControlFlow<_, _>) (expected : PreviousAndNex
                 true
             else
                 inTags
-                |> Seq.exists (fun num -> conf.Previous |> List.exists ((=) num))
+                |> Seq.exists (fun num -> conf.Previous |> List.exists (areEqualTokens num))
         Assert.True(checkInEdges, "There is incorrect in edge")
 
-        let outTags = getOutTags tokenToNumber graph conf.Key
+        let outTags = getOutTags areEqualTokens graph conf.Key
         let checkOutEdges = 
             if Seq.isEmpty inTags 
             then 
                 true
             else
                 outTags
-                |> Seq.exists (fun num -> conf.Next |> List.exists ((=) num))
+                |> Seq.exists (fun num -> conf.Next |> List.exists (areEqualTokens num))
         Assert.True(checkOutEdges, "There is incorrect out edge")
 
     let processExpression (graph : CfgTokensGraph<_>) = 
@@ -55,21 +92,26 @@ type ``Cycles inside expressions``() =
     let leftSides = ExtendedCalcTest.Parser.leftSide
     let indToString = ExtendedCalcTest.Parser.numToString
     let tokenData = ExtendedCalcTest.Parser.tokenData
+    
+    let tokenToFSA token = 
+        let res = tokenData token
+        res :?> FSA<_>
+
     let astToDot = ExtendedCalcTest.Parser.defaultAstToDot
 
     let fsa = new FSA<_>()
     let RNGLR_EOF = ExtendedCalcTest.Parser.RNGLR_EOF <| fsa
     let createParserInput' = createParserInputGraph ExtendedCalcTest.Lexer.tokenize RNGLR_EOF
     
-    let x = tokenToNumber <| ExtendedCalcTest.Parser.X fsa; 
-    let y = tokenToNumber <|ExtendedCalcTest.Parser.Y fsa;
-    let z = tokenToNumber <| ExtendedCalcTest.Parser.Z fsa;
-    let assign = tokenToNumber <| ExtendedCalcTest.Parser.ASSIGN fsa;
-    let num = tokenToNumber <| ExtendedCalcTest.Parser.NUMBER fsa;
-    let plus = tokenToNumber <| ExtendedCalcTest.Parser.PLUS fsa;
-    let minus = tokenToNumber <| ExtendedCalcTest.Parser.MINUS fsa;
-    let mult = tokenToNumber <| ExtendedCalcTest.Parser.MULT fsa;
-    let semi = tokenToNumber <| ExtendedCalcTest.Parser.SEMICOLON fsa
+    let xVariable = ExtendedCalcTest.Parser.ID <| createFSA 'x'
+    let yVariable = ExtendedCalcTest.Parser.ID <| createFSA 'y'
+    let zVariable = ExtendedCalcTest.Parser.ID <| createFSA 'z'
+    let assign = ExtendedCalcTest.Parser.ASSIGN fsa
+    let num = ExtendedCalcTest.Parser.NUMBER fsa
+    let plus = ExtendedCalcTest.Parser.PLUS fsa
+    let minus = ExtendedCalcTest.Parser.MINUS fsa
+    let mult = ExtendedCalcTest.Parser.MULT fsa
+    let semi = ExtendedCalcTest.Parser.SEMICOLON fsa
 
     let nodeToType = dict
                         [
@@ -78,10 +120,10 @@ type ``Cycles inside expressions``() =
                             "expr", Expression;
                         ]
 
-    let keywordToInt = dict [Keyword.SEMICOLON, semi;]
+    let keywordToInt = dict [Keyword.SEMICOLON, tokenToNumber semi;]
 
     let tokToRealString = tokenToNumber >> indToString
-    let parserSource = new GeneratedStuffSource<_, _>(tokenToNumber, indToString, leftSides, tokenData)
+    let parserSource = new GeneratedStuffSource<_, string>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, keywordToInt)
 
     let createCfg tree = ControlFlow(tree, parserSource, langSource, tokToRealString)
@@ -95,15 +137,15 @@ type ``Cycles inside expressions``() =
         let prefix = "`X = 1 [+Y]"
         let expected = 
             [
-                new PreviousAndNext(y, [plus], [semi]);
-                new PreviousAndNext(plus, [num; y], [y]);
-                new PreviousAndNext(num, [assign], [plus; semi]);
+                new PreviousAndNext<_>(yVariable, [plus], [semi]);
+                new PreviousAndNext<_>(plus, [num; yVariable], [yVariable]);
+                new PreviousAndNext<_>(num, [assign], [plus; semi]);
             ]
 
         //act
         let cfg = buildCfg' qGraph prefix
         //assert
-        assertCfg tokenToNumber cfg expected
+        assertCfg tokenToFSA cfg expected
         
 
     [<Test>]
@@ -112,16 +154,16 @@ type ``Cycles inside expressions``() =
 
         let expected = 
             [
-                new PreviousAndNext(y, [assign], [plus; minus]);
-                new PreviousAndNext(num, [plus], [plus; minus]);
-                new PreviousAndNext(z, [minus], [semi]);
+                new PreviousAndNext<_>(yVariable, [assign], [plus; minus]);
+                new PreviousAndNext<_>(num, [plus], [plus; minus]);
+                new PreviousAndNext<_>(zVariable, [minus], [semi]);
             ]
 
         let prefix = "`X = Y [+1] - Z"
         //act
         let cfg = buildCfg' qGraph prefix
         //assert
-        assertCfg tokenToNumber cfg expected
+        assertCfg tokenToFSA cfg expected
 
     [<Test>]
     member this.``X = Y [+1[-Z]*]*``() = 
@@ -129,16 +171,16 @@ type ``Cycles inside expressions``() =
 
         let expected = 
             [
-                new PreviousAndNext(y, [assign], [plus; semi]);
-                new PreviousAndNext(num, [plus], [plus; minus; semi]);
-                new PreviousAndNext(z, [minus], [plus; minus; semi]);
+                new PreviousAndNext<_>(yVariable, [assign], [plus; semi]);
+                new PreviousAndNext<_>(num, [plus], [plus; minus; semi]);
+                new PreviousAndNext<_>(zVariable, [minus], [plus; minus; semi]);
             ]
 
         let prefix = "`X = Y [+1[-Z]]"
         //act
         let cfg = buildCfg' qGraph prefix
         //assert
-        assertCfg tokenToNumber cfg expected
+        assertCfg tokenToFSA cfg expected
 
     [<Test>]
     member this.``X = Y [(+1) | (-Z)]*``() = 
@@ -146,16 +188,16 @@ type ``Cycles inside expressions``() =
 
         let expected = 
                 [
-                    new PreviousAndNext(y, [assign], [plus; minus; semi]);
-                    new PreviousAndNext(num, [plus], [plus; minus; semi]);
-                    new PreviousAndNext(z, [minus], [plus; minus; semi]);
+                    new PreviousAndNext<_>(yVariable, [assign], [plus; minus; semi]);
+                    new PreviousAndNext<_>(num, [plus], [plus; minus; semi]);
+                    new PreviousAndNext<_>(zVariable, [minus], [plus; minus; semi]);
                 ]
 
         let prefix = "`X = Y [(+1) or (-Z)]"
         //act
         let cfg = buildCfg' qGraph prefix
         //assert
-        assertCfg tokenToNumber cfg expected
+        assertCfg tokenToFSA cfg expected
 
 //[<EntryPoint>]
 let f x = 

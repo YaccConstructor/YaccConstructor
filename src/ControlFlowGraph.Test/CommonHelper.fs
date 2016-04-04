@@ -2,6 +2,7 @@
 
 open Microsoft.FSharp.Collections
 open NUnit.Framework
+open System.Collections.Generic
 
 open System
 
@@ -22,6 +23,20 @@ let baseInputGraphsPath = "../../../Tests/ControlFlowGraph/"
 let inputName = sprintf "%s input.dot"
 let astName = sprintf "%s ast.dot"
 let cfgName = sprintf "%s cfg.dot"
+
+let createFSA character = 
+    let startState = ResizeArray.singleton 0
+    let finishState = ResizeArray.singleton 1
+    let transitions = new ResizeArray<_>()
+    transitions.Add(0, Smbl(character, Unchecked.defaultof<_>), 1)
+    new FSA<_>(startState, finishState, transitions)
+
+let areEqualFSA one two fsaInfo = 
+        
+    let isSub fsa1 fsa2 = 
+        FSA<_>.IsSubFsa (fsa1, fsa2, fsaInfo)
+        
+    isSub one two && isSub two one
 
 let private quickGraphToFST (lexerInputGraph : AdjacencyGraph<int, TaggedEdge<_, string>>)= 
     let initialStates = ResizeArray.singleton 0

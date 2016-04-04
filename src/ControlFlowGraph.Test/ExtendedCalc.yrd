@@ -25,5 +25,4 @@ expr: expr op expr
          | LBRACE expr RBRACE
 
 op: PLUS | MINUS | MULT | DIV
-
-id: X | Y | Z
+id: ID

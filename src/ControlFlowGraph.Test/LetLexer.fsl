@@ -11,19 +11,18 @@ open System.Collections.Generic
 //open YC.SDK.CommonInterfaces
 }
 
+let letter = ['a'-'z']
 let digit = ['0'-'9']
 let whitespace = [' ' '\t' '\r' '\n']
 
 rule token = parse
 | whitespace { None }
 | ['-']? digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUMBER(gr) |> Some }
+| letter {ID(gr) |> Some}
 | '-' { MINUS(gr) |> Some }
 | '/' { DIV(gr) |> Some }
 | '+' { PLUS(gr) |> Some }
 | '*' { MULT(gr) |> Some }
-| 'x' { X(gr) |> Some }
-| 'y' { Y(gr) |> Some }
-| 'z' { Z(gr) |> Some }
 | '=' { ASSIGN(gr) |> Some }
 | ';' { SEMICOLON(gr) |> Some }
 | "let" { LET(gr) |> Some }

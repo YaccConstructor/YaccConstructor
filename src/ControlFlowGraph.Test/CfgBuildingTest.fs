@@ -1,5 +1,6 @@
 ﻿module ControlFlowGraph.Test.CfgBuildingTest
 
+open Microsoft.FSharp.Collections
 open NUnit.Framework
 
 open ControlFlowGraph
@@ -17,6 +18,13 @@ let incorrectParentMsg = "At least one block has incorrect parent"
 let missingBlockMsg = "Some blocks are lost"
 let incorrectEntryMsg = "Incorrect entry node"
 let incorrectExitMsg = "Incorrect exit node"
+
+let createFSA character = 
+    let startState = ResizeArray.singleton 0
+    let finishState = ResizeArray.singleton 1
+    let transitions = new ResizeArray<_>()
+    transitions.Add(0, Smbl(character, Unchecked.defaultof<_>), 1)
+    new FSA<_>(startState, finishState, transitions)
 
 let runTest (cfg : ControlFlow<_, _>) checkEntry checkExit checks = 
             
@@ -43,9 +51,10 @@ type ``Simple cases``() =
     let fsa = new FSA<_>()
     let RNGLR_EOF = ExtendedCalcTest.Parser.RNGLR_EOF fsa
 
-    let xNumber = tokenToNumber <| ExtendedCalcTest.Parser.X fsa
-    let yNumber = tokenToNumber <| ExtendedCalcTest.Parser.Y fsa
-    let zNumber = tokenToNumber <| ExtendedCalcTest.Parser.Z fsa
+    let xVariable = ExtendedCalcTest.Parser.ID <| createFSA 'x'
+    let yVariable = ExtendedCalcTest.Parser.ID <| createFSA 'y'
+    let zVariable = ExtendedCalcTest.Parser.ID <| createFSA 'z'
+
     let semicolonNumber = tokenToNumber <| ExtendedCalcTest.Parser.SEMICOLON fsa
 
     let nodeToType = dict 
@@ -67,18 +76,23 @@ type ``Simple cases``() =
         
     let buildCfg' = buildCfg parse createCfg astToDot tokToRealString
 
+    let areEqualTokens one two = 
+        let oneNumber = tokenToNumber one
+        let twoNumber = tokenToNumber two
+        oneNumber = twoNumber
+
     [<Test>]
     member test.``Elementary test``() =
         let qGraph = createParserInput' "Seq.dot"
 
-        let checkEntry' = checkEntryNode tokToRealString returnTrue
-        let checkExit' = checkExitNode tokToRealString returnTrue
+        let checkEntry' = checkEntryNode returnTrue
+        let checkExit' = checkExitNode returnTrue
 
-        let nodeToChildren = dict [xNumber, [yNumber]; yNumber, [zNumber]; zNumber, [];]
-        let myChildrenCheck = checkChildren tokenToNumber nodeToChildren
+        let nodeToChildren = dict [xVariable, [yVariable]; yVariable, [zVariable]; zVariable, [];]
+        let myChildrenCheck = checkChildren areEqualTokens nodeToChildren
 
-        let nodeToParents = dict [xNumber, []; yNumber, [xNumber]; zNumber, [yNumber];]
-        let myParentsCheck = checkParent tokenToNumber nodeToParents
+        let nodeToParents = dict [xVariable, []; yVariable, [xVariable]; zVariable, [yVariable];]
+        let myParentsCheck = checkParent areEqualTokens nodeToParents
 
         let myConds = 
             [
@@ -97,18 +111,18 @@ type ``Simple cases``() =
     member test.``Ambiguous test``() =
         let qGraph = createParserInput' "Ambiguous.dot"
 
-        let checkEntry' = checkEntryNode tokToRealString returnTrue
-        let checkExit' = checkExitNode tokToRealString returnTrue
+        let checkEntry' = checkEntryNode returnTrue
+        let checkExit' = checkExitNode returnTrue
 
-        let blockToChildren = dict [yNumber, [xNumber]; zNumber, [xNumber];]
-        let checkChildren' = checkChildren tokenToNumber blockToChildren
+        let blockToChildren = dict [yVariable, [xVariable]; zVariable, [xVariable];]
+        let checkChildren' = checkChildren areEqualTokens blockToChildren
 
-        let blockToParents = dict[xNumber, [yNumber; zNumber]]
-            //dict [(*yNumber, [xNumber]; zNumber, [xNumber];*)]
-        let checkParents' = checkParent tokenToNumber blockToParents
+        let blockToParents = dict[xVariable, [yVariable; zVariable]]
+            //dict [(*yVariable, [xVariable]; zVariable, [xVariable];*)]
+        let checkParents' = checkParent areEqualTokens blockToParents
         let myChecks = 
             [
-                checkChildren', incorrectChildMsg; 
+                checkChildren', incorrectChildMsg;
                 checkParents', incorrectParentMsg;
             ]
 
@@ -122,14 +136,14 @@ type ``Simple cases``() =
     member this.``Ambiguous2 test``() = 
         let qGraph = createParserInput' "Ambiguous2.dot"
 
-        let checkEntry' = checkEntryNode tokToRealString returnTrue
-        let checkExit' = checkExitNode tokToRealString returnTrue
+        let checkEntry' = checkEntryNode returnTrue
+        let checkExit' = checkExitNode returnTrue
 
-        let blockToChildren = dict [yNumber, []; zNumber, [];]
-        let checkChildren' = checkChildren tokenToNumber blockToChildren
+        let blockToChildren = dict [yVariable, []; zVariable, [];]
+        let checkChildren' = checkChildren areEqualTokens blockToChildren
 
-        let blockToParents = dict [yNumber, []; zNumber, [];]
-        let checkParents' = checkParent tokenToNumber blockToParents
+        let blockToParents = dict [yVariable, []; zVariable, [];]
+        let checkParents' = checkParent areEqualTokens blockToParents
         let myChecks = 
             [
                 checkChildren', incorrectChildMsg; 
@@ -186,8 +200,8 @@ type ``If statements`` () =
     member test.``Simple If test``() =
         let qGraph = createParserInput' "Simple if.dot"
 
-        let checkEntry' = checkEntryNode tokenToString returnTrue
-        let checkExit' = checkExitNode tokenToString returnTrue
+        let checkEntry' = checkEntryNode returnTrue
+        let checkExit' = checkExitNode returnTrue
 
         let prefix = "`simple if"
         
@@ -200,8 +214,8 @@ type ``If statements`` () =
     member test.``Big If test``() =
         let qGraph = createParserInput' "Big if.dot"
 
-        let checkEntry' = checkEntryNode tokenToString returnTrue
-        let checkExit' = checkExitNode tokenToString returnTrue
+        let checkEntry' = checkEntryNode returnTrue
+        let checkExit' = checkExitNode returnTrue
         let prefix = "`big if"
         
         //act
@@ -213,8 +227,8 @@ type ``If statements`` () =
     member test.``If without else test``() =
         let qGraph = createParserInput' "If without else.dot"
 
-        let checkEntry' = checkEntryNode tokenToString returnTrue
-        let checkExit' = checkExitNode tokenToString returnTrue
+        let checkEntry' = checkEntryNode returnTrue
+        let checkExit' = checkExitNode returnTrue
 
         let prefix = "`if without else"
         //act
@@ -226,8 +240,8 @@ type ``If statements`` () =
     member test.``Inner if``() =
         let qGraph = createParserInput' "Inner if.dot"
 
-        let checkEntry' = checkEntryNode tokenToString returnTrue
-        let checkExit' = checkExitNode tokenToString returnTrue
+        let checkEntry' = checkEntryNode returnTrue
+        let checkExit' = checkExitNode returnTrue
         let prefix = "`inner if"
         
         //act
@@ -247,9 +261,9 @@ type ``Cycles``() =
     let fsa = new FSA<_>()
     let RNGLR_EOF = SimpleTest.Parser.RNGLR_EOF <| new FSA<_>()
 
-    let aNumber = tokenToNumber <| SimpleTest.Parser.A fsa
-    let bNumber = tokenToNumber <| SimpleTest.Parser.B fsa
-    let cNumber = tokenToNumber <| SimpleTest.Parser.C fsa
+    let aToken = SimpleTest.Parser.A <| createFSA 'a'
+    let bToken = SimpleTest.Parser.B <| createFSA 'b'
+    let cToken = SimpleTest.Parser.C <| createFSA 'c'
     let semicolonNumber = tokenToNumber <| SimpleTest.Parser.SEMICOLON fsa
         
     let nodeToType = dict
@@ -269,23 +283,30 @@ type ``Cycles``() =
 
     let buildCfg' = buildCfg parse createCfg astToDot tokToRealString
 
+    
+    let areEqualTokens one two = 
+        let oneNumber = tokenToNumber one
+        let twoNumber = tokenToNumber two
+        oneNumber = twoNumber
+
     //At least one token from the expected set must exist in the tokenSet set
     let myCond expected tokenSet = 
         expected
-        |> Array.exists(fun num -> tokenSet |> Array.exists ((=) num))
+        |> Array.exists(fun token -> tokenSet |> Array.exists (areEqualTokens token))
+
 
     [<Test>]
     member this.``Cycle A+``() = 
         let qGraph = createParserInput' "A+.dot"
 
-        let checkEntryNode' = checkEntryNode tokenToNumber returnTrue
-        let checkExitNode' = checkExitNode tokenToNumber returnTrue
+        let checkEntryNode' = checkEntryNode returnTrue
+        let checkExitNode' = checkExitNode returnTrue
 
-        let blockToChildren = dict [aNumber, [aNumber];]
-        let checkChildren' = checkChildren tokenToNumber blockToChildren
+        let blockToChildren = dict [aToken, [aToken];]
+        let checkChildren' = checkChildren areEqualTokens blockToChildren
 
-        let blockToParents = dict [aNumber, [aNumber];]
-        let checkParents' = checkParent tokenToNumber blockToParents
+        let blockToParents = dict [aToken, [aToken];]
+        let checkParents' = checkParent areEqualTokens blockToParents
 
         let myChecks = 
             [
@@ -303,17 +324,17 @@ type ``Cycles``() =
     member this.``Cycle A B*``() = 
         let qGraph = createParserInput' "A B(asteriks).dot"
 
-        let entryCond = myCond [|aNumber|]
-        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
+        let entryCond = myCond [|aToken|]
+        let checkEntryNode' = checkEntryNode entryCond
         
-        let exitCond = myCond [|aNumber; bNumber|]
-        let checkExitNode' = checkExitNode tokenToNumber exitCond
+        let exitCond = myCond [|aToken; bToken|]
+        let checkExitNode' = checkExitNode exitCond
 
-        let blockToChildren = dict [aNumber, [bNumber];]
-        let checkChildren' = checkChildren tokenToNumber blockToChildren
+        let blockToChildren = dict [aToken, [bToken];]
+        let checkChildren' = checkChildren areEqualTokens blockToChildren
 
-        let blockToParents = dict [bNumber, [aNumber; bNumber];]
-        let checkParents' = checkParent tokenToNumber blockToParents
+        let blockToParents = dict [bToken, [aToken; bToken];]
+        let checkParents' = checkParent areEqualTokens blockToParents
 
         let myChecks = 
             [
@@ -331,24 +352,24 @@ type ``Cycles``() =
     member this.``Cycle A B* C``() = 
         let qGraph = createParserInput' "A B(asteriks) C.dot"
 
-        let entryCond = myCond [|aNumber|]
-        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
+        let entryCond = myCond [|aToken|]
+        let checkEntryNode' = checkEntryNode entryCond
         
-        let exitCond = myCond [|cNumber|]
-        let checkExitNode' = checkExitNode tokenToNumber exitCond
+        let exitCond = myCond [|cToken|]
+        let checkExitNode' = checkExitNode exitCond
 
         let blockToChildren = dict [
-                                    aNumber, [bNumber; cNumber];
-                                    bNumber, [bNumber; cNumber];
+                                    aToken, [bToken; cToken];
+                                    bToken, [bToken; cToken];
                                    ]
 
-        let checkChildren' = checkChildren tokenToNumber blockToChildren
+        let checkChildren' = checkChildren areEqualTokens blockToChildren
 
         let blockToParents = dict[
-                                bNumber, [aNumber; bNumber];
-                                cNumber, [aNumber; bNumber];
+                                bToken, [aToken; bToken];
+                                cToken, [aToken; bToken];
                                 ]
-        let checkParents' = checkParent tokenToNumber blockToParents
+        let checkParents' = checkParent areEqualTokens blockToParents
 
         let myChecks = 
             [
@@ -367,26 +388,26 @@ type ``Cycles``() =
         let qGraph = createParserInput' "(A or B)+.dot"
 
         //first block has two childs: A and B
-        let entryCond = myCond [| aNumber; bNumber |]
-        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
+        let entryCond = myCond [| aToken; bToken |]
+        let checkEntryNode' = checkEntryNode entryCond
 
         //last block has two childs: A and B
-        let exitCond = myCond [| aNumber; bNumber |]
-        let checkExitNode' = checkExitNode tokenToNumber exitCond
+        let exitCond = myCond [| aToken; bToken |]
+        let checkExitNode' = checkExitNode exitCond
 
         let blockToChildren = dict [
-                                    aNumber, [aNumber; bNumber];
-                                    bNumber, [aNumber; bNumber];
+                                    aToken, [aToken; bToken];
+                                    bToken, [aToken; bToken];
                                    ]
 
-        let checkChildren' = checkChildren tokenToNumber blockToChildren
+        let checkChildren' = checkChildren areEqualTokens blockToChildren
 
         let blockToParents = dict[
-                                    aNumber, [aNumber; bNumber];
-                                    bNumber, [aNumber; bNumber];
+                                    aToken, [aToken; bToken];
+                                    bToken, [aToken; bToken];
                                 ]
-        let checkParents' = checkParent tokenToNumber blockToParents
-        let checkExistence' = checkExistence tokenToNumber [aNumber; bNumber;]
+        let checkParents' = checkParent areEqualTokens blockToParents
+        let checkExistence' = checkExistence areEqualTokens [aToken; bToken;]
 
         let myChecks = 
             [
@@ -405,28 +426,28 @@ type ``Cycles``() =
         let qGraph = createParserInput' "A (B+ or C+).dot"
 
         //first block has only one child: A
-        let entryCond = myCond [|aNumber|]
-        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
+        let entryCond = myCond [|aToken|]
+        let checkEntryNode' = checkEntryNode entryCond
 
-        let exitCond = myCond [|bNumber; cNumber|]
-        let checkExitNode' = checkExitNode tokenToNumber exitCond
+        let exitCond = myCond [|bToken; cToken|]
+        let checkExitNode' = checkExitNode exitCond
 
         let blockToChildren = dict [
-                                    aNumber, [bNumber; cNumber];
-                                    bNumber, [bNumber;];
-                                    cNumber, [cNumber;];
+                                    aToken, [bToken; cToken];
+                                    bToken, [bToken;];
+                                    cToken, [cToken;];
                                    ]
 
-        let checkChildren' = checkChildren tokenToNumber blockToChildren
+        let checkChildren' = checkChildren areEqualTokens blockToChildren
 
         let blockToParents = dict[
-                                    bNumber, [aNumber; bNumber];
-                                    cNumber, [aNumber; cNumber];
+                                    bToken, [aToken; bToken];
+                                    cToken, [aToken; cToken];
                                 ]
         
-        let checkParents' = checkParent tokenToNumber blockToParents
+        let checkParents' = checkParent areEqualTokens blockToParents
 
-        let checkExistence' = checkExistence tokenToNumber [aNumber; bNumber; cNumber;]
+        let checkExistence' = checkExistence areEqualTokens [aToken; bToken; cToken;]
 
         let myChecks = 
             [
@@ -447,24 +468,24 @@ type ``Cycles``() =
         let qGraph = createParserInput' "(AB)+.dot"
 
         //first block has only one child: A
-        let entryCond = myCond [|aNumber|]
-        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
+        let entryCond = myCond [|aToken|]
+        let checkEntryNode' = checkEntryNode entryCond
 
-        let exitCond = myCond [|bNumber|]
-        let checkExitNode' = checkExitNode tokenToNumber exitCond
+        let exitCond = myCond [|bToken|]
+        let checkExitNode' = checkExitNode exitCond
 
         let blockToChildren = dict [
-                                    aNumber, [bNumber;];
-                                    bNumber, [aNumber;];
+                                    aToken, [bToken;];
+                                    bToken, [aToken;];
                                    ]
 
-        let checkChildren' = checkChildren tokenToNumber blockToChildren
+        let checkChildren' = checkChildren areEqualTokens blockToChildren
 
         let blockToParents = dict[
-                                    aNumber, [bNumber;];
-                                    bNumber, [aNumber;];
+                                    aToken, [bToken;];
+                                    bToken, [aToken;];
                                 ]
-        let checkParents' = checkParent tokenToNumber blockToParents
+        let checkParents' = checkParent areEqualTokens blockToParents
         
         let myChecks = 
             [
@@ -483,25 +504,25 @@ type ``Cycles``() =
         let qGraph = createParserInput' "(AB)+C.dot"
 
         //first block has only one child: A
-        let entryCond = myCond [|aNumber|]
-        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
+        let entryCond = myCond [|aToken|]
+        let checkEntryNode' = checkEntryNode entryCond
 
-        let exitCond = myCond [|cNumber|]
-        let checkExitNode' = checkExitNode tokenToNumber exitCond
+        let exitCond = myCond [|cToken|]
+        let checkExitNode' = checkExitNode exitCond
 
         let blockToChildren = dict [
-                                    aNumber, [bNumber;];
-                                    bNumber, [aNumber; cNumber];
+                                    aToken, [bToken;];
+                                    bToken, [aToken; cToken];
                                    ]
 
-        let checkChildren' = checkChildren tokenToNumber blockToChildren
+        let checkChildren' = checkChildren areEqualTokens blockToChildren
 
         let blockToParents = dict[
-                                    aNumber, [bNumber;];
-                                    bNumber, [aNumber;];
-                                    cNumber, [bNumber;];
+                                    aToken, [bToken;];
+                                    bToken, [aToken;];
+                                    cToken, [bToken;];
                                 ]
-        let checkParents' = checkParent tokenToNumber blockToParents
+        let checkParents' = checkParent areEqualTokens blockToParents
 
         let myChecks = 
             [
@@ -520,24 +541,24 @@ type ``Cycles``() =
         let qGraph = createParserInput' "A+B+.dot"
 
         //first block has only one child: A
-        let entryCond = myCond [|aNumber|]
-        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
+        let entryCond = myCond [|aToken|]
+        let checkEntryNode' = checkEntryNode entryCond
         
         //last block has only one child: B
-        let exitCond = myCond [|bNumber|]
-        let checkExitNode' = checkExitNode tokenToNumber exitCond
+        let exitCond = myCond [|bToken|]
+        let checkExitNode' = checkExitNode exitCond
 
         let blockToChildren = dict [
-                                    aNumber, [aNumber; bNumber;];
-                                    bNumber, [bNumber];
+                                    aToken, [aToken; bToken;];
+                                    bToken, [bToken];
                                    ]
-        let checkChildren' = checkChildren tokenToNumber blockToChildren
+        let checkChildren' = checkChildren areEqualTokens blockToChildren
 
         let blockToParents = dict[
-                                    aNumber, [aNumber;];
-                                    bNumber, [aNumber; bNumber;];
+                                    aToken, [aToken;];
+                                    bToken, [aToken; bToken;];
                                 ]
-        let checkParents' = checkParent tokenToNumber blockToParents
+        let checkParents' = checkParent areEqualTokens blockToParents
         
         let myChecks = 
             [
@@ -555,24 +576,24 @@ type ``Cycles``() =
     member this.``Cycle inside cycle (A+B)+``() = 
         let qGraph = createParserInput' "(A+B)+.dot"
 
-        let entryCond = myCond [|aNumber|]
-        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
+        let entryCond = myCond [|aToken|]
+        let checkEntryNode' = checkEntryNode entryCond
 
-        let exitCond = myCond [|bNumber|]
-        let checkExitNode' = checkExitNode tokenToNumber exitCond
+        let exitCond = myCond [|bToken|]
+        let checkExitNode' = checkExitNode exitCond
 
         let blockToChildren = dict [
-                                    aNumber, [aNumber; bNumber;];
-                                    bNumber, [aNumber; ];
+                                    aToken, [aToken; bToken;];
+                                    bToken, [aToken; ];
                                    ]
 
-        let checkChildren' = checkChildren tokenToNumber blockToChildren
+        let checkChildren' = checkChildren areEqualTokens blockToChildren
 
         let blockToParents = dict[
-                                    aNumber, [aNumber; bNumber;];
-                                    bNumber, [aNumber;];
+                                    aToken, [aToken; bToken;];
+                                    bToken, [aToken;];
                                 ]
-        let checkParents' = checkParent tokenToNumber blockToParents
+        let checkParents' = checkParent areEqualTokens blockToParents
         
         let myChecks = 
             [
@@ -590,26 +611,26 @@ type ``Cycles``() =
     member this.``Cycle inside cycle ((AB)+C)+``() = 
         let qGraph = createParserInput' "((AB)+C)+.dot"
 
-        let entryCond = myCond [|aNumber|]
-        let checkEntryNode' = checkEntryNode tokenToNumber entryCond
+        let entryCond = myCond [|aToken|]
+        let checkEntryNode' = checkEntryNode entryCond
         
-        let exitCond = myCond [| bNumber; cNumber;|]
-        let checkExitNode' = checkExitNode tokenToNumber exitCond
+        let exitCond = myCond [| bToken; cToken;|]
+        let checkExitNode' = checkExitNode exitCond
 
         let blockToChildren = dict [
-                                    aNumber, [bNumber;];
-                                    bNumber, [aNumber; cNumber];
-                                    cNumber, [aNumber;];
+                                    aToken, [bToken;];
+                                    bToken, [aToken; cToken];
+                                    cToken, [aToken;];
                                    ]
 
-        let checkChildren' = checkChildren tokenToNumber blockToChildren
+        let checkChildren' = checkChildren areEqualTokens blockToChildren
 
         let blockToParents = dict[
-                                    aNumber, [bNumber; cNumber];
-                                    bNumber, [aNumber;];
-                                    cNumber, [bNumber;];
+                                    aToken, [bToken; cToken];
+                                    bToken, [aToken;];
+                                    cToken, [bToken;];
                                 ]
-        let checkParents' = checkParent tokenToNumber blockToParents
+        let checkParents' = checkParent areEqualTokens blockToParents
         
         let myChecks = 
             [

@@ -74,9 +74,9 @@ let recognize (strToParse: string)
     let rec compute l m =
         let mid = int (l + m) / 2
         if m - l >= 4 then 
-            compute l mid |> ignore
+            compute l mid
             if mid < stringSize + 1 then
-                compute mid m |> ignore
+                compute mid m
 
         if mid < stringSize + 1 then
             completeT (l, mid, mid, m)
@@ -128,20 +128,20 @@ let recognize (strToParse: string)
 
             let underMaxSearchLength l m = m - l < maxSearchLength
 
-            completeT c |> ignore
+            completeT c
 
             if underMaxSearchLength mid1 l2 then
-                completeP d1 b1 c |> ignore
-                completeT d1 |> ignore
+                completeP d1 b1 c 
+                completeT d1
 
                 if mid2 <= stringSize then
-                    completeP d2 c b2 |> ignore
-                    completeT d2 |> ignore
+                    completeP d2 c b2 
+                    completeT d2 
 
                     if underMaxSearchLength mid1 mid2 then
-                        completeP e b1 d2 |> ignore
-                        completeP e d1 b2 |> ignore
-                        completeT e  |> ignore
+                        completeP e b1 d2 
+                        completeP e d1 b2 
+                        completeT e  
 
     compute 0 (roundedSize + 1) |> ignore
 

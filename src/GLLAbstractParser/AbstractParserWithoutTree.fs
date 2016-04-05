@@ -120,6 +120,8 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
               incr reused
 
         let containsEdge (b : Vertex) (e : Vertex) label extension =
+            let rt = getRuleNew label
+            let pt = getPositionNew label
             let nontermName = b.NontermLabel
             let beginLevel = int b.Level
             let endLevel = int e.Level
@@ -174,26 +176,41 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             if dict.IsSome then edges.[nontermName].[beginLevel] <- dict.Value
             cond
         
-        let create (inputVertex : int) (label : int<labelMeasure>) (vertex : Vertex) extension = 
+        let create (cE : int) (cP : int) (label : int<labelMeasure>) (vertex : Vertex) curSymbol =   
             let nonTermName = parser.LeftSide.[getRule label]
-            //let nV = vertices.[inputVertex]
-            let v = new Vertex(inputVertex, nonTermName)
-            //if nV <> null
-            //then 
-            let vertexKey = pack inputVertex nonTermName
-            let temp = containsEdge v vertex (int label) extension 
-            if not <| temp 
+            let i = packEdgePos cE cP
+            let extension = packExtension (getLeftExtension !currentExtension) i 
+            let v = new Vertex(i, nonTermName)
+            if edges.[nonTermName].[i] <> null
             then
-                if setP.ContainsKey(vertexKey)
+                let vertexKey = pack i nonTermName
+                let temp = containsEdge v vertex (int label) extension 
+                if not <| temp 
                 then
-                    let arr = setP.[vertexKey]  
-                    arr.DoForAll (fun ext  ->
-                        let e = packExtension (getLeftExtension extension) (getRightExtension ext)
-                        addContext (getRightExtension ext) label vertex e)
-            //else    
-            //    ignore <| containsEdge v vertex (int label) extension
-            //    Array.iteri (fun i e -> if e = nonTermName then addContext inputVertex ((packLabelNew i 0)*1<labelMeasure>) v (packExtension !currentIndex !currentIndex)) parser.LeftSide      
-            v
+                    if setP.ContainsKey(vertexKey)
+                    then
+                        let arr = setP.[vertexKey]  
+                        arr.DoForAll (fun ext  ->
+                            let e = packExtension (getLeftExtension extension) (getRightExtension ext)
+                            addContext ((getRightExtension ext) - shift) label vertex e)
+            else
+                ignore <| containsEdge v vertex (int label) extension
+                let chainLen = input.ChainLength.[cE]
+                let addCntxtForNonTerm e pos index = 
+                    let curToken = input.Edges.[e].Tokens.[pos]
+                    let key = int(( curSymbol  <<< 16) ||| (curToken - parser.NonTermCount))
+                    let flg,rules = parser.Table.TryGetValue key
+                    if flg then
+                        for rule in rules do
+                            let newLabel = 1<labelMeasure> * packLabelNew rule 0
+                            addContext !currentIndex newLabel v (packExtension index index)    
+                if cP < chainLen - 1
+                then
+                    addCntxtForNonTerm cE cP i   
+                else
+                    for oE in outEdges.[input.Edges.[cE].End] do
+                        addCntxtForNonTerm oE shift (packEdgePos oE 0)      
+            
                 
         let pop (u : Vertex) (i : int) (extension : int64<extension>) =
             if u <> dummyGSSNode
@@ -213,9 +230,14 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                         for slotLevels in edge.Value do
                                 let slot = slotLevels.Key
                                 for level in slotLevels.Value do
-                                let ext = packExtension (getLeftExtension extOnEdge) (getRightExtension extension)
-                                let newVertex = new Vertex(level, slot)
-                                addContext i (labelOnEdge*1<labelMeasure>) newVertex ext
+                                    let l = (getLeftExtension extOnEdge)
+                                    let tt = getPosOnEdge l
+                                    
+                                    let r = (getRightExtension extension)
+                                    let ttt = getPosOnEdge r
+                                    let ext = packExtension l r
+                                    let newVertex = new Vertex(level, slot)
+                                    addContext i (labelOnEdge*1<labelMeasure>) newVertex ext
 
         let table = parser.Table
         let condition = ref true 
@@ -242,8 +264,11 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             let rule = getRuleNew !currentLabel
             let position = getPositionNew !currentLabel
             let eatTerm () =
-                currentIndex := packEdgePos (getEdge !currentIndex) (1 + getPosOnEdge !currentIndex)
-                currentExtension := packExtension (getLeftExtension !currentExtension) !currentIndex
+                let pos = (1 + getPosOnEdge !currentIndex)
+                currentIndex := packEdgePos (getEdge !currentIndex) pos
+                let le = (getLeftExtension !currentExtension)
+                let re = packEdgePos (getEdge !currentIndex) ((getPosOnEdge !currentIndex) + shift)
+                currentExtension := packExtension le re
                 currentLabel := 1<labelMeasure> * packLabelNew rule (position + 1)
                 condition := false
             if Array.length parser.rules.[rule] = 0 
@@ -280,29 +305,12 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                                 currentIndex := (packEdgePos curEdge.Value 0)
                                 eatTerm ()
                             | None _ -> ()
-                    else 
-                        let getIndex nTerm term = 
-                            let mutable index = nTerm
-                            index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
-                            index <- index + term - parser.NonTermCount
-                            index
-                        currentGSSNode := create !currentIndex (1<labelMeasure>  * packLabelNew rule (position + 1)) !currentGSSNode !currentExtension
-                        let chainLen = input.ChainLength.[cE]
-                        let addCntxtForNonTerm e pos i = 
-                            let curToken = input.Edges.[e].Tokens.[pos]
-                            let key = int(( curSymbol  <<< 16) ||| (curToken - parser.NonTermCount))
-                            let flg,rules = table.TryGetValue key
-                            if flg then
-                                for rule in rules do
-                                    let newLabel = 1<labelMeasure> * packLabelNew rule 0
-                                    addContext i newLabel !currentGSSNode (packExtension !currentIndex !currentIndex)    
-                        if cP < chainLen - 1
+                    else
+                        let curToken = input.Edges.[cE].Tokens.[cP]
+                        let key = int(( curSymbol  <<< 16) ||| (curToken - parser.NonTermCount))
+                        if parser.Table.ContainsKey key
                         then
-                            addCntxtForNonTerm cE cP !currentIndex   
-                        else
-                            for oE in outEdges.[input.Edges.[cE].End] do
-                                addCntxtForNonTerm oE shift (packEdgePos oE 0)
-                                                      
+                            create cE cP (1<labelMeasure>  * packLabelNew rule (position + 1)) !currentGSSNode curSymbol                             
                 else
                     if Array.exists (fun e -> e = rule) condNonTermRules
                     then

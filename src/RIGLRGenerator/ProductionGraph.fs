@@ -3,6 +3,7 @@
 open System.Collections.Generic
 open Yard.Generators.Common.FinalGrammar
 open QuickGraph
+open Yard.Core.IL
 open Yard.Core.IL.Rule
 
 type ContextLabel = L | R | B
@@ -41,8 +42,8 @@ type ProductionGraph(grammar: FinalGrammar) as this =
                      (new TaggedEdge<int, ContextLabel> (nonTerm, item.Key, item.Value)) |> ignore
     
     new () =
-        let rule = {name = new Yard.Core.IL.Source.t(""); 
-                    body = Yard.Core.IL.Production.PToken(new Yard.Core.IL.Source.t("")); 
+        let rule = {name = new Source.t(""); 
+                    body = Production.PToken(new Source.t("")); 
                     args = []; 
                     isStart = true; 
                     isPublic = false; 

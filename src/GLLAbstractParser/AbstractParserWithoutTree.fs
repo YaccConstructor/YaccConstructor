@@ -62,10 +62,12 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let vertices = new CompressedArray<ResizeArray<_>>(input.ChainLength, (fun _ -> null),shift)
         let currentGSSNode = ref <| dummyGSSNode
      
-        for e in input.InitialVertices do
+        for i = input.InitialVertices.Length - 1 downto 0 do
+            let e = input.InitialVertices.[i]
             let t = getEdge e
-            let tt = getPosOnEdge e 
-            let ext = packExtension e e
+            let tt = getPosOnEdge e + shift
+            let ttt = packEdgePos t tt
+            let ext = packExtension ttt ttt
             setR.Push(new Context2(e, !currentLabel, !currentGSSNode, ext))
 
         let currentContext = ref <| new Context2(!currentIndex, !currentLabel, !currentGSSNode, !currentExtension)
@@ -177,8 +179,9 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             cond
         
         let create (cE : int) (cP : int) (label : int<labelMeasure>) (vertex : Vertex) curSymbol =   
-            let nonTermName = parser.LeftSide.[getRule label]
+            let nonTermName = curSymbol
             let i = packEdgePos cE cP
+            let ttttt = getPosOnEdge <| getLeftExtension !currentExtension
             let extension = packExtension (getLeftExtension !currentExtension) i 
             let v = new Vertex(i, nonTermName)
             if edges.[nonTermName].[i] <> null
@@ -192,7 +195,8 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                         let arr = setP.[vertexKey]  
                         arr.DoForAll (fun ext  ->
                             let e = packExtension (getLeftExtension extension) (getRightExtension ext)
-                            addContext ((getRightExtension ext) - shift) label vertex e)
+                            let iiii = packEdgePos (getEdge (getRightExtension ext)) ((getPosOnEdge <| getRightExtension ext) - shift)
+                            addContext iiii label vertex e)
             else
                 ignore <| containsEdge v vertex (int label) extension
                 let chainLen = input.ChainLength.[cE]
@@ -255,6 +259,8 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 currentGSSNode := currentContext.Value.Vertex
                 currentLabel := currentContext.Value.Label
                 currentExtension := currentContext.Value.Extension
+                let ttt = getPosOnEdge <| getLeftExtension !currentExtension
+                let aa = getPosOnEdge <| getRightExtension !currentExtension
                 condition := false
             else 
                 stop := true  
@@ -266,6 +272,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             let eatTerm () =
                 let pos = (1 + getPosOnEdge !currentIndex)
                 currentIndex := packEdgePos (getEdge !currentIndex) pos
+                let ttt = getPosOnEdge (getLeftExtension !currentExtension)
                 let le = (getLeftExtension !currentExtension)
                 let re = packEdgePos (getEdge !currentIndex) ((getPosOnEdge !currentIndex) + shift)
                 currentExtension := packExtension le re
@@ -273,7 +280,11 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 condition := false
             if Array.length parser.rules.[rule] = 0 
             then
-              pop !currentGSSNode !currentIndex !currentExtension
+                if Array.exists (fun e -> e = rule) condNonTermRules
+                then
+                    r.Add(new ResultStruct((getEdge <| getLeftExtension !currentExtension), (getPosOnEdge <| getLeftExtension !currentExtension), (getEdge <| getRightExtension !currentExtension), (getPosOnEdge <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule]))
+                    |> ignore
+                pop !currentGSSNode !currentIndex !currentExtension
             else
                 setR.Count
                 if Array.length parser.rules.[rule] <> position
@@ -281,10 +292,9 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                     let curSymbol = parser.rules.[rule].[position]
                     let cE = CommonFuns.getEdge !currentIndex
                     let cP = CommonFuns.getPosOnEdge !currentIndex + shift
+                    let chainLen = input.ChainLength.[cE]
                     if parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol
-                    then
-                        
-                        let chainLen = input.ChainLength.[cE]
+                    then                                                
                         if cP < chainLen - 1 
                         then    
                             let curToken = input.Edges.[cE].Tokens.[cP] 
@@ -306,11 +316,13 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                                 eatTerm ()
                             | None _ -> ()
                     else
+                  
                         let curToken = input.Edges.[cE].Tokens.[cP]
                         let key = int(( curSymbol  <<< 16) ||| (curToken - parser.NonTermCount))
                         if parser.Table.ContainsKey key
                         then
                             create cE cP (1<labelMeasure>  * packLabelNew rule (position + 1)) !currentGSSNode curSymbol                             
+                    
                 else
                     if Array.exists (fun e -> e = rule) condNonTermRules
                     then

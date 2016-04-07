@@ -120,32 +120,13 @@ let constructIRIA (grammar : FinalGrammar) =
 
 let constructRIA (grammar: FinalGrammar) =
     let IRIA = constructIRIA grammar
-    let RIA = new FSA<RCAEdge>()
-    IRIA.Edges 
-    |> Seq.iter
-          (
-              fun edge ->
-                  match edge.Tag with
-                  | Smbl(Sh(n)) -> 
-                        if not (grammar.indexator.isNonTerm n)
-                        then RIA.AddVerticesAndEdge (edge) |> ignore
-                  | _ -> RIA.AddVerticesAndEdge (edge) |> ignore
-          )
-    RIA.InitState <- IRIA.InitState
-    RIA.FinalState <- IRIA.FinalState
-    RIA.NfaToDfa()
-    
-//    let nonTermEdges = IRIA.Edges 
-//                       |> Seq.filter 
-//                             (
-//                                 fun edge ->
-//                                     match edge.Tag with
-//                                     | Smbl(Sh(n)) -> grammar.indexator.isNonTerm n
-//                                     | _ -> false
-//                             )
-//                       |> Seq.map (fun e -> new EdgeFSA<RCAEdge>(e.Source, e.Target, e.Tag))
-//    Seq.iter (fun edge -> IRIA.RemoveEdge edge |> ignore) nonTermEdges   lie
-//    IRIA.NfaToDfa()
+    IRIA.RemoveEdgeIf (
+                        fun edge ->
+                            match edge.Tag with
+                            | Smbl(Sh(n)) -> grammar.indexator.isNonTerm n
+                            | _ -> false
+                      ) |> ignore
+    IRIA.NfaToDfa()
 
 let constructRCA (grammar: FinalGrammar) =   
         

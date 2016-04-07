@@ -1,11 +1,18 @@
 ﻿module YC.Bio.RNA.Search
 
-open Argu
+open Nessos.Argu
 
 open YC.BIO.BioGraphLoader
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.AbstractParserWithoutTree
+
+open MBrace.Azure
+open MBrace.Core
+open MBrace.Core.Builders
+open MBrace.Core.CloudOperators
+open MBrace.Runtime
+//open MBrace.Azure.Management
 
 type CLIArguments =
     | [<NoAppSettings>][<Mandatory>][<AltCommandLine("-i")>] Input of string
@@ -24,7 +31,7 @@ type msg =
 
 let filterRnaParsingResult lengthLimit res  =
     match res:ParseResult<ResultStruct> with
-    | Success ast -> printfn "Result is success but it is unrxpectrd success"
+    | Success ast -> failwith "Result is success but it is unrxpectrd success"
     | Success1 x ->
         let ranges = new ResizeArray<_>()
         let curLeft = ref 0
@@ -60,15 +67,68 @@ let filterRnaParsingResult lengthLimit res  =
                 ranges.Add((left.le,left.lpos),(right.re,right.rpos)))
         
         //printfn "Expected: %A" expectedRange
-        ranges |> Seq.iter (printfn "%A; ")
-        printfn "Total ranges: %A" ranges.Count
+        ranges
         //printfn ""
         //printfn "Success!"        
         
     | Error e -> 
-        printfn "Input parsing failed: %A" e
+        failwithf "Input parsing failed: %A" e
         
+let searchInCloud graphs =
+    let start = System.DateTime.Now
+    let pubSettingsFile = @"C:\Users\User\Downloads\Free Trial-3-30-2016-credentials.publishsettings"
 
+    // If your publication settings defines more than one subscription,
+    // you will need to specify which one you will be using here.
+    let subscriptionId : string option = None
+
+    // Your prefered Azure service name for the cluster.
+    // NB: must be a valid DNS prefix unique across Azure.
+//    let clusterName = "RNASearchCluster"
+//
+//    // Your prefered Azure region. Assign this to a data center close to your location.
+//    let region = Region.North_Europe
+//    // Your prefered VM size
+//    let vmSize = VMSize.Large
+//    // Your prefered cluster count
+//    let vmCount = 4
+//
+//    let GetSubscriptionManager() = 
+//        SubscriptionManager.FromPublishSettingsFile(pubSettingsFile, region, ?subscriptionId = subscriptionId, logger = new ConsoleLogger())
+//
+//    /// Gets the already existing deployment
+//    let GetDeployment() = GetSubscriptionManager().GetDeployment(clusterName) 
+
+    let myStorageConnectionString = @"DefaultEndpointsProtocol=https;AccountName=mbracec3bb1560;AccountKey=G5GcN2Ne1JyP2u46EuAsCKZANM/xPSilqbwBk0z7zAncPStQax3SpYhxMb+8fwMSyXHhqhacsSwmHg3ZXZG/0A=="
+    let myServiceBusConnectionString = @"EndPoint=sb://mbrace085d90e9.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=+9y8h6pLDSZFeSr5KyYPslxpoI6zkAz0ryHYvNTe2KY="
+    let config = new Configuration(myStorageConnectionString, myServiceBusConnectionString)    
+    let cluster = 
+//        let deployment = GetDeployment()
+//        AzureCluster.Connect(deployment, logger = ConsoleLogger(true), logLevel = LogLevel.Info)
+        AzureCluster.Connect(config, 
+                                       logger = ConsoleLogger(true), 
+                                       logLevel = LogLevel.Info)
+    cluster.ShowWorkers()
+   
+    let cloudComputations = 
+        cloud { 
+//            let processGraph graph = 
+//                try
+//                    GLL.tRNA.buildAbstract graph 3                                
+//                    |> filterRnaParsingResult 60
+//                    |> Some
+//                with
+//                | e -> None 
+//            let! result = Cloud.Parallel [for g in graphs -> cloud {return processGraph g}]
+//            return  result |> Array.choose id
+                return "!!!!"
+            }
+        |> cluster.CreateProcess
+        
+    let r= cloudComputations.Result
+    printfn "time = %A" (System.DateTime.Now - start)
+    printfn "%A" r
+    r
 
 let search graphs agentsCount =
     let agent name  =
@@ -82,6 +142,7 @@ let search graphs agentsCount =
                             try
                                 GLL.tRNA.buildAbstract graph 3                                
                                 |> filterRnaParsingResult 60
+                                |> ignore
                             with
                             | e -> ()
                             return! loop n         
@@ -116,7 +177,9 @@ let searchTRNA path =
             | x ->   failwithf "Strange symbol in input: %A" x
             |> GLL.tRNA.tokenToNumber
 
-    let graphs, longEdges = loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.tRNA.RNGLR_EOF 0)
+    //let graphs, longEdges = loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.tRNA.RNGLR_EOF 0)
+    searchInCloud [] //graphs.[10000..10010]
+    |> fun x -> x.Length |> printfn "%A"
     ()
 
 [<EntryPoint>]

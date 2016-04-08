@@ -37,6 +37,9 @@ let rec eachProduction f productionList =
         | PAlt(left, right) ->
             f <| PAlt(left, right)
             eachProduction f [left; right]
+        | PConj(left, right) ->
+            f <| PConj(left, right)
+            eachProduction f [left; right]
         | PMany x ->
             f <| PMany x
             eachProduction f [x]

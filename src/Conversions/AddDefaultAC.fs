@@ -51,6 +51,7 @@ let rec addAcToProduction neededRules ruleBody =
                 |> List.map (fun x -> x.text) |> String.concat ", "|> (fun n -> genNewSourceWithRange n ruleBody))       
             , l)
     | PAlt(left, right) -> PAlt(addAcToProduction neededRules left, addAcToProduction neededRules right)
+    | PConj(left, right) -> PConj(addAcToProduction neededRules left, addAcToProduction neededRules right)
     | PRef(ref, _) as x -> neededRules := ref.text::!neededRules; x
     | PLiteral _ as x -> x
     | PToken _ as x -> x
@@ -64,12 +65,10 @@ let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  =
     let updatedRules = new HashSet<string>()
     let rulesQueueBfs = new System.Collections.Generic.Queue<string>()
     let rulesMap = new Dictionary<string, Rule.t<Source.t, Source.t>>()
-    ruleList |> List.iter 
-        (fun rule -> 
-            rulesMap.Add(rule.name.text, rule); 
+    for rule in ruleList do
+            rulesMap.Add(rule.name.text, rule) 
             //if rule._public then (rulesQueueBfs.Enqueue(rule.name) |> ignore)
             rulesQueueBfs.Enqueue rule.name.text
-        ) 
     while rulesQueueBfs.Count > 0 do
         let bfsFor = rulesQueueBfs.Dequeue()
         if not <| updatedRules.Contains bfsFor then    
@@ -85,6 +84,7 @@ let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  =
                 let rec bodyToSeq = function
                     | PSeq (_,_) as p -> p
                     | PAlt (l,r) -> PAlt(bodyToSeq l, bodyToSeq r)
+                    | PConj (l,r) -> PConj(bodyToSeq l, bodyToSeq r)
                     | x -> PSeq([{rule = x; binding = createSource "yard_bind" |> Some;
                                     omit = false; checker = None}]
                                 , Some(createSource "yard_bind"))

@@ -172,7 +172,7 @@ type CYKGeneartorImpl () =
 
                     buildRule (ntermId name) tId 0 lN lW
 
-                | _ -> failwith "CYK. Incorrect rule structure. Expected PToken."
+                | x -> failwithf "CYK. Incorrect rule structure. Expected PToken, but get %A" x
             | Production.PSeq ([elem1; elem2],_,lbl) -> 
                 let lN,lW = processLbl lbl
                 buildRule (ntermId name) (processNtermElem elem1) (processNtermElem elem2) lN lW

@@ -734,7 +734,7 @@ type ``GLL abstract parser tests`` () =
 
     [<Test>]
     member this.``1000: trna in 629-699`` () =
-        this.``1000: trna`` """simple_tRNA2\g""" 1001 ((0,597),(0,697))
+        this.``1000: trna`` """simple_tRNA2\g""" 1001 ((0,596),(0,697))
 
     [<Test>]
     member this.``1000: trna in 133-204`` () =
@@ -783,7 +783,7 @@ type ``GLL abstract parser tests`` () =
 
     [<Test>]
     member this.``Very small with 2 edges`` () =        
-        this.SmallTests  """very_small_multy_1\g"""  ((0,1),(0,6))
+        this.SmallTests  """very_small_multy_1\g"""  ((0,1),(1,3))
    
     member this.``Very very small tests`` file expectedRange =
         
@@ -812,7 +812,7 @@ type ``GLL abstract parser tests`` () =
 
     [<Test>]
     member this.``Very very small with 2 edges`` () =
-        this.``Very very small tests`` """v_very_small_multy\g""" ((0,0),(0,3))        
+        this.``Very very small tests`` """v_very_small_multy\g""" ((0,0),(1,2))        
 
     [<Test>]
     member this.``Very very small`` () =
@@ -868,10 +868,10 @@ let fs x =
     //t.``1000: trna in 860-930``()
     //t.``1000: trna in 629-699``()
     //t.``1000: trna in 133-204``()
-    //t.``1000 as graph 139 + 861: trna in 133-204`` ()
+    t.``1000 as graph 139 + 861: trna in 133-204`` ()
     //t.``Very small``()
     //t.``Very small with 2 edges``()
-    t.``Very very small with 2 edges``()
+    //t.``Very very small with 2 edges``()
     //t.``Very very small``()
     //t.``Problem with shift. Big`` ()
     

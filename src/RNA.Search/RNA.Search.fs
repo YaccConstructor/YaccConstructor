@@ -1,6 +1,6 @@
 ﻿module YC.Bio.RNA.Search
 
-open Argu
+open Nessos.Argu
 
 open YC.BIO.BioGraphLoader
 open AbstractAnalysis.Common

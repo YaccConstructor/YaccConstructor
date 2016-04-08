@@ -100,7 +100,7 @@ let perfTest2 parse graph =
         | Success tree->
             ()//printfn "%s" "sss"
 
-let test buildAbstractAst qGraph l (intToString : int -> string) (fileName : string) nodesCount edgesCount termsCount ambiguityCount (tokenData : 'TokenType -> obj) (tokenToNum : 'TokenType -> int) = 
+let test buildAbstractAst qGraph l (intToString : int -> string) (fileName : string) nodesCount edgesCount termsCount ambiguityCount tokenData tokenToNum = 
 
     let r = buildAbstractAst qGraph l
     printfn "%A" r
@@ -124,9 +124,8 @@ let filterRnaParsingResult res expectedRange lengthLimit =
     let ranges = YC.Bio.RNA.Search.filterRnaParsingResult lengthLimit res
     Assert.IsTrue(ranges |> Microsoft.FSharp.Collections.ResizeArray.exists ((=) expectedRange))
 
-//let edgB b e l t = new BioParserEdge(b, e, l, t) 
-//[<TestFixture>]
-//type ``GLL abstract parser tests`` () =
+[<TestFixture>]
+type ``GLL abstract parser tests`` () =
 //    [<Test>]
 //    member this._01_PrettySimpleCalc_SequenceInput () =
 //        
@@ -135,14 +134,14 @@ let filterRnaParsingResult res expectedRange lengthLimit =
 //        let a3 = f [|GLL.PrettySimpleCalc.NUM 3|] GLL.PrettySimpleCalc.tokenToNumber
 //        let a4 = f [|GLL.PrettySimpleCalc.RNGLR_EOF 0|] GLL.PrettySimpleCalc.tokenToNumber
 //        let edges = [|
-//            edgB 0 1 1 a1; 
-//            edgB 1 2 1 a2; 
-//            edgB 2 3 1 a3;
-//            edgB 3 4 1 a4|]
+//            edgB 0 1 a1; 
+//            edgB 1 2 a2; 
+//            edgB 2 3 a3;
+//            edgB 3 4 a4|]
 //         
-//        let qGraph = new BioParserInputGraph(edges)
+//        let qGraph = new BioParserInputGraph<GLL.PrettySimpleCalc.Token>([|0|], 4, len edges, edges, 5)
 //        test GLL.PrettySimpleCalc.buildAbstractAst qGraph 100 GLL.PrettySimpleCalc.numToString "PrettySimpleCalcSeq.dot" 21 24 5 0 GLL.PrettySimpleCalc.tokenData GLL.PrettySimpleCalc.tokenToNumber
-
+//
 //    [<Test>]
 //    member this._06_NotAmbigousSimpleCalc_Loop () =
 //        let a1 = f [|GLL.NotAmbigousSimpleCalc.NUM 0|] GLL.NotAmbigousSimpleCalc.tokenToNumber
@@ -703,26 +702,7 @@ let filterRnaParsingResult res expectedRange lengthLimit =
         let start = System.DateTime.Now
         let processRes res = 
             filterRnaParsingResult res expectedRange 60        
-        0
-//        let agent name  =
-//            MailboxProcessor.Start(fun inbox ->
-//                let rec loop n =
-//                    async {
-//                            let! msg = inbox.Receive()
-//                            match msg with
-//                            | Data (i,graph) ->
-//                                printfn "%A: %A" name i
-//                                try
-//                                 GLL.tRNA.buildAbstract graph 3
-//                                 |> processRes                 
-//                                with
-//                                | e -> ()
-//                                return! loop n
-//                            | End f -> f := true
-//                            | Die ch -> ch.Reply()
-//                            }
-//                loop 0)                
-//        
+
         let getSmb =
             let cnt = ref 0
             fun ch ->
@@ -738,128 +718,167 @@ let filterRnaParsingResult res expectedRange lengthLimit =
         let basePath = "../../../Tests/bio/"
         let path = Path.Combine(basePath, file)
         let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.tRNA.RNGLR_EOF 0)
-//                Data (i,graph) 
+
         graphs        
         |> Array.ofSeq        
         |> Array.mapi 
             (fun i graph -> 
-                GLL.tRNA.buildAbstract graph 4
+                GLL.tRNA.buildAbstract graph 5
             )
         |> Array.iter processRes
         printfn "Time = %A" (System.DateTime.Now - start)
-//        //|> Array.iter processRes
+
     [<Test>]
     member this.``1000: trna in 860-930`` () =
-        this.``1000: trna`` """simple_tRNA1\g""" 1001 ((0,860),(0,930))
+        this.``1000: trna`` """simple_tRNA1\g""" 1001 ((0,863),(0,926))
 
     [<Test>]
     member this.``1000: trna in 629-699`` () =
-        this.``1000: trna`` """simple_tRNA2\g""" 1001 ((0,629),(0,699))
+        this.``1000: trna`` """simple_tRNA2\g""" 1001 ((0,597),(0,697))
 
     [<Test>]
     member this.``1000: trna in 133-204`` () =
-        this.``1000: trna`` """simple_tRNA3\g""" 1001 ((0,133),(0,204))
+        this.``1000: trna`` """simple_tRNA3\g""" 1001 ((0,127),(0,205))
 
     [<Test>]
-    member this.``Problem with shift. Big`` () =
-        this.``1000: trna`` """simple_tRNA5\g""" 1001 ((0,34),(0,99))
-//                |> GLL.shiftProblem.tokenToNumber                
-//        let basePath = "../../../Tests/bio/"
-//        let path = Path.Combine(basePath, file)
-//        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.shiftProblem.RNGLR_EOF 0)
-//
-//        graphs
-//        |> Array.ofSeq
-//        |> Array.mapi 
-//            (fun i graph -> 
-//                printfn "%A" i
-//                GLL.shiftProblem.buildAbstract graph 1
-//            )
-//        |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 5)        
-//    
-//    [<Test>]
-//    member this.``Problem with shift. Small 2`` () =
-//        let file = """problem_with_shift_2\g""" 
-//        let lengthLimit = 1001 
-//        let expectedRange = ((0,0),(0,4))
-//        let getSmb =
-//            let cnt = ref 0
-//            fun ch ->
-//                let i = incr cnt; !cnt 
-//                match ch with
-//                | 'A' -> GLL.shiftProblem.A i                
-                GLL.shiftProblem.buildAbstract graph 2
-//                | 'G' -> GLL.shiftProblem.G i                
-//                | x ->   failwithf "Strange symbol in input: %A" x
-//                |> GLL.shiftProblem.tokenToNumber                
-//        let basePath = "../../../Tests/bio/"
-//        let path = Path.Combine(basePath, file)
-//        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.shiftProblem.RNGLR_EOF 0)
-//
-//        graphs
-//        |> Array.ofSeq
-//        |> Array.mapi 
-//            (fun i graph -> 
-//                printfn "%A" i
-//                GLL.shiftProblem.buildAbstract graph 1
-//            )
-//        |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 5)        
-//
-//
-//    [<Test>]
-//    member this.``Problem with multiple edges. Small`` () =
-//        let file = """problem_with_multiple_edges\g""" 
-//        let lengthLimit = 1001 
-//        let expectedRange = ((0,0),(0,4))
-//        let getSmb =
-//            let cnt = ref 0
-//            fun ch ->
-//                let i = incr cnt; !cnt 
-//                match ch with
-                GLL.shiftProblem.buildAbstract graph 2
-//                | 'C' -> GLL.multipleEdgesProblem.C i            
-//                | x ->   failwithf "Strange symbol in input: %A" x
-//                |> GLL.multipleEdgesProblem.tokenToNumber                
-//        let basePath = "../../../Tests/bio/"
-//        let path = Path.Combine(basePath, file)
-//        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.multipleEdgesProblem.RNGLR_EOF 0)
-//
-//        graphs
-//        |> Array.ofSeq
-//        |> Array.mapi 
-//            (fun i graph -> 
-//                printfn "%A" i
-//                GLL.multipleEdgesProblem.buildAbstract graph 1
-//            )
-//        |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 5)        
-//
-//        this.``1000: trna`` """simple_tRNA6\g""" 120 ((0,133),(0,204))
+    member this.``1000 as graph 139 + 861: trna in 133-204`` () =
+        this.``1000: trna`` """simple_tRNA4\g""" 1001 ((0,133),(0,204))
+
     [<Test>]
     member this.``1000 as graph 49 + 5: trna in 133-204`` () =
+        this.``1000: trna`` """simple_tRNA6\g""" 1001 ((0,133),(0,204))
+
+    //[<Test>]
+    member this.``Problem with shift. Big`` () =
+        this.``1000: trna`` """simple_tRNA5\g""" 1001 ((0,34),(0,99))
+
+    member this.SmallTests file expectedRange =        
+        let lengthLimit = 1001        
+        let getSmb =
+            let cnt = ref 0
+            fun ch ->
+                let i = incr cnt; !cnt 
+                match ch with
+                | 'A' -> GLL.shiftProblem.A i                
+                | 'C' -> GLL.shiftProblem.C i
+                | 'G' -> GLL.shiftProblem.G i                
+                | x ->   failwithf "Strange symbol in input: %A" x
+                |> GLL.shiftProblem.tokenToNumber                
+        let basePath = "../../../Tests/bio/"
+        let path = Path.Combine(basePath, file)
+        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.shiftProblem.RNGLR_EOF 0)
+
+        graphs
+        |> Array.ofSeq
+        |> Array.mapi 
+            (fun i graph -> 
+                printfn "%A" i
+                GLL.shiftProblem.buildAbstract graph 2
+            )
+        |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 5)        
+
+    [<Test>]
+    member this.``Very small`` () =        
+        this.SmallTests  """very_small\g"""  ((0,1),(0,6))
+
+    [<Test>]
+    member this.``Very small with 2 edges`` () =        
+        this.SmallTests  """very_small_multy_1\g"""  ((0,1),(0,6))
+   
+    member this.``Very very small tests`` file expectedRange =
+        
+        let getSmb =
+            let cnt = ref 0
+            fun ch ->
+                let i = incr cnt; !cnt 
+                match ch with
+                | 'A' -> GLL.VeryVerySmall.A i                
+                | 'C' -> GLL.VeryVerySmall.C i
+                | 'G' -> GLL.VeryVerySmall.G i                
+                | x ->   failwithf "Strange symbol in input: %A" x
+                |> GLL.VeryVerySmall.tokenToNumber                
+        let basePath = "../../../Tests/bio/"
+        let path = Path.Combine(basePath, file)
+        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 5 getSmb (GLL.VeryVerySmall.RNGLR_EOF 0)
+
+        graphs
+        |> Array.ofSeq
+        |> Array.mapi 
+            (fun i graph -> 
+                printfn "%A" i
+                GLL.VeryVerySmall.buildAbstract graph 3
+            )
+        |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 3) 
+
+    [<Test>]
+    member this.``Very very small with 2 edges`` () =
+        this.``Very very small tests`` """v_very_small_multy\g""" ((0,0),(0,3))        
+
+    [<Test>]
+    member this.``Very very small`` () =
+        this.``Very very small tests`` """v_very_small\g""" ((0,0),(0,3))        
+
+
+    [<Test>]
+    member this.``Problem with multiple edges. Small`` () =
+        let file = """problem_with_multiple_edges\g""" 
+        let lengthLimit = 1001 
+        let expectedRange = ((0,0),(0,4))
+        let getSmb =
+            let cnt = ref 0
+            fun ch ->
+                let i = incr cnt; !cnt 
+                match ch with
+                | 'A' -> GLL.multipleEdgesProblem.A i                
+                | 'C' -> GLL.multipleEdgesProblem.C i            
+                | x ->   failwithf "Strange symbol in input: %A" x
+                |> GLL.multipleEdgesProblem.tokenToNumber                
+        let basePath = "../../../Tests/bio/"
+        let path = Path.Combine(basePath, file)
+        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.multipleEdgesProblem.RNGLR_EOF 0)
+
+        graphs
+        |> Array.ofSeq
+        |> Array.mapi 
+            (fun i graph -> 
+                printfn "%A" i
+                GLL.multipleEdgesProblem.buildAbstract graph 1
+            )
+        |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 5)        
+
+    
 
    // [<Test>]
     member this.``Big for tRNA 1`` () =
         this.``1000: trna`` """mix_1\late_pair_info_count""" 120 ((0,860),(0,930))
 
-//    member this.``Big for tRNA 2`` () =
-//        this.``1000: trna`` """synth_1\graph""" 120 ((0,860),(0,930))
+    member this.``Big for tRNA 2`` () =
+        this.``1000: trna`` """synth_1\graph""" 120 ((0,860),(0,930))
 
         
 [<EntryPoint>]
 let fs x =
     //System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
-    //let t = new ``GLL abstract parser tests``()
+    let t = new ``GLL abstract parser tests``()
     //let f () = t.``TSQL performance test for GLL`` ()
               //_35_Expression() //
     //let th = new System.Threading.Thread(f, 10000000)
     //th.Start()
     //t.bio2_5()
     //t.``1000: trna in 860-930``()
-    //t.``Problem with shift. Big`` ()
+    //t.``1000: trna in 629-699``()
     //t.``1000: trna in 133-204``()
+    //t.``1000 as graph 139 + 861: trna in 133-204`` ()
+    //t.``Very small``()
+    //t.``Very small with 2 edges``()
+    t.``Very very small with 2 edges``()
+    //t.``Very very small``()
+    //t.``Problem with shift. Big`` ()
+    
+    
     //t.``Problem with shift. Small 2``()
-    //t.``1000 as graph 49 + 5: trna in 133-204``()
+    
     //t.``Problem with multiple edges. Small``()
     //t.``Big for tRNA 2``()
-    t.``Problem with shift. Small``()
+    //t.``Problem with shift. Small``()
     0

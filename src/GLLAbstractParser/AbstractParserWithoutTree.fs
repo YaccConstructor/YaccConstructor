@@ -286,7 +286,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                     |> ignore
                 pop !currentGSSNode !currentIndex !currentExtension
             else
-                setR.Count
+                setR.Count                
                 if Array.length parser.rules.[rule] <> position
                 then
                     let curSymbol = parser.rules.[rule].[position]
@@ -315,13 +315,13 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                                 currentIndex := (packEdgePos curEdge.Value 0)
                                 eatTerm ()
                             | None _ -> ()
-                    else
-                  
-                        let curToken = input.Edges.[cE].Tokens.[cP]
-                        let key = int(( curSymbol  <<< 16) ||| (curToken - parser.NonTermCount))
-                        if parser.Table.ContainsKey key
-                        then
-                            create cE cP (1<labelMeasure>  * packLabelNew rule (position + 1)) !currentGSSNode curSymbol                             
+                    else               
+                        if cP < chainLen - 1  then         
+                            let curToken = input.Edges.[cE].Tokens.[cP]
+                            let key = int(( curSymbol  <<< 16) ||| (curToken - parser.NonTermCount))
+                            if parser.Table.ContainsKey key
+                            then
+                                create cE cP (1<labelMeasure>  * packLabelNew rule (position + 1)) !currentGSSNode curSymbol                             
                     
                 else
                     if Array.exists (fun e -> e = rule) condNonTermRules

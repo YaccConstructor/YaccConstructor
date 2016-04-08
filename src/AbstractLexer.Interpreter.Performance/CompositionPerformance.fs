@@ -51,7 +51,7 @@ let getTests path fileList =
     [for x in fileList do yield path + "/" + x]
 
 let calcTests = getTests "../../../../Tests/AbstractLexing/DOT" ["test_0.dot"; "test_1.dot"; "test_2.dot"; "test_3.dot"]
-let TSQLTests = getTests "../../../TSQL.Test/DotTSQL" ["test_tsql_1.dot"; "test_tsql_2.dot"]
+let TSQLTests = getTests "../../../TSQL.Test/DotTSQL" ["test_tsql_1.dot"; "test_tsql_2.dot"; "test_tsql_3.dot"]
 let manuallyCreatedTests = [fstCompos1, fstCompos2; fstCompos12, fstCompos22; fstCompos13, fstCompos22]
 
 [<EntryPoint>]
@@ -62,8 +62,8 @@ let main argv =
                 let fst = getFST test
                 try
                     printfn "Processing %A:" test
-                    printfn "Average time for compose: %A" (benchmark (fun () -> compose fst) 10)
-                    printfn "Average time for optimal compose: %A\n" (benchmark (fun () -> optimalCompose fst) 10)
+                    printfn "Average time for compose: %A" (benchmark (fun () -> compose fst) 1)
+                    printfn "Average time for optimal compose: %A\n" (benchmark (fun () -> optimalCompose fst) 1)
                 with
                     | _ -> printfn"%s is not %s compliant!\n" test lang
             with
@@ -81,7 +81,7 @@ let main argv =
         runLangTests "TSQL" TSQLTests TSQLCompose TSQLOptimalCompose
         runManuallyCreatedTests manuallyCreatedTests
     if Array.exists (fun arg -> arg.Equals "-f") argv then
-        try 
+        try
             let path = argv.[Array.findIndex (fun x -> x.Equals("-f")) argv + 1]
             let folder = new DirectoryInfo(path)
             let externalTSQLTests = [for x in folder.GetFiles() do if x.Extension.Equals(".dot") then yield x.FullName]

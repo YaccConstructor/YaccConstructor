@@ -124,6 +124,7 @@
     <Compile Include="shift_problem.yrd.fs" />
     <Compile Include="tRNA.yrd.fs" />
     <Compile Include="multiple_edges_problem.yrd.fs" />
+    <Compile Include="very_very_small.yrd.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
@@ -165,6 +166,11 @@
     <ProjectReference Include="..\Parser.Common\GLLParsers.Common.fsproj">
       <Name>GLLParsers.Common</Name>
       <Project>{f2e8eda4-c13f-4f8d-b858-d5ef4fb8a06d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNA.Search\RNA.Search.fsproj">
+      <Name>RNA.Search</Name>
+      <Project>{f21f64d0-756e-4624-b422-d0638e75dca4}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

@@ -136,7 +136,7 @@ type BioParserInputGraph(edges : BioParserEdge[]) =
             let edg = new BioParserEdge(getV e.Start, getV e.End, e.RealLenght, e.Tokens)
             edgs.[i] <- edg
             chainLen.[i] <- e.Tokens.Length + 1
-            shift := max !shift (e.Tokens.Length - e.RealLenght)
+            shift := 0//max !shift (e.Tokens.Length - e.RealLenght)
             for j in 0..e.Tokens.Length - 1 do
                 initialVertices.Add(pack2to32 i (j - !shift)))
         vertexCount := vMap.Count

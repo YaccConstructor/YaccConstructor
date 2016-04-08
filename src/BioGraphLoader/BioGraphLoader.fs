@@ -60,8 +60,17 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
     let leCount = ref 0
     let longEdges = new ResizeArray<_>()
     let edgs = 
-        edges 
+        edges         
         |> Array.Parallel.map (fun (id,s,e,l) -> new BioGraphEdge(s,e,lbls.[id],l,id))
+        |> Array.collect (fun e -> 
+            let shift = e.Tag.str.Length - e.Tag.length
+            if shift <> 0 
+            then
+                incr cnt 
+                let newV = !cnt
+                [| new BioGraphEdge(newV, e.Source, e.Tag.str.[0..shift - 1], shift, e.Tag.id)
+                ;  new BioGraphEdge(e.Source, e.Target, e.Tag.str.[shift..], e.Tag.length, e.Tag.id) |]
+            else [|e|])
         |> Array.collect 
             (fun e -> 
                 if e.Tag.length <= templateLengthHightLimit
@@ -71,13 +80,13 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
                 else 
                     longEdges.Add e
                     incr leCount
-                    let str1 = e.Tag.str.Substring(0,templateLengthHightLimit)
+                    let str1 = e.Tag.str.Substring(0, templateLengthHightLimit)
                     let str2 = e.Tag.str.Substring(e.Tag.str.Length - 1 - templateLengthHightLimit)
                     incr cnt
                     let newE = !cnt
                     incr cnt
                     let newS = !cnt
-                    [|new BioGraphEdge(e.Source,newE,str1,templateLengthHightLimit, e.Tag.id);BioGraphEdge(newS,e.Target,str2,templateLengthHightLimit, e.Tag.id)|]
+                    [|new BioGraphEdge(e.Source, newE, str1, templateLengthHightLimit, e.Tag.id);BioGraphEdge(newS, e.Target, str2, templateLengthHightLimit, e.Tag.id)|]
             )
         |> Array.ofSeq
    

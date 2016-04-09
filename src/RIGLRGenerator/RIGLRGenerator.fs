@@ -7,6 +7,7 @@ open InitialConvert
 open Yard.Generators.Common.FinalGrammar
 open Constraints
 open Automata
+open System.Diagnostics
 
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YaccConstructor", "1.0")>]
@@ -17,12 +18,10 @@ type RIGLR() =
     inherit Generator()
         override this.Name = "hello"
         override this.Constraints = [|noEbnf; noMeta; noInnerAlt; (*noLiterals;*) noInnerAlt; noBrackets; needAC; singleModule|]
-        override this.Generate (definition, args) = 
+        override this.Generate (definition, args) =             
             let mutable newDefinition = initialConvert definition
             let grammar = new FinalGrammar(newDefinition.grammar.[0].rules, true)
-            let automaton = constructRIA grammar  
-            automaton.PrintToDOT("dot.dot", (fun x -> x.ToString())) |> ignore          
-            let x = automaton.Edges
-            printfn "%A" <| x
+            let RCA = constructRCA grammar            
+            RCA.PrintToDOT("dot.dot", (fun x -> x.ToString()))
             box ()
         override this.Generate definition = this.Generate (definition, "")

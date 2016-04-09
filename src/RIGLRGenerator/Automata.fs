@@ -128,16 +128,74 @@ let constructRIA (grammar: FinalGrammar) =
                       ) |> ignore
     IRIA.NfaToDfa()
 
-let constructRCA (grammar: FinalGrammar) =   
+let constructRCA (grammar: FinalGrammar) =
         
-    //TODO
-    let joinAutomata automata = ()    
+    let joinRIAs (terminalized: Dictionary<_, _>) (baseRIA: FSA<_>*int) (RIAs: list<FSA<_>*int>) =
+        let RCA = new FSA<RCAEdge>()
+        let termToStartState = new Dictionary<int, int>(RIAs.Length)
+        
+        let startState = ref (fst baseRIA).VertexCount
+        if terminalized.ContainsKey (snd baseRIA)
+        then termToStartState.Add (terminalized.[snd baseRIA], 0)
+        for pair in RIAs do
+            termToStartState.Add (terminalized.[snd pair], !startState)
+            startState := !startState + (fst pair).VertexCount
+        
+        let addEdgeToRCA (newLabels: Dictionary<_, _>) (e: EdgeFSA<_>) =
+            new EdgeFSA<_>(newLabels.[e.Source], newLabels.[e.Target], e.Tag)
+            |> RCA.AddVerticesAndEdge |> ignore
+                            
+        let i = ref (fst baseRIA).VertexCount
+        (fst baseRIA).Edges |> RCA.AddVerticesAndEdgeRange |> ignore
+        for pair in RIAs do
+            let ria = fst pair
+            let newLabels = new Dictionary<_, _>()
+            ria.Vertices |> Seq.iter (fun v -> newLabels.Add (v, !i); incr i)
+            
+            for edge in ria.Edges do
+                match edge.Tag with
+                | Smbl(Sh(n)) -> 
+                    if termToStartState.ContainsKey n
+                    then
+                        let pushTag = Smbl(Push(newLabels.[edge.Target]))
+                        new EdgeFSA<_>(newLabels.[edge.Source], termToStartState.[n], pushTag)
+                        |> RCA.AddVerticesAndEdge |> ignore
+                    else addEdgeToRCA newLabels edge
+                | _ ->  addEdgeToRCA newLabels edge
+        
+        RCA.InitState <- (fst baseRIA).InitState
+        RCA.FinalState <- (fst baseRIA).FinalState
+        RCA
 
     let removeEmbeddedRec = new RemoveEmbeddedRecursion (grammar)
     removeEmbeddedRec.ConvertGrammar()
-
-    let terminalized = removeEmbeddedRec.TerminalizedNonTerms
-    let x = constructIRIA grammar
-    //x.PrintToDOT ("iria.dot", (fun x -> x.ToString()))
     
-    printfn "I <3 embedded recursion"
+    let terminalized = removeEmbeddedRec.TerminalizedNonTerms
+    let startRule = grammar.startRule
+    let startNonTerm = (grammar.rules.rightSide startRule).[0]
+    let baseRIA = constructRIA grammar
+
+    if terminalized.Count > 0 
+    then
+        if terminalized.Count = 1 && terminalized.ContainsKey startNonTerm
+        then
+            let specialTermEdges = baseRIA.Edges 
+                                   |> Seq.filter (fun e -> e.Tag = Smbl(Sh(terminalized.[startNonTerm])))
+                                   |> Seq.toList
+            for i in 0 .. specialTermEdges.Length - 1 do
+                let edge = specialTermEdges.[i]
+                baseRIA.AddEdge (new EdgeFSA<_>(edge.Source, 0, Smbl(Push(edge.Target)))) |> ignore
+                baseRIA.RemoveEdge edge |> ignore
+            baseRIA
+        else
+            let RIAs = terminalized.Keys
+                       |> Seq.toList
+                       |> List.filter (fun s -> s <> startNonTerm)
+                       |> List.map 
+                               (
+                                   fun nonTerm -> 
+                                       grammar.rules.setRightSide startRule [|nonTerm|];
+                                       (constructRIA grammar, nonTerm)
+                               )
+            joinRIAs terminalized (baseRIA, startNonTerm) RIAs          
+    else baseRIA            

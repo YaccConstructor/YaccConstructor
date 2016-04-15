@@ -2,7 +2,6 @@
 
 open QuickGraph
 
-open SeqExtension
 open ControlFlowGraph.GraphConstructor
 
 type TokensEdge<'TokenType>(source, target, tag) = 

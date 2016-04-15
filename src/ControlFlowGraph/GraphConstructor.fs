@@ -68,16 +68,15 @@ type GraphConstructor<'TokenType, 'Edge when 'Edge :> IEdge<int>> =
                 if processed |> List.exists ((=) head)
                 then 
                     func acc processed tail
+                elif this.Graph.OutDegree head = 0
+                then 
+                    func (head :: acc) (head :: processed) tail
                 else
-                    if this.Graph.OutDegree head = 0
-                    then 
-                        func (head :: acc) (head :: processed) tail
-                    else
-                        let newQueue = 
-                            tail
-                            |> List.append <| getOutVertices head
+                    let newQueue = 
+                        tail
+                        |> List.append <| getOutVertices head
 
-                        func acc (head :: processed) newQueue
+                    func acc (head :: processed) newQueue
 
         let res = func [] [] <| getOutVertices start
 

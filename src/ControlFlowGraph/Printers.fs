@@ -9,10 +9,10 @@ open ControlFlowGraph.CfgTokensGraph
 open ControlFlowGraph.InnerGraph
 
 let getClusterDotString clasterName body = 
-    let strBuilder = ref <| new StringBuilder()
+    let strBuilder = new StringBuilder()
 
     let inline append str = 
-        strBuilder := (!strBuilder).AppendLine str
+        strBuilder.AppendLine str |> ignore
 
     append <| sprintf "subgraph %s{" clasterName
     append "node [style=filled, color=white]"
@@ -20,12 +20,12 @@ let getClusterDotString clasterName body =
     append "color=lightgrey"
     append body
     append "}"
-    string !strBuilder
+    string strBuilder
 
 type CfgTokensGraphPrinter private() = 
     
     static member GetDotString (graph : CfgTokensGraph<'TokenType>) tokenToString shift prefix = 
-        let strBuilder = ref <| new StringBuilder()
+        let strBuilder = new StringBuilder()
         let getVertexName num = 
             sprintf "%s%d" prefix <| shift num
         
@@ -39,9 +39,9 @@ type CfgTokensGraphPrinter private() =
                         match edge.Tag with
                         | Some token -> sprintf "%s" <| tokenToString token
                         | None -> "eps"
-                    strBuilder := (!strBuilder).AppendLine (sprintf "%s -> %s [label=\"%s\"]" src trg lbl)
+                    strBuilder.AppendLine (sprintf "%s -> %s [label=\"%s\"]" src trg lbl) |> ignore
             )
-        string !strBuilder
+        string strBuilder
 
     static member ToDot (graph : CfgTokensGraph<'TokenType>) tokenToString (name : string) = 
         use out = new StreamWriter(name)

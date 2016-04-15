@@ -1,10 +1,8 @@
 ﻿module ControlFlowGraph.Test.CfgFunctionsTest
 
-open NUnit.Framework
 open Microsoft.FSharp.Collections
+open NUnit.Framework
 open System.Collections.Generic
-
-open AbstractAnalysis.Common
 
 open ControlFlowGraph
 open ControlFlowGraph.Common

@@ -139,7 +139,7 @@ let rec processIfGraph (ifGraph : CfgBlocksGraph<_>) =
             match block with
             | Condition -> condBlock := processConditionGraph innerGraph
             | ThenStatement -> thenBlock := processSeq innerGraph
-            | ElseStatement -> elseBlockOpt := Some <| processSeq innerGraph
+            | ElseStatement -> elseBlockOpt := processSeq innerGraph |> Some
             | x -> invalidArg "block" <| sprintf "Unexpected statement type in ifStatement: %A" x
         | EmptyEdge -> ()
         | x -> invalidArg "edge.Tag" <| sprintf "Unexpected edge type in IfStatement: %A" x

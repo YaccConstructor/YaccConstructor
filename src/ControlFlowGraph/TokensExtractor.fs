@@ -4,8 +4,6 @@ open System.Collections.Generic
 
 open Yard.Generators.Common.AstNode
 
-open SeqExtension
-
 open CfgTokensGraph
 open ControlFlowGraph.Printers
 
@@ -50,16 +48,16 @@ let extractNodesFromFamily intToToken tokenToString (fam : Family) =
             let commonStartVertex = builder.CurrentVertex
             let allEndVertex = 
                 ast.map (processFamily commonStartVertex)
-                |> Seq.filter Option.isSome 
-                |> Seq.map Option.get
+                |> Array.filter Option.isSome 
+                |> Array.map Option.get
 
-            if not <| Seq.isEmpty allEndVertex
+            if not <| Array.isEmpty allEndVertex
             then 
-                let commonEndVertex = allEndVertex |> Seq.max
+                let commonEndVertex = allEndVertex |> Array.max
 
                 allEndVertex
-                |> Seq.filter ((<>) commonEndVertex)
-                |> Seq.iter (fun num -> addEpsilonEdge num commonEndVertex)
+                |> Array.filter ((<>) commonEndVertex)
+                |> Array.iter (fun num -> addEpsilonEdge num commonEndVertex)
 
                 builder.UpdateVertex()
         | :? Epsilon -> ()
@@ -95,7 +93,7 @@ let extractNodesFromFamily intToToken tokenToString (fam : Family) =
             
     fam.nodes.doForAll collectTokens
     let graph = builder.Build()
-    CfgTokensGraphPrinter.ToDot graph tokenToString "`afterExtraction.dot"
+    //CfgTokensGraphPrinter.ToDot graph tokenToString "`afterExtraction.dot"
     graph
     //builder.Build()
 

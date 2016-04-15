@@ -135,7 +135,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
         |> Option.map
             (fun x -> 
                 let y = parse x
-                printfn "Tree: %A" y
+                //printfn "Tree: %A" y
                 y)
         |> Option.iter
             (function 
@@ -147,19 +147,14 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
 
                     if semantic.IsSome 
                     then
-                        #if DEBUG
                         //sometimes it needs for debugging purposes
-                        printAst tree "result ast.dot"
-                        #endif
+                        //printAst tree "result ast.dot"
                         
                         let pSource, lSource, tokToSourceString = semantic.Value
                         let cfg = new ControlFlow<'TokenType, 'br>(tree, pSource, lSource, tokToSourceString)
                         
-                        #if DEBUG
                         //sometimes it needs for debugging purposes
-                        cfg.PrintToDot "result cfg.dot"
-                        #endif
-                        let semErrors = cfg.FindUndefinedVariables()
+                        //cfg.PrintToDot "result cfg.dot"
                         semErrors |> List.iter (fun error -> addSError undefinedVariableErrMsg error)
                     
 

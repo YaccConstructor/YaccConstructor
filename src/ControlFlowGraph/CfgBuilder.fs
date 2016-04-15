@@ -13,7 +13,6 @@ open ControlFlowGraph.TokensExtractor
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 
-
 let buildCfg (tree : Tree<'TokenType>) 
             (parserSource : GeneratedStuffSource<'TokenType, 'BackReference>) 
             (langSource : LanguageSource) 
@@ -98,17 +97,18 @@ let buildCfg (tree : Tree<'TokenType>)
             let endNumbers = 
                 ast.map (handleFamily commonStart)
                 |> Seq.distinct
-                |> Seq.filter Option.isSome 
-                |> Seq.map Option.get
+                |> Array.ofSeq
+                |> Array.filter Option.isSome 
+                |> Array.map Option.get
                 
-            match Seq.length endNumbers with
+            match Array.length endNumbers with
             | 0 -> ()
             | 1 -> graph.UpdateVertex()
             | _ -> 
                 let commonEndVertex = graph.CreateNewVertex()
 
                 endNumbers
-                |> Seq.iter(fun num -> addEpsilonEdge graph num commonEndVertex)
+                |> Array.iter(fun num -> addEpsilonEdge graph num commonEndVertex)
                 graph.UpdateVertex()
                     
         | x -> failwithf "Unexpected node type: %A" x

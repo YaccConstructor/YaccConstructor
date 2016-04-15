@@ -260,7 +260,7 @@ type ControlFlow<'TokenType, 'BackReference when 'BackReference : equality>
                 | true, num -> num, false
                 | false, _ -> 
                     incr count
-                    let label = node.ToString()
+                    let label = string node
                     let color =
                         if node.Children.Length <= 1 
                         then ""

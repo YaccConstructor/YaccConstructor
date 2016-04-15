@@ -47,7 +47,7 @@ let processIf (intToToken : int -> 'TokenType) tokenToNumber (tokenToString : 'T
         match node with
         | :? Epsilon -> ()
         | :? Terminal as t -> 
-            let terminalNum = tokenToNumber <| intToToken t.TokenNumber
+            let terminalNum =  t.TokenNumber |> intToToken |> tokenToNumber
             match tempDict.TryGetValue terminalNum with
             | true, b -> blockType := b
             | false, _ -> ()

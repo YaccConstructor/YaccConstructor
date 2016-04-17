@@ -21,7 +21,8 @@ type RIGLR() =
         override this.Generate (definition, args) =             
             let mutable newDefinition = initialConvert definition
             let grammar = new FinalGrammar(newDefinition.grammar.[0].rules, true)
-            let RCA = constructRCA grammar            
-            RCA.PrintToDOT("dot.dot", (fun x -> x.ToString()))
+            let RCA = new RCA(grammar)            
+            //RCA.PrintToDOT("dot.dot", (fun x -> x.ToString()))
+            Set.iter (fun s -> printfn "%A" s) RCA.PopStates
             box ()
         override this.Generate definition = this.Generate (definition, "")

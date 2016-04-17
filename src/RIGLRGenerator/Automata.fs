@@ -8,7 +8,7 @@ open Yard.Generators.Common.FinalGrammar
 open ProductionGraph
 open EmbeddedRecursion
 
-type RCAEdge =
+type RIAEdge =
     | Sh of int
     | Ri of int
     | Push of int
@@ -18,140 +18,149 @@ type RCAEdge =
         | Ri x  -> "R" + x.ToString()
         | Push x -> "Push" + x.ToString()
 
-let constructIRIA (grammar : FinalGrammar) =
-    let statesToItems = new Dictionary<int, int*int>(100)
-    let inEdges = new Dictionary<int, ResizeArray<EdgeFSA<RCAEdge>>>(100)
-    let primaryEpsEdges = new HashSet<int*int>()
-    let reductionStates = new ResizeArray<int>(10)
-    let dealtWith = new HashSet<int>()
-    let nextState = ref 1
+type IRIA(grammar: FinalGrammar) as this =
+    inherit FSA<RIAEdge>()
+    do
+        let statesToItems = new Dictionary<int, int*int>(100)
+        let inEdges = new Dictionary<int, ResizeArray<EdgeFSA<RIAEdge>>>(100)
+        let primaryEpsEdges = new HashSet<int*int>()
+        let reductionStates = new ResizeArray<int>(10)
+        let dealtWith = new HashSet<int>()
+        let nextState = ref 1
 
-    let IRIA = new FSA<RCAEdge>( new ResizeArray<_>([0]), new ResizeArray<_>(),
-                                 new ResizeArray<_>() )
-    statesToItems.Add (0, (grammar.startRule, 0))
+        this.AddVertex 0 |> ignore
+        statesToItems.Add (0, (grammar.startRule, 0))
+        this.InitState.Add 0
 
-    let addState state item parent edgeTag =
-        let newEdge = new EdgeFSA<_>(parent, state, edgeTag)
-        IRIA.AddVerticesAndEdge newEdge |> ignore
-        inEdges.Add (state, new ResizeArray<_>([newEdge]))
-        statesToItems.Add (state, item)
-        if edgeTag = Eps 
-        then primaryEpsEdges.Add (parent, state) |> ignore        
-        incr nextState
-    
-    let addEdge source target tag =
-        let newEdge = new EdgeFSA<_>(source, target, tag)
-        IRIA.AddEdge newEdge |> ignore
-        inEdges.[target].Add newEdge
+        let addState state item parent edgeTag =
+            let newEdge = new EdgeFSA<_>(parent, state, edgeTag)
+            this.AddVerticesAndEdge newEdge |> ignore
+            inEdges.Add (state, new ResizeArray<_>([newEdge]))
+            statesToItems.Add (state, item)
+            if edgeTag = Eps 
+            then primaryEpsEdges.Add (parent, state) |> ignore
+            incr nextState
         
-    let isPrimaryEdge (edge: EdgeFSA<RCAEdge>) =
-        match edge.Tag with
-        | Smbl(Sh x) -> true
-        | Eps -> primaryEpsEdges.Contains (edge.Source, edge.Target)
-        | _ -> failwith "Unexpected edge tag"
-    
-    let findPrimaryEdge edges = Seq.find (fun e -> isPrimaryEdge e) edges    
-    
-    let primaryParent state = (findPrimaryEdge inEdges.[state]).Source    
-    let primaryDescendant state = (findPrimaryEdge (IRIA.OutEdges state)).Target
-     
-    let findRecursionStates nonTerm state =
-        let targetRules = grammar.rules.rulesWithLeftSide nonTerm
-        let rec findStates curState result =
-            if curState = 0
-            then result
-            else
-                let item = statesToItems.[curState]
-                let nextState = primaryParent curState
-                if Array.exists ((=) (fst item)) targetRules && snd item = 0
-                then findStates nextState ((curState, fst item) :: result)
-                else findStates nextState result
-        findStates state []
-    
-    let rec retraceAlongPath startState path resultSet =
-        match path with
-        | [] -> startState :: resultSet
-        | h :: t -> 
-            let predecessors = inEdges.[startState] 
-                               |> Seq.where (fun e -> e.Tag = h)
-                               |> Seq.map (fun e -> e.Source)
-            predecessors
-            |> Seq.map (fun s -> retraceAlongPath s t resultSet)
-            |> Seq.concat |> Seq.toList
+        let addEdge source target tag =
+            let newEdge = new EdgeFSA<_>(source, target, tag)
+            this.AddEdge newEdge |> ignore
+            inEdges.[target].Add newEdge
             
-    while IRIA.VertexCount > dealtWith.Count do
-        let curState = IRIA.Vertices 
-                       |> Seq.find (fun x -> not (dealtWith.Contains x))
-        let curItem = statesToItems.[curState]       
-        let rule, pos = fst curItem, snd curItem
-        if grammar.rules.length rule > pos
-        then
-            let nextSymbol = grammar.rules.symbol rule pos
-            addState !nextState (rule, pos + 1) curState (Smbl(Sh(nextSymbol)))
-            if grammar.indexator.isNonTerm nextSymbol 
+        let isPrimaryEdge (edge: EdgeFSA<_>) =
+            match edge.Tag with
+            | Smbl(Sh x) -> true
+            | Eps -> primaryEpsEdges.Contains (edge.Source, edge.Target)
+            | _ -> failwith "Unexpected edge tag"
+        
+        let findPrimaryEdge edges = Seq.find (fun e -> isPrimaryEdge e) edges
+        let primaryParent state = (findPrimaryEdge inEdges.[state]).Source    
+        let primaryDescendant state = (findPrimaryEdge (this.OutEdges state)).Target
+         
+        let findRecursionStates nonTerm state =
+            let targetRules = grammar.rules.rulesWithLeftSide nonTerm
+            let rec findStates curState result =
+                if curState = 0
+                then result
+                else
+                    let item = statesToItems.[curState]
+                    let nextState = primaryParent curState
+                    if Array.exists ((=) (fst item)) targetRules && snd item = 0
+                    then findStates nextState ((curState, fst item) :: result)
+                    else findStates nextState result
+            findStates state []
+        
+        let rec retraceAlongPath startState path resultSet =
+            match path with
+            | [] -> startState :: resultSet
+            | h :: t -> 
+                let predecessors = inEdges.[startState] 
+                                   |> Seq.where (fun e -> e.Tag = h)
+                                   |> Seq.map (fun e -> e.Source)
+                predecessors
+                |> Seq.map (fun s -> retraceAlongPath s t resultSet)
+                |> Seq.concat |> Seq.toList
+                
+        while this.VertexCount > dealtWith.Count do
+            let curState = this.Vertices 
+                           |> Seq.find (fun x -> not (dealtWith.Contains x))
+            let curItem = statesToItems.[curState]       
+            let rule, pos = fst curItem, snd curItem
+            if grammar.rules.length rule > pos
             then
-                if nextSymbol <> grammar.rules.leftSide rule || pos <> 0  //they want xor
+                let nextSymbol = grammar.rules.symbol rule pos
+                addState !nextState (rule, pos + 1) curState (Smbl(Sh(nextSymbol)))
+                if grammar.indexator.isNonTerm nextSymbol 
                 then
-                    let recursionStates = findRecursionStates nextSymbol curState
-                    for rule in grammar.rules.rulesWithLeftSide nextSymbol do
-                        match List.tryFind (fun (s, r) -> rule = r) recursionStates with
-                        | Some (s, r) -> addEdge curState s Eps
-                        | None -> addState !nextState (rule, 0) curState Eps
-                elif curState <> 0
-                then
-                    primaryParent curState
-                    |> IRIA.OutEdges
-                    |> Seq.filter (fun x -> x.Tag = Eps)
-                    |> Seq.iter (fun x -> addEdge curState x.Target Eps)
-        else reductionStates.Add curState |> ignore  
-        dealtWith.Add curState |> ignore        
-    for state in reductionStates |> Seq.toList |> List.tail do
-        let rule = fst statesToItems.[state]
-        let pathForRetrace = rule
-                             |> grammar.rules.rightSide
-                             |> Array.map (fun x -> Smbl(Sh(x)))
-                             |> Array.toList
-        let reductionTargets = retraceAlongPath state (Eps :: pathForRetrace |> List.rev) []
-                               |> List.map (fun s -> primaryDescendant s)
-        reductionTargets |> List.iter (fun t -> addEdge state t (Smbl(Ri(rule))))
+                    if nextSymbol <> grammar.rules.leftSide rule || pos <> 0  //they want xor
+                    then
+                        let recursionStates = findRecursionStates nextSymbol curState
+                        for rule in grammar.rules.rulesWithLeftSide nextSymbol do
+                            match List.tryFind (fun (s, r) -> rule = r) recursionStates with
+                            | Some (s, r) -> addEdge curState s Eps
+                            | None -> addState !nextState (rule, 0) curState Eps
+                    elif curState <> 0
+                    then
+                        primaryParent curState
+                        |> this.OutEdges
+                        |> Seq.filter (fun x -> x.Tag = Eps)
+                        |> Seq.iter (fun x -> addEdge curState x.Target Eps)
+            else reductionStates.Add curState |> ignore
+            dealtWith.Add curState |> ignore
+        for state in reductionStates |> Seq.toList |> List.tail do
+            let rule = fst statesToItems.[state]
+            let pathForRetrace = rule
+                                 |> grammar.rules.rightSide
+                                 |> Array.map (fun x -> Smbl(Sh(x)))
+                                 |> Array.toList
+            let reductionTargets = retraceAlongPath state (Eps :: pathForRetrace |> List.rev) []
+                                   |> List.map (fun s -> primaryDescendant s)
+            reductionTargets |> List.iter (fun t -> addEdge state t (Smbl(Ri(rule))))
+        this.FinalState.Add 1
+
+//they should be combined into one class
+type RIA(grammar: FinalGrammar) as this =
+    inherit FSA<RIAEdge>()
+    do
+        let IRIA = IRIA(grammar)
+        IRIA.RemoveEdgeIf
+             (
+                 fun edge ->
+                     match edge.Tag with
+                     | Smbl(Sh(n)) -> grammar.indexator.isNonTerm n
+                     | _ -> false
+             ) |> ignore
+        let temp = IRIA.NfaToDfa()        
+        this.AddVerticesAndEdgeRange temp.Edges |> ignore
+        this.InitState <- temp.InitState
+        this.FinalState <- temp.FinalState
+
+    member val InitNonTerm = (grammar.rules.rightSide grammar.startRule).[0] with get
+
+type RCA(grammar: FinalGrammar) as this =
+    inherit FSA<RIAEdge>()
+
+    let mutable popStates = Set.empty
     
-    IRIA.FinalState.Add 1
-    IRIA
-
-let constructRIA (grammar: FinalGrammar) =
-    let IRIA = constructIRIA grammar
-    IRIA.RemoveEdgeIf (
-                        fun edge ->
-                            match edge.Tag with
-                            | Smbl(Sh(n)) -> grammar.indexator.isNonTerm n
-                            | _ -> false
-                      ) |> ignore
-    IRIA.NfaToDfa()
-
-let constructRCA (grammar: FinalGrammar) =
-        
-    let joinRIAs (terminalized: Dictionary<_, _>) (baseRIA: FSA<_>*int) (RIAs: list<FSA<_>*int>) =
-        let RCA = new FSA<RCAEdge>()
+    let joinRIAs (terminalized: Dictionary<_, _>) (baseRIA: RIA) (RIAs: list<RIA>) =
         let termToStartState = new Dictionary<int, int>(RIAs.Length)
+        let riaStartInRCA = ref baseRIA.VertexCount
+
+        if terminalized.ContainsKey baseRIA.InitNonTerm
+        then termToStartState.Add (terminalized.[baseRIA.InitNonTerm], 0)
+        for ria in RIAs do
+            termToStartState.Add (terminalized.[ria.InitNonTerm], !riaStartInRCA)
+            riaStartInRCA := !riaStartInRCA + ria.VertexCount
         
-        let startState = ref (fst baseRIA).VertexCount
-        if terminalized.ContainsKey (snd baseRIA)
-        then termToStartState.Add (terminalized.[snd baseRIA], 0)
-        for pair in RIAs do
-            termToStartState.Add (terminalized.[snd pair], !startState)
-            startState := !startState + (fst pair).VertexCount
-        
-        let addEdgeToRCA (newLabels: Dictionary<_, _>) (e: EdgeFSA<_>) =
+        let addEdge (newLabels: Dictionary<_, _>) (e: EdgeFSA<_>) =
             new EdgeFSA<_>(newLabels.[e.Source], newLabels.[e.Target], e.Tag)
-            |> RCA.AddVerticesAndEdge |> ignore
-                            
-        let i = ref (fst baseRIA).VertexCount
-        (fst baseRIA).Edges |> RCA.AddVerticesAndEdgeRange |> ignore
-        for pair in RIAs do
-            let ria = fst pair
+            |> this.AddVerticesAndEdge 
+            |> ignore
+  
+        let i = ref 0
+        let popStatesSet = new HashSet<_>()
+        for ria in baseRIA :: RIAs do            
             let newLabels = new Dictionary<_, _>()
             ria.Vertices |> Seq.iter (fun v -> newLabels.Add (v, !i); incr i)
-            
             for edge in ria.Edges do
                 match edge.Tag with
                 | Smbl(Sh(n)) -> 
@@ -159,43 +168,36 @@ let constructRCA (grammar: FinalGrammar) =
                     then
                         let pushTag = Smbl(Push(newLabels.[edge.Target]))
                         new EdgeFSA<_>(newLabels.[edge.Source], termToStartState.[n], pushTag)
-                        |> RCA.AddVerticesAndEdge |> ignore
-                    else addEdgeToRCA newLabels edge
-                | _ ->  addEdgeToRCA newLabels edge
+                        |> this.AddVerticesAndEdge |> ignore
+                    else addEdge newLabels edge
+                | _ ->  addEdge newLabels edge
+            ria.FinalState |> Seq.iter (fun s -> popStatesSet.Add newLabels.[s] |> ignore)
+        popStates <- Set.ofSeq popStatesSet
+    do
+        let removeEmbeddedRec = new RemoveEmbeddedRecursion (grammar)
+        removeEmbeddedRec.ConvertGrammar()
         
-        RCA.InitState <- (fst baseRIA).InitState
-        RCA.FinalState <- (fst baseRIA).FinalState
-        RCA
+        let terminalized = removeEmbeddedRec.TerminalizedNonTerms
+        let baseRIA = new RIA(grammar)
+        let initNonTerm = baseRIA.InitNonTerm
 
-    let removeEmbeddedRec = new RemoveEmbeddedRecursion (grammar)
-    removeEmbeddedRec.ConvertGrammar()
-    
-    let terminalized = removeEmbeddedRec.TerminalizedNonTerms
-    let startRule = grammar.startRule
-    let startNonTerm = (grammar.rules.rightSide startRule).[0]
-    let baseRIA = constructRIA grammar
-
-    if terminalized.Count > 0 
-    then
-        if terminalized.Count = 1 && terminalized.ContainsKey startNonTerm
+        if terminalized.Count > 0 
         then
-            let specialTermEdges = baseRIA.Edges 
-                                   |> Seq.filter (fun e -> e.Tag = Smbl(Sh(terminalized.[startNonTerm])))
-                                   |> Seq.toList
-            for i in 0 .. specialTermEdges.Length - 1 do
-                let edge = specialTermEdges.[i]
-                baseRIA.AddEdge (new EdgeFSA<_>(edge.Source, 0, Smbl(Push(edge.Target)))) |> ignore
-                baseRIA.RemoveEdge edge |> ignore
-            baseRIA
-        else
-            let RIAs = terminalized.Keys
-                       |> Seq.toList
-                       |> List.filter (fun s -> s <> startNonTerm)
-                       |> List.map 
-                               (
-                                   fun nonTerm -> 
-                                       grammar.rules.setRightSide startRule [|nonTerm|];
-                                       (constructRIA grammar, nonTerm)
-                               )
-            joinRIAs terminalized (baseRIA, startNonTerm) RIAs          
-    else baseRIA            
+            if terminalized.Count = 1 && terminalized.ContainsKey baseRIA.InitNonTerm
+            then joinRIAs terminalized baseRIA []
+            else
+                let RIAs = terminalized.Keys
+                           |> Seq.toList
+                           |> List.filter (fun s -> s <> baseRIA.InitNonTerm)
+                           |> List.map 
+                                   (
+                                       fun nonTerm -> 
+                                           grammar.rules.setRightSide grammar.startRule [|nonTerm|];
+                                           new RIA(grammar)
+                                   )
+                joinRIAs terminalized baseRIA RIAs          
+        else this.AddVerticesAndEdgeRange baseRIA.Edges |> ignore        
+        this.InitState <- baseRIA.InitState
+        this.FinalState <- baseRIA.FinalState
+
+    member val PopStates = popStates with get

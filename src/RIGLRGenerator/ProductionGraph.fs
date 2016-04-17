@@ -40,12 +40,3 @@ type ProductionGraph(grammar: FinalGrammar) as this =
             for item in targetNonTerms do
                 this.AddVerticesAndEdge 
                      (new TaggedEdge<int, ContextLabel> (nonTerm, item.Key, item.Value)) |> ignore
-    
-    new () =
-        let rule = {name = new Source.t(""); 
-                    body = Production.PToken(new Source.t("")); 
-                    args = []; 
-                    isStart = true; 
-                    isPublic = false; 
-                    metaArgs = []}
-        ProductionGraph(new FinalGrammar([rule], true))

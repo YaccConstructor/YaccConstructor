@@ -54,10 +54,16 @@
     <Compile Include="TwoEpsilonsMiddle.yrd.fs" />
     <Compile Include="TwoManyNonTerms.yrd.fs" />
     <Compile Include="TwoManyTerms.yrd.fs" />
+    <Compile Include="TwoParents.yrd.fs" />
     <Compile Include="Program.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common.ReadBack.AST\Common.ReadBack.AST.fsproj">
+      <Name>Common.ReadBack.AST</Name>
+      <Project>{808c49a8-2a45-49a9-92da-9778e6fd75aa}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Generators.Common\Common.Generators.fsproj">
       <Name>Common.Generators</Name>
       <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>

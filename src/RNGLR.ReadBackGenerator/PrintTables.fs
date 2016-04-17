@@ -229,7 +229,7 @@ let printTables
 
         printBr "let mutable private cur = 0"
 
-        print "let leftSide = "
+        print "let private leftSide = "
         printArr leftSide (print "%d")
 
         print "let private nfas = "
@@ -259,6 +259,16 @@ let printTables
             (fun l -> not l.IsEmpty)
             (fun l -> printListAsArray l (fun x -> print "%d" x))
             "zeroReduces"
+        
+        print "let private nonTermToRule ="
+        printArr grammar.rules.ruleWithLeftSideArr (print "%d")
+        
+        let canInferEpsilonArr = [|0 .. grammar.indexator.fullCount - 1|] |> Array.filter (fun i -> grammar.canInferEpsilon.[i])
+        printInd 0 "let private canInferEpsilonArr = "
+        printArr canInferEpsilonArr (print "%d")
+        printBr "let private canInferEpsilon = Array.create %d false" grammar.indexator.fullCount
+        printBrInd 0 "for i in canInferEpsilonArr do"
+        printBrInd 1 "canInferEpsilon.[i] <- true"
 
         printInd 0 "let private small_acc = "
         printList tables.acc (fun x -> print "%d" x)
@@ -273,7 +283,7 @@ let printTables
     
         printBrInd 0 "let errorIndex = %d" grammar.errorIndex
         
-        printBrInd 0 "let private parserSource = new ParserSourceReadBack<Token> (gotos, reduces, zeroReduces, accStates, nfas, leftSide, startRule, eofIndex, tokenToNumber, indexToSymbolType, acceptEmptyInput, numToString, epsilonIndex, errorIndex)"
+        printBrInd 0 "let private parserSource = new ParserSourceReadBack<Token> (gotos, reduces, zeroReduces, accStates, nfas, leftSide, startRule, eofIndex, tokenToNumber, indexToSymbolType, acceptEmptyInput, numToString, nonTermToRule, canInferEpsilon, epsilonIndex, errorIndex)"
 
         printBr "let buildAst : (seq<Token> -> ParseReadBackResult<Token>) ="
         printBrInd 1 "buildAstReadBack<Token> parserSource"

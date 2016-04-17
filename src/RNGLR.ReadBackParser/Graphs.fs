@@ -4,6 +4,9 @@ open Yard.Generators.RNGLR.ReadBack
 //open Yard.Generators.Common
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
+open Yard.Generators.RNGLR.ReadBack.Tree
+
+open Yard.Generators.Common
 
 //Sppf is a intersection of a production automaton and Gss, which, in its turn, has edges labelled with Sppf
 type Sppf = SppfVertex * int * int * Set<int>
@@ -123,6 +126,9 @@ and ReductionTemp(prod : int, numberOfStates : int, endLevel : int) =
     member this.TryGetAlreadyVisited (nfaVertex : VertexWithBackTrack<int, int>) (gssVertex : GssVertex) =
         visitedVertices.TryGet nfaVertex.label gssVertex.Level gssVertex.State
 
+    member this.TryGetLeftEnd (gssVertex : GssVertex) =
+        visitedVertices.TryGet 0 gssVertex.Level gssVertex.State
+
     member this.VisitedVerticesCount = visitedVertices.Count
 
 let inline isEpsilonReduction x =
@@ -163,3 +169,84 @@ let containsEdge (v : GssVertex) (lbl : SppfLabel) (out : ResizeArray<GssVertex 
     while i >= 0 && (let v',lbl' = out.[i] in vxEq v' v && not (lblCoincidence lbl lbl')) do
         i <- i - 1
     i >= 0 && (let v',lbl' = out.[i] in vxEq v' v && (lblCoincidence lbl lbl'))
+
+
+//kinda greedy algorithm to get simple (non-ambiguous) tree from sppf
+let sppfToTree<'TokenType> startRule (sppf : Sppf)
+    (tokens : 'TokenType[])
+    leftSide
+    (nonTermToRule : int[]) 
+    (rightParts : VertexWithBackTrack<int,int>[][]) epsilonIndex (canInferEpsilon : bool[]) 
+    : Tree<'TokenType> =
+    
+    let epsilonReductionDict = new Dictionary<int, Ast<'TokenType>>()
+    let rec buildEpsilonTail rule (nfaVertex : VertexWithBackTrack<int, int>) =
+        if nfaVertex.label = rightParts.[rule].Length - 1 then
+            Some []
+        else
+            let edges = 
+                nfaVertex.outEdges 
+                |> List.ofSeq 
+                |> List.filter (fun (edge : Edge<int,int>) -> (edge.label = epsilonIndex || canInferEpsilon.[edge.label]) && edge.dest.label > nfaVertex.label)
+                |> List.sortBy (fun (edge : Edge<int,int>) -> -edge.label)
+        
+            let rec f = function
+            | [] -> None
+            | (edge : Edge<int,int>) :: edges ->
+                match buildEpsilonTail rule (edge.dest :?> VertexWithBackTrack<int,int>) with
+                | Some tail -> 
+                    let subTree = 
+                        if edge.label = epsilonIndex then
+                            Tree.Leaf None
+                        else
+                            let childRule = nonTermToRule.[edge.label]
+                            buildEpsilonReductionTree childRule
+                    Some ((new AstEdge<'TokenType>(edge.dest.label, subTree)) :: tail)
+                | None -> f edges
+            f edges
+                                                        
+
+    and buildEpsilonReductionTree rule =
+        if epsilonReductionDict.ContainsKey rule then
+            epsilonReductionDict.[rule]
+        else
+            let edges = (buildEpsilonTail rule rightParts.[rule].[0]).Value |> List.toArray
+            let tree = Tree.Node(rule, edges)
+            epsilonReductionDict.Add(rule, tree)
+            tree
+    
+    let rec f rule sppf =
+        let rec g (vertex : SppfVertex) edgeAcc =
+            if vertex.outEdges.Length > 0 then
+                //take that edge, that has the least nfa state and the most gss level dest
+                let firstEdge, tail = vertex.outEdges.Head, vertex.outEdges.Tail
+                let edge = List.fold (fun (edge : SppfEdge) (leastNfaDestEdge : SppfEdge) -> 
+                            if edge.Dest.nfaVertex.label < leastNfaDestEdge.Dest.nfaVertex.label
+                                    || (edge.Dest.nfaVertex.label = leastNfaDestEdge.Dest.nfaVertex.label) && edge.Dest.gssVertex.Level > leastNfaDestEdge.Dest.gssVertex.Level then 
+                                edge
+                            else leastNfaDestEdge) firstEdge tail
+                let sppfLabel = edge.Label
+                let nextVertex = edge.Dest
+                let nfaDest = nextVertex.nfaVertex.label
+                let subTree =
+                    match sppfLabel with
+                    | SppfLabel.Epsilon -> Tree.Leaf None
+                    | SppfLabel.EpsilonReduction rule -> buildEpsilonReductionTree rule
+                    | SppfLabel.Reduction (rule, subSppf) -> f rule subSppf
+                    | SppfLabel.Terminal i ->  Tree.Leaf <| Some tokens.[i]
+                    | _ -> (* TODO raise error *) Tree.Leaf None
+                let astEdge = new AstEdge<'TokenType>(nfaDest, subTree)
+                g nextVertex (astEdge :: edgeAcc)
+            else
+                let edges = edgeAcc |> List.rev
+                let edgesWithTail = 
+                    if vertex.nfaVertex.label <> rightParts.[rule].Length - 1 then
+                        (buildEpsilonTail rule vertex.nfaVertex).Value
+                        |> List.append edges
+                    else
+                        edges
+                Array.ofList edgesWithTail
+        let startVertex, _, _, _ = sppf 
+        let edges = g startVertex []
+        Ast.Node (rule, edges)
+    new Tree<'TokenType>(f startRule sppf, leftSide)

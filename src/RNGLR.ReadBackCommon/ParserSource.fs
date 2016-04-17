@@ -31,6 +31,8 @@ type ParserSourceReadBack<'TokenType> (gotos : int[][]
                                , indexToSymbolType: int -> SymbolType
                                , acceptEmptyInput : bool
                                , numToString : int -> string
+                               , nonTermToRule : int[]
+                               , canInferEpsilon : bool[] 
                                , epsilonIndex : int
                                , errorIndex : int) =
     
@@ -68,3 +70,5 @@ type ParserSourceReadBack<'TokenType> (gotos : int[][]
     member this.NumToString = numToString
     member this.EpsilonIndex = epsilonIndex
     member this.ErrorIndex = errorIndex
+    member this.CanInferEpsilon = canInferEpsilon
+    member this.NontermToRule = nonTermToRule

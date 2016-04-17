@@ -63,8 +63,10 @@ let buildStatesNFA outTable (grammar : FinalGrammarNFA) =
                     <- Set.union mainKernelToLookAhead.[fst mainItems.[i]] (snd mainItems.[i])
             enqueue <| symbolAndLookAheads mainItems.[i]
         while queue.Count > 0 do
-            let nonterm, symbolSet = queue.Dequeue()
-            for rule in grammar.rules.rulesWithLeftSide nonterm do
+            let symbol, symbolSet = queue.Dequeue()
+            let rule = grammar.rules.ruleWithLeftSide symbol
+            if rule >= 0 then
+                let nonTerm = symbol
                 let kernelsAndStarts = grammar.startPositions.[rule] |> Set.map (fun x -> KernelInterpreter.toKernel (rule,x), x)
                 for (kernel, startPosition) in kernelsAndStarts do                
                     let newSymbolSet = 

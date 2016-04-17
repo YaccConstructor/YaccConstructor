@@ -6,9 +6,9 @@ open Yard.Generators.Common.EBNF.Epsilon
 open Yard.Generators.Common.EBNF.SymbolSets
 open Yard.Generators.Common.EBNF.StateSets
 
-type FinalGrammarNFA(ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
+type FinalGrammarNFA(ruleList : Rule.t<Source.t,Source.t> list, caseSensitive, needTranslate) =
     let _indexator = new IndexatorEBNF(ruleList, caseSensitive)
-    let _nfaRules = new NumberedRulesEBNF (ruleList, _indexator, caseSensitive)
+    let _nfaRules = new NumberedRulesEBNF (ruleList, _indexator, caseSensitive, needTranslate)
     let _canInferEpsilon = canInferEpsilonNFA _nfaRules _indexator
     let _hasEpsilonTail = hasEpsilonTail _nfaRules _canInferEpsilon
     let _firstSet = firstSetNFA _nfaRules _indexator _canInferEpsilon //

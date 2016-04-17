@@ -118,7 +118,7 @@ type RNGLR() =
 //            if !needHighlighting 
 //            then newDefinition <- highlightingConvertions newDefinition
 
-            let grammar = new FinalGrammarNFA(newDefinition.grammar.[0].rules, caseSensitive)
+            let grammar = new FinalGrammarNFA(newDefinition.grammar.[0].rules, caseSensitive, !needTranslate)
 
             (*if !needHighlighting
             then generateCsFiles grammar.indexator !namespaceName*)
@@ -182,6 +182,8 @@ type RNGLR() =
                     println "open Yard.Generators.RNGLR.ReadBack.Parser"
                     
                     println "open Yard.Generators.RNGLR.ReadBack"
+                    //TODO: maybe condition on needTranslate (no need in Tree otherwise)
+                    println "open Yard.Generators.RNGLR.ReadBack.Tree"
 
                     (*if !needHighlighting
                     then 
@@ -213,8 +215,7 @@ type RNGLR() =
                 if not !needTranslate || targetLanguage = Scala 
                 then tables
                 else 
-                    tables (*+ printTranslator grammar newDefinition.grammar.[0].rules 
-                                    positionType fullPath output dummyPos caseSensitive !isAbstractParsingMode !needHighlighting*)
+                    tables + "\n" + grammar.rules.TranslateRules
 
             (*let res = 
                 match definition.foot with

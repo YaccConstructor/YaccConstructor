@@ -6,6 +6,7 @@ open Yard.Generators.RNGLR.ReadBack.Graphs
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 open FSharpx.Collections.Experimental
+open Yard.Generators.RNGLR.ReadBack.Tree
 
 type ParserDebugFuns<'TokenType> = {
     drawGSSDot : string -> unit
@@ -14,7 +15,7 @@ type ParserDebugFuns<'TokenType> = {
 }
 
 type ParseReadBackResult<'TokenType> =
-    | Success of Sppf * array<'TokenType>
+    | Success of Tree<'TokenType> * array<'TokenType>
     | Error of int * array<'TokenType> * string * ParserDebugFuns<'TokenType>
 
 let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide : int[])
@@ -89,7 +90,9 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                     new SppfVertex(nfaFinal, gssFinal)
                 start.addEdge(new SppfEdge(final, SppfLabel.EpsilonReduction -1))
                 start, 1, 0, Set.ofArray [|0|]
-            Success (emptyParse, [||])
+            let tree = sppfToTree<_> 0 emptyParse ([||]) parserSource.LeftSide
+                        parserSource.NontermToRule parserSource.RightSideNFA parserSource.EpsilonIndex parserSource.CanInferEpsilon
+            Success (tree, [||])
         else
             Error (0, [||], "This grammar cannot accept empty string",
                     {
@@ -238,7 +241,9 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                                 pv
                         let edge = new SppfEdge(rightVertex, sppfLabel)
                         match sppfLabel with
-                        | SppfLabel.TemporaryReduction _ -> temporarySppfEdges.Push(prevVertex, edge)
+                        | SppfLabel.TemporaryReduction rt -> 
+                            let handleStart = (rt.TryGetLeftEnd leftGssVertex).Value
+                            temporarySppfEdges.Push(handleStart, edge)
                         | _ -> ()
                         prevVertex.addEdge edge
 
@@ -414,17 +419,21 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
         then 
             Error (!curInd , [|!curToken|] , "Parse Error", debugFuns ())
         else
-            let resSppf = ref None
+            let res = ref None
             for vertex in usedStates do
                 if parserSource.AccStates.[vertex] 
                 then
-                    resSppf :=
+                    res :=
                         match stateToVertex.[vertex].Value.firstOutEdge.Value.Label with
-                        | SppfLabel.Reduction (_, sppf) -> Some sppf
+                        | SppfLabel.Reduction (startRule, sppf) -> Some (startRule, sppf)
                         | _ -> None
-            match !resSppf with
+            match !res with
             | None -> Error (!curInd, [|!curToken|], "Input was fully processed, but it's not complete correct string.", debugFuns ())
-            | Some res -> 
+            | Some (startRule, sppf) -> 
                 //debugFuns().drawGSSDot @"C:\temp\help_old.dot"
                 //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber None parserSource.LeftSide "../../../Tests/RNGLR/sppf.dot"
-                Success (res, [||])
+                let ast = 
+                    sppfToTree<'TokenType> startRule sppf (tokens.ToArray()) parserSource.LeftSide parserSource.NontermToRule 
+                        parserSource.RightSideNFA parserSource.EpsilonIndex parserSource.CanInferEpsilon
+
+                Success (ast, [||])

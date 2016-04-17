@@ -6,6 +6,7 @@ open Yard.Generators.RNGLR.ReadBack
 open System.IO
 open System.Collections.Generic
 open FSharpx.Collections.Experimental
+open Yard.Generators.RNGLR.ReadBack.Tree
 
 let gssToDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide : int[])
         (initNodes : seq<GssVertex>) (numToString : int -> string) (errInd: int) (path : string) =
@@ -141,4 +142,47 @@ let nfaToDot (vertices : VertexWithBackTrack<int, int>[]) numToString epsilonInd
                 | n  when n = epsilonIndex -> "eps"
                 | _ -> numToString edge.label
             out.WriteLine(sprintf "    %d -> %d [label = \"%s\"]" vertex.label edge.dest.label label)
+    out.WriteLine("}")
+
+let astToDot (tree : Tree<'TokenType>) (numToString : int -> string) (tokenToNum : 'TokenType -> int) (file : string) =
+    
+    let nextIndex = 
+        let cur = ref -1
+        fun () -> 
+            incr cur
+            !cur
+    
+    let tokenToString = tokenToNum >> numToString
+                
+    use out = new StreamWriter(file)
+
+    let printEdge source dest = 
+        let str = sprintf "    %d -> %d" source dest
+        out.WriteLine(str)
+
+    let printNTerm nTerm index =
+        out.WriteLine(sprintf "    %d [label = \"%s\", shape = circle]" index (numToString nTerm))
+
+    let printTerminal token index =
+        out.WriteLine(sprintf "    %d [label = \"%s\", shape = box]" index (tokenToString token))
+        
+
+    out.WriteLine("digraph SPPF{")
+    out.WriteLine("    rankdir=TB")
+    let rec f (ast : Ast<'TokenType>) (parentIndex : int option) =
+        match ast with
+        | Node (rule, children) ->
+            let index = nextIndex()
+            printNTerm tree.LeftSide.[rule] index
+            if parentIndex.IsSome then
+                printEdge parentIndex.Value index
+            for astEdge in children do
+                f astEdge.SubTree (Some index)
+        | Leaf (Some token) ->
+            let index = nextIndex()
+            printTerminal token index
+            if parentIndex.IsSome then
+                printEdge parentIndex.Value index
+        | Leaf (None) -> ()
+    f tree.Ast None
     out.WriteLine("}")

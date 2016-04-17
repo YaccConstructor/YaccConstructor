@@ -46,14 +46,14 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
-      <Name>Common.AST</Name>
-      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\Common.EBNF\Common.EBNF.fsproj">
       <Name>Common.EBNF</Name>
       <Project>{939fadff-a1a7-4aee-b072-f3007396f1a9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Common.ReadBack.AST\Common.ReadBack.AST.fsproj">
+      <Name>Common.ReadBack.AST</Name>
+      <Project>{808c49a8-2a45-49a9-92da-9778e6fd75aa}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Common\Common.fsproj">

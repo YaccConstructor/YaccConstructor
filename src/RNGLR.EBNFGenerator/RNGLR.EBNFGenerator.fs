@@ -103,7 +103,7 @@ type RNGLREBNF() =
             then
                 newDefinition <- highlightingConvertions newDefinition*)
 
-            let grammar = new FinalGrammarNFA(newDefinition.grammar.[0].rules, caseSensitive)
+            let grammar = new FinalGrammarNFA(newDefinition.grammar.[0].rules, caseSensitive, false)
 
             (*if !needHighlighting && !needTranslate
             then

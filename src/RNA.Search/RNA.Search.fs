@@ -83,7 +83,7 @@ let searchInCloud graphs =
                                        logger = ConsoleLogger(true), 
                                        logLevel = LogLevel.Info)
 
-    cluster.Reset(true,true,true,true,true,true,true)
+    //cluster.Reset(true,true,true,true,true,true,true)
     cluster.ClearAllProcesses()
     cluster.ShowWorkers()
    
@@ -134,6 +134,7 @@ let search graphs agentsCount =
             loop 0)
 
     let agents = Array.init agentsCount (fun i -> agent (sprintf "searchAgent%A" i))
+    
     graphs
     |> Array.ofSeq  
     |> fun a -> a.[10000..10004] //[10000..10100]

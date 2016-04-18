@@ -5,7 +5,7 @@ open Yard.Core.IL.Production
 open System.Collections.Generic
 open Yard.Generators.Common
 
-type TranslateBuilder (startRule) =
+type TranslateBuilder () =
     
     let identN = ref 0
     let ruleCount = ref 0
@@ -17,31 +17,55 @@ type TranslateBuilder (startRule) =
             String.replicate (!identN * 4) " "
         Printf.kprintf (fun s -> builder.Append(ident).Append(s).Append("\n") |> ignore) line
 
-    static member FunPrefix = "_rnglr_rb_"
+    static member FunPrefix = "translate_"
 
     member this.Finish() =
         this.Untab()
         this.Append ""
-        this.PrintCall startRule
+        this.Append "match tree.Ast with"
+        this.Append "| Ast.Node (rule, derivation) ->"
+        this.Tab()
+        this.Append "match rule with"
+        for i in 0 .. !ruleCount - 1 do
+            this.Append "| %d -> translate_%d derivation |> box" i i
+        this.Append "| _ -> invalidArg \"rule\" \"Is out of count\""
+        this.Untab()
+        this.Append "| Ast.Leaf token -> box token"
+        
+    member this.InitPrint() =
+        this.Append("let translateAst (tree : Tree<'Token>) =")
+        this.Tab()
+        //function
+        this.Append "let getChildrenFromAstEdge (astEdge : AstEdge<'Token>) ="
+        this.Tab()
+        this.Append "match astEdge.SubTree with"
+        this.Append "| Ast.Node (_, c) -> c"
+        this.Append "| _ -> failwithf \"Tried to get children from Tree.Leaf\""
+        this.Untab()
+        this.Append ""
 
     member this.PrintBinding = 
         this.Append "let %s =" << Source.toString 
 
     member this.PrintCall n =
-        this.Append "%s%d tree" TranslateBuilder.FunPrefix n
+        this.Append "let children = getChildrenFromAstEdge derivation.[!i]"
+        this.Append "%s%d children" TranslateBuilder.FunPrefix n
 
     member this.PrintIfNext num =
-        this.Append "if currentEdge.Dest.Label = %d then" num
+        this.Append "if derivation.[!i].NfaDest = %d then" num
 
     member this.PrintElseNext() =
         this.Append "else"
 
+    member this.PrintExpression (sourceExpr : Source.t) =
+        this.Append "%s" <| (Source.toString sourceExpr).Trim()
+        
+
     member this.PrintWhileNext num =
-        this.Append "while currentEdge.Dest.Label = %d do" num
-    
-    member this.InitPrint() =
-        this.Append("let _rnglr_rb_translate (tree : Tree<Token>)")
-        this.Tab()
+        this.Append "while derivation.[!i].NfaDest = %d do" num
+
+    member this.PrintSkipEdge() =
+        this.Append "incr i"
 
     member this.StartNewRule() =
         let bindingStart =
@@ -49,9 +73,11 @@ type TranslateBuilder (startRule) =
                 "let rec"
             else
                 this.Untab()
-                "\nand"
-        this.Append "%s %s%d (tree : Tree<_>) =" bindingStart TranslateBuilder.FunPrefix !ruleCount
+                this.Append ""
+                "and"
+        this.Append "%s %s%d (derivation : AstEdge<'Token>[]) =" bindingStart TranslateBuilder.FunPrefix !ruleCount
         this.Tab()
+        this.Append "let i = ref 0"
         incr ruleCount
 
     override this.ToString() = builder.ToString()
@@ -73,7 +99,9 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
     
     let translateBuilder = 
         if needTranslate then
-            Some <| new TranslateBuilder(start)
+            let x = new TranslateBuilder()
+            x.InitPrint()
+            Some x
         else
             None
 
@@ -107,6 +135,7 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
                     if needTranslate then
                         translateBuilder.Value.PrintIfNext firstStateX.label
                         translateBuilder.Value.Tab()
+                        translateBuilder.Value.PrintSkipEdge()
                     let lastStateX : Vertex<_,_> = regExToDFA firstStateX stateToVertex x 
                     
                     let firstStateY = nextStateVertex stateToVertex
@@ -115,6 +144,7 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
                         translateBuilder.Value.Untab()
                         translateBuilder.Value.PrintElseNext()
                         translateBuilder.Value.Tab()
+                        translateBuilder.Value.PrintSkipEdge()
                     let lastStateY = regExToDFA firstStateY stateToVertex y
                     let lastState = nextStateVertex stateToVertex
                     lastStateX.addEdge(new Edge<_,_>(lastState, indexator.epsilonIndex))
@@ -131,6 +161,8 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
                             let lastState = nextStateVertex stateToVertex
                             firstState.addEdge(new Edge<_,_>(lastState, indexator.epsilonIndex))
                             //TODO
+                            if needTranslate then
+                                translateBuilder.Value.PrintSkipEdge()
                             lastState
                         | _ ->                    
                             let rec seqToDFA fstState (xs : elem<Source.t,Source.t> list) =
@@ -149,17 +181,17 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
                                         translateBuilder.Value.PrintBinding x.binding.Value
                                         translateBuilder.Value.Tab()
                                     let lastState = regExToDFA fstState stateToVertex x.rule
-                                    if needTranslate && x.binding.IsSome then
-                                        translateBuilder.Value.Untab()
                                     let lstState = nextStateVertex stateToVertex
                                     lastState.addEdge(new Edge<_,_>(lstState, indexator.epsilonIndex))
-                                    //TODO
-                                    seqToDFA lstState xs
-                         
+                                    if needTranslate then
+                                        if x.binding.IsSome then
+                                            translateBuilder.Value.Untab()
+                                        translateBuilder.Value.PrintSkipEdge()
+                                    seqToDFA lstState xs                         
                             s 
                             |> seqToDFA firstState
                     if needTranslate && meta.IsSome then
-                        translateBuilder.Value.Append "%s" <| Source.toString meta.Value
+                        translateBuilder.Value.PrintExpression meta.Value
                     lastState
                 |PToken _ | PLiteral _ | PRef _ as x -> 
                     let index =
@@ -176,7 +208,7 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
                             index
                         | _ -> failwithf "Unexpected construction"
                     let lastState = nextStateVertex stateToVertex
-                    firstState.addEdge(new Edge<_,_>(lastState, index))
+                    firstState.addEdge(new Edge<_,_>(lastState, index))                     
                     lastState
                 |PMany x ->
                     let fstState = nextStateVertex stateToVertex
@@ -184,6 +216,7 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
                     if needTranslate then
                         translateBuilder.Value.PrintWhileNext fstState.label
                         translateBuilder.Value.Tab()
+                        translateBuilder.Value.PrintSkipEdge()
                     let lstState = regExToDFA fstState stateToVertex x
                     lstState.addEdge(new Edge<_,_>(fstState, indexator.epsilonIndex))
                     let lastState = nextStateVertex stateToVertex
@@ -198,6 +231,7 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
                     if needTranslate then
                         translateBuilder.Value.PrintWhileNext fstState.label
                         translateBuilder.Value.Tab()
+                        translateBuilder.Value.PrintSkipEdge()
                     let lstState = regExToDFA fstState stateToVertex x
                     lstState.addEdge(new Edge<_,_>(fstState, indexator.epsilonIndex))
                     let lastState = nextStateVertex stateToVertex
@@ -211,6 +245,7 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
                     if needTranslate then
                         translateBuilder.Value.PrintIfNext fstState.label
                         translateBuilder.Value.Tab()
+                        translateBuilder.Value.PrintSkipEdge()
                     let lstState = regExToDFA fstState stateToVertex x
                     let lastState = nextStateVertex stateToVertex
                     lstState.addEdge(new Edge<_,_>(lastState, indexator.epsilonIndex))

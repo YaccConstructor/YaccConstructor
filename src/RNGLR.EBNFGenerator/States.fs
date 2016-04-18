@@ -101,7 +101,8 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
             enqueue <| symbolAndLookAheads mainKernelsAndLookAheads.[i]
         while queue.Count > 0 do
             let nonterm, symbolSet = queue.Dequeue()
-            for rule in grammar.rules.rulesWithLeftSide nonterm do
+            let rule = grammar.rules.ruleWithLeftSide nonterm
+            if rule >= 0 then
                 let kernelsAndStarts = grammar.startPositions.[rule] |> Set.map (fun x -> KernelInterpreter.toKernel (rule,x), x)
                 for (kernel, startPosition) in kernelsAndStarts do                
                     let newSymbolSet = 

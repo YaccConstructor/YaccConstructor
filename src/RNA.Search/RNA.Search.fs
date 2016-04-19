@@ -82,6 +82,8 @@ let searchInCloud graphs =
         AzureCluster.Connect(config, 
                                        logger = ConsoleLogger(true), 
                                        logLevel = LogLevel.Info)
+
+    cluster.Reset(true,true,true,true,true,true,true)
     cluster.ClearAllProcesses()
     cluster.ShowWorkers()
    

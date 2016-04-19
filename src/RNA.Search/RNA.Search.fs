@@ -108,10 +108,10 @@ let searchInCloud graphs =
     printfn "%A" r
     r
 
-let search graphs agentsCount =
+let search (graphs:array<_>) agentsCount =
     let start = System.DateTime.Now
-    let processRanges (ranges:ResizeArray<_>) =
-        ranges.Count |> printfn "Total ranges: %A"
+    let processRanges (ranges:ResizeArray<_>) = ()
+        //ranges.Count |> printfn "Total ranges: %A"
     let agent name  =
         MailboxProcessor.Start(fun inbox ->
             let rec loop n =
@@ -119,7 +119,7 @@ let search graphs agentsCount =
                         let! msg = inbox.Receive()
                         match msg with
                         | Data (i,graph) ->
-                            printfn "%A: %A" name i
+                            //printfn "%A: %A" name i
                             try
                                 GLL.tRNA.buildAbstract graph 4                                
                                 |> filterRnaParsingResult 60
@@ -133,8 +133,9 @@ let search graphs agentsCount =
 
     let agents = Array.init agentsCount (fun i -> agent (sprintf "searchAgent%A" i))
     graphs
-    |> Array.ofSeq  
-    |> fun a -> a.[10000..10004] //[10000..10100]
+    //|> Array.ofSeq  
+    //|> fun a -> a.[10000..11000]
+       //[10000..10004] //[10000..10100]
     |> Array.iteri 
         (fun i graph -> 
             Data (i, graph) 
@@ -161,9 +162,22 @@ let searchTRNA path agentsCount =
             |> GLL.tRNA.tokenToNumber
 
     let graphs, longEdges = loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.tRNA.RNGLR_EOF 0)
-    //search graphs agentsCount
-    searchInCloud graphs
-    |> printfn "%A"
+    let f graph = 
+        try
+            GLL.tRNA.buildAbstract graph 4                                
+            |> filterRnaParsingResult 60
+            |> fun x -> ()
+        with
+        | e -> printfn "ERROR! %A" e.Message
+    let gs = graphs.[10000..11000]
+    for i in 1..5 do 
+        printfn "i=%A" i
+        search gs i
+        |> printfn "%A"
+    //searchInCloud graphs
+    //let start = System.DateTime.Now
+    //Array.Parallel.iter f gs
+    //System.DateTime.Now - start |> printfn "%A"
     ()
 
 [<EntryPoint>]

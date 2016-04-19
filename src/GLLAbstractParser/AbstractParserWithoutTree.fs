@@ -329,7 +329,9 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                             let oEdges = outEdges.[input.Edges.[cE].End]
                             for oe in oEdges do 
                                 let curToken = input.Edges.[oe].Tokens.[shift]
-                                let key = int(( curSymbol  <<< 16) ||| (curToken - parser.NonTermCount))
+                                let nTerm = (curToken - parser.NonTermCount)
+                                if nTerm = condNonTerm then currentLength := 0uy
+                                let key = int(( curSymbol  <<< 16) ||| nTerm)
                                 if parser.Table.ContainsKey key
                                 then
                                     create oe shift (1<labelMeasure>  * packLabelNew rule (position + 1)) !currentGSSNode curSymbol !currentLength

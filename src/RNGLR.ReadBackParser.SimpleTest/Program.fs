@@ -89,30 +89,38 @@ type ``RNGLRReadBack parser tests with simple lexer`` () =
         let parserSource = RNGLR.ReadBackParser.SeqOfTwo.numToString, RNGLR.ReadBackParser.SeqOfTwo.tokenToNumber
         let file = "SeqOfTwoWrong3.txt"
         runTest parser parserSource file TER_Error None
+
+    [<Test>]
+    member test.``3.0 Seq of two nonterminals``() =
+        let parser = RNGLR.ReadBackParser.SeqOfTwoNonTerms.buildAst
+        let parserSource = RNGLR.ReadBackParser.SeqOfTwoNonTerms.numToString, RNGLR.ReadBackParser.SeqOfTwoNonTerms.tokenToNumber
+        let translate = Some RNGLR.ReadBackParser.SeqOfTwoNonTerms.translateAst
+        let file = "SeqOfTwo.txt"
+        runTest parser parserSource file TER_Success translate
     
     [<Test>]
-    member test.``3.0 Two parents`` () = 
+    member test.``4.0 Two parents`` () = 
         let parser = RNGLR.ReadBackParser.TwoParents.buildAst
         let parserSource = RNGLR.ReadBackParser.TwoParents.numToString, RNGLR.ReadBackParser.TwoParents.tokenToNumber
         let file = "One.txt"
         runTest parser parserSource file TER_Success None
 
     [<Test>]
-    member test.``4.0 First alternative in the middle``() =
+    member test.``5.0 First alternative in the middle``() =
         let parser = RNGLR.ReadBackParser.AlternativeInMiddle.buildAst
         let parserSource = RNGLR.ReadBackParser.AlternativeInMiddle.numToString, RNGLR.ReadBackParser.AlternativeInMiddle.tokenToNumber
         let file = "AlternativeInMiddle1.txt"
         runTest parser parserSource file TER_Success None
 
     [<Test>]
-    member test.``4.1 Second alternative in the middle``() =
+    member test.``5.1 Second alternative in the middle``() =
         let parser = RNGLR.ReadBackParser.AlternativeInMiddle.buildAst
         let parserSource = RNGLR.ReadBackParser.AlternativeInMiddle.numToString, RNGLR.ReadBackParser.AlternativeInMiddle.tokenToNumber
         let file = "AlternativeInMiddle2.txt"
         runTest parser parserSource file TER_Success None
     
     [<Test>]
-    member test.``5.0 Two many nonterminals`` () = 
+    member test.``6.0 Two many nonterminals`` () = 
         let parser = RNGLR.ReadBackParser.TwoManyNonTerms.buildAst
         let parserSource = RNGLR.ReadBackParser.TwoManyNonTerms.numToString, RNGLR.ReadBackParser.TwoManyNonTerms.tokenToNumber
         let file = "SeqOfThree.txt"
@@ -120,28 +128,28 @@ type ``RNGLRReadBack parser tests with simple lexer`` () =
 
         
     [<Test>]
-    member test.``6.0 Two many terminals`` () = 
+    member test.``7.0 Two many terminals`` () = 
         let parser = RNGLR.ReadBackParser.TwoManyTerms.buildAst
         let parserSource = RNGLR.ReadBackParser.TwoManyTerms.numToString, RNGLR.ReadBackParser.TwoManyTerms.tokenToNumber
         let file = "SeqOfThree.txt"
         runTest parser parserSource file TER_Success None
 
     [<Test>]
-    member test.``6.1 Two many one terminal`` () = 
+    member test.``7.1 Two many one terminal`` () = 
         let parser = RNGLR.ReadBackParser.TwoManyTerms.buildAst
         let parserSource = RNGLR.ReadBackParser.TwoManyTerms.numToString, RNGLR.ReadBackParser.TwoManyTerms.tokenToNumber
         let file = "One.txt"
         runTest parser parserSource file TER_Success None
 
     [<Test>]
-    member test.``7.0 Cached reduction`` () = 
+    member test.``8.0 Cached reduction`` () = 
         let parser = RNGLR.ReadBackParser.CachedReduction.buildAst
         let parserSource = RNGLR.ReadBackParser.CachedReduction.numToString, RNGLR.ReadBackParser.CachedReduction.tokenToNumber
         let file = "SeqOfThree.txt"
         runTest parser parserSource file TER_Success None
     
     [<Test>]
-    member test.``8.0 CalcEBNF`` () = 
+    member test.``9.0 CalcEBNF`` () = 
         let parser = RNGLR.ReadBackParser.CalcEBNF.buildAst
         let parserSource = RNGLR.ReadBackParser.CalcEBNF.numToString, RNGLR.ReadBackParser.CalcEBNF.tokenToNumber
         let file = "CalcEBNF.txt"
@@ -347,5 +355,5 @@ type ``RNGLRReadBack parser tests with simple lexer`` () =
 
 [<EntryPoint>]
 let main argv = 
-    (new ``RNGLRReadBack parser tests with simple lexer``()).``1.0 One``();
+    (new ``RNGLRReadBack parser tests with simple lexer``()).``3.0 Seq of two nonterminals``();
     0 // return an integer exit code

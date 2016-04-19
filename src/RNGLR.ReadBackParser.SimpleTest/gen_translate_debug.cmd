@@ -1,6 +1,6 @@
 del log.txt
 
-for %%i in (One) do (
+for %%i in (One, SeqOfTwoNonTerms) do (
 		echo . >> log.txt
 		echo %%i >> log.txt
     ..\..\Bin\Debug\v40\YC.YaccConstructor.exe -i %%i.yrd -c ExpandMeta ^

@@ -187,6 +187,7 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
                                         if x.binding.IsSome then
                                             translateBuilder.Value.Untab()
                                         translateBuilder.Value.PrintSkipEdge()
+                                        translateBuilder.Value.PrintSkipEdge()
                                     seqToDFA lstState xs                         
                             s 
                             |> seqToDFA firstState
@@ -200,11 +201,11 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
                         | PLiteral lit -> indexator.literalToIndex << transformLiteral <| Source.toString lit
                         | PRef (nTerm, meta) -> 
                             let index = indexator.nonTermToIndex <| Source.toString nTerm
-                            let index = rulesWithLeft.[index]
                             if needTranslate then
-                                translateBuilder.Value.PrintCall index
+                                let rule = rulesWithLeft.[index]
+                                translateBuilder.Value.PrintCall rule
                                 if meta.IsSome then
-                                    translateBuilder.Value.Append "%s" <| Source.toString meta.Value
+                                    translateBuilder.Value.PrintExpression meta.Value
                             index
                         | _ -> failwithf "Unexpected construction"
                     let lastState = nextStateVertex stateToVertex

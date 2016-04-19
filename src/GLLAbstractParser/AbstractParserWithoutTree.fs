@@ -261,6 +261,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 currentGSSNode := currentContext.Value.Vertex
                 currentLabel := currentContext.Value.Label
                 currentExtension := currentContext.Value.Extension
+                currentLength := currentContext.Value.Length
                 let ttt = getPosOnEdge <| getLeftExtension !currentExtension
                 let aa = getPosOnEdge <| getRightExtension !currentExtension
                 condition := false

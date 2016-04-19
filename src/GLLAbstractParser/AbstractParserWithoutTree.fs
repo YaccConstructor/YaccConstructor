@@ -29,7 +29,8 @@ type ResultStruct =
     val re : int
     val rpos : int
     val nterm : string
-    new (l,l1, r, r1, n) = {le = l; lpos = l1; re = r; rpos = r1; nterm = n}
+    val length   : byte
+    new (l,l1, r, r1, n, len) = {le = l; lpos = l1; re = r; rpos = r1; nterm = n; length = len}
 
 let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph) condNonTerm = 
     let shift = input.Shift
@@ -208,7 +209,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                     if flg then
                         for rule in rules do
                             let newLabel = 1<labelMeasure> * packLabelNew rule 0
-                            addContext !currentIndex newLabel v (packExtension index index)    
+                            addContext !currentIndex newLabel v (packExtension index index) len  
                 if cP < chainLen - 1
                 then
                     addCntxtForNonTerm cE cP i   
@@ -284,7 +285,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             then
                 if Array.exists (fun e -> e = rule) condNonTermRules
                 then
-                    r.Add(new ResultStruct((getEdge <| getLeftExtension !currentExtension), (getPosOnEdge <| getLeftExtension !currentExtension), (getEdge <| getRightExtension !currentExtension), (getPosOnEdge <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule]))
+                    r.Add(new ResultStruct((getEdge <| getLeftExtension !currentExtension), (getPosOnEdge <| getLeftExtension !currentExtension), (getEdge <| getRightExtension !currentExtension), (getPosOnEdge <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule], !currentLength))
                     |> ignore
                 pop !currentGSSNode !currentIndex !currentExtension !currentLength
             else
@@ -338,7 +339,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 else
                     if Array.exists (fun e -> e = rule) condNonTermRules
                     then
-                        r.Add(new ResultStruct((getEdge <| getLeftExtension !currentExtension), (getPosOnEdge <| getLeftExtension !currentExtension), (getEdge <| getRightExtension !currentExtension), (getPosOnEdge <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule]))
+                        r.Add(new ResultStruct((getEdge <| getLeftExtension !currentExtension), (getPosOnEdge <| getLeftExtension !currentExtension), (getEdge <| getRightExtension !currentExtension), (getPosOnEdge <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule], !currentLength))
                         |> ignore
                         
                     pop !currentGSSNode !currentIndex !currentExtension !currentLength

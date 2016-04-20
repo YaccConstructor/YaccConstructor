@@ -4,11 +4,11 @@ open NUnit.Framework
 open Microsoft.FSharp.Collections
 open QuickGraph
 open AbstractAnalysis.Common
+open Yard.Utils.StructClass
 open QuickGraph.FST.GraphBasedFst
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
 open Yard.Examples.MSParserAbstract
 open Graphviz4Net.Dot.AntlrParser
 open Graphviz4Net.Dot
@@ -16,6 +16,7 @@ open Yard.Generators.RNGLR.AbstractParser
 open Yard.Generators.ARNGLR.Parser
 open RNGLRAbstractParserTests
 open System
+open System.IO
 
 let baseInputGraphsPath = "../../../src/TSQL.Test/DotTSQL"
 
@@ -49,21 +50,13 @@ let printBref =
             | Yard.Examples.MSParserAbstract.L_minus_(gr) -> "MINUS"
             | x -> string x  |> (fun s -> s.Split '+' |> Array.rev |> fun a -> a.[0]) 
 
-let loadDotToQGReSharper baseInputGraphsPath gFile =
-    let qGraph = loadGraphFromDOT(path baseInputGraphsPath gFile)
-    let graphAppr = new Appr<_>()
-    graphAppr.InitState <- ResizeArray.singleton 0
-
-    for e in qGraph.Edges do
-        let edg = e :?> DotEdge<string>
-        new TaggedEdge<_,_>(int edg.Source.Id, int edg.Destination.Id, (edg.Label, br)) |> graphAppr.AddVerticesAndEdge |> ignore
-
-    graphAppr.FinalState <- ResizeArray.singleton (Seq.max graphAppr.Vertices)
-    graphAppr
+let loadGraphToQGResharper path =
+    let dot = File.ReadAllText(path)
+    BidirectionalGraph.LoadDot(dot, (fun v attrs -> int v), (fun v1 v2 attr -> new TaggedEdge<_,_>(int v1, int v2, (snd attr.[0], br))))
       
 let TSQLTokenizationTest path eCount vCount =
-    let graphAppr = loadDotToQGReSharper baseInputGraphsPath path
-    let graphFsa = graphAppr.ApprToFSA()
+    let graph = loadGraphToQGResharper (baseInputGraphsPath + path)
+    let graphFsa = approximateQG(graph)
     let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
     let res = YC.TSQLLexer.tokenize (Yard.Examples.MSParserAbstract.RNGLR_EOF(new FSA<_>())) graphFst
     match res with
@@ -103,8 +96,8 @@ type ``Lexer and Parser TSQL Tests`` () =
 
     [<Test>]  
     member this.``TSQL. Lexer and Parser test.`` () =
-        let graphAppr = loadDotToQGReSharper baseInputGraphsPath "test_tsql_1.dot"
-        let graphFsa = graphAppr.ApprToFSA()
+        let graph = loadGraphToQGResharper (baseInputGraphsPath + "test_tsql_1.dot")
+        let graphFsa = approximateQG(graph)
         let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
         let res = YC.TSQLLexer.tokenize (Yard.Examples.MSParserAbstract.RNGLR_EOF(new FSA<_>())) graphFst
         match res with

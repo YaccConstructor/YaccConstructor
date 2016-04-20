@@ -5,7 +5,6 @@ open AbstractAnalysis.Common
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 open QuickGraph
-open QuickGraph.FSA.FsaApproximation
 open QuickGraph.FSA.GraphBasedFsa
 
 //let printSmbString (x:char*Position<_>) = 

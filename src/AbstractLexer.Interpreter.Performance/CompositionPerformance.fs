@@ -9,7 +9,6 @@ open YC.FST.AbstractLexing.Tests.CommonTestChecker
 open QuickGraph
 open QuickGraph.FST.GraphBasedFst
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
 open QuickGraph.FST.Tests.GraphBasedFstTestData
 
 let benchmark func iterations =
@@ -22,17 +21,8 @@ let benchmark func iterations =
     double(sw.ElapsedMilliseconds) / double(iterations)
 
 let getFST path =
-    let dot = File.ReadAllText(path)
-    let f1 = Func<string, (string*string)[], int>(fun v attrs -> int v)
-    let f2 = Func<string, string, (string*string)[], TaggedEdge<_,_>>(fun v1 v2 attr -> 
-        new TaggedEdge<_,_>(int v1, int v2, (snd attr.[0], snd attr.[0])))
-    let graph = BidirectionalGraph.LoadDot(dot, f1, f2)
-    let graphAppr = new Appr<_>()
-    graphAppr.InitState <- ResizeArray.singleton 0
-    for e in graph.Edges do
-        e |> graphAppr.AddVerticesAndEdge |> ignore
-    graphAppr.FinalState <- ResizeArray.singleton (Seq.max graphAppr.Vertices)
-    FST<_,_>.FSAtoFST(graphAppr.ApprToFSA(), transform, smblEOF)
+    let graph = loadDotToQG path
+    FST<_,_>.FSAtoFST(approximateQG(graph), transform, smblEOF)
 
 let calcLexer = YC.FST.AbstractLexing.CalcLexer.fstLexer()
 let calcAlphabet = YC.FST.AbstractLexing.CalcLexer.alphabet()

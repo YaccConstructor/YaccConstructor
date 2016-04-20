@@ -3,7 +3,7 @@
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 
-open QuickGraph.FSA.FsaApproximation
+open Yard.Utils.StructClass
 open QuickGraph.FSA.GraphBasedFsa
 open JetBrains.ReSharper.Psi.CSharp.Tree
 

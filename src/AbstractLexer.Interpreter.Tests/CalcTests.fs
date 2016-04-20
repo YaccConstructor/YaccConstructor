@@ -3,12 +3,11 @@
 open NUnit.Framework
 open Microsoft.FSharp.Collections
 open QuickGraph
-open AbstractAnalysis.Common
+open Yard.Utils.StructClass
 open QuickGraph.FST.GraphBasedFst
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
 open System
 
 let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"
@@ -22,8 +21,8 @@ let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
 //        | _ -> (fst x).ToString() + "_br: " + (snd x).back_ref.ToString() + "(" + (snd x).start_offset.ToString() + "," + (snd x).end_offset.ToString() + ")"
 
 let calcTokenizationTest path eCount vCount countEdgesArray =
-    let graphAppr = loadDotToQG baseInputGraphsPath path
-    let graphFsa = graphAppr.ApprToFSA()
+    let graph = loadDotToQG (baseInputGraphsPath + path)
+    let graphFsa = approximateQG(graph)
     //graphFsa.PrintToDOT("../../../FST/FST/FSA.Tests/DOTfsa/test12FSA.dot", printSmb)
     let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
     //graphFst.PrintToDOT("../../../FST/FST/FSA.Tests/DOTfsa/test12FST.dot", printSmb)
@@ -39,8 +38,11 @@ let calcTokenizationTest path eCount vCount countEdgesArray =
 type ``Lexer Calc Fst Tests`` () =            
     [<Test>]
     member this.``Load graph test from DOT`` () =
-        let g = loadDotToQG baseInputGraphsPath "test_00.dot"
-        checkGraph g 4 4
+        let bidirectionalGraph = loadDotToQG (baseInputGraphsPath + "test_00.dot")
+        let adjacencyGraph = new AdjacencyGraph<_,_>()
+        for edge in bidirectionalGraph.Edges do
+            adjacencyGraph.AddVerticesAndEdge(edge) |> ignore
+        checkGraph adjacencyGraph 4 4
 
     [<Test>] 
     member this.``Calc. Simple number.`` () =

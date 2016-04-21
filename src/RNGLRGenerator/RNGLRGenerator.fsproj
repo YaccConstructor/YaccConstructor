@@ -94,11 +94,6 @@
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Helper\Helper.fsproj">
-      <Name>Helper</Name>
-      <Project>{fc9a166c-780d-4d15-b366-ca06277c803d}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
       <Name>RNGLRCommon</Name>
       <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>

@@ -288,6 +288,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 then
                     r.Add(new ResultStruct((getEdge <| getLeftExtension !currentExtension), (getPosOnEdge <| getLeftExtension !currentExtension), (getEdge <| getRightExtension !currentExtension), (getPosOnEdge <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule], !currentLength))
                     |> ignore
+                
                 pop !currentGSSNode !currentIndex !currentExtension !currentLength
             else
                 setR.Count                
@@ -322,6 +323,8 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                     else               
                         if cP < chainLen - 1  then         
                             let curToken = input.Edges.[cE].Tokens.[cP]
+                          
+                            if curSymbol = condNonTerm then currentLength := 0uy
                             let key = int(( curSymbol  <<< 16) ||| (curToken - parser.NonTermCount))
                             if parser.Table.ContainsKey key
                             then
@@ -330,9 +333,8 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                             let oEdges = outEdges.[input.Edges.[cE].End]
                             for oe in oEdges do 
                                 let curToken = input.Edges.[oe].Tokens.[shift]
-                                let nTerm = (curToken - parser.NonTermCount)
-                                if nTerm = condNonTerm then currentLength := 0uy
-                                let key = int(( curSymbol  <<< 16) ||| nTerm)
+                                if curSymbol = condNonTerm then currentLength := 0uy
+                                let key = int(( curSymbol  <<< 16) ||| (curToken - parser.NonTermCount))
                                 if parser.Table.ContainsKey key
                                 then
                                     create oe shift (1<labelMeasure>  * packLabelNew rule (position + 1)) !currentGSSNode curSymbol !currentLength
@@ -344,7 +346,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                     then
                         r.Add(new ResultStruct((getEdge <| getLeftExtension !currentExtension), (getPosOnEdge <| getLeftExtension !currentExtension), (getEdge <| getRightExtension !currentExtension), (getPosOnEdge <| getRightExtension !currentExtension), parser.NumToString <| parser.LeftSide.[rule], !currentLength))
                         |> ignore
-                        
+                      
                     pop !currentGSSNode !currentIndex !currentExtension !currentLength
                     
                     

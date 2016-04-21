@@ -799,7 +799,7 @@ type ``GLL abstract parser tests`` () =
                 |> GLL.VeryVerySmall.tokenToNumber                
         let basePath = "../../../Tests/bio/"
         let path = Path.Combine(basePath, file)
-        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 5 getSmb (GLL.VeryVerySmall.RNGLR_EOF 0)
+        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 20 getSmb (GLL.VeryVerySmall.RNGLR_EOF 0)
 
         graphs
         |> Array.ofSeq
@@ -818,6 +818,40 @@ type ``GLL abstract parser tests`` () =
     member this.``Very very small`` () =
         this.``Very very small tests`` """v_very_small\g""" ((0,0),(0,3))        
 
+    [<Test>]
+    member this.``Very very small 2 instances`` () =
+        this.``Very very small tests`` """v_very_small_many_instances\g""" ((0,0),(0,3))
+        this.``Very very small tests`` """v_very_small_many_instances\g""" ((0,4),(0,7))
+
+
+    member this.``Intersection small small tests`` file expectedRange =
+        
+        let getSmb =
+            let cnt = ref 0
+            fun ch ->
+                let i = incr cnt; !cnt 
+                match ch with
+                | 'A' -> GLL.IntersectionSmall.A i                
+                | 'C' -> GLL.IntersectionSmall.C i
+                | 'B' -> GLL.IntersectionSmall.B i                
+                | x ->   failwithf "Strange symbol in input: %A" x
+                |> GLL.IntersectionSmall.tokenToNumber                
+        let basePath = "../../../Tests/bio/"
+        let path = Path.Combine(basePath, file)
+        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 20 getSmb (GLL.IntersectionSmall.RNGLR_EOF 0)
+
+        graphs
+        |> Array.ofSeq
+        |> Array.mapi 
+            (fun i graph -> 
+                printfn "%A" i
+                GLL.IntersectionSmall.buildAbstract graph 4
+            )
+        |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 2) 
+
+    [<Test>]
+    member this.``Intersection small`` () =
+        this.``Intersection small small tests`` """intersection_small\g""" ((0,0),(1,2))        
 
     [<Test>]
     member this.``Problem with multiple edges. Small`` () =
@@ -868,11 +902,13 @@ let fs x =
     //t.``1000: trna in 860-930``()
     //t.``1000: trna in 629-699``()
     //t.``1000: trna in 133-204``()
-    t.``1000 as graph 139 + 861: trna in 133-204`` ()
+    //t.``1000 as graph 139 + 861: trna in 133-204`` ()
     //t.``Very small``()
     //t.``Very small with 2 edges``()
     //t.``Very very small with 2 edges``()
     //t.``Very very small``()
+    //t.``Very very small 2 instances``()
+    t.``Intersection small``()
     //t.``Problem with shift. Big`` ()
     
     

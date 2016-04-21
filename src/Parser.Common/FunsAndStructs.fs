@@ -36,7 +36,8 @@ type Context2 =
     val Label         : int<labelMeasure>
     val Vertex        : Vertex
     val Extension     : int64<extension>
-    new (index, label, vertex, ext) = {Index = index; Label = label; Vertex = vertex; Extension = ext}
+    val Length        : byte
+    new (index, label, vertex, ext, len) = {Index = index; Label = label; Vertex = vertex; Extension = ext; Length = len}
     
 
 type ParseResult<'TokenType> =

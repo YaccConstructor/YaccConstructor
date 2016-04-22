@@ -457,3 +457,5 @@ Tests/sbt/graphs_old/pl/*.dot
 Tests/sbt/ready/*.dot
 Tests/AbstractPerformance/TSQL/*/*.dot
 src/RNGLRApplication/*.dot
+Tests/_bio/biodata_1/pictures/01_before_repeat_resolution/components/*.dot
+Tests/_bio/biodata_1/pictures/01_before_repeat_resolution/*.dot

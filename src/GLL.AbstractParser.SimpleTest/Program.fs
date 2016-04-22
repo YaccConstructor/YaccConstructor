@@ -752,6 +752,7 @@ type ``GLL abstract parser tests`` () =
     member this.``Problem with shift. Big`` () =
         this.``1000: trna`` """simple_tRNA5\g""" 1001 ((0,34),(0,99))
 
+
     member this.SmallTests file expectedRange =        
         let lengthLimit = 1001        
         let getSmb =
@@ -773,7 +774,7 @@ type ``GLL abstract parser tests`` () =
         |> Array.mapi 
             (fun i graph -> 
                 printfn "%A" i
-                GLL.shiftProblem.buildAbstract graph 2
+                GLL.shiftProblem.buildAbstract graph 1
             )
         |> Array.iter (fun res -> filterRnaParsingResult res expectedRange 5)        
 
@@ -784,7 +785,12 @@ type ``GLL abstract parser tests`` () =
     [<Test>]
     member this.``Very small with 2 edges`` () =        
         this.SmallTests  """very_small_multy_1\g"""  ((0,1),(1,3))
-   
+    
+    [<Test>]
+    member this.``shift_small`` () =        
+        this.SmallTests  """problem_with_shift_2\g"""  ((0,1),(1,3))
+    
+    
     member this.``Very very small tests`` file expectedRange =
         
         let getSmb =
@@ -868,13 +874,13 @@ let fs x =
     //t.``1000: trna in 860-930``()
     //t.``1000: trna in 629-699``()
     //t.``1000: trna in 133-204``()
-    t.``1000 as graph 139 + 861: trna in 133-204`` ()
+    //t.``1000 as graph 139 + 861: trna in 133-204`` ()
     //t.``Very small``()
     //t.``Very small with 2 edges``()
     //t.``Very very small with 2 edges``()
     //t.``Very very small``()
     //t.``Problem with shift. Big`` ()
-    
+    t.``shift_small`` ()
     
     //t.``Problem with shift. Small 2``()
     

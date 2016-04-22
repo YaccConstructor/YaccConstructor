@@ -125,6 +125,7 @@
     <Compile Include="tRNA.yrd.fs" />
     <Compile Include="multiple_edges_problem.yrd.fs" />
     <Compile Include="very_very_small.yrd.fs" />
+    <Compile Include="intersection_small.yrd.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

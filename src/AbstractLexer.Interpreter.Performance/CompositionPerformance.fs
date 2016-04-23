@@ -22,7 +22,10 @@ let benchmark func iterations =
 
 let getFST path =
     let graph = loadDotToQG path
-    FST<_,_>.FSAtoFST(approximateQG(graph), transform, smblEOF)
+    let fst = FST<_,_>.FSAtoFST(approximateQG(graph), transform, smblEOF)
+    printfn "%A vertices, %A edges in approximation" graph.VertexCount graph.EdgeCount
+    printfn "%A vertices, %A edges in FST" fst.VertexCount fst.EdgeCount
+    fst
 
 let calcLexer = YC.FST.AbstractLexing.CalcLexer.fstLexer()
 let calcAlphabet = YC.FST.AbstractLexing.CalcLexer.alphabet()
@@ -41,19 +44,19 @@ let getTests path fileList =
     [for x in fileList do yield path + "/" + x]
 
 let calcTests = getTests "../../../../Tests/AbstractLexing/DOT" ["test_0.dot"; "test_1.dot"; "test_2.dot"; "test_3.dot"]
-let TSQLTests = getTests "../../../TSQL.Test/DotTSQL" ["test_tsql_1.dot"; "test_tsql_2.dot"; "test_tsql_3.dot"]
+let TSQLTests = getTests "../../../TSQL.Test/DotTSQL" ["test_tsql_1.dot"; "test_tsql_2.dot"; "test_tsql_3.dot"; "test_tsql_4.dot"; "test_tsql_5.dot"]
 let manuallyCreatedTests = [fstCompos1, fstCompos2; fstCompos12, fstCompos22; fstCompos13, fstCompos22]
 
 [<EntryPoint>]
 let main argv = 
     let runLangTests lang tests compose optimalCompose =
         for test in tests do
+            printfn "Processing %A:" test
             try
                 let fst = getFST test
                 try
-                    printfn "Processing %A:" test
-                    printfn "Average time for compose: %A" (benchmark (fun () -> compose fst) 1)
-                    printfn "Average time for optimal compose: %A\n" (benchmark (fun () -> optimalCompose fst) 1)
+                    printfn "Average time for compose: %A" (benchmark (fun () -> compose fst) 2)
+                    printfn "Average time for optimal compose: %A\n" (benchmark (fun () -> optimalCompose fst) 2)
                 with
                     | _ -> printfn"%s is not %s compliant!\n" test lang
             with

@@ -38,7 +38,8 @@ type ``RNGLRReadBack parser tests with simple lexer`` () =
             let numToString, tokenToNum = parserSource
             astToDot tree numToString tokenToNum "C:/temp/res.dot"
             if translate.IsSome then
-                printfn "%A" <| translate.Value tree
+                let t = translate.Value tree
+                printfn "%A" t
         | Error (num, tok, err, debugFuns), TER_Success ->  
             debugFuns.drawGSSDot "C:/temp/errorGss.dot"
             printErr (num, tok, err)
@@ -152,8 +153,9 @@ type ``RNGLRReadBack parser tests with simple lexer`` () =
     member test.``9.0 CalcEBNF`` () = 
         let parser = RNGLR.ReadBackParser.CalcEBNF.buildAst
         let parserSource = RNGLR.ReadBackParser.CalcEBNF.numToString, RNGLR.ReadBackParser.CalcEBNF.tokenToNumber
+        let translate = RNGLR.ReadBackParser.CalcEBNF.translateAst
         let file = "CalcEBNF.txt"
-        runTest parser parserSource file TER_Success None
+        runTest parser parserSource file TER_Success (Some translate)
 
     (*[<Test>]
     member test.``Choice`` () = 
@@ -355,5 +357,5 @@ type ``RNGLRReadBack parser tests with simple lexer`` () =
 
 [<EntryPoint>]
 let main argv = 
-    (new ``RNGLRReadBack parser tests with simple lexer``()).``3.0 Seq of two nonterminals``();
+    (new ``RNGLRReadBack parser tests with simple lexer``()).``9.0 CalcEBNF``();
     0 // return an integer exit code

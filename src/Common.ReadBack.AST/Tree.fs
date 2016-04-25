@@ -10,6 +10,6 @@ and Ast<'TokenType> =
     | Node of int * AstEdge<'TokenType>[]
     | Leaf of 'TokenType option //None for epsilons
 
-and AstEdge<'TokenType>(nfaDest, astLabel : Ast<'TokenType>) =
+and AstEdge<'TokenType>(nfaDest : int, astLabel : Ast<'TokenType>) =
     member this.NfaDest = nfaDest
     member this.SubTree = astLabel

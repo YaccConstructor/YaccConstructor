@@ -14,7 +14,7 @@ type TargetLanguage =
 let printTables 
     (grammar : FinalGrammarNFA) head (tables : TablesReadBack) (moduleName : string) 
     (tokenType : Map<_,_>) (res : System.Text.StringBuilder) targetLanguage 
-    _class positionType caseSensitive =
+    _class positionType (translateToAst : string option) caseSensitive =
     
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
@@ -161,6 +161,11 @@ let printTables
 
         let escapeQuotes = String.collect (function '"' -> "\\\"" | c -> string c)
 
+        if translateToAst.IsSome then
+            printBr ""
+            printBr @"//Ast to translate to"
+            printBr "%s" translateToAst.Value
+        
         printBr ""
         printBr "let genLiteral (str : string) (data : %s) =" literalType
         if caseSensitive then "str"
@@ -174,11 +179,14 @@ let printTables
 
         printBr "let tokenData = function"
 
-        for i = indexator.termsStart to indexator.termsEnd do
-            printBrInd 1 "| %s x -> box x" (indexator.indexToTerm i)
+        if translateToAst.IsNone then
+            for i = indexator.termsStart to indexator.termsEnd do
+                printBrInd 1 "| %s x -> box x" (indexator.indexToTerm i)
 
-        for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| L_%s x -> box x" (indexator.getLiteralName i)
+            for i = indexator.literalsStart to indexator.literalsEnd do
+                printBrInd 1 "| L_%s x -> box x" (indexator.getLiteralName i)
+        else
+            printBrInd 1 "| x -> x"
 
         printBr ""
         printBr "let numToString = function"

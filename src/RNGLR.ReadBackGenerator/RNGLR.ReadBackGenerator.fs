@@ -22,11 +22,13 @@ open Mono.Addins
 open Yard.Core
 open IL
 open Constraints
+open Yard.Core.IL.Definition
 open Yard.Generators.Common.InitialConvert
 open Yard.Generators.Common.LR.Kernels
 open Yard.Generators.Common.EBNF.FinalGrammar
 open Yard.Generators.RNGLR.ReadBack.States
 open Yard.Generators.RNGLR.ReadBack.Printer
+open Yard.Generators.RNGLR.ReadBack.AstActionCodeGenerator
 
 open Yard.Generators.RNGLR.TranslatorPrinter
 
@@ -35,10 +37,10 @@ open Yard.Generators.RNGLR.TranslatorPrinter
 do()
 
 [<Extension>]
-type RNGLR() = 
+type RNGLRReadBack() = 
     inherit Generator()
         override this.Name = "RNGLR.ReadBackGenerator"
-        override this.Constraints = [|noMeta; noBrackets; needAC; singleModule|]
+        override this.Constraints = [|noMeta; needAC; singleModule|]
         override this.Generate (definition, args) =
             let start = DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
@@ -65,6 +67,8 @@ type RNGLR() =
             let mutable fullPath = getBoolOption "fullpath" false
             let mutable positionType = getOption "pos" "" id
             let needTranslate = ref <| getBoolOption "translate" true
+            //nodes prefix option
+            let mutable translateToAst = getOption "translateToAst" None Some
             let needHighlighting = ref <| getBoolOption "highlighting" false
             let namespaceName = ref <| getOption "namespace" "NamespaceName" id
             let mutable light = getBoolOption "light" true
@@ -111,13 +115,22 @@ type RNGLR() =
                         | "scala" -> Scala
                         | s -> failwithf "Language %s is not supported" s*)
                 | "-abstract" -> isAbstractParsingMode := getBoolValue "abstract" value
+                | "-translateToAst" -> translateToAst <- Some value
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
             let mutable newDefinition = initialConvert definition
             
 //            if !needHighlighting 
 //            then newDefinition <- highlightingConvertions newDefinition
-
+            
+            let translateToAstTypes = ref ""
+            if translateToAst.IsSome then
+                needTranslate := true
+                //let outDir = output.Substring (0, ((output.LastIndexOf @"\ /") + 1))
+                let rulesWithTranslateMeta, translateToAstTypes' = setTranslateToTreeMeta newDefinition.grammar.[0].rules translateToAst.Value //outDir
+                translateToAstTypes := translateToAstTypes'
+                //additionalHeaders := !additionalHeaders + ("open " + astModule + "\n")
+                newDefinition <- {newDefinition with grammar = [{newDefinition.grammar.Head with rules=rulesWithTranslateMeta}]}
             let grammar = new FinalGrammarNFA(newDefinition.grammar.[0].rules, caseSensitive, !needTranslate)
 
             (*if !needHighlighting
@@ -185,6 +198,8 @@ type RNGLR() =
                     //TODO: maybe condition on needTranslate (no need in Tree otherwise)
                     println "open Yard.Generators.RNGLR.ReadBack.Tree"
 
+                    //print "%s" !additionalHeaders
+
                     (*if !needHighlighting
                     then 
                         println "open YC.SDK.ReSharper.Helper"
@@ -210,7 +225,7 @@ type RNGLR() =
                 | Scala -> scalaHeaders()
 
             printHeaders moduleName fullPath light output targetLanguage
-            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive
+            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType (Some !translateToAstTypes) caseSensitive
             let res = 
                 if not !needTranslate || targetLanguage = Scala 
                 then tables

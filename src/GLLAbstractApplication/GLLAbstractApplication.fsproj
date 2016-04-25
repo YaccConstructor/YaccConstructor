@@ -34,6 +34,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <Compile Include="SimpleAmb.yrd.fs" />
+    <Compile Include="SimpleAmb2.yrd.fs" />
     <Compile Include="Program.fs" />
     <Content Include="packages.config" />
   </ItemGroup>
@@ -129,6 +130,16 @@
     <ProjectReference Include="..\Parser.Common\GLLParsers.Common.fsproj">
       <Name>GLLParsers.Common</Name>
       <Project>{f2e8eda4-c13f-4f8d-b858-d5ef4fb8a06d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
+      <Name>RNGLRAbstractParser</Name>
+      <Project>{1873ea19-fab7-4d5f-b452-67c0b93c8b9b}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
+      <Name>RNGLRCommon</Name>
+      <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">

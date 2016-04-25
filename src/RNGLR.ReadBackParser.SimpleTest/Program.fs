@@ -5,6 +5,7 @@ open NUnit.Framework
 open LexCommon
 open Yard.Generators.RNGLR.ReadBack.Printers
 open Yard.Generators.RNGLR.ReadBack.Tree
+open CalcAstEvaluate
 
 type TestExpectedResult =
     | TER_Success
@@ -153,9 +154,9 @@ type ``RNGLRReadBack parser tests with simple lexer`` () =
     member test.``9.0 CalcEBNF`` () = 
         let parser = RNGLR.ReadBackParser.CalcEBNF.buildAst
         let parserSource = RNGLR.ReadBackParser.CalcEBNF.numToString, RNGLR.ReadBackParser.CalcEBNF.tokenToNumber
-        let translate = RNGLR.ReadBackParser.CalcEBNF.translateAst
+        let translate = Some (RNGLR.ReadBackParser.CalcEBNF.translateAst >> CalcEvaluate)
         let file = "CalcEBNF.txt"
-        runTest parser parserSource file TER_Success (Some translate)
+        runTest parser parserSource file TER_Success translate
 
     (*[<Test>]
     member test.``Choice`` () = 

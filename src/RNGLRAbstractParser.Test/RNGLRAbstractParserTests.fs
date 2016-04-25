@@ -971,19 +971,19 @@ let f x =
 //    t._28_UnambiguousBrackets_DifferentPathLengths ()
 //    t.``TSQL performance test for Alvor`` 2 100 false
 //    t._29_AandB_Circle ()
-//    t._30_Errors_PrettySimpleCalc_FirstEdge ()
-//    t._31_Errors_PrettySimpleCalc_FirstEdge2 ()
-//    t._32_Errors_PrettySimpleCalc_FirstEdge3 ()
-//    t._33_Errors_PrettySimpleCalc_SimpleBranchError ()
-//    t._34_Errors_PrettySimpleCalc_SimpleBranchError2 ()
-//    t._35_Errors_PrettySimpleCalc_ComplexBranchError ()
-//    t._36_Errors_PrettySimpleCalc_ComplexBranchError2 ()
+//    t._30_Errors_PrettySimpleCalc_FirstEdge () //ок
+//    t._31_Errors_PrettySimpleCalc_FirstEdge2 () //ок
+//    t._32_Errors_PrettySimpleCalc_FirstEdge3 () //ок
+//    t._33_Errors_PrettySimpleCalc_SimpleBranchError () //ок
+//    t._34_Errors_PrettySimpleCalc_SimpleBranchError2 () //ок
+//    t._35_Errors_PrettySimpleCalc_ComplexBranchError () //ок
+//    t._36_Errors_PrettySimpleCalc_ComplexBranchError2 () //ок
 //    t._37_Errors_StrangeBrackets_Inf ()
-//    t._38_Errors_StrangeBrackets_SequenceInput ()
-//    t._39_Errors_StrangeBrackets_SequenceInput2 ()
-//    t._40_Errors_StrangeBrackets_SimpleLoop ()
-//    t._41_Errors_StrangeBrackets_SimpleLoop2 ()
-//    t._42_Errors_AB_SimpleBranch ()
+//    t._38_Errors_StrangeBrackets_SequenceInput () //ok
+//    t._39_Errors_StrangeBrackets_SequenceInput2 () //ok
+//    t._40_Errors_StrangeBrackets_SimpleLoop () //ok
+//    t._41_Errors_StrangeBrackets_SimpleLoop2 () //ok
+//    t._42_Errors_AB_SimpleBranch () //ok
 //    t._25_UnambiguousBrackets_temp () 
 //    t.``TSQL performance test 2`` 2 100 false
 //    t.temp ()

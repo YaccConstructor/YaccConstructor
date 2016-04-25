@@ -771,16 +771,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             for e in outEdgesInnerGraph.[startV.vNum] do
                 addNonZeroReduction newVertex e.Tag edge startV
 
-        (*if isNotEps
-        then
-            let prefixes = gssVertexesToPrefixes.[newVertex]
-            for lprefixToAdd in lprefixesToAdd do
-                addPrefix prefixes lprefixToAdd
-            for e in outEdgesInnerGraph.[startV.vNum] do
-                addNonZeroReduction newVertex e.Tag edge startV
-        else
-            gssVertexesToPrefixes.[newVertex] <- lprefixesToAdd*)
-
     let edgesToTerms = new Dictionary<_,_>()
     let push (currentGraphV:VInfo<_>) (gssVertex : Vertex) =
         let newUnprocessedGssVs = new ResizeArray<_>(2)
@@ -998,37 +988,41 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         |Some old -> oldAst
         |None -> Some newAst
 
-//to do add epsilon cases (think about epsilon cycle)
-    let rec isContainPref (ast:AstNode option) (curAstPrefix:LabledPrefix<_>) (wasAstStarts:ResizeArray<AstNode> option) (findAst:AstNode option) (findPrefix:LabledPrefix<_>) (wasFindStarts:ResizeArray<AstNode> option) 
-                            (wasAstPrefixes:ResizeArray<LabledPrefix<_>>) (wasFindPrefixes:ResizeArray<LabledPrefix<_>>) =    //to do
+    let getNewWas oldWas newElem =
+        let newWas = new ResizeArray<LabledPrefix<_>>()
+        newWas.AddRange(oldWas)
+        newWas.Add(newElem)
+        newWas
+
+    let rec isContainPref (ast:AstNode option) (curAstPrefix:LabledPrefix<_>) (wasAstStarts:ResizeArray<AstNode> option) (findAst:AstNode option) (findPrefix:LabledPrefix<_>)
+                            (wasFindStarts:ResizeArray<AstNode> option) (wasAstPrefixes:ResizeArray<LabledPrefix<_>>) (wasFindPrefixes:ResizeArray<LabledPrefix<_>>) =
 
         if wasAstPrefixes.Contains(curAstPrefix) || wasFindPrefixes.Contains(findPrefix)
         then
             false
         else
-            let newWasAst = new ResizeArray<LabledPrefix<_>>()
-            newWasAst.AddRange(wasAstPrefixes)
-            newWasAst.Add(curAstPrefix)
-            let newWasFind = new ResizeArray<LabledPrefix<_>>()
-            newWasFind.AddRange(wasFindPrefixes)
-            newWasFind.Add(findPrefix)
-            if curAstPrefix = findPrefix    //bad compare
+            if curAstPrefix = findPrefix
             then
                 true
             else
                 match (curAstPrefix, findPrefix) with
                 |(Epsilon (gssV, astEpsPrefixes), _) ->
-                    astEpsPrefixes.Any(fun astEpsPref -> isContainPref ast astEpsPref None findAst findPrefix wasFindStarts newWasAst newWasFind)
+                    let newWasAst = getNewWas wasAstPrefixes curAstPrefix
+                    astEpsPrefixes.Any(fun astEpsPref -> isContainPref ast astEpsPref None findAst findPrefix wasFindStarts newWasAst wasFindPrefixes)
                 |(_, Epsilon (gssV, findEpsPrefixes)) ->
-                    findEpsPrefixes.All(fun findEpsPref -> isContainPref ast curAstPrefix wasAstStarts findAst findEpsPref None newWasAst newWasFind)
+                    let newWasFind = getNewWas wasFindPrefixes findPrefix
+                    findEpsPrefixes.All(fun findEpsPref -> isContainPref ast curAstPrefix wasAstStarts findAst findEpsPref None wasAstPrefixes newWasFind)
                 |(Pref astPref, Pref findPref) ->
                     if astPref.Head = findPref.Head
                     then
+                        let newWasAst = getNewWas wasAstPrefixes curAstPrefix
+                        let newWasFind = getNewWas wasFindPrefixes findPrefix
                         findPref.Tail.All(fun findTail -> astPref.Tail.Any(fun astTail -> isContainPref ast astTail None findAst findTail None newWasAst newWasFind))
                     else
                         false
                 |(Pref astPref, NontermStart (curFindAst, findAstPrefixes)) ->
                     let nextFindAst = getNewAst findAst curFindAst
+                    let newWasFind = getNewWas wasFindPrefixes findPrefix
                     match wasFindStarts with
                     |Some starts ->
                         if starts.Contains(curFindAst)
@@ -1036,17 +1030,18 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                             true
                         else
                             starts.Add(curFindAst)
-                            findAstPrefixes.All(fun findAstPrefix -> isContainPref ast curAstPrefix wasAstStarts nextFindAst findAstPrefix wasFindStarts newWasAst newWasFind)
+                            findAstPrefixes.All(fun findAstPrefix -> isContainPref ast curAstPrefix wasAstStarts nextFindAst findAstPrefix wasFindStarts wasAstPrefixes newWasFind)
                     |None ->
                         let newWasFindStarts = new ResizeArray<_>()
                         newWasFindStarts.Add(curFindAst)
-                        findAstPrefixes.All(fun findAstPrefix -> isContainPref ast curAstPrefix wasAstStarts nextFindAst findAstPrefix (Some newWasFindStarts) newWasAst newWasFind)
+                        findAstPrefixes.All(fun findAstPrefix -> isContainPref ast curAstPrefix wasAstStarts nextFindAst findAstPrefix (Some newWasFindStarts) wasAstPrefixes newWasFind)
                 |(Pref astPref, NontermEnd (curFindAst, findAstPrefixes)) ->
                     match findAst with
                     |Some fast ->
                         if fast = curFindAst
                         then
-                            findAstPrefixes.All(fun findAstPrefix -> isContainPref ast curAstPrefix None None findAstPrefix None newWasAst newWasFind)
+                            let newWasFind = getNewWas wasFindPrefixes findPrefix
+                            findAstPrefixes.All(fun findAstPrefix -> isContainPref ast curAstPrefix None None findAstPrefix None wasAstPrefixes newWasFind)
                         else
                             true
                     |None ->
@@ -1055,6 +1050,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     false
                 |(NontermStart (newAst, newAstPrefixes), Pref findPref) ->
                     let nextAst = getNewAst ast newAst
+                    let newWasAst = getNewWas wasAstPrefixes curAstPrefix
                     match wasAstStarts with
                     |Some starts ->
                         if starts.Contains(newAst)
@@ -1062,14 +1058,16 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                             false
                         else
                             starts.Add(newAst)
-                            newAstPrefixes.Any(fun newAstPrefix -> isContainPref nextAst newAstPrefix wasAstStarts findAst findPrefix wasFindStarts newWasAst newWasFind)
+                            newAstPrefixes.Any(fun newAstPrefix -> isContainPref nextAst newAstPrefix wasAstStarts findAst findPrefix wasFindStarts newWasAst wasFindPrefixes)
                     |None ->
                         let newWasAstStarts = new ResizeArray<_>()
                         newWasAstStarts.Add(newAst)
-                        newAstPrefixes.Any(fun newAstPrefix -> isContainPref nextAst newAstPrefix (Some newWasAstStarts) findAst findPrefix wasFindStarts newWasAst newWasFind)
+                        newAstPrefixes.Any(fun newAstPrefix -> isContainPref nextAst newAstPrefix (Some newWasAstStarts) findAst findPrefix wasFindStarts newWasAst wasFindPrefixes)
                 |(NontermStart (newAst, newAstPrefixes), NontermStart (curFindAst, findAstPrefixes)) ->
                     let nextFindAst = getNewAst findAst curFindAst
                     let nextAst = getNewAst ast newAst
+                    let newWasAst = getNewWas wasAstPrefixes curAstPrefix
+                    let newWasFind = getNewWas wasFindPrefixes findPrefix
                     match (wasAstStarts, wasFindStarts) with
                     |(Some astStarts, Some findStarts) ->
                         if findStarts.Contains(curFindAst)
@@ -1110,6 +1108,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         findAstPrefixes.All(fun findAstPrefix -> newAstPrefixes.Any(fun newAstPrefix -> isContainPref nextAst newAstPrefix (Some newWasAstStarts) nextFindAst findAstPrefix (Some newWasFindStarts) newWasAst newWasFind))
                 |(NontermStart (newAst, newAstPrefixes), NontermEnd (curFindAst, findAstPrefixes)) ->
                     let nextAst = getNewAst ast newAst
+                    let newWasAst = getNewWas wasAstPrefixes curAstPrefix
+                    let newWasFind = getNewWas wasFindPrefixes findPrefix
                     match findAst with
                     |Some fast ->
                         if fast = curFindAst
@@ -1137,13 +1137,16 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     |Some xast ->
                         if xast = newAst
                         then
-                            newAstPrefixes.Any(fun newAstPrefix -> isContainPref None newAstPrefix None findAst findPrefix None newWasAst newWasFind)
+                            let newWasAst = getNewWas wasAstPrefixes curAstPrefix
+                            newAstPrefixes.Any(fun newAstPrefix -> isContainPref None newAstPrefix None findAst findPrefix None newWasAst wasFindPrefixes)
                         else
                             false
                     |None ->
                         false
                 |(NontermEnd (newAst, newAstPrefixes), NontermStart (curFindAst, findAstPrefixes)) ->
                     let nextFindAst = getNewAst findAst curFindAst
+                    let newWasAst = getNewWas wasAstPrefixes curAstPrefix
+                    let newWasFind = getNewWas wasFindPrefixes findPrefix
                     match ast with
                     |Some xast ->
                         if xast = newAst
@@ -1165,6 +1168,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     |None ->
                         false
                 |(NontermEnd (newAst, newAstPrefixes), NontermEnd (curFindAst, findAstPrefixes)) ->
+                    let newWasAst = getNewWas wasAstPrefixes curAstPrefix
+                    let newWasFind = getNewWas wasFindPrefixes findPrefix
                     match (ast, findAst) with
                     |(Some xast, Some fast) ->
                         if xast = newAst

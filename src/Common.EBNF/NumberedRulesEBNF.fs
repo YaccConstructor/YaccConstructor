@@ -81,6 +81,7 @@ type TranslateBuilder () =
         this.PrintSkipEdge()
         inLoopCode()
         this.Untab()
+        this.PrintSkipEdge()
         this.Append "yield x"
         this.Untab()
         this.Untab()

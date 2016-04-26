@@ -38,74 +38,74 @@ open RNGLR.SimpleAmb
 let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)
 
-let graphGenerator numberOfBlocks numberOfPath =
-    let final = 100
-    let qGraph = new ParserInputGraph<_>(0, final)
-    let mutable b = 1
-    let mutable e = 2
-    let mutable curB = 1
-    let mutable curE = 3
-    let chains = Array.zeroCreate 5
-    let ra1 = new ResizeArray<_>()
-    ra1.Add(GLL.SimpleAmb.DEC_NUMBER 0)
-    ra1.Add(GLL.SimpleAmb.L_plus_ 0)
-    ra1.Add(GLL.SimpleAmb.IDENT 0)
-    let ra2 = new ResizeArray<_>()
-    ra2.Add(GLL.SimpleAmb.IDENT 0)
-    ra2.Add(GLL.SimpleAmb.L_plus_ 0)
-    ra2.Add(GLL.SimpleAmb.IDENT 0)
-    let ra3 = new ResizeArray<_>()
-    ra3.Add(GLL.SimpleAmb.L_left_bracket_ 0)
-    ra3.Add(GLL.SimpleAmb.IDENT 0)
-    ra3.Add(GLL.SimpleAmb.L_plus_ 0)
-    ra3.Add(GLL.SimpleAmb.IDENT 0)
-    ra3.Add(GLL.SimpleAmb.L_right_bracket_ 0)
-    let ra4 = new ResizeArray<_>()
-    ra4.Add(GLL.SimpleAmb.L_null 0)
-    ra4.Add(GLL.SimpleAmb.L_null 0)
-    let ra5 = new ResizeArray<_>()
-    ra5.Add(GLL.SimpleAmb.STRING_CONST 0)
-    ra5.Add(GLL.SimpleAmb.L_plus_ 0)
-    ra5.Add(GLL.SimpleAmb.IDENT 0)
-    chains.[0] <- ra1
-    chains.[1] <- ra2
-    chains.[2] <- ra3
-    chains.[3] <- ra4
-    chains.[4] <- ra5    
-    (qGraph.AddVerticesAndEdge <| edg 0 1 (GLL.SimpleAmb.L_select 0)) |> ignore
-    for blocks = 0 to numberOfBlocks - 1 do
-        for i = 0 to numberOfPath - 1 do
-            let curChain = chains.[i]
-            for k = 0 to curChain.Count - 1 do
-                if k <> curChain.Count - 1 then
-                    qGraph.AddVerticesAndEdge <| edg curB curE (curChain.[k]) |> ignore  
-                    curB <- curE
-                    curE <- curE + 1
-                else
-                    qGraph.AddVerticesAndEdge <| edg curB e (curChain.[k]) |> ignore
-                    if i <> numberOfPath - 1 then
-                        curE <- curE
-                        curB <- b
-        if blocks <> numberOfBlocks - 1 then
-            b <- e
-            e <- curE               
-            qGraph.AddVerticesAndEdge <| edg b e (GLL.SimpleAmb.L_comma_ 0) |> ignore
-            b <- e
-            e <- e + 1
-            curB <- b
-            curE <- e + 1
-    b <- e
-    e <- curE               
-    qGraph.AddVerticesAndEdge <| edg b e (GLL.SimpleAmb.L_from 0) |> ignore
-    b <- e
-    e <- e + 1
-    qGraph.AddVerticesAndEdge <| edg b e (GLL.SimpleAmb.IDENT 0) |> ignore
-    b <- e
-    e <- e + 1
-    qGraph.AddVerticesAndEdge <| edg b e (GLL.SimpleAmb.RNGLR_EOF 0) |> ignore
-    qGraph.FinalStates <- [|e|]
-    qGraph.PrintToDot "input.dot" (GLL.SimpleAmb.tokenToNumber >> GLL.SimpleAmb.numToString)
-    qGraph
+//let graphGenerator numberOfBlocks numberOfPath =
+//    let final = 100
+//    let qGraph = new ParserInputGraph<_>(0, final)
+//    let mutable b = 1
+//    let mutable e = 2
+//    let mutable curB = 1
+//    let mutable curE = 3
+//    let chains = Array.zeroCreate 5
+//    let ra1 = new ResizeArray<_>()
+//    ra1.Add(GLL.SimpleAmb.DEC_NUMBER 0)
+//    ra1.Add(GLL.SimpleAmb.L_plus_ 0)
+//    ra1.Add(GLL.SimpleAmb.IDENT 0)
+//    let ra2 = new ResizeArray<_>()
+//    ra2.Add(GLL.SimpleAmb.IDENT 0)
+//    ra2.Add(GLL.SimpleAmb.L_plus_ 0)
+//    ra2.Add(GLL.SimpleAmb.IDENT 0)
+//    let ra3 = new ResizeArray<_>()
+//    ra3.Add(GLL.SimpleAmb.L_left_bracket_ 0)
+//    ra3.Add(GLL.SimpleAmb.IDENT 0)
+//    ra3.Add(GLL.SimpleAmb.L_plus_ 0)
+//    ra3.Add(GLL.SimpleAmb.IDENT 0)
+//    ra3.Add(GLL.SimpleAmb.L_right_bracket_ 0)
+//    let ra4 = new ResizeArray<_>()
+//    ra4.Add(GLL.SimpleAmb.L_null 0)
+//    ra4.Add(GLL.SimpleAmb.L_null 0)
+//    let ra5 = new ResizeArray<_>()
+//    ra5.Add(GLL.SimpleAmb.STRING_CONST 0)
+//    ra5.Add(GLL.SimpleAmb.L_plus_ 0)
+//    ra5.Add(GLL.SimpleAmb.IDENT 0)
+//    chains.[0] <- ra1
+//    chains.[1] <- ra2
+//    chains.[2] <- ra3
+//    chains.[3] <- ra4
+//    chains.[4] <- ra5    
+//    (qGraph.AddVerticesAndEdge <| edg 0 1 (GLL.SimpleAmb.L_select 0)) |> ignore
+//    for blocks = 0 to numberOfBlocks - 1 do
+//        for i = 0 to numberOfPath - 1 do
+//            let curChain = chains.[i]
+//            for k = 0 to curChain.Count - 1 do
+//                if k <> curChain.Count - 1 then
+//                    qGraph.AddVerticesAndEdge <| edg curB curE (curChain.[k]) |> ignore  
+//                    curB <- curE
+//                    curE <- curE + 1
+//                else
+//                    qGraph.AddVerticesAndEdge <| edg curB e (curChain.[k]) |> ignore
+//                    if i <> numberOfPath - 1 then
+//                        curE <- curE
+//                        curB <- b
+//        if blocks <> numberOfBlocks - 1 then
+//            b <- e
+//            e <- curE               
+//            qGraph.AddVerticesAndEdge <| edg b e (GLL.SimpleAmb.L_comma_ 0) |> ignore
+//            b <- e
+//            e <- e + 1
+//            curB <- b
+//            curE <- e + 1
+//    b <- e
+//    e <- curE               
+//    qGraph.AddVerticesAndEdge <| edg b e (GLL.SimpleAmb.L_from 0) |> ignore
+//    b <- e
+//    e <- e + 1
+//    qGraph.AddVerticesAndEdge <| edg b e (GLL.SimpleAmb.IDENT 0) |> ignore
+//    b <- e
+//    e <- e + 1
+//    qGraph.AddVerticesAndEdge <| edg b e (GLL.SimpleAmb.RNGLR_EOF 0) |> ignore
+//    qGraph.FinalStates <- [|e|]
+//    qGraph.PrintToDot "input.dot" (GLL.SimpleAmb.tokenToNumber >> GLL.SimpleAmb.numToString)
+//    qGraph
     
 //let f arr tokenToNumber = Array.map (fun e -> tokenToNumber e) arr
 //let len (edges : BioParserEdge<'token>[]) : int[] = edges |> Array.map (fun e -> e.Tokens.Length + 1) 
@@ -132,99 +132,131 @@ let graphGenerator numberOfBlocks numberOfPath =
 //| ParserCommon.ParseResult.Success tree->
 //    printfn "%s" "sss"
 
-
-let f () =  
-    let parser = GLL.SimpleAmb.buildAbstractAst
-    System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
-    for i = 0 to 100 do
-        System.GC.Collect()
-        let g = graphGenerator (1 + i) 2 
-        let start = System.DateTime.Now
-        let r = parser g
-        let finish = System.DateTime.Now - start
-        printfn "%i  : %A" (i+1) finish.TotalSeconds
-        match r with
-        |  Yard.Generators.GLL.ParserCommon.Error _ ->
-            printfn "Error"     
-        | Yard.Generators.GLL.ParserCommon.Success tree->
-            ()
-    
-let th = new System.Threading.Thread(f, 10000000)
-th.Start()
-
-let graphGenerator2 numberOfBlocks numberOfPath =
+let graphGenerator numberOfBlocks  =
     let final = 100
     let qGraph = new ParserInputGraph<_>(0, final)
-    let mutable b = 1
-    let mutable e = 2
-    let mutable curB = 1
-    let mutable curE = 3
-    let chains = Array.zeroCreate 5
-    let ra1 = new ResizeArray<_>()
-    ra1.Add(RNGLR.SimpleAmb.DEC_NUMBER 0)
-    ra1.Add(RNGLR.SimpleAmb.L_plus_ 0)
-    ra1.Add(RNGLR.SimpleAmb.IDENT 0)
-    let ra2 = new ResizeArray<_>()
-    ra2.Add(RNGLR.SimpleAmb.IDENT 0)
-    ra2.Add(RNGLR.SimpleAmb.L_plus_ 0)
-    ra2.Add(RNGLR.SimpleAmb.IDENT 0)
-    let ra3 = new ResizeArray<_>()
-    ra3.Add(RNGLR.SimpleAmb.L_left_bracket_ 0)
-    ra3.Add(RNGLR.SimpleAmb.IDENT 0)
-    ra3.Add(RNGLR.SimpleAmb.L_plus_ 0)
-    ra3.Add(RNGLR.SimpleAmb.IDENT 0)
-    ra3.Add(RNGLR.SimpleAmb.L_right_bracket_ 0)
-    let ra4 = new ResizeArray<_>()
-    ra4.Add(RNGLR.SimpleAmb.L_null 0)
-    ra4.Add(RNGLR.SimpleAmb.L_null 0)
-    let ra5 = new ResizeArray<_>()
-    ra5.Add(RNGLR.SimpleAmb.STRING_CONST 0)
-    ra5.Add(RNGLR.SimpleAmb.L_plus_ 0)
-    ra5.Add(RNGLR.SimpleAmb.IDENT 0)
-    chains.[0] <- ra1
-    chains.[1] <- ra2
-    chains.[2] <- ra3
-    chains.[3] <- ra4
-    chains.[4] <- ra5    
-    (qGraph.AddVerticesAndEdge <| edg 0 1 (RNGLR.SimpleAmb.L_select 0)) |> ignore
+    let mutable b = 0
+    let mutable e = 1
     for blocks = 0 to numberOfBlocks - 1 do
-        for i = 0 to numberOfPath - 1 do
-            let curChain = chains.[i]
-            for k = 0 to curChain.Count - 1 do
-                if k <> curChain.Count - 1 then
-                    qGraph.AddVerticesAndEdge <| edg curB curE (curChain.[k]) |> ignore  
-                    curB <- curE
-                    curE <- curE + 1
-                else
-                    qGraph.AddVerticesAndEdge <| edg curB e (curChain.[k]) |> ignore
-                    if i <> numberOfPath - 1 then
-                        curE <- curE
-                        curB <- b
-        if blocks <> numberOfBlocks - 1 then
-            b <- e
-            e <- curE               
-            qGraph.AddVerticesAndEdge <| edg b e (RNGLR.SimpleAmb.L_comma_ 0) |> ignore
-            b <- e
-            e <- e + 1
-            curB <- b
-            curE <- e + 1
-    b <- e
-    e <- curE               
-    qGraph.AddVerticesAndEdge <| edg b e (RNGLR.SimpleAmb.L_from 0) |> ignore
-    b <- e
-    e <- e + 1
-    qGraph.AddVerticesAndEdge <| edg b e (RNGLR.SimpleAmb.IDENT 0) |> ignore
-    b <- e
-    e <- e + 1
+        qGraph.AddVerticesAndEdge <| edg b e (GLL.SimpleAmb.B 0) |> ignore
+        b <- e
+        e <- e + 1     
+    qGraph.AddVerticesAndEdge <| edg b e (GLL.SimpleAmb.RNGLR_EOF 0) |> ignore
+    qGraph.FinalStates <- [|e|]
+    qGraph.PrintToDot "input.dot" (GLL.SimpleAmb.tokenToNumber >> GLL.SimpleAmb.numToString)
+    qGraph
+
+let graphGenerator2 numberOfBlocks  =
+    let final = 100
+    let qGraph = new ParserInputGraph<_>(0, final)
+    let mutable b = 0
+    let mutable e = 1
+    for blocks = 0 to numberOfBlocks - 1 do
+        qGraph.AddVerticesAndEdge <| edg b e (RNGLR.SimpleAmb.B 0) |> ignore
+        b <- e
+        e <- e + 1     
     qGraph.AddVerticesAndEdge <| edg b e (RNGLR.SimpleAmb.RNGLR_EOF 0) |> ignore
     qGraph.FinalStates <- [|e|]
-    //qGraph.PrintToDot "input.dot" (RNGLR.SimpleAmb.tokenToNumber >> GLL.SimpleAmb.numToString)
+    qGraph.PrintToDot "input.dot" (RNGLR.SimpleAmb.tokenToNumber >> GLL.SimpleAmb.numToString)
     qGraph
+
+//let f () =  
+let parser = GLL.SimpleAmb.buildAbstractAst
+//let parser2 = RNGLR.SimpleAmb.buildAstAbstract
+//System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
+//for i = 50 to 150 do
+let g = graphGenerator (100) 
+//let g2 = graphGenerator2 (100) 
+let start = System.DateTime.Now
+let r = parser g
+let finish = System.DateTime.Now - start
+printfn " : %A"  finish.TotalSeconds
+let start2 = System.DateTime.Now
+//let r2 = parser2 g2
+let finis2h = System.DateTime.Now - start
+printfn " : %A"  finish.TotalSeconds
+match r with
+|  Yard.Generators.GLL.ParserCommon.Error _ ->
+    printfn "Error"     
+| Yard.Generators.GLL.ParserCommon.Success tree->
+    ()
+    
+//let th = new System.Threading.Thread(f, 10000000)
+//th.Start()
+
+//let graphGenerator2 numberOfBlocks numberOfPath =
+//    let final = 100
+//    let qGraph = new ParserInputGraph<_>(0, final)
+//    let mutable b = 1
+//    let mutable e = 2
+//    let mutable curB = 1
+//    let mutable curE = 3
+//    let chains = Array.zeroCreate 5
+//    let ra1 = new ResizeArray<_>()
+//    ra1.Add(RNGLR.SimpleAmb.DEC_NUMBER 0)
+//    ra1.Add(RNGLR.SimpleAmb.L_plus_ 0)
+//    ra1.Add(RNGLR.SimpleAmb.IDENT 0)
+//    let ra2 = new ResizeArray<_>()
+//    ra2.Add(RNGLR.SimpleAmb.IDENT 0)
+//    ra2.Add(RNGLR.SimpleAmb.L_plus_ 0)
+//    ra2.Add(RNGLR.SimpleAmb.IDENT 0)
+//    let ra3 = new ResizeArray<_>()
+//    ra3.Add(RNGLR.SimpleAmb.L_left_bracket_ 0)
+//    ra3.Add(RNGLR.SimpleAmb.IDENT 0)
+//    ra3.Add(RNGLR.SimpleAmb.L_plus_ 0)
+//    ra3.Add(RNGLR.SimpleAmb.IDENT 0)
+//    ra3.Add(RNGLR.SimpleAmb.L_right_bracket_ 0)
+//    let ra4 = new ResizeArray<_>()
+//    ra4.Add(RNGLR.SimpleAmb.L_null 0)
+//    ra4.Add(RNGLR.SimpleAmb.L_null 0)
+//    let ra5 = new ResizeArray<_>()
+//    ra5.Add(RNGLR.SimpleAmb.STRING_CONST 0)
+//    ra5.Add(RNGLR.SimpleAmb.L_plus_ 0)
+//    ra5.Add(RNGLR.SimpleAmb.IDENT 0)
+//    chains.[0] <- ra1
+//    chains.[1] <- ra2
+//    chains.[2] <- ra3
+//    chains.[3] <- ra4
+//    chains.[4] <- ra5    
+//    (qGraph.AddVerticesAndEdge <| edg 0 1 (RNGLR.SimpleAmb.L_select 0)) |> ignore
+//    for blocks = 0 to numberOfBlocks - 1 do
+//        for i = 0 to numberOfPath - 1 do
+//            let curChain = chains.[i]
+//            for k = 0 to curChain.Count - 1 do
+//                if k <> curChain.Count - 1 then
+//                    qGraph.AddVerticesAndEdge <| edg curB curE (curChain.[k]) |> ignore  
+//                    curB <- curE
+//                    curE <- curE + 1
+//                else
+//                    qGraph.AddVerticesAndEdge <| edg curB e (curChain.[k]) |> ignore
+//                    if i <> numberOfPath - 1 then
+//                        curE <- curE
+//                        curB <- b
+//        if blocks <> numberOfBlocks - 1 then
+//            b <- e
+//            e <- curE               
+//            qGraph.AddVerticesAndEdge <| edg b e (RNGLR.SimpleAmb.L_comma_ 0) |> ignore
+//            b <- e
+//            e <- e + 1
+//            curB <- b
+//            curE <- e + 1
+//    b <- e
+//    e <- curE               
+//    qGraph.AddVerticesAndEdge <| edg b e (RNGLR.SimpleAmb.L_from 0) |> ignore
+//    b <- e
+//    e <- e + 1
+//    qGraph.AddVerticesAndEdge <| edg b e (RNGLR.SimpleAmb.IDENT 0) |> ignore
+//    b <- e
+//    e <- e + 1
+//    qGraph.AddVerticesAndEdge <| edg b e (RNGLR.SimpleAmb.RNGLR_EOF 0) |> ignore
+//    qGraph.FinalStates <- [|e|]
+//    //qGraph.PrintToDot "input.dot" (RNGLR.SimpleAmb.tokenToNumber >> GLL.SimpleAmb.numToString)
+//    qGraph
 
   
 //let parser2 = RNGLR.SimpleAmb.buildAstAbstract
-//for i = 0 to 100 do
-//    let g = graphGenerator2 (1 + i) 2 
+//for i = 50 to 150 do
+//    let g = graphGenerator2 (1 + i) 4 
 //    let start = System.DateTime.Now
 //    let r = parser2 g
 //    let finish = System.DateTime.Now - start

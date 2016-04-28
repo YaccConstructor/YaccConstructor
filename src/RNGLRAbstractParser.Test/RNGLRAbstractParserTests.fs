@@ -25,6 +25,7 @@ open RNGLR.SimpleCalc
 open RNGLR.PrettySimpleCalc
 open Yard.Generators.RNGLR.AbstractParser
 open YC.Tests.Helper
+open RNGLR.Tesssst
 open Yard.Generators.ARNGLR.Parser
 
 open QuickGraph.FSA.GraphBasedFsa
@@ -47,7 +48,7 @@ let loadLexerInputGraph gFile =
 let test buildAstAbstract qGraph nodesCount edgesCount epsilonsCount termsCount ambiguityCount = 
     let start = System.DateTime.Now
     let r = (new Parser<_>()).Parse  buildAstAbstract qGraph
-    printfn "REsult = %A \n Time = %A" r (System.DateTime.Now - start)
+    printfn "Result = %A \n Time = %A" r (System.DateTime.Now - start)
     match r with
     | Error (num, tok, message) ->
         let msg = sprintf "Error in position %d on Token %A: %s" num tok message
@@ -689,91 +690,91 @@ type ``RNGLR abstract parser tests`` () =
         let parse = (new Parser<_>()).Parse RNGLR.NotAmbigousSimpleCalc.buildAstAbstract
         perfTest parse inpLength graph
 
-    member this.``TSQL performance test`` i inpLength isLoop =  
-        let tpl x =
-            [
-             yield! [for y in 0 .. i - 2  -> edg x (x + 1) (Yard.Examples.MSParserAbstract.IDENT(new FSA<_>()))]
-             yield edg (if isLoop then x + 1 else x) (if isLoop then x else x + 1) (Yard.Examples.MSParserAbstract.IDENT(new FSA<_>()))
-             yield edg (x + 1) (x + 2) (Yard.Examples.MSParserAbstract.L_comma_(new FSA<_>()))
-            ]
-
-        let graph x =
-            let eog = x * 2 + 3
-            let qGraph = new ParserInputGraph<_>(0, eog + 4)
-            for j in 0 .. x do
-                tpl (j * 2 + 1) |> qGraph.AddVerticesAndEdgeRange |> ignore
-
-            [ edg 0 1 (Yard.Examples.MSParserAbstract.L_select (new FSA<_>()))
-              edg eog (eog + 1) (Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))              
-              edg (eog + 1) (eog + 2) (Yard.Examples.MSParserAbstract.L_from (new FSA<_>()))
-              edg (eog + 2) (eog + 3) (Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))
-              edg (eog + 3) (eog + 4) (Yard.Examples.MSParserAbstract.RNGLR_EOF (new FSA<_>()))              
-            ]
-            |> qGraph.AddVerticesAndEdgeRange
-            |> ignore
-            //qGraph.PrintToDot "out.dot" (Yard.Examples.MSParser.tokenToNumber >> Yard.Examples.MSParser.numToString)
-            qGraph
-
-        let parse = (new Parser<_>()).Parse Yard.Examples.MSParserAbstract.buildAstAbstract
-        perfTest parse inpLength graph
-
-    member this.``TSQL performance test 2`` i inpLength isLoop =  
-        let tpl x =
-            [
-             yield! 
-                [
-                    for y in 0 .. i - 2  do
-                        yield edg x (x + y*2 + 2) (Yard.Examples.MSParserAbstract.IDENT(new FSA<_>()))
-                        yield edg (x + y*2 + 2) (x + y*2 + 3) (Yard.Examples.MSParserAbstract.L_plus_(new FSA<_>()))
-                        yield edg (x + y*2 + 3) (x + 1) (Yard.Examples.MSParserAbstract.IDENT(new FSA<_>()))
-                ]
-             yield edg (if isLoop then x + 1 else x) (if isLoop then x else x + 1) (Yard.Examples.MSParserAbstract.DEC_NUMBER(new FSA<_>()))
-             yield edg (x + 1) (x + (i-2)*2 + 4) (Yard.Examples.MSParserAbstract.L_comma_(new FSA<_>()))
-            ]
-
-        let graph x =
-            let eog = (x + 1) * (2 + (i-1) * 2) + 1
-            let qGraph = new ParserInputGraph<_>(0, eog + 4)
-            for j in 0 .. x do
-                tpl (j * (2 + (i-1) * 2) + 1) |> qGraph.AddVerticesAndEdgeRange |> ignore
-
-            [ edg 0 1 (Yard.Examples.MSParserAbstract.L_select (new FSA<_>()))
-              edg eog (eog + 1) (Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))              
-              edg (eog + 1) (eog + 2) (Yard.Examples.MSParserAbstract.L_from (new FSA<_>()))
-              edg (eog + 2) (eog + 3) (Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))
-              edg (eog + 3) (eog + 4) (Yard.Examples.MSParserAbstract.RNGLR_EOF (new FSA<_>()))              
-            ]
-            |> qGraph.AddVerticesAndEdgeRange
-            |> ignore
-            //qGraph.PrintToDot "out.dot" (Yard.Examples.MSParser.tokenToNumber >> Yard.Examples.MSParser.numToString)
-            qGraph
-
-        let parse = (new Parser<_>()).Parse Yard.Examples.MSParserAbstract.buildAstAbstract
-        perfTest parse inpLength graph
-
-
-    member this.``TSQL performance test for Alvor`` i inpLength isLoop =  
-        let tpl x =
-            [
-             yield! [ for y in 0 .. i - 2 -> sprintf "\"X%A + Y%A\"" (x + y*2 + 2)  (x + y*2 + 3)]
-             yield sprintf "\"%A\"" x             
-            ] |> String.concat ", "
-            |> fun s -> "{" + s + "}"
-            |> fun s -> if isLoop then "(" + s + ")+" else s 
-
-
-        let graph x =
-            let eog = (x + 1) * (2 + (i-1) * 2) + 1
-            let qGraph = new ParserInputGraph<_>(0, eog + 4)
-            let query = 
-                [for j in 0 .. x -> tpl (j * (2 + (i-1) * 2) + 1)]
-                |> String.concat "\",\""
-
-            "\"select \"" + query + "\", ddd from tbl\""
-            //qGraph.PrintToDot "out.dot" (Yard.Examples.MSParser.tokenToNumber >> Yard.Examples.MSParser.numToString)
-        seq{for i in 0..inpLength -> graph i}
-        |> fun s -> System.IO.File.WriteAllLines("sql_perf.txt",s)
-
+//    member this.``TSQL performance test`` i inpLength isLoop =  
+//        let tpl x =
+//            [
+//             yield! [for y in 0 .. i - 2  -> edg x (x + 1) (Yard.Examples.MSParserAbstract.IDENT(new FSA<_>()))]
+//             yield edg (if isLoop then x + 1 else x) (if isLoop then x else x + 1) (Yard.Examples.MSParserAbstract.IDENT(new FSA<_>()))
+//             yield edg (x + 1) (x + 2) (Yard.Examples.MSParserAbstract.L_comma_(new FSA<_>()))
+//            ]
+//
+//        let graph x =
+//            let eog = x * 2 + 3
+//            let qGraph = new ParserInputGraph<_>(0, eog + 4)
+//            for j in 0 .. x do
+//                tpl (j * 2 + 1) |> qGraph.AddVerticesAndEdgeRange |> ignore
+//
+//            [ edg 0 1 (Yard.Examples.MSParserAbstract.L_select (new FSA<_>()))
+//              edg eog (eog + 1) (Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))              
+//              edg (eog + 1) (eog + 2) (Yard.Examples.MSParserAbstract.L_from (new FSA<_>()))
+//              edg (eog + 2) (eog + 3) (Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))
+//              edg (eog + 3) (eog + 4) (Yard.Examples.MSParserAbstract.RNGLR_EOF (new FSA<_>()))              
+//            ]
+//            |> qGraph.AddVerticesAndEdgeRange
+//            |> ignore
+//            //qGraph.PrintToDot "out.dot" (Yard.Examples.MSParser.tokenToNumber >> Yard.Examples.MSParser.numToString)
+//            qGraph
+//
+//        let parse = (new Parser<_>()).Parse Yard.Examples.MSParserAbstract.buildAstAbstract
+//        perfTest parse inpLength graph
+//
+//    member this.``TSQL performance test 2`` i inpLength isLoop =  
+//        let tpl x =
+//            [
+//             yield! 
+//                [
+//                    for y in 0 .. i - 2  do
+//                        yield edg x (x + y*2 + 2) (Yard.Examples.MSParserAbstract.IDENT(new FSA<_>()))
+//                        yield edg (x + y*2 + 2) (x + y*2 + 3) (Yard.Examples.MSParserAbstract.L_plus_(new FSA<_>()))
+//                        yield edg (x + y*2 + 3) (x + 1) (Yard.Examples.MSParserAbstract.IDENT(new FSA<_>()))
+//                ]
+//             yield edg (if isLoop then x + 1 else x) (if isLoop then x else x + 1) (Yard.Examples.MSParserAbstract.DEC_NUMBER(new FSA<_>()))
+//             yield edg (x + 1) (x + (i-2)*2 + 4) (Yard.Examples.MSParserAbstract.L_comma_(new FSA<_>()))
+//            ]
+//
+//        let graph x =
+//            let eog = (x + 1) * (2 + (i-1) * 2) + 1
+//            let qGraph = new ParserInputGraph<_>(0, eog + 4)
+//            for j in 0 .. x do
+//                tpl (j * (2 + (i-1) * 2) + 1) |> qGraph.AddVerticesAndEdgeRange |> ignore
+//
+//            [ edg 0 1 (Yard.Examples.MSParserAbstract.L_select (new FSA<_>()))
+//              edg eog (eog + 1) (Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))              
+//              edg (eog + 1) (eog + 2) (Yard.Examples.MSParserAbstract.L_from (new FSA<_>()))
+//              edg (eog + 2) (eog + 3) (Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))
+//              edg (eog + 3) (eog + 4) (Yard.Examples.MSParserAbstract.RNGLR_EOF (new FSA<_>()))              
+//            ]
+//            |> qGraph.AddVerticesAndEdgeRange
+//            |> ignore
+//            //qGraph.PrintToDot "out.dot" (Yard.Examples.MSParser.tokenToNumber >> Yard.Examples.MSParser.numToString)
+//            qGraph
+//
+//        let parse = (new Parser<_>()).Parse Yard.Examples.MSParserAbstract.buildAstAbstract
+//        perfTest parse inpLength graph
+//
+//
+//    member this.``TSQL performance test for Alvor`` i inpLength isLoop =  
+//        let tpl x =
+//            [
+//             yield! [ for y in 0 .. i - 2 -> sprintf "\"X%A + Y%A\"" (x + y*2 + 2)  (x + y*2 + 3)]
+//             yield sprintf "\"%A\"" x             
+//            ] |> String.concat ", "
+//            |> fun s -> "{" + s + "}"
+//            |> fun s -> if isLoop then "(" + s + ")+" else s 
+//
+//
+//        let graph x =
+//            let eog = (x + 1) * (2 + (i-1) * 2) + 1
+//            let qGraph = new ParserInputGraph<_>(0, eog + 4)
+//            let query = 
+//                [for j in 0 .. x -> tpl (j * (2 + (i-1) * 2) + 1)]
+//                |> String.concat "\",\""
+//
+//            "\"select \"" + query + "\", ddd from tbl\""
+//            //qGraph.PrintToDot "out.dot" (Yard.Examples.MSParser.tokenToNumber >> Yard.Examples.MSParser.numToString)
+//        seq{for i in 0..inpLength -> graph i}
+//        |> fun s -> System.IO.File.WriteAllLines("sql_perf.txt",s)
+//
 
     [<Test>]
     member this.bio1_2 () =
@@ -794,9 +795,9 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.bio2_4 () =
-        let bp = @"C:\gsv\projects\infernal-1.1.1\testsuite\"
+        let bp = @"D:\YC\YaccConstructor\Tests\bio\infernal\"
         let file = 
-            "t.fa"
+            "1k-tRNA.fa"
             //"t1.fa"
             //"tremitted-Plant_SRP.fa"
             //"1k-4.fa"
@@ -866,6 +867,29 @@ type ``RNGLR abstract parser tests`` () =
             ] |> ignore
 
         test RNGLR.bio1.buildAstAbstract qGraph 25 24 4 8 1
+
+    [<Test>]
+    member this.Testsss () =
+        let grGenerator len = 
+            let final = 110
+            let qGraph = new ParserInputGraph<_>(0, final)
+            let mutable b = 0
+            let mutable e = 1
+            for i = 0 to len - 1 do
+                qGraph.AddVerticesAndEdge <| edg  b e (RNGLR.Tesssst.B 0) |> ignore
+                b <- e
+                e <- e + 1
+            qGraph.AddVerticesAndEdge <| edg  b final (RNGLR.Tesssst.RNGLR_EOF 0) |> ignore
+            //qGraph.FinalStates <- [|e|]
+            qGraph
+        for i in 1..100 do
+            let qGraph = grGenerator i
+            let start = System.DateTime.Now
+            let r = (new Parser<_>()).Parse  RNGLR.Tesssst.buildAstAbstract qGraph
+            printfn "%A" (System.DateTime.Now - start)
+    
+
+        //test RNGLR.bio1.buildAstAbstract qGraph 25 24 4 8 1
 
 
     [<Test>]
@@ -967,5 +991,5 @@ let f x =
     //t.``TSQL performance test for GLL`` ()
     //t._29_AandB_Circle ()
     //t.``TSQL performance test 2`` 2 100 false
-    t.bio2_4()
+    t.Testsss()
     0

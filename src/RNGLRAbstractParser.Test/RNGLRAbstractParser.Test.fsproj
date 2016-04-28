@@ -60,6 +60,7 @@
     <Compile Include="bio1.yrd.fs" />
     <Compile Include="bio2.yrd.fs" />
     <Compile Include="StrangeBrackets.yrd.fs" />
+    <Compile Include="Tesssst.yrd.fs" />
     <Compile Include="RNGLRAbstractParserTests.fs" />
     <None Include="packages.config" />
     <None Include="app.config" />
@@ -162,21 +163,6 @@
     <ProjectReference Include="..\RNGLRParser\RNGLRParser.fsproj">
       <Name>RNGLRParser</Name>
       <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\TSQL\TSQL.fsproj">
-      <Name>TSQL</Name>
-      <Project>{5c8b9089-f612-4761-b712-09ecb5317c76}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\TSQL\TSQLHighlighting\TSQLHighlighting.csproj">
-      <Name>TSQLHighlighting</Name>
-      <Project>{6ee8bdd8-79e9-41f5-8a8e-e959835d60fb}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.SEL.SDK.Core.fsproj">
-      <Name>YC.SEL.SDK.Core</Name>
-      <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

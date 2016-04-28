@@ -1,0 +1,1 @@
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i ..\YC.GrammarZOO\Bio\tRNA.yrd -c ExpandRepeat -c ExpandEbnf -c ExpandMeta -g "RNGLRGenerator -pos int -token int -module RNGLR.bio2 -o bio2.yrd.fs -abstract true -translate false" >> log.txt

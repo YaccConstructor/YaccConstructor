@@ -60,7 +60,7 @@
     <Compile Include="bio1.yrd.fs" />
     <Compile Include="bio2.yrd.fs" />
     <Compile Include="StrangeBrackets.yrd.fs" />
-    <Compile Include="Tesssst.yrd.fs" />
+    <!--Compile Include="Tesssst.yrd.fs" /-->
     <Compile Include="RNGLRAbstractParserTests.fs" />
     <None Include="packages.config" />
     <None Include="app.config" />

@@ -6,7 +6,6 @@ open System.Collections.Generic
 
 open ControlFlowGraph
 open ControlFlowGraph.Common
-open ControlFlowGraph.InputStructures
 open ControlFlowGraph.Test.CommonHelper
 
 open QuickGraph.FSA.GraphBasedFsa
@@ -99,7 +98,7 @@ type ``Find undefined variables``() =
 
     let isVariable tok = varsNumbers |> List.exists ((=) tok) 
 
-    let tokToRealName = tokenToNumber >> indToString
+    let tokToRealString = tokenToNumber >> indToString
 
     let xVariable = ExtendedCalcTest.Parser.ID <| createFSA 'x' 
     let yVariable = ExtendedCalcTest.Parser.ID <| createFSA 'y'
@@ -109,9 +108,9 @@ type ``Find undefined variables``() =
     let langSource = new LanguageSource(nodeToType, keywordToInt, isVariable)
 
     let createParserInput' = createParserInputGraph ExtendedCalcTest.Lexer.tokenize RNGLR_EOF
-    let createCfg tree = ControlFlow(tree, parserSource, langSource, tokToRealName)
+    let createCfg tree = CfgBuilder.CfgBuilder.BuildCfg tree parserSource langSource tokToRealString
 
-    let buildCfg' = buildCfg parse createCfg astToDot tokToRealName
+    let buildCfg' = buildCfg parse createCfg astToDot tokToRealString
 
     let act graph prefix = 
         let cfg = buildCfg' graph prefix
@@ -186,6 +185,21 @@ type ``Find undefined variables``() =
         
         //assert
         runTest tokenToFSA errorList expected
+
+    [<Test>]
+    member this.``{x, y} = 1; {z} = {x} + {y}``() = 
+        let qGraph = createParserInput' "MaybeUndefinedError.dot"
+        
+        let prefix = "`MaybeUndefinedError"
+
+        let expected = [], [xVariable; yVariable]
+
+        //act
+        let errorList = act qGraph prefix
+        
+        //assert
+        runTest tokenToFSA errorList expected
+    
      
 type ``Scope test``() = 
     let parse = LetTest.Parser.buildAstAbstract
@@ -216,7 +230,7 @@ type ``Scope test``() =
 
     let x = LetTest.Parser.ID <| createFSA 'x' 
     let y = LetTest.Parser.ID <| createFSA 'y' 
-    let z = LetTest.Parser.ID <| createFSA 'z' 
+    let z = LetTest.Parser.ID <| createFSA 'z'
 
     let varNumber = tokenToNumber x
     let isVariable tok = varNumber = tok
@@ -225,7 +239,7 @@ type ``Scope test``() =
     let langSource = new LanguageSource(nodeToType, keywordToInt, isVariable)
 
     let createParserInput' = createParserInputGraph LetTest.Lexer.tokenize RNGLR_EOF
-    let createCfg tree = ControlFlow(tree, parserSource, langSource, tokToRealName)
+    let createCfg tree = CfgBuilder.CfgBuilder.BuildCfg tree parserSource langSource tokToRealName
 
     let buildCfg' = buildCfg parse createCfg astToDot tokToRealName
 
@@ -279,10 +293,12 @@ type ``Scope test``() =
         //assert
         runTest tokenToFSA errors expected
         
-[<EntryPoint>]
+//[<EntryPoint>]
 let f x = 
     let functions =  ``Find undefined variables``()
-    functions.``Ambiguous 2``()
+    functions.Ambiguous()
+    //functions.``X = Z; Y = X;``()
+    //functions.``Ambiguous 2``()
     //functions.``X = Z; Y = X;``()
     (*let scopeTest = ``Scope test``()
     scopeTest.Scope1()*)

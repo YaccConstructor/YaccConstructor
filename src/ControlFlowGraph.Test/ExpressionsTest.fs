@@ -6,7 +6,6 @@ open System.Collections.Generic
 
 open ControlFlowGraph
 open ControlFlowGraph.Common
-open ControlFlowGraph.InputStructures
 open ControlFlowGraph.CfgTokensGraph
 open ControlFlowGraph.Test.CommonHelper
 open ControlFlowGraph.Test.ExpressionHelper
@@ -126,7 +125,7 @@ type ``Cycles inside expressions``() =
     let parserSource = new GeneratedStuffSource<_, string>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, keywordToInt)
 
-    let createCfg tree = ControlFlow(tree, parserSource, langSource, tokToRealString)
+    let createCfg tree = CfgBuilder.CfgBuilder.BuildCfg tree parserSource langSource tokToRealString
                 
     let buildCfg' = buildCfg parse createCfg astToDot tokToRealString
 

@@ -4,9 +4,7 @@ open System.IO
 open System.Collections.Generic
 
 open ControlFlowGraph.Common
-open ControlFlowGraph.CfgBuilder
 open ControlFlowGraph.CfgElements
-open ControlFlowGraph.InputStructures
 
 open QuickGraph.FSA.GraphBasedFsa
 open QuickGraph.FSA.FsaApproximation
@@ -75,12 +73,13 @@ type ErrorType<'TokenType, 'BackReference when 'BackReference : equality> =
         | _ -> false
 
 type ControlFlow<'TokenType, 'BackReference when 'BackReference : equality> 
-                            (tree : Tree<'TokenType>
+                            (entry : InterNode<'TokenType>
+                            , exit : InterNode<'TokenType>
+                            , intToToken : int -> 'TokenType
                             , generatedStuff : GeneratedStuffSource<'TokenType, 'BackReference>
-                            , langSource : LanguageSource
-                            , tokToSourceString : _ -> string) = 
+                            , langSource : LanguageSource) = 
     
-    let intToToken i = tree.Tokens.[i]
+    //let intToToken i = tree.Tokens.[i]
 
     let isNotAssign token = 
         let assignNumber = langSource.KeywordToInt.[Keyword.ASSIGN]
@@ -88,8 +87,8 @@ type ControlFlow<'TokenType, 'BackReference when 'BackReference : equality>
 
     let isVariable = 
         generatedStuff.TokenToNumber >> langSource.IsVariable
-
-    let entry, exit = buildCfg tree generatedStuff langSource tokToSourceString
+    
+    //let entry, exit = buildCfg tree generatedStuff langSource tokToSourceString
 
     let rec func' getNext acc (queue : _ list) = 
         
@@ -165,10 +164,10 @@ type ControlFlow<'TokenType, 'BackReference when 'BackReference : equality>
 
     let checkExpression (definedVariables : DefinedIds<_>) (expressionBlock : ExpressionBlock<_>) = 
         
-        let printToken token = 
-            
-            printfn "%s " <| tokToSourceString token
-            token
+//        let printToken token = 
+//            
+//            printfn "%s " <| tokToSourceString token
+//            token
             
         let printVariable token = 
             let fsa = tokenToFsa token
@@ -207,7 +206,7 @@ type ControlFlow<'TokenType, 'BackReference when 'BackReference : equality>
         |> Seq.filter ErrorType<_, _>.IsError
         |> List.ofSeq
 
-    let rec DoMarkup (blockToVars : Dictionary<_, _>) externVariables start =
+    let rec doMarkup (blockToVars : Dictionary<_, _>) externVariables start =
         
         let rec processBlock (block : Block<_>) = 
             let defined = blockToVars.[block]
@@ -220,7 +219,7 @@ type ControlFlow<'TokenType, 'BackReference when 'BackReference : equality>
                         assignBlock.Id.GetAvailableTokens()
                         |> List.ofSeq
 
-                    DoMarkup blockToVars defined <| fst assignBlock.RightPart
+                    doMarkup blockToVars defined <| fst assignBlock.RightPart
 
                     let newIds = 
                         leftPart
@@ -306,7 +305,7 @@ type ControlFlow<'TokenType, 'BackReference when 'BackReference : equality>
     member this.FindUndefinedVariables() = 
         let empty = new DefinedIds<_>()
         let markups = new Dictionary<_, _>()
-        DoMarkup markups empty entry
+        doMarkup markups empty entry
         let errors = findErrors markups entry 
 
         let guaranteedErrors, potentialErrors = 
@@ -335,7 +334,7 @@ type ControlFlow<'TokenType, 'BackReference when 'BackReference : equality>
         let interNodeToNumber = new Dictionary<_, _>()
         
         use out = new StreamWriter(name)
-        out.WriteLine("digraph AST {")
+        out.WriteLine("digraph CFG {")
 
         let rec printBlock parentNumber block = 
             let getBlockNumber (block : Block<'TokenType>) = 

@@ -32,7 +32,6 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <Compile Include="Common.fs" />
-    <Compile Include="InputStructures.fs" />
     <Compile Include="GraphConstructor.fs" />
     <Compile Include="CfgTokensGraph.fs" />
     <Compile Include="InnerGraph.fs" />
@@ -42,8 +41,8 @@
     <Compile Include="GraphInterpreter.fs" />
     <Compile Include="IfHelper.fs" />
     <Compile Include="AssignmentHelper.fs" />
-    <Compile Include="CfgBuilder.fs" />
     <Compile Include="ControlFlowGraph.fs" />
+    <Compile Include="CfgBuilder.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>

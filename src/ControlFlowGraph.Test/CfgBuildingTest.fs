@@ -5,7 +5,6 @@ open NUnit.Framework
 
 open ControlFlowGraph
 open ControlFlowGraph.Common
-open ControlFlowGraph.InputStructures
 open ControlFlowGraph.Test.CommonHelper
 open ControlFlowGraph.Test.BlockHelper
 
@@ -72,7 +71,7 @@ type ``Simple cases``() =
 
     let createParserInput' = createParserInputGraph ExtendedCalcTest.Lexer.tokenize RNGLR_EOF
     
-    let createCfg tree = ControlFlow(tree, parserSource, langSource, tokToRealString)
+    let createCfg tree = CfgBuilder.CfgBuilder.BuildCfg tree parserSource langSource tokToRealString
         
     let buildCfg' = buildCfg parse createCfg astToDot tokToRealString
 
@@ -192,7 +191,7 @@ type ``If statements`` () =
     let langSource = new LanguageSource(nodeToType, keywordToInt)
 
     let createParserInput' = createParserInputGraph IfTest.Lexer.tokenize RNGLR_EOF
-    let createCfg tree = ControlFlow (tree, parserSource, langSource, tokenToString)
+    let createCfg tree = CfgBuilder.CfgBuilder.BuildCfg tree parserSource langSource tokenToString
 
     let buildCfg' = buildCfg parse createCfg astToDot tokenToString
 
@@ -279,7 +278,7 @@ type ``Cycles``() =
     
     let createParserInput' = createParserInputGraph SimpleTest.Lexer.tokenize RNGLR_EOF
 
-    let createCfg tree = ControlFlow(tree, parserSource, langSource, tokToRealString)
+    let createCfg tree = CfgBuilder.CfgBuilder.BuildCfg tree parserSource langSource tokToRealString
 
     let buildCfg' = buildCfg parse createCfg astToDot tokToRealString
 

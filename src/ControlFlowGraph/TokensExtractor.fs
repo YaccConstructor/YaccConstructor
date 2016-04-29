@@ -61,7 +61,7 @@ let extractNodesFromFamily intToToken tokenToString (fam : Family) =
 
                 builder.UpdateVertex()
         | :? Epsilon -> ()
-        | _ -> invalidOp "Unexpected AST node type in Control-Flow construction"
+        | x -> invalidOp "Unexpected AST node type in Control-Flow construction"
 
     and processFamily startVertex fam = 
         builder.CurrentVertex <- startVertex

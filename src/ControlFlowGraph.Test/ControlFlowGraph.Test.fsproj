@@ -43,9 +43,9 @@
     <Compile Include="CommonHelper.fs" />
     <Compile Include="BlockHelper.fs" />
     <Compile Include="ExpressionHelper.fs" />
-    <Compile Include="CfgFunctionsTest.fs" />
     <Compile Include="ExpressionsTest.fs" />
     <Compile Include="CfgBuildingTest.fs" />
+    <Compile Include="CfgFunctionsTest.fs" />
     <None Include="packages.config" />
     <None Include="app.config" />
   </ItemGroup>

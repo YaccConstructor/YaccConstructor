@@ -9,7 +9,6 @@ open JetBrains.Application.BuildScript.Application.Zones
 open JetBrains.ReSharper.Psi.CSharp.Tree
 
 open ControlFlowGraph.Common
-open ControlFlowGraph.InputStructures
 
 open QuickGraph.FSA.GraphBasedFsa
 open QuickGraph.FSA.FsaApproximation

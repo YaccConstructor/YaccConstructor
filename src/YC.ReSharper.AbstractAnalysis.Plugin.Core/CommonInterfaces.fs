@@ -68,7 +68,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
         , getDocumentRange: Position<'br> -> 'range
         , printAst: Tree<'TokenType> -> string -> unit
         , printOtherAst: OtherTree<'TokenType> -> string -> unit
-        , semantic : _ option) = //as this =
+        , semantic : (Common.GeneratedStuffSource<'TokenType, 'br> * _ * _) option) = //as this =
 
     let lexingFinished = new Event<LexingFinishedArgs<'node>>()
     let parsingFinished = new Event<ParsingFinishedArgs>()
@@ -151,7 +151,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
                         //printAst tree "result ast.dot"
                         
                         let pSource, lSource, tokToSourceString = semantic.Value
-                        let cfg = new ControlFlow<'TokenType, 'br>(tree, pSource, lSource, tokToSourceString)
+                        let cfg = CfgBuilder.CfgBuilder.BuildCfg tree pSource lSource tokToSourceString
                         
                         //sometimes it needs for debugging purposes
                         //cfg.PrintToDot "result cfg.dot"

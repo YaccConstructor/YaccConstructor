@@ -155,6 +155,8 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
                         
                         //sometimes it needs for debugging purposes
                         //cfg.PrintToDot "result cfg.dot"
+                        
+                        let semErrors = fst <| cfg.FindUndefinedVariables()
                         semErrors |> List.iter (fun error -> addSError undefinedVariableErrMsg error)
                     
 

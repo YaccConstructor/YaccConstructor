@@ -10,9 +10,69 @@ open ControlFlowGraph.InputStructures
 
 open QuickGraph.FSA.GraphBasedFsa
 open QuickGraph.FSA.FsaApproximation
+
 open Yard.Generators.Common.AST
 
 open Printers
+
+type DefinedIds<'BackReference when 'BackReference : equality> = 
+    //this variables is defined on all possible paths
+    //under any configuration
+    val Always : FSA<char * Position<'BackReference>>
+    //this variables is defined on some paths or/and 
+    //under some configuration.
+    val Somewhere : FSA<char * Position<'BackReference>>
+
+    new () = {Always = new FSA<_>(); Somewhere = new FSA<_>()}
+    new (always, somewhere) = {Always = always; Somewhere = somewhere}
+
+    ///complement (always union somewhere)
+    member this.GetFullComplementation (fsaParams : FsaParams<_, _>) = 
+        let union = FSA<_>.Union(this.Always, this.Somewhere)
+        union.Complementation(fsaParams.Alphabet, fsaParams.NewSymbol, fsaParams.GetChar)
+
+    static member Intersect (fsaInfo : FsaParams<_, _>) (one : DefinedIds<_>) (two : DefinedIds<_>) = 
+        
+        let union one two = FSA.Union(one, two)
+        let intersect one two = FSA.Intersection(one, two, fsaInfo.SymbolsAreEqual)
+
+        let subtractFsa one (two : FSA<_>) = 
+            let twoComplement = two.Complementation (fsaInfo.Alphabet, fsaInfo.NewSymbol, fsaInfo.GetChar)
+            intersect one twoComplement
+
+        let resultAlways = intersect one.Always two.Always
+        let resultMaybe = intersect one.Somewhere two.Somewhere
+
+        new DefinedIds<_>(resultAlways, resultMaybe)
+
+    static member AreEqual (fsaInfo : FsaParams<_, _>) (one : DefinedIds<_>) (two : DefinedIds<_>) = 
+        
+        let isSubFsa one two = 
+            FSA<_>.IsSubFsa(one, two, fsaInfo)
+
+        let areEqual one two = 
+            isSubFsa one two && isSubFsa two one 
+
+        areEqual one.Always two.Always && areEqual one.Somewhere two.Somewhere
+        
+
+type ErrorType<'TokenType, 'BackReference when 'BackReference : equality> =
+| NoError 
+| MaybeError of 'TokenType * FSA<char * Position<'BackReference>>
+| AlwaysError of 'TokenType * FSA<char * Position<'BackReference>>
+
+    static member IsError errorType = 
+        match errorType with
+        | NoError -> false
+        | _ -> true
+
+    static member AreEqual compare (one : ErrorType<_, _>) (two : ErrorType<_, _>) = 
+        match one, two with
+        | NoError, NoError -> true
+        | MaybeError(token1, fsa1), MaybeError(token2, fsa2) 
+        | AlwaysError(token1, fsa1), AlwaysError(token2, fsa2) -> 
+            compare token1 token2
+        | _ -> false
 
 type ControlFlow<'TokenType, 'BackReference when 'BackReference : equality> 
                             (tree : Tree<'TokenType>
@@ -63,136 +123,179 @@ type ControlFlow<'TokenType, 'BackReference when 'BackReference : equality>
         func' getNext [] [entry]
         |> List.rev
 
-    let intersectFsa one two = 
+    let getFsaInfo() = 
         match generatedStuff.FsaInfo with
-        | Some info -> FSA.Intersection(one, two, info.SymbolsAreEqual)
+        | Some info -> info
         | None -> raise <| invalidOp "Missing FsaInfo"
+
+    let intersectFsa one two = 
+        let fsaInfo = getFsaInfo()
+        FSA.Intersection(one, two, fsaInfo.SymbolsAreEqual)
 
     let isSubFsa one two = 
-        
-        match generatedStuff.FsaInfo with
-        | Some info -> not <| FSA.IsSubFsa(one, two, info)
-        | None -> raise <| invalidOp "Missing FsaInfo"
+        let fsaInfo = getFsaInfo()
+        FSA.IsSubFsa(one, two, fsaInfo)
 
-    let checkExpression definedVariables (expressionBlock : ExpressionBlock<_>)= 
+    let unionFsa one two = 
+        FSA.Union(one, two)
+
+    // one \ two
+    let subtractFSA (one : FSA<_>) (two : FSA<_>) =
+        let fsaInfo = getFsaInfo()
+        let twoComplementation = two.Complementation(fsaInfo.Alphabet, fsaInfo.NewSymbol, fsaInfo.GetChar)
+
+        intersectFsa one twoComplementation
+
+    let tokenToFsa token = 
+        (generatedStuff.TokenToData token) :?> FSA<char * Position<_>>
+
+    let processNewVariable (previous : DefinedIds<_>) (variable : FSA<_>)= 
+        if variable.ContainsOneWordOnly()
+        then
+            let prevAlways = previous.Always
+            let newAlways = unionFsa prevAlways variable
+            let newMaybe = subtractFSA previous.Somewhere variable
+            new DefinedIds<_>(newAlways, newMaybe)
+        else
+            let newMaybe =
+                subtractFSA variable previous.Always
+                |> unionFsa previous.Somewhere
+
+            new DefinedIds<_>(previous.Always, newMaybe)
+
+    let checkExpression (definedVariables : DefinedIds<_>) (expressionBlock : ExpressionBlock<_>) = 
         
-        (*let printToken token = 
+        let printToken token = 
+            
             printfn "%s " <| tokToSourceString token
             token
-            *)
-        (*let printVariable token = 
-            printfn "variable %s" <| tokToSourceString token
-            token*)
+            
+        let printVariable token = 
+            let fsa = tokenToFsa token
+            
+            let tokenString = 
+                fsa.Edges
+                |> Seq.map (fun edge -> getFsaInfo().GetChar edge.Tag)
+                
+            printfn "variable %A" tokenString
+            token
 
-        let isUndefinedVariable token = 
-            let tokenFsa = 
-                (generatedStuff.TokenToData token) :?> FSA<char * Position<_>>
+        let analyseVariable token = 
+            let tokenFsa = tokenToFsa token
             
-            match definedVariables with
-            | [] -> true
-            | _ ->
-                let definedFsa = 
-                    definedVariables
-                    |> List.reduce (fun fsa1 fsa2 -> FSA.Union(fsa1, fsa2))
-            
-                isSubFsa tokenFsa definedFsa
-        
+            let fsaInfo = getFsaInfo()
+            let full = definedVariables.GetFullComplementation(fsaInfo)
+                
+            if isSubFsa tokenFsa full
+            then 
+                AlwaysError(token, tokenFsa)
+            else
+                let firstPart = intersectFsa tokenFsa definedVariables.Somewhere
+                let secondPart = intersectFsa tokenFsa full
+
+                let common = unionFsa firstPart secondPart
+                    
+                if common.IsEmpty
+                then NoError
+                else MaybeError(token, common)
+
         expressionBlock.TokensGraph.GetAvailableTokens()
+        //|> Seq.map printToken
         |> Seq.filter isVariable
-        |> Seq.filter isUndefinedVariable
+        //|> Seq.map printVariable
+        |> Seq.map analyseVariable
+        |> Seq.filter ErrorType<_, _>.IsError
         |> List.ofSeq
 
-    let rec findUndefinedVariables externVariables start =
-        let blockToVars = new Dictionary<_, _>()
-        let errorList = ref []
+    let rec DoMarkup (blockToVars : Dictionary<_, _>) externVariables start =
         
         let rec processBlock (block : Block<_>) = 
-            let prevVars = blockToVars.[block]
-            let defVars = ref prevVars
+            let defined = blockToVars.[block]
 
-            let newVariable, errors = 
+            let after =
                 match block.BlockType with 
-                | Expression -> 
-                    let expressionBlock = block :?> ExpressionBlock<_>
-                    None, checkExpression !defVars expressionBlock
                 | Assignment -> 
                     let assignBlock = block :?> AssignmentBlock<_>
                     let leftPart = 
                         assignBlock.Id.GetAvailableTokens()
                         |> List.ofSeq
 
-                    let newVar = 
+                    DoMarkup blockToVars defined <| fst assignBlock.RightPart
+
+                    let newIds = 
                         leftPart
                         |> List.tryFind isVariable
-                        |> Option.map
+                        |> Option.map 
                                 (
                                     fun token -> 
-                                        let fsa = generatedStuff.TokenToData token
-                                        fsa :?> FSA<char * Position<'BackReference>>
+                                        let fsa = tokenToFsa token
+                                        processNewVariable defined fsa
                                 )
-
-                    let newErrors = findUndefinedVariables !defVars <| fst assignBlock.RightPart
-                    newVar, newErrors
-                    
-                | x -> invalidOp <| sprintf "%A block isn't supported now" x
-
-            let isNewError token = 
-                let tokData = generatedStuff.TokenToData token
-                !errorList
-                |> List.forall (fun t -> generatedStuff.TokenToData t <> tokData) 
-
-            errors
-            |> List.filter isNewError
-            |> List.iter (fun token -> errorList := token :: !errorList)
-
-            newVariable
-            |> Option.iter (fun varName -> defVars := varName :: !defVars)
+                    match newIds with
+                    | Some id -> id
+                    | None -> defined
                 
-            block.Children 
-            |> List.iter (processInterNode !defVars)
+                | _ -> defined
 
-        and processInterNode defVars node = 
+            block.Children 
+            |> List.iter (processInterNode after)
+
+        and processInterNode defined node = 
             let processChild child = 
                 match blockToVars.TryGetValue child with
                 | true, vars -> 
-                    let intersectFsaLists one two = 
-                        match one, two with
-                        | [], _ 
-                        | _, [] -> []
-                        | _ -> 
-                            let oneCommon = one |> List.reduce (fun one two -> FSA.Union (one, two))
-                            let twoCommon = two |> List.reduce (fun one two -> FSA.Union (one, two))
-                            let res = intersectFsa oneCommon twoCommon
-                            [res]
                     
-                    // checks if {was} is subset {now}
-                    let isFsaChanged was now = 
-                        match was, now with
-                        | [], [] -> false
-                        | _ , [] -> true
-                        | [], _ -> invalidOp "Unexpected state in undefined variables finding"
-                        | _ -> 
-                            let newVars = List.head now
-                            let oldVars = was |> List.reduce (fun one two -> FSA.Union (one, two))
+                    let fsaParams = getFsaInfo()
+                    let commonVars = DefinedIds<_>.Intersect fsaParams vars defined
 
-                            isSubFsa oldVars newVars
-
-                    let commonVars = intersectFsaLists vars defVars
-
-                    //checks if variables set are changed
-                    if isFsaChanged vars commonVars
+                    //Does something change?
+                    if not <| DefinedIds<_>.AreEqual fsaParams vars commonVars
                     then
                         blockToVars.[child] <- commonVars
                         processBlock child
                 | false, _ ->
-                    blockToVars.[child] <- defVars
+                    blockToVars.[child] <- defined
+
                     processBlock child
             
             node.Children 
             |> List.iter processChild
 
         processInterNode externVariables start 
-        !errorList
+
+    let rec findErrors (markups : Dictionary<_, _>) start = 
+        
+        let errors = ref []
+        let processed = new HashSet<_>()
+
+        let rec processBlock (block : Block<_>)= 
+            let definedVariables = markups.[block]
+            let newErrors = 
+                match block.BlockType with
+                | Expression -> 
+                    let expression = block :?> ExpressionBlock<_>
+                    checkExpression definedVariables expression 
+                | Assignment -> 
+                    let assignment = block :?> AssignmentBlock<_>
+                    
+                    findErrors markups <| fst assignment.RightPart
+                | x -> invalidOp <| sprintf "This construction isn't supported now: %A" x
+
+            errors := newErrors @ !errors
+            processed.Add block |> ignore
+
+            block.Children
+            |> List.iter processInterNode
+
+        and processInterNode node = 
+            node.Children
+            |> List.filter (fun block -> not <| processed.Contains block)
+            |> List.iter processBlock 
+        
+        start.Children
+        |> List.iter processBlock
+        
+        !errors
 
     member this.Entry = entry
     member this.Exit = exit
@@ -201,7 +304,24 @@ type ControlFlow<'TokenType, 'BackReference when 'BackReference : equality>
     member this.Nodes = nodes
 
     member this.FindUndefinedVariables() = 
-        findUndefinedVariables [] entry
+        let empty = new DefinedIds<_>()
+        let markups = new Dictionary<_, _>()
+        DoMarkup markups empty entry
+        let errors = findErrors markups entry 
+
+        let guaranteedErrors, potentialErrors = 
+            errors
+            |> List.fold 
+                (
+                    fun acc error -> 
+                        let guaranteed, maybe = acc
+                        match error with
+                        | AlwaysError (token, fsa) -> token :: guaranteed, maybe
+                        | MaybeError (token, fsa) -> guaranteed, token :: maybe
+                        | NoError -> failwith "Invalid state"
+                ) ([], [])
+
+        guaranteedErrors, potentialErrors
 
     member this.PrintToDot (name : string) = 
         let prefix = "_"

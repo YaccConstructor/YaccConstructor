@@ -41,22 +41,27 @@ let fsaInfo : FsaParams<char, char * Position<_>> =
                 }
 
 
-let assertResult tokenToFsa (errorList : _ list) (expected : _ list) = 
+let runTest tokenToFsa (errorList : _ list * _ list) (expected : _ list * _ list) = 
+    
+    let actualGuaranteed, actualPotential = errorList
+    let expectedGuaranteed, expectedPotential = expected
         
-    printfn "%A" errorList
-    printfn "Expected: %d. Actual: %d." expected.Length errorList.Length 
-    Assert.AreEqual(expected.Length, errorList.Length)
+    //printfn "%A" errorList
+    Assert.AreEqual(expectedGuaranteed.Length, actualGuaranteed.Length, "Guaranteed errors")
+    Assert.AreEqual(expectedPotential.Length, actualPotential.Length, "Potential errors")
         
     let areEqual one two = 
         let fsa1 = tokenToFsa one
         let fsa2 = tokenToFsa two
         areEqualFSA fsa1 fsa2 fsaInfo
 
-    let res =
+    let check expected actual =
         expected
-        |> List.forall (fun var -> errorList |> List.exists (areEqual var))
+        |> List.forall (fun var -> actual |> List.exists (areEqual var))
+        |> fun res -> Assert.True(res, "Not all expected variables are found")
 
-    Assert.True(res, "Not all expected variables are found")
+    check expectedGuaranteed actualGuaranteed
+    check expectedPotential actualPotential
 
 [<TestFixture>]
 type ``Find undefined variables``() =
@@ -108,67 +113,65 @@ type ``Find undefined variables``() =
 
     let buildCfg' = buildCfg parse createCfg astToDot tokToRealName
 
+    let act graph prefix = 
+        let cfg = buildCfg' graph prefix
+        let guaranteedErrors, potentialErrors = cfg.FindUndefinedVariables()
+
+        guaranteedErrors, potentialErrors
+
     [<Test>]
     member test.``X = Z; Y = X;``() = 
         let qGraph = createParserInput' "X = Z; Y = X.dot"
 
-        let expected = [zVariable]
+        let expected = [zVariable], []
         let prefix = "`cfg undefined variables X = Z; Y = X"
         
         //act
-        let cfg = buildCfg' qGraph prefix
-        let errorList = 
-            cfg.FindUndefinedVariables()
+        let errors = act qGraph prefix
         
         //assert
-        assertResult tokenToFSA errorList expected
+        runTest tokenToFSA errors expected
 
     [<Test>]
     member test.``X = X``() = 
         let qGraph = createParserInput' "X = X.dot"
 
-        let expected = [xVariable]
+        let expected = [xVariable], []
         let prefix = "`cfg undefined variables X = X"
 
         //act
-        let cfg = buildCfg' qGraph prefix
-        let errorList = 
-            cfg.FindUndefinedVariables()
+        let errors = act qGraph prefix
         
         //assert
-        assertResult tokenToFSA errorList expected
+        runTest tokenToFSA errors expected
 
 
     [<Test>]
     member test.``Ambiguous``() =
         let qGraph = createParserInput' "Ambiguous.dot"
         
-        let expected = [yVariable; zVariable]
+        let expected = [yVariable; zVariable], []
         let prefix = "`cfg undefined variables ambiguous"
             
         //act
-        let cfg = buildCfg' qGraph prefix
-        let errorList = 
-            cfg.FindUndefinedVariables()
+        let errors = act qGraph prefix
         
         //assert
-        assertResult tokenToFSA errorList expected
+        runTest tokenToFSA errors expected
 
             
     [<Test>]
-    member test.``Ambiguous 2``() =
+    member test.``X = 1; [Y = 2]; X = Y + 2;``() =
         let qGraph = createParserInput' "Ambiguous3.dot"
         
-        let expected = [yVariable]
+        let expected = [yVariable], []
         let prefix = "`cfg undefined variables ambiguous2"
 
         //act
-        let cfg = buildCfg' qGraph prefix
-        let errorList = 
-            cfg.FindUndefinedVariables()
+        let errors = act qGraph prefix
         
         //assert
-        assertResult tokenToFSA errorList expected
+        runTest tokenToFSA errors expected
 
     [<Test>]
     member this.``Cycle inside expression``() = 
@@ -176,15 +179,13 @@ type ``Find undefined variables``() =
         
         let prefix = "`cfg cycle inside expression"
 
-        let expected = [yVariable]
+        let expected = [yVariable], []
 
         //act
-        let cfg = buildCfg' qGraph prefix
-        let errorList = 
-            cfg.FindUndefinedVariables()
+        let errorList = act qGraph prefix
         
         //assert
-        assertResult tokenToFSA errorList expected
+        runTest tokenToFSA errorList expected
      
 type ``Scope test``() = 
     let parse = LetTest.Parser.buildAstAbstract
@@ -210,9 +211,6 @@ type ``Scope test``() =
                                 Keyword.SEMICOLON, semicolonNumber;
                                 Keyword.ASSIGN, assignNumber;
                             ]
-        
-
-    
 
     let tokToRealName = tokenToNumber >> indToString
 
@@ -231,21 +229,27 @@ type ``Scope test``() =
 
     let buildCfg' = buildCfg parse createCfg astToDot tokToRealName
 
+    let act graph prefix = 
+        let cfg = buildCfg' graph prefix
+        let guaranteedErrors, potentialErrors = cfg.FindUndefinedVariables()
+
+        
+
+        guaranteedErrors, potentialErrors
+
     [<Test>]
     member this.``Scope1``() = 
         let qGraph = createParserInput' "Scope.dot"
         
         let prefix = "`scope"
 
-        let expected = [y]
+        let expected = [y], []
         
         //act
-        let cfg = buildCfg' qGraph prefix
-        let errorList = 
-            cfg.FindUndefinedVariables()
+        let errors = act qGraph prefix
         
         //assert
-        assertResult tokenToFSA errorList expected
+        runTest tokenToFSA errors expected
     
     [<Test>]
     member this.``Scope2``() = 
@@ -253,15 +257,13 @@ type ``Scope test``() =
         
         let prefix = "`scope2"
 
-        let expected = []
+        let expected = [], []
         
         //act
-        let cfg = buildCfg' qGraph prefix
-        let errorList = 
-            cfg.FindUndefinedVariables()
+        let errors = act qGraph prefix
         
         //assert
-        assertResult tokenToFSA errorList expected
+        runTest tokenToFSA errors expected
 
     [<Test>]
     member this.``Scope3``() = 
@@ -269,15 +271,13 @@ type ``Scope test``() =
         
         let prefix = "`scope3"
 
-        let expected = []
+        let expected = [], []
         
         //act
-        let cfg = buildCfg' qGraph prefix
-        let errorList = 
-            cfg.FindUndefinedVariables()
+        let errors = act qGraph prefix
         
         //assert
-        assertResult tokenToFSA errorList expected
+        runTest tokenToFSA errors expected
         
 [<EntryPoint>]
 let f x = 

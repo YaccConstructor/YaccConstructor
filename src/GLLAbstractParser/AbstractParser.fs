@@ -291,7 +291,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
                             index <- index + term - parser.NonTermCount
                             index
-                        currentGSSNode := create !currentVertexInInput (packLabel rule (position + 1)) !currentGSSNode  !structures.CurrentN
+                        let label = (packLabel rule (position + 1))
+                        currentGSSNode := create !currentVertexInInput label !currentGSSNode !structures.CurrentN
                         for edge in input.OutEdges !currentVertexInInput do
                             let curToken = parser.TokenToNumber ( edge.Tag)
 
@@ -329,6 +330,24 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
              while not !stop do
                 if !condition then dispatcher() else processing()
         control()
+
+        let rec checkConj (ast : obj) : bool = 
+            match ast with
+            | :? NonTerminalNode as node -> let buff = ref <| checkConj node.First
+                                            if node.Others = Unchecked.defaultof<_> then //others empty
+                                                !buff && not <| (parser.NumToString node.Name).StartsWith "yard_conjunction"
+                                            else 
+                                                node.Others.ForEach(fun n -> buff := !buff && checkConj n)
+                                                !buff 
+            | :? TerminalNode as node -> true
+            | :? PackedNode as node -> checkConj node.Left && checkConj node.Right
+            | :? IntermidiateNode as node -> let buff = ref <| checkConj node.First
+                                             if node.Others = Unchecked.defaultof<_> then //others empty
+                                                !buff
+                                             else
+                                                node.Others.ForEach(fun n -> buff := !buff && checkConj n)
+                                                !buff
+            | _ -> false
                  
         match !structures.ResultAST with
             | None -> 
@@ -342,21 +361,22 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
 //                        if errors.Count <> 0 then
 //                        for e in errors do
 //                            printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16) 
-                            
-                    let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
-                    (*let isSubpath l1 l2 =
-                        List.length l1 <= List.length l2 
-                        && Seq.forall2 (=) l1 (Seq.take (List.length l1) l2)*)
-                    //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
-                    //r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
-                    (*for e in errors do
-                        for p in e.Value do
-                            let path = List.rev errorPaths.[snd p.Value]                            
+                    
+                    if checkConj res then        
+                            let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
+                            printf "%A" r1
+                            (*let isSubpath l1 l2 =
+                                List.length l1 <= List.length l2 
+                                && Seq.forall2 (=) l1 (Seq.take (List.length l1) l2)*)
+                            //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
+                            r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
+                            (*for e in errors do
+                                for p in e.Value do
+                                    let path = List.rev errorPaths.[snd p.Value]                            
                                 
-                            if finalPaths |> ResizeArray.exists (fun fp -> isSubpath path (List.rev fp)) |> not
-                            then printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16)      *)                      
+                                    if finalPaths |> ResizeArray.exists (fun fp -> isSubpath path (List.rev fp)) |> not
+                                    then printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16)      *)                      
                                 
                     
-                    Success (r1)   
-                     
-                        
+                            Success (r1)   
+                    else Error ("String was not parsed")

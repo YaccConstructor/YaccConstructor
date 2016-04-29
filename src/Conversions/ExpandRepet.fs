@@ -38,6 +38,7 @@ let private expandRepet (ruleList: Rule.t<_,_> list) =
         | PSeq(elements, actionCode, l) -> 
             ( elements |> List.map (fun elem -> { elem with rule = expandBody attrs elem.rule }) ,actionCode, l) |> PSeq        
         | PAlt(left, right) -> PAlt(expandBody attrs left, expandBody attrs right)
+        | PConj(left, right) -> PConj(expandBody attrs left, expandBody attrs right)
         | PMany x -> PMany(expandBody attrs x)
         | PSome x -> PSome(expandBody attrs x)
         | POpt x ->  POpt(expandBody attrs x)

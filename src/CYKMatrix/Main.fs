@@ -1,8 +1,8 @@
 ﻿module Main
 
     open Util
-    open CYKMatrix
-    open CYKMatrixBFS
+//    open CYKMatrix
+//    open CYKMatrixBFS
     open System.Collections.Generic
 
     [<EntryPoint>]
@@ -66,14 +66,20 @@
                 |> List.forall (fun (i, j) -> matrix.[i,j] = 0.)
 
         let check str searchLen = 
-            let toCheck = recognize str crl srl erl nonterminals S searchLen
+            let toCheck    = CYKMatrix.recognize str crl srl erl nonterminals S searchLen
+            let toCheckBFS = CYKMatrixBFS.recognize str crl srl erl nonterminals S searchLen
             assert (isAnswerValid toCheck (String.length str) searchLen)
+            assert (isAnswerValid toCheckBFS (String.length str) searchLen)
+            let sameAnswers =
+                seq { 
+                    for i in 0 .. toCheck.GetLength(0) - 1 do
+                        for j in 0 .. toCheck.GetLength(1) - 1 do
+                            if toCheck.[i, j] <> toCheckBFS.[i, j] then
+                                yield false
+                }
+                |> Seq.forall id
+            assert sameAnswers
             printMatrix toCheck (String.length str) searchLen 
-    //        printfn "%.10f" toCheck |> ignore
-    //        assert (abs(res - toCheck) < 1e-14) 
-
-    //    check "abb"     0.032        2 |> ignore    
-    //    check "aaabbcc" 0.0000524288 3 |> ignore
 
         check "abb"     2 |> ignore    
         check "abb"     3 |> ignore    

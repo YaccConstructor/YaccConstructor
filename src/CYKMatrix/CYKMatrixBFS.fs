@@ -3,26 +3,6 @@
     open Util
     open System.Collections.Generic
 
-    type NonTerminal = NonTerminal of string
-
-    type ComplexRule = { 
-        Head: NonTerminal;
-        LeftTail: NonTerminal;
-        RightTail: NonTerminal; 
-        probability: double;
-    }
-
-    type SimpleRule = {
-        Head: NonTerminal;
-        Tail: char;
-        probability: double;
-    } 
-
-    type EpsRule =  {
-        Head: NonTerminal;
-        probability: double;
-    } 
-
     type RulesHolder(complexRules: Dictionary<(NonTerminal * NonTerminal), (NonTerminal * double) list>,
                      simpleRules: Dictionary<char, (NonTerminal * double) list>,
                      epsilonRules: NonTerminal list)  = 

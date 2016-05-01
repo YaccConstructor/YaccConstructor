@@ -41,9 +41,9 @@
             member this.HalfSize = int(float(this.Size) / 2.)
             member this.RelativeDot = dotWithShift this.Top
 
-            member this.Right  = this.RelativeDot this.HalfSize  0
-            member this.Left   = this.RelativeDot 0 -this.HalfSize
-            member this.Bottom = this.RelativeDot this.HalfSize -this.HalfSize        
+            member this.Right  = this.RelativeDot this.Size  0
+            member this.Left   = this.RelativeDot 0 -this.Size
+            member this.Bottom = this.RelativeDot this.Size -this.Size        
 
         let matrixWithShift matrixSize (initial: T) rowShift colShift =
             let newTop = dotWithShift initial.Top rowShift colShift
@@ -73,19 +73,8 @@
         SubMatrix.print task.from1
         printf "from2: "
         SubMatrix.print task.from2
-        printfn ""
+        printfn ""         
 
-
-    //type ComputeArg  = {row: int; col: int}
-    //type ComputeLevel = int
-    //type ComputeTask = (ComputeLevel * ComputeArg)
-    //
-    //
-    //type CompleteArg = SubMatrix
-    //type CompleteLevel = int
-    //type CompleteTask = (CompleteLevel * CompleteArg)
-    //
-    //type UpdatePArg  = {where: SubMatrix; from1: SubMatrix; from2: SubMatrix}
 
 
     // only for str size == 2^k-1
@@ -122,8 +111,7 @@
                             (
                                 complexRules.Keys
                                 |> Seq.map (fun x -> x, emptyMatrixOfSize (stringSize + 1))
-                            ) 
-
+                            )                                                        
 
         let addProbToMatrix (matrix: Map<_, double [,]>) row column nontermProb = 
             let key, prob = nontermProb
@@ -133,6 +121,24 @@
         let updateTMatrixCell row column nontermProbs = 
             nontermProbs |> List.iter (addProbToMatrix tMatrix row column)
 
+        let addToP nts (matrix: double [,]) (where: SubMatrix.T) =
+            for i in [0 .. where.Size - 1] do
+//                let rightBound = min m2 (stringSize + 1)
+                for j in [0 .. where.Size - 1] do
+                    addProbToMatrix pMatrix (i + fst where.Left) (j + snd where.Left) (nts, matrix.[i, j])
+
+        let subMatrixMult nt1 nt2 (from1: SubMatrix.T) (from2: SubMatrix.T) =
+            let calcCell i j =
+                [0..from1.Size-1] |> List.fold (fun acc k -> acc + tMatrix.[nt1].[i + fst from1.Left, k + snd from1.Left] * 
+                                                                   tMatrix.[nt2].[k + fst from2.Left, j + snd from2.Left]) 0. 
+//            let bUpperBound = min bm2 (stringSize + 1)
+            Array2D.init from1.Size from2.Size calcCell    
+
+        let performMultiplication task = 
+            let {where=where; from1=from1; from2=from2} = task
+            let completeOnePair (nt1, nt2) =
+                    addToP (nt1, nt2) (subMatrixMult nt1 nt2 from1 from2) where
+            pMatrix |> Map.iter (fun nts _ -> completeOnePair nts)
         
         let rec completeSubLayer layer matricesSize = 
             if matricesSize = 1 then
@@ -182,9 +188,7 @@
                                             firstSubLayer 
                                             toMult
                                             
-            // todo: do firstMultTasks  
-            firstMultTasks |> Array.iter printTask
-            printfn ""
+            firstMultTasks |> Array.iter performMultiplication
             completeSubLayer firstSubLayer halfMatricesSize
                       
             let secondSubLayer = 
@@ -201,12 +205,8 @@
             let secondMultTasks = Array.map2 (fun w (f1, f2) -> {where=w; from1=f1; from2=f2}) secondSubLayer secondToMult 
             let thirdMultTasks = Array.map2 (fun w (f1, f2) -> {where=w; from1=f1; from2=f2}) secondSubLayer thirdToMult 
                         
-            // todo: do secondMultTasks  
-            secondMultTasks |> Array.iter printTask
-            printfn ""
-            // todo: do thirdMultTasks  
-            thirdMultTasks  |> Array.iter printTask 
-            printfn ""               
+            secondMultTasks |> Array.iter performMultiplication
+            thirdMultTasks  |> Array.iter performMultiplication          
             completeSubLayer secondSubLayer halfMatricesSize
 
 
@@ -226,8 +226,9 @@
 
 
         for i in 1..matrixSizeExponent do
-            printfn "layer %d:" i
             completeLayer i
+            
+        tMatrix.Item S
 
 
 
@@ -257,12 +258,46 @@
     //    B -> 'b', 0.4
     //    B -> 'b', 0.4
 
+        let printMatrix (matrix: double [,]) strLen searchLen =
+            let rowLength = matrix.GetLength(0)
+            let colLength = matrix.GetLength(1)
+
+            for i in [0..rowLength-1] do
+                for j in [0..colLength-1] do
+                    if i <= strLen && j <= strLen && j > i && j-i <= searchLen then
+                        printf "%.8f  " matrix.[i, j]
+                    else
+                        assert (matrix.[i, j] = 0.)
+                        printf "----------  "
+                printfn ""
+            printfn ""
+
+        let isAnswerValid (matrix: double [,]) strLen searchLen = 
+            let rowLength = matrix.GetLength(0)
+            let colLength = matrix.GetLength(1)
+            if rowLength <> colLength || rowLength <> strLen + 1 then
+                false
+            else
+                let notRealCell (i, j) =
+                        i > strLen 
+                        || j > strLen 
+                        || j <= i 
+                        || j-i > searchLen 
+
+                [1..rowLength-1]
+                |> List.map (fun i -> [1..colLength-1] |> List.map (fun j -> (i,j))) 
+                |> List.concat
+                |> List.filter notRealCell
+                |> List.forall (fun (i, j) -> matrix.[i,j] = 0.)
+
         let check str = 
-            recognize str crl srl erl nonterminals S 0
-
-
-//        check "abb"      
-        check "aaabbcc"  
+            let searchLen = String.length str
+            let toCheck = recognize str crl srl erl nonterminals S searchLen
+            assert (isAnswerValid toCheck (String.length str) searchLen)
+            printMatrix toCheck (String.length str) searchLen
+            
+        check "abb"      
+        check "aaabbcc"
 
         System.Console.ReadLine() |> ignore
         0

@@ -1,5 +1,6 @@
 ﻿module CYKMatrixBFS
 
+    open Util
     open System.Collections.Generic
 
     type NonTerminal = NonTerminal of string
@@ -50,7 +51,6 @@
             {Top = newTop; Size = matrixSize}
 
         type T with
-//            member this.HalfSizeMatrixWithShift = matrixWithShift this.HalfSize this
             member this.RelativeMatrix = matrixWithShift this.Size this
 
             member this.TopMatrix    = matrixWithShift this.HalfSize this 0  0 
@@ -98,6 +98,7 @@
         let emptyMatrixOfSize n = Array2D.init n n (fun x y -> 0.)
     
         // bottom-left triangle and diagonal of tMatrixes and pMatrixes are not used
+        // upper-right triangle of size (stringSize - maxSearchLength) is not used
         let tMatrix = new Map<NonTerminal, double [,]>
                             (
                                 nonterminals 
@@ -240,7 +241,6 @@
                 let nonTermsForChars = strToParse |> List.ofSeq |> List.map allRules.GetSimpleRule
                 nonTermsForChars |> List.iteri (fun i p -> updateTMatrixCell i (i + 1) p)
             else   
-//                let matricesCount = (1 <<< (matrixSizeExponent - layerNum + 1)) - 1
                 let matricesCount = (double stringSize + 1.) / double(1 <<< (layerNum - 1)) - 1. |> ceil |> int
                 let firstInLayer = SubMatrix.create (0, 1 <<< layerNum) matricesSize
                 let layer = Array.init matricesCount (fun i -> firstInLayer.RelativeMatrix (i * matricesSize) (i * matricesSize))
@@ -253,89 +253,3 @@
             completeLayer i
             
         tMatrix.Item S
-
-
-    [<EntryPoint>]
-    let main args = 
-//        open CYKMatrix
-//        open CYKMatrixBFS
-
-        let A = NonTerminal "A"
-        let B = NonTerminal "B"
-        let BB = NonTerminal "BB"
-        let S = NonTerminal "S"
-        let nonterminals = [|A; B; S; BB|]
-
-
-        let crl = new Dictionary<NonTerminal * NonTerminal, (NonTerminal * double) list>()
-        [(A, BB), [S, 1.]; (B, B), [BB, 1.; B, 0.2]; (A, A), [A, 0.8]] |> Seq.iter crl.Add
-        let srl = new Dictionary<char, (NonTerminal * double) list>()
-        ['a', [(A, 0.2)]; 'b', [B, 0.4]; 'c', [B, 0.4]] |> Seq.iter srl.Add
-        let erl: NonTerminal list = []
-
-    //    S -> A BB, 1.
-    //
-    //    BB -> B B, 1.
-    //
-    //    A -> A A, 0.8
-    //    A -> 'a', 0.2
-    //
-    //    B -> B B, 0.2
-    //    B -> 'b', 0.4
-    //    B -> 'b', 0.4
-
-        let printMatrix (matrix: double [,]) strLen searchLen =
-            let rowLength = matrix.GetLength(0)
-            let colLength = matrix.GetLength(1)
-
-            for i in [0..rowLength-1] do
-                for j in [0..colLength-1] do
-                    if i <= strLen && j <= strLen && j > i && j-i <= searchLen then
-                        printf "%.8f  " matrix.[i, j]
-                    else
-                        assert (matrix.[i, j] = 0.)
-//                        printf "%.8f  " matrix.[i, j]
-                        printf "----------  "
-                printfn ""
-            printfn ""
-
-        let isAnswerValid (matrix: double [,]) strLen searchLen = 
-            let rowLength = matrix.GetLength(0)
-            let colLength = matrix.GetLength(1)
-            if rowLength <> colLength || rowLength <> strLen + 1 then
-                false
-            else
-                let redundantCell (i, j) =
-                        i > strLen 
-                        || j > strLen 
-                        || j <= i 
-                        || j-i > searchLen 
-
-                [0..rowLength-1]
-                |> List.map (fun i -> [0..colLength-1] |> List.map (fun j -> (i,j))) 
-                |> List.concat
-                |> List.filter redundantCell
-                |> List.forall (fun (i, j) -> matrix.[i,j] = 0.)
-
-        let check str searchLen = 
-            let toCheck = recognize str crl srl erl nonterminals S searchLen
-            assert (isAnswerValid toCheck (String.length str) searchLen)
-            printMatrix toCheck (String.length str) searchLen 
-    //        printfn "%.10f" toCheck |> ignore
-    //        assert (abs(res - toCheck) < 1e-14) 
-
-    //    check "abb"     0.032        2 |> ignore    
-    //    check "aaabbcc" 0.0000524288 3 |> ignore
-
-        check "abb"     2 |> ignore    
-        check "abb"     3 |> ignore    
-        check "aaabbcc" 3 |> ignore
- 
-//        check "aabb"
-//        check "abb"    
-//        check "aaabbcc"
-//        check "baaabbcc"
-//        check "aaaabbcc"
-
-        System.Console.ReadLine() |> ignore
-        0

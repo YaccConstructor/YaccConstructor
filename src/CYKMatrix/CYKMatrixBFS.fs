@@ -76,9 +76,6 @@
         printfn ""         
 
 
-
-    // only for str size == 2^k-1
-    // maxSearchLength ignored
     let recognize (strToParse: string) 
                   (complexRules: Dictionary<(NonTerminal * NonTerminal), (NonTerminal * double) list>)
                   (simpleRules: Dictionary<char, (NonTerminal * double) list>)
@@ -134,57 +131,64 @@
             let actualCol2Count = (min (snd from2.Top) (stringSize + 1)) - snd from2.Left
             Array2D.init from1.Size actualCol2Count calcCell    
 
-        let performMultiplication task = 
-            let {where=where; from1=from1; from2=from2} = task
-            let completeOnePair (nt1, nt2) =
-                    addToP (nt1, nt2) (subMatrixMult nt1 nt2 from1 from2) where
-            pMatrix |> Map.iter (fun nts _ -> completeOnePair nts)
+        let performMultiplication tasks = 
+            let performOne task = 
+                let {where=where; from1=from1; from2=from2} = task
+                let completeOnePair (nt1, nt2) =
+                        addToP (nt1, nt2) (subMatrixMult nt1 nt2 from1 from2) where
+                pMatrix |> Map.iter (fun nts _ -> completeOnePair nts)
+            tasks |> Array.iter performOne
+
+        let layerIsRedundant (layer: SubMatrix.T []) =
+            if Array.length layer = 0 
+            then true
+            else 
+                let layerIsOutOfSearchZone = snd layer.[0].Bottom - fst layer.[0].Bottom + 1 >= maxSearchLength + 1
+                layerIsOutOfSearchZone
         
         let rec completeSubLayer layer matricesSize = 
-            if Array.length layer > 0 
-            then
-                if matricesSize = 1 then
-                    let headsFromTail (tail, tailProb) = 
-                        if complexRules.ContainsKey tail then 
-                            complexRules.Item tail |> List.map (fun (head, headProb) -> head, headProb * tailProb)
-                        else 
-                            []
+            if matricesSize = 1 then
+                let headsFromTail (tail, tailProb) = 
+                    if complexRules.ContainsKey tail then 
+                        complexRules.Item tail |> List.map (fun (head, headProb) -> head, headProb * tailProb)
+                    else 
+                        []
 
-                    let tails row col = pMatrix |> Map.map (fun _ probs -> probs.[row, col-1]) |> Map.filter (fun _ prob -> prob > 0.)
-                    let heads (row, col) = tails row col |> Map.toList |> List.map headsFromTail |> List.concat
+                let tails row col = pMatrix |> Map.map (fun _ probs -> probs.[row, col-1]) |> Map.filter (fun _ prob -> prob > 0.)
+                let heads (row, col) = tails row col |> Map.toList |> List.map headsFromTail |> List.concat
 
-                    layer 
-                    |> Array.map (fun (matrix: SubMatrix.T) -> matrix.Top)
-                    |> Array.map (fun top -> top, heads top)
-                    |> Array.iter (fun (top, heads) -> heads |> updateTMatrixCell (fst top) (snd top - 1))
+                layer 
+                |> Array.map (fun (matrix: SubMatrix.T) -> matrix.Top)
+                |> Array.map (fun top -> top, heads top)
+                |> Array.iter (fun (top, heads) -> heads |> updateTMatrixCell (fst top) (snd top - 1))
 
-                else
-                    let halfMatricesSize = int(matricesSize / 2)
-                    let zeroSubLayer = layer |> Array.map (fun (matrix: SubMatrix.T) -> matrix.BottomMatrix)        
-                    completeSubLayer zeroSubLayer halfMatricesSize
-                    completeVLayer layer matricesSize
-
-        and completeVLayer layer matricesSize = 
-            if Array.length layer > 0 
-            then
+            else
                 let halfMatricesSize = int(matricesSize / 2)
-                let reducedLayer = 
-                    if snd layer.[Array.length layer - 1].Top > stringSize + 1 
-                    then layer.[0..Array.length layer - 2] 
-                    else layer
+                let zeroSubLayer = layer |> Array.map (fun (matrix: SubMatrix.T) -> matrix.BottomMatrix)                        
+                completeSubLayer zeroSubLayer halfMatricesSize
+                completeVLayer layer matricesSize
 
-                let firstSubLayer = 
-                    if Array.length layer = Array.length reducedLayer
-                    then
-                        layer 
+        and completeVLayer layer matricesSize =
+            let halfMatricesSize = int(matricesSize / 2)
+            let reducedLayer = 
+                if snd layer.[Array.length layer - 1].Top > stringSize + 1 
+                then layer.[0..Array.length layer - 2] 
+                else layer
+
+            let firstSubLayer = 
+                if Array.length layer = Array.length reducedLayer
+                then
+                    layer 
+                    |> Array.collect (fun matrix -> [|matrix.LeftMatrix; matrix.RightMatrix|])
+                else
+                    let reducedMatrix = layer.[Array.length layer - 1]
+                    let allButOne = 
+                        reducedLayer 
                         |> Array.collect (fun matrix -> [|matrix.LeftMatrix; matrix.RightMatrix|])
-                    else
-                        let reducedMatrix = layer.[Array.length layer - 1]
-                        let allButOne = 
-                            reducedLayer 
-                            |> Array.collect (fun matrix -> [|matrix.LeftMatrix; matrix.RightMatrix|])
-                        Array.append allButOne [| reducedMatrix.LeftMatrix |]   
+                    Array.append allButOne [| reducedMatrix.LeftMatrix |]   
 
+            if not <| layerIsRedundant firstSubLayer
+            then
                 let toMult = 
                     //todo: annotation?
                     let getMults i (matrix: SubMatrix.T) =
@@ -202,26 +206,29 @@
                                                 firstSubLayer 
                                                 toMult
                                             
-                firstMultTasks |> Array.iter performMultiplication
+                performMultiplication firstMultTasks
                 completeSubLayer firstSubLayer halfMatricesSize
                       
                 let secondSubLayer =                 
                     reducedLayer 
                     |> Array.map (fun matrix -> matrix.TopMatrix)
-                let secondToMult = 
-                    secondSubLayer 
-                    |> Array.map (fun matrix -> matrix.RelativeMatrix 0 -(snd matrix.Top - fst matrix.Top - matricesSize), 
-                                                matrix.RelativeMatrix halfMatricesSize 0) 
-                let thirdToMult = 
-                    secondSubLayer 
-                    |> Array.map (fun matrix -> matrix.RelativeMatrix 0 -halfMatricesSize, 
-                                                matrix.RelativeMatrix (snd matrix.Top - fst matrix.Top - matricesSize) 0)
-                let secondMultTasks = Array.map2 (fun w (f1, f2) -> {where=w; from1=f1; from2=f2}) secondSubLayer secondToMult 
-                let thirdMultTasks = Array.map2 (fun w (f1, f2) -> {where=w; from1=f1; from2=f2}) secondSubLayer thirdToMult 
+
+                if not <| layerIsRedundant secondSubLayer
+                then
+                    let secondToMult = 
+                        secondSubLayer 
+                        |> Array.map (fun matrix -> matrix.RelativeMatrix 0 -(snd matrix.Top - fst matrix.Top - matricesSize), 
+                                                    matrix.RelativeMatrix halfMatricesSize 0) 
+                    let thirdToMult = 
+                        secondSubLayer 
+                        |> Array.map (fun matrix -> matrix.RelativeMatrix 0 -halfMatricesSize, 
+                                                    matrix.RelativeMatrix (snd matrix.Top - fst matrix.Top - matricesSize) 0)
+                    let secondMultTasks = Array.map2 (fun w (f1, f2) -> {where=w; from1=f1; from2=f2}) secondSubLayer secondToMult 
+                    let thirdMultTasks = Array.map2 (fun w (f1, f2) -> {where=w; from1=f1; from2=f2}) secondSubLayer thirdToMult 
                         
-                secondMultTasks |> Array.iter performMultiplication
-                thirdMultTasks  |> Array.iter performMultiplication          
-                completeSubLayer secondSubLayer halfMatricesSize
+                    performMultiplication secondMultTasks
+                    performMultiplication thirdMultTasks       
+                    completeSubLayer secondSubLayer halfMatricesSize
 
 
         and completeLayer layerNum = 
@@ -241,7 +248,8 @@
                 then completeVLayer layer matricesSize
 
 
-        for i in 1..matrixSizeExponent do
+        let lastLayerToHandle = (log (double maxSearchLength + 1.)) / (log 2.) |> ceil |> int
+        for i in 1..lastLayerToHandle do
             completeLayer i
             
         tMatrix.Item S
@@ -286,6 +294,7 @@
                         printf "%.8f  " matrix.[i, j]
                     else
                         assert (matrix.[i, j] = 0.)
+//                        printf "%.8f  " matrix.[i, j]
                         printf "----------  "
                 printfn ""
             printfn ""
@@ -296,29 +305,37 @@
             if rowLength <> colLength || rowLength <> strLen + 1 then
                 false
             else
-                let notRealCell (i, j) =
+                let redundantCell (i, j) =
                         i > strLen 
                         || j > strLen 
                         || j <= i 
                         || j-i > searchLen 
 
-                [1..rowLength-1]
-                |> List.map (fun i -> [1..colLength-1] |> List.map (fun j -> (i,j))) 
+                [0..rowLength-1]
+                |> List.map (fun i -> [0..colLength-1] |> List.map (fun j -> (i,j))) 
                 |> List.concat
-                |> List.filter notRealCell
+                |> List.filter redundantCell
                 |> List.forall (fun (i, j) -> matrix.[i,j] = 0.)
 
-        let check str = 
-            let searchLen = String.length str
+        let check str searchLen = 
             let toCheck = recognize str crl srl erl nonterminals S searchLen
             assert (isAnswerValid toCheck (String.length str) searchLen)
-            printMatrix toCheck (String.length str) searchLen
-            
-        check "aabb"
-        check "abb"    
-        check "aaabbcc"
-        check "baaabbcc"
-        check "aaaabbcc"
+            printMatrix toCheck (String.length str) searchLen 
+    //        printfn "%.10f" toCheck |> ignore
+    //        assert (abs(res - toCheck) < 1e-14) 
+
+    //    check "abb"     0.032        2 |> ignore    
+    //    check "aaabbcc" 0.0000524288 3 |> ignore
+
+        check "abb"     2 |> ignore    
+        check "abb"     3 |> ignore    
+        check "aaabbcc" 3 |> ignore
+ 
+//        check "aabb"
+//        check "abb"    
+//        check "aaabbcc"
+//        check "baaabbcc"
+//        check "aaaabbcc"
 
         System.Console.ReadLine() |> ignore
         0

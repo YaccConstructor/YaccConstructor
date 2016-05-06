@@ -43,6 +43,7 @@ let GetIncorrectMetaArgsCount (def:Yard.Core.IL.Definition.t<_,_>) =
             | PRef (name,_) -> check acc name 0
             | PMetaRef (name, _, metas) -> check acc name metas.Length
             | PAlt (x, y) -> checkBody acc x |> fun acc' -> checkBody acc' y
+            | PConj (x, y) -> checkBody acc x |> fun acc' -> checkBody acc' y
             | PSeq (list,_,_) -> list |> List.fold (fun acc elem -> checkBody acc elem.rule) acc
             | PSome x
             | PMany x
@@ -177,6 +178,9 @@ let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Grammar.Module<
         | PAlt (lExpr,rExpr) -> 
             getUndeclaredRulesCurried lExpr
             getUndeclaredRulesCurried rExpr
+        | PConj (lExpr,rExpr) -> 
+            getUndeclaredRulesCurried lExpr
+            getUndeclaredRulesCurried rExpr
         | PLiteral _ 
         | PToken _  -> ()
 
@@ -228,6 +232,9 @@ let reachableRulesInfo_of_grammar (grammar: Grammar.t<_,_>) =
         | PAlt (lExpr,rExpr) -> 
             getReachableRulesCurried lExpr
             getReachableRulesCurried rExpr
+        | PConj (lExpr,rExpr) -> 
+            getReachableRulesCurried lExpr
+            getReachableRulesCurried rExpr
         | PLiteral _ 
         | PToken _  -> ()
 
@@ -277,6 +284,7 @@ let sourcesWithoutFileNames (def:Yard.Core.IL.Definition.t<Source.t,Source.t>) =
         | PSeq (s,ac,lab) -> collectOpt ac @ (s |> List.collect (fun e -> processBody e.rule))
         | PToken tok | PLiteral tok -> collectName tok
         | PAlt (l,r) -> processBody l @ processBody r
+        | PConj (l,r) -> processBody l @ processBody r
         | PMany e | PSome e | POpt e -> processBody e
         | PPerm p -> List.collect processBody p
         | PRepet (p,_,_) -> processBody p

@@ -1,0 +1,6 @@
+[<Start>]
+s: a b & d c
+a: A a  | {None}
+b: b B c| {None}
+c: C c | {None}
+d: A d B | {None}

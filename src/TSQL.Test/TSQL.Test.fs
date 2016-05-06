@@ -54,15 +54,15 @@ let loadGraphToQGResharper path =
     let dot = File.ReadAllText(path)
     BidirectionalGraph.LoadDot(dot, (fun v attrs -> int v), (fun v1 v2 attr -> new TaggedEdge<_,_>(int v1, int v2, (snd attr.[0], br))))
       
-let TSQLTokenizationTest path eCount vCount =
-    let graph = loadGraphToQGResharper (baseInputGraphsPath + path)
+let TSQLTokenizationTest file eCount vCount =
+    let graph = loadGraphToQGResharper (path baseInputGraphsPath file)
     let graphFsa = approximateQG(graph)
     let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
     let res = YC.TSQLLexer.tokenize (Yard.Examples.MSParserAbstract.RNGLR_EOF(new FSA<_>())) graphFst
     match res with
     | QuickGraph.FST.GraphBasedFst.Test.Success res -> 
         checkGraph res eCount vCount  
-    | QuickGraph.FST.GraphBasedFst.Test.Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" path e)
+    | QuickGraph.FST.GraphBasedFst.Test.Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" file e)
 
 let test buildAstAbstract qGraph nodesCount edgesCount epsilonsCount termsCount ambiguityCount = 
     let r = (new Parser<_>()).Parse  buildAstAbstract qGraph
@@ -96,7 +96,7 @@ type ``Lexer and Parser TSQL Tests`` () =
 
     [<Test>]  
     member this.``TSQL. Lexer and Parser test.`` () =
-        let graph = loadGraphToQGResharper (baseInputGraphsPath + "test_tsql_1.dot")
+        let graph = loadGraphToQGResharper (path baseInputGraphsPath "test_tsql_1.dot")
         let graphFsa = approximateQG(graph)
         let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
         let res = YC.TSQLLexer.tokenize (Yard.Examples.MSParserAbstract.RNGLR_EOF(new FSA<_>())) graphFst

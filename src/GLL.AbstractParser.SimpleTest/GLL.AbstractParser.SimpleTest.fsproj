@@ -117,6 +117,9 @@
     <Compile Include="Mixed.yrd.fs" />
     <Compile Include="Omit.yrd.fs" />
     <Compile Include="MsSqlParser.yrd.fs" />
+    <Compile Include="Conj1.yrd.fs" />
+    <Compile Include="Conj2.yrd.fs" />
+    <Compile Include="Conj3.yrd.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

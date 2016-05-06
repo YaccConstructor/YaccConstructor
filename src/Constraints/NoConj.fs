@@ -1,4 +1,4 @@
-﻿//   Copyright 2013, 2014 YaccConstructor Software Foundation
+﻿//   Copyright 2016 YaccConstructor Software Foundation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -12,17 +12,19 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.Constraints
+module Yard.Core.ConstraintsImpl.NoConj
 
-open Yard.Core.ConstraintsImpl
+open Yard.Core
+open IL
+open Production
+open Yard.Core.ConstraintsImpl.Common
 
-let singleModule = SingleModule.singleModule
-let noEbnf = NoEbnf.noEbnf
-let noMeta = NoMeta.noMeta
-let inCNF = InCNF.inCNF
-let needAC = NeedAC.needAC
-let noInnerAlt = NoInnerAlt.noInnerAlt
-let noBrackets = NoBrackets.noBrackets
-let noLiterals = NoLiterals.noLiterals
-let noAlt = NoAlt.noAlt
-let noConj = NoConj.noConj
+let private checker grammar =
+    let rec isConj = function
+        | PAlt (a, b) -> isConj a || isConj b
+        | PConj (_,_) -> true
+        | _ -> false
+    not <| existsRules (fun r -> isConj r.body) grammar
+
+let noConj = new Constraint("NoConj", checker, Conversions.ExpandConjunction.ExpandConjunction()) 
+

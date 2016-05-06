@@ -50,6 +50,9 @@ let rec eachProduction f productionList =
         | PAlt(left, right) -> 
             PAlt(left, right) |> f
             eachProduction f [left; right]
+        | PConj(left, right) -> 
+            PConj(left, right) |> f
+            eachProduction f [left; right]
         | PMany x ->
             PMany x |> f
             eachProduction f [x]
@@ -73,6 +76,7 @@ let replaceLiteralsInProduction production (replacedLiterals:Dictionary<_,_>) (g
             )
             |> PSeq
         | PAlt(left, right) -> PAlt(_replaceLiterals left, _replaceLiterals right)
+        | PConj(left, right) -> PConj(_replaceLiterals left, _replaceLiterals right)
         | PMany x -> PMany(_replaceLiterals x)
         | PSome x -> PSome(_replaceLiterals x)
         | POpt x  -> POpt(_replaceLiterals x)

@@ -44,7 +44,7 @@ let getTests path fileList =
     [for x in fileList do yield path + "/" + x]
 
 let calcTests = getTests "../../../../Tests/AbstractLexing/DOT" ["test_0.dot"; "test_1.dot"; "test_2.dot"; "test_3.dot"]
-let TSQLTests = getTests "../../../TSQL.Test/DotTSQL" ["test_tsql_1.dot"; "test_tsql_2.dot"; "test_tsql_3.dot"; "test_tsql_4.dot"; "test_tsql_5.dot"]
+let TSQLTests = getTests "../../../TSQL.Test/DotTSQL" ["test_tsql_1.dot"; "test_tsql_2.dot"; "test_tsql_3.dot"; "test_tsql_4.dot"; "test_tsql_5.dot"; "test_tsql_6.dot"; "test_tsql_7.dot"]
 let manuallyCreatedTests = [fstCompos1, fstCompos2; fstCompos12, fstCompos22; fstCompos13, fstCompos22]
 
 [<EntryPoint>]

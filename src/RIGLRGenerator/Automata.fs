@@ -198,6 +198,22 @@ type RCA(grammar: FinalGrammar) as this =
                 joinRIAs terminalized baseRIA RIAs          
         else this.AddVerticesAndEdgeRange baseRIA.Edges |> ignore        
         this.InitState <- baseRIA.InitState
-        this.FinalState <- baseRIA.FinalState
+        this.FinalState <- baseRIA.FinalState                 
 
     member val PopStates = popStates with get
+                    
+    //                 R-actions                 p-actions                  shifts
+    // state -> [(rule, stateTo), ...], [(pushState, stateTo), ...], [(term, stateTo), ...]
+    member this.ToTable() = 
+        let table = Array.zeroCreate this.VertexCount
+        for state in this.Vertices do
+            let reduce, push, shift = new ResizeArray<_>(), new ResizeArray<_>(), 
+                                      new ResizeArray<_>()
+            for edge in this.OutEdges state do
+                match edge.Tag with
+                | Smbl(Sh x) -> shift.Add (x, edge.Target)
+                | Smbl(Ri i) -> reduce.Add (i, edge.Target)
+                | Smbl(Push s) -> push.Add (s, edge.Target)
+            shift.Sort()            
+            table.[state] <- (Seq.toList(reduce), Seq.toList(push), Seq.toList(shift))
+        table

@@ -38,7 +38,7 @@ let calcTokenizationTest file eCount vCount countEdgesArray =
 type ``Lexer Calc Fst Tests`` () =            
     [<Test>]
     member this.``Load graph test from DOT`` () =
-        let bidirectionalGraph = loadDotToQG (baseInputGraphsPath + "test_00.dot")
+        let bidirectionalGraph = loadDotToQG (path baseInputGraphsPath "test_00.dot")
         let adjacencyGraph = new AdjacencyGraph<_,_>()
         for edge in bidirectionalGraph.Edges do
             adjacencyGraph.AddVerticesAndEdge(edge) |> ignore

@@ -1,4 +1,5 @@
 {
+open Yard.Utils.StructClass
 open QuickGraph.FSA.GraphBasedFsa
 }
 

@@ -8,21 +8,14 @@ tokens {
     _ of FSA<char*Position<string>>
 }
 
-options {
-    infEpsPath = epsilons
-    pos = uint64
-}
-
-
 [<Start>]
-start: assign+
-
-assign: id ASSIGN expr SEMICOLON
+start: (let_expr SEMICOLON)* expr
+let_expr: LET id ASSIGN (let_expr SEMICOLON)* expr
 
 expr: expr op expr
 	 | NUMBER 
 	 | id
-         | LBRACE expr RBRACE
 
 op: PLUS | MINUS | MULT | DIV
+
 id: ID

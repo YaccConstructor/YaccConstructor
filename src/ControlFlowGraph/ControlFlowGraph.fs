@@ -135,6 +135,9 @@ type ControlFlow<'TokenType, 'BackReference when 'BackReference : equality>
         let fsaInfo = getFsaInfo()
         FSA.IsSubFsa(one, two, fsaInfo)
 
+    let containsOneWordOnly (fsa : FSA<_>) = 
+        fsa.VertexCount > 1 && fsa.VertexCount - 1 = fsa.EdgeCount
+
     let unionFsa one two = 
         FSA.Union(one, two)
 
@@ -149,7 +152,7 @@ type ControlFlow<'TokenType, 'BackReference when 'BackReference : equality>
         (generatedStuff.TokenToData token) :?> FSA<char * Position<_>>
 
     let processNewVariable (previous : DefinedIds<_>) (variable : FSA<_>)= 
-        if variable.ContainsOneWordOnly()
+        if containsOneWordOnly variable
         then
             let prevAlways = previous.Always
             let newAlways = unionFsa prevAlways variable

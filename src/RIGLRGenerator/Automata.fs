@@ -215,5 +215,5 @@ type RCA(grammar: FinalGrammar) as this =
                 | Smbl(Ri i) -> reduce.Add (i, edge.Target)
                 | Smbl(Push s) -> push.Add (s, edge.Target)
             shift.Sort()            
-            table.[state] <- (Seq.toList(reduce), Seq.toList(push), Seq.toList(shift))
+            table.[state] <- [| Seq.toArray(reduce); Seq.toArray(push); Seq.toArray(shift) |]
         table

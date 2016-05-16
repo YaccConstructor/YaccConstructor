@@ -104,6 +104,7 @@ let errorTest buildAstAbstract qGraph shouldBeSuccess testErrors =
 
 
 let perfTest parse inputLength graph =    
+    use out = new System.IO.StreamWriter ("../../../Tests/AbstractRNGLR/DOT/perferrors.txt")
     for x in 0..inputLength do
         let qGraph = graph x
         let start = System.DateTime.Now
@@ -115,6 +116,7 @@ let perfTest parse inputLength graph =
         let time = (System.DateTime.Now - start).TotalMilliseconds / 10.0
         System.GC.Collect()
         printfn "%0i : %A" x time
+        out.WriteLine (sprintf "%0i : %A" x time)
 
 //let errorTest inputFilePath shouldContainsSuccess errorsCount =
 //    printfn "==============================================================="
@@ -986,5 +988,7 @@ let f x =
 //    t._42_Errors_AB_SimpleBranch () //ok
 //    t._25_UnambiguousBrackets_temp () 
 //    t.``TSQL performance test 2`` 2 100 false
+    t.``Not Ambigous Simple Calc. Branch. Perf`` 3 50 false
+
 //    t.temp ()
     0

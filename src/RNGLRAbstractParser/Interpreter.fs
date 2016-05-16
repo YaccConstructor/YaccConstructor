@@ -416,9 +416,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 then
                     curLevel.Add(tailLPrefix)
 
-        
-
-
     let rec pathToPrefixes (path:Path) (tailLPrefixes:ResizeArray<LabledPrefix<_>>) =
         if path = null || path.Length = 0
         then

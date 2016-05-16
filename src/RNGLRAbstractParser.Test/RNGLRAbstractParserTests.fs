@@ -116,7 +116,22 @@ let perfTest parse inputLength graph =
         let time = (System.DateTime.Now - start).TotalMilliseconds / 10.0
         System.GC.Collect()
         printfn "%0i : %A" x time
-        out.WriteLine (sprintf "%0i : %A" x time)
+        out.WriteLine (sprintf "%A" time)
+
+let perfTest2 parse maxBr graph =    
+    use out = new System.IO.StreamWriter ("../../../Tests/AbstractRNGLR/DOT/perferrors.txt")
+    for br in 2..maxBr do
+        let qGraph = graph br
+        let start = System.DateTime.Now
+        for y in 0..9 do
+            match parse qGraph with
+            | Success _ -> ()
+            | Error (errDict) -> failwithf "Performance test failed wit message:%A" errDict
+
+        let time = (System.DateTime.Now - start).TotalMilliseconds / 10.0
+        System.GC.Collect()
+        printfn "%0i : %A" br time
+        out.WriteLine (sprintf "%A" time)
 
 //let errorTest inputFilePath shouldContainsSuccess errorsCount =
 //    printfn "==============================================================="
@@ -850,6 +865,40 @@ type ``RNGLR abstract parser tests`` () =
         let parse = (new Parser<_>()).Parse RNGLR.NotAmbigousSimpleCalc.buildAstAbstract
         perfTest parse inpLength graph
 
+    member this.``Not Ambigous Simple Calc. Branch. Perf2`` maxBr inpLength isLoop =  
+        let tpl x br =
+            [
+             yield!
+                 [edg x (x + 1) (RNGLR.NotAmbigousSimpleCalc.NUM  x)
+                  edg (x + 1) (x + 2) (RNGLR.NotAmbigousSimpleCalc.PLUS (x + 1))
+                  edg (x + 2) (x + 3) (RNGLR.NotAmbigousSimpleCalc.NUM (x + 2))
+                  edg (x + 3) (x + 4) (RNGLR.NotAmbigousSimpleCalc.PLUS (x + 3))]            
+             yield![for y in 0..br do
+                        yield edg (x + (if isLoop then 4 else 2)) (x + 5 + y) (RNGLR.NotAmbigousSimpleCalc.NUM 5)
+                        yield edg (x + 5 + y) (x + (if isLoop then 2 else 4)) (RNGLR.NotAmbigousSimpleCalc.PLUS 6)]
+            
+             yield edg (x + 4) (x + 6 + br) (RNGLR.NotAmbigousSimpleCalc.NUM (x + 4))
+             yield edg (x + 6 + br) (x + 7 + br) (RNGLR.NotAmbigousSimpleCalc.PLUS (x + 4))
+            ]
+
+        let graph br =
+            let eog = (inpLength + 1) * (7 + br) 
+            let qGraph = new ParserInputGraph<_>(0 , eog + 2)
+            for j in 0..inpLength do
+                tpl (j * (7 + br)) br |> qGraph.AddVerticesAndEdgeRange |> ignore
+                    
+
+            
+            [edg eog (eog + 1) (RNGLR.NotAmbigousSimpleCalc.NUM (inpLength + 1))                            
+             edg (eog + 1) (eog + 2) (RNGLR.NotAmbigousSimpleCalc.RNGLR_EOF (inpLength + 1))]
+            |> qGraph.AddVerticesAndEdgeRange
+            |> ignore
+            //qGraph.PrintToDot "out.dot" (RNGLR.NotAmbigousSimpleCalc.tokenToNumber >> RNGLR.NotAmbigousSimpleCalc.numToString)
+            qGraph
+
+        let parse = (new Parser<_>()).Parse RNGLR.NotAmbigousSimpleCalc.buildAstAbstract
+        perfTest parse maxBr graph
+
     member this.``TSQL performance test`` i inpLength isLoop =  
         let tpl x =
             [
@@ -910,7 +959,7 @@ type ``RNGLR abstract parser tests`` () =
             qGraph
 
         let parse = (new Parser<_>()).Parse Yard.Examples.MSParserAbstract.buildAstAbstract
-        perfTest parse inpLength graph
+        perfTest2 parse inpLength graph
 
 
     member this.``TSQL performance test for Alvor`` i inpLength isLoop =  
@@ -988,7 +1037,7 @@ let f x =
 //    t._42_Errors_AB_SimpleBranch () //ok
 //    t._25_UnambiguousBrackets_temp () 
 //    t.``TSQL performance test 2`` 2 100 false
-    t.``Not Ambigous Simple Calc. Branch. Perf`` 3 50 false
-
+//    t.``Not Ambigous Simple Calc. Branch. Perf`` 2 50 true
+    t.``Not Ambigous Simple Calc. Branch. Perf2`` 20 10 true
 //    t.temp ()
     0

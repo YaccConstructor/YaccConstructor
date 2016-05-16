@@ -460,3 +460,4 @@ src/RNGLRApplication/*.dot
 Tests/_bio/biodata_1/pictures/01_before_repeat_resolution/components/*.dot
 Tests/_bio/biodata_1/pictures/01_before_repeat_resolution/*.dot
 src/RNA.Search/res.dot
+src/RNA.Search/tRNA.yrd.fs

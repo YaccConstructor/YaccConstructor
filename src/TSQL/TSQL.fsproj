@@ -145,6 +145,11 @@
       <Project>{740981f9-878c-4e96-ac6d-8ce178c28c38}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\YC.Utils.SourceText\src\YC.Utils.SourceText\Utils.SourceText.fsproj">
+      <Name>Utils.SourceText (Tools\Utils.SourceText\Utils.SourceText)</Name>
+      <Project>{f296356b-00c3-465c-9c97-7cfa279f5574}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="TSQLHighlighting\TSQLHighlighting.csproj">
       <Name>TSQLHighlighting</Name>
       <Project>{6ee8bdd8-79e9-41f5-8a8e-e959835d60fb}</Project>
@@ -209,10 +214,6 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="Utils.SourceText">
-      <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
       <Name>AbstractAnalysis.Common</Name>
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>

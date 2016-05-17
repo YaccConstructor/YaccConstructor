@@ -200,6 +200,10 @@
       <Project>{d21242ef-c310-4b89-a9aa-cfd1c2b34531}</Project>
       <Name>RegularApproximation</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\YC.Utils.SourceText\src\YC.Utils.SourceText\Utils.SourceText.fsproj">
+      <Project>{f296356b-00c3-465c-9c97-7cfa279f5574}</Project>
+      <Name>Utils.SourceText</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

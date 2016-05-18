@@ -45,20 +45,23 @@ let loadLexerInputGraph gFile =
     for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, e.Tag)))
     lexerInputG
 
-let getStringErrors (errDict:Dictionary<_,_>) =
+let getStringErrors (errors:Dictionary<string,_>) (probErrors:Dictionary<string,_>) =
     let mutable errStr = "Error tokens: "
-    for tknStr in errDict.Keys do
+    for tknStr in errors.Keys do
+        errStr <- errStr + tknStr + ", "
+    errStr <- errStr + "Probably error tokens: "
+    for tknStr in probErrors.Keys do
         errStr <- errStr + tknStr + ", "
     errStr
 
 let test buildAstAbstract qGraph nodesCount edgesCount epsilonsCount termsCount ambiguityCount = 
     let r = (new Parser<_>()).Parse  buildAstAbstract qGraph
     match r with
-    | Error (errDict) ->
-        let msg = getStringErrors errDict
+    | Error (errors, probErrors) ->
+        let msg = getStringErrors errors probErrors
         printfn "%A" msg
         Assert.Fail msg
-    | Success(tree, errDict) ->
+    | Success(tree, (errors, probErrors)) ->
         //tree.PrintAst()
         let n, e, eps, t, amb = tree.CountCounters()
         Assert.AreEqual(nodesCount, n, "Nodes count mismatch")
@@ -66,37 +69,41 @@ let test buildAstAbstract qGraph nodesCount edgesCount epsilonsCount termsCount 
         Assert.AreEqual(epsilonsCount, eps, "Epsilons count mismatch")
         Assert.AreEqual(termsCount, t, "Terms count mismatch")
         Assert.AreEqual(ambiguityCount, amb, "Ambiguities count mismatch")
-        let msg = getStringErrors errDict
+        let msg = getStringErrors errors probErrors
         printfn "%A" msg
         Assert.Pass()
 
-let checkEqualErrors (errorDict:Dictionary<_,_>) (testErrors:ResizeArray<_>) =
-    if errorDict.Keys.Count = testErrors.Count
-    then
-        let r = testErrors |> Seq.tryFind (fun error -> not <| errorDict.ContainsKey(error))
-        match r with
-        | None -> true
-        | Some x -> false
-     else
-        false
+let checkCorrectErrors (errors:Dictionary<_,_>) (testErrors:ResizeArray<_>) =
+    let r = errors.Keys |> Seq.tryFind (fun error -> not <| testErrors.Contains(error))
+    match r with
+    | None -> true
+    | Some x -> false
+
+let checkCorrectApprox (errors:Dictionary<_,_>) (probErrors:Dictionary<_,_>) (testErrors:ResizeArray<_>) =
+    let r = testErrors |> Seq.tryFind (fun testError -> not <| (errors.ContainsKey(testError) || probErrors.ContainsKey(testError)))
+    match r with
+    | None -> true
+    | Some x -> false
 
 let errorTest buildAstAbstract qGraph shouldBeSuccess testErrors =
     let r = (new Parser<_>()).Parse  buildAstAbstract qGraph
     match r with
-    | Error (errDict) ->
-        let msg = getStringErrors errDict
+    | Error (errors, probErrors) ->
+        let msg = getStringErrors errors probErrors
         if shouldBeSuccess
         then
             Assert.Fail(sprintf "Test should produce success parsing result but its fully failed. " + msg) 
         else
-            Assert.True(checkEqualErrors errDict testErrors)
+            Assert.True(checkCorrectErrors errors testErrors)
+            Assert.True(checkCorrectApprox errors probErrors testErrors)
             printfn "%A" msg
             Assert.Pass()
-    | Success(tree, errDict) ->
-        let msg = getStringErrors errDict
+    | Success(tree, (errors, probErrors)) ->
+        let msg = getStringErrors errors probErrors
         if shouldBeSuccess
         then
-            Assert.True(checkEqualErrors errDict testErrors)
+            Assert.True(checkCorrectErrors errors testErrors)
+            Assert.True(checkCorrectApprox errors probErrors testErrors)
             printfn "%A" msg
             Assert.Pass()
         else
@@ -111,7 +118,7 @@ let perfTest parse inputLength graph =
         for y in 0..9 do
             match parse qGraph with
             | Success _ -> ()
-            | Error (errDict) -> failwithf "Performance test failed wit message:%A" errDict
+            | Error (errors, probErrors) -> failwithf "Performance test failed wit message:%A" errors probErrors
 
         let time = (System.DateTime.Now - start).TotalMilliseconds / 10.0
         System.GC.Collect()
@@ -126,7 +133,7 @@ let perfTest2 parse maxBr graph =
         for y in 0..9 do
             match parse qGraph with
             | Success _ -> ()
-            | Error (errDict) -> failwithf "Performance test failed wit message:%A" errDict
+            | Error (errors, probErrors) -> failwithf "Performance test failed wit message:%A" errors probErrors
 
         let time = (System.DateTime.Now - start).TotalMilliseconds / 10.0
         System.GC.Collect()
@@ -1022,22 +1029,22 @@ let f x =
 //    t._28_UnambiguousBrackets_DifferentPathLengths ()
 //    t.``TSQL performance test for Alvor`` 2 100 false
 //    t._29_AandB_Circle ()
-//    t._30_Errors_PrettySimpleCalc_FirstEdge () //ок
-//    t._31_Errors_PrettySimpleCalc_FirstEdge2 () //ок
-//    t._32_Errors_PrettySimpleCalc_FirstEdge3 () //ок
-//    t._33_Errors_PrettySimpleCalc_SimpleBranchError () //ок
-//    t._34_Errors_PrettySimpleCalc_SimpleBranchError2 () //ок
-//    t._35_Errors_PrettySimpleCalc_ComplexBranchError () //ок
-//    t._36_Errors_PrettySimpleCalc_ComplexBranchError2 () //ок
+//    t._30_Errors_PrettySimpleCalc_FirstEdge ()
+//    t._31_Errors_PrettySimpleCalc_FirstEdge2 ()
+//    t._32_Errors_PrettySimpleCalc_FirstEdge3 ()
+//    t._33_Errors_PrettySimpleCalc_SimpleBranchError ()
+//    t._34_Errors_PrettySimpleCalc_SimpleBranchError2 ()
+//    t._35_Errors_PrettySimpleCalc_ComplexBranchError ()
+//    t._36_Errors_PrettySimpleCalc_ComplexBranchError2 ()
 //    t._37_Errors_StrangeBrackets_Inf ()
-//    t._38_Errors_StrangeBrackets_SequenceInput () //ok
-//    t._39_Errors_StrangeBrackets_SequenceInput2 () //ok
-//    t._40_Errors_StrangeBrackets_SimpleLoop () //ok
-//    t._41_Errors_StrangeBrackets_SimpleLoop2 () //ok
-//    t._42_Errors_AB_SimpleBranch () //ok
+//    t._38_Errors_StrangeBrackets_SequenceInput ()
+//    t._39_Errors_StrangeBrackets_SequenceInput2 ()
+//    t._40_Errors_StrangeBrackets_SimpleLoop ()
+//    t._41_Errors_StrangeBrackets_SimpleLoop2 ()
+//    t._42_Errors_AB_SimpleBranch ()
 //    t._25_UnambiguousBrackets_temp () 
 //    t.``TSQL performance test 2`` 2 100 false
 //    t.``Not Ambigous Simple Calc. Branch. Perf`` 2 50 true
-    t.``Not Ambigous Simple Calc. Branch. Perf2`` 20 10 true
+//    t.``Not Ambigous Simple Calc. Branch. Perf2`` 20 10 true
 //    t.temp ()
     0

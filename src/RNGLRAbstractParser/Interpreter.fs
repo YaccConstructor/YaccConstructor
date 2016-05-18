@@ -151,8 +151,8 @@ and [<AllowNullLiteral>]
     new (edge) = new Path (edge, null, 1)
 
 type ParseResult<'TokenType> =
-    | Success of Tree<'TokenType> * Dictionary<string,ResizeArray<LabledPrefix<'TokenType>>>
-    | Error of Dictionary<string,ResizeArray<LabledPrefix<'TokenType>>>
+    | Success of Tree<'TokenType> * (Dictionary<string,ResizeArray<LabledPrefix<'TokenType>>> * Dictionary<string,ResizeArray<LabledPrefix<'TokenType>>>)
+    | Error of Dictionary<string,ResizeArray<LabledPrefix<'TokenType>>> * Dictionary<string,ResizeArray<LabledPrefix<'TokenType>>>
 
 let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : ParserInputGraph<'TokenType>) =
     let startV, finalV, innerGraph =
@@ -179,6 +179,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         outEdgesInnerGraph.[v.vNum] <- innerGraph.OutEdges v |> Array.ofSeq
     let gssVertexesToPrefixes = new Dictionary<_,ResizeArray<LabledPrefix<_>>>()
     let nonTermsAstToPrefixes = new Dictionary<AstNode,ResizeArray<LabledPrefix<_>>>()
+    let isCycle = ref false
     
     let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide : int[])
         (initNodes : seq<Vertex>) (numToString : int -> string) (errInd: int) (path : string) =
@@ -568,6 +569,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
         if wasAstPrefixes.Contains(curAstPrefix) || wasFindPrefixes.Contains(findPrefix)
         then
+            isCycle := true
             false
         else
             if curAstPrefix = findPrefix
@@ -805,6 +807,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         let vertexesToPrefs = new Dictionary<_,ResizeArray<LabledPrefix<_>>>()
         let vertexesToNontStarts = new Dictionary<_,_>()
         let errorEdges = new Dictionary<QuickGraph.TaggedEdge<_,_>,_>()
+        let probErrorEdges = new Dictionary<QuickGraph.TaggedEdge<_,_>,_>()
 
         let collectPrefixes (v:VInfo<_>) =
             if not <| vertexesToPrefs.ContainsKey(v) then
@@ -869,6 +872,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         notPushedPrefs.Add(pref)
 
                 for notPushedPref in notPushedPrefs do
+                    isCycle := false
                     if not <| commonNonterms.Any(fun ast -> nonTermsAstToPrefixes.[ast].Any(fun astPrefix -> 
                                                                                                             let wasAstStarts = new ResizeArray<_>()
                                                                                                             wasAstStarts.Add(ast)
@@ -876,10 +880,17 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                                                                                                             let wasFind = new ResizeArray<_>()
                                                                                                             isContainPref (Some ast) astPrefix (Some wasAstStarts) None notPushedPref None wasAst wasFind))
                     then
-                        if not <| errorEdges.ContainsKey(e)
-                            then
-                                errorEdges.Add(e, new ResizeArray<_>())
-                        addPrefix errorEdges.[e] notPushedPref
+                        if !isCycle
+                        then
+                            if not <| probErrorEdges.ContainsKey(e)
+                                then
+                                    probErrorEdges.Add(e, new ResizeArray<_>())
+                            addPrefix probErrorEdges.[e] notPushedPref
+                        else
+                            if not <| errorEdges.ContainsKey(e)
+                                then
+                                    errorEdges.Add(e, new ResizeArray<_>())
+                            addPrefix errorEdges.[e] notPushedPref
 
                 if not <| was.Contains(e.Target) then
                     dfs(e.Target)
@@ -924,18 +935,26 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         |_ -> ignore()
 
             for napref in notAccPrefs do
-                if not <| accPrefs.Contains(napref)
+                isCycle := false
+                if not <| accNonterms.Any(fun ast -> nonTermsAstToPrefixes.[ast].Any(fun astPrefix ->   let wasAstStarts = new ResizeArray<_>()
+                                                                                                        wasAstStarts.Add(ast)
+                                                                                                        let wasAst = new ResizeArray<_>()
+                                                                                                        let wasFind = new ResizeArray<_>()
+                                                                                                        isContainPref (Some ast) astPrefix (Some wasAstStarts) None napref None wasAst wasFind))
                 then
-                    if not <| accNonterms.Any(fun ast -> nonTermsAstToPrefixes.[ast].Any(fun astPrefix ->   let wasAstStarts = new ResizeArray<_>()
-                                                                                                            wasAstStarts.Add(ast)
-                                                                                                            let wasAst = new ResizeArray<_>()
-                                                                                                            let wasFind = new ResizeArray<_>()
-                                                                                                            isContainPref (Some ast) astPrefix (Some wasAstStarts) None napref None wasAst wasFind))
+                    if !isCycle
                     then
-                        errorEdges.Add(e, new ResizeArray<_>())
+                        if not <| probErrorEdges.ContainsKey(e)
+                            then
+                                probErrorEdges.Add(e, new ResizeArray<_>())
+                        addPrefix probErrorEdges.[e] napref
+                    else
+                        if not <| errorEdges.ContainsKey(e)
+                            then
+                                errorEdges.Add(e, new ResizeArray<_>())
                         addPrefix errorEdges.[e] napref
 
-        buildErrors errorEdges
+        (buildErrors errorEdges, buildErrors probErrorEdges)
 
     let processVertex v =
         makeReductions v
@@ -955,8 +974,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     if tokens.EdgeCount = 0
     then
         if parserSource.AcceptEmptyInput
-        then (new Tree<_>([||], getEpsilon startNonTerm, parserSource.Rules), new Dictionary<_,_>()) |> Success
-        else Error (new Dictionary<_,_>())
+        then (new Tree<_>([||], getEpsilon startNonTerm, parserSource.Rules), (new Dictionary<_,_>(), new Dictionary<_,_>())) |> Success
+        else Error (new Dictionary<_,_>(), new Dictionary<_,_>())
     else
         let startGssV,_ = addVertex startV startState startV.unprocessedGssVertices
         gssVertexesToPrefixes.[startGssV].Add(End)
@@ -966,10 +985,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
         let starts = new ResizeArray<VInfo<_>>()
         starts.Add(startV)
-        let errorsDict = collectErrors starts
+        let errorsDicts = collectErrors starts
 
         if errorIndex <> -1 then
-            Error (errorsDict)
+            Error (errorsDicts)
         else
             let root = ref None
             let addTreeTop res =
@@ -996,7 +1015,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                                                                    && v.processedGssVertices.Count <> 0 (*&& v.unprocessedGssVertices.Count <> 0*)))
                     |> Seq.map (fun v -> string v.vNum)
                     |> String.concat "; "
-                Error (errorsDict)
+                Error (errorsDicts)
             | Some res -> 
                 try 
                     let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
@@ -1007,6 +1026,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 //
 //                    drawDot parserSource.TokenToNumber terminals parserSource.LeftSide gssInitVertices parserSource.NumToString parserSource.ErrorIndex "../../../Tests/AbstractRNGLR/DOT/gss.dot"
 
-                    Success <| (tree, errorsDict)
+                    Success <| (tree, errorsDicts)
                 with
-                e -> Error (errorsDict)
+                e -> Error (errorsDicts)

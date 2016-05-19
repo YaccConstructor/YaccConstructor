@@ -33,6 +33,7 @@
     <Compile Include="ProductionGraph.fs" />
     <Compile Include="EmbeddedRecursion.fs" />
     <Compile Include="Automata.fs" />
+    <Compile Include="PrintTable.fs" />
     <Compile Include="RIGLRGenerator.fs" />
     <None Include="Script.fsx" />
     <None Include="packages.config" />

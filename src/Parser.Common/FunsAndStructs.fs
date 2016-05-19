@@ -5,8 +5,6 @@ open Yard.Generators.Common.ASTGLL
 open FSharpx.Collections.Experimental
 open System.Collections.Generic
 
-
-
 [<Measure>] type vertexMeasure
 [<Measure>] type nodeMeasure
 [<Measure>] type labelMeasure
@@ -45,7 +43,6 @@ type ParseResult<'TokenType> =
     | Success1 of array<'TokenType>
     | Error of string
 
-
 module CommonFuns = 
 
     let inline pack left right : int64 =  ((int64 left <<< 32) ||| int64 right)
@@ -75,12 +72,13 @@ type CompressedArray<'t>(l : int[], f : _ -> 't, shift) =
             let pos = (CommonFuns.getPosOnEdge i)
             a.[edg].[shift + pos]
         and set i v = a.[(CommonFuns.getEdge i)].[shift + (CommonFuns.getPosOnEdge i)] <- v
-       
+
+      
 type ParserStructures<'TokenType> (currentRule : int)=
     let sppfNodes = new BlockResizeArray<INode>()
-    let dummyAST = new TerminalNode(-1, packExtension -1 -1, 0)
+    let dummyAST = new TerminalNode(-1, packExtension -1 -1)
     let setP = new Dictionary<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<nodeMeasure>>>(500)//list<int<nodeMeasure>>> (500)
-    let epsilonNode = new TerminalNode(-1, packExtension 0 0, 0)
+    let epsilonNode = new TerminalNode(-1, packExtension 0 0)
     let setR = new System.Collections.Generic. Queue<Context>(100)  
     let dummy = 0<nodeMeasure>
     let currentN = ref <| dummy
@@ -119,8 +117,8 @@ type ParserStructures<'TokenType> (currentRule : int)=
                 let y = findSppfNode label (getLeftExtension rightExt) (getRightExtension rightExt)
                 ignore <| findSppfPackedNode y label rightExt rightExt dummyAST currentRight 
                 y
-                                 
-    let containsContext (setU : CompressedArray<Dictionary<_, Dictionary<_, ResizeArray<_>>>>) inputIndex (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
+      //CompressedArray<Dictionary<_, Dictionary<_, ResizeArray<_>>>>                           
+    let containsContext (setU : Dictionary<_, Dictionary<_, ResizeArray<_>>>[]) inputIndex (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
         let vertexKey = CommonFuns.pack vertex.Level vertex.NontermLabel
         if setU.[inputIndex] <> Unchecked.defaultof<_>
         then
@@ -158,14 +156,11 @@ type ParserStructures<'TokenType> (currentRule : int)=
             dict2.Add(vertexKey, arr)
             false
         //else true
-
-    let addContext (setU : CompressedArray<System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>>) (inputVertex : int) (label : int<labelMeasure>) vertex ast len(*currentPath*) =
-        let l = sppfNodes.[int ast].getLength ()
-        if l < len
+//CompressedArray<System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>>
+    let addContext (setU ) (inputVertex : int) (label : int<labelMeasure>) vertex ast =
+        if not <| containsContext setU inputVertex label vertex ast
         then
-            if not <| containsContext setU inputVertex label vertex ast
-            then
-                setR.Enqueue(new Context(inputVertex, label, vertex, ast (*, currentPath*)))
+            setR.Enqueue(new Context(inputVertex, label, vertex, ast (*, currentPath*)))
 
     let containsEdge (dict1 : Dictionary<_, Dictionary<_, ResizeArray<_>>>) ast (e : Vertex) =
         if dict1 <> Unchecked.defaultof<_>

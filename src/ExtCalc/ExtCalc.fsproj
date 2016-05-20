@@ -177,6 +177,11 @@
       <Project>{f86a2827-4c61-4bc5-82c5-19c2b60ab831}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\YC.Utils.SourceText\src\YC.Utils.SourceText\Utils.SourceText.fsproj">
+      <Name>Utils.SourceText (Tools\Utils.SourceText\Utils.SourceText)</Name>
+      <Project>{f296356b-00c3-465c-9c97-7cfa279f5574}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="ExtCalcHighlighting\ExtCalcHighlighting.csproj">
       <Name>ExtCalcHighlighting</Name>
       <Project>{d0bad4be-5fea-4de3-a1d9-acd7ea255437}</Project>

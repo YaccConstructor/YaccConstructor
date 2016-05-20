@@ -70,6 +70,21 @@
       <Project>{a9a5c115-0680-44b3-a87e-5ecf4c93814e}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
+      <Name>AbstractAnalysis.Common</Name>
+      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\AbstractLexer.Interpreter.Tests\AbstractLexer.Interpreter.Tests.fsproj">
+      <Name>AbstractLexer.Interpreter.Tests</Name>
+      <Project>{114e4775-bf85-464f-bb3d-d68de62615bd}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\YC.Utils.SourceText\src\YC.Utils.SourceText\Utils.SourceText.fsproj">
+      <Name>Utils.SourceText (Tools\Utils.SourceText\Utils.SourceText)</Name>
+      <Project>{f296356b-00c3-465c-9c97-7cfa279f5574}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

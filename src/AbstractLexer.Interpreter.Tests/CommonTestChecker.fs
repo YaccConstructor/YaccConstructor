@@ -1,8 +1,8 @@
 ﻿module YC.FST.AbstractLexing.Tests.CommonTestChecker
 
+open System
 open AbstractParser.Tokens
 open YC.FST.AbstractLexing.Interpreter
-open QuickGraph.FSA.FsaApproximation
 open QuickGraph.FSA.GraphBasedFsa
 open NUnit.Framework
 open Microsoft.FSharp.Collections 
@@ -11,8 +11,9 @@ open AbstractAnalysis.Common
 open Graphviz4Net.Dot.AntlrParser
 open Graphviz4Net.Dot
 open System.IO
+open Yard.Utils.StructClass
 
-let eof = RNGLR_EOF(new FSA<_>())   
+let eof = RNGLR_EOF(new FSA<_>())
 
 let printTok =
      fun x -> string x  |> (fun s -> s.Split '+' |> Array.rev |> fun a -> a.[0])
@@ -22,7 +23,7 @@ let checkGraph (graph:AdjacencyGraph<_,_>) countE countV  =
     Assert.AreEqual(graph.VertexCount, countV, "Count of vertices not equal expected number. ")
 
 let printSmbString (x:char*Position<_>) = 
-        (fst x).ToString() + "_br: " + (snd x).back_ref + "(" + (snd x).start_offset.ToString() + "," + (snd x).end_offset.ToString() + ")"
+        (fst x).ToString() + "_br: " + (snd x).BackRef + "(" + (snd x).StartOffset.ToString() + "," + (snd x).EndOffset.ToString() + ")"
 
 let printBref printSmbString =       
     let printGr (gr:FSA<_>) = 
@@ -48,21 +49,45 @@ let printBref printSmbString =
 
 let path baseInputGraphsPath name = System.IO.Path.Combine(baseInputGraphsPath,name)
 
-let loadGraphFromDOT filePath =
-    let parser = AntlrParserAdapter<string>.GetParser()
-    parser.Parse(new StreamReader(File.OpenRead filePath))
+let loadDotToQG path =
+    let dot = File.ReadAllText(path)
+    BidirectionalGraph.LoadDot(dot, (fun v attrs -> int v), (fun v1 v2 attr -> new TaggedEdge<_,_>(int v1, int v2, (snd attr.[0], snd attr.[0]))))
 
-let loadDotToQG baseInputGraphsPath gFile =
-    let qGraph = loadGraphFromDOT(path baseInputGraphsPath gFile)
-    let graphAppr = new Appr<_>()
-    graphAppr.InitState <- ResizeArray.singleton 0
+let approximateQG (graph: BidirectionalGraph<int,TaggedEdge<int,(string * 'br)>>) = 
+    let fsa = new FSA<_>()
+    fsa.InitState <- ResizeArray.singleton 0
+    fsa.FinalState <- ResizeArray.singleton (Seq.max graph.Vertices)
+        
+    let counter = graph.Vertices |> Seq.max |> ref
 
-    for e in qGraph.Edges do
-        let edg = e :?> DotEdge<string>
-        new TaggedEdge<_,_>(int edg.Source.Id, int edg.Destination.Id, (edg.Label, edg.Label)) |> graphAppr.AddVerticesAndEdge |> ignore
+    let splitEdge (edg: TaggedEdge<int,(string * 'br)>) str br =
+        let start = edg.Source
+        let _end = edg.Target
+        let pos = ref 0
 
-    graphAppr.FinalState <- ResizeArray.singleton (Seq.max graphAppr.Vertices)
-    graphAppr
+        match str with
+        | Some("") -> [|new EdgeFSA<_>(start, _end, Eps)|]
+        | None -> [|new EdgeFSA<_>(start, _end, Eps)|]
+        | Some(s) ->
+            let l = s.Length
+            let ss = s.ToCharArray()
+            Array.init l
+                (fun i ->
+                    match i with
+                    | 0 when (l = 1)     -> new EdgeFSA<_>(start, _end, Smbl(ss.[i], new Position<'br>(0,1,br)))
+                    | 0                  -> new EdgeFSA<_>(start, (incr counter; !counter), Smbl(ss.[i], new Position<_>(!pos,(incr pos; !pos),br)))
+                    | i when (i = l - 1) -> new EdgeFSA<_>(!counter, _end, Smbl(ss.[i], new Position<_>(!pos,(incr pos; !pos),br)))
+                    | i                  -> new EdgeFSA<_>(!counter, (incr counter; !counter), Smbl(ss.[i], new Position<_>(!pos,(incr pos; !pos),br)))
+                )
+
+    for edge in graph.Edges do
+        match edge.Tag with
+        | (str, br) ->
+            let x = splitEdge edge (Some str) br
+            x |> fsa.AddVerticesAndEdgeRange
+            |> ignore
+        
+    fsa
 
 let checkArr expectedArr actualArr =
     if Array.length expectedArr = Array.length actualArr

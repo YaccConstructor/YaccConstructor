@@ -28,7 +28,6 @@ open YC.Tests.Helper
 open Yard.Generators.ARNGLR.Parser
 
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
 
 let baseInputGraphsPath = "../../../Tests/AbstractRNGLR/DOT"
 

@@ -8,7 +8,7 @@ open Microsoft.FSharp.Collections
 
 open ReSharperExtension.YcIntegration
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
+open Yard.Utils.StructClass
 
 type br = ICSharpLiteralExpression
 type range = DocumentRange
@@ -23,9 +23,9 @@ let private getNeedRange (backRef : br) beginPosTok endPosTok =
     grTokenBackRefRange.ExtendLeft(-beginPosTok).ExtendRight(-endPos)
 
 let getRange (pos : Position<br>) = 
-    let beginPosTok = pos.start_offset + 1
-    let endPosTok = pos.start_offset + 2
-    getNeedRange pos.back_ref beginPosTok endPosTok
+    let beginPosTok = pos.StartOffset + 1
+    let endPosTok = pos.StartOffset + 2
+    getNeedRange pos.BackRef beginPosTok endPosTok
 
 let addSemantic (parent : ITreeNode) (children : ITreeNode list) = 
     let mutable prev = null
@@ -57,7 +57,7 @@ let calculatePos (grToken: FSA<char*Position<#ITreeNode>>) =
             (
                 fun x -> 
                     match x.Tag with 
-                    | Smbl y -> (snd y).back_ref 
+                    | Smbl y -> (snd y).BackRef 
                     | _ -> failwith "Unexpected Eps!!"
             ) //x.BackRef)
         |> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)
@@ -71,7 +71,7 @@ let calculatePos (grToken: FSA<char*Position<#ITreeNode>>) =
                                 (
                                     fun i -> 
                                         match i.Tag with 
-                                        | Smbl y -> (snd y).start_offset 
+                                        | Smbl y -> (snd y).StartOffset 
                                         | _ -> failwith "Unexpected Eps!!"
                                 ) //i.StartPos)
                         let lengthTok = pos.Length
@@ -79,14 +79,14 @@ let calculatePos (grToken: FSA<char*Position<#ITreeNode>>) =
                         let endPosTok = pos.[lengthTok-1] + 2
                         let grTokenBackRef = 
                             match grToken.[0].Tag with 
-                            | Smbl y -> (snd y).back_ref 
+                            | Smbl y -> (snd y).BackRef 
                             | _ -> failwith "Unexpected Eps!!" 
                         getNeedRange grTokenBackRef beginPosTok endPosTok
                     with
                     | e -> 
                         let grTokenBackRef = 
                             match grToken.[0].Tag with 
-                            | Smbl y -> (snd y).back_ref 
+                            | Smbl y -> (snd y).BackRef 
                             | _  -> failwith "Unexpected Eps!!"
                         grTokenBackRef.GetDocumentRange()
             )

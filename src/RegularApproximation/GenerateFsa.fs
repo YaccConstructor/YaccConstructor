@@ -5,11 +5,13 @@ open Microsoft.FSharp.Collections
 
 open GenericGraphs
 open DDG
+open QuickGraph
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
+open AbstractAnalysis.Common
 open Utils
 open GraphUtils.TopoTraverser
 open GenericGraphs.BidirectTopoDownTraverser
+open YC.FST.AbstractLexing.Tests.CommonTestChecker
 
 type FSAMap<'a when 'a : equality> = Map<string, FSA<'a>>
 
@@ -79,12 +81,9 @@ let buildAutomaton (ddg: DDG<_,_>) (initialFsaMap: FSAMap<_>) controlData approx
         | a :: [] -> a
 
     let fsaForLiteral literalValue literalNode = 
-        let initial = ResizeArray.singleton 0
-        let final = ResizeArray.singleton 1
-        let transitionLabel = (literalValue, literalNode)
-        let transitions = ResizeArray.singleton (0, transitionLabel, 1)
-        let fsaApprox = Appr(initial, final, transitions)
-        fsaApprox.ApprToFSA()
+        let graph = new BidirectionalGraph<_,_>()
+        graph.AddVerticesAndEdge(new TaggedEdge<_,_>(0, 1, (literalValue, literalNode))) |> ignore
+        approximateQG(graph)
 
     let processAssingLikeNode target operands automata =
         let rightOperandFsa = List.head operands

@@ -7,5 +7,5 @@ digraph g
 1 -> 2 [label="4"];
 2 -> 3 [label="5"];
 2 -> 3 [label="16"];               			
-3 -> 4 [label="7"];
+3 -> 4 [label="7"]
 }

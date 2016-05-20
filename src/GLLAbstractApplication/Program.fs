@@ -106,10 +106,9 @@ let edg f t l = new ParserEdge<_>(f,t,lbl l)
 //    qGraph.FinalStates <- [|e|]
 //    qGraph.PrintToDot "input.dot" (GLL.SimpleAmb.tokenToNumber >> GLL.SimpleAmb.numToString)
 //    qGraph
-    
+//    
 //let f arr tokenToNumber = Array.map (fun e -> tokenToNumber e) arr
-//let len (edges : BioParserEdge<'token>[]) : int[] = edges |> Array.map (fun e -> e.Tokens.Length + 1) 
-//let edgB b e t = new BioParserEdge<_>(b, e, t) 
+//let edgB b e t = new ParserEdge<_>(b, e, t) 
 //
 //let inputGraph =
 //    
@@ -122,7 +121,7 @@ let edg f t l = new ParserEdge<_>(f,t,lbl l)
 //            edgB 1 2 a2;
 //            edgB 1 2 a3;
 //            edgB 2 3 a4|] 
-//        let qGraph = new BioParserInputGraph<_>([|0|], 3, len edges, edges, 4)
+//        let qGraph = new ParserInputGraph<_>([|0|], 3, edges, 4))
 //        qGraph
 //let parser = GLL.SimpleAmb.buildAbstractAst
 //let r = parser inputGraph 10
@@ -131,8 +130,7 @@ let edg f t l = new ParserEdge<_>(f,t,lbl l)
 //    printfn "Error"     
 //| ParserCommon.ParseResult.Success tree->
 //    printfn "%s" "sss"
-
-let graphGenerator numberOfBlocks  =
+//    printfn "%s" "sss"
     let final = 100
     let qGraph = new ParserInputGraph<_>(0, final)
     let mutable b = 0
@@ -145,24 +143,10 @@ let graphGenerator numberOfBlocks  =
     qGraph.FinalStates <- [|e|]
     qGraph.PrintToDot "input.dot" (GLL.SimpleAmb.tokenToNumber >> GLL.SimpleAmb.numToString)
     qGraph
-
-let graphGenerator2 numberOfBlocks  =
-    let final = 100
-    let qGraph = new ParserInputGraph<_>(0, final)
-    let mutable b = 0
-    let mutable e = 1
-    for blocks = 0 to numberOfBlocks - 1 do
-        qGraph.AddVerticesAndEdge <| edg b e (RNGLR.SimpleAmb.B 0) |> ignore
-        b <- e
-        e <- e + 1     
-    qGraph.AddVerticesAndEdge <| edg b e (RNGLR.SimpleAmb.RNGLR_EOF 0) |> ignore
     qGraph.FinalStates <- [|e|]
     qGraph.PrintToDot "input.dot" (RNGLR.SimpleAmb.tokenToNumber >> GLL.SimpleAmb.numToString)
-    qGraph
 
 //let f () =  
-let parser = GLL.SimpleAmb.buildAbstractAst
-//let parser2 = RNGLR.SimpleAmb.buildAstAbstract
 //System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
 //for i = 50 to 150 do
 let g = graphGenerator (100) 
@@ -175,11 +159,6 @@ let start2 = System.DateTime.Now
 //let r2 = parser2 g2
 let finis2h = System.DateTime.Now - start
 printfn " : %A"  finish.TotalSeconds
-match r with
-|  Yard.Generators.GLL.ParserCommon.Error _ ->
-    printfn "Error"     
-| Yard.Generators.GLL.ParserCommon.Success tree->
-    ()
     
 //let th = new System.Threading.Thread(f, 10000000)
 //th.Start()

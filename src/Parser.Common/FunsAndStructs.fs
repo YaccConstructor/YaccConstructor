@@ -4,8 +4,6 @@ open AbstractAnalysis.Common
 open Yard.Generators.Common.ASTGLL
 open FSharpx.Collections.Experimental
 
-
-
 [<Measure>] type vertexMeasure
 [<Measure>] type nodeMeasure
 [<Measure>] type labelMeasure
@@ -31,7 +29,6 @@ type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
     | Error of string
 
-
 module CommonFuns = 
 
     let inline pack left right : int64 =  ((int64 left <<< 32) ||| int64 right)
@@ -49,6 +46,8 @@ module CommonFuns =
     let inline getPosition (packedValue : int<labelMeasure>) = int (int packedValue &&& 0xffff)
 
 type ParserStructures<'TokenType> (inputLength : int, currentRule : int)=
+
+      
     let sppfNodes = new BlockResizeArray<INode>()
     let dummyAST = new TerminalNode(-1, packExtension -1 -1)
     let setP = new System.Collections.Generic.Dictionary<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<nodeMeasure>>>(500)//list<int<nodeMeasure>>> (500)
@@ -95,8 +94,8 @@ type ParserStructures<'TokenType> (inputLength : int, currentRule : int)=
                 let y = findSppfNode label (getLeftExtension rightExt) (getRightExtension rightExt)
                 ignore <| findSppfPackedNode y label rightExt rightExt dummyAST currentRight 
                 y
-                                 
-    let containsContext (setU : System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>[]) inputIndex (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
+      //CompressedArray<Dictionary<_, Dictionary<_, ResizeArray<_>>>>                           
+    let containsContext (setU : Dictionary<_, Dictionary<_, ResizeArray<_>>>[]) inputIndex (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
         if inputIndex <= inputLength
         then
             let vertexKey = CommonFuns.pack vertex.Level vertex.NontermLabel
@@ -134,8 +133,8 @@ type ParserStructures<'TokenType> (inputLength : int, currentRule : int)=
                 dict2.Add(vertexKey, arr)
                 false
         else true
-
-    let addContext (setU : System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>[]) (inputVertex : int) (label : int<labelMeasure>) vertex ast (*currentPath*) =
+//CompressedArray<System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>>
+    let addContext (setU ) (inputVertex : int) (label : int<labelMeasure>) vertex ast =
         if not <| containsContext setU inputVertex label vertex ast
         then
             setR.Enqueue(new Context(inputVertex, label, vertex, ast (*, currentPath*)))

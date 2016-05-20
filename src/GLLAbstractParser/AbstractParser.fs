@@ -11,6 +11,7 @@ open FSharpx.Collections.Experimental
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
 
+
 let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : ParserInputGraph<'TokenType>) : ParserCommon.ParseResult<_> = 
     
     if input.EdgeCount = 0 then
@@ -22,8 +23,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
     else
         let slots = parser.Slots
            
-        let setU = Array.zeroCreate<Dictionary<int, Dictionary<int64, ResizeArray<int<nodeMeasure>>>>> (input.VertexCount )///1
-        let structures = new ParserStructures<_>(input.VertexCount, parser.StartRule)
+        let setU = Array.zeroCreate<Dictionary<_, Dictionary<_, ResizeArray<_>>>> input.VertexCount
+        let structures = new ParserStructures<_>(parser.StartRule)
         let setR = structures.SetR
         let epsilonNode = structures.EpsilonNode
         let setP = structures.SetP
@@ -34,12 +35,10 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let dummyGSSNode = new Vertex(!currentVertexInInput, int !structures.CurrentLabel)
         let sppfNodes = structures.SppfNodes
         
-        let tokens = new BlockResizeArray<'TokenType>()
-        //let packedNodes = Array3D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount) (input.VertexCount) (input.VertexCount)// (fun _ _ _ -> new Dictionary<_,_>())
-        let packedNodes = new Dictionary<int64, Dictionary<int<labelMeasure>, int<nodeMeasure>>>()// (fun _ _ _ -> new Dictionary<_,_>())
+        let tokens = new BlockResizeArray<'TokenType>()        
+        let packedNodes = new Dictionary<M, int<nodeMeasure>>()
         
-        let nonTerminalNodes = new Dictionary<int64,int<nodeMeasure>>()
-        //Array3D.zeroCreate<int<nodeMeasure>> parser.NonTermCount (input.VertexCount) (input.VertexCount)
+        let nonTerminalNodes = new Dictionary<int64,int<nodeMeasure>>()        
         let intermidiateNodes = Array2D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount) (input.VertexCount) //убрала +1
         let edges = Array2D.zeroCreate<Dictionary<int<nodeMeasure>, Dictionary<int, ResizeArray<int>>>> slots.Count (input.VertexCount )
         let terminalNodes = Array3D.zeroCreate<int<nodeMeasure>> input.VertexCount input.VertexCount parser.TermCount  
@@ -99,23 +98,16 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             let i = getLeftExtension lExt
             let j = getRightExtension lExt
             let k = getRightExtension rExt
-            let rule = getRule label
-            let d = 
-                if packedNodes.ContainsKey <| pack3 i j k
-                then
-                    packedNodes.[pack3 i j k]
-                else 
-                    let t = new Dictionary<int<labelMeasure>, int<nodeMeasure>>(2)
-                    packedNodes.Add((pack3 i j k), t) 
-                    t
-            if d.ContainsKey label
-            then
-                d.[label] 
-            else 
+            let rule = getRule label            
+            let key = new M (pack3 i j k, label)
+            let flg,res = packedNodes.TryGetValue(key)            
+            if flg
+            then res
+            else
                 let newNode = new PackedNode(rule, left, right)
                 sppfNodes.Add(newNode)
                 let num = (sppfNodes.Length - 1 )*1<nodeMeasure>
-                d.Add(label, num)
+                packedNodes.Add(key, num)
                 match sppfNodes.Item (int symbolNode) with
                 | :? NonTerminalNode as n ->
                     n.AddChild newNode
@@ -123,7 +115,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     i.AddChild newNode
                 | _ -> ()
                 num
-                  
+        let getNodeT (edge : ParserEdge<'TokenType>) =
         let getNodeT (edge : ParserEdge<'TokenType>) =
             let beginVertix = edge.Source
             let endVertix = edge.Target
@@ -239,7 +231,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                 else 
                                     structures.CurrentR := getNodeT edge
                                 currentVertexInInput := edge.Target
-                                structures.CurrentLabel := packLabel rule (position + 1)
+                                structures.CurrentLabel := 1<labelMeasure> * (packLabelNew rule (position + 1))
                                 if !structures.CurrentR <> structures.Dummy
                                 then 
                                     structures.CurrentN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy !structures.CurrentLabel !structures.CurrentN !structures.CurrentR
@@ -251,7 +243,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
                             index <- index + term - parser.NonTermCount
                             index
-                        currentGSSNode := create !currentVertexInInput (packLabel rule (position + 1)) !currentGSSNode  !structures.CurrentN
+                        currentGSSNode := create !currentVertexInInput (1<labelMeasure> *(packLabelNew rule (position + 1))) !currentGSSNode  !structures.CurrentN
                         for edge in input.OutEdges !currentVertexInInput do
                             let curToken = parser.TokenToNumber edge.Tag
 
@@ -260,12 +252,11 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             if table.ContainsKey key
                             then
                                 for rule in table.[key] do
-                                 
                                     let newLabel = packLabel rule 0
                                     structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy 
-                                
-//                    else
-//                        if Seq.length <| input.OutEdges !currentVertexInInput = 0
+                                 
+                                    let newLabel = 1<labelMeasure> * (packLabelNew rule 0)
+                                    structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy 
 //                        then
 //                            if parser.CanInferEpsilon.[curSymbol]
 //                            then

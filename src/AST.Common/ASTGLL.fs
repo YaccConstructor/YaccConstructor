@@ -84,8 +84,7 @@ type NumNode =
     new (num, node) = {Num = num; Node = node} 
 
 [<AllowNullLiteral>]
-type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
-    member this.tokens = toks
+type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
     member this.AstToDot (indToString : int -> string) (tokenToNumber : 'TokenType -> int) (tokenData : 'TokenType -> obj) (path : string) =
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
@@ -160,7 +159,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                         then
                             if t.Name <> -1
                             then
-                                createNode !num false Terminal ("t " +  (indToString <| (tokenToNumber this.tokens.[t.Name])) + " " + string(tokenData this.tokens.[t.Name]))
+                                createNode !num false Terminal ("t " +  (indToString <| tokenToNumber tokens.[t.Name])) 
                                 createEdge currentPair.Num !num false ""
                             else
                                 createNode !num false Terminal ("epsilon")
@@ -182,6 +181,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
         out.WriteLine("}")
         out.Close()
 
+                    seq { yield (ReducedTree.Term((indToString <| tokenToNumber tokens.[t.Name]), t))}
     member this.ExtractFinalPaths =
         let nodeQueue = new Queue<NumNode>()
         let visitedNodes = new Dictionary<_, Dictionary<_,_>>()

@@ -4,218 +4,300 @@ open System.IO
 open System.Collections.Generic
 
 open ControlFlowGraph.Common
-open ControlFlowGraph.IfHelper
-open ControlFlowGraph.AssignmentHelper
 open ControlFlowGraph.CfgElements
-open ControlFlowGraph.InnerGraph
-open ControlFlowGraph.InputStructures
-open ControlFlowGraph.GraphInterpreter
+
+open QuickGraph.FSA.GraphBasedFsa
+open QuickGraph.FSA.FsaApproximation
 
 open Yard.Generators.Common.AST
-open Yard.Generators.Common.AstNode
 
-type private StartEndVertices = 
-    val mutable Start : int
-    val mutable Finish : int option
+open Printers
 
-    new(start) = {Start = start; Finish = None}
+type DefinedIds<'BackReference when 'BackReference : equality> = 
+    //this variables is defined on all possible paths
+    //under any configuration
+    val Always : FSA<char * Position<'BackReference>>
+    //this variables is defined on some paths or/and 
+    //under some configuration.
+    val Somewhere : FSA<char * Position<'BackReference>>
 
-type ControlFlow<'TokenType> (tree : Tree<'TokenType>
-                            , parserSource : CfgParserSource<'TokenType>
-                            , langSource : LanguageSource
-                            , tokToSourceString : _ -> string) = 
+    new () = {Always = new FSA<_>(); Somewhere = new FSA<_>()}
+    new (always, somewhere) = {Always = always; Somewhere = somewhere}
+
+    ///complement (always union somewhere)
+    member this.GetFullComplementation (fsaParams : FsaParams<_, _>) = 
+        let union = FSA<_>.Union(this.Always, this.Somewhere)
+        union.Complementation(fsaParams.Alphabet, fsaParams.NewSymbol, fsaParams.GetChar)
+
+    static member Intersect (fsaInfo : FsaParams<_, _>) (one : DefinedIds<_>) (two : DefinedIds<_>) = 
+        
+        let union one two = FSA.Union(one, two)
+        let intersect one two = FSA.Intersection(one, two, fsaInfo.SymbolsAreEqual)
+
+        let subtractFsa one (two : FSA<_>) = 
+            let twoComplement = two.Complementation (fsaInfo.Alphabet, fsaInfo.NewSymbol, fsaInfo.GetChar)
+            intersect one twoComplement
+
+        let resultAlways = intersect one.Always two.Always
+        let resultMaybe = intersect one.Somewhere two.Somewhere
+
+        new DefinedIds<_>(resultAlways, resultMaybe)
+
+    static member AreEqual (fsaInfo : FsaParams<_, _>) (one : DefinedIds<_>) (two : DefinedIds<_>) = 
+        
+        let isSubFsa one two = 
+            FSA<_>.IsSubFsa(one, two, fsaInfo)
+
+        let areEqual one two = 
+            isSubFsa one two && isSubFsa two one 
+
+        areEqual one.Always two.Always && areEqual one.Somewhere two.Somewhere
+        
+
+type ErrorType<'TokenType, 'BackReference when 'BackReference : equality> =
+| NoError 
+| MaybeError of 'TokenType * FSA<char * Position<'BackReference>>
+| AlwaysError of 'TokenType * FSA<char * Position<'BackReference>>
+
+    static member IsError errorType = 
+        match errorType with
+        | NoError -> false
+        | _ -> true
+
+    static member AreEqual compare (one : ErrorType<_, _>) (two : ErrorType<_, _>) = 
+        match one, two with
+        | NoError, NoError -> true
+        | MaybeError(token1, fsa1), MaybeError(token2, fsa2) 
+        | AlwaysError(token1, fsa1), AlwaysError(token2, fsa2) -> 
+            compare token1 token2
+        | _ -> false
+
+type ControlFlow<'TokenType, 'BackReference when 'BackReference : equality> 
+                            (entry : InterNode<'TokenType>
+                            , exit : InterNode<'TokenType>
+                            , intToToken : int -> 'TokenType
+                            , generatedStuff : GeneratedStuffSource<'TokenType, 'BackReference>
+                            , langSource : LanguageSource) = 
     
-    let intToToken = fun i -> tree.Tokens.[i]
+    //let intToToken i = tree.Tokens.[i]
 
-    let isNotEq token = 
-        let eqNumber = langSource.KeywordToInt.[Keyword.EQ]
-        parserSource.TokenToNumber token <> eqNumber
+    let isNotAssign token = 
+        let assignNumber = langSource.KeywordToInt.[Keyword.ASSIGN]
+        generatedStuff.TokenToNumber token <> assignNumber
 
     let isVariable = 
-        parserSource.TokenToNumber >> langSource.IsVariable
+        generatedStuff.TokenToNumber >> langSource.IsVariable
+    
+    //let entry, exit = buildCfg tree generatedStuff langSource tokToSourceString
 
-    let processIf' = processIf intToToken parserSource.TokenToNumber <| langSource.GetTempIfDict()
-
-    let entry, exit = 
-        let familyToVertices = new Dictionary<_, StartEndVertices>()
-
-        let getEndVertex family = familyToVertices.[family].Finish
-
-        let rec handleNode (node : obj) (currentGraph : GraphConstructor<_>) = 
-            let handleFamily (family : Family) = 
-                if familyToVertices.ContainsKey family 
-                then 
-                    let target = familyToVertices.[family].Start
-                    currentGraph.AddEdgeFromTo EmptyEdge currentGraph.CurrentVertex target
-                    
-                    match getEndVertex family with
-                    | Some n -> currentGraph.CurrentVertex <- n
-                    | None -> 
-                        let newEndVertex = currentGraph.FindLastVertex target
-                        newEndVertex
-                        |> Option.iter(fun n -> currentGraph.CurrentVertex <- n)
-                else
-                    familyToVertices.[family] <- new StartEndVertices(currentGraph.CurrentVertex)
-                    let familyName = parserSource.LeftSides.[family.prod] |> parserSource.NumToString
-
-                    if langSource.NodeToType.ContainsKey familyName 
-                    then 
-                        let edge = 
-                            match langSource.NodeToType.[familyName] with
-                            | IfStatement -> processIf' family handleNode
-                            | Assignment -> processAssignment intToToken family
-                            | x -> failwithf "This construction isn't supported now: %A" x
-                    
-                        currentGraph.AddEdge edge
-                        currentGraph.UpdateVertex()
-                    else 
-                        family.nodes.doForAll (fun node -> handleNode node currentGraph)
-                    familyToVertices.[family].Finish <- Some currentGraph.CurrentVertex
-                getEndVertex family
-
-            match node with 
-            | :? Epsilon 
-            | :? Terminal -> ()
-            | :? AST as ast ->
-                let commonStart = currentGraph.CurrentVertex
-                let endNumbersRef = ref []
-                
-                let setStartAndHandle family = 
-                    currentGraph.CurrentVertex <- commonStart
-                    let endNum = handleFamily family
-                    endNumbersRef := endNum :: !endNumbersRef
-                
-                ast.doForAllFamilies setStartAndHandle
-                let endNumbers = !endNumbersRef |> List.choose id
-                
-                if endNumbers.Length = 1
-                then 
-                    currentGraph.CurrentVertex <- endNumbers.Head
-                elif endNumbers.Length >= 2 
-                then 
-                    let commonFinish = currentGraph.CreateNewVertex()
-                    endNumbers
-                    |> Seq.iter (fun num -> currentGraph.AddEdgeFromTo EmptyEdge num commonFinish)
-                
-                    currentGraph.UpdateVertex()
-                    
-            | x -> failwithf "Unexpected node type: %s" <| x.GetType().ToString()
-
-        let graphInfo = new GraphConstructor<_>()
-        handleNode tree.Root graphInfo
-        graphToCfg graphInfo.Graph <| Some parserSource.TokenToString
+    let rec func' getNext acc (queue : _ list) = 
+        
+        match queue with
+        | [] -> acc
+        | head :: tail -> 
+            if acc |> List.exists ((=) head)
+            then 
+                func' getNext acc tail
+            else
+                let children = getNext head
+                func' getNext (head :: acc) <| List.append tail children
 
     let blocks = 
-        let markedBlocks = new ResizeArray<_>()
-        let queue = new Queue<_>()
-
-        let processNode (node : InterNode<_>) = 
-            let processBlock block = 
-                if not <| markedBlocks.Contains block
-                then
-                    markedBlocks.Add block
-                    queue.Enqueue block
         
-            node.Children 
-            |> List.iter processBlock
-    
-        processNode entry
-        while queue.Count > 0 do
-            let block = queue.Dequeue()
+        let getNext (block : Block<_>)= 
             block.Children
-            |> List.iter processNode
+            |> List.map (fun node -> node.Children)
+            |> List.concat
 
-        markedBlocks.ToArray()
-
-    let nodes = 
-        let markedNodes = new ResizeArray<_>()
-        let queue = new Queue<_>()
+        func' getNext [] entry.Children
+        |> List.rev
         
-        let processNode node = 
-            if not <| markedNodes.Contains node
-            then
-                markedNodes.Add node
-                queue.Enqueue node
-
-        processNode entry
-        while queue.Count > 0 do
-            let node = queue.Dequeue()
+    let nodes = 
+        
+        let getNext (node : InterNode<_>) = 
             node.Children
-            |> List.iter(fun block -> block.Children |> List.iter processNode)
+            |> List.map (fun block -> block.Children)
+            |> List.concat
 
-        markedNodes.ToArray()
+        func' getNext [] [entry]
+        |> List.rev
 
-    let findUndefVariable() = 
-        let blockToVars = new Dictionary<_, _>()
-        let errorList = ref []
+    let getFsaInfo() = 
+        match generatedStuff.FsaInfo with
+        | Some info -> info
+        | None -> raise <| invalidOp "Missing FsaInfo"
+
+    let intersectFsa one two = 
+        let fsaInfo = getFsaInfo()
+        FSA.Intersection(one, two, fsaInfo.SymbolsAreEqual)
+
+    let isSubFsa one two = 
+        let fsaInfo = getFsaInfo()
+        FSA.IsSubFsa(one, two, fsaInfo)
+
+    let containsOneWordOnly (fsa : FSA<_>) = 
+        fsa.VertexCount > 1 && fsa.VertexCount - 1 = fsa.EdgeCount
+
+    let unionFsa one two = 
+        FSA.Union(one, two)
+
+    // one \ two
+    let subtractFSA (one : FSA<_>) (two : FSA<_>) =
+        let fsaInfo = getFsaInfo()
+        let twoComplementation = two.Complementation(fsaInfo.Alphabet, fsaInfo.NewSymbol, fsaInfo.GetChar)
+
+        intersectFsa one twoComplementation
+
+    let tokenToFsa token = 
+        (generatedStuff.TokenToData token) :?> FSA<char * Position<_>>
+
+    let processNewVariable (previous : DefinedIds<_>) (variable : FSA<_>)= 
+        if containsOneWordOnly variable
+        then
+            let prevAlways = previous.Always
+            let newAlways = unionFsa prevAlways variable
+            let newMaybe = subtractFSA previous.Somewhere variable
+            new DefinedIds<_>(newAlways, newMaybe)
+        else
+            let newMaybe =
+                subtractFSA variable previous.Always
+                |> unionFsa previous.Somewhere
+
+            new DefinedIds<_>(previous.Always, newMaybe)
+
+    let checkExpression (definedVariables : DefinedIds<_>) (expressionBlock : ExpressionBlock<_>) = 
+        
+//        let printToken token = 
+//            
+//            printfn "%s " <| tokToSourceString token
+//            token
+            
+        let printVariable token = 
+            let fsa = tokenToFsa token
+            
+            let tokenString = 
+                fsa.Edges
+                |> Seq.map (fun edge -> getFsaInfo().GetChar edge.Tag)
+                
+            printfn "variable %A" tokenString
+            token
+
+        let analyseVariable token = 
+            let tokenFsa = tokenToFsa token
+            
+            let fsaInfo = getFsaInfo()
+            let full = definedVariables.GetFullComplementation(fsaInfo)
+                
+            if isSubFsa tokenFsa full
+            then 
+                AlwaysError(token, tokenFsa)
+            else
+                let firstPart = intersectFsa tokenFsa definedVariables.Somewhere
+                let secondPart = intersectFsa tokenFsa full
+
+                let common = unionFsa firstPart secondPart
+                    
+                if common.IsEmpty
+                then NoError
+                else MaybeError(token, common)
+
+        expressionBlock.TokensGraph.GetAvailableTokens()
+        //|> Seq.map printToken
+        |> Seq.filter isVariable
+        //|> Seq.map printVariable
+        |> Seq.map analyseVariable
+        |> Seq.filter ErrorType<_, _>.IsError
+        |> List.ofSeq
+
+    let rec doMarkup (blockToVars : Dictionary<_, _>) externVariables start =
         
         let rec processBlock (block : Block<_>) = 
-            let prevVars = blockToVars.[block]
-            let defVars = ref prevVars
-            let mutable newVar = None
+            let defined = blockToVars.[block]
 
-            let tokens = 
+            let after =
                 match block.BlockType with 
                 | Assignment -> 
+                    let assignBlock = block :?> AssignmentBlock<_>
                     let leftPart = 
-                         block.Tokens 
-                         |> Seq.takeWhile isNotEq
-                         |> List.ofSeq
+                        assignBlock.Id.GetAvailableTokens()
+                        |> List.ofSeq
 
-                    if leftPart.Length = 1 
-                    then
-                        let varName = leftPart.Head |> tokToSourceString
-                        newVar <- Some varName
-                    
-                    block.Tokens
-                    |> Seq.skipWhile isNotEq
-                    |> List.ofSeq
-                    |> List.tail
-                | _ -> block.Tokens |> List.ofArray
+                    doMarkup blockToVars defined <| fst assignBlock.RightPart
 
-            let isUndefinedVariable token = 
-                let varName = token |> tokToSourceString
-                !defVars |> List.forall ((<>) varName)
-            
-            let isNewError token = 
-                let tokData = parserSource.TokenToData token
-                !errorList
-                |> List.forall (fun t -> parserSource.TokenToData t <> tokData) 
-
-            tokens
-            |> List.filter isVariable
-            |> List.filter isUndefinedVariable
-            |> List.filter isNewError
-            |> List.iter (fun token -> errorList := token :: !errorList)
-
-            newVar
-            |> Option.iter (fun varName -> defVars := varName :: !defVars)
+                    let newIds = 
+                        leftPart
+                        |> List.tryFind isVariable
+                        |> Option.map 
+                                (
+                                    fun token -> 
+                                        let fsa = tokenToFsa token
+                                        processNewVariable defined fsa
+                                )
+                    match newIds with
+                    | Some id -> id
+                    | None -> defined
                 
+                | _ -> defined
+
             block.Children 
-            |> List.iter (fun child -> processInterNode child !defVars)
+            |> List.iter (processInterNode after)
 
-        and processInterNode node defVars = 
+        and processInterNode defined node = 
             let processChild child = 
-                if blockToVars.ContainsKey child 
-                then
-                    let intersect one two = 
-                        one |> List.filter (fun elem1 -> List.exists ((=) elem1) two)
-                    let oldVars = blockToVars.[child]
-                    let commonVars = intersect oldVars defVars
+                match blockToVars.TryGetValue child with
+                | true, vars -> 
+                    
+                    let fsaParams = getFsaInfo()
+                    let commonVars = DefinedIds<_>.Intersect fsaParams vars defined
 
-                    //Does list change?
-                    if oldVars.Length <> commonVars.Length
+                    //Does something change?
+                    if not <| DefinedIds<_>.AreEqual fsaParams vars commonVars
                     then
                         blockToVars.[child] <- commonVars
                         processBlock child
-                else
-                    blockToVars.[child] <- defVars
+                | false, _ ->
+                    blockToVars.[child] <- defined
+
                     processBlock child
+            
             node.Children 
             |> List.iter processChild
 
-        processInterNode entry []
-        !errorList
+        processInterNode externVariables start 
+
+    let rec findErrors (markups : Dictionary<_, _>) start = 
+        
+        let errors = ref []
+        let processed = new HashSet<_>()
+
+        let rec processBlock (block : Block<_>)= 
+            let definedVariables = markups.[block]
+            let newErrors = 
+                match block.BlockType with
+                | Expression -> 
+                    let expression = block :?> ExpressionBlock<_>
+                    checkExpression definedVariables expression 
+                | Assignment -> 
+                    let assignment = block :?> AssignmentBlock<_>
+                    
+                    findErrors markups <| fst assignment.RightPart
+                | x -> invalidOp <| sprintf "This construction isn't supported now: %A" x
+
+            errors := newErrors @ !errors
+            processed.Add block |> ignore
+
+            block.Children
+            |> List.iter processInterNode
+
+        and processInterNode node = 
+            node.Children
+            |> List.filter (fun block -> not <| processed.Contains block)
+            |> List.iter processBlock 
+        
+        start.Children
+        |> List.iter processBlock
+        
+        !errors
 
     member this.Entry = entry
     member this.Exit = exit
@@ -223,32 +305,67 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
     member this.Blocks = blocks
     member this.Nodes = nodes
 
-    member this.FindUndefVariable() = findUndefVariable()
+    member this.FindUndefinedVariables() = 
+        let empty = new DefinedIds<_>()
+        let markups = new Dictionary<_, _>()
+        doMarkup markups empty entry
+        let errors = findErrors markups entry 
 
-    member this.PrintToDot name = 
+        let guaranteedErrors, potentialErrors = 
+            errors
+            |> List.fold 
+                (
+                    fun acc error -> 
+                        let guaranteed, maybe = acc
+                        match error with
+                        | AlwaysError (token, fsa) -> token :: guaranteed, maybe
+                        | MaybeError (token, fsa) -> guaranteed, token :: maybe
+                        | NoError -> failwith "Invalid state"
+                ) ([], [])
+
+        guaranteedErrors, potentialErrors
+
+    member this.PrintToDot (name : string) = 
+        let prefix = "_"
         let count = ref -1
+        let clustersCount = ref 0
+
+        let innerVertices = ref 0
+        let shift num = num + !innerVertices
         
         let blockToNumber = new Dictionary<_, _>()
         let interNodeToNumber = new Dictionary<_, _>()
         
-        use out = new StreamWriter (name : string)
-        out.WriteLine("digraph AST {")
+        use out = new StreamWriter(name)
+        out.WriteLine("digraph CFG {")
 
         let rec printBlock parentNumber block = 
             let getBlockNumber (block : Block<'TokenType>) = 
-                if blockToNumber.ContainsKey block 
-                then 
-                    blockToNumber.[block], false
-                else
+                
+                match blockToNumber.TryGetValue block with
+                | true, num -> num, false
+                | false, _ -> 
                     incr count
                     
-                    let blockString = block.BlockToString parserSource.TokenToString
+                    let blockString = block.BlockToString generatedStuff.TokenToString
                     out.WriteLine (sprintf "%d [label=\"%s\",shape=box]" !count blockString)
+                    
                     blockToNumber.[block] <- !count
                     !count, true
 
             let nodeNumber, isNew = getBlockNumber block
             
+            //sometimes this code is needed for debug purposes
+            (*let needCluster = false
+            if needCluster 
+            then
+                let dotString, dotIn, dotOut = block.GetDotCluster tokToSourceString shift prefix
+            
+                let clusterString = getClusterDotString <| sprintf "cluster_%d" nodeNumber <| dotString
+                out.WriteLine clusterString
+                out.WriteLine (sprintf ("%d -> %s") nodeNumber dotIn)
+                out.WriteLine (sprintf ("%s -> %d") dotOut nodeNumber)
+                *)
             out.WriteLine (sprintf ("%d -> %d") parentNumber nodeNumber)
 
             if isNew 
@@ -260,12 +377,12 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
         and printInterNode parentNumber interNode =
             
             let getNodeNumber (node : InterNode<_>) = 
-                if interNodeToNumber.ContainsKey node 
-                then
-                    interNodeToNumber.[node], false
-                else
+                
+                match interNodeToNumber.TryGetValue node with
+                | true, num -> num, false
+                | false, _ -> 
                     incr count
-                    let label = node.ToString()
+                    let label = string node
                     let color =
                         if node.Children.Length <= 1 
                         then ""

@@ -6,6 +6,19 @@ open System.Collections.Generic
 open ControlFlowGraph.Common
 open ControlFlowGraph.CfgElements
 open ControlFlowGraph.InnerGraph
+open ControlFlowGraph.CfgTokensGraph
+open ControlFlowGraph.Printers
+
+let private addExitNode (exitNode : InterNode<_>) = 
+    let newExitNode = new InterNode<_>()
+    exitNode.Parents
+    |> List.iter 
+        (
+            fun parent -> 
+                parent.AddChild newExitNode
+                newExitNode.AddParent parent
+        )
+    newExitNode
 
 /// <summary>
 /// Contains entry and exit blocks of some part CFG
@@ -16,7 +29,7 @@ type EntryExit<'T> =
 
     new (entry, exit) = {Entry = entry; Exit = exit}
 
-    ///Links two nodes: exit from first node is entry for second one
+    ///Links two nodes: exit from the first node is entry for the second one
     static member ConcatNodes (first : EntryExit<_>) (second : EntryExit<_>) = 
         let entry, oldExit = first.Entry, first.Exit
         let oldEntry, exit = second.Entry, second.Exit
@@ -46,20 +59,13 @@ type EntryExit<'T> =
                 one.Exit.ReplaceMeForParentsOn two.Exit
                 one.Exit <- two.Exit
             else
-                failwithf "Finish nodes have children!"
+                commonEnd <- addExitNode one.Exit
+                let tempEnd = addExitNode two.Exit
+
+                tempEnd.ReplaceMeForParentsOn commonEnd
+                //failwithf "Finish nodes have children!"
                 
         new EntryExit<_>(commonStart, commonEnd)
-
-let private addExitNode (exitNode : InterNode<_>) = 
-    let newExitNode = new InterNode<_>()
-    exitNode.Parents
-    |> List.iter 
-        (
-            fun parent -> 
-                parent.AddChild newExitNode
-                newExitNode.AddParent parent
-        )
-    newExitNode
 
 //Sets common parent and common children for nodes
 let private mergeNodes (nodes : (InterNode<_> * InterNode<_> list) list) = 
@@ -93,44 +99,29 @@ let private mergeNodes (nodes : (InterNode<_> * InterNode<_> list) list) =
 
     commonEntry, commonExit
 
-let private processAssignmentGraph (graph : CfgBlocksGraph<_>) = 
-    
-    let processEdge (edge : BlockEdge<_>) = 
-        match edge.Tag with
-        | Simple toks -> 
-            let tokens = toks |> List.toArray 
-            AssignmentBlock.Create tokens
-        | x -> failwithf "Unexpected edge type in Assignment: %s" <| x.GetType().ToString()
+let private processExpressionGraph (graph : CfgTokensGraph<_>) = 
 
-    let start = graph.FirstVertex
-    let assigns = 
+    let expressions = 
         let getEntryExit (block : Block<_>) = 
-            //all assign blocks have only one child at this point
+            //all expression blocks have only one child at this point
             new EntryExit<_>(block.Parent, block.Children.Head)
 
-        graph.OutEdges(start)
-        |> Seq.map (processEdge >> getEntryExit)
-        |> List.ofSeq
-
-    let one = assigns.Head
-
-    assigns
-    |> List.tail
-    |> List.map (fun two -> EntryExit<_>.MergeTwoNodes one two)
-    |> ignore
-    one
+        ExpressionBlock.Create graph
+        |> getEntryExit
+    expressions
 
 let private processConditionGraph (graph : CfgBlocksGraph<_>) = 
     
     let processEdge (edge : BlockEdge<_>) = 
         match edge.Tag with
-        | Simple toks -> ConditionBlock.Create <| List.toArray toks
+        | Simple (_, toksGraph) -> ConditionBlock.Create toksGraph
         | x -> failwithf "Unexpected edge type in Condition: %A" x
 
     let start = graph.FirstVertex
     let conds = 
         let getParentAndChildren (cond : Block<_>) = cond.Parent, cond.Children
-        graph.OutEdges(start)
+        
+        graph.OutEdges start
         |> Seq.map (processEdge >> getParentAndChildren)
         |> List.ofSeq
         
@@ -142,26 +133,32 @@ let rec processIfGraph (ifGraph : CfgBlocksGraph<_>) =
     let thenBlock = ref Unchecked.defaultof<_>
     let elseBlockOpt = ref None
 
-    let ifQueue = new Queue<_>()
-    ifQueue.Enqueue ifGraph.FirstVertex
-
     let processEdge (edge : BlockEdge<_>)=
-        ifQueue.Enqueue edge.Target
         match edge.Tag with
         | Complicated (block, innerGraph) -> 
             match block with
             | Condition -> condBlock := processConditionGraph innerGraph
             | ThenStatement -> thenBlock := processSeq innerGraph
-            | ElseStatement -> elseBlockOpt := Some <| processSeq innerGraph
-            | x -> failwithf "Unexpected statement type in ifStatement: %A" x
+            | ElseStatement -> elseBlockOpt := processSeq innerGraph |> Some
+            | x -> invalidArg "block" <| sprintf "Unexpected statement type in ifStatement: %A" x
         | EmptyEdge -> ()
-        | x -> failwithf "Unexpected edge type in IfStatement: %A" x
+        | x -> invalidArg "edge.Tag" <| sprintf "Unexpected edge type in IfStatement: %A" x
 
-    while ifQueue.Count > 0 do
-        let vertex = ifQueue.Dequeue()
-                
-        ifGraph.OutEdges(vertex)
-        |> Seq.iter processEdge
+    let rec func queue = 
+        match queue with
+        | [] -> ()
+        | head :: tail -> 
+            let outEdges = ifGraph.OutEdges head 
+            outEdges
+            |> Seq.iter processEdge
+
+            let outVertices = 
+                outEdges 
+                |> Seq.map (fun edge -> edge.Target)
+                |> List.ofSeq
+            func <| List.append tail outVertices
+
+    func [ifGraph.FirstVertex]
 
     let exits = snd !condBlock
     exits.Head.ReplaceMeForParentsOn <| fst !thenBlock
@@ -189,65 +186,102 @@ let rec processIfGraph (ifGraph : CfgBlocksGraph<_>) =
 
     new EntryExit<_>(fst !condBlock, exitNode)
 
+and processAssignmentGraph idGraph (rightPartGraphOpt : CfgBlocksGraph<_> option) = 
+
+    let nodes = 
+        match rightPartGraphOpt with
+        | Some rightPart -> processSeq rightPart
+        | None -> new InterNode<_>(), new InterNode<_>()
+    
+    let assignBlock = 
+        let getEntryExit (block : Block<_>) = 
+            //all assign blocks have only one child at this point
+            new EntryExit<_>(block.Parent, block.Children.Head)
+        
+        AssignmentBlock.Create idGraph nodes
+        |> getEntryExit
+
+    assignBlock
+
 and processSeq (graph : CfgBlocksGraph<_>) = 
 
     let vertexToInterNode = new Dictionary<_, EntryExit<_>>()
-    let queue = new Queue<_>()
 
     let addToDictionary key value = 
-        if vertexToInterNode.ContainsKey key 
-        then
-            let oldData = vertexToInterNode.[key]
-            vertexToInterNode.[key] <- EntryExit<_>.MergeTwoNodes oldData value
-        else
-            vertexToInterNode.[key] <- value
+        
+        vertexToInterNode.[key] <-
+            match vertexToInterNode.TryGetValue key with
+            | true, data -> EntryExit<_>.MergeTwoNodes data value
+            | false, _ -> value
 
-    let getOldValue target = 
-        if vertexToInterNode.ContainsKey target
-        then Some vertexToInterNode.[target]
-        else None
-
-    let updateQueue = 
-        let processed = new ResizeArray<_>()
-        fun vertex -> 
-            if not <| processed.Contains vertex
-            then 
-                processed.Add vertex
-                queue.Enqueue vertex
-
-    updateQueue graph.FirstVertex
-    while queue.Count > 0 do
-        let vertex = queue.Dequeue()
-
-        let processEdge (edge : BlockEdge<_>) = 
-            updateQueue edge.Target
+    let processEdge vertex (edge : BlockEdge<_>) = 
                     
-            let oldValue = getOldValue vertex
+        let oldValue = vertexToInterNode.TryGetValue vertex
 
-            match edge.Tag with
-            | Complicated (block, innerGraph) ->
-                let nodes = 
-                    match block with
-                    | IfStatement -> processIfGraph innerGraph
-                    | Assignment -> processAssignmentGraph innerGraph
-                    | x -> failwithf "Now this statement type isn't supported: %s" <| x.GetType().ToString()
+        match edge.Tag with
+        | Simple (block, tokensGraph) -> 
+            let nodes = 
+                match block with
+                | Expression -> processExpressionGraph tokensGraph
+                | x -> invalidOp <| sprintf "Now this statement type isn't supported: %A"x
 
-                let newData = 
-                    match oldValue with
-                    | Some oldNodes -> EntryExit<_>.ConcatNodes oldNodes nodes
-                    | None -> nodes
-
-                addToDictionary edge.Target newData
-
-            | EmptyEdge -> 
+            let newData = 
                 match oldValue with
-                | Some oldNodes -> addToDictionary edge.Target oldNodes
-                | None -> failwith "Unexpected state during cfg building"
+                | true,  oldNodes -> EntryExit<_>.ConcatNodes oldNodes nodes
+                | false, _ -> nodes
 
-            | x -> failwithf "Unexpected edge tag: %s" <| x.GetType().ToString()
+            addToDictionary edge.Target newData
 
-        graph.OutEdges(vertex)
-        |> Seq.iter processEdge
+        | AssignmentEdge(block, idGraph, rightPartGraphOpt) -> 
+            
+            let nodes = 
+                processAssignmentGraph idGraph rightPartGraphOpt
+
+            let newData = 
+                match oldValue with
+                | true, oldNodes -> EntryExit<_>.ConcatNodes oldNodes nodes
+                | false, _ -> nodes
+
+            addToDictionary edge.Target newData
+                
+        | Complicated (block, innerGraph) ->
+            let nodes = 
+                match block with
+                | IfStatement -> processIfGraph innerGraph
+                | x -> invalidOp <| sprintf "Now this statement type isn't supported: %A"x
+
+            let newData = 
+                match oldValue with
+                | true, oldNodes -> EntryExit<_>.ConcatNodes oldNodes nodes
+                | false, _ -> nodes
+
+            addToDictionary edge.Target newData
+
+        | EmptyEdge -> 
+            match oldValue with
+            | true, oldNodes -> addToDictionary edge.Target oldNodes
+            | false, _ -> failwith "Unexpected state during cfg building"
+
+    let rec func processed queue = 
+        match queue with
+        | [] -> ()
+        | head :: tail -> 
+            if processed |> List.exists ((=) head)
+            then
+                func processed tail
+            else
+                let newQueue = 
+                    graph.OutEdges head
+                    |> Seq.map(fun edge -> edge.Target)
+                    |> List.ofSeq
+                    |> List.append tail
+
+                graph.OutEdges head
+                |> Seq.iter (processEdge head)
+
+                func (head :: processed) newQueue
+
+    func [] [graph.FirstVertex]
     
     let entry = vertexToInterNode.[graph.LastVertex].Entry
     let mutable exit = vertexToInterNode.[graph.LastVertex].Exit
@@ -258,7 +292,5 @@ and processSeq (graph : CfgBlocksGraph<_>) =
     entry, exit
 
 let graphToCfg (graph : CfgBlocksGraph<_>) tokenToString = 
-    graph.RemoveDuplicateEpsilons()
-    graph.RemoveEpsilonLoopEdges()
-    //graph.RelaxedPrintToDot "``input.dot" tokenToString
+    //InnerGraphPrinter.RelaxedPrintToDot graph "``input.dot" tokenToString
     processSeq graph

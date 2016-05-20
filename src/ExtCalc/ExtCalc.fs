@@ -71,9 +71,8 @@ type ExtCalcInjectedLanguageModule() =
     let semicolonNumber = tokenToNumber <| Token.SEMI (new FSA<_>())
     let eqNumber = tokenToNumber <| Token.EQ (new FSA<_>())
     let isVariable = 
-        fun n -> 
-            let num2 = tokenToNumber <| Token.VARIABLE (new FSA<_>())
-            n = num2
+        let num2 = tokenToNumber <| Token.VARIABLE (new FSA<_>())
+        fun n -> n = num2
 
     let nodeToType = dict["assign", Assignment;]
     let keywordToInt = dict [
@@ -89,9 +88,9 @@ type ExtCalcInjectedLanguageModule() =
         |> List.ofSeq
         |> List.map (fun range -> range.GetText())
         |> List.ofSeq
-        |> List.fold (fun acc elem -> acc + elem) ""
+        |> List.reduce (+)
 
-    let parserSource = new CfgParserSource<Token>(tokenToNumber, numToString, leftSide, tokenData)
+    let parserSource = new GeneratedStuffSource<Token, br>(tokenToNumber, numToString, leftSide, tokenData)
     let semantic = Some <| (parserSource, langSource, tokToSourceString)
 
     let processor =

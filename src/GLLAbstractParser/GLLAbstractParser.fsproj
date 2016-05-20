@@ -39,6 +39,8 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <ItemGroup>
+    <Compile Include="AbstractParserWithoutTree.fs" />
+    <Compile Include="TreeProcessor.fs" />
     <Compile Include="AbstractParser.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />

@@ -11,7 +11,7 @@ open ControlFlowGraph.Test.CommonHelper
 open ControlFlowGraph.Test.ExpressionHelper
 
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
+open Yard.Utils.StructClass
 
 type PreviousAndNext<'a>(key : 'a, previous : 'a list, next : 'a list) =
     member this.Key = key

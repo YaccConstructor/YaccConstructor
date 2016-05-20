@@ -2,19 +2,17 @@
 
 open Microsoft.FSharp.Collections
 open NUnit.Framework
-open System.Collections.Generic
-
-open System
 
 open AbstractAnalysis.Common
 open ControlFlowGraph
 
-open QuickGraph
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
 open QuickGraph.FST.GraphBasedFst
 
-open YC.Tests.Helper
+open Yard.Utils.StructClass
+
+open YC.FST.AbstractLexing.Tests.CommonTestChecker
+
 
 let needPrint = false
 
@@ -38,9 +36,9 @@ let areEqualFSA one two fsaInfo =
         
     isSub one two && isSub two one
 
-let private quickGraphToFST (lexerInputGraph : AdjacencyGraph<int, TaggedEdge<_, string>>)= 
-    let initialStates = ResizeArray.singleton 0
-    let finishStates = ResizeArray.singleton <| lexerInputGraph.VertexCount - 1
+let private dotToFST path = 
+    
+    let graph = loadDotToQG path
 
     let transform x = 
         match x with 
@@ -49,17 +47,12 @@ let private quickGraphToFST (lexerInputGraph : AdjacencyGraph<int, TaggedEdge<_,
         | _ -> x, Eps
     let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
 
-    let transitions = new ResizeArray<_>()
-    lexerInputGraph.Edges
-    |> Seq.iter(fun edge -> transitions.Add(edge.Source, (edge.Tag, edge.Tag), edge.Target))
-
-    let appr = new Appr<_>(initialStates, finishStates, transitions)
-    let nfaFsa = appr.ApprToFSA()
-    let fsa = nfaFsa.NfaToDfa()
-    FST<_, int>.FSAtoFST(fsa, transform, smblEOF)
+    FST<_,int>.FSAtoFST(approximateQG(graph), transform, smblEOF)
+    
 
 let createParserInputGraph tokenize parserEOF name =
-    let fstInput = quickGraphToFST <| loadDotToQG baseInputGraphsPath name
+    let fullPath = baseInputGraphsPath + name
+    let fstInput = dotToFST fullPath
 
     let lexResult = tokenize parserEOF fstInput
 

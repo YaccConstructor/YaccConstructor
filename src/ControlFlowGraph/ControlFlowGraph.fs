@@ -7,7 +7,7 @@ open ControlFlowGraph.Common
 open ControlFlowGraph.CfgElements
 
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
+open Yard.Utils.StructClass
 
 open Yard.Generators.Common.AST
 

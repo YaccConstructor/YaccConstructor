@@ -9,7 +9,7 @@ open ControlFlowGraph.Common
 open ControlFlowGraph.Test.CommonHelper
 
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
+open Yard.Utils.StructClass
 
 //lexer stuff
 let alphabet = 

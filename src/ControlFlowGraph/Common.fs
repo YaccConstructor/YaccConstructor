@@ -3,7 +3,7 @@
 open System.Collections.Generic
 open QuickGraph.FSA
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
+open Yard.Utils.StructClass
 
 [<RequireQualifiedAccess>]
 type Keyword = 

@@ -9,19 +9,20 @@ open JetBrains.Application.BuildScript.Application.Zones
 open JetBrains.ReSharper.Psi.CSharp.Tree
 
 open ControlFlowGraph.Common
-open ControlFlowGraph.InputStructures
 
-open Yard.Generators.RNGLR.OtherSPPF
 open ExtCalc.AbstractParser
 open ReSharperExtension
+
 open Yard.Generators.Common.AST
-open QuickGraph.FSA.GraphBasedFsa
+open Yard.Generators.RNGLR.OtherSPPF
 open Yard.Utils.StructClass
+
 open YC.FST.AbstractLexing.Interpreter
-open QuickGraph.FST.GraphBasedFst
 open YC.SDK.CommonInterfaces
 open YC.SDK.ReSharper.Helper
 
+open QuickGraph.FSA.GraphBasedFsa
+open QuickGraph.FST.GraphBasedFst
 
 [<ZoneMarker>]
 type ZoneMarker() = class end

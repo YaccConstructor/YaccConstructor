@@ -11,6 +11,11 @@ open FSharpx.Collections.Experimental
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
 
+[<Struct>]
+type M =
+    val pos : int64
+    val lbl : int<labelMeasure>
+    new (p,l) = {pos = p; lbl = l}
 
 let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : ParserInputGraph<'TokenType>) : ParserCommon.ParseResult<_> = 
     
@@ -53,7 +58,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             arr
 
         let slotIsEnd (label : int<labelMeasure>) =
-            (getPosition label) = Array.length (parser.rules.[getRule label])
+            (getPositionNew label) = Array.length (parser.rules.[getRule label])
 
         let findSppfNode (label : int<labelMeasure>) lExt rExt : int<nodeMeasure> =
             let isEnd = slotIsEnd <| label
@@ -115,7 +120,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     i.AddChild newNode
                 | _ -> ()
                 num
-        let getNodeT (edge : ParserEdge<'TokenType>) =
+                  
         let getNodeT (edge : ParserEdge<'TokenType>) =
             let beginVertix = edge.Source
             let endVertix = edge.Target
@@ -200,7 +205,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         and processing () =  
             condition := true
             let rule = getRule !structures.CurrentLabel
-            let position = getPosition !structures.CurrentLabel
+            let position = getPositionNew !structures.CurrentLabel
             if Array.length parser.rules.[rule] = 0 
             then
               let t = new TerminalNode(-1, packExtension !currentVertexInInput !currentVertexInInput)
@@ -252,29 +257,9 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             if table.ContainsKey key
                             then
                                 for rule in table.[key] do
-                                    let newLabel = packLabel rule 0
-                                    structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy 
                                  
                                     let newLabel = 1<labelMeasure> * (packLabelNew rule 0)
                                     structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy 
-//                        then
-//                            if parser.CanInferEpsilon.[curSymbol]
-//                            then
-//                                let curToken = parser.IndexEOF
-//                                let getIndex nTerm term = 
-//                                    let mutable index = nTerm
-//                                    index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
-//                                    index <- index + term - parser.NonTermCount
-//                                    index
-//                                let index = getIndex curSymbol curToken
-//                                currentGSSNode := create !currentVertexInInput (packLabel (rule) (position + 1)) !currentGSSNode  !currentN
-//                                if Array.length table.[index] <> 0 
-//                                then
-//                                    let a rule = 
-//                                        let newLabel = packLabel rule 0
-//                                        addContext !currentVertexInInput newLabel !currentGSSNode dummy 
-//                                    table.[index] |>  Array.iter a
-//                            condition := true
                                     
                 else
                     let curRight =  sppfNodes.Item (int !structures.CurrentN) 

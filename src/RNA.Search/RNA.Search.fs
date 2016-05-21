@@ -7,6 +7,8 @@ open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.AbstractParserWithoutTree
 
+open Microsoft.FSharp.Collections
+
 open MBrace.Azure
 open MBrace.Core
 open MBrace.Core.Builders
@@ -36,12 +38,15 @@ let filterRnaParsingResult lengthLimit res  =
     | Success1 x ->
         let ranges = new ResizeArray<_>()
         let curLeft = ref 0
-        let curRight = ref 0                  
+        let curRight = ref 0
+        let x = x |> Array.filter (fun i -> i.length >= byte lengthLimit)
+        printfn "Ranges filter: %A" x.Length
         let x = 
             let onOneEdg, other =
                 x
-                |> Array.filter (fun s -> s.rpos - s.lpos >= lengthLimit || s.le <> s.re)
+                |> Array.filter (fun s -> int s.length >= lengthLimit)
                 |> Array.partition (fun s -> s.le = s.re)
+                //, ([||] : array<ResultStruct> )
                     
             let curEdg = ref 0
             //printfn ""
@@ -67,6 +72,7 @@ let filterRnaParsingResult lengthLimit res  =
                 let left = s |> Array.minBy (fun s -> s.lpos)
                 let right = s |> Array.maxBy (fun s -> s.rpos)                        
                 ranges.Add((left.le,left.lpos),(right.re,right.rpos)))        
+        printfn "All: %A" ranges.Count
         ranges     
         
     | Error e -> 
@@ -112,8 +118,8 @@ let searchInCloud graphs =
 
 let search (graphs:array<_>) agentsCount =
     let start = System.DateTime.Now
-    let processRanges (ranges:ResizeArray<_>) = ()
-        //ranges.Count |> printfn "Total ranges: %A"
+    let processRanges (ranges:ResizeArray<_>) =  ()
+        //ranges |> (* ResizeArray.filter (fun r -> int r.length >= 60 ) |>*) fun x -> x.Count |> printfn "Total ranges: %A"
     let agent name  =
         MailboxProcessor.Start(fun inbox ->
             let rec loop n =
@@ -171,11 +177,11 @@ let searchTRNA path agentsCount =
             |> fun x -> ()
         with
         | e -> printfn "ERROR! %A" e.Message
-    let gs = graphs.[10000..11000]
-    for i in 1..5 do 
-        printfn "i=%A" i
-        search gs i
-        |> printfn "%A"
+    let gs = graphs.[10000..10100]
+//    for i in 1..5 do 
+//        printfn "i=%A" i
+    search gs 2
+    |> printfn "%A"
     //searchInCloud graphs
     //let start = System.DateTime.Now
     //Array.Parallel.iter f gs

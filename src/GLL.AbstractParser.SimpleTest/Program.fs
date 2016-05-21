@@ -742,7 +742,7 @@ type ``GLL abstract parser tests`` () =
 
     [<Test>]
     member this.``1000 as graph 139 + 861: trna in 133-204`` () =
-        this.``1000: trna`` """simple_tRNA4\g""" 1001 ((0,133),(0,204))
+        this.``1000: trna`` """simple_tRNA4\g""" 1001 ((0,127),(1,66))
 
     [<Test>]
     member this.``1000 as graph 49 + 5: trna in 133-204`` () =
@@ -908,15 +908,15 @@ let fs x =
     //t.``1000: trna in 860-930``()
     //t.``1000: trna in 629-699``()
     //t.``1000: trna in 133-204``()
-    //t.``1000 as graph 139 + 861: trna in 133-204`` ()
+    t.``1000 as graph 139 + 861: trna in 133-204`` ()
     //t.``Very small``()
     //t.``Very small with 2 edges``()
     //t.``Very very small with 2 edges``()
     //t.``Very very small``()
     //t.``Very very small 2 instances``()
-    t.``Intersection small``()
+    //t.``Intersection small``()
     //t.``Problem with shift. Big`` ()
-    t.``shift_small`` ()
+    //t.``shift_small`` ()
     
     //t.``Problem with shift. Small 2``()
     

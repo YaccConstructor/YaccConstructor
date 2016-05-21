@@ -24,6 +24,7 @@ let private removeAC (ruleList: Rule.t<Source.t, Source.t> list) =
         match production with
         | PSeq (x,ac,l) -> PSeq(x |> List.map (fun b -> {b with rule = b.rule |> inner}),None,l)
         | PAlt (l,r) -> PAlt (inner l, inner r)
+        | PConj (l,r) -> PConj (inner l, inner r)
         | PSome p -> inner p |> PSome
         | PMany p -> inner p |> PMany
         | PLiteral _ 

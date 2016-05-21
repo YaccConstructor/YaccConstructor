@@ -249,6 +249,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             index <- index + term - parser.NonTermCount
                             index
                         currentGSSNode := create !currentVertexInInput (1<labelMeasure> *(packLabelNew rule (position + 1))) !currentGSSNode  !structures.CurrentN
+                        currentGSSNode := create !currentVertexInInput label !currentGSSNode !structures.CurrentN
                         for edge in input.OutEdges !currentVertexInInput do
                             let curToken = parser.TokenToNumber edge.Tag
 
@@ -278,14 +279,33 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
              while not !stop do
                 if !condition then dispatcher() else processing()
         control()
+
+        let rec checkConj (ast : obj) : bool = 
+            match ast with
+            | :? NonTerminalNode as node -> let buff = ref <| checkConj node.First
+                                            if node.Others = Unchecked.defaultof<_> then //others empty
+                                                !buff && not <| (parser.NumToString node.Name).StartsWith "yard_conjunction"
+                                            else 
+                                                node.Others.ForEach(fun n -> buff := !buff && checkConj n)
+                                                !buff 
+            | :? TerminalNode as node -> true
+            | :? PackedNode as node -> checkConj node.Left && checkConj node.Right
+            | :? IntermidiateNode as node -> let buff = ref <| checkConj node.First
+                                             if node.Others = Unchecked.defaultof<_> then //others empty
+                                                !buff
+                                             else
+                                                node.Others.ForEach(fun n -> buff := !buff && checkConj n)
+                                                !buff
+            | _ -> false
                  
         match !structures.ResultAST with
             | None -> Error ("String was not parsed")
             | Some res -> 
-                    let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
-                    //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
-                    //r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
+                    if checkConj res then        
+                            let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
+                            printf "%A" r1
+                            //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
+                            r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
                     //printfn "%d" !tempCount
-                    Success (r1)   
-                     
-                        
+                            Success (r1)   
+                    else Error ("String was not parsed")

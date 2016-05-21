@@ -28,6 +28,7 @@ open GrammarParser
 let private tokenFun f = function
     | ACTION st
     | BAR st
+    | AND st
     | COLON st
     | COMMA st
     | GREAT st

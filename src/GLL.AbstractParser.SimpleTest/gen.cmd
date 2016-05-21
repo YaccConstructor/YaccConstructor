@@ -1,3 +1,12 @@
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Conj1.yrd ^
+        -g "GLLGenerator -pos int -token int -module GLL.Conj1 -translate true -o Conj1.yrd.fs -abstract true" >> log.txt
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Conj2.yrd ^
+        -g "GLLGenerator -pos int -token int -module GLL.Conj2 -translate true -o Conj2.yrd.fs -abstract true" >> log.txt
+        
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Conj3.yrd ^
+        -g "GLLGenerator -pos int -token int -module GLL.Conj3 -translate true -o Conj3.yrd.fs -abstract true" >> log.txt
+
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i SimpleCalc.yrd -c ExpandEbnf -c ExpandMeta ^
         -g "GLLGenerator -pos int -token int -module GLL.ParseSimpleCalc -translate true -o SimpleCalc.yrd.fs -abstract true" >> log.txt
 

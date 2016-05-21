@@ -102,6 +102,11 @@
       <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\YC.Utils.SourceText\src\YC.Utils.SourceText\Utils.SourceText.fsproj">
+      <Name>Utils.SourceText (Tools\Utils.SourceText\Utils.SourceText)</Name>
+      <Project>{f296356b-00c3-465c-9c97-7cfa279f5574}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontends", "Frontends", "{020587D2-50BA-4E6D-9BD5-1059EBCC13D7}"
 EndProject
@@ -266,6 +266,19 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLL.AbstractParser.SimpleTest", "GLL.AbstractParser.SimpleTest\GLL.AbstractParser.SimpleTest.fsproj", "{61A3B851-03A0-4A87-B786-D21DFE03B9DD}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLLAbstractApplication", "GLLAbstractApplication\GLLAbstractApplication.fsproj", "{C831D126-E5FC-4681-A316-574C08F83E6D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils.SourceText", "Utils.SourceText", "{A86712BF-1C5E-4B65-B558-07A0D7E3AF76}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{DE834494-2963-4983-8408-F18007E66155}"
+	ProjectSection(SolutionItems) = preProject
+		YC.Utils.SourceText\src\.nuget\NuGet.Config = YC.Utils.SourceText\src\.nuget\NuGet.Config
+		YC.Utils.SourceText\src\.nuget\NuGet.exe = YC.Utils.SourceText\src\.nuget\NuGet.exe
+		YC.Utils.SourceText\src\.nuget\NuGet.targets = YC.Utils.SourceText\src\.nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils.SourceText", "YC.Utils.SourceText\src\YC.Utils.SourceText\Utils.SourceText.fsproj", "{F296356B-00C3-465C-9C97-7CFA279F5574}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils.SourceText.Tests", "YC.Utils.SourceText\src\YC.Utils.SourceText.Tests\Utils.SourceText.Tests.fsproj", "{24AC8FF8-638D-437E-A806-859C0A0C701D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1651,6 +1664,46 @@ Global
 		{C831D126-E5FC-4681-A316-574C08F83E6D}.ReleaseContractsReferences|Any CPU.Build.0 = Release|Any CPU
 		{C831D126-E5FC-4681-A316-574C08F83E6D}.ReleaseContractsReferences|x86.ActiveCfg = Release|Any CPU
 		{C831D126-E5FC-4681-A316-574C08F83E6D}.ReleaseContractsReferences|x86.Build.0 = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Debug|x86.Build.0 = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.DebugContracts|Any CPU.ActiveCfg = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.DebugContracts|Any CPU.Build.0 = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.DebugContracts|x86.ActiveCfg = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.DebugContracts|x86.Build.0 = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|x86.ActiveCfg = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|x86.Build.0 = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release20|Any CPU.ActiveCfg = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release20|Any CPU.Build.0 = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release20|x86.ActiveCfg = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release20|x86.Build.0 = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.ReleaseContractsReferences|Any CPU.ActiveCfg = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.ReleaseContractsReferences|Any CPU.Build.0 = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.ReleaseContractsReferences|x86.ActiveCfg = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.ReleaseContractsReferences|x86.Build.0 = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Debug|x86.Build.0 = Debug|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.DebugContracts|Any CPU.ActiveCfg = Debug|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.DebugContracts|Any CPU.Build.0 = Debug|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.DebugContracts|x86.ActiveCfg = Debug|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.DebugContracts|x86.Build.0 = Debug|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Release|x86.ActiveCfg = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Release|x86.Build.0 = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Release20|Any CPU.ActiveCfg = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Release20|Any CPU.Build.0 = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Release20|x86.ActiveCfg = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Release20|x86.Build.0 = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.ReleaseContractsReferences|Any CPU.ActiveCfg = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.ReleaseContractsReferences|Any CPU.Build.0 = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.ReleaseContractsReferences|x86.ActiveCfg = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.ReleaseContractsReferences|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1765,6 +1818,10 @@ Global
 		{A414EAC8-F487-49A8-BF05-4E483BC87066} = {186631E1-2070-4866-B7D9-21C73477011E}
 		{61A3B851-03A0-4A87-B786-D21DFE03B9DD} = {86E52B7F-0A55-4785-8288-791F030F0F6A}
 		{C831D126-E5FC-4681-A316-574C08F83E6D} = {86E52B7F-0A55-4785-8288-791F030F0F6A}
+		{A86712BF-1C5E-4B65-B558-07A0D7E3AF76} = {D300525B-9E17-4920-A4F4-C3920D690B48}
+		{DE834494-2963-4983-8408-F18007E66155} = {A86712BF-1C5E-4B65-B558-07A0D7E3AF76}
+		{F296356B-00C3-465C-9C97-7CFA279F5574} = {A86712BF-1C5E-4B65-B558-07A0D7E3AF76}
+		{24AC8FF8-638D-437E-A806-859C0A0C701D} = {A86712BF-1C5E-4B65-B558-07A0D7E3AF76}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = QuickGraph1.vsmdi

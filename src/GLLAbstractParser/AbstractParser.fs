@@ -249,7 +249,6 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             index <- index + term - parser.NonTermCount
                             index
                         currentGSSNode := create !currentVertexInInput (1<labelMeasure> *(packLabelNew rule (position + 1))) !currentGSSNode  !structures.CurrentN
-                        currentGSSNode := create !currentVertexInInput label !currentGSSNode !structures.CurrentN
                         for edge in input.OutEdges !currentVertexInInput do
                             let curToken = parser.TokenToNumber edge.Tag
 

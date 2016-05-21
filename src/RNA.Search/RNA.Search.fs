@@ -40,15 +40,6 @@ let filterRnaParsingResult lengthLimit res  =
         let curLeft = ref 0
         let curRight = ref 0
         let x = x |> Array.filter (fun i -> i.length >= byte lengthLimit)
-        let intersect (r1:ResultStruct) (r2 :ResultStruct) =
-            let newLeftPoint = 
-                if r1.le = r2.le 
-                then
-                    if r1.re = r2.re 
-                    then
-                        if r1.le <> r1.re
-                        then Some (r1.le, min r1.lpos r2.lpos)
-                        elif 
                     
         printfn "Ranges filter: %A" x.Length
         let x = 

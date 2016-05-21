@@ -2,7 +2,6 @@
 
 open AbstractParser.Tokens
 open YC.FST.AbstractLexing.Interpreter
-open QuickGraph.FSA.FsaApproximation
 open QuickGraph.FSA.GraphBasedFsa
 open NUnit.Framework
 open Microsoft.FSharp.Collections 

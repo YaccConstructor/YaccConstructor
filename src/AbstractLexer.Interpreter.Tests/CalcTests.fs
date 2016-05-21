@@ -8,7 +8,6 @@ open QuickGraph.FST.GraphBasedFst
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
 open System
 
 let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"

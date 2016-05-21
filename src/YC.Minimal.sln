@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{ADFB2D79-F895-4FAC-AD8B-232D80BD542C}"
 	ProjectSection(SolutionItems) = preProject
@@ -46,9 +46,11 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "QuickGraph.FST", "..\QuickG
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickGraph.Graphviz", "..\QuickGraph\src\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj", "{595D6322-637A-4A36-97F1-D53F3F9ECEA7}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DotParserProject", "..\QuickGraph\DotParserProject\DotParserProject\DotParserProject.fsproj", "{8826810A-DC59-46E6-8978-21E273DB1236}"
-EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLLGenerator", "GLLGenerator\GLLGenerator.fsproj", "{8756690F-8138-495A-A368-39AFB9029823}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DotParser", "..\QuickGraph\src\DotParser\DotParser.fsproj", "{8826810A-DC59-46E6-8978-21E273DB1236}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AbstractAnalysis.Common", "AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj", "{4049CF0A-8F86-48B7-98BA-D062625BA281}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -260,18 +262,6 @@ Global
 		{595D6322-637A-4A36-97F1-D53F3F9ECEA7}.Release20|Any CPU.Build.0 = Release20|Any CPU
 		{595D6322-637A-4A36-97F1-D53F3F9ECEA7}.Release20|x86.ActiveCfg = Release20|Any CPU
 		{595D6322-637A-4A36-97F1-D53F3F9ECEA7}.Release20|x86.Build.0 = Release20|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Debug|x86.Build.0 = Debug|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Release|x86.ActiveCfg = Release|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Release|x86.Build.0 = Release|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Release20|Any CPU.ActiveCfg = Release|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Release20|Any CPU.Build.0 = Release|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Release20|x86.ActiveCfg = Release|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Release20|x86.Build.0 = Release|Any CPU
 		{8756690F-8138-495A-A368-39AFB9029823}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8756690F-8138-495A-A368-39AFB9029823}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8756690F-8138-495A-A368-39AFB9029823}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -281,6 +271,24 @@ Global
 		{8756690F-8138-495A-A368-39AFB9029823}.Release20|Any CPU.ActiveCfg = Release|Any CPU
 		{8756690F-8138-495A-A368-39AFB9029823}.Release20|Any CPU.Build.0 = Release|Any CPU
 		{8756690F-8138-495A-A368-39AFB9029823}.Release20|x86.ActiveCfg = Release|Any CPU
+		{8826810A-DC59-46E6-8978-21E273DB1236}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8826810A-DC59-46E6-8978-21E273DB1236}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8826810A-DC59-46E6-8978-21E273DB1236}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8826810A-DC59-46E6-8978-21E273DB1236}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8826810A-DC59-46E6-8978-21E273DB1236}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8826810A-DC59-46E6-8978-21E273DB1236}.Release|x86.ActiveCfg = Release|Any CPU
+		{8826810A-DC59-46E6-8978-21E273DB1236}.Release20|Any CPU.ActiveCfg = Release|Any CPU
+		{8826810A-DC59-46E6-8978-21E273DB1236}.Release20|Any CPU.Build.0 = Release|Any CPU
+		{8826810A-DC59-46E6-8978-21E273DB1236}.Release20|x86.ActiveCfg = Release|Any CPU
+		{4049CF0A-8F86-48B7-98BA-D062625BA281}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4049CF0A-8F86-48B7-98BA-D062625BA281}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4049CF0A-8F86-48B7-98BA-D062625BA281}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4049CF0A-8F86-48B7-98BA-D062625BA281}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4049CF0A-8F86-48B7-98BA-D062625BA281}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4049CF0A-8F86-48B7-98BA-D062625BA281}.Release|x86.ActiveCfg = Release|Any CPU
+		{4049CF0A-8F86-48B7-98BA-D062625BA281}.Release20|Any CPU.ActiveCfg = Release|Any CPU
+		{4049CF0A-8F86-48B7-98BA-D062625BA281}.Release20|Any CPU.Build.0 = Release|Any CPU
+		{4049CF0A-8F86-48B7-98BA-D062625BA281}.Release20|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

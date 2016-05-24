@@ -121,6 +121,8 @@
     <Compile Include="Conj3.yrd.fs" />
     <Compile Include="very_very_small.yrd.fs" />
     <Compile Include="intersection_small.yrd.fs" />
+    <Compile Include="BioTests.fs" />
+    <Compile Include="Tests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

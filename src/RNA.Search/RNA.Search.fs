@@ -31,50 +31,26 @@ type msg =
     | Data of int*BioParserInputGraph    
     | Die of AsyncReplyChannel<unit>
 
-let filterRnaParsingResult lengthLimit res  =
+let filterRnaParsingResult (graph:BioParserInputGraph) lengthLimit res  =
+    let hihtLenghtLimit = 100.0
     match res:ParseResult<ResultStruct> with
     | Success ast -> 
         failwith "Result is success but it is unrxpectrd success"
-    | Success1 x ->
-        let ranges = new ResizeArray<_>()
+    | Success1 x ->        
         let curLeft = ref 0
         let curRight = ref 0
-        let x = x |> Array.filter (fun i -> i.length >= byte lengthLimit)
-                    
-        printfn "Ranges filter: %A" x.Length
-        let x = 
-            let onOneEdg, other =
-                x
-                |> Array.filter (fun s -> int s.length >= lengthLimit)
-                |> Array.partition (fun s -> s.le = s.re)
-                //, ([||] : array<ResultStruct> )
-                    
-            let curEdg = ref 0
-            //printfn ""
-            onOneEdg
-            |> Array.iter(fun s ->
-                curEdg := s.le
-                if !curRight < s.lpos
-                then 
-                    ranges.Add ((s.le,!curLeft),(s.re,!curRight))
-                    curLeft := s.lpos
-                    curRight := s.rpos                        
-                else
-                    curLeft := min !curLeft s.lpos
-                    curRight := max !curRight s.rpos
-                    )
-            ranges.Add((!curEdg,!curLeft),(!curEdg,!curRight))
-            other
-            |> Seq.groupBy(fun s -> s.le,s.re)
-            |> Array.ofSeq
-            |> Array.map snd
-            |> Array.iter(fun s ->
-                let s = s |> Array.ofSeq
-                let left = s |> Array.minBy (fun s -> s.lpos)
-                let right = s |> Array.maxBy (fun s -> s.rpos)                        
-                ranges.Add((left.le,left.lpos),(right.re,right.rpos)))        
-        printfn "All: %A" ranges.Count
-        ranges     
+        let filteredByLength = x |> Array.filter (fun i -> i.length >= byte lengthLimit)
+        let findSubgraph s e = 
+            let qg = new QuickGraph.AdjacencyGraph<_,_>()
+            qg.AddVerticesAndEdgeRange(graph.Edges |> Array.map (fun e -> new QuickGraph.TaggedEquatableEdge<_,_>(e.Start,e.End,float e.RealLenght)))
+            let yen = new QuickGraph.Algorithms.ShortestPath.Yen.YenShortestPathsAlgorithm<_>(qg, s, e, 1000)
+            let paths = yen.Execute()
+                        |> Seq.filter (fun p -> p |> Seq.sumBy (fun e -> e.Tag) < hihtLenghtLimit)
+            paths
+        let paths =
+            filteredByLength
+            |> Array.map (fun r -> findSubgraph graph.Edges.[r.le].End graph.Edges.[r.re].Start)
+        [||]     
         
     | Error e -> 
         failwithf "Input parsing failed: %A" e
@@ -131,7 +107,7 @@ let search (graphs:array<_>) agentsCount =
                             //printfn "%A: %A" name i
                             try
                                 GLL.tRNA.buildAbstract graph 4                                
-                                |> filterRnaParsingResult 60
+                                |> filterRnaParsingResult graph 60
                                 |> processRanges
                             with
                             | e -> printfn "ERROR! %A" e.Message

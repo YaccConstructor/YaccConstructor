@@ -52,7 +52,7 @@ let printBref =
 
 let loadGraphToQGResharper path =
     let dot = File.ReadAllText(path)
-    BidirectionalGraph.LoadDot(dot, (fun v attrs -> int v), (fun v1 v2 attr -> new TaggedEdge<_,_>(int v1, int v2, (snd attr.[0], br))))
+    BidirectionalGraph.LoadDot(dot, (fun v attrs -> int v), (fun v1 v2 attr -> new TaggedEdge<_,_>(int v1, int v2, (attr.["label"], br))))
       
 let TSQLTokenizationTest file eCount vCount =
     let graph = loadGraphToQGResharper (path baseInputGraphsPath file)

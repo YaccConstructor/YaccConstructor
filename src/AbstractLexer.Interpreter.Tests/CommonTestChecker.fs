@@ -51,7 +51,7 @@ let path baseInputGraphsPath name = System.IO.Path.Combine(baseInputGraphsPath,n
 
 let loadDotToQG path =
     let dot = File.ReadAllText(path)
-    BidirectionalGraph.LoadDot(dot, (fun v attrs -> int v), (fun v1 v2 attr -> new TaggedEdge<_,_>(int v1, int v2, (snd attr.[0], snd attr.[0]))))
+    BidirectionalGraph.LoadDot(dot, (fun v attrs -> int v), (fun v1 v2 attr -> new TaggedEdge<_,_>(int v1, int v2, (attr.["label"], attr.["label"]))))
 
 let approximateQG (graph: BidirectionalGraph<int,TaggedEdge<int,(string * 'br)>>) = 
     let fsa = new FSA<_>()

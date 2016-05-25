@@ -50,7 +50,7 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lengthLimit res  =
         let paths =
             filteredByLength
             |> Array.map (fun r -> findSubgraph graph.Edges.[r.le].End graph.Edges.[r.re].Start)
-        [||]     
+        new ResizeArray<_>()    
         
     | Error e -> 
         failwithf "Input parsing failed: %A" e
@@ -76,7 +76,7 @@ let searchInCloud graphs =
                 let processGraph graph = 
                     try
                         GLL.tRNA.buildAbstract graph 3                                
-                        |> filterRnaParsingResult 60
+                        |> filterRnaParsingResult graph 60
                         |> Some
                     with
                     | e -> None 
@@ -150,7 +150,7 @@ let searchTRNA path agentsCount =
     let f graph = 
         try
             GLL.tRNA.buildAbstract graph 4                                
-            |> filterRnaParsingResult 60
+            |> filterRnaParsingResult graph 60
             |> fun x -> ()
         with
         | e -> printfn "ERROR! %A" e.Message

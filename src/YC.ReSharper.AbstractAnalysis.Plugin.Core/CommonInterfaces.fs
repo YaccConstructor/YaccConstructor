@@ -14,6 +14,7 @@ open Yard.Generators.Common.AstNode
 
 open QuickGraph.FST.GraphBasedFst
 open QuickGraph.FSA.GraphBasedFsa
+open Yard.Utils.StructClass
 
 let lexerErrMsg = "Unexpected symbol:"
 let parserErrMsg = "Syntax error. Unexpected token"

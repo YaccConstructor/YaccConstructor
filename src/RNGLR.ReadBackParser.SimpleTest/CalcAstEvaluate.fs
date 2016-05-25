@@ -4,43 +4,31 @@ open RNGLR.ReadBackParser.CalcEBNF
 
 let CalcEvaluate ast =
     
-    let tokenValue = function
-    | A _ -> 1
-    | B _ -> 2
-    | _ -> 0
-    
-    let rec evaluateExpr expr =
-        match expr with
-        | MY_expr' (leftTerm, rightPart) ->
-            let leftValue = evaluateTerm leftTerm
-            let f leftValue rightSignAndTerm =
-                let sign, term = rightSignAndTerm
-                let rightValue = evaluateTerm term
-                match sign with
-                | Choice1Of2 (ADD _) -> leftValue + rightValue
-                | Choice2Of2 (MIN _) -> leftValue - rightValue
-                | _ -> failwithf "Wrong sign"
-            rightPart |> List.fold f leftValue
+    let rec evaluateExpr = function
+    | Expr (leftTerm, rightPart) ->
+        let f leftValue (sign, term) =
+            let rightValue = evaluateTerm term
+            match sign with
+            | Choice1Of2 (_) -> leftValue + rightValue
+            | Choice2Of2 (_) -> leftValue - rightValue
+        rightPart |> List.fold f (evaluateTerm leftTerm)
 
     and evaluateTerm = function
-    | MY_term' (leftFact, rightPart)->
-        let leftValue = evaluateFact leftFact
-        let f leftValue rightSignAndFact =
-            let sign, fact = rightSignAndFact
+    | Term (leftFact, rightPart)->
+        let f leftValue (sign, fact) =
             let rightValue = evaluateFact fact
             match sign with
-            | Choice1Of2 (MUL _) -> leftValue * rightValue
-            | Choice2Of2 (DIV _) -> leftValue / rightValue
-            | _ -> failwithf "Wrong sign"
-        rightPart |> List.fold f leftValue
+            | Choice1Of2 (_) -> leftValue * rightValue
+            | Choice2Of2 _ -> leftValue / rightValue
+        rightPart |> List.fold f (evaluateFact leftFact)
 
     and evaluateFact = function
-    | MY_fact' fact ->
+    | Fact fact ->
         match fact with
-        | Choice1Of2 (MY_num' num) ->
-            match num with
-            | Choice1Of2 x | Choice2Of2 x -> tokenValue x
+        | Choice1Of2 (NUM num) ->
+            num
         | Choice2Of2 (_, expr, _) ->
             evaluateExpr expr
+        | _ -> failwithf "Invalid Factor node"
 
-    ast |> unbox |> MY_expr' |> evaluateExpr
+    evaluateExpr ast

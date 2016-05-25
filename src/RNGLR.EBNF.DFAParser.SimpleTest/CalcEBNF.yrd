@@ -1,5 +1,5 @@
 [<Start>]
-expr : term (ADD term)* {}
-term : fact (MUL fact)* {}
-fact : num {}
-num : A {} | B {}
+expr : term (('+'|'-') term)*
+term : fact (('*'|'/') fact)*
+fact : NUM | '(' expr ')'
+

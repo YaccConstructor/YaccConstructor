@@ -21,6 +21,7 @@
     <Compile Include="Kernels.fs" />
     <Compile Include="Linear.fs" />
     <Compile Include="NFA.fs" />
+    <Compile Include="DFA.fs" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
@@ -36,6 +37,11 @@
     <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
       <Name>Common.AST</Name>
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Common.EBNF.DFA\Common.EBNF.DFA.fsproj">
+      <Name>Common.EBNF.DFA</Name>
+      <Project>{75421c75-612a-473b-852f-1af3bd4352f3}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Common.EBNF\Common.EBNF.fsproj">

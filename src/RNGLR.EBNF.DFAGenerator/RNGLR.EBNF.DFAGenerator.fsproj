@@ -46,11 +46,32 @@
     <Compile Include="Tables.fs" />
     <Compile Include="PrintTables.fs" />
     <Compile Include="RNGLR.EBNF.DFAGenerator.fs" />
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common.EBNF.DFA\Common.EBNF.DFA.fsproj">
+      <Name>Common.EBNF.DFA</Name>
+      <Project>{75421c75-612a-473b-852f-1af3bd4352f3}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Common.EBNF\Common.EBNF.fsproj">
+      <Name>Common.EBNF</Name>
+      <Project>{939fadff-a1a7-4aee-b072-f3007396f1a9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Common.LR\Common.LR.fsproj">
+      <Name>Common.LR</Name>
+      <Project>{61f862cf-8889-4106-8612-a4d122f623ab}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Constraints\Constraints.fsproj">
       <Name>Constraints</Name>
       <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLR.ReadBackGenerator\RNGLR.ReadBackGenerator.fsproj">
+      <Name>RNGLR.ReadBackGenerator</Name>
+      <Project>{2610f200-dcfa-495a-98ca-abf3c08c216b}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\RNGLRGenerator\RNGLRGenerator.fsproj">
@@ -82,14 +103,6 @@
       <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\RNGLR.EBNF.DFACommon\RNGLR.EBNF.DFACommon.fsproj">
-      <Name>RNGLR.EBNF.DFACommon</Name>
-      <Project>{e7f2f65a-94bf-4681-8bba-e5b69521e5c3}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <Reference Include="YC.Common.EBNF.DFA">
-      <HintPath>..\..\Bin\Release\v40\YC.Common.EBNF.DFA.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

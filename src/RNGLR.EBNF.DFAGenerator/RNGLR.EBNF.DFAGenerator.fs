@@ -5,13 +5,12 @@ open Yard.Core
 open IL
 open Constraints
 open Yard.Generators.Common.InitialConvert
-open Yard.EBNF.DFA.FinalGrammar
-open Yard.EBNF.DFA.PrintFA
-open Yard.Generators.RNGLR.States
-open States
+open Yard.Generators.Common.LR.Kernels
 open Printer
 open Yard.Generators.RNGLR.TranslatorPrinter
 open Option
+open Yard.Generators.Common.DFA.FinalGrammar
+open Yard.Generators.RNGLR.EBNF.DFA.States
 //open PrintTreeNode
 //open HighlightingConvertions
 
@@ -23,7 +22,7 @@ do()
 type RNGLREBNFDFA() = 
     inherit Generator()
         override this.Name = "RNGLR.EBNF.DFAGenerator"
-        override this.Constraints = [|noMeta; noBrackets; needAC; singleModule|]
+        override this.Constraints = [|noMeta; needAC; singleModule|]
         override this.Generate (definition, args) =
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
@@ -102,7 +101,13 @@ type RNGLREBNFDFA() =
             then
                 newDefinition <- highlightingConvertions newDefinition*)
 
-            let grammar = new FinalGrammarNFA(newDefinition.grammar.[0].rules, caseSensitive)
+            let grammar = new FinalGrammarDFA(newDefinition.grammar.[0].rules, caseSensitive)
+            (*
+            //Debug
+            let fetch_stmt_prod = grammar.rules.ruleWithLeftSide 32
+            let sTV, s, f  = grammar.rules.rightSide fetch_stmt_prod
+            Yard.Generators.Common.FaToDot.faToDot sTV s f grammar.indexator "C:/temp/fetch_dfa"*)
+
             //printAll grammar
 
             (*if !needHighlighting && !needTranslate
@@ -140,8 +145,8 @@ type RNGLREBNFDFA() =
                             (System.IO.Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot"))
                 grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())*)
             
-            let statesInterpreter = buildStatesEBNF table grammar
-            let tables = new TablesEBNF(grammar, statesInterpreter)
+            let statesInterpreter = buildStatesDFA table grammar
+            let tables = new TablesReadBack(grammar, statesInterpreter)
             use out = new System.IO.StreamWriter (output)
             let res = new System.Text.StringBuilder()
             let dummyPos = char 0
@@ -194,7 +199,7 @@ type RNGLREBNFDFA() =
                 | Scala -> scalaHeaders()
 
             printHeaders moduleName fullPath light output targetLanguage
-            let tables = printTablesEBNF grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive
+            let tables = printTablesReadBack grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive
             let res = 
                 if not !needTranslate || targetLanguage = Scala 
                 then tables

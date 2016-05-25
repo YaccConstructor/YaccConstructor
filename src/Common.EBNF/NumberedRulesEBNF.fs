@@ -5,7 +5,8 @@ open Yard.Core.IL.Production
 open System.Collections.Generic
 open Yard.Generators.Common
 
-type TranslateBuilder () =
+//translateToAst - mapping number of rule to name of Ast type to wrap derivation into its parent
+type TranslateBuilder (translateToAst : string [] option) =
     
     let identN = ref 0
     let ruleCount = ref 0
@@ -27,7 +28,12 @@ type TranslateBuilder () =
         this.Tab()
         this.Append "match rule with"
         for i in 0 .. !ruleCount - 1 do
-            this.Append "| %d -> translate_%d derivation |> box" i i
+            let str =
+                if translateToAst.IsSome then
+                    sprintf "| %d -> translate_%d derivation |> %s |> box" i i (translateToAst.Value.[i])
+                else
+                    sprintf "| %d -> translate_%d derivation |> box" i i
+            this.Append "%s" str
         this.Append "| _ -> invalidArg \"rule\" \"Is out of count\""
         this.Untab()
         this.Append "| Ast.Leaf token -> box token"
@@ -136,7 +142,7 @@ type TranslateBuilder () =
             printfn "h"
 
 
-type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : IndexatorEBNF, caseSensitive, needTranslate) =
+type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : IndexatorEBNF, caseSensitive, needTranslate, translateToAst : (string -> string) option) =
     let transformLiteral = IndexatorEBNF.transformLiteral caseSensitive
     let rules = ruleList |> Array.ofList
     let start =
@@ -146,7 +152,12 @@ type NumberedRulesEBNF (ruleList : Rule.t<Source.t,Source.t> list, indexator : I
     
     let translateBuilder = 
         if needTranslate then
-            let x = new TranslateBuilder()
+            let translateToAst =
+                if translateToAst.IsSome then
+                    rules |> Array.map (fun x -> x.name |> Source.toString |> translateToAst.Value) |> Some
+                else
+                    None
+            let x = new TranslateBuilder(translateToAst)
             x.InitPrint()
             Some x
         else

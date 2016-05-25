@@ -1,19 +1,19 @@
-﻿namespace Yard.EBNF.DFA.GrammarWithNFARightSide
+﻿namespace Yard.EBNF.GrammarWithDFARightSide
 
 open Yard.Core.IL
 open Yard.Generators.Common
 
-module NFAProduction =
+module DFAProduction =
   
     type t = {
     
         numberOfStates : int
-        startState : Vertex<int,int>
-        //массив ко всем состояним автомата
+        startStates : int[]
         stateToVertex : Vertex<int, int>[]
+        finishStates : Set<int>
     }  
 
-module NFARule =
+module DFARule =
     
     type t<'patt,'expr> = {
         /// Rule name. Used to start from this or to be referenced to from other rules.
@@ -21,7 +21,7 @@ module NFARule =
         /// Heritable arguments of rule
         args    : 'patt list
         /// Rule body (production).
-        body    : NFAProduction.t
+        body    : DFAProduction.t
         /// Is this rule a start non-terminal (in this case '[<Start>]' is used before rule)
         isStart : bool
         /// Can this rule be seen from another module.
@@ -30,5 +30,3 @@ module NFARule =
         /// List of meta-arguments - names of rules, parametrizing this rule.
         metaArgs: 'patt list
     }
-
-

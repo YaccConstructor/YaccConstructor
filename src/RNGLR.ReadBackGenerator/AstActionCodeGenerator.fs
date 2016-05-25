@@ -1,5 +1,6 @@
 ﻿module Yard.Generators.RNGLR.ReadBack.AstActionCodeGenerator
 
+open System
 open Yard.Core.IL
 open System.Text
 open Yard.Core.IL.Production
@@ -16,10 +17,18 @@ let setTranslateToTreeMeta (grammar : Rule.t<'patt,'expr> list) (prefix : string
     //print "module %s\n" moduleName
     //print "\n"
 
+    let upperFirstLetter (s : string) =
+        if String.IsNullOrEmpty s || Char.IsUpper s.[0] then
+            s
+        else
+            s.ToUpper().[0].ToString() + s.Substring(1)
+
     let typeCount = ref 0
-    let prefix = prefix.ToUpper() + "_"
-    let unionName name = prefix + name
-    let typeName name = prefix + name + "'"
+
+    let defaultPrefix = "T"
+    let prefix = if String.IsNullOrEmpty prefix then defaultPrefix else upperFirstLetter prefix
+    let unionName name = prefix + (upperFirstLetter name)
+    let typeName name = upperFirstLetter name
     
     let addType name = 
         let intro = 
@@ -91,7 +100,8 @@ let setTranslateToTreeMeta (grammar : Rule.t<'patt,'expr> list) (prefix : string
                 let x = visitBody 0 x
                 print ") option"
                 POpt x 
-            | x -> x
+            | x -> 
+                x
 
     let newGrammar = grammar |> List.map (fun rule -> 
     
@@ -100,5 +110,5 @@ let setTranslateToTreeMeta (grammar : Rule.t<'patt,'expr> list) (prefix : string
         let newBody = visitBody 0 rule.body
         print "\n\n"
         {name = rule.name; args = rule.args; body = newBody; metaArgs = rule.metaArgs; isStart = rule.isStart; isPublic = rule.isPublic} )
-    (newGrammar, astStringBuilder.ToString())
+    (newGrammar, astStringBuilder.ToString(), typeName)
 

@@ -40,7 +40,8 @@ do()
 type RNGLRReadBack() = 
     inherit Generator()
         override this.Name = "RNGLR.ReadBackGenerator"
-        override this.Constraints = [|noMeta; needAC; singleModule|]
+        //TODO: remove constraints
+        override this.Constraints = [|noMeta; needAC; singleModule(*; noBrackets; noEbnf; noInnerAlt*)|]
         override this.Generate (definition, args) =
             let start = DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
@@ -123,15 +124,17 @@ type RNGLRReadBack() =
 //            if !needHighlighting 
 //            then newDefinition <- highlightingConvertions newDefinition
             
-            let translateToAstTypes = ref ""
+            let translateToAstTypes = ref None
+            let translateToAstNames = ref None
             if translateToAst.IsSome then
                 needTranslate := true
                 //let outDir = output.Substring (0, ((output.LastIndexOf @"\ /") + 1))
-                let rulesWithTranslateMeta, translateToAstTypes' = setTranslateToTreeMeta newDefinition.grammar.[0].rules translateToAst.Value //outDir
-                translateToAstTypes := translateToAstTypes'
+                let rulesWithTranslateMeta, translateToAstTypes', translateToAstNames' = setTranslateToTreeMeta newDefinition.grammar.[0].rules translateToAst.Value //outDir
+                translateToAstTypes := Some translateToAstTypes'
+                translateToAstNames := Some translateToAstNames'
                 //additionalHeaders := !additionalHeaders + ("open " + astModule + "\n")
                 newDefinition <- {newDefinition with grammar = [{newDefinition.grammar.Head with rules=rulesWithTranslateMeta}]}
-            let grammar = new FinalGrammarNFA(newDefinition.grammar.[0].rules, caseSensitive, !needTranslate)
+            let grammar = new FinalGrammarNFA(newDefinition.grammar.[0].rules, caseSensitive, !needTranslate, !translateToAstNames)
 
             (*if !needHighlighting
             then generateCsFiles grammar.indexator !namespaceName*)
@@ -225,7 +228,7 @@ type RNGLRReadBack() =
                 | Scala -> scalaHeaders()
 
             printHeaders moduleName fullPath light output targetLanguage
-            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType (Some !translateToAstTypes) caseSensitive
+            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType !translateToAstTypes caseSensitive
             let res = 
                 if not !needTranslate || targetLanguage = Scala 
                 then tables

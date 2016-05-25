@@ -14,44 +14,42 @@
     <Name>Common.EBNF.DFA</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <Tailcalls>false</Tailcalls>
-    <OutputPath>..\..\Bin\Debug\v40\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\Common.EBNF.DFA.XML</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <Tailcalls>true</Tailcalls>
-    <OutputPath>..\..\Bin\Release\v40\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\Common.EBNF.DFA.XML</DocumentationFile>
-  </PropertyGroup>
+  <Import Project="../YC.targets" />
   <ItemGroup>
-    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="FSharp.Core">
+      <HintPath>..\packages\FSharp.Core.3.1.2.5\lib\net40\FSharp.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Collections">
+      <HintPath>..\packages\FSharpx.Collections.1.12.1\lib\net40\FSharpx.Collections.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Collections.Experimental">
+      <HintPath>..\packages\FSharpx.Collections.Experimental.1.12.1\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Core">
+      <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GrammarWithNFARightSide.fs" />
-    <Compile Include="IndexatorNFA.fs" />
-    <Compile Include="NumberedRulesEBNF.fs" />
-    <Compile Include="ReverseNumberedRulesEBNF.fs" />
+    <Compile Include="GrammarWithDFARightSide.fs" />
+    <Compile Include="NumberedRulesDFA.fs" />
     <Compile Include="EpsilonEBNF.fs" />
     <Compile Include="SymbolSets.fs" />
-    <Compile Include="StateSets.fs" />
-    <Compile Include="FinalGrammarEBNF.fs" />
-    <Compile Include="PrintFA.fs" />
+    <Compile Include="FinalGrammarDFA.fs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common.EBNF\Common.EBNF.fsproj">
+      <Name>Common.EBNF</Name>
+      <Project>{939fadff-a1a7-4aee-b072-f3007396f1a9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>

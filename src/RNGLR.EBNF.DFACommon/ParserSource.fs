@@ -14,29 +14,51 @@
 
 namespace Yard.Generators.RNGLR.EBNF.DFA
 
-type ParserSourceEBNF<'TokenType> (gotos : int option [][] //goto consists of number of state where to go to and sets of productions to Stack/not to Stack
-                               , reduces : int [][][]
+open Yard.Generators.Common
+
+type SymbolType =
+    | Nonterminal
+    | Terminal
+
+type ParserSourceReadBack<'TokenType> (gotos : int [][]
+                               , reduces : (int * int) [][][]
                                , zeroReduces : int[][][]
-                               , dfaList : int[][][]
-                               , finiteStates : int[][]
-                               , amountOfStates : int[]
                                , accStates : bool[]
+                               , dfas : DFATable
                                , leftSide : int[]
                                , startRule : int
                                , eofIndex : int
                                , tokenToNumber : 'TokenType -> int
                                , acceptEmptyInput : bool
                                , numToString : int -> string
+                               , indexToSymbolType : int -> SymbolType
                                , errorIndex : int
                                (*, errorRulesExists : bool*)
                                ) =
    
+    let _dfas =
+        let openDfa dfa =
+            let numberOfStates, allTransitions, finishStates = dfa
+            let stateToVertex = Array.init numberOfStates (fun i -> new Vertex<_,_>(i))
+            let rec setAllTransitions = function
+                | (state, transitions) :: ats ->
+                    let vertex : Vertex<_, _> = stateToVertex.[state]
+                    let rec setTransitions = function
+                    | (dest, label) :: ts ->
+                        vertex.addEdge(new Edge<_,_>(stateToVertex.[dest], label))
+                        setTransitions ts
+                    | [] -> ()
+                    setTransitions transitions
+                    setAllTransitions ats
+                | [] -> ()
+            setAllTransitions allTransitions
+            stateToVertex, (finishStates |> Set.ofList)
+        dfas |> Array.map openDfa
+
     member this.Reduces = reduces
     member this.ZeroReduces = zeroReduces
     member this.Gotos = gotos
-    member this.DfaList = dfaList
-    member this.FiniteStates = finiteStates
-    member this.AmountOfStates = amountOfStates
+    member this.Dfas = _dfas
     member this.AccStates = accStates
     member this.LeftSide = leftSide
     member this.StartRule = startRule
@@ -44,5 +66,6 @@ type ParserSourceEBNF<'TokenType> (gotos : int option [][] //goto consists of nu
     member this.TokenToNumber = tokenToNumber
     member this.AcceptEmptyInput = acceptEmptyInput
     member this.NumToString = numToString
+    member this.IndexToSymbolType = indexToSymbolType
     member this.ErrorIndex = errorIndex
     //member this.ErrorRulesExists = errorRulesExists

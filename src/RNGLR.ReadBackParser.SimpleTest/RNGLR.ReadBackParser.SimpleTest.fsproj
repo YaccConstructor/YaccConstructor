@@ -38,6 +38,7 @@
     <Compile Include="AlternativeInMiddle.yrd.fs" />
     <Compile Include="CachedReduction.yrd.fs" />
     <Compile Include="CalcEBNF.yrd.fs" />
+    <Compile Include="CalcAstEvaluate.fs" />
     <Compile Include="Choice.yrd.fs" />
     <Compile Include="ComplexRightNull.yrd.fs" />
     <Compile Include="EpsilonCycle.yrd.fs" />

@@ -1,7 +1,7 @@
 
 del log.txt
 
-for %%i in (Epsilon, Longest, InfEpsilon) do (
+for %%i in (Epsilon, Longest, InfEpsilon, One) do (
     echo . >> log.txt
     echo %%i >> log.txt
     ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i %%i.yrd -c ExpandEbnf -c ExpandMeta ^

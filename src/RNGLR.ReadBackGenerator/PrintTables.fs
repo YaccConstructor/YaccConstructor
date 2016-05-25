@@ -181,10 +181,10 @@ let printTables
 
         if translateToAst.IsNone then
             for i = indexator.termsStart to indexator.termsEnd do
-                printBrInd 1 "| %s x -> box x" (indexator.indexToTerm i)
+                printBrInd 1 "| Token.%s x -> box x" (indexator.indexToTerm i)
 
             for i = indexator.literalsStart to indexator.literalsEnd do
-                printBrInd 1 "| L_%s x -> box x" (indexator.getLiteralName i)
+                printBrInd 1 "| Token.L_%s x -> box x" (indexator.getLiteralName i)
         else
             printBrInd 1 "| x -> x"
 
@@ -205,9 +205,9 @@ let printTables
 
         printBrInd 0 "let tokenToNumber = function"
         for i = indexator.termsStart to indexator.termsEnd do
-            printBrInd 1 "| %s _ -> %d" (indexator.indexToTerm i) i
+            printBrInd 1 "| Token.%s _ -> %d" (indexator.indexToTerm i) i
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| L_%s _ -> %d" (indexator.getLiteralName i) i
+            printBrInd 1 "| Token.L_%s _ -> %d" (indexator.getLiteralName i) i
         printBr ""
 
         printBrInd 0 "let indexToSymbolType = function"
@@ -224,9 +224,9 @@ let printTables
 
         printBrInd 0 "let isLiteral = function"
         for i = indexator.termsStart to indexator.termsEnd do
-            printBrInd 1 "| %s _ -> false" <| indexator.indexToTerm i
+            printBrInd 1 "| Token.%s _ -> false" <| indexator.indexToTerm i
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| L_%s _ -> true" (indexator.getLiteralName i)
+            printBrInd 1 "| Token.L_%s _ -> true" (indexator.getLiteralName i)
         printBr ""
 
         printInd 0 "let getLiteralNames = ["

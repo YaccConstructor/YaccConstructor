@@ -69,6 +69,10 @@
     <Compile Include="SimpleSome.yrd.fs" />
     <Compile Include="StackingConflict.yrd.fs" />
     <Compile Include="TwoEpsilonsMiddle.yrd.fs" />
+    <Compile Include="SeqOfTwoNonTerms.yrd.fs" />
+    <Compile Include="TwoManyNonTerms.yrd.fs" />
+    <Compile Include="TwoManyTerms.yrd.fs" />
+    <Compile Include="TwoParents.yrd.fs" />
     <Compile Include="Program.fs" />
     <None Include="packages.config" />
   </ItemGroup>
@@ -83,10 +87,33 @@
       <Project>{e7f2f65a-94bf-4681-8bba-e5b69521e5c3}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\RNGLR.EBNF.DFAGenerator\RNGLR.EBNF.DFAGenerator.fsproj">
+      <Name>RNGLR.EBNF.DFAGenerator</Name>
+      <Project>{55a3fc49-5acc-42ee-a510-65b158ea1858}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLR.EBNF.DFAParser\RNGLR.EBNF.DFAParser.fsproj">
+      <Name>RNGLR.EBNF.DFAParser</Name>
+      <Project>{b343a9c6-170b-48e9-8296-771f874675dc}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\FSharp\3.0\Runtime\v4.0\FSharp.Core.dll</HintPath>
+      <HintPath>..\packages\FSharp.Core.4.0.0.1\lib\net40\FSharp.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Collections">
+      <HintPath>..\packages\FSharpx.Collections.1.12.1\lib\net40\FSharpx.Collections.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Collections.Experimental">
+      <HintPath>..\packages\FSharpx.Collections.Experimental.1.12.1\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Core">
+      <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>

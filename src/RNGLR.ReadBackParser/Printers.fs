@@ -161,7 +161,7 @@ let astToDot (tree : Tree<'TokenType>) (numToString : int -> string) (tokenToNum
         out.WriteLine(str)
 
     let printNTerm nTerm index =
-        out.WriteLine(sprintf "    %d [label = \"%s\", shape = circle]" index (numToString nTerm))
+        out.WriteLine(sprintf "    %d [label = \"%s\", shape = ellipse]" index (numToString nTerm))
 
     let printTerminal token index =
         out.WriteLine(sprintf "    %d [label = \"%s\", shape = box]" index (tokenToString token))

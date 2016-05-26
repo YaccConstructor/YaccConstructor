@@ -29,7 +29,7 @@ let calcTokenizationTest file eCount vCount countEdgesArray =
     let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphFst    
     match res with
     | Success res ->
-        //ToDot res @"../../../src/AbstractLexer.Interpreter.Tests/Tests/TestInterpretParserLexer.dot" (printBref printSmbString)
+        //ToDot res @"D:/YC/YaccConstructor/TestInterpretParserLexer.dot" (printBref printSmbString)
         checkArr (countEdges res) countEdgesArray
         checkGraph res eCount vCount            
     | Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" file e)
@@ -170,7 +170,7 @@ type ``Lexer Calc Fst Tests`` () =
         
     [<Test>] 
     member this.``Calc. Complex 0`` () =
-        calcTokenizationTest "test_12.dot" 7 7 [|1; 1; 2; 1; 1; 1; 0|]
+        calcTokenizationTest "test_12.dot" 7 7 [|1; 1; 1; 2; 1; 1; 0|]
 
     [<Test>] 
     member this.``Calc. Whitespace edge.`` () =
@@ -195,7 +195,7 @@ type ``Lexer Calc Fst Tests`` () =
 //[<EntryPoint>]
 //let f x =
 //      let t = new ``Lexer Calc Fst Tests`` () 
-//      let a = t.``Calc. Complex branched 3.``()
+//      let a = t.``Calc. Complex 0``()
 //      //printfn "%A" a      
 //      1
 

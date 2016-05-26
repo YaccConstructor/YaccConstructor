@@ -55,13 +55,31 @@ module CommonFuns =
     let inline getIndex2Vertex (long : int64<vertexMeasure>)       = int <| ((int64 long) >>> 32)
  
 
+    let inline packEdgePos edge position = ((int position <<< 16) ||| int edge)                               
+    let inline getEdge packedValue = int (int packedValue &&& 0xffff)
+    let inline getPosOnEdge packedValue = int packedValue >>> 16 
+
+    let inline packLabelNew rule position = ((int rule <<< 16) ||| int position)                               
+    let inline getRuleNew packedValue   = int packedValue >>> 16
+    let inline getPositionNew packedValue = int (int packedValue &&& 0xffff)
+
+
+type CompressedArray<'t>(l : int[], f : _ -> 't, shift) =
+    let a = Array.init l.Length (fun i -> Array.init l.[i] f)
+    member this.Item         
+        with get (i:int) = 
+            let edg = (CommonFuns.getEdge i)
+            let pos = (CommonFuns.getPosOnEdge i)
+            a.[edg].[shift + pos]
+        and set i v = a.[(CommonFuns.getEdge i)].[shift + (CommonFuns.getPosOnEdge i)] <- v
 
       
+type ParserStructures<'TokenType> (currentRule : int)=
     let sppfNodes = new BlockResizeArray<INode>()
     let dummyAST = new TerminalNode(-1, packExtension -1 -1)
-    let setP = new System.Collections.Generic.Dictionary<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<nodeMeasure>>>(500)//list<int<nodeMeasure>>> (500)
+    let setP = new Dictionary<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<nodeMeasure>>>(500)//list<int<nodeMeasure>>> (500)
     let epsilonNode = new TerminalNode(-1, packExtension 0 0)
-    let setR = new System.Collections.Generic.Queue<Context(*<'TokenType>*)>(100)  
+    let setR = new System.Collections.Generic. Queue<Context>(100)  
     let dummy = 0<nodeMeasure>
     let currentN = ref <| dummy
     let currentR = ref <| dummy
@@ -101,7 +119,8 @@ module CommonFuns =
                 y
       //CompressedArray<Dictionary<_, Dictionary<_, ResizeArray<_>>>>                           
     let containsContext (setU : Dictionary<_, Dictionary<_, ResizeArray<_>>>[]) inputIndex (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
-        if inputIndex <= inputLength
+        let vertexKey = CommonFuns.pack vertex.Level vertex.NontermLabel
+        if setU.[inputIndex] <> Unchecked.defaultof<_>
         then
             let cond, current = setU.[inputIndex].TryGetValue(int label) 
             if  cond
@@ -128,6 +147,15 @@ module CommonFuns =
                 dict.Add(vertexKey, arr) 
                 false
         else 
+            let dict1 = new Dictionary<_, _>()
+            setU.[inputIndex] <- dict1
+            let dict2 = new Dictionary<_, ResizeArray<_>>()
+            dict1.Add(int label, dict2)
+            let arr = new ResizeArray<int<nodeMeasure>>()
+            arr.Add ast
+            dict2.Add(vertexKey, arr)
+            false
+        //else true
 //CompressedArray<System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>>
     let addContext (setU ) (inputVertex : int) (label : int<labelMeasure>) vertex ast =
         if not <| containsContext setU inputVertex label vertex ast

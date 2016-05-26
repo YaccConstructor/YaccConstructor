@@ -11,6 +11,11 @@ open FSharpx.Collections.Experimental
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
 
+[<Struct>]
+type M =
+    val pos : int64
+    val lbl : int<labelMeasure>
+    new (p,l) = {pos = p; lbl = l}
 
 let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : ParserInputGraph<'TokenType>) : ParserCommon.ParseResult<_> = 
     
@@ -115,7 +120,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     i.AddChild newNode
                 | _ -> ()
                 num
-        let getNodeT (edge : ParserEdge<'TokenType>) =
+                  
         let getNodeT (edge : ParserEdge<'TokenType>) =
             let beginVertix = edge.Source
             let endVertix = edge.Target
@@ -200,6 +205,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         and processing () =  
             condition := true
             let rule = getRule !structures.CurrentLabel
+            let position = getPositionNew !structures.CurrentLabel
             if Array.length parser.rules.[rule] = 0 
             then
               let t = new TerminalNode(-1, packExtension !currentVertexInInput !currentVertexInInput)
@@ -251,6 +257,9 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             if table.ContainsKey key
                             then
                                 for rule in table.[key] do
+                                 
+                                    let newLabel = 1<labelMeasure> * (packLabelNew rule 0)
+                                    structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy 
                                     
                 else
                     let curRight =  sppfNodes.Item (int !structures.CurrentN) 

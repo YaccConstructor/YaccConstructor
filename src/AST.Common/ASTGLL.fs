@@ -32,6 +32,7 @@ type NonTerminalNode =
     interface INode with
         member this.getExtension () = this.Extension
     
+
     new (name, extension) = {Name = name; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
     
 and TerminalNode =
@@ -191,7 +192,91 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
         out.WriteLine("}")
         out.Close()
 
+    member this.ReduceTree (tokenToNumber : 'TokenType -> int) (indToString : int -> string) : ReducedTree =
+        let rec cleanTree (st : INode)  =             
+            match st with 
+            | :? IntermidiateNode as i ->
+                cleanTree i.First   
+            | :? TerminalNode as t ->
+                if t.Name <> -1 
+                then 
                     seq { yield (ReducedTree.Term((indToString <| tokenToNumber tokens.[t.Name]), t))}
+                else    
+                    Seq.empty
+            | :? PackedNode as p ->
+                Seq.append (cleanTree p.Left) (cleanTree p.Right)
+            | :? NonTerminalNode as n ->
+                let child = cleanTree n.First
+                seq{yield ReducedTree.NonTerm(indToString n.Name, n, Seq.toList child )}
+            | _ -> failwith "Unexpected node type."
+        Seq.head <| (cleanTree root)
+
+    member this.ReducedTreeToDot (tree : ReducedTree)  (tokenData : 'TokenType -> obj) (path : string) =
+        use out = new System.IO.StreamWriter (path : string)
+        out.WriteLine("digraph AST {")
+
+        let createNode num isAmbiguous nodeType (str : string) =
+            let label =
+                let cur = str.Replace("\n", "\\n").Replace ("\r", "")
+                if not isAmbiguous then cur
+                else cur + " !"
+            let shape =
+                match nodeType with
+                | Terminal -> ",shape=box"
+                | NonTerminal -> ",shape=point"
+            let color = ""
+            out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + color + shape + "]")
+
+        let createEdge (b : int) (e : int) isBold (str : string) =
+            let label = str.Replace("\n", "\\n").Replace ("\r", "")
+            let bold = 
+                if not isBold then ""
+                else "style=bold,width=10,"
+            out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "label=\"" + label + "\"" + "]")
+        
+        let nodeQueue = new Queue<NumNode<ReducedTree>>()
+        let used = new Dictionary<_,_>()
+        let num = ref -1
+        nodeQueue.Enqueue(new NumNode<ReducedTree>(!num, tree))
+        while nodeQueue.Count <> 0 do
+            let currentPair = nodeQueue.Dequeue()
+            let key = ref 0
+            if !num <> -1
+            then
+
+                if used.TryGetValue(currentPair.Node, key)
+                then
+                    createEdge currentPair.Num !key false ""
+                else    
+                    num := !num + 1
+                    used.Add(currentPair.Node, !num)
+                    match currentPair.Node with 
+                    | NonTerm(name, node, children) -> 
+                        createNode !num false NonTerminal name
+                        createEdge currentPair.Num !num false ""
+                        for c in children do
+                            nodeQueue.Enqueue(new NumNode<ReducedTree>(!num, c))
+                    | Term(name, tnode) ->
+                        if tnode.Name <> -1
+                        then
+                            createNode !num false Terminal (name )
+                            createEdge currentPair.Num !num false ""
+                        else
+                            createNode !num false Terminal ("epsilon")
+                            createEdge currentPair.Num !num false ""
+                       
+                    | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
+            else
+                num := !num + 1
+                match currentPair.Node with
+                | NonTerm(name, node, children) -> 
+                    createNode !num false NonTerminal name
+                    for c in children do
+                        nodeQueue.Enqueue(new NumNode<_>(!num, c))
+                | _ -> ()
+        out.WriteLine("}")
+        out.Close()
+      
     member this.ExtractFinalPaths =
         let nodeQueue = new Queue<NumNode<_>>()
         let visitedNodes = new Dictionary<_, Dictionary<_,_>>()

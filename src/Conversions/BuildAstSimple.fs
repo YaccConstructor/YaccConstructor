@@ -61,6 +61,7 @@ let rec _buildAstSimple ruleName (production: t<Source.t, Source.t>) =
                             | PToken _, None | PLiteral _, None | PRef _, None -> { elem with binding=binding }
                             | PToken _, Some _ ->  { elem with binding=binding }
                             | PAlt(left,right), _ -> { elem with binding=binding; rule=PAlt(_buildAstSimple "" left,_buildAstSimple "" right) }
+                            | PConj(left,right), _ -> { elem with binding=binding; rule=PConj(_buildAstSimple "" left,_buildAstSimple "" right) }
                             | PMany(p), _ -> { elem with binding=binding; rule=PMany(_buildAstSimple "" p) }
                             | PSome(p), _ -> { elem with binding=binding; rule=PSome(_buildAstSimple "" p) }
                             | POpt(p), _  -> { elem with binding=binding; rule=POpt (_buildAstSimple "" p) }
@@ -86,6 +87,7 @@ let rec _buildAstSimple ruleName (production: t<Source.t, Source.t>) =
                 , l)
 
     | PAlt(left, right) -> PAlt(_buildAstSimple ruleName left, _buildAstSimple ruleName right)
+    | PConj(left, right) -> PConj(_buildAstSimple ruleName left, _buildAstSimple ruleName right)
     | x -> _buildAstSimple ruleName (seqify x)
 
 let buildAstSimple (ruleList: Rule.t<Source.t, Source.t> list)  = 

@@ -55,6 +55,7 @@
     <None Include="packages.config" />
     <Compile Include="GeneratorInternal.fs" />
     <Compile Include="Generator.fs" />
+    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">

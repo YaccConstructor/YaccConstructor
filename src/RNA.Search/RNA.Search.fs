@@ -7,6 +7,8 @@ open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.AbstractParserWithoutTree
 
+open Microsoft.FSharp.Collections
+
 open MBrace.Azure
 open MBrace.Core
 open MBrace.Core.Builders
@@ -29,45 +31,26 @@ type msg =
     | Data of int*BioParserInputGraph    
     | Die of AsyncReplyChannel<unit>
 
-let filterRnaParsingResult lengthLimit res  =
+let filterRnaParsingResult (graph:BioParserInputGraph) lengthLimit res  =
+    let hihtLenghtLimit = 100.0
     match res:ParseResult<ResultStruct> with
     | Success ast -> 
         failwith "Result is success but it is unrxpectrd success"
-    | Success1 x ->
-        let ranges = new ResizeArray<_>()
+    | Success1 x ->        
         let curLeft = ref 0
-        let curRight = ref 0                  
-        let x = 
-            let onOneEdg, other =
-                x
-                |> Array.filter (fun s -> s.rpos - s.lpos >= lengthLimit || s.le <> s.re)
-                |> Array.partition (fun s -> s.le = s.re)
-                    
-            let curEdg = ref 0
-            //printfn ""
-            onOneEdg
-            |> Array.iter(fun s ->
-                curEdg := s.le
-                if !curRight < s.lpos
-                then 
-                    ranges.Add ((s.le,!curLeft),(s.re,!curRight))
-                    curLeft := s.lpos
-                    curRight := s.rpos                        
-                else
-                    curLeft := min !curLeft s.lpos
-                    curRight := max !curRight s.rpos
-                    )
-            ranges.Add((!curEdg,!curLeft),(!curEdg,!curRight))
-            other
-            |> Seq.groupBy(fun s -> s.le,s.re)
-            |> Array.ofSeq
-            |> Array.map snd
-            |> Array.iter(fun s ->
-                let s = s |> Array.ofSeq
-                let left = s |> Array.minBy (fun s -> s.lpos)
-                let right = s |> Array.maxBy (fun s -> s.rpos)                        
-                ranges.Add((left.le,left.lpos),(right.re,right.rpos)))        
-        ranges     
+        let curRight = ref 0
+        let filteredByLength = x |> Array.filter (fun i -> i.length >= byte lengthLimit)
+        let findSubgraph s e = 
+            let qg = new QuickGraph.AdjacencyGraph<_,_>()
+            qg.AddVerticesAndEdgeRange(graph.Edges |> Array.map (fun e -> new QuickGraph.TaggedEquatableEdge<_,_>(e.Start,e.End,float e.RealLenght)))
+            let yen = new QuickGraph.Algorithms.ShortestPath.Yen.YenShortestPathsAlgorithm<_>(qg, s, e, 1000)
+            let paths = yen.Execute()
+                        |> Seq.filter (fun p -> p |> Seq.sumBy (fun e -> e.Tag) < hihtLenghtLimit)
+            paths
+        let paths =
+            filteredByLength
+            |> Array.map (fun r -> findSubgraph graph.Edges.[r.le].End graph.Edges.[r.re].Start)
+        new ResizeArray<_>()    
         
     | Error e -> 
         failwithf "Input parsing failed: %A" e
@@ -93,7 +76,7 @@ let searchInCloud graphs =
                 let processGraph graph = 
                     try
                         GLL.tRNA.buildAbstract graph 3                                
-                        |> filterRnaParsingResult 60
+                        |> filterRnaParsingResult graph 60
                         |> Some
                     with
                     | e -> None 
@@ -112,8 +95,8 @@ let searchInCloud graphs =
 
 let search (graphs:array<_>) agentsCount =
     let start = System.DateTime.Now
-    let processRanges (ranges:ResizeArray<_>) = ()
-        //ranges.Count |> printfn "Total ranges: %A"
+    let processRanges (ranges:ResizeArray<_>) =  ()
+        //ranges |> (* ResizeArray.filter (fun r -> int r.length >= 60 ) |>*) fun x -> x.Count |> printfn "Total ranges: %A"
     let agent name  =
         MailboxProcessor.Start(fun inbox ->
             let rec loop n =
@@ -124,7 +107,7 @@ let search (graphs:array<_>) agentsCount =
                             //printfn "%A: %A" name i
                             try
                                 GLL.tRNA.buildAbstract graph 4                                
-                                |> filterRnaParsingResult 60
+                                |> filterRnaParsingResult graph 60
                                 |> processRanges
                             with
                             | e -> printfn "ERROR! %A" e.Message
@@ -167,15 +150,15 @@ let searchTRNA path agentsCount =
     let f graph = 
         try
             GLL.tRNA.buildAbstract graph 4                                
-            |> filterRnaParsingResult 60
+            |> filterRnaParsingResult graph 60
             |> fun x -> ()
         with
         | e -> printfn "ERROR! %A" e.Message
-    let gs = graphs.[10000..11000]
-    for i in 1..5 do 
-        printfn "i=%A" i
-        search gs i
-        |> printfn "%A"
+    let gs = graphs.[10000..10100]
+//    for i in 1..5 do 
+//        printfn "i=%A" i
+    search gs 2
+    |> printfn "%A"
     //searchInCloud graphs
     //let start = System.DateTime.Now
     //Array.Parallel.iter f gs

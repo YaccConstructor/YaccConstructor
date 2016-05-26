@@ -85,6 +85,7 @@ let private linearize (grammar: Grammar.t<_,_>) =
             | PMetaRef (name, args, metas) ->
                 PMetaRef (rename name, args, List.map renamebody' metas)
             | PAlt (left, right) -> PAlt (renamebody' left, renamebody' right)
+            | PConj (left, right) -> PConj (renamebody' left, renamebody' right)
             | PMany body -> PMany (renamebody' body)
             | PSome body -> PSome (renamebody' body)
             | POpt body -> POpt (renamebody' body)

@@ -13,7 +13,7 @@ open Calc.AbstractParser
 open ReSharperExtension
 open Yard.Generators.Common.AST
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
+open Yard.Utils.StructClass
 open YC.FST.AbstractLexing.Interpreter
 open QuickGraph.FST.GraphBasedFst
 open YC.SDK.CommonInterfaces
@@ -33,7 +33,6 @@ do()
 [<ShellComponent>]
 type CalcInjectedLanguageModule() =
     let tokenize (lexerInputGraph : FSA<char * Position<'br>>) =
-        //let graphFsa = lexerInputGraph.ApprToFSA()
         let eof = RNGLR_EOF(new FSA<_>())
         let transform x = 
             match x with 

@@ -10,3 +10,6 @@
 [submodule "QuickGraph"]
     path = QuickGraph
     url = https://github.com/YaccConstructor/QuickGraph.git
+[submodule "src/YC.Utils.SourceText"]
+	path = src/YC.Utils.SourceText
+	url = https://github.com/YaccConstructor/YC.Utils.SourceText.git

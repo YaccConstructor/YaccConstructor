@@ -53,7 +53,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             arr
 
         let slotIsEnd (label : int<labelMeasure>) =
-            (getPosition label) = Array.length (parser.rules.[getRule label])
+            (getPositionNew label) = Array.length (parser.rules.[getRule label])
 
         let findSppfNode (label : int<labelMeasure>) lExt rExt : int<nodeMeasure> =
             let isEnd = slotIsEnd <| label
@@ -200,7 +200,6 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         and processing () =  
             condition := true
             let rule = getRule !structures.CurrentLabel
-            let position = getPosition !structures.CurrentLabel
             if Array.length parser.rules.[rule] = 0 
             then
               let t = new TerminalNode(-1, packExtension !currentVertexInInput !currentVertexInInput)
@@ -252,29 +251,6 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             if table.ContainsKey key
                             then
                                 for rule in table.[key] do
-                                    let newLabel = packLabel rule 0
-                                    structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy 
-                                 
-                                    let newLabel = 1<labelMeasure> * (packLabelNew rule 0)
-                                    structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy 
-//                        then
-//                            if parser.CanInferEpsilon.[curSymbol]
-//                            then
-//                                let curToken = parser.IndexEOF
-//                                let getIndex nTerm term = 
-//                                    let mutable index = nTerm
-//                                    index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
-//                                    index <- index + term - parser.NonTermCount
-//                                    index
-//                                let index = getIndex curSymbol curToken
-//                                currentGSSNode := create !currentVertexInInput (packLabel (rule) (position + 1)) !currentGSSNode  !currentN
-//                                if Array.length table.[index] <> 0 
-//                                then
-//                                    let a rule = 
-//                                        let newLabel = packLabel rule 0
-//                                        addContext !currentVertexInInput newLabel !currentGSSNode dummy 
-//                                    table.[index] |>  Array.iter a
-//                            condition := true
                                     
                 else
                     let curRight =  sppfNodes.Item (int !structures.CurrentN) 
@@ -293,14 +269,33 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
              while not !stop do
                 if !condition then dispatcher() else processing()
         control()
+
+        let rec checkConj (ast : obj) : bool = 
+            match ast with
+            | :? NonTerminalNode as node -> let buff = ref <| checkConj node.First
+                                            if node.Others = Unchecked.defaultof<_> then //others empty
+                                                !buff && not <| (parser.NumToString node.Name).StartsWith "yard_conjunction"
+                                            else 
+                                                node.Others.ForEach(fun n -> buff := !buff && checkConj n)
+                                                !buff 
+            | :? TerminalNode as node -> true
+            | :? PackedNode as node -> checkConj node.Left && checkConj node.Right
+            | :? IntermidiateNode as node -> let buff = ref <| checkConj node.First
+                                             if node.Others = Unchecked.defaultof<_> then //others empty
+                                                !buff
+                                             else
+                                                node.Others.ForEach(fun n -> buff := !buff && checkConj n)
+                                                !buff
+            | _ -> false
                  
         match !structures.ResultAST with
             | None -> Error ("String was not parsed")
             | Some res -> 
-                    let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
-                    //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
-                    //r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
+                    if checkConj res then        
+                            let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
+                            printf "%A" r1
+                            //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
+                            r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
                     //printfn "%d" !tempCount
-                    Success (r1)   
-                     
-                        
+                            Success (r1)   
+                    else Error ("String was not parsed")

@@ -98,10 +98,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="Utils.SourceText">
-      <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj">
@@ -177,6 +173,11 @@
     <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.SEL.SDK.Core.fsproj">
       <Name>YC.SEL.SDK.Core</Name>
       <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\YC.Utils.SourceText\src\YC.Utils.SourceText\Utils.SourceText.fsproj">
+      <Name>Utils.SourceText (Tools\Utils.SourceText\Utils.SourceText)</Name>
+      <Project>{f296356b-00c3-465c-9c97-7cfa279f5574}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

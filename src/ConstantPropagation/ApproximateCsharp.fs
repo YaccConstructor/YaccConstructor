@@ -19,7 +19,7 @@ open ResharperCsharpTreeUtils
 open Microsoft.FSharp.Collections
 open QuickGraph.FSA.GraphBasedFsa
 open ResharperCfgToGeneric
-open QuickGraph.FSA.FsaApproximation
+open Yard.Utils.StructClass
 
 let private tryDefineLang (node: IInvocationExpression) (hotspotInfoList: list<string * Hotspot>) = 
     let methodName, className, parameters, retType = getMethodSigniture node

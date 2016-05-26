@@ -33,6 +33,7 @@
   <ItemGroup>
     <Compile Include="Namer.fs" />
     <Compile Include="TransformAux.fs" />
+    <Compile Include="ExpandConjunction.fs" />
     <Compile Include="ExpandAlter.fs" />
     <Compile Include="ExpandBrackets.fs" />
     <Compile Include="AddEOF.fs" />

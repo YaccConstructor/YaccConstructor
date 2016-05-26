@@ -68,7 +68,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
         , getDocumentRange: Position<'br> -> 'range
         , printAst: Tree<'TokenType> -> string -> unit
         , printOtherAst: OtherTree<'TokenType> -> string -> unit
-        , semantic : _ option) = //as this =
+        , semantic : (Common.GeneratedStuffSource<'TokenType, 'br> * _ * _) option) = //as this =
 
     let lexingFinished = new Event<LexingFinishedArgs<'node>>()
     let parsingFinished = new Event<ParsingFinishedArgs>()
@@ -135,7 +135,7 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
         |> Option.map
             (fun x -> 
                 let y = parse x
-                printfn "Tree: %A" y
+                //printfn "Tree: %A" y
                 y)
         |> Option.iter
             (function 
@@ -147,19 +147,16 @@ type Processor<'TokenType, 'br, 'range, 'node >  when 'br: equality and  'range:
 
                     if semantic.IsSome 
                     then
-                        #if DEBUG
                         //sometimes it needs for debugging purposes
-                        printAst tree "result ast.dot"
-                        #endif
+                        //printAst tree "result ast.dot"
                         
                         let pSource, lSource, tokToSourceString = semantic.Value
-                        let cfg = new ControlFlow<'TokenType>(tree, pSource, lSource, tokToSourceString)
+                        let cfg = CfgBuilder.CfgBuilder.BuildCfg tree pSource lSource tokToSourceString
                         
-                        #if DEBUG
                         //sometimes it needs for debugging purposes
-                        cfg.PrintToDot "result cfg.dot"
-                        #endif
-                        let semErrors = cfg.FindUndefVariable()
+                        //cfg.PrintToDot "result cfg.dot"
+                        
+                        let semErrors = fst <| cfg.FindUndefinedVariables()
                         semErrors |> List.iter (fun error -> addSError undefinedVariableErrMsg error)
                     
 

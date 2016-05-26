@@ -1,6 +1,17 @@
-﻿[<Start>]
+﻿{
+open QuickGraph.FST.GraphBasedFst
+open QuickGraph.FSA.GraphBasedFsa
+open Yard.Utils.StructClass
+}
+
+tokens {
+    _ of FSA<char*Position<string>>
+}
+
+[<Start>]
 start: statement+
 statement: if_statement | simple_statement
-if_statement: IF cond THEN statement+ (ELSE statement+)? ENDIF
+if_statement: IF cond THEN one_or_many (ELSE one_or_many)?
+one_or_many: simple_statement | '{' statement+ '}'
 simple_statement: cond SEMICOLON
 cond: A | B | C | D | E | F | G | H

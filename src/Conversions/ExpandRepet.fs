@@ -18,13 +18,9 @@ let private expandRepet (ruleList: Rule.t<_,_> list) =
     let rec bodyRule acc b rule =
         if (acc > b) || (acc < 1) then failwith "Incorrect parameters of range for Repeat!"
         if acc = b 
-        then
-            let newName = Namer.newName Namer.Names.repeat                                 
-            PSeq([for i in 1..acc -> {omit=false; rule=rule; binding=None; checker=None }], None, None)
-        else
-            let newName = Namer.newName Namer.Names.repeat 
-            PAlt(PSeq([for i in 1..acc -> {omit=false; rule=rule; binding=None; checker=None }], None, None), bodyRule (acc + 1) b rule)   
-
+        then PSeq([for i in 1..acc -> {omit=false; rule=rule; binding=None; checker=None }], None, None)
+        else PAlt(PSeq([for i in 1..acc -> {omit=false; rule=rule; binding=None; checker=None }], None, None), bodyRule (acc + 1) b rule)               
+            
     let handleRepeat rule = 
         match rule with 
         | PRepet(r, a, b) ->    
@@ -38,7 +34,7 @@ let private expandRepet (ruleList: Rule.t<_,_> list) =
             | _ -> failwith "Unsupported parameters in Repetion!"                      
         | _ -> failwith "Unexpected rule for Repeat!"  
            
-    let rec expandBody attrs = function
+    let rec expandBody attrs = function        
         | PSeq(elements, actionCode, l) -> 
             PSeq(elements |>List.map (fun e -> {e with rule = expandBody attrs e.rule}) , actionCode, l)
 //            elements |> List.fold (fun (res, attrs) elem ->
@@ -54,19 +50,19 @@ let private expandRepet (ruleList: Rule.t<_,_> list) =
 //                |> fst |> List.rev
 //                |> fun elems -> PSeq (elems, actionCode, l)
         | PAlt(left, right) -> PAlt(expandBody attrs left, expandBody attrs right)
+        | PConj(left, right) -> PConj(expandBody attrs left, expandBody attrs right)
         | PMany x -> PMany(expandBody attrs x)
         | PSome x -> PSome(expandBody attrs x)
         | POpt x ->  POpt(expandBody attrs x)
         | PRepet (r, a, b) as x -> 
             let newName = Namer.newName Namer.Names.repeat
             toExpand.Enqueue({name = dummyPos newName; args=attrs; body=r;
-                                isStart=false; isPublic=false; metaArgs=[]})                                                             
+                                isStart=false; isPublic=false; metaArgs=[]})
             handleRepeat <| PRepet (PRef(dummyPos newName, list2opt <| createParams attrs), a, b)
         | PToken _ | PLiteral _  | PRef _  as x -> x
         | PPerm _ -> failwith "Unsupported rule in Repetion!"        
-        | PMetaRef (src, args, metas) as x -> 
-             PMetaRef (src, args, metas |> List.map (fun prod -> expandBody attrs prod))
-                   
+        | PMetaRef (src, args, metas) as x ->                         
+            PMetaRef (src, args, metas |> List.map (fun prod -> expandBody attrs prod))                   
                                      
     let expanded = ref []
     while toExpand.Count > 0 do 

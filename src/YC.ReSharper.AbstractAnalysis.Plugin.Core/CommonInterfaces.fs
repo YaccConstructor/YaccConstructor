@@ -5,6 +5,7 @@ open System.Collections.Generic
 
 open QuickGraph
 
+open Yard.Utils.StructClass
 open AbstractAnalysis.Common
 open ControlFlowGraph
 open Yard.Generators.RNGLR.OtherSPPF
@@ -12,8 +13,8 @@ open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 
 open QuickGraph.FST.GraphBasedFst
-open QuickGraph.FSA.FsaApproximation
 open QuickGraph.FSA.GraphBasedFsa
+open Yard.Utils.StructClass
 
 let lexerErrMsg = "Unexpected symbol:"
 let parserErrMsg = "Syntax error. Unexpected token"

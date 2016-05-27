@@ -204,6 +204,7 @@ and  main = parse
       }
     | "(" {LPAREN <| lex2source lexbuf}
     | ")" {RPAREN <| lex2source lexbuf}
+	| "&" {AND <| lex2source lexbuf}
     | _
        { raise(Lexical_error
                 ("illegal character " + (*String.escaped*)LexBuffer<_>.LexemeString(lexbuf),

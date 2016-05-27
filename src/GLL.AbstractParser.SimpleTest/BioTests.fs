@@ -33,7 +33,55 @@ type msg =
 let f arr tokenToNumber = Array.map (fun e -> tokenToNumber e) arr
 let len (edges : BioParserEdge[]) : int[] = edges |> Array.map (fun e -> e.Tokens.Length + 1) 
 let filterRnaParsingResult res expectedRange lengthLimit =
-    let ranges = YC.Bio.RNA.Search.filterRnaParsingResult lengthLimit res
+    let filterRnaParsingResult lengthLimit res  =
+        match res:ParseResult<ResultStruct> with
+        | Success ast -> 
+            failwith "Result is success but it is unrxpectrd success"
+        | Success1 x ->
+            let ranges = new ResizeArray<_>()
+            let curLeft = ref 0
+            let curRight = ref 0
+            let x = x |> Array.filter (fun i -> i.length >= byte lengthLimit)
+                    
+            printfn "Ranges filter: %A" x.Length
+            let x = 
+                let onOneEdg, other =
+                    x
+                    |> Array.filter (fun s -> int s.length >= lengthLimit)
+                    |> Array.partition (fun s -> s.le = s.re)
+                    //, ([||] : array<ResultStruct> )
+                    
+                let curEdg = ref 0
+                //printfn ""
+                onOneEdg
+                |> Array.iter(fun s ->
+                    curEdg := s.le
+                    if !curRight < s.lpos
+                    then 
+                        ranges.Add ((s.le,!curLeft),(s.re,!curRight))
+                        curLeft := s.lpos
+                        curRight := s.rpos                        
+                    else
+                        curLeft := min !curLeft s.lpos
+                        curRight := max !curRight s.rpos
+                        )
+                ranges.Add((!curEdg,!curLeft),(!curEdg,!curRight))
+                other
+                |> Seq.groupBy(fun s -> s.le,s.re)
+                |> Array.ofSeq
+                |> Array.map snd
+                |> Array.iter(fun s ->
+                    let s = s |> Array.ofSeq
+                    let left = s |> Array.minBy (fun s -> s.lpos)
+                    let right = s |> Array.maxBy (fun s -> s.rpos)                        
+                    ranges.Add((left.le,left.lpos),(right.re,right.rpos)))        
+            printfn "All: %A" ranges.Count
+            ranges     
+        
+        | Error e -> 
+            failwithf "Input parsing failed: %A" e
+
+    let ranges = filterRnaParsingResult lengthLimit res
     Assert.IsTrue(ranges |> Microsoft.FSharp.Collections.ResizeArray.exists ((=) expectedRange))
 
 [<TestFixture>]

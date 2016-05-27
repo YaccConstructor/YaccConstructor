@@ -46,6 +46,7 @@ let getKey module' key =
     and getProdKey this =
         match this with
         |PAlt (x, y) -> getProdKey x + "|" + getProdKey y
+        |PConj (x, y) -> getProdKey x + "&" + getProdKey y
         |PSeq (ruleSeq, attrs, l) ->
             let strAttrs =
                 match attrs with
@@ -165,6 +166,9 @@ let expandRule =
                 | PAlt (l, r) ->
                     let x,y = expandBody l module' metaRules expanded [], simpleExpand r
                     (PAlt (fst x, fst y), snd x @ snd y)
+                | PConj (l, r) ->
+                    let x,y = expandBody l module' metaRules expanded [], simpleExpand r
+                    (PConj (fst x, fst y), snd x @ snd y)
                 | PSeq (ruleList, actionCode, l) ->
                     ruleList
                     |> List.fold (fun (curSeq, accRes) elem' ->
@@ -195,6 +199,7 @@ let expandRule =
         | POpt body  -> POpt  <| replace body
         | PMany body -> PMany <| replace body
         | PAlt (l, r) -> PAlt(replace l, replace r)
+        | PConj (l, r) -> PConj(replace l, replace r)
         | PLiteral _ as literal -> literal
         | PToken _ as token -> token
         | PRef(name, attrs) as prev ->

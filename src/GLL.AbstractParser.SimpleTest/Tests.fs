@@ -115,9 +115,6 @@ let test buildAbstractAst qGraph  (intToString : int -> string) (fileName : stri
      
 let f arr tokenToNumber = Array.map (fun e -> tokenToNumber e) arr
 let len (edges : BioParserEdge[]) : int[] = edges |> Array.map (fun e -> e.Tokens.Length + 1) 
-let filterRnaParsingResult res expectedRange lengthLimit =
-    let ranges = YC.Bio.RNA.Search.filterRnaParsingResult lengthLimit res
-    Assert.IsTrue(ranges |> Microsoft.FSharp.Collections.ResizeArray.exists ((=) expectedRange))
 
 [<TestFixture>]
 type ``GLL abstract parser tests`` () =

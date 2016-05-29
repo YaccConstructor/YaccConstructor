@@ -42,7 +42,8 @@ module gr =
     let  mutable productions:Production list = []
     let  mutable starts = ""
     let mutable vertex:string list = []
-    let mutable edge:(string*string*string) list = []    
+    let mutable edge:(string*string*string) list = []   
+    let mutable cluster_vertex:string list list = [] 
     let mutable outPath = ""
 
 type FileDotEngine()  =
@@ -98,7 +99,6 @@ type GrammarFlowGraph() =
                 |_->"Not Found"
 
             //YardFrontend initialize and File reading
-            let basePath = @"C:\Users\Alex\Documents\GitHub"
             let yak = definition
                         |> applyConversion expandMeta
                         |> applyConversion expandEbnf
@@ -152,6 +152,8 @@ type GrammarFlowGraph() =
                                    getVert'(acc@[hd],tl)
                         |_->gr.vertex<-(patt+":"+(listToString acc)+".")::gr.vertex
                 getVert'([], res)
+                gr.cluster_vertex<-gr.vertex::gr.cluster_vertex
+                gr.vertex<-[]
 
                 gr.edge<-("."+patt,patt+":"+"."+listToString(res),"entry")::gr.edge;
                 gr.edge<-(patt+":"+listToString(res)+".",patt+".","exit")::gr.edge;
@@ -174,6 +176,11 @@ type GrammarFlowGraph() =
 
             //Make graph from vertix and edges lists
             let graph = new AdjacencyGraph<string, Edge<string>>();
+            let clust_graph = new ClusteredAdjacencyGraph<string, Edge<string>>(graph);
+            for vertex_cluster in gr.cluster_vertex do
+               let cluster = clust_graph.AddCluster();
+               for j in vertex_cluster do
+                  cluster.AddVertex(j)|>ignore
             for i in gr.vertex do
                 graph.AddVertex(i)|>ignore
             for i in gr.edge do
@@ -181,7 +188,7 @@ type GrammarFlowGraph() =
 
     
             //Initialize Graphviz algorithm
-            let graphViz = new GraphvizAlgorithm<string, Edge<string>>(graph);
+            let graphViz = new GraphvizAlgorithm<string, Edge<string>>(clust_graph);
             let evHandler (evArgs:FormatVertexEventArgs<string>) =
                 evArgs.VertexFormatter.Comment <- evArgs.VertexFormatter.Label
             let evHandler2 (evArgs:FormatEdgeEventArgs<string,Edge<string>>) =

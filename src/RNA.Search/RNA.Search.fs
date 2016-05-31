@@ -37,20 +37,71 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lengthLimit res  =
     | Success ast -> 
         failwith "Result is success but it is unrxpectrd success"
     | Success1 x ->        
-        let curLeft = ref 0
-        let curRight = ref 0
+        let weightLimit = 1000
         let filteredByLength = x |> Array.filter (fun i -> i.length >= byte lengthLimit)
+        let qgEdgFromBio (e:BioParserEdge) = new QuickGraph.TaggedEquatableEdge<_,_>(e.Start, e.End, float e.RealLenght) 
         let findSubgraph s e = 
             let qg = new QuickGraph.AdjacencyGraph<_,_>()
-            qg.AddVerticesAndEdgeRange(graph.Edges |> Array.map (fun e -> new QuickGraph.TaggedEquatableEdge<_,_>(e.Start,e.End,float e.RealLenght)))
+            let _ = qg.AddVerticesAndEdgeRange(graph.Edges |> Array.map qgEdgFromBio)
             let yen = new QuickGraph.Algorithms.ShortestPath.Yen.YenShortestPathsAlgorithm<_>(qg, s, e, 1000)
-            let paths = yen.Execute()
+            let paths = yen.Execute() 
                         |> Seq.filter (fun p -> p |> Seq.sumBy (fun e -> e.Tag) < hihtLenghtLimit)
             paths
-        let paths =
+            |> Seq.concat
+            |> System.Collections.Generic.HashSet<_>
+            |> fun s -> s, (s |> Seq.sumBy (fun x -> x.Tag |> int))
+        
+        let subgraphs =
             filteredByLength
-            |> Array.map (fun r -> findSubgraph graph.Edges.[r.le].End graph.Edges.[r.re].Start)
-        new ResizeArray<_>()    
+            |> Array.map (fun r -> 
+                let newStartEdge = qgEdgFromBio graph.Edges.[r.le]
+                let newEndEdge = qgEdgFromBio graph.Edges.[r.re]
+                let additionalWeight = newStartEdge.Tag + newEndEdge.Tag |> int
+                if r.le = r.re || graph.Edges.[r.le].End = graph.Edges.[r.re].Start
+                then new System.Collections.Generic.HashSet<_> [|newStartEdge; newEndEdge|], additionalWeight
+                else 
+                    let s,w = findSubgraph graph.Edges.[r.le].End graph.Edges.[r.re].Start
+                    s.Add newStartEdge |> ignore
+                    s.Add newEndEdge |> ignore
+                    s, w + additionalWeight
+                )
+        
+        let mergedSubgraphs = new ResizeArray<_>()
+
+        subgraphs
+        |> Array.iter
+            (fun (g1, w1) ->
+                if w1 > weightLimit || mergedSubgraphs.Count = 0
+                then mergedSubgraphs.Add (g1, ref w1)
+                else 
+                    let merged = ref false
+                    mergedSubgraphs 
+                    |> ResizeArray.iter (
+                        fun (g2, w2) -> 
+                            if !w2 < weightLimit && g2.Overlaps g1 
+                            then 
+                                g2.UnionWith g1
+                                w2 := g2 |> Seq.sumBy (fun x -> x.Tag |> int)
+                                merged := true
+                                )
+                    if not !merged
+                    then mergedSubgraphs.Add(g1, ref w1)
+            )
+
+        let fromStartVtoEdg = new SysDict<_,ResizeArray<_>>()
+        graph.Edges
+        |> Array.iter (
+            fun e -> 
+                let flg, v = fromStartVtoEdg.TryGetValue(e.Start)
+                if flg
+                then v.Add e
+                else fromStartVtoEdg.Add(e.Start, new ResizeArray<_>([|e|]))
+                )
+        
+        mergedSubgraphs
+        |> ResizeArray.map (fun (g1,n) -> 
+            printfn "Subgraph. smb = %A edges = %A" !n g1.Count
+            g1 |> Seq.collect (fun e -> fromStartVtoEdg.[e.Source]))
         
     | Error e -> 
         failwithf "Input parsing failed: %A" e
@@ -95,8 +146,21 @@ let searchInCloud graphs =
 
 let search (graphs:array<_>) agentsCount =
     let start = System.DateTime.Now
-    let processRanges (ranges:ResizeArray<_>) =  ()
-        //ranges |> (* ResizeArray.filter (fun r -> int r.length >= 60 ) |>*) fun x -> x.Count |> printfn "Total ranges: %A"
+    let processSubgraphs (subgraphs:ResizeArray<_>) =
+        let parseWithSPPF graph =
+            let sppf = GLL.tRNA.buildAbstractAst graph
+            match sppf with
+            | Success sppf -> ()
+            | _ -> ()
+        ()
+//        let buildParserInputGraph (bioEdges: seq<BioParserEdge>) =
+//            let cnt = ref 0
+//            let edges =
+//                bioEdges
+//                |> Seq.map (fun e -> )
+//            let parserInputGraph ParserInputGraph
+    ()
+
     let agent name  =
         MailboxProcessor.Start(fun inbox ->
             let rec loop n =
@@ -108,7 +172,7 @@ let search (graphs:array<_>) agentsCount =
                             try
                                 GLL.tRNA.buildAbstract graph 4                                
                                 |> filterRnaParsingResult graph 60
-                                |> processRanges
+                                |> processSubgraphs
                             with
                             | e -> printfn "ERROR! %A" e.Message
                             return! loop n         

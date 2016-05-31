@@ -1,1 +1,1 @@
-A MUL A ADD B DIV LBR A ADD B RBR ADD B
+1 + 2 * 3 - 4

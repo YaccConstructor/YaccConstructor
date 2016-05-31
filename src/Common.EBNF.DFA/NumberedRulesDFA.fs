@@ -94,10 +94,91 @@ type NumberedRulesDFA (ruleList : Rule.t<Source.t,Source.t> list, indexator : In
         let finishStates' = startStates |> Set.ofArray
         (stateToVertex', startStates', finishStates')
 
+    let minimize (stateToVertex : Vertex<_,_>[]) (startState : int) (finishStates : Set<int>) =
+        let statesN = stateToVertex.Length
+        //
+        let nonequalityTable = Array.zeroCreate (statesN - 1)
+        for i = 0 to statesN - 2 do
+            nonequalityTable.[i] <- Array.create (statesN - i - 1) false
+        let check x y = 
+            if x = y then false 
+            elif x < y then nonequalityTable.[x].[statesN - y - 1] 
+            else nonequalityTable.[y].[statesN - x - 1]
+        let set x y = if x < y then nonequalityTable.[x].[statesN - y - 1] <- true else nonequalityTable.[y].[statesN - x - 1] <- true
+        for i = 0 to statesN - 2 do
+            for j = i + 1 to statesN - 1 do
+                if finishStates.Contains i <> finishStates.Contains j then
+                    set i j
+        let modified = ref true
+        while !modified do
+            modified := false
+            for i = 0 to statesN - 2 do
+                for j = i + 1 to statesN - 1 do
+                    if not <| check i j then
+                        for iEdge in stateToVertex.[i].outEdges do
+                            let wasLabel = ref false
+                            for jEdge in stateToVertex.[j].outEdges do
+                                if iEdge.label = jEdge.label then
+                                    wasLabel := true
+                                    if check iEdge.dest.label jEdge.dest.label then
+                                        set i j
+                                        modified := true
+                            if not !wasLabel then
+                                set i j
+                                modified := true
+                        for jEdge in stateToVertex.[j].outEdges do
+                            let wasLabel = stateToVertex.[i].outEdges |> Seq.fold (fun x y -> x || y.label = jEdge.label) false
+                            if not wasLabel then
+                                set i j
+                                modified := true
+
+        let newVerticesDict = Array.create statesN None
+        let newStateToVertexList = new ResizeArray<_>()
+        let nextVertex oldState =
+            let res = new Vertex<_,_>(newStateToVertexList.Count)
+            newStateToVertexList.Add (res, oldState)
+            res
+        for i = 0 to statesN - 2 do
+            match newVerticesDict.[i] with
+            | Some x -> ()
+            | None -> 
+                let newVertex = nextVertex i
+                newVerticesDict.[i] <- Some newVertex
+                for j = i + 1 to statesN - 1 do
+                    if not <| check i j then
+                        newVerticesDict.[j] <- Some newVertex
+        if newVerticesDict.[statesN - 1].IsNone then
+            let newVertex = nextVertex (statesN - 1)
+            newVerticesDict.[statesN - 1] <- Some newVertex
+        for (newVertex, oldState) in newStateToVertexList do
+            for edge in stateToVertex.[oldState].outEdges do
+                let newDest = newVerticesDict.[edge.dest.label].Value
+                newVertex.addEdge(new Edge<_,_>(newDest,edge.label))
+
+        let newStateToVertex = newStateToVertexList |> Seq.map (fun (x, _) -> x) |> Seq.toArray
+        let newStartState = newVerticesDict.[startState].Value.label
+        let newFinishStates = finishStates |> Set.map (fun x -> newVerticesDict.[x].Value.label)
+        newStateToVertex, newStartState, newFinishStates                            
+
     let rightReverted = 
         nfaRules.rightSideArr 
         |> Array.map (fun x -> revertAutoma x.stateToVertex [|x.startState.label|] [|x.stateToVertex.Length - 1|])
         |> Array.map (fun (stateToVertex, startStates, finishStates) -> nfaToDfa stateToVertex startStates finishStates)
+        |> Array.map (fun (stateToVertex, startState, finishStates) -> minimize stateToVertex startState finishStates)
+    //debug
+    let moreThanOneFinishStates =
+        let acc = ref 0
+        let max = ref 0
+        rightReverted 
+        |> Array.iter 
+            (fun (_, _, finishStates) -> 
+                if finishStates.Count > 1 then 
+                    incr acc
+                    if finishStates.Count > !max then
+                        max := finishStates.Count
+            )
+        printfn "%d out of %d are polyfinish, max %d" !acc rightReverted.Length !max
+    //
     let right = 
         rightReverted 
         |> Array.map 

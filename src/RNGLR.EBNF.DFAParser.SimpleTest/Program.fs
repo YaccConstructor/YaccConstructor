@@ -35,12 +35,12 @@ type ``RNGLREBNF parser tests with simple lexer`` () =
     let runTest parser genLiteral file expected = 
         let path = dir + file
         match run path genLiteral parser, expected with
-        | Error (num, tok, err, _, _), TER_Error -> printErr (num, tok, err)
-        | Success (tree, _, _), TER_Success -> printfn "Success"
-        | Error (num, tok, err, _, _), TER_Success ->  
+        | Error (num, tok, err, _), TER_Error -> printErr (num, tok, err)
+        | Success (tree, _), TER_Success -> printfn "Success"
+        | Error (num, tok, err, _), TER_Success ->  
             printErr (num, tok, err)
             Assert.Fail()
-        | Success (tree, _, _), TER_Error -> 
+        | Success (tree, _), TER_Error -> 
             printfn "Wrong chain was accessed"
             Assert.Fail()
 
@@ -146,5 +146,5 @@ type ``RNGLREBNF parser tests with simple lexer`` () =
 
 [<EntryPoint>]
 let main argv = 
-    (new ``RNGLREBNF parser tests with simple lexer``()).``6.0 Two many nonterminals``();
+    (new ``RNGLREBNF parser tests with simple lexer``()).``1.0 One``();
     0 // return an integer exit code

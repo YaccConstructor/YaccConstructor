@@ -4,14 +4,14 @@
 open Yard.Generators.Common
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
-open Yard.Generators.Common.DataStructures
+//open Yard.Generators.Common.DataStructures
 open Yard.Generators.RNGLR.ReadBack.Compressor
 //open Yard.Generators.RNGLR.ReadBack.Tree
 
 open Yard.Generators.Common
 
 //Sppf is a intersection of a production automaton and Gss, which, in its turn, has edges labelled with Sppf
-type Sppf = UsualOne<SppfVertex> * int * int * Set<int>
+type Sppf = SppfVertex * int * int * Set<int>
     //(start vertex, number of nfa states, end level, accepting nfa states)
 
 and SppfLabel =
@@ -92,7 +92,7 @@ and SppfSearchDictionary<'ValueType>(numberOfDfaStates : int) =
 and ReductionTemp(prod : int, numberOfStates : int, leftEndStates : Set<int>, endLevel : int) =
     let prod = prod
     let notHandledLeftEnds = new Queue<SppfVertex>()
-    let leftEndsDict = new Dictionary<int64, ResizeArray<SppfVertex>>()
+    let leftEndsDict = new Dictionary<int64, SppfVertex>()
     let acceptingNfaStates = ref Set.empty
     let visitedVertices =
     //TODO: PERFORMANCE
@@ -107,13 +107,7 @@ and ReductionTemp(prod : int, numberOfStates : int, leftEndStates : Set<int>, en
         this.AddVisited lE
         let gssVertex = lE.gssVertex
         let compressedVertex = pairToOne gssVertex.Level gssVertex.State
-        match leftEndsDict.TryGetValue(compressedVertex) with
-        | (true, leftEnds) ->
-            leftEnds.Add lE
-        | (false, _) ->
-            let leftEnds = new ResizeArray<_>()
-            leftEnds.Add lE
-            leftEndsDict.[compressedVertex] <- leftEnds
+        leftEndsDict.[compressedVertex] <- lE
         notHandledLeftEnds.Enqueue lE
     
     member this.AddRightEnd rE =

@@ -15,9 +15,10 @@ type TablesReadBack (grammar : FinalGrammarDFA, states : StatesInterpreter) =
         let gotos : int list[,] = Array2D.create states.count symbolCount []
         let mutable acc = []
         if grammar.canInferEpsilon.[grammar.rules.leftSide grammar.startRule] then acc <- (*startState*)0::acc
-        let endRule = 
-            KernelInterpreterDFA.toKernel 
-                (grammar.startRule, (let _,x,_ = grammar.rules.rightRevertedArr.[grammar.startRule] in x))
+        let endRules = 
+            let _,_,x = grammar.rules.rightSide grammar.startRule in
+                Set.map (fun x -> KernelInterpreterDFA.toKernel (grammar.startRule, x)) x             
+                
         for i = 0 to states.count-1 do
             let vertex = states.vertex i
             let mainKernels, mainLookaheads = states.mainKernels i, states.mainLookaheads i
@@ -32,7 +33,7 @@ type TablesReadBack (grammar : FinalGrammarDFA, states : StatesInterpreter) =
             for j = 0 to mainKernels.Length - 1 do
                 let k, la = mainKernels.[j], mainLookaheads.[j]
                 let prod, pos = KernelInterpreterDFA.unzip k
-                if k = endRule then acc <- i::acc
+                if Set.contains k endRules then acc <- i::acc
                 elif grammar.hasEpsilonTail.[prod].[pos] then
                     for symbol in la do 
                         reduces.[i, symbol] <- (prod, pos)::reduces.[i, symbol]
@@ -40,7 +41,7 @@ type TablesReadBack (grammar : FinalGrammarDFA, states : StatesInterpreter) =
             for j = 0 to derivedKernels.Length - 1 do
                 let k, la = derivedKernels.[j], derivedLookaheads.[j]
                 let prod, pos = KernelInterpreterDFA.unzip k
-                if k = endRule then acc <- i::acc
+                if Set.contains k endRules then acc <- i::acc
                 elif grammar.hasEpsilonTail.[prod].[pos] then
                     for symbol in la do 
                         zeroReduces.[i, symbol] <- prod::zeroReduces.[i, symbol]
@@ -61,7 +62,7 @@ type TablesReadBack (grammar : FinalGrammarDFA, states : StatesInterpreter) =
         grammar.rules.rightRevertedArr 
         |> Array.map
             // first state ([0] is always start)
-            (fun (stateToVertex, startState, finishStates) -> stateToVertex.Length, (stateToVertex |> Array.toList |> statesAndTransitions), Set.toList finishStates)
+            (fun (stateToVertex, _, finishStates) -> stateToVertex.Length, (stateToVertex |> Array.toList |> statesAndTransitions), Set.toList finishStates)
 
     member this.reduces = _reduces
     member this.zeroReduces = _zeroReduces

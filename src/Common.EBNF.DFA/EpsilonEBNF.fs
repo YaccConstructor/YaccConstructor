@@ -20,7 +20,7 @@ let epsilonsDFA (rules : NumberedRulesDFA) (indexator : IndexatorEBNF) =
         modified <- false
         for i in 0..rules.rulesCount-1 do
             if not canInferEpsilon.[rules.leftSide i] then
-                if rules.startPos i |> Array.exists (fun x -> hasEpsilonTail.[i].[x]) then
+                if hasEpsilonTail.[i].[rules.startPos i] then
                     modified <- true
                     canInferEpsilon.[rules.leftSide i] <- true
 

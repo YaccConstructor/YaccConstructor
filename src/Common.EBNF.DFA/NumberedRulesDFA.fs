@@ -160,13 +160,16 @@ type NumberedRulesDFA (ruleList : Rule.t<Source.t,Source.t> list, indexator : In
         let newFinishStates = finishStates |> Set.map (fun x -> newVerticesDict.[x].Value.label)
         newStateToVertex, newStartState, newFinishStates                            
 
-    let rightReverted = 
+    let right = 
         nfaRules.rightSideArr 
-        |> Array.map (fun x -> revertAutoma x.stateToVertex [|x.startState.label|] [|x.stateToVertex.Length - 1|])
-        |> Array.map (fun (stateToVertex, startStates, finishStates) -> nfaToDfa stateToVertex startStates finishStates)
+        |> Array.map (fun x -> nfaToDfa x.stateToVertex [|x.startState.label|] ([x.numberOfStates - 1] |> Set.ofList))
         |> Array.map (fun (stateToVertex, startState, finishStates) -> minimize stateToVertex startState finishStates)
+
+    let rightReverted = 
+        right 
+        |> Array.map (fun (stateToVertex, startState, finishStates) -> revertAutoma stateToVertex [|startState|] (finishStates |> Set.toArray))
     //debug
-    let moreThanOneFinishStates =
+    (*let moreThanOneFinishStates =
         let acc = ref 0
         let max = ref 0
         rightReverted 
@@ -178,11 +181,7 @@ type NumberedRulesDFA (ruleList : Rule.t<Source.t,Source.t> list, indexator : In
                         max := finishStates.Count
             )
         printfn "%d out of %d are polyfinish, max %d" !acc rightReverted.Length !max
-    //
-    let right = 
-        rightReverted 
-        |> Array.map 
-            (fun (stateToVertex, startStates, finishStates) -> revertAutoma stateToVertex [|startStates|] (finishStates|> Set.toArray))
+    //*)
         
     
     //debug
@@ -223,7 +222,7 @@ type NumberedRulesDFA (ruleList : Rule.t<Source.t,Source.t> list, indexator : In
     member this.rightSide num = right.[num]
     member this.numberOfStates num = let stateToVertex, _, _ = right.[num] in stateToVertex.Length
     member this.state rule pos = let stateToVertex, _, _ = right.[rule] in stateToVertex.[pos]
-    member this.startPos rule = let _, startStates, _ = right.[rule] in startStates
+    member this.startPos rule = let _, startState, _ = right.[rule] in startState
     //member this.table rule = getTable rule
     member this.symbolsAndNextPos rule pos =
         symbolAndNextPos.[rule].[pos]

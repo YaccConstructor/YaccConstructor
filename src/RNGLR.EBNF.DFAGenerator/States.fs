@@ -68,25 +68,24 @@ let buildStatesDFA outTable (grammar : FinalGrammarDFA) =
             let rule = grammar.rules.ruleWithLeftSide symbol
             if rule >= 0 then
                 let nonTerm = symbol
-                let startPositions = grammar.rules.startPos rule
-                let kernels = startPositions |> Array.map (fun x -> KernelInterpreter.toKernel (rule, x))
-                for kernel in kernels do
-                    let newSymbolSet = 
-                        if not <| resultDerived.Contains kernel then
-                            resultDerived <- resultDerived.Add kernel
-                            derivedKernelToLookAhead.Add(kernel, symbolSet)
-                            symbolSet
-                        else
-                            let newSymbolSet = Set.difference symbolSet derivedKernelToLookAhead.[kernel]
-                            derivedKernelToLookAhead.[kernel] <- Set.union derivedKernelToLookAhead.[kernel] newSymbolSet
-                            newSymbolSet
-                    symbolsAndLookaheads (kernel, newSymbolSet)
-                    |> Array.iter 
-                        (fun x ->
-                            let (symbol, _) = x
-                            if not newSymbolSet.IsEmpty || not wasNonTerm.[symbol] then
-                               enqueue x
-                        )
+                let startPosition = grammar.rules.startPos rule
+                let kernel = KernelInterpreter.toKernel (rule, startPosition)
+                let newSymbolSet =
+                    if not <| resultDerived.Contains kernel then
+                        resultDerived <- resultDerived.Add kernel
+                        derivedKernelToLookAhead.Add(kernel, symbolSet)
+                        symbolSet
+                    else
+                        let newSymbolSet = Set.difference symbolSet derivedKernelToLookAhead.[kernel]
+                        derivedKernelToLookAhead.[kernel] <- Set.union derivedKernelToLookAhead.[kernel] newSymbolSet
+                        newSymbolSet
+                symbolsAndLookaheads (kernel, newSymbolSet)
+                |> Array.iter 
+                    (fun x ->
+                        let (symbol, _) = x
+                        if not newSymbolSet.IsEmpty || not wasNonTerm.[symbol] then
+                            enqueue x
+                    )
         for (f,s) in addedNTermsSymbols do
             wasNonTerm.[f] <- false
             wasNTermSymbol.[f,s] <- false
@@ -233,11 +232,10 @@ let buildStatesDFA outTable (grammar : FinalGrammarDFA) =
             decr dfsDepth
             vertex
 
-    let initKernels = grammar.rules.startPos grammar.startRule |> Array.map (fun x -> KernelInterpreter.toKernel(grammar.startRule, x))
+    let initKernel = KernelInterpreter.toKernel(grammar.startRule, grammar.rules.startPos grammar.startRule)
     let initLookAhead = Set.ofSeq [grammar.indexator.eofIndex]
-    let initKernelsAndLookAheads = Array.map (fun x -> (x, initLookAhead)) initKernels
     let threadFun = fun () ->
-        initKernelsAndLookAheads
+        [|initKernel, initLookAhead|]
         |> match outTable with
             | LALR -> dfsLALR
             | LR -> dfsLR

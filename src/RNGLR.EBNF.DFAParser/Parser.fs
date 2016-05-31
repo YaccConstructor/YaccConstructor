@@ -105,7 +105,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                     let nfaFinal = new Vertex<int, int>(0)
                     new SppfVertex(nfaFinal, gssFinal)
                 start.addEdge(new SppfEdge(final, SppfLabel.EpsilonReduction -1))
-                (new UsualOne<_>(start, null)), 1, 0, Set.ofArray [|0|]
+                start, 1, 0, Set.ofArray [|0|]
             (*let tree = sppfToTree<_> 0 emptyParse ([||]) parserSource.LeftSide
                         parserSource.NontermToRule parserSource.RightSideNFA parserSource.EpsilonIndex parserSource.CanInferEpsilon
             Success (tree, [||])*)
@@ -300,16 +300,8 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                         | TemporaryReduction rt ->
                             let numberOfStates = 
                                 let x, _ = parserSource.Dfas.[rt.Production] in x.Length
-                            let leftEnds = 
-                                let leftEnds = rt.GetLeftEnd gssVertex.Level gssVertex.State
-                                let other = 
-                                    if leftEnds.Count > 1 then
-                                        let other = Array.init (leftEnds.Count - 1) (fun i -> leftEnds.[i+1])
-                                        other
-                                    else
-                                        null
-                                new UsualOne<_>(leftEnds.[0], other)
-                            SppfLabel.Reduction (rt.Production, (leftEnds, numberOfStates, rt.EndLevel, rt.AcceptingNfaStates))
+                            let leftEnd = rt.GetLeftEnd gssVertex.Level gssVertex.State
+                            SppfLabel.Reduction (rt.Production, (leftEnd, numberOfStates, rt.EndLevel, rt.AcceptingNfaStates))
                         | _ -> sppfLabel
                     new GssEdge(gssVertex, sppfLabel)
                 let gssEdges = edges |> ResizeArray.map toEdge
@@ -325,15 +317,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                     | TemporaryReduction rt ->
                         let numberOfStates = 
                             let x, _ = parserSource.Dfas.[rt.Production] in x.Length
-                        let leftEnds = 
-                            let other = 
-                                if source.Count > 1 then
-                                    let other = Array.init (source.Count - 1) (fun i -> source.[i+1])
-                                    other
-                                else
-                                    null
-                            new UsualOne<_>(source.[0], other)
-                        SppfLabel.Reduction (rt.Production, (leftEnds, numberOfStates, rt.EndLevel, rt.AcceptingNfaStates))
+                        SppfLabel.Reduction (rt.Production, (source, numberOfStates, rt.EndLevel, rt.AcceptingNfaStates))
                     | _ -> edge.Label
                 edge.setLabel sppfLabel
             for i = 0 to currentReductions.Length - 1 do

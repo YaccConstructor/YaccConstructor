@@ -27,7 +27,7 @@ let firstSetDFA (rules : NumberedRulesDFA) (indexator : IndexatorEBNF) (canInfer
                             else checkEdges xs
                     if state.label >= rules.numberOfStates prod then false
                     else state.outEdges |> List.ofSeq |> checkEdges
-                rules.startPos prod |> Array.map (fun x -> rules.state prod x) |> Array.fold (fun x y -> x || checkOutSymbols y) false
+                checkOutSymbols (rules.state prod (rules.startPos prod))
 
             for i = 0 to rules.rulesCount-1 do
                 let v = rules.leftSide i

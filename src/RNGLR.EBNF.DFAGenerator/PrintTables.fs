@@ -143,8 +143,8 @@ let printTablesReadBack
                 (fun x -> 
                     printTriple x 
                         (fun x -> print "%d" x) 
-                        (fun x -> printList x (fun x -> printPair x (fun x -> print "%d" x) (fun x -> printList x (fun x -> printPair x (fun x -> print "%d" x) (fun x -> print "%d" x))))) 
-                        (fun x -> printList x (fun x -> print "%d" x)))
+                        (fun x -> printList x (fun x -> printPair x (fun x -> print "%d" x) (fun x -> printList x (fun x -> printPair x (fun x -> print "%d" x) (fun x -> printArr x (fun x ->print "%d" x)))))) 
+                        (fun x -> print "%d" x))
 
         printBr "type Token ="
         let indexator = grammar.indexator
@@ -281,10 +281,11 @@ let printTablesReadBack
         printBrInd 0 "let eofIndex = %d" grammar.indexator.eofIndex
 
         //printBrInd 0 "let epsilonIndex = %d" grammar.indexator.epsilonIndex
-    
+        
+        printBrInd 0 "let symbolsCount = %d" grammar.indexator.fullCount
         printBrInd 0 "let errorIndex = %d" grammar.errorIndex
         
-        printBrInd 0 "let private parserSource = new ParserSourceReadBack<Token> (gotos, reduces, zeroReduces, accStates, dfas, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, indexToSymbolType, errorIndex)"
+        printBrInd 0 "let private parserSource = new ParserSourceReadBack<Token> (gotos, reduces, zeroReduces, accStates, dfas, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, indexToSymbolType, symbolsCount, errorIndex)"
 
         printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
         printBrInd 1 "buildAstReadBack<Token> parserSource"

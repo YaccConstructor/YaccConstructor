@@ -32,33 +32,28 @@ type ParserSourceReadBack<'TokenType> (gotos : int [][]
                                , acceptEmptyInput : bool
                                , numToString : int -> string
                                , indexToSymbolType : int -> SymbolType
+                               , symbolsCount : int
                                , errorIndex : int
                                (*, errorRulesExists : bool*)
                                ) =
    
-    let _dfas =
-        let openDfa dfa =
-            let numberOfStates, allTransitions, finishStates = dfa
-            let stateToVertex = Array.init numberOfStates (fun i -> new Vertex<_,_>(i))
-            let rec setAllTransitions = function
-                | (state, transitions) :: ats ->
-                    let vertex : Vertex<_, _> = stateToVertex.[state]
-                    let rec setTransitions = function
-                    | (dest, label) :: ts ->
-                        vertex.addEdge(new Edge<_,_>(stateToVertex.[dest], label))
-                        setTransitions ts
-                    | [] -> ()
-                    setTransitions transitions
-                    setAllTransitions ats
-                | [] -> ()
-            setAllTransitions allTransitions
-            stateToVertex, (finishStates |> Set.ofList)
-        dfas |> Array.map openDfa
+    let _dfas, _finishStates =
+        let dfaTables = Array.zeroCreate dfas.Length
+        let finishStates = Array.zeroCreate dfas.Length
+        for i = 0 to dfas.Length - 1 do
+            let numberOfStates, allTransitions, finishState = dfas.[i]
+            dfaTables.[i] <- Array.init numberOfStates (fun j -> Array.create symbolsCount None)
+            finishStates.[i] <- finishState
+            for state, transitions in allTransitions do                
+                for symbol, dests in transitions do
+                    dfaTables.[i].[state].[symbol] <- Some dests
+        dfaTables, finishStates
 
     member this.Reduces = reduces
     member this.ZeroReduces = zeroReduces
     member this.Gotos = gotos
-    member this.Dfas = _dfas
+    member this.DfaTables = _dfas
+    member this.DfaFinishStates = _finishStates
     member this.AccStates = accStates
     member this.LeftSide = leftSide
     member this.StartRule = startRule

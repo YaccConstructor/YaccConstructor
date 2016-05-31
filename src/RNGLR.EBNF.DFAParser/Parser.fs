@@ -98,12 +98,12 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
             let emptyParse =
                 let start = 
                     let gssStart = new GssVertex(0, 0)
-                    let dfaStart = new Vertex<int, int>(0)
+                    let dfaStart = 0
                     new SppfVertex (dfaStart, gssStart)
                 let final =
                     let gssFinal = new GssVertex(1, 0)
-                    let nfaFinal = new Vertex<int, int>(0)
-                    new SppfVertex(nfaFinal, gssFinal)
+                    let dfaFinal = 0
+                    new SppfVertex(dfaFinal, gssFinal)
                 start.addEdge(new SppfEdge(final, SppfLabel.EpsilonReduction -1))
                 start, 1, 0, Set.ofArray [|0|]
             (*let tree = sppfToTree<_> 0 emptyParse ([||]) parserSource.LeftSide
@@ -129,7 +129,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
         //let edges = Array.init statesCount (fun _ -> new ResizeArray<GssVertex * ReductionTemp>())
         let notAttachedEdges = Array.init statesCount (fun _ -> new ResizeArray<GssVertex * SppfLabel>())
         let temporarySppfEdges = new Stack<_>()
-        let currentReductions : (ReductionTemp option)[] = Array.init parserSource.Dfas.Length (fun _ -> None)
+        let currentReductions : (ReductionTemp option)[] = Array.init parserSource.DfaTables.Length (fun _ -> None)
 
         let pushes = new Stack<_> (statesCount * 2 + 10)
         /// Stores states, used on current level. Instead statesCount must be number of non-terminals, but doesn't matter
@@ -186,35 +186,35 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                 else 
                     //TODO: PERFORMANCE REVIEW
                     //all this downcasts can be no good
-                    let dfaVertices, finishStates = parserSource.Dfas.[prod]
+                    let dfaTable, dfaFinishState = parserSource.DfaTables.[prod], parserSource.DfaFinishStates.[prod]
 
                     let reductionTemp =
                         match currentReductions.[prod] with
                         | Some x -> x
                         | None ->         
-                            let x = new ReductionTemp(prod, dfaVertices.Length, finishStates, num)
+                            let x = new ReductionTemp(prod, dfaTable.Length, dfaFinishState, num)
                             currentReductions.[prod] <- Some x
                             x
                     
                     let dfsStack = new Stack<_>(20)
     
-                    let matchNfaAndGssEdgeLabels (dfaEdge : Edge<_,_>) = function
+                    let getDfaTransitions (dfaState : int) = function
                         | SppfLabel.Reduction (prod,_)
                         | SppfLabel.EpsilonReduction prod ->
-                            dfaEdge.label = parserSource.LeftSide.[prod]
+                            dfaTable.[dfaState].[parserSource.LeftSide.[prod]]
                         | SppfLabel.TemporaryReduction rt ->
-                            dfaEdge.label = parserSource.LeftSide.[rt.Production]
+                            dfaTable.[dfaState].[parserSource.LeftSide.[rt.Production]]
                         | SppfLabel.Terminal token ->
-                            dfaEdge.label = parserSource.TokenToNumber tokens.[token]
-                        | _ -> false
+                            dfaTable.[dfaState].[parserSource.TokenToNumber tokens.[token]]
+                        | _ -> None
 
-                    let reductionStep (leftDfaVertex : Vertex<int, int>) (leftGssVertex : GssVertex) rightVertex sppfLabel =
+                    let reductionStep (leftDfaState : int) (leftGssVertex : GssVertex) rightVertex sppfLabel =
                         let prevVertex =
-                            match reductionTemp.TryGetAlreadyVisited leftDfaVertex leftGssVertex with
+                            match reductionTemp.TryGetAlreadyVisited leftDfaState leftGssVertex with
                             | Some pv -> pv
                             | None -> 
-                                let pv = new SppfVertex((leftDfaVertex, leftGssVertex))
-                                if finishStates.Contains leftDfaVertex.label then
+                                let pv = new SppfVertex(leftDfaState, leftGssVertex)
+                                if leftDfaState = dfaFinishState then
                                     reductionTemp.AddLeftEnd pv
                                 else
                                     reductionTemp.AddVisited pv                              
@@ -235,31 +235,36 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                     //NOT SAFE: does not check, if vertex has already been processed
                     let rec reductionDfs (vertex : SppfVertex) =
                         
-                        let dfaVertex, gssVertex = vertex.dfaVertex, vertex.gssVertex
-                        for edge in dfaVertex.outEdges do
-                            let f (leftGssVertex, label) = 
-                                if matchNfaAndGssEdgeLabels edge label then
-                                    reductionStep edge.dest leftGssVertex vertex label
-                            if gssVertex.Level <> num then
-                                let f (gssEdge : GssEdge) = f (gssEdge.Dest, gssEdge.Label)
-                                if gssVertex.firstOutEdge.IsSome then
-                                    f gssVertex.firstOutEdge.Value
-                                    if gssVertex.otherOutEdges <> null then
-                                        gssVertex.otherOutEdges |> Array.iter f
-                            else
-                                notAttachedEdges.[gssVertex.State] |> ResizeArray.iter f
+                        let dfaState, gssVertex = vertex.dfaState, vertex.gssVertex
+                        
+                        let f label leftGssVertex = 
+                            match getDfaTransitions dfaState label with
+                            | Some dests ->
+                                for leftDfaState in dests do
+                                    reductionStep leftDfaState leftGssVertex vertex label
+                            | None -> ()
+                        if gssVertex.Level <> num then
+                            let f (gssEdge : GssEdge) = f gssEdge.Label gssEdge.Dest
+                            if gssVertex.firstOutEdge.IsSome then
+                                f gssVertex.firstOutEdge.Value
+                                if gssVertex.otherOutEdges <> null then
+                                    gssVertex.otherOutEdges |> Array.iter f
+                        else
+                            notAttachedEdges.[gssVertex.State] |> ResizeArray.iter (fun (leftGssVertex, label) -> f label leftGssVertex)
 
                     let rightEnd =
-                        match reductionTemp.TryGetAlreadyVisited dfaVertices.[pos] gssVertex with
+                        match reductionTemp.TryGetAlreadyVisited pos gssVertex with
                         | Some x -> x
                         | None -> 
-                                let x = new SppfVertex((dfaVertices.[pos], gssVertex))
+                                let x = new SppfVertex(pos, gssVertex)
                                 reductionTemp.AddRightEnd x
                                 x
                     let prevGssVertex, sppfLabel = edgeOpt.Value
-                    for edge in rightEnd.dfaVertex.outEdges do
-                        if matchNfaAndGssEdgeLabels edge sppfLabel then
-                            reductionStep edge.dest prevGssVertex rightEnd sppfLabel
+                    match getDfaTransitions pos sppfLabel with
+                    | Some dfaDests ->
+                        for dfaDest in dfaDests do
+                            reductionStep dfaDest prevGssVertex rightEnd sppfLabel
+                    | None -> ()
 
                     while dfsStack.Count > 0 do
                         dfsStack.Pop() |> reductionDfs
@@ -298,8 +303,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                     let sppfLabel =
                         match sppfLabel with
                         | TemporaryReduction rt ->
-                            let numberOfStates = 
-                                let x, _ = parserSource.Dfas.[rt.Production] in x.Length
+                            let numberOfStates = parserSource.DfaTables.[rt.Production].Length
                             let leftEnd = rt.GetLeftEnd gssVertex.Level gssVertex.State
                             SppfLabel.Reduction (rt.Production, (leftEnd, numberOfStates, rt.EndLevel, rt.AcceptingNfaStates))
                         | _ -> sppfLabel
@@ -315,8 +319,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                 let sppfLabel = 
                     match edge.Label with
                     | TemporaryReduction rt ->
-                        let numberOfStates = 
-                            let x, _ = parserSource.Dfas.[rt.Production] in x.Length
+                        let numberOfStates = parserSource.DfaTables.[rt.Production].Length
                         SppfLabel.Reduction (rt.Production, (source, numberOfStates, rt.EndLevel, rt.AcceptingNfaStates))
                     | _ -> edge.Label
                 edge.setLabel sppfLabel

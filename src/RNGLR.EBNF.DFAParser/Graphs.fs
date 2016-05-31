@@ -40,13 +40,13 @@ and GssEdge =
     end
 
 and SppfVertex =
-    val dfaVertex : Vertex<int, int>
+    val dfaState : int
     val gssVertex : GssVertex
 
     //val outEdgesCount : int
     
     val mutable outEdges : SppfEdge list
-    new (dv, gv) = {dfaVertex = dv; gssVertex = gv; (*outEdgesCount = 0;*) outEdges = []}
+    new (ds, gv) = {dfaState = ds; gssVertex = gv; (*outEdgesCount = 0;*) outEdges = []}
     member this.addEdge edge =
         this.outEdges <- edge :: this.outEdges
 
@@ -66,9 +66,9 @@ and SppfSearchDictionary<'ValueType>(numberOfDfaStates : int) =
     let count = ref 0
 
     member this.Add (key : SppfVertex) (value : 'ValueType) =
-        let nfaState = key.dfaVertex.label
+        let dfaState = key.dfaState
         let gssLevel, lrState = key.gssVertex.Level, key.gssVertex.State
-        let levelDict = firstLevelArray.[nfaState]
+        let levelDict = firstLevelArray.[dfaState]
         let containsLrStateDict, lrStateDict = levelDict.TryGetValue(gssLevel)
         if containsLrStateDict then
             lrStateDict := (lrState, value) :: !lrStateDict
@@ -89,16 +89,16 @@ and SppfSearchDictionary<'ValueType>(numberOfDfaStates : int) =
     member this.Count = !count
  
  //for reductions that goes from level being processed
-and ReductionTemp(prod : int, numberOfStates : int, leftEndStates : Set<int>, endLevel : int) =
+and ReductionTemp(prod : int, numberOfStates : int, leftEndState : int, endLevel : int) =
     let prod = prod
     let notHandledLeftEnds = new Queue<SppfVertex>()
     let leftEndsDict = new Dictionary<int64, SppfVertex>()
-    let acceptingNfaStates = ref Set.empty
+    let acceptingDfaStates = ref Set.empty
     let visitedVertices =
     //TODO: PERFORMANCE
         new SppfSearchDictionary<SppfVertex>(numberOfStates)
             
-    member this.AcceptingNfaStates = !acceptingNfaStates
+    member this.AcceptingNfaStates = !acceptingDfaStates
 
     member this.AddVisited (vertex : SppfVertex) =
         visitedVertices.Add vertex vertex
@@ -112,7 +112,7 @@ and ReductionTemp(prod : int, numberOfStates : int, leftEndStates : Set<int>, en
     
     member this.AddRightEnd rE =
         this.AddVisited rE
-        acceptingNfaStates := Set.add rE.dfaVertex.label !acceptingNfaStates
+        acceptingDfaStates := Set.add rE.dfaState !acceptingDfaStates
     
     member this.EndLevel = endLevel
 
@@ -125,8 +125,8 @@ and ReductionTemp(prod : int, numberOfStates : int, leftEndStates : Set<int>, en
     member this.TryGetAlreadyVisited' nfaNum gssLevel lrState =
         visitedVertices.TryGet nfaNum gssLevel lrState
 
-    member this.TryGetAlreadyVisited (dfaVertex : Vertex<int, int>) (gssVertex : GssVertex) =
-        visitedVertices.TryGet dfaVertex.label gssVertex.Level gssVertex.State
+    member this.TryGetAlreadyVisited dfaState (gssVertex : GssVertex) =
+        visitedVertices.TryGet dfaState gssVertex.Level gssVertex.State
 
     (*member this.TryGetLeftEnd (gssVertex : GssVertex) =
         visitedVertices.TryGet 0 gssVertex.Level gssVertex.State*)
@@ -143,7 +143,7 @@ let inline vxLess (v' : GssVertex) (v : GssVertex) = v'.Level < v.Level || (v'.L
 let inline vxEq (v' : GssVertex) (v : GssVertex) = v'.Level = v.Level && v'.State = v.State
 
 let inline sppfVertexEq (v' : SppfVertex) (v : SppfVertex) =
-    v'.dfaVertex = v.dfaVertex && vxEq v'.gssVertex v.gssVertex
+    v'.dfaState = v.dfaState && vxEq v'.gssVertex v.gssVertex
 
 let inline lblCoincidence s' s =
     match s', s with

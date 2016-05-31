@@ -4,8 +4,9 @@ open Yard.Generators.Common
 open Yard.Generators.Common.LR.DFA
 open Yard.Generators.RNGLR.EBNF.DFA.States
 open Yard.Generators.Common.DFA.FinalGrammar
+open System.Collections.Generic
 
-type DFATable = (int * (int * (int * int) list) list * int list)[]
+type DFATable = (int * (int * (int * int []) list) list * int)[]
 
 type TablesReadBack (grammar : FinalGrammarDFA, states : StatesInterpreter) =
     let _reduces, _zeroReduces, _gotos, _acc =
@@ -50,19 +51,23 @@ type TablesReadBack (grammar : FinalGrammarDFA, states : StatesInterpreter) =
     let _dfas =
         let rec statesAndTransitions = function
             | (vertex : Vertex<_,_>) :: vs ->
-                let rec transitions = function
+                let outEdgesDict = new Dictionary<int, int list>()
+                let rec collectTransitions = function
                     | (edge : Edge<_,_>) :: es ->
-                        (edge.dest.label, edge.label) :: transitions es
-                    | [] -> []
+                        match outEdgesDict.TryGetValue edge.label with
+                        | (true, dests) -> outEdgesDict.[edge.label] <- (edge.dest.label :: dests)
+                        | (false, _) -> outEdgesDict.[edge.label] <- [edge.dest.label]
+                        collectTransitions es
+                    | [] -> 
+                        outEdgesDict |> List.ofSeq |> List.map (fun x -> (x.Key, x.Value |> List.rev |> List.toArray))
                 if vertex.outEdges.Count > 0 then
-                    (vertex.label, (vertex.outEdges |> List.ofSeq |> transitions)) :: statesAndTransitions vs
+                    (vertex.label, (vertex.outEdges |> List.ofSeq |> collectTransitions)) :: statesAndTransitions vs
                 else
                     statesAndTransitions vs
             | [] -> [] 
-        grammar.rules.rightRevertedArr 
-        |> Array.map
+        grammar.rules.rightRevertedArr |> Array.map
             // first state ([0] is always start)
-            (fun (stateToVertex, _, finishStates) -> stateToVertex.Length, (stateToVertex |> Array.toList |> statesAndTransitions), Set.toList finishStates)
+            (fun (stateToVertex, _, finishState) -> stateToVertex.Length, (stateToVertex |> Array.toList |> statesAndTransitions), finishState)
 
     member this.reduces = _reduces
     member this.zeroReduces = _zeroReduces

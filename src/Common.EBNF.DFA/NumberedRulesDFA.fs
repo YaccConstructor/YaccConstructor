@@ -167,7 +167,9 @@ type NumberedRulesDFA (ruleList : Rule.t<Source.t,Source.t> list, indexator : In
 
     let rightReverted = 
         right 
-        |> Array.map (fun (stateToVertex, startState, finishStates) -> revertAutoma stateToVertex [|startState|] (finishStates |> Set.toArray))
+        |> Array.map (fun (stateToVertex, startState, finishStates) -> 
+            let x, y, z = revertAutoma stateToVertex [|startState|] (finishStates |> Set.toArray)
+            x, y, (z |> Set.toArray |> fun x -> x.[0]))
     //debug
     (*let moreThanOneFinishStates =
         let acc = ref 0

@@ -105,7 +105,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                     let dfaFinal = 0
                     new SppfVertex(dfaFinal, gssFinal)
                 start.addEdge(new SppfEdge(final, SppfLabel.EpsilonReduction -1))
-                start, 1, 0, Set.ofArray [|0|]
+                start, 1, 0, ref (Set.ofArray [|0|])
             (*let tree = sppfToTree<_> 0 emptyParse ([||]) parserSource.LeftSide
                         parserSource.NontermToRule parserSource.RightSideNFA parserSource.EpsilonIndex parserSource.CanInferEpsilon
             Success (tree, [||])*)
@@ -128,7 +128,6 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
         /// Temporary storage for edges data (after all reductions real edges will be created).
         //let edges = Array.init statesCount (fun _ -> new ResizeArray<GssVertex * ReductionTemp>())
         let notAttachedEdges = Array.init statesCount (fun _ -> new ResizeArray<GssVertex * SppfLabel>())
-        let temporarySppfEdges = new Stack<_>()
         let currentReductions : (ReductionTemp option)[] = Array.init parserSource.DfaTables.Length (fun _ -> None)
 
         let pushes = new Stack<_> (statesCount * 2 + 10)
@@ -202,8 +201,6 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                         | SppfLabel.Reduction (prod,_)
                         | SppfLabel.EpsilonReduction prod ->
                             dfaTable.[dfaState].[parserSource.LeftSide.[prod]]
-                        | SppfLabel.TemporaryReduction rt ->
-                            dfaTable.[dfaState].[parserSource.LeftSide.[rt.Production]]
                         | SppfLabel.Terminal token ->
                             dfaTable.[dfaState].[parserSource.TokenToNumber tokens.[token]]
                         | _ -> None
@@ -224,11 +221,6 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                                 dfsStack.Push(pv)
                                 pv
                         let edge = new SppfEdge(rightVertex, sppfLabel)
-                        match sppfLabel with
-                        | SppfLabel.TemporaryReduction rt -> 
-                            let handleStart = rt.GetLeftEnd leftGssVertex.Level leftGssVertex.State
-                            temporarySppfEdges.Push(handleStart, edge)
-                        | _ -> ()
                         prevVertex.addEdge edge
 
                     //vertex is already in reductionTemp, put there it's predecessors
@@ -282,7 +274,13 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                             if state <> startState then
                                 
                                 let newVertex = addVertex state num None
-                                let sppfLabel = SppfLabel.TemporaryReduction reductionTemp
+                                let sppfLabel = 
+                                    SppfLabel.Reduction (
+                                        prod, (
+                                            leftEnd,
+                                            parserSource.DfaTables.[reductionTemp.Production].Length,
+                                            reductionTemp.EndLevel,
+                                            reductionTemp.AcceptingDfaStates))
                                 
                                 addEdge leftEndGss sppfLabel notAttachedEdges.[state]
                                 let arr = parserSource.Reduces.[state].[!curNum]
@@ -298,31 +296,15 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
         let attachEdges () =
             for state in usedStates do
                 let edges = notAttachedEdges.[state]
-                let count = edges.Count
-                let toEdge (gssVertex : GssVertex, sppfLabel) =
-                    let sppfLabel =
-                        match sppfLabel with
-                        | TemporaryReduction rt ->
-                            let numberOfStates = parserSource.DfaTables.[rt.Production].Length
-                            let leftEnd = rt.GetLeftEnd gssVertex.Level gssVertex.State
-                            SppfLabel.Reduction (rt.Production, (leftEnd, numberOfStates, rt.EndLevel, rt.AcceptingNfaStates))
-                        | _ -> sppfLabel
-                    new GssEdge(gssVertex, sppfLabel)
-                let gssEdges = edges |> ResizeArray.map toEdge
-                if count > 0 then
-                    stateToVertex.[state].Value.firstOutEdge <- Some gssEdges.[0]
-                    if count > 1 then
-                        stateToVertex.[state].Value.otherOutEdges <- ResizeArray.sub gssEdges 1 (count - 1) |> ResizeArray.toArray
+                //let toEdge (gssVertex : GssVertex, sppfLabel) =
+                    //new GssEdge(gssVertex, sppfLabel)
+                //let gssEdges = edges |> ResizeArray.map toEdge
+                let f i = let dest, label = edges.[i] in new GssEdge(dest, label)
+                if edges.Count > 0 then
+                    stateToVertex.[state].Value.firstOutEdge <- Some (f 0) 
+                if edges.Count > 1 then
+                    stateToVertex.[state].Value.otherOutEdges <- Array.init (edges.Count - 1) (fun i -> f (i+1))
                 edges.Clear()
-            while temporarySppfEdges.Count > 0 do
-                let source, edge = temporarySppfEdges.Pop()
-                let sppfLabel = 
-                    match edge.Label with
-                    | TemporaryReduction rt ->
-                        let numberOfStates = parserSource.DfaTables.[rt.Production].Length
-                        SppfLabel.Reduction (rt.Production, (source, numberOfStates, rt.EndLevel, rt.AcceptingNfaStates))
-                    | _ -> edge.Label
-                edge.setLabel sppfLabel
             for i = 0 to currentReductions.Length - 1 do
                 currentReductions.[i] <- None
 

@@ -11,7 +11,7 @@ open Yard.Generators.RNGLR.ReadBack.Compressor
 open Yard.Generators.Common
 
 //Sppf is a intersection of a production automaton and Gss, which, in its turn, has edges labelled with Sppf
-type Sppf = SppfVertex * int * int * Set<int>
+type Sppf = SppfVertex * int * int * (Set<int> ref)
     //(start vertex, number of nfa states, end level, accepting nfa states)
 
 and SppfLabel =
@@ -19,7 +19,7 @@ and SppfLabel =
     | Reduction of int * Sppf
     | EpsilonReduction of int
     //| Epsilon //used only in SPPF, while others may be used in GSS as well
-    | TemporaryReduction of ReductionTemp // only for currently processing reductions
+    //| TemporaryReduction of ReductionTemp // only for currently processing reductions
 
 and GssVertex  =
     val mutable firstOutEdge : GssEdge option
@@ -92,22 +92,22 @@ and SppfSearchDictionary<'ValueType>(numberOfDfaStates : int) =
 and ReductionTemp(prod : int, numberOfStates : int, leftEndState : int, endLevel : int) =
     let prod = prod
     let notHandledLeftEnds = new Queue<SppfVertex>()
-    let leftEndsDict = new Dictionary<int64, SppfVertex>()
+    //let leftEndsDict = new Dictionary<int64, SppfVertex>()
     let acceptingDfaStates = ref Set.empty
     let visitedVertices =
     //TODO: PERFORMANCE
         new SppfSearchDictionary<SppfVertex>(numberOfStates)
             
-    member this.AcceptingNfaStates = !acceptingDfaStates
+    member this.AcceptingDfaStates = acceptingDfaStates
 
     member this.AddVisited (vertex : SppfVertex) =
         visitedVertices.Add vertex vertex
 
     member this.AddLeftEnd lE =
         this.AddVisited lE
-        let gssVertex = lE.gssVertex
-        let compressedVertex = pairToOne gssVertex.Level gssVertex.State
-        leftEndsDict.[compressedVertex] <- lE
+        //let gssVertex = lE.gssVertex
+        //let compressedVertex = pairToOne gssVertex.Level gssVertex.State
+        //leftEndsDict.[compressedVertex] <- lE
         notHandledLeftEnds.Enqueue lE
     
     member this.AddRightEnd rE =
@@ -116,7 +116,7 @@ and ReductionTemp(prod : int, numberOfStates : int, leftEndState : int, endLevel
     
     member this.EndLevel = endLevel
 
-    member this.GetLeftEnd level state = leftEndsDict.[pairToOne level state]
+    //member this.GetLeftEnd level state = leftEndsDict.[pairToOne level state]
 
     member this.NotHandledLeftEnds = notHandledLeftEnds
 
@@ -150,8 +150,6 @@ let inline lblCoincidence s' s =
     | Terminal v', Terminal v -> v' = v
     | Reduction (v',_), Reduction (v,_) -> v' = v
     | EpsilonReduction v', EpsilonReduction v -> v' = v
-    | TemporaryReduction tr', TemporaryReduction tr ->
-        tr'.Production = tr.Production
     //|Epsilon, Epsilon
     | _ -> false
 

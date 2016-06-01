@@ -100,15 +100,23 @@ type GrammarFlowGraph() =
                         |> applyConversion expandEbnf
                         |> applyConversion expandBrackets
 
-
             //Add terminals and neterminals from production
             let rec getProd (r : Rule.t<'a, 'b>) rbody (rname : string) =
                 let rec getProd' (list : elem<'a, 'b> list)  (acc : string list) rname =
                     match list with
                     | hd::tl -> match hd.rule with
-                                | PToken tok -> if not(containsString(tok.ToString(), gr.nonterms)) then gr.nonterms <- (tok.ToString()) :: gr.nonterms; getProd' tl  (acc @ [tok.ToString()]) (rname : string) else getProd' tl  (acc @ [tok.ToString()]) (rname : string)
-                                | PRef (ref, a) -> if not(containsString(ref.ToString(), gr.nonterms)) then gr.nonterms <- (ref.ToString()) :: gr.nonterms;  getProd' tl  (acc @ [ref.ToString()]) (rname : string) else getProd' tl  (acc @ [ref.ToString()]) (rname : string)
-                                | PLiteral lit -> if not(containsString(lit.ToString(), gr.terms)) then gr.terms <- (lit.ToString()) :: gr.terms; getProd' tl  (acc @ [lit.ToString()]) (rname : string) else getProd' tl  (acc @ [lit.ToString()]) (rname : string)
+                                | PToken tok -> if not(containsString(tok.ToString(), gr.nonterms))
+                                                then gr.nonterms <- (tok.ToString()) :: gr.nonterms
+                                                     getProd' tl  (acc @ [tok.ToString()]) (rname : string) 
+                                                else getProd' tl  (acc @ [tok.ToString()]) (rname : string)
+                                | PRef (ref, a) -> if not(containsString(ref.ToString(), gr.nonterms)) 
+                                                   then gr.nonterms <- (ref.ToString()) :: gr.nonterms; 
+                                                        getProd' tl  (acc @ [ref.ToString()]) (rname : string)
+                                                   else getProd' tl  (acc @ [ref.ToString()]) (rname : string)
+                                | PLiteral lit -> if not(containsString(lit.ToString(), gr.terms)) 
+                                                  then gr.terms <- (lit.ToString()) :: gr.terms
+                                                       getProd' tl  (acc @ [lit.ToString()]) (rname : string) 
+                                                  else getProd' tl  (acc @ [lit.ToString()]) (rname : string)
                                 | _ -> getProd' tl  (acc @ [hd.rule.ToString()]) (rname : string)
                     | _-> gr.productions <- (new Production(rname, acc)) :: gr.productions
                     if (r.isStart) then gr.starts <- r.name.text
@@ -130,9 +138,6 @@ type GrammarFlowGraph() =
             gr.nonterms <- gr.starts :: gr.nonterms
             let grammar = new Grammar(pd = gr.productions, nt = gr.nonterms, t = gr.terms, s = gr.starts)
 
-
-
-
             ////////////////////////////////////Build a lists of edges and vertex
             for nt in grammar.nonterminals do
                 gr.vertex <- (nt + ".") :: gr.vertex
@@ -144,7 +149,7 @@ type GrammarFlowGraph() =
 
                 let rec getVert'(acc : string list, list : string list) =
                         match list with
-                        | hd :: tl -> gr.vertex <- (patt + ":" + (listToString acc) + "." + (listToString (hd :: tl))) :: gr.vertex; 
+                        | hd :: tl -> gr.vertex <- (patt + ":" + (listToString acc) + "." + (listToString (hd :: tl))) :: gr.vertex
                                       getVert'(acc@[hd],tl)
                         | _ -> gr.vertex <- (patt + ":" + (listToString acc) + ".") :: gr.vertex
                 getVert'([], res)
@@ -158,17 +163,14 @@ type GrammarFlowGraph() =
                     match res with
                     | hd :: tl -> match (containsString(hd, grammar.terminals)) with
                                   |true->
-                                    gr.edge <- (patt + ":" + listToString(acc) + "." + listToString(hd :: tl), patt + ":" + listToString(acc @ [hd]) + "." + listToString(tl), "scan") :: gr.edge;
-                                    getEdges(tl, acc @ [hd], patt)
+                                        gr.edge <- (patt + ":" + listToString(acc) + "." + listToString(hd :: tl), patt + ":" + listToString(acc @ [hd]) + "." + listToString(tl), "scan") :: gr.edge;
+                                        getEdges(tl, acc @ [hd], patt)
                                   |false->
                                         gr.edge <- (patt + ":" + listToString(acc) + "." + listToString(hd :: tl), "." + hd, "call") :: gr.edge
                                         gr.edge <- (hd + ".", patt + ":" + listToString(acc @ [hd]) + "." + listToString(tl), "return") :: gr.edge
                                         getEdges(tl, acc @ [hd], patt)
                     | _ -> gr.edge <- gr.edge
                 getEdges(res, [], patt)
-            ////////////////////////////////////////////////////
-
-
 
             //Make graph from vertix and edges lists
             let graph = new AdjacencyGraph<string, Edge<string>>();
@@ -181,7 +183,6 @@ type GrammarFlowGraph() =
                 graph.AddVertex(i) |> ignore
             for i in gr.edge do
                 graph.AddEdge(new TaggedEdge<string,string>(first(i), second(i), third(i))) |> ignore
-
 
             //Initialize Graphviz algorithm
             let graphViz = new GraphvizAlgorithm<string, Edge<string>>(clustGraph)

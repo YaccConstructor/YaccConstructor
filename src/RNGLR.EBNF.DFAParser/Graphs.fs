@@ -58,7 +58,7 @@ and SppfEdge (dest : SppfVertex, label : SppfLabel) =
         member this.setLabel label' = 
             label <- label'
 
-and SppfSearchDictionary<'ValueType>(numberOfDfaStates : int) =
+type SppfSearchDictionary<'ValueType>(numberOfDfaStates : int) =
     //three levels of indexing - nfa state, gss level, lr state
     let firstLevelArray = Array.init numberOfDfaStates (fun _ ->  new Dictionary<int, (int * 'ValueType) list ref>())
 
@@ -89,7 +89,7 @@ and SppfSearchDictionary<'ValueType>(numberOfDfaStates : int) =
     member this.Count = !count
  
  //for reductions that goes from level being processed
-and ReductionTemp(prod : int, numberOfStates : int, leftEndState : int, endLevel : int) =
+type ReductionTemp(prod : int, numberOfStates : int, leftEndState : int, endLevel : int) =
     let prod = prod
     let notHandledLeftEnds = new Queue<SppfVertex>()
     //let leftEndsDict = new Dictionary<int64, SppfVertex>()

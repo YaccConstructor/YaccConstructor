@@ -97,13 +97,13 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
         then
             let emptyParse =
                 let start = 
-                    let gssStart = new GssVertex(0, 0)
-                    let dfaStart = 0
-                    new SppfVertex (dfaStart, gssStart)
+                    //let gssStart = new GssVertex(0, 0)
+                    //let dfaStart = 0
+                    new SppfVertex ()
                 let final =
-                    let gssFinal = new GssVertex(1, 0)
-                    let dfaFinal = 0
-                    new SppfVertex(dfaFinal, gssFinal)
+                    //let gssFinal = new GssVertex(1, 0)
+                    //let dfaFinal = 0
+                    new SppfVertex()
                 start.addEdge(new SppfEdge(final, SppfLabel.EpsilonReduction -1))
                 start, 1, 0, ref (Set.ofArray [|0|])
             (*let tree = sppfToTree<_> 0 emptyParse ([||]) parserSource.LeftSide
@@ -210,24 +210,22 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                             match reductionTemp.TryGetAlreadyVisited leftDfaState leftGssVertex with
                             | Some pv -> pv
                             | None -> 
-                                let pv = new SppfVertex(leftDfaState, leftGssVertex)
+                                let pv = new SppfVertex()
                                 if leftDfaState = dfaFinishState then
-                                    reductionTemp.AddLeftEnd pv
+                                    reductionTemp.AddLeftEnd leftDfaState leftGssVertex pv
                                 else
-                                    reductionTemp.AddVisited pv                              
+                                    reductionTemp.AddVisited leftDfaState leftGssVertex pv                              
                         //TODO: maybe we should check and return, if we have reached left end of a handle, and add edge only in positive case
                         //this automaticaly would save us from useless hanging edges and subsequent search...
                         //But we can entrust this to GC
-                                dfsStack.Push(pv)
+                                dfsStack.Push(pv, leftDfaState, leftGssVertex)
                                 pv
                         let edge = new SppfEdge(rightVertex, sppfLabel)
                         prevVertex.addEdge edge
 
                     //vertex is already in reductionTemp, put there it's predecessors
                     //NOT SAFE: does not check, if vertex has already been processed
-                    let rec reductionDfs (vertex : SppfVertex) =
-                        
-                        let dfaState, gssVertex = vertex.dfaState, vertex.gssVertex
+                    let rec reductionDfs (vertex : SppfVertex) dfaState (gssVertex : GssVertex) =
                         
                         let f label leftGssVertex = 
                             match getDfaTransitions dfaState label with
@@ -248,8 +246,8 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                         match reductionTemp.TryGetAlreadyVisited pos gssVertex with
                         | Some x -> x
                         | None -> 
-                                let x = new SppfVertex(pos, gssVertex)
-                                reductionTemp.AddRightEnd x
+                                let x = new SppfVertex()
+                                reductionTemp.AddRightEnd pos gssVertex x
                                 x
                     let prevGssVertex, sppfLabel = edgeOpt.Value
                     match getDfaTransitions pos sppfLabel with
@@ -259,12 +257,12 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                     | None -> ()
 
                     while dfsStack.Count > 0 do
-                        dfsStack.Pop() |> reductionDfs
+                        let sppfVertex, dfaState, gssVertex = dfsStack.Pop()
+                        reductionDfs sppfVertex dfaState gssVertex
                     
                     //handle
                     while reductionTemp.NotHandledLeftEnds.Count > 0 do
-                        let leftEnd = reductionTemp.NotHandledLeftEnds.Dequeue()
-                        let leftEndGss = leftEnd.gssVertex
+                        let leftEndGss, leftEnd = reductionTemp.NotHandledLeftEnds.Dequeue()
                         
                         //it's not a zero reduction
                         if not <| vxEq gssVertex leftEndGss then
@@ -296,9 +294,6 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
         let attachEdges () =
             for state in usedStates do
                 let edges = notAttachedEdges.[state]
-                //let toEdge (gssVertex : GssVertex, sppfLabel) =
-                    //new GssEdge(gssVertex, sppfLabel)
-                //let gssEdges = edges |> ResizeArray.map toEdge
                 let f i = let dest, label = edges.[i] in new GssEdge(dest, label)
                 if edges.Count > 0 then
                     stateToVertex.[state].Value.firstOutEdge <- Some (f 0) 
@@ -387,6 +382,9 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
         then 
             Error (!curInd , [|!curToken|] , "Parse Error", debugFuns ())
         else
+            //Debug
+//            printfn "The end, you can snapshot memory or writeline"
+//            System.Console.ReadLine() |> ignore
             let res = ref None
             for vertex in usedStates do
                 if parserSource.AccStates.[vertex] 

@@ -40,13 +40,13 @@ and GssEdge =
     end
 
 and SppfVertex =
-    val dfaState : int
-    val gssVertex : GssVertex
+    //val dfaState : int
+    //val gssVertex : GssVertex
 
     //val outEdgesCount : int
     
     val mutable outEdges : SppfEdge list
-    new (ds, gv) = {dfaState = ds; gssVertex = gv; (*outEdgesCount = 0;*) outEdges = []}
+    new () = {(*dfaState = ds; gssVertex = gv; outEdgesCount = 0;*) outEdges = []}
     member this.addEdge edge =
         this.outEdges <- edge :: this.outEdges
 
@@ -65,19 +65,17 @@ type SppfSearchDictionary<'ValueType>(numberOfDfaStates : int) =
     //DEBUG
     let count = ref 0
 
-    member this.Add (key : SppfVertex) (value : 'ValueType) =
-        let dfaState = key.dfaState
-        let gssLevel, lrState = key.gssVertex.Level, key.gssVertex.State
-        let levelDict = firstLevelArray.[dfaState]
-        let containsLrStateDict, lrStateDict = levelDict.TryGetValue(gssLevel)
+    member this.Add keyDfa keyGssLevel keyLrState (value : 'ValueType) =
+        let levelDict = firstLevelArray.[keyDfa]
+        let containsLrStateDict, lrStateDict = levelDict.TryGetValue(keyGssLevel)
         if containsLrStateDict then
-            lrStateDict := (lrState, value) :: !lrStateDict
+            lrStateDict := (keyLrState, value) :: !lrStateDict
         else
-            levelDict.[gssLevel] <- ref [(lrState, value)] 
+            levelDict.[keyGssLevel] <- ref [(keyLrState, value)] 
         incr count               
 
-    member this.TryGet nfaState gssLevel lrState =
-        let levelDict = firstLevelArray.[nfaState]
+    member this.TryGet dfaState gssLevel lrState =
+        let levelDict = firstLevelArray.[dfaState]
         let containsLrStateDict, lrStateDict = levelDict.TryGetValue(gssLevel)
         if containsLrStateDict then
             match List.tryFind (fun (x, _) -> x = lrState) !lrStateDict with
@@ -91,7 +89,7 @@ type SppfSearchDictionary<'ValueType>(numberOfDfaStates : int) =
  //for reductions that goes from level being processed
 type ReductionTemp(prod : int, numberOfStates : int, leftEndState : int, endLevel : int) =
     let prod = prod
-    let notHandledLeftEnds = new Queue<SppfVertex>()
+    let notHandledLeftEnds = new Queue<_>()
     //let leftEndsDict = new Dictionary<int64, SppfVertex>()
     let acceptingDfaStates = ref Set.empty
     let visitedVertices =
@@ -100,19 +98,19 @@ type ReductionTemp(prod : int, numberOfStates : int, leftEndState : int, endLeve
             
     member this.AcceptingDfaStates = acceptingDfaStates
 
-    member this.AddVisited (vertex : SppfVertex) =
-        visitedVertices.Add vertex vertex
+    member this.AddVisited dfaState (gssVertex : GssVertex) (vertex : SppfVertex) =
+        visitedVertices.Add dfaState gssVertex.Level gssVertex.State vertex
 
-    member this.AddLeftEnd lE =
-        this.AddVisited lE
+    member this.AddLeftEnd dfaState (gssVertex : GssVertex) lE =
+        this.AddVisited dfaState gssVertex lE
         //let gssVertex = lE.gssVertex
         //let compressedVertex = pairToOne gssVertex.Level gssVertex.State
         //leftEndsDict.[compressedVertex] <- lE
-        notHandledLeftEnds.Enqueue lE
+        notHandledLeftEnds.Enqueue (gssVertex, lE)
     
-    member this.AddRightEnd rE =
-        this.AddVisited rE
-        acceptingDfaStates := Set.add rE.dfaState !acceptingDfaStates
+    member this.AddRightEnd dfaState (gssVertex : GssVertex) rE =
+        this.AddVisited dfaState gssVertex rE
+        acceptingDfaStates := Set.add dfaState !acceptingDfaStates
     
     member this.EndLevel = endLevel
 
@@ -142,8 +140,8 @@ let inline isEpsilonReduction x =
 let inline vxLess (v' : GssVertex) (v : GssVertex) = v'.Level < v.Level || (v'.Level = v.Level && v'.State < v.State)
 let inline vxEq (v' : GssVertex) (v : GssVertex) = v'.Level = v.Level && v'.State = v.State
 
-let inline sppfVertexEq (v' : SppfVertex) (v : SppfVertex) =
-    v'.dfaState = v.dfaState && vxEq v'.gssVertex v.gssVertex
+(*let inline sppfVertexEq (v' : SppfVertex) (v : SppfVertex) =
+    v'.dfaState = v.dfaState && vxEq v'.gssVertex v.gssVertex*)
 
 let inline lblCoincidence s' s =
     match s', s with

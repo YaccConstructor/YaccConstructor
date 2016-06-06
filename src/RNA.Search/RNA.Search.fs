@@ -105,6 +105,56 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lengthLimit res  =
         
     | Error e -> 
         failwithf "Input parsing failed: %A" e
+
+let convertToParserInputGraph (edges : ResizeArray<seq<BioParserEdge>>) maxVertex (startEdges : ResizeArray<ResizeArray<BioParserEdge>>) (finalEdges : ResizeArray<ResizeArray<BioParserEdge>>)  = 
+    let result = new ResizeArray<_>()
+    let mutable curB = 0
+    let mutable curE = 0 
+    let index = ref 0
+    let edg f t l = new ParserEdge<_>(f,t,l)
+    let addEdge (arr : ResizeArray<_>) b e t =
+        arr.Add(edg b e t)
+        curB <- curE
+        curE <- curE + 1 
+
+    let createStartFinalSets (set : ResizeArray<BioParserEdge>) (vMap: System.Collections.Generic.Dictionary<_, _>) (edgesSet : ResizeArray<_>)= 
+        curB <- !index
+        curE <- !index
+        let res = new ResizeArray<_>()
+        for edge in set do
+            vMap.Add(edge.Start, !index)
+            res.Add(!index)
+            edgesSet.Add(edg !index (!index + 1) edge.Tokens.[0])
+            if edge.Tokens.Length >1 
+            then
+                for i = 1 to edge.Tokens.Length - 2 do
+                    addEdge edgesSet curB curE edge.Tokens.[i]   
+                vMap.Add(curE,edge.End)
+                addEdge edgesSet curB curE edge.Tokens.[edge.Tokens.Length - 1]
+                index := curE + 1
+            else
+                vMap.Add(curE, edge.End)
+        res
+    for g = 0 to edges.Count - 1 do
+        let vertexMap = new System.Collections.Generic.Dictionary<_, _>()
+        let edgesRes = new ResizeArray<_>()
+        let startV = createStartFinalSets startEdges.[g] vertexMap edgesRes
+        let finalV = createStartFinalSets finalEdges.[g] vertexMap edgesRes
+      
+        for e in edges.[g] do
+            addEdge edgesRes e.Start !index e.Tokens.[0]
+            vertexMap.Add(e.Start, !index)
+            curB <- !index + 1
+            curE <- !index + 2
+            if e.Tokens.Length > 1 then
+                for i = 1 to e.Tokens.Length - 2 do
+                    addEdge edgesRes curE curB e.Tokens.[i]
+                addEdge edgesRes curE e.End e.Tokens.[e.Tokens.Length - 1]
+                vertexMap.Add(e.End, curE) 
+        let resGraph = new ParserInputGraph<_>(startV.ToArray(), finalV.ToArray())
+        resGraph.AddEdgeRange edgesRes |> ignore
+        result.Add(resGraph)
+    result
         
 let searchInCloud graphs =
     let start = System.DateTime.Now

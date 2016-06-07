@@ -11,8 +11,8 @@ open Yard.Generators.RNGLR.ReadBack.Compressor
 open Yard.Generators.Common
 
 //Sppf is a intersection of a production automaton and Gss, which, in its turn, has edges labelled with Sppf
-type Sppf = SppfVertex * int * int * (Set<int> ref)
-    //(start vertex, number of nfa states, end level, accepting nfa states)
+type Sppf = SppfVertex * int * int
+    //(start vertex, number of nfa states, end level)
 
 and SppfLabel =
     | Terminal of int //number in tokens array
@@ -41,12 +41,13 @@ and GssEdge =
 
 and SppfVertex =
     //val dfaState : int
-    //val gssVertex : GssVertex
+    val gssLevel : int
+    val lrState : int
 
     //val outEdgesCount : int
     
     val mutable outEdges : SppfEdge list
-    new () = {(*dfaState = ds; gssVertex = gv; outEdgesCount = 0;*) outEdges = []}
+    new (l, s) = {(*dfaState = ds; outEdgesCount = 0;*)gssLevel = l; lrState = s; outEdges = []}
     member this.addEdge edge =
         this.outEdges <- edge :: this.outEdges
 
@@ -90,13 +91,9 @@ type SppfSearchDictionary<'ValueType>(numberOfDfaStates : int) =
 type ReductionTemp(prod : int, numberOfStates : int, leftEndState : int, endLevel : int) =
     let prod = prod
     let notHandledLeftEnds = new Queue<_>()
-    //let leftEndsDict = new Dictionary<int64, SppfVertex>()
-    let acceptingDfaStates = ref Set.empty
     let visitedVertices =
     //TODO: PERFORMANCE
         new SppfSearchDictionary<SppfVertex>(numberOfStates)
-            
-    member this.AcceptingDfaStates = acceptingDfaStates
 
     member this.AddVisited dfaState (gssVertex : GssVertex) (vertex : SppfVertex) =
         visitedVertices.Add dfaState gssVertex.Level gssVertex.State vertex
@@ -110,7 +107,6 @@ type ReductionTemp(prod : int, numberOfStates : int, leftEndState : int, endLeve
     
     member this.AddRightEnd dfaState (gssVertex : GssVertex) rE =
         this.AddVisited dfaState gssVertex rE
-        acceptingDfaStates := Set.add dfaState !acceptingDfaStates
     
     member this.EndLevel = endLevel
 

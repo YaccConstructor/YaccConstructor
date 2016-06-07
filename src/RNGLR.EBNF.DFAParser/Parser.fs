@@ -99,13 +99,13 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                 let start = 
                     //let gssStart = new GssVertex(0, 0)
                     //let dfaStart = 0
-                    new SppfVertex ()
+                    new SppfVertex (0, 0)
                 let final =
                     //let gssFinal = new GssVertex(1, 0)
                     //let dfaFinal = 0
-                    new SppfVertex()
+                    new SppfVertex(0, 1)
                 start.addEdge(new SppfEdge(final, SppfLabel.EpsilonReduction -1))
-                start, 1, 0, ref (Set.ofArray [|0|])
+                start, 1, 0
             (*let tree = sppfToTree<_> 0 emptyParse ([||]) parserSource.LeftSide
                         parserSource.NontermToRule parserSource.RightSideNFA parserSource.EpsilonIndex parserSource.CanInferEpsilon
             Success (tree, [||])*)
@@ -210,7 +210,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                             match reductionTemp.TryGetAlreadyVisited leftDfaState leftGssVertex with
                             | Some pv -> pv
                             | None -> 
-                                let pv = new SppfVertex()
+                                let pv = new SppfVertex(leftGssVertex.Level, leftGssVertex.State)
                                 if leftDfaState = dfaFinishState then
                                     reductionTemp.AddLeftEnd leftDfaState leftGssVertex pv
                                 else
@@ -246,7 +246,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                         match reductionTemp.TryGetAlreadyVisited pos gssVertex with
                         | Some x -> x
                         | None -> 
-                                let x = new SppfVertex()
+                                let x = new SppfVertex(gssVertex.Level, gssVertex.State)
                                 reductionTemp.AddRightEnd pos gssVertex x
                                 x
                     let prevGssVertex, sppfLabel = edgeOpt.Value
@@ -277,8 +277,7 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
                                         prod, (
                                             leftEnd,
                                             parserSource.DfaTables.[reductionTemp.Production].Length,
-                                            reductionTemp.EndLevel,
-                                            reductionTemp.AcceptingDfaStates))
+                                            reductionTemp.EndLevel))
                                 
                                 addEdge leftEndGss sppfLabel notAttachedEdges.[state]
                                 let arr = parserSource.Reduces.[state].[!curNum]
@@ -383,8 +382,8 @@ let buildAstReadBack<'TokenType> (parserSource : ParserSourceReadBack<'TokenType
             Error (!curInd , [|!curToken|] , "Parse Error", debugFuns ())
         else
             //Debug
-//            printfn "The end, you can snapshot memory or writeline"
-//            System.Console.ReadLine() |> ignore
+            //printfn "The end, you can snapshot memory or writeline"
+            //System.Console.ReadLine() |> ignore
             let res = ref None
             for vertex in usedStates do
                 if parserSource.AccStates.[vertex] 

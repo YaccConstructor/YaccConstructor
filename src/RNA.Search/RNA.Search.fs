@@ -106,53 +106,103 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lengthLimit res  =
     | Error e -> 
         failwithf "Input parsing failed: %A" e
 
-let convertToParserInputGraph (edges : ResizeArray<seq<BioParserEdge>>) maxVertex (startEdges : ResizeArray<ResizeArray<BioParserEdge>>) (finalEdges : ResizeArray<ResizeArray<BioParserEdge>>)  = 
+let convertToParserInputGraph (edges : ResizeArray<BioParserEdge[]>) (startEdges : ResizeArray<ResizeArray<BioParserEdge>>) (finalEdges : ResizeArray<ResizeArray<BioParserEdge>>)  = 
     let result = new ResizeArray<_>()
-    let mutable curB = 0
-    let mutable curE = 0 
     let index = ref 0
     let edg f t l = new ParserEdge<_>(f,t,l)
     let addEdge (arr : ResizeArray<_>) b e t =
         arr.Add(edg b e t)
-        curB <- curE
-        curE <- curE + 1 
+        index := !index + 1
 
     let createStartFinalSets (set : ResizeArray<BioParserEdge>) (vMap: System.Collections.Generic.Dictionary<_, _>) (edgesSet : ResizeArray<_>)= 
-        curB <- !index
-        curE <- !index
         let res = new ResizeArray<_>()
         for edge in set do
-            vMap.Add(edge.Start, !index)
-            res.Add(!index)
-            edgesSet.Add(edg !index (!index + 1) edge.Tokens.[0])
-            if edge.Tokens.Length >1 
+            let cond, tmp = vMap.TryGetValue edge.Start 
+            if not cond 
+            then 
+                vMap.Add(edge.Start, !index)
+                res.Add(!index)
+                addEdge edgesSet !index (!index + 1) edge.Tokens.[0]
+            else
+                addEdge edgesSet tmp (!index) edge.Tokens.[0]
+            if edge.Tokens.Length > 1 
             then
                 for i = 1 to edge.Tokens.Length - 2 do
-                    addEdge edgesSet curB curE edge.Tokens.[i]   
-                vMap.Add(curE,edge.End)
-                addEdge edgesSet curB curE edge.Tokens.[edge.Tokens.Length - 1]
-                index := curE + 1
+                    res.Add !index
+                    addEdge edgesSet !index (!index + 1) edge.Tokens.[i]   
+                
+                let cond, tmp = vMap.TryGetValue edge.End
+                if not cond 
+                then 
+                    vMap.Add(edge.End, !index + 1)
+                    res.Add !index
+                    addEdge edgesSet !index (!index + 1) edge.Tokens.[edge.Tokens.Length - 1]
+                    index := !index + 1
+                else
+                    res.Add !index
+                    addEdge edgesSet !index tmp edge.Tokens.[edge.Tokens.Length - 1]
             else
-                vMap.Add(curE, edge.End)
+                let cond, tmp = vMap.TryGetValue edge.End 
+                if not cond 
+                then 
+                    vMap.Add(edge.End, !index)
+                    index := !index + 1
         res
+
     for g = 0 to edges.Count - 1 do
+        index := 0
         let vertexMap = new System.Collections.Generic.Dictionary<_, _>()
         let edgesRes = new ResizeArray<_>()
         let startV = createStartFinalSets startEdges.[g] vertexMap edgesRes
         let finalV = createStartFinalSets finalEdges.[g] vertexMap edgesRes
+        for i = 0 to finalV.Count - 1 do
+            finalV.[i] <- finalV.[i] + 1 
       
         for e in edges.[g] do
-            addEdge edgesRes e.Start !index e.Tokens.[0]
-            vertexMap.Add(e.Start, !index)
-            curB <- !index + 1
-            curE <- !index + 2
-            if e.Tokens.Length > 1 then
-                for i = 1 to e.Tokens.Length - 2 do
-                    addEdge edgesRes curE curB e.Tokens.[i]
-                addEdge edgesRes curE e.End e.Tokens.[e.Tokens.Length - 1]
-                vertexMap.Add(e.End, curE) 
+            if not <| (startEdges.[g].Contains e || finalEdges.[g].Contains e) 
+            then
+                if e.Tokens.Length > 1 then
+                    let cond, v = vertexMap.TryGetValue e.Start
+                    if not cond 
+                    then
+                        vertexMap.Add(e.Start, !index)
+                        addEdge edgesRes !index (!index + 1) e.Tokens.[0]
+                    else
+                        addEdge edgesRes v (!index) e.Tokens.[0]   
+                        index := !index - 1
+                    for i = 1 to e.Tokens.Length - 2 do
+                        addEdge edgesRes !index (!index + 1) e.Tokens.[i]
+                    let cond, v = vertexMap.TryGetValue e.End
+                    if not cond 
+                    then
+                        vertexMap.Add(e.End, !index + 1)
+                        addEdge edgesRes !index (!index + 1) e.Tokens.[e.Tokens.Length - 1]
+                        index := !index + 1
+                    else
+                        addEdge edgesRes !index v e.Tokens.[e.Tokens.Length - 1]
+                else
+                    let c1, v1 = vertexMap.TryGetValue e.Start
+                    let c2, v2 = vertexMap.TryGetValue e.End
+                    if not c1
+                    then
+                        vertexMap.Add(e.Start, !index)
+                        if not c2
+                        then
+                            vertexMap.Add(e.End, !index + 1)
+                            addEdge edgesRes !index (!index + 1) e.Tokens.[0]
+                            index := !index + 1
+                        else
+                            addEdge edgesRes !index v2 e.Tokens.[0]
+                    else
+                        if not c2
+                        then
+                            vertexMap.Add(e.End, !index)
+                            addEdge edgesRes v1 !index e.Tokens.[0]
+                        else
+                            addEdge edgesRes v1 v2 e.Tokens.[0]
+                            index := !index - 1
         let resGraph = new ParserInputGraph<_>(startV.ToArray(), finalV.ToArray())
-        resGraph.AddEdgeRange edgesRes |> ignore
+        let tmp = resGraph.AddVerticesAndEdgeRange edgesRes 
         result.Add(resGraph)
     result
         
@@ -281,14 +331,36 @@ let searchTRNA path agentsCount =
 
 [<EntryPoint>]
 let main argv = 
-    let parser = ArgumentParser.Create<CLIArguments>()
-    let args = parser.Parse argv
-    let appSetting = parser.ParseAppSettings (System.Reflection.Assembly.GetExecutingAssembly())
-    let agentsCount =
-        args.GetResult(<@Agents@>, defaultValue = appSetting.GetResult(<@Agents@>, defaultValue = 1))        
-    let inputGraphPath = 
-        args.GetResult <@Input@>
-        |> (fun s ->
-                System.IO.Path.Combine(System.IO.Path.GetDirectoryName s, System.IO.Path.GetFileNameWithoutExtension s))
-    searchTRNA inputGraphPath agentsCount
+//    let parser = ArgumentParser.Create<CLIArguments>()
+//    let args = parser.Parse argv
+//    let appSetting = parser.ParseAppSettings (System.Reflection.Assembly.GetExecutingAssembly())
+//    let agentsCount =
+//        args.GetResult(<@Agents@>, defaultValue = appSetting.GetResult(<@Agents@>, defaultValue = 1))        
+//    let inputGraphPath = 
+//        args.GetResult <@Input@>
+//        |> (fun s ->
+//                System.IO.Path.Combine(System.IO.Path.GetDirectoryName s, System.IO.Path.GetFileNameWithoutExtension s))
+//    searchTRNA inputGraphPath agentsCount
+    let e1 = new BioParserEdge(0, 1, 2, [|0; 1|])
+    let e2 = new BioParserEdge(1, 2, 2, [|3;4|])
+    let e3 = new BioParserEdge(2, 3, 2, [|1; 6|])
+    let e4 = new BioParserEdge(3, 4, 2, [|7; 8|])
+    let e5 = new BioParserEdge(2, 5, 1, [|9|])
+    let e6 = new BioParserEdge(1, 6, 2, [|4; 5|])
+    let e7 = new BioParserEdge(9, 3, 2, [|6; 7|])
+    let e8 = new BioParserEdge(9, 6, 1, [|10|])
+    let e9 = new BioParserEdge(6, 7, 1, [|11|])
+    let e10 = new BioParserEdge(7, 3, 2, [|12; 13|])
+    let e11 = new BioParserEdge(8, 9, 1, [|2|])
+
+    let seqE = new ResizeArray<_>()
+    let t = [|e1; e2; e3; e4; e5; e6; e7; e8; e9; e10; e11|]
+    seqE.Add t
+    let s = ResizeArray.init 1 (fun _ -> new ResizeArray<_>())
+    s.[0].Add e1
+    s.[0].Add e11
+    let f = ResizeArray.init 1 (fun _ -> new ResizeArray<_>())
+    f.[0].Add e4
+    f.[0].Add e5
+    let tmp = convertToParserInputGraph seqE s f
     0

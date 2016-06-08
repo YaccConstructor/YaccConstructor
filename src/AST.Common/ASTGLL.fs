@@ -89,8 +89,6 @@ type NumNode<'vtype> =
     val Node : 'vtype
     new (num, node) = {Num = num; Node = node} 
 
-
-
 [<AllowNullLiteral>]
 type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
     member this.AstToDot (indToString : int -> string) (tokenToNumber : 'TokenType -> int) (tokenData : 'TokenType -> obj) (path : string) =
@@ -302,10 +300,10 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
                     for ch in i.Others do
                         findNodes ch
         findNodes root
-        let cycleNode = new Dictionary<_, _>()
+        let cycleNode = ResizeArray<_>()
         let mutable index = 0
         let res = Array.init q.Count (fun _ -> new ResizeArray<_>())
-        let rec extractPath (node : INode) = 
+        let rec extractPath (node : INode) =  
             match node with
             | :? NonTerminalNode as n ->
                 extractPath n.First
@@ -315,8 +313,14 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
                         extractPath ch
             | :? TerminalNode as t -> res.[index].Add (getLeftExtension t.Extension)
             | :? PackedNode as p ->
-                extractPath p.Left
-                extractPath p.Right
+                let e = node.getExtension()
+                if cycleNode.Contains e
+                then
+                    extractPath p.Left
+                else
+                    cycleNode.Add e
+                    extractPath p.Left
+                    extractPath p.Right
             | :? IntermidiateNode as i ->
                 extractPath i.First
                 if i.Others <> Unchecked.defaultof<_>
@@ -328,11 +332,7 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
             extractPath q.[i]
         res
             
-            
-
-    
     member this.CountCounters  =
-         
         let nodesCount = ref 0
         let edgesCount = ref 0
         let termsCount = ref 0

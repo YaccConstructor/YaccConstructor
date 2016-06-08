@@ -82,14 +82,15 @@ let filterRnaParsingResult res expectedRange lengthLimit =
                     let right = s |> Array.maxBy (fun s -> s.rpos)                        
                     ranges.Add((left.le,left.lpos),(right.re,right.rpos)))        
             printfn "All: %A" ranges.Count
-            ranges     
+            ranges |> Microsoft.FSharp.Collections.ResizeArray.filter(fun x -> x <> ((0,0),(0,0)))    
         
         | Error e -> 
             failwithf "Input parsing failed: %A" e
 
     let ranges = filterRnaParsingResult lengthLimit res
-    printfn "Ranges length = %A" ranges.Count
-    Assert.IsTrue(ranges.Count >= 2 && ranges.Count < 5, sprintf "real length = %A" ranges.Count)
+    printfn "---Ranges length = %A" ranges.Count
+    printfn "---Ranges %A" ranges
+    Assert.IsTrue(ranges.Count >= 1 && ranges.Count < 7, sprintf "real length = %A" ranges.Count)
     //Assert.IsTrue(ranges |> Microsoft.FSharp.Collections.ResizeArray.exists ((=) expectedRange), sprintf "range %A does not exists in ranges %A" expectedRange ranges)
 
 [<TestFixture>]
@@ -233,10 +234,12 @@ type ``GLL abstract parser tests bio`` () =
     [<Test>]
     member this.``16s_H22_H23`` () =
         let cfg = YC.Bio.RNA.Search.r16s_H22_H23_SearchConfig
-        let graphs = fastaLoader """C:\Users\Semyon\Downloads\HOMD_16S_rRNA_RefSeq_V14.5.fasta""" cfg.Tokenizer
+        let graphs = fastaLoader """..\..\..\Tests\bio\16s\HOMD_16S_rRNA_RefSeq_V14.5.fasta""" cfg.Tokenizer
         graphs 
-        |> Seq.iter (fun g -> cfg.SearchWithoutSPPF g cfg.StartNonterm 
-                              |> fun res -> filterRnaParsingResult res ((0,650), (0,750)) cfg.LowLengthLimit)
+        |> Seq.iteri (fun i g -> cfg.SearchWithoutSPPF g cfg.StartNonterm 
+                                 |> fun res ->
+                                     printfn "line = %A" i
+                                     filterRnaParsingResult res ((0,650), (0,750)) cfg.LowLengthLimit)
 
 
 //

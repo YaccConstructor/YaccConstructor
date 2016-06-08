@@ -237,11 +237,12 @@ let r16s_H22_H23_SearchConfig =
             | 'U' -> GLL.r16s.H22_H23.U i
             | 'T' -> GLL.r16s.H22_H23.U i
             | 'C' -> GLL.r16s.H22_H23.C i
-            | 'G' -> GLL.r16s.H22_H23.G i                
+            | 'G' -> GLL.r16s.H22_H23.G i
+            | _ -> GLL.r16s.H22_H23.U i
             | x ->   failwithf "Strange symbol in input: %A" x
             |> GLL.r16s.H22_H23.tokenToNumber
     
-    new SearchConfig(GLL.r16s.H22_H23.buildAbstract(*, GLL.r16s.H22_H23.buildAbstractAst*), getSmb, 120, 90, 3)
+    new SearchConfig(GLL.r16s.H22_H23.buildAbstract(*, GLL.r16s.H22_H23.buildAbstractAst*), getSmb, 120, 90, 4)
 
 let searchMain path what agentsCount =
     let searchCfg = 

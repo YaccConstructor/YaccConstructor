@@ -110,43 +110,63 @@ let convertToParserInputGraph (edges : ResizeArray<BioParserEdge[]>) (startEdges
     let result = new ResizeArray<_>()
     let index = ref 0
     let edg f t l = new ParserEdge<_>(f,t,l)
-    let addEdge (arr : ResizeArray<_>) b e t =
+    let changeIndex i = 
+        index := !index + i
+    let addEdge (arr : ResizeArray<_>) b e t i =
         arr.Add(edg b e t)
-        index := !index + 1
-
-    let createStartFinalSets (set : ResizeArray<BioParserEdge>) (vMap: System.Collections.Generic.Dictionary<_, _>) (edgesSet : ResizeArray<_>)= 
-        let res = new ResizeArray<_>()
-        for edge in set do
-            let cond, tmp = vMap.TryGetValue edge.Start 
-            if not cond 
-            then 
-                vMap.Add(edge.Start, !index)
-                res.Add(!index)
-                addEdge edgesSet !index (!index + 1) edge.Tokens.[0]
-            else
-                addEdge edgesSet tmp (!index) edge.Tokens.[0]
-            if edge.Tokens.Length > 1 
-            then
-                for i = 1 to edge.Tokens.Length - 2 do
-                    res.Add !index
-                    addEdge edgesSet !index (!index + 1) edge.Tokens.[i]   
-                
-                let cond, tmp = vMap.TryGetValue edge.End
+        changeIndex (i + 1)
+        //index := !index + 1
+    
+    let processEdge (set : System.Collections.Generic.IEnumerable<BioParserEdge>) f (vMap : System.Collections.Generic.Dictionary<_, _>) (edgesSet : ResizeArray<_>) =
+        let checkAndAdd k v t =
+            vMap.Add(k, v)
+            f !index
+            addEdge edgesSet !index (!index + 1) t 0
+        for e in set do
+            if e.Tokens.Length > 1 then
+                let cond, v = vMap.TryGetValue e.Start
                 if not cond 
-                then 
-                    vMap.Add(edge.End, !index + 1)
-                    res.Add !index
-                    addEdge edgesSet !index (!index + 1) edge.Tokens.[edge.Tokens.Length - 1]
+                then
+                    checkAndAdd e.Start !index e.Tokens.[0]    
+                else
+                    addEdge edgesSet v (!index) e.Tokens.[0] -1  
+                for i = 1 to e.Tokens.Length - 2 do
+                    f !index
+                    addEdge edgesSet !index (!index + 1) e.Tokens.[i] 0
+                let cond, v = vMap.TryGetValue e.End
+                if not cond 
+                then
+                    checkAndAdd e.End (!index + 1) e.Tokens.[e.Tokens.Length - 1]
                     index := !index + 1
                 else
-                    res.Add !index
-                    addEdge edgesSet !index tmp edge.Tokens.[edge.Tokens.Length - 1]
+                    f !index
+                    addEdge edgesSet !index v e.Tokens.[e.Tokens.Length - 1] 0
             else
-                let cond, tmp = vMap.TryGetValue edge.End 
-                if not cond 
-                then 
-                    vMap.Add(edge.End, !index)
-                    index := !index + 1
+                let c1, v1 = vMap.TryGetValue e.Start
+                let c2, v2 = vMap.TryGetValue e.End
+                if not c1
+                then
+                    vMap.Add(e.Start, !index)
+                    f !index
+                    if not c2
+                    then
+                        vMap.Add(e.End, !index + 1)
+                        addEdge edgesSet !index (!index + 1) e.Tokens.[0] 1
+                    else
+                        addEdge edgesSet !index v2 e.Tokens.[0] 0
+                else
+                    if not c2
+                    then
+                        vMap.Add(e.End, !index)
+                        addEdge edgesSet v1 !index e.Tokens.[0] 0
+                    else
+                        addEdge edgesSet v1 v2 e.Tokens.[0] -1
+        ()
+        
+    let createStartFinalSets (set : ResizeArray<BioParserEdge>) (vMap: System.Collections.Generic.Dictionary<_, _>) (edgesSet : ResizeArray<_>)= 
+        let res = new ResizeArray<_>()
+        let f i = res.Add(i)
+        processEdge set f vMap edgesSet
         res
 
     for g = 0 to edges.Count - 1 do
@@ -157,50 +177,8 @@ let convertToParserInputGraph (edges : ResizeArray<BioParserEdge[]>) (startEdges
         let finalV = createStartFinalSets finalEdges.[g] vertexMap edgesRes
         for i = 0 to finalV.Count - 1 do
             finalV.[i] <- finalV.[i] + 1 
-      
-        for e in edges.[g] do
-            if not <| (startEdges.[g].Contains e || finalEdges.[g].Contains e) 
-            then
-                if e.Tokens.Length > 1 then
-                    let cond, v = vertexMap.TryGetValue e.Start
-                    if not cond 
-                    then
-                        vertexMap.Add(e.Start, !index)
-                        addEdge edgesRes !index (!index + 1) e.Tokens.[0]
-                    else
-                        addEdge edgesRes v (!index) e.Tokens.[0]   
-                        index := !index - 1
-                    for i = 1 to e.Tokens.Length - 2 do
-                        addEdge edgesRes !index (!index + 1) e.Tokens.[i]
-                    let cond, v = vertexMap.TryGetValue e.End
-                    if not cond 
-                    then
-                        vertexMap.Add(e.End, !index + 1)
-                        addEdge edgesRes !index (!index + 1) e.Tokens.[e.Tokens.Length - 1]
-                        index := !index + 1
-                    else
-                        addEdge edgesRes !index v e.Tokens.[e.Tokens.Length - 1]
-                else
-                    let c1, v1 = vertexMap.TryGetValue e.Start
-                    let c2, v2 = vertexMap.TryGetValue e.End
-                    if not c1
-                    then
-                        vertexMap.Add(e.Start, !index)
-                        if not c2
-                        then
-                            vertexMap.Add(e.End, !index + 1)
-                            addEdge edgesRes !index (!index + 1) e.Tokens.[0]
-                            index := !index + 1
-                        else
-                            addEdge edgesRes !index v2 e.Tokens.[0]
-                    else
-                        if not c2
-                        then
-                            vertexMap.Add(e.End, !index)
-                            addEdge edgesRes v1 !index e.Tokens.[0]
-                        else
-                            addEdge edgesRes v1 v2 e.Tokens.[0]
-                            index := !index - 1
+        let f i = ()
+        processEdge edges.[g] f vertexMap edgesRes 
         let resGraph = new ParserInputGraph<_>(startV.ToArray(), finalV.ToArray())
         let tmp = resGraph.AddVerticesAndEdgeRange edgesRes 
         result.Add(resGraph)
@@ -354,7 +332,7 @@ let main argv =
     let e11 = new BioParserEdge(8, 9, 1, [|2|])
 
     let seqE = new ResizeArray<_>()
-    let t = [|e1; e2; e3; e4; e5; e6; e7; e8; e9; e10; e11|]
+    let t = [| e2; e3; e6; e7; e8; e9; e10;|]
     seqE.Add t
     let s = ResizeArray.init 1 (fun _ -> new ResizeArray<_>())
     s.[0].Add e1

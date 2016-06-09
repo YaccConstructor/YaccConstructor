@@ -203,6 +203,7 @@
   <ItemGroup>
     <Compile Include="tRNA.yrd.fs" />
     <Compile Include="16s_H22_H23.yrd.fs" />
+    <Compile Include="shift_problem.yrd.fs" />
     <Compile Include="RNA.Search.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />

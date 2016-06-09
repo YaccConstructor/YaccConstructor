@@ -14,11 +14,13 @@ open MBrace.Core
 open MBrace.Core.Builders
 open MBrace.Core.CloudOperators
 open MBrace.Runtime
+open GLL.shift_problem
 //open MBrace.Azure.Management
 
 type WhatShouldISearch =
     | TRNA
     | R16S_H22_H23
+    | Shift_problem
 
 type CLIArguments =
     | [<NoAppSettings>][<Mandatory>][<AltCommandLine("-i")>] Input of string
@@ -60,7 +62,7 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lengthLimit res  =
     let hihtLenghtLimit = 100.0
     match res:ParseResult<ResultStruct> with
     | Success ast -> 
-        failwith "Result is success but it is unrxpectrd success"
+        failwith "Result is success but it is unrxpected success"
     | Success1 x ->        
         let weightLimit = 1000
         let filteredByLength = x |> Array.filter (fun i -> i.length >= byte lengthLimit)
@@ -140,7 +142,6 @@ let convertToParserInputGraph (edges : ResizeArray<BioParserEdge[]>) (startEdges
     let addEdge (arr : ResizeArray<_>) b e t i =
         arr.Add(edg b e t)
         changeIndex (i + 1)
-        //index := !index + 1
     
     let processEdge (set : System.Collections.Generic.IEnumerable<BioParserEdge>) f (vMap : System.Collections.Generic.Dictionary<_, _>) (edgesSet : ResizeArray<_>) =
         let checkAndAdd k v t =
@@ -322,11 +323,27 @@ let r16s_H22_H23_SearchConfig =
     
     new SearchConfig(GLL.r16s.H22_H23.buildAbstract(*, GLL.r16s.H22_H23.buildAbstractAst*), getSmb, 120, 90, 4)
 
+let shift_problem_SearchConfig =
+
+    let getSmb =
+        let cnt = ref 0
+        fun ch ->
+            let i = incr cnt; !cnt 
+            match ch with
+            | 'A' -> GLL.shift_problem.A i                
+            | 'C' -> GLL.shift_problem.C i
+            | 'G' -> GLL.shift_problem.G i
+            | x ->   failwithf "Strange symbol in input: %A" x
+            |> GLL.shift_problem.tokenToNumber
+    
+    new SearchConfig(GLL.shift_problem.buildAbstract, getSmb, 100, 0, 1)
+
 let searchMain path what agentsCount =
     let searchCfg = 
         match what with
         | TRNA -> tRNASearchConfig
         | R16S_H22_H23 -> r16s_H22_H23_SearchConfig
+        | Shift_problem -> shift_problem_SearchConfig
 
     let graphs, longEdges = loadGraphFormFileToBioParserInputGraph path searchCfg.HightLengthLimit searchCfg.Tokenizer (GLL.tRNA.RNGLR_EOF 0)
 
@@ -348,27 +365,32 @@ let main argv =
 //        |> (fun s ->
 //                System.IO.Path.Combine(System.IO.Path.GetDirectoryName s, System.IO.Path.GetFileNameWithoutExtension s))
 //    searchTRNA inputGraphPath agentsCount
-    searchMain inputGraphPath R16S_H22_H23 agentsCount
-    let e1 = new BioParserEdge(0, 1, 2, [|0; 1|])
-    let e2 = new BioParserEdge(1, 2, 2, [|3;4|])
-    let e3 = new BioParserEdge(2, 3, 2, [|1; 6|])
-    let e4 = new BioParserEdge(3, 4, 2, [|7; 8|])
-    let e5 = new BioParserEdge(2, 5, 1, [|9|])
-    let e6 = new BioParserEdge(1, 6, 2, [|4; 5|])
-    let e7 = new BioParserEdge(9, 3, 2, [|6; 7|])
-    let e8 = new BioParserEdge(9, 6, 1, [|10|])
-    let e9 = new BioParserEdge(6, 7, 1, [|11|])
-    let e10 = new BioParserEdge(7, 3, 2, [|12; 13|])
-    let e11 = new BioParserEdge(8, 9, 1, [|2|])
-
-    let seqE = new ResizeArray<_>()
-    let t = [| e2; e3; e6; e7; e8; e9; e10;|]
-    seqE.Add t
-    let s = ResizeArray.init 1 (fun _ -> new ResizeArray<_>())
-    s.[0].Add e1
-    s.[0].Add e11
-    let f = ResizeArray.init 1 (fun _ -> new ResizeArray<_>())
-    f.[0].Add e4
-    f.[0].Add e5
-    let tmp = convertToParserInputGraph seqE s f
+//    searchMain inputGraphPath R16S_H22_H23 agentsCount
+//    let e1 = new BioParserEdge(0, 1, 2, [|0; 1|])
+//    let e2 = new BioParserEdge(1, 2, 2, [|3;4|])
+//    let e3 = new BioParserEdge(2, 3, 2, [|1; 6|])
+//    let e4 = new BioParserEdge(3, 4, 2, [|7; 8|])
+//    let e5 = new BioParserEdge(2, 5, 1, [|9|])
+//    let e6 = new BioParserEdge(1, 6, 2, [|4; 5|])
+//    let e7 = new BioParserEdge(9, 3, 2, [|6; 7|])
+//    let e8 = new BioParserEdge(9, 6, 1, [|10|])
+//    let e9 = new BioParserEdge(6, 7, 1, [|11|])
+//    let e10 = new BioParserEdge(7, 3, 2, [|12; 13|])
+//    let e11 = new BioParserEdge(8, 9, 1, [|2|])
+//
+//    let seqE = new ResizeArray<_>()
+//    let t = [| e2; e3; e6; e7; e8; e9; e10;|]
+//    seqE.Add t
+//    let s = ResizeArray.init 1 (fun _ -> new ResizeArray<_>())
+//    s.[0].Add e1
+//    s.[0].Add e11
+//    let f = ResizeArray.init 1 (fun _ -> new ResizeArray<_>())
+//    f.[0].Add e4
+//    f.[0].Add e5
+//    let tmp = convertToParserInputGraph seqE s f
+    
+    let path = "C:\Users\User\recursive-ascent\Tests\bio\problem_with_shift_2"
+    let inputGraphPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName path, System.IO.Path.GetFileNameWithoutExtension path)
+    searchMain inputGraphPath Shift_problem 0
+    //let parseBioGraph = 
     0

@@ -40,18 +40,18 @@ type msg =
     | Die of AsyncReplyChannel<unit>
 
 [<Struct>]
-type SearchConfig(*<'Token>*) =
+type SearchConfig<'Token> =
     val SearchWithoutSPPF: BioParserInputGraph -> int -> ParseResult<ResultStruct>
-    //val SearchWithSPPF: ParserInputGraph<'Token> -> ParseResult<'Token>
+    val SearchWithSPPF: ParserInputGraph<'Token> -> ParseResult<'Token>
     val Tokenizer: char -> int
     val HightLengthLimit: int
     val LowLengthLimit: int
     val StartNonterm: int
 
-    new(withoutSppf(*, withSppf*), getSmb, hightLengthLimit, lowLengthLimit, startNonterm) = 
+    new(withoutSppf, withSppf, getSmb, hightLengthLimit, lowLengthLimit, startNonterm) = 
         {
             SearchWithoutSPPF = withoutSppf
-            //SearchWithSPPF = withSppf
+            SearchWithSPPF = withSppf
             Tokenizer = getSmb
             HightLengthLimit = hightLengthLimit
             LowLengthLimit = lowLengthLimit
@@ -62,7 +62,7 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lengthLimit res  =
     let hihtLenghtLimit = 100.0
     match res:ParseResult<ResultStruct> with
     | Success ast -> 
-        failwith "Result is success but it is unrxpected success"
+        failwith "Result is success but it is unexpected success"
     | Success1 x ->        
         let weightLimit = 1000
         let filteredByLength = x |> Array.filter (fun i -> i.length >= byte lengthLimit)
@@ -77,12 +77,15 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lengthLimit res  =
             |> Seq.concat
             |> System.Collections.Generic.HashSet<_>
             |> fun s -> s, (s |> Seq.sumBy (fun x -> x.Tag |> int))
-        
+        let startEdges = new ResizeArray<_>()
+        let finalEdges = new ResizeArray<_>()
         let subgraphs =
             filteredByLength
             |> Array.map (fun r -> 
                 let newStartEdge = qgEdgFromBio graph.Edges.[r.le]
+                startEdges.Add graph.Edges.[r.le]
                 let newEndEdge = qgEdgFromBio graph.Edges.[r.re]
+                finalEdges.Add graph.Edges.[r.re]
                 let additionalWeight = newStartEdge.Tag + newEndEdge.Tag |> int
                 if r.le = r.re || graph.Edges.[r.le].End = graph.Edges.[r.re].Start
                 then new System.Collections.Generic.HashSet<_> [|newStartEdge; newEndEdge|], additionalWeight
@@ -94,27 +97,45 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lengthLimit res  =
                 )
         
         let mergedSubgraphs = new ResizeArray<_>()
-
+        let mergedStart = Array.zeroCreate subgraphs.Length
+        let mergedFinal = Array.zeroCreate subgraphs.Length
+        let addStartFinal value =
+            let r = new ResizeArray<_>()
+            r.Add value
+            r
+            
+        let callSF i j =
+            mergedStart.[i] <- addStartFinal startEdges.[j]
+            mergedFinal.[i] <- addStartFinal finalEdges.[j]
+        subgraphs |> Array.iteri (fun i x -> ())
         subgraphs
-        |> Array.iter
-            (fun (g1, w1) ->
+        |> Array.iteri
+            (fun i (g1, w1) ->
                 if w1 > weightLimit || mergedSubgraphs.Count = 0
-                then mergedSubgraphs.Add (g1, ref w1)
+                then                     
+                    mergedSubgraphs.Add (g1, ref w1)
+                    callSF (mergedSubgraphs.Count - 1) i
                 else 
                     let merged = ref false
                     mergedSubgraphs 
-                    |> ResizeArray.iter (
-                        fun (g2, w2) -> 
+                    |> ResizeArray.iteri (
+                        fun j (g2, w2) -> 
                             if !w2 < weightLimit && g2.Overlaps g1 
                             then 
                                 g2.UnionWith g1
+                                mergedStart.[j].Add startEdges.[i]
+                                mergedFinal.[j].Add finalEdges.[i]
                                 w2 := g2 |> Seq.sumBy (fun x -> x.Tag |> int)
                                 merged := true
                                 )
                     if not !merged
-                    then mergedSubgraphs.Add(g1, ref w1)
+                    then 
+                        mergedSubgraphs.Add(g1, ref w1)
+                        callSF (mergedSubgraphs.Count - 1) i
+                        
             )
-
+        let mergedStart = Array.sub mergedStart 0 mergedSubgraphs.Count
+        let mergedFinal = Array.sub mergedFinal 0 mergedSubgraphs.Count
         let fromStartVtoEdg = new SysDict<_,ResizeArray<_>>()
         graph.Edges
         |> Array.iter (
@@ -128,12 +149,13 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lengthLimit res  =
         mergedSubgraphs
         |> ResizeArray.map (fun (g1,n) -> 
             printfn "Subgraph. smb = %A edges = %A" !n g1.Count
-            g1 |> Seq.collect (fun e -> fromStartVtoEdg.[e.Source]))
+            g1 |> Seq.collect (fun e -> fromStartVtoEdg.[e.Source])), mergedStart, mergedFinal
+        
         
     | Error e -> 
         failwithf "Input parsing failed: %A" e
 
-let convertToParserInputGraph (edges : ResizeArray<BioParserEdge[]>) (startEdges : ResizeArray<ResizeArray<BioParserEdge>>) (finalEdges : ResizeArray<ResizeArray<BioParserEdge>>)  = 
+let convertToParserInputGraph (edges : ResizeArray<seq<BioParserEdge>>) (startEdges : ResizeArray<BioParserEdge>[]) (finalEdges : ResizeArray<BioParserEdge>[])  = 
     let result = new ResizeArray<_>()
     let index = ref 0
     let edg f t l = new ParserEdge<_>(f,t,l)
@@ -248,14 +270,15 @@ let searchInCloud graphs =
     printfn "%A" r
     r
 
-let searchInBioGraphs (searchCfg:SearchConfig) graphs agentsCount =
+let searchInBioGraphs (searchCfg : SearchConfig<_>) graphs agentsCount =
     let start = System.DateTime.Now
-    let processSubgraphs (subgraphs:ResizeArray<_>) =
-//        let parseWithSPPF graph =
-//            let sppf = GLL.tRNA.buildAbstractAst graph
-//            match sppf with
-//            | Success sppf -> ()
-//            | _ -> ()
+    let processSubgraphs (subgraphs:ResizeArray<_>) (startEdges : ResizeArray<_>[]) (finalEdges : ResizeArray<_>[])=
+        let parserInputGraphs = convertToParserInputGraph subgraphs startEdges finalEdges
+        parserInputGraphs
+        |> ResizeArray.iteri
+            (fun i g ->
+                searchCfg.SearchWithSPPF g |> ignore
+            )
         ()
     ()
 
@@ -267,9 +290,8 @@ let searchInBioGraphs (searchCfg:SearchConfig) graphs agentsCount =
                         match msg with
                         | Data (i,graph) ->
                             try
-                                searchCfg.SearchWithoutSPPF graph searchCfg.StartNonterm                                
-                                |> filterRnaParsingResult graph searchCfg.LowLengthLimit
-                                |> processSubgraphs
+                                let g, s ,f = searchCfg.SearchWithoutSPPF graph searchCfg.StartNonterm |> filterRnaParsingResult graph searchCfg.LowLengthLimit
+                                g |> processSubgraphs 
                             with
                             | e -> printfn "ERROR in bio graph parsing! %A" e.Message
                             return! loop n         
@@ -303,7 +325,7 @@ let tRNASearchConfig =
             | x ->   failwithf "Strange symbol in input: %A" x
             |> GLL.tRNA.tokenToNumber
     
-    new SearchConfig(GLL.tRNA.buildAbstract(*, GLL.tRNA.buildAbstractAst*), getSmb, 120, 60, 4)
+    new SearchConfig<_>(GLL.tRNA.buildAbstract, GLL.tRNA.buildAbstractAst, getSmb, 120, 60, 4)
 
 let r16s_H22_H23_SearchConfig =
 
@@ -321,7 +343,7 @@ let r16s_H22_H23_SearchConfig =
             | x ->   failwithf "Strange symbol in input: %A" x
             |> GLL.r16s.H22_H23.tokenToNumber
     
-    new SearchConfig(GLL.r16s.H22_H23.buildAbstract(*, GLL.r16s.H22_H23.buildAbstractAst*), getSmb, 120, 90, 4)
+    new SearchConfig<_>(GLL.r16s.H22_H23.buildAbstract, GLL.r16s.H22_H23.buildAbstractAst, getSmb, 120, 90, 4)
 
 let shift_problem_SearchConfig =
 
@@ -336,7 +358,7 @@ let shift_problem_SearchConfig =
             | x ->   failwithf "Strange symbol in input: %A" x
             |> GLL.shift_problem.tokenToNumber
     
-    new SearchConfig(GLL.shift_problem.buildAbstract, getSmb, 100, 0, 1)
+    new SearchConfig<_>(GLL.shift_problem.buildAbstract, GLL.shift_problem.buildAbstractAst, getSmb, 100, 0, 1)
 
 let searchMain path what agentsCount =
     let searchCfg = 
@@ -347,8 +369,8 @@ let searchMain path what agentsCount =
 
     let graphs, longEdges = loadGraphFormFileToBioParserInputGraph path searchCfg.HightLengthLimit searchCfg.Tokenizer (GLL.tRNA.RNGLR_EOF 0)
 
-    let gs = graphs.[100..150]
-    searchInBioGraphs searchCfg gs agentsCount
+    //let gs = graphs.[100..150]
+    searchInBioGraphs searchCfg graphs agentsCount
     |> printfn "%A"
     //searchInCloud graphs
     ()

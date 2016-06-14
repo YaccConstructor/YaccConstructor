@@ -291,7 +291,7 @@ let searchInBioGraphs (searchCfg : SearchConfig<_>) graphs agentsCount =
                         | Data (i,graph) ->
                             try
                                 let g, s ,f = searchCfg.SearchWithoutSPPF graph searchCfg.StartNonterm |> filterRnaParsingResult graph searchCfg.LowLengthLimit
-                                g |> processSubgraphs 
+                                processSubgraphs g s f 
                             with
                             | e -> printfn "ERROR in bio graph parsing! %A" e.Message
                             return! loop n         

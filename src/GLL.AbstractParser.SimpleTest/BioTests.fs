@@ -47,13 +47,13 @@ let filterRnaParsingResult res expectedRange lengthLimit =
             let ranges = new ResizeArray<_>()
             let curLeft = ref 0
             let curRight = ref 0
-            let x = x |> Array.filter (fun i -> i.length >= byte lengthLimit)
+            let x = x |> Array.filter (fun i -> true (*i.rpos - i.lpos >= lengthLimit*))
                     
             printfn "Ranges filter: %A" x.Length
             let x = 
                 let onOneEdg, other =
                     x
-                    |> Array.filter (fun s -> int s.length >= lengthLimit)
+                    |> Array.filter (fun s -> true (* s.rpos - s.lpos >= lengthLimit*))
                     |> Array.partition (fun s -> s.le = s.re)
                     //, ([||] : array<ResultStruct> )
                     
@@ -236,10 +236,14 @@ type ``GLL abstract parser tests bio`` () =
         let cfg = YC.Bio.RNA.Search.r16s_H22_H23_SearchConfig
         let graphs = fastaLoader """..\..\..\Tests\bio\16s\HOMD_16S_rRNA_RefSeq_V14.5.fasta""" cfg.Tokenizer
         graphs 
-        |> Seq.iteri (fun i g -> cfg.SearchWithoutSPPF g cfg.StartNonterm 
-                                 |> fun res ->
-                                     printfn "line = %A" i
-                                     filterRnaParsingResult res ((0,650), (0,750)) cfg.LowLengthLimit)
+        |> Seq.iteri (fun i g -> 
+            try 
+                cfg.SearchWithoutSPPF g cfg.StartNonterm 
+                |> fun res ->
+                    printfn "line = %A" i
+                    filterRnaParsingResult res ((0,650), (0,750)) cfg.LowLengthLimit
+            with
+            | e -> printfn "!!!!!! Unparsd : %A" e.Message)
 
 
 //

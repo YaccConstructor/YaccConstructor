@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RNGLR", "RNGLR", "{319C1C63-44C0-4A68-A028-222D72029FE8}"
 EndProject
@@ -150,6 +150,8 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils.SourceText", "YC.Utils.SourceText\src\YC.Utils.SourceText\Utils.SourceText.fsproj", "{F296356B-00C3-465C-9C97-7CFA279F5574}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DotParser.Tests", "..\QuickGraph\tests\DotParser.Tests\DotParser.Tests.fsproj", "{C2F89DE1-B429-4B5D-AF22-3A075D00BAA4}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLLAbstractApplication", "GLLAbstractApplication\GLLAbstractApplication.fsproj", "{C831D126-E5FC-4681-A316-574C08F83E6D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -825,6 +827,26 @@ Global
 		{C2F89DE1-B429-4B5D-AF22-3A075D00BAA4}.ReleaseContractsReferences|Any CPU.ActiveCfg = Release|Any CPU
 		{C2F89DE1-B429-4B5D-AF22-3A075D00BAA4}.ReleaseContractsReferences|Any CPU.Build.0 = Release|Any CPU
 		{C2F89DE1-B429-4B5D-AF22-3A075D00BAA4}.ReleaseContractsReferences|x86.ActiveCfg = Release|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.Debug|x86.Build.0 = Debug|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.DebugContracts|Any CPU.ActiveCfg = Debug|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.DebugContracts|Any CPU.Build.0 = Debug|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.DebugContracts|x86.ActiveCfg = Debug|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.DebugContracts|x86.Build.0 = Debug|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.Release|x86.ActiveCfg = Release|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.Release|x86.Build.0 = Release|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.Release20|Any CPU.ActiveCfg = Release|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.Release20|Any CPU.Build.0 = Release|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.Release20|x86.ActiveCfg = Release|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.Release20|x86.Build.0 = Release|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.ReleaseContractsReferences|Any CPU.ActiveCfg = Release|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.ReleaseContractsReferences|Any CPU.Build.0 = Release|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.ReleaseContractsReferences|x86.ActiveCfg = Release|Any CPU
+		{C831D126-E5FC-4681-A316-574C08F83E6D}.ReleaseContractsReferences|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -883,6 +905,7 @@ Global
 		{8826810A-DC59-46E6-8978-21E273DB1236} = {278F278F-6F15-4CAE-9665-A068A795A222}
 		{F296356B-00C3-465C-9C97-7CFA279F5574} = {D300525B-9E17-4920-A4F4-C3920D690B48}
 		{C2F89DE1-B429-4B5D-AF22-3A075D00BAA4} = {FBFEF0E6-F195-4146-A529-8B613AB549DC}
+		{C831D126-E5FC-4681-A316-574C08F83E6D} = {86E52B7F-0A55-4785-8288-791F030F0F6A}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = QuickGraph1.vsmdi

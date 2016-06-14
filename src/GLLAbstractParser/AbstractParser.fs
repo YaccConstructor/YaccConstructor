@@ -305,6 +305,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             printf "%A" r1
                             //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
                             r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
+                            let t = r1.GetPath 1
                     //printfn "%d" !tempCount
                             Success (r1)   
                     else Error ("String was not parsed")

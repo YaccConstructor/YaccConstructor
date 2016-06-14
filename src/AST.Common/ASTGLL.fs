@@ -89,8 +89,6 @@ type NumNode<'vtype> =
     val Node : 'vtype
     new (num, node) = {Num = num; Node = node} 
 
-
-
 [<AllowNullLiteral>]
 type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
     member this.AstToDot (indToString : int -> string) (tokenToNumber : 'TokenType -> int) (tokenData : 'TokenType -> obj) (path : string) =
@@ -277,42 +275,64 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
         out.WriteLine("}")
         out.Close()
       
-    member this.ExtractFinalPaths =
-        let nodeQueue = new Queue<NumNode<_>>()
-        let visitedNodes = new Dictionary<_, Dictionary<_,_>>()
-        let createdPaths = new Dictionary<_,_>()
-
-        let cartesianProduct seq1 seq2 = 
-            seq1 |> Seq.collect(fun x -> Seq.map (fun y -> seq{yield! x; yield! y}) seq2)
-
-        let rec getSubtree (tree : INode) = 
-            match tree with
-            | :? NonTerminalNode as nTerm ->
-                let c, v = visitedNodes. TryGetValue(nTerm.Name)
-                if c then
-                    let c2, v2 = v.TryGetValue(nTerm.Extension)
-                    if c2 then
-                        Seq.empty<_>
-                    else
-                        v.Add(nTerm.Extension, true)
-                        getSubtree nTerm.First
+    member this.GetPath nTerm = 
+        let q = new ResizeArray<_>()
+        let mutable cond = true
+        let rec findNodes (node : INode) = 
+            match node with
+            | :? NonTerminalNode as n ->
+                if n.Name = nTerm
+                then q.Add n
+                else 
+                    findNodes n.First
+                    if n.Others <> Unchecked.defaultof<_>
+                    then
+                        for ch in n.Others do
+                            findNodes ch
+            | :? TerminalNode as t -> ()
+            | :? PackedNode as p ->
+                findNodes p.Left
+                findNodes p.Right
+            | :? IntermidiateNode as i ->
+                findNodes i.First
+                if i.Others <> Unchecked.defaultof<_>
+                then
+                    for ch in i.Others do
+                        findNodes ch
+        findNodes root
+        let cycleNode = ResizeArray<_>()
+        let mutable index = 0
+        let res = Array.init q.Count (fun _ -> new ResizeArray<_>())
+        let rec extractPath (node : INode) =  
+            match node with
+            | :? NonTerminalNode as n ->
+                extractPath n.First
+                if n.Others <> Unchecked.defaultof<_>
+                then
+                    for ch in n.Others do
+                        extractPath ch
+            | :? TerminalNode as t -> res.[index].Add (getLeftExtension t.Extension)
+            | :? PackedNode as p ->
+                let e = node.getExtension()
+                if cycleNode.Contains e
+                then
+                    extractPath p.Left
                 else
-                    let d = new Dictionary<_,_>()
-                    d.Add(nTerm.Extension, true)
-                    visitedNodes.Add(nTerm.Name, d)
-                    getSubtree nTerm.First
-                        
-            | :? PackedNode as pNode ->
-                getSubtree pNode.Left             
-            | :? IntermidiateNode as iNode ->
-                getSubtree iNode.First
-            | :? TerminalNode as term ->
-                seq{yield seq{yield term}}
-            | x -> failwith "Error"
-        ()                     
-    
+                    cycleNode.Add e
+                    extractPath p.Left
+                    extractPath p.Right
+            | :? IntermidiateNode as i ->
+                extractPath i.First
+                if i.Others <> Unchecked.defaultof<_>
+                then
+                    for ch in i.Others do
+                        extractPath ch
+        for i in 0..q.Count do
+            index <- i
+            extractPath q.[i]
+        res
+            
     member this.CountCounters  =
-         
         let nodesCount = ref 0
         let edgesCount = ref 0
         let termsCount = ref 0

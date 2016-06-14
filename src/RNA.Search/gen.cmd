@@ -1,2 +1,3 @@
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i ..\YC.GrammarZOO\Bio\tRNA.yrd -c ExpandRepeat -c ExpandEbnf -c ExpandMeta -g "GLLGenerator -pos int -token int -module GLL.tRNA -o tRNA.yrd.fs -abstract true" >> log.txt
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i ..\YC.GrammarZOO\Bio\16s\H22_H23.yrd -c ExpandRepeat -c ExpandEbnf -c ExpandMeta -g "GLLGenerator -pos int -token int -module GLL.r16s.H22_H23 -o 16s_H22_H23.yrd.fs -abstract true" >> log.txt
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i ..\YC.GrammarZOO\Bio\tests\shift_problem.yrd -c ExpandRepeat -c ExpandEbnf -c ExpandMeta -g "GLLGenerator -pos int -token int -module GLL.shift_problem -o shift_problem.yrd.fs -abstract true" >> log.txt

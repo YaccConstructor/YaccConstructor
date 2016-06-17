@@ -48,7 +48,7 @@ type SearchConfig =
     val LowLengthLimit: int
     val StartNonterm: int
 
-    new(withoutSppf, withSppf, getSmb, hightLengthLimit, lowLengthLimit, startNonterm) = 
+    new(withoutSppf, withSppf, getSmb, lowLengthLimit, hightLengthLimit, startNonterm) = 
         {
             SearchWithoutSPPF = withoutSppf
             SearchWithSPPF = withSppf
@@ -64,9 +64,19 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lengthLimit res  =
     | Success ast -> 
         failwith "Result is success but it is unexpected success"
     | Success1 x ->        
-        let weightLimit = 1000
+        let weightLimit = 10000
         let filteredByLength = x |> Array.filter (fun i -> i.length >= uint16 lengthLimit)
         let qgEdgFromBio (e:BioParserEdge) = new QuickGraph.TaggedEquatableEdge<_,_>(e.Start, e.End, float e.RealLenght) 
+        let subgraphsMemoization =
+            let x = new System.Collections.Generic.Dictionary<_,_>()
+            fun s e ->
+                let flg,v = x.TryGetValue((s,e))
+                if flg
+                then true
+                else 
+                    x.Add((s,e),0)
+                    false
+
         let findSubgraph s e = 
             let qg = new QuickGraph.AdjacencyGraph<_,_>()
             let _ = qg.AddVerticesAndEdgeRange(graph.Edges |> Array.map qgEdgFromBio)
@@ -81,19 +91,23 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lengthLimit res  =
         let finalEdges = new ResizeArray<_>()
         let subgraphs =
             filteredByLength
-            |> Array.map (fun r -> 
+            |> Array.choose (fun r -> 
                 let newStartEdge = qgEdgFromBio graph.Edges.[r.le]
                 startEdges.Add graph.Edges.[r.le]
                 let newEndEdge = qgEdgFromBio graph.Edges.[r.re]
                 finalEdges.Add graph.Edges.[r.re]
                 let additionalWeight = newStartEdge.Tag + newEndEdge.Tag |> int
                 if r.le = r.re || graph.Edges.[r.le].End = graph.Edges.[r.re].Start
-                then new System.Collections.Generic.HashSet<_> [|newStartEdge; newEndEdge|], additionalWeight
-                else 
+                then (new System.Collections.Generic.HashSet<_> [|newStartEdge; newEndEdge|], additionalWeight)
+                     |> Some
+                elif not <| subgraphsMemoization graph.Edges.[r.le].End graph.Edges.[r.re].Start
+                then 
                     let s,w = findSubgraph graph.Edges.[r.le].End graph.Edges.[r.re].Start
                     s.Add newStartEdge |> ignore
                     s.Add newEndEdge |> ignore
-                    s, w + additionalWeight
+                    (s, w + additionalWeight)
+                    |> Some
+                else None
                 )
         
         let mergedSubgraphs = new ResizeArray<_>()

@@ -34,13 +34,13 @@ type Context2 =
     val Label         : int<labelMeasure>
     val Vertex        : Vertex
     val Extension     : int64<extension>
-    val Length        : byte
+    val Length        : uint16
     new (index, label, vertex, ext, len) = {Index = index; Label = label; Vertex = vertex; Extension = ext; Length = len}
     
 
-type ParseResult<'TokenType> =
-    | Success of Tree<'TokenType> 
-    | Success1 of array<'TokenType>
+type ParseResult<'a> =
+    | Success of Tree
+    | Success1 of 'a[]
     | Error of string
 
 module CommonFuns = 

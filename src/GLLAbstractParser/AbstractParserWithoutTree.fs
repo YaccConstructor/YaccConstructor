@@ -29,7 +29,7 @@ type ResultStruct =
     val re : int
     val rpos : int
     val nterm : string
-    val length   : byte
+    val length   : uint16
     new (l,l1, r, r1, n, len) = {le = l; lpos = l1; re = r; rpos = r1; nterm = n; length = len}
 
 let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph) condNonTerm = 
@@ -48,19 +48,19 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let slots = parser.Slots
         let condNonTermRules = Seq.toArray <| seq{for i in 0..parser.LeftSide.Length - 1 do if parser.LeftSide.[i] = condNonTerm then yield i}
         let setU = new CompressedArray<SysDict<int, SysDict<int64, ResizeArray<int64<extension>>>>>(input.ChainLength, (fun _ -> null ),shift) 
-        let setP = new SysDict<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int64<extension>*byte>>(500)
+        let setP = new SysDict<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int64<extension>*uint16>>(500)
         let setR = new System.Collections.Generic.Stack<Context2>(100)  
         let currentRule = parser.StartRule
         let currentLabel = ref <| (CommonFuns.packLabelNew currentRule 0) * 1<labelMeasure>
         let tempCount = ref 0
-        let currentLength = ref 0uy
+        let currentLength = ref 0us
         let r = new System.Collections.Generic.HashSet<_>()
         let currentIndex = ref 0 
         let currentrule = parser.StartRule
         let currentExtension = ref 0L<extension>
         let dummyGSSNode = new Vertex(!currentIndex, -1)
         let input = input           
-        let edges = Array.init parser.NonTermCount (fun _ -> new CompressedArray<SysDict<int, SysDict<int64<extension>, SysDict<int, ResizeArray<int*byte>>>>> (input.ChainLength, (fun _ -> null),shift))          
+        let edges = Array.init parser.NonTermCount (fun _ -> new CompressedArray<SysDict<int, SysDict<int64<extension>, SysDict<int, ResizeArray<int*uint16>>>>> (input.ChainLength, (fun _ -> null),shift))          
         let vertices = new CompressedArray<ResizeArray<_>>(input.ChainLength, (fun _ -> null),shift)
         let currentGSSNode = ref <| dummyGSSNode
      
@@ -123,7 +123,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             else
               incr reused
 
-        let containsEdge (b : Vertex) (e : Vertex) label extension len =
+        let containsEdge (b : Vertex) (e : Vertex) label extension (len : uint16) =
             let rt = getRuleNew label
             let pt = getPositionNew label
             let nontermName = b.NontermLabel
@@ -182,7 +182,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             if dict.IsSome then edges.[nontermName].[beginLevel] <- dict.Value
             cond
         
-        let create (cE : int) (cP : int) (label : int<labelMeasure>) (vertex : Vertex) curSymbol len =   
+        let create (cE : int) (cP : int) (label : int<labelMeasure>) (vertex : Vertex) curSymbol (len : uint16) =   
             let nonTermName = curSymbol
             let i = packEdgePos cE cP
             let ttttt = getPosOnEdge <| getLeftExtension !currentExtension
@@ -214,7 +214,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                     if flg then
                         for rule in rules do
                             let newLabel = 1<labelMeasure> * packLabelNew rule 0
-                            addContext !currentIndex newLabel v (packExtension index index) 0uy  
+                            addContext !currentIndex newLabel v (packExtension index index) 0us  
                 if cP < chainLen - 1
                 then
                     addCntxtForNonTerm cE cP i   
@@ -281,7 +281,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             let eatTerm () =
                 let pos = (1 + getPosOnEdge !currentIndex)
                 currentIndex := packEdgePos (getEdge !currentIndex) pos
-                currentLength := !currentLength + 1uy
+                currentLength := !currentLength + 1us
                 let ttt = getPosOnEdge (getLeftExtension !currentExtension)
                 let le = (getLeftExtension !currentExtension)
                 let re = packEdgePos (getEdge !currentIndex) ((getPosOnEdge !currentIndex) + shift)
@@ -330,7 +330,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                         if cP < chainLen - 1  then         
                             let curToken = input.Edges.[cE].Tokens.[cP]
                           
-                            if curSymbol = condNonTerm then currentLength := 0uy
+                            if curSymbol = condNonTerm then currentLength := 0us
                             let key = int(( curSymbol  <<< 16) ||| (curToken - parser.NonTermCount))
                             if parser.Table.ContainsKey key
                             then
@@ -339,7 +339,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                             let oEdges = outEdges.[input.Edges.[cE].End]
                             for oe in oEdges do 
                                 let curToken = input.Edges.[oe].Tokens.[shift]
-                                if curSymbol = condNonTerm then currentLength := 0uy
+                                if curSymbol = condNonTerm then currentLength := 0us
                                 let key = int(( curSymbol  <<< 16) ||| (curToken - parser.NonTermCount))
                                 if parser.Table.ContainsKey key
                                 then

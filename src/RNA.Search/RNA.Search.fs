@@ -40,18 +40,18 @@ type msg =
     | Die of AsyncReplyChannel<unit>
 
 [<Struct>]
-type SearchConfig<'Token> =
+type SearchConfig(*<'Token>*) =
     val SearchWithoutSPPF: BioParserInputGraph -> int -> ParseResult<ResultStruct>
-    val SearchWithSPPF: ParserInputGraph<'Token> -> ParseResult<'Token>
+    //val SearchWithSPPF: ParserInputGraph<'Token> -> ParseResult<'Token>
     val Tokenizer: char -> int
     val HightLengthLimit: int
     val LowLengthLimit: int
     val StartNonterm: int
 
-    new(withoutSppf, withSppf, getSmb, lowLengthLimit, hightLengthLimit, startNonterm) = 
+    new(withoutSppf(*, withSppf*), getSmb, lowLengthLimit, hightLengthLimit, startNonterm) = 
         {
             SearchWithoutSPPF = withoutSppf
-            SearchWithSPPF = withSppf
+            //SearchWithSPPF = withSppf
             Tokenizer = getSmb
             HightLengthLimit = hightLengthLimit
             LowLengthLimit = lowLengthLimit
@@ -284,14 +284,14 @@ let searchInCloud graphs =
     printfn "%A" r
     r
 
-let searchInBioGraphs (searchCfg : SearchConfig<_>) graphs agentsCount =
+let searchInBioGraphs (searchCfg : SearchConfig) graphs agentsCount =
     let start = System.DateTime.Now
     let processSubgraphs (subgraphs:ResizeArray<_>) (startEdges : ResizeArray<_>[]) (finalEdges : ResizeArray<_>[])=
         let parserInputGraphs = convertToParserInputGraph subgraphs startEdges finalEdges
         parserInputGraphs
         |> ResizeArray.iteri
             (fun i g ->
-                searchCfg.SearchWithSPPF g |> ignore
+                ()(*searchCfg.SearchWithSPPF g |> ignore*)
             )
         ()
     ()
@@ -339,7 +339,7 @@ let tRNASearchConfig =
             | x ->   failwithf "Strange symbol in input: %A" x
             |> GLL.tRNA.tokenToNumber
     
-    new SearchConfig<_>(GLL.tRNA.buildAbstract, GLL.tRNA.buildAbstractAst, getSmb, 120, 60, 4)
+    new SearchConfig(GLL.tRNA.buildAbstract(*, GLL.tRNA.buildAbstractAst*), getSmb, 120, 60, 4)
 
 let r16s_H22_H23_SearchConfig =
 
@@ -348,16 +348,16 @@ let r16s_H22_H23_SearchConfig =
         fun ch ->
             let i = incr cnt; !cnt 
             match ch with
-            | 'A' -> GLL.r16s.H22_H23.A i                
-            | 'U' -> GLL.r16s.H22_H23.U i
-            | 'T' -> GLL.r16s.H22_H23.U i
-            | 'C' -> GLL.r16s.H22_H23.C i
-            | 'G' -> GLL.r16s.H22_H23.G i
+            | 'A' | 'a' -> GLL.r16s.H22_H23.A i                
+            | 'U' | 'u' 
+            | 'T' | 't' -> GLL.r16s.H22_H23.U i
+            | 'C' | 'c' -> GLL.r16s.H22_H23.C i
+            | 'G' | 'g' -> GLL.r16s.H22_H23.G i
             | _ -> GLL.r16s.H22_H23.U i
             | x ->   failwithf "Strange symbol in input: %A" x
             |> GLL.r16s.H22_H23.tokenToNumber
     
-    new SearchConfig<_>(GLL.r16s.H22_H23.buildAbstract, GLL.r16s.H22_H23.buildAbstractAst, getSmb, 180, 340, 12)
+    new SearchConfig(GLL.r16s.H22_H23.buildAbstract(*, GLL.r16s.H22_H23.buildAbstractAst*), getSmb, 180, 340, 12)
 
 let shift_problem_SearchConfig =
 
@@ -372,14 +372,14 @@ let shift_problem_SearchConfig =
             | x ->   failwithf "Strange symbol in input: %A" x
             |> GLL.shift_problem.tokenToNumber
     
-    new SearchConfig<_>(GLL.shift_problem.buildAbstract, GLL.shift_problem.buildAbstractAst, getSmb, 100, 0, 1)
+    new SearchConfig(GLL.shift_problem.buildAbstract(*, GLL.shift_problem.buildAbstractAst*), getSmb, 100, 0, 1)
 
 let searchMain path what agentsCount =
     let searchCfg = 
         match what with
-        | TRNA -> tRNASearchConfig
+        | TRNA -> r16s_H22_H23_SearchConfig//tRNASearchConfig
         | R16S_H22_H23 -> r16s_H22_H23_SearchConfig
-        | Shift_problem -> shift_problem_SearchConfig
+        | Shift_problem -> r16s_H22_H23_SearchConfig//shift_problem_SearchConfig
 
     let graphs, longEdges = loadGraphFormFileToBioParserInputGraph path searchCfg.HightLengthLimit searchCfg.Tokenizer (GLL.tRNA.RNGLR_EOF 0)
 

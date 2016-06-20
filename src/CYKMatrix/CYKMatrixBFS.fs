@@ -212,24 +212,25 @@
                     completeSubLayer secondSubLayer halfMatricesSize
 
 
-        and completeLayer layerNum = 
+        and constructLayer layerNum = 
             let matricesSize = 1 <<< (layerNum - 1)
             let halfMatricesSize = int(matricesSize / 2)
-
-            if matricesSize = 1 
-            then
-                let nonTermsForChars = strToParse |> List.ofSeq |> List.map allRules.HeadBySimpleTail
-                nonTermsForChars |> List.iteri (fun i p -> updateTMatrixCell i (i + 1) p)
-            else   
-                let matricesCount = (double stringSize + 1.) / double(1 <<< (layerNum - 1)) - 1. |> ceil |> int
-                let firstInLayer = SubMatrix.create (0, 1 <<< layerNum) matricesSize
-                let layer = Array.init matricesCount (fun i -> firstInLayer.RelativeMatrix (i * matricesSize) (i * matricesSize))
-                if Array.length layer > 0 
-                then completeVLayer layer matricesSize
+   
+            let matricesCount = (double stringSize + 1.) / double(1 <<< (layerNum - 1)) - 1. |> ceil |> int
+            let firstInLayer = SubMatrix.create (0, 1 <<< layerNum) matricesSize
+            let layer = Array.init matricesCount (fun i -> firstInLayer.RelativeMatrix (i * matricesSize) (i * matricesSize))
+            layer
 
 
         let lastLayerToHandle = (log (double maxSearchLength + 1.)) / (log 2.) |> ceil |> int
-        for i in 1..lastLayerToHandle do
-            completeLayer i
+
+        let nonTermsForChars = strToParse |> List.ofSeq |> List.map allRules.HeadBySimpleTail
+        nonTermsForChars |> List.iteri (fun i p -> updateTMatrixCell i (i + 1) p)
+        for i in 2..lastLayerToHandle do
+            let layer = constructLayer i
+            let matricesSize = 1 <<< (i - 1)
+            
+            if Array.length layer > 0 
+            then completeVLayer layer matricesSize
             
         tMatrix.Item S

@@ -65,7 +65,7 @@
                 |> List.filter redundantCell
                 |> List.forall (fun (i, j) -> matrix.[i,j] = 0.)
 
-        let check str searchLen = 
+        let check str searchLen =             
             let toCheck    = CYKMatrix.recognize str rules nonterminals S searchLen
             let toCheckBFS = CYKMatrixBFS.recognize str rules nonterminals S searchLen true
             assert (isAnswerValid toCheck (String.length str) searchLen)
@@ -77,9 +77,19 @@
             assert sameAnswers
 //            printMatrix toCheck (String.length str) searchLen 
 
-        check "abb"     2 |> ignore    
-        check "abb"     3 |> ignore    
-        check "aaabbcc" 3 |> ignore
+        let checkTime str searchLen doParallel =
+            let stopWatch = System.Diagnostics.Stopwatch.StartNew()
+            let toCheckBFS = CYKMatrixBFS.recognize str rules nonterminals S searchLen doParallel
+            stopWatch.Stop()
+            assert (isAnswerValid toCheckBFS (String.length str) searchLen)
+            printfn "is parallel: %b, str length: %i, search length: %i, time(ms): %f." doParallel (String.length str) searchLen stopWatch.Elapsed.TotalMilliseconds
+
+        check "abb"     2 
+        check "abb"     3    
+        check "aaabbcc" 3
+
+        checkTime (String.replicate 300 "abb") 100 true
+        checkTime (String.replicate 300 "abb") 100 false
  
 //        check "aabb"
 //        check "abb"    

@@ -3,13 +3,6 @@
     open Util
     open System.Collections.Generic
 
-    type RulesHolder(complexRules: Dictionary<(NonTerminal * NonTerminal), (NonTerminal * double) list>,
-                     simpleRules: Dictionary<char, (NonTerminal * double) list>,
-                     epsilonRules: NonTerminal list)  = 
-        member this.GetSimpleRule c = simpleRules.Item c
-
-
-
     // todo: сделать красиво
     module SubMatrix = 
 
@@ -57,15 +50,10 @@
 
 
     let recognize (strToParse: string) 
-                  (complexRules: Dictionary<(NonTerminal * NonTerminal), (NonTerminal * double) list>)
-                  (simpleRules: Dictionary<char, (NonTerminal * double) list>)
-                  (epsilonRules: NonTerminal list) 
+                  (allRules: RulesHolder) 
                   (nonterminals : NonTerminal [])
                   S 
                   maxSearchLength = 
-
-        //todo:
-        let allRules = new RulesHolder(complexRules, simpleRules, epsilonRules)
 
 
         let stringSize = String.length strToParse
@@ -87,7 +75,7 @@
 
         let pMatrix = new Map<NonTerminal * NonTerminal, double [,]>
                             (
-                                complexRules.Keys
+                                allRules.ComplexTails
                                 |> Seq.map (fun x -> x, emptyMatrixOfSize (stringSize + 1))
                             )                                                        
 
@@ -130,8 +118,8 @@
         let rec completeSubLayer layer matricesSize = 
             if matricesSize = 1 then
                 let headsFromTail (tail, tailProb) = 
-                    if complexRules.ContainsKey tail then 
-                        complexRules.Item tail |> List.map (fun (head, headProb) -> head, headProb * tailProb)
+                    if allRules.IsComplexTail tail then 
+                        allRules.HeadByComplexTail tail |> List.map (fun (head, headProb) -> head, headProb * tailProb)
                     else 
                         []
 
@@ -218,7 +206,7 @@
 
             if matricesSize = 1 
             then
-                let nonTermsForChars = strToParse |> List.ofSeq |> List.map allRules.GetSimpleRule
+                let nonTermsForChars = strToParse |> List.ofSeq |> List.map allRules.HeadBySimpleTail
                 nonTermsForChars |> List.iteri (fun i p -> updateTMatrixCell i (i + 1) p)
             else   
                 let matricesCount = (double stringSize + 1.) / double(1 <<< (layerNum - 1)) - 1. |> ceil |> int

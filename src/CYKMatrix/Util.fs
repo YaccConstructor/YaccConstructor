@@ -1,4 +1,7 @@
 ﻿module Util
+    
+    open System.Collections.Generic
+
     type NonTerminal = NonTerminal of string
 
     type ComplexRule = { 
@@ -18,3 +21,15 @@
         Head: NonTerminal;
         probability: double;
     } 
+
+    type RulesHolder(complexRules: Dictionary<(NonTerminal * NonTerminal), (NonTerminal * double) list>,
+                     simpleRules: Dictionary<char, (NonTerminal * double) list>,
+                     epsilonRules: NonTerminal list)  =  
+                                         
+        member this.SimpleTails = simpleRules.Keys
+        member this.IsSimpleTail = simpleRules.ContainsKey
+        member this.HeadBySimpleTail c  = simpleRules.Item c
+
+        member this.ComplexTails = complexRules.Keys
+        member this.IsComplexTail = complexRules.ContainsKey
+        member this.HeadByComplexTail c = complexRules.Item c

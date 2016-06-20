@@ -29,6 +29,8 @@
     //    B -> B B, 0.2
     //    B -> 'b', 0.4
     //    B -> 'b', 0.4
+    
+        let rules = new RulesHolder(crl, srl, erl)
 
         let printMatrix (matrix: double [,]) strLen searchLen =
             let rowLength = matrix.GetLength(0)
@@ -64,8 +66,8 @@
                 |> List.forall (fun (i, j) -> matrix.[i,j] = 0.)
 
         let check str searchLen = 
-            let toCheck    = CYKMatrix.recognize str crl srl erl nonterminals S searchLen
-            let toCheckBFS = CYKMatrixBFS.recognize str crl srl erl nonterminals S searchLen
+            let toCheck    = CYKMatrix.recognize str rules nonterminals S searchLen
+            let toCheckBFS = CYKMatrixBFS.recognize str rules nonterminals S searchLen
             assert (isAnswerValid toCheck (String.length str) searchLen)
             assert (isAnswerValid toCheckBFS (String.length str) searchLen)
             let sameAnswers =

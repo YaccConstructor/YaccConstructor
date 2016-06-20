@@ -4,12 +4,11 @@
     open System.Collections.Generic
 
     let recognize (strToParse: string) 
-                  (complexRules: Dictionary<(NonTerminal * NonTerminal), (NonTerminal * double) list>)
-                  (simpleRules: Dictionary<char, (NonTerminal * double) list>)
-                  (epsilonRules: NonTerminal list) 
+                  (allRules: RulesHolder)  
                   (nonterminals : NonTerminal [])
                   S 
                   maxSearchLength = 
+
 
         let stringSize = String.length strToParse
 
@@ -29,7 +28,7 @@
 
         let pMatrix = new Map<NonTerminal * NonTerminal, double [,]>
                             (
-                                complexRules.Keys
+                                allRules.ComplexTails
                                 |> Seq.map (fun x -> x, emptyMatrixOfSize (stringSize + 1))
                             ) 
 
@@ -74,7 +73,7 @@
 
             if m1 - l1 = 1 && m1 = l2 then
                 let currentChar = strToParse.[l1]
-                let nonTerms = simpleRules.Item currentChar
+                let nonTerms = allRules.HeadBySimpleTail currentChar
 
                 nonTerms
                 |> List.iter (updateTMatrixCell l1 (l1 + 1))
@@ -83,8 +82,8 @@
                 assert (m2 <= stringSize + 1)
 
                 let headsFromTail (tail, tailProb) = 
-                    if complexRules.ContainsKey tail then 
-                        complexRules.Item tail |> List.map (fun (head, headProb) -> head, headProb * tailProb)
+                    if allRules.IsComplexTail tail then 
+                        allRules.HeadByComplexTail tail |> List.map (fun (head, headProb) -> head, headProb * tailProb)
                     else 
                         []
 

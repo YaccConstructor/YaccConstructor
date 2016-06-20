@@ -57,8 +57,11 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <None Include="App.config" />
-    <Compile Include="CYKMatrix.fs" />
     <None Include="packages.config" />
+    <Compile Include="Util.fs" />
+    <Compile Include="CYKMatrix.fs" />
+    <Compile Include="CYKMatrixBFS.fs" />
+    <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

@@ -2,6 +2,7 @@
 
     open Util
     open System.Collections.Generic
+    open Array.Parallel
 
     // todo: сделать красиво
     module SubMatrix = 
@@ -46,14 +47,16 @@
         SubMatrix.print task.from1
         printf "from2: "
         SubMatrix.print task.from2
-        printfn ""         
+        printfn ""        
 
 
     let recognize (strToParse: string) 
                   (allRules: RulesHolder) 
                   (nonterminals : NonTerminal [])
                   S 
-                  maxSearchLength = 
+                  maxSearchLength 
+                  doParallel
+                  = 
 
 
         let stringSize = String.length strToParse
@@ -101,12 +104,21 @@
             Array2D.init from1.Size actualCol2Count calcCell    
 
         let performMultiplication tasks = 
-            let performOne task = 
+            let crossproduct l1 l2 = 
+                seq { for el1 in l1 do  
+                          for el2 in l2 do
+                              yield el1, el2 }
+
+            let fullTasks = crossproduct tasks allRules.ComplexTails |> Array.ofSeq
+
+            let performOne (task, nts) = 
+                let (nt1, nt2) = nts
                 let {where=where; from1=from1; from2=from2} = task
-                let completeOnePair (nt1, nt2) =
-                        addToP (nt1, nt2) (subMatrixMult nt1 nt2 from1 from2) where
-                pMatrix |> Map.iter (fun nts _ -> completeOnePair nts)
-            tasks |> Array.iter performOne
+                addToP (nt1, nt2) (subMatrixMult nt1 nt2 from1 from2) where
+
+            if doParallel
+            then fullTasks |> Array.Parallel.iter performOne
+            else fullTasks |> Array.iter performOne
 
         let layerIsRedundant (layer: SubMatrix.T []) =
             if Array.length layer = 0 

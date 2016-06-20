@@ -67,19 +67,15 @@
 
         let check str searchLen = 
             let toCheck    = CYKMatrix.recognize str rules nonterminals S searchLen
-            let toCheckBFS = CYKMatrixBFS.recognize str rules nonterminals S searchLen
+            let toCheckBFS = CYKMatrixBFS.recognize str rules nonterminals S searchLen true
             assert (isAnswerValid toCheck (String.length str) searchLen)
             assert (isAnswerValid toCheckBFS (String.length str) searchLen)
             let sameAnswers =
-                seq { 
-                    for i in 0 .. toCheck.GetLength(0) - 1 do
-                        for j in 0 .. toCheck.GetLength(1) - 1 do
-                            if toCheck.[i, j] <> toCheckBFS.[i, j] then
-                                yield false
-                }
-                |> Seq.forall id
+                Seq.forall (fun i -> (Seq.forall (fun j -> toCheck.[i, j] = toCheckBFS.[i, j])
+                                                 [0 .. toCheck.GetLength(0) - 1]))
+                           [0 .. toCheck.GetLength(0) - 1] 
             assert sameAnswers
-            printMatrix toCheck (String.length str) searchLen 
+//            printMatrix toCheck (String.length str) searchLen 
 
         check "abb"     2 |> ignore    
         check "abb"     3 |> ignore    

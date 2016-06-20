@@ -104,12 +104,11 @@
             Array2D.init from1.Size actualCol2Count calcCell    
 
         let performMultiplication tasks = 
-            let crossproduct l1 l2 = 
-                seq { for el1 in l1 do  
-                          for el2 in l2 do
-                              yield el1, el2 }
+            let crossproduct xs ys = 
+                xs |> Array.collect (fun x -> ys |> Array.map (fun y -> x, y))
 
-            let fullTasks = crossproduct tasks allRules.ComplexTails |> Array.ofSeq
+
+            let fullTasks = crossproduct tasks (Array.ofSeq allRules.ComplexTails) |> Array.ofSeq
 
             let performOne (task, nts) = 
                 let (nt1, nt2) = nts
@@ -127,16 +126,16 @@
                 let layerIsOutOfSearchZone = snd layer.[0].Bottom - fst layer.[0].Bottom + 1 >= maxSearchLength + 1
                 layerIsOutOfSearchZone
         
-        let rec completeSubLayer layer matricesSize = 
+        let rec completeLayer layer matricesSize = 
             if matricesSize = 1 then
-                let headsFromTail (tail, tailProb) = 
+                let headProbsFromTail (tail, tailProb) = 
                     if allRules.IsComplexTail tail then 
                         allRules.HeadByComplexTail tail |> List.map (fun (head, headProb) -> head, headProb * tailProb)
                     else 
                         []
 
                 let tails row col = pMatrix |> Map.map (fun _ probs -> probs.[row, col-1]) |> Map.filter (fun _ prob -> prob > 0.)
-                let heads (row, col) = tails row col |> Map.toList |> List.map headsFromTail |> List.concat
+                let heads (row, col) = tails row col |> Map.toList |> List.map headProbsFromTail |> List.concat
 
                 layer 
                 |> Array.map (fun (matrix: SubMatrix.T) -> matrix.Top)
@@ -145,8 +144,8 @@
 
             else
                 let halfMatricesSize = int(matricesSize / 2)
-                let zeroSubLayer = layer |> Array.map (fun (matrix: SubMatrix.T) -> matrix.BottomMatrix)                        
-                completeSubLayer zeroSubLayer halfMatricesSize
+                let zeroSubLayer = layer |> Array.map (fun (matrix: SubMatrix.T) -> matrix.BottomMatrix)                   
+                completeLayer zeroSubLayer halfMatricesSize
                 completeVLayer layer matricesSize
 
         and completeVLayer layer matricesSize =
@@ -188,7 +187,7 @@
                                                 toMult
                                             
                 performMultiplication firstMultTasks
-                completeSubLayer firstSubLayer halfMatricesSize
+                completeLayer firstSubLayer halfMatricesSize
                       
                 let secondSubLayer =                 
                     reducedLayer 
@@ -209,26 +208,26 @@
                         
                     performMultiplication secondMultTasks
                     performMultiplication thirdMultTasks       
-                    completeSubLayer secondSubLayer halfMatricesSize
+                    completeLayer secondSubLayer halfMatricesSize
 
 
         and constructLayer layerNum = 
-            let matricesSize = 1 <<< (layerNum - 1)
+            let matricesSize = 1 <<< layerNum
             let halfMatricesSize = int(matricesSize / 2)
    
-            let matricesCount = (double stringSize + 1.) / double(1 <<< (layerNum - 1)) - 1. |> ceil |> int
-            let firstInLayer = SubMatrix.create (0, 1 <<< layerNum) matricesSize
+            let matricesCount = (double stringSize + 1.) / double(matricesSize) - 1. |> ceil |> int
+            let firstInLayer = SubMatrix.create (0, 1 <<< (layerNum + 1)) matricesSize
             let layer = Array.init matricesCount (fun i -> firstInLayer.RelativeMatrix (i * matricesSize) (i * matricesSize))
             layer
-
-
-        let lastLayerToHandle = (log (double maxSearchLength + 1.)) / (log 2.) |> ceil |> int
+            
+        let layerNumBound = (log (double maxSearchLength + 1.)) / (log 2.) |> ceil |> int
 
         let nonTermsForChars = strToParse |> List.ofSeq |> List.map allRules.HeadBySimpleTail
         nonTermsForChars |> List.iteri (fun i p -> updateTMatrixCell i (i + 1) p)
-        for i in 2..lastLayerToHandle do
+
+        for i in 1..(layerNumBound - 1) do
             let layer = constructLayer i
-            let matricesSize = 1 <<< (i - 1)
+            let matricesSize = 1 <<< i
             
             if Array.length layer > 0 
             then completeVLayer layer matricesSize

@@ -77,20 +77,37 @@
             assert sameAnswers
 //            printMatrix toCheck (String.length str) searchLen 
 
-        let checkTime str searchLen doParallel =
+        let checkOneType task check taskType str searchLen =        
             let stopWatch = System.Diagnostics.Stopwatch.StartNew()
-            let toCheckBFS = CYKMatrixBFS.recognize str rules nonterminals S searchLen doParallel
+            List.iter (fun _ -> task str searchLen |> ignore) [1..10] 
+//            let toCheck = task str searchLen           
             stopWatch.Stop()
-            assert (isAnswerValid toCheckBFS (String.length str) searchLen)
-            printfn "is parallel: %b, str length: %i, search length: %i, time(ms): %f." doParallel (String.length str) searchLen stopWatch.Elapsed.TotalMilliseconds
+//            assert (check toCheck (String.length str) searchLen)
+            printfn "type: %s, str length: %i, search length: %i, time(ms): %f." taskType (String.length str) searchLen stopWatch.Elapsed.TotalMilliseconds
+            
+        let checkTime str searchLen =
+            checkOneType (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen true)
+                         (fun toCheck -> isAnswerValid toCheck)
+                         "parallel"
+                         str
+                         searchLen
+            checkOneType (fun str searchLen -> CYKMatrix.recognize str rules nonterminals S searchLen)
+                         (fun toCheck -> isAnswerValid toCheck)
+                         "okhotin"
+                         str
+                         searchLen
+            checkOneType (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen false)
+                         (fun toCheck -> isAnswerValid toCheck)
+                         "not parallel"
+                         str
+                         searchLen
 
         check "abb"     2 
         check "abb"     3    
         check "aaabbcc" 3
 
-        checkTime (String.replicate 300 "abb") 100 true
-        checkTime (String.replicate 300 "abb") 100 false
- 
+        checkTime (String.replicate 300 "abb") 30
+         
 //        check "aabb"
 //        check "abb"    
 //        check "aaabbcc"

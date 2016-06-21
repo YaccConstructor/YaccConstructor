@@ -116,8 +116,8 @@
                 [0..from1.Size-1] |> List.fold (fun acc k -> acc + nt1Matrix.[i + left1Fst, k + left1Snd] * 
                                                                    nt2Matrix.[k + left2Fst, j + left2Snd]) 0. 
             let actualCol2Count = (min (snd from2.Top) (stringSize + 1)) - snd from2.Left
-            Array2D.init from1.Size actualCol2Count calcCell    
-
+            Array2D.init from1.Size actualCol2Count calcCell  
+            
         let performMultiplication tasks = 
             multiplicationCounter := !multiplicationCounter + (Array.length tasks)
             let crossproduct xs ys = 
@@ -184,7 +184,7 @@
                 let toMult = 
                     //todo: annotation?
                     let getMults i (matrix: SubMatrix.T) =
-                        if (i % 2) = 1
+                        if (i % 2) = 0
                         then
                             matrix.RelativeMatrix 0 -(snd matrix.Top - fst matrix.Top - matricesSize), 
                             matrix.RelativeMatrix halfMatricesSize 0
@@ -223,7 +223,7 @@
                     completeLayer secondSubLayer
 
 
-        and constructLayer layerNum = 
+        let constructLayer layerNum = 
             let matricesSize = 1 <<< layerNum   
             let matricesCount = (double stringSize + 1.) / double(matricesSize) - 1. |> ceil |> int
 
@@ -231,12 +231,13 @@
             let layer = Array.init matricesCount (fun i -> firstInLayer.RelativeMatrix (i * matricesSize) (i * matricesSize))
             layer
             
-        let layerNumUpperBound = (log (double maxSearchLength + 1.)) / (log 2.) |> ceil |> int
+        let layerSearchUpperBound = ((log (double maxSearchLength + 1.)) / (log 2.) |> ceil |> int)
+        let layerSizeUpperBound = matrixSizeExponent - 1
 
         let nonTermsForChars = strToParse |> List.ofSeq |> List.map allRules.HeadsBySimpleTail
         nonTermsForChars |> List.iteri (fun i ntProbs -> updateTMatrixCell i (i + 1) ntProbs)
 
-        for i in 1..(layerNumUpperBound - 1) do
+        for i in 1..(min layerSearchUpperBound layerSizeUpperBound) do
             let layer = constructLayer i
             
             if Array.length layer > 0 

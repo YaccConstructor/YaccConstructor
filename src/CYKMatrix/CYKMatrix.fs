@@ -3,6 +3,8 @@
     open Util
     open System.Collections.Generic
 
+    let multiplicationCounter = ref 0
+
     let recognize (strToParse: string) 
                   (allRules: RulesHolder)  
                   (nonterminals : NonTerminal [])
@@ -12,7 +14,7 @@
 
         let stringSize = String.length strToParse
 
-        let strSizeExponent = (System.Math.Log (double stringSize)) / (System.Math.Log 2.) |> System.Math.Ceiling |> int
+        let strSizeExponent = (System.Math.Log (double stringSize + 1.)) / (System.Math.Log 2.) |> System.Math.Ceiling |> int
         let roundedSize = (1 <<< strSizeExponent) - 1
     
 
@@ -48,6 +50,7 @@
             Array2D.init aHight (bUpperBound - bl2) calcCell                    
                                     
         let completeP where from1 from2 = 
+            multiplicationCounter := !multiplicationCounter + 1
             let completeOnePair (nt1, nt2) =
                     addToP (nt1, nt2) (subMatrixMult tMatrix.[nt1] tMatrix.[nt2] from1 from2) where
             pMatrix |> Map.iter (fun nts _ -> completeOnePair nts)
@@ -73,7 +76,7 @@
 
             if m1 - l1 = 1 && m1 = l2 then
                 let currentChar = strToParse.[l1]
-                let nonTerms = allRules.HeadBySimpleTail currentChar
+                let nonTerms = allRules.HeadsBySimpleTail currentChar
 
                 nonTerms
                 |> List.iter (updateTMatrixCell l1 (l1 + 1))
@@ -83,7 +86,7 @@
 
                 let headsFromTail (tail, tailProb) = 
                     if allRules.IsComplexTail tail then 
-                        allRules.HeadByComplexTail tail |> List.map (fun (head, headProb) -> head, headProb * tailProb)
+                        allRules.HeadsByComplexTail tail |> List.map (fun (head, headProb) -> head, headProb * tailProb)
                     else 
                         []
 
@@ -126,5 +129,7 @@
                             completeT e  
 
         compute 0 (roundedSize + 1) |> ignore
-
+        
+        printfn "okhotin mult count: %i" !multiplicationCounter
+        multiplicationCounter := 0
         tMatrix.Item S

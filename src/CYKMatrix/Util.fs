@@ -28,8 +28,14 @@
                                          
         member this.SimpleTails = simpleRules.Keys
         member this.IsSimpleTail = simpleRules.ContainsKey
-        member this.HeadBySimpleTail c  = simpleRules.Item c
+        member this.HeadsBySimpleTail c = 
+            if simpleRules.ContainsKey c
+            then simpleRules.Item c
+            else []
 
         member this.ComplexTails = complexRules.Keys
         member this.IsComplexTail = complexRules.ContainsKey
-        member this.HeadByComplexTail c = complexRules.Item c
+        member this.HeadsByComplexTail c = 
+            if complexRules.ContainsKey c
+            then complexRules.Item c
+            else []

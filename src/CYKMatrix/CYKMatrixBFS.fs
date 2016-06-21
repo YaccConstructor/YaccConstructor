@@ -47,7 +47,10 @@
         SubMatrix.print task.from1
         printf "from2: "
         SubMatrix.print task.from2
-        printfn ""        
+        printfn ""
+        
+        
+//    let multiplicationCounter = ref 0
 
 
     let recognize (strToParse: string) 
@@ -70,6 +73,8 @@
     
         // bottom-left triangle and diagonal of tMatrixes and pMatrixes are not used
         // upper-right triangle of size (stringSize - maxSearchLength) is not used
+
+        // swich to dictionary (?)
         let tMatrix = new Map<NonTerminal, double [,]>
                             (
                                 nonterminals 
@@ -91,19 +96,30 @@
             nontermProbs |> List.iter (addProbToMatrix tMatrix row column)
 
         let addToP nts (matrix: double [,]) (where: SubMatrix.T) =
+            let whereMatrix = pMatrix.[nts]
+            let iShift = fst where.Left
+            let jShift = snd where.Left
             for i in [0 .. where.Size - 1] do
                 let actualColCount = (min (snd where.Top) (stringSize + 1)) - snd where.Left
                 for j in [0 .. actualColCount - 1] do
-                    addProbToMatrix pMatrix (i + fst where.Left) (j + snd where.Left) (nts, matrix.[i, j])
+                    whereMatrix.[i + iShift, j + jShift] 
+                            <- whereMatrix.[i + iShift, j + jShift] + 
+                               matrix.[i, j]
+//                    addProbToMatrix pMatrix (i + fst where.Left) (j + snd where.Left) (nts, matrix.[i, j])
 
-        let subMatrixMult nt1 nt2 (from1: SubMatrix.T) (from2: SubMatrix.T) =
+        let subMatrixMult (nt1Matrix: double [,]) (nt2Matrix: double [,]) (from1: SubMatrix.T) (from2: SubMatrix.T) =
+            let left1Fst = fst from1.Left
+            let left1Snd = snd from1.Left
+            let left2Fst = fst from2.Left
+            let left2Snd = snd from2.Left
             let calcCell i j =
-                [0..from1.Size-1] |> List.fold (fun acc k -> acc + tMatrix.[nt1].[i + fst from1.Left, k + snd from1.Left] * 
-                                                                   tMatrix.[nt2].[k + fst from2.Left, j + snd from2.Left]) 0. 
+                [0..from1.Size-1] |> List.fold (fun acc k -> acc + nt1Matrix.[i + left1Fst, k + left1Snd] * 
+                                                                   nt2Matrix.[k + left2Fst, j + left2Snd]) 0. 
             let actualCol2Count = (min (snd from2.Top) (stringSize + 1)) - snd from2.Left
             Array2D.init from1.Size actualCol2Count calcCell    
 
         let performMultiplication tasks = 
+//            multiplicationCounter := !multiplicationCounter + (Array.length tasks)
             let crossproduct xs ys = 
                 xs |> Array.collect (fun x -> ys |> Array.map (fun y -> x, y))
 
@@ -113,7 +129,7 @@
             let performOne (task, nts) = 
                 let (nt1, nt2) = nts
                 let {where=where; from1=from1; from2=from2} = task
-                addToP (nt1, nt2) (subMatrixMult nt1 nt2 from1 from2) where
+                addToP (nt1, nt2) (subMatrixMult tMatrix.[nt1] tMatrix.[nt2] from1 from2) where
 
             if doParallel
             then fullTasks |> Array.Parallel.iter performOne
@@ -126,7 +142,8 @@
                 let layerIsOutOfSearchZone = snd layer.[0].Bottom - fst layer.[0].Bottom + 1 >= maxSearchLength + 1
                 layerIsOutOfSearchZone
         
-        let rec completeLayer layer matricesSize = 
+        let rec completeLayer (layer: SubMatrix.T []) = 
+            let matricesSize = layer.[0].Size
             if matricesSize = 1 then
                 let headProbsFromTail (tail, tailProb) = 
                     if allRules.IsComplexTail tail then 
@@ -145,10 +162,11 @@
             else
                 let halfMatricesSize = int(matricesSize / 2)
                 let zeroSubLayer = layer |> Array.map (fun (matrix: SubMatrix.T) -> matrix.BottomMatrix)                   
-                completeLayer zeroSubLayer halfMatricesSize
-                completeVLayer layer matricesSize
+                completeLayer zeroSubLayer
+                completeVLayer layer
 
-        and completeVLayer layer matricesSize =
+        and completeVLayer layer =
+            let matricesSize = layer.[0].Size
             let halfMatricesSize = int(matricesSize / 2)
             let reducedLayer = 
                 if snd layer.[Array.length layer - 1].Top > stringSize + 1 
@@ -187,7 +205,7 @@
                                                 toMult
                                             
                 performMultiplication firstMultTasks
-                completeLayer firstSubLayer halfMatricesSize
+                completeLayer firstSubLayer
                       
                 let secondSubLayer =                 
                     reducedLayer 
@@ -208,7 +226,7 @@
                         
                     performMultiplication secondMultTasks
                     performMultiplication thirdMultTasks       
-                    completeLayer secondSubLayer halfMatricesSize
+                    completeLayer secondSubLayer
 
 
         and constructLayer layerNum = 
@@ -227,9 +245,10 @@
 
         for i in 1..(layerNumBound - 1) do
             let layer = constructLayer i
-            let matricesSize = 1 <<< i
             
             if Array.length layer > 0 
-            then completeVLayer layer matricesSize
+            then completeVLayer layer
             
+//        printfn "bfs mult count: %i" !multiplicationCounter
+//        multiplicationCounter := 0
         tMatrix.Item S

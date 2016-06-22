@@ -17,8 +17,7 @@
         let strSizeExponent = (System.Math.Log (double stringSize + 1.)) / (System.Math.Log 2.) |> System.Math.Ceiling |> int
         let roundedSize = (1 <<< strSizeExponent) - 1
     
-    
-        let emptyMatrixOfSize n = new MyMatrix(n, n, (fun x y -> 0.))
+        let emptyMatrixOfSize n = myMatrixInit n n (fun x y -> 0.)
     
         // bottom-left triangle and diagonal of tMatrix and pMatrix are not used
         // upper-right triangle of size (stringSize - maxSearchLength) is not used
@@ -47,7 +46,7 @@
             let calcCell i j =
                 [0..aLength-1] |> List.fold (fun acc k -> acc + matrixA.[i + al1, k + al2] * matrixB.[k + bl1, j + bl2]) 0. 
             let bUpperBound = min bm2 (stringSize + 1)
-            new MyMatrix(aHight, (bUpperBound - bl2), calcCell)                 
+            myMatrixInit aHight (bUpperBound - bl2) calcCell                 
                                     
         let completeP where from1 from2 = 
 //            multiplicationCounter := !multiplicationCounter + 1

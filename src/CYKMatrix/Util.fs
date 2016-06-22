@@ -1,6 +1,8 @@
 ﻿module Util
     
+    open System
     open System.Collections.Generic
+    open Microsoft.FSharp.Math
 
     type NonTerminal = NonTerminal of string
 
@@ -82,10 +84,16 @@
             printf " (top: %d, %d; size: %d) " row col matrix.Size
 
 
-    type MyMatrix(sizeX: int, sizeY: int, generator: int -> int -> double) = 
-        let data  = Array2D.init sizeX sizeY generator
-
-        member this.GetLength i = data.GetLength(i)  
+//    type MyMatrix(sizeX: int, sizeY: int, generator: int -> int -> double) = 
+    type MyMatrix(matrix: Matrix<float>) =
+//        let data  = Matrix.init sizeX sizeY generator
+        let data = matrix
+        
+        member this.GetLength i = 
+            match i with
+            | 0 -> data.NumRows   
+            | 1 -> data.NumCols   
+            | _ -> raise <| IndexOutOfRangeException()
 
         member this.Item
             with get (i, j) = data.[i, j]
@@ -100,7 +108,7 @@
             let rowFinish = 
                 match rowFinish with
                 | Some(v) -> v
-                | None -> data.GetLength(0) - 1
+                | None -> data.NumRows - 1
             let colStart = 
                 match colStart with
                 | Some(v) -> v
@@ -108,18 +116,32 @@
             let colFinish = 
                 match colFinish with
                 | Some(v) -> v
-                | None -> data.GetLength(1) - 1
+                | None -> data.NumCols - 1
             data.[rowStart..rowFinish, colStart..colFinish]
+            
+        member this.AddValueToCell (i, j) value = data.[i, j] <- data.[i, j] + value
 
-//let arr = new MyIndexedArray<int>()
-//let a = arr.[1]
-//let b = arr.["name"]
-//let c = arr.[1..2]
-//let d = arr.[1..]
-//let e = arr.[..3]
-//let f = arr.[*]
-
-
+    let myMatrixInit sizeX sizeY generator =
+        new MyMatrix(Matrix.init sizeX sizeY generator)
+        
+    let subMatrixMult (nt1Matrix: MyMatrix) (nt2Matrix: MyMatrix) (from1: SubMatrix.T) (from2: SubMatrix.T) actualColCount =
+        let from1Matrix = nt1Matrix.[fst from1.Left..(fst from1.Right - 1), 
+                                     snd from1.Left..(snd from1.Right - 1)]
+        let from2Matrix = nt2Matrix.[fst from2.Left..(fst from2.Right - 1),
+                                     (snd from2.Left)..(snd from2.Right - 1 - (from1.Size - actualColCount))]
+        new MyMatrix(from1Matrix * from2Matrix)
+        
+//    let subMatrixMult (nt1Matrix: MyMatrix) (nt2Matrix: MyMatrix) (from1: SubMatrix.T) (from2: SubMatrix.T) actualColCount =
+//        let left1Fst = fst from1.Left
+//        let left1Snd = snd from1.Left
+//        let left2Fst = fst from2.Left
+//        let left2Snd = snd from2.Left
+//        let calcCell i j =
+//            [0..from1.Size-1] |> List.fold (fun acc k -> acc + nt1Matrix.[i + left1Fst, k + left1Snd] 
+//                                                                * nt2Matrix.[k + left2Fst, j + left2Snd]) 
+//                                            0. 
+//        new MyMatrix(from1.Size, actualColCount, calcCell) 
+        
 
     type MultiplicationTask = {where: SubMatrix.T; from1: SubMatrix.T; from2: SubMatrix.T}
     let printTask task = 

@@ -19,7 +19,7 @@
         let matrixSizeExponent = (log (double stringSize + 1.)) / (log 2.) |> ceil |> int
         let matrixSize = (1 <<< matrixSizeExponent)
     
-        let emptyMatrixOfSize n = new MyMatrix(n, n, (fun x y -> 0.))
+        let emptyMatrixOfSize n = myMatrixInit n n (fun x y -> 0.)
     
         // bottom-left triangle and diagonal of tMatrixes and pMatrixes are not used
         // upper-right triangle of size (stringSize - maxSearchLength) is not used
@@ -35,16 +35,11 @@
                             (
                                 allRules.ComplexTails
                                 |> Seq.map (fun x -> x, emptyMatrixOfSize (stringSize + 1))
-                            )                                                        
-
-        let addProbToMatrix (matrix: Map<_, MyMatrix>) row column nontermProb = 
-            let key, prob = nontermProb
-            (matrix.Item key).[row, column] <- (matrix.Item key).[row, column] + prob
+                            )
                   
         // todo: wrapper?      
         let addProbToTMatrix cell nontermProbs =
-            let row, column = cell 
-            nontermProbs |> List.iter (addProbToMatrix tMatrix row column)
+            nontermProbs |> List.iter (fun (key, prob) -> tMatrix.[key].AddValueToCell cell prob)
 
         let addProbsToPSubMatrix nts (matrix: MyMatrix) (where: SubMatrix.T) =
             let whereMatrix = pMatrix.[nts]
@@ -53,28 +48,16 @@
             for i in [0 .. where.Size - 1] do
                 let actualColCount = (min (snd where.Top) (stringSize + 1)) - snd where.Left
                 for j in [0 .. actualColCount - 1] do
-                    whereMatrix.[i + iShift, j + jShift] 
-                            <- whereMatrix.[i + iShift, j + jShift] + 
-                               matrix.[i, j]
-//                    addProbToMatrix pMatrix (i + fst where.Left) (j + snd where.Left) (nts, matrix.[i, j])
-
-        let subMatrixMult (nt1Matrix: MyMatrix) (nt2Matrix: MyMatrix) (from1: SubMatrix.T) (from2: SubMatrix.T) =
-            let left1Fst = fst from1.Left
-            let left1Snd = snd from1.Left
-            let left2Fst = fst from2.Left
-            let left2Snd = snd from2.Left
-            let calcCell i j =
-                [0..from1.Size-1] |> List.fold (fun acc k -> acc + nt1Matrix.[i + left1Fst, k + left1Snd] * 
-                                                                   nt2Matrix.[k + left2Fst, j + left2Snd]) 0. 
-            let actualCol2Count = (min (snd from2.Top) (stringSize + 1)) - snd from2.Left
-            new MyMatrix(from1.Size, actualCol2Count, calcCell)  
+                    whereMatrix.AddValueToCell (i + iShift, j + jShift) matrix.[i, j]
+//                    addProbToMatrix pMatrix (i + fst where.Left) (j + snd where.Left) (nts, matrix.[i, j]) 
             
         let performMultiplication tasks = 
 //            multiplicationCounter := !multiplicationCounter + (Array.length tasks)
 
             let performOneTask nts nt1Matrix nt2Matrix task = 
                 let {where=where; from1=from1; from2=from2} = task
-                addProbsToPSubMatrix nts (subMatrixMult nt1Matrix nt2Matrix from1 from2) where
+                let actualColCount = (min (snd from2.Top) (stringSize + 1)) - snd from2.Left
+                addProbsToPSubMatrix nts (subMatrixMult nt1Matrix nt2Matrix from1 from2 actualColCount) where
 
             let performForOneNts nts = 
                 let nt1, nt2 = nts

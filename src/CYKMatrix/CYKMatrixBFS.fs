@@ -101,7 +101,7 @@
             let row, column = cell 
             nontermProbs |> List.iter (addProbToMatrix tMatrix row column)
 
-        let addToP nts (matrix: double [,]) (where: SubMatrix.T) =
+        let addProbsToPSubMatrix nts (matrix: double [,]) (where: SubMatrix.T) =
             let whereMatrix = pMatrix.[nts]
             let iShift = fst where.Left
             let jShift = snd where.Left
@@ -126,19 +126,19 @@
             
         let performMultiplication tasks = 
 //            multiplicationCounter := !multiplicationCounter + (Array.length tasks)
-            let crossproduct xs ys = 
-                xs |> Array.collect (fun x -> ys |> Array.map (fun y -> x, y))
 
-            let fullTasks = crossproduct tasks (Array.ofSeq allRules.ComplexTails) |> Array.ofSeq
-
-            let performOne (task, nts) = 
-                let (nt1, nt2) = nts
+            let performOneTask nts nt1Matrix nt2Matrix task = 
                 let {where=where; from1=from1; from2=from2} = task
-                addToP (nt1, nt2) (subMatrixMult tMatrix.[nt1] tMatrix.[nt2] from1 from2) where
+                addProbsToPSubMatrix nts (subMatrixMult nt1Matrix nt2Matrix from1 from2) where
 
+            let performForOneNts nts = 
+                let nt1, nt2 = nts
+                tasks 
+                |> Array.iter (fun task -> performOneTask nts tMatrix.[nt1] tMatrix.[nt2] task)
+                
             if doParallel
-            then fullTasks |> Array.Parallel.iter performOne
-            else fullTasks |> Array.iter performOne
+            then Array.ofSeq allRules.ComplexTails |> Array.Parallel.iter performForOneNts
+            else Array.ofSeq allRules.ComplexTails |> Array.iter          performForOneNts
             
 
         let updateTMatrixCells cells =

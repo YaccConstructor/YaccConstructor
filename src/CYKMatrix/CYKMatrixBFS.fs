@@ -27,10 +27,15 @@
         type T with
             member this.RelativeMatrix = matrixWithShift this.Size this
 
-            member this.TopMatrix    = matrixWithShift this.HalfSize this 0  0 
-            member this.RightMatrix  = matrixWithShift this.HalfSize this this.HalfSize  0
-            member this.LeftMatrix   = matrixWithShift this.HalfSize this 0 -this.HalfSize
-            member this.BottomMatrix = matrixWithShift this.HalfSize this this.HalfSize -this.HalfSize 
+            member this.TopSubmatrix    = matrixWithShift this.HalfSize this 0  0 
+            member this.RightSubmatrix  = matrixWithShift this.HalfSize this this.HalfSize  0
+            member this.LeftSubmatrix   = matrixWithShift this.HalfSize this 0 -this.HalfSize
+            member this.BottomSubmatrix = matrixWithShift this.HalfSize this this.HalfSize -this.HalfSize 
+            
+            member this.RightNeighbor = this.RelativeMatrix this.Size 0
+            member this.LeftNeighbor  = this.RelativeMatrix 0 -this.Size
+            member this.RightGrounded = this.RelativeMatrix (snd this.Top - fst this.Top - 2 * this.Size)  0
+            member this.LeftGrounded  = this.RelativeMatrix 0 -(snd this.Top - fst this.Top - 2 * this.Size)
     
         let create top size = {Top = top; Size = size}
         let print matrix = 
@@ -50,7 +55,7 @@
         printfn ""
         
         
-    let multiplicationCounter = ref 0
+//    let multiplicationCounter = ref 0
 
 
     let recognize (strToParse: string) 
@@ -92,7 +97,8 @@
             (matrix.Item key).[row, column] <- (matrix.Item key).[row, column] + prob
                   
         // todo: wrapper?      
-        let updateTMatrixCell row column nontermProbs = 
+        let addProbToTMatrix cell nontermProbs =
+            let row, column = cell 
             nontermProbs |> List.iter (addProbToMatrix tMatrix row column)
 
         let addToP nts (matrix: double [,]) (where: SubMatrix.T) =
@@ -119,10 +125,9 @@
             Array2D.init from1.Size actualCol2Count calcCell  
             
         let performMultiplication tasks = 
-            multiplicationCounter := !multiplicationCounter + (Array.length tasks)
+//            multiplicationCounter := !multiplicationCounter + (Array.length tasks)
             let crossproduct xs ys = 
                 xs |> Array.collect (fun x -> ys |> Array.map (fun y -> x, y))
-
 
             let fullTasks = crossproduct tasks (Array.ofSeq allRules.ComplexTails) |> Array.ofSeq
 
@@ -134,8 +139,17 @@
             if doParallel
             then fullTasks |> Array.Parallel.iter performOne
             else fullTasks |> Array.iter performOne
+            
 
+        let updateTMatrixCells cells =
+                let headProbsFromTail (tail, tailProb) = 
+                    allRules.HeadsByComplexTail tail |> List.map (fun (head, headProb) -> head, headProb * tailProb)
 
+                let tails cell = pMatrix |> Map.map (fun _ probs -> probs.[fst cell, snd cell]) |> Map.filter (fun _ prob -> prob > 0.)
+                let heads cell = tails cell |> Map.toList |> List.map headProbsFromTail |> List.concat
+
+                cells
+                |> Array.iter (fun cell -> heads cell |> addProbToTMatrix cell)
 
         let layerIsRedundant (layer: SubMatrix.T []) =
             if Array.length layer = 0 
@@ -143,27 +157,18 @@
             else 
                 let layerIsOutOfSearchZone = snd layer.[0].Bottom - fst layer.[0].Bottom + 1 >= maxSearchLength + 1
                 layerIsOutOfSearchZone
+
         
         let rec completeLayer (layer: SubMatrix.T []) = 
             let matricesSize = layer.[0].Size
 
             if matricesSize = 1 then
-                let headProbsFromTail (tail, tailProb) = 
-                    if allRules.IsComplexTail tail then 
-                        allRules.HeadsByComplexTail tail |> List.map (fun (head, headProb) -> head, headProb * tailProb)
-                    else 
-                        []
-
-                let tails row col = pMatrix |> Map.map (fun _ probs -> probs.[row, col-1]) |> Map.filter (fun _ prob -> prob > 0.)
-                let heads (row, col) = tails row col |> Map.toList |> List.map headProbsFromTail |> List.concat
-
                 layer 
-                |> Array.map (fun (matrix: SubMatrix.T) -> matrix.Top)
-                |> Array.map (fun top -> top, heads top)
-                |> Array.iter (fun (top, heads) -> heads |> updateTMatrixCell (fst top) (snd top - 1))
+                |> Array.map (fun (matrix: SubMatrix.T) -> matrix.Left)
+                |> updateTMatrixCells
 
             else
-                let zeroSubLayer = layer |> Array.map (fun (matrix: SubMatrix.T) -> matrix.BottomMatrix)                   
+                let zeroSubLayer = layer |> Array.map (fun (matrix: SubMatrix.T) -> matrix.BottomSubmatrix)                   
                 completeLayer zeroSubLayer
                 completeVLayer layer
 
@@ -171,52 +176,37 @@
             let matricesSize = layer.[0].Size
             let halfMatricesSize = int(matricesSize / 2)
 
-            let needToReduceNextLayers = snd layer.[Array.length layer - 1].LeftMatrix.Top > stringSize 
+            let needToShortenNextLayers = snd layer.[Array.length layer - 1].LeftSubmatrix.Top > stringSize 
 
-            let firstSubLayerWithExtras = layer |> Array.collect (fun matrix -> [|matrix.LeftMatrix; matrix.RightMatrix|])
+            let firstSubLayerWithExtras = layer |> Array.collect (fun matrix -> [|matrix.LeftSubmatrix; matrix.RightSubmatrix|])
             let firstSubLayer = 
-                if needToReduceNextLayers
+                if needToShortenNextLayers
                 then firstSubLayerWithExtras.[0..(Array.length firstSubLayerWithExtras) - 2] 
-                else firstSubLayerWithExtras
+                else firstSubLayerWithExtras 
             
             if not <| layerIsRedundant firstSubLayer
             then
-                let toMult = 
-                    //todo: annotation?
-                    let getMults i (matrix: SubMatrix.T) =
-                        if (i % 2) = 0
-                        then
-                            matrix.RelativeMatrix 0 -(snd matrix.Top - fst matrix.Top - matricesSize), 
-                            matrix.RelativeMatrix halfMatricesSize 0
-                        else
-                            matrix.RelativeMatrix 0 -halfMatricesSize, 
-                            matrix.RelativeMatrix (snd matrix.Top - fst matrix.Top - matricesSize) 0
+                let firstMultTasks = 
                     firstSubLayer
-                    |> Array.mapi getMults
-                         
-                let firstMultTasks = Array.map2 (fun w (f1, f2) -> {where=w; from1=f1; from2=f2})
-                                                firstSubLayer 
-                                                toMult
+                    |> Array.mapi (fun i matrix -> if (i % 2) = 0
+                                                   then {where=matrix; from1=matrix.LeftGrounded; from2=matrix.RightNeighbor}
+                                                   else {where=matrix; from1=matrix.LeftNeighbor; from2=matrix.RightGrounded} )
                                             
                 performMultiplication firstMultTasks
                 completeLayer firstSubLayer
 
                 let secondSubLayer = 
-                    (if needToReduceNextLayers then layer.[0..(Array.length layer) - 2] else layer)
-                    |> Array.map (fun matrix -> matrix.TopMatrix)  
+                    (if needToShortenNextLayers then layer.[0..(Array.length layer) - 2] else layer)
+                    |> Array.map (fun matrix -> matrix.TopSubmatrix)  
 
                 if not <| layerIsRedundant secondSubLayer
                 then
-                    let secondToMult = 
+                    let secondMultTasks = 
                         secondSubLayer 
-                        |> Array.map (fun matrix -> matrix.RelativeMatrix 0 -(snd matrix.Top - fst matrix.Top - matricesSize), 
-                                                    matrix.RelativeMatrix halfMatricesSize 0) 
-                    let thirdToMult = 
+                        |> Array.map (fun matrix -> {where=matrix; from1=matrix.LeftGrounded; from2=matrix.RightNeighbor}) 
+                    let thirdMultTasks  = 
                         secondSubLayer 
-                        |> Array.map (fun matrix -> matrix.RelativeMatrix 0 -halfMatricesSize, 
-                                                    matrix.RelativeMatrix (snd matrix.Top - fst matrix.Top - matricesSize) 0)
-                    let secondMultTasks = Array.map2 (fun w (f1, f2) -> {where=w; from1=f1; from2=f2}) secondSubLayer secondToMult 
-                    let thirdMultTasks = Array.map2 (fun w (f1, f2) -> {where=w; from1=f1; from2=f2}) secondSubLayer thirdToMult 
+                        |> Array.map (fun matrix -> {where=matrix; from1=matrix.LeftNeighbor; from2=matrix.RightGrounded})
                         
                     performMultiplication secondMultTasks
                     performMultiplication thirdMultTasks       
@@ -227,7 +217,7 @@
             let matricesSize = 1 <<< layerNum   
             let matricesCount = (double stringSize + 1.) / double(matricesSize) - 1. |> ceil |> int
 
-            let firstInLayer = SubMatrix.create (0, 1 <<< (layerNum + 1)) matricesSize
+            let firstInLayer = SubMatrix.create (0, 2 * matricesSize) matricesSize
             let layer = Array.init matricesCount (fun i -> firstInLayer.RelativeMatrix (i * matricesSize) (i * matricesSize))
             layer
             
@@ -235,7 +225,7 @@
         let layerSizeUpperBound = matrixSizeExponent - 1
 
         let nonTermsForChars = strToParse |> List.ofSeq |> List.map allRules.HeadsBySimpleTail
-        nonTermsForChars |> List.iteri (fun i ntProbs -> updateTMatrixCell i (i + 1) ntProbs)
+        nonTermsForChars |> List.iteri (fun i ntProbs -> addProbToTMatrix (i, i + 1) ntProbs)
 
         for i in 1..(min layerSearchUpperBound layerSizeUpperBound) do
             let layer = constructLayer i
@@ -243,6 +233,4 @@
             if Array.length layer > 0 
             then completeVLayer layer
             
-        printfn "bfs mult count: %i" !multiplicationCounter
-        multiplicationCounter := 0
         tMatrix.Item S

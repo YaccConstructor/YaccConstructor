@@ -3,60 +3,8 @@
     open Util
     open System.Collections.Generic
     open Array.Parallel
-
-    // todo: сделать красиво
-    module SubMatrix = 
-
-        // todo: private?
-        let dotWithShift initial rowShift colShift =
-            let initRow, initCol = initial
-            (initRow + rowShift, initCol + colShift)
-
-        type T = {Top: int * int; Size: int} with
-            member this.HalfSize = int(float(this.Size) / 2.)
-            member this.RelativeDot = dotWithShift this.Top
-
-            member this.Right  = this.RelativeDot this.Size  0
-            member this.Left   = this.RelativeDot 0 -this.Size
-            member this.Bottom = this.RelativeDot this.Size -this.Size        
-
-        let matrixWithShift matrixSize (initial: T) rowShift colShift =
-            let newTop = dotWithShift initial.Top rowShift colShift
-            {Top = newTop; Size = matrixSize}
-
-        type T with
-            member this.RelativeMatrix = matrixWithShift this.Size this
-
-            member this.TopSubmatrix    = matrixWithShift this.HalfSize this 0  0 
-            member this.RightSubmatrix  = matrixWithShift this.HalfSize this this.HalfSize  0
-            member this.LeftSubmatrix   = matrixWithShift this.HalfSize this 0 -this.HalfSize
-            member this.BottomSubmatrix = matrixWithShift this.HalfSize this this.HalfSize -this.HalfSize 
-            
-            member this.RightNeighbor = this.RelativeMatrix this.Size 0
-            member this.LeftNeighbor  = this.RelativeMatrix 0 -this.Size
-            member this.RightGrounded = this.RelativeMatrix (snd this.Top - fst this.Top - 2 * this.Size)  0
-            member this.LeftGrounded  = this.RelativeMatrix 0 -(snd this.Top - fst this.Top - 2 * this.Size)
-    
-        let create top size = {Top = top; Size = size}
-        let print matrix = 
-            let row, col = matrix.Top
-            printf " (top: %d, %d; size: %d) " row col matrix.Size
-
-
-
-    type MultiplicationTask = {where: SubMatrix.T; from1: SubMatrix.T; from2: SubMatrix.T}
-    let printTask task = 
-        printf "where: "
-        SubMatrix.print task.where
-        printf "from1: "
-        SubMatrix.print task.from1
-        printf "from2: "
-        SubMatrix.print task.from2
-        printfn ""
-        
-        
+          
 //    let multiplicationCounter = ref 0
-
 
     let recognize (strToParse: string) 
                   (allRules: RulesHolder) 
@@ -66,33 +14,30 @@
                   doParallel
                   = 
 
-
         let stringSize = String.length strToParse
 
         let matrixSizeExponent = (log (double stringSize + 1.)) / (log 2.) |> ceil |> int
         let matrixSize = (1 <<< matrixSizeExponent)
-
     
-
-        let emptyMatrixOfSize n = Array2D.init n n (fun x y -> 0.)
+        let emptyMatrixOfSize n = new MyMatrix(n, n, (fun x y -> 0.))
     
         // bottom-left triangle and diagonal of tMatrixes and pMatrixes are not used
         // upper-right triangle of size (stringSize - maxSearchLength) is not used
 
         // swich to dictionary (?)
-        let tMatrix = new Map<NonTerminal, double [,]>
+        let tMatrix = new Map<NonTerminal, MyMatrix>
                             (
                                 nonterminals 
                                 |> Seq.map (fun x -> x, emptyMatrixOfSize (stringSize + 1))
                             )
 
-        let pMatrix = new Map<NonTerminal * NonTerminal, double [,]>
+        let pMatrix = new Map<NonTerminal * NonTerminal, MyMatrix>
                             (
                                 allRules.ComplexTails
                                 |> Seq.map (fun x -> x, emptyMatrixOfSize (stringSize + 1))
                             )                                                        
 
-        let addProbToMatrix (matrix: Map<_, double [,]>) row column nontermProb = 
+        let addProbToMatrix (matrix: Map<_, MyMatrix>) row column nontermProb = 
             let key, prob = nontermProb
             (matrix.Item key).[row, column] <- (matrix.Item key).[row, column] + prob
                   
@@ -101,7 +46,7 @@
             let row, column = cell 
             nontermProbs |> List.iter (addProbToMatrix tMatrix row column)
 
-        let addProbsToPSubMatrix nts (matrix: double [,]) (where: SubMatrix.T) =
+        let addProbsToPSubMatrix nts (matrix: MyMatrix) (where: SubMatrix.T) =
             let whereMatrix = pMatrix.[nts]
             let iShift = fst where.Left
             let jShift = snd where.Left
@@ -113,7 +58,7 @@
                                matrix.[i, j]
 //                    addProbToMatrix pMatrix (i + fst where.Left) (j + snd where.Left) (nts, matrix.[i, j])
 
-        let subMatrixMult (nt1Matrix: double [,]) (nt2Matrix: double [,]) (from1: SubMatrix.T) (from2: SubMatrix.T) =
+        let subMatrixMult (nt1Matrix: MyMatrix) (nt2Matrix: MyMatrix) (from1: SubMatrix.T) (from2: SubMatrix.T) =
             let left1Fst = fst from1.Left
             let left1Snd = snd from1.Left
             let left2Fst = fst from2.Left
@@ -122,7 +67,7 @@
                 [0..from1.Size-1] |> List.fold (fun acc k -> acc + nt1Matrix.[i + left1Fst, k + left1Snd] * 
                                                                    nt2Matrix.[k + left2Fst, j + left2Snd]) 0. 
             let actualCol2Count = (min (snd from2.Top) (stringSize + 1)) - snd from2.Left
-            Array2D.init from1.Size actualCol2Count calcCell  
+            new MyMatrix(from1.Size, actualCol2Count, calcCell)  
             
         let performMultiplication tasks = 
 //            multiplicationCounter := !multiplicationCounter + (Array.length tasks)

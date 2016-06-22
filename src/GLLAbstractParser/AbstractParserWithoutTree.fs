@@ -49,7 +49,6 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let condNonTermRules = Seq.toArray <| seq{for i in 0..parser.LeftSide.Length - 1 do if parser.LeftSide.[i] = condNonTerm then yield i}
         let setU = new CompressedArray<SysDict<int, SysDict<int64, ResizeArray<int64<extension>>>>>(input.ChainLength, (fun _ -> null ),shift) 
         let setP = new SysDict<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int64<extension>*uint16>>(500)
-        let setR = new System.Collections.Generic.Stack<Context2>(100)  
         let currentRule = parser.StartRule
         let currentLabel = ref <| (CommonFuns.packLabelNew currentRule 0) * 1<labelMeasure>
         let tempCount = ref 0
@@ -64,13 +63,17 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let vertices = new CompressedArray<ResizeArray<_>>(input.ChainLength, (fun _ -> null),shift)
         let currentGSSNode = ref <| dummyGSSNode
      
-        for i = input.InitialVertices.Length - 1 downto 0 do
-            let e = input.InitialVertices.[i]
-            let t = getEdge e
-            let tt = getPosOnEdge e + shift
-            let ttt = packEdgePos t tt
-            let ext = packExtension ttt ttt
-            setR.Push(new Context2(e, !currentLabel, !currentGSSNode, ext, !currentLength))
+        let startContexts = 
+            input.InitialVertices
+            |> Array.rev
+            |> Array.Parallel.mapi(fun i e -> 
+                let t = getEdge e
+                let tt = getPosOnEdge e + shift
+                let ttt = packEdgePos t tt
+                let ext = packExtension ttt ttt
+                new Context2(e, !currentLabel, !currentGSSNode, ext, !currentLength))
+
+        let setR = new System.Collections.Generic.Stack<Context2>(startContexts)  
 
         let currentContext = ref <| new Context2(!currentIndex, !currentLabel, !currentGSSNode, !currentExtension, !currentLength)
         

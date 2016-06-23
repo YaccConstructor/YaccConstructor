@@ -34,7 +34,7 @@
         let pMatrix = new Map<NonTerminal * NonTerminal, MyMatrix>
                             (
                                 allRules.ComplexTails
-                                |> Seq.map (fun x -> x, emptyMatrixOfSize (stringSize + 1))
+                                |> Array.map (fun x -> x, emptyMatrixOfSize (stringSize + 1))
                             )
                   
         // todo: wrapper?      
@@ -54,19 +54,22 @@
         let performMultiplication tasks = 
 //            multiplicationCounter := !multiplicationCounter + (Array.length tasks)
 
-            let performOneTask nts nt1Matrix nt2Matrix task = 
+            let crossproduct l1 l2 =
+                let product lst v = Array.map (fun vl -> (vl, v)) lst
+                Array.collect (product l1) l2
+
+            let performOneTask (task, nts) = 
+                let nt1, nt2 = nts
+                let nt1Matrix = tMatrix.[nt1]
+                let nt2Matrix = tMatrix.[nt2]
                 let {where=where; from1=from1; from2=from2} = task
                 let actualColCount = (min (snd from2.Top) (stringSize + 1)) - snd from2.Left
                 addProbsToPSubMatrix nts (subMatrixMult nt1Matrix nt2Matrix from1 from2 actualColCount) where
-
-            let performForOneNts nts = 
-                let nt1, nt2 = nts
-                tasks 
-                |> Array.iter (fun task -> performOneTask nts tMatrix.[nt1] tMatrix.[nt2] task)
                 
-            if doParallel
-            then Array.ofSeq allRules.ComplexTails |> Array.Parallel.iter performForOneNts
-            else Array.ofSeq allRules.ComplexTails |> Array.iter          performForOneNts
+            crossproduct tasks allRules.ComplexTails
+            |>  if doParallel
+                then  Array.Parallel.iter performOneTask
+                else  Array.iter          performOneTask
             
 
         let updateTMatrixCells cells =

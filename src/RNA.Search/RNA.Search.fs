@@ -42,7 +42,7 @@ type msg =
 [<Struct>]
 type SearchConfig =
     val SearchWithoutSPPF: BioParserInputGraph -> int -> ParseResult<ResultStruct>
-    val SearchWithSPPF: ParserInputGraph -> ParseResult<int>
+    val SearchWithSPPF: ParserInputGraph -> int -> ParseResult<int>
     val Tokenizer: char -> int
     val HightLengthLimit: int
     val LowLengthLimit: int
@@ -199,7 +199,7 @@ let convertToParserInputGraph (edges : ResizeArray<seq<BioParserEdge>>) (startEd
                 if not cond 
                 then
                     checkAndAdd e.End (!index + 1) e.Tokens.[e.Tokens.Length - 1]
-                    index := !index + 1
+                    changeIndex 1
                 else
                     f !index
                     addEdge edgesSet !index v e.Tokens.[e.Tokens.Length - 1] 0
@@ -240,7 +240,10 @@ let convertToParserInputGraph (edges : ResizeArray<seq<BioParserEdge>>) (startEd
         for i = 0 to finalV.Count - 1 do
             finalV.[i] <- finalV.[i] + 1 
         let f i = ()
-        processEdge edges.[g] f vertexMap edgesRes 
+        for e in edges.[g] do
+            if not <| startEdges.[g].Contains e || finalEdges.[g].Contains e
+            then
+                processEdge edges.[g] f vertexMap edgesRes 
         let resGraph = new ParserInputGraph(startV.ToArray(), finalV.ToArray())
         let tmp = resGraph.AddVerticesAndEdgeRange edgesRes 
         result.Add(resGraph)
@@ -291,7 +294,7 @@ let searchInBioGraphs (searchCfg : SearchConfig) graphs agentsCount =
         parserInputGraphs
         |> ResizeArray.iteri
             (fun i g ->
-                let r = searchCfg.SearchWithSPPF g 
+                let r = searchCfg.SearchWithSPPF g searchCfg.StartNonterm 
                 match r : ParseResult<_> with
                     | Success t -> 
                         t.GetPath searchCfg.StartNonterm 
@@ -361,7 +364,7 @@ let r16s_H22_H23_SearchConfig =
             | x ->   failwithf "Strange symbol in input: %A" x
             |> GLL.r16s.H22_H23.tokenToNumber
     
-    new SearchConfig(GLL.r16s.H22_H23.buildAbstract, GLL.r16s.H22_H23.buildAbstractAst, getSmb, 120, 90, 4)
+    new SearchConfig(GLL.r16s.H22_H23.buildAbstract, GLL.r16s.H22_H23.buildAbstractAst, getSmb, 90, 120, 4)
 
 let shift_problem_SearchConfig =
 
@@ -376,7 +379,7 @@ let shift_problem_SearchConfig =
             | x ->   failwithf "Strange symbol in input: %A" x
             |> GLL.shift_problem.tokenToNumber
     
-    new SearchConfig(GLL.shift_problem.buildAbstract, GLL.shift_problem.buildAbstractAst, getSmb, 100, 0, 1)
+    new SearchConfig(GLL.shift_problem.buildAbstract, GLL.shift_problem.buildAbstractAst, getSmb, 0, 100, 1)
 
 let searchMain path what agentsCount =
     let searchCfg = 

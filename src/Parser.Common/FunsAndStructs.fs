@@ -197,14 +197,14 @@ type ParserStructures<'TokenType> (currentRule : int)=
                 newDict1.Add(ast, newDict2)
                 false, Some newDict1   
 
-    let finalMatching (curRight : INode) nontermName finalExtensions findSppfNode findSppfPackedNode currentGSSNode currentVertexInInput (pop : Vertex -> int -> int<nodeMeasure> -> unit)  = 
+    let finalMatching (curRight : INode) nontermName (*finalExtensions*) findSppfNode findSppfPackedNode currentGSSNode currentVertexInInput (pop : Vertex -> int -> int<nodeMeasure> -> unit)  = 
         match curRight with
         | :? TerminalNode as t ->
             currentN := getNodeP findSppfNode findSppfPackedNode dummy !currentLabel !currentR !currentN
             let r = (sppfNodes.Item (int !currentN)) :?> NonTerminalNode 
             pop !currentGSSNode !currentVertexInInput !currentN
         | :? NonTerminalNode as r ->
-            if (r.Name = nontermName) && (Array.exists ((=) r.Extension) finalExtensions)
+            if (r.Name = nontermName) //&& (Array.exists ((=) r.Extension) finalExtensions)
             then 
                 match !resultAST with
                 | None ->  resultAST := Some r

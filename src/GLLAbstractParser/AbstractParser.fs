@@ -17,7 +17,7 @@ type M =
     val lbl : int<labelMeasure>
     new (p,l) = {pos = p; lbl = l}
 
-let buildAbstractAst<'TorenType> (parser : ParserSourceGLL<'TorenType>) (input : ParserInputGraph) : ParserCommon.ParseResult<int> = 
+let buildAbstractAst<'TorenType> (parser : ParserSourceGLL<'TorenType>) (input : ParserInputGraph) nonTerm : ParserCommon.ParseResult<int> = 
     
     if input.EdgeCount = 0 then
       //  if parser.AcceptEmptyInput then
@@ -264,8 +264,8 @@ let buildAbstractAst<'TorenType> (parser : ParserSourceGLL<'TorenType>) (input :
                     let curRight =  sppfNodes.Item (int !structures.CurrentN) 
                     structures.FinalMatching
                         curRight 
-                        parser.LeftSide.[parser.StartRule]
-                        finalExtensions
+                        nonTerm
+                        
                         findSppfNode
                         findSppfPackedNode
                         currentGSSNode

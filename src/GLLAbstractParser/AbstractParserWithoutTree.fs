@@ -343,10 +343,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                                 let key = int(( curSymbol  <<< 16) ||| (curToken - parser.NonTermCount))
                                 if parser.Table.ContainsKey key
                                 then
-                                    create oe shift (1<labelMeasure>  * packLabelNew rule (position + 1)) !currentGSSNode curSymbol !currentLength
-                            
-                                                        
-                    
+                                    create oe shift (1<labelMeasure>  * packLabelNew rule (position + 1)) !currentGSSNode curSymbol !currentLength    
                 else
                     if Array.exists (fun e -> e = rule) condNonTermRules
                     then

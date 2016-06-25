@@ -17,8 +17,6 @@
         let strSizeExponent = (System.Math.Log (double stringSize + 1.)) / (System.Math.Log 2.) |> System.Math.Ceiling |> int
         let roundedSize = (1 <<< strSizeExponent) - 1
     
-        let emptyMatrixOfSize n = myMatrixInit n n (fun x y -> 0.)
-    
         // bottom-left triangle and diagonal of tMatrix and pMatrix are not used
         // upper-right triangle of size (stringSize - maxSearchLength) is not used
         let tMatrix = new Map<NonTerminal, MyMatrix>
@@ -38,12 +36,12 @@
             for i in [l1..m1-1] do
                 let rightBound = min m2 (stringSize + 1)
                 for j in [l2..rightBound-1] do
-                    where.[i, j] <- (where.[i, j] + matrix.[i-l1, j-l2])         
+                    where.AddValueToCell (i, j) matrix.[i-l1, j-l2]      
 
         let subMatrixMult (matrixA: MyMatrix) (matrixB: MyMatrix) (al1, am1, al2, am2) (bl1, bm1, bl2, bm2) = 
             let aHight = am1 - al1
             let aLength = aHight
-            let calcCell i j =
+            let calcCell (i, j) =
                 [0..aLength-1] |> List.fold (fun acc k -> acc + matrixA.[i + al1, k + al2] * matrixB.[k + bl1, j + bl2]) 0. 
             let bUpperBound = min bm2 (stringSize + 1)
             myMatrixInit aHight (bUpperBound - bl2) calcCell                 
@@ -68,8 +66,7 @@
         and completeT (l1, m1, l2, m2) =
             assert (m1 - l1 = m2 - l2)
 
-            let addProbToMatrix (matrix: Map<_, MyMatrix>) row column key prob = 
-                    (matrix.Item key).[row, column] <- (matrix.Item key).[row, column] + prob
+            let addProbToMatrix (matrix: Map<_, MyMatrix>) row column key prob = (matrix.Item key).AddValueToCell (row, column) prob
                 
             let updateTMatrixCell row column (nonTerm, prob) = addProbToMatrix tMatrix row column nonTerm prob
 

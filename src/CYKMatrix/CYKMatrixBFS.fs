@@ -14,12 +14,12 @@
                   doParallel
                   = 
 
+        let GPUMultiplicator = new MatrixMultiplicator()
+
         let stringSize = String.length strToParse
 
         let matrixSizeExponent = (log (double stringSize + 1.)) / (log 2.) |> ceil |> int
         let matrixSize = (1 <<< matrixSizeExponent)
-    
-        let emptyMatrixOfSize n = myMatrixInit n n (fun x y -> 0.)
     
         // bottom-left triangle and diagonal of tMatrixes and pMatrixes are not used
         // upper-right triangle of size (stringSize - maxSearchLength) is not used
@@ -64,7 +64,7 @@
                 let nt2Matrix = tMatrix.[nt2]
                 let {where=where; from1=from1; from2=from2} = task
                 let actualColCount = (min (snd from2.Top) (stringSize + 1)) - snd from2.Left
-                addProbsToPSubMatrix nts (subMatrixMult nt1Matrix nt2Matrix from1 from2 actualColCount) where
+                addProbsToPSubMatrix nts (GPUMultiplicator.multiplicate nt1Matrix nt2Matrix from1 from2 actualColCount) where
                 
             crossproduct tasks allRules.ComplexTails
             |>  if doParallel
@@ -152,7 +152,7 @@
             let layer = Array.init matricesCount (fun i -> firstInLayer.RelativeMatrix (i * matricesSize) (i * matricesSize))
             layer
             
-        let layerSearchUpperBound = ((log (double maxSearchLength + 1.)) / (log 2.) |> ceil |> int)
+        let layerSearchUpperBound = (log (double maxSearchLength + 1.)) / (log 2.) |> ceil |> int
         let layerSizeUpperBound = matrixSizeExponent - 1
 
         let nonTermsForChars = strToParse |> List.ofSeq |> List.map allRules.HeadsBySimpleTail

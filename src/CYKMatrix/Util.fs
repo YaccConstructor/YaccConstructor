@@ -4,6 +4,13 @@
     open System.Collections.Generic
     open Microsoft.FSharp.Math
 
+    open Brahma.Helpers
+    open OpenCL.Net
+    open Brahma.OpenCL
+    open Brahma.FSharp.OpenCL.Core
+    open Microsoft.FSharp.Quotations
+    open Brahma.FSharp.OpenCL.Extensions
+
     type NonTerminal = NonTerminal of string
 
     type ComplexRule = { 
@@ -84,20 +91,71 @@
             printf " (top: %d, %d; size: %d) " row col matrix.Size
 
 
-//    type MyMatrix(sizeX: int, sizeY: int, generator: int -> int -> double) = 
-    type MyMatrix(matrix: Matrix<float>) =
-//        let data  = Matrix.init sizeX sizeY generator
+////    type MyMatrix(sizeX: int, sizeY: int, generator: int -> int -> double) = 
+//    type MyMatrix(matrix: Matrix<float>) =
+////        let data  = Matrix.init sizeX sizeY generator
+//        let data = matrix
+//        
+//        member this.GetLength i = 
+//            match i with
+//            | 0 -> data.NumRows   
+//            | 1 -> data.NumCols   
+//            | _ -> raise <| IndexOutOfRangeException()
+//
+//        member this.Item
+//            with get (i, j) = data.[i, j]
+////            and  set (i, j) value = data.[i, j] <- value
+//
+//        member this.GetSlice (rowStart: int option, rowFinish: int option,
+//                              colStart: int option, colFinish: int option) =
+//            let rowStart = 
+//                match rowStart with
+//                | Some(v) -> v
+//                | None -> 0
+//            let rowFinish = 
+//                match rowFinish with
+//                | Some(v) -> v
+//                | None -> data.NumRows - 1
+//            let colStart = 
+//                match colStart with
+//                | Some(v) -> v
+//                | None -> 0
+//            let colFinish = 
+//                match colFinish with
+//                | Some(v) -> v
+//                | None -> data.NumCols - 1
+//            data.[rowStart..rowFinish, colStart..colFinish]
+//            
+//        member this.AddValueToCell (i, j) value = data.[i, j] <- data.[i, j] + value
+//
+//    let myMatrixInit sizeX sizeY generator =
+//        new MyMatrix(Matrix.init sizeX sizeY (fun i j -> generator (i,j)))
+//        
+//    let emptyMatrixOfSize n = myMatrixInit n n (fun cell -> 0.)
+//        
+//    let subMatrixMult (nt1Matrix: MyMatrix) (nt2Matrix: MyMatrix) (from1: SubMatrix.T) (from2: SubMatrix.T) actualColCount =
+//        let from1Matrix = nt1Matrix.[fst from1.Left..(fst from1.Right - 1), 
+//                                     snd from1.Left..(snd from1.Right - 1)]
+//        let from2Matrix = nt2Matrix.[fst from2.Left..(fst from2.Right - 1),
+//                                     (snd from2.Left)..(snd from2.Right - 1 - (from1.Size - actualColCount))]
+//
+//        new MyMatrix(from1Matrix * from2Matrix)
+
+    type MyMatrix(matrix: float32 [], nrow: int, ncol: int) =
+        let ncol = ncol
+        let nrow = nrow
+        let getSingleIndex i j = i * ncol + j
         let data = matrix
         
         member this.GetLength i = 
             match i with
-            | 0 -> data.NumRows   
-            | 1 -> data.NumCols   
+            | 0 -> nrow
+            | 1 -> ncol   
             | _ -> raise <| IndexOutOfRangeException()
 
         member this.Item
-            with get (i, j) = data.[i, j]
-            and  set (i, j) value = data.[i, j] <- value
+            with get (i, j) = double data.[getSingleIndex i j]
+//            and  set (i, j) value = data.[getSingleIndex i j] <- (float32 value)
 
         member this.GetSlice (rowStart: int option, rowFinish: int option,
                               colStart: int option, colFinish: int option) =
@@ -108,7 +166,7 @@
             let rowFinish = 
                 match rowFinish with
                 | Some(v) -> v
-                | None -> data.NumRows - 1
+                | None -> nrow - 1
             let colStart = 
                 match colStart with
                 | Some(v) -> v
@@ -116,20 +174,82 @@
             let colFinish = 
                 match colFinish with
                 | Some(v) -> v
-                | None -> data.NumCols - 1
-            data.[rowStart..rowFinish, colStart..colFinish]
-            
-        member this.AddValueToCell (i, j) value = data.[i, j] <- data.[i, j] + value
+                | None -> ncol - 1
+            let subNcol = colFinish - colStart + 1
+            let subNrow = rowFinish - rowStart + 1
+            let rebaseIndex x =
+                let subi = x / subNcol
+                let subj = x - subNcol * subi
+                getSingleIndex (subi + rowStart) (subj + colStart)            
+            Array.init (subNcol * subNrow) (fun x -> data.[rebaseIndex x])
 
-    let myMatrixInit sizeX sizeY generator =
-        new MyMatrix(Matrix.init sizeX sizeY generator)
+        member this.AddValueToCell (i, j) (value: double) = 
+            let x = getSingleIndex i j
+            data.[x] <- data.[x] + (float32 value)
+
+    let myMatrixInit nrow ncol generator =
+        let splitIndex x =
+            let i = x / ncol
+            let j = x - ncol * i
+            i, j
+        new MyMatrix(Array.init (ncol * nrow) (fun x -> splitIndex x |> generator |> float32), nrow, ncol)
         
-    let subMatrixMult (nt1Matrix: MyMatrix) (nt2Matrix: MyMatrix) (from1: SubMatrix.T) (from2: SubMatrix.T) actualColCount =
-        let from1Matrix = nt1Matrix.[fst from1.Left..(fst from1.Right - 1), 
-                                     snd from1.Left..(snd from1.Right - 1)]
-        let from2Matrix = nt2Matrix.[fst from2.Left..(fst from2.Right - 1),
-                                     (snd from2.Left)..(snd from2.Right - 1 - (from1.Size - actualColCount))]
-        new MyMatrix(from1Matrix * from2Matrix)
+    let emptyMatrixOfSize n = myMatrixInit n n (fun cell -> 0.)
+        
+    type MatrixMultiplicator() = 
+        let localWorkSize = 2
+        let platformName = "*"
+        let deviceType = DeviceType.Default
+
+        let provider =
+            try  ComputeProvider.Create(platformName, deviceType)
+            with 
+            | ex -> failwith ex.Message
+
+        let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
+
+        let command = 
+            <@
+                fun (r:_2D) resultColumns vectorLength (a:array<_>) (b:array<_>) (c:array<_>) -> 
+                    let ti = r.GlobalID0
+                    let tj = r.GlobalID1                    
+                    let mutable buf = c.[ti * resultColumns + tj]
+                    for k in 0 .. vectorLength - 1 do
+                        buf <- buf + (a.[ti * vectorLength + k] * b.[k * resultColumns + tj])
+                    c.[ti * resultColumns + tj] <- buf
+            @>
+
+        member this.multiplicate (nt1Matrix: MyMatrix) (nt2Matrix: MyMatrix) (from1: SubMatrix.T) (from2: SubMatrix.T) actualColCount =
+            let from1Matrix = nt1Matrix.[fst from1.Left..(fst from1.Right - 1), 
+                                         snd from1.Left..(snd from1.Right - 1)]
+            let from2Matrix = nt2Matrix.[fst from2.Left..(fst from2.Right - 1),
+                                         (snd from2.Left)..(snd from2.Right - 1 - (from1.Size - actualColCount))]
+
+    //        if from1.Size >= 4
+    //        then
+    //        else
+
+            let resultRows = from1.Size
+            let resultColumns = actualColCount
+            let vectorLength = from1.Size
+        
+            let result = Array.zeroCreate(from1.Size * actualColCount)
+
+            let kernel, kernelPrepare, kernelRun = provider.Compile command
+    
+            let d = new _2D(from1.Size, actualColCount, min 4 from1.Size, 1)
+            kernelPrepare d resultColumns vectorLength from1Matrix from2Matrix result
+         
+            commandQueue.Add(kernelRun()).Finish() |> ignore        
+            commandQueue.Add(result.ToHost provider).Finish() |> ignore
+
+            new MyMatrix(result, from1.Size, actualColCount)
+
+        member this.releaseResources =
+            commandQueue.Dispose()
+            provider.Dispose()
+            provider.CloseAllBuffers()
+
         
 //    let subMatrixMult (nt1Matrix: MyMatrix) (nt2Matrix: MyMatrix) (from1: SubMatrix.T) (from2: SubMatrix.T) actualColCount =
 //        let left1Fst = fst from1.Left

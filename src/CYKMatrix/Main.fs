@@ -33,13 +33,14 @@
     
         let rules = new RulesHolder(crl, srl, erl)
 
-        let printMatrix (matrix: MyMatrix) strLen searchLen =
+        let printMatrix (matrix: ProbabilityMatrix) strLen searchLen =
             let rowLength = matrix.GetLength(0)
             let colLength = matrix.GetLength(1)
 
             for i in [0..rowLength-1] do
                 for j in [0..colLength-1] do
-                    if i <= strLen && j <= strLen && j > i && j-i <= searchLen then
+//                    if i <= strLen && j <= strLen && j > i && j-i <= searchLen then
+                    if i <= strLen && j <= strLen && j > i then
                         printf "%.8f  " matrix.[i, j]
                     else
                         assert (matrix.[i, j] = 0.)
@@ -48,7 +49,7 @@
                 printfn ""
             printfn ""
 
-        let isAnswerValid (matrix: MyMatrix) strLen searchLen = 
+        let isAnswerValid (matrix: ProbabilityMatrix) strLen searchLen = 
             let rowLength = matrix.GetLength(0)
             let colLength = matrix.GetLength(1)
             if rowLength <> colLength || rowLength <> strLen + 1 then
@@ -72,12 +73,12 @@
             assert (isAnswerValid toCheck (String.length str) searchLen)
             assert (isAnswerValid toCheckBFS (String.length str) searchLen)
             let sameAnswers =
-                Seq.forall (fun i -> (Seq.forall (fun j -> toCheck.[i, j] = toCheckBFS.[i, j])
+                Seq.forall (fun i -> (Seq.forall (fun j -> toCheck.[i, j] - toCheckBFS.[i, j] < 0.0000001)
                                                  [0 .. toCheck.GetLength(0) - 1]))
                            [0 .. toCheck.GetLength(0) - 1] 
             assert sameAnswers
-//            printMatrix toCheck (String.length str) searchLen 
-//            printMatrix toCheckBFS (String.length str) searchLen 
+            printMatrix toCheck (String.length str) searchLen 
+            printMatrix toCheckBFS (String.length str) searchLen 
 
         let checkOneType task check taskType str searchLen =        
             let stopWatch = System.Diagnostics.Stopwatch.StartNew()
@@ -103,24 +104,24 @@
                          str
                          searchLen
 
-        check "abb"      2 
+//        check "abb"      2
         check "abb"      3    
-        check "aaabbcc"  5
-        check "aaabb"    5
-        check "aaaaabbb" 6
-        check "aaaabbbbbb" 6
-        check "aaaabbbbbbbbbbb" 10
-        check "aaaabbbbbbbbbbbbbbb" 10
-        check "aaaabb" 6
-        check "aaaabb" 6
-        check "aaaabb" 5
-        check "aaaabb" 4
-        check "aaaabb" 3
-        check "aaaabb" 2
-        check "aaaabb" 1
-        check "aaaabb" 0
-        
-        checkTime (String.replicate 300 "abb") 30
+//        check "aaabbcc"  5
+//        check "aaabb"    5
+//        check "aaaaabbb" 6
+//        check "aaaabbbbbb" 6
+//        check "aaaabbbbbbbbbbb" 10
+//        check "aaaabbbbbbbbbbbbbbb" 10
+//        check "aaaabb" 6
+//        check "aaaabb" 6
+//        check "aaaabb" 5
+//        check "aaaabb" 4
+//        check "aaaabb" 3
+//        check "aaaabb" 2
+//        check "aaaabb" 1
+//        check "aaaabb" 0
+//        
+//        checkTime (String.replicate 300 "abb") 30
 //        checkTime ((String.replicate 511 "abbb") + "abb") 50
          
 //        check "aabb"

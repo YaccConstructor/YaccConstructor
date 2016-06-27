@@ -15,6 +15,7 @@
     <Name>CYKMatrix</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <NuGetPackageImportStamp>f0b7da8c</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -64,9 +65,53 @@
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Brahma">
+      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma.FSharp.OpenCL.AST">
+      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.FSharp.OpenCL.AST.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma.FSharp.OpenCL.Core">
+      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.FSharp.OpenCL.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma.FSharp.OpenCL.Extensions">
+      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.FSharp.OpenCL.Extensions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma.FSharp.OpenCL.Printer">
+      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.FSharp.OpenCL.Printer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma.FSharp.OpenCL.Translator">
+      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.FSharp.OpenCL.Translator.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma.Helpers">
+      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.Helpers.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma.OpenCL">
+      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.OpenCL.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
+    <Reference Include="FSharpx.Core">
+      <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Text.StructuredFormat">
+      <HintPath>..\packages\FSharpx.Text.StructuredFormat.1.8.41\lib\40\FSharpx.Text.StructuredFormat.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="OpenCL.Net">
+      <HintPath>..\packages\OpenCL.Net.2.2.9.0\lib\net40\OpenCL.Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -79,7 +124,9 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets'))" />
   </Target>
+  <Import Project="..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

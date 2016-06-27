@@ -234,7 +234,6 @@ let convertToParserInputGraph (edges : ResizeArray<seq<BioParserEdge>>) (startEd
         
 let searchInCloud graphs =
     let start = System.DateTime.Now
-
     let myStorageConnectionString = @"DefaultEndpointsProtocol=https;AccountName=mbracec3bb1560;AccountKey=G5GcN2Ne1JyP2u46EuAsCKZANM/xPSilqbwBk0z7zAncPStQax3SpYhxMb+8fwMSyXHhqhacsSwmHg3ZXZG/0A=="
     let myServiceBusConnectionString = @"EndPoint=sb://mbrace085d90e9.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=+9y8h6pLDSZFeSr5KyYPslxpoI6zkAz0ryHYvNTe2KY="
     let config = new Configuration(myStorageConnectionString, myServiceBusConnectionString)    
@@ -269,8 +268,8 @@ let searchInCloud graphs =
     printfn "time = %A" (System.DateTime.Now - start)
     printfn "%A" r
     r
-
-let searchInBioGraphs (searchCfg : SearchConfig<_>) graphs agentsCount =
+  //   searchInBioGraphs searchCfg graphs agentsCount
+let searchInBioGraphs (searchCfg : SearchConfig<'Token>) graphs agentsCount =
     let start = System.DateTime.Now
     let processSubgraphs (subgraphs:ResizeArray<_>) (startEdges : ResizeArray<_>[]) (finalEdges : ResizeArray<_>[])=
         let parserInputGraphs = convertToParserInputGraph subgraphs startEdges finalEdges
@@ -352,19 +351,19 @@ let shift_problem_SearchConfig =
         fun ch ->
             let i = incr cnt; !cnt 
             match ch with
-            | 'A' -> GLL.shift_problem.A i                
+            | 'A' -> GLL.shift_problem.A i               
             | 'C' -> GLL.shift_problem.C i
             | 'G' -> GLL.shift_problem.G i
             | x ->   failwithf "Strange symbol in input: %A" x
             |> GLL.shift_problem.tokenToNumber
     
-    new SearchConfig<_>(GLL.shift_problem.buildAbstract, GLL.shift_problem.buildAbstractAst, getSmb, 100, 0, 1)
+    new SearchConfig<GLL.shift_problem.Token>(GLL.shift_problem.buildAbstract, GLL.shift_problem.buildAbstractAst, getSmb, 100, 0, 1)
 
 let searchMain path what agentsCount =
     let searchCfg = 
         match what with
-        | TRNA -> tRNASearchConfig
-        | R16S_H22_H23 -> r16s_H22_H23_SearchConfig
+        | TRNA -> shift_problem_SearchConfig
+        | R16S_H22_H23 -> shift_problem_SearchConfig
         | Shift_problem -> shift_problem_SearchConfig
 
     let graphs, longEdges = loadGraphFormFileToBioParserInputGraph path searchCfg.HightLengthLimit searchCfg.Tokenizer (GLL.tRNA.RNGLR_EOF 0)

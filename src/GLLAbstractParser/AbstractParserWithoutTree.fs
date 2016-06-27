@@ -57,9 +57,8 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let currentIndex = ref 0 
         let currentrule = parser.StartRule
         let currentExtension = ref 0L<extension>
-        let dummyGSSNode = new Vertex(!currentIndex, -1)
+        let dummyGSSNode = new Vertex2(!currentIndex, -1, Unchecked.defaultof<_>)
         let input = input           
-        let edges = Array.init parser.NonTermCount (fun _ -> new CompressedArray<SysDict<int, SysDict<int64<extension>, SysDict<int, ResizeArray<int*uint16>>>>> (input.ChainLength, (fun _ -> null),shift))          
         let vertices = new CompressedArray<ResizeArray<_>>(input.ChainLength, (fun _ -> null),shift)
         let currentGSSNode = ref <| dummyGSSNode
      
@@ -76,7 +75,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let slotIsEnd (label : int<labelMeasure>) =
             (getPositionNew label) = Array.length (parser.rules.[getRuleNew label])
          
-        let containsContext  inputIndex (label : int<labelMeasure>) (vertex : Vertex) extension =
+        let containsContext  inputIndex (label : int<labelMeasure>) (vertex : Vertex2) extension =
             let vertexKey = CommonFuns.pack vertex.Level vertex.NontermLabel
             if setU.[inputIndex] <> null
             then
@@ -122,71 +121,23 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             else
               incr reused
 
-        let containsEdge (b : Vertex) (e : Vertex) label extension (len : uint16) =
+        let containsEdge (b : Vertex2) (e : Vertex2) label extension (len : uint16) =
             let rt = getRuleNew label
             let pt = getPositionNew label
             let nontermName = b.NontermLabel
             let beginLevel = int b.Level
             let endLevel = int e.Level
-            let dictLabelKey = edges.[nontermName].[beginLevel]
-            let cond, dict = 
-                if dictLabelKey <> null
+            for edge in e.Edges do
+                if not <| (edge.Ast = extension) && (edge.Length = len) && (edge.Dest = b)
                 then
-                    let c1, dictExtensionKey = dictLabelKey.TryGetValue label
-                    if c1
-                    then
-                        let c2, dictNontermKey = dictExtensionKey.TryGetValue extension
-                        if c2
-                        then
-                            let c3, ra = dictNontermKey.TryGetValue e.NontermLabel
-                            if c3
-                            then
-                                let mutable contains = false
-                                for pair in ra do if (fst pair) = e.NontermLabel then contains <- true
-                                if contains then true, None
-                                else
-                                    ra.Add((e.Level,len))
-                                    false, None
-                            else
-                                let arr = new ResizeArray<_>()
-                                arr.Add((e.Level,len)) 
-                                dictNontermKey.Add(e.NontermLabel, arr)
-                                false, None
-                        else
-                            let ra = new ResizeArray<_>()
-                            ra.Add((e.Level,len))
-                            let d = new SysDict<int, ResizeArray<_>>()
-                            d.Add(e.NontermLabel, ra)
-                            dictExtensionKey.Add(extension, d)
-                            false, None    
-                    else
-                        let d1 = new SysDict<int64<extension>, SysDict<int, ResizeArray<_>>>()
-                        let d2 = new SysDict<int, ResizeArray<_>>()
-                        let ra = new ResizeArray<_>()
-                        ra.Add((e.Level,len))
-                        d2.Add(e.NontermLabel, ra)
-                        d1.Add(extension, d2)
-                        dictLabelKey.Add(label, d1)
-                        false, None
-                else 
-                    let d0 = new SysDict<int, SysDict<int64<extension>, SysDict<int, ResizeArray<_>>>>()
-                    let d1 = new SysDict<int64<extension>, SysDict<int, ResizeArray<_>>>()
-                    let d2 = new SysDict<int, ResizeArray<_>>()
-                    let ra = new ResizeArray<_>()
-                    ra.Add((e.Level,len))
-                    d2.Add(e.NontermLabel, ra)
-                    d1.Add(extension, d2)
-                    d0.Add(label, d1)
-                    false, Some d0
-            if dict.IsSome then edges.[nontermName].[beginLevel] <- dict.Value
-            cond
+                    e.Edges.Add(new GSSEdge(b, extension, label, len))
         
-        let create (cE : int) (cP : int) (label : int<labelMeasure>) (vertex : Vertex) curSymbol (len : uint16) =   
+        let create (cE : int) (cP : int) (label : int<labelMeasure>) (vertex : Vertex2) curSymbol (len : uint16) =   
             let nonTermName = curSymbol
             let i = packEdgePos cE cP
             let ttttt = getPosOnEdge <| getLeftExtension !currentExtension
             let extension = packExtension (getLeftExtension !currentExtension) i 
-            let v = new Vertex(i, nonTermName)
+            let v = new Vertex2(i, nonTermName, new ResizeArray<_>())
             if edges.[nonTermName].[i] <> null
             then
                 let vertexKey = pack i nonTermName
@@ -204,7 +155,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                             let iiii = packEdgePos (getEdge (getRightExtension ex)) ((getPosOnEdge <| getRightExtension ex) - shift)
                             addContext iiii label vertex e (len + l))
             else
-                ignore <| containsEdge v vertex (int label) extension len
+                containsEdge v vertex (int label) extension len
                 let chainLen = input.ChainLength.[cE]
                 let addCntxtForNonTerm e pos index = 
                     let curToken = input.Edges.[e].Tokens.[pos]
@@ -222,7 +173,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                         addCntxtForNonTerm oE shift (packEdgePos oE 0)      
             
                 
-        let pop (u : Vertex) (i : int) (extension : int64<extension>) len =
+        let pop (u : Vertex2) (i : int) (extension : int64<extension>) len =
             if u <> dummyGSSNode
             then
                 
@@ -233,22 +184,16 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 else
                     let newList = new ResizableUsualOne<_>((extension, len))
                     setP.Add(vertexKey, newList)
-                let outEdges = edges.[u.NontermLabel].[u.Level]
-                for eLabel in outEdges do
-                    let labelOnEdge = eLabel.Key  
-                    for edge in eLabel.Value do
-                        let extOnEdge = edge.Key
-                        for slotLevels in edge.Value do
-                                let slot = slotLevels.Key
-                                for level in slotLevels.Value do
-                                    let l = (getLeftExtension extOnEdge)
-                                    let tt = getPosOnEdge l
+                let outEdges = u.Edges
+                for e in outEdges do
+                    let l = (getLeftExtension e.Ast)
+                    let tt = getPosOnEdge l
                                     
-                                    let r = (getRightExtension extension)
-                                    let ttt = getPosOnEdge r
-                                    let ext = packExtension l r
-                                    let newVertex = new Vertex(fst level, slot)
-                                    addContext i (labelOnEdge*1<labelMeasure>) newVertex ext (len + snd level)
+                    let r = (getRightExtension extension)
+                    let ttt = getPosOnEdge r
+                    let ext = packExtension l r
+                    let newVertex = new Vertex2(u.Level, e.Label, new ResizeArray<_>())          //!!!!!!!!!!!!!!!!!!!
+                    addContext i e.Label newVertex ext (len + e.Length)
 
         let table = parser.Table
         let condition = ref true 

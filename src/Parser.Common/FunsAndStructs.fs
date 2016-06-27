@@ -10,27 +10,29 @@ open System.Collections.Generic
 [<Measure>] type labelMeasure
 
 [<Struct>]
-//type Vertex =
-//    val Level            : int
-//    val NontermLabel     : int
-//    new (level, nonterm) = {Level = level; NontermLabel = nonterm}
+type Vertex =
+    val Level            : int
+    val NontermLabel     : int
+    new (level, nonterm) = {Level = level; NontermLabel = nonterm}
 
 type Vertex2 =
     val Level : int
-    val Label : int
+    val NontermLabel : int
     val Edges : ResizeArray<GSSEdge>
-    new (lev, lab, e) = {Level = lev; Label = lab; Edges = e}
+    new (lev, lab, e) = {Level = lev; NontermLabel = lab; Edges = e}
 and GSSEdge =
     val Dest : Vertex2
-    val Ast : IntermidiateNode
-    new (d, a) = {Dest = d; Ast = a}
+    val Label : int<labelMeasure>
+    val Ast : int64<extension>
+    val Length : uint16
+    new (d, a, l, len) = {Dest = d; Ast = a; Length = len; Label = l}
 
 
 [<Struct>]
 type Context(*<'TokenType>*) =
     val Index         : int
     val Label         : int<labelMeasure>
-    val Vertex        : Vertex2
+    val Vertex        : Vertex 
     val Ast           : int<nodeMeasure>
     val Probability   : float
     val SLength       : int   
@@ -50,7 +52,7 @@ type Context2 =
     
 
 type ParseResult<'a> =
-    | Success of Tree
+    | Success of Tree<'a>
     | Success1 of 'a[]
     | Error of string
 

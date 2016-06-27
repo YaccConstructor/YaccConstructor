@@ -300,7 +300,7 @@ let buildAbstractAst<'TorenType> (parser : ParserSourceGLL<'TorenType>) (input :
             | None -> Error ("String was not parsed")
             | Some res -> 
                     if checkConj res then        
-                            let r1 = new Tree (tokens.ToArray(), res, parser.rules)
+                            let r1 = new Tree<'TokenType> (tokens.ToArray(), res, parser.rules)
                             printf "%A" r1
                             //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
                             //r1.AstToDot parser.NumToString "AST123456.dot"

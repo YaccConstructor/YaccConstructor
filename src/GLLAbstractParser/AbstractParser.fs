@@ -17,7 +17,7 @@ type M =
     val lbl : int<labelMeasure>
     new (p,l) = {pos = p; lbl = l}
 
-let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : ParserInputGraph<'TokenType>) : ParserCommon.ParseResult<_> = 
+let buildAbstractAst<'TorenType> (parser : ParserSourceGLL<'TorenType>) (input : ParserInputGraph) nonTerm : ParserCommon.ParseResult<int> = 
     
     if input.EdgeCount = 0 then
       //  if parser.AcceptEmptyInput then
@@ -121,11 +121,11 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 | _ -> ()
                 num
                   
-        let getNodeT (edge : ParserEdge<'TokenType>) =
+        let getNodeT (edge : ParserEdge<int>) =
             let beginVertix = edge.Source
             let endVertix = edge.Target
             let tag = edge.Tag
-            let i = (parser.TokenToNumber tag) - parser.NonTermCount
+            let i = tag - parser.NonTermCount
             if terminalNodes.[beginVertix, endVertix, i] <> Unchecked.defaultof<int<nodeMeasure>>
             then
                 terminalNodes.[beginVertix, endVertix, i]
@@ -222,11 +222,11 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                    // then
                     if parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol
                     then
-                        let isEq (sym : int) (elem : ParserEdge<'TokenType>) = sym = parser.TokenToNumber elem.Tag
+                        let isEq (sym : int) (elem : ParserEdge<int>) = sym = elem.Tag
                         let curEdge = Seq.tryFind (isEq curSymbol) (input.OutEdges !currentVertexInInput)
                         match curEdge with
                         | Some edge ->
-                            let curToken = parser.TokenToNumber edge.Tag
+                            let curToken = edge.Tag
                             if curSymbol = curToken 
                             then
                                 if !structures.CurrentN = structures.Dummy
@@ -250,8 +250,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             index
                         currentGSSNode := create !currentVertexInInput (1<labelMeasure> *(packLabelNew rule (position + 1))) !currentGSSNode  !structures.CurrentN
                         for edge in input.OutEdges !currentVertexInInput do
-                            let curToken = parser.TokenToNumber edge.Tag
-
+                            let curToken = edge.Tag
                             let index = getIndex curSymbol curToken
                             let key =  int((int32 curSymbol <<< 16) ||| int32 (curToken - parser.NonTermCount  ))    
                             if table.ContainsKey key
@@ -265,8 +264,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     let curRight =  sppfNodes.Item (int !structures.CurrentN) 
                     structures.FinalMatching
                         curRight 
-                        parser.LeftSide.[parser.StartRule]
-                        finalExtensions
+                        nonTerm
+                        
                         findSppfNode
                         findSppfPackedNode
                         currentGSSNode
@@ -301,11 +300,11 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             | None -> Error ("String was not parsed")
             | Some res -> 
                     if checkConj res then        
-                            let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
+                            let r1 = new Tree (tokens.ToArray(), res, parser.rules)
                             printf "%A" r1
                             //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
-                            r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
+                            //r1.AstToDot parser.NumToString "AST123456.dot"
                             let t = r1.GetPath 1
                     //printfn "%d" !tempCount
-                            Success (r1)   
+                            ParseResult<'TokenType>.Success(r1)   
                     else Error ("String was not parsed")

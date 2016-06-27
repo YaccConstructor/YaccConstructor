@@ -13,90 +13,34 @@
                   maxSearchLength 
                   doParallel
                   = 
-
-        let GPUMultiplicator = new MatrixMultiplicator()
-
+                  
         let stringSize = String.length strToParse
-
-        let matrixSizeExponent = (log (double stringSize + 1.)) / (log 2.) |> ceil |> int
-        let matrixSize = (1 <<< matrixSizeExponent)
-    
+        
         // bottom-left triangle and diagonal of tMatrixes and pMatrixes are not used
         // upper-right triangle of size (stringSize - maxSearchLength) is not used
+        let matrices = new MatrixHolder(nonterminals, allRules.ComplexTails, stringSize)
 
-        // swich to dictionary (?)
-        let tMatrix = new Map<NonTerminal, MyMatrix>
-                            (
-                                nonterminals 
-                                |> Seq.map (fun x -> x, emptyMatrixOfSize (stringSize + 1))
-                            )
-
-        let pMatrix = new Map<NonTerminal * NonTerminal, MyMatrix>
-                            (
-                                allRules.ComplexTails
-                                |> Array.map (fun x -> x, emptyMatrixOfSize (stringSize + 1))
-                            )
-                  
-        // todo: wrapper?      
-        let addProbToTMatrix cell nontermProbs =
-            nontermProbs |> List.iter (fun (key, prob) -> tMatrix.[key].AddValueToCell cell prob)
-
-        let addProbsToPSubMatrix nts (matrix: MyMatrix) (where: SubMatrix.T) =
-            let whereMatrix = pMatrix.[nts]
-            let iShift = fst where.Left
-            let jShift = snd where.Left
-            for i in [0 .. where.Size - 1] do
-                let actualColCount = (min (snd where.Top) (stringSize + 1)) - snd where.Left
-                for j in [0 .. actualColCount - 1] do
-                    whereMatrix.AddValueToCell (i + iShift, j + jShift) matrix.[i, j]
-//                    addProbToMatrix pMatrix (i + fst where.Left) (j + snd where.Left) (nts, matrix.[i, j]) 
-            
-        let performMultiplication tasks = 
-//            multiplicationCounter := !multiplicationCounter + (Array.length tasks)
-
-            let crossproduct l1 l2 =
-                let product lst v = Array.map (fun vl -> (vl, v)) lst
-                Array.collect (product l1) l2
-
-            let performOneTask (task, nts) = 
-                let nt1, nt2 = nts
-                let nt1Matrix = tMatrix.[nt1]
-                let nt2Matrix = tMatrix.[nt2]
-                let {where=where; from1=from1; from2=from2} = task
-                let actualColCount = (min (snd from2.Top) (stringSize + 1)) - snd from2.Left
-                addProbsToPSubMatrix nts (GPUMultiplicator.multiplicate nt1Matrix nt2Matrix from1 from2 actualColCount) where
-                
-            crossproduct tasks allRules.ComplexTails
-            |>  if doParallel
-                then  Array.Parallel.iter performOneTask
-                else  Array.iter          performOneTask
-            
-
-        let updateTMatrixCells cells =
-                let headProbsFromTail (tail, tailProb) = 
-                    allRules.HeadsByComplexTail tail |> List.map (fun (head, headProb) -> head, headProb * tailProb)
-
-                let tails cell = pMatrix |> Map.map (fun _ probs -> probs.[fst cell, snd cell]) |> Map.filter (fun _ prob -> prob > 0.)
-                let heads cell = tails cell |> Map.toList |> List.map headProbsFromTail |> List.concat
-
-                cells
-                |> Array.iter (fun cell -> heads cell |> addProbToTMatrix cell)
+        let matrixSizeExponent = (log (double stringSize + 1.)) / (log 2.) |> ceil |> int
+        let matrixSize = (1 <<< matrixSizeExponent)    
 
         let layerIsRedundant (layer: SubMatrix.T []) =
             if Array.length layer = 0 
             then true
             else 
-                let layerIsOutOfSearchZone = snd layer.[0].Bottom - fst layer.[0].Bottom + 1 >= maxSearchLength + 1
-                layerIsOutOfSearchZone
-
+                let previousLayerCell = layer.[0].Bottom
+                let correspondingStringLength cell = snd cell - fst cell
+                correspondingStringLength previousLayerCell >= maxSearchLength
         
         let rec completeLayer (layer: SubMatrix.T []) = 
             let matricesSize = layer.[0].Size
 
             if matricesSize = 1 then
+                let headProbsFromTail (tail, tailProb) = 
+                    allRules.HeadsByComplexTail tail |> List.map (fun (head, headProb) -> head, headProb * tailProb)
+                
                 layer 
-                |> Array.map (fun (matrix: SubMatrix.T) -> matrix.Left)
-                |> updateTMatrixCells
+                |> Array.map (fun (matrix: SubMatrix.T) -> matrix.Left)  //todo: unwrap single cell
+                |> matrices.refreshTCells (headProbsFromTail)
 
             else
                 let zeroSubLayer = layer |> Array.map (fun (matrix: SubMatrix.T) -> matrix.BottomSubmatrix)                   
@@ -123,7 +67,7 @@
                                                    then {where=matrix; from1=matrix.LeftGrounded; from2=matrix.RightNeighbor}
                                                    else {where=matrix; from1=matrix.LeftNeighbor; from2=matrix.RightGrounded} )
                                             
-                performMultiplication firstMultTasks
+                matrices.performMultiplication firstMultTasks allRules.ComplexTails
                 completeLayer firstSubLayer
 
                 let secondSubLayer = 
@@ -139,8 +83,8 @@
                         secondSubLayer 
                         |> Array.map (fun matrix -> {where=matrix; from1=matrix.LeftNeighbor; from2=matrix.RightGrounded})
                         
-                    performMultiplication secondMultTasks
-                    performMultiplication thirdMultTasks       
+                    matrices.performMultiplication secondMultTasks allRules.ComplexTails
+                    matrices.performMultiplication thirdMultTasks allRules.ComplexTails      
                     completeLayer secondSubLayer
 
 
@@ -155,8 +99,8 @@
         let layerSearchUpperBound = (log (double maxSearchLength + 1.)) / (log 2.) |> ceil |> int
         let layerSizeUpperBound = matrixSizeExponent - 1
 
-        let nonTermsForChars = strToParse |> List.ofSeq |> List.map allRules.HeadsBySimpleTail
-        nonTermsForChars |> List.iteri (fun i ntProbs -> addProbToTMatrix (i, i + 1) ntProbs)
+        let stringOfNonterminals = strToParse |> List.ofSeq |> List.map allRules.HeadsBySimpleTail
+        matrices.initTDiagonalWith stringOfNonterminals
 
         for i in 1..(min layerSearchUpperBound layerSizeUpperBound) do
             let layer = constructLayer i
@@ -164,4 +108,4 @@
             if Array.length layer > 0 
             then completeVLayer layer
             
-        tMatrix.Item S
+        matrices.getProbabilities S

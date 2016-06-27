@@ -19,32 +19,32 @@
     
         // bottom-left triangle and diagonal of tMatrix and pMatrix are not used
         // upper-right triangle of size (stringSize - maxSearchLength) is not used
-        let tMatrix = new Map<NonTerminal, MyMatrix>
+        let tMatrix = new Map<NonTerminal, ProbabilityMatrix>
                             (
                                 nonterminals 
                                 |> Seq.map (fun x -> x, emptyMatrixOfSize (stringSize + 1))
                             )
 
-        let pMatrix = new Map<NonTerminal * NonTerminal, MyMatrix>
+        let pMatrix = new Map<NonTerminal * NonTerminal, ProbabilityMatrix>
                             (
                                 allRules.ComplexTails
                                 |> Seq.map (fun x -> x, emptyMatrixOfSize (stringSize + 1))
                             ) 
 
-        let addToP nts (matrix: MyMatrix) (l1, m1, l2, m2) =
+        let addToP nts (matrix: ProbabilityMatrix) (l1, m1, l2, m2) =
             let where = pMatrix.[nts]
             for i in [l1..m1-1] do
                 let rightBound = min m2 (stringSize + 1)
                 for j in [l2..rightBound-1] do
                     where.AddValueToCell (i, j) matrix.[i-l1, j-l2]      
 
-        let subMatrixMult (matrixA: MyMatrix) (matrixB: MyMatrix) (al1, am1, al2, am2) (bl1, bm1, bl2, bm2) = 
+        let subMatrixMult (matrixA: ProbabilityMatrix) (matrixB: ProbabilityMatrix) (al1, am1, al2, am2) (bl1, bm1, bl2, bm2) = 
             let aHight = am1 - al1
             let aLength = aHight
             let calcCell (i, j) =
                 [0..aLength-1] |> List.fold (fun acc k -> acc + matrixA.[i + al1, k + al2] * matrixB.[k + bl1, j + bl2]) 0. 
             let bUpperBound = min bm2 (stringSize + 1)
-            myMatrixInit aHight (bUpperBound - bl2) calcCell                 
+            probabilityMatrixInit aHight (bUpperBound - bl2) calcCell                 
                                     
         let completeP where from1 from2 = 
 //            multiplicationCounter := !multiplicationCounter + 1
@@ -66,7 +66,7 @@
         and completeT (l1, m1, l2, m2) =
             assert (m1 - l1 = m2 - l2)
 
-            let addProbToMatrix (matrix: Map<_, MyMatrix>) row column key prob = (matrix.Item key).AddValueToCell (row, column) prob
+            let addProbToMatrix (matrix: Map<_, ProbabilityMatrix>) row column key prob = (matrix.Item key).AddValueToCell (row, column) prob
                 
             let updateTMatrixCell row column (nonTerm, prob) = addProbToMatrix tMatrix row column nonTerm prob
 

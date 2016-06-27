@@ -10,16 +10,27 @@ open System.Collections.Generic
 [<Measure>] type labelMeasure
 
 [<Struct>]
-type Vertex =
-    val Level            : int
-    val NontermLabel     : int
-    new (level, nonterm) = {Level = level; NontermLabel = nonterm}
+//type Vertex =
+//    val Level            : int
+//    val NontermLabel     : int
+//    new (level, nonterm) = {Level = level; NontermLabel = nonterm}
+
+type Vertex2 =
+    val Level : int
+    val Label : int
+    val Edges : ResizeArray<GSSEdge>
+    new (lev, lab, e) = {Level = lev; Label = lab; Edges = e}
+and GSSEdge =
+    val Dest : Vertex2
+    val Ast : IntermidiateNode
+    new (d, a) = {Dest = d; Ast = a}
+
 
 [<Struct>]
 type Context(*<'TokenType>*) =
     val Index         : int
     val Label         : int<labelMeasure>
-    val Vertex        : Vertex
+    val Vertex        : Vertex2
     val Ast           : int<nodeMeasure>
     val Probability   : float
     val SLength       : int   
@@ -32,7 +43,7 @@ type Context(*<'TokenType>*) =
 type Context2 =
     val Index         : int
     val Label         : int<labelMeasure>
-    val Vertex        : Vertex
+    val Vertex        : Vertex2
     val Extension     : int64<extension>
     val Length        : uint16
     new (index, label, vertex, ext, len) = {Index = index; Label = label; Vertex = vertex; Extension = ext; Length = len}

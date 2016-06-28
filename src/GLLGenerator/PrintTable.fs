@@ -227,7 +227,7 @@ let printTableGLL
         printArr grammar.canInferEpsilon (print "%A")
 
         printBr "let defaultAstToDot ="
-        printBrInd 1 "(fun (tree : Yard.Generators.Common.ASTGLL.Tree<Token>) -> tree.AstToDot numToString)"
+        printBrInd 1 "(fun (tree : Yard.Generators.Common.ASTGLL.Tree) -> tree.AstToDot numToString)"
 
         printBr ""
 
@@ -263,7 +263,7 @@ let printTableGLL
             printBr "let buildAst : (seq<Token> -> ParserCommon.ParseResult<_>) ="
             printBrInd 1 "buildAst<Token> parserSource"
         else
-            printBr "let buildAbstractAst : (AbstractAnalysis.Common.ParserInputGraph<_> -> ParserCommon.ParseResult<_>) ="
+            printBr "let buildAbstractAst : (AbstractAnalysis.Common.ParserInputGraph -> ParserCommon.ParseResult<_>) ="
             printBrInd 1 "Yard.Generators.GLL.AbstractParser.buildAbstractAst<Token> parserSource"            
             printBr "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> int -> ParserCommon.ParseResult<_>) ="
             printBrInd 1 "Yard.Generators.GLL.AbstractParserWithoutTree.buildAbstract<Token> parserSource"

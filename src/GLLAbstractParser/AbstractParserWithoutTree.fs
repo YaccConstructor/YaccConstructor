@@ -28,8 +28,8 @@ type ResultStruct =
     val lpos : int
     val re : int
     val rpos : int
-    val nterm : string
-    val length   : uint16
+    val nterm  : string
+    val length : uint16
     new (l,l1, r, r1, n, len) = {le = l; lpos = l1; re = r; rpos = r1; nterm = n; length = len}
 
 let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph) condNonTerm = 
@@ -47,7 +47,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let descriptorNumber = ref 0
         let slots = parser.Slots
         let condNonTermRules = Seq.toArray <| seq{for i in 0..parser.LeftSide.Length - 1 do if parser.LeftSide.[i] = condNonTerm then yield i}
-        let setU = new CompressedArray<SysDict<int, SysDict<int64, ResizeArray<int64<extension>>>>>(input.ChainLength, (fun _ -> null ),shift) 
+        let setU = new CompressedArray<SysDict<int, SysDict<int64, _(*ResizeArray<int64<extension>>*)>>>(input.ChainLength, (fun _ -> null ),shift) 
         let setP = new SysDict<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int64<extension>*uint16>>(500)
         let currentRule = parser.StartRule
         let currentLabel = ref <| (CommonFuns.packLabelNew currentRule 0) * 1<labelMeasure>
@@ -59,7 +59,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let currentExtension = ref 0L<extension>
         let dummyGSSNode = new Vertex(!currentIndex, -1)
         let input = input           
-        let edges = Array.init parser.NonTermCount (fun _ -> new CompressedArray<SysDict<int, SysDict<int64<extension>, SysDict<int, ResizeArray<int*uint16>>>>> (input.ChainLength, (fun _ -> null),shift))          
+        let edges = Array.init parser.NonTermCount (fun _ -> new CompressedArray<SysDict<int, SysDict<int64<extension>, SysDict<int, _(*ResizeArray<int*uint16>*)>>>> (input.ChainLength, (fun _ -> null),shift))
         let vertices = new CompressedArray<ResizeArray<_>>(input.ChainLength, (fun _ -> null),shift)
         let currentGSSNode = ref <| dummyGSSNode
      
@@ -90,32 +90,34 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                     if current.ContainsKey vertexKey
                     then
                         let trees = current.[vertexKey]
-                        if not <| trees.Contains extension
+                        if not <| Array.contains extension !trees
                         then 
-                            trees.Add extension
+                            Array.Resize(trees, (!trees).Length + 1)
+                            (!trees).[(!trees).Length - 1] <- extension
+                            //trees := Array.reduce` extension
                             false
                         else
                             true
                     else 
-                        let arr = new ResizeArray<int64<extension>>()
-                        arr.Add extension
-                        current.Add(vertexKey, arr)                    
+//                        let arr = new ResizeArray<int64<extension>>()
+//                        arr.Add extension
+                        current.Add(vertexKey, ref [|extension|])                    
                         false
                 else 
-                    let dict = new SysDict<_, ResizeArray<_>>()
+                    let dict = new SysDict<_,_>()
                     setU.[inputIndex].Add(int label, dict)
-                    let arr = new ResizeArray<_>()
-                    arr.Add extension
-                    dict.Add(vertexKey, arr) 
+                    //let arr = new ResizeArray<_>()
+                    //arr.Add extension
+                    dict.Add(vertexKey, ref [|extension|]) 
                     false
             else 
                 let dict1 = new SysDict<_, _>()
                 setU.[inputIndex] <- dict1
-                let dict2 = new SysDict<_, ResizeArray<_>>()
+                let dict2 = new SysDict<_, _>()
                 dict1.Add(int label, dict2)
-                let arr = new ResizeArray<_>()
-                arr.Add extension
-                dict2.Add(vertexKey, arr)
+//                let arr = new ResizeArray<_>()
+//                arr.Add extension
+                dict2.Add(vertexKey, ref [|extension|])
                 false
             
         let addContext (inputVertex : int) (label : int<labelMeasure>) vertex extension len =
@@ -149,36 +151,43 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                                 for pair in ra do if (fst pair) = e.NontermLabel then contains <- true
                                 if contains then true, None
                                 else
-                                    ra.Add((e.Level,len))
+                                    let a = ref ra
+                                    Array.Resize(a, ra.Length + 1)
+                                    (!a).[ra.Length] <- (e.Level,len)
+                                    dictNontermKey.[e.NontermLabel] <- (!a)
                                     false, None
                             else
-                                let arr = new ResizeArray<_>()
-                                arr.Add((e.Level,len)) 
+                                //let arr = new ResizeArray<_>()
+                                //arr.Add((e.Level,len))
+                                let arr = [|e.Level,len|]
                                 dictNontermKey.Add(e.NontermLabel, arr)
                                 false, None
                         else
-                            let ra = new ResizeArray<_>()
-                            ra.Add((e.Level,len))
-                            let d = new SysDict<int, ResizeArray<_>>()
-                            d.Add(e.NontermLabel, ra)
+//                            let ra = new ResizeArray<_>()
+//                            ra.Add((e.Level,len))
+                            let arr = [|e.Level,len|]
+                            let d = new SysDict<int, _>()
+                            d.Add(e.NontermLabel, arr)
                             dictExtensionKey.Add(extension, d)
                             false, None    
                     else
-                        let d1 = new SysDict<int64<extension>, SysDict<int, ResizeArray<_>>>()
-                        let d2 = new SysDict<int, ResizeArray<_>>()
-                        let ra = new ResizeArray<_>()
-                        ra.Add((e.Level,len))
-                        d2.Add(e.NontermLabel, ra)
+                        let d1 = new SysDict<int64<extension>, SysDict<int, _>>()
+                        let d2 = new SysDict<int, _>()
+//                        let ra = new ResizeArray<_>()
+//                        ra.Add((e.Level,len))
+                        let arr = [|e.Level,len|]
+                        d2.Add(e.NontermLabel, arr)
                         d1.Add(extension, d2)
                         dictLabelKey.Add(label, d1)
                         false, None
                 else 
-                    let d0 = new SysDict<int, SysDict<int64<extension>, SysDict<int, ResizeArray<_>>>>()
-                    let d1 = new SysDict<int64<extension>, SysDict<int, ResizeArray<_>>>()
-                    let d2 = new SysDict<int, ResizeArray<_>>()
-                    let ra = new ResizeArray<_>()
-                    ra.Add((e.Level,len))
-                    d2.Add(e.NontermLabel, ra)
+                    let d0 = new SysDict<int, SysDict<int64<extension>, SysDict<int, _>>>()
+                    let d1 = new SysDict<int64<extension>, SysDict<int, _>>()
+                    let d2 = new SysDict<int, _>()
+//                    let ra = new ResizeArray<_>()
+//                    ra.Add((e.Level,len))
+                    let arr = [|e.Level,len|]
+                    d2.Add(e.NontermLabel, arr)
                     d1.Add(extension, d2)
                     d0.Add(label, d1)
                     false, Some d0
@@ -188,7 +197,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let create (cE : int) (cP : int) (label : int<labelMeasure>) (vertex : Vertex) curSymbol (len : uint16) =   
             let nonTermName = curSymbol
             let i = packEdgePos cE cP
-            let ttttt = getPosOnEdge <| getLeftExtension !currentExtension
+            ///let ttttt = getPosOnEdge <| getLeftExtension !currentExtension
             let extension = packExtension (getLeftExtension !currentExtension) i 
             let v = new Vertex(i, nonTermName)
             if edges.[nonTermName].[i] <> null
@@ -246,10 +255,10 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                                 let slot = slotLevels.Key
                                 for level in slotLevels.Value do
                                     let l = (getLeftExtension extOnEdge)
-                                    let tt = getPosOnEdge l
+                                    //let tt = getPosOnEdge l
                                     
                                     let r = (getRightExtension extension)
-                                    let ttt = getPosOnEdge r
+                                    //let ttt = getPosOnEdge r
                                     let ext = packExtension l r
                                     let newVertex = new Vertex(fst level, slot)
                                     addContext i (labelOnEdge*1<labelMeasure>) newVertex ext (len + snd level)
@@ -271,8 +280,8 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 currentLabel := currentContext.Value.Label
                 currentExtension := currentContext.Value.Extension
                 currentLength := currentContext.Value.Length
-                let ttt = getPosOnEdge <| getLeftExtension !currentExtension
-                let aa = getPosOnEdge <| getRightExtension !currentExtension
+                //let ttt = getPosOnEdge <| getLeftExtension !currentExtension
+                //let aa = getPosOnEdge <| getRightExtension !currentExtension
                 condition := false
             else 
                 stop := true  
@@ -285,7 +294,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 let pos = (1 + getPosOnEdge !currentIndex)
                 currentIndex := packEdgePos (getEdge !currentIndex) pos
                 currentLength := !currentLength + 1us
-                let ttt = getPosOnEdge (getLeftExtension !currentExtension)
+                //let ttt = getPosOnEdge (getLeftExtension !currentExtension)
                 let le = (getLeftExtension !currentExtension)
                 let re = packEdgePos (getEdge !currentIndex) ((getPosOnEdge !currentIndex) + shift)
                 currentExtension := packExtension le re
@@ -300,7 +309,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                 
                 pop !currentGSSNode !currentIndex !currentExtension !currentLength
             else
-                setR.Count                
+                //setR.Count                
                 if Array.length parser.rules.[rule] <> position
                 then
                     let curSymbol = parser.rules.[rule].[position]
@@ -313,8 +322,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                         then    
                             let curToken = input.Edges.[cE].Tokens.[cP] 
                             if curToken = curSymbol
-                            then
-                                eatTerm ()
+                            then eatTerm ()
                         else   
                             let curEdge = 
                                 let oEdges = outEdges.[input.Edges.[cE].End]

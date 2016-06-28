@@ -31,8 +31,10 @@
         let zero = create 0.
         let isZero v = unwrap v = 0.
 
-//        let innerSumm v1 v2 = v1 || v2
-//        let innerMult v1 v2 = v1 && v2
+//        let inline innerSumm v1 v2 = v1 || v2
+//        let inline innerMult v1 v2 = v1 && v2
+        let innerSummQuote = <@ fun v1 v2 -> v1 + v2 @>
+        let innerMultQuote = <@ fun v1 v2 -> v1 * v2 @>
         let innerSumm v1 v2 = v1 + v2
         let innerMult v1 v2 = v1 * v2
 
@@ -164,63 +166,6 @@
             new T(Array.init (ncol * nrow) (fun x -> splitIndex x |> generator |> Probability.innerValue), nrow, ncol)
         
         let empty n = init n n (fun cell -> Probability.zero)
-    
-
-    type GPUMatriceswMultiplicator () =
-    
-        let localWorkSize = 2
-        let platformName = "*"
-        let deviceType = DeviceType.Default
-
-        let provider =
-            try  ComputeProvider.Create(platformName, deviceType)
-            with 
-            | ex -> failwith ex.Message
-
-        let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
-
-        let command = 
-            <@
-                fun (r:_2D) resultColumns vectorLength (a:array<_>) (b:array<_>) (c:array<_>) -> 
-                    let ti = r.GlobalID0
-                    let tj = r.GlobalID1                    
-                    let mutable buf = c.[ti * resultColumns + tj]
-                    for k in 0 .. vectorLength - 1 do
-                        buf <- Probability.innerMult a.[ti * vectorLength + k] b.[k * resultColumns + tj]
-                               |> Probability.innerSumm buf
-                    c.[ti * resultColumns + tj] <- buf
-            @>
-
-        member this.multiplicate (nt1Matrix: ProbabilityMatrix.T) (nt2Matrix: ProbabilityMatrix.T) (from1: SubMatrix.T) (from2: SubMatrix.T) actualColCount =
-            let from1Matrix = nt1Matrix.[fst from1.Left..(fst from1.Right - 1), 
-                                         snd from1.Left..(snd from1.Right - 1)]
-            let from2Matrix = nt2Matrix.[fst from2.Left..(fst from2.Right - 1),
-                                         (snd from2.Left)..(snd from2.Right - 1 - (from1.Size - actualColCount))]
-
-    //        if from1.Size >= 4
-    //        then
-    //        else
-
-            let resultRows = from1.Size
-            let resultColumns = actualColCount
-            let vectorLength = from1.Size
-        
-            let result = Array.zeroCreate(from1.Size * actualColCount)
-
-            let kernel, kernelPrepare, kernelRun = provider.Compile command
-    
-            let d = new _2D(from1.Size, actualColCount, min 4 from1.Size, 1)
-            kernelPrepare d resultColumns vectorLength from1Matrix.innerValue from2Matrix.innerValue result
-         
-            commandQueue.Add(kernelRun()).Finish() |> ignore        
-            commandQueue.Add(result.ToHost provider).Finish() |> ignore
-
-            ProbabilityMatrix.create result from1.Size actualColCount
-
-        member this.releaseResources =
-            commandQueue.Dispose()
-            provider.Dispose()
-            provider.CloseAllBuffers()
 
             
     type SimpleMatriceswMultiplicator () =
@@ -241,12 +186,60 @@
                              Probability.zero    
                              
             ProbabilityMatrix.init resultRows resultColumns calculateCell 
+    
+
+    type GPUMatriceswMultiplicator (probabilitySummQuote, probabilityMultQuote) =
+    
+        let localWorkSize = 2
+        let platformName = "*"
+        let deviceType = DeviceType.Default
+
+        let provider =
+            try  ComputeProvider.Create(platformName, deviceType)
+            with 
+            | ex -> failwith ex.Message
+
+        let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
+
+        let multiplicateProbabilities = probabilityMultQuote
+        let summProbabilities = probabilitySummQuote
+
+        let command = 
+            <@
+                fun (r:_2D) resultColumns vectorLength (a:array<_>) (b:array<_>) (c:array<_>) -> 
+                    let ti = r.GlobalID0
+                    let tj = r.GlobalID1                    
+                    let mutable buf = c.[ti * resultColumns + tj]
+                    for k in 0 .. vectorLength - 1 do
+                        buf <- (%summProbabilities) buf 
+                                                    ((%multiplicateProbabilities) a.[ti * vectorLength + k] b.[k * resultColumns + tj])
+                    c.[ti * resultColumns + tj] <- buf
+            @>
+
+        member this.multiplicate from1 from2 resultRows resultColumns vectorLength =
+               
+            let result = Array.zeroCreate(resultRows * resultColumns)
+
+            let kernel, kernelPrepare, kernelRun = provider.Compile command
+    
+            let d = new _2D(resultRows, resultColumns, min 4 resultRows, 1)
+            kernelPrepare d resultColumns vectorLength from1 from2 result
+         
+            commandQueue.Add(kernelRun()).Finish() |> ignore        
+            commandQueue.Add(result.ToHost provider).Finish() |> ignore
+
+            result
+
+        member this.releaseResources =
+            commandQueue.Dispose()
+            provider.Dispose()
+            provider.CloseAllBuffers()
 
        
     type MatrixHolder(tKeys, pKeys, stringSize) = 
     
-        let GPUMultiplicator = new GPUMatriceswMultiplicator ()
-        let simpleMultiplicator = new SimpleMatriceswMultiplicator ()
+        let GPUMultiplicator = new GPUMatriceswMultiplicator (Probability.innerSummQuote, Probability.innerMultQuote)
+//        let simpleMultiplicator = new SimpleMatriceswMultiplicator ()
             
         // swich to dictionary (?)
         let tMatrix = Map<NonTerminal, ProbabilityMatrix.T>
@@ -264,7 +257,7 @@
         let addProbsToTMatrix cell nontermProbs =
             nontermProbs |> List.iter (fun (key, prob) -> tMatrix.[key].AddValueToCell cell prob)
 
-        let addProbsToPSubMatrix nts (matrix: ProbabilityMatrix.T) (where: SubMatrix.T) =
+        let addProbsToPSubMatrix  (where: SubMatrix.T) nts (matrix: ProbabilityMatrix.T) =
                 let whereMatrix = pMatrix.[nts]
                 let iShift = fst where.Left
                 let jShift = snd where.Left
@@ -300,8 +293,23 @@
                 let nt2Matrix = tMatrix.[nt2]
                 let {where=where; from1=from1; from2=from2} = task
                 let actualColCount = (min (snd task.from2.Top) (stringSize + 1)) - snd task.from2.Left
-                if matricesSize > 64
-                then addProbsToPSubMatrix nts (GPUMultiplicator.multiplicate nt1Matrix nt2Matrix task.from1 task.from2 actualColCount) task.where
-                else addProbsToPSubMatrix nts (simpleMultiplicator.multiplicate nt1Matrix nt2Matrix task.from1 task.from2 actualColCount) task.where               
+
+                let from1Matrix = nt1Matrix.[fst from1.Left..(fst from1.Right - 1), 
+                                             snd from1.Left..(snd from1.Right - 1)]
+                let from2Matrix = nt2Matrix.[fst from2.Left..(fst from2.Right - 1),
+                                             (snd from2.Left)..(snd from2.Right - 1 - (from1.Size - actualColCount))]
+                
+                let resultRows = from1.Size
+                let resultColumns = actualColCount
+                let vectorLength = from1.Size
+
+                let multiplicationResult = GPUMultiplicator.multiplicate from1Matrix.innerValue 
+                                                                         from2Matrix.innerValue 
+                                                                         resultRows
+                                                                         resultColumns
+                                                                         vectorLength
+                ProbabilityMatrix.create multiplicationResult resultRows resultColumns
+                |> addProbsToPSubMatrix task.where nts 
+//                else addProbsToPSubMatrix nts (simpleMultiplicator.multiplicate nt1Matrix nt2Matrix task.from1 task.from2 actualColCount) task.where               
                 
             crossproduct tasks nts |> Array.iter performOneTask

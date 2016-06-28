@@ -301,7 +301,7 @@ type Tree (tokens : int[], root : INode, rules : int[][]) =
                         findNodes ch
         findNodes root
         let cycleNode = ResizeArray<_>()
-        let mutable index = 0
+        let index = ref 0
         let res = Array.init q.Count (fun _ -> new ResizeArray<_>())
         let rec extractPath (node : INode) =  
             match node with
@@ -311,7 +311,7 @@ type Tree (tokens : int[], root : INode, rules : int[][]) =
                 then
                     for ch in n.Others do
                         extractPath ch
-            | :? TerminalNode as t -> res.[index].Add (getLeftExtension t.Extension)
+            | :? TerminalNode as t -> res.[!index].Add (getLeftExtension t.Extension)
             | :? PackedNode as p ->
                 let e = node.getExtension()
                 if cycleNode.Contains e
@@ -328,7 +328,7 @@ type Tree (tokens : int[], root : INode, rules : int[][]) =
                     for ch in i.Others do
                         extractPath ch
         for i in 0..q.Count do
-            index <- i
+            index := i
             extractPath q.[i]
         res
             

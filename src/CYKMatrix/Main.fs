@@ -28,7 +28,7 @@
 //        |> List.map (fun (c, heads) -> c, rawHeadsToProbs heads)
 //        |> Seq.iter srl.Add
         let srl = new Dictionary<char, (NonTerminal * Probability.T) list>()
-        ['a', [A, 0.2]; 'b', [B, 0.4]; 'c', [B, 0.4]] 
+        ['a', [A, 0.2; B, 0.1]; 'b', [B, 0.4]; 'c', [B, 0.3]] 
         |> List.map (fun (c, heads) -> c, rawHeadsToProbs heads)
         |> Seq.iter srl.Add
         let erl: NonTerminal list = []
@@ -43,7 +43,8 @@
     //
     //    B -> B B, 0.2
     //    B -> 'b', 0.4
-    //    B -> 'c', 0.4
+    //    B -> 'c', 0.3
+    //    B -> 'a', 0.1
     
         let rules = new RulesHolder(crl, srl, erl)
 
@@ -89,27 +90,27 @@
             assert (isAnswerValid toCheckBFS (String.length str) searchLen)
             let sameCells (i, j) = 
 //                (Probability.unwrap toCheck.[i, j]) = (Probability.unwrap toCheckBFS.[i, j])
-                (Probability.unwrap toCheck.[i, j]) - (Probability.unwrap toCheckBFS.[i, j]) < 0.0000001
+                (Probability.unwrap toCheck.[i, j]) - (Probability.unwrap toCheckBFS.[i, j]) < 0.0000000001
             let sameAnswers =
                 Seq.forall (fun i -> (Seq.forall (fun j -> sameCells (i,j)) [0 .. toCheck.GetLength(0) - 1]))
                            [0 .. toCheck.GetLength(0) - 1] 
             assert sameAnswers
-            printMatrix toCheck (String.length str) searchLen 
-            printMatrix toCheckBFS (String.length str) searchLen 
+//            printMatrix toCheck (String.length str) searchLen 
+//            printMatrix toCheckBFS (String.length str) searchLen 
 
         let checkOneType task check taskType str searchLen =        
             let stopWatch = System.Diagnostics.Stopwatch.StartNew()
-            List.iter (fun _ -> task str searchLen |> ignore) [1..10] 
-//            let toCheck = task str searchLen           
+//            List.iter (fun _ -> task str searchLen |> ignore) [1..10] 
+            let toCheck = task str searchLen           
             stopWatch.Stop()
             printfn "type: %s, str length: %i, search length: %i, time(ms): %f." taskType (String.length str) searchLen stopWatch.Elapsed.TotalMilliseconds
             
         let checkTime str searchLen =
-            checkOneType (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen true)
-                         (fun toCheck -> isAnswerValid toCheck)
-                         "parallel"
-                         str
-                         searchLen
+//            checkOneType (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen true)
+//                         (fun toCheck -> isAnswerValid toCheck)
+//                         "parallel"
+//                         str
+//                         searchLen
             checkOneType (fun str searchLen -> CYKMatrix.recognize str rules nonterminals S searchLen)
                          (fun toCheck -> isAnswerValid toCheck)
                          "okhotin"
@@ -117,12 +118,12 @@
                          searchLen
             checkOneType (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen false)
                          (fun toCheck -> isAnswerValid toCheck)
-                         "not parallel"
+                         "gpu"
                          str
                          searchLen
 
 //        check "abb"      2
-        check "abb"      3    
+//        check "abb"      3    
 //        check "aaabbcc"  5
 //        check "aaabb"    5
 //        check "aaaaabbb" 6
@@ -138,7 +139,8 @@
 //        check "aaaabb" 1
 //        check "aaaabb" 0
 //        
-//        checkTime (String.replicate 300 "abb") 30
+//        check (String.replicate 300 "abb") 100
+        checkTime (String.replicate 300 "abb") 100
 //        checkTime ((String.replicate 511 "abbb") + "abb") 50
          
 //        check "aabb"

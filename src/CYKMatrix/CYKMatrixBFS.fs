@@ -1,6 +1,7 @@
 ﻿module CYKMatrixBFS
 
     open Util
+    open TPMatrices
     open System.Collections.Generic
     open Array.Parallel
           

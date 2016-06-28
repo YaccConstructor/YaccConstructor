@@ -139,8 +139,8 @@
 //        check "aaaabb" 1
 //        check "aaaabb" 0
 //        
-//        check (String.replicate 300 "abb") 100
-        checkTime (String.replicate 300 "abb") 100
+        check (String.replicate 40 "abb") 100
+//        checkTime (String.replicate 300 "abb") 100
 //        checkTime ((String.replicate 511 "abbb") + "abb") 50
          
 //        check "aabb"

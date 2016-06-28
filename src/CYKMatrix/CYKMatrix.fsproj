@@ -60,6 +60,7 @@
     <None Include="App.config" />
     <None Include="packages.config" />
     <Compile Include="Util.fs" />
+    <Compile Include="TPMatrices.fs" />
     <Compile Include="CYKMatrix.fs" />
     <Compile Include="CYKMatrixBFS.fs" />
     <Compile Include="Main.fs" />

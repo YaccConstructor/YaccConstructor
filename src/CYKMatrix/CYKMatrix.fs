@@ -1,7 +1,6 @@
 ﻿module CYKMatrix
 
     open Util
-    open System.Collections.Generic
 
 //    let multiplicationCounter = ref 0
 

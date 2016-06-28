@@ -47,7 +47,7 @@
     
         let rules = new RulesHolder(crl, srl, erl)
 
-        let printMatrix (matrix: ProbabilityMatrix) strLen searchLen =
+        let printMatrix (matrix: ProbabilityMatrix.T) strLen searchLen =
             let rowLength = matrix.GetLength(0)
             let colLength = matrix.GetLength(1)
 
@@ -64,7 +64,7 @@
                 printfn ""
             printfn ""
 
-        let isAnswerValid (matrix: ProbabilityMatrix) strLen searchLen = 
+        let isAnswerValid (matrix: ProbabilityMatrix.T) strLen searchLen = 
             let rowLength = matrix.GetLength(0)
             let colLength = matrix.GetLength(1)
             if rowLength <> colLength || rowLength <> strLen + 1 then

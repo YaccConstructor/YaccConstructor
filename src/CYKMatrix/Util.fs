@@ -13,8 +13,35 @@
 
     type NonTerminal = NonTerminal of string
 
-    type RulesHolder(complexRules: Dictionary<(NonTerminal * NonTerminal), (NonTerminal * double) list>,
-                     simpleRules: Dictionary<char, (NonTerminal * double) list>,
+    module Probability =
+//        type InnerType = bool
+        type InnerType = float32
+        type T = Float32Probability of InnerType
+
+        let innerValue (Float32Probability v) = v
+        let fromInnerValue v = v |> Float32Probability
+        
+//        let create = fromInnerValue
+//        let unwrap = innerValue
+        let create = float32 >> fromInnerValue
+        let unwrap = innerValue >> double
+        
+//        let zero = create false
+//        let isZero v = not <| unwrap v
+        let zero = create 0.
+        let isZero v = unwrap v = 0.
+
+//        let innerSumm v1 v2 = v1 || v2
+//        let innerMult v1 v2 = v1 && v2
+        let innerSumm v1 v2 = v1 + v2
+        let innerMult v1 v2 = v1 * v2
+
+        let summ (Float32Probability v1) (Float32Probability v2) = innerSumm v1 v2 |> fromInnerValue
+        let multiplicate (Float32Probability v1) (Float32Probability v2) = innerMult v1 v2 |> fromInnerValue
+
+
+    type RulesHolder(complexRules: Dictionary<(NonTerminal * NonTerminal), (NonTerminal * Probability.T) list>,
+                     simpleRules: Dictionary<char, (NonTerminal * Probability.T) list>,
                      epsilonRules: NonTerminal list)  =  
                                          
         member this.SimpleTails = simpleRules.Keys |> Array.ofSeq
@@ -30,6 +57,7 @@
             if complexRules.ContainsKey c
             then complexRules.Item c
             else []
+
 
     module SubMatrix = 
         // todo: private?
@@ -73,18 +101,17 @@
             let row, col = matrix.Top
             printf " (top: %d, %d; size: %d) " row col matrix.Size
 
-            
+                        
     type MultiplicationTask = {where: SubMatrix.T; from1: SubMatrix.T; from2: SubMatrix.T}
 
-
-
-
     
-    type ProbabilityMatrix(matrix: float32 [], nrow: int, ncol: int) =
+    type ProbabilityMatrix(matrix: Probability.InnerType [], nrow: int, ncol: int) =
         let ncol = ncol
         let nrow = nrow
         let getSingleIndex i j = i * ncol + j
         let data = matrix
+
+        member this.innerValue = data
         
         member this.GetLength i = 
             match i with
@@ -93,7 +120,7 @@
             | _ -> raise <| IndexOutOfRangeException()
 
         member this.Item
-            with get (i, j) = double data.[getSingleIndex i j]
+            with get (i, j) = Probability.fromInnerValue data.[getSingleIndex i j]
 
         member this.GetSlice (rowStart: int option, rowFinish: int option,
                               colStart: int option, colFinish: int option) =
@@ -119,27 +146,22 @@
                 let subi = x / subNcol
                 let subj = x - subNcol * subi
                 getSingleIndex (subi + rowStart) (subj + colStart)            
-            Array.init (subNcol * subNrow) (fun x -> data.[rebaseIndex x])
+            ProbabilityMatrix(Array.init (subNrow * subNcol) (fun x -> data.[rebaseIndex x]), subNrow, subNcol)
 
-        member this.AddValueToCell (i, j) (value: double) = 
+        member this.AddValueToCell (i, j) prob = 
             let x = getSingleIndex i j
-            data.[x] <- data.[x] + (float32 value)
-
-
+            data.[x] <- Probability.innerSumm data.[x] <| Probability.innerValue prob
+            
 
     let probabilityMatrixInit nrow ncol generator =
         let splitIndex x =
             let i = x / ncol
             let j = x - ncol * i
             i, j
-        new ProbabilityMatrix(Array.init (ncol * nrow) (fun x -> splitIndex x |> generator |> float32), nrow, ncol)
+        new ProbabilityMatrix(Array.init (ncol * nrow) (fun x -> splitIndex x |> generator |> Probability.innerValue), nrow, ncol)
         
-    let emptyMatrixOfSize n = probabilityMatrixInit n n (fun cell -> 0.)
-
-
-
-
-
+    let emptyMatrixOfSize n = probabilityMatrixInit n n (fun cell -> Probability.zero)
+    
 
     type GPUMatriceswMultiplicator () =
     
@@ -161,7 +183,8 @@
                     let tj = r.GlobalID1                    
                     let mutable buf = c.[ti * resultColumns + tj]
                     for k in 0 .. vectorLength - 1 do
-                        buf <- buf + (a.[ti * vectorLength + k] * b.[k * resultColumns + tj])
+                        buf <- Probability.innerMult a.[ti * vectorLength + k] b.[k * resultColumns + tj]
+                               |> Probability.innerSumm buf
                     c.[ti * resultColumns + tj] <- buf
             @>
 
@@ -184,7 +207,7 @@
             let kernel, kernelPrepare, kernelRun = provider.Compile command
     
             let d = new _2D(from1.Size, actualColCount, min 4 from1.Size, 1)
-            kernelPrepare d resultColumns vectorLength from1Matrix from2Matrix result
+            kernelPrepare d resultColumns vectorLength from1Matrix.innerValue from2Matrix.innerValue result
          
             commandQueue.Add(kernelRun()).Finish() |> ignore        
             commandQueue.Add(result.ToHost provider).Finish() |> ignore
@@ -196,9 +219,7 @@
             provider.Dispose()
             provider.CloseAllBuffers()
 
-
-
-
+            
     type SimpleMatriceswMultiplicator () =
 
         member this.multiplicate (nt1Matrix: ProbabilityMatrix) (nt2Matrix: ProbabilityMatrix) (from1: SubMatrix.T) (from2: SubMatrix.T) actualColCount =
@@ -211,21 +232,14 @@
             let resultColumns = actualColCount
             let vectorLength = from1.Size
         
-            let result = Array.zeroCreate(from1.Size * actualColCount)
+            let calculateCell (i, j) = 
+                [0..vectorLength - 1] 
+                |> List.fold (fun buf k -> Probability.summ buf (Probability.multiplicate from1Matrix.[i, k] from2Matrix.[k, j])) 
+                             Probability.zero    
+                             
+            probabilityMatrixInit resultRows resultColumns calculateCell 
 
-            for i in 0 .. resultRows - 1 do
-                for j in 0 .. resultColumns - 1 do
-                    let resultIndex = i * resultColumns + j
-                    let mutable buf = result.[resultIndex]
-                    for k in 0 .. vectorLength - 1 do
-                        buf <- buf + (from1Matrix.[i * vectorLength + k] * from2Matrix.[k * resultColumns + j])
-                    result.[resultIndex] <- buf                       
-
-            new ProbabilityMatrix(result, from1.Size, actualColCount)         
-
-
-
-        
+       
     type MatrixHolder(tKeys, pKeys, stringSize) = 
     
         let GPUMultiplicator = new GPUMatriceswMultiplicator ()
@@ -262,7 +276,7 @@
             nonterminals |> List.iteri (fun i ntProbs -> addProbsToTMatrix (i, i + 1) ntProbs)
 
         member this.refreshTCells headProbsFromTail cells =
-                let tails cell = pMatrix |> Map.map (fun _ probs -> probs.[fst cell, snd cell]) |> Map.filter (fun _ prob -> prob > 0.)
+                let tails cell = pMatrix |> Map.map (fun _ probs -> probs.[fst cell, snd cell]) |> Map.filter (fun _ prob -> not <| Probability.isZero prob)
                 let heads cell = tails cell |> Map.toList |> List.map headProbsFromTail |> List.concat
 
                 cells

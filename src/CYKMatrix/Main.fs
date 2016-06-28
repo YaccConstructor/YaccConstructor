@@ -2,6 +2,7 @@
 
     open Util
     open System.Collections.Generic
+    open Printf
 
     [<EntryPoint>]
     let main args = 
@@ -12,11 +13,24 @@
         let S = NonTerminal "S"
         let nonterminals = [|A; B; S; BB|]
 
+        let rawHeadsToProbs = List.map (fun (nt, prob) -> nt, Probability.create prob)
 
-        let crl = new Dictionary<NonTerminal * NonTerminal, (NonTerminal * double) list>()
-        [(A, BB), [S, 0.5]; (S, S), [S, 0.5]; (B, B), [BB, 1.; B, 0.2]; (A, A), [A, 0.8]] |> Seq.iter crl.Add
-        let srl = new Dictionary<char, (NonTerminal * double) list>()
-        ['a', [A, 0.2]; 'b', [B, 0.4]; 'c', [B, 0.4]] |> Seq.iter srl.Add
+//        let crl = new Dictionary<NonTerminal * NonTerminal, (NonTerminal * Probability.T) list>()
+//        [(A, BB), [S, true]; (S, S), [S, true]; (B, B), [BB, true; B, true]; (A, A), [A, true]] 
+//        |> List.map (fun (nts, heads) -> nts, rawHeadsToProbs heads)
+//        |> Seq.iter crl.Add        
+        let crl = new Dictionary<NonTerminal * NonTerminal, (NonTerminal * Probability.T) list>()
+        [(A, BB), [S, 0.5]; (S, S), [S, 0.5]; (B, B), [BB, 1.; B, 0.2]; (A, A), [A, 0.8]] 
+        |> List.map (fun (nts, heads) -> nts, rawHeadsToProbs heads)
+        |> Seq.iter crl.Add
+//        let srl = new Dictionary<char, (NonTerminal * Probability.T) list>()
+//        ['a', [A, true]; 'b', [B, true]; 'c', [B, true]] 
+//        |> List.map (fun (c, heads) -> c, rawHeadsToProbs heads)
+//        |> Seq.iter srl.Add
+        let srl = new Dictionary<char, (NonTerminal * Probability.T) list>()
+        ['a', [A, 0.2]; 'b', [B, 0.4]; 'c', [B, 0.4]] 
+        |> List.map (fun (c, heads) -> c, rawHeadsToProbs heads)
+        |> Seq.iter srl.Add
         let erl: NonTerminal list = []
         
     //    S -> A BB, 0.5
@@ -39,11 +53,12 @@
 
             for i in [0..rowLength-1] do
                 for j in [0..colLength-1] do
-//                    if i <= strLen && j <= strLen && j > i && j-i <= searchLen then
-                    if i <= strLen && j <= strLen && j > i then
-                        printf "%.8f  " matrix.[i, j]
+                    if i <= strLen && j <= strLen && j > i && j-i <= searchLen then
+//                    if i <= strLen && j <= strLen && j > i then
+//                        printf "%b  " <| Probability.unwrap matrix.[i, j]
+                        printf "%.8f  " <| Probability.unwrap matrix.[i, j]
                     else
-                        assert (matrix.[i, j] = 0.)
+                        assert (Probability.isZero matrix.[i, j])
 //                        printf "%.8f  " matrix.[i, j]
                         printf "----------  "
                 printfn ""
@@ -65,16 +80,18 @@
                 |> List.map (fun i -> [0..colLength-1] |> List.map (fun j -> (i,j))) 
                 |> List.concat
                 |> List.filter redundantCell
-                |> List.forall (fun (i, j) -> matrix.[i,j] = 0.)
+                |> List.forall (fun (i, j) -> Probability.isZero matrix.[i,j])
 
         let check str searchLen =             
             let toCheck    = CYKMatrix.recognize str rules nonterminals S searchLen
             let toCheckBFS = CYKMatrixBFS.recognize str rules nonterminals S searchLen false
             assert (isAnswerValid toCheck (String.length str) searchLen)
             assert (isAnswerValid toCheckBFS (String.length str) searchLen)
+            let sameCells (i, j) = 
+//                (Probability.unwrap toCheck.[i, j]) = (Probability.unwrap toCheckBFS.[i, j])
+                (Probability.unwrap toCheck.[i, j]) - (Probability.unwrap toCheckBFS.[i, j]) < 0.0000001
             let sameAnswers =
-                Seq.forall (fun i -> (Seq.forall (fun j -> toCheck.[i, j] - toCheckBFS.[i, j] < 0.0000001)
-                                                 [0 .. toCheck.GetLength(0) - 1]))
+                Seq.forall (fun i -> (Seq.forall (fun j -> sameCells (i,j)) [0 .. toCheck.GetLength(0) - 1]))
                            [0 .. toCheck.GetLength(0) - 1] 
             assert sameAnswers
             printMatrix toCheck (String.length str) searchLen 

@@ -42,7 +42,8 @@
             let aHight = am1 - al1
             let aLength = aHight
             let calcCell (i, j) =
-                [0..aLength-1] |> List.fold (fun acc k -> acc + matrixA.[i + al1, k + al2] * matrixB.[k + bl1, j + bl2]) 0. 
+                [0..aLength-1] |> List.fold (fun acc k -> Probability.summ acc <| Probability.multiplicate matrixA.[i + al1, k + al2] matrixB.[k + bl1, j + bl2]) 
+                                            Probability.zero 
             let bUpperBound = min bm2 (stringSize + 1)
             probabilityMatrixInit aHight (bUpperBound - bl2) calcCell                 
                                     
@@ -82,11 +83,11 @@
 
                 let headsFromTail (tail, tailProb) = 
                     if allRules.IsComplexTail tail then 
-                        allRules.HeadsByComplexTail tail |> List.map (fun (head, headProb) -> head, headProb * tailProb)
+                        allRules.HeadsByComplexTail tail |> List.map (fun (head, headProb) -> head, Probability.multiplicate headProb tailProb)
                     else 
                         []
 
-                let tails = pMatrix |> Map.map (fun _ probs -> probs.[l1, l2]) |> Map.filter (fun _ prob -> prob > 0.)
+                let tails = pMatrix |> Map.map (fun _ probs -> probs.[l1, l2]) |> Map.filter (fun _ prob -> not <| Probability.isZero prob)
                 let heads = tails |> Map.toList |> List.map headsFromTail |> List.concat
 
                 heads 

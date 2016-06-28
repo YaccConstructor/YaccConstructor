@@ -27,6 +27,7 @@
             if Array.length layer = 0 
             then true
             else 
+                // cell
                 let previousLayerCell = layer.[0].Bottom
                 let correspondingStringLength cell = snd cell - fst cell
                 correspondingStringLength previousLayerCell >= maxSearchLength
@@ -35,11 +36,13 @@
             let matricesSize = layer.[0].Size
 
             if matricesSize = 1 then
+                // prob
                 let headProbsFromTail (tail, tailProb) = 
-                    allRules.HeadsByComplexTail tail |> List.map (fun (head, headProb) -> head, headProb * tailProb)
+                    allRules.HeadsByComplexTail tail 
+                    |> List.map (fun (head, headProb) -> head, Probability.multiplicate headProb tailProb)
                 
                 layer 
-                |> Array.map (fun (matrix: SubMatrix.T) -> matrix.Left)  //todo: unwrap single cell
+                |> Array.map (fun (matrix: SubMatrix.T) -> matrix.Left)  //todo: unwrap single cell matrix
                 |> matrices.refreshTCells (headProbsFromTail)
 
             else

@@ -59,9 +59,10 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let currentExtension = ref 0L<extension>
         let dummyGSSNode = new Vertex2(!currentIndex, -1, Unchecked.defaultof<_>)
         let input = input           
-        let vertices = new CompressedArray<ResizeArray<_>>(input.ChainLength, (fun _ -> null),shift)
+        let vertices = new CompressedArray<ResizeArray<_>>(input.ChainLength, (fun _ -> null), shift)
         let currentGSSNode = ref <| dummyGSSNode
-     
+        let verticesGSS = new CompressedArray<SysDict<int, ResizeArray<GSSEdge>>>(input.ChainLength, (fun _ -> null), shift)
+
         for i = input.InitialVertices.Length - 1 downto 0 do
             let e = input.InitialVertices.[i]
             let t = getEdge e
@@ -121,27 +122,46 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
             else
               incr reused
 
-        let containsEdge (b : Vertex2) (e : Vertex2) label extension (len : uint16) =
+        let containsEdge (b : Vertex2) (e : Vertex2) label (extension : int64<extension>) (len : uint16) =
             let rt = getRuleNew label
             let pt = getPositionNew label
             let nontermName = b.NontermLabel
             let beginLevel = int b.Level
             let endLevel = int e.Level
-            for edge in e.Edges do
-                if not <| (edge.Ast = extension) && (edge.Length = len) && (edge.Dest = b)
-                then
-                    e.Edges.Add(new GSSEdge(b, extension, label, len))
+            let mutable res = false
+            if  not <| (e.Edges |> ResizeArray.exists (fun ed -> ed.Ast = extension && ed.Dest = b && ed.Label = label && ed.Length = len))
+            then
+                e.Edges.Add(new GSSEdge(b, extension, label, len))
+                false
+            else true
         
         let create (cE : int) (cP : int) (label : int<labelMeasure>) (vertex : Vertex2) curSymbol (len : uint16) =   
             let nonTermName = curSymbol
             let i = packEdgePos cE cP
             let ttttt = getPosOnEdge <| getLeftExtension !currentExtension
             let extension = packExtension (getLeftExtension !currentExtension) i 
-            let v = new Vertex2(i, nonTermName, new ResizeArray<_>())
-            if edges.[nonTermName].[i] <> null
+            let v =
+                let t = verticesGSS.Item i
+                if t <> Unchecked.defaultof<_> then 
+                    if t.ContainsKey nonTermName 
+                    then 
+                        new Vertex2(i, nonTermName, t.[nonTermName])
+                    else
+                        let r = new ResizeArray<_>()
+                        let rv = new Vertex2(i, nonTermName, r)
+                        t.Add(nonTermName, r)
+                        rv
+                else
+                    let d = new SysDict<_, _>() 
+                    let r = new ResizeArray<_>()
+                    d.Add(nonTermName, r)
+                    verticesGSS.[i] <- d
+                    let rv = new Vertex2(i, nonTermName, r)
+                    rv   
+            if v.Edges.Count <> 0
             then
                 let vertexKey = pack i nonTermName
-                let temp = containsEdge v vertex (int label) extension len
+                let temp = containsEdge v vertex label extension len
                 if not <| temp 
                 then
                     if setP.ContainsKey(vertexKey)
@@ -155,7 +175,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                             let iiii = packEdgePos (getEdge (getRightExtension ex)) ((getPosOnEdge <| getRightExtension ex) - shift)
                             addContext iiii label vertex e (len + l))
             else
-                containsEdge v vertex (int label) extension len
+                ignore <| containsEdge vertex v label extension len
                 let chainLen = input.ChainLength.[cE]
                 let addCntxtForNonTerm e pos index = 
                     let curToken = input.Edges.[e].Tokens.[pos]
@@ -192,7 +212,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                     let r = (getRightExtension extension)
                     let ttt = getPosOnEdge r
                     let ext = packExtension l r
-                    let newVertex = new Vertex2(u.Level, e.Label, new ResizeArray<_>())          //!!!!!!!!!!!!!!!!!!!
+                    let newVertex = new Vertex2(u.Level, parser.LeftSide.[getRuleNew e.Label], new ResizeArray<_>())          //!!!!!!!!!!!!!!!!!!!
                     addContext i e.Label newVertex ext (len + e.Length)
 
         let table = parser.Table

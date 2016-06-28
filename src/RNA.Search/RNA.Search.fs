@@ -431,7 +431,7 @@ let main argv =
 //    f.[0].Add e5
 //    let tmp = convertToParserInputGraph seqE s f
     
-    let path = "C:\Users\User\recursive-ascent\Tests\bio\problem_with_shift_2"
+    let path = """..\..\..\Tests\bio\problem_with_shift_2\g"""
     let inputGraphPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName path, System.IO.Path.GetFileNameWithoutExtension path)
     searchMain inputGraphPath Shift_problem 1
     //let parseBioGraph = 

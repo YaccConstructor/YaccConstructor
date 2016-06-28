@@ -10,6 +10,7 @@ open System.Collections.Generic
 [<Measure>] type labelMeasure
 
 [<Struct>]
+[<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
 type Vertex =
     val Level            : int
     val NontermLabel     : int
@@ -29,6 +30,7 @@ type Context(*<'TokenType>*) =
     //new (index, label, vertex, ast, path) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Path = path}
 
 [<Struct>]
+[<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
 type Context2 =
     val Index         : int
     val Label         : int<labelMeasure>

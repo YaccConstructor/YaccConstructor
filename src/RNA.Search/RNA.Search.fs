@@ -48,10 +48,10 @@ type SearchConfig =
     val LowLengthLimit: int
     val StartNonterm: int
 
-    new(withoutSppf(*, withSppf*), getSmb, lowLengthLimit, hightLengthLimit, startNonterm) = 
+    new(withoutSppf, withSppf, getSmb, lowLengthLimit, hightLengthLimit, startNonterm) = 
         {
             SearchWithoutSPPF = withoutSppf
-            //SearchWithSPPF = withSppf
+            SearchWithSPPF = withSppf
             Tokenizer = getSmb
             HightLengthLimit = hightLengthLimit
             LowLengthLimit = lowLengthLimit
@@ -59,7 +59,7 @@ type SearchConfig =
         }
 
 let filterRnaParsingResult (graph:BioParserInputGraph) lengthLimit res  =
-    let hihtLenghtLimit = 100.0
+    let hihtLenghtLimit = 500.0
     match res:ParseResult<ResultStruct> with
     | Success ast -> 
         failwith "Result is success but it is unexpected success"
@@ -287,18 +287,18 @@ let searchInCloud graphs =
 let searchInBioGraphs (searchCfg : SearchConfig) graphs agentsCount =
     let start = System.DateTime.Now
     let processSubgraphs (subgraphs:ResizeArray<_>) (startEdges : ResizeArray<_>[]) (finalEdges : ResizeArray<_>[]) =
-        let parserInputGraphs = convertToParserInputGraph subgraphs startEdges finalEdges
-        parserInputGraphs
-        |> ResizeArray.iteri
-            (fun i g ->
-                let r = searchCfg.SearchWithSPPF g 
-                match r : ParseResult<_> with
-                    | Success t -> 
-                        t.GetPath searchCfg.StartNonterm 
-                        |> Array.iter (fun e -> e |> ResizeArray.iter (fun t -> printf "%A " t))  
-                    | _ -> ()
-            )
-    ()
+//        let parserInputGraphs = convertToParserInputGraph subgraphs startEdges finalEdges
+//        parserInputGraphs
+//        |> ResizeArray.iteri
+//            (fun i g ->
+//                let r = searchCfg.SearchWithSPPF g 
+//                match r : ParseResult<_> with
+//                    | Success t -> 
+//                        t.GetPath searchCfg.StartNonterm 
+//                        |> Array.iter (fun e -> e |> ResizeArray.iter (fun t -> printf "%A " t))  
+//                    | _ -> ()
+//            )
+        ()
 
     let agent name  =
         MailboxProcessor.Start(fun inbox ->
@@ -308,6 +308,8 @@ let searchInBioGraphs (searchCfg : SearchConfig) graphs agentsCount =
                         match msg with
                         | Data (i,graph) ->
                             try
+                                printfn "Search in agent %A" name
+                                printfn "Vertices: %A Edges: %A" graph.VertexCount graph.EdgeCount
                                 let g, s ,f = searchCfg.SearchWithoutSPPF graph searchCfg.StartNonterm |> filterRnaParsingResult graph searchCfg.LowLengthLimit
                                 processSubgraphs g s f 
                             with
@@ -361,7 +363,10 @@ let r16s_H22_H23_SearchConfig =
             | x ->   failwithf "Strange symbol in input: %A" x
             |> GLL.r16s.H22_H23.tokenToNumber
     
-    new SearchConfig(GLL.r16s.H22_H23.buildAbstract, GLL.r16s.H22_H23.buildAbstractAst, getSmb, 120, 90, 4)
+    new SearchConfig(GLL.r16s.H22_H23.buildAbstract, GLL.r16s.H22_H23.buildAbstractAst, getSmb, 
+                        //318, 370, 13)
+                        //400, 550, 13)
+                        800, 910, 13)
 
 let shift_problem_SearchConfig =
 
@@ -381,13 +386,15 @@ let shift_problem_SearchConfig =
 let searchMain path what agentsCount =
     let searchCfg = 
         match what with
-        | TRNA -> shift_problem_SearchConfig
-        | R16S_H22_H23 -> shift_problem_SearchConfig
-        | Shift_problem -> r16s_H22_H23_SearchConfig//shift_problem_SearchConfig
+        | TRNA -> tRNASearchConfig
+        | R16S_H22_H23 -> r16s_H22_H23_SearchConfig
+        | Shift_problem -> shift_problem_SearchConfig
 
     let graphs, longEdges = loadGraphFormFileToBioParserInputGraph path searchCfg.HightLengthLimit searchCfg.Tokenizer (GLL.tRNA.RNGLR_EOF 0)
 
-    //let gs = graphs.[100..150]
+    let graphs = 
+        graphs.[1500..]
+        //graphs.[5000..5050]
     searchInBioGraphs searchCfg graphs agentsCount
     |> printfn "%A"
     //searchInCloud graphs
@@ -395,17 +402,17 @@ let searchMain path what agentsCount =
 
 [<EntryPoint>]
 let main argv = 
-//    let parser = ArgumentParser.Create<CLIArguments>()
-//    let args = parser.Parse argv
-//    let appSetting = parser.ParseAppSettings (System.Reflection.Assembly.GetExecutingAssembly())
-//    let agentsCount =
-//        args.GetResult(<@Agents@>, defaultValue = appSetting.GetResult(<@Agents@>, defaultValue = 1))        
-//    let inputGraphPath = 
-//        args.GetResult <@Input@>
-//        |> (fun s ->
-//                System.IO.Path.Combine(System.IO.Path.GetDirectoryName s, System.IO.Path.GetFileNameWithoutExtension s))
-//    searchTRNA inputGraphPath agentsCount
-//    searchMain inputGraphPath R16S_H22_H23 agentsCount
+    let parser = ArgumentParser.Create<CLIArguments>()
+    let args = parser.Parse argv
+    let appSetting = parser.ParseAppSettings (System.Reflection.Assembly.GetExecutingAssembly())
+    let agentsCount =
+        args.GetResult(<@Agents@>, defaultValue = appSetting.GetResult(<@Agents@>, defaultValue = 1))        
+    let inputGraphPath = 
+        args.GetResult <@Input@>
+        |> (fun s ->
+                System.IO.Path.Combine(System.IO.Path.GetDirectoryName s, System.IO.Path.GetFileNameWithoutExtension s))
+ //   searchTRNA inputGraphPath agentsCount
+    searchMain inputGraphPath R16S_H22_H23 agentsCount
 //    let e1 = new BioParserEdge(0, 1, 2, [|0; 1|])
 //    let e2 = new BioParserEdge(1, 2, 2, [|3;4|])
 //    let e3 = new BioParserEdge(2, 3, 2, [|1; 6|])
@@ -429,8 +436,8 @@ let main argv =
 //    f.[0].Add e5
 //    let tmp = convertToParserInputGraph seqE s f
     
-    let path = "D:/YC/YaccConstructor/Tests/bio/problem_with_shift_2/g"
-    let inputGraphPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName path, System.IO.Path.GetFileNameWithoutExtension path)
-    searchMain inputGraphPath Shift_problem 1
-    //let parseBioGraph = 
+//    let path = "D:/YC/YaccConstructor/Tests/bio/problem_with_shift_2/g"
+//    let inputGraphPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName path, System.IO.Path.GetFileNameWithoutExtension path)
+//    searchMain inputGraphPath Shift_problem 1
+//    //let parseBioGraph = 
     0

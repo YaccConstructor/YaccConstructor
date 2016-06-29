@@ -13,46 +13,26 @@
 
     open Util
 
-            
-    type SimpleMatriceswMultiplicator () =
-        member this.multiplicate (nt1Matrix: ProbabilityMatrix.T) (nt2Matrix: ProbabilityMatrix.T) (from1: SubMatrix.T) (from2: SubMatrix.T) actualColCount =
-            let from1Matrix = nt1Matrix.GetInnerSubMatrix from1.Left (Cell.shift from1.Right -1 -1) false
-            let from2Matrix = nt2Matrix.GetInnerSubMatrix from2.Left (Cell.shift from2.Right -1 -1) true
-//            (snd from2.Right - 1 - (from1.Size - actualColCount)) true
+    type GPUHelpers = {
+        provider: ComputeProvider
+        commandQueue: CommandQueue
+        options: GPUOptions
+    }
 
-            let matricesSize = from1.Size
-//            let resultColumns = actualColCount
-//            let vectorLength = from1.Size
-        
-            let calculateCell (n, i, j) = 
-                let skipMatrices = n * matricesSize * matricesSize
-                let skipRows = skipMatrices + i * matricesSize
-                let skipColumns = skipMatrices + j * matricesSize                
-                Array.fold2 (fun b v1 v2 -> Probability.innerSumm b <| Probability.innerMult v1 v2)
-                            Probability.innerZero
-                            from1Matrix.[skipRows..skipRows + matricesSize - 1] 
-                            from2Matrix.[skipColumns..skipColumns + matricesSize - 1]
+    type GPUMatriceswMultiplicator (options: MultiplicationOptions, probabilitySummQuote, probabilityMultQuote) =
 
-            let getNIJ x = 
-                let n = x / (matricesSize * matricesSize)
-                let i = (x - n * matricesSize * matricesSize) / matricesSize
-                let j = x - n * matricesSize * matricesSize - i * matricesSize
-                n, i, j
+        let gpuHelpers = 
+            match options.GPU with
+            | Some gpuOptions -> 
+                let provider =
+                    try ComputeProvider.Create(gpuOptions.PlatformName, gpuOptions.DeviceType)
+                    with 
+                    | ex -> failwith ex.Message
 
-            Array.init (matricesSize * actualColCount) (fun x -> calculateCell <| getNIJ x)
-    
+                let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
 
-    type GPUMatriceswMultiplicator (probabilitySummQuote, probabilityMultQuote) =
-    
-        let platformName = "*"
-        let deviceType = DeviceType.Default
-
-        let provider =
-            try  ComputeProvider.Create(platformName, deviceType)
-            with 
-            | ex -> failwith ex.Message
-
-        let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
+                Some {provider = provider; commandQueue = commandQueue; options = gpuOptions}
+            | None -> None
 
         let multiplicateProbabilities = probabilityMultQuote
         let summProbabilities = probabilitySummQuote
@@ -60,7 +40,6 @@
         let command = 
             <@
                 fun (r:_2D) matricesSize (a:array<_>) (b:array<_>) (c:array<_>) -> 
-//                    let num =  r.GlobalID0
                     let num = r.GlobalID0 / matricesSize
                     let ti = r.GlobalID0 - num * matricesSize
                     let tj = r.GlobalID1                 
@@ -72,34 +51,124 @@
                     for k in 0 .. matricesSize - 1 do
                         buf <- (%summProbabilities) buf ((%multiplicateProbabilities) a.[skipRows + k] b.[skipCols + k])
                     c.[skipRows + tj] <- buf
-            @>
+            @>        
 
-        member this.multiplicate (from1: Probability.InnerType []) (from2: Probability.InnerType []) matricesCount matricesSize =
+        let flushMultiplicationResults addToPSubMatrix fullTasks matrices =
+            Array.zip fullTasks matrices
+            |> Array.iter (fun (fullTask, matrix) ->
+                               let task, nts = fullTask
+                               addToPSubMatrix task.where nts matrix)
+
+        let simpleMultiplicate (from1: Probability.InnerType []) (from2: Probability.InnerType []) matricesSize actualColCount =        
+            let calculateCell (n, i, j) = 
+                let skipMatrices = n * matricesSize * matricesSize
+                let skipRows = skipMatrices + i * matricesSize
+                let skipColumns = skipMatrices + j * matricesSize                
+                Array.fold2 (fun b v1 v2 -> Probability.innerSumm b <| Probability.innerMult v1 v2)
+                            Probability.innerZero
+                            from1.[skipRows..skipRows + matricesSize - 1] 
+                            from2.[skipColumns..skipColumns + matricesSize - 1]
+
+            let getNIJ x = 
+                let n = x / (matricesSize * matricesSize)
+                let i = (x - n * matricesSize * matricesSize) / matricesSize
+                let j = x - n * matricesSize * matricesSize - i * matricesSize
+                n, i, j
+
+            Array.init (matricesSize * actualColCount) (fun x -> calculateCell <| getNIJ x)
+
+        let gpuMultiplicate (helpers: GPUHelpers) 
+                            (from1: Probability.InnerType []) 
+                            (from2: Probability.InnerType []) 
+                            matricesCount 
+                            matricesSize =
                
             let result: Probability.InnerType [] = Array.zeroCreate(matricesCount * matricesSize * matricesSize)
-                          
-    
+                              
             let d = new _2D(matricesSize * matricesCount, matricesSize, 1, 1)
-//            let d = new _2D(matricesSize * matricesCount, matricesSize, min 4 (matricesSize * matricesCount), 1)
+    //            let d = new _2D(matricesSize * matricesCount, matricesSize, min 4 (matricesSize * matricesCount), 1)
 
-            let kernel, kernelPrepare, kernelRun = provider.Compile command
+            let kernel, kernelPrepare, kernelRun = helpers.provider.Compile command
             kernelPrepare d matricesSize from1 from2 result
          
-            commandQueue.Add(kernelRun()).Finish() |> ignore        
-            commandQueue.Add(result.ToHost provider).Finish() |> ignore
+            helpers.commandQueue.Add(kernelRun()).Finish() |> ignore        
+            helpers.commandQueue.Add(result.ToHost helpers.provider).Finish() |> ignore
 
             result
 
-        member this.releaseResources =
-            commandQueue.Dispose()
-            provider.Dispose()
-            provider.CloseAllBuffers()
+        let doSimpleMultiplications getTSubmatrix addToPSubMatrix matricesSize fullTasks = 
+            let doOne (task, nts) =
+                let nt1, nt2 = nts
+                let from1 = getTSubmatrix nt1 task.from1 false
+                let from2 = getTSubmatrix nt2 task.from2 true
+                simpleMultiplicate from1 from2 matricesSize matricesSize
+
+            fullTasks
+            |> Array.map doOne
+            |> Array.map (ProbabilityMatrix.create matricesSize matricesSize)
+            |> flushMultiplicationResults addToPSubMatrix fullTasks
+
+        let doGPUMultiplications getTSubmatrix addToPSubMatrix matricesCount matricesSize helpers fullTasks = 
+            let matricesCellCount = matricesSize * matricesSize
+
+            let addOneFromToBuffer doTranspone buffer (from: SubMatrix.T, nt) = 
+                getTSubmatrix nt from doTranspone
+                |> Array.append buffer
+
+            let from1 = 
+                fullTasks 
+                |> Array.map (fun ({from1 = from}, nts) -> from, fst nts)
+                |> Array.fold (addOneFromToBuffer false) Array.empty
+            let from2 = 
+                fullTasks 
+                |> Array.map (fun ({from2 = from}, nts) -> from, snd nts)
+                |> Array.fold (addOneFromToBuffer true) Array.empty 
+
+            let multiplicationResult = gpuMultiplicate helpers from1 from2 matricesCount matricesSize
+
+            fullTasks 
+            |> Array.mapi (fun num _ -> multiplicationResult.[num * matricesCellCount..(num + 1) * matricesCellCount - 1])
+            |> Array.map (ProbabilityMatrix.create matricesSize matricesSize)
+            |> flushMultiplicationResults addToPSubMatrix fullTasks
+
+        member this.performMultiplication getTSubmatrix addToPSubMatrix (tasks: MultiplicationTask []) nts = 
+//            multiplicationCounter := !multiplicationCounter + (Array.length tasks)
+
+            let crossproduct l1 l2 =
+                let product lst v = Array.map (fun vl -> (vl, v)) lst
+                Array.collect (product l1) l2
+
+            let fullTasks = crossproduct tasks nts
+
+            let matricesSize = tasks.[0].where.Size
+            let matricesCount = fullTasks.Length
+            let matricesCellCount = matricesSize * matricesSize
+            
+            // todo: last matrix reduced size !!!!!!!!!!!!
+            match gpuHelpers with
+            | Some helpers ->
+                if matricesSize >= helpers.options.MinMatrixSize
+                then doGPUMultiplications getTSubmatrix addToPSubMatrix matricesCount matricesSize helpers fullTasks
+                else doSimpleMultiplications getTSubmatrix addToPSubMatrix matricesSize fullTasks 
+            | None -> doSimpleMultiplications getTSubmatrix addToPSubMatrix matricesSize fullTasks 
+                
+
+        member this.releaseResources () =
+            match gpuHelpers with
+            | Some helpers ->
+                helpers.commandQueue.Dispose()
+                helpers.provider.Dispose()
+                helpers.provider.CloseAllBuffers()
+            // todo: hmmm...
+            | None -> ignore 0
+
+
+
 
        
-    type MatrixHolder(tKeys, pKeys, stringSize) = 
+    type MatrixHolder(tKeys, pKeys, stringSize, options: MultiplicationOptions) = 
     
-        let GPUMultiplicator = new GPUMatriceswMultiplicator (Probability.innerSummQuote, Probability.innerMultQuote)
-        let simpleMultiplicator = new SimpleMatriceswMultiplicator ()
+        let GPUMultiplicator = new GPUMatriceswMultiplicator (options, Probability.innerSummQuote, Probability.innerMultQuote)
             
         // swich to dictionary (?)
         let tMatrix = Map<NonTerminal, ProbabilityMatrix.T>
@@ -114,10 +183,10 @@
                                 |> Array.map (fun x -> x, ProbabilityMatrix.empty (stringSize + 1))
                             )
    
-        let addProbsToTMatrix cell nontermProbs =
+        let addToTMatrix cell nontermProbs =
             nontermProbs |> List.iter (fun (key, prob) -> tMatrix.[key].AddValueToCell cell prob)
 
-        let addProbsToPSubMatrix (where: SubMatrix.T) nts (matrix: ProbabilityMatrix.T) =
+        let addToPSubMatrix (where: SubMatrix.T) nts (matrix: ProbabilityMatrix.T) =
                 let whereMatrix = pMatrix.[nts]
                 for i in [0 .. where.Size - 1] do
                     let actualColCount = (min (where.Top.Column) (stringSize + 1)) - where.Left.Column
@@ -130,7 +199,7 @@
 
         member this.initTDiagonalWith nonterminals =
             let diagonalCell i = Cell.create i (i + 1)
-            nonterminals |> List.iteri (fun i ntProbs -> addProbsToTMatrix (diagonalCell i) ntProbs)
+            nonterminals |> List.iteri (fun i ntProbs -> addToTMatrix (diagonalCell i) ntProbs)
 
         member this.refreshTCells headProbsFromTail cells =
                 let tails cell = 
@@ -144,62 +213,10 @@
                     |> List.concat
 
                 cells
-                |> Array.iter (fun cell -> heads cell |> addProbsToTMatrix cell)
+                |> Array.iter (fun cell -> heads cell |> addToTMatrix cell)
+                
+        member this.performMultiplication tasks nts = 
+            let getTSubMatrix nt = tMatrix.[nt].GetInnerSubMatrix
+            GPUMultiplicator.performMultiplication getTSubMatrix addToPSubMatrix tasks nts
 
-
-        // todo: combine small matrices to multiplicate together !!!
-        member this.performMultiplication (tasks: MultiplicationTask []) nts = 
-//            multiplicationCounter := !multiplicationCounter + (Array.length tasks)
-
-            let crossproduct l1 l2 =
-                let product lst v = Array.map (fun vl -> (vl, v)) lst
-                Array.collect (product l1) l2
-
-            let fullTasks = crossproduct tasks nts
-
-            let matricesSize = tasks.[0].where.Size
-            let matricesCount = fullTasks.Length
-            let matricesCellCount = matricesSize * matricesSize
-
-            if matricesSize > 8
-            then
-                // todo: last matrix reduced size !!!!!!!!!!!!
-
-                let addOneFrom doTranspone buffer (from: SubMatrix.T, nt)  = 
-                    let ntMatrix = tMatrix.[nt]
-
-                    ntMatrix.GetInnerSubMatrix from.Left (Cell.shift from.Right -1 -1) doTranspone
-                    |> Array.append buffer
-
-                let from1 = 
-                    fullTasks 
-                    |> Array.map (fun ({from1 = from}, nts) -> from, fst nts)
-                    |> Array.fold (addOneFrom false) Array.empty
-                let from2 = 
-                    fullTasks 
-                    |> Array.map (fun ({from2 = from}, nts) -> from, snd nts)
-                    |> Array.fold (addOneFrom true) Array.empty 
-
-                let multiplicationResult = GPUMultiplicator.multiplicate from1 from2 matricesCount matricesSize
-
-                [0..matricesCount - 1] 
-                |> List.map (fun num -> multiplicationResult.[num * matricesCellCount..(num + 1) * matricesCellCount - 1])
-                |> List.map (ProbabilityMatrix.create matricesSize matricesSize)
-                |> List.iteri 
-                    (fun i matrix -> 
-                        let task, nt = fullTasks.[i]
-                        addProbsToPSubMatrix task.where nt matrix)
-            else
-                let doOne (task, nts) =
-                    let nt1, nt2 = nts
-                    let nt1Matrix = tMatrix.[nt1]
-                    let nt2Matrix = tMatrix.[nt2]
-                    simpleMultiplicator.multiplicate nt1Matrix nt2Matrix task.from1 task.from2 matricesSize
-
-                fullTasks
-                |> Array.map doOne
-                |> Array.map (ProbabilityMatrix.create matricesSize matricesSize)
-                |> Array.iteri 
-                    (fun i matrix -> 
-                        let task, nt = fullTasks.[i]
-                        addProbsToPSubMatrix task.where nt matrix)
+        member this.releaseResources = GPUMultiplicator.releaseResources

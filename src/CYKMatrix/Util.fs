@@ -3,6 +3,17 @@
     open System
     open System.Collections.Generic
     open Microsoft.FSharp.Math
+    open OpenCL.Net
+
+    type GPUOptions = {
+        PlatformName: string 
+        DeviceType: DeviceType
+        MinMatrixSize: int
+    }
+
+    type MultiplicationOptions = {
+        GPU: GPUOptions option  
+    }
 
     type NonTerminal = NonTerminal of string
 
@@ -66,11 +77,6 @@
 
 
     module SubMatrix = 
-        // todo: private?
-        // todo: cell
-//        let dotWithShift initial rowShift colShift =
-//            let initRow, initCol = initial
-//            (initRow + rowShift, initCol + colShift)
 
         type T(top: Cell.T, size: int) =
             member this.Top  = top
@@ -94,6 +100,10 @@
         let matrixWithShift matrixSize (initial: T) rowShift colShift =
             let newTop = Cell.shift initial.Top rowShift colShift
             T(newTop, matrixSize)
+
+        let getOnlyCell (matrix: T) = 
+            assert (matrix.Size = 1)
+            matrix.Left
 
         type T with
             member this.RelativeMatrix = shift this
@@ -121,6 +131,8 @@
             let ncol = ncol
             let nrow = nrow
             let getSingleIndex (cell: Cell.T) = cell.Row * ncol + cell.Column
+
+            //todo: optimize not used space
             let data = matrix
 
             member this.innerValue = data
@@ -133,8 +145,11 @@
 
             member this.Item
                 with get cell = Probability.fromInnerValue data.[getSingleIndex cell]
-
-            member this.GetInnerSubMatrix (cellStart: Cell.T) (cellFinish: Cell.T) isTransponed =
+                
+            member this.GetInnerSubMatrix (submatrix: SubMatrix.T) isTransponed =
+//            member this.GetInnerSubMatrix (cellStart: Cell.T) (cellFinish: Cell.T) isTransponed =
+                let cellStart = submatrix.Left 
+                let cellFinish = Cell.shift submatrix.Right -1 -1
                 let subNcol = cellFinish.Column - cellStart.Column + 1
                 let subNrow = cellFinish.Row - cellStart.Row + 1
 

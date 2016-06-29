@@ -12,14 +12,14 @@
                   (nonterminals : NonTerminal [])
                   S 
                   maxSearchLength 
-                  doParallel
+                  (options: MultiplicationOptions)
                   = 
                   
         let stringSize = String.length strToParse
         
         // bottom-left triangle and diagonal of tMatrixes and pMatrixes are not used
         // upper-right triangle of size (stringSize - maxSearchLength) is not used
-        let matrices = new MatrixHolder(nonterminals, allRules.ComplexTails, stringSize)
+        let matrices = new MatrixHolder(nonterminals, allRules.ComplexTails, stringSize, options)
 
         let matrixSizeExponent = (log (double stringSize + 1.)) / (log 2.) |> ceil |> int
         let matrixSize = (1 <<< matrixSizeExponent)    
@@ -35,13 +35,12 @@
             let matricesSize = layer.[0].Size
 
             if matricesSize = 1 then
-                // prob
                 let headProbsFromTail (tail, tailProb) = 
                     allRules.HeadsByComplexTail tail 
                     |> List.map (fun (head, headProb) -> head, Probability.multiplicate headProb tailProb)
                 
                 layer 
-                |> Array.map (fun (matrix: SubMatrix.T) -> matrix.Left)  //todo: unwrap single cell matrix
+                |> Array.map SubMatrix.getOnlyCell 
                 |> matrices.refreshTCells (headProbsFromTail)
 
             else
@@ -111,4 +110,5 @@
             if Array.length layer > 0 
             then completeVLayer layer
             
+        matrices.releaseResources ()
         matrices.getProbabilities S

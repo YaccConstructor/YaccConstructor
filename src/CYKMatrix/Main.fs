@@ -3,9 +3,16 @@
     open Util
     open System.Collections.Generic
     open Printf
+    open OpenCL.Net
 
     [<EntryPoint>]
     let main args = 
+
+        let defaultPlatformName = "*"
+        let defaultDeviceType = DeviceType.Default
+        let gpuOptions = Some {PlatformName = defaultPlatformName; DeviceType = defaultDeviceType; MinMatrixSize = 16}
+
+        let defaultMultiplicationOptions = {GPU = gpuOptions}
 
         let A = NonTerminal "A"
         let B = NonTerminal "B"
@@ -86,7 +93,7 @@
 
         let check str searchLen =             
             let toCheck    = CYKMatrix.recognize str rules nonterminals S searchLen
-            let toCheckBFS = CYKMatrixBFS.recognize str rules nonterminals S searchLen false
+            let toCheckBFS = CYKMatrixBFS.recognize str rules nonterminals S searchLen defaultMultiplicationOptions
             assert (isAnswerValid toCheck (String.length str) searchLen)
             assert (isAnswerValid toCheckBFS (String.length str) searchLen)
             let sameCells cell = 
@@ -118,7 +125,7 @@
                          "okhotin"
                          str
                          searchLen
-            checkOneType (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen false)
+            checkOneType (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen defaultMultiplicationOptions)
                          (fun toCheck -> isAnswerValid toCheck)
                          "gpu"
                          str

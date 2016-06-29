@@ -81,7 +81,7 @@ type LexerInnerGraph<'br> (g:LexerInputGraph<'br>) as this =
 type ParserEdge<'token>(s, e, t)=
     inherit TaggedEdge<int, 'token>(s,e,t)
     
-type    ParserInputGraph(initialVertices : int[], finalVertices : int[]) = 
+type ParserInputGraph(initialVertices : int[], finalVertices : int[]) = 
     inherit AdjacencyGraph<int,ParserEdge<int>>()
 
     member val InitStates = initialVertices 

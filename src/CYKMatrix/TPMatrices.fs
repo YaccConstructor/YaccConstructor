@@ -16,8 +16,8 @@
             
     type SimpleMatriceswMultiplicator () =
         member this.multiplicate (nt1Matrix: ProbabilityMatrix.T) (nt2Matrix: ProbabilityMatrix.T) (from1: SubMatrix.T) (from2: SubMatrix.T) actualColCount =
-            let from1Matrix = nt1Matrix.GetInnerSubMatrix (fst from1.Left) (fst from1.Right - 1) (snd from1.Left) (snd from1.Right - 1) false
-            let from2Matrix = nt2Matrix.GetInnerSubMatrix (fst from2.Left) (fst from2.Right - 1) (snd from2.Left) (snd from2.Right - 1) true
+            let from1Matrix = nt1Matrix.GetInnerSubMatrix from1.Left (Cell.shift from1.Right -1 -1) false
+            let from2Matrix = nt2Matrix.GetInnerSubMatrix from2.Left (Cell.shift from2.Right -1 -1) true
 //            (snd from2.Right - 1 - (from1.Size - actualColCount)) true
 
             let matricesSize = from1.Size
@@ -119,21 +119,29 @@
 
         let addProbsToPSubMatrix (where: SubMatrix.T) nts (matrix: ProbabilityMatrix.T) =
                 let whereMatrix = pMatrix.[nts]
-                let iShift = fst where.Left
-                let jShift = snd where.Left
                 for i in [0 .. where.Size - 1] do
-                    let actualColCount = (min (snd where.Top) (stringSize + 1)) - snd where.Left
+                    let actualColCount = (min (where.Top.Column) (stringSize + 1)) - where.Left.Column
                     for j in [0 .. actualColCount - 1] do
-                        whereMatrix.AddValueToCell (i + iShift, j + jShift) matrix.[i, j]
+                        let matrixCell = Cell.create i j
+                        let realCell = Cell.shift matrixCell where.Left.Row where.Left.Column
+                        whereMatrix.AddValueToCell realCell matrix.[matrixCell]
             
         member this.getProbabilities nt = tMatrix.[nt]
 
         member this.initTDiagonalWith nonterminals =
-            nonterminals |> List.iteri (fun i ntProbs -> addProbsToTMatrix (i, i + 1) ntProbs)
+            let diagonalCell i = Cell.create i (i + 1)
+            nonterminals |> List.iteri (fun i ntProbs -> addProbsToTMatrix (diagonalCell i) ntProbs)
 
         member this.refreshTCells headProbsFromTail cells =
-                let tails cell = pMatrix |> Map.map (fun _ probs -> probs.[fst cell, snd cell]) |> Map.filter (fun _ prob -> not <| Probability.isZero prob)
-                let heads cell = tails cell |> Map.toList |> List.map headProbsFromTail |> List.concat
+                let tails cell = 
+                    pMatrix 
+                    |> Map.map (fun _ probs -> probs.[cell]) 
+                    |> Map.filter (fun _ prob -> not <| Probability.isZero prob)
+                let heads cell = 
+                    tails cell 
+                    |> Map.toList 
+                    |> List.map headProbsFromTail 
+                    |> List.concat
 
                 cells
                 |> Array.iter (fun cell -> heads cell |> addProbsToTMatrix cell)
@@ -160,7 +168,7 @@
                 let addOneFrom doTranspone buffer (from: SubMatrix.T, nt)  = 
                     let ntMatrix = tMatrix.[nt]
 
-                    ntMatrix.GetInnerSubMatrix (fst from.Left) (fst from.Right - 1) (snd from.Left) (snd from.Right - 1) doTranspone
+                    ntMatrix.GetInnerSubMatrix from.Left (Cell.shift from.Right -1 -1) doTranspone
                     |> Array.append buffer
 
                 let from1 = 

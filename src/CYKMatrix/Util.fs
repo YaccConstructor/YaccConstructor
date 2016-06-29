@@ -4,13 +4,6 @@
     open System.Collections.Generic
     open Microsoft.FSharp.Math
 
-    open Brahma.Helpers
-    open OpenCL.Net
-    open Brahma.OpenCL
-    open Brahma.FSharp.OpenCL.Core
-    open Microsoft.FSharp.Quotations
-    open Brahma.FSharp.OpenCL.Extensions
-
     type NonTerminal = NonTerminal of string
 
     module Probability =
@@ -27,14 +20,15 @@
         let unwrap = innerValue >> double
         
 //        let zero = create false
-//        let isZero v = not <| unwrap v
         let zero = create 0.
-        let isZero v = unwrap v = 0.
+        
+        let innerZero = innerValue zero
+        let isZero v = innerValue v = innerZero
 
 //        let inline innerSumm v1 v2 = v1 || v2
 //        let inline innerMult v1 v2 = v1 && v2
-        let innerSummQuote = <@ fun v1 v2 -> v1 + v2 @>
-        let innerMultQuote = <@ fun v1 v2 -> v1 * v2 @>
+        let innerSummQuote = <@ fun (v1: InnerType) (v2: InnerType) -> v1 + v2 @>
+        let innerMultQuote = <@ fun (v1: InnerType) (v2: InnerType) -> v1 * v2 @>
         let innerSumm v1 v2 = v1 + v2
         let innerMult v1 v2 = v1 * v2
 
@@ -60,58 +54,73 @@
             then complexRules.[c]
             else []
 
+    module Cell =
+        type T(i, j) =
+            member this.Row = i
+            member this.Column = j
+            member this.StringLength = j - i
+        
+        let create i j = T(i, j) 
+
+        let shift (initial: T) rowShift colShift = create (initial.Row + rowShift) (initial.Column + colShift)
+
 
     module SubMatrix = 
         // todo: private?
         // todo: cell
-        let dotWithShift initial rowShift colShift =
-            let initRow, initCol = initial
-            (initRow + rowShift, initCol + colShift)
+//        let dotWithShift initial rowShift colShift =
+//            let initRow, initCol = initial
+//            (initRow + rowShift, initCol + colShift)
 
-        type T(top: int * int, size: int) =
-            let relativeDot = dotWithShift top
-
+        type T(top: Cell.T, size: int) =
             member this.Top  = top
             member this.Size = size
 
             member this.HalfSize = int(float(this.Size) / 2.)
-            member this.RelativeDot = dotWithShift this.Top
+            member this.RelativeDot = Cell.shift this.Top
 
             member this.Right  = this.RelativeDot this.Size  0
             member this.Left   = this.RelativeDot 0 -this.Size
-            member this.Bottom = this.RelativeDot this.Size -this.Size        
+            member this.Bottom = this.RelativeDot this.Size -this.Size  
+            
+            member this.maxStringLength = this.Top.StringLength - 1
+            member this.minStringLength = this.Bottom.StringLength + 1
+            
+        let create top size = T(top, size)      
+        let shift (matrix: T) rowShift colShift =
+            let shiftedTop = Cell.shift matrix.Top rowShift colShift
+            create shiftedTop matrix.Size
 
         let matrixWithShift matrixSize (initial: T) rowShift colShift =
-            let newTop = dotWithShift initial.Top rowShift colShift
+            let newTop = Cell.shift initial.Top rowShift colShift
             T(newTop, matrixSize)
 
         type T with
-            member this.RelativeMatrix = matrixWithShift this.Size this
+            member this.RelativeMatrix = shift this
 
-            member this.TopSubmatrix    = matrixWithShift this.HalfSize this 0  0 
-            member this.RightSubmatrix  = matrixWithShift this.HalfSize this this.HalfSize  0
-            member this.LeftSubmatrix   = matrixWithShift this.HalfSize this 0 -this.HalfSize
-            member this.BottomSubmatrix = matrixWithShift this.HalfSize this this.HalfSize -this.HalfSize 
+            member this.TopSubmatrix    = create this.Top this.HalfSize  
+            member this.RightSubmatrix  = shift this.TopSubmatrix this.HalfSize  0
+            member this.LeftSubmatrix   = shift this.TopSubmatrix 0 -this.HalfSize
+            member this.BottomSubmatrix = shift this.TopSubmatrix this.HalfSize -this.HalfSize 
             
             member this.RightNeighbor = this.RelativeMatrix this.Size 0
             member this.LeftNeighbor  = this.RelativeMatrix 0 -this.Size
-            member this.RightGrounded = this.RelativeMatrix (snd this.Top - fst this.Top - 2 * this.Size)  0
-            member this.LeftGrounded  = this.RelativeMatrix 0 -(snd this.Top - fst this.Top - 2 * this.Size)
+            member this.RightGrounded = this.RelativeMatrix (this.Top.StringLength - 2 * this.Size)  0
+            member this.LeftGrounded  = this.RelativeMatrix 0 -(this.Top.StringLength - 2 * this.Size)
     
-        let create top size = T(top, size)
         let print (matrix: T) = 
-            let row, col = matrix.Top
-            printf " (top: %d, %d; size: %d) " row col matrix.Size
+            let top = matrix.Top
+            printf " (top: %d, %d; size: %d) " top.Row top.Column matrix.Size    
 
-                        
+                
     type MultiplicationTask = {where: SubMatrix.T; from1: SubMatrix.T; from2: SubMatrix.T}
 
-    
+
     module ProbabilityMatrix =
         type T(matrix: Probability.InnerType [], nrow: int, ncol: int) =
             let ncol = ncol
             let nrow = nrow
-            let getSingleIndex i j = i * ncol + j
+            let getSingleIndex (cell: Cell.T) = cell.Row * ncol + cell.Column
             let data = matrix
 
             member this.innerValue = data
@@ -123,193 +132,42 @@
                 | _ -> raise <| IndexOutOfRangeException()
 
             member this.Item
-                with get (i, j) = Probability.fromInnerValue data.[getSingleIndex i j]
+                with get cell = Probability.fromInnerValue data.[getSingleIndex cell]
 
-            member this.GetSlice (rowStart: int option, rowFinish: int option,
-                                  colStart: int option, colFinish: int option) =
-                let rowStart = 
-                    match rowStart with
-                    | Some(v) -> v
-                    | None -> 0
-                let rowFinish = 
-                    match rowFinish with
-                    | Some(v) -> v
-                    | None -> nrow - 1
-                let colStart = 
-                    match colStart with
-                    | Some(v) -> v
-                    | None -> 0
-                let colFinish = 
-                    match colFinish with
-                    | Some(v) -> v
-                    | None -> ncol - 1
-                let subNcol = colFinish - colStart + 1
-                let subNrow = rowFinish - rowStart + 1
-                let rebaseIndex x =
+            member this.GetInnerSubMatrix (cellStart: Cell.T) (cellFinish: Cell.T) isTransponed =
+                let subNcol = cellFinish.Column - cellStart.Column + 1
+                let subNrow = cellFinish.Row - cellStart.Row + 1
+
+                let splitIndex x =
                     let subi = x / subNcol
                     let subj = x - subNcol * subi
-                    getSingleIndex (subi + rowStart) (subj + colStart)            
-                T(Array.init (subNrow * subNcol) (fun x -> data.[rebaseIndex x]), subNrow, subNcol)
 
-            member this.AddValueToCell (i, j) prob = 
-                let x = getSingleIndex i j
+                    if isTransponed
+                    then subj, subi
+                    else subi, subj
+
+                let getDataFromCell subCell = 
+                    let subi, subj = subCell
+                    let cellOutOfMatrix = (subi < 0) || (subj < 0) || (subi >= nrow) || (subj >= ncol)
+
+                    if cellOutOfMatrix
+                    then Probability.innerZero
+                    else data.[getSingleIndex <| Cell.create (subi + cellStart.Row) (subj + cellStart.Column)]   
+                      
+                Array.init (subNrow * subNcol) (fun x -> splitIndex x |> getDataFromCell)
+
+            member this.AddValueToCell cell prob = 
+                let x = getSingleIndex cell
                 data.[x] <- Probability.innerSumm data.[x] <| Probability.innerValue prob
                 
-        let create matrix nrow ncol =
+        let create nrow ncol matrix =
             T(matrix, nrow, ncol)
 
         let init nrow ncol generator =
             let splitIndex x =
                 let i = x / ncol
                 let j = x - ncol * i
-                i, j
+                Cell.create i j
             new T(Array.init (ncol * nrow) (fun x -> splitIndex x |> generator |> Probability.innerValue), nrow, ncol)
         
         let empty n = init n n (fun cell -> Probability.zero)
-
-            
-    type SimpleMatriceswMultiplicator () =
-
-        member this.multiplicate (nt1Matrix: ProbabilityMatrix.T) (nt2Matrix: ProbabilityMatrix.T) (from1: SubMatrix.T) (from2: SubMatrix.T) actualColCount =
-            let from1Matrix = nt1Matrix.[fst from1.Left..(fst from1.Right - 1), 
-                                         snd from1.Left..(snd from1.Right - 1)]
-            let from2Matrix = nt2Matrix.[fst from2.Left..(fst from2.Right - 1),
-                                         (snd from2.Left)..(snd from2.Right - 1 - (from1.Size - actualColCount))]
-
-            let resultRows = from1.Size
-            let resultColumns = actualColCount
-            let vectorLength = from1.Size
-        
-            let calculateCell (i, j) = 
-                [0..vectorLength - 1] 
-                |> List.fold (fun buf k -> Probability.summ buf (Probability.multiplicate from1Matrix.[i, k] from2Matrix.[k, j])) 
-                             Probability.zero    
-                             
-            ProbabilityMatrix.init resultRows resultColumns calculateCell 
-    
-
-    type GPUMatriceswMultiplicator (probabilitySummQuote, probabilityMultQuote) =
-    
-        let localWorkSize = 2
-        let platformName = "*"
-        let deviceType = DeviceType.Default
-
-        let provider =
-            try  ComputeProvider.Create(platformName, deviceType)
-            with 
-            | ex -> failwith ex.Message
-
-        let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
-
-        let multiplicateProbabilities = probabilityMultQuote
-        let summProbabilities = probabilitySummQuote
-
-        let command = 
-            <@
-                fun (r:_2D) resultColumns vectorLength (a:array<_>) (b:array<_>) (c:array<_>) -> 
-                    let ti = r.GlobalID0
-                    let tj = r.GlobalID1                    
-                    let mutable buf = c.[ti * resultColumns + tj]
-                    for k in 0 .. vectorLength - 1 do
-                        buf <- (%summProbabilities) buf 
-                                                    ((%multiplicateProbabilities) a.[ti * vectorLength + k] b.[k * resultColumns + tj])
-                    c.[ti * resultColumns + tj] <- buf
-            @>
-
-        member this.multiplicate from1 from2 resultRows resultColumns vectorLength =
-               
-            let result = Array.zeroCreate(resultRows * resultColumns)
-
-            let kernel, kernelPrepare, kernelRun = provider.Compile command
-    
-            let d = new _2D(resultRows, resultColumns, min 4 resultRows, 1)
-            kernelPrepare d resultColumns vectorLength from1 from2 result
-         
-            commandQueue.Add(kernelRun()).Finish() |> ignore        
-            commandQueue.Add(result.ToHost provider).Finish() |> ignore
-
-            result
-
-        member this.releaseResources =
-            commandQueue.Dispose()
-            provider.Dispose()
-            provider.CloseAllBuffers()
-
-       
-    type MatrixHolder(tKeys, pKeys, stringSize) = 
-    
-        let GPUMultiplicator = new GPUMatriceswMultiplicator (Probability.innerSummQuote, Probability.innerMultQuote)
-//        let simpleMultiplicator = new SimpleMatriceswMultiplicator ()
-            
-        // swich to dictionary (?)
-        let tMatrix = Map<NonTerminal, ProbabilityMatrix.T>
-                            (
-                                tKeys 
-                                |> Seq.map (fun x -> x, ProbabilityMatrix.empty (stringSize + 1))
-                            )
-
-        let pMatrix = Map<NonTerminal * NonTerminal, ProbabilityMatrix.T>
-                            (
-                                pKeys
-                                |> Array.map (fun x -> x, ProbabilityMatrix.empty (stringSize + 1))
-                            )
-   
-        let addProbsToTMatrix cell nontermProbs =
-            nontermProbs |> List.iter (fun (key, prob) -> tMatrix.[key].AddValueToCell cell prob)
-
-        let addProbsToPSubMatrix  (where: SubMatrix.T) nts (matrix: ProbabilityMatrix.T) =
-                let whereMatrix = pMatrix.[nts]
-                let iShift = fst where.Left
-                let jShift = snd where.Left
-                for i in [0 .. where.Size - 1] do
-                    let actualColCount = (min (snd where.Top) (stringSize + 1)) - snd where.Left
-                    for j in [0 .. actualColCount - 1] do
-                        whereMatrix.AddValueToCell (i + iShift, j + jShift) matrix.[i, j]
-            
-        member this.getProbabilities nt = tMatrix.[nt]
-
-        member this.initTDiagonalWith nonterminals =
-            nonterminals |> List.iteri (fun i ntProbs -> addProbsToTMatrix (i, i + 1) ntProbs)
-
-        member this.refreshTCells headProbsFromTail cells =
-                let tails cell = pMatrix |> Map.map (fun _ probs -> probs.[fst cell, snd cell]) |> Map.filter (fun _ prob -> not <| Probability.isZero prob)
-                let heads cell = tails cell |> Map.toList |> List.map headProbsFromTail |> List.concat
-
-                cells
-                |> Array.iter (fun cell -> heads cell |> addProbsToTMatrix cell)
-
-        // todo: combine small matrices to multiplicate together !!!
-        member this.performMultiplication (tasks: MultiplicationTask []) nts = 
-//            multiplicationCounter := !multiplicationCounter + (Array.length tasks)
-            let matricesSize = tasks.[0].where.Size
-
-            let crossproduct l1 l2 =
-                let product lst v = Array.map (fun vl -> (vl, v)) lst
-                Array.collect (product l1) l2
-
-            let performOneTask (task, nts) = 
-                let nt1, nt2 = nts
-                let nt1Matrix = tMatrix.[nt1]
-                let nt2Matrix = tMatrix.[nt2]
-                let {where=where; from1=from1; from2=from2} = task
-                let actualColCount = (min (snd task.from2.Top) (stringSize + 1)) - snd task.from2.Left
-
-                let from1Matrix = nt1Matrix.[fst from1.Left..(fst from1.Right - 1), 
-                                             snd from1.Left..(snd from1.Right - 1)]
-                let from2Matrix = nt2Matrix.[fst from2.Left..(fst from2.Right - 1),
-                                             (snd from2.Left)..(snd from2.Right - 1 - (from1.Size - actualColCount))]
-                
-                let resultRows = from1.Size
-                let resultColumns = actualColCount
-                let vectorLength = from1.Size
-
-                let multiplicationResult = GPUMultiplicator.multiplicate from1Matrix.innerValue 
-                                                                         from2Matrix.innerValue 
-                                                                         resultRows
-                                                                         resultColumns
-                                                                         vectorLength
-                ProbabilityMatrix.create multiplicationResult resultRows resultColumns
-                |> addProbsToPSubMatrix task.where nts 
-//                else addProbsToPSubMatrix nts (simpleMultiplicator.multiplicate nt1Matrix nt2Matrix task.from1 task.from2 actualColCount) task.where               
-                
-            crossproduct tasks nts |> Array.iter performOneTask

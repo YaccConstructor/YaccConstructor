@@ -35,14 +35,20 @@
             for i in [l1..m1-1] do
                 let rightBound = min m2 (stringSize + 1)
                 for j in [l2..rightBound-1] do
-                    where.AddValueToCell (i, j) matrix.[i-l1, j-l2]      
+                    let realCell = Cell.create i j
+                    let matrixCell = Cell.shift realCell -l1 -l2
+                    where.AddValueToCell realCell matrix.[matrixCell]      
 
         let subMatrixMult (matrixA: ProbabilityMatrix.T) (matrixB: ProbabilityMatrix.T) (al1, am1, al2, am2) (bl1, bm1, bl2, bm2) = 
             let aHight = am1 - al1
             let aLength = aHight
-            let calcCell (i, j) =
-                [0..aLength-1] |> List.fold (fun acc k -> Probability.summ acc <| Probability.multiplicate matrixA.[i + al1, k + al2] matrixB.[k + bl1, j + bl2]) 
-                                            Probability.zero 
+            let calcCell (cell: Cell.T) =
+                let aCell k = Cell.create (cell.Row + al1) (k + al2)
+                let bCell k = Cell.create (k + bl1) (cell.Column + bl2)
+                [0..aLength-1] 
+                |> List.fold 
+                    (fun acc k -> Probability.summ acc <| Probability.multiplicate matrixA.[aCell k] matrixB.[bCell k]) 
+                    Probability.zero 
             let bUpperBound = min bm2 (stringSize + 1)
             ProbabilityMatrix.init aHight (bUpperBound - bl2) calcCell                 
                                     
@@ -66,19 +72,22 @@
         and completeT (l1, m1, l2, m2) =
             assert (m1 - l1 = m2 - l2)
 
-            let addProbToMatrix (matrix: Map<_, ProbabilityMatrix.T>) row column key prob = matrix.[key].AddValueToCell (row, column) prob
+            let addProbToMatrix (matrix: Map<_, ProbabilityMatrix.T>) cell key prob = 
+                matrix.[key].AddValueToCell cell prob
                 
-            let updateTMatrixCell row column (nonTerm, prob) = addProbToMatrix tMatrix row column nonTerm prob
+            let updateTMatrixCell cell (nonTerm, prob) = addProbToMatrix tMatrix cell nonTerm prob
 
             if m1 - l1 = 1 && m1 = l2 then
                 let currentChar = strToParse.[l1]
                 let nonTerms = allRules.HeadsBySimpleTail currentChar
+                let cell = Cell.create l1 (l1 + 1)
 
                 nonTerms
-                |> List.iter (updateTMatrixCell l1 (l1 + 1))
+                |> List.iter (updateTMatrixCell cell)
 
             else if m1 - l1 = 1 && m1 < l2 then
                 assert (m2 <= stringSize + 1)
+                let cell = Cell.create l1 l2
 
                 let headsFromTail (tail, tailProb) = 
                     if allRules.IsComplexTail tail then 
@@ -86,11 +95,11 @@
                     else 
                         []
 
-                let tails = pMatrix |> Map.map (fun _ probs -> probs.[l1, l2]) |> Map.filter (fun _ prob -> not <| Probability.isZero prob)
+                let tails = pMatrix |> Map.map (fun _ probs -> probs.[cell]) |> Map.filter (fun _ prob -> not <| Probability.isZero prob)
                 let heads = tails |> Map.toList |> List.map headsFromTail |> List.concat
 
                 heads 
-                |> List.iter (updateTMatrixCell l1 l2)
+                |> List.iter (updateTMatrixCell cell)
 
             else if m1 - l1 > 1 then
                 assert (l2 < stringSize + 1)

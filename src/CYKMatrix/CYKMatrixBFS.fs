@@ -28,10 +28,8 @@
             if Array.length layer = 0 
             then true
             else 
-                // cell
-                let previousLayerCell = layer.[0].Bottom
-                let correspondingStringLength cell = snd cell - fst cell
-                correspondingStringLength previousLayerCell >= maxSearchLength
+                let oneMatrix = layer.[0]
+                oneMatrix.minStringLength > maxSearchLength
         
         let rec completeLayer (layer: SubMatrix.T []) = 
             let matricesSize = layer.[0].Size
@@ -55,7 +53,7 @@
             let matricesSize = layer.[0].Size
             let halfMatricesSize = int(matricesSize / 2)
 
-            let needToShortenNextLayers = snd layer.[Array.length layer - 1].LeftSubmatrix.Top > stringSize 
+            let needToShortenNextLayers = layer.[Array.length layer - 1].LeftSubmatrix.Top.Column > stringSize 
 
             let firstSubLayerWithExtras = layer |> Array.collect (fun matrix -> [|matrix.LeftSubmatrix; matrix.RightSubmatrix|])
             let firstSubLayer = 
@@ -96,7 +94,8 @@
             let matricesSize = 1 <<< layerNum   
             let matricesCount = (double stringSize + 1.) / double(matricesSize) - 1. |> ceil |> int
 
-            let firstInLayer = SubMatrix.create (0, 2 * matricesSize) matricesSize
+            let firstTopCell = Cell.create 0 (2 * matricesSize)
+            let firstInLayer = SubMatrix.create firstTopCell matricesSize
             let layer = Array.init matricesCount (fun i -> firstInLayer.RelativeMatrix (i * matricesSize) (i * matricesSize))
             layer
             

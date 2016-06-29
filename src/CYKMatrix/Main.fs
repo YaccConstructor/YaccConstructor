@@ -54,12 +54,13 @@
 
             for i in [0..rowLength-1] do
                 for j in [0..colLength-1] do
+                    let cell = Cell.create i j
                     if i <= strLen && j <= strLen && j > i && j-i <= searchLen then
 //                    if i <= strLen && j <= strLen && j > i then
 //                        printf "%b  " <| Probability.unwrap matrix.[i, j]
-                        printf "%.8f  " <| Probability.unwrap matrix.[i, j]
+                        printf "%.8f  " <| Probability.unwrap matrix.[cell]
                     else
-                        assert (Probability.isZero matrix.[i, j])
+                        assert (Probability.isZero matrix.[cell])
 //                        printf "%.8f  " matrix.[i, j]
                         printf "----------  "
                 printfn ""
@@ -71,28 +72,29 @@
             if rowLength <> colLength || rowLength <> strLen + 1 then
                 false
             else
-                let redundantCell (i, j) =
-                        i > strLen 
-                        || j > strLen 
-                        || j <= i 
-                        || j-i > searchLen 
-
+                let redundantCell (cell: Cell.T) =
+                        cell.Row > strLen 
+                        || cell.Column > strLen 
+                        || cell.Column <= cell.Row
+                        || cell.Column - cell.Row > searchLen 
+                       
                 [0..rowLength-1]
-                |> List.map (fun i -> [0..colLength-1] |> List.map (fun j -> (i,j))) 
+                |> List.map (fun i -> [0..colLength-1] |> List.map (fun j -> Cell.create i j)) 
                 |> List.concat
                 |> List.filter redundantCell
-                |> List.forall (fun (i, j) -> Probability.isZero matrix.[i,j])
+                |> List.forall (fun cell -> Probability.isZero matrix.[cell])
 
         let check str searchLen =             
             let toCheck    = CYKMatrix.recognize str rules nonterminals S searchLen
             let toCheckBFS = CYKMatrixBFS.recognize str rules nonterminals S searchLen false
             assert (isAnswerValid toCheck (String.length str) searchLen)
             assert (isAnswerValid toCheckBFS (String.length str) searchLen)
-            let sameCells (i, j) = 
+            let sameCells cell = 
 //                (Probability.unwrap toCheck.[i, j]) = (Probability.unwrap toCheckBFS.[i, j])
-                (Probability.unwrap toCheck.[i, j]) - (Probability.unwrap toCheckBFS.[i, j]) < 0.0000000001
+                (Probability.unwrap toCheck.[cell]) - (Probability.unwrap toCheckBFS.[cell]) < 0.0000000001
             let sameAnswers =
-                Seq.forall (fun i -> (Seq.forall (fun j -> sameCells (i,j)) [0 .. toCheck.GetLength(0) - 1]))
+                Seq.forall (fun i -> (Seq.forall (fun j -> sameCells <| Cell.create i j) 
+                                                 [0 .. toCheck.GetLength(0) - 1]))
                            [0 .. toCheck.GetLength(0) - 1] 
             assert sameAnswers
 //            printMatrix toCheck (String.length str) searchLen 
@@ -139,8 +141,8 @@
 //        check "aaaabb" 1
 //        check "aaaabb" 0
 //        
-        check (String.replicate 40 "abb") 100
-//        checkTime (String.replicate 300 "abb") 100
+//        check (String.replicate 40 "abb") 100
+        checkTime (String.replicate 100 "abb") 200
 //        checkTime ((String.replicate 511 "abbb") + "abb") 50
          
 //        check "aabb"

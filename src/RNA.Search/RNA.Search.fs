@@ -85,8 +85,9 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lengthLimit res  =
                         |> Seq.filter (fun p -> p |> Seq.sumBy (fun e -> e.Tag) < hihtLenghtLimit)
             paths
             |> Seq.concat
-            |> System.Collections.Generic.HashSet<_>
+            |> fun s -> new  System.Collections.Generic.HashSet<_>(s)
             |> fun s -> s, (s |> Seq.sumBy (fun x -> x.Tag |> int))
+        
         let startEdges = new ResizeArray<_>()
         let finalEdges = new ResizeArray<_>()
         let subgraphs =

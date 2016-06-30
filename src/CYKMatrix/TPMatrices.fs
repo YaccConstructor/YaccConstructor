@@ -16,23 +16,13 @@
     type GPUHelpers = {
         provider: ComputeProvider
         commandQueue: CommandQueue
+        kernel: _2D Kernel
+        kernelPrepare: _2D -> int -> Probability.InnerType [] -> Probability.InnerType [] -> Probability.InnerType [] -> unit
+        kernelRun: unit -> _2D Commands.Run
         options: GPUOptions
     }
 
     type GPUMatriceswMultiplicator (options: MultiplicationOptions, probabilitySummQuote, probabilityMultQuote) =
-
-        let gpuHelpers = 
-            match options.GPU with
-            | Some gpuOptions -> 
-                let provider =
-                    try ComputeProvider.Create(gpuOptions.PlatformName, gpuOptions.DeviceType)
-                    with 
-                    | ex -> failwith ex.Message
-
-                let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
-
-                Some {provider = provider; commandQueue = commandQueue; options = gpuOptions}
-            | None -> None
 
         let multiplicateProbabilities = probabilityMultQuote
         let summProbabilities = probabilitySummQuote
@@ -51,8 +41,29 @@
                     for k in 0 .. matricesSize - 1 do
                         buf <- (%summProbabilities) buf ((%multiplicateProbabilities) a.[skipRows + k] b.[skipCols + k])
                     c.[skipRows + tj] <- buf
-            @>        
+            @>  
 
+        let gpuHelpers = 
+            match options.GPU with
+            | Some gpuOptions -> 
+                let provider =
+                    try ComputeProvider.Create(gpuOptions.PlatformName, gpuOptions.DeviceType)
+                    with 
+                    | ex -> failwith ex.Message
+
+                let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
+                let kernel, kernelPrepare, kernelRun = provider.Compile command
+
+                Some {
+                    provider = provider; 
+                    commandQueue = commandQueue; 
+                    kernel = kernel;
+                    kernelPrepare = kernelPrepare;
+                    kernelRun = kernelRun;
+                    options = gpuOptions
+                }
+            | None -> None      
+            
         let flushMultiplicationResults addToPSubMatrix fullTasks matrices =
             Array.zip fullTasks matrices
             |> Array.iter (fun (fullTask, matrix) ->
@@ -85,13 +96,12 @@
                
             let result: Probability.InnerType [] = Array.zeroCreate(matricesCount * matricesSize * matricesSize)
                               
-            let d = new _2D(matricesSize * matricesCount, matricesSize, 1, 1)
+            let d = new _2D(matricesSize * matricesCount, matricesSize, min 4 (matricesSize * matricesCount), 1)
     //            let d = new _2D(matricesSize * matricesCount, matricesSize, min 4 (matricesSize * matricesCount), 1)
 
-            let kernel, kernelPrepare, kernelRun = helpers.provider.Compile command
-            kernelPrepare d matricesSize from1 from2 result
+            helpers.kernelPrepare d matricesSize from1 from2 result
          
-            helpers.commandQueue.Add(kernelRun()).Finish() |> ignore        
+            helpers.commandQueue.Add(helpers.kernelRun()).Finish() |> ignore        
             helpers.commandQueue.Add(result.ToHost helpers.provider).Finish() |> ignore
 
             result

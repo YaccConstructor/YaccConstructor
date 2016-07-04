@@ -15,11 +15,24 @@ type Vertex =
     val NontermLabel     : int
     new (level, nonterm) = {Level = level; NontermLabel = nonterm}
 
+type Vertex2 =
+    val Level : int
+    val NontermLabel : int
+    val Edges : ResizeArray<GSSEdge>
+    new (lev, lab, e) = {Level = lev; NontermLabel = lab; Edges = e}
+and GSSEdge =
+    val Dest : Vertex2
+    val Label : int<labelMeasure>
+    val Ast : int64<extension>
+    val Length : uint16
+    new (d, a, l, len) = {Dest = d; Ast = a; Length = len; Label = l}
+
+
 [<Struct>]
 type Context(*<'TokenType>*) =
     val Index         : int
     val Label         : int<labelMeasure>
-    val Vertex        : Vertex
+    val Vertex        : Vertex 
     val Ast           : int<nodeMeasure>
     val Probability   : float
     val SLength       : int   
@@ -32,15 +45,15 @@ type Context(*<'TokenType>*) =
 type Context2 =
     val Index         : int
     val Label         : int<labelMeasure>
-    val Vertex        : Vertex
+    val Vertex        : Vertex2
     val Extension     : int64<extension>
-    val Length        : byte
+    val Length        : uint16
     new (index, label, vertex, ext, len) = {Index = index; Label = label; Vertex = vertex; Extension = ext; Length = len}
     
 
-type ParseResult<'TokenType> =
-    | Success of Tree<'TokenType> 
-    | Success1 of array<'TokenType>
+type ParseResult<'a> =
+    | Success of Tree<'a>
+    | Success1 of 'a[]
     | Error of string
 
 module CommonFuns = 
@@ -197,14 +210,14 @@ type ParserStructures<'TokenType> (currentRule : int)=
                 newDict1.Add(ast, newDict2)
                 false, Some newDict1   
 
-    let finalMatching (curRight : INode) nontermName finalExtensions findSppfNode findSppfPackedNode currentGSSNode currentVertexInInput (pop : Vertex -> int -> int<nodeMeasure> -> unit)  = 
+    let finalMatching (curRight : INode) nontermName (*finalExtensions*) findSppfNode findSppfPackedNode currentGSSNode currentVertexInInput (pop : Vertex -> int -> int<nodeMeasure> -> unit)  = 
         match curRight with
         | :? TerminalNode as t ->
             currentN := getNodeP findSppfNode findSppfPackedNode dummy !currentLabel !currentR !currentN
             let r = (sppfNodes.Item (int !currentN)) :?> NonTerminalNode 
             pop !currentGSSNode !currentVertexInInput !currentN
         | :? NonTerminalNode as r ->
-            if (r.Name = nontermName) && (Array.exists ((=) r.Extension) finalExtensions)
+            if (r.Name = nontermName) //&& (Array.exists ((=) r.Extension) finalExtensions)
             then 
                 match !resultAST with
                 | None ->  resultAST := Some r

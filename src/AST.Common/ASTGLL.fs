@@ -90,7 +90,7 @@ type NumNode<'vtype> =
     new (num, node) = {Num = num; Node = node} 
 
 [<AllowNullLiteral>]
-type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
+type Tree<'Tokens> (tokens : int[], root : INode, rules : int[][]) =
     member this.AstToDot (indToString : int -> string) (tokenToNumber : 'TokenType -> int) (tokenData : 'TokenType -> obj) (path : string) =
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
@@ -245,7 +245,7 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
                 if used.TryGetValue(currentPair.Node, key)
                 then
                     createEdge currentPair.Num !key false ""
-                else    
+                else     
                     num := !num + 1
                     used.Add(currentPair.Node, !num)
                     match currentPair.Node with 

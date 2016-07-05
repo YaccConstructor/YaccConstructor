@@ -95,8 +95,62 @@ open Util
                 let i = (x - n * matricesSize * matricesSize) / matricesSize
                 let j = x - n * matricesSize * matricesSize - i * matricesSize
                 n, i, j
-
             Array.init (matricesSize * actualColCount) (fun x -> calculateCell <| getNIJ x)
+
+        let ceilToPowerOf2 x = 
+            let exp = (log (double x)) / (log 2.) |> ceil |> int
+            1 <<< exp
+        let floorToPowerOf2 x = 
+            let exp = (log (double x)) / (log 2.) |> floor |> int
+            1 <<< exp
+
+        let wgSizesForMatricesWise wgSizeRestriction localLinesRestriction matricesCount matricesSize =
+            if wgSizeRestriction < matricesSize * matricesSize || localLinesRestriction < 2 * matricesSize 
+            then 
+                let maxPairedLines = floorToPowerOf2 <| min ((double >> sqrt >> floor >> int) wgSizeRestriction) (localLinesRestriction / 2)
+                maxPairedLines, maxPairedLines
+            else 
+                let maxCoeff = min (wgSizeRestriction / (matricesSize * matricesSize)) 
+                                    (localLinesRestriction / (2 * matricesSize))
+//                // !!!!!!!!!!!!!! some crazy code
+//                let mutable coeff = maxCoeff
+//                while (not (matricesCount % coeff = 0)) do 
+//                    coeff <- coeff - 1
+                // coeff should divide matrixCount
+                let coeff = 1
+                coeff * matricesSize, matricesSize
+
+        let wgSizesLineWise wgSizeRestriction localLinesRestriction matricesCount matricesSize = 
+            if wgSizeRestriction < matricesSize || localLinesRestriction < matricesSize + 1
+            then 
+                let maxWgSize = min wgSizeRestriction (localLinesRestriction - 1)
+                matricesSize / (ceilToPowerOf2 <| matricesSize / maxWgSize), 1          
+            else if wgSizeRestriction < matricesSize * matricesSize || localLinesRestriction < 2 * matricesSize 
+            then 
+                let maxRightLines = min (wgSizeRestriction / matricesSize) (localLinesRestriction - matricesSize)
+                matricesSize, floorToPowerOf2 maxRightLines
+            else 
+                let coeff = floorToPowerOf2 
+                            <| min (wgSizeRestriction / (matricesSize * matricesSize)) 
+                                    (localLinesRestriction / (2 * matricesSize))
+                // coeff should divide matrixCount
+                let coeff = 1
+                coeff * matricesSize, matricesSize
+
+        let wgSizesIgnoringLocalMemoryRestrictions wgSizeRestriction localLinesRestriction matricesCount matricesSize = 
+            if wgSizeRestriction < matricesSize
+            then 
+                matricesSize / (ceilToPowerOf2 <| matricesSize / wgSizeRestriction), 1          
+            else if wgSizeRestriction < matricesSize * matricesSize
+            then 
+                let maxRightLines = wgSizeRestriction / matricesSize
+                matricesSize, floorToPowerOf2 maxRightLines
+            else 
+                let coeff = floorToPowerOf2 
+                            <| wgSizeRestriction / (matricesSize * matricesSize)    
+                // coeff should divide matrixCount
+                let coeff = 1                                 
+                coeff * matricesSize, matricesSize
 
         let gpuMultiplicate (helpers: GPUHelpers) 
                             (from1: Probability.InnerType []) 
@@ -119,63 +173,11 @@ open Util
             let wgItemsXCount = matricesCount * matricesSize
             let wgItemsYCount = matricesSize
 
-            let ceilToPowerOf2 x = 
-                let exp = (log (double x)) / (log 2.) |> ceil |> int
-                1 <<< exp
-            let floorToPowerOf2 x = 
-                let exp = (log (double x)) / (log 2.) |> floor |> int
-                1 <<< exp
-
-            let wgSizeX, wgSizeY =
-                if wgSizeRestriction < matricesSize * matricesSize || localLinesRestriction < 2 * matricesSize 
-                then 
-                    let maxPairedLines = floorToPowerOf2 <| min ((double >> sqrt >> floor >> int) wgSizeRestriction) (localLinesRestriction / 2)
-                    maxPairedLines, maxPairedLines
-                else 
-//                    let coeff = floorToPowerOf2 
-//                                <| min (wgSizeRestriction / (matricesSize * matricesSize)) 
-//                                       (localLinesRestriction / (2 * matricesSize))
-                    // coeff should divide matrixCount
-                    let coeff = 1
-                    coeff * matricesSize, coeff * matricesSize
-
-////            let wgSizeX, wgSizeY_ =
-//            let wgSizeX, wgSizeY =
-//                if wgSizeRestriction < matricesSize || localLinesRestriction < matricesSize + 1
-//                then 
-//                    let maxWgSize = min wgSizeRestriction (localLinesRestriction - 1)
-//                    matricesSize / (ceilToPowerOf2 <| matricesSize / maxWgSize), 1          
-//                else if wgSizeRestriction < matricesSize * matricesSize || localLinesRestriction < 2 * matricesSize 
-//                then 
-//                    let maxRightLines = min (wgSizeRestriction / matricesSize) (localLinesRestriction - matricesSize)
-//                    matricesSize, floorToPowerOf2 maxRightLines
-//                else 
-//                    let coeff = floorToPowerOf2 
-//                                <| min (wgSizeRestriction / (matricesSize * matricesSize)) 
-//                                       (localLinesRestriction / (2 * matricesSize))
-//                    // coeff should divide matrixCount
-//                    let coeff = 1
-//                    coeff * matricesSize, coeff * matricesSize
-
-//            let wgSizeX, wgSizeY =
-//                if wgSizeRestriction < matricesSize
-//                then 
-//                    matricesSize / (ceilToPowerOf2 <| matricesSize / wgSizeRestriction), 1          
-//                else if wgSizeRestriction < matricesSize * matricesSize
-//                then 
-//                    let maxRightLines = wgSizeRestriction / matricesSize
-//                    matricesSize, floorToPowerOf2 maxRightLines
-//                else 
-//                    let coeff = floorToPowerOf2 
-//                                <| wgSizeRestriction / (matricesSize * matricesSize)    
-//                    // coeff should divide matrixCount
-//                    let coeff = 1                                 
-//                    coeff * matricesSize, coeff * matricesSize
-
-//            let wgSizeY = if wgSizeY_ = 1 then wgSizeY_ else wgSizeY_ / 2
+            let wgSizeX, wgSizeY = wgSizesForMatricesWise wgSizeRestriction localLinesRestriction matricesCount matricesSize 
+//            let wgSizeX, wgSizeY = if wgSizeY_ < 2 then wgSizeX_, wgSizeY_ else wgSizeX_ / 2, wgSizeY_ / 2
                                                    
-            let d = new _2D(wgItemsXCount, wgItemsYCount, 1, 1)
-//            let d = new _2D(wgItemsXCount, wgItemsYCount, wgSizeX, wgSizeY)
+//            let d = new _2D(wgItemsXCount, wgItemsYCount, 1, 1)
+            let d = new _2D(wgItemsXCount, wgItemsYCount, wgSizeX, wgSizeY)
 
             helpers.kernelPrepare d matricesSize from1 from2 result
          

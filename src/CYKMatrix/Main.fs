@@ -12,49 +12,29 @@ open Util
 //    open OpenCL.Net.Extensions
 [<EntryPoint>]
 let main args = 
+
     let amdPlatformName = "AMD*"
     let intelPlatformName = "Intel*"
+    let nvidiaPlatformName = "NVIDIA*"
     let defaultPlatformName = "*"
-    let defaultDeviceType = DeviceType.Gpu
-    
-    let amdGPUOptions = 
-        Some { PlatformName = amdPlatformName
-               DeviceType = defaultDeviceType
-               MinMatrixSize = 16 }
-    
-    let intelGPUOptions = 
-        Some { PlatformName = intelPlatformName
-               DeviceType = defaultDeviceType
-               MinMatrixSize = 64 }
-    
-    let defaultGPUOptions = 
-        Some { PlatformName = defaultPlatformName
-               DeviceType = defaultDeviceType
-               MinMatrixSize = 16 }
-    
-    let amdMultiplicationOptions = { GPU = amdGPUOptions }
-    let intelMultiplicationOptions = { GPU = intelGPUOptions }
-    let defaultMultiplicationOptions = { GPU = defaultGPUOptions }
-    let error = ref <| ErrorCode()
-    
-    //        Cl.GetPlatformIDs(error)
-    //        |> Array.iter (fun platform ->
-    //            let smth = Cl.GetPlatformInfo(platform, PlatformInfo.Name, error).ToString ()
-    //            printfn "%s" smth            
-    //        )
-    //        
-    //        
-    //        System.Console.ReadLine() |> ignore
-    //
-    let amdProvider = 
-        try 
-            ComputeProvider.Create(amdPlatformName, defaultDeviceType)
-        with ex -> failwith ex.Message
-    
-    let intelProvider = 
-        try 
-            ComputeProvider.Create(intelPlatformName, defaultDeviceType)
-        with ex -> failwith ex.Message
+
+    let getGpuOptions platformName minMatrixSize =
+        let deviceType = DeviceType.Gpu
+        let gpuOptions = 
+            Some { PlatformName = platformName
+                   DeviceType = deviceType
+                   MinMatrixSize = minMatrixSize }
+        let multiplicationOptions = { GPU = gpuOptions }
+        let provider = 
+            try 
+                ComputeProvider.Create(platformName, deviceType)
+            with ex -> failwith ex.Message
+        multiplicationOptions, provider
+        
+    let nvidiaOptions, nvidiaProvider = getGpuOptions nvidiaPlatformName 16
+//    let intelOptions, intelProvider = getGpuOptions intelPlatformName 16
+//    let amdOptions, amdProvider = getGpuOptions amdPlatformName 16
+//    let defaultOptions, dafeultProvider = getGpuOptions defaultPlatformName 16
     
     let printParams (provider: ComputeProvider) = 
         let globalMem = OpenCL.Net.DeviceInfo.GlobalMemSize
@@ -78,13 +58,15 @@ let main args =
         getInfo WGSize "WG size (MB)" 1
         getInfo WISizes "WI sizes (B)" 1
     
-    //            
-    //        printfn "AMD:"
-    //        printParams amdProvider
-    //        printfn "Intel:"
-    //        printParams intelProvider
-    //
-    //        0
+//                
+//    printfn "AMD:"
+//    printParams amdProvider
+//    printfn "Intel:"
+//    printParams intelProvider
+    printfn "NVIDIA:"
+    printParams nvidiaProvider
+    
+    0
 
     let A = NonTerminal "A"
     let B = NonTerminal "B"
@@ -166,7 +148,8 @@ let main args =
     
     let check str searchLen = 
         let toCheck    = CYKMatrix.recognize str rules nonterminals S searchLen
-        let toCheckBFS = CYKMatrixBFS.recognize str rules nonterminals S searchLen defaultMultiplicationOptions
+        let toCheckBFS = CYKMatrixBFS.recognize str rules nonterminals S searchLen nvidiaOptions
+//        let toCheckBFS = CYKMatrixBFS.recognize str rules nonterminals S searchLen defaultOptions
         assert (isAnswerValid toCheck (String.length str) searchLen)
         assert (isAnswerValid toCheckBFS (String.length str) searchLen)
         let sameCells cell = 
@@ -199,12 +182,12 @@ let main args =
         //                         "okhotin"
         //                         str
         //                         searchLen
+//        checkOneType 
+//            (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen amdOptions) 
+//            (fun toCheck -> isAnswerValid toCheck) "amd" str searchLen
         checkOneType 
-            (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen amdMultiplicationOptions) 
-            (fun toCheck -> isAnswerValid toCheck) "amd" str searchLen
-        checkOneType 
-            (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen intelMultiplicationOptions) 
-            (fun toCheck -> isAnswerValid toCheck) "intel" str searchLen
+            (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen nvidiaOptions) 
+            (fun toCheck -> isAnswerValid toCheck) "nvidia" str searchLen
     
     //        check "abb"      2
     //        check "abb"      3    
@@ -224,7 +207,7 @@ let main args =
     //        check "aaaabb" 0
     //        
     //        check (String.replicate 40 "abb") 100
-    checkTime (String.replicate 200 "abb") 500
+    checkTime (String.replicate 300 "abb") 800
     //        checkTime ((String.replicate 511 "abbb") + "abb") 50
 
     //        check "aabb"

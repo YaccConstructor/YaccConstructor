@@ -1,26 +1,25 @@
 ﻿module TPMatrices
 
-    open System
-    open System.Collections.Generic
-    open Microsoft.FSharp.Math
+open Brahma.FSharp.OpenCL.Core
+open Brahma.FSharp.OpenCL.Extensions
+//open Brahma.Helpers
+open Brahma.OpenCL
+//open Microsoft.FSharp.Quotations
+//open OpenCL.Net
+//open System
+//open System.Collections.Generic
 
-    open Brahma.Helpers
-    open OpenCL.Net
-    open Brahma.OpenCL
-    open Brahma.FSharp.OpenCL.Core
-    open Microsoft.FSharp.Quotations
-    open Brahma.FSharp.OpenCL.Extensions
+open Util
 
-    open Util
-
-    type GPUHelpers = {
-        provider: ComputeProvider
-        commandQueue: CommandQueue
-        kernel: _2D Kernel
-        kernelPrepare: _2D -> int -> Probability.InnerType [] -> Probability.InnerType [] -> Probability.InnerType [] -> unit
-        kernelRun: unit -> _2D Commands.Run
-        options: GPUOptions
-    }
+    type GPUHelpers = 
+        { provider: ComputeProvider
+          commandQueue: CommandQueue
+          localMemory: int option
+          maxWorkGroupSize: int option
+          kernel: _2D Kernel
+          kernelPrepare: _2D -> int -> Probability.InnerType [] -> Probability.InnerType [] -> Probability.InnerType [] -> unit
+          kernelRun: unit -> _2D Commands.Run
+          options: GPUOptions }
 
     type GPUMatriceswMultiplicator (options: MultiplicationOptions, probabilitySummQuote, probabilityMultQuote) =
 
@@ -54,8 +53,19 @@
                 let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
                 let kernel, kernelPrepare, kernelRun = provider.Compile command
 
+                let getInfo infoType =
+                    let info, ex = OpenCL.Net.Cl.GetDeviceInfo(provider.Devices |> Seq.head, infoType)
+                    match ex with 
+                        | OpenCL.Net.ErrorCode.Success -> Some <| info.CastTo<int>()
+                        | _ -> None
+                    
+                let localMem = getInfo OpenCL.Net.DeviceInfo.LocalMemSize
+                let maxWGSize = getInfo OpenCL.Net.DeviceInfo.MaxWorkGroupSize
+
                 Some {
                     provider = provider; 
+                    localMemory = localMem;
+                    maxWorkGroupSize = maxWGSize;
                     commandQueue = commandQueue; 
                     kernel = kernel;
                     kernelPrepare = kernelPrepare;
@@ -95,9 +105,77 @@
                             matricesSize =
                
             let result: Probability.InnerType [] = Array.zeroCreate(matricesCount * matricesSize * matricesSize)
-                              
-            let d = new _2D(matricesSize * matricesCount, matricesSize, min 4 (matricesSize * matricesCount), 1)
-    //            let d = new _2D(matricesSize * matricesCount, matricesSize, min 4 (matricesSize * matricesCount), 1)
+
+            let wgSizeRestriction = 
+                match helpers.maxWorkGroupSize with
+                    | Some size -> size
+                    | None -> 4
+            let localLinesRestriction = 
+                match helpers.localMemory with
+                    // todo:
+                    | Some size -> size / (32 * matricesSize)
+                    | None -> 32 * (1 <<< 20) / (32 * matricesSize)
+                    
+            let wgItemsXCount = matricesCount * matricesSize
+            let wgItemsYCount = matricesSize
+
+            let ceilToPowerOf2 x = 
+                let exp = (log (double x)) / (log 2.) |> ceil |> int
+                1 <<< exp
+            let floorToPowerOf2 x = 
+                let exp = (log (double x)) / (log 2.) |> floor |> int
+                1 <<< exp
+
+            let wgSizeX, wgSizeY =
+                if wgSizeRestriction < matricesSize * matricesSize || localLinesRestriction < 2 * matricesSize 
+                then 
+                    let maxPairedLines = floorToPowerOf2 <| min ((double >> sqrt >> floor >> int) wgSizeRestriction) (localLinesRestriction / 2)
+                    maxPairedLines, maxPairedLines
+                else 
+//                    let coeff = floorToPowerOf2 
+//                                <| min (wgSizeRestriction / (matricesSize * matricesSize)) 
+//                                       (localLinesRestriction / (2 * matricesSize))
+                    // coeff should divide matrixCount
+                    let coeff = 1
+                    coeff * matricesSize, coeff * matricesSize
+
+////            let wgSizeX, wgSizeY_ =
+//            let wgSizeX, wgSizeY =
+//                if wgSizeRestriction < matricesSize || localLinesRestriction < matricesSize + 1
+//                then 
+//                    let maxWgSize = min wgSizeRestriction (localLinesRestriction - 1)
+//                    matricesSize / (ceilToPowerOf2 <| matricesSize / maxWgSize), 1          
+//                else if wgSizeRestriction < matricesSize * matricesSize || localLinesRestriction < 2 * matricesSize 
+//                then 
+//                    let maxRightLines = min (wgSizeRestriction / matricesSize) (localLinesRestriction - matricesSize)
+//                    matricesSize, floorToPowerOf2 maxRightLines
+//                else 
+//                    let coeff = floorToPowerOf2 
+//                                <| min (wgSizeRestriction / (matricesSize * matricesSize)) 
+//                                       (localLinesRestriction / (2 * matricesSize))
+//                    // coeff should divide matrixCount
+//                    let coeff = 1
+//                    coeff * matricesSize, coeff * matricesSize
+
+//            let wgSizeX, wgSizeY =
+//                if wgSizeRestriction < matricesSize
+//                then 
+//                    matricesSize / (ceilToPowerOf2 <| matricesSize / wgSizeRestriction), 1          
+//                else if wgSizeRestriction < matricesSize * matricesSize
+//                then 
+//                    let maxRightLines = wgSizeRestriction / matricesSize
+//                    matricesSize, floorToPowerOf2 maxRightLines
+//                else 
+//                    let coeff = floorToPowerOf2 
+//                                <| wgSizeRestriction / (matricesSize * matricesSize)    
+//                    // coeff should divide matrixCount
+//                    let coeff = 1                                 
+//                    coeff * matricesSize, coeff * matricesSize
+
+//            let wgSizeY = if wgSizeY_ = 1 then wgSizeY_ else wgSizeY_ / 2
+                                                   
+            let d = new _2D(wgItemsXCount, wgItemsYCount, 1, 1)
+//            let d = new _2D(wgItemsXCount, wgItemsYCount, wgSizeX, wgSizeY)
 
             helpers.kernelPrepare d matricesSize from1 from2 result
          

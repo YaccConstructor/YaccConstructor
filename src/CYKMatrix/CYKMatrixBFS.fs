@@ -36,6 +36,7 @@
 
             if matricesSize = 1 then
                 let headProbsFromTail (tail, tailProb) = 
+                    // todo: boolean grammar
                     allRules.HeadsByComplexTail tail 
                     |> List.map (fun (head, headProb) -> head, Probability.multiplicate headProb tailProb)
                 

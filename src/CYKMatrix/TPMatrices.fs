@@ -198,24 +198,20 @@ open Util
 
         let doGPUMultiplications getTSubmatrix addToPSubMatrix matricesCount matricesSize helpers fullTasks = 
             let matricesCellCount = matricesSize * matricesSize
-
-            let addOneFromToBuffer doTranspone buffer (from: SubMatrix.T, nt) = 
-                getTSubmatrix nt from doTranspone
-                |> Array.append buffer
-
+            
             let from1 = 
-                fullTasks 
-                |> Array.map (fun ({from1 = from}, nts) -> from, fst nts)
-                |> Array.fold (addOneFromToBuffer false) Array.empty
+                fullTasks
+                |> Array.map (fun ({ from2 = from }, nts) -> getTSubmatrix (fst nts) from false)
+                |> Array.concat
+            
             let from2 = 
-                fullTasks 
-                |> Array.map (fun ({from2 = from}, nts) -> from, snd nts)
-                |> Array.fold (addOneFromToBuffer true) Array.empty 
-
+                fullTasks
+                |> Array.map (fun ({ from2 = from }, nts) -> getTSubmatrix (snd nts) from true)
+                |> Array.concat
+            
             let multiplicationResult = gpuMultiplicate helpers from1 from2 matricesCount matricesSize
-
-            fullTasks 
-            |> Array.mapi (fun num _ -> multiplicationResult.[num * matricesCellCount..(num + 1) * matricesCellCount - 1])
+            fullTasks
+            |> Array.mapi (fun num _ -> multiplicationResult.[num * matricesCellCount .. (num + 1) * matricesCellCount - 1])
             |> Array.map (ProbabilityMatrix.create matricesSize matricesSize)
             |> flushMultiplicationResults addToPSubMatrix fullTasks
 
@@ -232,7 +228,6 @@ open Util
             let matricesCount = fullTasks.Length
             let matricesCellCount = matricesSize * matricesSize
             
-            // todo: last matrix reduced size !!!!!!!!!!!!
             match gpuHelpers with
             | Some helpers ->
                 if matricesSize >= helpers.options.MinMatrixSize

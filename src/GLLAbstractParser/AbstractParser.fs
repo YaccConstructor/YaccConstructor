@@ -278,23 +278,23 @@ let buildAbstractAst<'TorenType> (parser : ParserSourceGLL<'TorenType>) (input :
                 if !condition then dispatcher() else processing()
         control()
 
-        let rec checkConj (ast : obj) : bool = 
-            match ast with
-            | :? NonTerminalNode as node -> let buff = ref <| checkConj node.First
-                                            if node.Others = Unchecked.defaultof<_> then //others empty
-                                                !buff && not <| (parser.NumToString node.Name).StartsWith "yard_conjunction"
-                                            else 
-                                                node.Others.ForEach(fun n -> buff := !buff && checkConj n)
-                                                !buff 
-            | :? TerminalNode as node -> true
-            | :? PackedNode as node -> checkConj node.Left && checkConj node.Right
-            | :? IntermidiateNode as node -> let buff = ref <| checkConj node.First
-                                             if node.Others = Unchecked.defaultof<_> then //others empty
-                                                !buff
-                                             else
-                                                node.Others.ForEach(fun n -> buff := !buff && checkConj n)
-                                                !buff
-            | _ -> false
+        let rec checkConj (ast : obj) : bool = true
+//            match ast with
+//            | :? NonTerminalNode as node -> let buff = ref <| checkConj node.First
+//                                            if node.Others = Unchecked.defaultof<_> then //others empty
+//                                                !buff && not <| (parser.NumToString node.Name).StartsWith "yard_conjunction"
+//                                            else 
+//                                                node.Others.ForEach(fun n -> buff := !buff && checkConj n)
+//                                                !buff 
+//            | :? TerminalNode as node -> true
+//            | :? PackedNode as node -> checkConj node.Left && checkConj node.Right
+//            | :? IntermidiateNode as node -> let buff = ref <| checkConj node.First
+//                                             if node.Others = Unchecked.defaultof<_> then //others empty
+//                                                !buff
+//                                             else
+//                                                node.Others.ForEach(fun n -> buff := !buff && checkConj n)
+//                                                !buff
+//            | _ -> false
                  
         match !structures.ResultAST with
             | None -> Error ("String was not parsed")
@@ -304,7 +304,7 @@ let buildAbstractAst<'TorenType> (parser : ParserSourceGLL<'TorenType>) (input :
                             printf "%A" r1
                             //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
                             //r1.AstToDot parser.NumToString "AST123456.dot"
-                            let t = r1.GetPath 1
-                    //printfn "%d" !tempCount
+                            //let t = r1.GetPath 1
+                            //printfn "%d" !tempCount
                             ParseResult<'TokenType>.Success(r1)   
                     else Error ("String was not parsed")

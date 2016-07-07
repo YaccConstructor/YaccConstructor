@@ -249,7 +249,7 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-i "../../../Tests/bio/mix_1\late_pair_info_count"</StartArguments>
+    <StartArguments>-i "../../../Tests/bio/mix_1\late_pair_info_count</StartArguments>
   </PropertyGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">

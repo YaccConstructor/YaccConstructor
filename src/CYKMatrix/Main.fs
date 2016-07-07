@@ -21,7 +21,7 @@ let main args =
     let getGpuOptions platformName minMatrixSize =
         let deviceType = DeviceType.Gpu
         let gpuOptions = 
-            { PlatformName = platformName; DeviceType = deviceType; MinMatrixSize = minMatrixSize }
+            { PlatformName = platformName; DeviceType = deviceType; MinMatrixSize = minMatrixSize; doParallelFlush = true }
         let multiplicationOptions = { Options.empty with GPU = Some gpuOptions }
         let provider = 
             try 
@@ -172,9 +172,9 @@ let main args =
         checkOneType 
             (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen { nvidiaOptions with Parallel = Some { MinMatrixSize = 1 } }) 
             (fun toCheck -> isAnswerValid toCheck) "nvidia" str searchLen
-        checkOneType 
-            (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen { Options.empty with Fast = Some { MinMatrixSize = 64 }; Parallel = Some { MinMatrixSize = 1 } }) 
-            (fun toCheck -> isAnswerValid toCheck) "fast, parallel" str searchLen
+//        checkOneType 
+//            (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen { Options.empty with Fast = Some { MinMatrixSize = 64 }; Parallel = Some { MinMatrixSize = 1 } }) 
+//            (fun toCheck -> isAnswerValid toCheck) "fast, parallel" str searchLen
     
 
     
@@ -196,7 +196,7 @@ let main args =
 //    check "aaaabb" 0
 
 //    check (String.replicate 40 "abb") 100
-    checkTime (String.replicate 1000 "abb") 2500
+    checkTime (String.replicate 1000 "abb") 2000
     //        checkTime ((String.replicate 511 "abbb") + "abb") 50
 
     //        check "aabb"

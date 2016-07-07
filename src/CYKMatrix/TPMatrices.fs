@@ -222,15 +222,23 @@ open Util
                 fullTasks
                 |> Array.map (fun ({ from2 = from }, nts) -> getSubMatrix (snd nts) from true)
                 |> Array.concat
-            
+                
             let multiplicationResult = gpuMultiplicate helpers from1 from2 matricesCount matricesSize
-            fullTasks
-            |> Array.mapi (fun num _ -> multiplicationResult.[num * matricesCellCount .. (num + 1) * matricesCellCount - 1])
-            |> Array.map (ProbabilityMatrix.create matricesSize matricesSize)
-            |> Array.zip fullTasks
-            |> Array.iter (fun (fullTask, matrix) ->
-                               let task, nts = fullTask
-                               flushSubMatrix task.where nts matrix)
+
+            let flushOneMatrix num = 
+                let matrix = 
+                    multiplicationResult.[num * matricesCellCount .. (num + 1) * matricesCellCount - 1]
+                    |> ProbabilityMatrix.create matricesSize matricesSize
+                let task, nts = fullTasks.[num]
+                flushSubMatrix task.where nts matrix    
+                
+            let doParallelFlush = 
+                match gpuHelpers with
+                | Some helpers -> helpers.options.doParallelFlush
+                | None -> failwith "imposibru"        
+            
+            [|0..matricesCount - 1|]
+            |> (if doParallelFlush then Array.Parallel.iter else Array.iter) flushOneMatrix
 
         member this.performMultiplication arrayMatrixHandler fastMatrixHandler (tasks: MultiplicationTask []) nts = 
 

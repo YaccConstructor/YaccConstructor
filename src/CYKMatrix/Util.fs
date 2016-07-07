@@ -9,6 +9,7 @@
         PlatformName: string 
         DeviceType: DeviceType
         MinMatrixSize: int
+        doParallelFlush: bool
     }
 
     type FastOptions = {

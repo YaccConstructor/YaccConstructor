@@ -168,6 +168,7 @@
                 then Probability.innerZero
                 else data.[getSingleIndex cell]                                         
 
+            // todo: recurring code
             member this.GetInnerSubMatrix (submatrix: SubMatrix.T) isTransponed =
                 let cellStart = submatrix.Left 
                 let cellFinish = Cell.shift submatrix.Right -1 -1

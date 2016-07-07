@@ -2,8 +2,6 @@
 
     open Util
     open TPMatrices
-    open System.Collections.Generic
-    open Array.Parallel
           
 //    let multiplicationCounter = ref 0
 
@@ -111,5 +109,6 @@
             if Array.length layer > 0 
             then completeVLayer layer
             
-        matrices.releaseResources ()
+        // todo: release ????
+//        matrices.releaseResources ()
         matrices.getProbabilities S

@@ -1,16 +1,17 @@
 ﻿module CYKMatrix
 
     open Util
+    open TPMatrices
 
 //    let multiplicationCounter = ref 0
 
-    let recognize (strToParse: string) 
+    let recognize strToParse
                   (allRules: RulesHolder)  
-                  (nonterminals : NonTerminal [])
+                  nonterminals
                   S 
-                  maxSearchLength = 
-
-
+                  maxSearchLength
+                  options = 
+                                    
         let stringSize = String.length strToParse
 
         let strSizeExponent = (System.Math.Log (double stringSize + 1.)) / (System.Math.Log 2.) |> System.Math.Ceiling |> int
@@ -18,46 +19,24 @@
     
         // bottom-left triangle and diagonal of tMatrix and pMatrix are not used
         // upper-right triangle of size (stringSize - maxSearchLength) is not used
-        let tMatrix = new Map<NonTerminal, ProbabilityMatrix.T>
-                            (
-                                nonterminals 
-                                |> Seq.map (fun x -> x, ProbabilityMatrix.empty (stringSize + 1))
-                            )
-
-        let pMatrix = new Map<NonTerminal * NonTerminal, ProbabilityMatrix.T>
-                            (
-                                allRules.ComplexTails
-                                |> Seq.map (fun x -> x, ProbabilityMatrix.empty (stringSize + 1))
-                            ) 
-
-        let addToP nts (matrix: ProbabilityMatrix.T) (l1, m1, l2, m2) =
-            let where = pMatrix.[nts]
-            for i in [l1..m1-1] do
-                let rightBound = min m2 (stringSize + 1)
-                for j in [l2..rightBound-1] do
-                    let realCell = Cell.create i j
-                    let matrixCell = Cell.shift realCell -l1 -l2
-                    where.AddValueToCell realCell matrix.[matrixCell]      
-
-        let subMatrixMult (matrixA: ProbabilityMatrix.T) (matrixB: ProbabilityMatrix.T) (al1, am1, al2, am2) (bl1, bm1, bl2, bm2) = 
-            let aHight = am1 - al1
-            let aLength = aHight
-            let calcCell (cell: Cell.T) =
-                let aCell k = Cell.create (cell.Row + al1) (k + al2)
-                let bCell k = Cell.create (k + bl1) (cell.Column + bl2)
-                [0..aLength-1] 
-                |> List.fold 
-                    (fun acc k -> Probability.summ acc <| Probability.multiplicate matrixA.[aCell k] matrixB.[bCell k]) 
-                    Probability.zero 
-            let bUpperBound = min bm2 (stringSize + 1)
-            ProbabilityMatrix.init aHight (bUpperBound - bl2) calcCell                 
+        let matrices = new MatrixHolder(nonterminals, allRules.ComplexTails, stringSize, options)
+        
+        let matrixSizeExponent = (log (double stringSize + 1.)) / (log 2.) |> ceil |> int
+        let matrixSize = (1 <<< matrixSizeExponent)                  
                                     
         let completeP where from1 from2 = 
 //            multiplicationCounter := !multiplicationCounter + 1
-            let completeOnePair (nt1, nt2) =
-                    addToP (nt1, nt2) (subMatrixMult tMatrix.[nt1] tMatrix.[nt2] from1 from2) where
-            pMatrix |> Map.iter (fun nts _ -> completeOnePair nts)
+            let submatrixFromTuple (l1, m1, l2, m2) =
+                let top = Cell.create l1 m2
+                let size = m1 - l1
+                SubMatrix.create top size
 
+            let task = 
+                { where = submatrixFromTuple where
+                  from1 = submatrixFromTuple from1
+                  from2 = submatrixFromTuple from2 }
+
+            matrices.performMultiplication [| task |] allRules.ComplexTails
     
         let rec compute l m =
             let mid = int (l + m) / 2
@@ -72,40 +51,30 @@
         and completeT (l1, m1, l2, m2) =
             assert (m1 - l1 = m2 - l2)
 
-            let addProbToMatrix (matrix: Map<_, ProbabilityMatrix.T>) cell key prob = 
-                matrix.[key].AddValueToCell cell prob
-                
-            let updateTMatrixCell cell (nonTerm, prob) = addProbToMatrix tMatrix cell nonTerm prob
-
             if m1 - l1 = 1 && m1 = l2 then
                 let currentChar = strToParse.[l1]
-                let nonTerms = allRules.HeadsBySimpleTail currentChar
+                let nonterminals = allRules.HeadsBySimpleTail currentChar
                 let cell = Cell.create l1 (l1 + 1)
 
-                nonTerms
-                |> List.iter (updateTMatrixCell cell)
+                matrices.updateTCellWith cell nonterminals
 
             else if m1 - l1 = 1 && m1 < l2 then
                 assert (m2 <= stringSize + 1)
                 let cell = Cell.create l1 l2
 
-                let headsFromTail (tail, tailProb) = 
+                let headProbsFromTail (tail, tailProb) = 
                     if allRules.IsComplexTail tail then 
                         allRules.HeadsByComplexTail tail |> List.map (fun (head, headProb) -> head, Probability.multiplicate headProb tailProb)
                     else 
                         []
 
-                let tails = pMatrix |> Map.map (fun _ probs -> probs.[cell]) |> Map.filter (fun _ prob -> not <| Probability.isZero prob)
-                let heads = tails |> Map.toList |> List.map headsFromTail |> List.concat
-
-                heads 
-                |> List.iter (updateTMatrixCell cell)
-
+                matrices.refreshTCells headProbsFromTail [| cell |]
+                 
             else if m1 - l1 > 1 then
                 assert (l2 < stringSize + 1)
 
-                let mid1: int = int (l1 + m1) / 2
-                let mid2: int = int (l2 + m2) / 2
+                let mid1 = (l1 + m1) / 2
+                let mid2 = (l2 + m2) / 2
 
                 let b1 = (l1, mid1, mid1, m1)
 
@@ -137,4 +106,4 @@
         
 //        printfn "okhotin mult count: %i" !multiplicationCounter
 //        multiplicationCounter := 0
-        tMatrix.Item S
+        matrices.getProbabilities S

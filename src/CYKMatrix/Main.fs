@@ -145,7 +145,7 @@ let main args =
             |> List.forall (fun cell -> Probability.isZero matrix.[cell])
     
     let check str searchLen = 
-        let toCheck    = CYKMatrix.recognize str rules nonterminals S searchLen
+        let toCheck    = CYKMatrix.recognize str rules nonterminals S searchLen Options.empty 
         let toCheckBFS = CYKMatrixBFS.recognize str rules nonterminals S searchLen nvidiaOptions
         assert (isAnswerValid toCheck (String.length str) searchLen)
         assert (isAnswerValid toCheckBFS (String.length str) searchLen)
@@ -178,25 +178,25 @@ let main args =
     
 
     
-//    check "abb"      2
-//    check "abb"      3    
-//    check "aaabbcc"  5
-//    check "aaabb"    5
-//    check "aaaaabbb" 6
-//    check "aaaabbbbbb" 6
-//    check "aaaabbbbbbbbbbb" 10
-//    check "aaaabbbbbbbbbbbbbbb" 10
-//    check "aaaabb" 6
-//    check "aaaabb" 6
-//    check "aaaabb" 5
-//    check "aaaabb" 4
-//    check "aaaabb" 3
-//    check "aaaabb" 2
-//    check "aaaabb" 1
-//    check "aaaabb" 0
+    check "abb"      2
+    check "abb"      3    
+    check "aaabbcc"  5
+    check "aaabb"    5
+    check "aaaaabbb" 6
+    check "aaaabbbbbb" 6
+    check "aaaabbbbbbbbbbb" 10
+    check "aaaabbbbbbbbbbbbbbb" 10
+    check "aaaabb" 6
+    check "aaaabb" 6
+    check "aaaabb" 5
+    check "aaaabb" 4
+    check "aaaabb" 3
+    check "aaaabb" 2
+    check "aaaabb" 1
+    check "aaaabb" 0
 
 //    check (String.replicate 40 "abb") 100
-    checkTime (String.replicate 1000 "abb") 2000
+//    checkTime (String.replicate 1000 "abb") 2000
     //        checkTime ((String.replicate 511 "abbb") + "abb") 50
 
     //        check "aabb"

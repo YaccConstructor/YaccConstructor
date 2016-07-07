@@ -2,12 +2,7 @@
 
 open Brahma.FSharp.OpenCL.Core
 open Brahma.FSharp.OpenCL.Extensions
-//open Brahma.Helpers
 open Brahma.OpenCL
-//open Microsoft.FSharp.Quotations
-//open OpenCL.Net
-//open System
-//open System.Collections.Generic
 
 open Util
 
@@ -308,11 +303,9 @@ open Util
                             (
                                 pKeys
                                 |> Array.map (fun x -> x, ProbabilityMatrix.empty (stringSize + 1))
-                            )
-   
-        let addToTMatrix cell nontermProbs =
-            nontermProbs |> List.iter (fun (key, prob) -> tMatrix.[key].AddValueToCell cell prob)
+                            )   
 
+        // todo: recurring code
         let addToPSubMatrix (where: SubMatrix.T) nts (matrix: ProbabilityMatrix.T) =
             let whereMatrix = pMatrix.[nts]
             for i in [0 .. where.Size - 1] do
@@ -330,12 +323,15 @@ open Util
                     let matrixCell = Cell.create i j
                     let realCell = Cell.shift matrixCell where.Left.Row where.Left.Column
                     whereMatrix.AddValueToCell realCell (Probability.create matrix.[i,j])
+                    
+        member this.updateTCellWith cell nonterminals =
+            nonterminals |> List.iter (fun (key, prob) -> tMatrix.[key].AddValueToCell cell prob)
             
         member this.getProbabilities nt = tMatrix.[nt]
 
         member this.initTDiagonalWith nonterminals =
             let diagonalCell i = Cell.create i (i + 1)
-            nonterminals |> List.iteri (fun i ntProbs -> addToTMatrix (diagonalCell i) ntProbs)
+            nonterminals |> List.iteri (fun i ntProbs -> this.updateTCellWith (diagonalCell i) ntProbs)
 
         member this.refreshTCells headProbsFromTail cells =
                 let tails cell = 
@@ -349,7 +345,7 @@ open Util
                     |> List.concat
 
                 cells
-                |> Array.iter (fun cell -> heads cell |> addToTMatrix cell)
+                |> Array.iter (fun cell -> heads cell |> this.updateTCellWith cell)
 
         member this.performMultiplication tasks nts = 
             let getTSubMatrix nt = tMatrix.[nt].GetInnerSubMatrix

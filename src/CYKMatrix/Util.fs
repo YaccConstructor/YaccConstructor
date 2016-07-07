@@ -2,8 +2,8 @@
     
     open System
     open System.Collections.Generic
-    open Microsoft.FSharp.Math
     open OpenCL.Net
+    open Microsoft.FSharp.Math
 
     type GPUOptions = {
         PlatformName: string 
@@ -11,9 +11,23 @@
         MinMatrixSize: int
     }
 
-    type MultiplicationOptions = {
-        GPU: GPUOptions option  
+    type FastOptions = {
+        MinMatrixSize: int
     }
+
+    type ParallelOptions = {
+        MinMatrixSize: int
+    }
+
+    module Options =
+        type T = {
+            GPU: GPUOptions option  
+            Fast: FastOptions option
+            Parallel: ParallelOptions option
+        }
+
+        let empty = { GPU = None; Fast = None; Parallel = None }
+    
 
     type NonTerminal = NonTerminal of string
 
@@ -146,30 +160,41 @@
             member this.Item
                 with get cell = Probability.fromInnerValue data.[getSingleIndex cell]
                 
+            member this.getDataFromCell (cell: Cell.T) =
+                let cellOutOfMatrix = cell.Row < 0 || cell.Column < 0 || cell.Row >= nrow || cell.Column >= ncol
+
+                if cellOutOfMatrix
+                then Probability.innerZero
+                else data.[getSingleIndex cell]                                         
+
             member this.GetInnerSubMatrix (submatrix: SubMatrix.T) isTransponed =
-//            member this.GetInnerSubMatrix (cellStart: Cell.T) (cellFinish: Cell.T) isTransponed =
                 let cellStart = submatrix.Left 
                 let cellFinish = Cell.shift submatrix.Right -1 -1
                 let subNcol = cellFinish.Column - cellStart.Column + 1
                 let subNrow = cellFinish.Row - cellStart.Row + 1
 
-                let splitIndex x =
+                let getCell x =
                     let subi = x / subNcol
                     let subj = x - subNcol * subi
 
                     if isTransponed
-                    then subj, subi
-                    else subi, subj
+                    then Cell.create (subj + cellStart.Row) (subi + cellStart.Column)
+                    else Cell.create (subi + cellStart.Row) (subj + cellStart.Column)
+                                          
+                Array.init (subNcol * subNrow) (fun x -> getCell x |> this.getDataFromCell)
 
-                let getDataFromCell subCell = 
-                    let subi, subj = subCell
-                    let cellOutOfMatrix = (subi < 0) || (subj < 0) || (subi >= nrow) || (subj >= ncol)
+            member this.GetFastSubMatrix (submatrix: SubMatrix.T) isTransponed : Matrix<float> =
+                let cellStart = submatrix.Left 
+                let cellFinish = Cell.shift submatrix.Right -1 -1
+                let subNcol = cellFinish.Column - cellStart.Column + 1
+                let subNrow = cellFinish.Row - cellStart.Row + 1
 
-                    if cellOutOfMatrix
-                    then Probability.innerZero
-                    else data.[getSingleIndex <| Cell.create (subi + cellStart.Row) (subj + cellStart.Column)]   
+                let getCell (subi, subj) =
+                    if isTransponed
+                    then Cell.create (subj + cellStart.Row) (subi + cellStart.Column)
+                    else Cell.create (subi + cellStart.Row) (subj + cellStart.Column) 
                       
-                Array.init (subNrow * subNcol) (fun x -> splitIndex x |> getDataFromCell)
+                Matrix.init subNrow subNcol (fun x y -> getCell (x, y) |> this.getDataFromCell |> float)
 
             member this.AddValueToCell cell prob = 
                 let x = getSingleIndex cell

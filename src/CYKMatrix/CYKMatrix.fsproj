@@ -56,6 +56,15 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets'))" />
+  </Target>
+  <Import Project="..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
@@ -98,7 +107,22 @@
       <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.OpenCL.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\packages\FSPowerPack.Core.Community.3.0.0.0\Lib\Net40\FSharp.PowerPack.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharp.PowerPack.Linq">
+      <HintPath>..\packages\FSPowerPack.Linq.Community.3.0.0.0\Lib\Net40\FSharp.PowerPack.Linq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharp.PowerPack.Metadata">
+      <HintPath>..\packages\FSPowerPack.Metadata.Community.3.0.0.0\Lib\Net40\FSharp.PowerPack.Metadata.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharp.PowerPack.Parallel.Seq">
+      <HintPath>..\packages\FSPowerPack.Parallel.Seq.Community.3.0.0.0\Lib\Net40\FSharp.PowerPack.Parallel.Seq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FSharpx.Core">
       <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
@@ -119,15 +143,6 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-    <Error Condition="!Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets'))" />
-  </Target>
-  <Import Project="..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

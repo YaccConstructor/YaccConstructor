@@ -12,7 +12,7 @@
                   (nonterminals : NonTerminal [])
                   S 
                   maxSearchLength 
-                  (options: MultiplicationOptions)
+                  (options: Options.T)
                   = 
                   
         let stringSize = String.length strToParse

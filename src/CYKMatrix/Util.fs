@@ -20,14 +20,17 @@
         MinMatrixSize: int
     }
 
+    type Algorithm = Okhotin | Modified
+
     module Options =
         type T = {
             GPU: GPUOptions option  
             Fast: FastOptions option
             Parallel: ParallelOptions option
+            algorithm: Algorithm
         }
 
-        let empty = { GPU = None; Fast = None; Parallel = None }
+        let empty algorithm = { GPU = None; Fast = None; Parallel = None; algorithm = algorithm }
     
 
     type NonTerminal = NonTerminal of string

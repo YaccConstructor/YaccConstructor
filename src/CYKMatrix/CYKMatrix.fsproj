@@ -70,8 +70,9 @@
     <None Include="packages.config" />
     <Compile Include="Util.fs" />
     <Compile Include="TPMatrices.fs" />
-    <Compile Include="CYKMatrix.fs" />
+    <Compile Include="CYKMatrixOkhotin.fs" />
     <Compile Include="CYKMatrixBFS.fs" />
+    <Compile Include="CYKMatrix.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>

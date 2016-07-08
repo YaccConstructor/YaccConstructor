@@ -7,7 +7,9 @@ open OpenCL.Net
 open Printf
 open System
 open System.Collections.Generic
+
 open Util
+open CYKMatrix
 
 //    open OpenCL.Net.Extensions
 [<EntryPoint>]
@@ -22,7 +24,7 @@ let main args =
         let deviceType = DeviceType.Gpu
         let gpuOptions = 
             { PlatformName = platformName; DeviceType = deviceType; MinMatrixSize = minMatrixSize; doParallelFlush = true }
-        let multiplicationOptions = { Options.empty with GPU = Some gpuOptions }
+        let multiplicationOptions = { Options.empty Algorithm.Modified with GPU = Some gpuOptions }
         let provider = 
             try 
                 ComputeProvider.Create(platformName, deviceType)
@@ -145,8 +147,8 @@ let main args =
             |> List.forall (fun cell -> Probability.isZero matrix.[cell])
     
     let check str searchLen = 
-        let toCheck    = CYKMatrix.recognize str rules nonterminals S searchLen Options.empty 
-        let toCheckBFS = CYKMatrixBFS.recognize str rules nonterminals S searchLen nvidiaOptions
+        let toCheck    = recognize (Options.empty Algorithm.Okhotin) str rules nonterminals S searchLen 
+        let toCheckBFS = recognize nvidiaOptions str rules nonterminals S searchLen 
         assert (isAnswerValid toCheck (String.length str) searchLen)
         assert (isAnswerValid toCheckBFS (String.length str) searchLen)
         let sameCells cell = 
@@ -170,7 +172,7 @@ let main args =
     
     let checkTime str searchLen = 
         checkOneType 
-            (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen { nvidiaOptions with Parallel = Some { MinMatrixSize = 1 } }) 
+            (fun str searchLen -> recognize { nvidiaOptions with Parallel = Some { MinMatrixSize = 1 } } str rules nonterminals S searchLen ) 
             (fun toCheck -> isAnswerValid toCheck) "nvidia" str searchLen
 //        checkOneType 
 //            (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen { Options.empty with Fast = Some { MinMatrixSize = 64 }; Parallel = Some { MinMatrixSize = 1 } }) 

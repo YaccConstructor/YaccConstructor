@@ -5,13 +5,12 @@
           
 //    let multiplicationCounter = ref 0
 
-    let recognize (strToParse: string) 
+    let recognize options
+                  strToParse
                   (allRules: RulesHolder) 
-                  (nonterminals : NonTerminal [])
+                  nonterminals 
                   S 
-                  maxSearchLength 
-                  (options: Options.T)
-                  = 
+                  maxSearchLength = 
                   
         let stringSize = String.length strToParse
         
@@ -43,7 +42,7 @@
                 |> matrices.refreshTCells (headProbsFromTail)
 
             else
-                let zeroSubLayer = layer |> Array.map (fun (matrix: SubMatrix.T) -> matrix.BottomSubmatrix)                   
+                let zeroSubLayer = layer |> Array.map (fun matrix -> matrix.BottomSubmatrix)                   
                 completeLayer zeroSubLayer
                 completeVLayer layer
 

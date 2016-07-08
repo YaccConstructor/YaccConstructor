@@ -81,7 +81,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
                     longEdges.Add e
                     incr leCount
                     let str1 = e.Tag.str.Substring(0, templateLengthHightLimit)
-                    let str2 = e.Tag.str.Substring(e.Tag.str.Length - 1 - templateLengthHightLimit)
+                    let str2 = e.Tag.str.Substring(e.Tag.str.Length - templateLengthHightLimit)
                     incr cnt
                     let newE = !cnt
                     incr cnt

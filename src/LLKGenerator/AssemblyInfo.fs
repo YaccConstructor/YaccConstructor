@@ -1,4 +1,4 @@
-namespace LLKGenerator.AssemblyInfo
+ï»¿namespace LLKGenerator.AssemblyInfo
 
 open System.Reflection
 open System.Runtime.CompilerServices
@@ -12,7 +12,7 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyConfiguration("Release")>]
 [<assembly: AssemblyCompany("")>]
 [<assembly: AssemblyProduct("LLKGenerator")>]
-[<assembly: AssemblyCopyright("Copyright ©  2016")>]
+[<assembly: AssemblyCopyright("Copyright ï¿½  2016")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]
 

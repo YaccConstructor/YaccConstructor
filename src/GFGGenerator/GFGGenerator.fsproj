@@ -69,11 +69,6 @@
       <Project>{a9a5c115-0680-44b3-a87e-5ecf4c93814e}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\QuickGraph\tests\DotParser.Tests\QuickGraph.DotParserTest\QuickGraph.DotParserTest.csproj">
-      <Name>QuickGraph.DotParserTest</Name>
-      <Project>{e28a6069-2131-48cc-b174-60458d973613}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{ADFB2D79-F895-4FAC-AD8B-232D80BD542C}"
 	ProjectSection(SolutionItems) = preProject
@@ -45,8 +45,6 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "QuickGraph.FST", "..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj", "{4B220E23-A7E0-4222-83F5-C785F7C66B33}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickGraph.Graphviz", "..\QuickGraph\src\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj", "{595D6322-637A-4A36-97F1-D53F3F9ECEA7}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DotParserProject", "..\QuickGraph\DotParserProject\DotParserProject\DotParserProject.fsproj", "{8826810A-DC59-46E6-8978-21E273DB1236}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLLGenerator", "GLLGenerator\GLLGenerator.fsproj", "{8756690F-8138-495A-A368-39AFB9029823}"
 EndProject
@@ -260,18 +258,6 @@ Global
 		{595D6322-637A-4A36-97F1-D53F3F9ECEA7}.Release20|Any CPU.Build.0 = Release20|Any CPU
 		{595D6322-637A-4A36-97F1-D53F3F9ECEA7}.Release20|x86.ActiveCfg = Release20|Any CPU
 		{595D6322-637A-4A36-97F1-D53F3F9ECEA7}.Release20|x86.Build.0 = Release20|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Debug|x86.Build.0 = Debug|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Release|x86.ActiveCfg = Release|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Release|x86.Build.0 = Release|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Release20|Any CPU.ActiveCfg = Release|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Release20|Any CPU.Build.0 = Release|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Release20|x86.ActiveCfg = Release|Any CPU
-		{8826810A-DC59-46E6-8978-21E273DB1236}.Release20|x86.Build.0 = Release|Any CPU
 		{8756690F-8138-495A-A368-39AFB9029823}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8756690F-8138-495A-A368-39AFB9029823}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8756690F-8138-495A-A368-39AFB9029823}.Debug|x86.ActiveCfg = Debug|Any CPU

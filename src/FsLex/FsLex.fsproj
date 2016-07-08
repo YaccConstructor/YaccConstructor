@@ -8,6 +8,7 @@
     <SccLocalPath>SAK</SccLocalPath>
     <TargetFrameworkProfile />
     <Name>FsLex</Name>
+    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -25,7 +26,7 @@
     <AssemblyName>YC.FsLex</AssemblyName>
     <DefineConstants>INTERNALIZED_POWER_PACK;$(DefineConstants)</DefineConstants>
     <AllowCrossTargeting>true</AllowCrossTargeting>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <!-- These dummy entries are needed for F# Beta2 -->

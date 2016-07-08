@@ -58,20 +58,14 @@
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="FSharp.Core">
-      <HintPath>..\packages\FSharp.Core.3.1.2.5\lib\net40\FSharp.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <Reference Include="FSharp.Core, Version=4.4.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="FSharpx.Collections">
-      <HintPath>..\packages\FSharpx.Collections.1.12.1\lib\net40\FSharpx.Collections.dll</HintPath>
+      <HintPath>..\packages\FSharpx.Collections.1.15.1\lib\net40\FSharpx.Collections.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Collections.Experimental">
-      <HintPath>..\packages\FSharpx.Collections.Experimental.1.12.1\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
+      <HintPath>..\packages\FSharpx.Collections.Experimental.1.15.1\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Core">
-      <HintPath>..\..\Bin\Debug\v40\FSharpx.Core.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework">

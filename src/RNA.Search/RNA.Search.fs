@@ -447,7 +447,7 @@ let r16s_H22_H23_SearchConfig =
     
     new SearchConfig(GLL.r16s.H22_H23.buildAbstract, GLL.r16s.H22_H23.buildAbstractAst, getSmb, 
                         //300, 550, 14, GLL.r16s.H22_H23.numToString)
-                        318, 370, 14, GLL.r16s.H22_H23.numToString)
+                        318, 370, 13, GLL.r16s.H22_H23.numToString)
                         //400, 550, 14, GLL.r16s.H22_H23.numToString)
                         //800, 910, 14, GLL.r16s.H22_H23.numToString)
 
@@ -479,7 +479,7 @@ let searchMain path what agentsCount =
         //graphs.[1500..]
         //graphs.[5000..5050]
         //graphs.[4071..4072]
-        graphs.[114..]
+        graphs.[1..]
     searchInBioGraphs searchCfg graphs agentsCount
     |> printfn "%A"
     //searchInCloud graphs

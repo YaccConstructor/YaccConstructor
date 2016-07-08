@@ -70,6 +70,7 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lowLengthLimit highLength
         failwith "Result is success but it is unexpected success"
     | Success1 x ->        
         let weightLimit = 10000
+        // (leftEdge, rightEdge) , (leftPosition, rightPosition, lengthOfPath)
         let filteredByLength = 
             x 
             |> Array.filter (fun i -> i.length >= uint16 lowLengthLimit && i.length <= uint16 highLengthLimit)
@@ -124,6 +125,14 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lowLengthLimit highLength
                                                                         let rightEdgePartOfPath = uint16 <| rpos + 1
                                                                         pathLength - leftEdgePartOfPath - rightEdgePartOfPath |> lengths0.Add |> ignore
                                                                         lpos,rpos,pathLength - leftEdgePartOfPath - rightEdgePartOfPath)
+                              |> Seq.groupBy (fun (lpos,rpos,pathLength) -> pathLength)
+                              |> Seq.map (fun (pathLength,values) -> let mostLeft = ref graph.Edges.[re].RealLenght
+                                                                     let mostRight= ref 0
+                                                                     values
+                                                                     |> Seq.iter (fun (lpos,rpos,_) -> 
+                                                                                     if lpos < !mostLeft then mostLeft := lpos
+                                                                                     if rpos > !mostRight then mostRight := rpos)
+                                                                     !mostLeft, !mostRight, pathLength)
                 let toReturn = graph.Edges.[le], graph.Edges.[re], newPoss
                 //let startEdge = graph.Edges.[le], poss |> Seq.collect (fun (l,_,_) -> [l]) |> Seq.distinct
                 //let finalEdge = graph.Edges.[re], poss |> Seq.collect (fun (_,r,_) -> [r]) |> Seq.distinct
@@ -555,7 +564,7 @@ let searchMain path what agentsCount =
         //graphs.[1500..]
         //graphs.[5000..5050]
         //graphs.[4071..4072]
-        graphs.[114..]
+        graphs.[154gi..]
     searchInBioGraphs searchCfg graphs agentsCount
     |> printfn "%A"
     //searchInCloud graphs

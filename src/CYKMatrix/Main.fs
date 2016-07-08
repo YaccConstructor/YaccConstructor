@@ -22,16 +22,18 @@ let main args =
 
     let getGpuOptions platformName minMatrixSize =
         let deviceType = DeviceType.Gpu
-        let gpuOptions = 
-            { PlatformName = platformName; DeviceType = deviceType; MinMatrixSize = minMatrixSize; doParallelFlush = true }
-        let multiplicationOptions = { Options.empty Algorithm.Modified with GPU = Some gpuOptions }
+        let gpuOneThread = 
+            { PlatformName = platformName; DeviceType = deviceType; MinMatrixSize = minMatrixSize; doParallelFlush = false }
+        let gpuParallel = { gpuOneThread with doParallelFlush = true }
+        let multOneThread = { Options.empty Algorithm.Modified with GPU = Some gpuOneThread }
+        let multParallel = { Options.empty Algorithm.Modified with GPU = Some gpuParallel }
         let provider = 
             try 
                 ComputeProvider.Create(platformName, deviceType)
             with ex -> failwith ex.Message
-        multiplicationOptions, provider
+        multOneThread, multParallel, provider
         
-    let nvidiaOptions, nvidiaProvider = getGpuOptions nvidiaPlatformName 16
+    let nvidiaOneThread, nvidiaParallel, nvidiaProvider = getGpuOptions nvidiaPlatformName 16
 //    let intelOptions, intelProvider = getGpuOptions intelPlatformName 16
 //    let amdOptions, amdProvider = getGpuOptions amdPlatformName 16
 //    let defaultOptions, dafeultProvider = getGpuOptions defaultPlatformName 16
@@ -148,7 +150,7 @@ let main args =
     
     let check str searchLen = 
         let toCheck    = recognize (Options.empty Algorithm.Okhotin) str rules nonterminals S searchLen 
-        let toCheckBFS = recognize nvidiaOptions str rules nonterminals S searchLen 
+        let toCheckBFS = recognize nvidiaParallel str rules nonterminals S searchLen 
         assert (isAnswerValid toCheck (String.length str) searchLen)
         assert (isAnswerValid toCheckBFS (String.length str) searchLen)
         let sameCells cell = 
@@ -171,34 +173,39 @@ let main args =
             stopWatch.Elapsed.TotalMilliseconds
     
     let checkTime str searchLen = 
+//        checkOneType 
+//            (fun str searchLen -> recognize { nvidiaOptions with Parallel = Some { MinMatrixSize = 1 } } str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "nvidia" str searchLen
         checkOneType 
-            (fun str searchLen -> recognize { nvidiaOptions with Parallel = Some { MinMatrixSize = 1 } } str rules nonterminals S searchLen ) 
-            (fun toCheck -> isAnswerValid toCheck) "nvidia" str searchLen
+            (fun str searchLen -> recognize { Options.empty Algorithm.Okhotin with Parallel = Some { MinMatrixSize = 8 }; Fast = Some { MinMatrixSize = 64 } } str rules nonterminals S searchLen ) 
+            (fun toCheck -> isAnswerValid toCheck) "okhotin" str searchLen
+        checkOneType 
+            (fun str searchLen -> recognize { Options.empty Algorithm.Modified with Parallel = Some { MinMatrixSize = 1 }; Fast = Some { MinMatrixSize = 64 } } str rules nonterminals S searchLen ) 
+            (fun toCheck -> isAnswerValid toCheck) "my" str searchLen
 //        checkOneType 
 //            (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen { Options.empty with Fast = Some { MinMatrixSize = 64 }; Parallel = Some { MinMatrixSize = 1 } }) 
 //            (fun toCheck -> isAnswerValid toCheck) "fast, parallel" str searchLen
     
 
-    
-    check "abb"      2
-    check "abb"      3    
-    check "aaabbcc"  5
-    check "aaabb"    5
-    check "aaaaabbb" 6
-    check "aaaabbbbbb" 6
-    check "aaaabbbbbbbbbbb" 10
-    check "aaaabbbbbbbbbbbbbbb" 10
-    check "aaaabb" 6
-    check "aaaabb" 6
-    check "aaaabb" 5
-    check "aaaabb" 4
-    check "aaaabb" 3
-    check "aaaabb" 2
-    check "aaaabb" 1
-    check "aaaabb" 0
+//    check "abb"      2
+//    check "abb"      3    
+//    check "aaabbcc"  5
+//    check "aaabb"    5
+//    check "aaaaabbb" 6
+//    check "aaaabbbbbb" 6
+//    check "aaaabbbbbbbbbbb" 10
+//    check "aaaabbbbbbbbbbbbbbb" 10
+//    check "aaaabb" 6
+//    check "aaaabb" 6
+//    check "aaaabb" 5
+//    check "aaaabb" 4
+//    check "aaaabb" 3
+//    check "aaaabb" 2
+//    check "aaaabb" 1
+//    check "aaaabb" 0
 
 //    check (String.replicate 40 "abb") 100
-//    checkTime (String.replicate 1000 "abb") 2000
+    checkTime (String.replicate 300 "abb") 800
     //        checkTime ((String.replicate 511 "abbb") + "abb") 50
 
     //        check "aabb"

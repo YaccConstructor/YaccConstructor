@@ -91,7 +91,8 @@
         
         let create i j = T(i, j) 
 
-        let shift (initial: T) rowShift colShift = create (initial.Row + rowShift) (initial.Column + colShift)
+        let transpone (cell: T) = create cell.Column cell.Row
+        let shift rowShift colShift (initial: T) = create (initial.Row + rowShift) (initial.Column + colShift)
 
 
     module SubMatrix = 
@@ -101,7 +102,7 @@
             member this.Size = size
 
             member this.HalfSize = int(float(this.Size) / 2.)
-            member this.RelativeDot = Cell.shift this.Top
+            member this.RelativeDot x y = Cell.shift x y this.Top
 
             member this.Right  = this.RelativeDot this.Size  0
             member this.Left   = this.RelativeDot 0 -this.Size
@@ -112,11 +113,11 @@
             
         let create top size = T(top, size)      
         let shift (matrix: T) rowShift colShift =
-            let shiftedTop = Cell.shift matrix.Top rowShift colShift
+            let shiftedTop = Cell.shift rowShift colShift matrix.Top 
             create shiftedTop matrix.Size
 
         let matrixWithShift matrixSize (initial: T) rowShift colShift =
-            let newTop = Cell.shift initial.Top rowShift colShift
+            let newTop = Cell.shift rowShift colShift initial.Top
             T(newTop, matrixSize)
 
         let getOnlyCell (matrix: T) = 
@@ -149,6 +150,9 @@
             let ncol = ncol
             let nrow = nrow
             let getSingleIndex (cell: Cell.T) = cell.Row * ncol + cell.Column
+                
+            let isOutOfStorage (cell: Cell.T) =
+                cell.Row < 0 || cell.Column < 0 || cell.Row >= nrow || cell.Column >= ncol
 
             //todo: optimize not used space
             let data = matrix
@@ -160,46 +164,41 @@
                 | 0 -> nrow
                 | 1 -> ncol   
                 | _ -> raise <| IndexOutOfRangeException()
+                
+            member this.getInnerFromCell (cell: Cell.T) =
+                if isOutOfStorage cell
+                then Probability.innerZero
+                else data.[getSingleIndex cell]
 
             member this.Item
-                with get cell = Probability.fromInnerValue data.[getSingleIndex cell]
-                
-            member this.getDataFromCell (cell: Cell.T) =
-                let cellOutOfMatrix = cell.Row < 0 || cell.Column < 0 || cell.Row >= nrow || cell.Column >= ncol
+                with get cell = Probability.fromInnerValue <| this.getInnerFromCell cell                                         
 
-                if cellOutOfMatrix
-                then Probability.innerZero
-                else data.[getSingleIndex cell]                                         
-
-            // todo: recurring code
             member this.GetInnerSubMatrix (submatrix: SubMatrix.T) isTransponed =
-                let cellStart = submatrix.Left 
-                let cellFinish = Cell.shift submatrix.Right -1 -1
-                let subNcol = cellFinish.Column - cellStart.Column + 1
-                let subNrow = cellFinish.Row - cellStart.Row + 1
+                let leftCell = submatrix.Left 
+                let size = submatrix.Size
 
-                let getCell x =
-                    let subi = x / subNcol
-                    let subj = x - subNcol * subi
+                let getDataBySubCell x =
+                    let subi = x / size
+                    let subj = x - size * subi
 
-                    if isTransponed
-                    then Cell.create (subj + cellStart.Row) (subi + cellStart.Column)
-                    else Cell.create (subi + cellStart.Row) (subj + cellStart.Column)
+                    Cell.create subi subj 
+                    |> if isTransponed then Cell.transpone else id 
+                    |> Cell.shift leftCell.Row leftCell.Column
+                    |> this.getInnerFromCell 
                                           
-                Array.init (subNcol * subNrow) (fun x -> getCell x |> this.getDataFromCell)
+                Array.init (size * size) getDataBySubCell
 
             member this.GetFastSubMatrix (submatrix: SubMatrix.T) isTransponed : Matrix<float> =
-                let cellStart = submatrix.Left 
-                let cellFinish = Cell.shift submatrix.Right -1 -1
-                let subNcol = cellFinish.Column - cellStart.Column + 1
-                let subNrow = cellFinish.Row - cellStart.Row + 1
+                let leftCell = submatrix.Left 
 
-                let getCell (subi, subj) =
-                    if isTransponed
-                    then Cell.create (subj + cellStart.Row) (subi + cellStart.Column)
-                    else Cell.create (subi + cellStart.Row) (subj + cellStart.Column) 
+                let getDataBySubCell x y =
+                    Cell.create x y 
+                    |> if isTransponed then Cell.transpone else id 
+                    |> Cell.shift leftCell.Row leftCell.Column
+                    |> this.getInnerFromCell 
+                    |> float
                       
-                Matrix.init subNrow subNcol (fun x y -> getCell (x, y) |> this.getDataFromCell |> float)
+                Matrix.init submatrix.Size submatrix.Size getDataBySubCell
 
             member this.AddValueToCell cell prob = 
                 let x = getSingleIndex cell

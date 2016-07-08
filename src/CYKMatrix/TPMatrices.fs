@@ -312,7 +312,7 @@ open Util
                 let actualColCount = (min (where.Top.Column) (stringSize + 1)) - where.Left.Column
                 for j in [0 .. actualColCount - 1] do
                     let matrixCell = Cell.create i j
-                    let realCell = Cell.shift matrixCell where.Left.Row where.Left.Column
+                    let realCell = Cell.shift where.Left.Row where.Left.Column matrixCell
                     whereMatrix.AddValueToCell realCell matrix.[matrixCell]
 
         let addToPFastMatrix (where: SubMatrix.T) nts (matrix: Matrix<float>) =
@@ -321,7 +321,7 @@ open Util
                 let actualColCount = (min (where.Top.Column) (stringSize + 1)) - where.Left.Column
                 for j in [0 .. actualColCount - 1] do
                     let matrixCell = Cell.create i j
-                    let realCell = Cell.shift matrixCell where.Left.Row where.Left.Column
+                    let realCell = Cell.shift where.Left.Row where.Left.Column matrixCell
                     whereMatrix.AddValueToCell realCell (Probability.create matrix.[i,j])
                     
         member this.updateTCellWith cell nonterminals =

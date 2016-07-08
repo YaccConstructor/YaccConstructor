@@ -19,6 +19,8 @@ open MBrace.Runtime
 open GLL.shift_problem
 //open MBrace.Azure.Management
 
+let lockArray = new ResizeArray<int>()
+
 type WhatShouldISearch =
     | TRNA
     | R16S_H22_H23
@@ -447,7 +449,7 @@ let searchInBioGraphs (searchCfg : SearchConfig) graphs agentsCount =
                 |> Seq.collect (fun line -> let header = info + (!index).ToString()
                                             index := !index + 1
                                             header::(splitLine line))
-            File.AppendAllLines(resultPath, toPrint)
+            lock lockArray (fun () -> File.AppendAllLines(resultPath, toPrint))
             isPrinted := true
         res
         |> Seq.iteri printResult
@@ -482,7 +484,7 @@ let searchInBioGraphs (searchCfg : SearchConfig) graphs agentsCount =
     |> Array.iteri 
         (fun i graph -> 
             Data (i, graph) 
-            |> agents.[i % agentsCount].Post
+            |> agents.[if i < 150 then 0 else (i % agentsCount)].Post
         )
     agents |> Array.iter (fun a -> a.PostAndReply Die)
     printfn "Total time = %A" (System.DateTime.Now - start)

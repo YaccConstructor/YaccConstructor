@@ -534,7 +534,7 @@ let r16s_H22_H23_SearchConfig =
     
     new SearchConfig(GLL.r16s.H22_H23.buildAbstract, GLL.r16s.H22_H23.buildAbstractAst, getSmb, 
                         //300, 550, 14, GLL.r16s.H22_H23.numToString)
-                        318, 370, 13, GLL.r16s.H22_H23.numToString)
+                        318, 370, 14, GLL.r16s.H22_H23.numToString)
                         //400, 550, 14, GLL.r16s.H22_H23.numToString)
                         //800, 910, 14, GLL.r16s.H22_H23.numToString)
 

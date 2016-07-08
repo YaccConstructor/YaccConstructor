@@ -151,8 +151,6 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils.SourceText", "YC.Util
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DotParser.Tests", "..\QuickGraph\tests\DotParser.Tests\DotParser.Tests.fsproj", "{C2F89DE1-B429-4B5D-AF22-3A075D00BAA4}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Bio.toSTO", "Bio.toSTO\Bio.toSTO.fsproj", "{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -832,26 +830,6 @@ Global
 		{C2F89DE1-B429-4B5D-AF22-3A075D00BAA4}.ReleaseContractsReferences|Any CPU.Build.0 = Release|Any CPU
 		{C2F89DE1-B429-4B5D-AF22-3A075D00BAA4}.ReleaseContractsReferences|x86.ActiveCfg = Release|Any CPU
 		{C2F89DE1-B429-4B5D-AF22-3A075D00BAA4}.ReleaseContractsReferences|x86.Build.0 = Release|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.Debug|x86.Build.0 = Debug|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.DebugContracts|Any CPU.ActiveCfg = Debug|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.DebugContracts|Any CPU.Build.0 = Debug|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.DebugContracts|x86.ActiveCfg = Debug|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.DebugContracts|x86.Build.0 = Debug|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.Release|x86.ActiveCfg = Release|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.Release|x86.Build.0 = Release|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.Release20|Any CPU.ActiveCfg = Release|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.Release20|Any CPU.Build.0 = Release|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.Release20|x86.ActiveCfg = Release|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.Release20|x86.Build.0 = Release|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.ReleaseContractsReferences|Any CPU.ActiveCfg = Release|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.ReleaseContractsReferences|Any CPU.Build.0 = Release|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.ReleaseContractsReferences|x86.ActiveCfg = Release|Any CPU
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085}.ReleaseContractsReferences|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -910,7 +888,6 @@ Global
 		{8826810A-DC59-46E6-8978-21E273DB1236} = {278F278F-6F15-4CAE-9665-A068A795A222}
 		{F296356B-00C3-465C-9C97-7CFA279F5574} = {D300525B-9E17-4920-A4F4-C3920D690B48}
 		{C2F89DE1-B429-4B5D-AF22-3A075D00BAA4} = {FBFEF0E6-F195-4146-A529-8B613AB549DC}
-		{1DDA9076-5CC4-4C7C-85C8-CCD215B6E085} = {186631E1-2070-4866-B7D9-21C73477011E}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = QuickGraph1.vsmdi

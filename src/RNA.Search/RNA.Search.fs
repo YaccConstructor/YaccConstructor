@@ -78,7 +78,7 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lowLengthLimit highLength
             |> Array.filter (fun i -> i.length >= uint16 lowLengthLimit && i.length <= uint16 highLengthLimit)
             |> Seq.groupBy(fun x -> x.le, x.re)
             //|> Seq.map(fun (_,a) -> a |> Seq.maxBy (fun x -> x.length))
-            |> Seq.map(fun (edg,a) -> edg, a |> Seq.collect (fun res -> [res.lpos, res.rpos, res.length]))
+            |> Seq.map(fun (edg,a) -> edg, a |> Seq.collect (fun res -> [res.lpos, res.rpos, res.length]) |> Array.ofSeq)
             |> Array.ofSeq
         let qgEdgFromBio (e:BioParserEdge) =
             new QuickGraph.TaggedEquatableEdge<_,_>(e.Start, e.End, float e.RealLenght) 
@@ -98,6 +98,7 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lowLengthLimit highLength
         let findSubgraph s e (lengths:HashSet<uint16>) = 
             let yen = new QuickGraph.Algorithms.ShortestPath.Yen.YenShortestPathsAlgorithm<_>(qg, s, e, 1000)
             let paths = yen.Execute()
+            if Seq.isEmpty paths then failwith "No path found."
             let filteredPaths = paths |> Seq.filter (fun p -> p |> Seq.sumBy (fun e -> e.Tag) |> uint16 |> lengths.Contains)
             //let allEdgsOfPaths = Seq.concat filteredPaths
             (*let hashSet = new System.Collections.Generic.HashSet<_>()*)
@@ -106,6 +107,7 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lowLengthLimit highLength
             //    printfn "Edge: %A" edge
             (*Seq.iter (fun x -> hashSet.Add x |> ignore) allEdgsOfPaths
             hashSet, (hashSet |> Seq.sumBy (fun x -> x.Tag |> int))*)
+            if Seq.isEmpty filteredPaths then failwith "No path with expected length found."
             filteredPaths |> Seq.toList
         
         
@@ -123,10 +125,10 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lowLengthLimit highLength
                 *)
                 let lengths0 = new ResizeArray<_>()
                 let newPoss = poss
-                              |> Seq.map (fun (lpos,rpos,pathLength) -> let leftEdgePartOfPath = uint16 <| graph.Edges.[le].RealLenght - lpos - 1
-                                                                        let rightEdgePartOfPath = uint16 <| rpos + 1
-                                                                        pathLength - leftEdgePartOfPath - rightEdgePartOfPath |> lengths0.Add |> ignore
-                                                                        lpos,rpos,pathLength - leftEdgePartOfPath - rightEdgePartOfPath)
+                              |> Array.map (fun (lpos,rpos,pathLength) -> let leftEdgePartOfPath = uint16 <| graph.Edges.[le].RealLenght - lpos - 1
+                                                                          let rightEdgePartOfPath = uint16 <| rpos + 1
+                                                                          pathLength - leftEdgePartOfPath - rightEdgePartOfPath |> lengths0.Add
+                                                                          lpos,rpos,pathLength - leftEdgePartOfPath - rightEdgePartOfPath)
                               |> Seq.groupBy (fun (lpos,rpos,pathLength) -> pathLength)
                               |> Seq.map (fun (pathLength,values) -> let mostLeft = ref graph.Edges.[re].RealLenght
                                                                      let mostRight= ref 0
@@ -135,6 +137,7 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lowLengthLimit highLength
                                                                                      if lpos < !mostLeft then mostLeft := lpos
                                                                                      if rpos > !mostRight then mostRight := rpos)
                                                                      !mostLeft, !mostRight, pathLength)
+                              |> Array.ofSeq
                 let toReturn = graph.Edges.[le], graph.Edges.[re], newPoss
                 //let startEdge = graph.Edges.[le], poss |> Seq.collect (fun (l,_,_) -> [l]) |> Seq.distinct
                 //let finalEdge = graph.Edges.[re], poss |> Seq.collect (fun (_,r,_) -> [r]) |> Seq.distinct
@@ -144,7 +147,7 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lowLengthLimit highLength
                      |> Some
                 elif not <| subgraphsMemoization graph.Edges.[le].End graph.Edges.[re].Start
                 then
-                    let lengths = new HashSet<uint16>(Seq.distinct lengths0)
+                    let lengths = new HashSet<uint16>(lengths0)
                     (*poss |> Seq.iter (fun (lpos,rpos,pathLength) -> let leftEdgePartOfPath = uint16 <| graph.Edges.[le].RealLenght - lpos - 1
                                                                     let rightEdgePartOfPath = uint16 <| rpos + 1
                                                                     pathLength - leftEdgePartOfPath - rightEdgePartOfPath |> lengths.Add |> ignore )
@@ -412,7 +415,7 @@ let searchInBioGraphs (searchCfg : SearchConfig) graphs agentsCount =
                                                                    File.AppendAllLines(resultPath, info::toPrint))
     *)
 
-    let printResultGraphs (res:seq<seq<seq<BioParserEdge>> * (BioParserEdge * BioParserEdge * seq<int * int * uint16>)>) i numToString = 
+    let printResultGraphs (res:seq<seq<seq<BioParserEdge>> * (BioParserEdge * BioParserEdge * _)>) i numToString = 
         let maxLineLength = 80
         let resultPath = ".\\result.fa"
         let isPrinted = ref false

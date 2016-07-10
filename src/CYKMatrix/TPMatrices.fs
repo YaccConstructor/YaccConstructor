@@ -157,38 +157,57 @@ open Util
                 let coeff = 1                                 
                 coeff * matricesSize, matricesSize
 
-        let dgemm (m: int) n k (A:float[]) (B:float[]) (worker: Worker) =
+        let doCublasMultiplications helpers matrixHandler (matricesCount: int) matricesSize fullTasks =   
+            let getSubMatrix, flushSubMatrix = matrixHandler
+            let matricesCellCount = matricesSize * matricesSize
+            
+            let from1 = 
+                fullTasks
+                |> Array.map (fun ({ from1 = from }, nts) -> getSubMatrix (fst nts) from false)
+                |> Array.concat            
+            let from2 = 
+                fullTasks
+                |> Array.map (fun ({ from2 = from }, nts) -> getSubMatrix (snd nts) from false)
+                |> Array.concat
+
+            let worker = helpers.worker
+
             let transa = cublasOperation_t.CUBLAS_OP_N
             let transb = cublasOperation_t.CUBLAS_OP_N
                     
-            let lda = k 
-            let ldb = n // ldb >= max(1,k)
-            let ldc = n // ldc >= max(1,m)
+            let lda = matricesSize
+            let ldb = matricesSize
+            let ldc = matricesSize
+        
+            let dalpha = 1.
+            use dA = worker.Malloc(from1)
+            use dB = worker.Malloc(from2)
+            let dbeta = 0.
+            use dC = worker.Malloc(matricesSize * matricesSize * matricesCount)
 
-            use dalpha = worker.Malloc([|1.|])
-            use dA = worker.Malloc(A)
-            use dB = worker.Malloc(B)
-            use dbeta = worker.Malloc([|0.|])
-            use dC = worker.Malloc(m * n)
-            CUBLAS.Default.Dgemm(transa, transb, n, m, k, dalpha.Ptr, dB.Ptr, ldb, dA.Ptr, lda, dbeta.Ptr, dC.Ptr, ldc)
-            dC.Gather()
+            let doOne i =
+                let ptrShift = i * matricesCellCount
+                CUBLAS.Default.Dgemm(transa, transb, matricesSize, matricesSize, matricesSize, dalpha, dB.Ptr + ptrShift, ldb, dA.Ptr + ptrShift, lda, dbeta, dC.Ptr + ptrShift, ldc)
 
+            [|0..matricesCount - 1|]
+            |> Array.iter doOne      
+            
+            let multiplicationResult = dC.Gather()         
 
-        let doCublasMultiplications helpers arrayMatrixHandler matricesCount matricesSize fullTasks =             
-            let getSubMatrix, flushSubMatrix = arrayMatrixHandler
-            let doOne (task, nts) =
-                let nt1, nt2 = nts
-                let from1 = getSubMatrix nt1 task.from1 false
-                let from2 = getSubMatrix nt2 task.from2 false
-                let m = matricesSize
-                let n = matricesSize
-                let k = matricesSize
-                let result = dgemm m n k from1 from2 helpers.worker 
-                flushSubMatrix task.where nts result 
+            let flushOneMatrix num = 
+                let matrix = 
+                    multiplicationResult.[num * matricesCellCount .. (num + 1) * matricesCellCount - 1]
+                let task, nts = fullTasks.[num]
+                flushSubMatrix task.where nts matrix 
                 
-            fullTasks
-            |> Array.Parallel.iter doOne
-//            |> Array.iter doOne
+            let doParallelFlush = 
+                match cudaHelpers with
+                | Some helpers -> helpers.options.doParallelFlush
+                | None -> failwith "imposibru"        
+            
+            [|0..matricesCount - 1|]
+            |> (if doParallelFlush then Array.Parallel.iter else Array.iter) flushOneMatrix       
+
 
         let gpuMultiplicate (helpers: GPUBrahmaHelpers) 
                             (from1: Probability.InnerType []) 
@@ -224,8 +243,8 @@ open Util
 
             result
 
-        let doSimpleMultiplications isParallel arrayMatrixHandler matricesSize fullTasks = 
-            let getSubMatrix, flushSubMatrix = arrayMatrixHandler
+        let doSimpleMultiplications isParallel matrixHandler matricesSize fullTasks = 
+            let getSubMatrix, flushSubMatrix = matrixHandler
             let doOne (task, nts) =
                 let nt1, nt2 = nts
                 let from1 = getSubMatrix nt1 task.from1 false
@@ -237,8 +256,8 @@ open Util
             fullTasks
             |> (if isParallel then Array.Parallel.iter else Array.iter) doOne 
             
-        let doFastMultiplications isParallel fastMatrixHandler matricesSize fullTasks = 
-            let getSubMatrix, flushSubMatrix = fastMatrixHandler
+        let doFastMultiplications isParallel matrixHandler matricesSize fullTasks = 
+            let getSubMatrix, flushSubMatrix = matrixHandler
             let doOne (task, nts) =
                 let nt1, nt2 = nts
                 let from1 = getSubMatrix nt1 task.from1 false
@@ -249,8 +268,8 @@ open Util
             fullTasks
             |> (if isParallel then Array.Parallel.iter else Array.iter) doOne 
 
-        let doBrahmaMultiplications arrayMatrixHandler matricesCount matricesSize helpers fullTasks = 
-            let getSubMatrix, flushSubMatrix = arrayMatrixHandler
+        let doBrahmaMultiplications matrixHandler matricesCount matricesSize helpers fullTasks = 
+            let getSubMatrix, flushSubMatrix = matrixHandler
             let matricesCellCount = matricesSize * matricesSize
             
             let from1 = 

@@ -14,6 +14,7 @@
 
     type GPUCudaOptions = {
         MinMatrixSize: int
+        doParallelFlush: bool
     }
 
     type FastOptions = {
@@ -52,6 +53,7 @@
 //        let unwrap = innerValue
         let create = float32 >> fromInnerValue
         let unwrap = innerValue >> double
+        let createInnerType (x: float) = float32 x
         
 //        let zero = create false
         let zero = create 0.

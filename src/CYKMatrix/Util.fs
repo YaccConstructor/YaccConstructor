@@ -5,11 +5,15 @@
     open OpenCL.Net
     open Microsoft.FSharp.Math
 
-    type GPUOptions = {
+    type GPUBrahmaOptions = {
         PlatformName: string 
         DeviceType: DeviceType
-        MinMatrixSize: int
         doParallelFlush: bool
+        MinMatrixSize: int
+    }
+
+    type GPUCudaOptions = {
+        MinMatrixSize: int
     }
 
     type FastOptions = {
@@ -24,13 +28,14 @@
 
     module Options =
         type T = {
-            GPU: GPUOptions option  
+            Brahma: GPUBrahmaOptions option  
+            Cuda: GPUCudaOptions option  
             Fast: FastOptions option
             Parallel: ParallelOptions option
             algorithm: Algorithm
         }
 
-        let empty algorithm = { GPU = None; Fast = None; Parallel = None; algorithm = algorithm }
+        let empty algorithm = { Brahma = None; Cuda = None; Fast = None; Parallel = None; algorithm = algorithm }
     
 
     type NonTerminal = NonTerminal of string
@@ -185,6 +190,22 @@
                     |> if isTransponed then Cell.transpone else id 
                     |> Cell.shift leftCell.Row leftCell.Column
                     |> this.getInnerFromCell 
+                                          
+                Array.init (size * size) getDataBySubCell
+
+            member this.GetFloatSubMatrix (submatrix: SubMatrix.T) isTransponed =
+                let leftCell = submatrix.Left 
+                let size = submatrix.Size
+
+                let getDataBySubCell x =
+                    let subi = x / size
+                    let subj = x - size * subi
+
+                    Cell.create subi subj 
+                    |> if isTransponed then Cell.transpone else id 
+                    |> Cell.shift leftCell.Row leftCell.Column
+                    |> this.getInnerFromCell 
+                    |> float
                                           
                 Array.init (size * size) getDataBySubCell
 

@@ -3,18 +3,26 @@
 open Brahma.FSharp.OpenCL.Core
 open Brahma.FSharp.OpenCL.Extensions
 open Brahma.OpenCL
+open Alea.CUDA
+open Alea.CUDA.CULib
+open Alea.CUDA.Utilities
+open Alea.CUDA.IL
 
 open Util
 
-    type GPUHelpers = 
+    type GPUBrahmaHelpers = 
         { provider: ComputeProvider
           commandQueue: CommandQueue
           localMemory: int option
           maxWorkGroupSize: int option
-          kernel: _2D Kernel
+          kernel: _2D Brahma.OpenCL.Kernel
           kernelPrepare: _2D -> int -> Probability.InnerType [] -> Probability.InnerType [] -> Probability.InnerType [] -> unit
           kernelRun: unit -> _2D Commands.Run
-          options: GPUOptions }
+          options: GPUBrahmaOptions }
+
+    type GPUCudaHelpers = 
+        { worker: Worker
+          options: GPUCudaOptions }
 
     type MatriceswMultiplicator (options: Options.T, probabilitySummQuote, probabilityMultQuote) =
 
@@ -37,37 +45,43 @@ open Util
                     c.[skipRows + tj] <- buf
             @>  
 
-        let gpuHelpers = 
-            match options.GPU with
-            | Some gpuOptions -> 
-                let provider =
-                    try ComputeProvider.Create(gpuOptions.PlatformName, gpuOptions.DeviceType)
-                    with 
-                    | ex -> failwith ex.Message
+        let createBrahmaHelper brahmaOptions =
+            let provider =
+                try ComputeProvider.Create(brahmaOptions.PlatformName, brahmaOptions.DeviceType)
+                with 
+                | ex -> failwith ex.Message
 
-                let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
-                let kernel, kernelPrepare, kernelRun = provider.Compile command
+            let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
+            let kernel, kernelPrepare, kernelRun = provider.Compile command
 
-                let getInfo infoType =
-                    let info, ex = OpenCL.Net.Cl.GetDeviceInfo(provider.Devices |> Seq.head, infoType)
-                    match ex with 
-                        | OpenCL.Net.ErrorCode.Success -> Some <| info.CastTo<int>()
-                        | _ -> None
+            let getInfo infoType =
+                let info, ex = OpenCL.Net.Cl.GetDeviceInfo(provider.Devices |> Seq.head, infoType)
+                match ex with 
+                    | OpenCL.Net.ErrorCode.Success -> Some <| info.CastTo<int>()
+                    | _ -> None
                     
-                let localMem = getInfo OpenCL.Net.DeviceInfo.LocalMemSize
-                let maxWGSize = getInfo OpenCL.Net.DeviceInfo.MaxWorkGroupSize
+            let localMem = getInfo OpenCL.Net.DeviceInfo.LocalMemSize
+            let maxWGSize = getInfo OpenCL.Net.DeviceInfo.MaxWorkGroupSize
 
-                Some {
-                    provider = provider; 
-                    localMemory = localMem;
-                    maxWorkGroupSize = maxWGSize;
-                    commandQueue = commandQueue; 
-                    kernel = kernel;
-                    kernelPrepare = kernelPrepare;
-                    kernelRun = kernelRun;
-                    options = gpuOptions
-                }
-            | None -> None      
+            {
+                provider = provider; 
+                localMemory = localMem;
+                maxWorkGroupSize = maxWGSize;
+                commandQueue = commandQueue; 
+                kernel = kernel;
+                kernelPrepare = kernelPrepare;
+                kernelRun = kernelRun;
+                options = brahmaOptions
+            }
+
+        let createCudaHelper cudaOptions =            
+            {
+                worker = Worker.Default
+                options = cudaOptions
+            }
+            
+        let brahmaHelpers = Option.map createBrahmaHelper options.Brahma
+        let cudaHelpers = Option.map createCudaHelper options.Cuda
 
         let simpleMultiplicate (from1: Probability.InnerType []) (from2: Probability.InnerType []) matricesSize actualColCount =        
             let calculateCell (n, i, j) = 
@@ -143,9 +157,40 @@ open Util
                 let coeff = 1                                 
                 coeff * matricesSize, matricesSize
 
+        let dgemm (m: int) n k (A:float[]) (B:float[]) (worker: Worker) =
+            let transa = cublasOperation_t.CUBLAS_OP_N
+            let transb = cublasOperation_t.CUBLAS_OP_N
+                    
+            let lda = k 
+            let ldb = n // ldb >= max(1,k)
+            let ldc = n // ldc >= max(1,m)
 
+            use dalpha = worker.Malloc([|1.|])
+            use dA = worker.Malloc(A)
+            use dB = worker.Malloc(B)
+            use dbeta = worker.Malloc([|0.|])
+            use dC = worker.Malloc(m * n)
+            CUBLAS.Default.Dgemm(transa, transb, n, m, k, dalpha.Ptr, dB.Ptr, ldb, dA.Ptr, lda, dbeta.Ptr, dC.Ptr, ldc)
+            dC.Gather()
+
+
+        let doCublasMultiplications helpers arrayMatrixHandler matricesCount matricesSize fullTasks =             
+            let getSubMatrix, flushSubMatrix = arrayMatrixHandler
+            let doOne (task, nts) =
+                let nt1, nt2 = nts
+                let from1 = getSubMatrix nt1 task.from1 false
+                let from2 = getSubMatrix nt2 task.from2 false
+                let m = matricesSize
+                let n = matricesSize
+                let k = matricesSize
+                let result = dgemm m n k from1 from2 helpers.worker 
+                flushSubMatrix task.where nts result 
                 
-        let gpuMultiplicate (helpers: GPUHelpers) 
+            fullTasks
+            |> Array.Parallel.iter doOne
+//            |> Array.iter doOne
+
+        let gpuMultiplicate (helpers: GPUBrahmaHelpers) 
                             (from1: Probability.InnerType []) 
                             (from2: Probability.InnerType []) 
                             matricesCount 
@@ -204,7 +249,7 @@ open Util
             fullTasks
             |> (if isParallel then Array.Parallel.iter else Array.iter) doOne 
 
-        let doGPUMultiplications arrayMatrixHandler matricesCount matricesSize helpers fullTasks = 
+        let doBrahmaMultiplications arrayMatrixHandler matricesCount matricesSize helpers fullTasks = 
             let getSubMatrix, flushSubMatrix = arrayMatrixHandler
             let matricesCellCount = matricesSize * matricesSize
             
@@ -225,17 +270,17 @@ open Util
                     multiplicationResult.[num * matricesCellCount .. (num + 1) * matricesCellCount - 1]
                     |> ProbabilityMatrix.create matricesSize matricesSize
                 let task, nts = fullTasks.[num]
-                flushSubMatrix task.where nts matrix    
+                flushSubMatrix task.where nts matrix     
                 
             let doParallelFlush = 
-                match gpuHelpers with
+                match brahmaHelpers with
                 | Some helpers -> helpers.options.doParallelFlush
                 | None -> failwith "imposibru"        
             
             [|0..matricesCount - 1|]
             |> (if doParallelFlush then Array.Parallel.iter else Array.iter) flushOneMatrix
-
-        member this.performMultiplication arrayMatrixHandler fastMatrixHandler (tasks: MultiplicationTask []) nts = 
+            
+        member this.performMultiplication arrayMatrixHandler fastMatrixHandler cublasMatrixHandler (tasks: MultiplicationTask []) nts = 
 
             let crossproduct l1 l2 =
                 let product lst v = Array.map (fun vl -> (vl, v)) lst
@@ -245,13 +290,13 @@ open Util
 
             let matricesSize = tasks.[0].where.Size
             let matricesCount = fullTasks.Length
-            let matricesCellCount = matricesSize * matricesSize
             
             let doFastParallel () = doFastMultiplications true fastMatrixHandler matricesSize fullTasks 
             let doFast () = doFastMultiplications false fastMatrixHandler matricesSize fullTasks 
             let doSimpleParallel () = doSimpleMultiplications true arrayMatrixHandler matricesSize fullTasks 
             let doSimple () = doSimpleMultiplications false arrayMatrixHandler matricesSize fullTasks 
-            let doGPU helpers = doGPUMultiplications arrayMatrixHandler matricesCount matricesSize helpers fullTasks
+            let doBrahmaGPU helpers = doBrahmaMultiplications arrayMatrixHandler matricesCount matricesSize helpers fullTasks
+            let doCublas helpers = doCublasMultiplications helpers cublasMatrixHandler matricesCount matricesSize fullTasks
 
             let doCheckParallel doOneThread doParallel  =
                 match options.Parallel with 
@@ -261,11 +306,18 @@ open Util
                     else doOneThread ()
                 | None -> doOneThread ()
                             
-            match gpuHelpers with
-            | Some helpers ->
+            //todo:
+            match brahmaHelpers with
+            | Some helpers ->            
                 if matricesSize >= helpers.options.MinMatrixSize
-                then doGPU helpers
-                else doCheckParallel doSimple doSimpleParallel                
+                then doBrahmaGPU helpers
+                else doCheckParallel doSimple doSimpleParallel
+            | None -> 
+            match cudaHelpers with
+            | Some helpers ->            
+                if matricesSize >= helpers.options.MinMatrixSize
+                then doCublas helpers
+                else doCheckParallel doSimple doSimpleParallel
             | None -> 
             match options.Fast with
             | Some { MinMatrixSize = size } -> 
@@ -276,11 +328,15 @@ open Util
                 
 
         member this.releaseResources () =
-            match gpuHelpers with
+            match brahmaHelpers with
             | Some helpers ->
                 helpers.commandQueue.Dispose()
                 helpers.provider.Dispose()
                 helpers.provider.CloseAllBuffers()
+            | None -> 
+            match cudaHelpers with
+            | Some helpers ->
+                helpers.worker.Dispose()
             // todo: hmmm...
             | None -> ignore 0
 
@@ -305,7 +361,6 @@ open Util
                                 |> Array.map (fun x -> x, ProbabilityMatrix.empty (stringSize + 1))
                             )   
 
-        // todo: recurring code
         let addToPSubMatrix (where: SubMatrix.T) nts (matrix: ProbabilityMatrix.T) =
             let whereMatrix = pMatrix.[nts]
             for i in [0 .. where.Size - 1] do
@@ -314,6 +369,17 @@ open Util
                     let matrixCell = Cell.create i j
                     let realCell = Cell.shift where.Left.Row where.Left.Column matrixCell
                     whereMatrix.AddValueToCell realCell matrix.[matrixCell]
+
+        // todo: recurring code
+        let addToPCublasSubMatrix (where: SubMatrix.T) nts (matrix: float []) =
+            let whereMatrix = pMatrix.[nts]
+            for i in [0 .. where.Size - 1] do
+                let actualColCount = (min (where.Top.Column) (stringSize + 1)) - where.Left.Column
+                for j in [0 .. actualColCount - 1] do
+                    let x =  i * where.Size + j
+                    let matrixCell = Cell.create i j
+                    let realCell = Cell.shift where.Left.Row where.Left.Column matrixCell
+                    whereMatrix.AddValueToCell realCell (Probability.create matrix.[x])
 
         let addToPFastMatrix (where: SubMatrix.T) nts (matrix: Matrix<float>) =
             let whereMatrix = pMatrix.[nts]
@@ -350,8 +416,10 @@ open Util
         member this.performMultiplication tasks nts = 
             let getTSubMatrix nt = tMatrix.[nt].GetInnerSubMatrix
             let getFastSubMatrix nt = tMatrix.[nt].GetFastSubMatrix
+            let getFloatSubMatrix nt = tMatrix.[nt].GetFloatSubMatrix
             let arrayMatrixHandler = (getTSubMatrix, addToPSubMatrix)
             let fastMatrixHandler = (getFastSubMatrix, addToPFastMatrix)
-            GPUMultiplicator.performMultiplication arrayMatrixHandler fastMatrixHandler tasks nts
+            let cublasMatrixHandler = (getFloatSubMatrix, addToPCublasSubMatrix)
+            GPUMultiplicator.performMultiplication arrayMatrixHandler fastMatrixHandler cublasMatrixHandler tasks nts
 
         member this.releaseResources = GPUMultiplicator.releaseResources

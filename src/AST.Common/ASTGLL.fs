@@ -274,8 +274,108 @@ type Tree (tokens : int[], root : INode, rules : int[][]) =
                 | _ -> ()
         out.WriteLine("}")
         out.Close()
-      
-    member this.GetPath nTerm = 
+
+    /// Returns all paths found for specific nonterminal
+    member this.GetStrings nTerm numToString = 
+        //todo: add cycle detection
+        let q = new ResizeArray<_>()
+        let mutable cond = true
+        let rec findNodes (node : INode) = 
+            match node with
+            | :? NonTerminalNode as n ->
+                if n.Name = nTerm
+                then q.Add n
+                else 
+                    findNodes n.First
+                    if n.Others <> Unchecked.defaultof<_>
+                    then
+                        for ch in n.Others do
+                            findNodes ch
+            | :? TerminalNode as t -> ()
+            | :? PackedNode as p ->
+                findNodes p.Left
+                findNodes p.Right
+            | :? IntermidiateNode as i ->
+                findNodes i.First
+                if i.Others <> Unchecked.defaultof<_>
+                then
+                    for ch in i.Others do
+                        findNodes ch
+        findNodes root
+        let results = Dictionary<INode,_>()
+        let index = ref 0
+        let res = new HashSet<string> ()
+
+        let rec extractPath (node : INode) : HashSet<string> =  
+            match node with
+            | :? NonTerminalNode as n ->
+                let isGot,value = results.TryGetValue n
+
+                if isGot then
+                    if value = Unchecked.defaultof<_> |> not then value else
+                    failwith "cycle detected"
+                else
+                    results.Add(n, Unchecked.defaultof<_>)
+                    let paths = new HashSet<string> (extractPath n.First)
+                    if n.Others <> Unchecked.defaultof<_>
+                    then n.Others.ForEach (fun o -> paths.UnionWith(extractPath o))
+                    results.Remove n |> ignore
+                    results.Add(n, paths)
+                    paths
+            | :? TerminalNode as t -> if t.Name <> -1 
+                                      then
+                                          let qwqw = tokens.[t.Name]
+                                          let res = new HashSet<string> ([numToString tokens.[t.Name]])
+                                          res
+                                      else new HashSet<string> ()
+            | :? PackedNode as p ->
+                let isGot,value = results.TryGetValue p
+
+                if isGot then
+                    if value = Unchecked.defaultof<_> |> not then value else
+                    failwith "cycle detected"
+                else
+                    results.Add(p, Unchecked.defaultof<_>)
+                    let leftPaths = extractPath p.Left
+                    let rightPaths = extractPath p.Right
+                    let paths = ref (new HashSet<string> ())
+                    if leftPaths.Count = 0 then paths := rightPaths
+                    elif rightPaths.Count = 0 then paths := leftPaths
+                    else leftPaths 
+                         |> Seq.iter (fun (l:string) -> rightPaths
+                                                        |> Seq.iter (fun (r:string) -> (!paths).Add(l+r) |> ignore ))
+                    results.Remove p |> ignore
+                    results.Add(p, !paths)
+                    !paths
+                (*let e = p.getExtension()
+                if cycleNode.Contains e
+                then
+                    extractPath p.Left
+                else
+                    cycleNode.Add e
+                    extractPath p.Left
+                    extractPath p.Right*)
+            | :? IntermidiateNode as i ->
+                let isGot,value = results.TryGetValue i
+
+                if isGot then
+                    if value = Unchecked.defaultof<_> |> not then value else
+                    failwith "cycle detected"
+                else
+                    results.Add(i, Unchecked.defaultof<_>)
+                    let paths = new HashSet<string> (extractPath i.First)
+                    if i.Others <> Unchecked.defaultof<_>
+                    then i.Others.ForEach (fun o -> paths.UnionWith(extractPath o))
+                    results.Remove i |> ignore
+                    results.Add(i, paths)
+                    paths
+        
+        for i in 0..q.Count-1 do
+            index := i
+            extractPath q.[i] |> res.UnionWith
+        Seq.toList res
+    (*
+    member this.GetPath nTerm numToString = 
         let q = new ResizeArray<_>()
         let mutable cond = true
         let rec findNodes (node : INode) = 
@@ -303,17 +403,17 @@ type Tree (tokens : int[], root : INode, rules : int[][]) =
         let cycleNode = ResizeArray<_>()
         let index = ref 0
         let res = Array.init q.Count (fun _ -> new ResizeArray<_>())
-        let rec extractPath (node : INode) =  
+
+        let rec extractPath (node : INode) : HashSet<_> =  
             match node with
             | :? NonTerminalNode as n ->
-                extractPath n.First
+                let paths = new HashSet<string> (extractPath n.First)
                 if n.Others <> Unchecked.defaultof<_>
-                then
-                    for ch in n.Others do
-                        extractPath ch
+                then n.Others.ForEach (fun o -> paths.UnionWith(extractPath o))
+                paths
             | :? TerminalNode as t -> res.[!index].Add (getLeftExtension t.Extension)
             | :? PackedNode as p ->
-                let e = node.getExtension()
+                let e = p.getExtension()
                 if cycleNode.Contains e
                 then
                     extractPath p.Left
@@ -327,11 +427,11 @@ type Tree (tokens : int[], root : INode, rules : int[][]) =
                 then
                     for ch in i.Others do
                         extractPath ch
-        for i in 0..q.Count do
+        for i in 0..q.Count-1 do
             index := i
             extractPath q.[i]
         res
-            
+    *)        
     member this.CountCounters  =
         let nodesCount = ref 0
         let edgesCount = ref 0

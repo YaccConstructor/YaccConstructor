@@ -50,12 +50,26 @@ let buildAbstractAst<'TorenType> (parser : ParserSourceGLL<'TorenType>) (input :
         let currentGSSNode = ref <| dummyGSSNode
         let currentContext = ref <| new Context(!currentVertexInInput, !structures.CurrentLabel, !currentGSSNode, structures.Dummy) //without *1<labelMeasure>
         
+        //push initial vertices		        
+        for i = input.InitStates.Length - 1 downto 0 do
+            let e = input.InitStates.[i]
+            setR.Enqueue(new Context(e, !structures.CurrentLabel, !currentGSSNode, structures.Dummy))
+
+        let finalExtensions =
+            let arr = new ResizeArray<int64<extension>> ()
+            let len = input.FinalStates.Length * input.InitStates.Length
+            for finalState in input.FinalStates do
+                for initState in input.InitStates do
+                    arr.Add(packExtension initState finalState)
+            arr.ToArray()
+        (*
         let finalExtensions =
             let len = input.FinalStates.Length
             let arr = Array.zeroCreate<int64<extension>> len
             for i = 0 to len - 1 do
                 arr.[i] <- packExtension input.InitStates.[0] input.FinalStates.[i]
             arr
+            *)
 
         let slotIsEnd (label : int<labelMeasure>) =
             (getPositionNew label) = Array.length (parser.rules.[getRule label])
@@ -186,7 +200,7 @@ let buildAbstractAst<'TorenType> (parser : ParserSourceGLL<'TorenType>) (input :
 
         let table = parser.Table
         
-        let condition = ref false 
+        let condition = ref true 
         let stop = ref false
 
         let rec dispatcher () =
@@ -299,12 +313,12 @@ let buildAbstractAst<'TorenType> (parser : ParserSourceGLL<'TorenType>) (input :
         match !structures.ResultAST with
             | None -> Error ("String was not parsed")
             | Some res -> 
-                    if checkConj res then        
+                    if true then        
                             let r1 = new Tree (tokens.ToArray(), res, parser.rules)
                             printf "%A" r1
                             //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
                             //r1.AstToDot parser.NumToString "AST123456.dot"
-                            let t = r1.GetPath 1
-                    //printfn "%d" !tempCount
+                            //let t = r1.GetPath 1
+                            //printfn "%d" !tempCount
                             ParseResult<'TokenType>.Success(r1)   
                     else Error ("String was not parsed")

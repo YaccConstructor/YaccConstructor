@@ -68,8 +68,8 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
             then
                 incr cnt 
                 let newV = !cnt
-                [| new BioGraphEdge(newV, e.Source, e.Tag.str.[0..shift - 1], shift, e.Tag.id)
-                ;  new BioGraphEdge(e.Source, e.Target, e.Tag.str.[shift..], e.Tag.length, e.Tag.id) |]
+                [| (*new BioGraphEdge(newV, e.Source, e.Tag.str.[0..shift - 1], shift, e.Tag.id)*)
+                  new BioGraphEdge(e.Source, e.Target, e.Tag.str.[shift..], e.Tag.length, e.Tag.id) |]
             else [|e|])
         |> Array.collect 
             (fun e -> 
@@ -118,12 +118,14 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
 //    printfn "Sum %A" (suml)
 
     printfn "L %A" (Seq.length components)
+    
     components
     |> Array.Parallel.map
        (fun edges -> 
          let qGraph = new QuickGraph.AdjacencyGraph<_,_>()
          qGraph.AddVerticesAndEdgeRange edges
          |> ignore
+         //printfn "V = %A E = %A" qGraph.VertexCount qGraph.EdgeCount
          qGraph)
     , longEdges
             

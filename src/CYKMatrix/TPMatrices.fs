@@ -380,35 +380,17 @@ open Util
                                 |> Array.map (fun x -> x, ProbabilityMatrix.empty (stringSize + 1))
                             )   
 
-        let addToPSubMatrix (where: SubMatrix.T) nts (matrix: ProbabilityMatrix.T) =
+        
+        let addToPMatrix (where: SubMatrix.T) nts getValueFromCell =
             let whereMatrix = pMatrix.[nts]
             for i in [0 .. where.Size - 1] do
                 let actualColCount = (min (where.Top.Column) (stringSize + 1)) - where.Left.Column
                 for j in [0 .. actualColCount - 1] do
                     let matrixCell = Cell.create i j
                     let realCell = Cell.shift where.Left.Row where.Left.Column matrixCell
-                    whereMatrix.AddValueToCell realCell matrix.[matrixCell]
+                    whereMatrix.AddValueToCell realCell <| getValueFromCell matrixCell
 
-        // todo: recurring code
-        let addToPCublasSubMatrix (where: SubMatrix.T) nts (matrix: float []) =
-            let whereMatrix = pMatrix.[nts]
-            for i in [0 .. where.Size - 1] do
-                let actualColCount = (min (where.Top.Column) (stringSize + 1)) - where.Left.Column
-                for j in [0 .. actualColCount - 1] do
-                    let x =  i * where.Size + j
-                    let matrixCell = Cell.create i j
-                    let realCell = Cell.shift where.Left.Row where.Left.Column matrixCell
-                    whereMatrix.AddValueToCell realCell (Probability.create matrix.[x])
 
-        let addToPFastMatrix (where: SubMatrix.T) nts (matrix: Matrix<float>) =
-            let whereMatrix = pMatrix.[nts]
-            for i in [0 .. where.Size - 1] do
-                let actualColCount = (min (where.Top.Column) (stringSize + 1)) - where.Left.Column
-                for j in [0 .. actualColCount - 1] do
-                    let matrixCell = Cell.create i j
-                    let realCell = Cell.shift where.Left.Row where.Left.Column matrixCell
-                    whereMatrix.AddValueToCell realCell (Probability.create matrix.[i,j])
-                    
         member this.updateTCellWith cell nonterminals =
             nonterminals |> List.iter (fun (key, prob) -> tMatrix.[key].AddValueToCell cell prob)
             
@@ -433,12 +415,25 @@ open Util
                 |> Array.iter (fun cell -> heads cell |> this.updateTCellWith cell)
 
         member this.performMultiplication tasks nts = 
-            let getTSubMatrix nt = tMatrix.[nt].GetInnerSubMatrix
-            let getFastSubMatrix nt = tMatrix.[nt].GetFastSubMatrix
-            let getFloatSubMatrix nt = tMatrix.[nt].GetFloatSubMatrix
-            let arrayMatrixHandler = (getTSubMatrix, addToPSubMatrix)
-            let fastMatrixHandler = (getFastSubMatrix, addToPFastMatrix)
-            let cublasMatrixHandler = (getFloatSubMatrix, addToPCublasSubMatrix)
+            
+            let addProbMatrix (where: SubMatrix.T) nts (matrix: ProbabilityMatrix.T) = addToPMatrix where nts (fun cell -> matrix.[cell])
+            let addCublasMatrix (where: SubMatrix.T) nts (matrix: float []) =
+                let getValueFromCell (cell: Cell.T) =
+                    let x = cell.Row * where.Size + cell.Column
+                    Probability.create matrix.[x]
+                addToPMatrix where nts getValueFromCell
+            let addFastMatrix (where: SubMatrix.T) nts (matrix: Matrix<float>) = 
+                addToPMatrix where nts (fun cell -> Probability.create matrix.[cell.Row, cell.Column])         
+
+            let getInnerSubMatrix nt = tMatrix.[nt].GetSubArrayWithType id
+            let getFloatSubMatrix nt = tMatrix.[nt].GetSubArrayWithType float
+            let getFastSubMatrix nt (submatrix: SubMatrix.T) isTransponed : Matrix<float> =
+                let valueGetter = tMatrix.[nt].SubMatrixValuesGetter submatrix isTransponed float                        
+                Matrix.init submatrix.Size submatrix.Size (fun x y -> Cell.create x y |> valueGetter)
+
+            let arrayMatrixHandler = (getInnerSubMatrix, addProbMatrix)
+            let fastMatrixHandler = (getFastSubMatrix, addFastMatrix)
+            let cublasMatrixHandler = (getFloatSubMatrix, addCublasMatrix)
             GPUMultiplicator.performMultiplication arrayMatrixHandler fastMatrixHandler cublasMatrixHandler tasks nts
 
         member this.releaseResources = GPUMultiplicator.releaseResources

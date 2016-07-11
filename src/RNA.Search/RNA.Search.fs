@@ -392,6 +392,13 @@ let searchMain path what agentsCount =
         | Shift_problem -> shift_problem_SearchConfig
 
     let graphs, longEdges = loadGraphFormFileToBioParserInputGraph path searchCfg.HightLengthLimit searchCfg.Tokenizer (GLL.tRNA.RNGLR_EOF 0)
+    
+    async
+        {
+            longEdges
+            |> Seq.iteri(fun i e -> System.IO.File.AppendAllLines("long.fa",[sprintf ">long%A" i; e.Tag.str]))
+        }
+    |> Async.Start
 
     let graphs = 
         graphs.[1500..]

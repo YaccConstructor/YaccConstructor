@@ -1,3 +1,12 @@
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Conj1.yrd ^
+        -g "GLLGenerator -pos int -token int -module GLL.Conj1 -translate true -o Conj1.yrd.fs -abstract true" >> log.txt
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Conj2.yrd ^
+        -g "GLLGenerator -pos int -token int -module GLL.Conj2 -translate true -o Conj2.yrd.fs -abstract true" >> log.txt
+        
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Conj3.yrd ^
+        -g "GLLGenerator -pos int -token int -module GLL.Conj3 -translate true -o Conj3.yrd.fs -abstract true" >> log.txt
+
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i SimpleCalc.yrd -c ExpandEbnf -c ExpandMeta ^
         -g "GLLGenerator -pos int -token int -module GLL.ParseSimpleCalc -translate true -o SimpleCalc.yrd.fs -abstract true" >> log.txt
 
@@ -67,10 +76,12 @@
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i StrangeBrackets.yrd -c ExpandEbnf -c ExpandMeta ^
         -g "GLLGenerator -pos int -token int -module GLL.StrangeBrackets -translate false -o StrangeBrackets.yrd.fs -abstract true" >> log.txt
 
-for %%i in (Attrs,Cond,Counter,Cycle,Eps2,Epsilon,Expr,First,ListEps,LolCalc,LongCycle,LongCycle_BAD,Longest,Mixed,Omit,Order) do (
+for %%i in (Attrs, Cond, Counter, Cycle, Eps2, Epsilon, Expr, First, ListEps, LolCalc, LongCycle, LongCycle_BAD, Longest, Mixed, Omit, Order) do (
     echo . >> log.txt
     echo %%i >> log.txt
     ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i %%i.yrd ^
         -g "GLLGenerator -pos int -token int -abstract true -module GLL.Parse%%i -o %%i.yrd.fs" >> log.txt
 )
 
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i "..\YC.GrammarZOO\SQL\TSQL\mssql_abstract.yrd" -c ExpandEbnf -c Linearize -c ExpandMeta ^
+        -g "GLLGenerator -pos int -token int -abstract true -module GLL.MsSqlParser -o MsSqlParser.yrd.fs " >> log.txt

@@ -9,7 +9,7 @@ open Microsoft.FSharp.Reflection
 let tokens(str : string) = 
     let toLexerTag (name:string) =
             match name with
-            | "B" -> GLL.SimpleAmb.B (2)
+            | "A" -> GLL.SimpleAmb.A (2)
             | x -> failwithf "Unexpected token %s" x
 
     str.Split([|' '|])

@@ -2,7 +2,10 @@
 module Yard.Frontends.AntlrFrontend.Parser
 open Yard.Core.IL
 type token = 
-  | HENCE
+  | ARROW
+  | T_COMMAND
+  | SQR_RBR
+  | SQR_LBR
   | DOUBLE_DOT
   | TILDE
   | EXCLAMATION
@@ -18,7 +21,6 @@ type token =
   | TERMINAL of (Source.t)
   | LITERAL of (Source.t)
   | IDENTIFIER of (Source.t)
-  | T_SCOPE
   | T_FRAGMENT
   | T_OPTIONS
   | T_GRAMMAR
@@ -29,7 +31,10 @@ type token =
   | SINGLELINE_COMMENT of (Source.t)
   | MULTILINE_COMMENT of (Source.t)
 type tokenId = 
-    | TOKEN_HENCE
+    | TOKEN_ARROW
+    | TOKEN_T_COMMAND
+    | TOKEN_SQR_RBR
+    | TOKEN_SQR_LBR
     | TOKEN_DOUBLE_DOT
     | TOKEN_TILDE
     | TOKEN_EXCLAMATION
@@ -45,7 +50,6 @@ type tokenId =
     | TOKEN_TERMINAL
     | TOKEN_LITERAL
     | TOKEN_IDENTIFIER
-    | TOKEN_T_SCOPE
     | TOKEN_T_FRAGMENT
     | TOKEN_T_OPTIONS
     | TOKEN_T_GRAMMAR
@@ -65,16 +69,15 @@ type nonTerminalId =
     | NONTERM_TopLevelDef
     | NONTERM_ActionNameOpt
     | NONTERM_Rule
-    | NONTERM_ScopeOpt
     | NONTERM_CatOpt
     | NONTERM_TerminalRule
     | NONTERM_FragmentOpt
     | NONTERM_OptionsOpt
+    | NONTERM_CommandOpt
     | NONTERM_RuleBody
     | NONTERM_Alt
     | NONTERM_ActionCodeOpt
     | NONTERM_Seq
-    | NONTERM_BodyOptionsOpt
     | NONTERM_PredicateOpt
     | NONTERM_Modifier
     | NONTERM_SimpleProduction

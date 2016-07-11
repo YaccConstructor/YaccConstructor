@@ -32,6 +32,7 @@
   <ItemGroup>
     <Compile Include="Namer.fs" />
     <Compile Include="TransformAux.fs" />
+    <Compile Include="ExpandConjunction.fs" />
     <Compile Include="ExpandAlter.fs" />
     <Compile Include="ExpandBrackets.fs" />
     <Compile Include="AddEOF.fs" />
@@ -48,6 +49,7 @@
     <Compile Include="RemoveAC.fs" />
     <Compile Include="ReplaceInline.fs" />
     <Compile Include="Linearize.fs" />
+    <Compile Include="ExpandRepet.fs" />
     <Compile Include="ToCNF.fs" />
     <None Include="app.config" />
     <None Include="paket.references" />

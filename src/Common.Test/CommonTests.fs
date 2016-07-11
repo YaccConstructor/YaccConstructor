@@ -27,7 +27,7 @@ type ``Components loader tests`` () =
             List.ofSeq generatorNames
             |> List.sort
         let expetedResult = 
-            ["FacioBackend"; "CYKGenerator"; "FsYaccPrinter"; "GLLGenerator"; "RNGLRGenerator"; "TreeDump"; "YardPrinter"]
+            ["FacioBackend"; "CYKGenerator"; "FsYaccPrinter"; "GLLGenerator"; "RNGLRGenerator"; "TreeDump"; "YardPrinter"; "LLKGenerator"]
             |> List.sort
         Seq.iter (printfn "%A;") allGenerators
         printfn "**********************"
@@ -61,9 +61,9 @@ type ``Components loader tests`` () =
             List.ofSeq conversionNames
             |> List.sort
         let expetedResult =
-             ["AddDefaultAC"; "AddEOF"; "BuildAST"; "BuildAstSimple"; "CNF"; "DeleteChainRule"; "DeleteEpsRule"; "EliminateLeftRecursion";
+             ["AddDefaultAC"; "AddEOF"; "BuildAST"; "BuildAstSimple"; "ToCNF"; "DeleteChainRule"; "DeleteEpsRule"; "SplitLongRule"; "RenameTerm"; "EliminateLeftRecursion";
              "ExpandTopLevelAlt"; "ExpandBrackets"; "ExpandEbnf"; "ExpandInnerAlt"; "ExpandMeta"; "LeaveLast"; "MergeAlter";
-             "RemoveAC"; "ReplaceInline"; "ReplaceLiterals"; "ToCNF"; "Linearize"]
+             "RemoveAC"; "ReplaceInline"; "ReplaceLiterals"; "Linearize"; "ExpandRepeat"; "ExpandConjunction"]
             |> List.sort
         Seq.iter (printfn "%A;") allConversions
         printfn "**********************"

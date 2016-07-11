@@ -28,84 +28,53 @@ open Yard.Core.Helpers
 open Conversions.TransformAux
 open NUnit.Framework
 open ConversionsTests
+open ConversionsTests
 open Yard.Core.Helpers
 
 [<TestFixture>]
 type ``Expand subseq tests`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "ExpandSubseq")
-    let fe = getFrontend("YardFrontend")    
-
-    let applyConversion loadIL = 
-        {
-            loadIL
-                with grammar = (new Conversions.ExpandBrackets.ExpandBrackets()).ConvertGrammar (loadIL.grammar, [||])                               
-        }
+    let path f = System.IO.Path.Combine(basePath, f)
 
     [<Test>]
     member test.``Subseq 1`` () =
-        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"subseq1.yrd"))
-        Namer.initNamer loadIL.grammar
-        let result = applyConversion loadIL
-        let rules =
-            (verySimpleRules "s"
-                [{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1",None)}]
-            ) @ (
-                verySimpleNotStartRules "yard_exp_brackets_1"
-                    [{dummyRule with rule = PRef (Source.t("x"),None)}
-                    ;{dummyRule with rule = PRef (Source.t("y"),None)}]
-            )
-        let expected = defaultDefinition rules
-
-        expected |> treeDump.Generate |> string |> printfn "%s"
-        printfn "%s" "************************"
-        result |> treeDump.Generate |> string |> printfn "%s"
-        Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
+        (verySimpleRules "s"
+            [{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1",None)}]
+        ) @ (
+            verySimpleNotStartRules "yard_exp_brackets_1"
+                [{dummyRule with rule = PRef (Source.t("x"),None)}
+                ;{dummyRule with rule = PRef (Source.t("y"),None)}]
+        )
+        |> runTest (path "subseq1.yrd") expandSubSeq
 
     [<Test>]
     member test.``Subseq 2`` () =
-        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"subseq2.yrd"))
-        Namer.initNamer loadIL.grammar
-        let result = applyConversion loadIL
-        let rules =
-            (verySimpleRules "s"
-                [{dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}
-                ;{dummyRule with rule = PRef (Source.t("yard_exp_brackets_2"),None)}]
-            ) @ (
-                verySimpleNotStartRules "yard_exp_brackets_1"
-                    [{dummyRule with rule = PRef (Source.t("x"),None)}
-                    ;{dummyRule with rule = PRef (Source.t("y"),None)}]
-            ) @ (
-                verySimpleNotStartRules "yard_exp_brackets_2"
-                    [{dummyRule with rule = PRef (Source.t("n"),None)}
-                    ;{dummyRule with rule = PRef (Source.t("m"),None)}]
-            )
-
-        let expected = defaultDefinition rules
-        expected |> treeDump.Generate |> string |> printfn "%s"
-        printfn "%s" "************************"
-        result |> treeDump.Generate |> string |> printfn "%s"
-        Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
+        (verySimpleRules "s"
+            [{dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}
+            ;{dummyRule with rule = PRef (Source.t("yard_exp_brackets_2"),None)}]
+        ) @ (
+            verySimpleNotStartRules "yard_exp_brackets_1"
+                [{dummyRule with rule = PRef (Source.t("x"),None)}
+                ;{dummyRule with rule = PRef (Source.t("y"),None)}]
+        ) @ (
+            verySimpleNotStartRules "yard_exp_brackets_2"
+                [{dummyRule with rule = PRef (Source.t("n"),None)}
+                ;{dummyRule with rule = PRef (Source.t("m"),None)}]
+        )
+        |> runTest (path "subseq2.yrd") expandSubSeq
     
     [<Test>]
     member test.``Inner subseq`` () =
-        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"innerSubseq.yrd"))
-        Namer.initNamer loadIL.grammar
-        let result = applyConversion loadIL
-        let rules =
-            (verySimpleRules "s"
-                [{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1",None)}]
-            ) @ (
-                verySimpleNotStartRules "yard_exp_brackets_1"
-                    [{dummyRule with rule = PRef (Source.t "x", None)}
-                    ;{dummyRule with rule = PRef (Source.t "yard_exp_brackets_2", None)}
-                    ;{dummyRule with rule = PRef (Source.t "y", None)}]
-            ) @ (
-                verySimpleNotStartRules "yard_exp_brackets_2"
-                    [{dummyRule with rule = PRef (Source.t "n", None)}
-                    ;{dummyRule with rule = PRef (Source.t "m", None)}]
-            )
-        let expected = defaultDefinition rules
-        expected |> treeDump.Generate |> string |> printfn "%s"
-        printfn "%s" "************************"
-        result |> treeDump.Generate |> string |> printfn "%s"
-        Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
+        (verySimpleRules "s"
+            [{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1",None)}]
+        ) @ (
+            verySimpleNotStartRules "yard_exp_brackets_1"
+                [{dummyRule with rule = PRef (Source.t "x", None)}
+                ;{dummyRule with rule = PRef (Source.t "yard_exp_brackets_2", None)}
+                ;{dummyRule with rule = PRef (Source.t "y", None)}]
+        ) @ (
+            verySimpleNotStartRules "yard_exp_brackets_2"
+                [{dummyRule with rule = PRef (Source.t "n", None)}
+                ;{dummyRule with rule = PRef (Source.t "m", None)}]
+        )
+        |> runTest (path "innerSubseq.yrd") expandSubSeq

@@ -243,6 +243,10 @@
       <Name>QuickGraph</Name>
       <Aliases>YCQuickGraph</Aliases>
     </ProjectReference>
+    <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
+      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
+      <Name>AbstractAnalysis.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ConstantPropagation\ConstantPropagation.fsproj">
       <Project>{42485bca-665d-48fb-befd-4a0232f2cf0b}</Project>
       <Name>ConstantPropagation</Name>
@@ -250,6 +254,10 @@
     <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.SEL.SDK.Core.fsproj">
       <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>
       <Name>YC.SEL.SDK.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\YC.Utils.SourceText\src\YC.Utils.SourceText\Utils.SourceText.fsproj">
+      <Project>{f296356b-00c3-465c-9c97-7cfa279f5574}</Project>
+      <Name>Utils.SourceText</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

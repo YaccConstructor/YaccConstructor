@@ -11,6 +11,5 @@ node [shape = circle]
 1 -> 2 [label="IDENT: [x];"]; 
 2 -> 3 [label="FROM: [f];[r];[o];[m];"]; 
 3 -> 4 [label="IDENT: [y];"]; 
-4 -> 5 [label="RNGLR_EOF"]; 
-
+4 -> 5 [label="RNGLR_EOF"];
 }

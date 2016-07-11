@@ -53,6 +53,8 @@ module Names =
    let predicate = x "predicate"
    let brackets = x "exp_brackets"
    let leftRec = x "lr_" 
+   let repeat = x "repeat"
+   let conjunction = x "conjunction"
 end 
 
 let usedNames = new HashSet<_>()
@@ -85,6 +87,9 @@ let initNamer (grammar : Grammar.t<_,_>) =
         | PToken n -> addSrc n
         | PLiteral n -> addSrc n
         | PAlt (l,r) ->
+            walk l
+            walk r
+        | PConj (l,r) ->
             walk l
             walk r
         | PMany x | PSome x | POpt x | PRepet (x,_,_) -> walk x
@@ -135,6 +140,7 @@ let genNewSourceWithRange (name : string) (body : t<_,_>) =
                 | None -> failwith "Empty sequence without action code"
         | PRef (n,_) -> n
         | PAlt (l, r) -> getBegin l
+        | PConj (l, r) -> getBegin l
         | PLiteral l -> l
         | PMany b -> getBegin b
         | PSome b -> getBegin b

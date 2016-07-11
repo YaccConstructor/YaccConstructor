@@ -24,8 +24,8 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-f YardFrontend -g "TestGenerator -token int -o C:\Users\Ekaterina\YaccConstructor\src\CheckInterpreter\Parser_new.fs" -i C:\Users\Ekaterina\YaccConstructor\src\CheckInterpreter\Lr0_grammar.yrd</StartArguments>
-    <StartWorkingDirectory>C:\Users\Ekaterina\YaccConstructor\src\</StartWorkingDirectory>
+    <StartArguments>-i TestConj.yrd -g "GLLGenerator -pos int -token int -module GLL.TestConj -translate false -abstract true -o TestConj.yrd.fs "</StartArguments>
+    <StartWorkingDirectory>G:\YaccConstructor\</StartWorkingDirectory>
     <StartAction>Project</StartAction>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">

@@ -1,30 +1,28 @@
-﻿binExpr<operand binOp>:
-  operand (binOp operand)*
-  
+﻿{
+open QuickGraph.FST.GraphBasedFst
+open QuickGraph.FSA.GraphBasedFsa
+open Yard.Utils.StructClass
+}
+
+tokens {
+    _ of FSA<char*Position<string>>
+}
+
+options {
+    infEpsPath = epsilons
+    pos = uint64
+}
+
+
 [<Start>]
 start: assign+
 
-assign: id EQ expr SEMICOLON
+assign: id ASSIGN expr SEMICOLON
 
-calcExpr: expr
-
-expr: binExpr<term termOp> 
-      | ERROR
-
-termOp: PLUS | MINUS
-
-term: binExpr<factor factorOp>
-
-factorOp: MULT | DIV
-
-factor: binExpr<powExpr powOp>
-
-
-powOp: POW
-
-powExpr:   number 
-		 | id
+expr: expr op expr
+	 | NUMBER 
+	 | id
          | LBRACE expr RBRACE
 
-id: X | Y | Z
-number: ONE | TWO | THREE | FOUR | FIVE | SIX | SEVEN | EIGHT | NINE
+op: PLUS | MINUS | MULT | DIV
+id: ID

@@ -28,7 +28,6 @@ open YC.Tests.Helper
 open Yard.Generators.ARNGLR.Parser
 
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
 
 let baseInputGraphsPath = "../../../Tests/AbstractRNGLR/DOT"
 
@@ -74,6 +73,21 @@ let perfTest parse inputLength graph =
         let time = (System.DateTime.Now - start).TotalMilliseconds / 10.0
         System.GC.Collect()
         printfn "%0i : %A" x time
+
+let perfTest2 parse graph =    
+    for i = 10 to 200 do
+        let g = graph (1 + i) 2 
+        let start = System.DateTime.Now
+        let r = parse g
+        let finish = System.DateTime.Now - start
+        printfn "%i  : %A" (i+1) finish.TotalSeconds
+        System.GC.Collect()
+        match r with
+        | Error _ ->
+            printfn "Error"     
+        | Success tree->
+            ()//printfn "%s" "sss"
+    
 
 //let errorTest inputFilePath shouldContainsSuccess errorsCount =
 //    printfn "==============================================================="
@@ -129,6 +143,43 @@ type ``RNGLR abstract parser tests`` () =
              ] |> ignore
 
         test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 13 12 0 3 0
+
+    [<Test>]
+    member this._01_PrettySimpleCalc_SequenceInput_1 () =
+        let qGraph = new ParserInputGraph<_>([|0|], [|4|])
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
+             edg 1 2 (RNGLR.PrettySimpleCalc.PLUS 2)
+             edg 2 3 (RNGLR.PrettySimpleCalc.NUM 3)
+             edg 3 4 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+
+        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 13 12 0 3 0
+
+    [<Test>]
+    member this._01_PrettySimpleCalc_SequenceInput_MultipleFinalVertices () =
+        let qGraph = new ParserInputGraph<_>([|0|], [|1; 2; 3; 4|])
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
+             edg 1 2 (RNGLR.PrettySimpleCalc.PLUS 2)
+             edg 2 3 (RNGLR.PrettySimpleCalc.NUM 3)
+             edg 3 4 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+
+        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 13 12 0 3 0
+
+    [<Test>]
+    member this._01_PrettySimpleCalc_SequenceInput_MultipleStartAndFinalVertices () =
+        let qGraph = new ParserInputGraph<_>([|0; 2|], [|4; 5|])
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
+             edg 1 2 (RNGLR.PrettySimpleCalc.PLUS 2)
+             edg 1 5 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             edg 2 3 (RNGLR.PrettySimpleCalc.NUM 3)
+             edg 3 4 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+
+        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 22 22 0 4 1
 
     [<Test>]
     member this._02_PrettySimpleCalcSimple_BranchedInput () =
@@ -476,6 +527,30 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
 
     [<Test>]
+    member this._24_UnambiguousBrackets_Circle_MultipleStartVertices () =
+        let qGraph = new ParserInputGraph<_>([|0; 1|], [|9; 10|])
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 0)
+            edg 1 0 (RNGLR.StrangeBrackets.RBR 1)
+            edg 0 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            edg 1 10 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2 // ???
+
+    [<Test>]
+    member this._24_UnambiguousBrackets_Circle_MultipleStartVertices_1 () =
+        let qGraph = new ParserInputGraph<_>([|0; 1|], [|9|])
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 0)
+            edg 1 0 (RNGLR.StrangeBrackets.RBR 1)
+            edg 0 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
+
+
+    [<Test>]
     member this._25_UnambiguousBrackets_BiggerCircle () =
         let qGraph = new ParserInputGraph<_>(0, 9)
         qGraph.AddVerticesAndEdgeRange
@@ -698,13 +773,88 @@ type ``RNGLR abstract parser tests`` () =
         |> fun s -> System.IO.File.WriteAllLines("sql_perf.txt",s)
 
 //[<EntryPoint>]
+//    [<Test>]
+//    member this.``TSQL performance test for GLL`` () =  
+//        let graphGenerator numberOfBlocks numberOfPath =
+//            let final = 100
+//            let qGraph = new ParserInputGraph<_>(0, final)
+//            let mutable b = 1
+//            let mutable e = 2
+//            let mutable curB = 1
+//            let mutable curE = 3
+//            let chains = Array.zeroCreate 5
+//            let ra1 = new ResizeArray<_>()
+//            ra1.Add(Yard.Examples.MSParserAbstract.DEC_NUMBER (new FSA<_>()))
+//            ra1.Add(Yard.Examples.MSParserAbstract.L_plus_ (new FSA<_>()))
+//            ra1.Add(Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))
+//            let ra2 = new ResizeArray<_>()
+//            ra2.Add(Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))
+//            ra2.Add(Yard.Examples.MSParserAbstract.L_plus_ (new FSA<_>()))
+//            ra2.Add(Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))
+//            let ra3 = new ResizeArray<_>()
+//            ra3.Add(Yard.Examples.MSParserAbstract.L_left_bracket_ (new FSA<_>()))
+//            ra3.Add(Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))
+//            ra3.Add(Yard.Examples.MSParserAbstract.L_plus_ (new FSA<_>()))
+//            ra3.Add(Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))
+//            ra3.Add(Yard.Examples.MSParserAbstract.L_right_bracket_ (new FSA<_>()))
+//            let ra4 = new ResizeArray<_>()
+//            ra4.Add(Yard.Examples.MSParserAbstract.L_null (new FSA<_>()))
+//            ra4.Add(Yard.Examples.MSParserAbstract.L_null (new FSA<_>()))
+//            let ra5 = new ResizeArray<_>()
+//            ra5.Add(Yard.Examples.MSParserAbstract.STRING_CONST (new FSA<_>()))
+//            ra5.Add(Yard.Examples.MSParserAbstract.L_plus_ (new FSA<_>()))
+//            ra5.Add(Yard.Examples.MSParserAbstract.IDENT (new FSA<_>()))
+//            chains.[0] <- ra1
+//            chains.[1] <- ra2
+//            chains.[2] <- ra3
+//            chains.[3] <- ra4
+//            chains.[4] <- ra5    
+//            (qGraph.AddVerticesAndEdge <| edg 0 1 (Yard.Examples.MSParserAbstract.L_select (new FSA<_>()))) |> ignore
+//            for blocks = 0 to numberOfBlocks - 1 do
+//                for i = 0 to numberOfPath - 1 do
+//                    let curChain = chains.[i]
+//                    for k = 0 to curChain.Count - 1 do
+//                        if k <> curChain.Count - 1 then
+//                            qGraph.AddVerticesAndEdge <| edg curB curE (curChain.[k]) |> ignore  
+//                            curB <- curE
+//                            curE <- curE + 1
+//                        else
+//                            qGraph.AddVerticesAndEdge <| edg curB e (curChain.[k]) |> ignore
+//                            if i <> numberOfPath - 1 then
+//                                curE <- curE
+//                                curB <- b
+//                if blocks <> numberOfBlocks - 1 then
+//                    b <- e
+//                    e <- curE               
+//                    qGraph.AddVerticesAndEdge <| edg b e (Yard.Examples.MSParserAbstract.L_comma_ (new FSA<_>())) |> ignore
+//                    b <- e
+//                    e <- e + 1
+//                    curB <- b
+//                    curE <- e + 1
+//            b <- e
+//            e <- curE               
+//            qGraph.AddVerticesAndEdge <| edg b e (Yard.Examples.MSParserAbstract.L_from (new FSA<_>())) |> ignore
+//            b <- e
+//            e <- e + 1
+//            qGraph.AddVerticesAndEdge <| edg b e (Yard.Examples.MSParserAbstract.IDENT (new FSA<_>())) |> ignore
+//            b <- e
+//            e <- e + 1
+//            qGraph.AddVerticesAndEdge <| edg b e (Yard.Examples.MSParserAbstract.RNGLR_EOF (new FSA<_>())) |> ignore
+//            qGraph.FinalStates <- [|e|]
+//            //qGraph.PrintToDot "input.dot" (Yard.Examples.MSParserAbstract.tokenToNumber >> Yard.Examples.MSParser.numToString)
+//            qGraph
+//
+//        let parse = (new Parser<_>()).Parse Yard.Examples.MSParserAbstract.buildAstAbstract
+//        perfTest2 parse graphGenerator
+
+
 let f x =
     if System.IO.Directory.Exists "dot" 
     then 
         System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
     else System.IO.Directory.CreateDirectory "dot" |> ignore
     let t = new ``RNGLR abstract parser tests`` () 
-
+    System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
 //    t._01_PrettySimpleCalc_SequenceInput ()
 //    t._02_PrettySimpleCalc_SimpleBranchedInput ()
 //    t._03_PrettySimpleCalc_BranchedInput ()
@@ -733,8 +883,8 @@ let f x =
 //    t._26_UnambiguousBrackets_Inf()
 //    t._27_UnambiguousBrackets_WithoutEmptyString()
 //    t._28_UnambiguousBrackets_DifferentPathLengths ()
-   // t.``TSQL performance test for Alvor`` 2 100 false
+    //t.``TSQL performance test for GLL`` ()
     //t._29_AandB_Circle ()
     //t.``TSQL performance test 2`` 2 100 false
-//    t.temp ()
+  //  t._24_UnambiguousBrackets_Circle_MultipleStartVertices()
     0

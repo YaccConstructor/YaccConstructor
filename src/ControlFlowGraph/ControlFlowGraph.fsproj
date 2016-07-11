@@ -8,7 +8,7 @@
     <ProjectGuid>e94970c1-26a4-4fa6-bb3b-261b70938ff4</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>ControlFlowGraph</RootNamespace>
-    <AssemblyName>ControlFlowGraph</AssemblyName>
+    <AssemblyName>YC.ControlFlowGraph</AssemblyName>
     <Name>ControlFlowGraph</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
   </PropertyGroup>
@@ -31,45 +31,43 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <Compile Include="Common.fs" />
-    <Compile Include="InputStructures.fs" />
-    <Compile Include="TokensExtractor.fs" />
-    <Compile Include="CfgElements.fs" />
+    <Compile Include="GraphConstructor.fs" />
+    <Compile Include="CfgTokensGraph.fs" />
     <Compile Include="InnerGraph.fs" />
+    <Compile Include="Printers.fs" />
+    <Compile Include="CfgElements.fs" />
+    <Compile Include="TokensExtractor.fs" />
     <Compile Include="GraphInterpreter.fs" />
     <Compile Include="IfHelper.fs" />
     <Compile Include="AssignmentHelper.fs" />
     <Compile Include="ControlFlowGraph.fs" />
+    <Compile Include="CfgBuilder.fs" />
     <None Include="app.config" />
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\YC.Utils.SourceText\src\YC.Utils.SourceText\Utils.SourceText.fsproj">
+      <Name>Utils.SourceText (Tools\Utils.SourceText\Utils.SourceText)</Name>
+      <Project>{f296356b-00c3-465c-9c97-7cfa279f5574}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj">
+      <Name>QuickGraph.FSA</Name>
+      <Project>{bd5d18de-1c9d-4314-a777-21aa683eeace}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\QuickGraph\src\QuickGraph\QuickGraph.csproj">
       <Name>QuickGraph</Name>
       <Project>{a9a5c115-0680-44b3-a87e-5ecf4c93814e}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
-      <Name>AbstractAnalysis.Common</Name>
-      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
       <Name>Common.AST</Name>
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
-      <Name>RNGLRAbstractParser</Name>
-      <Project>{1873ea19-fab7-4d5f-b452-67c0b93c8b9b}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
-      <Name>RNGLRCommon</Name>
-      <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

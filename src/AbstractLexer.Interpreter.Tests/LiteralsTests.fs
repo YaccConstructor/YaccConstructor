@@ -3,12 +3,11 @@
 open NUnit.Framework
 open Microsoft.FSharp.Collections
 open QuickGraph
-open AbstractAnalysis.Common
+open Yard.Utils.StructClass
 open QuickGraph.FST.GraphBasedFst
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
 open System
 
 let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"
@@ -16,14 +15,14 @@ let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"
 let transform x = (x, match x with |Smbl(y:char, _) when y <> (char 65535) -> Smbl(int y) |Smbl(y:char, _) when y = (char 65535) -> Smbl 65535 |_ -> Eps)
 let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
   
-let literalsTokenizationTest path eCount vCount pathPrint =
-    let graphAppr = loadDotToQG baseInputGraphsPath path
-    let graphFsa = graphAppr.ApprToFSA()
+let literalsTokenizationTest file eCount vCount pathPrint =
+    let graph = loadDotToQG (path baseInputGraphsPath file)
+    let graphFsa = approximateQG(graph)
     let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
     let res = YC.FST.AbstractLexing.LiteralsLexer.tokenize eof graphFst
     match res with
     | Success res -> checkGraph res eCount vCount  
-    | Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" path e)
+    | Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" file e)
 
 [<TestFixture>]
 type ``Lexer Literals Fst Tests`` () =   

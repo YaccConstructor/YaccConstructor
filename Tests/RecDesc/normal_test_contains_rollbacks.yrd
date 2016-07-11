@@ -1,0 +1,10 @@
+[<Start>]
+a: b c;
+b: A;
+b: d e;
+d: A;
+e: B;
+c: D;
+c: f g;
+f: C;
+g: D;

@@ -22,6 +22,7 @@ open AbstractAnalysis.Common
 open Yard.Generators.GLL.AbstractParser
 open YC.Tests.Helper
 open Yard.Generators.Common.ASTGLL
+open Yard.Generators.GLL.ParserCommon
 
 open GLL.SimpleRightRecursion
 open GLL.BadLeftRecursion
@@ -77,9 +78,23 @@ let outputDir = @"../../../src/GLL.AbstractParser.SimpleTest/"
 let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)
 
+let perfTest2 parse graph =    
+    for i = 10 to 200 do
+        let g = graph (1 + i) 2 
+        let start = System.DateTime.Now
+        System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
+        let r = parse g
+        System.GC.Collect()        
+        let finish = System.DateTime.Now - start
+        printfn "%i  : %A" (i+1) finish.TotalSeconds
+        System.GC.Collect()
+        match r with
+        | Error _ ->
+            printfn "Error"     
+        | Success tree->
+            ()//printfn "%s" "sss"
 
 let test buildAbstractAst qGraph (intToString : int -> string) (fileName : string) nodesCount edgesCount termsCount ambiguityCount tokenData tokenToNum = 
-
     let r = buildAbstractAst qGraph
     printfn "%A" r
     match r with
@@ -95,6 +110,7 @@ let test buildAbstractAst qGraph (intToString : int -> string) (fileName : strin
             Assert.AreEqual(termsCount, t, "Terms count mismatch") 
             Assert.AreEqual(ambiguityCount, amb, "Ambiguities count mismatch")
             Assert.Pass()
+     
 
 
 [<TestFixture>]
@@ -102,7 +118,7 @@ type ``GLL abstract parser tests`` () =
 
     [<Test>]
     member this._01_PrettySimpleCalc_SequenceInput () =
-        let qGraph = new ParserInputGraph<_>(0, 3)
+        let qGraph = new ParserInputGraph<_>(0, 4)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (GLL.PrettySimpleCalc.NUM 1)
              edg 1 2 (GLL.PrettySimpleCalc.PLUS 2)
@@ -110,21 +126,20 @@ type ``GLL abstract parser tests`` () =
              edg 3 4 (GLL.PrettySimpleCalc.RNGLR_EOF 0)
              ] |> ignore
 
-        test GLL.PrettySimpleCalc.buildAbstractAst qGraph GLL.PrettySimpleCalc.numToString "PrettySimpleCalcSeq.dot" 18 21 4 0 GLL.PrettySimpleCalc.tokenData GLL.PrettySimpleCalc.tokenToNumber
+        test GLL.PrettySimpleCalc.buildAbstractAst qGraph GLL.PrettySimpleCalc.numToString "PrettySimpleCalcSeq.dot" 21 24 5 0 GLL.PrettySimpleCalc.tokenData GLL.PrettySimpleCalc.tokenToNumber
 
     [<Test>]
     member this._06_NotAmbigousSimpleCalc_Loop () =
-        let qGraph = new ParserInputGraph<_>([|0|] , [|5|] )
+        let qGraph = new ParserInputGraph<_>([|0|] , [|4|] )
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (GLL.NotAmbigousSimpleCalc.NUM  1)
              edg 1 2 (GLL.NotAmbigousSimpleCalc.PLUS 2)
              edg 2 3 (GLL.NotAmbigousSimpleCalc.NUM 3)
-             edg 3 4 (GLL.NotAmbigousSimpleCalc.PLUS 4)
-             edg 4 1 (GLL.NotAmbigousSimpleCalc.NUM 5)
-             edg 4 5 (GLL.NotAmbigousSimpleCalc.RNGLR_EOF 0)
+             edg 3 4 (GLL.NotAmbigousSimpleCalc.RNGLR_EOF 4)
+             edg 3 0 (GLL.NotAmbigousSimpleCalc.PLUS 5)
              ] |> ignore
         
-        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc2.dot" 0 0 0 0 GLL.NotAmbigousSimpleCalc.tokenData GLL.NotAmbigousSimpleCalc.tokenToNumber
+        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc2.dot" 25 30 6 1 GLL.NotAmbigousSimpleCalc.tokenData GLL.NotAmbigousSimpleCalc.tokenToNumber
 
     [<Test>]
     member this._07_NotAmbigousSimpleCalc_LoopInLoop () =
@@ -276,38 +291,38 @@ type ``GLL abstract parser tests`` () =
 
     [<Test>]
     member this._24_UnambiguousBrackets_Circle () =
-        let qGraph = new ParserInputGraph<_>(0, 9)
+        let qGraph = new ParserInputGraph<_>(0, 2)
         qGraph.AddVerticesAndEdgeRange
            [edg 0 1 (GLL.StrangeBrackets.LBR 0)
             edg 1 0 (GLL.StrangeBrackets.RBR 1)
-            edg 0 9 (GLL.StrangeBrackets.RNGLR_EOF 0)
+            edg 0 2 (GLL.StrangeBrackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets2.dot" 0 0 0 0 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
+        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets2.dot" 19 21 6 1 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
 
     [<Test>]
     member this._25_UnambiguousBrackets_BiggerCircle () =
-        let qGraph = new ParserInputGraph<_>(0, 9)
+        let qGraph = new ParserInputGraph<_>(0, 4)
         qGraph.AddVerticesAndEdgeRange
            [edg 0 1 (GLL.StrangeBrackets.LBR 0)
             edg 1 2 (GLL.StrangeBrackets.RBR 1)
             edg 2 3 (GLL.StrangeBrackets.LBR 2)
             edg 3 0 (GLL.StrangeBrackets.RBR 3)
-            edg 0 9 (GLL.StrangeBrackets.RNGLR_EOF 0)
+            edg 0 4 (GLL.StrangeBrackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets3.dot" 0 0 0 0 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
+        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets3.dot" 30 33 9 1 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
 
     [<Test>]
     member this._26_UnambiguousBrackets_Inf () =
-        let qGraph = new ParserInputGraph<_>(0, 9)
+        let qGraph = new ParserInputGraph<_>(0, 1)
         qGraph.AddVerticesAndEdgeRange
            [edg 0 0 (GLL.StrangeBrackets.LBR 0)
             edg 0 0 (GLL.StrangeBrackets.RBR 1)
-            edg 0 9 (GLL.StrangeBrackets.RNGLR_EOF 0)
+            edg 0 1 (GLL.StrangeBrackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets4.dot" 0 0 0 0 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
+        test GLL.StrangeBrackets.buildAbstractAst qGraph GLL.StrangeBrackets.numToString "StrangeBrackets4.dot" 16 18 5 1 GLL.StrangeBrackets.tokenData GLL.StrangeBrackets.tokenToNumber
 
     
     [<Test>]
@@ -578,4 +593,230 @@ type ``GLL abstract parser tests`` () =
              ] |> ignore
 
         test GLL.ParseSimpleBranch.buildAbstractAst qGraph GLL.ParseSimpleBranch.numToString "SimpleBranch.dot" 14 15 5 1 GLL.ParseSimpleBranch.tokenData GLL.ParseSimpleBranch.tokenToNumber
-     
+
+    [<Test>]
+    member this._51_Conj1_Success () =
+        let qGraph = new ParserInputGraph<_>(0, 10)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (GLL.Conj1.A 1)
+             edg 1 2 (GLL.Conj1.A 2)
+             edg 2 3 (GLL.Conj1.A 3)
+             edg 3 4 (GLL.Conj1.B 3)
+             edg 4 5 (GLL.Conj1.B 3)
+             edg 5 6 (GLL.Conj1.B 3)
+             edg 6 7 (GLL.Conj1.C 3)
+             edg 7 8 (GLL.Conj1.C 3)
+             edg 8 9 (GLL.Conj1.C 3)
+             edg 9 10 (GLL.Conj1.RNGLR_EOF 0)
+             ] |> ignore
+        let r = GLL.Conj1.buildAbstractAst qGraph
+        printfn "%A" r
+        match r with
+        | Error str ->
+            printfn "Error"
+            Assert.Fail("")
+        | Success tree ->
+            tree.AstToDot GLL.Conj1.numToString GLL.Conj1.tokenToNumber GLL.Conj1.tokenData (outputDir + "Conj1_Success.dot")
+            Assert.Pass()
+
+    [<Test>]
+    member this._52_Conj1_Fail () =
+        let qGraph = new ParserInputGraph<_>(0, 9)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (GLL.Conj1.A 1)
+             edg 1 2 (GLL.Conj1.A 2)
+             edg 2 3 (GLL.Conj1.A 3)
+             edg 3 4 (GLL.Conj1.B 3)
+             edg 4 5 (GLL.Conj1.B 3)
+             edg 5 6 (GLL.Conj1.C 3)
+             edg 6 7 (GLL.Conj1.C 3)
+             edg 7 8 (GLL.Conj1.C 3)
+             edg 8 9 (GLL.Conj1.RNGLR_EOF 0)
+             ] |> ignore
+        let r = GLL.Conj1.buildAbstractAst qGraph
+        printfn "%A" r
+        match r with
+        | Error str ->
+            printfn "Error"
+            Assert.Pass()
+        | Success tree ->
+            tree.AstToDot GLL.Conj1.numToString GLL.Conj1.tokenToNumber GLL.Conj1.tokenData (outputDir + "Conj1_Fail.dot")
+            Assert.Fail()
+
+    [<Test>]
+    member this._53_Conj2_Success () =
+        let qGraph = new ParserInputGraph<_>(0, 10)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (GLL.Conj2.A 1)
+             edg 1 2 (GLL.Conj2.A 2)
+             edg 2 3 (GLL.Conj2.A 3)
+             edg 3 4 (GLL.Conj2.B 3)
+             edg 4 5 (GLL.Conj2.C 3)
+             edg 5 6 (GLL.Conj2.A 3)
+             edg 6 7 (GLL.Conj2.A 3)
+             edg 7 8 (GLL.Conj2.A 3)
+             edg 8 9 (GLL.Conj2.B 3)
+             edg 9 10 (GLL.Conj2.RNGLR_EOF 0)
+             ] |> ignore
+        let r = GLL.Conj2.buildAbstractAst qGraph
+        printfn "%A" r
+        match r with
+        | Error str ->
+            printfn "Error"
+            Assert.Fail("")
+        | Success tree ->
+            tree.AstToDot GLL.Conj2.numToString GLL.Conj2.tokenToNumber GLL.Conj2.tokenData (outputDir + "Conj2_Success.dot")
+            Assert.Pass()
+
+    [<Test>]
+    member this._54_Conj2_Fail () =
+        let qGraph = new ParserInputGraph<_>(0, 10)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (GLL.Conj2.A 1)
+             edg 1 2 (GLL.Conj2.B 2)
+             edg 2 3 (GLL.Conj2.A 3)
+             edg 3 4 (GLL.Conj2.B 3)
+             edg 4 5 (GLL.Conj2.C 3)
+             edg 5 6 (GLL.Conj2.A 3)
+             edg 6 7 (GLL.Conj2.A 3)
+             edg 7 8 (GLL.Conj2.A 3)
+             edg 8 9 (GLL.Conj2.B 3)
+             edg 9 10 (GLL.Conj2.RNGLR_EOF 0)
+             ] |> ignore
+        let r = GLL.Conj2.buildAbstractAst qGraph
+        printfn "%A" r
+        match r with
+        | Error str ->
+            printfn "Error"
+            Assert.Pass()
+        | Success tree ->
+            tree.AstToDot GLL.Conj2.numToString GLL.Conj2.tokenToNumber GLL.Conj2.tokenData (outputDir + "Conj2_Fail.dot")
+            Assert.Fail("")
+
+    [<Test>]
+    member this._55_Conj3_Success () =
+        let qGraph = new ParserInputGraph<_>(0, 5)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (GLL.Conj3.A 1)
+             edg 1 2 (GLL.Conj3.B 2)
+             edg 2 3 (GLL.Conj3.A 3)
+             edg 3 4 (GLL.Conj3.B 3)
+             edg 4 5 (GLL.Conj3.RNGLR_EOF 0)
+             ] |> ignore
+        let r = GLL.Conj3.buildAbstractAst qGraph
+        printfn "%A" r
+        match r with
+        | Error str ->
+            printfn "Error"
+            Assert.Fail("")
+        | Success tree ->
+            tree.AstToDot GLL.Conj3.numToString GLL.Conj3.tokenToNumber GLL.Conj3.tokenData (outputDir + "Conj3_Success.dot")
+            Assert.Fail("")
+
+    [<Test>]
+    member this._56_Conj3_Fail () =
+        let qGraph = new ParserInputGraph<_>(0, 7)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (GLL.Conj3.A 1)
+             edg 1 2 (GLL.Conj3.A 2)
+             edg 2 3 (GLL.Conj3.A 3)
+             edg 3 4 (GLL.Conj3.B 3)
+             edg 4 5 (GLL.Conj3.B 3)
+             edg 5 6 (GLL.Conj3.B 3)
+             edg 6 7 (GLL.Conj3.RNGLR_EOF 0)
+             ] |> ignore
+        let r = GLL.Conj3.buildAbstractAst qGraph
+        printfn "%A" r
+        match r with
+        | Error str ->
+            printfn "Error"
+            Assert.Pass()
+        | Success tree ->
+            tree.AstToDot GLL.Conj3.numToString GLL.Conj3.tokenToNumber GLL.Conj3.tokenData (outputDir + "Conj3_Fail.dot")
+            Assert.Fail("")
+
+    [<Test>]
+    member this.``TSQL performance test for GLL`` () =  
+        let graphGenerator numberOfBlocks numberOfPath =
+            let final = 100
+            let qGraph = new ParserInputGraph<_>(0, final)
+            let mutable b = 1
+            let mutable e = 2
+            let mutable curB = 1
+            let mutable curE = 3
+            let chains = Array.zeroCreate 5
+            let ra1 = new ResizeArray<_>()
+            ra1.Add(GLL.MsSqlParser.DEC_NUMBER (0))
+            ra1.Add(GLL.MsSqlParser.L_plus_ (1))
+            ra1.Add(GLL.MsSqlParser.IDENT (2))
+            let ra2 = new ResizeArray<_>()
+            ra2.Add(GLL.MsSqlParser.IDENT (3))
+            ra2.Add(GLL.MsSqlParser.L_plus_ (4))
+            ra2.Add(GLL.MsSqlParser.IDENT (5))
+            let ra3 = new ResizeArray<_>()
+            ra3.Add(GLL.MsSqlParser.L_left_bracket_ (6))
+            ra3.Add(GLL.MsSqlParser.IDENT (7))
+            ra3.Add(GLL.MsSqlParser.L_plus_ (8))
+            ra3.Add(GLL.MsSqlParser.IDENT (9))
+            ra3.Add(GLL.MsSqlParser.L_right_bracket_ (10))
+            let ra4 = new ResizeArray<_>()
+            ra4.Add(GLL.MsSqlParser.L_null (11))
+            ra4.Add(GLL.MsSqlParser.L_null (12))
+            let ra5 = new ResizeArray<_>()
+            ra5.Add(GLL.MsSqlParser.STRING_CONST (13))
+            ra5.Add(GLL.MsSqlParser.L_plus_ (14))
+            ra5.Add(GLL.MsSqlParser.IDENT (15))
+            chains.[0] <- ra1
+            chains.[1] <- ra2
+            chains.[2] <- ra3
+            chains.[3] <- ra4
+            chains.[4] <- ra5    
+            (qGraph.AddVerticesAndEdge <| edg 0 1 (GLL.MsSqlParser.L_select (16))) |> ignore
+            for blocks = 0 to numberOfBlocks - 1 do
+                for i = 0 to numberOfPath - 1 do
+                    let curChain = chains.[i]
+                    for k = 0 to curChain.Count - 1 do
+                        if k <> curChain.Count - 1 then
+                            qGraph.AddVerticesAndEdge <| edg curB curE (curChain.[k]) |> ignore  
+                            curB <- curE
+                            curE <- curE + 1
+                        else
+                            qGraph.AddVerticesAndEdge <| edg curB e (curChain.[k]) |> ignore
+                            if i <> numberOfPath - 1 then
+                                curE <- curE
+                                curB <- b
+                if blocks <> numberOfBlocks - 1 then
+                    b <- e
+                    e <- curE               
+                    qGraph.AddVerticesAndEdge <| edg b e (GLL.MsSqlParser.L_comma_ (17)) |> ignore
+                    b <- e
+                    e <- e + 1
+                    curB <- b
+                    curE <- e + 1
+            b <- e
+            e <- curE               
+            qGraph.AddVerticesAndEdge <| edg b e (GLL.MsSqlParser.L_from (18)) |> ignore
+            b <- e
+            e <- e + 1
+            qGraph.AddVerticesAndEdge <| edg b e (GLL.MsSqlParser.IDENT (19)) |> ignore
+            b <- e
+            e <- e + 1
+            qGraph.AddVerticesAndEdge <| edg b e (GLL.MsSqlParser.RNGLR_EOF (20)) |> ignore
+            qGraph.FinalStates <- [|e|]
+            //qGraph.PrintToDot "input.dot" (GLL.MsSqlParser.tokenToNumber >> GLL.MsSqlParser.numToString)
+            qGraph
+
+        let parse = GLL.MsSqlParser.buildAbstractAst
+        perfTest2 parse graphGenerator
+  
+
+[<EntryPoint>]
+let f x =
+    //System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
+    let t = new ``GLL abstract parser tests``()
+    let f () = t.``TSQL performance test for GLL`` ()
+              //_35_Expression() //
+    //let th = new System.Threading.Thread(f, 10000000)
+    //th.Start()
+    f()
+    0

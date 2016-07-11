@@ -31,11 +31,11 @@ open JetBrains.Application.BuildScript.Application.Zones
 
 open LexerHelper
 open ReSharperExtension
-open OtherSPPF
+open Yard.Generators.RNGLR.OtherSPPF
 open Yard.Examples.MSParserAbstract
 open Yard.Generators.Common.AST
 open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
+open Yard.Utils.StructClass
 open YC.FST.AbstractLexing.Interpreter
 open QuickGraph.FST.GraphBasedFst
 open YC.SDK.CommonInterfaces
@@ -55,7 +55,6 @@ do()
 type TSQLInjectedLanguageModule() =
 
     let tokenize (lexerInputGraph : FSA<char * Position<'br>>) =
-//        let graphFsa = lexerInputGraph.ApprToFSA()
         let transform x = 
             match x with 
             | Smbl(y : char, _) when y <> (char 65535) -> x, Smbl(int <| Convert.ToUInt32(y)) 

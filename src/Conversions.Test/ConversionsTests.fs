@@ -33,6 +33,14 @@ let dummyToken s = PToken <| new Source.t(s)
 
 exception FEError of string
 
+[<assembly:AddinRoot ("YaccConstructor", "1.0")>]
+do()
+
+[<SetUp>]
+let f () = 
+    AddinManager.Initialize()    
+    AddinManager.Registry.Update(null)
+
 let ConversionsManager = AddinManager.GetExtensionObjects (typeof<Conversion>) |> Seq.cast<Conversion>
 let FrontendsManager = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
 
@@ -57,7 +65,15 @@ let expandBrackets = new Conversions.ExpandBrackets.ExpandBrackets()
 let expandMeta = new Conversions.ExpandMeta.ExpandMeta()
 let expandEbnf = new Conversions.ExpandEbnfStrict.ExpandEbnf()
 let expandInnerAlt = new Conversions.ExpandInnerAlt.ExpandInnerAlt()
+let expandRepeat = new Conversions.ExpandRepet.ExpandExpand()
 let expandTopLevelAlt = new Conversions.ExpandTopLevelAlt.ExpandTopLevelAlt()
+let expandSubSeq = new Conversions.ExpandBrackets.ExpandBrackets()
+let eliminateLeftRecursion = new Conversions.EliminateLeftRecursion.EliminateLeftRecursion()
+let conversionLongRules = new Conversions.ToCNF.SplitLongRule()
+let conversionEps = new Conversions.ToCNF.DeleteEpsRule()
+let conversionChain = new Conversions.ToCNF.DeleteChainRule()
+let conversionRenamer = new Conversions.ToCNF.RenameTerm()
+let conversionCNF = new Conversions.ToCNF.ToCNF()
 
 let applyConversion (conversion:Conversion) loadIL = 
     {
@@ -65,41 +81,21 @@ let applyConversion (conversion:Conversion) loadIL =
             with grammar = conversion.ConvertGrammar (loadIL.grammar, [||])                               
     }
 
+let fe = getFrontend("YardFrontend")
+let runTest inputFile conversion expectedResult =
+    let loadIL = fe.ParseGrammar inputFile
+    Namer.initNamer loadIL.grammar
+    let result = loadIL |> applyConversion conversion
+    let expected = defaultDefinition expectedResult
+#if DEBUG    
+    expected |> treeDump.Generate |> string |> printfn "%s"
+    printfn "%s" "************************"
+    result |> treeDump.Generate |> string |> printfn "%s"
+#endif
+    Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
+
 [<TestFixture>]
 type ``Conversions tests`` () =
-    //[<Test>]
-    member test.``ExpandBrackets tests. Lexer seq test`` () =
-        let rules =
-            PAlt (
-                PSeq(
-                    [
-                        {dummyRule with rule=dummyToken "NUMBER"};
-                        {dummyRule with rule=PAlt(dummyToken "ALT1", dummyToken "ALT2")}
-                        {dummyRule with rule=dummyToken "CHUMBER"};
-                    ], None, None),
-                dummyToken "OUTER")
-            |> simpleRules "s"
-        let ilTree = defaultDefinition rules
-        Namer.initNamer ilTree.grammar
-        let ilTreeConverted =  applyConversion expandBrackets ilTree
-#if DEBUG
-        printfn "%A" ilTreeConverted
-#endif
-        let rules = 
-            (simpleRules "s"
-                <| PAlt(
-                        PSeq([
-                                {dummyRule with rule = dummyToken "NUMBER"};
-                                {dummyRule with rule = PRef (dummyPos "yard_exp_brackets_1",None)}; 
-                                {dummyRule with rule = dummyToken "CHUMBER"}
-                        ],None, None)
-                        , dummyToken "OUTER")
-            ) @ (
-                simpleNotStartRules "yard_exp_brackets_1"
-                <| PAlt (dummyToken "ALT1", dummyToken "ALT2")
-            )
-        let correctConverted = defaultDefinition rules
-        Assert.AreEqual(ilTreeConverted, correctConverted)
     
     [<Test>]
     member test.``ExpandBrackets. Sequence as sequence element test.``()=
@@ -144,70 +140,46 @@ type ``Conversions tests`` () =
 #endif
 
         //treeDump.Generate expected |> string |> printfn "%s"
-        treeDump.Generate ilTreeConverted |> string |> printfn "%s"
+        //treeDump.Generate ilTreeConverted |> string |> printfn "%s"
         Assert.True(hasNotInnerSeq)
    
 [<TestFixture>]
 type ``Expand top level alters`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "ExpandTopLevelAlters")
-    let fe = getFrontend("YardFrontend")    
+    let path f = System.IO.Path.Combine(basePath, f)
 
     [<Test>]
-    member test.``No alter`` () =
-        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"noAlters.yrd"))
-        let result = applyConversion expandTopLevelAlt loadIL
-        let rules =
-            (verySimpleRules "s"
-                [{dummyRule with rule = PRef (Source.t "d", None)}]
-            ) @ (
-                verySimpleNotStartRules "d"
-                    [{dummyRule with rule = PToken (Source.t "NUM")}]
-            )
-
-        let expected = defaultDefinition rules
-        expected |> treeDump.Generate |> string |> printfn "%s"
-        printfn "%s" "************************"
-        result |> treeDump.Generate |> string |> printfn "%s"
-        Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
+    member test.``No alter`` () =     
+        (verySimpleRules "s"
+            [{dummyRule with rule = PRef (Source.t "d", None)}]
+        ) @ (
+            verySimpleNotStartRules "d"
+                [{dummyRule with rule = PToken (Source.t "NUM")}]
+        )
+        |> runTest (path "noAlters.yrd") expandTopLevelAlt        
 
     [<Test>]
     member test.``One alter`` () =
-        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"oneAlter.yrd"))
-        let result = applyConversion expandTopLevelAlt loadIL
-        let rules =
-            (verySimpleRules "s"
-                [{dummyRule with rule = PRef (Source.t "c", None)}]
-            ) @ (
-                verySimpleRules "s"
-                    [{dummyRule with rule = PRef (Source.t "d", None)}]
-            )
-
-        let expected = defaultDefinition rules
-        expected |> treeDump.Generate |> string |> printfn "%s"
-        printfn "%s" "************************"
-        result |> treeDump.Generate |> string |> printfn "%s"
-        Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
-
+        (verySimpleRules "s"
+            [{dummyRule with rule = PRef (Source.t "c", None)}]
+        ) @ (
+            verySimpleRules "s"
+                [{dummyRule with rule = PRef (Source.t "d", None)}]
+        )
+        |> runTest (path "oneAlter.yrd") expandTopLevelAlt        
 
     [<Test>]
-    member test.``Multi alters`` () =
-        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"multiAlters.yrd"))
-        let result = applyConversion expandTopLevelAlt loadIL
-        let rules =
-            (verySimpleRules "s"
-                [{dummyRule with rule = PRef (Source.t "x", None)}]
-            ) @ (
-                verySimpleRules "s"
-                    [{dummyRule with rule = PRef (Source.t "y", None)}]
-            ) @ (
-                verySimpleRules "s"
-                    [{dummyRule with rule = PRef (Source.t "z", None)}]
-            ) @ (
-                verySimpleRules "s"
-                    [{dummyRule with rule = PRef (Source.t "m", None)}]
-            )
-        let expected = defaultDefinition rules
-        expected |> treeDump.Generate |> string |> printfn "%s"
-        printfn "%s" "************************"
-        result |> treeDump.Generate |> string |> printfn "%s"
-        Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
+    member test.``Multi alters`` () =        
+        (verySimpleRules "s"
+            [{dummyRule with rule = PRef (Source.t "x", None)}]
+        ) @ (
+            verySimpleRules "s"
+                [{dummyRule with rule = PRef (Source.t "y", None)}]
+        ) @ (
+            verySimpleRules "s"
+                [{dummyRule with rule = PRef (Source.t "z", None)}]
+        ) @ (
+            verySimpleRules "s"
+                [{dummyRule with rule = PRef (Source.t "m", None)}]
+        )
+        |> runTest (path "multiAlters.yrd") expandTopLevelAlt 

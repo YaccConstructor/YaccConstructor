@@ -1,4 +1,9 @@
 [<Start>]
+
 x: y;
-s: {[]}| y ID s;
+
+s: {[]}
+s: y ID s;
+
+y: {[]}
 y: s;

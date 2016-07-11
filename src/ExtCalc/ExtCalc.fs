@@ -9,19 +9,20 @@ open JetBrains.Application.BuildScript.Application.Zones
 open JetBrains.ReSharper.Psi.CSharp.Tree
 
 open ControlFlowGraph.Common
-open ControlFlowGraph.InputStructures
 
-open OtherSPPF
 open ExtCalc.AbstractParser
 open ReSharperExtension
+
 open Yard.Generators.Common.AST
-open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FSA.FsaApproximation
+open Yard.Generators.RNGLR.OtherSPPF
+open Yard.Utils.StructClass
+
 open YC.FST.AbstractLexing.Interpreter
-open QuickGraph.FST.GraphBasedFst
 open YC.SDK.CommonInterfaces
 open YC.SDK.ReSharper.Helper
 
+open QuickGraph.FSA.GraphBasedFsa
+open QuickGraph.FST.GraphBasedFst
 
 [<ZoneMarker>]
 type ZoneMarker() = class end
@@ -35,7 +36,6 @@ do()
 [<ShellComponent>]
 type ExtCalcInjectedLanguageModule() =
     let tokenize (lexerInputGraph : FSA<char * Position<'br>>) =
-//        let graphFsa = lexerInputGraph.ApprToFSA()
         let eof = RNGLR_EOF(new FSA<_>())
         let transform x = 
             match x with 
@@ -72,9 +72,8 @@ type ExtCalcInjectedLanguageModule() =
     let semicolonNumber = tokenToNumber <| Token.SEMI (new FSA<_>())
     let eqNumber = tokenToNumber <| Token.EQ (new FSA<_>())
     let isVariable = 
-        fun n -> 
-            let num2 = tokenToNumber <| Token.VARIABLE (new FSA<_>())
-            n = num2
+        let num2 = tokenToNumber <| Token.VARIABLE (new FSA<_>())
+        fun n -> n = num2
 
     let nodeToType = dict["assign", Assignment;]
     let keywordToInt = dict [
@@ -90,9 +89,9 @@ type ExtCalcInjectedLanguageModule() =
         |> List.ofSeq
         |> List.map (fun range -> range.GetText())
         |> List.ofSeq
-        |> List.fold (fun acc elem -> acc + elem) ""
+        |> List.reduce (+)
 
-    let parserSource = new CfgParserSource<Token>(tokenToNumber, numToString, leftSide, tokenData)
+    let parserSource = new GeneratedStuffSource<Token, br>(tokenToNumber, numToString, leftSide, tokenData)
     let semantic = Some <| (parserSource, langSource, tokToSourceString)
 
     let processor =

@@ -51,6 +51,8 @@ let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
                     )
         | PAlt(left1, right1), PAlt(left2, right2) -> 
             ilTreeEqualsWithoutLineNumbers left1 left2 && ilTreeEqualsWithoutLineNumbers right1 right2
+        | PConj(left1, right1), PConj(left2, right2) -> 
+            ilTreeEqualsWithoutLineNumbers left1 left2 && ilTreeEqualsWithoutLineNumbers right1 right2
         | PToken t1, PToken t2 -> srcEquals t1 t2
         | PRef(r1, args1), PRef(r2, args2) -> srcEquals r1 r2 && srcOptEquals args1 args2
         | PMany t1, PMany t2 -> ilTreeEqualsWithoutLineNumbers t1 t2

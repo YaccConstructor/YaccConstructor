@@ -1,6 +1,6 @@
 {
-open YC.FSA.FsaApproximation
-open YC.FSA.GraphBasedFsa
+open Yard.Utils.StructClass
+open QuickGraph.FSA.GraphBasedFsa
 }
 
 tokens {

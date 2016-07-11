@@ -3,7 +3,7 @@
 open AbstractAnalysis.Common
 open Yard.Generators.ARNGLR
 open Yard.Generators.RNGLR.AbstractParser
-open OtherSPPF
+open Yard.Generators.RNGLR.OtherSPPF
 
 open NUnit.Framework
 

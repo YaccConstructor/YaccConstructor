@@ -1,12 +1,15 @@
 [submodule "tools/Build.Tools"]
-    path = tools/Build.Tools
-    url = https://github.com/YaccConstructor/Build.Tools.git
+	path = tools/Build.Tools
+	url = https://github.com/YaccConstructor/Build.Tools.git
 [submodule "facio"]
-    path = facio
-    url = https://github.com/YaccConstructor/facio.git
+	path = facio
+	url = https://github.com/YaccConstructor/facio.git
 [submodule "src/YC.GrammarZOO"]
-    path = src/YC.GrammarZOO
-    url = https://github.com/YaccConstructor/YC.GrammarZOO.git
+	path = src/YC.GrammarZOO
+	url = https://github.com/YaccConstructor/YC.GrammarZOO.git
 [submodule "QuickGraph"]
-    path = QuickGraph
-    url = https://github.com/YaccConstructor/QuickGraph.git
+	path = QuickGraph
+	url = https://github.com/YaccConstructor/QuickGraph.git
+[submodule "src/YC.Utils.SourceText"]
+	path = src/YC.Utils.SourceText
+	url = https://github.com/YaccConstructor/YC.Utils.SourceText.git

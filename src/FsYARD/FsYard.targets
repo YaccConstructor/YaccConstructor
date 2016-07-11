@@ -8,7 +8,7 @@
           Condition="'@(FsYard)'!=''"
           Outputs="$(FsYardOutputFolder)$(OutFile)">
     <MakeDir Directories="$(FsYardOutputFolder)"/>
-    <FsYard InputFiles="@(FsYardDefore);@(FsYard);@(FsYardAfter)" Light="$(Light)" OutFile="$(OutFile)" ModuleName="$(Module)"
+    <FsYard InputFiles="@(FsYardBefore);@(FsYard);@(FsYardAfter)" Light="$(Light)" OutFile="$(OutFile)" ModuleName="$(Module)"
             NeedTranslate="$(NeedTranslate)" TokenType="$(Token)" EpsilonPath="$(EpsilonPath)" FullPath="$(FullPath)"
             ProjectBasePath="$(MSBuildProjectDirectory)">
       <Output TaskParameter="OutFile" ItemName="FileWrites"/>

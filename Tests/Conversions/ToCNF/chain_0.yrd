@@ -1,3 +1,4 @@
 [<Start>]
-e: s;
+e: a;
+a: s;
 s: STRING;

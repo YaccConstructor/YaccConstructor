@@ -51,8 +51,8 @@ let makeModifiedRule innerProduction modifier =
     | "" -> innerProduction
     | x -> failwithf "Unexpected modifier %s" x
 
-let makePSeq (productionList, actionCode) =
-    PSeq( List.map (fun prod -> {omit = false; rule = prod; binding = None; checker = None;}) productionList , actionCode, None )
+let makePSeq (productionList, actionCode, checker) =
+    PSeq( List.map (fun prod -> {omit = false; rule = prod; binding = None; checker = checker;}) productionList , actionCode, None )
 
 let termCount = ref 0
 let generateNewName =
@@ -76,7 +76,6 @@ let makeToken (src : Source.t) descr =
 %token T_GRAMMAR
 %token T_OPTIONS
 %token T_FRAGMENT
-%token T_SCOPE
 %token <Source.t> IDENTIFIER
 %token <Source.t> LITERAL
 %token <Source.t> TERMINAL
@@ -92,7 +91,11 @@ let makeToken (src : Source.t) descr =
 %token EXCLAMATION
 %token TILDE
 %token DOUBLE_DOT
-%token HENCE
+%token SQR_LBR
+%token SQR_RBR
+%token T_COMMAND
+%token ARROW
+
 
 %start ParseAntlr
 %type <Grammar.t<Source.t, Source.t> * System.Collections.Generic.Dictionary<string, string>> ParseAntlr
@@ -114,31 +117,28 @@ TopLevelDefs: TopLevelDef { $1 }
 TopLevelDef: Rule { [$1] }
     | TerminalRule { [] }
     | T_OPTIONS ACTION_CODE { [] }
-    | T_SCOPE TERMINAL ACTION_CODE { [] }
     | CAT_CODE ActionNameOpt ACTION_CODE { [] }
 
 ActionNameOpt: ACTION_NAME { }
     | { }
     
-Rule: IDENTIFIER OptionsOpt ScopeOpt CatOpt COLON RuleBody SEMICOLON
+Rule: IDENTIFIER OptionsOpt CatOpt COLON RuleBody SEMICOLON
     {
         {
             name = ($1)
             args = []
-            body = $6
+            body = $5
             isStart = false
             isPublic = false
             metaArgs = []
         } : Rule.t<Source.t, Source.t>
     }
 
-ScopeOpt: T_SCOPE TERMINAL SEMICOLON { }
-    | { }
 
 CatOpt: CAT_CODE ACTION_CODE { }
     | { }
 
-TerminalRule: FragmentOpt TERMINAL OptionsOpt COLON RuleString SEMICOLON { makeToken ($2) (List.fold (fun acc elem -> acc+" "+elem) "" ($5)); }
+TerminalRule: FragmentOpt TERMINAL COLON RuleString CommandOpt SEMICOLON { makeToken ($2) (List.fold (fun acc elem -> acc+" "+elem) "" ($4)); }
 
 FragmentOpt: T_FRAGMENT { }
     | { }
@@ -146,7 +146,11 @@ FragmentOpt: T_FRAGMENT { }
 OptionsOpt: T_OPTIONS ACTION_CODE { }
     | { }
 
-RuleBody: Alt { makePSeq ($1, None) } | RuleBody BAR Alt { PAlt($1, makePSeq ($3, None)) }
+CommandOpt: ARROW T_COMMAND {}
+	| ACTION_CODE {}
+	| {}
+
+RuleBody: PredicateOpt Alt { makePSeq ($2, None, $1) } | RuleBody BAR PredicateOpt Alt { PAlt($1, makePSeq ($4, None, $3)) }
 
 Alt: Seq ActionCodeOpt { [$1] } | Seq Alt { $1 :: $2 }
 
@@ -154,13 +158,10 @@ ActionCodeOpt: { None }
     | ACTION_CODE { Some($1) }
 
 Seq: LPAREN RuleBody RPAREN Modifier { makeModifiedRule $2 $4 }
-    | BodyOptionsOpt PredicateOpt SimpleProduction Modifier { makeModifiedRule ($3) $4 }
+    | SimpleProduction Modifier { makeModifiedRule ($1) $2 }
 
-BodyOptionsOpt: T_OPTIONS ACTION_CODE COLON { }
-    | { }
-
-PredicateOpt: LPAREN RuleBody RPAREN HENCE { }
-    | { }
+PredicateOpt: ACTION_CODE QUESTION { Some($1) }
+    | { None }
 
 Modifier: PLUS { "+" }
     | STAR { "*" }
@@ -204,4 +205,5 @@ RulePart:
   | CAT_CODE { ($1).text }
   | T_OPTIONS { "options" }
   | COLON { ":" }
-  | HENCE { "=>" }
+  | SQR_LBR { "[" }
+  | SQR_RBR { "]" }

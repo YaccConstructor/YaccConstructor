@@ -1,0 +1,4 @@
+[<Start>] 
+s: A a b | A b A
+a: A | A B
+b: C | D

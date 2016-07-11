@@ -37,6 +37,7 @@
     <Compile Include="EliminateLeftRecursionTests.fs" />
     <Compile Include="ToCNFTests.fs" />
     <None Include="paket.references" />
+    <Compile Include="ExpandRepeatTests.fs" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>

@@ -193,7 +193,10 @@ let main args =
             (fun str searchLen -> recognize (myAlg |> addCuda 256 cudaOneThread |> addBrahma 16 nvidiaOneThread) str rules nonterminals S searchLen ) 
             (fun toCheck -> isAnswerValid toCheck) "256, 16, one thread" str searchLen
         checkOneType 
-            (fun str searchLen -> recognize (okhotinAlg |> addParallel 8) str rules nonterminals S searchLen ) 
+            (fun str searchLen -> recognize (okhotinAlg |> addCuda 64 cudaParallel |> addParallel 8) str rules nonterminals S searchLen ) 
+            (fun toCheck -> isAnswerValid toCheck) "okhotin, Gpu" str searchLen
+        checkOneType 
+            (fun str searchLen -> recognize (okhotinAlg |> addFast 64 |> addParallel 8) str rules nonterminals S searchLen ) 
             (fun toCheck -> isAnswerValid toCheck) "okhotin, parallel" str searchLen
         checkOneType 
             (fun str searchLen -> recognize okhotinAlg str rules nonterminals S searchLen ) 

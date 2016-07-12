@@ -87,7 +87,7 @@ open Util
                 options = brahmaOptions
             }
 
-        let createCudaHelper cudaOptions =            
+        let createCudaHelper cudaOptions =   
             {
                 worker = Worker.Default
                 options = cudaOptions
@@ -357,10 +357,9 @@ open Util
                 helpers.Options.provider.CloseAllBuffers()
             | None -> 
             match helpers.Cuda with
-            | Some helpers ->
-                helpers.Options.worker.Dispose()
-            // todo: hmmm...
-            | None -> ignore 0
+            | Some helpers -> ()
+//                    helpers.Options.worker.Dispose()  
+            | None -> ()
 
 
 

@@ -15,9 +15,9 @@ open Util
           commandQueue: CommandQueue
           localMemory: int option
           maxWorkGroupSize: int option
-          kernel: _2D Brahma.OpenCL.Kernel
-          kernelPrepare: _2D -> int -> Probability.InnerType [] -> Probability.InnerType [] -> Probability.InnerType [] -> unit
-          kernelRun: unit -> _2D Commands.Run
+          kernel: _1D Brahma.OpenCL.Kernel
+          kernelPrepare: _1D -> int -> int -> Probability.InnerType [] -> Probability.InnerType [] -> Probability.InnerType [] -> unit
+          kernelRun: unit -> _1D Commands.Run
           options: Util.GPUBrahma }
 
     type GPUCuda = 
@@ -44,18 +44,22 @@ open Util
 
         let command = 
             <@
-                fun (r:_2D) matricesSize (a:array<_>) (b:array<_>) (c:array<_>) -> 
-                    let num = r.GlobalID0 / matricesSize
-                    let ti = r.GlobalID0 - num * matricesSize
-                    let tj = r.GlobalID1                 
-                    let skipMatrices = num * matricesSize * matricesSize
-                    let skipRows = ti * matricesSize + skipMatrices
-                    let skipCols = tj * matricesSize + skipMatrices
-                    // todo: innerZero
-                    let mutable buf = c.[skipRows + tj]
-                    for k in 0 .. matricesSize - 1 do
-                        buf <- (%summProbabilities) buf ((%multiplicateProbabilities) a.[skipRows + k] b.[skipCols + k])
-                    c.[skipRows + tj] <- buf
+                fun (r:_1D) matricesSize matricesCount (a:array<_>) (b:array<_>) (c:array<_>) -> 
+                    let matricesCellNum = matricesSize * matricesSize
+                    let num = r.GlobalID0 / matricesCellNum
+                    if num < matricesCount
+                    then
+                        let x = matricesCount - num * matricesCellNum
+                        let ti = x / matricesSize
+                        let tj = x - ti * matricesSize           
+                        let skipMatrices = num * matricesCellNum
+                        let skipRows = ti * matricesSize + skipMatrices
+                        let skipCols = tj * matricesSize + skipMatrices
+                        // todo: innerZero
+                        let mutable buf = c.[skipRows + tj]
+                        for k in 0 .. matricesSize - 1 do
+                            buf <- (%summProbabilities) buf ((%multiplicateProbabilities) a.[skipRows + k] b.[skipCols + k])
+                        c.[skipRows + tj] <- buf
             @>  
 
         let createBrahmaHelper brahmaOptions =
@@ -239,16 +243,19 @@ open Util
                     | Some size -> size / (32 * matricesSize)
                     | None -> 32 * (1 <<< 20) / (32 * matricesSize)
                     
-            let wgItemsXCount = matricesCount * matricesSize
-            let wgItemsYCount = matricesSize
+            let wgItemsXCount = matricesCount * matricesSize * matricesSize
+//            let wgItemsYCount = 1
 
             let wgSizeX, wgSizeY = wgSizesForMatricesWise wgSizeRestriction localLinesRestriction matricesCount matricesSize 
 //            let wgSizeX, wgSizeY = if wgSizeY_ < 2 then wgSizeX_, wgSizeY_ else wgSizeX_ / 2, wgSizeY_ / 2
                                                    
 //            let d = new _2D(wgItemsXCount, wgItemsYCount, 1, 1)
-            let d = new _2D(wgItemsXCount, wgItemsYCount, wgSizeX, wgSizeY)
+//            let d = new _2D(wgItemsXCount, wgItemsYCount, wgSizeX, wgSizeY)
 
-            helpers.kernelPrepare d matricesSize from1 from2 result
+            // todo: local size
+            let d = new _1D(wgItemsXCount, wgSizeX * wgSizeY)
+
+            helpers.kernelPrepare d matricesSize matricesCount from1 from2 result
          
             helpers.commandQueue.Add(helpers.kernelRun()).Finish() |> ignore        
             helpers.commandQueue.Add(result.ToHost helpers.provider).Finish() |> ignore

@@ -5,38 +5,44 @@
     open OpenCL.Net
     open Microsoft.FSharp.Math
 
-    type GPUBrahmaOptions = {
+    type Info<'T> = {
+        MinMatrixSize: int
+        Options: 'T
+    }       
+
+    type GPUBrahma = {
         PlatformName: string 
         DeviceType: DeviceType
         doParallelFlush: bool
-        MinMatrixSize: int
     }
 
-    type GPUCudaOptions = {
-        MinMatrixSize: int
+    type GPUCuda = {
         doParallelFlush: bool
     }
 
-    type FastOptions = {
-        MinMatrixSize: int
-    }
-
-    type ParallelOptions = {
-        MinMatrixSize: int
-    }
+    type CPUFast = Unit
+    type CPUParallel = Unit
 
     type Algorithm = Okhotin | Modified
 
     module Options =
+
         type T = {
-            Brahma: GPUBrahmaOptions option  
-            Cuda: GPUCudaOptions option  
-            Fast: FastOptions option
-            Parallel: ParallelOptions option
+            Brahma: GPUBrahma Info option  
+            Cuda: GPUCuda Info option  
+            Fast: CPUFast Info option
+            Parallel: CPUParallel Info option
             algorithm: Algorithm
         }
 
         let empty algorithm = { Brahma = None; Cuda = None; Fast = None; Parallel = None; algorithm = algorithm }
+        let createOne minMatrixSize options = { MinMatrixSize = minMatrixSize; Options = options}
+        let create algorithm fast parall cuda brahma = { Brahma = brahma; Cuda = cuda; Fast = fast; Parallel = parall; algorithm = algorithm }
+
+        let map f (option: _ Info) = {
+            MinMatrixSize = option.MinMatrixSize
+            Options = f option.Options
+        }
     
 
     type NonTerminal = NonTerminal of string

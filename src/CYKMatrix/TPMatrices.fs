@@ -10,7 +10,7 @@ open Alea.CUDA.IL
 
 open Util
 
-    type GPUBrahmaHelpers = 
+    type GPUBrahma = 
         { provider: ComputeProvider
           commandQueue: CommandQueue
           localMemory: int option
@@ -18,11 +18,24 @@ open Util
           kernel: _2D Brahma.OpenCL.Kernel
           kernelPrepare: _2D -> int -> Probability.InnerType [] -> Probability.InnerType [] -> Probability.InnerType [] -> unit
           kernelRun: unit -> _2D Commands.Run
-          options: GPUBrahmaOptions }
+          options: Util.GPUBrahma }
 
-    type GPUCudaHelpers = 
+    type GPUCuda = 
         { worker: Worker
-          options: GPUCudaOptions }
+          options: Util.GPUCuda }
+    
+    type CPUFast = Unit
+    type CPUSimple = Unit
+    type CPUParallel = Unit
+    
+    type Helpers = {
+        Brahma: GPUBrahma Info option  
+        Cuda: GPUCuda Info option  
+        Fast: CPUFast Info option
+        Simple: CPUSimple Info option
+        Parallel: CPUParallel Info option
+    }
+
 
     type MatriceswMultiplicator (options: Options.T, probabilitySummQuote, probabilityMultQuote) =
 
@@ -79,9 +92,14 @@ open Util
                 worker = Worker.Default
                 options = cudaOptions
             }
-            
-        let brahmaHelpers = Option.map createBrahmaHelper options.Brahma
-        let cudaHelpers = Option.map createCudaHelper options.Cuda
+
+        let helpers = {
+            Brahma = Option.map (Options.map createBrahmaHelper) options.Brahma
+            Cuda = Option.map (Options.map createCudaHelper) options.Cuda
+            Fast = Option.map id options.Fast
+            Parallel = Option.map id options.Parallel
+            Simple = Some { MinMatrixSize = 1; Options = () }
+        }
 
         let simpleMultiplicate (from1: Probability.InnerType []) (from2: Probability.InnerType []) matricesSize actualColCount =        
             let calculateCell (n, i, j) = 
@@ -99,7 +117,6 @@ open Util
                 let j = x - n * matricesSize * matricesSize - i * matricesSize
                 n, i, j
             Array.init (matricesSize * actualColCount) (fun x -> calculateCell <| getNIJ x)
-
 
 
         let ceilToPowerOf2 x = 
@@ -157,7 +174,7 @@ open Util
                 let coeff = 1                                 
                 coeff * matricesSize, matricesSize
 
-        let doCublasMultiplications helpers matrixHandler (matricesCount: int) matricesSize fullTasks =   
+        let doCublasMultiplications matrixHandler (matricesCount: int) matricesSize fullTasks helpers =   
             let getSubMatrix, flushSubMatrix = matrixHandler
             let matricesCellCount = matricesSize * matricesSize
             
@@ -198,18 +215,13 @@ open Util
                 let matrix = 
                     multiplicationResult.[num * matricesCellCount .. (num + 1) * matricesCellCount - 1]
                 let task, nts = fullTasks.[num]
-                flushSubMatrix task.where nts matrix 
-                
-            let doParallelFlush = 
-                match cudaHelpers with
-                | Some helpers -> helpers.options.doParallelFlush
-                | None -> failwith "imposibru"        
+                flushSubMatrix task.where nts matrix   
             
             [|0..matricesCount - 1|]
-            |> (if doParallelFlush then Array.Parallel.iter else Array.iter) flushOneMatrix       
+            |> (if  helpers.options.doParallelFlush then Array.Parallel.iter else Array.iter) flushOneMatrix       
 
 
-        let gpuMultiplicate (helpers: GPUBrahmaHelpers) 
+        let gpuMultiplicate helpers
                             (from1: Probability.InnerType []) 
                             (from2: Probability.InnerType []) 
                             matricesCount 
@@ -268,7 +280,7 @@ open Util
             fullTasks
             |> (if isParallel then Array.Parallel.iter else Array.iter) doOne 
 
-        let doBrahmaMultiplications matrixHandler matricesCount matricesSize helpers fullTasks = 
+        let doBrahmaMultiplications matrixHandler matricesCount matricesSize fullTasks helpers = 
             let getSubMatrix, flushSubMatrix = matrixHandler
             let matricesCellCount = matricesSize * matricesSize
             
@@ -289,15 +301,10 @@ open Util
                     multiplicationResult.[num * matricesCellCount .. (num + 1) * matricesCellCount - 1]
                     |> ProbabilityMatrix.create matricesSize matricesSize
                 let task, nts = fullTasks.[num]
-                flushSubMatrix task.where nts matrix     
-                
-            let doParallelFlush = 
-                match brahmaHelpers with
-                | Some helpers -> helpers.options.doParallelFlush
-                | None -> failwith "imposibru"        
+                flushSubMatrix task.where nts matrix          
             
             [|0..matricesCount - 1|]
-            |> (if doParallelFlush then Array.Parallel.iter else Array.iter) flushOneMatrix
+            |> (if helpers.options.doParallelFlush then Array.Parallel.iter else Array.iter) flushOneMatrix
             
         member this.performMultiplication arrayMatrixHandler fastMatrixHandler cublasMatrixHandler (tasks: MultiplicationTask []) nts = 
 
@@ -309,53 +316,49 @@ open Util
 
             let matricesSize = tasks.[0].where.Size
             let matricesCount = fullTasks.Length
-            
-            let doFastParallel () = doFastMultiplications true fastMatrixHandler matricesSize fullTasks 
-            let doFast () = doFastMultiplications false fastMatrixHandler matricesSize fullTasks 
-            let doSimpleParallel () = doSimpleMultiplications true arrayMatrixHandler matricesSize fullTasks 
-            let doSimple () = doSimpleMultiplications false arrayMatrixHandler matricesSize fullTasks 
-            let doBrahmaGPU helpers = doBrahmaMultiplications arrayMatrixHandler matricesCount matricesSize helpers fullTasks
-            let doCublas helpers = doCublasMultiplications helpers cublasMatrixHandler matricesCount matricesSize fullTasks
 
-            let doCheckParallel doOneThread doParallel  =
+            let isParallel =
                 match options.Parallel with 
-                | Some { MinMatrixSize = size } -> 
-                    if matricesSize >= size
-                    then doParallel ()
-                    else doOneThread ()
-                | None -> doOneThread ()
-                            
-            //todo:
-            match brahmaHelpers with
-            | Some helpers ->            
-                if matricesSize >= helpers.options.MinMatrixSize
-                then doBrahmaGPU helpers
-                else doCheckParallel doSimple doSimpleParallel
-            | None -> 
-            match cudaHelpers with
-            | Some helpers ->            
-                if matricesSize >= helpers.options.MinMatrixSize
-                then doCublas helpers
-                else doCheckParallel doSimple doSimpleParallel
-            | None -> 
-            match options.Fast with
-            | Some { MinMatrixSize = size } -> 
-                if matricesSize >= size
-                then doCheckParallel doFast doFastParallel
-                else doCheckParallel doSimple doSimpleParallel 
-            | None -> doCheckParallel doSimple doSimpleParallel
+                | Some { MinMatrixSize = size } -> matricesSize >= size
+                | None -> false
+            
+            let doFast _ = doFastMultiplications isParallel fastMatrixHandler matricesSize fullTasks 
+            let doSimple _  = doSimpleMultiplications isParallel arrayMatrixHandler matricesSize fullTasks 
+            let doBrahma helpers = doBrahmaMultiplications arrayMatrixHandler matricesCount matricesSize fullTasks helpers
+            let doCublas helpers = doCublasMultiplications cublasMatrixHandler matricesCount matricesSize fullTasks helpers
+
+            let doCheck doMultiplication (helpers_: _ Info option) isDone = 
+                if not isDone 
+                then 
+                    match helpers_ with
+                    | Some helpers ->            
+                        if matricesSize >= helpers.MinMatrixSize
+                        then 
+                            doMultiplication helpers.Options
+                            true
+                        else false
+                    | None -> false
+                else isDone
+
+            false 
+            |> doCheck doCublas helpers.Cuda
+            |> doCheck doBrahma helpers.Brahma      
+            |> doCheck doFast helpers.Fast
+            |> doCheck doSimple helpers.Simple
+            |> ignore
+
                 
 
         member this.releaseResources () =
-            match brahmaHelpers with
+            match helpers.Brahma with
             | Some helpers ->
-                helpers.commandQueue.Dispose()
-                helpers.provider.Dispose()
-                helpers.provider.CloseAllBuffers()
+                helpers.Options.commandQueue.Dispose()
+                helpers.Options.provider.Dispose()
+                helpers.Options.provider.CloseAllBuffers()
             | None -> 
-            match cudaHelpers with
+            match helpers.Cuda with
             | Some helpers ->
-                helpers.worker.Dispose()
+                helpers.Options.worker.Dispose()
             // todo: hmmm...
             | None -> ignore 0
 

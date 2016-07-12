@@ -11,65 +11,47 @@ open System.Collections.Generic
 open Util
 open CYKMatrix
 
-//    open OpenCL.Net.Extensions
+
+
+
+
+let printMatrix (matrix: ProbabilityMatrix.T) strLen searchLen = 
+    let rowLength = matrix.GetLength(0)
+    let colLength = matrix.GetLength(1)
+    for i in [ 0..rowLength - 1 ] do
+        for j in [ 0..colLength - 1 ] do
+            let cell = Cell.create i j
+            if i <= strLen && j <= strLen && j > i && j - i <= searchLen then 
+                //                    if i <= strLen && j <= strLen && j > i then
+                //                        printf "%b  " <| Probability.unwrap matrix.[i, j]
+                printf "%.8f  " <| Probability.unwrap matrix.[cell]
+            else 
+                assert (Probability.isZero matrix.[cell])
+                //                        printf "%.8f  " matrix.[i, j]
+                printf "----------  "
+        printfn ""
+    printfn ""
+    
+let isAnswerValid (matrix: ProbabilityMatrix.T) strLen searchLen = 
+    let rowLength = matrix.GetLength(0)
+    let colLength = matrix.GetLength(1)
+    if rowLength <> colLength || rowLength <> strLen + 1 then false
+    else 
+        let redundantCell (cell: Cell.T) = 
+            cell.Row > strLen || cell.Column > strLen || cell.Column <= cell.Row 
+            || cell.Column - cell.Row > searchLen
+        [ 0..rowLength - 1 ]
+        |> List.map (fun i -> [ 0..colLength - 1 ] |> List.map (fun j -> Cell.create i j))
+        |> List.concat
+        |> List.filter redundantCell
+        |> List.forall (fun cell -> Probability.isZero matrix.[cell])
+
+
+
+
+
 [<EntryPoint>]
 let main args = 
-
-    let amdPlatformName = "AMD*"
-    let intelPlatformName = "Intel*"
-    let nvidiaPlatformName = "NVIDIA*"
-    let defaultPlatformName = "*"
-
-    let getGpuOptions platformName minMatrixSize =
-        let deviceType = DeviceType.Gpu
-        let gpuOneThread = 
-            { PlatformName = platformName; DeviceType = deviceType; doParallelFlush = false; MinMatrixSize = minMatrixSize }
-        let gpuParallel = { gpuOneThread with doParallelFlush = true }
-        let multOneThread = { Options.empty Algorithm.Modified with Brahma = Some gpuOneThread }
-        let multParallel = { Options.empty Algorithm.Modified with Brahma = Some gpuParallel }
-        let provider = 
-            try 
-                ComputeProvider.Create(platformName, deviceType)
-            with ex -> failwith ex.Message
-        multOneThread, multParallel, provider
-        
-    let nvidiaOneThread, nvidiaParallel, nvidiaProvider = getGpuOptions nvidiaPlatformName 16
-//    let intelOptions, intelProvider = getGpuOptions intelPlatformName 16
-//    let amdOptions, amdProvider = getGpuOptions amdPlatformName 16
-//    let defaultOptions, dafeultProvider = getGpuOptions defaultPlatformName 16
-    
-    let printParams (provider: ComputeProvider) = 
-        let globalMem = OpenCL.Net.DeviceInfo.GlobalMemSize
-        let allocMem = OpenCL.Net.DeviceInfo.MaxMemAllocSize
-        let globalCache = OpenCL.Net.DeviceInfo.GlobalMemCacheSize
-        let localMem = OpenCL.Net.DeviceInfo.LocalMemSize
-        let computeUnits = OpenCL.Net.DeviceInfo.MaxComputeUnits
-        let WGSize = OpenCL.Net.DeviceInfo.MaxWorkGroupSize
-        let WISizes = OpenCL.Net.DeviceInfo.MaxWorkItemSizes
-        
-        let getInfo infoType infoName div = 
-            let info_, ex = OpenCL.Net.Cl.GetDeviceInfo(provider.Devices |> Seq.head, infoType)
-            let info = info_.CastTo<uint64>()
-            let toMB x = int <| x / (uint64 div)
-            printfn "%s: %d" infoName <| toMB info
-        getInfo globalMem "global mem (MB)" (1 <<< 20)
-        getInfo allocMem "alloc mem (MB)" (1 <<< 20)
-        getInfo globalCache "global cache (MB)" (1 <<< 20)
-        getInfo localMem "local mem (KB)" (1 <<< 10)
-        getInfo computeUnits "comp units" 1
-        getInfo WGSize "WG size (MB)" 1
-        getInfo WISizes "WI sizes (B)" 1
-    
-//                
-//    printfn "AMD:"
-//    printParams amdProvider
-//    printfn "Intel:"
-//    printParams intelProvider
-    printfn "NVIDIA:"
-    printParams nvidiaProvider
-    
-    0
-
     let A = NonTerminal "A"
     let B = NonTerminal "B"
     let BB = NonTerminal "BB"
@@ -116,78 +98,122 @@ let main args =
     //    B -> 'a', 0.1
 
     let rules = new RulesHolder(crl, srl, erl)
+
     
-    let printMatrix (matrix: ProbabilityMatrix.T) strLen searchLen = 
-        let rowLength = matrix.GetLength(0)
-        let colLength = matrix.GetLength(1)
-        for i in [ 0..rowLength - 1 ] do
-            for j in [ 0..colLength - 1 ] do
-                let cell = Cell.create i j
-                if i <= strLen && j <= strLen && j > i && j - i <= searchLen then 
-                    //                    if i <= strLen && j <= strLen && j > i then
-                    //                        printf "%b  " <| Probability.unwrap matrix.[i, j]
-                    printf "%.8f  " <| Probability.unwrap matrix.[cell]
-                else 
-                    assert (Probability.isZero matrix.[cell])
-                    //                        printf "%.8f  " matrix.[i, j]
-                    printf "----------  "
-            printfn ""
-        printfn ""
     
-    let isAnswerValid (matrix: ProbabilityMatrix.T) strLen searchLen = 
-        let rowLength = matrix.GetLength(0)
-        let colLength = matrix.GetLength(1)
-        if rowLength <> colLength || rowLength <> strLen + 1 then false
-        else 
-            let redundantCell (cell: Cell.T) = 
-                cell.Row > strLen || cell.Column > strLen || cell.Column <= cell.Row 
-                || cell.Column - cell.Row > searchLen
-            [ 0..rowLength - 1 ]
-            |> List.map (fun i -> [ 0..colLength - 1 ] |> List.map (fun j -> Cell.create i j))
-            |> List.concat
-            |> List.filter redundantCell
-            |> List.forall (fun cell -> Probability.isZero matrix.[cell])
-    
-    let check str searchLen = 
-        let toCheck    = recognize (Options.empty Algorithm.Okhotin) str rules nonterminals S searchLen 
-        let toCheckBFS = recognize { Options.empty Algorithm.Modified with Cuda = Some { MinMatrixSize = 4; doParallelFlush = false } } str rules nonterminals S searchLen 
-        assert (isAnswerValid toCheck (String.length str) searchLen)
-        assert (isAnswerValid toCheckBFS (String.length str) searchLen)
-        let sameCells cell = 
-            //                (Probability.unwrap toCheck.[i, j]) = (Probability.unwrap toCheckBFS.[i, j])
-            (Probability.unwrap toCheck.[cell]) - (Probability.unwrap toCheckBFS.[cell]) < 0.0000000001
-        let sameAnswers = 
-            [ 0..toCheck.GetLength(0) - 1 ]
-            |> Seq.forall (fun i -> (Seq.forall (fun j -> sameCells <| Cell.create i j) [ 0..toCheck.GetLength(0) - 1 ])) 
-                
-        assert sameAnswers
-        printMatrix toCheck (String.length str) searchLen 
-        printMatrix toCheckBFS (String.length str) searchLen 
 
     let checkOneType task check taskType str searchLen = 
+        List.iter (fun _ -> task str searchLen |> ignore) [1..3] 
         let stopWatch = System.Diagnostics.Stopwatch.StartNew()
-        //            List.iter (fun _ -> task str searchLen |> ignore) [1..10] 
-        let toCheck = task str searchLen
+        List.iter (fun _ -> task str searchLen |> ignore) [1..10] 
+//        let toCheck = task str searchLen
         stopWatch.Stop()
-        printfn "type: %s, str length: %i, search length: %i, time(ms): %f." taskType (String.length str) searchLen 
-            stopWatch.Elapsed.TotalMilliseconds
+        printfn "type: %s, str length: %i, search length: %i, time(ms): %f." taskType (String.length str) searchLen (stopWatch.Elapsed.TotalMilliseconds / 10.)
+         
+
+
+
+
+
+
     
+    let amdPlatformName = "AMD*"
+    let intelPlatformName = "Intel*"
+    let nvidiaPlatformName = "NVIDIA*"
+    let defaultPlatformName = "*"
+
+    let getGpuOptions platformName =
+        let deviceType = DeviceType.Gpu
+        let gpuOneThread = { PlatformName = platformName; DeviceType = deviceType; doParallelFlush = false }
+        let gpuParallel = { gpuOneThread with doParallelFlush = true }
+        let provider = 
+            try 
+                ComputeProvider.Create(platformName, deviceType)
+            with ex -> failwith ex.Message
+        gpuOneThread, gpuParallel, provider
+            
+    let printParams (provider: ComputeProvider) = 
+        let globalMem = OpenCL.Net.DeviceInfo.GlobalMemSize
+        let allocMem = OpenCL.Net.DeviceInfo.MaxMemAllocSize
+        let globalCache = OpenCL.Net.DeviceInfo.GlobalMemCacheSize
+        let localMem = OpenCL.Net.DeviceInfo.LocalMemSize
+        let computeUnits = OpenCL.Net.DeviceInfo.MaxComputeUnits
+        let WGSize = OpenCL.Net.DeviceInfo.MaxWorkGroupSize
+        let WISizes = OpenCL.Net.DeviceInfo.MaxWorkItemSizes
+        
+        let getInfo infoType infoName div = 
+            let info_, ex = OpenCL.Net.Cl.GetDeviceInfo(provider.Devices |> Seq.head, infoType)
+            let info = info_.CastTo<uint64>()
+            let toMB x = int <| x / (uint64 div)
+            printfn "%s: %d" infoName <| toMB info
+        getInfo globalMem "global mem (MB)" (1 <<< 20)
+        getInfo allocMem "alloc mem (MB)" (1 <<< 20)
+        getInfo globalCache "global cache (MB)" (1 <<< 20)
+        getInfo localMem "local mem (KB)" (1 <<< 10)
+        getInfo computeUnits "comp units" 1
+        getInfo WGSize "WG size (MB)" 1
+        getInfo WISizes "WI sizes (B)" 1
+    
+//                
+//    printfn "AMD:"
+//    printParams amdProvider
+//    printfn "Intel:"
+//    printParams intelProvider
+//    printfn "NVIDIA:"
+//    printParams nvidiaProvider
+//    
+//    0
+
+
+    let nvidiaOneThread, nvidiaParallel, nvidiaProvider = getGpuOptions nvidiaPlatformName
+//    let intelOptions, intelProvider = getGpuOptions intelPlatformName
+//    let amdOptions, amdProvider = getGpuOptions amdPlatformName
+//    let defaultOptions, dafeultProvider = getGpuOptions defaultPlatformName
+    let cudaOneThread: GPUCuda = { doParallelFlush = false }
+    let cudaParallel: GPUCuda = { doParallelFlush = true }
+
+
+
+
+    
+    let myAlg = Options.empty Algorithm.Modified
+    let okhotinAlg = Options.empty Algorithm.Okhotin
+    let addCuda minms cuda (init: Options.T) = { init with Cuda = Some <| Options.createOne minms cuda } 
+    let addBrahma minms brahma (init: Options.T) = { init with Brahma = Some <| Options.createOne minms brahma } 
+    let addParallel minms (init: Options.T) = { init with Parallel = Some <| Options.createOne minms () } 
+    let addFast minms (init: Options.T) = { init with Fast = Some <| Options.createOne minms () } 
+
+    let bestOption = (myAlg |> addCuda 256 cudaParallel |> addBrahma 16 nvidiaParallel |> addParallel 1)
+
     let checkTime str searchLen = 
         checkOneType 
-            (fun str searchLen -> recognize { nvidiaParallel with Parallel = Some { MinMatrixSize = 1 } } str rules nonterminals S searchLen ) 
-            (fun toCheck -> isAnswerValid toCheck) "nvidia" str searchLen
-//        checkOneType 
-//            (fun str searchLen -> recognize { Options.empty Algorithm.Okhotin with Parallel = Some { MinMatrixSize = 8 }; Fast = Some { MinMatrixSize = 64 } } str rules nonterminals S searchLen ) 
-//            (fun toCheck -> isAnswerValid toCheck) "okhotin" str searchLen
-//        checkOneType 
-//            (fun str searchLen -> recognize { Options.empty Algorithm.Modified with Parallel = Some { MinMatrixSize = 1 }; Fast = Some { MinMatrixSize = 64 } } str rules nonterminals S searchLen ) 
-//            (fun toCheck -> isAnswerValid toCheck) "my" str searchLen
+            (fun str searchLen -> recognize bestOption str rules nonterminals S searchLen ) 
+            (fun toCheck -> isAnswerValid toCheck) "256, 16, parallel" str searchLen
         checkOneType 
-            (fun str searchLen -> recognize { Options.empty Algorithm.Modified with Cuda = Some { MinMatrixSize = 16; doParallelFlush = true }; Parallel = Some { MinMatrixSize = 1 } } str rules nonterminals S searchLen ) 
-            (fun toCheck -> isAnswerValid toCheck) "cuda" str searchLen
-//        checkOneType 
-//            (fun str searchLen -> CYKMatrixBFS.recognize str rules nonterminals S searchLen { Options.empty with Fast = Some { MinMatrixSize = 64 }; Parallel = Some { MinMatrixSize = 1 } }) 
-//            (fun toCheck -> isAnswerValid toCheck) "fast, parallel" str searchLen
+            (fun str searchLen -> recognize (myAlg |> addCuda 256 cudaOneThread |> addBrahma 16 nvidiaOneThread) str rules nonterminals S searchLen ) 
+            (fun toCheck -> isAnswerValid toCheck) "256, 16, one thread" str searchLen
+        checkOneType 
+            (fun str searchLen -> recognize (okhotinAlg |> addParallel 8) str rules nonterminals S searchLen ) 
+            (fun toCheck -> isAnswerValid toCheck) "okhotin, parallel" str searchLen
+        checkOneType 
+            (fun str searchLen -> recognize okhotinAlg str rules nonterminals S searchLen ) 
+            (fun toCheck -> isAnswerValid toCheck) "okhotin, one thread" str searchLen
+
+    let check str searchLen = 
+        let toCheck1    = recognize okhotinAlg str rules nonterminals S searchLen 
+        let toCheck2    = recognize (bestOption |> addCuda 64 cudaParallel) str rules nonterminals S searchLen 
+        assert (isAnswerValid toCheck1 (String.length str) searchLen)
+        assert (isAnswerValid toCheck2 (String.length str) searchLen)
+        let sameCells cell = 
+            //                (Probability.unwrap toCheck.[i, j]) = (Probability.unwrap toCheckBFS.[i, j])
+            (Probability.unwrap toCheck1.[cell]) - (Probability.unwrap toCheck2.[cell]) < 0.0000000001
+        let sameAnswers = 
+            [ 0..toCheck1.GetLength(0) - 1 ]
+            |> Seq.forall (fun i -> (Seq.forall (fun j -> sameCells <| Cell.create i j) [ 0..toCheck1.GetLength(0) - 1 ])) 
+                
+        assert sameAnswers
+    //        printMatrix toCheck1 (String.length str) searchLen 
+    //        printMatrix toCheck2 (String.length str) searchLen 
     
 
 //    check "abb"      2
@@ -208,7 +234,8 @@ let main args =
 //    check "aaaabb" 0
 
 //    checkTime (String.replicate 40 "abb") 100
-    checkTime (String.replicate 400 "abb") 1000
+//    checkTime (String.replicate 200 "abb") 400
+    checkTime (String.replicate 700 "abb") 1600
     //        checkTime ((String.replicate 511 "abbb") + "abb") 50
 
     //        check "aabb"

@@ -109,5 +109,5 @@
             then completeVLayer layer
             
         // todo: release ????
-//        matrices.releaseResources ()
+        matrices.releaseResources ()
         matrices.getProbabilities S

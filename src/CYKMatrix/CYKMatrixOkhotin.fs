@@ -106,4 +106,5 @@
         
 //        printfn "okhotin mult count: %i" !multiplicationCounter
 //        multiplicationCounter := 0
+        matrices.releaseResources ()
         matrices.getProbabilities S

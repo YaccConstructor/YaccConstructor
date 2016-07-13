@@ -23,8 +23,8 @@ open Yard.Core
 open Constraints
 open IL
 open System.Collections.Generic
-open Microsoft.FSharp.Text.StructuredFormat
-open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
+open YC.PrettyPrinter.Pretty
+open YC.PrettyPrinter.StructuredFormat
 open System.IO
 open Mono.Addins
 
@@ -77,10 +77,7 @@ type CYKGeneartorImpl () =
 
     let layoutToStr l =
         let res = ref ""
-        let f () = 
-            res := 
-                Microsoft.FSharp.Text.StructuredFormat.Display.layout_to_string 
-                    {Microsoft.FSharp.Text.StructuredFormat.FormatOptions.Default with PrintWidth=80} l
+        let f () = res := print 80 l
         let thread = new System.Threading.Thread(f, 134217728)
         thread.Start()
         thread.Join()

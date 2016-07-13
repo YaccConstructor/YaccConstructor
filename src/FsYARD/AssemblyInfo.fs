@@ -1,4 +1,4 @@
-//   Copyright 2013, 2014 YaccConstructor Software Foundation
+ï»¿//   Copyright 2013, 2014 YaccConstructor Software Foundation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyConfiguration("Release")>]
 [<assembly: AssemblyCompany("YaccConstructor Software Foundation")>]
 [<assembly: AssemblyProduct("YC.FsYARD")>]
-[<assembly: AssemblyCopyright("Copyright © 2013. YaccConstructor Software Foundation https://code.google.com/p/recursive-ascent/")>]
+[<assembly: AssemblyCopyright("Copyright ï¿½ 2013. YaccConstructor Software Foundation https://code.google.com/p/recursive-ascent/")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]
 

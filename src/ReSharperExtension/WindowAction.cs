@@ -4,10 +4,9 @@ using System.Windows.Controls;
 
 using Microsoft.VisualStudio.Shell.Interop;
 
-using GraphX;
 using GraphX.Controls;
-using GraphX.GraphSharp.Algorithms.Layout.Simple.FDP;
-
+using GraphX.PCL.Common.Enums;
+using GraphX.PCL.Logic.Algorithms.LayoutAlgorithms;
 using JetBrains.UI.ActionsRevised;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ActionManagement;
@@ -18,6 +17,7 @@ using JetBrains.UI.Application;
 using JetBrains.TextControl;
 using JetBrains.Application;
 using JetBrains.ReSharper.Feature.Services.Resources;
+using ReSharperExtension.GraphDefine;
 using ReSharperExtension.Highlighting;
 
 namespace ReSharperExtension

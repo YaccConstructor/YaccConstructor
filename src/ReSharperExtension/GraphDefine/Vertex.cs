@@ -1,8 +1,6 @@
-﻿using System.Windows.Media;
-using GraphX;
+﻿using GraphX.PCL.Common.Models;
 
-
-namespace ReSharperExtension
+namespace ReSharperExtension.GraphDefine
 {
     public class Vertex : VertexBase
     {
@@ -58,7 +56,7 @@ namespace ReSharperExtension
 
         public override int GetHashCode()
         {
-            return this.ID;
+            return (int) ID;
         }
     }
 }

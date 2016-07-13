@@ -10,14 +10,28 @@ open Alea.CUDA.IL
 
 open Util
 
+    type NewGPUBrahma = 
+        { provider: ComputeProvider
+          commandQueue: CommandQueue
+          localMemory: int option
+          maxWorkGroupSize: int option
+          kernel: _1D Brahma.OpenCL.Kernel
+          kernelPrepare: _1D -> int32 [] -> Probability.InnerType [] -> Probability.InnerType [] -> Probability.InnerType [] -> unit
+          kernelRun: unit -> _1D Commands.Run
+          mult1: Probability.InnerType []
+          mult2: Probability.InnerType []
+          result: Probability.InnerType []
+          sizes: int32 []
+          options: Util.GPUBrahma }
+
     type GPUBrahma = 
         { provider: ComputeProvider
           commandQueue: CommandQueue
           localMemory: int option
           maxWorkGroupSize: int option
-          kernel: _2D Brahma.OpenCL.Kernel
-          kernelPrepare: _2D -> int -> Probability.InnerType [] -> Probability.InnerType [] -> Probability.InnerType [] -> unit
-          kernelRun: unit -> _2D Commands.Run
+          kernel: _1D Brahma.OpenCL.Kernel
+          kernelPrepare: _1D -> int -> int -> Probability.InnerType [] -> Probability.InnerType [] -> Probability.InnerType [] -> unit
+          kernelRun: unit -> _1D Commands.Run
           options: Util.GPUBrahma }
 
     type GPUCuda = 
@@ -29,6 +43,7 @@ open Util
     type CPUParallel = Unit
     
     type Helpers = {
+        newBrahma: NewGPUBrahma Info option 
         Brahma: GPUBrahma Info option  
         Cuda: GPUCuda Info option  
         Fast: CPUFast Info option
@@ -37,18 +52,43 @@ open Util
     }
 
 
-    type MatriceswMultiplicator (options: Options.T, probabilitySummQuote, probabilityMultQuote) =
+    type MatriceswMultiplicator (options: Options.T, probabilitySummQuote, probabilityMultQuote, maxMatrixSize, ntsCount) =
 
         let multiplicateProbabilities = probabilityMultQuote
         let summProbabilities = probabilitySummQuote
 
+        let newCommand = 
+            <@
+                fun (r:_1D) (sizes:array<_>) (a:array<_>) (b:array<_>) (c:array<_>) -> 
+                    let gridSize = sizes.[0]
+                    let matricesSize = sizes.[2]
+                    let matricesCount = sizes.[3]
+                    let matricesCellNum = matricesSize * matricesSize
+                    let num = r.GlobalID0 / matricesCellNum
+                    if (r.GlobalID0 < matricesCellNum * matricesCount) && (num < matricesCount)
+                    then
+                        let x = r.GlobalID0 - num * matricesCellNum
+                        let ti = x / matricesSize
+                        let tj = x - ti * matricesSize           
+                        let skipMatrices = num * matricesCellNum
+                        let skipRows = ti * matricesSize + skipMatrices
+                        let skipCols = tj * matricesSize + skipMatrices
+                        // todo: innerZero
+                        let mutable buf = c.[skipRows + tj]
+                        for k in 0 .. matricesSize - 1 do
+                            buf <- (%summProbabilities) buf ((%multiplicateProbabilities) a.[skipRows + k] b.[skipCols + k])
+                        c.[skipRows + tj] <- buf
+            @>  
+
         let command = 
             <@
-                fun (r:_2D) matricesSize (a:array<_>) (b:array<_>) (c:array<_>) -> 
-                    let num = r.GlobalID0 / matricesSize
-                    let ti = r.GlobalID0 - num * matricesSize
-                    let tj = r.GlobalID1                 
-                    let skipMatrices = num * matricesSize * matricesSize
+                fun (r:_1D) matricesSize matricesCount (a:array<_>) (b:array<_>) (c:array<_>) -> 
+                    let matricesCellNum = matricesSize * matricesSize
+                    let num = r.GlobalID0 / matricesCellNum
+                    let x = r.GlobalID0 - num * matricesCellNum
+                    let ti = x / matricesSize
+                    let tj = x - ti * matricesSize      
+                    let skipMatrices = num * matricesCellNum
                     let skipRows = ti * matricesSize + skipMatrices
                     let skipCols = tj * matricesSize + skipMatrices
                     // todo: innerZero
@@ -58,6 +98,79 @@ open Util
                     c.[skipRows + tj] <- buf
             @>  
 
+        let newCreateBrahmaHelper brahmaOptions =
+            let provider =
+                try ComputeProvider.Create(brahmaOptions.PlatformName, brahmaOptions.DeviceType)
+                with 
+                | ex -> failwith ex.Message
+
+            let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
+            let kernel, kernelPrepare, kernelRun = provider.Compile newCommand
+
+            let getInfo infoType =
+                let info, ex = OpenCL.Net.Cl.GetDeviceInfo(provider.Devices |> Seq.head, infoType)
+                match ex with 
+                    | OpenCL.Net.ErrorCode.Success -> Some <| info.CastTo<int>()
+                    | _ -> None
+                    
+            let localMem = getInfo OpenCL.Net.DeviceInfo.LocalMemSize
+            let maxWGSize = getInfo OpenCL.Net.DeviceInfo.MaxWorkGroupSize
+            let maxAllocationBits_ = getInfo OpenCL.Net.DeviceInfo.MaxMemAllocSize
+
+            // todo: type size
+            let maxAllocatedBitsForVar = maxMatrixSize * maxMatrixSize * 32 * ntsCount
+
+            let maxAllocationBits = 
+                match maxAllocationBits_ with
+                | Some maxBits ->
+                    // todo: split tasks
+                    if 3 * maxAllocatedBitsForVar > maxBits 
+                    then failwith "string size too big"
+                    else maxBits
+                | None ->
+                    //todo: do something 
+                    failwith "not enough information"
+
+            let bufferSize = maxMatrixSize * maxMatrixSize * ntsCount
+            
+            let wgSizeRestriction = 
+                match maxWGSize with
+                    | Some size -> size
+                    | None -> 4
+            let localLinesRestriction = 
+                match localMem with
+                    // todo:
+                    | Some size -> size / (32 * maxMatrixSize)
+                    | None -> 32 * (1 <<< 20) / (32 * maxMatrixSize)
+
+            
+            // todo: smaller grid
+            let gridSize = bufferSize
+            let wgSize = 2
+            let grid = new _1D(gridSize, wgSize)
+
+            let mult1 = Array.create bufferSize <| Probability.innerZero
+            let mult2 = Array.create bufferSize <| Probability.innerZero
+            let result = Array.create bufferSize <| Probability.innerZero
+            let sizes = [|gridSize; wgSize; 0; 0|] |> Array.map int32
+
+            kernelPrepare grid sizes mult1 mult2 result
+
+            {
+                provider = provider
+                localMemory = localMem
+                maxWorkGroupSize = maxWGSize
+                commandQueue = commandQueue
+                kernel = kernel
+                kernelPrepare = kernelPrepare
+                kernelRun = kernelRun
+                mult1 = mult1
+                mult2 = mult2
+                result = result
+                sizes = sizes
+                options = brahmaOptions
+            }
+            
         let createBrahmaHelper brahmaOptions =
             let provider =
                 try ComputeProvider.Create(brahmaOptions.PlatformName, brahmaOptions.DeviceType)
@@ -94,6 +207,7 @@ open Util
             }
 
         let helpers = {
+            newBrahma = Option.map (Options.map newCreateBrahmaHelper) options.newBrahma
             Brahma = Option.map (Options.map createBrahmaHelper) options.Brahma
             Cuda = Option.map (Options.map createCudaHelper) options.Cuda
             Fast = Option.map id options.Fast
@@ -140,38 +254,6 @@ open Util
 //                    coeff <- coeff - 1
                 // coeff should divide matrixCount
                 let coeff = 1
-                coeff * matricesSize, matricesSize
-
-        let wgSizesLineWise wgSizeRestriction localLinesRestriction matricesCount matricesSize = 
-            if wgSizeRestriction < matricesSize || localLinesRestriction < matricesSize + 1
-            then 
-                let maxWgSize = min wgSizeRestriction (localLinesRestriction - 1)
-                matricesSize / (ceilToPowerOf2 <| matricesSize / maxWgSize), 1          
-            else if wgSizeRestriction < matricesSize * matricesSize || localLinesRestriction < 2 * matricesSize 
-            then 
-                let maxRightLines = min (wgSizeRestriction / matricesSize) (localLinesRestriction - matricesSize)
-                matricesSize, floorToPowerOf2 maxRightLines
-            else 
-                let coeff = floorToPowerOf2 
-                            <| min (wgSizeRestriction / (matricesSize * matricesSize)) 
-                                    (localLinesRestriction / (2 * matricesSize))
-                // coeff should divide matrixCount
-                let coeff = 1
-                coeff * matricesSize, matricesSize
-
-        let wgSizesIgnoringLocalMemoryRestrictions wgSizeRestriction localLinesRestriction matricesCount matricesSize = 
-            if wgSizeRestriction < matricesSize
-            then 
-                matricesSize / (ceilToPowerOf2 <| matricesSize / wgSizeRestriction), 1          
-            else if wgSizeRestriction < matricesSize * matricesSize
-            then 
-                let maxRightLines = wgSizeRestriction / matricesSize
-                matricesSize, floorToPowerOf2 maxRightLines
-            else 
-                let coeff = floorToPowerOf2 
-                            <| wgSizeRestriction / (matricesSize * matricesSize)    
-                // coeff should divide matrixCount
-                let coeff = 1                                 
                 coeff * matricesSize, matricesSize
 
         let doCublasMultiplications matrixHandler (matricesCount: int) matricesSize fullTasks helpers =   
@@ -239,22 +321,25 @@ open Util
                     | Some size -> size / (32 * matricesSize)
                     | None -> 32 * (1 <<< 20) / (32 * matricesSize)
                     
-            let wgItemsXCount = matricesCount * matricesSize
-            let wgItemsYCount = matricesSize
+            let wgItemsXCount = matricesCount * matricesSize * matricesSize
+//            let wgItemsYCount = matricesSize
 
             let wgSizeX, wgSizeY = wgSizesForMatricesWise wgSizeRestriction localLinesRestriction matricesCount matricesSize 
 //            let wgSizeX, wgSizeY = if wgSizeY_ < 2 then wgSizeX_, wgSizeY_ else wgSizeX_ / 2, wgSizeY_ / 2
                                                    
 //            let d = new _2D(wgItemsXCount, wgItemsYCount, 1, 1)
-            let d = new _2D(wgItemsXCount, wgItemsYCount, wgSizeX, wgSizeY)
+//            let d = new _2D(wgItemsXCount, wgItemsYCount, wgSizeX, wgSizeY)
 
-            helpers.kernelPrepare d matricesSize from1 from2 result
+            // todo: local size
+            let d = new _1D(wgItemsXCount, wgSizeX * wgSizeY)
+
+            helpers.kernelPrepare d matricesSize matricesCount from1 from2 result
          
             helpers.commandQueue.Add(helpers.kernelRun()).Finish() |> ignore        
             helpers.commandQueue.Add(result.ToHost helpers.provider).Finish() |> ignore
 
             result
-
+            
         let doSimpleMultiplications isParallel matrixHandler matricesSize fullTasks = 
             let getSubMatrix, flushSubMatrix = matrixHandler
             let doOne (task, nts) =
@@ -280,6 +365,45 @@ open Util
             fullTasks
             |> (if isParallel then Array.Parallel.iter else Array.iter) doOne 
 
+        let newDoBrahmaMultiplications matrixHandler matricesCount matricesSize fullTasks helpers = 
+            let getSubMatrix, flushSubMatrix = matrixHandler
+            let matricesCellCount = matricesSize * matricesSize
+
+            let copyMatrix (where: _ []) skip matrix =
+                matrix |> Array.iteri (fun j v -> where.[skip + j] <- v)
+
+            //todo: 2x copy
+            fullTasks
+            |> Array.map (fun ({ from1 = from }, nts) -> getSubMatrix (fst nts) from false)
+            |> Array.iteri (fun i matrix -> copyMatrix helpers.mult1 (i * matricesCellCount) matrix)
+
+            fullTasks
+            |> Array.map (fun ({ from2 = from }, nts) -> getSubMatrix (snd nts) from true)
+            |> Array.iteri (fun i matrix -> copyMatrix helpers.mult2 (i * matricesCellCount) matrix)
+
+            [0..matricesCellCount * matricesCount-1]
+            |> List.iter (fun i -> helpers.result.[i] <- Probability.innerZero)
+
+            helpers.sizes.[2] <- int32 matricesSize
+            helpers.sizes.[3] <- int32 matricesCount
+            
+            helpers.commandQueue.Add(helpers.mult1.ToGpu(helpers.provider)) |> ignore   
+            helpers.commandQueue.Add(helpers.mult2.ToGpu(helpers.provider)) |> ignore  
+            helpers.commandQueue.Add(helpers.result.ToGpu(helpers.provider)) |> ignore 
+            helpers.commandQueue.Add(helpers.sizes.ToGpu(helpers.provider)) |> ignore          
+            helpers.commandQueue.Add(helpers.kernelRun()) |> ignore        
+            helpers.commandQueue.Add(helpers.result.ToHost helpers.provider).Finish() |> ignore
+
+            let flushOneMatrix num = 
+                let matrix = 
+                    helpers.result.[num * matricesCellCount .. (num + 1) * matricesCellCount - 1]
+                    |> ProbabilityMatrix.create matricesSize matricesSize
+                let task, nts = fullTasks.[num]
+                flushSubMatrix task.where nts matrix          
+            
+            [|0..matricesCount - 1|]
+            |> (if helpers.options.doParallelFlush then Array.Parallel.iter else Array.iter) flushOneMatrix
+            
         let doBrahmaMultiplications matrixHandler matricesCount matricesSize fullTasks helpers = 
             let getSubMatrix, flushSubMatrix = matrixHandler
             let matricesCellCount = matricesSize * matricesSize
@@ -305,7 +429,7 @@ open Util
             
             [|0..matricesCount - 1|]
             |> (if helpers.options.doParallelFlush then Array.Parallel.iter else Array.iter) flushOneMatrix
-            
+  
         member this.performMultiplication arrayMatrixHandler fastMatrixHandler cublasMatrixHandler (tasks: MultiplicationTask []) nts = 
 
             let crossproduct l1 l2 =
@@ -325,6 +449,7 @@ open Util
             let doFast _ = doFastMultiplications isParallel fastMatrixHandler matricesSize fullTasks 
             let doSimple _  = doSimpleMultiplications isParallel arrayMatrixHandler matricesSize fullTasks 
             let doBrahma helpers = doBrahmaMultiplications arrayMatrixHandler matricesCount matricesSize fullTasks helpers
+            let doNewBrahma helpers = newDoBrahmaMultiplications arrayMatrixHandler matricesCount matricesSize fullTasks helpers
             let doCublas helpers = doCublasMultiplications cublasMatrixHandler matricesCount matricesSize fullTasks helpers
 
             let doCheck doMultiplication (helpers_: _ Info option) isDone = 
@@ -342,12 +467,12 @@ open Util
 
             false 
             |> doCheck doCublas helpers.Cuda
-            |> doCheck doBrahma helpers.Brahma      
+            |> doCheck doBrahma helpers.Brahma  
+            |> doCheck doNewBrahma helpers.newBrahma      
             |> doCheck doFast helpers.Fast
             |> doCheck doSimple helpers.Simple
             |> ignore
 
-                
 
         member this.releaseResources () =
             match helpers.Brahma with
@@ -366,8 +491,16 @@ open Util
 
        
     type MatrixHolder(tKeys, pKeys, stringSize, options: Options.T) = 
-    
-        let GPUMultiplicator = new MatriceswMultiplicator (options, Probability.innerSummQuote, Probability.innerMultQuote)
+        
+        let GPUMultiplicator = 
+            // todo: think about search size!!!!!!!!!!
+            let matrixSizeExponent = (log (double stringSize + 1.)) / (log 2.) |> ceil |> int
+            let maxMatrixForMultiplicationSize = (1 <<< (matrixSizeExponent - 1))
+            new MatriceswMultiplicator (options, 
+                                        Probability.innerSummQuote, 
+                                        Probability.innerMultQuote, 
+                                        maxMatrixForMultiplicationSize, 
+                                        Array.length pKeys)
             
         // swich to dictionary (?)
         let tMatrix = Map<NonTerminal, ProbabilityMatrix.T>

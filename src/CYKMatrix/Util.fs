@@ -14,7 +14,7 @@
         PlatformName: string 
         DeviceType: DeviceType
         doParallelFlush: bool
-    }
+    } 
 
     type GPUCuda = {
         doParallelFlush: bool
@@ -28,6 +28,7 @@
     module Options =
 
         type T = {
+            newBrahma: GPUBrahma Info option  
             Brahma: GPUBrahma Info option  
             Cuda: GPUCuda Info option  
             Fast: CPUFast Info option
@@ -35,9 +36,12 @@
             algorithm: Algorithm
         }
 
-        let empty algorithm = { Brahma = None; Cuda = None; Fast = None; Parallel = None; algorithm = algorithm }
+        let empty algorithm = { Brahma = None; newBrahma = None; Cuda = None; Fast = None; Parallel = None; algorithm = algorithm }
         let createOne minMatrixSize options = { MinMatrixSize = minMatrixSize; Options = options}
-        let create algorithm fast parall cuda brahma = { Brahma = brahma; Cuda = cuda; Fast = fast; Parallel = parall; algorithm = algorithm }
+        let create isNewBrahma algorithm fast parall cuda brahma = 
+            if isNewBrahma
+            then { Brahma = None; newBrahma = brahma; Cuda = cuda; Fast = fast; Parallel = parall; algorithm = algorithm }
+            else { Brahma = brahma; newBrahma = None; Cuda = cuda; Fast = fast; Parallel = parall; algorithm = algorithm }
 
         let map f (option: _ Info) = {
             MinMatrixSize = option.MinMatrixSize

@@ -9,7 +9,7 @@ using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.Util;
-
+using ReSharperExtension.GraphDefine;
 using ReSharperExtension.Highlighting;
 using ReSharperExtension.Highlighting.Dynamic;
 using ReSharperExtension.Settings;

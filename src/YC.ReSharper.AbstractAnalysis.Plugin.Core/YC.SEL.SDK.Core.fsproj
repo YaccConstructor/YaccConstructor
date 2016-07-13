@@ -36,6 +36,10 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="DotParser">
+      <HintPath>..\packages\DotParser.1.0.5\lib\net45\DotParser.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FSharp.Control.AsyncSeq">
       <HintPath>..\packages\FSharp.Control.AsyncSeq.2.0.8\lib\net45\FSharp.Control.AsyncSeq.dll</HintPath>
       <Private>True</Private>
@@ -53,14 +57,6 @@
       <HintPath>..\packages\FSharpx.Collections.Experimental.1.15.1\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharpx.Extras">
-      <HintPath>..\packages\FSharpx.Extras.1.10.3\lib\40\FSharpx.Extras.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Text.StructuredFormat">
-      <HintPath>..\packages\FSharpx.Text.StructuredFormat.1.10.3\lib\40\FSharpx.Text.StructuredFormat.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Mono.Addins">
       <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
       <Private>True</Private>
@@ -70,23 +66,44 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
+    <Reference Include="YC.PrettyPrinter">
+      <HintPath>..\packages\YC.PrettyPrinter.0.0.5\lib\net40\YC.PrettyPrinter.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.Data">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.FSA">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.FSA.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.FST">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.FST.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.Glee">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.Glee.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.Graphviz">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.Graphviz.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.Petri">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.Petri.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraphFS">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraphFS.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj">
-      <Name>QuickGraph.FSA</Name>
-      <Project>{bd5d18de-1c9d-4314-a777-21aa683eeace}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj">
-      <Name>QuickGraph.FST</Name>
-      <Project>{4b220e23-a7e0-4222-83f5-c785f7c66b33}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph\QuickGraph.csproj">
-      <Name>QuickGraph</Name>
-      <Project>{a9a5c115-0680-44b3-a87e-5ecf4c93814e}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
       <Name>AbstractAnalysis.Common</Name>
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>

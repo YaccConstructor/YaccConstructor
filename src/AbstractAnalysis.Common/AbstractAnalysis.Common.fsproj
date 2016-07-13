@@ -51,16 +51,55 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="DotParser">
+      <HintPath>..\packages\DotParser.1.0.5\lib\net45\DotParser.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FSharp.Core, Version=4.4.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="FSharpx.Collections">
+      <HintPath>..\packages\FSharpx.Collections.1.15.1\lib\net40\FSharpx.Collections.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Collections.Experimental">
+      <HintPath>..\packages\FSharpx.Collections.Experimental.1.15.1\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph\QuickGraph.csproj">
-      <Name>QuickGraph (SEL.SDK\AbstractLexing\QuickGraph\Core\QuickGraph)</Name>
-      <Project>{a9a5c115-0680-44b3-a87e-5ecf4c93814e}</Project>
+    <Reference Include="YC.QuickGraph">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.dll</HintPath>
       <Private>True</Private>
-    </ProjectReference>
+    </Reference>
+    <Reference Include="YC.QuickGraph.Data">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.FSA">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.FSA.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.FST">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.FST.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.Glee">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.Glee.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.Graphviz">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.Graphviz.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.Petri">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.Petri.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraphFS">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraphFS.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,7 +1,7 @@
-﻿using GraphX;
+﻿using GraphX.Controls;
 using QuickGraph;
 
-namespace ReSharperExtension
+namespace ReSharperExtension.GraphDefine
 {
     /// <summary>
     /// This is custom GraphArea representation using custom data types.

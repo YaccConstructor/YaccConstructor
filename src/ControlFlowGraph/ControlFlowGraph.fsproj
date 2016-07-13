@@ -52,6 +52,10 @@
       <Project>{f296356b-00c3-465c-9c97-7cfa279f5574}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <Reference Include="DotParser">
+      <HintPath>..\packages\DotParser.1.0.5\lib\net45\DotParser.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FSharp.Core">
       <HintPath>..\packages\FSharp.Core.4.0.0.1\lib\net40\FSharp.Core.dll</HintPath>
       <Private>True</Private>
@@ -68,21 +72,43 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj">
-      <Name>QuickGraph.FSA</Name>
-      <Project>{bd5d18de-1c9d-4314-a777-21aa683eeace}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph\QuickGraph.csproj">
-      <Name>QuickGraph</Name>
-      <Project>{a9a5c115-0680-44b3-a87e-5ecf4c93814e}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
       <Name>Common.AST</Name>
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <Reference Include="YC.QuickGraph">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.Data">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.FSA">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.FSA.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.FST">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.FST.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.Glee">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.Glee.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.Graphviz">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.Graphviz.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.Petri">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraph.Petri.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraphFS">
+      <HintPath>..\packages\YC.QuickGraph.3.7.1\lib\net45\YC.QuickGraphFS.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

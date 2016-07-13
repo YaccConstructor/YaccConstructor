@@ -1,7 +1,7 @@
-﻿using GraphX.Logic;
+﻿using GraphX.PCL.Logic.Models;
 using QuickGraph;
 
-namespace ReSharperExtension
+namespace ReSharperExtension.GraphDefine
 {
     public class LogicCore : GXLogicCore<Vertex, Edge, BidirectionalGraph<Vertex, Edge>> { }
 }

@@ -20,8 +20,8 @@ module Yard.Generators.FsYaccPrinter.Generator
 open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
-open Microsoft.FSharp.Text.StructuredFormat
-open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
+open YC.PrettyPrinter.Pretty
+open YC.PrettyPrinter.StructuredFormat
 
 let findTokens (grammar:Rule.t<Source.t, Source.t> list) = 
     let rec _findTokens productions = 
@@ -86,7 +86,7 @@ let fsYaccRule (yardRule : Rule.t<Source.t, Source.t>) =
         | POpt _ -> wordL "$UNEXPECTED OPT$"
 //        | _ -> wordL "$UNEXPECTED$"
     let layout = (^^) (wordL (yardRule.name.text + " :")) (layoutProduction true yardRule.body)
-    Display.layout_to_string FormatOptions.Default layout
+    print 80 layout
 
 let generate2 (ilDef : Definition.t<Source.t, Source.t>) tokenType =
     let headerSection = match ilDef.head with Some v -> sprintf "%%{\n%s\n%%}\n" v.text | None -> ""

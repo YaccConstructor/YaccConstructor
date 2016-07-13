@@ -129,7 +129,8 @@ let main args =
         let provider = 
             try 
                 ComputeProvider.Create(platformName, deviceType)
-            with ex -> failwith ex.Message
+            with ex -> 
+            failwith ex.Message
         gpuOneThread, gpuParallel, provider
             
     let printParams (provider: ComputeProvider) = 
@@ -165,9 +166,9 @@ let main args =
 //    0
 
 
-    let nvidiaOneThread, nvidiaParallel, nvidiaProvider = getGpuOptions nvidiaPlatformName
+//    let nvidiaOneThread, nvidiaParallel, nvidiaProvider = getGpuOptions nvidiaPlatformName
 //    let intelOptions, intelProvider = getGpuOptions intelPlatformName
-//    let amdOptions, amdProvider = getGpuOptions amdPlatformName
+    let amdSequential, amdParallel, amdProvider = getGpuOptions amdPlatformName
 //    let defaultOptions, dafeultProvider = getGpuOptions defaultPlatformName
     let cudaOneThread: GPUCuda = { doParallelFlush = false }
     let cudaParallel: GPUCuda = { doParallelFlush = true }
@@ -180,51 +181,63 @@ let main args =
     let okhotinAlg = Options.empty Algorithm.Okhotin
     let addCuda minms cuda (init: Options.T) = { init with Cuda = Some <| Options.createOne minms cuda } 
     let addBrahma minms brahma (init: Options.T) = { init with Brahma = Some <| Options.createOne minms brahma } 
+    let addNewBrahma minms brahma (init: Options.T) = { init with newBrahma = Some <| Options.createOne minms brahma } 
     let addParallel minms (init: Options.T) = { init with Parallel = Some <| Options.createOne minms () } 
     let addFast minms (init: Options.T) = { init with Fast = Some <| Options.createOne minms () } 
 
-    let bestOption = (myAlg |> addCuda 256 cudaParallel |> addBrahma 16 nvidiaParallel |> addParallel 1)
+//    let bestOption = (myAlg |> addCuda 256 cudaParallel |> addBrahma 16 amdParallel |> addParallel 1)
+    let amdOptions = (myAlg |> addBrahma 2 amdParallel |> addParallel 1)
+    let amdNewOptions = (myAlg |> addNewBrahma 2 amdParallel |> addParallel 1)
 
     let checkTime str searchLen = 
+//        checkOneType 
+//            (fun str searchLen -> recognize amdNewOptions str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "amd new, 16, 1" str searchLen
         checkOneType 
-            (fun str searchLen -> recognize bestOption str rules nonterminals S searchLen ) 
-            (fun toCheck -> isAnswerValid toCheck) "256, 16, parallel" str searchLen
-        checkOneType 
-            (fun str searchLen -> recognize (myAlg |> addCuda 256 cudaOneThread |> addBrahma 16 nvidiaOneThread) str rules nonterminals S searchLen ) 
-            (fun toCheck -> isAnswerValid toCheck) "256, 16, one thread" str searchLen
-        checkOneType 
-            (fun str searchLen -> recognize (okhotinAlg |> addCuda 64 cudaParallel |> addParallel 8) str rules nonterminals S searchLen ) 
-            (fun toCheck -> isAnswerValid toCheck) "okhotin, Gpu" str searchLen
-        checkOneType 
-            (fun str searchLen -> recognize (okhotinAlg |> addFast 64 |> addParallel 8) str rules nonterminals S searchLen ) 
-            (fun toCheck -> isAnswerValid toCheck) "okhotin, parallel" str searchLen
-        checkOneType 
-            (fun str searchLen -> recognize okhotinAlg str rules nonterminals S searchLen ) 
-            (fun toCheck -> isAnswerValid toCheck) "okhotin, one thread" str searchLen
+            (fun str searchLen -> recognize amdOptions str rules nonterminals S searchLen ) 
+            (fun toCheck -> isAnswerValid toCheck) "amd, 16, 1" str searchLen
+//        checkOneType 
+//            (fun str searchLen -> recognize (myAlg |> addCuda 256 cudaOneThread |> addBrahma 16 amdSequential) str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "256, 16, one thread" str searchLen
+//        checkOneType 
+//            (fun str searchLen -> recognize (okhotinAlg |> addCuda 64 cudaParallel |> addParallel 8) str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "okhotin, Gpu" str searchLen
+//        checkOneType 
+//            (fun str searchLen -> recognize (okhotinAlg |> addFast 64 |> addParallel 8) str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "okhotin, parallel" str searchLen
+//        checkOneType 
+//            (fun str searchLen -> recognize okhotinAlg str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "okhotin, one thread" str searchLen
 
-    let check str searchLen = 
-        let toCheck1    = recognize okhotinAlg str rules nonterminals S searchLen 
-        let toCheck2    = recognize (bestOption |> addCuda 64 cudaParallel) str rules nonterminals S searchLen 
+    let check str searchLen param1 param2 = 
+        let toCheck1    = recognize param1 str rules nonterminals S searchLen 
+        let toCheck2    = recognize param2 str rules nonterminals S searchLen 
         assert (isAnswerValid toCheck1 (String.length str) searchLen)
         assert (isAnswerValid toCheck2 (String.length str) searchLen)
         let sameCells cell = 
             //                (Probability.unwrap toCheck.[i, j]) = (Probability.unwrap toCheckBFS.[i, j])
-            (Probability.unwrap toCheck1.[cell]) - (Probability.unwrap toCheck2.[cell]) < 0.0000000001
+            let mutable value = min (Probability.unwrap toCheck1.[cell]) (Probability.unwrap toCheck2.[cell])
+            let mutable diff = abs <| (Probability.unwrap toCheck1.[cell]) - (Probability.unwrap toCheck2.[cell])
+            (diff * 100.) <= value
         let sameAnswers = 
             [ 0..toCheck1.GetLength(0) - 1 ]
             |> Seq.forall (fun i -> (Seq.forall (fun j -> sameCells <| Cell.create i j) [ 0..toCheck1.GetLength(0) - 1 ])) 
-                
-        assert sameAnswers
-    //        printMatrix toCheck1 (String.length str) searchLen 
-    //        printMatrix toCheck2 (String.length str) searchLen 
+               
+        printMatrix toCheck1 (String.length str) searchLen 
+        printMatrix toCheck2 (String.length str) searchLen 
+
+        if not sameAnswers
+        then failwith "different answers"
     
+
+    let toCheckOptions = amdNewOptions
 
 //    check "abb"      2
 //    check "abb"      3    
 //    check "aaabbcc"  5
 //    check "aaabb"    5
-//    check "aaaaabbb" 6
-//    check "aaaabbbbbb" 6
+    check "aaaaabbb" 6 okhotinAlg toCheckOptions
+    check "aaaabbbbbb" 6 okhotinAlg toCheckOptions
 //    check "aaaabbbbbbbbbbb" 10
 //    check "aaaabbbbbbbbbbbbbbb" 10
 //    check "aaaabb" 6
@@ -237,8 +250,8 @@ let main args =
 //    check "aaaabb" 0
 
 //    checkTime (String.replicate 40 "abb") 100
-//    checkTime (String.replicate 200 "abb") 400
-    checkTime (String.replicate 700 "abb") 1600
+//    check (String.replicate 6 "abb") 18 okhotinAlg amdOptions
+//    checkTime (String.replicate 120 "abb") 300
     //        checkTime ((String.replicate 511 "abbb") + "abb") 50
 
     //        check "aabb"

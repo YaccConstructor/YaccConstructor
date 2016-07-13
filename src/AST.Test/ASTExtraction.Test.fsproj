@@ -41,7 +41,6 @@
     <Compile Include="Calc.yrd.fs" />
     <Compile Include="Cycle.yrd.fs" />
     <Compile Include="GetNextTree.Tests.fs" />
-    <None Include="packages.config.bak" />
     <None Include="app.config" />
     <Content Include="packages.config" />
   </ItemGroup>

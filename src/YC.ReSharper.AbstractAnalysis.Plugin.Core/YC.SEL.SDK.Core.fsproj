@@ -44,7 +44,6 @@
       <HintPath>..\packages\FSharp.Control.AsyncSeq.2.0.8\lib\net45\FSharp.Control.AsyncSeq.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharp.Core, Version=4.4.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="FSharpx.Async">
       <HintPath>..\packages\FSharpx.Async.1.12.0\lib\net40\FSharpx.Async.dll</HintPath>
       <Private>True</Private>

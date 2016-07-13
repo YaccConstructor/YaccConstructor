@@ -1,12 +1,10 @@
-﻿open Brahma.FSharp.OpenCL.Core
-open Brahma.FSharp.OpenCL.Extensions
-open Brahma.Helpers
+﻿
 open Brahma.OpenCL
-open Microsoft.FSharp.Quotations
 open OpenCL.Net
 open Printf
 open System
 open System.Collections.Generic
+open Alea.CUDA
 
 open Util
 open CYKMatrix
@@ -103,12 +101,17 @@ let main args =
     
 
     let checkOneType task check taskType str searchLen = 
-        List.iter (fun _ -> task str searchLen |> ignore) [1..3] 
-        let stopWatch = System.Diagnostics.Stopwatch.StartNew()
-        List.iter (fun _ -> task str searchLen |> ignore) [1..10] 
-//        let toCheck = task str searchLen
-        stopWatch.Stop()
-        printfn "type: %s, str length: %i, search length: %i, time(ms): %f." taskType (String.length str) searchLen (stopWatch.Elapsed.TotalMilliseconds / 10.)
+        let n = 15
+        let doOne i =
+            let stopWatch = System.Diagnostics.Stopwatch.StartNew()
+            task str searchLen |> ignore
+            stopWatch.Stop()
+            GC.Collect()
+            let time = stopWatch.Elapsed.TotalMilliseconds
+            printfn "%f" time
+            time
+        let time = [1..n] |> List.map doOne |> List.min
+        printfn "type: %s, str length: %i, search length: %i, time(ms): %f." taskType (String.length str) searchLen time
          
 
 
@@ -189,22 +192,39 @@ let main args =
         checkOneType 
             (fun str searchLen -> recognize bestOption str rules nonterminals S searchLen ) 
             (fun toCheck -> isAnswerValid toCheck) "256, 16, parallel" str searchLen
-        checkOneType 
-            (fun str searchLen -> recognize (myAlg |> addCuda 256 cudaOneThread |> addBrahma 16 nvidiaOneThread) str rules nonterminals S searchLen ) 
-            (fun toCheck -> isAnswerValid toCheck) "256, 16, one thread" str searchLen
-        checkOneType 
-            (fun str searchLen -> recognize (okhotinAlg |> addCuda 64 cudaParallel |> addParallel 8) str rules nonterminals S searchLen ) 
-            (fun toCheck -> isAnswerValid toCheck) "okhotin, Gpu" str searchLen
-        checkOneType 
-            (fun str searchLen -> recognize (okhotinAlg |> addFast 64 |> addParallel 8) str rules nonterminals S searchLen ) 
-            (fun toCheck -> isAnswerValid toCheck) "okhotin, parallel" str searchLen
-        checkOneType 
-            (fun str searchLen -> recognize okhotinAlg str rules nonterminals S searchLen ) 
-            (fun toCheck -> isAnswerValid toCheck) "okhotin, one thread" str searchLen
+//        checkOneType 
+//            (fun str searchlen -> recognize (myAlg |> addCuda 256 cudaParallel |> addBrahma 16 nvidiaParallel) str rules nonterminals S searchlen ) 
+//            (fun tocheck -> isAnswerValid tocheck) "256, 16, parallel" str searchLen
+//        checkOneType 
+//            (fun str searchLen -> recognize (myAlg |> addFast 64 |> addParallel 1) str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "fast 64, par" str searchLen
+//        checkOneType 
+//            (fun str searchLen -> recognize (myAlg |> addFast 64) str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "fast 64" str searchLen
+//        checkOneType 
+//            (fun str searchLen -> recognize myAlg str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "my, vanilla" str searchLen
 
-    let check str searchLen = 
-        let toCheck1    = recognize okhotinAlg str rules nonterminals S searchLen 
-        let toCheck2    = recognize (bestOption |> addCuda 64 cudaParallel) str rules nonterminals S searchLen 
+//        checkOneType 
+//            (fun str searchLen -> recognize (okhotinAlg |> addCuda 64 cudaParallel |> addParallel 16) str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "okhotin, Gpu, par" str searchLen
+//        checkOneType 
+//            (fun str searchLen -> recognize (okhotinAlg |> addCuda 64 cudaOneThread) str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "okhotin, Gpu, seq" str searchLen
+//        checkOneType 
+//            (fun str searchLen -> recognize (okhotinAlg |> addFast 64 |> addParallel 16) str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "okhotin, fast, par" str searchLen
+//        checkOneType 
+//            (fun str searchLen -> recognize (okhotinAlg |> addFast 64) str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "okhotin, fast 64" str searchLen
+//        checkOneType 
+//            (fun str searchLen -> recognize okhotinAlg str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "okhotin, vanilla" str searchLen
+
+
+    let check str searchLen param1 param2 = 
+        let toCheck1    = recognize param1 str rules nonterminals S searchLen 
+        let toCheck2    = recognize param2 str rules nonterminals S searchLen 
         assert (isAnswerValid toCheck1 (String.length str) searchLen)
         assert (isAnswerValid toCheck2 (String.length str) searchLen)
         let sameCells cell = 
@@ -235,9 +255,13 @@ let main args =
 //    check "aaaabb" 2
 //    check "aaaabb" 1
 //    check "aaaabb" 0
+//    check (String.replicate 350 "abb") 800 (myAlg |> addFast 64 |> addParallel 1) bestOption
+//    check (String.replicate 350 "abb") 800 bestOption (myAlg |> addFast 64 |> addParallel 1) 
 
 //    checkTime (String.replicate 40 "abb") 100
 //    checkTime (String.replicate 200 "abb") 400
+
+
     checkTime (String.replicate 700 "abb") 1600
     //        checkTime ((String.replicate 511 "abbb") + "abb") 50
 

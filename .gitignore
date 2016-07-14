@@ -21,6 +21,9 @@ bld/
 # Roslyn cache directories
 *.ide/
 
+# Fake cache
+.fake/
+
 # MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
@@ -466,6 +469,7 @@ Tests/sbt/graphs_old/ms/*.dot
 Tests/sbt/graphs_old/pl/*.dot
 Tests/sbt/ready/*.dot
 Tests/AbstractPerformance/TSQL/*/*.dot
+src/RNGLRApplication/res.dot
 # Guidance Automation Toolkit
 *.gpState
 

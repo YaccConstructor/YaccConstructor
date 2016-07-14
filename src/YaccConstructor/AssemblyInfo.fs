@@ -1,5 +1,6 @@
 ﻿namespace System
 open System.Reflection
+[<assembly: AssemblyCopyright("Copyright © 2013. YaccConstructor Software Foundation https://code.google.com/p/recursive-ascent/")>]
 
 [<assembly: AssemblyTitleAttribute("YaccConstructor")>]
 [<assembly: AssemblyProductAttribute("YaccConstructor")>]

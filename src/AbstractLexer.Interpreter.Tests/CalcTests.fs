@@ -170,7 +170,7 @@ type ``Lexer Calc Fst Tests`` () =
         
     [<Test>] 
     member this.``Calc. Complex 0`` () =
-        calcTokenizationTest "test_12.dot" 7 7 [|1; 1; 2; 1; 1; 1; 0|]
+        calcTokenizationTest "test_12.dot" 7 7 [|1; 1; 1; 2; 1; 1; 0|]
 
     [<Test>] 
     member this.``Calc. Whitespace edge.`` () =

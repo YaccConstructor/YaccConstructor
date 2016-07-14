@@ -11,6 +11,7 @@ open AbstractAnalysis.Common
 open Graphviz4Net.Dot.AntlrParser
 open Graphviz4Net.Dot
 open System.IO
+open System.Collections.Generic
 open Yard.Utils.StructClass
 
 let eof = RNGLR_EOF(new FSA<_>())
@@ -51,7 +52,10 @@ let path baseInputGraphsPath name = System.IO.Path.Combine(baseInputGraphsPath,n
 
 let loadDotToQG path =
     let dot = File.ReadAllText(path)
-    BidirectionalGraph.LoadDot(dot, (fun v attrs -> int v), (fun v1 v2 attr -> new TaggedEdge<_,_>(int v1, int v2, (snd attr.[0], snd attr.[0]))))
+    let vertexFunc = fun v attrs -> int v
+    let edgeFunc = fun v1 v2 (attrs: IDictionary<string, string>) -> new TaggedEdge<_,_>(v1, v2, (attrs.Item("label"), attrs.Item("label")))
+     
+    BidirectionalGraph<_,_>.LoadDot(dot, new Func<_,_,_>(vertexFunc), new Func<_,_,_,_>(edgeFunc))
 
 let approximateQG (graph: BidirectionalGraph<int,TaggedEdge<int,(string * 'br)>>) = 
     let fsa = new FSA<_>()
@@ -94,7 +98,9 @@ let checkArr expectedArr actualArr =
     then 
         Array.iteri2 (
             fun i x1 x2 -> 
-            if x1 <> x2 then Assert.Fail ("Arrays differ at position: " + string i)) expectedArr actualArr
+            if x1 <> x2 then
+                printfn "%A %A" expectedArr actualArr
+                Assert.Fail ("Arrays differ at position: " + string i)) expectedArr actualArr
         Assert.Pass()
     else Assert.Fail ("Arrays have different length")
  

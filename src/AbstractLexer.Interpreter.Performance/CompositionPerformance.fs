@@ -1,15 +1,14 @@
-﻿open System
+﻿module YC.FST.AbstractLexing.CompositionPerformance
+
+open System
 open System.IO
 open System.Diagnostics
 open System.Collections.Generic
-open Microsoft.FSharp.Collections 
-open YC.FST.AbstractLexing.Interpreter
+open Microsoft.FSharp.Collections
 open YC.FST.AbstractLexing.Tests.Calc
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
-open QuickGraph
 open QuickGraph.FST.GraphBasedFst
-open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FST.Tests.GraphBasedFstTestData
+open Performance.TestData
 
 let benchmark func iterations =
     GC.Collect() // give the test as good a chance as possible of avoiding garbage collection
@@ -61,7 +60,7 @@ let main argv =
                     printfn "Average time for optimal compose: %A" composeTime
                     printfn "Ratio: %A\n" (oldComposeTime / composeTime)
                 with
-                    | _ -> printfn"%s is not %s compliant!\n" test lang
+                    | e -> printfn"%s is not %s compliant! Error: %A\n" test lang e.Message
             with
                 | e -> printfn"%s is not a valid .dot file! Full error: %A\n" test e
     let runManuallyCreatedTests (tests : list<FST<_,_>*FST<_,_>>) = 

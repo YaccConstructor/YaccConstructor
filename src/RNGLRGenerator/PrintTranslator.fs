@@ -22,8 +22,8 @@ open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 open Yard.Core.IL
 open Yard.Core.IL.Production
-open Microsoft.FSharp.Text.StructuredFormat
-open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
+open YC.PrettyPrinter.Pretty
+open YC.PrettyPrinter.StructuredFormat
 open Yard.Generators.Common.Epsilon
 open HighlightingPrinter
 
@@ -300,4 +300,4 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
     //let nowarn = wordL "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
     [(*nowarn; *)defineEpsilonTrees; (*declareNonTermsArrays;*)rules; funRes]
     |> aboveListL
-    |> Display.layout_to_string(FormatOptions.Default)
+    |> print 80

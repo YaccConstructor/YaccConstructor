@@ -1,15 +1,14 @@
-﻿open System
+﻿module YC.FST.AbstractLexing.CompositionPerformance
+
+open System
 open System.IO
 open System.Diagnostics
 open System.Collections.Generic
-open Microsoft.FSharp.Collections 
-open YC.FST.AbstractLexing.Interpreter
+open Microsoft.FSharp.Collections
 open YC.FST.AbstractLexing.Tests.Calc
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
-open QuickGraph
 open QuickGraph.FST.GraphBasedFst
-open QuickGraph.FSA.GraphBasedFsa
-open QuickGraph.FST.Tests.GraphBasedFstTestData
+open Performance.TestData
 
 let benchmark func iterations =
     GC.Collect() // give the test as good a chance as possible of avoiding garbage collection

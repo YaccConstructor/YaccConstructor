@@ -1,8 +1,7 @@
 ﻿using System.Windows.Media;
 using QuickGraph;
-using QuickGraph.Collections;
 
-namespace ReSharperExtension
+namespace ReSharperExtension.GraphDefine
 {
 
     public class Graph : BidirectionalGraph<Vertex, Edge>

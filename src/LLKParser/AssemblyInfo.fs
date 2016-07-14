@@ -1,4 +1,4 @@
-namespace LLKParser.AssemblyInfo
+ï»¿namespace LLKParser.AssemblyInfo
 
 open System.Reflection
 open System.Runtime.CompilerServices
@@ -12,7 +12,7 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyConfiguration("Release")>]
 [<assembly: AssemblyCompany("")>]
 [<assembly: AssemblyProduct("LLKParser")>]
-[<assembly: AssemblyCopyright("Copyright ©  2016")>]
+[<assembly: AssemblyCopyright("Copyright ï¿½  2016")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]
 

@@ -69,6 +69,7 @@ type ``CYK generator tests`` () =
             ; "  [| 281479271677952UL |]"
             ; "let lblName = "
             ; "  [|"
+            ; "  "
             ; "  |]"
             ; "let StartNTerm = 1"
             ; "let CodeTokenStream (stream:seq<CYKToken<cykToken,_>>) = "

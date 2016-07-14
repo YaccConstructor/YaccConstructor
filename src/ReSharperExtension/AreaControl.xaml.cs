@@ -3,11 +3,12 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using GraphX;
 using GraphX.Controls;
-using GraphX.GraphSharp.Algorithms.Layout.Simple.FDP;
-using GraphX.Models;
+using GraphX.Controls.Models;
+using GraphX.PCL.Common.Enums;
+using GraphX.PCL.Logic.Algorithms.LayoutAlgorithms;
 using JetBrains.TextControl;
+using ReSharperExtension.GraphDefine;
 
 namespace ReSharperExtension
 {

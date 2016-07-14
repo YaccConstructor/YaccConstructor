@@ -7,9 +7,9 @@
 [submodule "src/YC.GrammarZOO"]
 	path = src/YC.GrammarZOO
 	url = https://github.com/YaccConstructor/YC.GrammarZOO.git
-[submodule "QuickGraph"]
-	path = QuickGraph
-	url = https://github.com/YaccConstructor/QuickGraph.git
 [submodule "src/YC.Utils.SourceText"]
 	path = src/YC.Utils.SourceText
 	url = https://github.com/YaccConstructor/YC.Utils.SourceText.git
+[submodule "src/GraphX"]
+	path = src/GraphX
+	url = https://github.com/YaccConstructor/GraphX.git

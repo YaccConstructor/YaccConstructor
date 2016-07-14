@@ -1,7 +1,7 @@
 ﻿using System.Windows.Media;
-using GraphX;
+using GraphX.PCL.Common.Models;
 
-namespace ReSharperExtension
+namespace ReSharperExtension.GraphDefine
 {
     public class Edge : EdgeBase<Vertex>
     {

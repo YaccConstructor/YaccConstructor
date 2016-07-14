@@ -16,6 +16,7 @@ open Yard.Generators.RNGLR.AbstractParser
 open Yard.Generators.ARNGLR.Parser
 open RNGLRAbstractParserTests
 open System
+open System.Collections.Generic
 open System.IO
 
 let baseInputGraphsPath = "../../../src/TSQL.Test/DotTSQL"
@@ -52,7 +53,10 @@ let printBref =
 
 let loadGraphToQGResharper path =
     let dot = File.ReadAllText(path)
-    BidirectionalGraph.LoadDot(dot, (fun v attrs -> int v), (fun v1 v2 attr -> new TaggedEdge<_,_>(int v1, int v2, (snd attr.[0], br))))
+    let vertexFunc = fun v attrs -> int v
+    let edgeFunc = fun v1 v2 (attrs: IDictionary<string, string>) -> new TaggedEdge<_,_>(v1, v2, (attrs.Item("label"), br))
+     
+    BidirectionalGraph<_,_>.LoadDot(dot, new Func<_,_,_>(vertexFunc), new Func<_,_,_,_>(edgeFunc))
       
 let TSQLTokenizationTest file eCount vCount =
     let graph = loadGraphToQGResharper (path baseInputGraphsPath file)

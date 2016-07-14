@@ -15,7 +15,7 @@
     <Name>CYKMatrix</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <NuGetPackageImportStamp>cbbb5a48</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>e8522a78</NuGetPackageImportStamp>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -40,6 +40,8 @@
     <PlatformTarget>x64</PlatformTarget>
     <DocumentationFile>bin\Release\CYKMatrix.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
+    <OtherFlags>
+    </OtherFlags>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -63,11 +65,10 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-    <Error Condition="!Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets'))" />
     <Error Condition="!Exists('..\packages\Alea.CUDA.2.2.0.3307\build\Alea.CUDA.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Alea.CUDA.2.2.0.3307\build\Alea.CUDA.targets'))" />
-    <Error Condition="!Exists('..\packages\Fody.1.28.3\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.1.28.3\build\Fody.targets'))" />
+    <Error Condition="!Exists('..\packages\Fody.1.29.4\build\portable-net+sl+win+wpa+wp\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.1.29.4\build\portable-net+sl+win+wpa+wp\Fody.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets'))" />
   </Target>
-  <Import Project="..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />
   <Import Project="..\packages\Alea.CUDA.2.2.0.3307\build\Alea.CUDA.targets" Condition="Exists('..\packages\Alea.CUDA.2.2.0.3307\build\Alea.CUDA.targets')" />
   <ItemGroup>
     <None Include="App.config" />
@@ -94,35 +95,31 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma">
-      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Brahma.FSharp.1.0.0\lib\net45\Brahma.dll</HintPath>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.AST">
-      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.FSharp.OpenCL.AST.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Brahma.FSharp.1.0.0\lib\net45\Brahma.FSharp.OpenCL.AST.dll</HintPath>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Core">
-      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.FSharp.OpenCL.Core.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Brahma.FSharp.1.0.0\lib\net45\Brahma.FSharp.OpenCL.Core.dll</HintPath>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Extensions">
-      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.FSharp.OpenCL.Extensions.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Brahma.FSharp.1.0.0\lib\net45\Brahma.FSharp.OpenCL.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Printer">
-      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.FSharp.OpenCL.Printer.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Brahma.FSharp.1.0.0\lib\net45\Brahma.FSharp.OpenCL.Printer.dll</HintPath>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Translator">
-      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.FSharp.OpenCL.Translator.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Brahma.FSharp.1.0.0\lib\net45\Brahma.FSharp.OpenCL.Translator.dll</HintPath>
     </Reference>
     <Reference Include="Brahma.Helpers">
-      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.Helpers.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Brahma.FSharp.1.0.0\lib\net45\Brahma.Helpers.dll</HintPath>
     </Reference>
     <Reference Include="Brahma.OpenCL">
-      <HintPath>..\packages\Brahma.FSharp.0.3.5.0\lib\net40\Brahma.OpenCL.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.1.0.0\lib\net45\Brahma.OpenCL.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.Core">
+      <HintPath>..\packages\FSharp.Core.4.0.0.1\lib\net40\FSharp.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.PowerPack">
@@ -141,18 +138,15 @@
       <HintPath>..\packages\FSPowerPack.Parallel.Seq.Community.3.0.0.0\Lib\Net40\FSharp.PowerPack.Parallel.Seq.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharpx.Core">
-      <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
+    <Reference Include="FSharp.Quotations.Evaluator">
+      <HintPath>..\packages\FSharp.Quotations.Evaluator.1.0.7\lib\net40\FSharp.Quotations.Evaluator.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharpx.Text.StructuredFormat">
-      <HintPath>..\packages\FSharpx.Text.StructuredFormat.1.8.41\lib\40\FSharpx.Text.StructuredFormat.dll</HintPath>
+    <Reference Include="FSharpx.Collections">
+      <HintPath>..\packages\FSharpx.Collections.1.15.1\lib\net40\FSharpx.Collections.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Private>True</Private>
-    </Reference>
     <Reference Include="OpenCL.Net">
       <HintPath>..\packages\OpenCL.Net.2.2.9.0\lib\net40\OpenCL.Net.dll</HintPath>
       <Private>True</Private>
@@ -160,8 +154,13 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="YC.PrettyPrinter">
+      <HintPath>..\packages\YC.PrettyPrinter.0.0.5\lib\net40\YC.PrettyPrinter.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
-  <Import Project="..\packages\Fody.1.28.3\build\Fody.targets" Condition="Exists('..\packages\Fody.1.28.3\build\Fody.targets')" />
+  <Import Project="..\packages\Fody.1.29.4\build\portable-net+sl+win+wpa+wp\Fody.targets" Condition="Exists('..\packages\Fody.1.29.4\build\portable-net+sl+win+wpa+wp\Fody.targets')" />
+  <Import Project="..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

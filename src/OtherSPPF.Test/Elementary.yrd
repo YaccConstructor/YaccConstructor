@@ -1,3 +1,0 @@
-[<Start>]
-start: A B C D | A epsilon C
-epsilon: {}

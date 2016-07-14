@@ -1,7 +1,0 @@
-[<Start>]
-Num: Mul;
-Num: Num '+' Mul;
-Mul: 'a';
-Mul: Mul '*' 'a';
-
-	

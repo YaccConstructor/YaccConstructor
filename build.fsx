@@ -45,7 +45,7 @@ let authors = [ "YaccConstructor software foundation" ]
 let tags = "F# Parser Lexer BNF EBNF GLR GLL generator syntax .NET FSharp"
 
 // File system information 
-let solutionFile  = "src/YC.SDK.sln"
+let solutionFile  = "YaccConstructor.sln"
 
 // Pattern specifying assemblies to be tested using NUnit
 let testAssemblies = "tests/**/bin/Release/*Tests*.dll"

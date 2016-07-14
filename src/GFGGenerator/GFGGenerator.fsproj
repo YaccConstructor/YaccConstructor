@@ -13,7 +13,6 @@
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
     <Name>GFGGenerator</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -50,7 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GFGGenerator.fs" />
-    <None Include="packages.config" />
+    <None Include="paket.references" />
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
@@ -67,11 +66,6 @@
     <ProjectReference Include="..\..\QuickGraph\src\QuickGraph\QuickGraph.csproj">
       <Name>QuickGraph (SEL.SDK\AbstractLexing\QuickGraph\Core\QuickGraph)</Name>
       <Project>{a9a5c115-0680-44b3-a87e-5ecf4c93814e}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\QuickGraph\tests\DotParser.Tests\QuickGraph.DotParserTest\QuickGraph.DotParserTest.csproj">
-      <Name>QuickGraph.DotParserTest</Name>
-      <Project>{e28a6069-2131-48cc-b174-60458d973613}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Common\Common.fsproj">
@@ -121,13 +115,6 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>Данный проект ссылается на пакеты NuGet, отсутствующие на этом компьютере. Включите восстановление пакетов NuGet, чтобы загрузить их. Дополнительные сведения см. по адресу: http://go.microsoft.com/fwlink/?LinkID=322105. Отсутствует следующий файл: {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
@@ -135,4 +122,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Import Project="..\.paket\paket.targets" />
 </Project>

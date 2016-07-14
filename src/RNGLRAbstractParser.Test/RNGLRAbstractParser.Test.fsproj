@@ -84,9 +84,7 @@
     <Reference Include="Graphviz4Net">
       <HintPath>..\..\3rdParty\graphviz4net\Graphviz4Net.dll</HintPath>
     </Reference>
-    <Reference Include="JetBrains.ReSharper.Psi.CSharp">
-      <HintPath>..\packages\JetBrains.Psi.Features.src.102.0.20150522.71619\DotFiles\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
-    </Reference>
+
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
@@ -155,21 +153,6 @@
     <ProjectReference Include="..\RNGLRParser\RNGLRParser.fsproj">
       <Name>RNGLRParser</Name>
       <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\TSQL\TSQL.fsproj">
-      <Name>TSQL</Name>
-      <Project>{5c8b9089-f612-4761-b712-09ecb5317c76}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\TSQL\TSQLHighlighting\TSQLHighlighting.csproj">
-      <Name>TSQLHighlighting</Name>
-      <Project>{6ee8bdd8-79e9-41f5-8a8e-e959835d60fb}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.SEL.SDK.Core.fsproj">
-      <Name>YC.SEL.SDK.Core</Name>
-      <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\YC.Utils.SourceText\src\YC.Utils.SourceText\Utils.SourceText.fsproj">

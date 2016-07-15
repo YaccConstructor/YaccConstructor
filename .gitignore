@@ -203,7 +203,7 @@ Builder/SolutionTemplate/*/*.cs
 Builder/SolutionTemplate/*/*.yrd
 Builder/SolutionTemplate/*/*.fsi
 Examples/RNGLR/MSSql/ast.dot
-Examples/RNGLR/MSSql/ast.dot.pdf
+*.dot.pdf
 Examples/RNGLR/MSSql/log.txt
 Examples/yc/*
 Examples/CYK/DialectsCYKDemo/SQLSelectDemo/SelectDemo.fs

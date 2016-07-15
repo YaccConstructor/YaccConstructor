@@ -1,7 +1,7 @@
 ﻿namespace System
 open System.Reflection
 
-[<assembly: AssemblyTitleAttribute("Common.Generators")>]
+[<assembly: AssemblyTitleAttribute("Generators.Common")>]
 [<assembly: AssemblyProductAttribute("YaccConstructor")>]
 [<assembly: AssemblyDescriptionAttribute("Platform for parser generators and other grammarware research and development.")>]
 [<assembly: AssemblyVersionAttribute("1.0")>]

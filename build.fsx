@@ -47,6 +47,9 @@ let tags = "F# Parser Lexer BNF EBNF GLR GLL generator syntax .NET FSharp"
 // File system information 
 let solutionFile  = "YaccConstructor.sln"
 
+let ycCoreSolutionFile  = "YC.Core.sln"
+let ycMinimalSolutionFile  = "YC.Minimal.sln"
+
 // Pattern specifying assemblies to be tested using NUnit
 let testAssemblies = "tests/**/bin/Release/*Tests*.dll"
 
@@ -126,11 +129,35 @@ Target "CleanDocs" (fun _ ->
 // --------------------------------------------------------------------------------------
 // Build library & test project
 
-Target "Build" (fun _ ->
+Target "BuildAll" (fun _ ->
     !! solutionFile
     |> MSBuildRelease "" "Rebuild"
     |> ignore
 )
+
+Target "BuildCore" (fun _ ->
+    !! ycCoreSolutionFile
+    |> MSBuildRelease "" "Rebuild"
+    |> ignore
+)
+
+Target "BuildMinimal" (fun _ ->
+    !! ycMinimalSolutionFile
+    |> MSBuildRelease "" "Rebuild"
+    |> ignore
+)
+
+
+// --------------------------------------------------------------------------------------
+// Gen frontends, tests etc
+
+Target "Gen:FsYaccFrontend" (fun _ ->
+    let retCode = Fake.ProcessHelper.Shell.Exec(System.IO.Path.GetFullPath(@"src\FsYaccFrontend\gen.cmd"), dir = @"src\FsYaccFrontend")
+    if retCode = 0
+    then ()
+    else failwith "FsYaccFrontend generation failed!"
+)
+
 
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner
@@ -366,11 +393,15 @@ Target "All" DoNothing
 
 "Clean"
   ==> "AssemblyInfo"
-  ==> "Build"
+  ==> "BuildCore"
+  ==> "Gen:FsYaccFrontend"
+  ==> "BuildMinimal"
+(*  ==> "BuildAll"
   ==> "CopyBinaries"
   ==> "RunTests"
   ==> "GenerateReferenceDocs"
   ==> "GenerateDocs"
+  *)
   ==> "All"
   =?> ("ReleaseDocs",isLocalBuild)
 

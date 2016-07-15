@@ -75,8 +75,11 @@
 //        let inline innerMult v1 v2 = v1 && v2
         let innerSummQuote = <@ fun (v1: InnerType) (v2: InnerType) -> v1 + v2 @>
         let innerMultQuote = <@ fun (v1: InnerType) (v2: InnerType) -> v1 * v2 @>
+        let innerZeroQuote = <@ float32 0. @>
+
         let innerSumm v1 v2 = v1 + v2
         let innerMult v1 v2 = v1 * v2
+        //todo: compile quote
 
         let summ (Float32Probability v1) (Float32Probability v2) = innerSumm v1 v2 |> fromInnerValue
         let multiplicate (Float32Probability v1) (Float32Probability v2) = innerMult v1 v2 |> fromInnerValue

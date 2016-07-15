@@ -1,4 +1,6 @@
-﻿module TPMatrices
+﻿module TPMatrices 
+open FSharp.Quotations.Evaluator
+open Microsoft.FSharp.Quotations
 
 open Brahma.FSharp.OpenCL.Core
 open Brahma.FSharp.OpenCL.Extensions
@@ -29,9 +31,9 @@ open Util
           commandQueue: CommandQueue
           localMemory: int option
           maxWorkGroupSize: int option
-          kernel: _1D Brahma.OpenCL.Kernel
-          kernelPrepare: _1D -> int -> int -> Probability.InnerType [] -> Probability.InnerType [] -> Probability.InnerType [] -> unit
-          kernelRun: unit -> _1D Commands.Run
+          kernel: _2D Brahma.OpenCL.Kernel
+          kernelPrepare: _2D -> int -> Probability.InnerType [] -> Probability.InnerType [] -> Probability.InnerType [] -> unit
+          kernelRun: unit -> _2D Commands.Run
           options: Util.GPUBrahma }
 
     type GPUCuda = 
@@ -52,53 +54,79 @@ open Util
     }
 
 
-    type MatriceswMultiplicator (options: Options.T, probabilitySummQuote, probabilityMultQuote, maxMatrixSize, ntsCount) =
+    type MatriceswMultiplicator (options: Options.T, summProbabilities, multiplicateProbabilities, zeroProbability, maxMatrixSize, ntsCount) =
 
-        let multiplicateProbabilities = probabilityMultQuote
-        let summProbabilities = probabilitySummQuote
 
         let newCommand = 
             <@
                 fun (r:_1D) (sizes:array<_>) (a:array<_>) (b:array<_>) (c:array<_>) -> 
+                    // предполагается, что все в рамках одной пары матриц
                     let gridSize = sizes.[0]
                     let matricesSize = sizes.[2]
                     let matricesCount = sizes.[3]
-                    let matricesCellNum = matricesSize * matricesSize
-                    let num = r.GlobalID0 / matricesCellNum
-                    if (r.GlobalID0 < matricesCellNum * matricesCount) && (num < matricesCount)
+                    let matrixCellNum = matricesSize * matricesSize
+                    let globalCellCount = matrixCellNum * matricesCount
+                    // todo:
+                    let cellsToHandle_ = globalCellCount / gridSize
+                    let cellsToHandle = 
+                        if cellsToHandle_ < matrixCellNum
+                        then cellsToHandle_
+                        else matrixCellNum
+                    let firstToHandle = r.GlobalID0 * cellsToHandle 
+                    if firstToHandle < globalCellCount
                     then
-                        let x = r.GlobalID0 - num * matricesCellNum
-                        let ti = x / matricesSize
-                        let tj = x - ti * matricesSize           
-                        let skipMatrices = num * matricesCellNum
-                        let skipRows = ti * matricesSize + skipMatrices
-                        let skipCols = tj * matricesSize + skipMatrices
-                        // todo: innerZero
-                        let mutable buf = c.[skipRows + tj]
-                        for k in 0 .. matricesSize - 1 do
-                            buf <- (%summProbabilities) buf ((%multiplicateProbabilities) a.[skipRows + k] b.[skipCols + k])
-                        c.[skipRows + tj] <- buf
+                        let num = firstToHandle / matrixCellNum
+                        let skipMatrices = num * matrixCellNum
+                        for ti in [firstToHandle..matricesSize..firstToHandle + cellsToHandle - 1] do
+                            let i = (ti - skipMatrices) / matricesSize
+                            for tj in [ti..(min (firstToHandle + cellsToHandle - 1) (ti + matricesSize - 1))] do
+                                let j = tj - skipMatrices - (i * matricesSize)         
+                            
+                                let skipRows = i * matricesSize + skipMatrices
+                                let skipCols = j * matricesSize + skipMatrices
+                                // todo: innerZero
+                                let mutable buf = c.[skipRows + j]
+                                for k in 0 .. matricesSize - 1 do
+                                    buf <- (%summProbabilities) buf ((%multiplicateProbabilities) a.[skipRows + k] b.[skipCols + k])
+                                c.[skipRows + j] <- buf
             @>  
 
         let command = 
             <@
-                fun (r:_1D) matricesSize matricesCount (a:array<_>) (b:array<_>) (c:array<_>) -> 
-                    let matricesCellNum = matricesSize * matricesSize
-                    let num = r.GlobalID0 / matricesCellNum
-                    let x = r.GlobalID0 - num * matricesCellNum
-                    let ti = x / matricesSize
-                    let tj = x - ti * matricesSize      
-                    let skipMatrices = num * matricesCellNum
+                fun (r:_2D) matricesSize (a:array<_>) (b:array<_>) (c:array<_>) -> 
+                    let num = r.GlobalID0 / matricesSize
+                    let ti = r.GlobalID0 - num * matricesSize
+                    let tj = r.GlobalID1                 
+                    let skipMatrices = num * matricesSize * matricesSize
                     let skipRows = ti * matricesSize + skipMatrices
                     let skipCols = tj * matricesSize + skipMatrices
-                    // todo: innerZero
-                    let mutable buf = c.[skipRows + tj]
-                    for k in 0 .. matricesSize - 1 do
+                    let mutable buf = (%zeroProbability)
+//                    let mutable buf = c.[skipRows + tj]
+//                    let k = ref 0
+//                    while (!k < matricesSize) do 
+                    for k in 0 .. (matricesSize - 1) do
+                        buf <- (%summProbabilities) buf ((%multiplicateProbabilities) a.[skipRows + k] b.[skipCols + k])
+//                        k := !k + 1
+                    c.[skipRows + tj] <- buf
+            @>  
+
+        let command_ = 
+            <@
+                fun global0 global1 matricesSize (a:array<_>) (b:array<_>) (c:array<_>) -> 
+                    let num = global0 / matricesSize
+                    let ti = global0 - num * matricesSize
+                    let tj = global1                 
+                    let skipMatrices = num * matricesSize * matricesSize
+                    let skipRows = ti * matricesSize + skipMatrices
+                    let skipCols = tj * matricesSize + skipMatrices
+                    let mutable buf = (%zeroProbability)
+//                    let mutable buf = c.[skipRows + tj]
+                    for k in 0 .. (matricesSize - 1) do
                         buf <- (%summProbabilities) buf ((%multiplicateProbabilities) a.[skipRows + k] b.[skipCols + k])
                     c.[skipRows + tj] <- buf
             @>  
 
-        let newCreateBrahmaHelper brahmaOptions =
+        let newCreateBrahmaHelper minMatrixSize brahmaOptions =
             let provider =
                 try ComputeProvider.Create(brahmaOptions.PlatformName, brahmaOptions.DeviceType)
                 with 
@@ -144,8 +172,8 @@ open Util
                     | None -> 32 * (1 <<< 20) / (32 * maxMatrixSize)
 
             
-            // todo: smaller grid
-            let gridSize = bufferSize
+            // todo: sizes
+            let gridSize = maxMatrixSize / minMatrixSize
             let wgSize = 2
             let grid = new _1D(gridSize, wgSize)
 
@@ -207,7 +235,10 @@ open Util
             }
 
         let helpers = {
-            newBrahma = Option.map (Options.map newCreateBrahmaHelper) options.newBrahma
+            newBrahma = 
+                match options.newBrahma with 
+                | Some options -> Some (Options.map (newCreateBrahmaHelper options.MinMatrixSize) options)
+                | None -> None
             Brahma = Option.map (Options.map createBrahmaHelper) options.Brahma
             Cuda = Option.map (Options.map createCudaHelper) options.Cuda
             Fast = Option.map id options.Fast
@@ -321,9 +352,10 @@ open Util
                     | Some size -> size / (32 * matricesSize)
                     | None -> 32 * (1 <<< 20) / (32 * matricesSize)
                     
-            let wgItemsXCount = matricesCount * matricesSize * matricesSize
-//            let wgItemsYCount = matricesSize
+            let wgItemsXCount = matricesCount * matricesSize
+            let wgItemsYCount = matricesSize
 
+//            let wgSizeX, wgSizeY = 1, 1
             let wgSizeX, wgSizeY = wgSizesForMatricesWise wgSizeRestriction localLinesRestriction matricesCount matricesSize 
 //            let wgSizeX, wgSizeY = if wgSizeY_ < 2 then wgSizeX_, wgSizeY_ else wgSizeX_ / 2, wgSizeY_ / 2
                                                    
@@ -331,13 +363,35 @@ open Util
 //            let d = new _2D(wgItemsXCount, wgItemsYCount, wgSizeX, wgSizeY)
 
             // todo: local size
-            let d = new _1D(wgItemsXCount, wgSizeX * wgSizeY)
+            let d = new _2D(wgItemsXCount, wgItemsYCount, wgSizeX, wgSizeY)
 
-            helpers.kernelPrepare d matricesSize matricesCount from1 from2 result
+            helpers.kernelPrepare d matricesSize from1 from2 result
          
             helpers.commandQueue.Add(helpers.kernelRun()).Finish() |> ignore        
             helpers.commandQueue.Add(result.ToHost helpers.provider).Finish() |> ignore
+            
+            let checkWhetherResultIsValid () = 
+                let result_: Probability.InnerType [] = Array.zeroCreate(matricesCount * matricesSize * matricesSize)
+                for i in [0 .. (matricesCount * matricesSize - 1)] do
+                    for j in [0 .. matricesSize - 1] do
+                        (QuotationEvaluator.Evaluate command_) i j matricesSize from1 from2 result_
+                
+                let sameCells x = 
+                    //                (Probability.unwrap toCheck.[i, j]) = (Probability.unwrap toCheckBFS.[i, j])
+                    let value = float <| min result.[x] result_.[x]
+                    let diff = abs <| result.[x] - result_.[x]
+                    (float diff * 1000.) <= value
 
+                for x in [ 0..matricesCount * matricesSize * matricesSize - 1 ] do 
+                    if not <| sameCells x
+                    then
+                        let num = x / (matricesSize * matricesSize)
+                        let i = (x - num * (matricesSize * matricesSize)) / matricesSize
+                        let j = (x - num * (matricesSize * matricesSize) - i * matricesSize) 
+                        printfn "During evaluation of %ith multiplication task value in cell (%i,%i) was computed wrong. Expecting %e but %e found." (num + 1) i j result_.[x] result.[x]
+
+            checkWhetherResultIsValid()
+                        
             result
             
         let doSimpleMultiplications isParallel matrixHandler matricesSize fullTasks = 
@@ -480,9 +534,11 @@ open Util
                 helpers.Options.commandQueue.Dispose()
                 helpers.Options.provider.Dispose()
                 helpers.Options.provider.CloseAllBuffers()
+                ()
             | None -> 
             match helpers.Cuda with
             | Some helpers -> ()
+            // wtf?
 //                    helpers.Options.worker.Dispose()  
             | None -> ()
 
@@ -496,11 +552,12 @@ open Util
             // todo: think about search size!!!!!!!!!!
             let matrixSizeExponent = (log (double stringSize + 1.)) / (log 2.) |> ceil |> int
             let maxMatrixForMultiplicationSize = (1 <<< (matrixSizeExponent - 1))
-            new MatriceswMultiplicator (options, 
-                                        Probability.innerSummQuote, 
-                                        Probability.innerMultQuote, 
-                                        maxMatrixForMultiplicationSize, 
-                                        Array.length pKeys)
+            MatriceswMultiplicator (options, 
+                                    Probability.innerSummQuote, 
+                                    Probability.innerMultQuote, 
+                                    Probability.innerZeroQuote, 
+                                    maxMatrixForMultiplicationSize, 
+                                    Array.length pKeys)
             
         // swich to dictionary (?)
         let tMatrix = Map<NonTerminal, ProbabilityMatrix.T>

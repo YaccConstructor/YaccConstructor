@@ -101,12 +101,12 @@ let main args =
     
 
     let checkOneType task check taskType str searchLen = 
-        let n = 15
+        let n = 100
         let doOne i =
             let stopWatch = System.Diagnostics.Stopwatch.StartNew()
             task str searchLen |> ignore
             stopWatch.Stop()
-            GC.Collect()
+//            GC.Collect()
             let time = stopWatch.Elapsed.TotalMilliseconds
             printfn "%f" time
             time
@@ -175,9 +175,6 @@ let main args =
     let cudaOneThread: GPUCuda = { doParallelFlush = false }
     let cudaParallel: GPUCuda = { doParallelFlush = true }
 
-
-
-
     
     let myAlg = Options.empty Algorithm.Modified
     let okhotinAlg = Options.empty Algorithm.Okhotin
@@ -187,15 +184,15 @@ let main args =
     let addParallel minms (init: Options.T) = { init with Parallel = Some <| Options.createOne minms () } 
     let addFast minms (init: Options.T) = { init with Fast = Some <| Options.createOne minms () } 
 
-    let bestOption = (myAlg |> addCuda 256 cudaParallel |> addBrahma 16 nvidiaParallel |> addParallel 1)
+    let bestOption = (myAlg |> addCuda 128 cudaParallel |> addBrahma 64 nvidiaParallel |> addParallel 1)
 
     let checkTime str searchLen = 
-        checkOneType 
-            (fun str searchLen -> recognize bestOption str rules nonterminals S searchLen ) 
-            (fun toCheck -> isAnswerValid toCheck) "256, 16, parallel" str searchLen
 //        checkOneType 
-//            (fun str searchlen -> recognize (myAlg |> addCuda 256 cudaParallel |> addBrahma 16 nvidiaParallel) str rules nonterminals S searchlen ) 
-//            (fun tocheck -> isAnswerValid tocheck) "256, 16, parallel" str searchLen
+//            (fun str searchLen -> recognize bestOption str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "128, 64, parallel" str searchLen
+//        checkOneType 
+//            (fun str searchlen -> recognize (myAlg |> addCuda 256 cudaOneThread |> addBrahma 16 nvidiaOneThread) str rules nonterminals S searchlen ) 
+//            (fun tocheck -> isAnswerValid tocheck) "128, 64, parallel" str searchLen
 //        checkOneType 
 //            (fun str searchLen -> recognize (myAlg |> addFast 64 |> addParallel 1) str rules nonterminals S searchLen ) 
 //            (fun toCheck -> isAnswerValid toCheck) "fast 64, par" str searchLen
@@ -222,37 +219,62 @@ let main args =
 //            (fun str searchLen -> recognize okhotinAlg str rules nonterminals S searchLen ) 
 //            (fun toCheck -> isAnswerValid toCheck) "okhotin, vanilla" str searchLen
 
+//        checkOneType 
+//            (fun str searchLen -> recognize (myAlg |> addCuda 128 cudaParallel |> addBrahma 8 nvidiaParallel |> addParallel 1) str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "my" str searchLen
+        checkOneType 
+            (fun str searchLen -> recognize (myAlg |> addCuda 64 cudaParallel |> addParallel 1) str rules nonterminals S searchLen ) 
+            (fun toCheck -> isAnswerValid toCheck) "my" str searchLen
+
 
     let check str searchLen param1 param2 = 
         let toCheck1    = recognize param1 str rules nonterminals S searchLen 
         let toCheck2    = recognize param2 str rules nonterminals S searchLen 
         assert (isAnswerValid toCheck1 (String.length str) searchLen)
         assert (isAnswerValid toCheck2 (String.length str) searchLen)
+        let printcellDiff (cell: Cell.T) =
+            let v1 = Probability.unwrap toCheck1.[cell]
+            let v2 = Probability.unwrap toCheck2.[cell]
+            printfn "cell num %d, %d: %e, %e, %e" cell.Row cell.Column v1 v2 (abs <| v1 - v2)
         let sameCells cell = 
             //                (Probability.unwrap toCheck.[i, j]) = (Probability.unwrap toCheckBFS.[i, j])
             let mutable value = min (Probability.unwrap toCheck1.[cell]) (Probability.unwrap toCheck2.[cell])
             let mutable diff = abs <| (Probability.unwrap toCheck1.[cell]) - (Probability.unwrap toCheck2.[cell])
-            (diff * 100.) <= value
+            if (diff * 1000.) <= value
+            then 
+                true
+            else 
+//                printcellDiff cell
+                false
         let sameAnswers = 
             [ 0..toCheck1.GetLength(0) - 1 ]
             |> Seq.forall (fun i -> (Seq.forall (fun j -> sameCells <| Cell.create i j) [ 0..toCheck1.GetLength(0) - 1 ])) 
-                
-        printMatrix toCheck1 (String.length str) searchLen 
-        printMatrix toCheck2 (String.length str) searchLen 
+            
+//        printcellDiff <| Cell.create 0 68
+//        printcellDiff <| Cell.create 0 65
+//        printcellDiff <| Cell.create 0 66
+//        printcellDiff <| Cell.create 0 67
+//        printcellDiff <| Cell.create 0 69
+//        printcellDiff <| Cell.create 1 68
+//        printcellDiff <| Cell.create 1 69
+                        
+//        printMatrix toCheck1 (String.length str) searchLen 
+//        printMatrix toCheck2 (String.length str) searchLen 
 
         if not sameAnswers
         then failwith "different answers"
     
     
 //    let toCheckOptions = amdNewOptions
-    let toCheckOptions = bestOption
+//    let toCheckOptions = (myAlg |> addBrahma 8 nvidiaOneThread)
+    let toCheckOptions = (myAlg |> addBrahma 32 nvidiaOneThread)
 
 //    check "abb"      2
 //    check "abb"      3    
 //    check "aaabbcc"  5
 //    check "aaabb"    5
-    check "aaaaabbb" 6 okhotinAlg toCheckOptions
-    check "aaaabbbbbb" 6 okhotinAlg toCheckOptions
+//    check "aaaaabbb" 6 okhotinAlg toCheckOptions
+//    check "aaaabbbbbb" 6 okhotinAlg toCheckOptions
 //    check "aaaabbbbbbbbbbb" 10
 //    check "aaaabbbbbbbbbbbbbbb" 10
 //    check "aaaabb" 6
@@ -263,16 +285,16 @@ let main args =
 //    check "aaaabb" 2
 //    check "aaaabb" 1
 //    check "aaaabb" 0
-//    check (String.replicate 350 "abb") 800 (myAlg |> addFast 64 |> addParallel 1) bestOption
+    check (String.replicate 23 "abb") 69 okhotinAlg toCheckOptions
 //    check (String.replicate 350 "abb") 800 bestOption (myAlg |> addFast 64 |> addParallel 1) 
 
-//    checkTime (String.replicate 40 "abb") 100
+//    checkTime (String.replicate 200 "abb") 550
 //    check (String.replicate 6 "abb") 18 okhotinAlg amdOptions
 //    checkTime (String.replicate 120 "abb") 300
 //    checkTime (String.replicate 200 "abb") 400
 
 
-    checkTime (String.replicate 700 "abb") 1600
+//    checkTime (String.replicate 700 "abb") 1600
     //        checkTime ((String.replicate 511 "abbb") + "abb") 50
 
     //        check "aabb"
@@ -281,7 +303,7 @@ let main args =
     //        check "baaabbcc"
     //        check "aaaabbcc"
 
-    System.Console.ReadLine() |> ignore
-    System.Console.ReadLine() |> ignore
+//    System.Console.ReadLine() |> ignore
+//    System.Console.ReadLine() |> ignore
     System.Console.ReadLine() |> ignore
     0

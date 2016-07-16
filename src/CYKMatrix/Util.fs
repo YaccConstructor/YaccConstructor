@@ -56,7 +56,7 @@
 
     module Probability =
 //        type InnerType = bool
-        type InnerType = float
+        type InnerType = float32
         type T = FloatProbability of InnerType
 
         let innerValue (FloatProbability v) = v
@@ -66,19 +66,19 @@
 //        let inline innerMult v1 v2 = v1 && v2
         let innerSummQuote = <@ fun (v1: InnerType) (v2: InnerType) -> v1 + v2 @>
         let innerMultQuote = <@ fun (v1: InnerType) (v2: InnerType) -> v1 * v2 @>
-        let innerTypeQuote = <@ float @>
+        let innerTypeQuote = <@ float32 @>
         let innerZeroQuote = <@ (%innerTypeQuote) 0. @>
         
-        let createInnerType = QuotationEvaluator.Evaluate innerTypeQuote
+        let createInnerType = float32
+        let innerZero = createInnerType 0.
+        let innerSumm v1 v2 = v1 + v2
+        let innerMult v1 v2 = v1 * v2
+
         let create = createInnerType >> fromInnerValue
         let unwrap = innerValue >> double
         
-        let innerZero = QuotationEvaluator.Evaluate innerZeroQuote
         let isZero v = innerValue v = innerZero        
-        let zero = create innerZero
-
-        let innerSumm = QuotationEvaluator.Evaluate innerSummQuote
-        let innerMult = QuotationEvaluator.Evaluate innerMultQuote
+        let zero = fromInnerValue innerZero
         //todo: compile quote
 
         let summ (FloatProbability v1) (FloatProbability v2) = innerSumm v1 v2 |> fromInnerValue

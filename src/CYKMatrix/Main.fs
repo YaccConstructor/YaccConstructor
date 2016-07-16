@@ -187,11 +187,11 @@ let main args =
     let bestOption = (myAlg |> addCuda 128 cudaParallel |> addBrahma 64 nvidiaParallel |> addParallel 1)
 
     let checkTime str searchLen = 
+        checkOneType 
+            (fun str searchLen -> recognize bestOption str rules nonterminals S searchLen ) 
+            (fun toCheck -> isAnswerValid toCheck) "128, 64, parallel" str searchLen
 //        checkOneType 
-//            (fun str searchLen -> recognize bestOption str rules nonterminals S searchLen ) 
-//            (fun toCheck -> isAnswerValid toCheck) "128, 64, parallel" str searchLen
-//        checkOneType 
-//            (fun str searchlen -> recognize (myAlg |> addCuda 256 cudaOneThread |> addBrahma 16 nvidiaOneThread) str rules nonterminals S searchlen ) 
+//            (fun str searchlen -> recognize (myAlg |> addCuda 128 cudaOneThread |> addBrahma 16 nvidiaOneThread) str rules nonterminals S searchlen ) 
 //            (fun tocheck -> isAnswerValid tocheck) "128, 64, parallel" str searchLen
 //        checkOneType 
 //            (fun str searchLen -> recognize (myAlg |> addFast 64 |> addParallel 1) str rules nonterminals S searchLen ) 
@@ -222,9 +222,9 @@ let main args =
 //        checkOneType 
 //            (fun str searchLen -> recognize (myAlg |> addCuda 128 cudaParallel |> addBrahma 8 nvidiaParallel |> addParallel 1) str rules nonterminals S searchLen ) 
 //            (fun toCheck -> isAnswerValid toCheck) "my" str searchLen
-        checkOneType 
-            (fun str searchLen -> recognize (myAlg |> addCuda 64 cudaParallel |> addParallel 1) str rules nonterminals S searchLen ) 
-            (fun toCheck -> isAnswerValid toCheck) "my" str searchLen
+//        checkOneType 
+//            (fun str searchLen -> recognize (myAlg |> addCuda 64 cudaParallel |> addParallel 1) str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "my" str searchLen
 
 
     let check str searchLen param1 param2 = 
@@ -240,11 +240,11 @@ let main args =
             //                (Probability.unwrap toCheck.[i, j]) = (Probability.unwrap toCheckBFS.[i, j])
             let mutable value = min (Probability.unwrap toCheck1.[cell]) (Probability.unwrap toCheck2.[cell])
             let mutable diff = abs <| (Probability.unwrap toCheck1.[cell]) - (Probability.unwrap toCheck2.[cell])
-            if (diff * 1000.) <= value
+            if (diff * 10.) <= value
             then 
                 true
             else 
-//                printcellDiff cell
+                printcellDiff cell
                 false
         let sameAnswers = 
             [ 0..toCheck1.GetLength(0) - 1 ]
@@ -267,7 +267,8 @@ let main args =
     
 //    let toCheckOptions = amdNewOptions
 //    let toCheckOptions = (myAlg |> addBrahma 8 nvidiaOneThread)
-    let toCheckOptions = (myAlg |> addBrahma 32 nvidiaOneThread)
+    let toCheckOptions = (myAlg |> addNewBrahma 2 nvidiaOneThread)
+//    let toCheckOptions = (myAlg |> addCuda 32 cudaOneThread)
 
 //    check "abb"      2
 //    check "abb"      3    
@@ -285,10 +286,10 @@ let main args =
 //    check "aaaabb" 2
 //    check "aaaabb" 1
 //    check "aaaabb" 0
-    check (String.replicate 23 "abb") 69 okhotinAlg toCheckOptions
+//    check (String.replicate 23 "abb") 69 okhotinAlg toCheckOptions
 //    check (String.replicate 350 "abb") 800 bestOption (myAlg |> addFast 64 |> addParallel 1) 
 
-//    checkTime (String.replicate 200 "abb") 550
+    checkTime (String.replicate 200 "abb") 550
 //    check (String.replicate 6 "abb") 18 okhotinAlg amdOptions
 //    checkTime (String.replicate 120 "abb") 300
 //    checkTime (String.replicate 200 "abb") 400

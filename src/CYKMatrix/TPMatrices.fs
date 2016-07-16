@@ -56,40 +56,65 @@ open Util
 
     type MatriceswMultiplicator (options: Options.T, summProbabilities, multiplicateProbabilities, zeroProbability, maxMatrixSize, ntsCount) =
 
-
+    
         let newCommand = 
             <@
-                fun (r:_1D) (sizes:array<_>) (a:array<_>) (b:array<_>) (c:array<_>) -> 
+                fun (r: _1D) (sizes:array<_>) (a:array<_>) (b:array<_>) (c:array<_>) -> 
                     // предполагается, что все в рамках одной пары матриц
                     let gridSize = sizes.[0]
                     let matricesSize = sizes.[2]
                     let matricesCount = sizes.[3]
                     let matrixCellNum = matricesSize * matricesSize
                     let globalCellCount = matrixCellNum * matricesCount
-                    // todo:
-                    let cellsToHandle_ = globalCellCount / gridSize
-                    let cellsToHandle = 
-                        if cellsToHandle_ < matrixCellNum
-                        then cellsToHandle_
-                        else matrixCellNum
+                    let cellsToHandle = (globalCellCount - 1) / gridSize + 1
                     let firstToHandle = r.GlobalID0 * cellsToHandle 
                     if firstToHandle < globalCellCount
                     then
-                        let num = firstToHandle / matrixCellNum
-                        let skipMatrices = num * matrixCellNum
-                        for ti in [firstToHandle..matricesSize..firstToHandle + cellsToHandle - 1] do
-                            let i = (ti - skipMatrices) / matricesSize
-                            for tj in [ti..(min (firstToHandle + cellsToHandle - 1) (ti + matricesSize - 1))] do
-                                let j = tj - skipMatrices - (i * matricesSize)         
-                            
-                                let skipRows = i * matricesSize + skipMatrices
-                                let skipCols = j * matricesSize + skipMatrices
-                                // todo: innerZero
-                                let mutable buf = c.[skipRows + j]
-                                for k in 0 .. matricesSize - 1 do
-                                    buf <- (%summProbabilities) buf ((%multiplicateProbabilities) a.[skipRows + k] b.[skipCols + k])
-                                c.[skipRows + j] <- buf
+                        for currentCell in firstToHandle .. firstToHandle + cellsToHandle - 1 do                         
+                            let num = currentCell / matrixCellNum
+                            let ti = (currentCell - num * matrixCellNum) / matricesSize
+                            let tj = currentCell - num * matrixCellNum - ti * matricesSize          
+                            let skipMatrices = num * matricesSize * matricesSize
+                            let skipRows = ti * matricesSize + skipMatrices
+                            let skipCols = tj * matricesSize + skipMatrices
+                            let mutable buf = 0.
+        //                    let mutable buf = c.[skipRows + tj]
+        //                    let k = ref 0
+        //                    while (!k < matricesSize) do 
+                            for k in 0 .. (matricesSize - 1) do
+                                buf <- (+) buf ((*) a.[skipRows + k] b.[skipCols + k])
+        //                        k := !k + 1
+                            c.[skipRows + tj] <- buf
             @>  
+
+//        let newCommand_ = 
+//                fun global0 (sizes:array<_>) (a:array<_>) (b:array<_>) (c:array<_>) -> 
+//                    // предполагается, что все в рамках одной пары матриц
+//                    let gridSize = sizes.[0]
+//                    let matricesSize = sizes.[2]
+//                    let matricesCount = sizes.[3]
+//                    let matrixCellNum = matricesSize * matricesSize
+//                    let globalCellCount = matrixCellNum * matricesCount
+//                    // todo:
+//                    let cellsToHandle = (globalCellCount - 1) / gridSize + 1
+//                    let firstToHandle = global0 * cellsToHandle 
+//                    if firstToHandle < globalCellCount
+//                    then
+//                        for currentCell in firstToHandle .. firstToHandle + cellsToHandle - 1 do                         
+//                            let num = currentCell / matrixCellNum
+//                            let ti = (currentCell - num * matrixCellNum) / matricesSize
+//                            let tj = currentCell - num * matrixCellNum - ti * matricesSize          
+//                            let skipMatrices = num * matricesSize * matricesSize
+//                            let skipRows = ti * matricesSize + skipMatrices
+//                            let skipCols = tj * matricesSize + skipMatrices
+//                            let mutable buf = 0.
+//        //                    let mutable buf = c.[skipRows + tj]
+//        //                    let k = ref 0
+//        //                    while (!k < matricesSize) do 
+//                            for k in 0 .. (matricesSize - 1) do
+//                                buf <- (+) buf ((*) a.[skipRows + k] b.[skipCols + k])
+//        //                        k := !k + 1
+//                            c.[skipRows + tj] <- buf
 
         let command = 
             <@
@@ -157,8 +182,8 @@ open Util
 
             
             // todo: sizes
-            let gridSize = maxMatrixSize / minMatrixSize
-            let wgSize = 2
+            let gridSize = maxMatrixSize
+            let wgSize = 128
             let grid = new _1D(gridSize, wgSize)
 
             let mult1 = Array.create bufferSize <| Probability.innerZero
@@ -402,6 +427,9 @@ open Util
 
             helpers.sizes.[2] <- int32 matricesSize
             helpers.sizes.[3] <- int32 matricesCount
+
+//            for i in 0 .. (matricesCount * matricesSize * matricesSize - 1) do
+//                newCommand_ i helpers.sizes helpers.mult1 helpers.mult2 helpers.result
             
             helpers.commandQueue.Add(helpers.mult1.ToGpu(helpers.provider)) |> ignore   
             helpers.commandQueue.Add(helpers.mult2.ToGpu(helpers.provider)) |> ignore  

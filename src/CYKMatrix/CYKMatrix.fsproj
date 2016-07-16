@@ -15,7 +15,7 @@
     <Name>CYKMatrix</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <NuGetPackageImportStamp>e8522a78</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>4bdd715f</NuGetPackageImportStamp>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -66,8 +66,8 @@
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
     <Error Condition="!Exists('..\packages\Alea.CUDA.2.2.0.3307\build\Alea.CUDA.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Alea.CUDA.2.2.0.3307\build\Alea.CUDA.targets'))" />
-    <Error Condition="!Exists('..\packages\Fody.1.29.4\build\portable-net+sl+win+wpa+wp\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.1.29.4\build\portable-net+sl+win+wpa+wp\Fody.targets'))" />
     <Error Condition="!Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets'))" />
+    <Error Condition="!Exists('..\packages\Fody.1.30.0-beta01\build\portable-net+sl+win+wpa+wp\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.1.30.0-beta01\build\portable-net+sl+win+wpa+wp\Fody.targets'))" />
   </Target>
   <Import Project="..\packages\Alea.CUDA.2.2.0.3307\build\Alea.CUDA.targets" Condition="Exists('..\packages\Alea.CUDA.2.2.0.3307\build\Alea.CUDA.targets')" />
   <ItemGroup>
@@ -79,7 +79,7 @@
     <Compile Include="CYKMatrixBFS.fs" />
     <Compile Include="CYKMatrix.fs" />
     <Compile Include="Main.fs" />
-    <Content Include="FodyWeavers.xml" />
+    <None Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Alea.CUDA">
@@ -95,28 +95,40 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma">
-      <HintPath>..\packages\Brahma.FSharp.1.0.0\lib\net45\Brahma.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.1.0.1\lib\net45\Brahma.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma.Agents">
+      <HintPath>..\packages\Brahma.FSharp.1.0.1\lib\net45\Brahma.Agents.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.AST">
-      <HintPath>..\packages\Brahma.FSharp.1.0.0\lib\net45\Brahma.FSharp.OpenCL.AST.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.1.0.1\lib\net45\Brahma.FSharp.OpenCL.AST.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Core">
-      <HintPath>..\packages\Brahma.FSharp.1.0.0\lib\net45\Brahma.FSharp.OpenCL.Core.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.1.0.1\lib\net45\Brahma.FSharp.OpenCL.Core.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Extensions">
-      <HintPath>..\packages\Brahma.FSharp.1.0.0\lib\net45\Brahma.FSharp.OpenCL.Extensions.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.1.0.1\lib\net45\Brahma.FSharp.OpenCL.Extensions.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Printer">
-      <HintPath>..\packages\Brahma.FSharp.1.0.0\lib\net45\Brahma.FSharp.OpenCL.Printer.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.1.0.1\lib\net45\Brahma.FSharp.OpenCL.Printer.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Translator">
-      <HintPath>..\packages\Brahma.FSharp.1.0.0\lib\net45\Brahma.FSharp.OpenCL.Translator.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.1.0.1\lib\net45\Brahma.FSharp.OpenCL.Translator.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.Helpers">
-      <HintPath>..\packages\Brahma.FSharp.1.0.0\lib\net45\Brahma.Helpers.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.1.0.1\lib\net45\Brahma.Helpers.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.OpenCL">
-      <HintPath>..\packages\Brahma.FSharp.1.0.0\lib\net45\Brahma.OpenCL.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.1.0.1\lib\net45\Brahma.OpenCL.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Core">
       <HintPath>..\packages\FSharp.Core.4.0.0.1\lib\net40\FSharp.Core.dll</HintPath>
@@ -159,8 +171,8 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
-  <Import Project="..\packages\Fody.1.29.4\build\portable-net+sl+win+wpa+wp\Fody.targets" Condition="Exists('..\packages\Fody.1.29.4\build\portable-net+sl+win+wpa+wp\Fody.targets')" />
   <Import Project="..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />
+  <Import Project="..\packages\Fody.1.30.0-beta01\build\portable-net+sl+win+wpa+wp\Fody.targets" Condition="Exists('..\packages\Fody.1.30.0-beta01\build\portable-net+sl+win+wpa+wp\Fody.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

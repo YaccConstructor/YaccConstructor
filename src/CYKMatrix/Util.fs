@@ -5,6 +5,9 @@
     open OpenCL.Net
     open Microsoft.FSharp.Math
 
+    open FSharp.Quotations.Evaluator
+    open Microsoft.FSharp.Quotations
+
     type Info<'T> = {
         MinMatrixSize: int
         Options: 'T
@@ -53,36 +56,33 @@
 
     module Probability =
 //        type InnerType = bool
-        type InnerType = float32
-        type T = Float32Probability of InnerType
+        type InnerType = float
+        type T = FloatProbability of InnerType
 
-        let innerValue (Float32Probability v) = v
-        let fromInnerValue v = v |> Float32Probability
-        
-//        let create = fromInnerValue
-//        let unwrap = innerValue
-        let create = float32 >> fromInnerValue
-        let unwrap = innerValue >> double
-        let createInnerType (x: float) = float32 x
-        
-//        let zero = create false
-        let zero = create 0.
-        
-        let innerZero = innerValue zero
-        let isZero v = innerValue v = innerZero
+        let innerValue (FloatProbability v) = v
+        let fromInnerValue v = v |> FloatProbability
 
 //        let inline innerSumm v1 v2 = v1 || v2
 //        let inline innerMult v1 v2 = v1 && v2
         let innerSummQuote = <@ fun (v1: InnerType) (v2: InnerType) -> v1 + v2 @>
         let innerMultQuote = <@ fun (v1: InnerType) (v2: InnerType) -> v1 * v2 @>
-        let innerZeroQuote = <@ float32 0. @>
+        let innerTypeQuote = <@ float @>
+        let innerZeroQuote = <@ (%innerTypeQuote) 0. @>
+        
+        let createInnerType = QuotationEvaluator.Evaluate innerTypeQuote
+        let create = createInnerType >> fromInnerValue
+        let unwrap = innerValue >> double
+        
+        let innerZero = QuotationEvaluator.Evaluate innerZeroQuote
+        let isZero v = innerValue v = innerZero        
+        let zero = create innerZero
 
-        let innerSumm v1 v2 = v1 + v2
-        let innerMult v1 v2 = v1 * v2
+        let innerSumm = QuotationEvaluator.Evaluate innerSummQuote
+        let innerMult = QuotationEvaluator.Evaluate innerMultQuote
         //todo: compile quote
 
-        let summ (Float32Probability v1) (Float32Probability v2) = innerSumm v1 v2 |> fromInnerValue
-        let multiplicate (Float32Probability v1) (Float32Probability v2) = innerMult v1 v2 |> fromInnerValue
+        let summ (FloatProbability v1) (FloatProbability v2) = innerSumm v1 v2 |> fromInnerValue
+        let multiplicate (FloatProbability v1) (FloatProbability v2) = innerMult v1 v2 |> fromInnerValue
 
 
     type RulesHolder(complexRules: Dictionary<(NonTerminal * NonTerminal), (NonTerminal * Probability.T) list>,

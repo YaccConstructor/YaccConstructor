@@ -110,22 +110,6 @@ open Util
                     c.[skipRows + tj] <- buf
             @>  
 
-        let command_ = 
-            <@
-                fun global0 global1 matricesSize (a:array<_>) (b:array<_>) (c:array<_>) -> 
-                    let num = global0 / matricesSize
-                    let ti = global0 - num * matricesSize
-                    let tj = global1                 
-                    let skipMatrices = num * matricesSize * matricesSize
-                    let skipRows = ti * matricesSize + skipMatrices
-                    let skipCols = tj * matricesSize + skipMatrices
-                    let mutable buf = (%zeroProbability)
-//                    let mutable buf = c.[skipRows + tj]
-                    for k in 0 .. (matricesSize - 1) do
-                        buf <- (%summProbabilities) buf ((%multiplicateProbabilities) a.[skipRows + k] b.[skipCols + k])
-                    c.[skipRows + tj] <- buf
-            @>  
-
         let newCreateBrahmaHelper minMatrixSize brahmaOptions =
             let provider =
                 try ComputeProvider.Create(brahmaOptions.PlatformName, brahmaOptions.DeviceType)
@@ -369,28 +353,6 @@ open Util
          
             helpers.commandQueue.Add(helpers.kernelRun()).Finish() |> ignore        
             helpers.commandQueue.Add(result.ToHost helpers.provider).Finish() |> ignore
-            
-            let checkWhetherResultIsValid () = 
-                let result_: Probability.InnerType [] = Array.zeroCreate(matricesCount * matricesSize * matricesSize)
-                for i in [0 .. (matricesCount * matricesSize - 1)] do
-                    for j in [0 .. matricesSize - 1] do
-                        (QuotationEvaluator.Evaluate command_) i j matricesSize from1 from2 result_
-                
-                let sameCells x = 
-                    //                (Probability.unwrap toCheck.[i, j]) = (Probability.unwrap toCheckBFS.[i, j])
-                    let value = float <| min result.[x] result_.[x]
-                    let diff = abs <| result.[x] - result_.[x]
-                    (float diff * 1000.) <= value
-
-                for x in [ 0..matricesCount * matricesSize * matricesSize - 1 ] do 
-                    if not <| sameCells x
-                    then
-                        let num = x / (matricesSize * matricesSize)
-                        let i = (x - num * (matricesSize * matricesSize)) / matricesSize
-                        let j = (x - num * (matricesSize * matricesSize) - i * matricesSize) 
-                        printfn "During evaluation of %ith multiplication task value in cell (%i,%i) was computed wrong. Expecting %e but %e found." (num + 1) i j result_.[x] result.[x]
-
-            checkWhetherResultIsValid()
                         
             result
             

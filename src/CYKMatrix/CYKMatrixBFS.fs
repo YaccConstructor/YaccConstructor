@@ -39,7 +39,7 @@
                 
                 layer 
                 |> Array.map SubMatrix.getOnlyCell 
-                |> matrices.refreshTCells (headProbsFromTail)
+                |> matrices.refreshTCells headProbsFromTail
 
             else
                 let zeroSubLayer = layer |> Array.map (fun matrix -> matrix.BottomSubmatrix)                   

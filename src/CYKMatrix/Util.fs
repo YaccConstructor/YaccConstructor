@@ -31,7 +31,7 @@
     module Options =
 
         type T = {
-            newBrahma: GPUBrahma Info option  
+            _1DBrahma: GPUBrahma Info option  
             Brahma: GPUBrahma Info option  
             Cuda: GPUCuda Info option  
             Fast: CPUFast Info option
@@ -39,12 +39,12 @@
             algorithm: Algorithm
         }
 
-        let empty algorithm = { Brahma = None; newBrahma = None; Cuda = None; Fast = None; Parallel = None; algorithm = algorithm }
+        let empty algorithm = { Brahma = None; _1DBrahma = None; Cuda = None; Fast = None; Parallel = None; algorithm = algorithm }
         let createOne minMatrixSize options = { MinMatrixSize = minMatrixSize; Options = options}
-        let create isNewBrahma algorithm fast parall cuda brahma = 
-            if isNewBrahma
-            then { Brahma = None; newBrahma = brahma; Cuda = cuda; Fast = fast; Parallel = parall; algorithm = algorithm }
-            else { Brahma = brahma; newBrahma = None; Cuda = cuda; Fast = fast; Parallel = parall; algorithm = algorithm }
+        let create is_1DBrahma algorithm fast parall cuda brahma = 
+            if is_1DBrahma
+            then { Brahma = None; _1DBrahma = brahma; Cuda = cuda; Fast = fast; Parallel = parall; algorithm = algorithm }
+            else { Brahma = brahma; _1DBrahma = None; Cuda = cuda; Fast = fast; Parallel = parall; algorithm = algorithm }
 
         let map f (option: _ Info) = {
             MinMatrixSize = option.MinMatrixSize
@@ -156,6 +156,14 @@
             member this.LeftNeighbor  = this.RelativeMatrix 0 -this.Size
             member this.RightGrounded = this.RelativeMatrix (this.Top.StringLength - 2 * this.Size)  0
             member this.LeftGrounded  = this.RelativeMatrix 0 -(this.Top.StringLength - 2 * this.Size)
+            
+            member this.CellByX x =
+                let i = x / this.Size
+                let j = x - i * this.Size
+                Cell.create i j
+            
+            member this.XByCell (cell: Cell.T) =
+                cell.Row * this.Size + cell.Column
     
         let print (matrix: T) = 
             let top = matrix.Top
@@ -190,6 +198,26 @@
                 | 1 -> ncol   
                 | _ -> raise <| IndexOutOfRangeException()
                 
+//            member this.GetInnerFromCell (cell: Cell.T) =
+//                if isOutOfStorage cell
+//                then Probability.innerZero
+//                else data.[getSingleIndex cell]
+//
+//            member this.Item
+//                with get cell = Probability.fromInnerValue <| this.GetInnerFromCell cell    
+//                
+//            member this.SubMatrixValuesGetter fromInner (submatrix: SubMatrix.T) isTransponed  =
+//                let leftCell = submatrix.Left 
+//
+//                if isTransponed then Cell.transpone else id 
+//                >> Cell.shift leftCell.Row leftCell.Column
+//                >> this.GetInnerFromCell 
+//                >> fromInner                             
+//
+//            member this.GetSubArrayWithType fromInner (submatrix: SubMatrix.T) isTransponed  =
+//                let valueGetter = this.SubMatrixValuesGetter fromInner submatrix isTransponed                                          
+//                Array.init (submatrix.Size * submatrix.Size) ((cellBySingleIndex submatrix.Size) >> valueGetter)
+
             member this.getInnerFromCell (cell: Cell.T) =
                 if isOutOfStorage cell
                 then Probability.innerZero

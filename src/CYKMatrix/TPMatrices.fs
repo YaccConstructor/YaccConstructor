@@ -1,6 +1,8 @@
 ﻿module TPMatrices 
+
 open FSharp.Quotations.Evaluator
 open Microsoft.FSharp.Quotations
+open System.Collections.Generic
 
 open Brahma.FSharp.OpenCL.Core
 open Brahma.FSharp.OpenCL.Extensions
@@ -45,7 +47,7 @@ open Util
     type CPUParallel = Unit
     
     type Helpers = {
-        newBrahma: NewGPUBrahma Info option 
+        _1DBrahma: NewGPUBrahma Info option 
         Brahma: GPUBrahma Info option  
         Cuda: GPUCuda Info option  
         Fast: CPUFast Info option
@@ -60,7 +62,6 @@ open Util
         let newCommand = 
             <@
                 fun (r: _1D) (sizes:array<_>) (a:array<_>) (b:array<_>) (c:array<_>) -> 
-                    // предполагается, что все в рамках одной пары матриц
                     let gridSize = sizes.[0]
                     let matricesSize = sizes.[2]
                     let matricesCount = sizes.[3]
@@ -86,35 +87,6 @@ open Util
         //                        k := !k + 1
                             c.[skipRows + tj] <- buf
             @>  
-
-//        let newCommand_ = 
-//                fun global0 (sizes:array<_>) (a:array<_>) (b:array<_>) (c:array<_>) -> 
-//                    // предполагается, что все в рамках одной пары матриц
-//                    let gridSize = sizes.[0]
-//                    let matricesSize = sizes.[2]
-//                    let matricesCount = sizes.[3]
-//                    let matrixCellNum = matricesSize * matricesSize
-//                    let globalCellCount = matrixCellNum * matricesCount
-//                    // todo:
-//                    let cellsToHandle = (globalCellCount - 1) / gridSize + 1
-//                    let firstToHandle = global0 * cellsToHandle 
-//                    if firstToHandle < globalCellCount
-//                    then
-//                        for currentCell in firstToHandle .. firstToHandle + cellsToHandle - 1 do                         
-//                            let num = currentCell / matrixCellNum
-//                            let ti = (currentCell - num * matrixCellNum) / matricesSize
-//                            let tj = currentCell - num * matrixCellNum - ti * matricesSize          
-//                            let skipMatrices = num * matricesSize * matricesSize
-//                            let skipRows = ti * matricesSize + skipMatrices
-//                            let skipCols = tj * matricesSize + skipMatrices
-//                            let mutable buf = 0.
-//        //                    let mutable buf = c.[skipRows + tj]
-//        //                    let k = ref 0
-//        //                    while (!k < matricesSize) do 
-//                            for k in 0 .. (matricesSize - 1) do
-//                                buf <- (+) buf ((*) a.[skipRows + k] b.[skipCols + k])
-//        //                        k := !k + 1
-//                            c.[skipRows + tj] <- buf
 
         let command = 
             <@
@@ -244,8 +216,8 @@ open Util
             }
 
         let helpers = {
-            newBrahma = 
-                match options.newBrahma with 
+            _1DBrahma = 
+                match options._1DBrahma with 
                 | Some options -> Some (Options.map (newCreateBrahmaHelper options.MinMatrixSize) options)
                 | None -> None
             Brahma = Option.map (Options.map createBrahmaHelper) options.Brahma
@@ -406,7 +378,29 @@ open Util
             fullTasks
             |> (if isParallel then Array.Parallel.iter else Array.iter) doOne 
 
-        let newDoBrahmaMultiplications matrixHandler matricesCount matricesSize fullTasks helpers = 
+//        let _1DDoBrahmaMultiplications matrixHandler matricesCount matricesSize fullTasks helpers = 
+//            let (getMatrix: NonTerminal -> ProbabilityMatrix.T), flushSubMatrix = matrixHandler
+//            let matricesCellCount = matricesSize * matricesSize
+//            
+//            let cellGetter (from: SubMatrix.T) isTransponed = 
+//                let leftCell = from.Left
+//
+//                from.CellByX
+//                >> if isTransponed then Cell.transpone else id 
+//                >> Cell.shift leftCell.Row leftCell.Column
+//
+//            let copyMatrix nt getCell (where: _ []) skip =
+//                [0..matricesCellCount - 1]
+//                |> List.iter (fun x -> where.[skip + x] <- getCell x |> (getMatrix nt).GetInnerFromCell |> float)
+//
+//            //todo: 2x copy
+//            fullTasks
+//            |> Array.iteri (fun i ({ from1 = from }, nts) -> copyMatrix (fst nts) (cellGetter from false) helpers.mult1 (i * matricesCellCount))
+//            
+//            fullTasks
+//            |> Array.iteri (fun i ({ from2 = from }, nts) -> copyMatrix (snd nts) (cellGetter from true) helpers.mult2 (i * matricesCellCount))
+            
+        let _1DDoBrahmaMultiplications matrixHandler matricesCount matricesSize fullTasks helpers = 
             let getSubMatrix, flushSubMatrix = matrixHandler
             let matricesCellCount = matricesSize * matricesSize
 
@@ -475,6 +469,7 @@ open Util
             |> (if helpers.options.doParallelFlush then Array.Parallel.iter else Array.iter) flushOneMatrix
   
         member this.performMultiplication arrayMatrixHandler fastMatrixHandler cublasMatrixHandler (tasks: MultiplicationTask []) nts = 
+//        member this.performMultiplication arrayMatrixHandler array1DMatrixHandler fastMatrixHandler cublasMatrixHandler (tasks: MultiplicationTask []) nts = 
 
             let crossproduct l1 l2 =
                 let product lst v = Array.map (fun vl -> (vl, v)) lst
@@ -493,7 +488,8 @@ open Util
             let doFast _ = doFastMultiplications isParallel fastMatrixHandler matricesSize fullTasks 
             let doSimple _  = doSimpleMultiplications isParallel arrayMatrixHandler matricesSize fullTasks 
             let doBrahma helpers = doBrahmaMultiplications arrayMatrixHandler matricesCount matricesSize fullTasks helpers
-            let doNewBrahma helpers = newDoBrahmaMultiplications arrayMatrixHandler matricesCount matricesSize fullTasks helpers
+//            let do_1DBrahma helpers = _1DDoBrahmaMultiplications array1DMatrixHandler matricesCount matricesSize fullTasks helpers
+            let do_1DBrahma helpers = _1DDoBrahmaMultiplications arrayMatrixHandler matricesCount matricesSize fullTasks helpers
             let doCublas helpers = doCublasMultiplications cublasMatrixHandler matricesCount matricesSize fullTasks helpers
 
             let doCheck doMultiplication (helpers_: _ Info option) isDone = 
@@ -512,7 +508,7 @@ open Util
             false 
             |> doCheck doCublas helpers.Cuda
             |> doCheck doBrahma helpers.Brahma  
-            |> doCheck doNewBrahma helpers.newBrahma      
+            |> doCheck do_1DBrahma helpers._1DBrahma      
             |> doCheck doFast helpers.Fast
             |> doCheck doSimple helpers.Simple
             |> ignore
@@ -534,7 +530,8 @@ open Util
 
 
 
-
+    type TMatrix = Dictionary<NonTerminal, ProbabilityMatrix.T>
+    type PMatrix = Dictionary<NonTerminal * NonTerminal, ProbabilityMatrix.T>
        
     type MatrixHolder(tKeys, pKeys, stringSize, options: Options.T) = 
         
@@ -548,20 +545,51 @@ open Util
                                     Probability.innerZeroQuote, 
                                     maxMatrixForMultiplicationSize, 
                                     Array.length pKeys)
-            
+
         // swich to dictionary (?)
-        let tMatrix = Map<NonTerminal, ProbabilityMatrix.T>
-                            (
-                                tKeys 
-                                |> Seq.map (fun x -> x, ProbabilityMatrix.empty (stringSize + 1))
-                            )
+        let tMatrix = new TMatrix ()
+        do 
+            (
+                tKeys 
+                |> Seq.map (fun x -> x, ProbabilityMatrix.empty (stringSize + 1))
+            )
+            |> Seq.iter tMatrix.Add
+                            
 
-        let pMatrix = Map<NonTerminal * NonTerminal, ProbabilityMatrix.T>
-                            (
-                                pKeys
-                                |> Array.map (fun x -> x, ProbabilityMatrix.empty (stringSize + 1))
-                            )   
+        let pMatrix = new PMatrix ()
+        do 
+            (
+                pKeys
+                |> Array.map (fun x -> x, ProbabilityMatrix.empty (stringSize + 1))
+            )
+            |> Seq.iter pMatrix.Add
 
+      
+//    type MatrixHolder(tKeys, pKeys, stringSize, options: Options.T) = 
+//        
+//        let GPUMultiplicator = 
+//            // todo: think about search size!!!!!!!!!!
+//            let matrixSizeExponent = (log (double stringSize + 1.)) / (log 2.) |> ceil |> int
+//            let maxMatrixForMultiplicationSize = (1 <<< (matrixSizeExponent - 1))
+//            MatriceswMultiplicator (options, 
+//                                    Probability.innerSummQuote, 
+//                                    Probability.innerMultQuote, 
+//                                    Probability.innerZeroQuote, 
+//                                    maxMatrixForMultiplicationSize, 
+//                                    Array.length pKeys)
+//            
+//        // swich to dictionary (?)
+//        let tMatrix = Map<NonTerminal, ProbabilityMatrix.T>
+//                            (
+//                                tKeys 
+//                                |> Seq.map (fun x -> x, ProbabilityMatrix.empty (stringSize + 1))
+//                            )
+//
+//        let pMatrix = Map<NonTerminal * NonTerminal, ProbabilityMatrix.T>
+//                            (
+//                                pKeys
+//                                |> Array.map (fun x -> x, ProbabilityMatrix.empty (stringSize + 1))
+//                            )   
         
         let addToPMatrix (where: SubMatrix.T) nts getValueFromCell =
             let whereMatrix = pMatrix.[nts]
@@ -571,7 +599,6 @@ open Util
                     let matrixCell = Cell.create i j
                     let realCell = Cell.shift where.Left.Row where.Left.Column matrixCell
                     whereMatrix.AddValueToCell realCell <| getValueFromCell matrixCell
-
 
         member this.updateTCellWith cell nonterminals =
             nonterminals |> List.iter (fun (key, prob) -> tMatrix.[key].AddValueToCell cell prob)
@@ -583,16 +610,25 @@ open Util
             nonterminals |> List.iteri (fun i ntProbs -> this.updateTCellWith (diagonalCell i) ntProbs)
 
         member this.refreshTCells headProbsFromTail cells =
-                let tails cell = 
-                    pMatrix 
-                    |> Map.map (fun _ probs -> probs.[cell]) 
-                    |> Map.filter (fun _ prob -> not <| Probability.isZero prob)
                 let heads cell = 
-                    tails cell 
-                    |> Map.toList 
+                    pMatrix
+                    |> List.ofSeq
+                    |> List.map (fun pair -> (pair.Key, pair.Value.[cell]))
+                    |> List.filter (fun (_, prob) -> not <| Probability.isZero prob)
                     |> List.map headProbsFromTail 
                     |> List.concat
 
+//        member this.refreshTCells headProbsFromTail cells =
+//                let tails cell = 
+//                    pMatrix 
+//                    |> Map.map (fun _ probs -> probs.[cell]) 
+//                    |> Map.filter (fun _ prob -> not <| Probability.isZero prob)
+//                let heads cell = 
+//                    tails cell 
+//                    |> Map.toList 
+//                    |> List.map headProbsFromTail 
+//                    |> List.concat
+//
                 cells
                 |> Array.iter (fun cell -> heads cell |> this.updateTCellWith cell)
 
@@ -606,6 +642,19 @@ open Util
                 addToPMatrix where nts getValueFromCell
             let addFastMatrix (where: SubMatrix.T) nts (matrix: Matrix<float>) = 
                 addToPMatrix where nts (fun cell -> Probability.create matrix.[cell.Row, cell.Column])         
+                
+//            let getInnerSubMatrix nt = tMatrix.[nt].GetSubArrayWithType id
+//            let getInnerSubMatrixCells nt = tMatrix.[nt]
+//            let getFloatSubMatrix nt = tMatrix.[nt].GetSubArrayWithType float
+//            let getFastSubMatrix nt (submatrix: SubMatrix.T) isTransponed : Matrix<float> =
+//                let valueGetter = tMatrix.[nt].SubMatrixValuesGetter float submatrix isTransponed                        
+//                Matrix.init submatrix.Size submatrix.Size (fun x y -> Cell.create x y |> valueGetter)
+//
+//            let arrayMatrixHandler = (getInnerSubMatrix, addProbMatrix)
+//            let array1DMatrixHandler = (getInnerSubMatrixCells, addProbMatrix)
+//            let fastMatrixHandler = (getFastSubMatrix, addFastMatrix)
+//            let cublasMatrixHandler = (getFloatSubMatrix, addCublasMatrix)
+//            GPUMultiplicator.performMultiplication arrayMatrixHandler array1DMatrixHandler fastMatrixHandler cublasMatrixHandler tasks nts
 
             let getInnerSubMatrix nt = tMatrix.[nt].GetSubArrayWithType id
             let getFloatSubMatrix nt = tMatrix.[nt].GetSubArrayWithType float
@@ -617,5 +666,5 @@ open Util
             let fastMatrixHandler = (getFastSubMatrix, addFastMatrix)
             let cublasMatrixHandler = (getFloatSubMatrix, addCublasMatrix)
             GPUMultiplicator.performMultiplication arrayMatrixHandler fastMatrixHandler cublasMatrixHandler tasks nts
-
+            
         member this.releaseResources = GPUMultiplicator.releaseResources

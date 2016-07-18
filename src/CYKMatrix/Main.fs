@@ -156,8 +156,7 @@ let main args =
         getInfo computeUnits "comp units" 1
         getInfo WGSize "WG size (MB)" 1
         getInfo WISizes "WI sizes (B)" 1
-    
-//                
+                
 //    printfn "AMD:"
 //    printParams amdProvider
 //    printfn "Intel:"
@@ -180,11 +179,14 @@ let main args =
     let okhotinAlg = Options.empty Algorithm.Okhotin
     let addCuda minms cuda (init: Options.T) = { init with Cuda = Some <| Options.createOne minms cuda } 
     let addBrahma minms brahma (init: Options.T) = { init with Brahma = Some <| Options.createOne minms brahma } 
-    let addNewBrahma minms brahma (init: Options.T) = { init with newBrahma = Some <| Options.createOne minms brahma } 
+    let add_1DBrahma minms brahma (init: Options.T) = { init with _1DBrahma = Some <| Options.createOne minms brahma } 
     let addParallel minms (init: Options.T) = { init with Parallel = Some <| Options.createOne minms () } 
     let addFast minms (init: Options.T) = { init with Fast = Some <| Options.createOne minms () } 
-
+    
     let bestOption = (myAlg |> addCuda 128 cudaParallel |> addBrahma 64 nvidiaParallel |> addParallel 1)
+    let toCheck1 = (myAlg |> addCuda 128 cudaParallel |> addBrahma 64 nvidiaParallel |> addParallel 1)
+    let toCheck2 = (myAlg |> addCuda 128 cudaParallel |> add_1DBrahma 64 nvidiaParallel |> addParallel 1)
+    let toCheck3 = (myAlg |> addCuda 64 cudaParallel |> addParallel 1)
 
     let checkTime str searchLen = 
         checkOneType 
@@ -219,12 +221,9 @@ let main args =
 //            (fun str searchLen -> recognize okhotinAlg str rules nonterminals S searchLen ) 
 //            (fun toCheck -> isAnswerValid toCheck) "okhotin, vanilla" str searchLen
 
-//        checkOneType 
-//            (fun str searchLen -> recognize (myAlg |> addCuda 128 cudaParallel |> addBrahma 8 nvidiaParallel |> addParallel 1) str rules nonterminals S searchLen ) 
-//            (fun toCheck -> isAnswerValid toCheck) "my" str searchLen
-//        checkOneType 
-//            (fun str searchLen -> recognize (myAlg |> addCuda 64 cudaParallel |> addParallel 1) str rules nonterminals S searchLen ) 
-//            (fun toCheck -> isAnswerValid toCheck) "my" str searchLen
+        checkOneType 
+            (fun str searchLen -> recognize toCheck2 str rules nonterminals S searchLen ) 
+            (fun toCheck -> isAnswerValid toCheck) "my" str searchLen
 
 
     let check str searchLen param1 param2 = 
@@ -267,7 +266,7 @@ let main args =
     
 //    let toCheckOptions = amdNewOptions
 //    let toCheckOptions = (myAlg |> addBrahma 8 nvidiaOneThread)
-    let toCheckOptions = (myAlg |> addNewBrahma 2 nvidiaOneThread)
+    let toCheckOptions = (myAlg |> add_1DBrahma 2 nvidiaOneThread)
 //    let toCheckOptions = (myAlg |> addCuda 32 cudaOneThread)
 
 //    check "abb"      2

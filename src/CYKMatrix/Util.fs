@@ -61,7 +61,7 @@
             type T = float
 
             let create = float
-            let unwrap (x: T) = float
+            let unwrap: T -> float = float
 
             let zero = create 0.
 
@@ -202,47 +202,26 @@
                 match i with
                 | 0 -> nrow
                 | 1 -> ncol   
-                | _ -> raise <| IndexOutOfRangeException()
-                
-//            member this.GetInnerFromCell (cell: Cell.T) =
-//                if isOutOfStorage cell
-//                then Probability.innerZero
-//                else data.[getSingleIndex cell]
-//
-//            member this.Item
-//                with get cell = Probability.fromInnerValue <| this.GetInnerFromCell cell    
-//                
-//            member this.SubMatrixValuesGetter fromInner (submatrix: SubMatrix.T) isTransponed  =
-//                let leftCell = submatrix.Left 
-//
-//                if isTransponed then Cell.transpone else id 
-//                >> Cell.shift leftCell.Row leftCell.Column
-//                >> this.GetInnerFromCell 
-//                >> fromInner                             
-//
-//            member this.GetSubArrayWithType fromInner (submatrix: SubMatrix.T) isTransponed  =
-//                let valueGetter = this.SubMatrixValuesGetter fromInner submatrix isTransponed                                          
-//                Array.init (submatrix.Size * submatrix.Size) ((cellBySingleIndex submatrix.Size) >> valueGetter)
+                | _ -> raise <| IndexOutOfRangeException()  
 
-            member this.getInnerFromCell (cell: Cell.T) =
+            member this.GetInnerFromCell (cell: Cell.T) =
                 if isOutOfStorage cell
                 then Probability.InnerType.zero
                 else data.[getSingleIndex cell]
 
             member this.Item
-                with get cell = Probability.fromInnerValue <| this.getInnerFromCell cell    
-                
-            member this.SubMatrixValuesGetter (submatrix: SubMatrix.T) isTransponed =
+                with get cell = Probability.fromInnerValue <| this.GetInnerFromCell cell    
+               
+            member this.SubMatrixValuesGetter (submatrix: SubMatrix.T) isTransponed  =
                 let leftCell = submatrix.Left 
 
                 if isTransponed then Cell.transpone else id 
                 >> Cell.shift leftCell.Row leftCell.Column
-                >> this.getInnerFromCell 
-//                >> Probability.InnerType.unwrap                             
+                >> this.GetInnerFromCell              
 
             member this.GetSubArray fromInner (submatrix: SubMatrix.T) isTransponed  =
-                let valueGetter = this.SubMatrixValuesGetter submatrix isTransponed
-                Array.init (submatrix.Size * submatrix.Size) ((cellBySingleIndex submatrix.Size) >> valueGetter >> fromInner)
+                let valueGetter = this.SubMatrixValuesGetter submatrix isTransponed                                          
+                Array.init (submatrix.Size * submatrix.Size) ((cellBySingleIndex submatrix.Size) >> valueGetter >> fromInner)        
 
             member this.AddValueToCell cell prob = 
                 let x = getSingleIndex cell

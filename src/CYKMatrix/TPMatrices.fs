@@ -40,7 +40,10 @@ open Util
 
     type GPUCuda = 
         { worker: Worker
-          options: Util.GPUCuda }
+          options: Util.GPUCuda
+          mult1: DeviceMemory<float>
+          mult2: DeviceMemory<float>
+          result: DeviceMemory<float> }
     
     type CPUFast = Unit
     type CPUSimple = Unit
@@ -127,7 +130,12 @@ open Util
             let maxAllocationBits_ = getInfo OpenCL.Net.DeviceInfo.MaxMemAllocSize
 
             // todo: type size
-            let maxAllocatedBitsForVar = maxMatrixSize * maxMatrixSize * 32 * ntsCount
+            let realMaxMatrixSize = 
+                match options.Cuda with
+                | Some {MinMatrixSize = size} -> size / 2
+                | None -> maxMatrixSize
+            let maxMaxMatricesCount = maxMatrixSize / realMaxMatrixSize
+            let maxAllocatedBitsForVar = maxMaxMatricesCount * realMaxMatrixSize * realMaxMatrixSize * 32 * ntsCount
 
             let maxAllocationBits = 
                 match maxAllocationBits_ with
@@ -138,10 +146,15 @@ open Util
                     else maxBits
                 | None ->
                     //todo: do something 
-                    failwith "not enough information"
+                    0
+//                    failwith "not enough information"
 
-            let bufferSize = maxMatrixSize * maxMatrixSize * ntsCount
+            let bufferSize = maxAllocatedBitsForVar
             
+            let floorToPowerOf2 x = 
+                let exp = (log (double x)) / (log 2.) |> ceil |> int
+                1 <<< exp
+
             let wgSizeRestriction = 
                 match maxWGSize with
                     | Some size -> size
@@ -149,13 +162,12 @@ open Util
             let localLinesRestriction = 
                 match localMem with
                     // todo:
-                    | Some size -> size / (32 * maxMatrixSize)
-                    | None -> 32 * (1 <<< 20) / (32 * maxMatrixSize)
-
-            
+                    | Some size -> size / (32 * realMaxMatrixSize)
+                    | None -> 32 * (1 <<< 20) / (32 * realMaxMatrixSize)
+                                                
             // todo: sizes
             let gridSize = maxMatrixSize
-            let wgSize = 128
+            let wgSize = min (floorToPowerOf2 wgSizeRestriction) (min (floorToPowerOf2 localLinesRestriction) <| min 128 (floorToPowerOf2 gridSize))
             let grid = new _1D(gridSize, wgSize)
 
             let mult1 = Array.create bufferSize <| Probability.InnerType.zero
@@ -210,15 +222,23 @@ open Util
             }
 
         let createCudaHelper cudaOptions =   
+            let bufferSize = maxMatrixSize * maxMatrixSize * ntsCount
+            let worker = Worker.Default
             {
-                worker = Worker.Default
+                worker = worker
                 options = cudaOptions
+                mult1 = worker.Malloc(bufferSize)
+                mult2 = worker.Malloc(bufferSize)
+                result = worker.Malloc(bufferSize)
             }
 
         let helpers = {
             _1DBrahma = 
                 match options._1DBrahma with 
-                | Some options -> Some (Options.map (newCreateBrahmaHelper options.MinMatrixSize) options)
+                | Some options -> 
+                    if options.MinMatrixSize <= maxMatrixSize
+                    then Some (Options.map (newCreateBrahmaHelper options.MinMatrixSize) options)
+                    else None
                 | None -> None
             Brahma = Option.map (Options.map createBrahmaHelper) options.Brahma
             Cuda = Option.map (Options.map createCudaHelper) options.Cuda
@@ -244,10 +264,6 @@ open Util
                 n, i, j
             Array.init (matricesSize * actualColCount) (fun x -> calculateCell <| getNIJ x)
 
-
-        let ceilToPowerOf2 x = 
-            let exp = (log (double x)) / (log 2.) |> ceil |> int
-            1 <<< exp
         let floorToPowerOf2 x = 
             let exp = (log (double x)) / (log 2.) |> floor |> int
             1 <<< exp
@@ -291,19 +307,18 @@ open Util
             let ldc = matricesSize
         
             let dalpha = 1.
-            use dA = worker.Malloc(from1)
-            use dB = worker.Malloc(from2)
+            helpers.mult1.Scatter(from1) 
+            helpers.mult2.Scatter(from2) 
             let dbeta = 0.
-            use dC = worker.Malloc(matricesSize * matricesSize * matricesCount)
 
             let doOne i =
                 let ptrShift = i * matricesCellCount
-                CUBLAS.Default.Dgemm(transa, transb, matricesSize, matricesSize, matricesSize, dalpha, dB.Ptr + ptrShift, ldb, dA.Ptr + ptrShift, lda, dbeta, dC.Ptr + ptrShift, ldc)
+                CUBLAS.Default.Dgemm(transa, transb, matricesSize, matricesSize, matricesSize, dalpha, helpers.mult2.Ptr + ptrShift, ldb, helpers.mult1.Ptr + ptrShift, lda, dbeta, helpers.result.Ptr + ptrShift, ldc)
 
             [|0..matricesCount - 1|]
             |> Array.iter doOne      
             
-            let multiplicationResult = dC.Gather()         
+            let multiplicationResult = helpers.result.Gather()         
 
             let flushOneMatrix num = 
                 let matrix = 
@@ -381,7 +396,7 @@ open Util
             fullTasks
             |> (if isParallel then Array.Parallel.iter else Array.iter) doOne 
 
-        let _1DDoBrahmaMultiplications (getMatrix: NonTerminal -> ProbabilityMatrix.T) flushSubMatrix matricesCount matricesSize fullTasks helpers = 
+        let _1DDoBrahmaMultiplications (getMatrix: NonTerminal -> ProbabilityMatrix.T) flushSubMatrix matricesCount matricesSize fullTasks (helpers: NewGPUBrahma) = 
             let matricesCellCount = matricesSize * matricesSize
             
             let cellGetter (from: SubMatrix.T) isTransponed = 
@@ -508,6 +523,7 @@ open Util
             // wtf?
 //                    helpers.Options.worker.Dispose()  
             | None -> ()
+
 
 
 

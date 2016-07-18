@@ -56,29 +56,35 @@
 
     module Probability =
 //        type InnerType = bool
-        type InnerType = float
-        type T = FloatProbability of InnerType
+
+        module InnerType =
+            type T = float
+
+            let create = float
+            let unwrap (x: T) = float
+
+            let zero = create 0.
+
+            let zeroQuote = <@ float 0. @>            
+            
+        type T = FloatProbability of InnerType.T
 
         let innerValue (FloatProbability v) = v
         let fromInnerValue v = v |> FloatProbability
-
-//        let inline innerSumm v1 v2 = v1 || v2
-//        let inline innerMult v1 v2 = v1 && v2
-        let innerSummQuote = <@ fun (v1: InnerType) (v2: InnerType) -> v1 + v2 @>
-        let innerMultQuote = <@ fun (v1: InnerType) (v2: InnerType) -> v1 * v2 @>
-        let innerTypeQuote = <@ float @>
-        let innerZeroQuote = <@ (%innerTypeQuote) 0. @>
-        
-        let createInnerType = float
-        let innerZero = createInnerType 0.
+                
         let innerSumm v1 v2 = v1 + v2
         let innerMult v1 v2 = v1 * v2
 
-        let create = createInnerType >> fromInnerValue
+//        let inline innerSumm v1 v2 = v1 || v2
+//        let inline innerMult v1 v2 = v1 && v2
+        let innerSummQuote = <@ fun (v1: InnerType.T) (v2: InnerType.T) -> v1 + v2 @>
+        let innerMultQuote = <@ fun (v1: InnerType.T) (v2: InnerType.T) -> v1 * v2 @>
+
+        let create = InnerType.create >> fromInnerValue
         let unwrap = innerValue >> double
         
-        let isZero v = innerValue v = innerZero        
-        let zero = fromInnerValue innerZero
+        let isZero v = innerValue v = InnerType.zero
+        let zero = fromInnerValue InnerType.zero
         //todo: compile quote
 
         let summ (FloatProbability v1) (FloatProbability v2) = innerSumm v1 v2 |> fromInnerValue
@@ -174,7 +180,7 @@
 
 
     module ProbabilityMatrix =
-        type T(matrix: Probability.InnerType [], nrow: int, ncol: int) =
+        type T(matrix: Probability.InnerType.T [], nrow: int, ncol: int) =
             let ncol = ncol
             let nrow = nrow
             let getSingleIndex (cell: Cell.T) = cell.Row * ncol + cell.Column
@@ -220,23 +226,23 @@
 
             member this.getInnerFromCell (cell: Cell.T) =
                 if isOutOfStorage cell
-                then Probability.innerZero
+                then Probability.InnerType.zero
                 else data.[getSingleIndex cell]
 
             member this.Item
                 with get cell = Probability.fromInnerValue <| this.getInnerFromCell cell    
                 
-            member this.SubMatrixValuesGetter (submatrix: SubMatrix.T) isTransponed fromInner =
+            member this.SubMatrixValuesGetter (submatrix: SubMatrix.T) isTransponed =
                 let leftCell = submatrix.Left 
 
                 if isTransponed then Cell.transpone else id 
                 >> Cell.shift leftCell.Row leftCell.Column
                 >> this.getInnerFromCell 
-                >> fromInner                             
+//                >> Probability.InnerType.unwrap                             
 
-            member this.GetSubArrayWithType fromInner (submatrix: SubMatrix.T) isTransponed  =
-                let valueGetter = this.SubMatrixValuesGetter submatrix isTransponed fromInner                                         
-                Array.init (submatrix.Size * submatrix.Size) ((cellBySingleIndex submatrix.Size) >> valueGetter)
+            member this.GetSubArray fromInner (submatrix: SubMatrix.T) isTransponed  =
+                let valueGetter = this.SubMatrixValuesGetter submatrix isTransponed
+                Array.init (submatrix.Size * submatrix.Size) ((cellBySingleIndex submatrix.Size) >> valueGetter >> fromInner)
 
             member this.AddValueToCell cell prob = 
                 let x = getSingleIndex cell

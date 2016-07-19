@@ -17,6 +17,7 @@
         PlatformName: string 
         DeviceType: DeviceType
         doParallelFlush: bool
+        MinCells: int
     } 
 
     type GPUCuda = {
@@ -219,9 +220,14 @@
                 >> Cell.shift leftCell.Row leftCell.Column
                 >> this.GetInnerFromCell              
 
-            member this.GetSubArray fromInner (submatrix: SubMatrix.T) isTransponed  =
+            member this.GetSubArray fromInner (submatrix: SubMatrix.T) isTransponed =
                 let valueGetter = this.SubMatrixValuesGetter submatrix isTransponed                                          
-                Array.init (submatrix.Size * submatrix.Size) ((cellBySingleIndex submatrix.Size) >> valueGetter >> fromInner)        
+                Array.init (submatrix.Size * submatrix.Size) (submatrix.CellByX >> valueGetter >> fromInner) 
+
+            member this.CopyToArray fromInner (submatrix: SubMatrix.T) isTransponed (where: _ []) shift =
+                let valueGetter = this.SubMatrixValuesGetter submatrix isTransponed  
+                for i in 0..submatrix.Size * submatrix.Size do
+                    where.[shift + i] <- (submatrix.CellByX i) |> valueGetter |> fromInner
 
             member this.AddValueToCell cell prob = 
                 let x = getSingleIndex cell

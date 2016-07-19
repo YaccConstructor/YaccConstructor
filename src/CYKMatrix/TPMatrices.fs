@@ -82,12 +82,8 @@ open Util
                             let skipRows = ti * matricesSize + skipMatrices
                             let skipCols = tj * matricesSize + skipMatrices
                             let mutable buf = (%zeroProbability)
-        //                    let mutable buf = c.[skipRows + tj]
-        //                    let k = ref 0
-        //                    while (!k < matricesSize) do 
                             for k in 0 .. (matricesSize - 1) do
                                 buf <- (+) buf ((*) a.[skipRows + k] b.[skipCols + k])
-        //                        k := !k + 1
                             c.[skipRows + tj] <- buf
             @>  
 
@@ -101,12 +97,8 @@ open Util
                     let skipRows = ti * matricesSize + skipMatrices
                     let skipCols = tj * matricesSize + skipMatrices
                     let mutable buf = (%zeroProbability)
-//                    let mutable buf = c.[skipRows + tj]
-//                    let k = ref 0
-//                    while (!k < matricesSize) do 
                     for k in 0 .. (matricesSize - 1) do
                         buf <- (%summProbabilities) buf ((%multiplicateProbabilities) a.[skipRows + k] b.[skipCols + k])
-//                        k := !k + 1
                     c.[skipRows + tj] <- buf
             @>  
 
@@ -166,8 +158,8 @@ open Util
                     | None -> 32 * (1 <<< 20) / (32 * realMaxMatrixSize)
                                                 
             // todo: sizes
-            let gridSize = maxMatrixSize
-            let wgSize = min (floorToPowerOf2 wgSizeRestriction) (min (floorToPowerOf2 localLinesRestriction) <| min 128 (floorToPowerOf2 gridSize))
+            let gridSize = maxMatrixSize * 4
+            let wgSize = min (floorToPowerOf2 wgSizeRestriction) <| min 128 (floorToPowerOf2 gridSize)
             let grid = new _1D(gridSize, wgSize)
 
             let mult1 = Array.create bufferSize <| Probability.InnerType.zero
@@ -236,7 +228,7 @@ open Util
             _1DBrahma = 
                 match options._1DBrahma with 
                 | Some options -> 
-                    if options.MinMatrixSize <= maxMatrixSize
+                    if options.MinMatrixSize <= maxMatrixSize && options.Options.MinCells <= maxMatrixSize * maxMatrixSize * ntsCount
                     then Some (Options.map (newCreateBrahmaHelper options.MinMatrixSize) options)
                     else None
                 | None -> None
@@ -398,23 +390,16 @@ open Util
 
         let _1DDoBrahmaMultiplications (getMatrix: NonTerminal -> ProbabilityMatrix.T) flushSubMatrix matricesCount matricesSize fullTasks (helpers: NewGPUBrahma) = 
             let matricesCellCount = matricesSize * matricesSize
-            
-            let cellGetter (from: SubMatrix.T) isTransponed = 
-                let leftCell = from.Left
 
-                from.CellByX
-                >> if isTransponed then Cell.transpone else id 
-                >> Cell.shift leftCell.Row leftCell.Column
-
-            let copyMatrix nt getCell (where: _ []) skip =
-                [0..matricesCellCount - 1]
-                |> List.iter (fun x -> where.[skip + x] <- getCell x |> (getMatrix nt).GetInnerFromCell)
+            let copyMatrix nt from (where: _ []) skip =
+                let matrix = getMatrix nt
+                matrix.CopyToArray id from false where skip
 
             fullTasks
-            |> Array.iteri (fun i ({ from1 = from }, nts) -> copyMatrix (fst nts) (cellGetter from false) helpers.mult1 (i * matricesCellCount))
+            |> Array.iteri (fun i ({ from1 = from }, nts) -> copyMatrix (fst nts) from helpers.mult1 (i * matricesCellCount))
             
             fullTasks
-            |> Array.iteri (fun i ({ from2 = from }, nts) -> copyMatrix (snd nts) (cellGetter from true) helpers.mult2 (i * matricesCellCount))
+            |> Array.iteri (fun i ({ from2 = from }, nts) -> copyMatrix (snd nts) from helpers.mult2 (i * matricesCellCount))
 
             [0..matricesCellCount * matricesCount - 1]
             |> List.iter (fun i -> helpers.result.[i] <- Probability.InnerType.zero)
@@ -488,12 +473,12 @@ open Util
             let do_1DBrahma helpers = _1DDoBrahmaMultiplications getTMatrix flushArrayMatrix matricesCount matricesSize fullTasks helpers
             let doCublas helpers = doCublasMultiplications getTMatrix flushCublasMatrix matricesCount matricesSize fullTasks helpers
 
-            let doCheck doMultiplication (helpers_: _ Info option) isDone = 
+            let doCheck doMultiplication (helpers_: _ Info option) useThis isDone = 
                 if not isDone 
                 then 
                     match helpers_ with
                     | Some helpers ->            
-                        if matricesSize >= helpers.MinMatrixSize
+                        if useThis helpers
                         then 
                             doMultiplication helpers.Options
                             true
@@ -502,11 +487,11 @@ open Util
                 else isDone
 
             false 
-            |> doCheck doCublas helpers.Cuda
-            |> doCheck doBrahma helpers.Brahma  
-            |> doCheck do_1DBrahma helpers._1DBrahma      
-            |> doCheck doFast helpers.Fast
-            |> doCheck doSimple helpers.Simple
+            |> doCheck doCublas helpers.Cuda (fun helpers -> matricesSize >= helpers.MinMatrixSize)
+            |> doCheck doBrahma helpers.Brahma (fun helpers -> matricesSize >= helpers.MinMatrixSize)
+            |> doCheck do_1DBrahma helpers._1DBrahma (fun helpers -> matricesSize >= helpers.MinMatrixSize && matricesSize * matricesSize * matricesCount >= helpers.Options.options.MinCells)      
+            |> doCheck doFast helpers.Fast (fun helpers -> matricesSize >= helpers.MinMatrixSize)
+            |> doCheck doSimple helpers.Simple (fun helpers -> matricesSize >= helpers.MinMatrixSize)
             |> ignore
 
 

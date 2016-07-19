@@ -1,1 +1,0 @@
-nuget pack ..\src\YardFrontend\YC.Frontends.Yard.nuspec  

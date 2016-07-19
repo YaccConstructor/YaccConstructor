@@ -29,8 +29,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     let translateAndCheck toDot translateFunction (expected : List<_>) (ast : Tree<_>) file errors = 
 #if DEBUG
         ast.PrintAst()
-#endif
-        toDot ast (file + ".dot")
+#endif        
         let res = translate translateFunction ast errors
         printfn "Result: %A" res
         Assert.AreEqual(expected, res)

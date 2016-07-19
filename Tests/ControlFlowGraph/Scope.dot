@@ -1,8 +1,0 @@
-digraph g
-{
-rankdir=LR;
-0;1;2;3;
-0 -> 1 [label="let x ="]
-1 -> 2 [label="let y = 1; y + 2;"]
-2 -> 3 [label="x + y"]
-}

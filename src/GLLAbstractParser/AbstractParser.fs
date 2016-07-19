@@ -362,14 +362,15 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
 //                        for e in errors do
 //                            printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16) 
                     
-                    if checkConj res then        
+                    if true//checkConj res 
+                    then        
                             let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
                             printf "%A" r1
                             (*let isSubpath l1 l2 =
                                 List.length l1 <= List.length l2 
                                 && Seq.forall2 (=) l1 (Seq.take (List.length l1) l2)*)
                             //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
-                            r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
+                            //r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
                             (*for e in errors do
                                 for p in e.Value do
                                     let path = List.rev errorPaths.[snd p.Value]                            

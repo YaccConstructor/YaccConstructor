@@ -1,0 +1,7 @@
+[<Start>]
+s: c & d
+c: A c A | A c B | B c A | B c B | C
+d: A a & A d | B b & B d | C e
+a: A a A | A a B | B a A | B a B | C e A
+b: A b A | A b B | B b A | B b B | C e B
+e: A e | B e | {None}

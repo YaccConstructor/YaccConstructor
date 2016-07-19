@@ -1,0 +1,6 @@
+digraph AST {
+    0 [label="n yard_start_rule",shape=box]
+    2 [label="prod 2"]
+    0 -> 2 [style=bold,width=10]
+    2 -> 16 []
+}

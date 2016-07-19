@@ -1,6 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{57C9FE8E-B557-449F-92C1-BA2D439332D8}"
+	ProjectSection(SolutionItems) = preProject
+		..\paket.dependencies = ..\paket.dependencies
+		..\..\paket.dependencies = ..\..\paket.dependencies
+	EndProjectSection
+EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RNGLRAbstractParser", "RNGLRAbstractParser.fsproj", "{1873EA19-FAB7-4D5F-B452-67C0B93C8B9B}"
 EndProject
 Global

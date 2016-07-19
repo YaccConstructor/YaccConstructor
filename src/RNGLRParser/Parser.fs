@@ -670,7 +670,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             match !root with
             | None -> Error (!curInd, [|!curToken|], "Input was fully processed, but it's not complete correct string.", debugFuns (), errDict)
             | Some res -> 
-                debugFuns().drawGSSDot "res.dot"
+                //debugFuns().drawGSSDot "res.dot"
                 let tree = new Tree<_> (tokens.ToArray(), res :> AstNode, parserSource.Rules)
                 //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber None parserSource.LeftSide "../../../Tests/RNGLR/sppf.dot"
                 Success (tree, [||], errDict)

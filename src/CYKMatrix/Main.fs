@@ -14,8 +14,8 @@ open CYKMatrix
 
 
 let printMatrix (matrix: ProbabilityMatrix.T) strLen searchLen = 
-    let rowLength = matrix.GetLength(0)
-    let colLength = matrix.GetLength(1)
+    let rowLength = matrix.Nrow
+    let colLength = matrix.Ncol
     for i in [ 0..rowLength - 1 ] do
         for j in [ 0..colLength - 1 ] do
             let cell = Cell.create i j
@@ -31,8 +31,8 @@ let printMatrix (matrix: ProbabilityMatrix.T) strLen searchLen =
     printfn ""
     
 let isAnswerValid (matrix: ProbabilityMatrix.T) strLen searchLen = 
-    let rowLength = matrix.GetLength(0)
-    let colLength = matrix.GetLength(1)
+    let rowLength = matrix.Nrow
+    let colLength = matrix.Ncol
     if rowLength <> colLength || rowLength <> strLen + 1 then false
     else 
         let redundantCell (cell: Cell.T) = 
@@ -127,6 +127,7 @@ let main args =
 
     let getGpuOptions platformName =
         let deviceType = DeviceType.Gpu
+        //todo:
         let gpuOneThread = { PlatformName = platformName; DeviceType = deviceType; doParallelFlush = false }
         let gpuParallel = { gpuOneThread with doParallelFlush = true }
         let provider = 
@@ -183,15 +184,20 @@ let main args =
     let addParallel minms (init: Options.T) = { init with Parallel = Some <| Options.createOne minms () } 
     let addFast minms (init: Options.T) = { init with Fast = Some <| Options.createOne minms () } 
     
-    let bestOption = (myAlg |> addCuda 128 cudaParallel |> addBrahma 64 nvidiaParallel |> addParallel 1)
+    let bestOption = (myAlg |> addCuda 128 cudaParallel |> addBrahma 32 nvidiaParallel |> addParallel 1)
     let toCheck1 = (myAlg |> addCuda 128 cudaParallel |> addBrahma 64 nvidiaParallel |> addParallel 1)
-    let toCheck2 = (myAlg |> addCuda 128 cudaParallel |> add_1DBrahma 64 nvidiaParallel |> addParallel 1)
+    let toCheck2 = (myAlg |> addCuda 128 cudaParallel |> add_1DBrahma 64 nvidiaParallel |> addFast 64 |> addParallel 1)
     let toCheck3 = (myAlg |> addCuda 64 cudaParallel |> addParallel 1)
 
     let checkTime str searchLen = 
+
         checkOneType 
-            (fun str searchLen -> recognize bestOption str rules nonterminals S searchLen ) 
-            (fun toCheck -> isAnswerValid toCheck) "128, 64, parallel" str searchLen
+            (fun str searchLen -> recognize toCheck2 str rules nonterminals S searchLen ) 
+            (fun toCheck -> isAnswerValid toCheck) "my" str searchLen
+            
+//        checkOneType 
+//            (fun str searchLen -> recognize bestOption str rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "128, 64, parallel" str searchLen
 //        checkOneType 
 //            (fun str searchlen -> recognize (myAlg |> addCuda 128 cudaOneThread |> addBrahma 16 nvidiaOneThread) str rules nonterminals S searchlen ) 
 //            (fun tocheck -> isAnswerValid tocheck) "128, 64, parallel" str searchLen
@@ -221,10 +227,6 @@ let main args =
 //            (fun str searchLen -> recognize okhotinAlg str rules nonterminals S searchLen ) 
 //            (fun toCheck -> isAnswerValid toCheck) "okhotin, vanilla" str searchLen
 
-        checkOneType 
-            (fun str searchLen -> recognize toCheck2 str rules nonterminals S searchLen ) 
-            (fun toCheck -> isAnswerValid toCheck) "my" str searchLen
-
 
     let check str searchLen param1 param2 = 
         let toCheck1    = recognize param1 str rules nonterminals S searchLen 
@@ -246,8 +248,8 @@ let main args =
                 printcellDiff cell
                 false
         let sameAnswers = 
-            [ 0..toCheck1.GetLength(0) - 1 ]
-            |> Seq.forall (fun i -> (Seq.forall (fun j -> sameCells <| Cell.create i j) [ 0..toCheck1.GetLength(0) - 1 ])) 
+            [ 0..toCheck1.Nrow - 1 ]
+            |> Seq.forall (fun i -> (Seq.forall (fun j -> sameCells <| Cell.create i j) [ 0..toCheck1.Ncol - 1 ])) 
             
 //        printcellDiff <| Cell.create 0 68
 //        printcellDiff <| Cell.create 0 65
@@ -257,24 +259,25 @@ let main args =
 //        printcellDiff <| Cell.create 1 68
 //        printcellDiff <| Cell.create 1 69
                         
-//        printMatrix toCheck1 (String.length str) searchLen 
-//        printMatrix toCheck2 (String.length str) searchLen 
+        printMatrix toCheck1 (String.length str) searchLen 
+        printMatrix toCheck2 (String.length str) searchLen 
 
         if not sameAnswers
         then failwith "different answers"
     
-    
 //    let toCheckOptions = amdNewOptions
-//    let toCheckOptions = (myAlg |> addBrahma 8 nvidiaOneThread)
-    let toCheckOptions = (myAlg |> add_1DBrahma 2 nvidiaOneThread)
-//    let toCheckOptions = (myAlg |> addCuda 32 cudaOneThread)
+//    let toCheck = (myAlg |> addBrahma 8 nvidiaOneThread)
+    let toCheck = (myAlg |> add_1DBrahma 2 nvidiaOneThread)
+//    let toCheck = (myAlg |> addCuda 2 cudaOneThread)
+//    let toCheck = (myAlg |> addBrahma 2 nvidiaOneThread)
+//    let toCheck = (myAlg |> addFast 4 |> addParallel 1 )
 
 //    check "abb"      2
-//    check "abb"      3    
+//    check "abb"      3    s
 //    check "aaabbcc"  5
 //    check "aaabb"    5
-//    check "aaaaabbb" 6 okhotinAlg toCheckOptions
-//    check "aaaabbbbbb" 6 okhotinAlg toCheckOptions
+    check "aaaaabbb" 6 okhotinAlg toCheck
+    check "aaaabbbbbb" 6 okhotinAlg toCheck
 //    check "aaaabbbbbbbbbbb" 10
 //    check "aaaabbbbbbbbbbbbbbb" 10
 //    check "aaaabb" 6
@@ -285,10 +288,10 @@ let main args =
 //    check "aaaabb" 2
 //    check "aaaabb" 1
 //    check "aaaabb" 0
-//    check (String.replicate 23 "abb") 69 okhotinAlg toCheckOptions
+//    check (String.replicate 23 "abb") 69 okhotinAlg toCheck
 //    check (String.replicate 350 "abb") 800 bestOption (myAlg |> addFast 64 |> addParallel 1) 
 
-    checkTime (String.replicate 200 "abb") 550
+//    checkTime (String.replicate 200 "abb") 550
 //    check (String.replicate 6 "abb") 18 okhotinAlg amdOptions
 //    checkTime (String.replicate 120 "abb") 300
 //    checkTime (String.replicate 200 "abb") 400

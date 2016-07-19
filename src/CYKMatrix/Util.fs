@@ -3,10 +3,10 @@
     open System
     open System.Collections.Generic
     open OpenCL.Net
-    open Microsoft.FSharp.Math
+//    open Microsoft.FSharp.Math
 
-    open FSharp.Quotations.Evaluator
-    open Microsoft.FSharp.Quotations
+//    open FSharp.Quotations.Evaluator
+//    open Microsoft.FSharp.Quotations
 
     type Info<'T> = {
         MinMatrixSize: int
@@ -17,7 +17,6 @@
         PlatformName: string 
         DeviceType: DeviceType
         doParallelFlush: bool
-        MinCells: int
     } 
 
     type GPUCuda = {
@@ -76,8 +75,6 @@
         let innerSumm v1 v2 = v1 + v2
         let innerMult v1 v2 = v1 * v2
 
-//        let inline innerSumm v1 v2 = v1 || v2
-//        let inline innerMult v1 v2 = v1 && v2
         let innerSummQuote = <@ fun (v1: InnerType.T) (v2: InnerType.T) -> v1 + v2 @>
         let innerMultQuote = <@ fun (v1: InnerType.T) (v2: InnerType.T) -> v1 * v2 @>
 
@@ -181,66 +178,63 @@
 
 
     module ProbabilityMatrix =
-        type T(matrix: Probability.InnerType.T [], nrow: int, ncol: int) =
-            let ncol = ncol
-            let nrow = nrow
-            let getSingleIndex (cell: Cell.T) = cell.Row * ncol + cell.Column
-                
-            let isOutOfStorage (cell: Cell.T) =
-                cell.Row < 0 || cell.Column < 0 || cell.Row >= nrow || cell.Column >= ncol
-                            
-            let cellBySingleIndex size x =
-                let subi = x / size
-                let subj = x - size * subi
-                Cell.create subi subj 
+        type T(matrix: Probability.InnerType.T [], size: int) =
 
             //todo: optimize not used space
             let data = matrix
+//            member this.InnerValue = data
 
-            member this.innerValue = data
-        
-            member this.GetLength i = 
-                match i with
-                | 0 -> nrow
-                | 1 -> ncol   
-                | _ -> raise <| IndexOutOfRangeException()  
+            member this.Nrow = size
+            member this.Ncol = size
+            member this.Size = size
+
+            member this.WholeMatrix = SubMatrix.create (Cell.create 0 this.Ncol) this.Size
+                
+            member this.IsOutOfStorage (cell: Cell.T) =
+                cell.Row < 0 || cell.Column < 0 || cell.Row >= this.Nrow || cell.Column >= this.Ncol
 
             member this.GetInnerFromCell (cell: Cell.T) =
-                if isOutOfStorage cell
+                if this.IsOutOfStorage cell
                 then Probability.InnerType.zero
-                else data.[getSingleIndex cell]
+                else data.[this.WholeMatrix.XByCell cell]
 
             member this.Item
                 with get cell = Probability.fromInnerValue <| this.GetInnerFromCell cell    
                
-            member this.SubMatrixValuesGetter (submatrix: SubMatrix.T) isTransponed  =
+            member this.SubMatrixValuesGetter isTransponed (submatrix: SubMatrix.T) =
                 let leftCell = submatrix.Left 
 
                 if isTransponed then Cell.transpone else id 
                 >> Cell.shift leftCell.Row leftCell.Column
                 >> this.GetInnerFromCell              
 
-            member this.GetSubArray fromInner (submatrix: SubMatrix.T) isTransponed =
-                let valueGetter = this.SubMatrixValuesGetter submatrix isTransponed                                          
+            member this.GetSubArray fromInner isTransponed (submatrix: SubMatrix.T) =
+                let valueGetter = this.SubMatrixValuesGetter isTransponed submatrix                                          
                 Array.init (submatrix.Size * submatrix.Size) (submatrix.CellByX >> valueGetter >> fromInner) 
 
-            member this.CopyToArray fromInner (submatrix: SubMatrix.T) isTransponed (where: _ []) shift =
-                let valueGetter = this.SubMatrixValuesGetter submatrix isTransponed  
+            member this.CopyToArray fromInner isTransponed (submatrix: SubMatrix.T) (where: _ []) shift =
+                let valueGetter = this.SubMatrixValuesGetter isTransponed submatrix  
                 for i in 0..submatrix.Size * submatrix.Size do
                     where.[shift + i] <- (submatrix.CellByX i) |> valueGetter |> fromInner
 
             member this.AddValueToCell cell prob = 
-                let x = getSingleIndex cell
+                let x = this.WholeMatrix.XByCell cell
                 data.[x] <- Probability.innerSumm data.[x] <| Probability.innerValue prob
-                
-        let create nrow ncol matrix =
-            T(matrix, nrow, ncol)
-
-        let init nrow ncol generator =
-            let splitIndex x =
-                let i = x / ncol
-                let j = x - ncol * i
-                Cell.create i j
-            new T(Array.init (ncol * nrow) (fun x -> splitIndex x |> generator |> Probability.innerValue), nrow, ncol)
         
-        let empty n = init n n (fun cell -> Probability.zero)
+            member this.AddSubmatrixByGetter (where: SubMatrix.T) getValueFromCell =
+                for i in [0 .. where.Size - 1] do
+                    let actualColCount = (min where.Top.Column this.Size) - where.Left.Column
+                    for j in [0 .. actualColCount - 1] do
+                        let matrixCell = Cell.create i j
+                        let realCell = Cell.shift where.Left.Row where.Left.Column matrixCell
+                        this.AddValueToCell realCell <| getValueFromCell matrixCell                        
+            
+            member this.AddSubmatrix where (matrix: T) = this.AddSubmatrixByGetter where (fun cell -> matrix.[cell])
+                
+        let create size matrix = T(matrix, size)
+
+        let init size generator =
+            let wholeSubmatrix = SubMatrix.create (Cell.create 0 size) size
+            new T(Array.init (size * size) (fun x -> wholeSubmatrix.CellByX x |> generator |> Probability.innerValue), size)
+        
+        let empty n = init n (fun cell -> Probability.zero)

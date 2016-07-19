@@ -362,7 +362,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
 //                        for e in errors do
 //                            printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16) 
                     
-                    if checkConj res then        
+                    if true//checkConj res 
+                    then        
                             let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
                             printf "%A" r1
                             (*let isSubpath l1 l2 =

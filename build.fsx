@@ -8,6 +8,7 @@ open Fake.Git
 open Fake.AssemblyInfoFile
 open Fake.ReleaseNotesHelper
 open Fake.UserInputHelper
+open Fake.Testing.NUnit3
 open System
 open System.IO
 #if MONO
@@ -49,6 +50,7 @@ let solutionFile  = "YaccConstructor.sln"
 
 let ycCoreSolutionFile  = "YC.Core.sln"
 let ycMinimalSolutionFile  = "YC.Minimal.sln"
+let ycYardFrontendSolutionFile  = "YC.YardFrontend.sln"
 
 // Pattern specifying assemblies to be tested using NUnit
 let testAssemblies = "tests/**/bin/Release/*Tests*.dll"
@@ -129,20 +131,26 @@ Target "CleanDocs" (fun _ ->
 // --------------------------------------------------------------------------------------
 // Build library & test project
 
-Target "BuildAll" (fun _ ->
+Target "Build:All" (fun _ ->
     !! solutionFile
     |> MSBuildRelease "" "Rebuild"
     |> ignore
 )
 
-Target "BuildCore" (fun _ ->
+Target "Build:Core" (fun _ ->
     !! ycCoreSolutionFile
     |> MSBuildRelease "" "Rebuild"
     |> ignore
 )
 
-Target "BuildMinimal" (fun _ ->
+Target "Build:Minimal" (fun _ ->
     !! ycMinimalSolutionFile
+    |> MSBuildRelease "" "Rebuild"
+    |> ignore
+)
+
+Target "Build:YardFrontend" (fun _ ->
+    !! ycYardFrontendSolutionFile
     |> MSBuildRelease "" "Rebuild"
     |> ignore
 )
@@ -151,24 +159,38 @@ Target "BuildMinimal" (fun _ ->
 // --------------------------------------------------------------------------------------
 // Gen frontends, tests etc
 
-Target "Gen:FsYaccFrontend" (fun _ ->
-    let retCode = Fake.ProcessHelper.Shell.Exec(System.IO.Path.GetFullPath(@"src\FsYaccFrontend\gen.cmd"), dir = @"src\FsYaccFrontend")
-    if retCode = 0
-    then ()
-    else failwith "FsYaccFrontend generation failed!"
-)
+let runCmd cmdFile =
+    let retCode = Fake.ProcessHelper.Shell.Exec(System.IO.Path.GetFullPath(cmdFile), dir = System.IO.Path.GetDirectoryName cmdFile)
+    if retCode <> 0
+    then failwithf "Execution of %A failed!" cmdFile
 
+Target "Gen:FsYaccFrontend" (fun _ -> runCmd @"src\FsYaccFrontend\gen.cmd")
+
+Target "Gen:YardFrontend" (fun _ -> runCmd @"src\YardFrontend\gen.cmd")
+
+Target "GenTests:RNGLR" (fun _ -> 
+                            runCmd @"tests\RNGLRAbstractParser.Tests\gen.cmd"
+                            runCmd @"tests\RNGLRAbstractParser.Tests\gen_lex.cmd"
+                            runCmd @"tests\RNGLRParser.ErrorRecovery.Tests\gen.cmd"
+                        )
+
+Target "GenTests:GLL" (fun _ -> 
+                         runCmd @"tests\GLLParser.Simple.Tests\gen.cmd"
+                         runCmd @"tests\GLL.AbstractParser.Simple.Tests\gen.cmd"
+                      )
 
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner
 
 Target "RunTests" (fun _ ->
     !! testAssemblies
-    |> NUnit (fun p ->
+    |> NUnit3 (fun p ->
         { p with
-            DisableShadowCopy = true
+            ShadowCopy = false
+            DisposeRunners = true
             TimeOut = TimeSpan.FromMinutes 20.
-            OutputFile = "TestResults.xml" })
+            WorkingDir = "tests/YardFrontend.Tests/bin/Release/"
+        })
 )
 
 #if MONO
@@ -393,15 +415,18 @@ Target "All" DoNothing
 
 "Clean"
   ==> "AssemblyInfo"
-  ==> "BuildCore"
+  ==> "Build:Core"
   ==> "Gen:FsYaccFrontend"
-  ==> "BuildMinimal"
-(*  ==> "BuildAll"
-  ==> "CopyBinaries"
+  ==> "Build:Minimal"
+  ==> "Gen:YardFrontend"
+  ==> "Build:YardFrontend"
+  ==> "GenTests:RNGLR"
+  ==> "GenTests:GLL"
+  ==> "Build:All"
+  //==> "CopyBinaries"
   ==> "RunTests"
   ==> "GenerateReferenceDocs"
   ==> "GenerateDocs"
-  *)
   ==> "All"
   =?> ("ReleaseDocs",isLocalBuild)
 

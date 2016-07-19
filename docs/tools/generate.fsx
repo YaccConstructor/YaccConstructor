@@ -80,19 +80,20 @@ let binaries =
         |> List.map (fun b -> bin @@ b)
     
     let conventionBased = 
-        directoryInfo bin 
+        directoryInfo (sprintf "%s/../src/" bin)
         |> subDirectories
-        |> Array.map (fun d -> d.FullName @@ (sprintf "%s.dll" d.Name))
+        |> Array.map (fun d -> bin @@ (sprintf "Release/v40/%s.dll" d.Name))
         |> List.ofArray
 
     conventionBased @ manuallyAdded
 
 let libDirs =
     let conventionBasedbinDirs =
-        directoryInfo bin 
+        (*directoryInfo bin 
         |> subDirectories
         |> Array.map (fun d -> d.FullName)
-        |> List.ofArray
+        |> List.ofArray*)
+        [sprintf "%s/Release/v40/" bin]
 
     conventionBasedbinDirs @ [bin]
 

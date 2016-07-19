@@ -30,6 +30,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLLGenerator", "src\GLLGene
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Generators.Common", "src\Generators.Common\Generators.Common.fsproj", "{F46A55CF-A97F-4DFC-9483-340C631C80FE}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsYaccFrontend", "src\FsYaccFrontend\FsYaccFrontend.fsproj", "{17103A48-DB90-4101-92EE-7B2719DB2CF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -172,6 +174,18 @@ Global
 		{F46A55CF-A97F-4DFC-9483-340C631C80FE}.Release20|Any CPU.Build.0 = Release|Any CPU
 		{F46A55CF-A97F-4DFC-9483-340C631C80FE}.Release20|x86.ActiveCfg = Release|Any CPU
 		{F46A55CF-A97F-4DFC-9483-340C631C80FE}.Release20|x86.Build.0 = Release|Any CPU
+		{17103A48-DB90-4101-92EE-7B2719DB2CF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17103A48-DB90-4101-92EE-7B2719DB2CF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17103A48-DB90-4101-92EE-7B2719DB2CF0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{17103A48-DB90-4101-92EE-7B2719DB2CF0}.Debug|x86.Build.0 = Debug|Any CPU
+		{17103A48-DB90-4101-92EE-7B2719DB2CF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17103A48-DB90-4101-92EE-7B2719DB2CF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17103A48-DB90-4101-92EE-7B2719DB2CF0}.Release|x86.ActiveCfg = Release|Any CPU
+		{17103A48-DB90-4101-92EE-7B2719DB2CF0}.Release|x86.Build.0 = Release|Any CPU
+		{17103A48-DB90-4101-92EE-7B2719DB2CF0}.Release20|Any CPU.ActiveCfg = Release|Any CPU
+		{17103A48-DB90-4101-92EE-7B2719DB2CF0}.Release20|Any CPU.Build.0 = Release|Any CPU
+		{17103A48-DB90-4101-92EE-7B2719DB2CF0}.Release20|x86.ActiveCfg = Release|Any CPU
+		{17103A48-DB90-4101-92EE-7B2719DB2CF0}.Release20|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

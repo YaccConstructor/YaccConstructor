@@ -1,8 +1,0 @@
-digraph g
-{
-rankdir=LR;
-0;1;2;
-0 -> 1 [label="x"]
-0 -> 1 [label="y"]
-1 -> 2 [label="=1;"]
-}

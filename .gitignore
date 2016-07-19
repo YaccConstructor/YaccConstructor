@@ -593,3 +593,7 @@ docs/content/license.md
 docs/content/release-notes.md
 .fake
 docs/tools/FSharp.Formatting.svclog
+*.dot.*
+*.yrd.fs
+tests/GLLParser.Simple.Tests/*.dot
+tests/GLL.AbstractParser.Simple.Tests/*.dot

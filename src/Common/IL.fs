@@ -71,6 +71,8 @@ module Production =
     and t<'patt,'expr> = 
         /// Alternative (e1 | e2)
         |PAlt     of (t<'patt,'expr>) * (t<'patt,'expr>)
+        /// Conjunction (e1 & e2)
+        |PConj    of (t<'patt,'expr>) * (t<'patt,'expr>)
         /// Sequence * attribute. (Attribute is always applied to sequence) 
         |PSeq     of (elem<'patt,'expr>) list * 'expr option * DLabel option
         /// Token itself. Final element of parsing.
@@ -110,6 +112,7 @@ module Production =
                     
             match this with
             |PAlt (x, y) -> x.ToString() + " | " + y.ToString()
+            |PConj (x, y) -> x.ToString() + " & " + y.ToString()
             |PSeq (ruleSeq, attrs, l) ->
                 let strAttrs =
                     match attrs with
@@ -196,6 +199,7 @@ module Definition =
      /// Text after a grammar description, what will be simply copied
      foot    :'expr option;
      options : Map<string, string>
+     ///
      tokens : Map<string, string option>
     }    
     

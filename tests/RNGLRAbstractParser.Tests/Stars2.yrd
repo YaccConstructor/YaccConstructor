@@ -1,0 +1,12 @@
+options {
+    translate = false
+    module = "RNGLR.Stars2"
+    infEpsPath = epsilons
+    pos = uint64
+}
+
+[<Start>]
+s: j
+j: (e|r)j|e
+e: STAR STAR 
+r: STAR STAR STAR 

@@ -1,7 +1,0 @@
-digraph g
-{
-0;1;2;
-0 -> 1 [label="select x from "];
-1 -> 2 [label=" y"];
-1 -> 2 [label=" select s from b"];
-}

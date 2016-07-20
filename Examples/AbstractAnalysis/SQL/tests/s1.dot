@@ -1,8 +1,0 @@
-digraph G
-{
-0;1;2;3;4;
-0->1 [label="select "];
-1->2 [label=" x "];
-2->3 [label=" from "];
-3->4 [label=" y "];
-}

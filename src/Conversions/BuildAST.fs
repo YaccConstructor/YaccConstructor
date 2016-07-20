@@ -74,6 +74,9 @@ let rec _buildAST ruleName (production: t<Source.t, Source.t>) =
                         | PAlt(left,right) -> { elem with binding=Some(new Source.t(sprintf "S%d" (i+1)));
                                                           rule=PAlt(_buildAST (sprintf "%s_Alt%dL" ruleName (i+1)) left,
                                                                     _buildAST (sprintf "%s_Alt%dR" ruleName (i+1)) right) }
+                        | PConj(left,right) -> { elem with binding=Some(new Source.t(sprintf "S%d" (i+1)));
+                                                          rule=PConj(_buildAST (sprintf "%s_Conj%dL" ruleName (i+1)) left,
+                                                                    _buildAST (sprintf "%s_Conj%dR" ruleName (i+1)) right) }
                         | PMany p -> { elem with binding=Some(new Source.t(sprintf "S%d" (i+1)));
                                                  rule=PMany(_buildAST (sprintf "%s_Many%d" ruleName (i+1)) p) }
                         | PSome p -> { elem with binding=Some(new Source.t(sprintf "S%d" (i+1)));
@@ -97,6 +100,8 @@ let rec _buildAST ruleName (production: t<Source.t, Source.t>) =
                 ,l)
     | PAlt(left,right) -> 
         PAlt(_buildAST (sprintf "%s_Alt%dL" ruleName 1) left,_buildAST (sprintf "%s_Alt%dR" ruleName 1) right)
+    | PConj(left,right) -> 
+        PConj(_buildAST (sprintf "%s_Conj%dL" ruleName 1) left,_buildAST (sprintf "%s_Conj%dR" ruleName 1) right)
     | x -> seqify x |> _buildAST ruleName
 
 let buildAST (ruleList: Rule.t<Source.t, Source.t> list) tokenType =

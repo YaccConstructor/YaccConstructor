@@ -4,11 +4,10 @@ open System
 open Yard.Generators.Common.FinalGrammar
 open System.Collections.Generic
 open Yard.Generators.Common
-open Yard.Generators.Common.AST2
 open Yard.Core.IL
 open Yard.Core.IL.Production
-open Microsoft.FSharp.Text.StructuredFormat
-open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
+open YC.PrettyPrinter.Pretty
+open YC.PrettyPrinter.StructuredFormat
 
 let getPosFromSource fullPath dummyPos (src : Source.t) =
     let file =
@@ -265,5 +264,5 @@ let printTranslator2 (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sour
 
     [(*nowarn; *)(*defineEpsilonTrees;*) (*declareNonTermsArrays;*) rules; funRes]
     |> aboveListL
-    |> Display.layout_to_string(FormatOptions.Default)
+    |> print 80
     

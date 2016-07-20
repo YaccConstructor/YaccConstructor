@@ -1,0 +1,9 @@
+digraph g
+{
+rankdir=LR
+node [shape=circle]
+0 -> 1 [label="LBR"]
+1 -> 0 [label="RBR"]
+0 -> 2 [label=" EOF"]
+{rank = same; 0, 2 }
+}

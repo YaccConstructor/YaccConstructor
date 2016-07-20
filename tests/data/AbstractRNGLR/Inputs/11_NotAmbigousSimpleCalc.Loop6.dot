@@ -1,0 +1,17 @@
+digraph g
+{
+rankdir=LR
+node [shape=circle]
+0 -> 1 [label="NUM  1"]
+1 -> 2 [label="PLUS 2"]
+2 -> 3 [label="NUM 3"]
+3 -> 4 [label="PLUS 4"]
+4 -> 5 [label="NUM 5"]
+5 -> 2 [label="PLUS 6"]
+5 -> 7 [label="PLUS 6"]
+7 -> 1 [label="NUM 8"]
+4 -> 6 [label="NUM 7"]
+6 -> 8 [label="RNGLR_EOF 0"]
+{rank = same; 3, 5 }
+{rank = same; 2, 7 }
+}

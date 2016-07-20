@@ -21,8 +21,23 @@ open Yard.Generators.Common
 
 type FinalGrammar (ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
     let _indexator = new Indexator(ruleList, caseSensitive)
+    let _probability = 
+        let getProb body = 
+            match body with
+            | Production.PSeq (_,_,Some lbl) -> 
+                match lbl.weight with 
+                | Some w -> w
+                | None -> 1.0
+            | Production.PSeq (_,_,None) -> 1.0
+            | _ -> 1.0 //failwith "Incorrect right part of production."
+
+        ruleList
+        |> List.map (fun r -> getProb r.body)
+        |> Array.ofList
+
     let _numberedRules = new NumberedRules(ruleList, _indexator, caseSensitive)
     let _canInferEpsilon = canInferEpsilon _numberedRules _indexator
+    let _epsilon_rules = epsilonRules _numberedRules _canInferEpsilon
     let _firstSet = firstSet _numberedRules _indexator _canInferEpsilon
     let _followSet = followSet _numberedRules _indexator _canInferEpsilon _firstSet
     let _epsilonCyclicNonTerms = getEpsilonCyclicNonTerms _numberedRules _indexator _canInferEpsilon
@@ -35,6 +50,7 @@ type FinalGrammar (ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
     member this.rules = _numberedRules
     member this.EpsilonCyclicNonTerms = _epsilonCyclicNonTerms
     member this.canInferEpsilon = _canInferEpsilon
+    member this.epsilonRules = _epsilon_rules
     member this.firstSet = _firstSet
     member this.followSet = _followSet
     member this.epsilonTrees = _epsilonTrees
@@ -42,3 +58,4 @@ type FinalGrammar (ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
     member this.startRule = _numberedRules.startRule
     member this.errorIndex = _errorIndex
     member this.errorRulesExists = _errorRulesExists
+    member this.probability = _probability

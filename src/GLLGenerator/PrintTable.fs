@@ -7,8 +7,11 @@ open Yard.Core.IL
 
 let printTableGLL 
     (grammar : FinalGrammar )(table : Table) (moduleName : string) 
-    (tokenType : Map<_,_>) (res : System.Text.StringBuilder) 
-    _class positionType caseSensitive : string =
+    (tokenType : Map<_,_>) (res : System.Text.StringBuilder)  
+    _class positionType caseSensitive (isAbstract : bool) : string =
+
+    let inline packRulePosition rule position = (int rule <<< 16) ||| int position
+
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
     let inline printInd num (x : 'a) =
@@ -44,10 +47,19 @@ let printTableGLL
          l |> List.iteri (fun i x -> if i <> 0 then print sep printer x)
          print rBr
 
+    let printResizeArray prefix lBr rBr sep (arr : ResizeArray<_>)  printer = 
+        print prefix
+        print lBr
+        for i = 0 to arr.Count - 1 do
+            if i <> 0 then print sep
+            printer arr.[i]
+        printBr rBr        
 
 
     let printArr (arr : 'a[]) printer = printArr "" "[|" "|]" "; " (arr : 'a[]) printer
     let printArr2 (arr : 'a[]) printer = printArr2 "" "[|" "|]" "; " (arr : 'a[]) printer
+    
+    let printRessizeArrayAsList (arr : ResizeArray<_>) printer = printResizeArray "" "[|" "|]" "; " (arr : ResizeArray<_>) printer
 
     let leftSide = Array.zeroCreate grammar.rules.rulesCount
     for i = 0 to grammar.rules.rulesCount-1 do
@@ -68,6 +80,16 @@ let printTableGLL
             cur <- cur + 1
     rulesStart.[grammar.rules.rulesCount] <- cur
 
+    let createSlots =
+        let slots = new List<_>()
+        slots.Add(packRulePosition -1 -1, 0)
+        for i = 0 to grammar.rules.rulesCount - 1 do
+            let currentRightSide = grammar.rules.rightSide i
+            for j = 0 to currentRightSide.Length - 1 do
+                if grammar.indexator.isNonTerm currentRightSide.[j] then
+                    let key = packRulePosition i (j + 1)
+                    slots.Add(key, slots.Count)
+        slots
 
     let printTable () =
         let indexator = grammar.indexator
@@ -140,7 +162,7 @@ let printTableGLL
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %s _ -> %d" (indexator.indexToTerm i) i
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| L_%s _ -> %d" (indexator.indexToLiteral i) i
+            printBrInd 1 "| L_%s _ -> %d" (indexator.getLiteralName i) i
         printBr ""
 
         printBrInd 0 "let isLiteral = function"
@@ -154,7 +176,8 @@ let printTableGLL
         printBrInd 0 "let isTerminal = function"
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %s _ -> true" <| indexator.indexToTerm i
-        printBrInd 1 "| _ -> false"
+        if indexator.literalsCount > 0
+        then printBrInd 1 "| _ -> false"
         printBr ""
 
         printBrInd 0 "let numIsTerminal = function"
@@ -175,12 +198,6 @@ let printTableGLL
         printBrInd 1 "| _ -> false"
         printBr ""
 
-        printBrInd 0 "let isNonTerminal = function"   
-        for i = 0 to indexator.nonTermCount-1 do
-            printBrInd 1 "| %s -> true" <| indexator.indexToNonTerm i
-        printBrInd 1 "| _ -> false"
-        printBr ""
-
         printInd 0 "let getLiteralNames = ["
         for i = indexator.literalsStart to indexator.literalsEnd do
             print "\"%s\";" <| indexator.indexToLiteral i
@@ -196,11 +213,11 @@ let printTableGLL
         print "let leftSide = "
         printArr leftSide (print "%d")
 
-        print "let table = [| "
-        for arr in table.result do
-            printArr2 arr (print "%d")
-            print ";"
-        print " |]"
+        print "let table = new System.Collections.Generic.Dictionary<int, int[]>(%A)\n" table.result.Count
+        for kvp in table.result do
+            let arr = "[|" + (kvp.Value |> Seq.map string |> String.concat ";") + "|]"                               
+            let str = "table.Add(" + kvp.Key.ToString() + ", " + arr + ")\n" 
+            print "%s" str 
         printBr ""
 
         print "let private rules = "
@@ -210,19 +227,20 @@ let printTableGLL
         printArr grammar.canInferEpsilon (print "%A")
 
         printBr "let defaultAstToDot ="
-        printBrInd 1 "(fun (tree : Yard.Generators.Common.AST2.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)"
+        printBrInd 1 "(fun (tree : Yard.Generators.Common.ASTGLL.Tree<Token>) -> tree.AstToDot numToString)"
 
         printBr ""
 
         print "let private rulesStart = "
         printArr rulesStart (print "%d")
-        
+        print "let probs = "
+        printArr grammar.probability (print "%A")
         printBr "let startRule = %d" grammar.startRule
         printBr "let indexatorFullCount = %d" indexator.fullCount
         printBr "let rulesCount = %d" grammar.rules.rulesCount
         printBr "let indexEOF = %d" grammar.indexator.eofIndex
         printBr "let nonTermCount = %d" grammar.indexator.nonTermCount
-        printBr "let termCount = %d" grammar.indexator.termCount
+        printBr "let termCount = %d" (grammar.indexator.termCount + grammar.indexator.literalsCount)
         printBr "let termStart = %d" grammar.indexator.termsStart
         printBr "let termEnd = %d" grammar.indexator.termsEnd
         printBr "let literalStart = %d" grammar.indexator.literalsStart
@@ -231,12 +249,22 @@ let printTableGLL
        
         printBr ""
 
+        let slots = createSlots
+        print "let slots = dict <| "
+        printRessizeArrayAsList slots (print "%A")
+        
+
         printBr ""
 
-        printBrInd 0 "let private parserSource = new ParserSource2<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon)"
-                       
-        printBr "let buildAst : (seq<Token> -> ParseResult<_>) ="
-        printBrInd 1 "buildAst<Token> parserSource"
+        printBrInd 0 "let private parserSource = new ParserSourceGLL<Token> (Token.RNGLR_EOF 0, tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon, slots)"
+        
+        if not isAbstract
+        then               
+            printBr "let buildAst : (seq<Token> -> ParserCommon.ParseResult<_>) ="
+            printBrInd 1 "buildAst<Token> parserSource"
+        else
+            printBr "let buildAbstractAst : (AbstractAnalysis.Common.ParserInputGraph<Token> -> ParserCommon.ParseResult<_>) ="
+            printBrInd 1 "buildAbstractAst<Token> parserSource"
         printBr ""
         res.ToString()
     printTable ()

@@ -1,4 +1,4 @@
-﻿module Yard.Generators.RNGLR.AstNode
+﻿module Yard.Generators.Common.AstNode
 
 [<AllowNullLiteral>]
 type AstNode =

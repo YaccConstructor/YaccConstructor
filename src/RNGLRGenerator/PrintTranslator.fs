@@ -19,12 +19,13 @@ open Yard.Generators.Common.FinalGrammar
 open System.Collections.Generic
 open Yard.Generators.Common
 open Yard.Generators.Common.AST
+open Yard.Generators.Common.AstNode
 open Yard.Core.IL
 open Yard.Core.IL.Production
-open Microsoft.FSharp.Text.StructuredFormat
-open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
+open YC.PrettyPrinter.Pretty
+open YC.PrettyPrinter.StructuredFormat
 open Yard.Generators.Common.Epsilon
-open PrintTreeNode
+open HighlightingPrinter
 
 let getPosFromSource fullPath dummyPos (src : Source.t) =
     let file =
@@ -41,7 +42,7 @@ let getPosFromSource fullPath dummyPos (src : Source.t) =
 let defaultSource output = new Source.t("", new Source.Position(0,-1,0), new Source.Position(), output)
 
 let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list)
-        positionType fullPath output dummyPos caseSensitive (highlightingOpt : string option)=
+        positionType fullPath output dummyPos caseSensitive isAbstractParsingMode isHighlightingMode =
     let tab = 4
 
     let rules = grammar.rules
@@ -121,10 +122,11 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     let toStr (x : int) = x.ToString()
     let defineEpsilonTrees =
-        let rec printAst : (obj -> _) =
+        let rec printAst : (AstNode -> _) =
             function
             | :? AST as arr ->
-                "box (new AST(" + printChild arr.first
+                //(if isAbstractParsingMode then "" else "box ") + 
+                "(new AST(" + printChild arr.first
                         + ", " + printArr arr.other printChild + "))"
             | _ -> failwith "SingleNode was not expected in epsilon tree"
         and printChild (family : Family) = "new Family(" + toStr family.prod + ", new Nodes("
@@ -148,22 +150,22 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             incr num
             let name = Source.toString name
             let value = 
-                if name <> "error" || highlightingOpt.IsSome
+                if name <> "error" || isHighlightingMode
                 then sprintf "((unbox %s.[%d]) : '_rnglr_type_%s) " childrenName !num name
-                else sprintf "((unbox %s.[%d]) : list<ErrorNode>)" childrenName !num
+                else sprintf "((unbox %s.[%d]) : list<ErrorNode<Token>>)" childrenName !num
             value + (printArgsCallOpt args)
             |> wordL
         | PToken name -> 
             incr num
             let name = Source.toString name
-            sprintf "(match ((unbox %s.[%d]) : Token) with %s _rnglr_val -> [_rnglr_val] | a -> failwith \"%s expected, but %%A found\" a )"
+            sprintf "(match ((unbox %s.[%d]) : Token) with %s _rnglr_val -> [_rnglr_val] | a -> failwithf \"%s expected, but %%A found\" a )"
                 childrenName !num name name
             |> wordL
         | PLiteral name -> 
             incr num
             let name = Source.toString name
             let i = Indexator.transformLiteral caseSensitive name |> indexator.literalToIndex
-            sprintf "(match ((unbox %s.[%d]) : Token) with L_%s _rnglr_val -> [_rnglr_val] | a -> failwith \"%s expected, but %%A found\" a )"
+            sprintf "(match ((unbox %s.[%d]) : Token) with L_%s _rnglr_val -> [_rnglr_val] | a -> failwithf \"%s expected, but %%A found\" a )"
                 childrenName !num (indexator.getLiteralName i) name
             |> wordL
         | PSeq (s, ac, _) ->
@@ -296,17 +298,6 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         funHead @@-- body
 
     //let nowarn = wordL "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
-    let mainHighlightSemantic () = 
-        
-        if highlightingOpt.IsSome
-        then 
-            let printXmlName = sprintf "let xmlPath = \"%s.xml\" %s" highlightingOpt.Value System.Environment.NewLine
-            wordL <| System.String.Concat [| 
-                                             printXmlName; System.Environment.NewLine; 
-                                             printTokenToTreeNode (grammar.indexator); System.Environment.NewLine;
-                                          |] 
-        else wordL ""
-    
-    [ mainHighlightSemantic(); (*nowarn; *)defineEpsilonTrees; (*declareNonTermsArrays;*)rules; funRes]
+    [(*nowarn; *)defineEpsilonTrees; (*declareNonTermsArrays;*)rules; funRes]
     |> aboveListL
-    |> Display.layout_to_string(FormatOptions.Default)
+    |> print 80

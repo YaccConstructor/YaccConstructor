@@ -26,10 +26,6 @@
     <NoWarn>$(NoWarn);9;60;35;42;62;86;47;40</NoWarn>
   </PropertyGroup>
   <!-- These dummy entries are needed for F# Beta2 -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-  </PropertyGroup>
   <ItemGroup>
     <Compile Include="assemblyinfo.Common.fs" />
     <Compile Include="assemblyinfo.FSharp.PowerPack.Build.Tasks.dll.fs">

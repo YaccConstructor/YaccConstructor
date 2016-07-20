@@ -1,0 +1,10 @@
+options {
+    translate = false
+    module = "RNGLR.NotAmbigousSimpleCalc"
+    infEpsPath = epsilons
+    pos = uint64
+}
+
+[<Start>]
+s: e
+e: e PLUS NUM | NUM 

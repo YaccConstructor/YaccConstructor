@@ -1,119 +1,147 @@
 ﻿module HighlightingConvertions
 
+open System
+
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Generators.Common
+
+open HighlightingPrinter
 
 let toClassName (str : string) = 
     let symbols = [| 
                     for i = 0 to str.Length - 1 do
                         if i = 0 
-                        then yield System.Char.ToUpper str.[0]
+                        then yield Char.ToUpper str.[0]
                         else yield str.[i] 
                     |] 
-    new System.String(symbols)
+    new String(symbols)
 
 let litToClassName (lit : string) = 
     toClassName <| lit.ToLowerInvariant()
 
-let getLeafSemanticForToken token = 
-    let res = new System.Text.StringBuilder()
+let private getLeafSemanticForTerminal token = 
+    let printer = new FormatPrinter()
 
-    let inline printBr (x : 'a) = Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
+    printer.PrintBr "let pos = _rnglr_var_0"
+    printer.PrintBr "let ranges = calculatePos pos"
 
-    printBr "let pos = _rnglr_var_0"
-    printBr "let ranges = calculatePos pos"
+    printer.PrintBr "new %s%s(ranges) :> ITreeNode" <| toClassName token <| termSuffix
+    printer.ToString()
 
-    printBr "new %sTermNode(ranges) :> ITreeNode" <| toClassName token
-    res.ToString()
+let private getLeafSemanticForLiteral litName litText = 
+    let printer = new FormatPrinter()
 
-let getLeafSemanticForLiteral litName litText = 
-    let res = new System.Text.StringBuilder()
+    printer.PrintBr "let pos =  _rnglr_var_0"
+    printer.PrintBr "let ranges = calculatePos pos"
 
-    let inline printBr (x : 'a) = Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
-
-    printBr "let pos =  _rnglr_var_0"
-    printBr "let ranges = calculatePos pos"
-
-    printBr "new %sLitNode(ranges) :> ITreeNode"  <| litToClassName litName
-
-    res.ToString()
+    printer.PrintBr "new %s%s(ranges) :> ITreeNode"  <| litToClassName litName <| literalSuffix
+    printer.ToString()
                                
-let getNodeSemantic parent children = 
-    let res = new System.Text.StringBuilder()
-    let inline print (x : 'a) =
-        Printf.kprintf (fun s -> res.Append s |> ignore) x
+let private getNodeSemantic parent children = 
+    let printer = new FormatPrinter()
 
-    let inline printBr (x : 'a) =
-        Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
+    printer.PrintBrInd 0 "let parent = new %s%s()" <| toClassName parent <| nonTermSuffix
+    printer.PrintBrInd 0 "let children = %A" children
+    printer.PrintBrInd 0 "addSemantic parent children"
+    printer.ToString()
 
-    let inline printBrInd num (x : 'a) =
-        print "%s" (String.replicate (num <<< 2) " ")
-        printBr x
+let private changeRule (oldRule : Rule.t<_,_>) (elemList : elem<Source.t, Source.t> list) (bindings : Source.t list) = 
+    let actionCode = getNodeSemantic oldRule.name.text bindings
+    let newRule : Rule.t<Source.t, Source.t> = 
+        {
+            name = oldRule.name
+            args = []
+            body = PSeq(elemList, Some <| new Source.t(actionCode), None)
+            isStart = oldRule.isStart
+            isPublic = oldRule.isPublic
+            metaArgs = []
+        }
+    newRule
 
-    printBrInd 0 "let parent = new %sNonTermNode()" <| toClassName parent
-    printBrInd 0 "let children = %A" children
-    printBrInd 0 "addSemantic parent children"
-    res.ToString()
+let private createNewBinding (numOpt : int ref option) = 
+    let newBinding = 
+        numOpt
+        |> Option.map
+            (
+                fun num -> 
+                    incr num
+                    new Source.t (sprintf "h%d" num.Value)
+            )
+    newBinding
+
+let private getNewElem newBinding refRule = 
+    let newElem : elem<Source.t, Source.t> = 
+        {
+            binding = newBinding
+            checker = None
+            omit = false
+            rule = refRule
+        }
+    newElem
+
+let private literalToName rules lit = 
+    let indexator = new Indexator(rules, true)
+    lit
+    |> indexator.literalToIndex
+    |> indexator.getLiteralName
+
+let createHighlightingRule name newElem actionCode =
+    let newRule : Rule.t<Source.t, Source.t> =
+        {
+            name = new Source.t(sprintf "highlight_%s" name)
+            args = []
+            body = PSeq([newElem], Some <| actionCode, None)
+            isStart = false
+            isPublic = false
+            metaArgs = []
+        }
+    newRule
+
+let getRulesForTerminal terminals = 
+    let processTerminal terminal = 
+        let actionCode = new Source.t(getLeafSemanticForTerminal terminal)
+        let newElem = getNewElem None <| t.PToken (new Source.t(terminal))
+        createHighlightingRule terminal newElem actionCode
+
+    terminals
+    |> List.map processTerminal
+
+let getRulesForLiterals literals = 
+    
+    let processLiteral literal =
+        let litName, litText = literal
+        let actionCode = new Source.t (getLeafSemanticForLiteral litName litText)
+        let newElem =  getNewElem None <| t.PLiteral(new Source.t(litName))
+
+        createHighlightingRule litName newElem actionCode
+
+    literals
+    |> List.map processLiteral
 
 let highlightingConvertions (def : Definition.t<Source.t, Source.t>) = 
-    let rules = def.grammar.Head.rules    
-    let literalToName lit = 
-        let indexator = new Indexator(rules, true)
-        lit
-        |> indexator.literalToIndex
-        |> indexator.getLiteralName
-        
+    let rules = def.grammar.Head.rules
+    let literalToName' = literalToName rules
 
     let terminals = ref []
     let literals = ref []
-
-    let createNewBinding (numOpt : int ref option) = 
-        let newBinding = 
-            if numOpt.IsSome 
-            then 
-                incr numOpt.Value
-                Some <| new Source.t ("h" + numOpt.Value.Value.ToString())
-            else None
-        newBinding
-
-    let getNewElem newBinding refRule : elem<Source.t, Source.t> = 
-        
-        let newElem : elem<Source.t, Source.t> = 
-            {
-                binding = newBinding
-                checker = None
-                omit = false
-                rule = refRule
-            }
-        
-        newElem
-
-    let changeRule (oldRule : Rule.t<_,_>) (elemList : elem<Source.t, Source.t> list) (bindings : Source.t list) = 
-        let actionCode = getNodeSemantic oldRule.name.text bindings
-        let newRule : Rule.t<Source.t, Source.t> = 
-            {
-                name = oldRule.name
-                args = []
-                body = PSeq(elemList, Some <| new Source.t(actionCode), None)
-                isStart = oldRule.isStart
-                isPublic = oldRule.isPublic
-                metaArgs = []
-            }
-        newRule
 
     let rec processElem (oldElem : elem<Source.t, Source.t>) count = 
         let result = ref []
         let newElem = ref oldElem
 
         let inline createHighlightRefRule text = 
-            t.PRef(new Source.t("highlight_" + text), None)
+            t.PRef(new Source.t(sprintf "highlight_%s" text), None)
         
         match oldElem.rule with
         | t.PSeq (metaList,_,_) -> 
-            for meta in metaList do 
-                let someElemList = processElem meta count
-                result := !result @ someElemList
+            metaList
+            |> List.iter
+                (
+                    fun meta -> 
+                        let someElemList = processElem meta count
+                        result := !result @ someElemList
+                )
 
         | t.PRef (name, _) as oldElemRule -> 
             let newBinding = createNewBinding <| Some count
@@ -121,7 +149,7 @@ let highlightingConvertions (def : Definition.t<Source.t, Source.t>) =
             result := !result @ [!newElem]
 
         | t.PToken tok -> 
-            if not <| List.exists (fun symbol -> symbol = tok.text) !terminals
+            if List.forall ((<>) tok.text) !terminals
             then terminals := tok.text :: !terminals
             
             let newBinding = createNewBinding <| Some count
@@ -129,8 +157,8 @@ let highlightingConvertions (def : Definition.t<Source.t, Source.t>) =
             result := !result @ [!newElem]
         
         | t.PLiteral lit -> 
-            let litName = literalToName lit.text
-            if not <| List.exists (fun symbol -> fst symbol = litName) !literals
+            let litName = literalToName' lit.text
+            if List.forall (fun symbol -> fst symbol <> litName) !literals
             then literals := (litName, lit.text) :: !literals
         
             let newBinding = createNewBinding <| Some count
@@ -144,53 +172,20 @@ let highlightingConvertions (def : Definition.t<Source.t, Source.t>) =
         let count = ref 0
         match oldRule.body with 
         | t.PSeq(elemList, _, _) -> 
-                            let mutable newElemList = []
-                            let mutable bindingsList = []
-                            for item in elemList do
-                                let newElem = processElem item count
-                                newElemList <- newElemList @ newElem
+            let newElemList = ref []
+            let bindingsList = ref []
+            elemList
+            |> List.iter(fun item -> newElemList := !newElemList @ processElem item count)
 
-                            for newElem in newElemList do
-                                bindingsList <- newElem.binding.Value :: bindingsList
+            !newElemList
+            |> List.iter (fun newElem -> bindingsList := newElem.binding.Value :: !bindingsList)
 
-                            changeRule <| oldRule <| newElemList <| List.rev bindingsList
-        | t.PRef (_, _) -> oldRule
+            changeRule <| oldRule <| !newElemList <| List.rev !bindingsList
+        | t.PRef _ -> oldRule
         | _ -> failwith "Error in highlighting convertions"
 
     let addHighlightRules() = 
-        let mutable res = []
-
-        for token in !terminals do 
-            let actionCode = new Source.t(getLeafSemanticForToken token)
-            let newElem = getNewElem None <| t.PToken (new Source.t(token))
-
-            let newRule : Rule.t<Source.t, Source.t> = 
-                {
-                    name = new Source.t("highlight_" + token)
-                    args = []
-                    body = PSeq([newElem], Some <| actionCode, None)
-                    isStart = false
-                    isPublic = false
-                    metaArgs = []
-                }
-            res <- newRule :: res
-        
-        for litName, litText in !literals do
-            let actionCode = new Source.t (getLeafSemanticForLiteral litName litText)
-            let newElem =  getNewElem None <| t.PLiteral (new Source.t (litName))
-
-            let newRule : Rule.t<Source.t, Source.t> = 
-                {
-                    name = new Source.t("highlight_" + litName)
-                    args = []
-                    body = PSeq([newElem], Some <| actionCode, None)
-                    isStart = false
-                    isPublic = false
-                    metaArgs = []
-                }
-            res <- newRule :: res
-        res
+        getRulesForTerminal !terminals @ getRulesForLiterals !literals
 
     let newRules = List.map processRule rules @ addHighlightRules()
-
-    {def with grammar = [{def.grammar.Head with rules=newRules}]}
+    {def with grammar = [{def.grammar.Head with rules = newRules}]}

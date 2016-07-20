@@ -13,7 +13,7 @@
 //   limitations under the License.
 
 //  InitialConvert.fs contains methods, which must be applied to grammar
-//    to transform this to appliable for RNGLR form.
+//    to transform it to appliable for RNGLR or GLL form.
 
 module Yard.Generators.Common.InitialConvert
 

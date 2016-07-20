@@ -37,11 +37,11 @@ let eol = System.Environment.NewLine
 
 let log (e:System.Exception) msg =
     printfn "ERROR!"
-    "Stack trace: " + e.StackTrace
+    "\nStack trace:\n " + e.StackTrace
     |> printfn "%s"
-    "Internal message: " + e.Message
+    "\nInternal message:\n  " + e.Message
     |> printfn "%s"
-    "Message: " + msg
+    "\nMessage:\n  " + msg
     |> printfn "%s"
 
 let () =
@@ -209,7 +209,7 @@ let () =
                 ilTree := apply_Conversion conv !ilTree
                 checkSources conv !ilTree
   //          printfn "========================================================"
-    //        printfn "%A" <| ilTree
+           // printfn "%A" <| !ilTree
             let gen =
                 let _raise () = InvalidGenName generatorName |> raise
                 if Array.exists (fun (elem : Generator) -> elem.Name = generatorName) addinGenerators
@@ -236,7 +236,9 @@ let () =
                             ilTree := {!ilTree with grammar = constr.Fix grammar}
 
                     match !generatorParams with
-                    | None -> gen.Generate !ilTree
+                    | None -> 
+                        printfn "%A" <| !ilTree
+                        gen.Generate !ilTree
                     | Some genParams -> gen.Generate(!ilTree, genParams)
                 //with
 //                | Yard.Generators.GNESCCGenerator.StartRuleNotFound 
@@ -277,8 +279,8 @@ List of available frontends, generators and conversions can be obtained by -af -
     | :? System.IO.IOException as e -> 
         "Could not read input file.\n"
         |> log e
-    | x -> "Unrecognized error." |> log x
-
+    | x -> "Correct this or above construction. Pay attention to the punctuation.\n"
+        |> log x
 
 
 //Tests. Please do not remove

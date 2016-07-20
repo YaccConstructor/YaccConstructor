@@ -1,0 +1,7 @@
+list <item separator>:
+{ [] }
+| hd=item tl=(-separator item)* {hd::tl}
+
+[<Start>]
+s: (n PLUS?)*
+n: NUM list<NUM? PLUS>

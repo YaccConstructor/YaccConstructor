@@ -24,3 +24,5 @@ let needAC = NeedAC.needAC
 let noInnerAlt = NoInnerAlt.noInnerAlt
 let noBrackets = NoBrackets.noBrackets
 let noLiterals = NoLiterals.noLiterals
+let noAlt = NoAlt.noAlt
+let noConj = NoConj.noConj

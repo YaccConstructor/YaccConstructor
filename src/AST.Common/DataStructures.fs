@@ -15,47 +15,84 @@
 module Yard.Generators.Common.DataStructures
 
 open System
-
-type BlockResizeArray<'T> () =
-    let initArraysCount = 1
-    let mutable count = 0
-    let shift = 17
-    let blockSize = 1 <<< shift
-    let smallPart = blockSize - 1
-    let mutable arrays = Array.init initArraysCount (fun _ -> Array.zeroCreate blockSize)
-    let mutable cap = blockSize * arrays.Length
-    let mutable nextAllocate = cap
-    member this.Add (x : 'T) =
-        if count = nextAllocate then
-            if count = cap then
-                let oldArrays = arrays
-                arrays <- Array.zeroCreate (arrays.Length * 2)
-                for i = 0 to oldArrays.Length-1 do
-                    arrays.[i] <- oldArrays.[i]
-                cap <- blockSize * arrays.Length
-                //printfn "%A %A" count cap
-            arrays.[count >>> shift] <- Array.zeroCreate blockSize
-            nextAllocate <- nextAllocate + blockSize
-        arrays.[count >>> shift].[count &&& smallPart] <- x
-        count <- count + 1
-
-    member this.Item i =
-        arrays.[i >>> shift].[i &&& smallPart]
-
-    member this.Set i value =
-        arrays.[i >>> shift].[i &&& smallPart] <- value
-
-    member this.DeleteBlock i = arrays.[i] <- null
-    member this.Count = count
-    member this.Shift = shift
-
-    member this.ToArray() =
-        let res = Array.zeroCreate count
-        for i = 0 to (count >>> shift) - 1 do
-            Array.blit arrays.[i] 0 res (i <<< shift) blockSize
-        if (count &&& smallPart) <> 0 then
-            let i = count >>> shift
-            Array.blit arrays.[i] 0 res (i <<< shift) (count &&& smallPart)
-        res
+open Microsoft.FSharp.Collections
         
+[<Struct>]
+type UsualOne<'T> =
+    val mutable first : 'T
+    val mutable other : 'T[]
+    new (f,o) = {first = f; other = o}    
+
+    member this.DoForAll f = 
+        f this.first
+        this.other |> Array.iter f
+
+[<Struct>]
+type ResizableUsualOne<'T> =
+    val mutable first : 'T
+    val other : ref<ResizeArray<'T>>
+    new (f,o) = {first = f; other = o}
+    new (f) = {first = f; other = ref null}
+    member this.Add x =        
+        if !this.other = null
+        then this.other := new ResizeArray<_>()
+        (!this.other).Add x
+    member this.TryFind f =
+        if f this.first
+        then Some this.first
+        else ResizeArray.tryFind f !this.other
+    member this.DoForAll f = 
+        f this.first
+        if !this.other <> null then !this.other |> ResizeArray.iter f
+
+[<Struct>]
+type ResizableUsualFive<'T when 'T:equality> =
+    val mutable first  : 'T
+    val mutable second : 'T
+    val mutable third  : 'T
+    val mutable fourth : 'T
+    val mutable fifth  : 'T
+    val mutable other          : list<'T>
+    member this.Eq (o : ResizableUsualFive<_>) = 
+        this.first = o.first && this.second = o.second && this.third = o.third && this.fourth = o.fourth && this.fifth = o.fifth
+    member this.Add x =
+        if this.second <> Unchecked.defaultof<_> 
+        then 
+            if this.third <> Unchecked.defaultof<_>
+            then
+                if this.fourth <> Unchecked.defaultof<_>
+                then
+                    if this.fifth <> Unchecked.defaultof<_>
+                    then
+                        this.other <- x :: this.other
+                    else
+                        this.fifth <- x
+                else
+                    this.fourth <- x
+            else
+                this.third <- x
+        else
+            this.second <- x
         
+    member this.TryFind f =
+        if f this.first
+        then Some this.first
+        else 
+            if f this.second
+            then Some this.second
+            else
+                if f this.third
+                then Some this.third
+                else
+                    if f this.fourth
+                    then Some this.fourth
+                    else
+                        if f this.fifth
+                        then
+                            Some this.fifth
+                        else
+                            List.tryFind f this.other
+    new (f) = {first = f; second = Unchecked.defaultof<_>; third = Unchecked.defaultof<_>; fourth = Unchecked.defaultof<_>; fifth = Unchecked.defaultof<_>; other = []}
+    
+
+

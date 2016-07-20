@@ -1,0 +1,4 @@
+[<Start>]
+s : A B a A | A b a A | A B A
+a : A | A a
+b : B

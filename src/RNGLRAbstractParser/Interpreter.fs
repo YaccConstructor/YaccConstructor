@@ -1,4 +1,3 @@
-﻿
 //  Parser.fs contains methods, needed to build an AST
 //
 //  Copyright 2011-2012 Avdyukhin Dmitry
@@ -18,504 +17,448 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Yard.Generators.RNGLR.Parser
+module Yard.Generators.ARNGLR.Parser
 
-open Yard.Generators.RNGLR
-open Yard.Generators.Common.AST
-open System.Collections.Generic
-open Yard.Generators.Common.DataStructures
-open Yard.Generators.RNGLR.Parser 
+open AbstractAnalysis.Common
 open Microsoft.FSharp.Collections
+open System.Collections.Generic
+open System.Linq
+open Yard.Generators.Common.AST
+open Yard.Generators.Common.AstNode
+open Yard.Generators.Common.DataStructures
+open Yard.Generators.RNGLR
+open FSharpx.Collections.Experimental
+
+type ParseResult<'TokenType> =
+    | Success of Tree<'TokenType>
+    | Error of int * 'TokenType * string
+
+[<AllowNullLiteral>]
+type Vertex (state : int, level : int) =
+    let out = new ResizeArray<Edge>(4)
+    let passingReductions = new ResizeArray<_>(10)
+    member this.Level = level
+    member this.OutEdges = out
+    member this.State = state
+    member this.PassingReductions = passingReductions
+
+    member this.addEdge (edge : Edge) =
+        let mutable i = out.Count - 1
+        out.Add edge
+        while i >= 0 && (out.[i].Dest : Vertex).Level < edge.Dest.Level do
+            out.[i+1] <- out.[i]
+            i <- i - 1
+        out.[i+1] <- edge
+
+    member this.FindIndex state level =
+        let mutable i = out.Count - 1
+        while i >= 0 && out.[i].Dest.Level <= level && (out.[i].Dest.Level <> level || out.[i].Dest.State <> state) do
+            i <- i - 1
+        if i >= 0 && out.[i].Dest.Level = level && out.[i].Dest.State = state 
+        then i
+        else -1
+
+    member this.Edge i = out.[i]
+
+and Edge (destination : Vertex, ast : int) =
+    member this.Dest = destination
+    member this.Ast = ast
+
+and VInfo<'TokenType> (vNum) =
+    member val vNum = vNum with get
+    member val processedGssVertices = new ResizeArray<Vertex>() with get
+    member val unprocessedGssVertices = new ResizeArray<Vertex>() with get
+    member val passingReductions = new ResizeArray<Vertex * Edge>() with get
+    member val reductions = new Queue<_> (10) with get
+
+    member this.GetReduction() = 
+        this.reductions.Dequeue()
+
+    member this.AddReduction(r) =
+        if not <| this.reductions.Contains(r)
+        then this.reductions.Enqueue(r)
+
+and [<Struct>]
+    Reduction =
+    val gssVertex : Vertex
+    val prod : int
+    val pos : int
+    val edge : Edge option
+    new (_gssVertex, _prod, _pos, _edge) = {gssVertex = _gssVertex; prod = _prod; pos = _pos; edge = _edge}
+
+and [<AllowNullLiteral>]
+    Path (head : AstNode, tail : Path, length : int) = 
+
+    let compare (x : AstNode) (y : AstNode) = 
+        match x with
+        | :? Epsilon as x' -> match y with | :? Epsilon as y' -> x'.EpsilonNonTerm = y'.EpsilonNonTerm | _ -> false
+        | :? Terminal as x' -> match y with | :? Terminal as y' -> x'.TokenNumber = y'.TokenNumber | _ -> false
+        | :? AST as xast -> match y with | :? AST as yast -> 
+                                                xast.pos = yast.pos 
+                                                && xast = yast 
+                                         | _ -> false
+        | _ -> false
+
+    member this.Head = head
+    member this.Tail = tail
+    member this.Length = length
 
 
-[<Struct>]
-type TokenWithInfo<'token> =
-    val Token  : 'token    
-    val NxtLvl : int
-    val CurNum : int
-    new (t,nl,cn) = {Token=t;NxtLvl=nl;CurNum=cn}
-
-[<Struct>]
-type TokensInfo<'token> =
-    val Tokens  : array<TokenWithInfo<'token>>
-    val CurLvl : int
-    new (ts,cl) = {Tokens=ts;CurLvl=cl}
-
-// Custom graph structure. For optimization and needed (by algorithm) relation with AST
-
-/// Compare vertex like a pair: (level, state)
-let inline private less (v' : Vertex) (v : Vertex) = v'.Level < v.Level || (v'.Level = v.Level && v'.State < v.State)
-let inline private eq (v' : Vertex) (v : Vertex) = v'.Level = v.Level && v'.State = v.State
-
-/// Add edges, what must be unique (after shift or epsilon-edges).
-/// All edges are sorted by destination ascending.
-let private addSimpleEdge (v : Vertex) (ast : obj) (out : ResizeArray<Vertex * obj>) =
-    let mutable i = out.Count - 1
-    while i >= 0 && less (fst out.[i]) v do
-        i <- i - 1
-    out.Insert (i+1, (v, ast))
-
-/// Check if edge with specified destination and AST already exists
-let private containsSimpleEdge (v : Vertex) (f : obj) (out : ResizeArray<Vertex * obj>) =
-    let mutable i = out.Count - 1
-    while i >= 0 && less (fst out.[i]) v do
-        i <- i - 1
-    while i >= 0 && (let v',f' = out.[i] in eq v' v && f <> f') do
-        i <- i - 1
-    i >= 0 && (let v',f' = out.[i] in eq v' v && f = f')
-
-/// Add or extend edge with specified destination and family.
-/// All edges are sorted by destination ascending.
-let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * Family * AST>) =
-    let mutable i = out.Count - 1
-    let inline fst3 (x,_,_) = x
-    while i >= 0 && less (fst3 out.[i]) v do
-        i <- i - 1
-
-    let isCreated = not (i >= 0 && eq (fst3 out.[i]) v)
-
-    let ast = if not isCreated 
-              then let _,_,n = out.[i] in n
-              else new AST (Unchecked.defaultof<_>, null)
-
-    out.Insert (i+1, (v, family, ast))
-    isCreated, ast
-
-/// Check if edge with specified destination and family already exists
-let private containsEdge (v : Vertex) (f : Family) (out : ResizeArray<Vertex * Family * AST>) =
-    let inline fst3 (x,_,_) = x
-    let mutable i = out.Count - 1
-    while i >= 0 && less (fst3 out.[i]) v do
-        i <- i - 1
-    while i >= 0 && (let v',f',_ = out.[i] in eq v' v && f <> f') do
-        i <- i - 1
-    i >= 0 && (let v',f',_ = out.[i] in eq v' v && f = f')
-
-let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide : int[])
-        (initNodes : seq<Vertex>) (numToString : int -> string) (errInd: int) (path : string) =
-    use out = new System.IO.StreamWriter (path)
-    let was = new Dictionary<_,_>()
-    let levels = new Dictionary<_,_>()
-    out.WriteLine "digraph GSS {"
-    let print s = out.WriteLine ("    " + s)
-    let curNum = ref 0
-    print "rankdir=RL"
-    let getAstString (ast : obj) =
-        match ast with
-        | :? int as i when i >= 0 -> tokens.[i] |> tokenToNumber |> numToString |> sprintf "%s"    
-        | :? int as i when i < 0 -> "eps " + numToString (-i-1)
-        | :? AST as ast -> 
-            let nonT = 
-                if ast.first.prod < leftSide.Length then ast.first.prod
-                else errInd
-            numToString leftSide.[nonT]
-        | _ -> failwith "Unexpected ast"
-
-    let rec dfs (u : Vertex) =
-        was.Add (u, !curNum)
-        if not <| levels.ContainsKey u.Level then
-            levels.[u.Level] <- [!curNum]
-        else
-            levels.[u.Level] <- !curNum :: levels.[u.Level]
-        print <| sprintf "%d [label=\"%d\"]" !curNum u.State
-        incr curNum
-        if u.OutEdges.first <> Unchecked.defaultof<_> then
-            handleEdge u u.OutEdges.first
-            if u.OutEdges.other <> null then
-                u.OutEdges.other |> Array.iter (handleEdge u)
-
-    and handleEdge u (e : Edge) =
-        let v = e.Dest
-        if not <| was.ContainsKey v then
-            dfs v
-        print <| sprintf "%d -> %d [label=\"%s\"]" was.[u] was.[v] (getAstString e.Ast)
-
-    for v in initNodes do
-        if not <| was.ContainsKey v then
-            dfs v
+    member this.AddEdge edge =
+        new Path(edge, this, this.Length + 1)
     
-    for level in levels do
-        print <| sprintf "{rank=same; %s}" (level.Value |> List.map (fun (u : int) -> string u) |> String.concat " ")
+    member this.IsEqual (other : Path) =
+        if this = null && other <> null || this <> null && other = null
+        then false
+        else 
+            this = null && other = null || compare this.Head other.Head && this.Tail.IsEqual(other.Tail)
 
-    out.WriteLine "}"
-    out.Close()
+    member this.IsEqual (nodes : Nodes) = 
+        nodes.Length = this.Length 
+        && let h = ref this in nodes.isForAll(fun x -> let res = compare x h.Value.Head
+                                                       h := h.Value.Tail
+                                                       res )
 
-let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq<int*array<'TokenType*int>>) =
-    let processChunk (cl,ts) =
-        new TokensInfo<_>(Array.map (fun (t,nl) -> new TokenWithInfo<_>(t,nl, parserSource.TokenToNumber t))ts,cl)
-    
-    let pushesMap = new Dictionary<_,ResizeArray<_>>(10)
-    let rangeToSkip = ref (-1,-1)
-    let enum = tokens.GetEnumerator()
-    // Change if it doesn't equal to zero. Now it's true according to states building algorithm
-    let startState = 0
-    let startNonTerm = parserSource.LeftSide.[parserSource.StartRule]
-    let nonTermsCountLimit = 1 + (Array.max parserSource.LeftSide)
-    let getEpsilon =
-        let epsilons = Array.init nonTermsCountLimit (fun i -> box (-i-1))
-        fun i -> epsilons.[i]
-                          
-    // If input stream is empty or consists only of EOF token
-    if not <| enum.MoveNext() || Array.forall (fun t -> parserSource.EofIndex = parserSource.TokenToNumber (fst t)) (snd enum.Current) then
-        if parserSource.AcceptEmptyInput then
-            Success (new Tree<_>(null, getEpsilon startNonTerm, null), [||], new Dictionary<_,_>())
-        else
-            Error (0, Unchecked.defaultof<_>, "This grammar cannot accept empty string",
-                    {
-                        drawGSSDot = fun _ -> ()
-                        lastTokens = fun _ -> [||]
-                    }
-                    , new Dictionary<_,_>())
-    else                                     
-        // Currently processed token
-        let curTokens = processChunk enum.Current |> ref
-        let curLvl = ref (!curTokens).CurLvl
-        let errorLvl = ref -1
-        let isEOF = ref false
-        /// Here all tokens from the input will be collected
-        let tokens = new BlockResizeArray<_>()
-        let reductions = new Stack<_>(10)
-        let statesCount = parserSource.Gotos.Length
-        // New edges can be created only from last level.
-        /// Temporary storage for edges data (after all reductions real edges will be created).
-        let edges = Array.init statesCount (fun _ -> new ResizeArray<Vertex * Family * AST>())
-        let simpleEdges = Array.init statesCount (fun _ -> new ResizeArray<Vertex * obj>())
-        let pushes = ref [||]
-        let pushesInitFun l = 
-            pushes := Array.init l (fun _ -> new Stack<_> (statesCount * 2 + 10))  
-        pushesInitFun curTokens.Value.Tokens.Length
-        /// Stores states, used on current level. Instead statesCount must be number of non-terminals, but doesn't matter
-        let usedStates = new Stack<_>(statesCount)
-        let stateToVertex : Vertex[] = Array.zeroCreate statesCount
+    member this.ToArray() =
+        let p = ref this
+        Array.init this.Length (fun _ -> let cur = p.Value.Head
+                                         p := p.Value.Tail
+                                         cur)
+       
+    new (head, tail) = new Path(head, tail, if tail = null then 1 else tail.Length + 1)
+    new (edge) = new Path (edge, null, 1)
 
-        let addVertex vertData =
-            [|
-            for (state, level, (edgeOpt : option<Vertex * obj>)) in vertData |> Array.sortBy (fun (_,x,_) -> -x) do
-                let curNums = if !isEOF then [|parserSource.EofIndex|] else curTokens.Value.Tokens |> Array.map (fun t -> t.CurNum)
-                if stateToVertex.[state] = null then
-                    let v = new Vertex(state, level)
-                    stateToVertex.[state] <- v
-                    curNums
-                    |> Array.iteri (fun i curNum ->
-                        let push = parserSource.Gotos.[state].[curNum]
-                        // Push to init state is impossible
-                        if push <> 0 then
-                            pushes.Value.[i].Push (v, push)
-                        let arr = parserSource.ZeroReduces.[state].[curNum]
-                        if arr <> null then
-                            for prod in arr do
-                                reductions.Push (v, prod, 0, None)
-                    )
-                    usedStates.Push state
-                let v = stateToVertex.[state]
-                if edgeOpt.IsSome then
-                    for curNum in curNums do
-                        let arr = parserSource.Reduces.[state].[curNum]
-                        if arr <> null then
-                            for (prod, pos) in arr do
-                                reductions.Push (v, prod, pos, edgeOpt)
-                yield v
-            |]
-
-        ignore <| addVertex [|startState, 0, None|]
-        let inline trd (_,_,x) = x
-        let makeReductions () =
-            while reductions.Count > 0 do
-                let vertex, prod, pos, edgeOpt = reductions.Pop()
-                let nonTerm = parserSource.LeftSide.[prod]
-
-                let handlePath (path : obj[]) (final : Vertex) =
-                    let state = parserSource.Gotos.[final.State].[nonTerm]
-                    let newVertex = (addVertex [|state, !curLvl, None|]).[0]
-                    
-                    let family = new Family(prod, new Nodes(Array.copy path))
-                    if not <| containsEdge final family edges.[state] then
-                        let isCreated, edgeLabel = addEdge final family edges.[state]
-                        if (pos > 0 && isCreated) then
-                            if curTokens.Value.Tokens.Length = 0
-                                then
-                                    let arr = parserSource.Reduces.[state].[parserSource.EofIndex]
-                                    if arr <> null then
-                                        for (prod, pos) in arr do
-                                            reductions.Push (newVertex, prod, pos, Some (final, box edgeLabel))
-                                else
-                                    for tok in curTokens.Value.Tokens do 
-                                        let arr = parserSource.Reduces.[state].[tok.CurNum]
-                                        if arr <> null then
-                                            for (prod, pos) in arr do
-                                                reductions.Push (newVertex, prod, pos, Some (final, box edgeLabel))
-
-                let rec walk remainLength (vertex : Vertex) path =
-                    if remainLength = 0 then handlePath path vertex
-                    else
-                        if vertex.Level <> !curLvl then
-                            if vertex.OutEdges.other <> null then
-                                vertex.OutEdges.other |> Array.iter
-                                    (fun e ->
-                                        path.[remainLength - 1] <- e.Ast
-                                        walk (remainLength - 1) e.Dest path)
-                            path.[remainLength - 1] <- vertex.OutEdges.first.Ast
-                            walk (remainLength - 1) vertex.OutEdges.first.Dest path
-                        else
-                            simpleEdges.[vertex.State] |> ResizeArray.iter(fun (v,a) ->
-                                    path.[remainLength - 1] <- a
-                                    walk (remainLength - 1) v path)
-                            
-                            let mutable i = 0
-                            let edges = edges.[vertex.State]
-                            let mutable count = 0
-                            while i < edges.Count do
-                                let (v,_,a) = edges.[i]
-                                let mutable j = i+1
-                                path.[remainLength - 1] <- box a
-                                walk (remainLength - 1) v path
-                                while j < edges.Count && trd edges.[j] = a do
-                                    j <- j + 1
-                                i <- j
-                
-                if pos = 0 then
-                    let state = parserSource.Gotos.[vertex.State].[nonTerm]
-                    addVertex [|state, !curLvl, None|] |> ignore
-                    let ast = getEpsilon parserSource.LeftSide.[prod]
-                    if not <| containsSimpleEdge vertex ast simpleEdges.[state] then
-                        addSimpleEdge vertex ast simpleEdges.[state]
-                else 
-                    let path = Array.zeroCreate pos
-                    path.[pos - 1] <- snd edgeOpt.Value
-                    walk (pos - 1) (fst edgeOpt.Value) path
-
-        let curInd = ref 0
-        let isEnd = ref false
-        let attachEdges () =
-            let inline snd3 (_,x,_) = x
-            for vertex in usedStates do
-                let mutable i = 0
-                let edges = edges.[vertex]
-                let mutable count = -1
-                while i < edges.Count do
-                    let k = trd edges.[i]
-                    let mutable j = i+1
-                    while j < edges.Count && trd edges.[j] = k do
-                        j <- j + 1
-                    i <- j
-                    count <- count + 1
-                count <- count + simpleEdges.[vertex].Count
-                let vEdges =
-                    if count > 0 then Array.zeroCreate count
-                    else null
-                let mutable first = Unchecked.defaultof<_>
-                i <- 0
-                count <- -1
-                while i < edges.Count do
-                    let (v,_,a) = edges.[i]
-                    let mutable j = i+1
-                    while j < edges.Count && trd edges.[j] = a do
-                        j <- j + 1
-                    let other = 
-                        if j <> i + 1 then
-                            let res = Array.zeroCreate (j - i - 1)
-                            for k = i + 1 to j-1 do
-                                res.[k-i-1] <- snd3 edges.[k]
-                            res
-                        else
-                            null
-                    if count >= 0 then
-                        vEdges.[count] <- new Edge(v, box a)
-                    else
-                        first <- new Edge(v, box a)
-                    count <- count + 1
-                    a.first <- snd3 edges.[i]
-                    a.other <- other
-                    i <- j
-
-                for i = 0 to simpleEdges.[vertex].Count - 1 do
-                    let v, a = simpleEdges.[vertex].[i]
-                    if count >= 0 then
-                        vEdges.[count] <- new Edge(v, a)
-                    else
-                        first <- new Edge(v, a)
-                    count <- count + 1
-
-                stateToVertex.[vertex].OutEdges <- UsualOne<_>(first, vEdges)
-                edges.Clear()
-                simpleEdges.[vertex].Clear()
-
-        let shift () =
-            let newAstNodes = curTokens.Value.Tokens |> Array.mapi (fun i _ -> tokens.Count + i |> box)
-            let oldTokens = !curTokens
-            curTokens.Value.Tokens |> Array.iter (fun t -> tokens.Add t.Token)
-            let flg = 
-                //enum.MoveNext() |> ref
-                ref false
-            //let actualVertices = usedStates |> Seq.map (fun x -> stateToVertex.[x].Level) |> Array.ofSeq
-            while (flg := enum.MoveNext(); !flg) && fst (!rangeToSkip) < (fst enum.Current) && (fst enum.Current) < snd (!rangeToSkip) do printfn "sckiped %A"  (fst enum.Current)
-            if !flg then
-                curTokens := processChunk enum.Current                
-                curLvl := (!curTokens).CurLvl
-                isEOF := 
-                    curTokens.Value.Tokens.Length = 0 
-                    || (curTokens.Value.Tokens.Length = 1 
-                        && parserSource.TokenToNumber curTokens.Value.Tokens.[0].Token = parserSource.EofIndex ) 
-            else
-                isEOF := true
-            let oldPushes = !pushes |> Array.map (fun p -> p.ToArray())
-            for i in 0..oldTokens.Tokens.Length-1 do
-                let newAstNode = newAstNodes.[i]
-                let oldPushes = oldPushes.[i]
-                let num = oldTokens.Tokens.[i].NxtLvl                
-                if pushesMap.ContainsKey num
-                then 
-                    pushesMap.[num].Add((oldPushes,newAstNode)) 
-                else pushesMap.Add(num,new ResizeArray<_>([|oldPushes,newAstNode|]))
-            pushesInitFun curTokens.Value.Tokens.Length
- 
-        let print (fName:PrintfFormat<_,_,_,_>) =
-#if DEBUG
-            let path = fName.Value |> System.IO.Path.GetDirectoryName
-            if path |> System.IO.Directory.Exists |> not
-            then System.IO.Directory.CreateDirectory path |> ignore
-            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])
-            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-                        <| sprintf fName !curLvl
-#endif
-            ()
-
-        let mutable errorList = []
-        let errorRuleExist = parserSource.ErrorRulesExists
-        let mutable wasError = false
-        let lastErr = ref -1
-        let pushesBackup = ref [||]
-
-        let errors = new ResizeArray<_>()
-        
-        let restorePushes () =
-          if pushesMap.ContainsKey !curLvl
-          then
-              for vertex in usedStates do
-                  stateToVertex.[vertex] <- null
-              usedStates.Clear()
-              for oldPushes,newAstNode in pushesMap.[!curLvl] do
-                  for (vertex, state) in oldPushes do
-                      let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode)|]
-                      addSimpleEdge vertex newAstNode simpleEdges.[state]
-              pushesMap.Remove(!curLvl) |> ignore
-
-        let erTok () = 
-            //let shiftBase = tokens.Count - (!pushesBackup).Length 
-            //let x = !pushesBackup |> Array.mapi (fun i (a:Stack<_>) -> if a.Count = 0  then Some (tokens.Item(shiftBase + i)) else None)
-            rangeToSkip := !curLvl, try pushesMap.Keys |> Seq.min with _ -> !curLvl
-            let x = !pushesBackup |> Array.mapi (fun i (a:Stack<_>) -> if a.Count = 0  then Some (curTokens.Value.Tokens.[i].Token) else None)
-            x |> Array.choose id
-            |> errors.AddRange
-            //(try curTokens.Value.Tokens.[0].Token with _ -> tokens.[tokens.Count-1])
-
-        while not !isEnd && not wasError do
-            print @"dot\stack_%A_1"
-            if usedStates.Count = 0 && reductions.Count = 0
-            then
-                if pushesMap.Count = 0
-                then
-                  let errInfo = !curTokens
-                  errorList <- errInfo :: errorList
-                  wasError <- true
-                else
-                    pushesBackup := !pushes
-                    erTok()
-                    curLvl := pushesMap.Keys |> Seq.min
-                    restorePushes ()
-                    makeReductions ()
-                    attachEdges()
-                    if not !isEOF then shift()
-            else
-                print @"dot\stack_%A_2"
-                if !isEOF
-                then
-                    restorePushes ()
-                    makeReductions()
-                    attachEdges()
-                    print @"dot\stack_%A_3"               
-                    isEnd := true
-                else
-                    print @"dot\stack_%A_4"
-                    if !curLvl > 0
-                    then
-                        if pushesMap.ContainsKey !curLvl
-                        then restorePushes ()
-                        else
-                            for vertex in usedStates do
-                                stateToVertex.[vertex] <- null
-                            usedStates.Clear()
-                    makeReductions ()
-                    attachEdges()
-                    let bad, good = !pushes |> Array.partition (fun x -> x.Count = 0)
-                    if bad.Length > 0 || good.Length = 0
-                    then
-                        //()
-                        pushesBackup := !pushes 
-                        erTok ()
-//                    if good.Length = 0
-//                    then 
-//                        //wasError <- true
-//                        pushesBackup := !pushes
-//                        erTok ()
-//                        if pushesMap.Count > 0 
-//                        then ()
-//                          //curLvl := pushesMap.Keys |> Seq.min
-//                          //restorePushes ()
-//                        //else wasError <- true
-                    shift ()
-
-        let isAcceptState() = 
-            let flag = ref false
-            for state in usedStates do
-                if not !flag 
-                then
-                    flag := parserSource.AccStates.[state]
-            !flag
-
-        // if finish isn't accepting state then error
-        if !isEnd && usedStates.Count > 0 && not <| isAcceptState() 
-        then
-            //recovery()
-            makeReductions()
-            attachEdges()
-
-        let lastTokens count =
-            [| for i = max 0 (tokens.Count-count) to tokens.Count-1 do
-                yield tokens.[i]|]
-        let debugFuns () =
-            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])
-            {
-                drawGSSDot = drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-                lastTokens = lastTokens
-            }
-
-        if not errorList.IsEmpty 
-        then
-            errorList <- List.rev errorList
-            let tokenToString token = token |> parserSource.TokenToNumber |> parserSource.NumToString
-            for i = 0 to errorList.Length-1 do ()
+let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : ParserInputGraph<'TokenType>) =
+    // let startV, finalV, innerGraph =
+    let startVList, finalVList, innerGraph =
+        let verticesMap = Array.zeroCreate (Seq.max tokens.Vertices + 1)            
+        for i in tokens.Vertices do
+             verticesMap.[i] <- new VInfo<_> (i)
+        let g = new QuickGraph.AdjacencyGraph<_,_>()
+        tokens.Edges 
+        |> Seq.map (fun e -> new QuickGraph.TaggedEdge<_,_>(verticesMap.[e.Source], verticesMap.[e.Target], e.Tag))
+        |> g.AddVerticesAndEdgeRange
+        |> ignore
+        [ for initS in tokens.InitStates -> verticesMap.[initS] ],
+        [ for finalS in tokens.FinalStates -> verticesMap.[finalS] ],
+        g
+        //verticesMap.[tokens.InitState], verticesMap.[tokens.FinalState], g
             
-        if wasError 
+    let nodes = new BlockResizeArray<AstNode>()
+    let terminals = new BlockResizeArray<'TokenType>()
+    let startState = 0
+    let inline getEpsilon i = new Epsilon(-1-i)
+    let startNonTerm = parserSource.LeftSide.[parserSource.StartRule]
+    let verticesToProcess = new Queue<_>()
+    
+    for startV in startVList do
+        verticesToProcess.Enqueue (startV)
+    
+    let mutable errorIndex = -1
+    let outEdgesInnerGraph = Array.init (Seq.max tokens.Vertices + 1) (fun _ -> [||])
+    for v in innerGraph.Vertices do
+        outEdgesInnerGraph.[v.vNum] <- innerGraph.OutEdges v |> Array.ofSeq
+    
+    let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide : int[])
+        (initNodes : seq<Vertex>) (numToString : int -> string) (errInd: int) (path : string) =
+        use out = new System.IO.StreamWriter (path)
+        let was = new Dictionary<_,_>()
+        let levels = new Dictionary<_,_>()
+        out.WriteLine "digraph GSS {"
+        let print s = out.WriteLine ("    " + s)
+        let curNum = ref 0
+        print "rankdir=RL"
+        let getAstString astInd =
+            if astInd >= 0 
+            then
+                match nodes.[astInd] with
+                | :? Terminal as i -> tokens.[i.TokenNumber] |> tokenToNumber |> numToString |> sprintf "%s"    
+                | :? AST as ast -> 
+                    let nonT = 
+                        if ast.first.prod < leftSide.Length then ast.first.prod
+                        else errInd
+                    numToString leftSide.[nonT]
+                | _ -> failwith "Unexpected ast"
+            else "eps"
+
+        let rec dfs (u : Vertex) =
+            was.Add (u, !curNum)
+            if not <| levels.ContainsKey u.Level then
+                levels.[u.Level] <- [!curNum]
+            else
+                levels.[u.Level] <- !curNum :: levels.[u.Level]
+            print <| sprintf "%d [label=\"%d_%d\"]" !curNum u.Level u.State 
+            incr curNum
+            u.OutEdges |> ResizeArray.iter (handleEdge u)
+            
+
+        and handleEdge u (e : Edge) =
+            let v = e.Dest
+            if not <| was.ContainsKey v then
+                dfs v
+            print <| sprintf "%d -> %d [label=\"%s\"]" was.[u] was.[v] (getAstString e.Ast)
+
+        for v in initNodes do
+            if not <| was.ContainsKey v then
+                dfs v
+        
+        for level in levels do
+            print <| sprintf "{rank=same; %s}" (level.Value |> List.map (fun (u : int) -> string u) |> String.concat " ")
+
+        out.WriteLine "}"
+        out.Close()
+    
+    let customEnqueue (elem : VInfo<_>) =
+        if verticesToProcess.Count = 0 || ((verticesToProcess.ElementAt (verticesToProcess.Count - 1)).vNum = elem.vNum |> not)
         then
-            erTok() 
-            Error (!curInd, errors.ToArray() , "Parse Error", debugFuns (), new Dictionary<_,_>())
+            verticesToProcess.Enqueue(elem)
+
+    let addNonZeroReduction (gssVertex : Vertex) token gssEdge (innerGraphV : VInfo<_>)=
+        let arr = parserSource.Reduces.[gssVertex.State].[parserSource.TokenToNumber token]
+        if arr <> null 
+        then
+            for (prod, pos) in arr do
+                innerGraphV.AddReduction(new Reduction(gssVertex, prod, pos, Some gssEdge))
+
+    let addZeroReduction (gssVertex : Vertex) token (innerGraphV : VInfo<_>) shouldEnqueue =
+        let arr = parserSource.ZeroReduces.[gssVertex.State].[parserSource.TokenToNumber token]
+        if arr <> null
+        then
+            for prod in arr do
+                innerGraphV.AddReduction(new Reduction(gssVertex, prod, 0, None))
+    
+    let (*inline*) addVertex (currentGraphV:VInfo<_>) state (listToAddUnprocessedGssV : ResizeArray<_>) =
+        let mutable v = null
+        let mutable isNew = false
+        let vOpt = currentGraphV.processedGssVertices |> ResizeArray.tryFind (fun v -> v.State = state)
+        match vOpt with
+        | Some x -> v <- x
+        | None ->
+            let vOpt = currentGraphV.unprocessedGssVertices |> ResizeArray.tryFind (fun v -> v.State = state)
+            match vOpt with
+            | Some x -> v <- x
+            | None ->
+                v <- new Vertex(state, currentGraphV.vNum)
+                isNew <- true
+                listToAddUnprocessedGssV.Add v
+                for e in outEdgesInnerGraph.[currentGraphV.vNum] do
+                    addZeroReduction v e.Tag currentGraphV false
+        v, isNew
+
+    let addEdge (startV:VInfo<_>) isNew (newVertex:Vertex) edge isNotEps =
+        if not isNew && newVertex.PassingReductions.Count > 0
+        then startV.passingReductions.Add((newVertex, edge))
+        customEnqueue(startV)
+        newVertex.addEdge edge
+        if isNotEps
+        then
+            for e in outEdgesInnerGraph.[startV.vNum] do
+                addNonZeroReduction newVertex e.Tag edge startV
+
+    let edgesToTerms = new Dictionary<_,_>()
+    let push (currentGraphV:VInfo<_>) (gssVertex : Vertex) =
+        let newUnprocessedGssVs = new ResizeArray<_>(2)
+        for e in outEdgesInnerGraph.[currentGraphV.vNum] do
+            let push = parserSource.Gotos.[gssVertex.State].[parserSource.TokenToNumber e.Tag]
+            if push <> 0 
+            then
+                let tailGssV, isNew = addVertex e.Target push (if currentGraphV.vNum = e.Target.vNum then newUnprocessedGssVs else e.Target.unprocessedGssVertices)
+
+                if not <| edgesToTerms.ContainsKey e
+                then
+                    terminals.Add e.Tag
+                    nodes.Add <| Terminal (terminals.Length - 1)
+                    edgesToTerms.Add(e, nodes.Length - 1)
+                let edge = new Edge(gssVertex, edgesToTerms.[e])
+
+                let ind = tailGssV.FindIndex gssVertex.State gssVertex.Level 
+                if ind = -1 || (tailGssV.Edge ind).Ast <> edgesToTerms.[e]
+                then addEdge e.Target isNew tailGssV edge true
+               
+
+        if not <| currentGraphV.processedGssVertices.Contains(gssVertex)
+        then 
+            currentGraphV.processedGssVertices.Add(gssVertex)
+        newUnprocessedGssVs
+
+    let verticesToRecalc = new ResizeArray<_> (10)
+
+    let (*inline*) addChildren node (path : Path) prod =
+        let ast = getFamily node
+        let familyOpt = 
+            ast.findFamily (function family -> family.prod = prod && path.IsEqual(family.nodes))
+        match familyOpt with 
+        | None -> 
+            let newFamily = new Family (prod, new Nodes(path.ToArray()))
+            if ast.first = Unchecked.defaultof<_> 
+            then ast.first <- newFamily 
+            else
+                if ast.other = null 
+                then ast.other <- [|newFamily|]
+                else ast.other <- Array.append ast.other [|newFamily|]
+        | Some _ -> ()
+
+    let handlePath (path : Path) (final : Vertex) startV nonTerm pos prod shouldEnqueueVertex =
+        let state = parserSource.Gotos.[final.State].[nonTerm]
+        let newVertex, isNew = addVertex startV state startV.unprocessedGssVertices
+        if shouldEnqueueVertex && isNew 
+        then
+            verticesToRecalc.Add startV
+        let ast = 
+            match newVertex.FindIndex final.State final.Level with
+            | -1 -> 
+                let edge = new Edge(final, nodes.Length)
+                nodes.Add <| new AST (Unchecked.defaultof<_>, null)
+                addEdge  startV isNew newVertex edge (pos > 0)
+                edge.Ast
+            | x -> (newVertex.Edge x).Ast 
+        if ast >= 0 
+        then addChildren nodes.[ast] path prod
+        else 
+            let edge = new Edge(final, nodes.Length)
+            nodes.Add <| new AST (Unchecked.defaultof<_>, null)
+            addEdge  startV isNew newVertex edge (pos > 0)
+            addChildren nodes.[nodes.Length - 1] path prod
+
+    let rec walk remainLength (vertex : Vertex) path startV nonTerm pos prod shouldEnqueueVertex = 
+        if remainLength = 0 
+        then handlePath path vertex startV nonTerm pos prod shouldEnqueueVertex
+        else
+            if not (ResizeArray.exists 
+                       (fun (_prod, _remainLength, _path : Path, _nonTerm, _pos, _startV) ->
+                            prod = _prod 
+                            && remainLength = _remainLength 
+                            && path.IsEqual(_path)
+                            && nonTerm = _nonTerm 
+                            && pos = _pos 
+                            && startV = _startV)
+                       vertex.PassingReductions)
+            then vertex.PassingReductions.Add (prod, remainLength, path, nonTerm, pos, startV)
+            vertex.OutEdges |> ResizeArray.iter
+                (fun e ->
+                    let newPath = path.AddEdge(if e.Ast < 0 then new Epsilon(e.Ast) :> AstNode else nodes.[e.Ast])
+                    walk (remainLength - 1) e.Dest newPath startV nonTerm pos prod shouldEnqueueVertex)
+
+    let makeSingleReduction currentGraphV (reduction : Reduction) =
+        let nonTerm = parserSource.LeftSide.[reduction.prod]
+
+        if reduction.pos = 0 then
+            let state = parserSource.Gotos.[reduction.gssVertex.State].[nonTerm]
+            let newVertex, isNew = addVertex currentGraphV state currentGraphV.unprocessedGssVertices
+            if newVertex.FindIndex reduction.gssVertex.State reduction.gssVertex.Level = -1 
+            then
+                let edge = new Edge(reduction.gssVertex, -parserSource.LeftSide.[reduction.prod]-1)
+                addEdge currentGraphV isNew newVertex edge false
+        else 
+            let path = new Path(nodes.[reduction.edge.Value.Ast])
+            walk (reduction.pos - 1) (reduction.edge.Value : Edge).Dest path currentGraphV nonTerm reduction.pos reduction.prod false
+
+    let makeReductions (currentGraphV : VInfo<_>) =
+        while currentGraphV.reductions.Count > 0 do
+            let r = currentGraphV.GetReduction()
+            makeSingleReduction currentGraphV r
+
+
+    let handlePassingReductions (graphV : VInfo<_>) =
+        let copyPR = ResizeArray.copy(graphV.passingReductions)
+        for (v, e) in copyPR do
+            let passingReductions = v.PassingReductions
+            for prod, remainLength, path, nonTerm, pos, startV in passingReductions do
+                let newPath = path.AddEdge(if e.Ast < 0 then new Epsilon(e.Ast) :> AstNode else nodes.[e.Ast])
+                walk (remainLength - 1) e.Dest newPath startV nonTerm pos prod true
+            graphV.passingReductions.Remove((v, e)) |> ignore
+
+    let processVertex v = 
+        makeReductions v
+
+        let newGssVs = new ResizeArray<_>(2)
+        for gssVertex in v.unprocessedGssVertices do 
+            newGssVs.AddRange(push v gssVertex)
+        v.unprocessedGssVertices.Clear()
+        if newGssVs.Count > 0 
+        then
+            v.unprocessedGssVertices.AddRange(newGssVs)
+
+        if v.passingReductions.Count > 0
+        then
+            handlePassingReductions v
+
+    if tokens.EdgeCount = 0
+    then
+        if parserSource.AcceptEmptyInput
+        then new Tree<_>([||], getEpsilon startNonTerm, parserSource.Rules) |> Success
+        else Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string")
+    else
+        for startV in startVList do
+            addVertex startV startState startV.unprocessedGssVertices |> ignore 
+
+        while errorIndex = -1 && verticesToProcess.Count > 0 do
+            let curV = verticesToProcess.Dequeue()
+            processVertex curV
+
+        if errorIndex <> -1 then
+            Error (errorIndex - 1, Unchecked.defaultof<'TokenType>, "Parse error")
         else
             let root = ref None
-            let addTreeTop res =
-                let children = new Family(parserSource.StartRule,  new Nodes(res, null, null))
-                new AST(children, null)
-            for vertex in usedStates do
-                if parserSource.AccStates.[vertex] 
+            let addTreeTop resList =
+                let children = resList |> Array.map (fun x -> new Family(parserSource.StartRule, new Nodes([|x|])))
+                new AST(children)
+
+            let vertices = innerGraph.Edges |> Seq.filter (fun e -> List.exists (fun f -> f = e.Target) finalVList) |> Seq.collect (fun e -> e.Source.processedGssVertices)
+            
+            let rootList = new BlockResizeArray<_>()
+            for v in vertices do
+                if parserSource.AccStates.[v.State]
                 then
-                    root :=
-                        stateToVertex.[vertex].OutEdges.first.Ast
-                        |> addTreeTop
-                        |> Some
+                    let rL = v.OutEdges 
+                                    |> Seq.filter (fun e -> e.Dest.State = startState && e.Ast >= 0 && e <> Unchecked.defaultof<_>) 
+                                    |> Seq.map (fun e -> e.Ast)
+                    for ast in rL do
+                        rootList.Add nodes.[ast]
+//                        
+            //assert (rootList.Length = 1) // single acc state
+
+            root := Some nodes.Length
+            rootList.ToArray() |> addTreeTop |> nodes.Add
+
+//            for ast in rootList do
+//                root := Some nodes.Length
+//                [|ast|]
+//                |> addTreeTop
+//                |> nodes.Add
+
+//            // old
+//            for v in vertices do
+//                if parserSource.AccStates.[v.State]
+//                then
+//                    root := Some nodes.Length //!
+//                    let nonEpsilonEdge = v.OutEdges.FirstOrDefault(fun x -> x.Ast >= 0)
+//                    if nonEpsilonEdge <> Unchecked.defaultof<_>
+//                    then
+//                        [|nodes.[nonEpsilonEdge.Ast]|]
+//                        |> addTreeTop
+//                        |> nodes.Add
+
             match !root with
-            | None ->
-                erTok() 
-                Error (!curInd, errors.ToArray(), "Input was fully processed, but it's not complete correct string.", debugFuns (), new Dictionary<_,_>())
+            | None -> 
+                let states = 
+                    innerGraph.Vertices 
+                    |> Seq.filter (fun v -> innerGraph.OutEdges(v) 
+                                            |> Seq.exists(fun e -> e.Target.processedGssVertices.Count = 0 (*&& e.Target.unprocessedGssVertices.Count = 0*)
+                                                                   && v.processedGssVertices.Count <> 0 (*&& v.unprocessedGssVertices.Count <> 0*)))
+                    |> Seq.map (fun v -> string v.vNum)
+                    |> String.concat "; "
+                Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state. Possible errors: (" + states + ")")
             | Some res -> 
-            //    debugFuns().drawGSSDot "res.dot"
-                Success(new Tree<_>(tokens.ToArray() , res, parserSource.Rules), errors.ToArray(), new Dictionary<_,_>())
+                try 
+                    let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
+                    //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
+//
+//                    let gssInitVertices = 
+//                    innerGraph.Edges |> Seq.filter (fun e -> List.exists (fun f -> f = e.Target) finalVList) |> Seq.collect (fun e -> e.Source.processedGssVertices)
+//
+//                    drawDot parserSource.TokenToNumber terminals parserSource.LeftSide gssInitVertices parserSource.NumToString parserSource.ErrorIndex "../../../Tests/AbstractRNGLR/DOT/gss.dot"
+
+                    Success <| tree
+                with
+                e -> Error (-1, Unchecked.defaultof<'TokenType>, e.Message)

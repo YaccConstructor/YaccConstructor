@@ -1,51 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>YaccConstructor. RNGLR</title>
+    <title>RNGLR
+</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="description" content="YaccConstructor"/>
-    <meta name="author" content="Semyon Grigorev and others"/>
+    <meta name="description" content="Platform for parser generators and other grammarware research and development."/>
+    <meta name="author" content="YaccConstructor software foundation"/>
 
     <script src="https://code.jquery.com/jquery-1.8.0.js"></script>
     <script src="https://code.jquery.com/ui/1.8.23/jquery-ui.js"></script>
     <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
     <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet"/>
 
-    <link type="text/css" rel="stylesheet" href="./content/style.css" />
-    <script type="text/javascript" src="./content/tips.js"></script>
+    <link type="text/css" rel="stylesheet" href="/YaccConstructor/content/style.css" />
+    <script type="text/javascript" src="/YaccConstructor/content/tips.js"></script>
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-      <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
     <![endif]-->
   </head>
+  <body>
     <div class="container">
       <div class="masthead">
         <ul class="nav nav-pills pull-right">
-          <!--li><a href="http://yc.com">YaccConstructor</a></li-->
-          <li><a href="https://github.com/YaccConstructor/YaccConstructor">github page</a>
-          </li>
+          <li><a href="http://fsharp.org">fsharp.org</a></li>
+          <li><a href="http://github.com/YaccConstructor/YaccConstructor">github page</a></li>
         </ul>
-        <h3 class="muted"><a href="./index.html">YaccConstructor</a></h3>
+        <h3 class="muted"><a href="/YaccConstructor/index.html">YaccConstructor</a></h3>
       </div>
       <hr />
       <div class="row">
         <div class="span9" id="main">
           
-<h1>RNGLR</h1>
+<h1><a name="RNGLR" class="anchor" href="#RNGLR">RNGLR</a></h1>
 <h2>Module purpose</h2>
 This generator creates GLR parser, corresponding to described grammar. The main their benefit is ability to produce all possible derivation trees and store them in compact form. As result, they can accept all strings, belonging to language, described with given grammar.
-
-The generated GLR parser works according to the paper Elizabeth Scott, Adrian Johnstone, Right Nulled GLR Parsers, 2006.
-
+<p>The generated GLR parser works according to the paper Elizabeth Scott, Adrian Johnstone, Right Nulled GLR Parsers, 2006.</p>
 <h2>Generator</h2>
 <h3>Running</h3>
 To run generator you must type:
 <pre>
 YaccConstructor -i &lt;input file&gt; &lt;conversions&gt; -g "RNGLRGenerator &lt;command line options&gt;"
 </pre>
-
-Where <code> &lt;command line options&gt;</code>  is sequence of pair: (-option value). All of them are represented as string, separated by whitespaces. The meaning of options is as follows:
+<p>Where <code> &amp;lt;command line options&amp;gt;</code>  is sequence of pair: (-option value). All of them are represented as string, separated by whitespaces. The meaning of options is as follows:
 <ul>
 <li><tt>-module name</tt> - The name of generated module. Inserted in the beginning of generated file. default: RNGLR.Parse.
 </li>
@@ -63,8 +61,7 @@ Where <code> &lt;command line options&gt;</code>  is sequence of pair: (-option 
 </li>
 <li><tt>-light (true|false)</tt> - whether print #light "off" directive in the beginning of generated file. Currently only 'true' option is supported. default: true
 </li>
-</ul>
-
+</ul></p>
 <h3>Constraints on a grammar</h3>
 <p>
     The grammar must not contain EBNF, meta-rules, Literals, embedded alternatives (only high-level are allowed). It's also recommended not to use nested rules sequences because of unknown performance effect. Following conversion can translate your grammar into appropriate form: ExpandMeta, ExpandEbnf, ReplaceLiterals, ExpandInnerAlt, ExpandBrackets.
@@ -75,7 +72,6 @@ Where <code> &lt;command line options&gt;</code>  is sequence of pair: (-option 
 <p>
     Epsilon-productions are allowed. Generation extracts all epsilon-trees from grammar (so in the result tree they doesn't figurate directly and just referenced by some label). For each nonterminal there is a set of epsilon-trees, it can produce.
 </p>
-
 <h2>Parser</h2>
 <h3>Abstract Syntax Tree structure</h3>
 <p>
@@ -93,7 +89,6 @@ Each node, if we discard optimization details, have several families of children
 </ul>
 The entire tree can be either Node or epsilon-tree.
 </p>
-
 <h3>Building AST</h3>
 <p>
 See RNGLRApplication for example. Project references must include RNGLRCommon and RNGLRParser. Using any tool you have to obtain a sequence of tokens. You can create AST from this sequence using command
@@ -102,7 +97,6 @@ See RNGLRApplication for example. Project references must include RNGLRCommon an
 &lt;parserModule&gt;.buildAst tokens
 </pre>
 , where <code>&lt;parserModule&gt;</code> - name of generated module.
-
 <h3>Translation</h3>
 Suppose you have AST named tree. Then you can perform semantic actions on it. This is allowed by command:
 <pre>
@@ -135,7 +129,6 @@ filterEpsilons
 If it is true, used epsilon-trees will produce only one tree for each. If you want to have all results (with all epsilon-trees values), you are to set it to false.
 </li>
 </ul>
-
 <h2>Useful Features</h2>
 Suppose we have AST (named ast). Then we can perform following actions:
 <ul>
@@ -164,7 +157,6 @@ tokenToRange - previously described function (Token -> Position * Position). It 
 <li>Its range.</li>
 <li>All rules, it can be derived with.</li>
 </ul>
-
 </li>
 <li>
 <pre>
@@ -185,14 +177,10 @@ tree.EliminateCycles()
 Delete cycles from tree. It allows to translate tree. Also used in generation to allow writing epsilon-tree structurally.
 </li>
 </ul>
-
 <h2>Error recovery</h2>
-
 <h3>Algorithm</h3>
 Parser has a mechanism for error recovery. The mechanism is based on a strategy of error token (more about).
-
-In short, when error happens then error token is inserted in front of the error detection point. The parser will pop states from the parse stack until this token becomes valid, and then skip symbols from the input until an acceptable symbol is found.
-
+<p>In short, when error happens then error token is inserted in front of the error detection point. The parser will pop states from the parse stack until this token becomes valid, and then skip symbols from the input until an acceptable symbol is found.</p>
 <h3>Rule with error token in a grammar</h3>
 You should add error token in grammar as simple rule:
 <pre>
@@ -202,16 +190,13 @@ stmt: firstRule
     | error
 </pre>
 By the way, the error token is always defined.
-
 <h3>Info about errors</h3>
 When you got the tree (named ast), you can learn about all errors which occur during parsing by command
-
 <pre>
 ast.collectErrors tokenToRange
 </pre>
 where <tt>tokenToRange</tt> - previously described function (Token -> Position * Position).
-
-This function traverses AST and returns the array of triples:
+<p>This function traverses AST and returns the array of triples:
 <ul>
 <li>Start position of unparsed exression.
 </li>
@@ -219,15 +204,13 @@ This function traverses AST and returns the array of triples:
 </li>
 <li>Array of skipped tokens.
 </li>
-</ul>
-
+</ul></p>
 <h3>Semantic for error node</h3>
 You can add semantic for error node.
-
-For instance:
+<p>For instance:
 <pre>
-stmt: res=someRule {<some actions with res>} 
-    | e=error {printfn "Error on %A token. Expected %A token(s)" e.errorOn e.expected}
+stmt: res=someRule {<some actions with res>}
+| e=error {printfn "Error on %A token. Expected %A token(s)" e.errorOn e.expected}
 </pre>
 Now error node has such fields as:
 <ul>
@@ -239,13 +222,11 @@ It's token in which error occurs
 <tt>expected</tt>
 Parser was expecting one of these tokens. Example ariphmetic expression "1 2;" After "1" parser was expecting such symbols as "+", "-", "", "/" etc.
 </li>
-<li>
-
+<li></p>
 <tt>tokens</tt>
 Skipped tokens during error recovery.
 </li>
 <li>
-
 <tt>recTokens</tt>
 Parser was looking for one of these tokens during recovery. Example: ariphmetic expression with rule:
 <pre>
@@ -254,38 +235,29 @@ stmt -> error ;
 and "1 2 ;" as input. The recovery token in this case is ";".
 </li>
 </ul>
-</div>
+
+
+        </div>
         <div class="span3">
-          <img src="./images/YC_big.jpg" alt="YaccConstructor" style="width:150px;margin:10px" />  
+          <img src="/YaccConstructor/img/logo.png" alt="F# Project" style="width:150px;margin:10px" />  
           <ul class="nav nav-list" id="menu" style="margin-top: 20px;">
             <li class="nav-header">YaccConstructor</li>
-            <li><a href="./index.html">Home page</a></li>
+            <li><a href="/YaccConstructor/index.html">Home page</a></li>
             <li class="divider"></li>
-            <!--li><a href="https://www.nuget.org/packages/FSharpx.Core/">Get Library via NuGet</a></li-->
-            <li><a href="https://github.com/YaccConstructor/YaccConstructor">Source Code on GitHub</a></li>
-            <!--li><a href="https://github.com/fsprojects/fsharpx/blob/master/LICENSE.txt">License</a></li-->
-            <li><a href="https://github.com/YaccConstructor/YaccConstructor/zipball/master" class="button">
-                  <small>Download</small>
-                        .zip file
-                </a>
-            </li>
-            <li><a href="https://github.com/YaccConstructor/YaccConstructor/tarball/master" class="button">
-                  <small>Download</small>
-                        .tar.gz file
-                  </a>
-            </li>
-            <p class="repo-owner"><a href="https://github.com/YaccConstructor/YaccConstructor">YC</a> is maintained by <a href="https://github.com/YaccConstructor">YaccConstructor</a>.</p>
-            <!--li><a href="https://github.com/fsprojects/fsharpx/blob/master/RELEASE_NOTES.md">Release Notes</a></li>
+            <li><a href="http://nuget.org/packages/YaccConstructor">Get Library via NuGet</a></li>
+            <li><a href="http://github.com/YaccConstructor/YaccConstructor">Source Code on GitHub</a></li>
+            <li><a href="/YaccConstructor/license.html">License</a></li>
+            <li><a href="/YaccConstructor/release-notes.html">Release Notes</a></li>
             
             <li class="nav-header">Getting started</li>
-            <li><a href="./index.html">Introduction</a></li>
+            <li><a href="/YaccConstructor/tutorial.html">Sample tutorial</a></li>
 
             <li class="nav-header">Documentation</li>
-            <li><a href="./reference/index.html">API Reference</a></li-->
+            <li><a href="/YaccConstructor/reference/index.html">API Reference</a></li>
           </ul>
         </div>
       </div>
     </div>
-    <a href="https://github.com/YaccConstructor/YaccConstructor"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"/></a>
+    <a href="http://github.com/YaccConstructor/YaccConstructor"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"/></a>
   </body>
-</html>
+  </html>

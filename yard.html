@@ -1,42 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>YaccConstructor.YARD</title>
+    <title>YARD
+</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="description" content="YaccConstructor"/>
-    <meta name="author" content="Semyon Grigorev and others"/>
+    <meta name="description" content="Platform for parser generators and other grammarware research and development."/>
+    <meta name="author" content="YaccConstructor software foundation"/>
 
     <script src="https://code.jquery.com/jquery-1.8.0.js"></script>
     <script src="https://code.jquery.com/ui/1.8.23/jquery-ui.js"></script>
     <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
     <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet"/>
 
-    <link type="text/css" rel="stylesheet" href="./content/style.css" />
-    <script type="text/javascript" src="./content/tips.js"></script>
+    <link type="text/css" rel="stylesheet" href="/YaccConstructor/content/style.css" />
+    <script type="text/javascript" src="/YaccConstructor/content/tips.js"></script>
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-      <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
     <![endif]-->
   </head>
+  <body>
     <div class="container">
       <div class="masthead">
         <ul class="nav nav-pills pull-right">
-          <!--li><a href="http://yc.com">YaccConstructor</a></li-->
-          <li><a href="https://github.com/YaccConstructor/YaccConstructor">github page</a>
-          </li>
+          <li><a href="http://fsharp.org">fsharp.org</a></li>
+          <li><a href="http://github.com/YaccConstructor/YaccConstructor">github page</a></li>
         </ul>
-        <h3 class="muted"><a href="./index.html">YaccConstructor</a></h3>
+        <h3 class="muted"><a href="/YaccConstructor/index.html">YaccConstructor</a></h3>
       </div>
       <hr />
       <div class="row">
         <div class="span9" id="main">
           
-<h1>YARD</h1>
-YARD is powerful translation specification language. It allows you to use EBNF, metarules and conditional generation. Also YARD support L and S attributed grammars.
-
+<h1><a name="YARD" class="anchor" href="#YARD">YARD</a></h1>
+<p>YARD is powerful translation specification language. It allows you to use EBNF, metarules and conditional generation. Also YARD support L and S attributed grammars.</p>
 <h2>Why YARD?</h2>
-
 <h3>Comparison</h3>
 <table class="table" border="3" style="width:100%">
   <tr>
@@ -131,17 +130,12 @@ YARD is powerful translation specification language. It allows you to use EBNF, 
     <td>-</td>
   </tr>
 </table>
-
-[1] &mdash; in ANTLR rule are specified using the syntax of the generated language, meanwhile YARD can accept RegExps' or other rules too!
-
+<p>[1] &amp;mdash; in ANTLR rule are specified using the syntax of the generated language, meanwhile YARD can accept RegExps' or other rules too!</p>
 <h2>Lexing</h2>
 Basically, you can use anything as a lexer and then transform it into suitable form. If you do not want things to get complicated, you can use modified version of FsLex that is bundled with YaccConstructor.
-
 <h2>Grammar structure</h2>
-
 <h3>Grammar definition</h3>
 Definition in its general form looks like this:
-
 <pre>
   info
   tokens
@@ -150,7 +144,6 @@ Definition in its general form looks like this:
   grammar 
   foot
 </pre>
-
 <p>
 Where<br>
   &emsp;<b>info</b>:    text that contains some information and would not be used anywhere.<br>
@@ -160,17 +153,14 @@ Where<br>
   &emsp;<b>grammar</b>: grammar description.<br>
   &emsp;<b>foot</b>:    F# code that will be copied to the end of a generated F# file.<br>
 </p>
-
 <h3>Grammar description</h3>
 <p>Basically, grammar description is list of modules. A module in general form looks like this:</p>
-
 <pre>
   [&lt;AllPublic&gt;]
   name
   openings
   rules
 </pre>
-
 <p>
 Where<br>
   &emsp;<b>AllPublic</b>: this annotation makes all rules visible when using this module. By default, all rules are private except the ones explicitly marked public.<br>
@@ -178,10 +168,8 @@ Where<br>
   &emsp;<b>openings</b>:  usage (opening) of another grammars from .yrd files<br>
   &emsp;<b>rules</b>:     rules that are present in grammar<br>
 </p>
-
 <h3>Rules</h3>
 <p>A rule in general form looks like this:</p>
-
 <pre>
   [&lt;Start&gt;]
   public modifier
@@ -189,7 +177,6 @@ Where<br>
   args
   body
 </pre>
-
 <p>
 Where<br>
   &emsp;<b>Start</b>:  this annotation makes this rule a starting one.<br>
@@ -198,14 +185,12 @@ Where<br>
   &emsp;<b>args</b>:   heritable rule's arguments<br>
   &emsp;<b>body</b>:   rule's body (production)<br>
 </p>
-
 <h2>Syntax in examples</h2>
 <h3>Grammar</h3>
 <pre>
 grammar: ('{'header'}')? rules ('{'footer'}')?
 </pre>
-
-Example of YARD grammar file:
+<p>Example of YARD grammar file:
 <pre>
 {
 let helperFunction x y = x+y
@@ -214,8 +199,7 @@ s: NUMBER;
 {
 let helperFunction2 x y = x*y
 }
-</pre>
-
+</pre></p>
 <h3>Sequence</h3>
 <pre>
 s: e PLUS e;
@@ -224,7 +208,6 @@ or in EBNF-like notation you can use
 <pre>
 s = e, PLUS, e;
 </pre>
-
 <h3>Alternative</h3>
 <pre>
 s: DECNUMBER|HEXNUMBER;
@@ -232,7 +215,6 @@ s: NUMBER (PLUS|MULT) NUMBER;
 s: { None }|n=NUMBER{Some n};
 </pre>
 Note that empty branch is an epsilon, so s can produce epsilon or NUMBER. It is important that empty branch must have action code as it is necessary for type checking.
-
 <h3>Zero or more</h3>
 <pre>
 grammar: rule*;
@@ -241,12 +223,10 @@ or in EBNF-like notation you can use
 <pre>
 grammar = (: rule :);
 </pre>
-
 <h3>One or more</h3>
 <pre>
 grammar: rule+;
 </pre>
-
 <h3>Option</h3>
 <pre>
 s: PLUS?;
@@ -264,116 +244,94 @@ you can write
 s: [n PLUS expr];
 </pre>
 which contains grouping and optionality.
-
 <h3>Literal</h3>
 <pre>
 stmt_block: 'BEGIN' stmt+ 'END';
 </pre>
-
 <h3>Metarules</h3>
 <pre>
 not_empty_list&lt;item sep&gt;: item (sep item)*;
 statements: not_empty_list&lt;statement SEMICOLON&gt;;
 args: not_empty_list&lt;arg COMMA&gt;;
 </pre>
-
 <h3>Action code</h3>
 <pre>
 s: n {printfn "n is detected!!!"}
 </pre>
-
 <h3>Bindings</h3>
 <pre>
 s: n=NUMBER {printfn "Number value is %A" n}
 s: &lt;hd::tl&gt;=not_empty_list&lt;NUMBER COLON&gt; {List.fold myFunction hd tl}
 </pre>
-
 <h3>L-attributes</h3>
 <pre>
 proc: declarations=var_declarations IN expressions[declarations];
 expressions[declarations]: 
      expr_lst=expression+ {check_undeclared_variables_in_expressions expr_lst declarations};
 </pre>
-
 <h3>Conditional generation</h3>
 <pre>
 exec_literal:
-#if ms
-("EXEC" | "EXECUTE")
-#elif pl
-"EXECUTE" "IMMEDIATE"
-#endif
-LBRACE LITERAL RBRACE
+<h1><a name="if-ms" class="anchor" href="#if-ms">if ms</a></h1>
+<p>("EXEC" | "EXECUTE")</p>
+<h1><a name="elif-pl" class="anchor" href="#elif-pl">elif pl</a></h1>
+<p>"EXECUTE" "IMMEDIATE"</p>
+<h1><a name="endif" class="anchor" href="#endif">endif</a></h1>
+<p>LBRACE LITERAL RBRACE
 ;
 </pre>
 Means, that if you run generator with key -D "ms" then you get parser for grammar
 <pre>
-exec_literal:
+exec<em>literal:
 ("EXEC" | "EXECUTE")
 LBRACE LITERAL RBRACE
 ;
 </pre>
 Else, if you run generator with key -D "pl" then you get parser for grammar
 <pre>
-exec_literal:
+exec</em>literal:
 "EXECUTE" "IMMEDIATE"
 LBRACE LITERAL RBRACE
 ;
-</pre>
-
-<h3>Labels</h3>
+</pre></p>
+<p><h3>Labels</h3>
 <pre>
 s: x (@l1(y z)| @l2(a b)) g;
 </pre>
-Where @l1 and @l2 are labels. Labels are used for working with dialects.
-
+Where @l1 and @l2 are labels. Labels are used for working with dialects.</p>
 <h2>Experimental syntax</h2>
 <h3>Syntactic factor</h3>
 Note that though syntactic factor is implemented in YARD, it is currently not supported by generators.
-
 <pre>
   strict_rule = 5 * " ";
 </pre>
-
-Extended annotation for repetition rule:
-
+<p>Extended annotation for repetition rule:</p>
 <pre>
   grammar = rule *[2..5] ;
 </pre>
 
 
-</div>
+        </div>
         <div class="span3">
-          <img src="./images/YC_big.jpg" alt="YaccConstructor" style="width:150px;margin:10px" />  
+          <img src="/YaccConstructor/img/logo.png" alt="F# Project" style="width:150px;margin:10px" />  
           <ul class="nav nav-list" id="menu" style="margin-top: 20px;">
             <li class="nav-header">YaccConstructor</li>
-            <li><a href="./index.html">Home page</a></li>
+            <li><a href="/YaccConstructor/index.html">Home page</a></li>
             <li class="divider"></li>
-            <!--li><a href="https://www.nuget.org/packages/FSharpx.Core/">Get Library via NuGet</a></li-->
-            <li><a href="https://github.com/YaccConstructor/YaccConstructor">Source Code on GitHub</a></li>
-            <!--li><a href="https://github.com/fsprojects/fsharpx/blob/master/LICENSE.txt">License</a></li-->
-            <li><a href="https://github.com/YaccConstructor/YaccConstructor/zipball/master" class="button">
-                  <small>Download</small>
-                        .zip file
-                </a>
-            </li>
-            <li><a href="https://github.com/YaccConstructor/YaccConstructor/tarball/master" class="button">
-                  <small>Download</small>
-                        .tar.gz file
-                  </a>
-            </li>
-            <p class="repo-owner"><a href="https://github.com/YaccConstructor/YaccConstructor">YC</a> is maintained by <a href="https://github.com/YaccConstructor">YaccConstructor</a>.</p>
-            <!--li><a href="https://github.com/fsprojects/fsharpx/blob/master/RELEASE_NOTES.md">Release Notes</a></li>
+            <li><a href="http://nuget.org/packages/YaccConstructor">Get Library via NuGet</a></li>
+            <li><a href="http://github.com/YaccConstructor/YaccConstructor">Source Code on GitHub</a></li>
+            <li><a href="/YaccConstructor/license.html">License</a></li>
+            <li><a href="/YaccConstructor/release-notes.html">Release Notes</a></li>
             
             <li class="nav-header">Getting started</li>
-            <li><a href="./index.html">Introduction</a></li>
+            <li><a href="/YaccConstructor/tutorial.html">Sample tutorial</a></li>
 
             <li class="nav-header">Documentation</li>
-            <li><a href="./reference/index.html">API Reference</a></li-->
+            <li><a href="/YaccConstructor/reference/index.html">API Reference</a></li>
           </ul>
         </div>
       </div>
     </div>
-    <a href="https://github.com/YaccConstructor/YaccConstructor"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"/></a>
+    <a href="http://github.com/YaccConstructor/YaccConstructor"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"/></a>
   </body>
-</html>
+  </html>

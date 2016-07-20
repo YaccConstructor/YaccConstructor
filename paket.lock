@@ -68,7 +68,8 @@ NUGET
       DotNet.Contracts
       DotParser (>= 1.0.5)
       FSharp.Core
-    YC.Utils.SourceText (0.1.6500.5)
+    YC.Utils.SourceText (0.3.0.1)
+      FSharp.Core (4.0.0.1)
 GITHUB
   remote: fsharp/FAKE
     modules/Octokit/Octokit.fsx (57b7731e3386ae98806970506ff731872f3c9260)

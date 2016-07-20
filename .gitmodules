@@ -1,6 +1,3 @@
 [submodule "src/YC.GrammarZOO"]
     path = src/YC.GrammarZOO
     url = https://github.com/YaccConstructor/YC.GrammarZOO.git
-[submodule "src/YC.Utils.SourceText"]
-    path = src/YC.Utils.SourceText
-    url = https://github.com/YaccConstructor/YC.Utils.SourceText.git

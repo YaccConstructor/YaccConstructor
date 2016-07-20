@@ -42,9 +42,6 @@
     </ProjectReference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
-    <Reference Include="System.Collections.Generic.IntDictionary">
-      <HintPath>..\..\3rdParty\IntDict\System.Collections.Generic.IntDictionary.dll</HintPath>
-    </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">

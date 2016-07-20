@@ -10,7 +10,7 @@ open QuickGraph
 open AbstractAnalysis.Common
 open System.IO
 open System.Collections.Generic
-open Yard.Utils.StructClass
+open YC.Utils.StructClass
 
 let eof = RNGLR_EOF(new FSA<_>())
 

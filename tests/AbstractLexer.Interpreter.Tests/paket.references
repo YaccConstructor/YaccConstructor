@@ -3,3 +3,4 @@ FSharpx.Collections
 FSharpx.Collections.Experimental
 NUnit
 YC.QuickGraph
+YC.Utils.SourceText

@@ -3,7 +3,7 @@
 open NUnit.Framework
 open Microsoft.FSharp.Collections
 open QuickGraph
-open Yard.Utils.StructClass
+open YC.Utils.StructClass
 open QuickGraph.FST.GraphBasedFst
 open YC.FST.AbstractLexing.Interpreter
 open AbstractParser.Tokens

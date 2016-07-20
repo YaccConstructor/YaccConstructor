@@ -1,7 +1,7 @@
 module AbstractParser.Tokens
 
 open QuickGraph.FSA.GraphBasedFsa
-open Yard.Utils.StructClass
+open YC.Utils.StructClass
 
 type Token =
     | NUMBER of FSA<char*Position<string>>

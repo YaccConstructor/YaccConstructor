@@ -7,8 +7,6 @@
 YaccConstructor
 ======================
 
-Documentation
-
 <div class="row">
   <div class="span1"></div>
   <div class="span6">
@@ -40,12 +38,19 @@ Samples & documentation
 The library comes with comprehensible documentation. 
 It can include tutorials automatically generated from `*.fsx` files in [the content folder][content]. 
 The API reference is automatically generated from Markdown comments in the library implementation.
-
  * [Tutorial](tutorial.html) contains a further explanation of this sample library.
 
  * [API Reference](reference/index.html) contains automatically generated documentation for all types, modules
    and functions in the library. This includes additional brief samples on using most of the
    functions.
+
+ * [YARD](yard.html) grammar specification language.
+
+ * [RNGLR parser generator](rnglr.html) contains description of RNGLR parser generator.
+
+ * [GLL parser generator](gll.html).
+
+ * [Research requirements in Russian](ru_researchReq.html) contains basic requirements on research process. For students.
  
 Contributing and copyright
 --------------------------

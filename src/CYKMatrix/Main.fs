@@ -264,10 +264,16 @@ let main args =
 
         if not sameAnswers
         then failwith "different answers"
+
+    let checkMultiplicationNumber strLen param = 
+        let str = (String.replicate strLen "a")
+        let testParam = { param with Options.mode = Mode.Test }
+        recognize testParam str rules nonterminals S strLen |> ignore
+        printfn ""
     
 //    let toCheckOptions = amdNewOptions
 //    let toCheck = (myAlg |> addBrahma 8 nvidiaOneThread)
-    let toCheck = (myAlg |> add_1DBrahma 2 nvidiaOneThread)
+//    let toCheck = (myAlg |> add_1DBrahma 2 nvidiaOneThread)
 //    let toCheck = (myAlg |> addCuda 2 cudaOneThread)
 //    let toCheck = (myAlg |> addBrahma 2 nvidiaOneThread)
 //    let toCheck = (myAlg |> addFast 4 |> addParallel 1 )
@@ -276,8 +282,8 @@ let main args =
 //    check "abb"      3    s
 //    check "aaabbcc"  5
 //    check "aaabb"    5
-    check "aaaaabbb" 6 okhotinAlg toCheck
-    check "aaaabbbbbb" 6 okhotinAlg toCheck
+//    check "aaaaabbb" 6 okhotinAlg toCheck
+//    check "aaaabbbbbb" 6 okhotinAlg toCheck
 //    check "aaaabbbbbbbbbbb" 10
 //    check "aaaabbbbbbbbbbbbbbb" 10
 //    check "aaaabb" 6
@@ -295,6 +301,8 @@ let main args =
 //    check (String.replicate 6 "abb") 18 okhotinAlg amdOptions
 //    checkTime (String.replicate 120 "abb") 300
 //    checkTime (String.replicate 200 "abb") 400
+
+    checkMultiplicationNumber 63 myAlg
 
 
 //    checkTime (String.replicate 700 "abb") 1600

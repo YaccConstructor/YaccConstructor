@@ -507,10 +507,11 @@ open Util
     type PMatrix = Dictionary<NonTerminal * NonTerminal, ProbabilityMatrix.T>
        
     type MatrixHolder(tKeys, pKeys, stringSize, options: Options.T) = 
+
+        let matrixSizeExponent = log2 <| stringSize + 1
         
         let GPUMultiplicator = 
-            // todo: think about search size!!!!!!!!!!
-            let matrixSizeExponent = (log (double stringSize + 1.)) / (log 2.) |> ceil |> int
+            // todo: think about search size!!!!!!!!!!            
             let maxMatrixForMultiplicationSize = (1 <<< (matrixSizeExponent - 1))
             MatriceswMultiplicator (options, 
                                     Probability.innerSummQuote, 
@@ -535,6 +536,13 @@ open Util
             )
             |> Seq.iter pMatrix.Add
 
+        let multiplicationCounter = 
+            match options.mode with
+            | Work -> None
+            | Test -> Some <| Array.zeroCreate matrixSizeExponent
+
+        member this.MultiplicationCounter = multiplicationCounter
+
         member this.updateTCellWith cell nonterminals =
             nonterminals |> List.iter (fun (key, prob) -> tMatrix.[key].AddValueToCell cell prob)
             
@@ -557,10 +565,16 @@ open Util
                 |> Array.iter (fun cell -> heads cell |> this.updateTCellWith cell)
 
         member this.performMultiplication tasks nts = 
-
-            let getPMatrix (nts: NonTerminal * NonTerminal) : ProbabilityMatrix.T = pMatrix.[nts]             
-            let getTMatrix nt = tMatrix.[nt]
+            match options.mode with
+            | Work ->             
+                let getPMatrix (nts: NonTerminal * NonTerminal) : ProbabilityMatrix.T = pMatrix.[nts]             
+                let getTMatrix nt = tMatrix.[nt]
                 
-            GPUMultiplicator.performMultiplication getTMatrix getPMatrix tasks nts
+                GPUMultiplicator.performMultiplication getTMatrix getPMatrix tasks nts
+            | Test -> 
+                let size = tasks.[0].where.Size
+                multiplicationCounter
+                |> Option.iter (fun arr -> arr.[log2 size] <- (arr.[log2 size] + tasks.Length ))
+                
             
         member this.releaseResources = GPUMultiplicator.releaseResources

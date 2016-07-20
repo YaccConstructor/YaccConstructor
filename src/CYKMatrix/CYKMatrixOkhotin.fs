@@ -10,7 +10,7 @@
                   (allRules: RulesHolder)  
                   nonterminals
                   S 
-                  maxSearchLength= 
+                  maxSearchLength = 
                                     
         let stringSize = String.length strToParse
 
@@ -107,4 +107,4 @@
 //        printfn "okhotin mult count: %i" !multiplicationCounter
 //        multiplicationCounter := 0
         matrices.releaseResources ()
-        matrices.getProbabilities S
+        (matrices.getProbabilities S), matrices.MultiplicationCounter

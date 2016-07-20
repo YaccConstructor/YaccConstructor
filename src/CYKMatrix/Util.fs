@@ -7,6 +7,8 @@
 
 //    open FSharp.Quotations.Evaluator
 //    open Microsoft.FSharp.Quotations
+    
+    let log2 s = (log (double s)) / (log 2.) |> ceil |> int
 
     type Info<'T> = {
         MinMatrixSize: int
@@ -27,6 +29,7 @@
     type CPUParallel = Unit
 
     type Algorithm = Okhotin | Modified
+    type Mode = Test | Work
 
     module Options =
 
@@ -37,19 +40,22 @@
             Fast: CPUFast Info option
             Parallel: CPUParallel Info option
             algorithm: Algorithm
+            mode: Mode
         }
 
-        let empty algorithm = { Brahma = None; _1DBrahma = None; Cuda = None; Fast = None; Parallel = None; algorithm = algorithm }
-        let createOne minMatrixSize options = { MinMatrixSize = minMatrixSize; Options = options}
+        let empty algorithm = { Brahma = None; _1DBrahma = None; Cuda = None; Fast = None; Parallel = None; algorithm = algorithm; mode = Work }
+        let createOne minMatrixSize options = { MinMatrixSize = minMatrixSize; Options = options }
         let create is_1DBrahma algorithm fast parall cuda brahma = 
             if is_1DBrahma
-            then { Brahma = None; _1DBrahma = brahma; Cuda = cuda; Fast = fast; Parallel = parall; algorithm = algorithm }
-            else { Brahma = brahma; _1DBrahma = None; Cuda = cuda; Fast = fast; Parallel = parall; algorithm = algorithm }
+            then { Brahma = None; _1DBrahma = brahma; Cuda = cuda; Fast = fast; Parallel = parall; algorithm = algorithm; mode = Work }
+            else { Brahma = brahma; _1DBrahma = None; Cuda = cuda; Fast = fast; Parallel = parall; algorithm = algorithm; mode = Work }
 
         let map f (option: _ Info) = {
             MinMatrixSize = option.MinMatrixSize
             Options = f option.Options
         }
+
+        let emptyTest algorithm = { Brahma = None; _1DBrahma = None; Cuda = None; Fast = None; Parallel = None; algorithm = algorithm; mode = Test }
     
 
     type NonTerminal = NonTerminal of string

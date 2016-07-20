@@ -110,4 +110,4 @@
             
         // todo: release ????
         matrices.releaseResources ()
-        matrices.getProbabilities S
+        (matrices.getProbabilities S), matrices.MultiplicationCounter

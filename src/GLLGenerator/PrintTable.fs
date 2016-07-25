@@ -92,7 +92,6 @@ let printTableGLL
         slots
 
     let printTable () =
-        let indexator = grammar.indexator
         printBr "type Token ="
         let indexator = grammar.indexator
         let defaultType = tokenType.TryFind "_"

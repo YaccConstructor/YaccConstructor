@@ -250,7 +250,7 @@ let buildAbstractAst<'TorenType> (parser : ParserSourceGLL<'TorenType>) (input :
                                 else 
                                     structures.CurrentR := getNodeT edge
                                 currentVertexInInput := edge.Target
-                                structures.CurrentLabel := 1<labelMeasure> * (packLabelNew rule (position + 1))
+                                structures.CurrentLabel := packLabelNew rule (position + 1)
                                 if !structures.CurrentR <> structures.Dummy
                                 then 
                                     structures.CurrentN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy !structures.CurrentLabel !structures.CurrentN !structures.CurrentR
@@ -262,7 +262,7 @@ let buildAbstractAst<'TorenType> (parser : ParserSourceGLL<'TorenType>) (input :
                             index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
                             index <- index + term - parser.NonTermCount
                             index
-                        currentGSSNode := create !currentVertexInInput (1<labelMeasure> *(packLabelNew rule (position + 1))) !currentGSSNode  !structures.CurrentN
+                        currentGSSNode := create !currentVertexInInput (packLabelNew rule (position + 1)) !currentGSSNode  !structures.CurrentN
                         for edge in input.OutEdges !currentVertexInInput do
                             let curToken = edge.Tag
                             let index = getIndex curSymbol curToken
@@ -271,7 +271,7 @@ let buildAbstractAst<'TorenType> (parser : ParserSourceGLL<'TorenType>) (input :
                             then
                                 for rule in table.[key] do
                                  
-                                    let newLabel = 1<labelMeasure> * (packLabelNew rule 0)
+                                    let newLabel = packLabelNew rule 0
                                     structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy 
                                     
                 else

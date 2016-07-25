@@ -1,23 +1,10 @@
 ﻿module GLLAbstractApplication
 open System.IO
 open System
-open Microsoft.FSharp.Text
-open Microsoft.FSharp.Reflection
-open Graphviz4Net.Dot.AntlrParser
-open System.IO
-open Graphviz4Net.Dot
-open QuickGraph
-open NUnit.Framework
-open AbstractAnalysis.Common
-open YC.Tests.Helper
-open Yard.Generators.GLL
-open Yard.Generators.GLL.AbstractParser 
-open Yard.Frontends.YardFrontend
-open Yard.Generators.GLL
-open GLL.SimpleAmb
-open Yard.Generators.GLL.AbstractParser
 open Yard.Generators.GLL.ParserCommon
-open Yard.Generators.ARNGLR.Parser
+open AbstractAnalysis.Common
+open GLL.aa
+
 //open RNGLR.SimpleAmb
 ////let outDir = @"../../../src/GLLAbstractApplication/"
 ////
@@ -246,3 +233,42 @@ open Yard.Generators.ARNGLR.Parser
 ////    | Yard.Generators.ARNGLR.Parser.Success tree->
 ////        ()
 //
+
+let f arr tokenToNumber = Array.map (fun e -> tokenToNumber e) arr
+let edgB b e l t = new BioParserEdge(b, e, l, t) 
+
+(*
+let inputGraph =
+    let a1 = f [|GLL.aa.C 0; |] GLL.aa.tokenToNumber
+    let a2 = f [|GLL.aa.C 1|] GLL.aa.tokenToNumber
+    let a3 = f [|GLL.aa.C 2|] GLL.aa.tokenToNumber
+    let a4 = f [|GLL.aa.C 3|] GLL.aa.tokenToNumber
+    let a5 = f [|GLL.aa.C 4|] GLL.aa.tokenToNumber
+    let a6 = f [|GLL.aa.A 5|] GLL.aa.tokenToNumber
+   // let a7 = f [|GLL.aa.RNGLR_EOF 6|] GLL.aa.tokenToNumber
+    let edges = [| edgB 0 1 1 a1;
+                   edgB 1 2 1 a2;
+                   edgB 2 3 1 a3;
+                   edgB 3 4 1 a4;
+                   edgB 4 5 1 a5;
+                   edgB 5 6 1 a6|] 
+    let qGraph = new BioParserInputGraph(edges)
+    qGraph
+*)
+let inputGraph =
+    //CC
+    let a1 = f [|GLL.aa.C 0|] GLL.aa.tokenToNumber
+    //CCCA
+    let a2 = f [|GLL.aa.C 1; GLL.aa.A 0|] GLL.aa.tokenToNumber
+    let edges = [| edgB 0 1 1 a1;
+                   edgB 1 2 1 a2;
+                   edgB 1 3 1 a2;
+                   edgB 1 4 1 a2|] 
+    let qGraph = new BioParserInputGraph(edges)
+    qGraph
+let res = buildAbstract inputGraph 0
+
+match res with
+| Success1 s -> Array.iter (printfn "Res%A") s
+| Success _ -> printfn "Suc"
+| _ -> printfn "Failed."

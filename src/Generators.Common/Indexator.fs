@@ -28,10 +28,11 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
     let rules = ruleList |> Array.ofList
 
     let terms, literals =
-        let rec collectTermsAndLits (accTerms, accLiterals) (*body*) = function (*body*)
+        let rec collectTermsAndLits (accTerms, accLiterals) (*body*) = function
             | PRef _ | PMetaRef _ -> (accTerms, accLiterals)
             | PSeq (s, _, _) ->
-                s |> List.map (fun e -> e.rule)
+                s
+                |> List.map (fun e -> e.rule)
                 |> List.fold collectTermsAndLits (accTerms, accLiterals)
             | PLiteral lit -> accTerms, (Indexator.transformLiteral caseSensitive lit.text)::accLiterals
             | PToken token -> token.text::accTerms, accLiterals

@@ -2,6 +2,8 @@
 
 open QuickGraph
 
+[<Measure>] type token
+
 type LexerEdge<'l ,'br  when 'l: equality> (s,e,t) =
     inherit TaggedEdge<int,Option<'l*'br>>(s,e,t)
     let l,br =
@@ -139,7 +141,7 @@ type BioParserInputGraph(edges : BioParserEdge[]) =
         |> Array.iteri (fun i e -> 
             let edg = new BioParserEdge(getV e.Start, getV e.End, e.RealLenght, e.Tokens)
             edgs.[i] <- edg
-            chainLen.[i] <- e.Tokens.Length + 1
+            chainLen.[i] <- e.Tokens.Length
             shift := 0//max !shift (e.Tokens.Length - e.RealLenght)
             for j in 0..e.Tokens.Length - 1 do
                 initialVertices.Add(pack2to32 i (j - !shift)))
@@ -148,6 +150,7 @@ type BioParserInputGraph(edges : BioParserEdge[]) =
     member this.Edges  with get () = edgs
     member this.InitialVertices with get () = initialVertices.ToArray()
     member this.FinalVertex with get () = !finalVertex
+    /// Lengths of edges.
     member this.ChainLength with get () = chainLen
     member this.EdgeCount with get () = edgs.Length
     member this.VertexCount with get () = !vertexCount

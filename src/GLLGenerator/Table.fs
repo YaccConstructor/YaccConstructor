@@ -30,7 +30,6 @@ type Table (grammar : FinalGrammar) =
                 List.iter (addElementsToSet followSets.[currentruleLeft]) previousNonTerms
         followSets
 
-
     let newRightSideForStartRule () =
         let oldRightSide = grammar.rules.rightSide grammar.rules.startRule 
         let newRightSide = Array.zeroCreate<int> (oldRightSide.Length + 1)
@@ -43,15 +42,15 @@ type Table (grammar : FinalGrammar) =
         //grammar.rules.
         grammar.rules.setRightSide grammar.rules.startRule newRightSide
     
-
     let follow = getFollowSets
 
     let canInferEpsilon = Array.create grammar.rules.rulesCount false
 
+    //
     let firstForChain = 
         let ruleCount = grammar.rules.rulesCount
         let result = Array.create ruleCount Set.empty<int>
-        let mutable condition = true
+        //let mutable condition = true
         for i = 0 to ruleCount - 1 do
             let mutable condition = true
             let currule = grammar.rules.rightSide i
@@ -75,42 +74,37 @@ type Table (grammar : FinalGrammar) =
     let getTableIndex num =
         let result = num - grammar.indexator.nonTermCount
         result
+
+    let addToDictionary (dict:System.Collections.Generic.Dictionary<int,ResizeArray<int>>) key value = 
+        if dict.ContainsKey(key)
+        then
+            dict.[key].Add value
+        else
+            let ra = new ResizeArray<int>()
+            ra.Add value
+            dict.Add(key, ra)
             
     let _table = 
         let inline pack left right : int =  int((int32 left <<< 16) ||| int32 right)
         newRightSideForStartRule()
         let result = new System.Collections.Generic.Dictionary<int, ResizeArray<int>>()
-        let length1 = grammar.indexator.nonTermCount
-        let length2 = grammar.indexator.fullCount - grammar.indexator.nonTermCount
+        //let length1 = grammar.indexator.nonTermCount
+        //let length2 = grammar.indexator.fullCount - grammar.indexator.nonTermCount
         let firsts = firstForChain
         for i = 0 to grammar.rules.rulesCount - 1 do
             let curFirst = Set.toArray firsts.[i]
             let curNTerm = grammar.rules.leftSide i
             for j = 0 to curFirst.Length - 1 do
                 let key = pack curNTerm (getTableIndex curFirst.[j])
-                if result.ContainsKey(key)
-                then
-                    result.[key].Add i
-                else
-                    let ra = new ResizeArray<int>()
-                    ra.Add i
-                    result.Add(key, ra) 
+                addToDictionary result key i
             if grammar.epsilonRules.[i]
             then 
                 let curFollow = Set.toArray follow.[curNTerm]
                 for j = 0 to curFollow.Length - 1 do
                     let key = pack curNTerm (getTableIndex curFollow.[j])
-                    if result.ContainsKey(key)
-                    then
-                        result.[key].Add i
-                    else
-                        let ra = new ResizeArray<int>()
-                        ra.Add i
-                        result.Add(key, ra) 
-                     
+                    addToDictionary result key i
         
         result
-    
 
     member this.result = _table
     

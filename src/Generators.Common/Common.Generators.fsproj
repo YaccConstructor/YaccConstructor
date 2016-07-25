@@ -46,6 +46,7 @@
     <Compile Include="InitialConvert.fs" />
     <Compile Include="SymbolSets.fs" />
     <Compile Include="FinalGrammar.fs" />
+    <Compile Include="FSAGrammar.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>

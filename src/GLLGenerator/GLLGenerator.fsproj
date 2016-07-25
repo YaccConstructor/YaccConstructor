@@ -44,6 +44,7 @@
     <Compile Include="Table.fs" />
     <Compile Include="PrintTable.fs" />
     <Compile Include="GllGenerator.fs" />
+    <Compile Include="GLLGeneratorFSA.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>

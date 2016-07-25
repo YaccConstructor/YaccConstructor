@@ -6,7 +6,7 @@ open IL
 open Constraints
 open Yard.Generators.Common
 open InitialConvert
-open Yard.Generators.Common.FinalGrammar
+open Yard.Generators.Common.FSAGrammar
 open Yard.Generators.GLL
 open PrintTable
 open Yard.Generators.GLL.TranslatorPrinter2
@@ -17,12 +17,11 @@ open Option
 [<assembly:AddinDependency ("YaccConstructor", "1.0")>]
 do()
 [<Extension>]
-type GLL() = 
+type GLLFSA() = 
     inherit Generator()
-        override this.Name = "GLLGenerator"
-        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; noBrackets; needAC; singleModule; (new Constraint("inline", (fun _ -> false), Conversions.ExpandInline.ReplaceInline()))|]
+        override this.Name = "GLLGeneratorFSA"
+        override this.Constraints = [|noMeta; noBrackets; singleModule|]
         override this.Generate (definition, args) =
-            
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
             let pairs = Array.zeroCreate <| args.Length / 2
@@ -43,13 +42,12 @@ type GLL() =
             let mutable tokenType = getOption "token" definition.tokens mapFromType
             let mutable fullPath = getBoolOption "fullpath" false
             let mutable positionType = getOption "pos" "" id
-            let mutable needTranslate = getBoolOption "translate" true
+            let mutable needTranslate = getBoolOption "translate" false
             let mutable light = getBoolOption "light" true
             let mutable printInfiniteEpsilonPath = getOption "infEpsPath" "" id
-            let mutable isAbstract = getBoolOption "abstract" false
+            let mutable isAbstract = getBoolOption "abstract" true
             let withoutTree = ref <| getBoolOption "withoutTree" true
-            let FSAinput = ref <| getBoolOption "FSAinput" false
-            let mutable caseSensitive = getBoolOption "caseSensitive" false
+            //let mutable caseSensitive = getBoolOption "caseSensitive" true
             let mutable output =
                 let fstVal = getOption "output" (definition.info.fileName + ".fs") id
                 getOption "o" fstVal id
@@ -65,44 +63,20 @@ type GLL() =
                 | "-pos" -> positionType <- value
                 | "-o" -> if value.Trim() <> "" then output <- value
                 | "-output" -> if value.Trim() <> "" then output <- value
-                | "-caseSensitive" -> caseSensitive <- getBoolValue "caseSensitive" value
+                //| "-caseSensitive" -> caseSensitive <- getBoolValue "caseSensitive" value
                 | "-fullpath" -> fullPath <- getBoolValue "fullPath" value
                 | "-translate" -> needTranslate <- getBoolValue "translate" value
                 | "-light" -> light <- getBoolValue "light" value
                 | "-infEpsPath" -> printInfiniteEpsilonPath <- value
                 | "-abstract" -> isAbstract <- getBoolValue "abstract" value
                 | "-withoutTree" -> withoutTree := getBoolValue "withoutTree" value
-                | "-FSAinput" -> FSAinput := getBoolValue "FSAinput" value
                 | value -> failwithf "Unexpected %s option" value
                  
-            let newDefinition = initialConvert definition
-            let grammar = new FinalGrammar(newDefinition.grammar.[0].rules, caseSensitive)
+            //let newDefinition = initialConvert definition
+            let grammar = new FSAGrammar(definition.grammar.[0].rules)
 
-            //print rules to console
-            let printrules () =
-                let printSymbol (symbol : int) =
-                    if symbol < grammar.indexator.nonTermCount
-                    then grammar.indexator.indexToNonTerm symbol
-                    elif symbol >= grammar.indexator.termsStart && symbol <= grammar.indexator.termsEnd
-                    then grammar.indexator.indexToTerm symbol
-                    else grammar.indexator.indexToLiteral symbol
-                printfn "\nrules:"
-                for i = 0 to grammar.rules.rulesCount - 1 do
-                    printf "%4d: %s = " i <| printSymbol (grammar.rules.leftSide i)
-                    for j = 0 to grammar.rules.length i - 1 do
-                        printf "%s " <| printSymbol (grammar.rules.symbol i j)
-                    printfn ""
-            printrules ()
-
-            if grammar.EpsilonCyclicNonTerms.Length > 0
-            then
-                eprintfn "Grammar contains non-terminals, which can infinitely infer epsilon:"
-                grammar.EpsilonCyclicNonTerms
-                |> List.map (String.concat " <- ")
-                |> List.iter (eprintfn "%s")
-                eprintfn ""
-
-            let table = new Table(grammar)
+            
+            (*
             use out = new System.IO.StreamWriter (output)
             let res = new System.Text.StringBuilder()
             let dummyPos = char 0
@@ -155,7 +129,7 @@ type GLL() =
                         println "%s" <| s.text + getPosFromSource fullPath dummyPos (defaultSource output)
                 
                 fsHeaders()
-                
+
             printHeaders moduleName fullPath light output isAbstract
             let table = printTableGLL grammar table moduleName tokenType res _class positionType caseSensitive isAbstract !withoutTree
             let res = table
@@ -180,5 +154,6 @@ type GLL() =
             out.Flush()
             out.Close()
             eprintfn "Generation time: %A" <| System.DateTime.Now - start
+            *)
             box ()
         override this.Generate definition = this.Generate (definition, "")

@@ -204,6 +204,8 @@
     <Compile Include="tRNA.yrd.fs" />
     <Compile Include="16s_H22_H23.yrd.fs" />
     <Compile Include="shift_problem.yrd.fs" />
+    <Compile Include="tblReader.fs" />
+    <Compile Include="io.fs" />
     <Compile Include="RNA.Search.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
@@ -249,7 +251,7 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-i "../../../Tests/bio/mix_1\late_pair_info_count</StartArguments>
+    <StartArguments>-i "../../../Tests/bio/mix_1\late_pair_info_count"</StartArguments>
   </PropertyGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">

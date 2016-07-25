@@ -1,37 +1,37 @@
 ﻿namespace Yard.Generators.GLL.ParserCommon
 open System.Collections.Generic
-       
-type ParserSourceGLL<'TokenType> (eof                  : 'TokenType
-                               , tokenToNumber      : 'TokenType -> int
-                               , genLiteral         : string -> int -> 'TokenType option
-                               , numToString        : int -> string
-                               , tokenData          : 'TokenType -> obj
-                               , isLiteral          : 'TokenType -> bool
-                               , isTerminal         : 'TokenType -> bool
-                               , getLiteralNames    : string list
-                               , table              : System.Collections.Generic.Dictionary<int, int[]>
-                               , rules              : array<int>
-                               , rulesStart         : array<int>
-                               , leftSide           : array<int>
-                               , startRule          : int
-                               , literalEnd         : int
-                               , literalStart       : int
-                               , termEnd            : int
-                               , termStart          : int
-                               , termCount          : int
-                               , nonTermCount       : int
-                               , literalCount       : int
-                               , indexEOF           : int
-                               , rulesCount         : int
-                               , indexatorFullCount : int
-                               , acceptEmptyInput   : bool
-                               , numIsTerminal      : int -> bool
-                               , numIsNonTerminal   : int -> bool
-                               , numIsLiteral       : int -> bool
-                               , canInferEpsilon    : bool array
-                               , slots              : IDictionary<int,int>
-                               , probabilities      : array<float>
-                               ) =
+
+type ParserSourceGLL<'TokenType> (eof                : 'TokenType
+                                , tokenToNumber      : 'TokenType -> int
+                                , genLiteral         : string -> int -> 'TokenType option
+                                , numToString        : int -> string
+                                , tokenData          : 'TokenType -> obj
+                                , isLiteral          : 'TokenType -> bool
+                                , isTerminal         : 'TokenType -> bool
+                                , getLiteralNames    : string list
+                                , table              : System.Collections.Generic.Dictionary<int, int[]>
+                                , rules              : array<int>
+                                , rulesStart         : array<int>
+                                , leftSide           : array<int<labelMeasure>>
+                                , startRule          : int
+                                , literalEnd         : int
+                                , literalStart       : int
+                                , termEnd            : int
+                                , termStart          : int
+                                , termCount          : int
+                                , nonTermCount       : int
+                                , literalCount       : int
+                                , indexEOF           : int
+                                , rulesCount         : int
+                                , indexatorFullCount : int
+                                , acceptEmptyInput   : bool
+                                , numIsTerminal      : int -> bool
+                                , numIsNonTerminal   : int -> bool
+                                , numIsLiteral       : int -> bool
+                                , canInferEpsilon    : bool array
+                                , slots              : IDictionary<int,int>
+                                , probabilities      : array<float>
+                                ) =
     let length =
         let res = Array.zeroCreate <| (rulesStart.Length - 1)
         for i=0 to res.Length-1 do
@@ -44,21 +44,15 @@ type ParserSourceGLL<'TokenType> (eof                  : 'TokenType
             _rules.[i].[j] <- rules.[rulesStart.[i] + j]
 
     let printrules () =
-                
                 printfn "\nrules:"
                 for i = 0 to rulesCount - 1 do
-                    printf "%4d: %s = " i <| numToString (leftSide.[i])
+                    printf "%4d: %s = " i <| numToString (int leftSide.[i])
                     for j = 0 to _rules.[i].Length - 1 do
                         printf "%s " <| numToString (_rules.[i].[j])
                     printfn ""
 
-
-
     do printrules()
-   
-    
-                  
-                               
+                           
     member this.GenLiteral         = genLiteral 
     member this.TokenData          = tokenData
     member this.IsLiteral          = isLiteral
@@ -90,3 +84,49 @@ type ParserSourceGLL<'TokenType> (eof                  : 'TokenType
     member this.Slots              = slots
     member this.Probabilities      = probabilities
     member this.EOF                = eof
+
+type FSAParserSourceGLL (             tokenToNumber      : _ -> int
+                                    , numToString        : int -> string
+                                    , states             : array<array<int * int<state>>>
+                                    , startState         : int<state>
+                                    , lastState          : int<state>
+                                    , leftSide           : array<int>
+                                    , nonTermCount       : int
+                                    , numIsTerminal      : int -> bool
+                                    , numIsNonTerminal   : int -> bool
+                                    , numIsLiteral       : int -> bool
+                                    , table              : System.Collections.Generic.Dictionary<int, int<state>>
+                                    ) =
+    (*
+    let length =
+        let res = Array.zeroCreate <| (rulesStart.Length - 1)
+        for i=0 to res.Length-1 do
+            res.[i] <- rulesStart.[i+1] - rulesStart.[i]
+        res
+    let _states : int [][]= Array.zeroCreate length.Length
+    do for i = 0 to length.Length-1 do
+        _rules.[i] <- Array.zeroCreate length.[i]
+        for j = 0 to length.[i] - 1 do
+            _rules.[i].[j] <- rules.[rulesStart.[i] + j]
+    
+    let printrules () =
+                printfn "\nrules:"
+                for i = 0 to rulesCount - 1 do
+                    printf "%4d: %s = " i <| numToString (leftSide.[i])
+                    for j = 0 to _rules.[i].Length - 1 do
+                        printf "%s " <| numToString (_rules.[i].[j])
+                    printfn ""
+
+    do printrules()
+    *)
+    member this.Table              = table
+    member this.States             = states
+    member this.LeftSide           = leftSide
+    member this.LastState          = lastState
+    member this.StartState         = startState
+    member this.TokenToNumber      = tokenToNumber
+    member this.NumToString        = numToString
+    member this.NonTermCount       = nonTermCount
+    member this.NumIsTerminal      = numIsTerminal
+    member this.NumIsNonTerminal   = numIsNonTerminal
+    member this.NumIsLiteral       = numIsLiteral

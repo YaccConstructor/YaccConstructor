@@ -8,7 +8,7 @@ open Yard.Generators.Common.ASTGLL
 open Yard.Generators.GLL.ParserCommon
 
 #nowarn "40"
-
+(*
 type Message =
     | NodeToProcess of INode
     | End
@@ -134,3 +134,4 @@ type TreeProcessor<'TokenType> (parser : ParserSourceGLL<'TokenType>, tokens:Blo
         messageLoop 
         )
 
+*)

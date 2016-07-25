@@ -34,8 +34,8 @@ type ResultStruct =
     override this.ToString () = "Start:edge:" + (this.le.ToString()) + ";pos:" + (this.lpos.ToString()) + "--" +
                                 "Final:edge:" + (this.re.ToString()) + ";pos:" + (this.rpos.ToString())
 
-let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph) (condNonTermInt: int) = 
-    let condNonTerm = condNonTermInt*1<labelMeasure>
+let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph) (condNonTerm: int) = 
+    //let condNonTerm = condNonTermInt*1<labelMeasure>
     let shift = input.Shift
     if input.EdgeCount = 0 then
       Error ("This grammar does not accept empty input.")     
@@ -50,6 +50,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
         let descriptorNumber = ref 0
         /// Start rule productions for wich we should output the result
         let condNonTermRules = Seq.toArray <| seq{for i in 0..parser.LeftSide.Length - 1 do if parser.LeftSide.[i] = condNonTerm then yield i}
+        let condNonTerm = condNonTerm*1<labelMeasure>
         /// Descriptors
         let setU = new CompressedArray<SysDict<int, SysDict<int64, _(*ResizeArray<int64<extension>>*)>>>(input.ChainLength, (fun _ -> null ),shift)
         /// Poped elements

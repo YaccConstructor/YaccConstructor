@@ -48,7 +48,6 @@ type GLL() =
             let mutable printInfiniteEpsilonPath = getOption "infEpsPath" "" id
             let mutable isAbstract = getBoolOption "abstract" false
             let withoutTree = ref <| getBoolOption "withoutTree" true
-            let FSAinput = ref <| getBoolOption "FSAinput" false
             let mutable caseSensitive = getBoolOption "caseSensitive" false
             let mutable output =
                 let fstVal = getOption "output" (definition.info.fileName + ".fs") id
@@ -72,7 +71,6 @@ type GLL() =
                 | "-infEpsPath" -> printInfiniteEpsilonPath <- value
                 | "-abstract" -> isAbstract <- getBoolValue "abstract" value
                 | "-withoutTree" -> withoutTree := getBoolValue "withoutTree" value
-                | "-FSAinput" -> FSAinput := getBoolValue "FSAinput" value
                 | value -> failwithf "Unexpected %s option" value
                  
             let newDefinition = initialConvert definition

@@ -12,7 +12,7 @@ type ParserSourceGLL<'TokenType> (eof                : 'TokenType
                                 , table              : System.Collections.Generic.Dictionary<int, int[]>
                                 , rules              : array<int>
                                 , rulesStart         : array<int>
-                                , leftSide           : array<int<labelMeasure>>
+                                , leftSide           : array<int>
                                 , startRule          : int
                                 , literalEnd         : int
                                 , literalStart       : int
@@ -46,7 +46,7 @@ type ParserSourceGLL<'TokenType> (eof                : 'TokenType
     let printrules () =
                 printfn "\nrules:"
                 for i = 0 to rulesCount - 1 do
-                    printf "%4d: %s = " i <| numToString (int leftSide.[i])
+                    printf "%4d: %s = " i <| numToString leftSide.[i]
                     for j = 0 to _rules.[i].Length - 1 do
                         printf "%s " <| numToString (_rules.[i].[j])
                     printfn ""

@@ -78,19 +78,19 @@ type FSAGrammar (ruleList : Rule.t<Source.t,Source.t> list) =
                 then
                     nNewEdges firstState finalState expr lower.Value
                 else
-                    let lastState = ref <| newState()
-                    nNewEdges firstState !lastState expr lower.Value
-                    let preFinal = newState()
+                    let lastState = ref <| firstState
+                    if lower.Value <> 0 then 
+                        lastState := newState()
+                        nNewEdges firstState !lastState expr lower.Value
 
                     for _ in lower.Value..upper.Value-2 do
                         let newLastState = newState()
                         productionToStates !lastState newLastState expr
-                        newEpsilonEdge !lastState preFinal
+                        newEpsilonEdge !lastState finalState
                         lastState := newLastState
                     
-                    productionToStates !lastState preFinal expr
-                    newEpsilonEdge !lastState preFinal
-                    newEpsilonEdge preFinal finalState
+                    productionToStates !lastState finalState expr
+                    newEpsilonEdge !lastState finalState
 
             function
             // Alternative (e1 | e2) of (t<'patt,'expr>) * (t<'patt,'expr>)
@@ -270,8 +270,8 @@ type FSAGrammar (ruleList : Rule.t<Source.t,Source.t> list) =
     do
         convertRulesToFSA ()
         _printDot @"C:\zgrviewer-0.10.0\dot\bio_grammar_before_inline.dot"
-        inlineNonterms()
-        _printDot @"C:\zgrviewer-0.10.0\dot\bio_grammar.dot"
+        //inlineNonterms()
+        //_printDot @"C:\zgrviewer-0.10.0\dot\bio_grammar.dot"
 
 
 

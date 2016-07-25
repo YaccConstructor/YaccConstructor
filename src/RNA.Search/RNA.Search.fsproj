@@ -251,7 +251,7 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-i "../../../Tests/bio/16s_silva\test"</StartArguments>
+    <StartArguments>-i "../../../Tests/bio\synth_for_semen\simplification"</StartArguments>
   </PropertyGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">

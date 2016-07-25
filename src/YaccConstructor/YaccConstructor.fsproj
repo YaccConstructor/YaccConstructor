@@ -25,7 +25,7 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-i tRNA.yrd -g "GLLGeneratorFSA -pos int -token int -module GLL.r16s.H22_H23 -o 16s_H22_H23.yrd.fs -abstract true"</StartArguments>
+    <StartArguments>-i 16s.yrd -g "GLLGeneratorFSA -pos int -token int -module GLL.r16s.H22_H23 -o 16s_H22_H23.yrd.fs -abstract true"</StartArguments>
     <StartWorkingDirectory>C:\Yacc Constructor</StartWorkingDirectory>
     <StartAction>Project</StartAction>
   </PropertyGroup>

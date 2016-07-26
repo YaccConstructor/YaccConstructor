@@ -11,6 +11,7 @@ open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
 
 type SysDict<'k,'v> = System.Collections.Generic.Dictionary<'k,'v>
+type Queue<'t> = System.Collections.Generic.Queue<'t>
 type CompressedArray<'t> = Yard.Generators.GLL.ParserCommon.CompressedArray<'t>
      
 [<Struct>]
@@ -117,6 +118,10 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                 dict2.Add(vertexKey, ref [|extension|])
                 false
         
+
+        let pushContext (inputVertex : int<positionInInput>) (state : int<state>) vertex extension len =
+            setR.Push(new ContextFSA(inputVertex, state, vertex, extension, len))
+
         /// Adds new context to stack (setR) if it is first occurrence of this context (if SetU doesn't contain it).
         let addContext (inputVertex : int<positionInInput>) (state : int<state>) vertex extension len =
             if not <| containsContext inputVertex state vertex extension 
@@ -244,7 +249,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         let condition = ref true 
         let stop = ref false
 
-        let rec dispatcher () =
+        let dispatcher () =
             let get() = setR.Pop()
 
             if setR.Count <> 0
@@ -258,21 +263,21 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                 condition := false
             else 
                 stop := true  
-                              
-        and processing () =  
+                  
+        let processing () =  
             condition := true
             let state = !currentState
+            let index = !currentIndex
 
             /// Moves positions in input and grammar by 1.
             let eatTerm nextState =
                 let pos = (1 + getPosOnEdge !currentIndex)
-                currentIndex := packEdgePos (getEdge !currentIndex) pos
-                currentLength := !currentLength + 1us
+                let newIndex = packEdgePos (getEdge !currentIndex) pos
+                let newLength = !currentLength + 1us
                 let le = (getLeftExtension !currentExtension)
-                let re = packEdgePos (getEdge !currentIndex) ((getPosOnEdge !currentIndex) + shift)
-                currentExtension := packExtension le re
-                currentState := nextState
-                condition := false
+                let re = packEdgePos (getEdge newIndex) ((getPosOnEdge newIndex) + shift)
+                let newExtension = packExtension le re
+                pushContext index nextState !currentGSSNode newExtension newLength
 
             if Array.isEmpty parser.States.[int state]
             then// Rule finished.
@@ -290,8 +295,15 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                 pop ()
             else// Rule isn't finished.
                 // Process each next edge and state.
+                // Although process each edge that comes from the state in wich we can come by epsilon edge.
+
+                //let edgesToProcess = new Queue<int * int<state>>()
+                //parser.States.[int state]
+                //|> Array.iter (fun x -> edgesToProcess.Enqueue x)
+
                 for curSymbol, nextState in parser.States.[int state] do
                     ///current edge in input
+                    //let curSymbol, nextState = edgesToProcess.Dequeue()
                     let cE = CommonFuns.getEdge !currentIndex
                     ///current position on edge in input
                     let cP = CommonFuns.getPosOnEdge !currentIndex + shift
@@ -314,22 +326,24 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                             if curEdge.IsNone then () else
                             // One of out edges starts with token equal with current terminal.
                             // Move positions.
-                            currentIndex := (packEdgePos curEdge.Value 0)
                             eatTerm nextState
+                    elif parser.NumIsEpsilon curSymbol
+                    then//found epsilon edge
+                        pushContext index nextState !currentGSSNode !currentExtension !currentLength
                     else//current grammar symbol is nonterminal
-                        let curNonterm : int<state> = LanguagePrimitives.Int32WithMeasure curSymbol
+                        let curNonterm = curSymbol*1<state>
                         if cP < chainLen
                         then//edge isn't finished(cur token on edgee is on current edge)
                             // Found nonterninal in rule, and it have derivation starting with current token.
                             // Create new descriptors.
-                            create cE cP !currentState !currentGSSNode curNonterm !currentLength
+                            create cE cP state !currentGSSNode curNonterm !currentLength
                         else//edge is finished(cur token on edgee is not on current edge)
                             let oEdges = outEdges.[input.Edges.[cE].End]
                             for oe in oEdges do
                                 // Found nonterninal in rule, and it have derivation
                                 //     starting with first token of one of the out edges.
                                 // Create new descriptors for this token.
-                                create oe shift !currentState !currentGSSNode curNonterm !currentLength      
+                                create oe shift state !currentGSSNode curNonterm !currentLength      
                     
         let control () =
              while not !stop do

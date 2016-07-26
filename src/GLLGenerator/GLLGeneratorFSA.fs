@@ -20,7 +20,7 @@ do()
 type GLLFSA() = 
     inherit Generator()
         override this.Name = "GLLGeneratorFSA"
-        override this.Constraints = [|noMeta; noBrackets; singleModule|]
+        override this.Constraints = [|noMeta; noBrackets; singleModule; noInnerAlt|]
         override this.Generate (definition, args) =
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
@@ -46,7 +46,7 @@ type GLLFSA() =
             let mutable light = getBoolOption "light" true
             let mutable printInfiniteEpsilonPath = getOption "infEpsPath" "" id
             let mutable isAbstract = getBoolOption "abstract" true
-            let withoutTree = ref <| getBoolOption "withoutTree" true
+            //let withoutTree = ref <| getBoolOption "withoutTree" true
             //let mutable caseSensitive = getBoolOption "caseSensitive" true
             let mutable output =
                 let fstVal = getOption "output" (definition.info.fileName + ".fs") id
@@ -69,14 +69,14 @@ type GLLFSA() =
                 | "-light" -> light <- getBoolValue "light" value
                 | "-infEpsPath" -> printInfiniteEpsilonPath <- value
                 | "-abstract" -> isAbstract <- getBoolValue "abstract" value
-                | "-withoutTree" -> withoutTree := getBoolValue "withoutTree" value
+                //| "-withoutTree" -> withoutTree := getBoolValue "withoutTree" value
                 | value -> failwithf "Unexpected %s option" value
                  
             //let newDefinition = initialConvert definition
             let grammar = new FSAGrammar(definition.grammar.[0].rules)
 
             
-            (*
+            
             use out = new System.IO.StreamWriter (output)
             let res = new System.Text.StringBuilder()
             let dummyPos = char 0
@@ -110,14 +110,15 @@ type GLLFSA() =
                     if isAbstract
                     then
                         //println "open Yard.Generators.GLL.AbstractParser"
-                        println "open AbstractAnalysis.Common"
+                        //println "open AbstractAnalysis.Common"
+                        println "Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput"
                     else
-                        if !withoutTree
-                        then
-                            //println "open Yard.Generators.GLL.AbstractParserWithoutTree"
-                            println "open AbstractAnalysis.Common"
-                        else
-                            println "open Yard.Generators.GLL.Parser"
+//                        if !withoutTree
+//                        then
+//                            //println "open Yard.Generators.GLL.AbstractParserWithoutTree"
+//                            println "open AbstractAnalysis.Common"
+//                        else
+//                            println "open Yard.Generators.GLL.Parser"
                     println "open Yard.Generators.GLL"
                     println "open Yard.Generators.Common.ASTGLL"
                     println "open Yard.Generators.GLL.ParserCommon"
@@ -154,6 +155,6 @@ type GLLFSA() =
             out.Flush()
             out.Close()
             eprintfn "Generation time: %A" <| System.DateTime.Now - start
-            *)
+            
             box ()
         override this.Generate definition = this.Generate (definition, "")

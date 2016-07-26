@@ -95,6 +95,7 @@ type FSAParserSourceGLL (             tokenToNumber      : _ -> int
                                     , numIsTerminal      : int -> bool
                                     , numIsNonTerminal   : int -> bool
                                     , numIsLiteral       : int -> bool
+                                    , numIsEpsilon       : int -> bool
                                     , table              : System.Collections.Generic.Dictionary<int, int<state>>
                                     ) =
     (*
@@ -130,3 +131,4 @@ type FSAParserSourceGLL (             tokenToNumber      : _ -> int
     member this.NumIsTerminal      = numIsTerminal
     member this.NumIsNonTerminal   = numIsNonTerminal
     member this.NumIsLiteral       = numIsLiteral
+    member this.NumIsEpsilon       = numIsEpsilon

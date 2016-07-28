@@ -11,6 +11,7 @@ open System.Collections.Generic
 [<Measure>] type positionInInput
 [<Measure>] type state
 [<Measure>] type length
+[<Measure>] type leftPosition
 
 module CommonFuns = 
 
@@ -95,14 +96,14 @@ type ContextFSA =
     /// Current GSS node.
     val Vertex        : GSSVertexNFA
     /// 4 values packed in one int64: leftEdge, leftPos, rightEdge, rightPos.
-    val Extension     : int64<extension>
+    val LeftPos       : int<leftPosition>
     /// Length of current result
     val Length        : uint16
-    new (index, state, vertex, ext, len) = {Index = index; State = state; Vertex = vertex; Extension = ext; Length = len}
+    new (index, state, vertex, leftPos, len) = {Index = index; State = state; Vertex = vertex; LeftPos = leftPos; Length = len}
     override this.ToString () = "Edge:" + (CommonFuns.getEdge(this.Index).ToString()) +
                                 "; PosOnEdge:" + (CommonFuns.getPosOnEdge(this.Index).ToString()) +
                                 "; State:" + (this.State.ToString()) +
-                                "; Ext:" + (this.Extension.ToString()) +
+                                "; LeftPos:" + (this.LeftPos.ToString()) +
                                 "; Len:" + (this.Length.ToString())
 
 type ParseResult<'a> =

@@ -329,7 +329,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
 
     partitioned, longEdges*)
             
-let loadGraphFormFileToBioParserInputGraph fileWithoutExt templateLengthHightLimit tokenizer eof =
+let loadGraphFormFileToBioParserInputGraph fileWithoutExt templateLengthHightLimit tokenizer =
     let convert (g:AdjacencyGraph<_,BioGraphEdge>) =
         let edges =
             let EList = new ResizeArray<_>()

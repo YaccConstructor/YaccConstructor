@@ -85,19 +85,14 @@ type ParserSourceGLL<'TokenType> (eof                : 'TokenType
     member this.Probabilities      = probabilities
     member this.EOF                = eof
 
-type FSAParserSourceGLL (             tokenToNumber      : _ -> int
-                                    , numToString        : int -> string
-                                    , states             : array<array<int * int<state>>>
-                                    , startState         : int<state>
-                                    , lastState          : int<state>
-                                    , leftSide           : array<int>
-                                    , nonTermCount       : int
-                                    , numIsTerminal      : int -> bool
-                                    , numIsNonTerminal   : int -> bool
-                                    , numIsLiteral       : int -> bool
-                                    , numIsEpsilon       : int -> bool
-                                    , table              : System.Collections.Generic.Dictionary<int, int<state>>
-                                    ) =
+type FSAParserSourceGLL ( states             : array<array<int * int<state>>>
+                        , startState         : int<state>
+                        , finalState         : int<state>
+                        , nontermCount       : int
+                        , numIsTerminal      : int -> bool
+                        , numIsEpsilon       : int -> bool
+                        , firstSet           : Set<int>
+                        ) =
     (*
     let length =
         let res = Array.zeroCreate <| (rulesStart.Length - 1)
@@ -120,15 +115,15 @@ type FSAParserSourceGLL (             tokenToNumber      : _ -> int
 
     do printrules()
     *)
-    member this.Table              = table
+
+    let getFirstSetItem state token = 
+        int( (int state <<< 16) ||| (token - nontermCount) )
+
+    member this.FirstSet           = firstSet
     member this.States             = states
-    member this.LeftSide           = leftSide
-    member this.LastState          = lastState
+    member this.FinalState         = finalState
     member this.StartState         = startState
-    member this.TokenToNumber      = tokenToNumber
-    member this.NumToString        = numToString
-    member this.NonTermCount       = nonTermCount
+    member this.NonTermCount       = nontermCount
     member this.NumIsTerminal      = numIsTerminal
-    member this.NumIsNonTerminal   = numIsNonTerminal
-    member this.NumIsLiteral       = numIsLiteral
     member this.NumIsEpsilon       = numIsEpsilon
+    member this.GetFirstSetItem    = getFirstSetItem

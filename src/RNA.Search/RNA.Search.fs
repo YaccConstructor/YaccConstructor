@@ -5,7 +5,7 @@ open Argu
 open YC.BIO.BioGraphLoader
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
-open Yard.Generators.GLL.AbstractParserWithoutTree
+open Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput
 
 open YC.Bio.RNA.tblReader
 open YC.Bio.RNA.IO
@@ -19,7 +19,7 @@ open MBrace.Core
 open MBrace.Core.Builders
 open MBrace.Core.CloudOperators
 open MBrace.Runtime
-open GLL.shift_problem
+//open GLL.shift_problem
 //open MBrace.Azure.Management
 
 type WhatShouldISearch =
@@ -46,7 +46,7 @@ type msg =
 
 [<Struct>]
 type SearchConfig =
-    val SearchWithoutSPPF: BioParserInputGraph -> int -> ParseResult<ResultStruct>
+    val SearchWithoutSPPF: BioParserInputGraph -> (*int -> *)ParseResult<ResultStruct>
     //val SearchWithSPPF: ParserInputGraph -> ParseResult<int>
     val Tokenizer: char -> int
     val HighLengthLimit: int
@@ -65,177 +65,172 @@ type SearchConfig =
             NumToString = numToString
         }
 
-let filterRnaParsingResult (graph:BioParserInputGraph) lowLengthLimit highLengthLimit res  =
+let filterRnaParsingResult (graph:BioParserInputGraph) lowLengthLimit highLengthLimit (res : ResultStruct []) =
     //let hihtLenghtLimit = 500.0
     let hihtLenghtLimit = float highLengthLimit
-    match res:ParseResult<ResultStruct> with
-    | Success ast -> 
-        failwith "Result is success but it is unexpected success"
-    | Success1 x ->        
-        let weightLimit = 10000
-        // (leftEdge, rightEdge) , (leftPosition, rightPosition, lengthOfPath)
-        let filteredByLength = 
-            x 
-            |> Array.filter (fun i -> i.length >= uint16 lowLengthLimit && i.length <= uint16 highLengthLimit)
-            |> Array.groupBy(fun x -> x.le, x.re)
-            //|> Seq.map(fun (_,a) -> a |> Seq.maxBy (fun x -> x.length))
-            |> Array.map(fun (edg,a) -> edg, a |> Array.collect (fun res -> [|res.lpos, res.rpos, res.length|]))
-        let qgEdgFromBio (e:BioParserEdge) =
-            new QuickGraph.TaggedEquatableEdge<_,_>(e.Start, e.End, float e.RealLenght) 
-        let subgraphsMemoization =
-            let x = new System.Collections.Generic.Dictionary<_,_>()
-            fun s e ->
-                let flg,v = x.TryGetValue((s,e))
-                if flg
-                then true
-                else 
-                    x.Add((s,e),0)
-                    false
+    let weightLimit = 10000
+    // (leftEdge, rightEdge) , (leftPosition, rightPosition, lengthOfPath)
+    let filteredByLength = 
+        res 
+        |> Array.filter (fun i -> i.length >= uint16 lowLengthLimit && i.length <= uint16 highLengthLimit)
+        |> Array.groupBy(fun x -> x.le, x.re)
+        //|> Seq.map(fun (_,a) -> a |> Seq.maxBy (fun x -> x.length))
+        |> Array.map(fun (edg,a) -> edg, a |> Array.collect (fun res -> [|res.lpos, res.rpos, res.length|]))
+    let qgEdgFromBio (e:BioParserEdge) =
+        new QuickGraph.TaggedEquatableEdge<_,_>(e.Start, e.End, float e.RealLenght) 
+    let subgraphsMemoization =
+        let x = new System.Collections.Generic.Dictionary<_,_>()
+        fun s e ->
+            let flg,v = x.TryGetValue((s,e))
+            if flg
+            then true
+            else 
+                x.Add((s,e),0)
+                false
 
-        let qg = new QuickGraph.AdjacencyGraph<_,_>()
-        let _ = qg.AddVerticesAndEdgeRange(graph.Edges |> Array.map qgEdgFromBio)
+    let qg = new QuickGraph.AdjacencyGraph<_,_>()
+    let _ = qg.AddVerticesAndEdgeRange(graph.Edges |> Array.map qgEdgFromBio)
         
-        let findSubgraph s e (lengths:HashSet<uint16>) = 
-            let yen = new QuickGraph.Algorithms.ShortestPath.Yen.YenShortestPathsAlgorithm<_>(qg, s, e, 1000)
-            let paths = yen.Execute()
-            if Seq.isEmpty paths then failwith "No path found."
-            let filteredPaths = paths |> Seq.filter (fun p -> p |> Seq.sumBy (fun e -> e.Tag) |> uint16 |> lengths.Contains)
-            //let allEdgsOfPaths = Seq.concat filteredPaths
-            (*let hashSet = new System.Collections.Generic.HashSet<_>()*)
-            //printfn "Length: %A" (Seq.toList allEdgsOfPaths).Length
-            //for edge in allEdgsOfPaths do
-            //    printfn "Edge: %A" edge
-            (*Seq.iter (fun x -> hashSet.Add x |> ignore) allEdgsOfPaths
-            hashSet, (hashSet |> Seq.sumBy (fun x -> x.Tag |> int))*)
-            if Seq.isEmpty filteredPaths then failwith "No path with expected length found."
-            filteredPaths |> Seq.toList
+    let findSubgraph s e (lengths:HashSet<uint16>) = 
+        let yen = new QuickGraph.Algorithms.ShortestPath.Yen.YenShortestPathsAlgorithm<_>(qg, s, e, 1000)
+        let paths = yen.Execute()
+        if Seq.isEmpty paths then failwith "No path found."
+        let filteredPaths = paths |> Seq.filter (fun p -> p |> Seq.sumBy (fun e -> e.Tag) |> uint16 |> lengths.Contains)
+        //let allEdgsOfPaths = Seq.concat filteredPaths
+        (*let hashSet = new System.Collections.Generic.HashSet<_>()*)
+        //printfn "Length: %A" (Seq.toList allEdgsOfPaths).Length
+        //for edge in allEdgsOfPaths do
+        //    printfn "Edge: %A" edge
+        (*Seq.iter (fun x -> hashSet.Add x |> ignore) allEdgsOfPaths
+        hashSet, (hashSet |> Seq.sumBy (fun x -> x.Tag |> int))*)
+        if Seq.isEmpty filteredPaths then failwith "No path with expected length found."
+        filteredPaths |> Seq.toList
         
         
-        let subgraphs =
-            filteredByLength
-            |> Array.choose (fun ((le, re), poss) ->
-                (*
-                let startEdges = new ResizeArray<_>()
-                let finalEdges = new ResizeArray<_>()
-                let newStartEdge = qgEdgFromBio graph.Edges.[le]
-                startEdges.Add (graph.Edges.[le], poss |> Seq.collect (fun (l,_,_) -> [l]) |> Seq.distinct)
-                let newEndEdge = qgEdgFromBio graph.Edges.[re]
-                finalEdges.Add (graph.Edges.[re], poss |> Seq.collect (fun (_,r,_) -> [r]) |> Seq.distinct)
-                let additionalWeight = newStartEdge.Tag + newEndEdge.Tag |> int
-                *)
-                let lengths0 = new ResizeArray<_>()
-                let newPoss = 
-                    poss
-                    |> Array.map (fun (lpos,rpos,pathLength) -> let leftEdgePartOfPath = uint16 <| graph.Edges.[le].RealLenght - lpos - 1
-                                                                let rightEdgePartOfPath = uint16 <| rpos + 1
-                                                                pathLength - leftEdgePartOfPath - rightEdgePartOfPath |> lengths0.Add
-                                                                lpos,rpos,pathLength - leftEdgePartOfPath - rightEdgePartOfPath)
-                    |> Array.groupBy (fun (lpos,rpos,pathLength) -> pathLength)
-                    |> Array.map (fun (pathLength,values) -> let mostLeft = ref graph.Edges.[re].RealLenght
-                                                             let mostRight= ref 0
-                                                             values
-                                                             |> Array.iter (fun (lpos,rpos,_) -> 
-                                                                             if lpos < !mostLeft then mostLeft := lpos
-                                                                             if rpos > !mostRight then mostRight := rpos)
-                                                             !mostLeft, !mostRight, pathLength)
-                let toReturn = graph.Edges.[le], graph.Edges.[re], newPoss
-                //let startEdge = graph.Edges.[le], poss |> Seq.collect (fun (l,_,_) -> [l]) |> Seq.distinct
-                //let finalEdge = graph.Edges.[re], poss |> Seq.collect (fun (_,r,_) -> [r]) |> Seq.distinct
+    let subgraphs =
+        filteredByLength
+        |> Array.choose (fun ((le, re), poss) ->
+            (*
+            let startEdges = new ResizeArray<_>()
+            let finalEdges = new ResizeArray<_>()
+            let newStartEdge = qgEdgFromBio graph.Edges.[le]
+            startEdges.Add (graph.Edges.[le], poss |> Seq.collect (fun (l,_,_) -> [l]) |> Seq.distinct)
+            let newEndEdge = qgEdgFromBio graph.Edges.[re]
+            finalEdges.Add (graph.Edges.[re], poss |> Seq.collect (fun (_,r,_) -> [r]) |> Seq.distinct)
+            let additionalWeight = newStartEdge.Tag + newEndEdge.Tag |> int
+            *)
+            let lengths0 = new ResizeArray<_>()
+            let newPoss = 
+                poss
+                |> Array.map (fun (lpos,rpos,pathLength) ->
+                    let leftEdgePartOfPath = uint16 <| graph.Edges.[le].RealLenght - lpos// - 1
+                    let rightEdgePartOfPath = uint16 <| rpos + 1
+                    pathLength - leftEdgePartOfPath - rightEdgePartOfPath |> lengths0.Add
+                    lpos,rpos,pathLength - leftEdgePartOfPath - rightEdgePartOfPath)
+                |> Array.groupBy (fun (lpos,rpos,pathLength) -> pathLength)
+                |> Array.map (fun (pathLength,values) ->
+                    let mostLeft = ref graph.Edges.[re].RealLenght
+                    let mostRight= ref -1
+                    values
+                    |> Array.iter (fun (lpos,rpos,_) -> 
+                                    if lpos < !mostLeft then mostLeft := lpos
+                                    if rpos > !mostRight then mostRight := rpos)
+                    !mostLeft, !mostRight, pathLength)
+            let toReturn = graph.Edges.[le], graph.Edges.[re], newPoss
+            //let startEdge = graph.Edges.[le], poss |> Seq.collect (fun (l,_,_) -> [l]) |> Seq.distinct
+            //let finalEdge = graph.Edges.[re], poss |> Seq.collect (fun (_,r,_) -> [r]) |> Seq.distinct
 
-                if le = re || graph.Edges.[le].End = graph.Edges.[re].Start
-                then ((*new System.Collections.Generic.HashSet<_> [|newStartEdge; newEndEdge|]*) [], (*additionalWeight,*) toReturn)
-                     |> Some
-                elif not <| subgraphsMemoization graph.Edges.[le].End graph.Edges.[re].Start
-                then
-                    let lengths = new HashSet<uint16>(lengths0)
-                    (*poss |> Seq.iter (fun (lpos,rpos,pathLength) -> let leftEdgePartOfPath = uint16 <| graph.Edges.[le].RealLenght - lpos - 1
-                                                                    let rightEdgePartOfPath = uint16 <| rpos + 1
-                                                                    pathLength - leftEdgePartOfPath - rightEdgePartOfPath |> lengths.Add |> ignore )
-                                                                    *)
-                    let s(*,w*) = findSubgraph graph.Edges.[le].End graph.Edges.[re].Start lengths
-                    //s.Add newStartEdge |> ignore
-                    //s.Add newEndEdge |> ignore
-                    (*(s, w + additionalWeight, startEdges, finalEdges)*)
-                    (s, toReturn)
+            if le = re || graph.Edges.[le].End = graph.Edges.[re].Start
+            then ((*new System.Collections.Generic.HashSet<_> [|newStartEdge; newEndEdge|]*) [], (*additionalWeight,*) toReturn)
                     |> Some
-                else None
-                )
-        (*
-        let mergedSubgraphs = new ResizeArray<_>()
-        let mergedStart = Array.zeroCreate subgraphs.Length
-        let mergedFinal = Array.zeroCreate subgraphs.Length
-        let addStartFinal value =
-            let r = new ResizeArray<_>()
-            r.Add value
-            r
-            
-        let callSF i startEdges finalEdges =
-            //if mergedStart |> Array.contains startEdges.[j] |> not
-            //then 
-            mergedStart.[i] <- startEdges
-            mergedFinal.[i] <- finalEdges
-        //subgraphs |> Array.iteri (fun i x -> ())
-        subgraphs
-        |> Array.iteri
-            (fun i (g1, w1, startEdges, finalEdges) ->
-                if w1 > weightLimit || mergedSubgraphs.Count = 0
-                then                     
-                    mergedSubgraphs.Add (g1, ref w1)
-                    callSF (mergedSubgraphs.Count - 1) startEdges finalEdges
-                else 
-                    let merged = ref false
-                    mergedSubgraphs 
-                    |> ResizeArray.iteri (
-                        fun j (g2, w2) -> 
-                            if !w2 < weightLimit && g2.Overlaps g1 
-                            then 
-                                g2.UnionWith g1
-                                startEdges.ForEach (fun x -> mergedStart.[j].Add x)
-                                finalEdges.ForEach (fun x -> mergedFinal.[j].Add x)
-                                w2 := g2 |> Seq.sumBy (fun x -> x.Tag |> int)
-                                merged := true
-                                )
-                    if not !merged
-                    then 
-                        mergedSubgraphs.Add(g1, ref w1)
-                        callSF (mergedSubgraphs.Count - 1) startEdges finalEdges
+            elif not <| subgraphsMemoization graph.Edges.[le].End graph.Edges.[re].Start
+            then
+                let lengths = new HashSet<uint16>(lengths0)
+                (*poss |> Seq.iter (fun (lpos,rpos,pathLength) -> let leftEdgePartOfPath = uint16 <| graph.Edges.[le].RealLenght - lpos - 1
+                                                                let rightEdgePartOfPath = uint16 <| rpos + 1
+                                                                pathLength - leftEdgePartOfPath - rightEdgePartOfPath |> lengths.Add |> ignore )
+                                                                *)
+                let s(*,w*) = findSubgraph graph.Edges.[le].End graph.Edges.[re].Start lengths
+                //s.Add newStartEdge |> ignore
+                //s.Add newEndEdge |> ignore
+                (*(s, w + additionalWeight, startEdges, finalEdges)*)
+                (s, toReturn)
+                |> Some
+            else None
             )
-        //cut zero endings
-        let mergedStart = Array.sub mergedStart 0 mergedSubgraphs.Count
-        let mergedFinal = Array.sub mergedFinal 0 mergedSubgraphs.Count
-        *)
-        let adjacentEdgs = new SysDict<_,ResizeArray<_>>()
-        graph.Edges
-        |> Array.iter (
-            fun e -> 
-                let flg, v = adjacentEdgs.TryGetValue(e.Start)
-                if flg
-                then v.Add e
-                else adjacentEdgs.Add(e.Start, new ResizeArray<_>([|e|]))
-                )
+    (*
+    let mergedSubgraphs = new ResizeArray<_>()
+    let mergedStart = Array.zeroCreate subgraphs.Length
+    let mergedFinal = Array.zeroCreate subgraphs.Length
+    let addStartFinal value =
+        let r = new ResizeArray<_>()
+        r.Add value
+        r
+            
+    let callSF i startEdges finalEdges =
+        //if mergedStart |> Array.contains startEdges.[j] |> not
+        //then 
+        mergedStart.[i] <- startEdges
+        mergedFinal.[i] <- finalEdges
+    //subgraphs |> Array.iteri (fun i x -> ())
+    subgraphs
+    |> Array.iteri
+        (fun i (g1, w1, startEdges, finalEdges) ->
+            if w1 > weightLimit || mergedSubgraphs.Count = 0
+            then                     
+                mergedSubgraphs.Add (g1, ref w1)
+                callSF (mergedSubgraphs.Count - 1) startEdges finalEdges
+            else 
+                let merged = ref false
+                mergedSubgraphs 
+                |> ResizeArray.iteri (
+                    fun j (g2, w2) -> 
+                        if !w2 < weightLimit && g2.Overlaps g1 
+                        then 
+                            g2.UnionWith g1
+                            startEdges.ForEach (fun x -> mergedStart.[j].Add x)
+                            finalEdges.ForEach (fun x -> mergedFinal.[j].Add x)
+                            w2 := g2 |> Seq.sumBy (fun x -> x.Tag |> int)
+                            merged := true
+                            )
+                if not !merged
+                then 
+                    mergedSubgraphs.Add(g1, ref w1)
+                    callSF (mergedSubgraphs.Count - 1) startEdges finalEdges
+        )
+    //cut zero endings
+    let mergedStart = Array.sub mergedStart 0 mergedSubgraphs.Count
+    let mergedFinal = Array.sub mergedFinal 0 mergedSubgraphs.Count
+    *)
+    let adjacentEdgs = new SysDict<_,ResizeArray<_>>()
+    graph.Edges
+    |> Array.iter (
+        fun e -> 
+            let flg, v = adjacentEdgs.TryGetValue(e.Start)
+            if flg
+            then v.Add e
+            else adjacentEdgs.Add(e.Start, new ResizeArray<_>([|e|]))
+            )
         
-        subgraphs
-        |> Seq.map (fun (paths, toReturn) ->
-            Seq.map (Seq.collect (fun (e:QuickGraph.TaggedEquatableEdge<_,_>) -> adjacentEdgs.[e.Source]
-                                                                                 |> ResizeArray.filter (fun (x:BioParserEdge) -> x.End = e.Target)
-                                                                                 |> ResizeArray.distinct)) paths
-                                                    , toReturn)
-        (*
-        let mergedsg =
-            mergedSubgraphs
-              |> ResizeArray.map (fun (g1,n) -> 
-                printfn "Subgraph. smb = %A edges = %A" !n g1.Count
-                g1 |> Seq.collect (fun e -> adjacentEdgs.[e.Source]
-                                            |> ResizeArray.filter (fun (x:BioParserEdge) -> x.End = e.Target)
-                                            |> ResizeArray.distinct)
-                )
-        mergedsg, mergedStart, mergedFinal
-        *)
+    subgraphs
+    |> Seq.map (fun (paths, toReturn) ->
+        Seq.map (Seq.collect (fun (e:QuickGraph.TaggedEquatableEdge<_,_>) -> adjacentEdgs.[e.Source]
+                                                                                |> ResizeArray.filter (fun (x:BioParserEdge) -> x.End = e.Target)
+                                                                                |> ResizeArray.distinct)) paths
+                                                , toReturn)
+    (*
+    let mergedsg =
+        mergedSubgraphs
+            |> ResizeArray.map (fun (g1,n) -> 
+            printfn "Subgraph. smb = %A edges = %A" !n g1.Count
+            g1 |> Seq.collect (fun e -> adjacentEdgs.[e.Source]
+                                        |> ResizeArray.filter (fun (x:BioParserEdge) -> x.End = e.Target)
+                                        |> ResizeArray.distinct)
+            )
+    mergedsg, mergedStart, mergedFinal
+    *)
 
-        
-    | Error e -> 
-        failwithf "Input parsing failed: %A" e
-
+(*
 let convertToParserInputGraph (edges : ResizeArray<seq<BioParserEdge>>) (startEdges : ResizeArray<BioParserEdge * seq<int>>[]) (finalEdges : ResizeArray<BioParserEdge * seq<int>>[])  = 
     //let init = startEdges |> ResizeArray.distinctBy  (fun (x, y) -> x |> ResizeArray.map (fun (x,_) -> x)
     let result = new ResizeArray<_>()
@@ -344,7 +339,7 @@ let convertToParserInputGraph (edges : ResizeArray<seq<BioParserEdge>>) (startEd
         let tmp = resGraph.AddVerticesAndEdgeRange edgesRes 
         result.Add(resGraph)
     result
-        
+       
 let searchInCloud graphs =
     let start = System.DateTime.Now
 
@@ -382,7 +377,7 @@ let searchInCloud graphs =
     printfn "time = %A" (System.DateTime.Now - start)
     printfn "%A" r
     r
-
+*)
 let searchInBioGraphs (searchCfg : SearchConfig) graphs agentsCount =
     let start = System.DateTime.Now
     (*
@@ -414,12 +409,16 @@ let searchInBioGraphs (searchCfg : SearchConfig) graphs agentsCount =
                             try
                                 printfn "\nSearch in agent %A. Graph %A." name i
                                 printfn "Vertices: %A Edges: %A" graph.VertexCount graph.EdgeCount
-                                let parseResult = searchCfg.SearchWithoutSPPF graph searchCfg.StartNonterm
+                                let parseResult = searchCfg.SearchWithoutSPPF graph// searchCfg.StartNonterm
                                 printfn "SearchWithoutSPPF done"
-                                let res = parseResult |> filterRnaParsingResult graph searchCfg.LowLengthLimit searchCfg.HighLengthLimit
-                                //let subgraphsResults = processSubgraphs g s f
-                                //printResult subgraphsResults i
-                                printPathsToFASTA ".\\result.fa" res i searchCfg.NumToString
+                                match parseResult with
+                                | Success1 result -> 
+                                    let res = result |> filterRnaParsingResult graph searchCfg.LowLengthLimit searchCfg.HighLengthLimit
+                                    //let subgraphsResults = processSubgraphs g s f
+                                    //printResult subgraphsResults i
+                                    printPathsToFASTA ".\\result.fa" res i searchCfg.NumToString
+                                | Success _ -> failwith "Result is success but it is unexpected success"
+                                | Error e -> printfn "Input parsing failed: %A" e
                             with
                             | e -> printfn "ERROR in bio graph parsing! %A" e.Message
                             return! loop n         
@@ -438,7 +437,7 @@ let searchInBioGraphs (searchCfg : SearchConfig) graphs agentsCount =
     printfn "Total time = %A" (System.DateTime.Now - start)
     0
 
-let tRNASearchConfig =
+(*let tRNASearchConfig =
 
     let getSmb =
         let cnt = ref 0
@@ -453,7 +452,7 @@ let tRNASearchConfig =
             | x ->   failwithf "Strange symbol in input: %A" x
             |> GLL.tRNA.tokenToNumber
     
-    new SearchConfig(GLL.tRNA.buildAbstract(*, GLL.tRNA.buildAbstractAst*), getSmb, 120, 60, 4, GLL.tRNA.numToString)
+    new SearchConfig(GLL.tRNA.buildAbstract(*, GLL.tRNA.buildAbstractAst*), getSmb, 120, 60, 4, GLL.tRNA.numToString)*)
 
 let r16s_H22_H23_SearchConfig =
 
@@ -462,12 +461,12 @@ let r16s_H22_H23_SearchConfig =
         fun ch ->
             let i = incr cnt; !cnt 
             match ch with
-            | 'A' | 'a' -> GLL.r16s.H22_H23.A i                
+            | 'A' | 'a' -> GLL.r16s.H22_H23.A ()                
             | 'U' | 'u' 
-            | 'T' | 't' -> GLL.r16s.H22_H23.U i
-            | 'C' | 'c' -> GLL.r16s.H22_H23.C i
-            | 'G' | 'g' -> GLL.r16s.H22_H23.G i
-            | _ -> GLL.r16s.H22_H23.U i
+            | 'T' | 't' -> GLL.r16s.H22_H23.U ()
+            | 'C' | 'c' -> GLL.r16s.H22_H23.C ()
+            | 'G' | 'g' -> GLL.r16s.H22_H23.G ()
+            | _ -> GLL.r16s.H22_H23.U ()
             | x ->   failwithf "Strange symbol in input: %A" x
             |> GLL.r16s.H22_H23.tokenToNumber
     
@@ -477,7 +476,7 @@ let r16s_H22_H23_SearchConfig =
                         //400, 550, 14, GLL.r16s.H22_H23.numToString)
                         //800, 910, 14, GLL.r16s.H22_H23.numToString)
 
-let shift_problem_SearchConfig =
+(*let shift_problem_SearchConfig =
 
     let getSmb =
         let cnt = ref 0
@@ -491,15 +490,16 @@ let shift_problem_SearchConfig =
             |> GLL.shift_problem.tokenToNumber
     
     new SearchConfig(GLL.shift_problem.buildAbstract(*, GLL.shift_problem.buildAbstractAst*), getSmb, 100, 0, 1, GLL.shift_problem.numToString)
-
+*)
 let searchMain path what agentsCount =
     let searchCfg = 
-        match what with
+    (*    match what with
         | TRNA -> tRNASearchConfig
         | R16S_H22_H23 -> r16s_H22_H23_SearchConfig
-        | Shift_problem -> shift_problem_SearchConfig
+        | Shift_problem -> shift_problem_SearchConfig*)
+        r16s_H22_H23_SearchConfig
 
-    let graphs, longEdges = loadGraphFormFileToBioParserInputGraph path searchCfg.HighLengthLimit searchCfg.Tokenizer (GLL.tRNA.RNGLR_EOF 0)
+    let graphs, longEdges = loadGraphFormFileToBioParserInputGraph path searchCfg.HighLengthLimit searchCfg.Tokenizer// (GLL.tRNA.RNGLR_EOF 0)
 
     //printfn "dsdsdf %A" graphs.Length
 
@@ -535,12 +535,12 @@ let searchMain path what agentsCount =
     //let graphs = Array.append longEdgesGraphs graphs
     let graphs = Array.append graphs longEdgesGraphs
     *)
-    //let graphs = 
-        //graphs.[10..305]
+    let graphs = 
+        graphs.[300..405]
         //graphs.[1500..]
         //graphs.[5000..5050]
         //graphs.[4071..4072]
-    //    graphs.[0..1]
+        //graphs.[0..1]
     searchInBioGraphs searchCfg graphs agentsCount
     |> printfn "%A"
     //searchInCloud graphs

@@ -10,7 +10,8 @@ open Yard.Generators.Common.FSAGrammar
 open Yard.Generators.GLL
 open PrintTable
 open Yard.Generators.GLL.TranslatorPrinter2
-open Option
+
+open System.Collections.Generic
 
 
 [<assembly:Addin>]
@@ -73,24 +74,24 @@ type GLLFSA() =
                 | value -> failwithf "Unexpected %s option" value
                  
             //let newDefinition = initialConvert definition
-            let grammar = new FSAGrammar(definition.grammar.[0].rules)
+            let fsa = new FSAGrammar(definition.grammar.[0].rules)
 
-            
+            fsa.PrintDot @"C:\zgrviewer-0.10.0\dot\bio_grammar_before_inline.dot"
             
             use out = new System.IO.StreamWriter (output)
             let res = new System.Text.StringBuilder()
             let dummyPos = char 0
             let println (x : 'a) =
                 Printf.kprintf (fun s -> res.Append(s).Append "\n" |> ignore) x
-            //let print (x : 'a) =
-            //    Printf.kprintf (fun s -> res.Append(s) |> ignore) x
+            let print (x : 'a) =
+                Printf.kprintf (fun s -> res.Append(s) |> ignore) x
             let _class  =
                 match moduleName with
                 | "" -> if isAbstract then "AbstractParse" else "Parse"
                 | s when s.Contains "." -> s.Split '.' |> Array.rev |> (fun a -> String.concat "." a.[1..])
                 | s -> s
   
-            let printHeaders moduleName fullPath light (output: string) isAbstract =
+            let printHeaders moduleName fullPath light isAbstract =
                 let n = output.Substring(0, output.IndexOf("."))
                 let mName = 
                     if isAbstract then
@@ -99,7 +100,7 @@ type GLLFSA() =
                         "GLL.Parse"
 
                 let fsHeaders() = 
-                    println "%s" <| getPosFromSource fullPath dummyPos (defaultSource output)
+                    //println "%s" <| getPosFromSource fullPath dummyPos (defaultSource output)
                     println "module %s"
                     <|  match moduleName with
                         | "" -> mName
@@ -107,12 +108,12 @@ type GLLFSA() =
                     if not light then
                         println "#light \"off\""
                     println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
-                    if isAbstract
-                    then
+                    //if isAbstract
+                    //then
                         //println "open Yard.Generators.GLL.AbstractParser"
                         //println "open AbstractAnalysis.Common"
-                        println "Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput"
-                    else
+                    //println "open Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput"
+                    //else
 //                        if !withoutTree
 //                        then
 //                            //println "open Yard.Generators.GLL.AbstractParserWithoutTree"
@@ -120,8 +121,8 @@ type GLLFSA() =
 //                        else
 //                            println "open Yard.Generators.GLL.Parser"
                     println "open Yard.Generators.GLL"
-                    println "open Yard.Generators.Common.ASTGLL"
-                    println "open Yard.Generators.GLL.ParserCommon"
+                    //println "open Yard.Generators.Common.ASTGLL"
+                    println "open Yard.Generators.GLL.ParserCommon\n"
 
                     match definition.head with
                     | None -> ()
@@ -130,28 +131,158 @@ type GLLFSA() =
                         println "%s" <| s.text + getPosFromSource fullPath dummyPos (defaultSource output)
                 
                 fsHeaders()
+            
+            let termToInt = new Dictionary<string,int>()
 
-            printHeaders moduleName fullPath light output isAbstract
-            let table = printTableGLL grammar table moduleName tokenType res _class positionType caseSensitive isAbstract !withoutTree
-            let res = table
+            let printFSA () = 
+                let nextInt = ref fsa.States.Count
+                let eps = ref -1
+                           
+                let fsaStates = 
+                    fsa.States
+                    |> Seq.map (fun x ->
+                        x
+                        |> List.map (fun (symbol,state) -> 
+                            match symbol with
+                                | Nonterm s -> s.ToString(), state
+                                | Term s -> 
+                                    let cond, value = termToInt.TryGetValue s
+                                    if cond then
+                                        value.ToString(), state
+                                    else
+                                        termToInt.Add(s,!nextInt)
+                                        incr nextInt
+                                        (!nextInt-1).ToString(), state
+                                | Epsilon() ->
+                                    if !eps = -1 then
+                                        eps := !nextInt
+                                        incr nextInt
+                                        (!nextInt-1).ToString(), state
+                                    else
+                                        (!eps).ToString(), state))
+                    |> List.ofSeq
+
+                let printState (state:(string * int<state>) list) isFirst isLast =
+                    let prefix = if isFirst then "  [|" else "    "
+                    let postfix = if isLast then " |]" else ";"
+
+                    let printEdge (str,state) isFirst isLast = 
+                        let prefix = if isFirst then "[|" else ""
+                        let postfix = if isLast then "|]" else ";"
+                        print "%s%s,%s%s" prefix str (state.ToString()) postfix
+                    
+                    print "%s" prefix
+
+                    if state.Length = 0
+                    then
+                        print "[||]"
+                    else
+                        state
+                        |> List.iteri (fun i edge -> printEdge edge (i = 0) (i = state.Length-1))
+
+                    println "%s" postfix
+                
+                println "type Token ="
+                for token in termToInt.Keys do
+                    println "    | %s of unit" token
+                println ""
+
+                println "let tokenToNumber = function"
+                for tokenNumber in termToInt do
+                    println "    | %s() -> %i" tokenNumber.Key tokenNumber.Value
+                println ""
+
+                println "let numToString = function"
+                for tokenNumber in termToInt do
+                    println "    | %i -> \"%s\"" tokenNumber.Value tokenNumber.Key 
+                println ""
+
+                println "let numIsTerminal = function"
+                for i in termToInt.Values do
+                    println "    | %i -> true" i
+                println "    | _ -> false\n"
+
+                println "let numIsEpsilon = function"
+                println "    | %i -> true" !eps
+                println "    | _ -> false\n"
+
+                println "let statesToConvert ="
+                fsaStates    
+                |> List.iteri (fun i state -> printState state (i = 0) (i = fsaStates.Length-1))
+                println ""
+                println "%s " "let states = "
+                println "%s " "    statesToConvert"
+                println "%s " "    |> Array.Parallel.map (fun x -> "
+                println "%s " "        x"
+                println "%s " "        |> Array.map (fun (x,y) -> x, y * 1<state>))"
+
+                println "let startState = %i * 1<state>" fsa.StartState
+                println "let finalState = %i * 1<state>" fsa.FinalState
+                println "let nontermCount = %i\n" fsa.NontermCount
+                
+            let printFirstSet () =
+                
+                let inline pack state token = int( (int state <<< 16) ||| (token - fsa.NontermCount) )
+                println "let firstSet ="
+                
+                let printState state (terms : HashSet<string>) isFirst isLast = 
+                    let prefix = if isFirst then "  set[|" else "       "
+                    let postfix = if isLast then "|]" else ";"
+
+                    let printTerm term isFirst isLast =
+                        //let prefix = if isFirst then "" else "      "
+                        let postfix = if isLast then "" else ";"
+                        let packedValue = pack state <| termToInt.[term]
+                        print "%i%s"  packedValue postfix
+
+                    print "%s" prefix
+
+                    let i = ref 0
+                    for term in terms do
+                        printTerm term (!i = 0) (!i = terms.Count - 1)
+                        incr i
+
+                    println "%s" postfix
+
+                let i = ref 0
+                for stateTerms in fsa.FirstSet do
+                    printState stateTerms.Key stateTerms.Value (!i = 0) (!i = fsa.FirstSet.Count - 1)
+                    incr i
+                println ""
+            
+            let printParser () =
+                println "let private parserSource = new FSAParserSourceGLL (states, startState, finalState, nontermCount, numIsTerminal, numIsEpsilon, firstSet)"
+
+            let printFuns () =
+                println "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> ParserCommon.ParseResult<_>) ="
+                println "    Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput.buildAbstract parserSource"
+
+
+            printHeaders moduleName fullPath light isAbstract
+            printFSA ()
+            printFirstSet ()
+            printParser ()
+            printFuns ()
+
             let res = 
                 match definition.foot with
                 | None -> res
                 | Some (s : Source.t) ->
-                    res + (getPosFromSource fullPath dummyPos s + "\n"
-                                + s.text + getPosFromSource fullPath dummyPos (defaultSource output) + "\n")
-            let res =
+                    res
+                    //res + (getPosFromSource fullPath dummyPos s + "\n"
+                    //            + s.text + getPosFromSource fullPath dummyPos (defaultSource output) + "\n")
+            (*let res =
                 let init = res.Replace("\r\n", "\n")
                 let curLine = ref 1// Must be 2, but there are (maybe) some problems with F# compiler, causing to incorrect warning
                 let res = new System.Text.StringBuilder(init.Length * 2)
-                for c in init do
+                for c in init.ToString() do
                     match c with
                     | '\n' -> incr curLine; res.Append System.Environment.NewLine
                     | c when c = dummyPos -> res.Append (string !curLine)
                     | x -> res.Append x
                     |> ignore
-                res.ToString()
-            out.WriteLine res
+                res.ToString()*)
+            out.WriteLine (res.ToString())
             out.Flush()
             out.Close()
             eprintfn "Generation time: %A" <| System.DateTime.Now - start

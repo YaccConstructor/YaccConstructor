@@ -120,7 +120,7 @@ type BioParserInputGraph(edges : BioParserEdge[]) =
 //        edges |> Array.map (fun e -> new TaggedEdge<_,_>(e.s, e.e, e.Tokens))
     let pack2to32 rule position = ((int position <<< 16) ||| int rule)
     let edgs = Array.zeroCreate edges.Length
-    let shift = ref -1
+    let shift = ref 0//-1
     let vertexCount = ref 0
     let chainLen = Array.zeroCreate edges.Length
     let initialVertices = new ResizeArray<_>()
@@ -142,7 +142,7 @@ type BioParserInputGraph(edges : BioParserEdge[]) =
             let edg = new BioParserEdge(getV e.Start, getV e.End, e.RealLenght, e.Tokens)
             edgs.[i] <- edg
             chainLen.[i] <- e.Tokens.Length
-            shift := 0//max !shift (e.Tokens.Length - e.RealLenght)
+            //shift := 0//max !shift (e.Tokens.Length - e.RealLenght)
             for j in 0..e.Tokens.Length - 1 do
                 initialVertices.Add(pack2to32 i (j - !shift)))
         vertexCount := vMap.Count

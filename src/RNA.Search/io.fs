@@ -43,7 +43,8 @@ let printPathsToFASTA path (res:seq<seq<seq<BioParserEdge>> * (BioParserEdge * B
                                 "",l
                             else 
                                 (edgeToString numToString startE).Substring sp,
-                                (edgeToString numToString finalE).Substring (0,fp),l)
+                                (if fp < 0 then "" else (edgeToString numToString finalE).Substring (0,fp+1)),
+                                l)
         let lines =
             if Seq.length paths = 0 then
                 startfinal

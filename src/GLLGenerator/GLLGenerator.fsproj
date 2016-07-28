@@ -41,7 +41,6 @@
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
     <Compile Include="PrintTranslator.fs" />
-    <Compile Include="FSATable.fs" />
     <Compile Include="Table.fs" />
     <Compile Include="PrintTable.fs" />
     <Compile Include="GllGenerator.fs" />

@@ -43,10 +43,9 @@ type FSAGrammar (ruleList : Rule.t<Source.t,Source.t> list) =
     
     let newState () : int<state> = 
             _states.Add []
-            LanguagePrimitives.Int32WithMeasure (_states.Count-1)
+            (_states.Count-1) * 1<state>
 
     let convertRulesToFSA () =
-        //let alterStates = new HashSet<int<state>>()
         let sourse_tToSymbol isTerm (token : Source.t) =
             if isTerm
             then
@@ -171,7 +170,10 @@ type FSAGrammar (ruleList : Rule.t<Source.t,Source.t> list) =
             // expr? of (t<'patt,'expr>)
             | POpt expr -> proccessRepet expr (Some 0) (Some 1)
             | x -> failwithf "Unexpected construction %A in grammar" x       
-             
+        
+        ruleList
+        |> List.iter (fun rule -> ignore <| sourse_tToSymbol false rule.name)
+
         ruleList
         |> List.iter (fun rule -> match sourse_tToSymbol false rule.name with
                                   | Nonterm x -> let finalState = productionToStates x (Some(newState())) rule.body
@@ -310,40 +312,52 @@ type FSAGrammar (ruleList : Rule.t<Source.t,Source.t> list) =
             |> List.collect (fun x -> x)
         System.IO.File.WriteAllLines(filePrintPath ,"digraph G {\nnode [shape = circle]\n"::strs@["}"])
 
-    let _firstSet () =
-        //переделать в словарь, состояние -> что то там...
-        let result : HashSet<string>[] = Array.create _nonterms.Count (new HashSet<string>())   
-      
-        //let calc nonterterm = 
-        //for term = indexator.nonTermCount to indexator.fullCount-1 do
-        let rec dfs nonterm state (callStack : Set<_>) = 
-            for symbol,_ in _states.[nonterm] do
+    let firstSet = new Dictionary<int<state>,HashSet<string>>()
+
+    let genFirstSet() =
+        let addToResult state value = 
+            let cond,set = firstSet.TryGetValue state
+            if cond
+            then set.UnionWith value
+            else firstSet.Add(state, value) |> ignore
+
+        let rec dfs (nonterm: int<state>) (state: int<state>) (callStack : Set<_>) : HashSet<string>= 
+            for symbol,nextState in _states.[int state] do
                 match symbol with
                 | Nonterm nextNonterm -> 
-                    if callStack.Contains nonterm
-                    then Set.empty
+                    if callStack.Contains nextNonterm
+                    then ()
                     else 
-                        let res = dfs (int nextNonterm) <| callStack.Add nonterm
-                        result.[nonterm].UnionWith res
-                | Term term -> result.[nonterm].Add term |> ignore
-                | Epsilon() -> 
+                        let res = 
+                            let cond,value = firstSet.TryGetValue nextNonterm
+                            if cond then value else
+                            dfs nextNonterm nextNonterm (callStack.Add nonterm)
+                        
+                        addToResult nonterm res
+                | Term term -> addToResult nonterm (new HashSet<_>([term]))
+                | Epsilon() -> dfs nonterm nextState callStack |> ignore
 
-        for term =  to indexator.fullCount-1 do
-            dfs term (Set.empty)
-        result                                       
-            
+            if firstSet.ContainsKey nonterm then
+                firstSet.[nonterm]
+            else
+                failwith "sdfsf"
+        
+        for i in 0.._nonterms.Count - 1 do
+            dfs (i * 1<state>) (i * 1<state>) (Set.empty) |> ignore
+
     do
         convertRulesToFSA ()
-        _printDot @"C:\zgrviewer-0.10.0\dot\bio_grammar_before_inline.dot"
+        genFirstSet()
         //inlineNonterms()
         //_printDot @"C:\zgrviewer-0.10.0\dot\bio_grammar.dot"
 
 
 
 
-    member this.printDot = _printDot
-    member this.states = _states
-    member this.startState = _startState
-    member this.finalState = _finalState
+    member this.PrintDot = _printDot
+    member this.States = _states
+    member this.StartState = !_startState
+    member this.FinalState = !_finalState
     member this.NontermCount = _nonterms.Count
+    member this.FirstSet = firstSet
     //member this.nontermStates = _nontermStates

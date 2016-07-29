@@ -222,7 +222,9 @@ type GLLFSA() =
                 
             let printFirstSet () =
                 
-                let inline pack state token = int( (int state <<< 16) ||| (token - fsa.NontermCount) )
+                let inline pack state token =
+                    if (int state < 65536) && (int token - fsa.NontermCount < 65536) then int( (int state <<< 16) ||| (token - fsa.NontermCount) )
+                        else failwith "State or token is greater then 65535!!"
                 println "let firstSet ="
                 
                 let printState state (terms : HashSet<string>) isFirst isLast = 

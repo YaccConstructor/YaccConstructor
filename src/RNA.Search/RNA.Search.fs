@@ -409,6 +409,13 @@ let searchInBioGraphs (searchCfg : SearchConfig) graphs agentsCount =
                             try
                                 printfn "\nSearch in agent %A. Graph %A." name i
                                 printfn "Vertices: %A Edges: %A" graph.VertexCount graph.EdgeCount
+
+                                //             debug
+                                //printfn ""
+                                //graph.Edges.[717].Tokens
+                                //|> Array.iter (fun x -> printf "%s" <| searchCfg.NumToString x)
+                                //printfn ""
+
                                 let parseResult = searchCfg.SearchWithoutSPPF graph// searchCfg.StartNonterm
                                 printfn "SearchWithoutSPPF done"
                                 match parseResult with
@@ -536,7 +543,7 @@ let searchMain path what agentsCount =
     let graphs = Array.append graphs longEdgesGraphs
     *)
     let graphs = 
-        graphs.[300..405]
+        graphs.[9..10]
         //graphs.[1500..]
         //graphs.[5000..5050]
         //graphs.[4071..4072]

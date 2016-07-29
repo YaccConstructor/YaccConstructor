@@ -118,10 +118,11 @@ type BioParserInputGraph(edges : BioParserEdge[]) =
 //    inherit AdjacencyGraph<int, TaggedEdge<int, int[]>>()
 //    do
 //        edges |> Array.map (fun e -> new TaggedEdge<_,_>(e.s, e.e, e.Tokens))
-    let pack2to32 rule position = ((int position <<< 16) ||| int rule)
+    let pack2to32 edge position = ((int position <<< 16) ||| int edge)
     let edgs = Array.zeroCreate edges.Length
     let shift = ref 0//-1
     let vertexCount = ref 0
+    /// Length of each edge
     let chainLen = Array.zeroCreate edges.Length
     let initialVertices = new ResizeArray<_>()
     let finalVertex = ref 0

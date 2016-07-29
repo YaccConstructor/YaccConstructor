@@ -15,7 +15,7 @@ open System.Collections.Generic
 
 module CommonFuns = 
 
-    let inline pack left right : int64 =  ((int64 left <<< 32) ||| int64 right)
+    let inline pack left right : int64 = ((int64 left <<< 32) ||| int64 right)
     let inline pack3 l m r : int64 =  ((int64 l <<< 42) ||| (int64 m <<< 21) ||| int64 r)
     let inline getRight (long : int64) = int <| ((int64 long) &&& 0xffffffffL)
     let inline getLeft (long : int64)  = int <| ((int64 long) >>> 32)
@@ -24,11 +24,13 @@ module CommonFuns =
     let inline getIndex1Vertex (long : int64<vertexMeasure>) = int <| ((int64 long) &&& 0xffffffffL)
     let inline getIndex2Vertex (long : int64<vertexMeasure>) = int <| ((int64 long) >>> 32)
 
-    let inline packVertexFSA position state: int64<vertexMeasure>  =  LanguagePrimitives.Int64WithMeasure ((int64 position <<< 32) ||| int64 state)
+    let inline packVertexFSA position state: int64<vertexMeasure>  = LanguagePrimitives.Int64WithMeasure ((int64 position <<< 32) ||| int64 state)
     let inline getPosition (packed : int64<vertexMeasure>) = int <| ((int64 packed) &&& 0xffffffffL)
     let inline getState (packed : int64<vertexMeasure>) = int <| ((int64 packed) >>> 32)
 
-    let inline packEdgePos edge position : int<positionInInput>  = LanguagePrimitives.Int32WithMeasure((int position <<< 16) ||| int edge)
+    let inline packEdgePos edge position : int<positionInInput>  =
+        (*if (edge < 65536) && (position < 65536) then *)LanguagePrimitives.Int32WithMeasure((int position <<< 16) ||| int edge)
+        (*else failwith "Edge or position is greater then 65535!!"*)
     let inline getEdge (packedValue : int<positionInInput>)      = int (int packedValue &&& 0xffff)
     let inline getPosOnEdge (packedValue : int<positionInInput>) = int packedValue >>> 16 
 
@@ -96,14 +98,14 @@ type ContextFSA =
     /// Current GSS node.
     val Vertex        : GSSVertexNFA
     /// 4 values packed in one int64: leftEdge, leftPos, rightEdge, rightPos.
-    val LeftPos       : int<leftPosition>
+    //val LeftPos       : int<leftPosition>
     /// Length of current result
     val Length        : uint16
-    new (index, state, vertex, leftPos, len) = {Index = index; State = state; Vertex = vertex; LeftPos = leftPos; Length = len}
+    new (index, state, vertex, len) = {Index = index; State = state; Vertex = vertex; Length = len}
     override this.ToString () = "Edge:" + (CommonFuns.getEdge(this.Index).ToString()) +
                                 "; PosOnEdge:" + (CommonFuns.getPosOnEdge(this.Index).ToString()) +
                                 "; State:" + (this.State.ToString()) +
-                                "; LeftPos:" + (this.LeftPos.ToString()) +
+                                //"; LeftPos:" + (this.LeftPos.ToString()) +
                                 "; Len:" + (this.Length.ToString())
 
 type ParseResult<'a> =

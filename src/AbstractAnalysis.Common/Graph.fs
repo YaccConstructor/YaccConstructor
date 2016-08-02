@@ -112,7 +112,7 @@ type BioParserEdge(s : int, e : int, l : int, t : int[]) =
     member this.End = e
     member this.RealLenght = l
     member this.Tokens = t 
-    override this.ToString () = (this.Start.ToString()) + "->" + (this.End.ToString())
+    override this.ToString () = (this.Start.ToString()) + "- "+ (this.Tokens.[0].ToString()) + " ->" + (this.End.ToString()) 
       
 type BioParserInputGraph(edges : BioParserEdge[]) =
 //    inherit AdjacencyGraph<int, TaggedEdge<int, int[]>>()
@@ -156,5 +156,6 @@ type BioParserInputGraph(edges : BioParserEdge[]) =
     member this.EdgeCount with get () = edgs.Length
     member this.VertexCount with get () = !vertexCount
     member this.Shift with get () = !shift
+
 
 

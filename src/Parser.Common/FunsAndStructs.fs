@@ -114,7 +114,7 @@ type ParseResult<'a> =
     | Error of string
 
 type CompressedArray<'t>(l : int[], f : _ -> 't, shift) =
-    let a = Array.init l.Length (fun i -> Array.init (l.[i]+1) f)
+    let a = Array.init l.Length (fun i -> Array.init (l.[i]) f)
     member this.Item         
         with get (i:int<positionInInput>) = 
             let edg = (CommonFuns.getEdge i)

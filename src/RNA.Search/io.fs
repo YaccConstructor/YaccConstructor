@@ -12,7 +12,8 @@ let edgeToString numToString (e:BioParserEdge) =
 
 ///Seq of edges to one string 
 let pathToString numToString path =
-    Seq.fold (fun string e -> string + edgeToString numToString e) "" path
+    path
+    |> ResizeArray.fold (fun string e -> string + edgeToString numToString e) ""
 
 let getInfo prefix index = 
     ">" + prefix + index.ToString() + "\n"
@@ -28,16 +29,16 @@ let printEdgesToFASTA path numToString prefix edges =
     |> List.mapi (fun i line -> (getInfo prefix i) + line)
     |> (fun x -> File.AppendAllLines(path, x))
 
-let printPathsToFASTA path (res:seq<seq<seq<BioParserEdge>> * (BioParserEdge * BioParserEdge * _)>) i numToString = 
+let printPathsToFASTA path (res:(List<List<BioParserEdge>> * (BioParserEdge * BioParserEdge * (int * int * uint16) [])) []) i numToString = 
     //let rec splitLine (line:string) =
     //    if line.Length <= maxLineLength then [line] else
     //    (line.Substring (0, maxLineLength))::(splitLine (line.Substring maxLineLength))
 
-    let printResult j (paths, ((startE:BioParserEdge), finalE, poss)) = 
+    let printResult j ((paths:List<List<BioParserEdge>>), ((startE:BioParserEdge), finalE, poss)) = 
         let prefix = "Graph" + i.ToString() + ".Subgraph" + j.ToString()+ "."
         let startfinal =
             poss
-            |> Seq.map (fun (sp,fp,(l:uint16)) -> 
+            |> Array.map (fun (sp,fp,(l:uint16)) -> 
                             if startE = finalE then 
                                 (edgeToString numToString startE).Substring (sp,(fp-sp+1)),
                                 "",l
@@ -46,24 +47,23 @@ let printPathsToFASTA path (res:seq<seq<seq<BioParserEdge>> * (BioParserEdge * B
                                 (if fp < 0 then "" else (edgeToString numToString finalE).Substring (0,fp+1)),
                                 l)
         let lines =
-            if Seq.length paths = 0 then
-                startfinal
-                |> Seq.map (fun (start,final,l) -> start + final)
-                |> List.ofSeq
+            if paths.Count = 0 then
+                startfinal |> Array.map (fun (start,final,l) -> start + final)
             else
                 paths
                 |> Seq.collect (fun path ->
                     startfinal
-                    |> Seq.choose (fun (start,final,l) -> 
-                    let line = pathToString numToString path
-                    if line.Length = int l then 
-                        start + line + final |> Some
-                    else None))
-                |> List.ofSeq
+                    |> Array.map (fun (start,final,l) -> 
+                        let line = pathToString numToString path
+                        if line.Length = int l then 
+                            start + line + final
+                        else failwith "some length is not eq res length")
+                    )
+                |> Array.ofSeq
 
         printStringsToFASTA path prefix lines
     res
-    |> Seq.iteri printResult
+    |> Array.iteri printResult
 
 (*
 let printResult results graphNumber =

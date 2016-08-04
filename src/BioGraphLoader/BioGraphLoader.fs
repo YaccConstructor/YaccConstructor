@@ -140,8 +140,8 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
                     |> Array.ofSeq
                     |> Array.map (fun kvp -> kvp.Key))
                 |> Array.filter(fun a -> a.Length > 1)
-                //|> Array.sortBy (Array.length >> ((*)-1))
-                |> Array.sortBy (Array.length)
+                |> Array.sortBy (Array.length >> ((*)-1))
+                //|> Array.sortBy (Array.length)
             
             x
             |> Array.Parallel.map (fun vs ->

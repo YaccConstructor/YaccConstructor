@@ -273,8 +273,8 @@ let searchMain path what agentsCount =
 
     let workingDir = System.AppDomain.CurrentDomain.BaseDirectory + @"..\..\..\infernal\"
    
-    //let graphs = 
-    //    graphs.[10..]
+    let graphs = 
+        graphs.[1..1]
         //graphs.[1500..]
         //graphs.[5000..5050]
         //graphs.[4071..4072]

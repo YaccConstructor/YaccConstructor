@@ -91,6 +91,7 @@ type FSAParserSourceGLL ( states             : array<array<int * int<state>>>
                         , nontermCount       : int
                         , numIsTerminal      : int -> bool
                         , numIsEpsilon       : int -> bool
+                        , numToString        : int -> string
                         , firstSet           : Set<int>
                         ) =
     (*
@@ -126,4 +127,5 @@ type FSAParserSourceGLL ( states             : array<array<int * int<state>>>
     member this.NonTermCount       = nontermCount
     member this.NumIsTerminal      = numIsTerminal
     member this.NumIsEpsilon       = numIsEpsilon
+    member this.NumToString        = numToString
     member this.GetFirstSetItem    = getFirstSetItem

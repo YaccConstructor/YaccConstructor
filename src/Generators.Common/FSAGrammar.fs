@@ -182,95 +182,7 @@ type FSAGrammar (ruleList : Rule.t<Source.t,Source.t> list) =
                                                      _startState := x
                                                      _finalState := finalState
                                   | _ -> failwith "???")
-    (*
-    let inlineNonterms () =
-        let processedStates = new List<int<state>>()
-        let copiedComponents = new List<int<state>>()
-
-        let getCopyOfComponent state = 
-            let startState = ref dummyState
-            let finalState = ref dummyState
-            let visited = new List<_>()
-
-            if not <| copiedComponents.Contains state
-            then 
-                copiedComponents.Add state
-                let rec findFinal state = 
-                    if visited.Contains state  then () else
-                    visited.Add state
-                    if _states.[int state].Length = 0
-                    then
-                        finalState := state
-                    else 
-                        _states.[int state]
-                        |> List.iter (fun (_,nextState) ->
-                            findFinal nextState)
-
-                findFinal state
-                startState := state
-            else
-                let newStates = new Dictionary<int<state>,int<state>>()
-
-                let rec copyComponent initState =
-                    if visited.Contains initState then () else
-                    visited.Add initState
-                    if _states.[int initState].Length = 0
-                    then
-                        finalState := newStates.[initState]
-                    else
-                        let newEdges = 
-                            _states.[int initState]
-                            |> List.map (fun (symbol,nextState) ->
-                                if not <| newStates.ContainsKey (nextState)
-                                then newStates.Add (nextState, newState())
-                                     copyComponent nextState
-                                (symbol, newStates.[nextState]))
-
-                        _states.[int newStates.[initState]] <- newEdges
-            
-                newStates.Add (state, newState())
-                copyComponent state
-
-                startState := newStates.[state]
-
-            !startState, !finalState
-
-        let rec doInline initState (callStack : int<state> list) : unit =
-            let visited = new List<_>()
-
-            let rec processEdges initState =
-                //if _states.[int initState].Length = 0
-                //    then if nextState <> dummyState then newEpsilonEdge initState nextState
-                //else
-                if visited.Contains initState then () else
-                visited.Add initState
-                let newEdges = 
-                    _states.[int initState]
-                    |> List.map (fun (symbol,nextState) ->
-                        match symbol with
-                        | Nonterm state -> if List.contains state callStack
-                                           then
-                                               processEdges nextState
-                                               (symbol,nextState)
-                                           else
-
-                                           if not <| processedStates.Contains state
-                                           then
-                                               doInline state (callStack@[state])
-
-                                           let startOfCopy, endOfCopy = getCopyOfComponent state
-                                           newEpsilonEdge state startOfCopy
-                                           newEpsilonEdge endOfCopy nextState
-                                           processEdges nextState
-                                           (Epsilon(), startOfCopy)
-                        | Term _ | Epsilon _ -> processEdges nextState
-                                                (symbol,nextState))
-                _states.[int initState] <- newEdges
-            processEdges initState
-            processedStates.Add initState
-
-        doInline !_startState [!_startState]
-    *)
+    
     let stateToString state =
         let opt, value = _stateStringDict.TryGetValue state
         if opt then value else ""
@@ -360,4 +272,5 @@ type FSAGrammar (ruleList : Rule.t<Source.t,Source.t> list) =
     member this.FinalState = !_finalState
     member this.NontermCount = _nonterms.Count
     member this.FirstSet = firstSet
+    member this.IntToString = _stateStringDict
     //member this.nontermStates = _nontermStates

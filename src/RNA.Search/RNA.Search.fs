@@ -69,7 +69,11 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lowLengthLimit highLength
     //let hihtLenghtLimit = 500.0
     let hihtLenghtLimit = float highLengthLimit
     let weightLimit = 10000
-    // (leftEdge, rightEdge) , (leftPosition, rightPosition, lengthOfPath)
+    let x = 
+        res 
+        |> Array.sumBy (fun i -> if i.length > uint16 highLengthLimit then 1 else 0)
+
+
     let filteredByLength = 
         res 
         |> Array.filter (fun i -> i.length >= uint16 lowLengthLimit && i.length <= uint16 highLengthLimit)

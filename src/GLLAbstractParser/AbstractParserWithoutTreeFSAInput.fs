@@ -13,7 +13,8 @@ open Yard.Generators.GLL.ParserCommon.CommonFuns
 type SysDict<'k,'v> = System.Collections.Generic.Dictionary<'k,'v>
 type Queue<'t> = System.Collections.Generic.Queue<'t>
 type CompressedArray<'t> = Yard.Generators.GLL.ParserCommon.CompressedArray<'t>
-     
+
+
 [<Struct>]
 type ResultStruct =
     val le : int
@@ -27,11 +28,12 @@ type ResultStruct =
 
 let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) = 
     //let shift = input.Shift
+    let maxlen = 370us
     if input.EdgeCount = 0 then Error ("This grammar does not accept empty input.") else
     let result = new System.Collections.Generic.HashSet<_>()
     let dummyEdge = input.EdgeCount
     let outEdges = 
-        let r = Array.init<_> input.VertexCount (fun _ -> new System.Collections.Generic.List<int>())
+        let r = Array.init<_> input.VertexCount (fun _ -> new ResizeArray<int>())
         for i in 0..input.EdgeCount - 1 do
              r.[input.Edges.[i].Start].Add i
         r
@@ -57,10 +59,10 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                                          SysDict<int<positionInInput>, //vertex.posInInput
                                                  (int<state> * uint16)[]>>) ref //edges
                                 *
-                                ((int<positionInInput> * uint16)[]) ref //SetP
+                                (ResizableUsualOne<int<positionInInput>*uint16>) option ref //SetP
                                 *
                                 (SysDict<int<state>, int<positionInInput>[]>) ref //SetU
-                                > (input.ChainLength, (fun _ -> ref null,ref null,ref null),0))
+                                > (input.ChainLength, (fun _ -> ref null,ref None,ref null),0))
 
     /// State of FSA.
     let currentState = ref <| parser.StartState
@@ -167,11 +169,10 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         then//such vertex already exist
             if not <| containsEdge index nonTermName currentVertex stateToContinue len
             then//no such edge between vertices
-                if !(SetP GSSNode) <> null
+                if (!(SetP GSSNode)).IsSome
                     then// aready poped for current index and nonterm
                         // add contexts for each position in input
-                        !(SetP GSSNode)
-                        |> Array.iter (fun (newIndex, l) ->
+                        (!(SetP GSSNode)).Value.DoForAll (fun (newIndex, l) ->
                             addContext newIndex stateToContinue currentVertex.PositionInInput currentVertex.NontermState (len + l))
         else//need to create new edge, vertex and context
             containsEdge index nonTermName currentVertex stateToContinue len |> ignore
@@ -185,19 +186,22 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         let setP = SetP GSS.[int curVertex.NontermState].[curVertex.PositionInInput]
         if curVertex.NontermState <> parser.StartState
         then
-            if !(setP) <> null
+            if (!(setP)).IsSome
             then
-                setP := Array.append !setP [|curIndex, curLen|]
+                (!setP).Value.Add (curIndex, curLen)
             else
-                setP := [|curIndex, curLen|]
+                setP := new ResizableUsualOne<_>((curIndex, curLen)) |> Some
 
             let outEdges = Edges GSS.[int curVertex.NontermState].[curVertex.PositionInInput]
                 
             for keyValue1 in !outEdges do
-                let nonterm = keyValue1.Key  
+                let nonterm = keyValue1.Key 
                 for keyValue2 in keyValue1.Value do
                     let position = keyValue2.Key
                     for state,length in keyValue2.Value do
+//                        if curLen + length > maxlen then
+//                            ()
+//                        else
                         addContext curIndex state position nonterm (curLen + length)
         else//Nowhere to pop. Reached end of start state.
             //  Need to add derivation to results.
@@ -223,7 +227,8 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
     let eatTerm nextState curEdge curPos =
         let chainLen = input.ChainLength.[curEdge]
         let newLength = !currentLength + 1us
-                
+
+        //if newLength > maxlen then () else
         if (curPos + 1) < chainLen
         then//edge isn't finished(cur token on edgee is on current edge)
             let newIndex = packEdgePos curEdge (curPos + 1)
@@ -281,6 +286,9 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                 elif parser.NumIsEpsilon curSymbol
                 then//found epsilon edge
                     pushContext !currentIndex nextState !currentGSSNode !currentLength
+                elif (parser.NumToString curSymbol).Equals("any")
+                then//found any rule
+                    eatTerm nextState curEdge curPos
                 else//current grammar symbol is nonterminal
                     let curNonterm = curSymbol*1<state>
                     (*let curToken = input.Edges.[curEdge].Tokens.[curPos] 
@@ -294,7 +302,30 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
             while not !stop do
             if !condition then dispatch() else handle()
     control()
-                 
+    (*
+    let lens = Array.init (10000) (fun _ -> 0)
+    
+    GSS
+    |> Array.iter (fun x ->
+        input.ChainLength
+        |> Array.iteri (fun i l ->
+            for j in 0..l-1 do
+                let s = CommonFuns.packEdgePos i j
+                let len = 
+                    if (!(SetP (x.[s])) ).IsSome
+                    then 
+                        (!(SetP (x.[s]))).Value.Length()
+                    else
+                        0
+                if len >= 10000 then printfn "%i" len
+                else lens.[len] <- lens.[len] + 1)
+                )
+
+    lens
+    |> Array.mapi (fun i x -> i.ToString() + " : " + x.ToString())
+    |> (fun x -> System.IO.File.AppendAllLines("C:\\YCInfernal\\res", x))
+    *)
+                
     match result.Count with
         | 0 -> Error ("String was not parsed")
         | _ -> Success1 (Array.ofSeq result)

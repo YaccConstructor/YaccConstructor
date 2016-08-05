@@ -194,8 +194,10 @@ type GLLFSA() =
 
                 println "let numToString = function"
                 for tokenNumber in termToInt do
-                    println "    | %i -> \"%s\"" tokenNumber.Value tokenNumber.Key 
-                println ""
+                    println "    | %i -> \"%s\"" tokenNumber.Value tokenNumber.Key
+                for numberNonterm in fsa.IntToString do
+                    println "    | %i -> \"%s\"" numberNonterm.Key numberNonterm.Value
+                println "    | _ -> \"\"\n"
 
                 println "let numIsTerminal = function"
                 for i in termToInt.Values do
@@ -253,7 +255,7 @@ type GLLFSA() =
                 println ""
             
             let printParser () =
-                println "let private parserSource = new FSAParserSourceGLL (states, startState, finalState, nontermCount, numIsTerminal, numIsEpsilon, firstSet)"
+                println "let private parserSource = new FSAParserSourceGLL (states, startState, finalState, nontermCount, numIsTerminal, numIsEpsilon, numToString, firstSet)"
 
             let printFuns () =
                 println "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> ParserCommon.ParseResult<_>) ="

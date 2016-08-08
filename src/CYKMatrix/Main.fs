@@ -168,9 +168,9 @@ let main args =
 //    0
 
 
-    let nvidiaOneThread, nvidiaParallel, nvidiaProvider = getGpuOptions nvidiaPlatformName
+//    let nvidiaOneThread, nvidiaParallel, nvidiaProvider = getGpuOptions nvidiaPlatformName
 //    let intelOptions, intelProvider = getGpuOptions intelPlatformName
-//    let amdOptions, amdProvider = getGpuOptions amdPlatformName
+    let amdOneThreadOptions, amdParallel, amdProvider = getGpuOptions amdPlatformName
 //    let defaultOptions, dafeultProvider = getGpuOptions defaultPlatformName
     let cudaOneThread: GPUCuda = { doParallelFlush = false }
     let cudaParallel: GPUCuda = { doParallelFlush = true }
@@ -184,15 +184,15 @@ let main args =
     let addParallel minms (init: Options.T) = { init with Parallel = Some <| Options.createOne minms () } 
     let addFast minms (init: Options.T) = { init with Fast = Some <| Options.createOne minms () } 
     
-    let bestOption = (myAlg |> addCuda 128 cudaParallel |> addBrahma 32 nvidiaParallel |> addParallel 1)
-    let toCheck1 = (myAlg |> addCuda 128 cudaParallel |> addBrahma 64 nvidiaParallel |> addParallel 1)
-    let toCheck2 = (myAlg |> addCuda 128 cudaParallel |> add_1DBrahma 64 nvidiaParallel |> addFast 64 |> addParallel 1)
+//    let bestOption = (myAlg |> addCuda 128 cudaParallel |> addBrahma 32 nvidiaParallel |> addParallel 1)
+//    let toCheck1 = (myAlg |> addCuda 128 cudaParallel |> addBrahma 64 nvidiaParallel |> addParallel 1)
+//    let toCheck2 = (myAlg |> addCuda 128 cudaParallel |> add_1DBrahma 64 nvidiaParallel |> addFast 64 |> addParallel 1)
     let toCheck3 = (myAlg |> addCuda 64 cudaParallel |> addParallel 1)
 
     let checkTime str searchLen = 
 
         checkOneType 
-            (fun str searchLen -> recognize toCheck2 str rules nonterminals S searchLen ) 
+            (fun str searchLen -> recognize toCheck3 str rules nonterminals S searchLen ) 
             (fun toCheck -> isAnswerValid toCheck) "my" str searchLen
             
 //        checkOneType 
@@ -256,11 +256,12 @@ let main args =
 //        printcellDiff <| Cell.create 0 66
 //        printcellDiff <| Cell.create 0 67
 //        printcellDiff <| Cell.create 0 69
+
 //        printcellDiff <| Cell.create 1 68
 //        printcellDiff <| Cell.create 1 69
                         
-        printMatrix toCheck1 (String.length str) searchLen 
-        printMatrix toCheck2 (String.length str) searchLen 
+//        printMatrix toCheck1 (String.length str) searchLen 
+//        printMatrix toCheck2 (String.length str) searchLen 
 
         if not sameAnswers
         then failwith "different answers"
@@ -276,14 +277,14 @@ let main args =
 //    let toCheck = (myAlg |> add_1DBrahma 2 nvidiaOneThread)
 //    let toCheck = (myAlg |> addCuda 2 cudaOneThread)
 //    let toCheck = (myAlg |> addBrahma 2 nvidiaOneThread)
-//    let toCheck = (myAlg |> addFast 4 |> addParallel 1 )
+    let toCheck = (myAlg)
 
 //    check "abb"      2
 //    check "abb"      3    s
 //    check "aaabbcc"  5
 //    check "aaabb"    5
-//    check "aaaaabbb" 6 okhotinAlg toCheck
-//    check "aaaabbbbbb" 6 okhotinAlg toCheck
+    check "aaaaabbb" 6 okhotinAlg toCheck
+    check "aaaabbbbbb" 6 okhotinAlg toCheck
 //    check "aaaabbbbbbbbbbb" 10
 //    check "aaaabbbbbbbbbbbbbbb" 10
 //    check "aaaabb" 6
@@ -302,7 +303,7 @@ let main args =
 //    checkTime (String.replicate 120 "abb") 300
 //    checkTime (String.replicate 200 "abb") 400
 
-    checkMultiplicationNumber 63 myAlg
+//    checkMultiplicationNumber 63 myAlg
 
 
 //    checkTime (String.replicate 700 "abb") 1600

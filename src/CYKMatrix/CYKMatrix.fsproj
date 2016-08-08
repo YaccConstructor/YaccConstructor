@@ -83,19 +83,19 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Alea.CUDA">
-      <HintPath>..\packages\Alea.CUDA.2.2.0.3307\lib\net40\Alea.CUDA.dll</HintPath>
+      <HintPath>bin\Debug\Alea.CUDA.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Alea.CUDA.IL">
-      <HintPath>..\packages\Alea.CUDA.IL.2.2.0.3307\lib\net40\Alea.CUDA.IL.dll</HintPath>
+      <HintPath>bin\Debug\Alea.CUDA.IL.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Alea.IL">
-      <HintPath>..\packages\Alea.IL.2.2.0.3307\lib\net40\Alea.IL.dll</HintPath>
+      <HintPath>bin\Debug\Alea.IL.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma">
-      <HintPath>..\packages\Brahma.FSharp.1.0.1\lib\net45\Brahma.dll</HintPath>
+      <HintPath>bin\Debug\Brahma.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.Agents">
@@ -103,51 +103,51 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.AST">
-      <HintPath>..\packages\Brahma.FSharp.1.0.1\lib\net45\Brahma.FSharp.OpenCL.AST.dll</HintPath>
+      <HintPath>bin\Debug\Brahma.FSharp.OpenCL.AST.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Core">
-      <HintPath>..\packages\Brahma.FSharp.1.0.1\lib\net45\Brahma.FSharp.OpenCL.Core.dll</HintPath>
+      <HintPath>bin\Debug\Brahma.FSharp.OpenCL.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Extensions">
-      <HintPath>..\packages\Brahma.FSharp.1.0.1\lib\net45\Brahma.FSharp.OpenCL.Extensions.dll</HintPath>
+      <HintPath>bin\Debug\Brahma.FSharp.OpenCL.Extensions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Printer">
-      <HintPath>..\packages\Brahma.FSharp.1.0.1\lib\net45\Brahma.FSharp.OpenCL.Printer.dll</HintPath>
+      <HintPath>bin\Debug\Brahma.FSharp.OpenCL.Printer.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Translator">
-      <HintPath>..\packages\Brahma.FSharp.1.0.1\lib\net45\Brahma.FSharp.OpenCL.Translator.dll</HintPath>
+      <HintPath>bin\Debug\Brahma.FSharp.OpenCL.Translator.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.Helpers">
-      <HintPath>..\packages\Brahma.FSharp.1.0.1\lib\net45\Brahma.Helpers.dll</HintPath>
+      <HintPath>bin\Debug\Brahma.Helpers.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.OpenCL">
-      <HintPath>..\packages\Brahma.FSharp.1.0.1\lib\net45\Brahma.OpenCL.dll</HintPath>
+      <HintPath>bin\Debug\Brahma.OpenCL.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Core">
-      <HintPath>..\packages\FSharp.Core.4.0.0.1\lib\net40\FSharp.Core.dll</HintPath>
+      <HintPath>..\packages\FSharp.Core.4.0.1.7-alpha\lib\net40\FSharp.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.PowerPack">
-      <HintPath>..\packages\FSPowerPack.Core.Community.3.0.0.0\Lib\Net40\FSharp.PowerPack.dll</HintPath>
+      <HintPath>bin\Debug\FSharp.PowerPack.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.PowerPack.Linq">
-      <HintPath>..\packages\FSPowerPack.Linq.Community.3.0.0.0\Lib\Net40\FSharp.PowerPack.Linq.dll</HintPath>
+      <HintPath>bin\Debug\FSharp.PowerPack.Linq.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.PowerPack.Metadata">
-      <HintPath>..\packages\FSPowerPack.Metadata.Community.3.0.0.0\Lib\Net40\FSharp.PowerPack.Metadata.dll</HintPath>
+      <HintPath>bin\Debug\FSharp.PowerPack.Metadata.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.PowerPack.Parallel.Seq">
-      <HintPath>..\packages\FSPowerPack.Parallel.Seq.Community.3.0.0.0\Lib\Net40\FSharp.PowerPack.Parallel.Seq.dll</HintPath>
+      <HintPath>bin\Debug\FSharp.PowerPack.Parallel.Seq.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Quotations.Evaluator">
@@ -158,9 +158,15 @@
       <HintPath>..\packages\FSharpx.Collections.1.15.1\lib\net40\FSharpx.Collections.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="FSharpx.Core">
+      <HintPath>bin\Debug\FSharpx.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharpx.Text.StructuredFormat">
+      <HintPath>bin\Debug\FSharpx.Text.StructuredFormat.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="OpenCL.Net">
-      <HintPath>..\packages\OpenCL.Net.2.2.9.0\lib\net40\OpenCL.Net.dll</HintPath>
+      <HintPath>bin\Debug\OpenCL.Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

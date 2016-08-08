@@ -2,6 +2,9 @@
 
     open Util
     open TPMatrices
+    open System
+    open System.Threading
+    open System.Threading.Tasks
 
 //    let multiplicationCounter = ref 0
 
@@ -25,7 +28,6 @@
         let matrixSize = (1 <<< matrixSizeExponent)                  
                                     
         let completeP where from1 from2 = 
-//            multiplicationCounter := !multiplicationCounter + 1
             let submatrixFromTuple (l1, m1, l2, m2) =
                 let top = Cell.create l1 m2
                 let size = m1 - l1
@@ -40,10 +42,12 @@
     
         let rec compute l m =
             let mid = int (l + m) / 2
-            if m - l >= 4 then 
+            if m - l >= 4 && mid < stringSize + 1 then 
+                let doLeft = Action( fun () -> compute l mid )
+                let doRight = Action( fun () -> compute mid m )
+                Parallel.Invoke(doLeft, doRight)
+            elif m - l >= 4 then
                 compute l mid
-                if mid < stringSize + 1 then
-                    compute mid m
 
             if mid < stringSize + 1 then
                 completeT (l, mid, mid, m)
@@ -104,7 +108,5 @@
 
         compute 0 (roundedSize + 1) |> ignore
         
-//        printfn "okhotin mult count: %i" !multiplicationCounter
-//        multiplicationCounter := 0
         matrices.releaseResources ()
         (matrices.getProbabilities S), matrices.MultiplicationCounter

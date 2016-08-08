@@ -3,6 +3,7 @@
 open FSharp.Quotations.Evaluator
 open Microsoft.FSharp.Quotations
 open System.Collections.Generic
+open System.Threading
 
 open Brahma.FSharp.OpenCL.Core
 open Brahma.FSharp.OpenCL.Extensions
@@ -45,22 +46,22 @@ open Util
           mult2: DeviceMemory<float>
           result: DeviceMemory<float> }
     
-    type CPU = { IsParallel: int -> bool }
-    type Parallel = Unit
+    type CPU_ = { IsParallel: int -> bool }
+    type Parallel_ = Unit
     
     type Helpers = {
         _1DBrahma: NewGPUBrahma Info option 
         Brahma: GPUBrahma Info option  
         Cuda: GPUCuda Info option  
-        Fast: CPU Info option
-        Simple: CPU Info option
-        Parallel: Parallel Info option
+        Fast: CPU_ Info option
+        Simple: CPU_ Info option
+        Parallel: Parallel_ Info option
     }
-
-
-    type MatriceswMultiplicator (options: Options.T, summProbabilities, multiplicateProbabilities, zeroProbability, maxMatrixSize, ntsCount) =
-
-    
+        
+    type MatricesMultiplicator (options: Options.T, summProbabilities, multiplicateProbabilities, zeroProbability, maxMatrixSize, ntsCount) =
+        
+        let gpuMutex = new Mutex()
+        
         let newCommand = 
             <@
                 fun (r: _1D) (sizes:array<_>) (a:array<_>) (b:array<_>) (c:array<_>) -> 
@@ -300,32 +301,40 @@ open Util
 
             let transa = cublasOperation_t.CUBLAS_OP_N
             let transb = cublasOperation_t.CUBLAS_OP_N
-        
-            helpers.mult1.Scatter(from1) 
-            helpers.mult2.Scatter(from2) 
+                            
             let dalpha = 1.
             let dbeta = 0.
 
-            let doOne i =
-                let ptrShift = i * matricesCellCount
-                CUBLAS.Default.Dgemm(transa, 
-                                     transb, 
-                                     matricesSize, 
-                                     matricesSize, 
-                                     matricesSize, 
-                                     dalpha, 
-                                     helpers.mult2.Ptr + ptrShift, 
-                                     matricesSize, 
-                                     helpers.mult1.Ptr + ptrShift, 
-                                     matricesSize, 
-                                     dbeta, 
-                                     helpers.result.Ptr + ptrShift, 
-                                     matricesSize)
+            let multiplicationResult = 
+                if gpuMutex.WaitOne()
+                then        
+                    helpers.mult1.Scatter(from1) 
+                    helpers.mult2.Scatter(from2) 
 
-            [|0..matricesCount - 1|]
-            |> Array.iter doOne      
+                    let doOne i =
+                        let ptrShift = i * matricesCellCount
+                        CUBLAS.Default.Dgemm(transa, 
+                                             transb, 
+                                             matricesSize, 
+                                             matricesSize, 
+                                             matricesSize, 
+                                             dalpha, 
+                                             helpers.mult2.Ptr + ptrShift, 
+                                             matricesSize, 
+                                             helpers.mult1.Ptr + ptrShift, 
+                                             matricesSize, 
+                                             dbeta, 
+                                             helpers.result.Ptr + ptrShift, 
+                                             matricesSize)
+
+                    [|0..matricesCount - 1|]
+                    |> Array.iter doOne      
             
-            let multiplicationResult = helpers.result.Gather()         
+                    let result = helpers.result.Gather()  
+                    gpuMutex.ReleaseMutex()
+                    result 
+                else 
+                    failwith "cant get gpuMutex" 
 
             let flushOneMatrix num = 
                 let matrix = 
@@ -334,8 +343,8 @@ open Util
                 (getPMatrix nts).AddSubmatrixByGetter task.where (fun cell -> Probability.create matrix.[task.where.XByCell cell])   
             
             [|0..matricesCount - 1|]
-            |> (if  helpers.options.doParallelFlush then Array.Parallel.iter else Array.iter) flushOneMatrix       
-
+            |> (if  helpers.options.doParallelFlush then Array.Parallel.iter else Array.iter) flushOneMatrix   
+    
 
         let gpuMultiplicate helpers
                             (from1: Probability.InnerType.T []) 
@@ -363,10 +372,15 @@ open Util
                                 
             let d = new _2D(wgItemsXCount, wgItemsYCount, wgSizeX, wgSizeY)
 
-            helpers.kernelPrepare d matricesSize from1 from2 result
+            if gpuMutex.WaitOne()
+            then
+                helpers.kernelPrepare d matricesSize from1 from2 result
          
-            helpers.commandQueue.Add(helpers.kernelRun()).Finish() |> ignore        
-            helpers.commandQueue.Add(result.ToHost helpers.provider).Finish() |> ignore
+                helpers.commandQueue.Add(helpers.kernelRun()).Finish() |> ignore        
+                helpers.commandQueue.Add(result.ToHost helpers.provider).Finish() |> ignore
+                gpuMutex.ReleaseMutex()
+            else 
+                failwith "cant get gpuMutex"
                         
             result
             
@@ -403,30 +417,36 @@ open Util
             let matricesCount = fullTasks.Length
             let matricesCellCount = matricesSize * matricesSize
 
-            fullTasks
-            |> Array.iteri (fun i ({ from1 = from }, nts) -> (getTMatrix <| fst nts).CopyToArray id false from helpers.mult1 (i * matricesCellCount))
+            if gpuMutex.WaitOne()
+            then
+                fullTasks
+                |> Array.iteri (fun i ({ from1 = from }, nts) -> (getTMatrix <| fst nts).CopyToArray id false from helpers.mult1 (i * matricesCellCount))
             
-            fullTasks
-            |> Array.iteri (fun i ({ from2 = from }, nts) -> (getTMatrix <| snd nts).CopyToArray id true  from helpers.mult2 (i * matricesCellCount))
+                fullTasks
+                |> Array.iteri (fun i ({ from2 = from }, nts) -> (getTMatrix <| snd nts).CopyToArray id true  from helpers.mult2 (i * matricesCellCount))
 
-            helpers.sizes.[2] <- int32 matricesSize
-            helpers.sizes.[3] <- int32 matricesCount
+                helpers.sizes.[2] <- int32 matricesSize
+                helpers.sizes.[3] <- int32 matricesCount
 
-            helpers.commandQueue.Add(helpers.mult1.ToGpu(helpers.provider)) |> ignore   
-            helpers.commandQueue.Add(helpers.mult2.ToGpu(helpers.provider)) |> ignore  
-            helpers.commandQueue.Add(helpers.sizes.ToGpu(helpers.provider)) |> ignore          
-            helpers.commandQueue.Add(helpers.kernelRun()) |> ignore        
-            helpers.commandQueue.Add(helpers.result.ToHost helpers.provider).Finish() |> ignore
+                helpers.commandQueue.Add(helpers.mult1.ToGpu(helpers.provider)) |> ignore   
+                helpers.commandQueue.Add(helpers.mult2.ToGpu(helpers.provider)) |> ignore  
+                helpers.commandQueue.Add(helpers.sizes.ToGpu(helpers.provider)) |> ignore          
+                helpers.commandQueue.Add(helpers.kernelRun()) |> ignore        
+                helpers.commandQueue.Add(helpers.result.ToHost helpers.provider).Finish() |> ignore
 
-            let flushOneMatrix num = 
-                let matrix = 
-                    helpers.result.[num * matricesCellCount .. (num + 1) * matricesCellCount - 1]
-                    |> ProbabilityMatrix.create matricesSize
-                let task, nts = fullTasks.[num]
-                (getPMatrix nts).AddSubmatrix task.where matrix          
+                let flushOneMatrix num = 
+                    let matrix = 
+                        helpers.result.[num * matricesCellCount .. (num + 1) * matricesCellCount - 1]
+                        |> ProbabilityMatrix.create matricesSize
+                    let task, nts = fullTasks.[num]
+                    (getPMatrix nts).AddSubmatrix task.where matrix          
             
-            [|0..matricesCount - 1|]
-            |> (if helpers.options.doParallelFlush then Array.Parallel.iter else Array.iter) flushOneMatrix
+                [|0..matricesCount - 1|]
+                |> (if helpers.options.doParallelFlush then Array.Parallel.iter else Array.iter) flushOneMatrix
+
+                gpuMutex.ReleaseMutex()
+            else 
+                failwith "cant get gpuMutex"
             
         let doBrahmaMultiplications helpers (getTMatrix: _ -> ProbabilityMatrix.T) (getPMatrix: _ -> ProbabilityMatrix.T) matricesSize (fullTasks: _ []) = 
             let matricesCount = fullTasks.Length
@@ -513,7 +533,7 @@ open Util
         let GPUMultiplicator = 
             // todo: think about search size!!!!!!!!!!            
             let maxMatrixForMultiplicationSize = (1 <<< (matrixSizeExponent - 1))
-            MatriceswMultiplicator (options, 
+            MatricesMultiplicator (options, 
                                     Probability.innerSummQuote, 
                                     Probability.innerMultQuote, 
                                     Probability.InnerType.zeroQuote, 

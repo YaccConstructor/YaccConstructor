@@ -1,1 +1,0 @@
-..\..\Bin\Release\v40\YC.YaccConstructor.exe -i aa.yrd -c ExpandRepeat -c ExpandEbnf -c ExpandMeta -g "GLLGenerator -pos int -token int -module GLL.aa -o aa.yrd.fs -abstract true" >> log.txt

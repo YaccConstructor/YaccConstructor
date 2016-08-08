@@ -76,7 +76,7 @@ type GLLFSA() =
             //let newDefinition = initialConvert definition
             let fsa = new FSAGrammar(definition.grammar.[0].rules)
 
-            fsa.PrintDot @"C:\zgrviewer-0.10.0\dot\bio_grammar_before_inline.dot"
+            fsa.PrintDot @"C:\zgrviewer-0.10.0\dot\fsa_grammar.dot"
             
             use out = new System.IO.StreamWriter (output)
             let res = new System.Text.StringBuilder()

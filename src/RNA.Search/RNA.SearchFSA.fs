@@ -1,11 +1,11 @@
-﻿module YC.Bio.RNA.Search
+﻿module YC.Bio.RNA.SearchFSA
 
 open Argu
 
 open YC.BIO.BioGraphLoader
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
-open Yard.Generators.GLL.AbstractParserWithoutTree
+open Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput
 
 open YC.Bio.RNA.tblReader
 open YC.Bio.RNA.IO
@@ -46,7 +46,7 @@ type msg =
 
 [<Struct>]
 type SearchConfig =
-    val SearchWithoutSPPF: BioParserInputGraph -> int -> ParseResult<ResultStruct>
+    val SearchWithoutSPPF: BioParserInputGraph -> (*int -> *)ParseResult<ResultStruct>
     //val SearchWithSPPF: ParserInputGraph -> ParseResult<int>
     val Tokenizer: char -> int
     val HighLengthLimit: int
@@ -69,11 +69,7 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lowLengthLimit highLength
     //let hihtLenghtLimit = 500.0
     let hihtLenghtLimit = float highLengthLimit
     let weightLimit = 10000
-    let x = 
-        res 
-        |> Array.sumBy (fun i -> if i.length > uint16 highLengthLimit then 1 else 0)
-
-
+    // (leftEdge, rightEdge) , (leftPosition, rightPosition, lengthOfPath)
     let filteredByLength = 
         res 
         |> Array.filter (fun i -> i.length >= uint16 lowLengthLimit && i.length <= uint16 highLengthLimit)
@@ -204,7 +200,7 @@ let searchInBioGraphs (searchCfg : SearchConfig) graphs agentsCount =
                                 //|> Array.iter (fun x -> printf "%s" <| searchCfg.NumToString x)
                                 //printfn ""
 
-                                let parseResult = searchCfg.SearchWithoutSPPF graph searchCfg.StartNonterm
+                                let parseResult = searchCfg.SearchWithoutSPPF graph// searchCfg.StartNonterm
                                 printfn "SearchWithoutSPPF done"
                                 match parseResult with
                                 | Success1 result -> 
@@ -278,7 +274,7 @@ let searchMain path what agentsCount =
     let workingDir = System.AppDomain.CurrentDomain.BaseDirectory + @"..\..\..\infernal\"
    
     let graphs = 
-        graphs.[1..1]
+        graphs.[0..0]
         //graphs.[1500..]
         //graphs.[5000..5050]
         //graphs.[4071..4072]
@@ -322,7 +318,7 @@ let toSmallEdges path =
     File.WriteAllLines(path + lblsExt, toPrint)
     File.WriteAllLines(path + graphStrauctureExt, getVertexList (strings.Length+1)@["\n"]@ getEdgeList strings.Length)
 
-//[<EntryPoint>]
+[<EntryPoint>]
 let main argv = 
     //let qq = getTbl @"C:\CM\log.txt"
     //let path = @"C:\YCInfernal\Tests\bio\16s_1_small_edges\test"

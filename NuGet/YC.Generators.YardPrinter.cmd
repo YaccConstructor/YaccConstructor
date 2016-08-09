@@ -1,1 +1,0 @@
-nuget pack ..\src\YardPrinter\YC.Generators.YardPrinter.nuspec 

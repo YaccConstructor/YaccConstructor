@@ -16,15 +16,7 @@ type LexerEdge<'l ,'br  when 'l: equality> (s,e,t) =
 
 type DAG<'l,'br  when 'l: equality> () =
     inherit AdjacencyGraph<int, LexerEdge<'l,'br>>()
-    let mutable startV = None
-
-    member this.AddEdgeForsed (e:LexerEdge<'l,'br>) =        
-        this.AddVertex e.Source |> ignore
-        this.AddVertex e.Target |> ignore
-        this.AddEdge e |> ignore
-
-    member this.AddEdgesForsed (edges:#seq<LexerEdge<_,_>>) =
-        Seq.iter this.AddEdgeForsed edges
+    let mutable startV = None   
 
     member this.StartVertex 
         with get () = match startV with Some v -> v | _ -> failwith "Start vertex is not defined!"
@@ -75,7 +67,7 @@ type LexerInnerGraph<'br> (g:LexerInputGraph<'br>) as this =
                         | i                  -> new LexerEdge<_,_>(!counter,(incr counter; !counter),Some(ss.[i],br.Value))
                     )
         let newEdges = g.Edges |> Array.ofSeq |> Array.collect splitEdge
-        this.AddEdgesForsed(newEdges)
+        this.AddVerticesAndEdgeRange(newEdges) |> ignore
         this.StartVertex <- g.StartVertex
 
     do convert()

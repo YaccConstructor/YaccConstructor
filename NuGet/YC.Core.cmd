@@ -1,1 +1,0 @@
-nuget pack ..\src\YaccConstructor\YC.Core.nuspec

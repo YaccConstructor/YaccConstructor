@@ -1,1 +1,0 @@
-bin\Release\SQLSelectDemo.exe -i "test input.sql"

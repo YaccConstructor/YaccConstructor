@@ -369,5 +369,5 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         | None -> Error ("String was not parsed")
         | Some res -> 
             let r1 = new Tree<_> (tokens, res, parser.rules)
-            r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
+            //r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
             Success (r1)

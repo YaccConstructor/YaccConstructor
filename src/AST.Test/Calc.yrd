@@ -1,2 +1,0 @@
-[<Start>]
-expr : a=expr '+' b=expr {a + b} | a=expr '*' b=expr {a * b} | A {1} | B{10} | C{100} | D{1000}

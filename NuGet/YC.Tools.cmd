@@ -1,1 +1,0 @@
-nuget pack ..\src\YC.FsYacc\Tools.nuspec

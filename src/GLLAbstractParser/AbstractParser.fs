@@ -315,9 +315,11 @@ let buildAbstractAst<'TorenType> (parser : ParserSourceGLL<'TorenType>) (input :
             | Some res -> 
                     if true then        
                             let r1 = new Tree (tokens.ToArray(), res, parser.rules)
+                    if true//checkConj res 
+                    then        
                             printf "%A" r1
                             //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
-                            //r1.AstToDot parser.NumToString "AST123456.dot"
+                            //r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
                             //let t = r1.GetPath 1
                             //printfn "%d" !tempCount
                             ParseResult<'TokenType>.Success(r1)   

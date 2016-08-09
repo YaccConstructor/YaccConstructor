@@ -36,7 +36,7 @@ type ParseResult<'TokenType> =
 [<AllowNullLiteral>]
 type Vertex (state : int, level : int) =
     let out = new ResizeArray<Edge>(4)
-    let passingReductions = new HashSet<_>()
+    let passingReductions = new ResizeArray<_>(10)
     member this.Level = level
     member this.OutEdges = out
     member this.State = state
@@ -146,6 +146,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         [ for initS in tokens.InitStates -> verticesMap.[initS] ],
         [ for finalS in tokens.FinalStates -> verticesMap.[finalS] ],
         g        
+        //verticesMap.[tokens.InitState], verticesMap.[tokens.FinalState], g
             
     let nodes = new BlockResizeArray<AstNode>()
     let terminals = new BlockResizeArray<'TokenType>()

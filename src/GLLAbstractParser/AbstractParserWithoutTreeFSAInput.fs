@@ -14,20 +14,11 @@ type SysDict<'k,'v> = System.Collections.Generic.Dictionary<'k,'v>
 type Queue<'t> = System.Collections.Generic.Queue<'t>
 type CompressedArray<'t> = Yard.Generators.GLL.ParserCommon.CompressedArray<'t>
      
-[<Struct>]
-type ResultStruct =
-    val le : int
-    val lpos : int
-    val re : int
-    val rpos : int
-    val length : uint16
-    new (l, l1, r, r1, len) = {le = l; lpos = l1; re = r; rpos = r1; length = len}
-    override this.ToString () = "Start:edge:" + (this.le.ToString()) + ";pos:" + (this.lpos.ToString()) + "--" +
-                                "Final:edge:" + (this.re.ToString()) + ";pos:" + (this.rpos.ToString())
+
 
 let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) = 
     //let shift = input.Shift
-    if input.EdgeCount = 0 then Error ("This grammar does not accept empty input.") else
+    if input.EdgeCount = 0 then failwith ("This grammar does not accept empty input.") else
     let result = new System.Collections.Generic.HashSet<_>()
     let dummyEdge = input.EdgeCount
     let outEdges = 

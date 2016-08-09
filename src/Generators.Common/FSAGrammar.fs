@@ -60,8 +60,13 @@ type FSAGrammar (ruleList : Rule.t<Source.t,Source.t> list) =
                      _stateStringDict.Add (state,token.text)
                      Nonterm state
 
-        let newEdge isTerm firstState (finalState : int<state> option) s =
-            let symbol = sourse_tToSymbol isTerm s
+        let newEdge isTerm firstState (finalState : int<state> option) (s : Source.t option) =
+            let symbol =
+                if s.IsNone
+                then
+                    Epsilon()
+                else
+                    sourse_tToSymbol isTerm s.Value
             let final = ref dummyState
             let nextState = 
                 _states.[int firstState]
@@ -148,13 +153,13 @@ type FSAGrammar (ruleList : Rule.t<Source.t,Source.t> list) =
                     | hd :: [] -> productionToStates first final hd.rule
                     | hd :: tl -> let newstate = productionToStates first None hd.rule
                                   seqToStates newstate final tl
-                    | [] -> failwith "PSeq is empty!!!"
+                    | [] -> newEdge false first final None
                 seqToStates firstState finalState s
             // Token itself. Final element of parsing. of Source.t 
             // Literal. We can use constants ("if" and "then" in ' .."if" expr "then" expr...') of Source.t 
-            | PToken s | PLiteral s -> newEdge true firstState finalState s
+            | PToken s | PLiteral s -> newEdge true firstState finalState (Some s)
             // Reference to other rule inside production. With an optional args list.  of Source.t * 'expr option
-            | PRef (rule,_) -> newEdge false firstState finalState rule 
+            | PRef (rule,_) -> newEdge false firstState finalState (Some rule )
             // Reference to metarule inside production (mr<<x>> in rule "a: mr<<x>> y z") of Source.t * 'expr option * t<'patt,'expr> list 
             | PMetaRef _ -> failwith "Metaref found!!!"
             // expr* of (t<'patt,'expr>)
@@ -260,8 +265,6 @@ type FSAGrammar (ruleList : Rule.t<Source.t,Source.t> list) =
     do
         convertRulesToFSA ()
         genFirstSet()
-        //inlineNonterms()
-        //_printDot @"C:\zgrviewer-0.10.0\dot\bio_grammar.dot"
 
 
 
@@ -273,4 +276,3 @@ type FSAGrammar (ruleList : Rule.t<Source.t,Source.t> list) =
     member this.NontermCount = _nonterms.Count
     member this.FirstSet = firstSet
     member this.IntToString = _stateStringDict
-    //member this.nontermStates = _nontermStates

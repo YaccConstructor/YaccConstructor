@@ -41,7 +41,6 @@
   <ItemGroup>
     <Compile Include="TreeProcessor.fs" />
     <Compile Include="AbstractParserWithoutTreeFSAInput.fs" />
-    <Compile Include="AbstractParserWithoutTree.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>

@@ -22,18 +22,6 @@ type M =
     val lbl : int<labelMeasure>
     new (p,l) = {pos = p; lbl = l}
         
-[<Struct>]
-type ResultStruct =
-    val le : int
-    val lpos : int
-    val re : int
-    val rpos : int
-    val nterm  : string
-    val length : uint16
-    new (l,l1, r, r1, n, len) = {le = l; lpos = l1; re = r; rpos = r1; nterm = n; length = len}
-    override this.ToString () = "Start:edge:" + (this.le.ToString()) + ";pos:" + (this.lpos.ToString()) + "--" +
-                                "Final:edge:" + (this.re.ToString()) + ";pos:" + (this.rpos.ToString())
-
 let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : BioParserInputGraph) (condNonTerm: int) = 
     //let condNonTerm = condNonTermInt*1<labelMeasure>
     let shift = input.Shift
@@ -318,7 +306,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                                                 getPosOnEdge <| (getLeftExtension !currentExtension)*1<positionInInput>,
                                                 getEdge <| (getRightExtension !currentExtension)*1<positionInInput>,
                                                 getPosOnEdge <| (getRightExtension !currentExtension)*1<positionInInput>,
-                                                parser.NumToString <| int parser.LeftSide.[rule],
+                                                //parser.NumToString <| int parser.LeftSide.[rule],
                                                 !currentLength))
                     |> ignore
                 
@@ -386,7 +374,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : Bi
                                                     getPosOnEdge <| (getLeftExtension !currentExtension)*1<positionInInput>,
                                                     getEdge <| (getRightExtension !currentExtension)*1<positionInInput>,
                                                     getPosOnEdge <| (getRightExtension !currentExtension)*1<positionInInput>,
-                                                    parser.NumToString <| int parser.LeftSide.[rule],
+                                                    //parser.NumToString <| int parser.LeftSide.[rule],
                                                     !currentLength))
                         |> ignore
                       

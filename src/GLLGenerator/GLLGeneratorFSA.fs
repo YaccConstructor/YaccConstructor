@@ -20,7 +20,7 @@ do()
 [<Extension>]
 type GLLFSA() = 
     inherit Generator()
-        override this.Name = "GLLGeneratorFSA"
+        override this.Name = "GLLFSAGenerator"
         override this.Constraints = [|noMeta; noBrackets; singleModule; noInnerAlt|]
         override this.Generate (definition, args) =
             let start = System.DateTime.Now
@@ -95,7 +95,7 @@ type GLLFSA() =
                 let n = output.Substring(0, output.IndexOf("."))
                 let mName = 
                     if isAbstract then
-                        "GLL.AbstractParse." + n
+                        "GLLFSA.AbstractParse." + n
                     else
                         "GLL.Parse"
 

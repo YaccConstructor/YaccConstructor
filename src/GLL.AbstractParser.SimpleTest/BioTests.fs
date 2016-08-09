@@ -19,8 +19,8 @@ open System.IO
 open QuickGraph
 open NUnit.Framework
 open AbstractAnalysis.Common
-open Yard.Generators.GLL.AbstractParser
-open Yard.Generators.GLL.AbstractParserWithoutTree
+//open Yard.Generators.GLL.AbstractParser
+open Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput
 open YC.Tests.Helper
 open Yard.Generators.Common.ASTGLL
 open Yard.Generators.GLL.ParserCommon
@@ -115,7 +115,7 @@ type ``GLL abstract parser tests bio`` () =
                 |> GLL.tRNA.tokenToNumber                
         let basePath = "../../../Tests/bio/"
         let path = Path.Combine(basePath, file)
-        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.tRNA.RNGLR_EOF 0)
+        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb// (GLL.tRNA.RNGLR_EOF 0)
 
         graphs        
         |> Array.ofSeq        
@@ -165,7 +165,7 @@ type ``GLL abstract parser tests bio`` () =
                 |> GLL.shiftProblem.tokenToNumber                
         let basePath = "../../../Tests/bio/"
         let path = Path.Combine(basePath, file)
-        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb (GLL.shiftProblem.RNGLR_EOF 0)
+        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path lengthLimit getSmb// (GLL.shiftProblem.RNGLR_EOF 0)
 
         graphs
         |> Array.ofSeq
@@ -204,7 +204,7 @@ type ``GLL abstract parser tests bio`` () =
                 |> GLL.VeryVerySmall.tokenToNumber                
         let basePath = "../../../Tests/bio/"
         let path = Path.Combine(basePath, file)
-        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 20 getSmb (GLL.VeryVerySmall.RNGLR_EOF 0)
+        let graphs,longEdges = YC.BIO.BioGraphLoader.loadGraphFormFileToBioParserInputGraph path 20 getSmb// (GLL.VeryVerySmall.RNGLR_EOF 0)
 
         graphs
         |> Array.ofSeq

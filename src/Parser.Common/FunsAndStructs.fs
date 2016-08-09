@@ -113,6 +113,17 @@ type ParseResult<'a> =
     | Success1 of 'a[]
     | Error of string
 
+[<Struct>]
+type ResultStruct =
+    val le : int
+    val lpos : int
+    val re : int
+    val rpos : int
+    val length : uint16
+    new (l, l1, r, r1, len) = {le = l; lpos = l1; re = r; rpos = r1; length = len}
+    override this.ToString () = "Start:edge:" + (this.le.ToString()) + ";pos:" + (this.lpos.ToString()) + "--" +
+                                "Final:edge:" + (this.re.ToString()) + ";pos:" + (this.rpos.ToString())
+
 type CompressedArray<'t>(l : int[], f : _ -> 't, shift) =
     let a = Array.init l.Length (fun i -> Array.init (l.[i]) f)
     member this.Item         

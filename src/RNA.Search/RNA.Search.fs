@@ -232,39 +232,7 @@ let searchInBioGraphs (searchCfg : SearchConfig) graphs agentsCount =
     printfn "Total time = %A" (System.DateTime.Now - start)
     0
 
-let r16s_H22_H23_SearchConfig =
 
-    let getSmb =
-        let cnt = ref 0
-        fun ch ->
-            let i = incr cnt; !cnt 
-            match ch with
-            | 'A' | 'a' -> GLL.r16s.H22_H23.A ()                
-            | 'U' | 'u' 
-            | 'T' | 't' -> GLL.r16s.H22_H23.U ()
-            | 'C' | 'c' -> GLL.r16s.H22_H23.C ()
-            | 'G' | 'g' -> GLL.r16s.H22_H23.G ()
-            | _ -> GLL.r16s.H22_H23.U ()
-            | x ->   failwithf "Strange symbol in input: %A" x
-            (*match ch with
-            | 'A' | 'a' -> GLL.r16s.H22_H23.A ()                
-            | 'K' | 'k' -> GLL.r16s.H22_H23.K ()
-            | 'B' | 'b' -> GLL.r16s.H22_H23.B ()
-            | 'C' | 'c' -> GLL.r16s.H22_H23.C ()
-            | 'F' | 'f' -> GLL.r16s.H22_H23.F ()
-            | 'L' | 'l' -> GLL.r16s.H22_H23.L ()
-            | 'M' | 'm' -> GLL.r16s.H22_H23.M ()
-            | 'U' | 'u' -> GLL.r16s.H22_H23.U ()
-            | 'E' | 'e' -> GLL.r16s.H22_H23.E ()
-            | x ->   failwithf "Strange symbol in input: %A" x*)
-            |> GLL.r16s.H22_H23.tokenToNumber
-    
-    new SearchConfig(GLL.r16s.H22_H23.buildAbstract(*, GLL.r16s.H22_H23.buildAbstractAst*), getSmb, 
-                        //300, 550, 14, GLL.r16s.H22_H23.numToString)
-                     318, 370, 14, GLL.r16s.H22_H23.numToString)
-                        //0 , 10, 14, GLL.r16s.H22_H23.numToString)
-                        //400, 550, 14, GLL.r16s.H22_H23.numToString)
-                        //800, 910, 14, GLL.r16s.H22_H23.numToString)
 
 let searchMain path what agentsCount =
     let searchCfg = 
@@ -322,7 +290,6 @@ let toSmallEdges path =
     File.WriteAllLines(path + lblsExt, toPrint)
     File.WriteAllLines(path + graphStrauctureExt, getVertexList (strings.Length+1)@["\n"]@ getEdgeList strings.Length)
 
-//[<EntryPoint>]
 let main argv = 
     //let qq = getTbl @"C:\CM\log.txt"
     //let path = @"C:\YCInfernal\Tests\bio\16s_1_small_edges\test"

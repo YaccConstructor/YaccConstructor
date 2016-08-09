@@ -169,7 +169,7 @@
     <ProjectReference Include="..\RNA.Search\RNA.Search.fsproj">
       <Name>RNA.Search</Name>
       <Project>{f21f64d0-756e-4624-b422-d0638e75dca4}</Project>
-            <Private>True</Private>
+      <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\YC.Utils.SourceText\src\YC.Utils.SourceText\Utils.SourceText.fsproj">
       <Name>Utils.SourceText (Tools\Utils.SourceText\Utils.SourceText)</Name>

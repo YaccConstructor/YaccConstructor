@@ -201,9 +201,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="16s_H22_H23.yrd.fs" />
+    <Compile Include="FSA_16s_H22_H23.yrd.fs" />
     <Compile Include="tblReader.fs" />
     <Compile Include="io.fs" />
+    <Compile Include="structs.fs" />
     <Compile Include="RNA.SearchFSA.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />

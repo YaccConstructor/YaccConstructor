@@ -1,2 +1,2 @@
 [<Start>]
-s : NUM | LBR s RBR | s s
+s : NUM | LBR s RBR  | s s 

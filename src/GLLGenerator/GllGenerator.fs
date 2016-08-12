@@ -143,6 +143,7 @@ type GLL() =
                         else
                             println "open Yard.Generators.GLL.Parser"
                     println "open Yard.Generators.GLL"
+                    println "open Yard.Generators.GLL.Parser "
                     println "open Yard.Generators.Common.ASTGLL"
                     println "open Yard.Generators.GLL.ParserCommon"
 

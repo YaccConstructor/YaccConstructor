@@ -6,10 +6,11 @@ open IL
 open Constraints
 open Yard.Generators.Common
 open InitialConvert
-open Yard.Generators.Common.FSAGrammar
+open Yard.Generators.Common.FSA
 open Yard.Generators.GLL
 open PrintTable
 open Yard.Generators.GLL.TranslatorPrinter2
+open Yard.Generators.Common.FSA.Common
 
 open System.Collections.Generic
 
@@ -21,7 +22,7 @@ do()
 type GLLFSA() = 
     inherit Generator()
         override this.Name = "GLLFSAGenerator"
-        override this.Constraints = [|noMeta; noBrackets; singleModule; noInnerAlt|]
+        override this.Constraints = [|noMeta; noBrackets; singleModule(*; noInnerAlt*)|]
         override this.Generate (definition, args) =
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
@@ -74,9 +75,9 @@ type GLLFSA() =
                 | value -> failwithf "Unexpected %s option" value
                  
             //let newDefinition = initialConvert definition
-            let fsa = new FSAGrammar(definition.grammar.[0].rules)
+            let fsa = new FSA(definition.grammar.[0].rules)
 
-            fsa.PrintDot @"C:\zgrviewer-0.10.0\dot\fsa_grammar.dot"
+            //fsa.PrintDot @"C:\zgrviewer-0.10.0\dot\fsa_grammar.dot"
             
             use out = new System.IO.StreamWriter (output)
             let res = new System.Text.StringBuilder()
@@ -135,14 +136,14 @@ type GLLFSA() =
             let termToInt = new Dictionary<string,int>()
 
             let printFSA () = 
-                let nextInt = ref fsa.States.Count
+                let nextInt = ref fsa.States.Length
                 let eps = ref -1
                            
                 let fsaStates = 
                     fsa.States
-                    |> Seq.map (fun x ->
+                    |> Array.map (fun x ->
                         x
-                        |> List.map (fun (symbol,state) -> 
+                        |> Array.map (fun (symbol,state) -> 
                             match symbol with
                                 | Nonterm s -> s.ToString(), state
                                 | Term s -> 
@@ -162,7 +163,7 @@ type GLLFSA() =
                                         (!eps).ToString(), state))
                     |> List.ofSeq
 
-                let printState (state:(string * int<state>) list) isFirst isLast =
+                let printState (state:(string * int<state>) []) isFirst isLast =
                     let prefix = if isFirst then "  [|" else "    "
                     let postfix = if isLast then " |]" else ";"
 
@@ -178,7 +179,7 @@ type GLLFSA() =
                         print "[||]"
                     else
                         state
-                        |> List.iteri (fun i edge -> printEdge edge (i = 0) (i = state.Length-1))
+                        |> Array.iteri (fun i edge -> printEdge edge (i = 0) (i = state.Length-1))
 
                     println "%s" postfix
                 

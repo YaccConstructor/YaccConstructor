@@ -1,0 +1,316 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>61a3b851-03a0-4a87-b786-d21dfe03b9dd</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>GLL.AbstractParser.SimpleTest</RootNamespace>
+    <AssemblyName>GLL.AbstractParser.SimpleTest</AssemblyName>
+    <Name>GLL.AbstractParser.SimpleTest</Name>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '11.0'">
+      <PropertyGroup>
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <Tailcalls>false</Tailcalls>
+    <OutputPath>..\..\Bin\Debug\v40</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <!--DocumentationFile>bin\Debug\FsYaccFrontend.XML</DocumentationFile-->
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OutputPath>..\..\Bin\Release\v40</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <!--DocumentationFile>bin\Release\FsYaccFrontend.XML</DocumentationFile-->
+  </PropertyGroup>
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '11.0'">
+      <PropertyGroup>
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ItemGroup>
+    <Compile Include="SimpleBranch.yrd.fs" />
+    <Compile Include="BadLeftRecursion.yrd.fs" />
+    <Compile Include="SimpleAmb.yrd.fs" />
+    <Compile Include="SimpleleftRecursion.yrd.fs" />
+    <Compile Include="SimpleRightNull.yrd.fs" />
+    <Compile Include="SimpleRightRecursion.yrd.fs" />
+    <Compile Include="Brackets.yrd.fs" />
+    <Compile Include="Calc.yrd.fs" />
+    <Compile Include="CroppedBrackets.yrd.fs" />
+    <Compile Include="Eps.yrd.fs" />
+    <Compile Include="FirstEps.yrd.fs" />
+    <Compile Include="List.yrd.fs" />
+    <Compile Include="NotAmbigousSimpleCalc.yrd.fs" />
+    <Compile Include="NotAmbigousSimpleCalcWith2Ops.yrd.fs" />
+    <Compile Include="PrettySimpleCalc.yrd.fs" />
+    <Compile Include="SimpleCalc.yrd.fs" />
+    <Compile Include="simpleCalc_with_Nterms.yrd.fs" />
+    <Compile Include="simpleCalc_with_Nterms_2.yrd.fs" />
+    <Compile Include="simpleCalc_with_Nterms_3.yrd.fs" />
+    <Compile Include="simpleCalc_with_Nterms_4.yrd.fs" />
+    <Compile Include="Stars.yrd.fs" />
+    <Compile Include="Stars2.yrd.fs" />
+    <Compile Include="StrangeBrackets.yrd.fs" />
+    <Compile Include="Attrs.yrd.fs" />
+    <Compile Include="Cond.yrd.fs" />
+    <Compile Include="Counter.yrd.fs" />
+    <Compile Include="Cycle.yrd.fs" />
+    <Compile Include="Eps2.yrd.fs" />
+    <Compile Include="Epsilon.yrd.fs" />
+    <Compile Include="Expr.yrd.fs" />
+    <Compile Include="First.yrd.fs" />
+    <Compile Include="ListEps.yrd.fs" />
+    <Compile Include="LolCalc.yrd.fs" />
+    <Compile Include="LongCycle.yrd.fs" />
+    <Compile Include="LongCycle_BAD.yrd.fs" />
+    <Compile Include="Longest.yrd.fs" />
+    <Compile Include="Mixed.yrd.fs" />
+    <Compile Include="Omit.yrd.fs" />
+    <Compile Include="MsSqlParser.yrd.fs" />
+    <Compile Include="shift_problem.yrd.fs" />
+    <Compile Include="tRNA.yrd.fs" />
+    <Compile Include="multiple_edges_problem.yrd.fs" />
+    <Compile Include="very_very_small.yrd.fs" />
+    <Compile Include="intersection_small.yrd.fs" />
+    <Compile Include="BioTests.fs" />
+    <Compile Include="Tests.fs" />
+    <Compile Include="Program.fs" />
+    <Content Include="App.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\..\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
+      <Name>AbstractAnalysis.Common</Name>
+      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\AST.Common\Common.AST.fsproj">
+      <Name>Common.AST</Name>
+      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\BioGraphLoader\BioGraphLoader.fsproj">
+      <Name>BioGraphLoader</Name>
+      <Project>{ffbc56cc-6fa9-40fa-bf23-5404fd5e2d4a}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\GLLAbstractParser\GLLAbstractParser.fsproj">
+      <Name>GLLAbstractParser</Name>
+      <Project>{bd40477e-7ceb-4ff4-b53f-05316f3bb6d8}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Helper\Helper.fsproj">
+      <Name>Helper</Name>
+      <Project>{fc9a166c-780d-4d15-b366-ca06277c803d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Parser.Common\GLLParsers.Common.fsproj">
+      <Name>GLLParsers.Common</Name>
+      <Project>{f2e8eda4-c13f-4f8d-b858-d5ef4fb8a06d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\RNA.Search\RNA.Search.fsproj">
+      <Name>RNA.Search</Name>
+      <Project>{f21f64d0-756e-4624-b422-d0638e75dca4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\YC.Utils.SourceText\src\YC.Utils.SourceText\Utils.SourceText.fsproj">
+      <Name>Utils.SourceText (Tools\Utils.SourceText\Utils.SourceText)</Name>
+      <Project>{f296356b-00c3-465c-9c97-7cfa279f5574}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
+        <Reference Include="DotParser">
+          <HintPath>..\..\packages\DotParser\lib\net45\DotParser.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
+        <Reference Include="FSharp.Core">
+          <HintPath>..\..\packages\FSharp.Core\lib\net40\FSharp.Core.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
+        <Reference Include="FSharpx.Collections">
+          <HintPath>..\..\packages\FSharpx.Collections\lib\net40\FSharpx.Collections.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
+        <Reference Include="FSharpx.Collections.Experimental">
+          <HintPath>..\..\packages\FSharpx.Collections.Experimental\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
+        <Reference Include="nunit.framework">
+          <HintPath>..\..\packages\NUnit\lib\nunit.framework.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
+        <Reference Include="QuickGraph.Data">
+          <HintPath>..\..\packages\QuickGraph\lib\net4\QuickGraph.Data.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="QuickGraph.Graphviz">
+          <HintPath>..\..\packages\QuickGraph\lib\net4\QuickGraph.Graphviz.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="QuickGraph.Serialization">
+          <HintPath>..\..\packages\QuickGraph\lib\net4\QuickGraph.Serialization.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="QuickGraph">
+          <HintPath>..\..\packages\QuickGraph\lib\net4\QuickGraph.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
+        <Reference Include="YC.QuickGraph.Data">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.Data.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph.FSA">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.FSA.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph.FST">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.FST.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph.Glee">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.Glee.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph.Graphviz">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.Graphviz.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph.Petri">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.Petri.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraphFS">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraphFS.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+</Project>

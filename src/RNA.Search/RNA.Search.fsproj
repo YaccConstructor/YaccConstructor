@@ -1,220 +1,182 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>f21f64d0-756e-4624-b422-d0638e75dca4</ProjectGuid>
+    <ProjectGuid>3d4a8bfe-32ed-47a7-8afb-5cf13266fb4b</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>RNA.Search</RootNamespace>
     <AssemblyName>RNA.Search</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <Name>RNA.Search</Name>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <NuGetPackageImportStamp>72d4d921</NuGetPackageImportStamp>
   </PropertyGroup>
-  <Import Project="../YC.targets" />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <Tailcalls>false</Tailcalls>
+    <OutputPath>..\..\Bin\Debug\v40\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>bin\Debug\RNA.Search.XML</DocumentationFile>
+    <Prefer32Bit>true</Prefer32Bit>
+    <StartArguments>--input "../../../tests/data/bio/mix_1\late_pair_info_count"</StartArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OutputPath>..\..\Bin\Release\v40\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>bin\Release\RNA.Search.XML</DocumentationFile>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '11.0'">
+      <PropertyGroup Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')">
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets')">
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  <Import Project="$(FSharpTargetsPath)" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v3.5'">
+      <ItemGroup>
+        <Reference Include="Argu">
+          <HintPath>..\..\packages\Argu\lib\net35\Argu.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
+        <Reference Include="Argu">
+          <HintPath>..\..\packages\Argu\lib\net40\Argu.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
+        <Reference Include="DotParser">
+          <HintPath>..\..\packages\DotParser\lib\net45\DotParser.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
+        <Reference Include="FSharpx.Collections">
+          <HintPath>..\..\packages\FSharpx.Collections\lib\net40\FSharpx.Collections.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
+        <Reference Include="FSharpx.Collections.Experimental">
+          <HintPath>..\..\packages\FSharpx.Collections.Experimental\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
+        <Reference Include="YC.QuickGraph.Data">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.Data.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph.FSA">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.FSA.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph.FST">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.FST.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph.Glee">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.Glee.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph.Graphviz">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.Graphviz.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph.Petri">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.Petri.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraphFS">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraphFS.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
   <ItemGroup>
-    <Reference Include="Argu">
-      <HintPath>..\packages\Argu.2.0\lib\net40\Argu.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharp.Core">
-      <HintPath>..\packages\FSharp.Core.4.0.0.1\lib\net40\FSharp.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Collections">
-      <HintPath>..\packages\FSharpx.Collections.1.14.0\lib\net40\FSharpx.Collections.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Collections.Experimental">
-      <HintPath>..\packages\FSharpx.Collections.Experimental.1.14.0\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FsPickler">
-      <HintPath>..\packages\FsPickler.2.0.0\lib\net45\FsPickler.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FsPickler.Json">
-      <HintPath>..\packages\FsPickler.Json.2.0.0\lib\net45\FsPickler.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Hyak.Common">
-      <HintPath>..\packages\Hyak.Common.1.1.0\lib\net45\Hyak.Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="MBrace.Azure">
-      <HintPath>..\packages\MBrace.Azure.1.2.2\lib\net45\MBrace.Azure.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="MBrace.Core">
-      <HintPath>..\packages\MBrace.Core.1.1.7\lib\net45\MBrace.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="MBrace.Runtime">
-      <HintPath>..\packages\MBrace.Runtime.1.1.7\lib\net45\MBrace.Runtime.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Azure.Common">
-      <HintPath>..\packages\Microsoft.Azure.Common.2.1.0\lib\net45\Microsoft.Azure.Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Azure.Common.NetFramework">
-      <HintPath>..\packages\Microsoft.Azure.Common.2.1.0\lib\net45\Microsoft.Azure.Common.NetFramework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Data.Edm">
-      <HintPath>..\packages\Microsoft.Data.Edm.5.7.0\lib\net40\Microsoft.Data.Edm.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Data.OData">
-      <HintPath>..\packages\Microsoft.Data.OData.5.7.0\lib\net40\Microsoft.Data.OData.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Data.Services.Client">
-      <HintPath>..\packages\Microsoft.Data.Services.Client.5.7.0\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.ServiceBus">
-      <HintPath>..\packages\WindowsAzure.ServiceBus.2.5.4\lib\net40-full\Microsoft.ServiceBus.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Threading.Tasks">
-      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Threading.Tasks.Extensions">
-      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Threading.Tasks.Extensions.Desktop">
-      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.Desktop.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Common">
-      <HintPath>..\packages\Microsoft.WindowsAzure.Common.1.4.1\lib\net45\Microsoft.WindowsAzure.Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Common.NetFramework">
-      <HintPath>..\packages\Microsoft.WindowsAzure.Common.1.4.1\lib\net45\Microsoft.WindowsAzure.Common.NetFramework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Configuration">
-      <HintPath>..\packages\Microsoft.WindowsAzure.ConfigurationManager.1.8.0.0\lib\net35-full\Microsoft.WindowsAzure.Configuration.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Management">
-      <HintPath>..\packages\Microsoft.WindowsAzure.Management.2.2.2\lib\net40\Microsoft.WindowsAzure.Management.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Management.Compute">
-      <HintPath>..\packages\Microsoft.WindowsAzure.Management.Compute.5.3.0\lib\net40\Microsoft.WindowsAzure.Management.Compute.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Management.MediaServices">
-      <HintPath>..\packages\Microsoft.WindowsAzure.Management.MediaServices.2.1.2\lib\net40\Microsoft.WindowsAzure.Management.MediaServices.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Management.Monitoring">
-      <HintPath>..\packages\Microsoft.WindowsAzure.Management.Monitoring.1.0.1\lib\net40\Microsoft.WindowsAzure.Management.Monitoring.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Management.Network">
-      <HintPath>..\packages\Microsoft.WindowsAzure.Management.Network.3.2.1\lib\net40\Microsoft.WindowsAzure.Management.Network.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Management.Scheduler">
-      <HintPath>..\packages\Microsoft.WindowsAzure.Management.Scheduler.3.1.1\lib\net40\Microsoft.WindowsAzure.Management.Scheduler.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Management.ServiceBus">
-      <HintPath>..\packages\Microsoft.WindowsAzure.Management.ServiceBus.0.18.0-preview\lib\net40\Microsoft.WindowsAzure.Management.ServiceBus.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Management.Sql">
-      <HintPath>..\packages\Microsoft.WindowsAzure.Management.Sql.3.1.2\lib\net40\Microsoft.WindowsAzure.Management.Sql.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Management.Storage">
-      <HintPath>..\packages\Microsoft.WindowsAzure.Management.Storage.3.2.2\lib\net40\Microsoft.WindowsAzure.Management.Storage.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Management.WebSites">
-      <HintPath>..\packages\Microsoft.WindowsAzure.Management.WebSites.3.2.0-prerelease\lib\net40\Microsoft.WindowsAzure.Management.WebSites.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Storage">
-      <HintPath>..\packages\WindowsAzure.Storage.4.3.0\lib\net40\Microsoft.WindowsAzure.Storage.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Mono.Cecil">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Mono.Cecil.Mdb">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Mdb.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Mono.Cecil.Pdb">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Pdb.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Mono.Cecil.Rocks">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Rocks.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <Compile Include="16s_H22_H23.yrd.fs" />
+    <Compile Include="io.fs" />
+    <Compile Include="structs.fs" />
+    <Compile Include="tblReader.fs" />
+    <Compile Include="RNA.SearchFSA.fs" />
+    <None Include="paket.references" />
+    <Content Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="mscorlib" />
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Net.Http.Extensions">
-      <HintPath>..\packages\Microsoft.Net.Http.2.2.29\lib\net45\System.Net.Http.Extensions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Net.Http.Primitives">
-      <HintPath>..\packages\Microsoft.Net.Http.2.2.29\lib\net45\System.Net.Http.Primitives.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Net.Http.WebRequest" />
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="System.ServiceModel.Discovery" />
-    <Reference Include="System.Spatial">
-      <HintPath>..\packages\System.Spatial.5.7.0\lib\net40\System.Spatial.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Vagabond">
-      <HintPath>..\packages\Vagabond.0.12.10\lib\net45\Vagabond.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="FSA_16s_H22_H23.yrd.fs" />
-    <Compile Include="tblReader.fs" />
-    <Compile Include="io.fs" />
-    <Compile Include="structs.fs" />
-    <Compile Include="RNA.SearchFSA.fs" />
-    <None Include="App.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\QuickGraph\src\QuickGraph\QuickGraph.csproj">
-      <Name>QuickGraph (SEL.SDK\AbstractLexing\QuickGraph\Core\QuickGraph)</Name>
-      <Project>{a9a5c115-0680-44b3-a87e-5ecf4c93814e}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
       <Name>AbstractAnalysis.Common</Name>
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
@@ -230,55 +192,20 @@
       <Project>{ffbc56cc-6fa9-40fa-bf23-5404fd5e2d4a}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Generators.Common\Generators.Common.fsproj">
+      <Name>Generators.Common</Name>
+      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\GLLAbstractParser\GLLAbstractParser.fsproj">
       <Name>GLLAbstractParser</Name>
       <Project>{bd40477e-7ceb-4ff4-b53f-05316f3bb6d8}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Parser.Common\GLLParsers.Common.fsproj">
+    <ProjectReference Include="..\ParserCommon\GLLParsers.Common.fsproj">
       <Name>GLLParsers.Common</Name>
       <Project>{f2e8eda4-c13f-4f8d-b858-d5ef4fb8a06d}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <PropertyGroup>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <StartArguments>-i "../../../Tests/bio/mix_1\late_pair_info_count"</StartArguments>
-    <Prefer32Bit>false</Prefer32Bit>
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-i "../../../Tests/bio/synth_for_semen/simplification"</StartArguments>
-  </PropertyGroup>
-  <Choose>
-    <When Condition="'$(VisualStudioVersion)' == '11.0'">
-      <PropertyGroup Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')">
-        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
-      </PropertyGroup>
-    </When>
-    <Otherwise>
-      <PropertyGroup Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets')">
-        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
-      </PropertyGroup>
-    </Otherwise>
-  </Choose>
-  <Import Project="$(FSharpTargetsPath)" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
-  </Target>
-  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

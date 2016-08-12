@@ -54,7 +54,6 @@
     <Compile Include="Linearize.fs" />
     <Compile Include="ExpandRepet.fs" />
     <Compile Include="ToCNF.fs" />
-    <None Include="app.config" />
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>

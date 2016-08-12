@@ -35,14 +35,12 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <Reference Include="Accessibility" />
-      <HintPath>..\packages\FSharp.Core.4.0.0.1\lib\net40\FSharp.Core.dll</HintPath>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <!--Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" /-->
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="Lexer.fsl" />
     <None Include="Parser.fsy" />
     <Compile Include="Parser.fs" />

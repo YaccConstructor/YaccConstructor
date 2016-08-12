@@ -1,3 +1,0 @@
-[<Start>]
-expr: subexpr PLUS NUM
-subexpr: NUM

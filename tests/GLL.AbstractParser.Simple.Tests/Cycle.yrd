@@ -1,3 +1,0 @@
-[<Start>]
-start : f=s B {f}
-s : A  {0} | v=s {v+1}

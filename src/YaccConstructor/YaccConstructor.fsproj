@@ -25,17 +25,16 @@
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-i "C:\YCInfernal\src\GLL.AbstractParser.SimpleTest\SimpleCalc.yrd"  -g "GLLFSAGenerator -pos int -token int -module GLLFSA.ParseSimpleCalc -translate true -o SimpleCalc.yrd.fs -abstract true"</StartArguments>
+    <StartArguments>-i 16s.yrd -g "GLLFSAGenerator -module GLLFSA.r16s.H22_H23 -o 16s_H22_H23.yrd.fs -abstract true"</StartArguments>
     <StartWorkingDirectory>C:\Yacc Constructor</StartWorkingDirectory>
     <StartAction>Project</StartAction>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <StartArguments>-i C:\Users\Ekaterina\YaccConstructor\src\CheckInterpreter\Calc.yrd -g "TestGenerator -pos int -token int -o C:\Users\Ekaterina\YaccConstructor\src\CheckInterpreter\Calc_lalr1.fs -parserType LALR1"</StartArguments>
+    <StartArguments>-i 16s.yrd -g "GLLFSAGenerator -module GLLFSA.r16s.H22_H23 -o 16s_H22_H23.yrd.fs -abstract true"</StartArguments>
     <RemoteDebugEnabled>false</RemoteDebugEnabled>
     <RemoteDebugMachine />
     <OutputPath>C:\Users\Eugene\Source\Repos\YaccConstructor\src\..\Bin\Release\v40\</OutputPath>
-    <StartWorkingDirectory>
-    </StartWorkingDirectory>
+    <StartWorkingDirectory>C:\Yacc Constructor</StartWorkingDirectory>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" />
@@ -54,9 +53,6 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <Compile Include="Program.fs" />
-    <None Include="App.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="paket.references" />
     <None Include="YaccConstructor.addins">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

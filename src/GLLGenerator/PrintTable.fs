@@ -226,13 +226,13 @@ let printTableGLL
         printArr grammar.canInferEpsilon (print "%A")
 
         printBr "let defaultAstToDot ="
-        printBrInd 1 "(fun (tree : Yard.Generators.Common.ASTGLL.Tree) -> tree.AstToDot numToString)"
+        printBrInd 1 "(fun (tree : Yard.Generators.Common.ASTGLL.Tree<_>) -> tree.AstToDot numToString)"
 
         printBr ""
 
         print "let private rulesStart = "
         printArr rulesStart (print "%d")
-        print "let probs = "
+        print "let probabilities = "
         printArr grammar.probability (print "%A")
         printBr "let startRule = %d" grammar.startRule
         printBr "let indexatorFullCount = %d" indexator.fullCount
@@ -262,8 +262,8 @@ let printTableGLL
             printBr "let buildAst : (seq<Token> -> ParserCommon.ParseResult<_>) ="
             printBrInd 1 "buildAst<Token> parserSource"
         else
-            printBr "let buildAbstractAst : (AbstractAnalysis.Common.ParserInputGraph -> ParserCommon.ParseResult<_>) ="
-            printBrInd 1 "Yard.Generators.GLL.AbstractParser.buildAbstractAst<Token> parserSource"            
+            //printBr "let buildAbstractAst : (AbstractAnalysis.Common.ParserInputGraph -> ParserCommon.ParseResult<_>) ="
+            //printBrInd 1 "Yard.Generators.GLL.AbstractParser.buildAbstractAst<Token> parserSource"            
             printBr "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> int -> ParserCommon.ParseResult<_>) ="
             printBrInd 1 "Yard.Generators.GLL.AbstractParserWithoutTree.buildAbstract<Token> parserSource"
         printBr ""

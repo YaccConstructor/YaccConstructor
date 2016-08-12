@@ -75,13 +75,13 @@ type LexerInnerGraph<'br> (g:LexerInputGraph<'br>) as this =
 type ParserEdge<'token>(s, e, t)=
     inherit TaggedEdge<int, 'token>(s,e,t)
     
-type ParserInputGraph(initialVertices : int[], finalVertices : int[]) = 
-    inherit AdjacencyGraph<int,ParserEdge<int>>()
+type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) = 
+    inherit AdjacencyGraph<int,ParserEdge<'token>>()
 
     member val InitStates = initialVertices 
     member val FinalStates = finalVertices with get, set
 
-    member this.PrintToDot name (numToString: int -> string) (*(tokenToString : 'token -> string) (numToToken : int -> 'token)*) = 
+    member this.PrintToDot name (numToString: 'token -> string) (*(tokenToString : 'token -> string) (numToToken : int -> 'token)*) = 
         use out = new System.IO.StreamWriter (name : string)
         out.WriteLine("digraph AST {")
         out.WriteLine "rankdir=LR"
@@ -97,7 +97,7 @@ type ParserInputGraph(initialVertices : int[], finalVertices : int[]) =
         out.Close()      
 
     new (initial : int, final : int) = 
-        ParserInputGraph([|initial|], [|final|])
+        ParserInputGraph<_>([|initial|], [|final|])
  
 type BioParserEdge(s : int, e : int, l : int, t : int[]) =
     member this.Start = s

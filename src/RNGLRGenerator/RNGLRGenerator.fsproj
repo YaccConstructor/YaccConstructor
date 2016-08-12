@@ -72,6 +72,8 @@
     <ProjectReference Include="..\Generators.Common\Generators.Common.fsproj">
       <Name>Generators.Common</Name>
       <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
       <Name>RNGLRCommon</Name>
       <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>

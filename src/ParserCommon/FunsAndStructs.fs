@@ -109,7 +109,7 @@ type ContextFSA =
                                 "; Len:" + (this.Length.ToString())
 
 type ParseResult<'a> =
-    | Success of Tree
+    | Success of Tree<'a>
     | Success1 of 'a[]
     | Error of string
 

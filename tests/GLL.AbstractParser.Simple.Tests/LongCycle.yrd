@@ -1,4 +1,0 @@
-[<Start>]
-start : e
-e : A { 1 } | red
-red : e

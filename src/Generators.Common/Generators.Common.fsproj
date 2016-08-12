@@ -38,7 +38,8 @@
     <Compile Include="InitialConvert.fs" />
     <Compile Include="SymbolSets.fs" />
     <Compile Include="FinalGrammar.fs" />
-    <None Include="app.config" />
+    <Compile Include="FSACommon.fs" />
+    <Compile Include="FSA.fs" />
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>

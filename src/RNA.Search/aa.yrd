@@ -1,8 +1,0 @@
-(*[<Start>]
-a: C C d | C d m
-d: C a | {None}
-m: A k | k C
-k: d a | {None}*)
-[<Start>]
-a: C C d
-d: A

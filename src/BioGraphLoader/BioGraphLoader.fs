@@ -2,7 +2,6 @@
 
 open AbstractAnalysis.Common
 open QuickGraph
-open QuickGraph.Algorithms.KernighanLinAlgoritm
 
 open System.IO
 open Microsoft.FSharp.Collections
@@ -25,13 +24,13 @@ type BioGraphEdgeLbl=
     val str: string
     val length : int
     val id: int
-    //new (_s,_l, _id) = {str=_s;length=_l;id=_id}
-    new (_s, _id) = {str=_s; length=_s.Length; id=_id}
+    new (_s,_l, _id) = {str=_s;length=_l;id=_id}
+    //new (_s, _id) = {str=_s; length=_s.Length; id=_id}
 
 type BioGraphEdge(s,e,t) =
     inherit TaggedEdge<int, BioGraphEdgeLbl>(s,e,t)
-    //new (s,e,str,l,id) = BioGraphEdge(s,e,new BioGraphEdgeLbl(str,l,id))
-    new (s,e,str,id) = BioGraphEdge(s,e,new BioGraphEdgeLbl(str,id))
+    new (s,e,str,l,id) = BioGraphEdge(s,e,new BioGraphEdgeLbl(str,l,id))
+    //new (s,e,str,id) = BioGraphEdge(s,e,new BioGraphEdgeLbl(str,id))
 
 let bioEdgeToUndirected (e:BioGraphEdge) = 
     new TaggedUndirectedEdge<int,double>(e.Source, e.Target, 1.0)
@@ -85,18 +84,16 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
     *)
     let edgs = 
         edges       
-        |> Array.Parallel.map (fun (id,s,e,l) -> //new BioGraphEdge(s,e,lbls.[id],l,id))
-                                                   new BioGraphEdge(s,e,lbls.[id],id))
-        // ЗАЧЕМ??????
-        (*|> Array.collect (fun e -> 
+        |> Array.Parallel.map (fun (id,s,e,l) -> new BioGraphEdge(s,e,lbls.[id],l,id))
+                                                   //new BioGraphEdge(s,e,lbls.[id],id))
+        |> Array.collect (fun e -> 
             let shift = e.Tag.str.Length - e.Tag.length
             if shift <> 0 
             then
                 incr cnt 
                 let newV = !cnt
-                [| new BioGraphEdge(newV, e.Source, e.Tag.str.[0..shift - 1], shift, e.Tag.id)
-                ;  new BioGraphEdge(e.Source, e.Target, e.Tag.str.[shift..], e.Tag.length, e.Tag.id) |]
-            else [|e|])*)
+                [| new BioGraphEdge(e.Source, e.Target, e.Tag.str.[shift..], e.Tag.length, e.Tag.id) |]
+            else [|e|])
         |> Array.collect 
             (fun e -> 
                 if e.Tag.length <= templateLengthHightLimit
@@ -110,15 +107,14 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
                     longEdges.Add e
                     incr leCount
                     let str1 = e.Tag.str.Substring(0, templateLengthHightLimit)
-                    let str2 = e.Tag.str.Substring(e.Tag.length - templateLengthHightLimit)
+                    let str2 = e.Tag.str.Substring(e.Tag.str.Length - templateLengthHightLimit)
                     incr cnt
                     let newE = !cnt
                     incr cnt
                     let newS = !cnt
-                    //[|new BioGraphEdge(e.Source, newE, str1, templateLengthHightLimit, e.Tag.id);
-                    //  new BioGraphEdge(newS, e.Target, str2, templateLengthHightLimit, e.Tag.id)|]
-                    [|new BioGraphEdge(e.Source, newE, str1, e.Tag.id);
-                      new BioGraphEdge(newS, e.Target, str2, e.Tag.id)|]
+                    [|new BioGraphEdge(e.Source, newE, str1, templateLengthHightLimit, e.Tag.id);
+                      new BioGraphEdge(newS, e.Target, str2, templateLengthHightLimit, e.Tag.id)|]
+                    
             )
    
     printfn "long edges %A" !leCount

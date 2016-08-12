@@ -35,7 +35,6 @@
     <Compile Include="DataStructures.fs" />
     <Compile Include="AST.fs" />
     <Compile Include="ASTGLL.fs" />
-    <None Include="app.config" />
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>

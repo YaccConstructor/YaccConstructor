@@ -43,7 +43,6 @@
     <Compile Include="PrintTable.fs" />
     <Compile Include="GllGenerator.fs" />
     <Compile Include="GLLGeneratorFSA.fs" />
-    <None Include="app.config" />
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
@@ -62,10 +61,6 @@
       <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="FSharp.Core">
-      <HintPath>..\packages\FSharp.Core.4.0.0.1\lib\net40\FSharp.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

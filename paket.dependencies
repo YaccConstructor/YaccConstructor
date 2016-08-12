@@ -1,19 +1,24 @@
 source https://nuget.org/api/v2
 
+nuget Argu
+nuget DotNet.Contracts 1.10.20606.1 framework: >= net45
+nuget DotParser 1.0.5 framework: >= net45
 nuget ExtCore 0.8.43
 nuget FsCheck 0.9.2.0 framework: >= net40
+nuget FSharpx.Collections 1.15.1
 nuget Mono.Addins
-nuget FSharp.Core
+nuget FSharp.Core 4.0.0.1 framework: >= net45
 nuget FSharp.Formatting
-nuget FSharpx.Collections.Experimental
+nuget FSharpx.Collections.Experimental 1.15.1
 nuget FSharpx.Extras
 
 nuget FSharpx.Text.StructuredFormat
-nuget NUnit
+nuget NUnit 2.6.3 framework: >= net40
 nuget NUnit.Runners
 nuget FSharpx.Core
+nuget QuickGraph 3.6.61119.7 framework: >= net45
 nuget YC.PrettyPrinter
-nuget YC.QuickGraph
+nuget YC.QuickGraph 3.7.1 framework: >= net45
 nuget YC.Utils.SourceText
 
 nuget FsLexYacc 6.0.0 framework: >= net45

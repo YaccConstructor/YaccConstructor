@@ -16,11 +16,6 @@ open Microsoft.FSharp.Collections
 open System.IO
 open System.Collections.Generic
 
-open MBrace.Azure
-open MBrace.Core
-open MBrace.Core.Builders
-open MBrace.Core.CloudOperators
-open MBrace.Runtime
 
 let filterRnaParsingResult (graph:BioParserInputGraph) lowLengthLimit highLengthLimit (res : ResultStruct []) =
     let hihtLenghtLimit = float highLengthLimit
@@ -234,9 +229,9 @@ let toSmallEdges path =
 let main argv =
     let argParser = ArgumentParser.Create<CLIArguments>()
     let args = argParser.Parse argv
-    let appSetting = argParser.ParseAppSettings (System.Reflection.Assembly.GetExecutingAssembly())
+    //let appSetting = argParser.ParseConfiguration (ConfigurationReader.FromAppSettingsFile("C:\YCInfernal\src\RNA.Search\App.config"))
     let agentsCount =
-        args.GetResult(<@Agents@>, defaultValue = appSetting.GetResult(<@Agents@>, defaultValue = 1))        
+        args.GetResult(<@Agents@>, defaultValue = 1)//appSetting.GetResult(<@Agents@>, defaultValue = 1))        
     let inputGraphPath = 
         args.GetResult <@Input@>
         |> (fun s ->

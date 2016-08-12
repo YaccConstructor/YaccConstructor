@@ -5,12 +5,6 @@ VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RNGLR", "RNGLR", "{319C1C63-44C0-4A68-A028-222D72029FE8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{D273A088-F9CE-4DC7-BA4B-082007601C67}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SEL.SDK", "SEL.SDK", "{C5101F9B-C218-4A45-A167-5A07127D15A2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Generators", "Generators", "{55F8552B-A06B-4D28-8681-6358E5EA2E3F}"
@@ -61,6 +55,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "QuickGraph", "QuickGraph", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{FAAD5B1C-1217-48D6-B1EF-7CAC0440D6A4}"
 	ProjectSection(SolutionItems) = preProject
+		..\paket.dependencies = ..\paket.dependencies
 		..\QuickGraph\paket.dependencies = ..\QuickGraph\paket.dependencies
 	EndProjectSection
 EndProject

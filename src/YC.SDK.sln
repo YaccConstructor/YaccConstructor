@@ -11,12 +11,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AbstractLexing", "AbstractL
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReSharper", "ReSharper", "{636BE8DF-A4D0-4D2F-936C-494E5AF75E64}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{D273A088-F9CE-4DC7-BA4B-082007601C67}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Languages", "Languages", "{ADC9DB7B-3A38-4D86-9D89-8E13C073FC60}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL", "SQL", "{241A2C93-1EEE-40C6-B729-0DB38F6D43F4}"
@@ -167,6 +161,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "QuickGraph", "QuickGraph", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{FAAD5B1C-1217-48D6-B1EF-7CAC0440D6A4}"
 	ProjectSection(SolutionItems) = preProject
+		..\paket.dependencies = ..\paket.dependencies
 		..\QuickGraph\paket.dependencies = ..\QuickGraph\paket.dependencies
 	EndProjectSection
 EndProject
@@ -267,7 +262,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{DE8344
 	ProjectSection(SolutionItems) = preProject
 		YC.Utils.SourceText\src\.nuget\NuGet.Config = YC.Utils.SourceText\src\.nuget\NuGet.Config
 		YC.Utils.SourceText\src\.nuget\NuGet.exe = YC.Utils.SourceText\src\.nuget\NuGet.exe
-		YC.Utils.SourceText\src\.nuget\NuGet.targets = YC.Utils.SourceText\src\.nuget\NuGet.targets
 	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils.SourceText", "YC.Utils.SourceText\src\YC.Utils.SourceText\Utils.SourceText.fsproj", "{F296356B-00C3-465C-9C97-7CFA279F5574}"

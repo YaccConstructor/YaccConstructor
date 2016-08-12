@@ -31,7 +31,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
     
     let nonTermsCountLimit = 1 + (Array.max parser.LeftSide)
     let currentRule = parser.StartRule
-    let structures = new ParserStructures<'TokenType>(inputLength, currentRule)
+    let structures = new ParserStructures<'TokenType>(currentRule)
     let setP = structures.SetP
     let epsilonNode = structures.EpsilonNode
     let setR = structures.SetR
@@ -62,7 +62,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
     let currentIndex = ref 0
     
     
-    let dummyGSSNode = new Vertex(-1, currentRule)
+    let dummyGSSNode = new Vertex(-1<positionInInput>, currentRule*1<labelMeasure>)
   
     //let packedNodes = Array.zeroCreate<IntDictionary<IntDictionary<int>>> (inputLength + 1)
     let packedNodes = new Dictionary<int, int<nodeMeasure>>()
@@ -118,7 +118,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                       
 
     let inline slotIsEnd (label : int<labelMeasure>) =
-        (getPosition label) = Array.length (parser.rules.[getRule label])
+        (getPositionNew label) = Array.length (parser.rules.[getRule label])
 
     let findSppfNode label lExt rExt : int<nodeMeasure> =
         let isEnd = slotIsEnd label
@@ -188,46 +188,46 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                      
     let containsEdge (b : Vertex) (l : int<labelMeasure>) (e : Vertex) (ast : int<nodeMeasure>) =
         let tempRule = getRule l
-        let tempPos = getPosition l
-        let dict1 = edges.[b.NontermLabel, b.Level]
+        let tempPos = getPositionNew l
+        let dict1 = edges.[int b.NontermLabel, int b.Level]
         let key = pack ast (int l)
         if dict1 <> Unchecked.defaultof<_>
         then
             let contains, t = dict1.TryGetValue(key)
             if contains
             then
-                let c2, t2 = t.TryGetValue(e.NontermLabel)
+                let c2, t2 = t.TryGetValue(int e.NontermLabel)
                 if c2 
                 then
-                    if t2.Contains(e.Level) then true
+                    if t2.Contains(int e.Level) then true
                     else 
-                        t2.Add(e.Level) 
+                        t2.Add(int e.Level) 
                         false
                 else
                     let arr = new ResizeArray<int>()
-                    arr.Add(e.Level) 
-                    t.Add(e.NontermLabel, arr)
+                    arr.Add(int e.Level) 
+                    t.Add(int e.NontermLabel, arr)
                     false
             else
                 let newDict = new Dictionary<int, ResizeArray<int>>()
                 let arr = new ResizeArray<int>()
-                arr.Add(e.Level) 
-                newDict.Add(e.NontermLabel, arr)
+                arr.Add(int e.Level) 
+                newDict.Add(int e.NontermLabel, arr)
                 dict1.Add(key, newDict)
                 false
         else
             let newDict = new Dictionary<int64, Dictionary<int, ResizeArray<int>>>()
             let newDict2 = new Dictionary<int, ResizeArray<int>>()
             let newArr = new ResizeArray<int>()
-            newArr.Add(e.Level)
-            newDict2.Add(e.NontermLabel, newArr)
+            newArr.Add(int e.Level)
+            newDict2.Add(int e.NontermLabel, newArr)
             newDict.Add(key,newDict2)
-            edges.[b.NontermLabel, b.Level] <- newDict
+            edges.[int b.NontermLabel, int b.Level] <- newDict
             false                    
         
     
     let create index (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) = 
-        let v = new Vertex(index, parser.LeftSide.[getRule label])
+        let v = new Vertex(index, parser.LeftSide.[getRule label]*1<labelMeasure>)
         let vertexKey = pack index (int label)
         let temp = containsEdge v label vertex ast
         if not <| temp //containsEdge v vertex ast
@@ -254,7 +254,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                 //let newList = new ResizeArray<int<nodeMeasure>>()
                 //newList.Add(z)
                 setP.Add(vertexKey, new ResizableUsualOne<_>(z))
-            let outEdges = edges.[u.NontermLabel, u.Level]
+            let outEdges = edges.[int u.NontermLabel, int u.Level]
             
             for kvp1 in outEdges do
                 let sppfNodeOnEdge = (getLeft kvp1.Key) * 1<nodeMeasure>
@@ -262,7 +262,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                 for kvp2 in kvp1.Value do 
                     for level in kvp2.Value do
                         let resTree = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy slot sppfNodeOnEdge z 
-                        let newVertex = new Vertex(level, kvp2.Key)
+                        let newVertex = new Vertex(level*1<positionInInput>, kvp2.Key*1<labelMeasure>)
                         structures.AddContext setU i slot newVertex resTree
 
     let table = parser.Table
@@ -278,7 +278,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             currentGSSNode := currentContext.Value.Vertex
             structures.CurrentLabel := currentContext.Value.Label
             let tmpRule = getRule !structures.CurrentLabel
-            let tmpPos = getPosition !structures.CurrentLabel
+            let tmpPos = getPositionNew !structures.CurrentLabel
             structures.CurrentN := currentContext.Value.Ast 
             structures.CurrentR := structures.Dummy
             condition := false
@@ -288,7 +288,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
     and processing () =  
         condition := true
         let rule = getRule !structures.CurrentLabel
-        let position = getPosition !structures.CurrentLabel
+        let position = getPositionNew !structures.CurrentLabel
         if Array.length parser.rules.[rule] = 0 
         then
             let t = new TerminalNode(-1, packExtension !currentIndex !currentIndex)
@@ -313,7 +313,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                             then structures.CurrentN := getNodeT !currentIndex
                             else structures.CurrentR := getNodeT !currentIndex
                             currentIndex := !currentIndex + 1
-                            structures.CurrentLabel := packLabel (rule) ((position) + 1)
+                            structures.CurrentLabel := packLabelNew (rule) ((position) + 1)
                             if !structures.CurrentR <> structures.Dummy
                             then 
                                 structures.CurrentN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy !structures.CurrentLabel !structures.CurrentN !structures.CurrentR
@@ -327,11 +327,11 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
 
                         let index = getIndex curSymbol curToken
                         let key = int((int32 curSymbol <<< 16) ||| int32 curToken)
-                        currentGSSNode := create !currentIndex (packLabel (rule) (position + 1)) !currentGSSNode  !structures.CurrentN
+                        currentGSSNode := create (!currentIndex * 1<positionInInput>) (packLabelNew (rule) (position + 1)) !currentGSSNode  !structures.CurrentN
                         if table.ContainsKey key 
                         then
                             for r in table.[key] do 
-                                let newLabel = packLabel rule 0
+                                let newLabel = packLabelNew rule 0
                                 structures.AddContext setU !currentIndex newLabel !currentGSSNode structures.Dummy 
                             
                 else
@@ -345,11 +345,11 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
                             index
                         let index = getIndex curSymbol curToken
                         let key = int((int32 curSymbol <<< 16) ||| int32 (curToken - parser.NonTermCount))
-                        currentGSSNode := create !currentIndex (packLabel (rule) (position + 1)) !currentGSSNode  !structures.CurrentN
+                        currentGSSNode := create (!currentIndex * 1<positionInInput>) (packLabelNew (rule) (position + 1)) !currentGSSNode  !structures.CurrentN
                         if table.ContainsKey key
                         then
                             for r in table.[key] do 
-                                let newLabel = packLabel rule 0
+                                let newLabel = packLabelNew rule 0
                                 structures.AddContext setU !currentIndex newLabel !currentGSSNode structures.Dummy 
                             
                         condition := true

@@ -38,6 +38,7 @@
     <Compile Include="InitialConvert.fs" />
     <Compile Include="SymbolSets.fs" />
     <Compile Include="FinalGrammar.fs" />
+    <Compile Include="GrammarFlowGraph.fs" />
     <None Include="app.config" />
     <None Include="paket.references" />
   </ItemGroup>
@@ -85,6 +86,17 @@
   </Target>
   -->
   <Import Project="..\..\.paket\paket.targets" />
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
+        <Reference Include="DotParser">
+          <HintPath>..\..\packages\DotParser\lib\net45\DotParser.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v2.0' Or $(TargetFrameworkVersion) == 'v3.0' Or $(TargetFrameworkVersion) == 'v3.5')">
       <ItemGroup>
@@ -166,6 +178,52 @@
       <ItemGroup>
         <Reference Include="FSharpx.Collections.Experimental">
           <HintPath>..\..\packages\FSharpx.Collections.Experimental\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
+        <Reference Include="YC.QuickGraph.Data">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.Data.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph.FSA">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.FSA.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph.FST">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.FST.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph.Glee">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.Glee.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph.Graphviz">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.Graphviz.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph.Petri">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.Petri.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraph">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="YC.QuickGraphFS">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraphFS.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>

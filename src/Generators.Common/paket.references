@@ -2,3 +2,4 @@ FSharp.Core
 FSharpx.Collections
 FSharpx.Collections.Experimental
 YC.Utils.SourceText
+YC.QuickGraph

@@ -252,7 +252,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                    // then
                     if parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol
                     then
-                        let isEq (sym : int) (elem : ParserEdge<'TokenType>) = sym = parser.TokenToNumber (elem.Tag)
+                        let isEq (sym : int) (elem : ParserEdge<'TokenType>) = sym = parser.TokenToNumber elem.Tag
                         
                         let curEdge = 
                             let mutable  c = false
@@ -267,14 +267,11 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                         match curEdge with
                         | Some edge ->
                             //snd edge.Tag := true
-                            let curToken = parser.TokenToNumber ( edge.Tag)
+                            let curToken = parser.TokenToNumber edge.Tag
                             //currentPath := edge :: currentPath.Value
                             if !structures.CurrentN = structures.Dummy
-                            then 
-                                structures.CurrentN := getNodeT edge
-                                    
-                            else 
-                                structures.CurrentR := getNodeT edge
+                            then structures.CurrentN := getNodeT edge
+                            else structures.CurrentR := getNodeT edge
                             currentVertexInInput := edge.Target
                             structures.CurrentLabel := packLabel rule (position + 1)
                             if !structures.CurrentR <> structures.Dummy
@@ -297,7 +294,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             let curToken = parser.TokenToNumber ( edge.Tag)
 
                             let index = getIndex curSymbol curToken
-                            let key =  int((int32 curSymbol <<< 16) ||| int32 (curToken - parser.NonTermCount  ))    
+                            let key =  int((int32 curSymbol <<< 16) ||| int32 (curToken - parser.NonTermCount))    
                             if table.ContainsKey key
                             then
                                 for rule in table.[key] do

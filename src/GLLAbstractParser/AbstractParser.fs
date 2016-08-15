@@ -47,7 +47,6 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
 
         //let finalPaths = new ResizeArray<list<ParserEdge<'TokenType*ref<bool>>>>()
         //let errorPaths = new ResizeArray<list<ParserEdge<'TokenType*ref<bool>>>>()
-
          //packLabel without int
         let dummyGSSNode = new Vertex(!currentVertexInInput, int !structures.CurrentLabel)
         let sppfNodes = structures.SppfNodes
@@ -60,7 +59,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let edges = Array2D.zeroCreate<SysDict<int<nodeMeasure>, SysDict<int, ResizeArray<int>>>> slots.Count (input.VertexCount )
         let terminalNodes = Array3D.zeroCreate<int<nodeMeasure>> input.VertexCount input.VertexCount parser.TermCount  
         let currentGSSNode = ref <| dummyGSSNode
-        let currentContext = ref <| new Context(*<_>*)(!currentVertexInInput, !structures.CurrentLabel, !currentGSSNode, structures.Dummy) //without *1<labelMeasure>
+        let currentContext = ref <| new Context(*<_>*)(!currentVertexInInput, !structures.CurrentLabel, !currentGSSNode, structures.Dummy, structures.Dummy) //without *1<labelMeasure>
         
         let finalExtensions =
             let len = input.FinalStates.Length
@@ -134,22 +133,21 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 num
                   
         let getNodeT (edge : ParserEdge<'TokenType>) =
-            let beginVertix = edge.Source
-            let endVertix = edge.Target
+            let beginVertex = edge.Source
+            let endVertex = edge.Target
             let tag = edge.Tag
-            let i = (parser.TokenToNumber ( tag)) - parser.NonTermCount
-            if terminalNodes.[beginVertix, endVertix, i] <> Unchecked.defaultof<int<nodeMeasure>>
+            let i = parser.TokenToNumber tag - parser.NonTermCount
+            if terminalNodes.[beginVertex, endVertex, i] <> Unchecked.defaultof<int<nodeMeasure>>
             then
-                terminalNodes.[beginVertix, endVertix, i]
+                terminalNodes.[beginVertex, endVertex, i]
             else
-                tokens.Add ( tag)
-                let t = new TerminalNode(tokens.Length - 1, packExtension beginVertix endVertix)
+                tokens.Add tag
+                let t = new TerminalNode(tokens.Length - 1, packExtension beginVertex endVertex)
                 sppfNodes.Add t
                 let res = sppfNodes.Length - 1
-                terminalNodes.[beginVertix, endVertix, i] <- ((sppfNodes.Length - 1)*1<nodeMeasure>)
+                terminalNodes.[beginVertex, endVertex, i] <- ((sppfNodes.Length - 1)*1<nodeMeasure>)
                 res * 1<nodeMeasure>
             
-                     
         let containsEdge (b : Vertex) (e : Vertex) ast =
             let labelN = slots.[int b.NontermLabel]
             let beginLevel = int b.Level
@@ -158,7 +156,6 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             let cond, dict = structures.ContainsEdge dict1 ast e
             if dict.IsSome then edges.[labelN, beginLevel] <- dict.Value
             cond
-        
         
         let create (inputVertex : int) (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) = 
             let v = new Vertex(inputVertex, int label)
@@ -217,7 +214,6 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 d.Add(ast, (vertex, (errorPaths.Count - 1)))
                 errors.Add(key, d)*)
             
-
         let rec dispatcher () =
             if setR.Count <> 0
             then
@@ -236,7 +232,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             condition := true
             let rule = getRule !structures.CurrentLabel
             let position = getPosition !structures.CurrentLabel
-            if Array.length parser.rules.[rule] = 0 
+            if Array.isEmpty parser.rules.[rule]
             then
               let t = new TerminalNode(-1, packExtension !currentVertexInInput !currentVertexInInput)
               sppfNodes.Add t
@@ -252,36 +248,29 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                    // then
                     if parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol
                     then
-                        let isEq (sym : int) (elem : ParserEdge<'TokenType>) = sym = parser.TokenToNumber elem.Tag
-                        
-                        let curEdge = 
-                            let mutable  c = false
-                            let mutable res = None
-                            for oe in input.OutEdges !currentVertexInInput do
-                                if isEq curSymbol oe then
-                                    res <- Some oe  
-                                (*else
-                                    let p = oe :: !currentPath
-                                    containsError !currentVertexInInput !structures.CurrentLabel !currentGSSNode !structures.CurrentN p*)
-                            res
-                        match curEdge with
-                        | Some edge ->
-                            //snd edge.Tag := true
-                            let curToken = parser.TokenToNumber edge.Tag
-                            //currentPath := edge :: currentPath.Value
-                            if !structures.CurrentN = structures.Dummy
-                            then structures.CurrentN := getNodeT edge
-                            else structures.CurrentR := getNodeT edge
-                            currentVertexInInput := edge.Target
-                            structures.CurrentLabel := packLabel rule (position + 1)
-                            if !structures.CurrentR <> structures.Dummy
-                            then 
-                                structures.CurrentN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy !structures.CurrentLabel !structures.CurrentN !structures.CurrentR
-                            condition := false
-                        | 
-                            None _ -> ()
-                                //containsError !currentVertexInInput !structures.CurrentLabel !currentGSSNode !structures.CurrentN !currentPath
-                                
+                        let isEq (sym : int) (elem : ParserEdge<'TokenType>) =
+                            sym = parser.TokenToNumber elem.Tag
+
+                        for oe in input.OutEdges !currentVertexInInput do
+                            if isEq curSymbol oe
+                            then
+                                let curToken = parser.TokenToNumber (oe.Tag)
+                                let newN = ref !structures.CurrentN
+                                let newR = ref !structures.CurrentR
+
+                                if !structures.CurrentN = structures.Dummy
+                                then 
+                                    newN := getNodeT oe
+                                else 
+                                    newR := getNodeT oe
+
+                                let newVertexInInput = oe.Target
+                                let newLabel = packLabel rule (position + 1)
+                                if !newR <> structures.Dummy
+                                then 
+                                    newN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy newLabel !newN !newR
+
+                                structures.PushContext newVertexInInput newLabel !currentGSSNode !newN !newR
                     else 
                         let getIndex nTerm term = 
                             let mutable index = nTerm
@@ -290,6 +279,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             index
                         let label = (packLabel rule (position + 1))
                         currentGSSNode := create !currentVertexInInput label !currentGSSNode !structures.CurrentN
+
                         for edge in input.OutEdges !currentVertexInInput do
                             let curToken = parser.TokenToNumber ( edge.Tag)
 
@@ -298,7 +288,6 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             if table.ContainsKey key
                             then
                                 for rule in table.[key] do
-                                 
                                     let newLabel = packLabel rule 0
                                     structures.AddContext setU !currentVertexInInput newLabel !currentGSSNode structures.Dummy //!currentPath
                             (*else 
@@ -306,8 +295,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                     if int kvp.Key >>> 16 = curSymbol then
                                         for r in kvp.Value do
                                             let newLabel = packLabel r 0
-                                            containsError !currentVertexInInput newLabel !currentGSSNode structures.Dummy !currentPath*)
-                                            
+                                            containsError !currentVertexInInput newLabel !currentGSSNode structures.Dummy !currentPath*)                   
                 else
                     let curRight =  sppfNodes.Item (int !structures.CurrentN) 
                     let r = curRight.getExtension ()
@@ -322,7 +310,6 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                         currentVertexInInput
                         pop
                   
-                    
         let control () =
              while not !stop do
                 if !condition then dispatcher() else processing()

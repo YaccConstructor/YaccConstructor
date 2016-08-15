@@ -82,7 +82,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
 
 
     let currentGSSNode = ref <| dummyGSSNode
-    let currentContext = ref <| new Context(*<'TokenType>*)(!currentIndex, !structures.CurrentLabel, !currentGSSNode, structures.Dummy)
+    let currentContext = ref <| new Context(*<'TokenType>*)(!currentIndex, !structures.CurrentLabel, !currentGSSNode, 1<nodeMeasure>, structures.Dummy)
         
     let finalExtension = packExtension 0 (inputLength)
 

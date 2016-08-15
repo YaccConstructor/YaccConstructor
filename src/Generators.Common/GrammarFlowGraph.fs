@@ -10,7 +10,12 @@ type GFGEdge =
     | Call of int   // stores matching return node
     | Scan of string
     | Eps           // other edges (Entry, Return, etc.)
-    
+    override this.ToString() =
+        match this with
+        | Call n -> string n
+        | Scan s -> s
+        | Eps -> ""
+
 type GrammarFlowGraph (ruleList : Rule.t<Source.t,Source.t> list) as this =
     inherit AdjacencyGraph<int, TaggedEdge<int, GFGEdge>>()
 
@@ -36,10 +41,11 @@ type GrammarFlowGraph (ruleList : Rule.t<Source.t,Source.t> list) as this =
         then addEdge source !final (Scan s.text)
         else
             let startState, endState = nonTermToStates.[s.text]
-            let returnState = newState()
-            addEdge source startState (Call returnState)
-            addEdge endState returnState Eps
-            final := returnState
+            let returnState = ref dummyState
+            if target.IsNone then returnState := newState() else returnState := target.Value
+            addEdge source startState (Call !returnState)
+            addEdge endState !returnState Eps
+            final := !returnState
         !final
 
     let rec productionToStates startState (endState: int option) prod : int =
@@ -75,3 +81,14 @@ type GrammarFlowGraph (ruleList : Rule.t<Source.t,Source.t> list) as this =
                 finalState := endState
     do
         rulesToGFG ()
+
+    member this.PrintToDot output =
+        let head = "digraph GFG { \n"
+        let edges = this.Edges
+                    |> Seq.map (fun e -> sprintf 
+                                             "%i -> %i [label=\"%s\"]; \n" 
+                                             e.Source 
+                                             e.Target 
+                                             (e.Tag.ToString()))
+                    |> Seq.toList            
+        System.IO.File.WriteAllLines (output, ([head] @ edges @ ["}"]))

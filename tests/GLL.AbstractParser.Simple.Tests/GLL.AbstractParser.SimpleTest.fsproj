@@ -65,6 +65,7 @@
     <Compile Include="SimpleRightNull.yrd.fs" />
     <Compile Include="SimpleRightRecursion.yrd.fs" />
     <Compile Include="Brackets.yrd.fs" />
+    <Compile Include="Brackets2.yrd.fs" />
     <Compile Include="Calc.yrd.fs" />
     <Compile Include="CroppedBrackets.yrd.fs" />
     <Compile Include="Eps.yrd.fs" />

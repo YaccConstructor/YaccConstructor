@@ -791,6 +791,145 @@ type ``GLL abstract parser tests`` () =
             tree.AstToDot GLL.Conj3.numToString GLL.Conj3.tokenToNumber GLL.Conj3.tokenData (outputDir + "Conj3_Fail.dot")
             Assert.Fail("")    
 
+    member this.GetFullGraph n tokens eof allPath =
+        let graph = new ParserInputGraph<_>([|0 .. n - 1|],[|n|])
+        for i in 0 .. n - 1 do
+            [for t in tokens do 
+                yield! [for j in 0 .. n - 1 do if i <> j then yield edg i j t ]]
+            |> graph.AddVerticesAndEdgeRange
+            |> ignore
+
+        [for i in 0 .. n - 1 -> edg i n eof] 
+        |> graph.AddVerticesAndEdgeRange
+        |> ignore
+
+        graph
+
+    member this.GetLineraBrackets n lbr rbr eof =
+        let graph = new ParserInputGraph<_>(0, n + 1)
+        for i in 0 .. 2 .. n - 1 do
+            [ edg i (i + 1) lbr 
+              edg (i + 1) (i + 2) rbr]
+            |> graph.AddVerticesAndEdgeRange
+            |> ignore
+
+        edg n (n + 1) eof
+        |> graph.AddVerticesAndEdge
+        |> ignore
+
+        graph
+    
+    member this.GetLineraForBad n =
+        let graph = new ParserInputGraph<_>(0, n)
+        for i in 0 .. n - 2 do
+            edg i (i + 1) (GLL.BadLeftRecursion.B 0) 
+            |> graph.AddVerticesAndEdge
+            |> ignore
+
+        edg (n - 1) n (GLL.BadLeftRecursion.RNGLR_EOF 1)
+        |> graph.AddVerticesAndEdge
+        |> ignore
+
+        graph
+
+    member this.PerformanceTestFullGraphUnambBraces() =
+        printfn "----------Unamb brackets---------------"
+        for i in 2 .. 40 do
+            let g = this.GetFullGraph i [GLL.StrangeBrackets.LBR 0; GLL.StrangeBrackets.RBR 1] (GLL.StrangeBrackets.RNGLR_EOF 2) true
+            let start = System.DateTime.Now            
+            let r = GLL.StrangeBrackets.buildAbstractAst g
+            let time = (System.DateTime.Now - start).TotalMilliseconds
+            match r with 
+            | Error str ->
+                printfn "Error"
+            
+            | Success tree ->
+                let nodes,_,_,_ = tree.CountCounters
+                printfn "%A: %A: %A" i time nodes
+                //tree.AstToDot GLL.StrangeBrackets.numToString GLL.StrangeBrackets.tokenToNumber GLL.StrangeBrackets.tokenData "Nondet.dot"
+            
+    member this.PerformanceTestFullGraphAmbBraces() =
+        printfn "----------Amb brackets---------------"
+        for i in 2 .. 40 do
+            let g = this.GetFullGraph i [GLL.Brackets2.LBR 0; GLL.Brackets2.RBR 1] (GLL.Brackets2.RNGLR_EOF 2) true
+            let start = System.DateTime.Now            
+            let r = GLL.Brackets2.buildAbstractAst g
+            let time = (System.DateTime.Now - start).TotalMilliseconds
+            match r with 
+            | Error str ->
+                printfn "Error"
+            
+            | Success tree ->
+                let nodes,_,_,_ = tree.CountCounters
+                printfn "%A: %A : %A" i time nodes
+                //tree.AstToDot GLL.StrangeBrackets.numToString GLL.StrangeBrackets.tokenToNumber GLL.StrangeBrackets.tokenData "Nondet.dot"
+    
+
+    member this.PerformanceTestFullGraphBadLeftRec() =
+        printfn "----------BAD---------------"
+        for i in 2 .. 40 do
+            let g = this.GetFullGraph i [GLL.BadLeftRecursion.B 0] (GLL.BadLeftRecursion.RNGLR_EOF 2) true
+            let start = System.DateTime.Now            
+            let r = GLL.BadLeftRecursion.buildAbstractAst g
+            let time = (System.DateTime.Now - start).TotalMilliseconds
+            match r with 
+            | Error str ->
+                printfn "Error"
+            
+            | Success tree ->
+                let nodes,_,_,_ = tree.CountCounters
+                printfn "%A: %A : %A" i time nodes
+                //tree.AstToDot GLL.StrangeBrackets.numToString GLL.StrangeBrackets.tokenToNumber GLL.StrangeBrackets.tokenData "Nondet.dot"
+    
+    member this.PerformanceTestLinearUnambBraces() =
+        printfn "----------Unamb brackets---------------"
+        for i in 100 .. 50 .. 1000 do
+            let g = this.GetLineraBrackets i (GLL.StrangeBrackets.LBR 0) (GLL.StrangeBrackets.RBR 1) (GLL.StrangeBrackets.RNGLR_EOF 2)
+            let start = System.DateTime.Now            
+            let r = GLL.StrangeBrackets.buildAbstractAst g
+            let time = (System.DateTime.Now - start).TotalMilliseconds
+            match r with 
+            | Error str ->
+                printfn "Error: %A" str
+            
+            | Success tree ->
+                let nodes,_,_,_ = tree.CountCounters
+                printfn "%A: %A: %A" i time nodes
+                //tree.AstToDot GLL.StrangeBrackets.numToString GLL.StrangeBrackets.tokenToNumber GLL.StrangeBrackets.tokenData "Nondet.dot"
+            
+    member this.PerformanceTestLinearAmbBraces() =
+        printfn "----------Amb brackets---------------"
+        for i in 100 .. 50 .. 1000 do
+            let g = this.GetLineraBrackets i (GLL.Brackets2.LBR 0) (GLL.Brackets2.RBR 1) (GLL.Brackets2.RNGLR_EOF 2)
+            let start = System.DateTime.Now            
+            let r = GLL.Brackets2.buildAbstractAst g
+            let time = (System.DateTime.Now - start).TotalMilliseconds
+            match r with 
+            | Error str ->
+                printfn "Error"
+            
+            | Success tree ->
+                let nodes,_,_,_ = tree.CountCounters
+                printfn "%A: %A : %A" i time nodes
+                //tree.AstToDot GLL.StrangeBrackets.numToString GLL.StrangeBrackets.tokenToNumber GLL.StrangeBrackets.tokenData "Nondet.dot"
+    
+
+    member this.PerformanceTestLinearBadLeftRec() =
+        printfn "----------BAD---------------"
+        for i in 1 .. 100 do
+            let g = this.GetLineraForBad i
+            let start = System.DateTime.Now            
+            let r = GLL.BadLeftRecursion.buildAbstractAst g
+            let time = (System.DateTime.Now - start).TotalMilliseconds
+            match r with 
+            | Error str ->
+                printfn "Error"
+            
+            | Success tree ->
+                let nodes,_,_,_ = tree.CountCounters
+                printfn "%A: %A : %A" i time nodes
+                //tree.AstToDot GLL.StrangeBrackets.numToString GLL.StrangeBrackets.tokenToNumber GLL.StrangeBrackets.tokenData "Nondet.dot"
+    
     [<Test>]
     member this._57_random_unambiguous_edges_function () =    
         let tokens = [|GLL.StrangeBrackets.LBR 1; GLL.StrangeBrackets.RBR 2|]
@@ -1054,18 +1193,18 @@ type ``GLL abstract parser tests`` () =
 let f x =
     //System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
     let t = new ``GLL abstract parser tests``()
-    let f () = t._Brackets_performance_Linear_single_unamb()
-              //_58_random_unambiguous_edges_function ()
+    let f () = 
+//               t.PerformanceTestFullGraphBadLeftRec()
+//               t.PerformanceTestFullGraphUnambBraces()
+//               t.PerformanceTestFullGraphAmbBraces()
+               t.PerformanceTestLinearBadLeftRec()
+               t.PerformanceTestLinearUnambBraces()
+               t.PerformanceTestLinearAmbBraces()
               //_35_Expression() //
     //let th = new System.Threading.Thread(f, 10000000)
     //th.Start()
     f()
     0
-
-(*
-++++++++++
-1000:9.32604
-
 ++++++++++
 1050:2.22569
 

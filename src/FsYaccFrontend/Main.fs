@@ -49,6 +49,7 @@ let rec _addBindings = function
         ) |> PSeq
     | PSeq(elements, None, l) -> PSeq(List.map (fun elem -> { elem with rule=_addBindings elem.rule} ) elements, None, l)
     | PAlt(left, right) -> PAlt(_addBindings left, _addBindings right)
+    | PConj(left, right) -> PAlt(_addBindings left, _addBindings right)
     | PSome(x) -> PSome(_addBindings x)
     | POpt(x) -> POpt(_addBindings x)
     | PMany(x) -> PMany(_addBindings x)

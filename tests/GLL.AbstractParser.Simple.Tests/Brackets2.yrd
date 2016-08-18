@@ -1,0 +1,2 @@
+[<Start>]
+s : {""} | LBR s RBR {""} | s s {""}

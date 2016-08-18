@@ -1,1 +1,0 @@
-for %%i in (**.nupkg) do nuget push %%i  f6ba9139-9d42-4cf1-acaf-344f963ff807 -Source https://www.myget.org/F/yc/api/v2/package

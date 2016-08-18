@@ -2,9 +2,6 @@ init:
   - git config --global core.autocrlf input
 install:
   - git submodule update --init --recursive
-before_build:
-  - cmd: install.cmd
-  - cmd: msiexec.exe /i "lib\Pex\pex.academic.x86.msi" /quiet /norestart
 build_script:
   - cmd: build.cmd
 test: off

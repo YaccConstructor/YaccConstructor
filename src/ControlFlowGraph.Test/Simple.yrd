@@ -1,6 +1,0 @@
-﻿[<Start>]
-start: assign+
-
-assign: id SEMICOLON
-
-id: A | B | C | D | E | F | G | H

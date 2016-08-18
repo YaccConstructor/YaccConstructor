@@ -1,2 +1,0 @@
-BEGIN TRANSACTION @TranName;
-GO

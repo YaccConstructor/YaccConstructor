@@ -40,7 +40,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let parser = parser
         let slots = parser.Slots
         let errors = new SysDict<int64, SysDict<int<nodeMeasure>, Vertex*int>>()   
-        let setU = new CompressedArray<SysDict<int, SysDict<int64, ResizeArray<int<nodeMeasure>>>>>(input.ChainLength, (fun _ -> null ))
+        let setU = Array.zeroCreate<SysDict<int, SysDict<int64, ResizeArray<int<nodeMeasure>>>>> (input.VertexCount)///1
         let structures = new ParserStructures<'TokenType>(parser.StartRule)
         let setR = structures.SetR
         let epsilonNode = structures.EpsilonNode
@@ -57,7 +57,6 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
 
         //let finalPaths = new ResizeArray<list<ParserEdge<'TokenType*ref<bool>>>>()
         //let errorPaths = new ResizeArray<list<ParserEdge<'TokenType*ref<bool>>>>()
-
          //packLabel without int
         let dummyGSSNode = new Vertex(!currentIndex, int !structures.CurrentLabel)
         let sppfNodes = structures.SppfNodes
@@ -75,7 +74,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let edges = Array.init slots.Count (fun _ -> new CompressedArray<_> (input.ChainLength, (fun _ -> null)))
         let terminalNodes = new CompressedArray<_>(input.ChainLength, (fun _ -> 0 * 1<nodeMeasure> ))
         let currentGSSNode = ref <| dummyGSSNode
-        for v in input.InitialVertices do
+        let currentContext = ref <| new Context(*<_>*)(!currentVertexInInput, !structures.CurrentLabel, !currentGSSNode, structures.Dummy, structures.Dummy) //without *1<labelMeasure>
             let oEdges = outEdges.[v]
             for e in oEdges do
                 setR.Enqueue(new Context(pack2to32 e 0, !structures.CurrentLabel, !currentGSSNode, structures.Dummy)) 
@@ -176,19 +175,20 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 num
                 
                   
-        let getNodeT (index) =
-            if terminalNodes.[index] <> Unchecked.defaultof<int<nodeMeasure>>
+            let beginVertex = edge.Source
+            let endVertex = edge.Target
+            let i = parser.TokenToNumber tag - parser.NonTermCount
+            if terminalNodes.[beginVertex, endVertex, i] <> Unchecked.defaultof<int<nodeMeasure>>
             then
-                terminalNodes.[index]
+                terminalNodes.[beginVertex, endVertex, i]
             else
-                let ext = packExtension index (pack2to32 (getLeft32 index) (1 + getRight32 index))
-                let t = new TerminalNode(index, ext, 1)
+                tokens.Add tag
+                let t = new TerminalNode(tokens.Length - 1, packExtension beginVertex endVertex)
                 sppfNodes.Add t
                 let res = sppfNodes.Length - 1
-                terminalNodes.[index] <- ((sppfNodes.Length - 1)*1<nodeMeasure>)
+                terminalNodes.[beginVertex, endVertex, i] <- ((sppfNodes.Length - 1)*1<nodeMeasure>)
                 res * 1<nodeMeasure>
             
-                     
         let containsEdge (b : Vertex) (e : Vertex) ast =
             let labelN = slots.[int b.NontermLabel]
             let beginLevel = int b.Level
@@ -197,7 +197,6 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             let cond, dict = structures.ContainsEdge dict1 ast e
             if dict.IsSome then edges.[labelN].[beginLevel] <- dict.Value
             cond
-        
         
         let create (inputVertex : int) (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) (*prob sLength*) = 
             let v = new Vertex(inputVertex, int label)
@@ -263,7 +262,6 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 d.Add(ast, (vertex, (errorPaths.Count - 1)))
                 errors.Add(key, d)*)
             
-
         let rec dispatcher () =
             let rec get () =
                 let c = setR.Dequeue()
@@ -289,7 +287,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
             condition := true
             let rule = getRule !structures.CurrentLabel
             let position = getRight32 !structures.CurrentLabel
-            if Array.length parser.rules.[rule] = 0 
+            if Array.isEmpty parser.rules.[rule]
             then
               let t = new TerminalNode(-1, packExtension !currentIndex !currentIndex, 0)
               sppfNodes.Add t
@@ -305,8 +303,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                    // then
                     if parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol
                     then
-                        let isEq (sym : int) (elem : ParserEdge<'TokenType>) = sym = parser.TokenToNumber (elem.Tag)
-                        let cE = CommonFuns.getLeft32 !currentIndex
+                        let isEq (sym : int) (elem : ParserEdge<'TokenType>) =
+                            sym = parser.TokenToNumber elem.Tag
                         let cP = CommonFuns.getRight32 !currentIndex
                         let chainLen = input.ChainLength.[cE]
                         if cP < chainLen - 1 
@@ -328,49 +326,42 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                         let node = sppfNodes.[int !structures.CurrentN]
                                         o.Post(new Message(node))
                                 condition := false
-                                
+
                         else   
-                            let curEdge = 
-                                let oEdges = outEdges.[input.Edges.[cE].End]
-                                let mutable res = None
-                                for oe in oEdges do
-                                    if curSymbol = input.Edges.[oe].Tokens.[0] then
-                                        res <- Some oe  
-                                res
+                        for oe in input.OutEdges !currentVertexInInput do
+                            if isEq curSymbol oe
                             
-                            match curEdge with
-                            | Some edge ->
-                                currentIndex := (pack2to32 curEdge.Value 0)
-                                let curToken = input.Edges.[edge].Tokens.[0]
+                            then
+                                let curToken = parser.TokenToNumber (oe.Tag)
+                                let newN = ref !structures.CurrentN
+                                let newR = ref !structures.CurrentR
+
                                 if !structures.CurrentN = structures.Dummy
-                                then structures.CurrentN := getNodeT !currentIndex
-                                else structures.CurrentR := getNodeT !currentIndex
-                                currentIndex := pack2to32 (getLeft32 !currentIndex) (1 + getRight32 !currentIndex)
-                                structures.CurrentLabel := 1<labelMeasure> * pack2to32 rule (position + 1)
-                                if !structures.CurrentR <> structures.Dummy
-                                then 
-                                    structures.CurrentN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy !structures.CurrentLabel !structures.CurrentN !structures.CurrentR
+                                then newN := getNodeT oe
+                                else newR := getNodeT oe
                                     if slotIsEnd !structures.CurrentLabel
                                     then 
                                         //let name = parser.NumToString <| parser.LeftSide.[getRule !structures.CurrentLabel]
                                         let node = sppfNodes.[int !structures.CurrentN]
                                         o.Post(new Message(node))
-                                condition := false
-                            | 
-                                None _ -> ()
-                                    //containsError !currentVertexInInput !structures.CurrentLabel !currentGSSNode !structures.CurrentN !currentPath
-                                
+
+                                let newVertexInInput = oe.Target
+                                let newLabel = packLabel rule (position + 1)
+                                if !newR <> structures.Dummy
+                                then newN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy newLabel !newN !newR
+
+                                structures.PushContext newVertexInInput newLabel !currentGSSNode !newN !newR
                     else 
                         let getIndex nTerm term = 
                             let mutable index = nTerm
                             index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
                             index <- index + term - parser.NonTermCount
                             index
-                        currentGSSNode := create !currentIndex (1<labelMeasure>  * pack2to32 rule (position + 1)) !currentGSSNode  !structures.CurrentN //prob sLength
-                        let cE = CommonFuns.getLeft32 !currentIndex
-                        let cP = CommonFuns.getRight32 !currentIndex
+                        let label = (packLabel rule (position + 1))
+                        currentGSSNode := create !currentVertexInInput label !currentGSSNode !structures.CurrentN
+
                         let chainLen = input.ChainLength.[cE]
-                        if cP < chainLen - 1
+                            let curToken = parser.TokenToNumber edge.Tag
                         then
                             let curToken = input.Edges.[cE].Tokens.[cP]
                             let index = getIndex curSymbol curToken
@@ -393,8 +384,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                         structures.AddContext setU t newLabel !currentGSSNode structures.Dummy maxLen 
                             
                                     
-                       
-                                            
+                                            containsError !currentVertexInInput newLabel !currentGSSNode structures.Dummy !currentPath*)                   
                 else
                     let curRight =  sppfNodes.Item (int !structures.CurrentN) 
                     let r = curRight.getExtension ()
@@ -409,11 +399,28 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                         currentIndex
                         pop
                   
-                    
         let control () =
              while not !stop do
                 if !condition then dispatcher() else processing()
         control()
+
+        let rec checkConj (ast : obj) : bool = 
+            match ast with
+            | :? NonTerminalNode as node -> let buff = ref <| checkConj node.First
+                                            if node.Others = Unchecked.defaultof<_> then //others empty
+                                                !buff && not <| (parser.NumToString node.Name).StartsWith "yard_conjunction"
+                                            else 
+                                                node.Others.ForEach(fun n -> buff := !buff && checkConj n)
+                                                !buff 
+            | :? TerminalNode as node -> true
+            | :? PackedNode as node -> checkConj node.Left && checkConj node.Right
+            | :? IntermidiateNode as node -> let buff = ref <| checkConj node.First
+                                             if node.Others = Unchecked.defaultof<_> then //others empty
+                                                !buff
+                                             else
+                                                node.Others.ForEach(fun n -> buff := !buff && checkConj n)
+                                                !buff
+            | _ -> false
                  
         match !structures.ResultAST with
             | None -> 
@@ -427,17 +434,17 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
 //                        if errors.Count <> 0 then
 //                        for e in errors do
 //                            printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16) 
-                                                
-                    let rec filter (node:INode) = 
-                        match node with
-                        | :? NonTerminalNode as n ->
-                            let fst = 
-                                if n.Others <> null && n.Others.Count > 0
-                                then                             
-                                    n.Others.Add n.First
-                                    n.Others |> ResizeArray.toList |> List.maxBy(fun p -> parser.Probabilities.[p.Production])
-                                else n.First
-                            let otehrs = n.Others
+                    
+                    if true//checkConj res 
+                    then        
+                            let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
+//                            setU |> Array.sumBy (fun s -> if s <> null 
+//                                                            then s.Values |> Seq.sumBy (fun s -> if s <> null 
+//                                                                                                   then s.Values |> Seq.sumBy (fun r -> if r <> null then r.Count else 0)
+//                                                                                                   else 0)
+//                                                            else 0)
+//                            |> printfn "%A" 
+                            //printf "%A" r1
                             n.First <- fst
                             n.Others <- null
                             filter fst
@@ -509,19 +516,18 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
 
                     let r1 = new Tree<_> (input, res, parser.rules)
                     r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
-                                            (*let isSubpath l1 l2 =
-                        List.length l1 <= List.length l2 
-                        && Seq.forall2 (=) l1 (Seq.take (List.length l1) l2)*)
-                    //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
-                    //r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
-                    (*for e in errors do
-                        for p in e.Value do
-                            let path = List.rev errorPaths.[snd p.Value]                            
+                            (*let isSubpath l1 l2 =
+                                List.length l1 <= List.length l2 
+                                && Seq.forall2 (=) l1 (Seq.take (List.length l1) l2)*)
+                            //setU |> Seq.iter(fun x -> x |> Seq.iter (fun x -> printf "%A; " x.Value.Count))
+                            //r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
+                            (*for e in errors do
+                                for p in e.Value do
+                                    let path = List.rev errorPaths.[snd p.Value]                            
                                 
-                            if finalPaths |> ResizeArray.exists (fun fp -> isSubpath path (List.rev fp)) |> not
-                            then printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16)      *)                      
+                                    if finalPaths |> ResizeArray.exists (fun fp -> isSubpath path (List.rev fp)) |> not
+                                    then printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16)      *)                      
                                 
                     
-                    Success (r1)   
-                     
-                        
+                            Success (r1)   
+                    else Error ("String was not parsed")

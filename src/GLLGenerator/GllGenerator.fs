@@ -20,7 +20,7 @@ do()
 type GLL() = 
     inherit Generator()
         override this.Name = "GLLGenerator"
-        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; noBrackets; needAC; singleModule|]
+        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; noBrackets; needAC; singleModule; noConj|]
         override this.Generate (definition, args) =
             
             let start = System.DateTime.Now

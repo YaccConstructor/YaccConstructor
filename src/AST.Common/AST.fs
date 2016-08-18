@@ -810,12 +810,12 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
         /// list of unprocessed token after adding new tree
         let finalUnprocessed = 
             let index = ref -1
-            let processElem elem acc = 
+            let processElem acc elem = 
                 incr index
                 if elem then acc else new Terminal(!index) :: acc
 
             processedToks
-            |> Array.fold (fun acc elem -> processElem elem acc) []
+            |> Array.fold processElem []
 
         // now parameter 'tokens' is all sppf tokens rather than tokens from new tree
         let newTree = new Tree<_>(tokens, tree, rules)

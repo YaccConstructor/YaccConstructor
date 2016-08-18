@@ -2,72 +2,18 @@
 
 open System.Collections.Generic
 
-open QuickGraph
-
 open Yard.Generators.Common.AstNode
 
-type TokensEdge(source, target, tag) = 
-    inherit TaggedEdge<int, int option>(source, target, tag)
+open CfgTokensGraph
+open ControlFlowGraph.Printers
 
-/// <summary>
-/// <para>Intermediate structure that is obtained after processing the AST node or family.</para><br />
-/// Each edge is labelled token option.
-/// </summary>
-type CfgTokensGraph() =
-    inherit AdjacencyGraph<int, TokensEdge>()
-    
-    member this.StartVertex = 0
+type ASTProcessingState = 
+| Processed of int * int
+| InProgress of int
 
-    member this.AddEdgeForced (e : TokensEdge) =
-        this.AddVertex e.Source |> ignore
-        this.AddVertex e.Target |> ignore
-        this.AddEdge e |> ignore
-
-    member this.CollectAllTokens() = 
-        
-        let vertexToTokens = Dictionary<_, _>()
-        let expected = Queue<_>()
-        expected.Enqueue this.StartVertex
-
-        let endVertex = this.VertexCount - 1
-
-        let handleEdge (edge : TokensEdge) data = 
-            let newData = 
-                data
-                |> List.map 
-                    (
-                        fun tokList -> 
-                            match edge.Tag with
-                            | Some token -> tokList |> List.append [token]
-                            | None -> tokList
-                    )
-            
-            let newVertex = edge.Target
-            
-            if vertexToTokens.ContainsKey(newVertex)
-            then
-                let oldData = vertexToTokens.[newVertex]
-                vertexToTokens.[newVertex] <- List.append oldData newData
-            else
-                vertexToTokens.[newVertex] <- newData
-                expected.Enqueue newVertex
-            
-        let handleVertex vertex = 
-            
-            let data = 
-                if not <| vertexToTokens.ContainsKey vertex 
-                then vertexToTokens.[vertex] <-  [[]]
-                vertexToTokens.[vertex]
-            
-            this.OutEdges vertex
-            |> Seq.iter(fun edge -> handleEdge edge data)
-
-        while expected.Count > 0 do
-            let vertex = expected.Dequeue()
-            handleVertex vertex
-
-        vertexToTokens.[endVertex]
-        |> List.map List.rev
+type private EpsilonEdge(source, target) = 
+    member this.Source with get() = source
+    member this.Target with get() = target
 
 /// <summary>
 ///<para>Takes family and builds graph.
@@ -75,57 +21,81 @@ type CfgTokensGraph() =
 ///<para>If there aren't ambiguous then graph'll be linear.
 ///Otherwise it'll contain branches.</para><br />
 /// </summary>
-let extractNodesFromFamily (fam : Family) = 
-    let tokensGraph = new CfgTokensGraph()
-    let tStartVertex = ref tokensGraph.StartVertex
-    let tEndVertex = ref <| tokensGraph.StartVertex + 1
-            
-    let rec collectTokens (node : obj) startVertex endVertex = 
+let extractNodesFromFamily intToToken tokenToString (fam : Family) = 
+    let builder = new TokensGraphBuilder<_>()
+    let cache = new Dictionary<Family, ASTProcessingState>()
+    //hack against duplicated epsilon edges
+    let addEpsilonEdge = 
+        let epsEdges = new ResizeArray<_>()
+        fun source target ->
+            if source <> target 
+            then 
+                let epsilon = new EpsilonEdge(source, target)
+                if not <| epsEdges.Contains epsilon
+                then
+                    builder.AddEdgeFromTo None source target
+                    epsEdges.Add epsilon
+
+    let rec collectTokens (node : obj) = 
             
         match node with 
         | :? Terminal as t -> 
-            let edge = new TokensEdge(!startVertex, !endVertex, Some <| t.TokenNumber)
-            tokensGraph.AddEdgeForced edge 
-
-            startVertex := !endVertex
-            incr endVertex
+            let tag = Some <| intToToken t.TokenNumber
+            builder.AddEdge tag
+            builder.UpdateVertex()
 
         | :? AST as ast -> 
+            let commonStartVertex = builder.CurrentVertex
+            let allEndVertex = 
+                ast.map (processFamily commonStartVertex)
+                |> Array.filter Option.isSome 
+                |> Array.map Option.get
 
-            let commonStartVertex = !startVertex
-            let newEndVertex = processFamily ast.first (ref commonStartVertex) endVertex
-                        
-            if ast.other <> null 
+            if not <| Array.isEmpty allEndVertex
             then 
-                let allEndVertex = 
-                    ast.other
-                    |> Array.map (fun fam -> processFamily fam (ref commonStartVertex) endVertex)
-                    |> List.ofArray
-                    |> List.append [newEndVertex]
-
-                let commonEndVertex = !endVertex
+                let commonEndVertex = allEndVertex |> Array.max
 
                 allEndVertex
-                |> List.iter 
-                    (
-                        fun num -> 
-                            let edge = TokensEdge(num, commonEndVertex, None)
-                            tokensGraph.AddEdgeForced edge
-                    )
-                startVertex := !endVertex
-                incr endVertex
-            else
-                startVertex := newEndVertex
+                |> Array.filter ((<>) commonEndVertex)
+                |> Array.iter (fun num -> addEpsilonEdge num commonEndVertex)
 
-        | _ -> failwith "Unexpected AST node type in Control-Flow construction"
+                builder.UpdateVertex()
+        | :? Epsilon -> ()
+        | x -> invalidOp "Unexpected AST node type in Control-Flow construction"
 
-    and processFamily (fam : Family) startVertex endVertex = 
+    and processFamily startVertex fam = 
+        builder.CurrentVertex <- startVertex
+
+        match cache.TryGetValue fam with
+        | true, value ->
+            match value with
+            | Processed (source, target) -> 
+                addEpsilonEdge builder.CurrentVertex source
+                builder.CurrentVertex <- target
+                builder.NextVertex <- target
+                Some target
+            | InProgress start -> 
+
+                addEpsilonEdge startVertex start
+                match builder.TryFindLastVertex start with
+                | Some vertex -> 
+                    cache.[fam] <- Processed(start, vertex)
+                    builder.CurrentVertex <- vertex
+                    builder.NextVertex <- vertex
+                    Some vertex
+                | None -> None
+        | false, _ ->
+            cache.[fam] <- InProgress(startVertex)
+            fam.nodes.doForAll collectTokens
+            cache.[fam] <- Processed(startVertex, builder.CurrentVertex)
             
-        fam.nodes.doForAll (fun node -> collectTokens node startVertex endVertex)
-        !endVertex - 1 //current it because of algorithm realization. Ideally, it should be !endVertex
+            Some <| builder.CurrentVertex
             
-    fam.nodes.doForAll(fun node -> collectTokens node tStartVertex tEndVertex)
-    tokensGraph
+    fam.nodes.doForAll collectTokens
+    let graph = builder.Build()
+    //CfgTokensGraphPrinter.ToDot graph tokenToString "`afterExtraction.dot"
+    graph
+    //builder.Build()
 
 /// <summary>
 ///<para>Takes AST and builds graph.
@@ -133,11 +103,5 @@ let extractNodesFromFamily (fam : Family) =
 ///<para>If there aren't ambiguous then graph'll be linear.
 ///Otherwise it'll contain branches.</para><br />
 /// </summary>
-let extractNodesFromAST (ast : AST)= 
-    if ast.other = null
-    then
-        [|extractNodesFromFamily ast.first|]
-    else
-        ast.other
-        |> Array.map extractNodesFromFamily
-        |> Array.append [| extractNodesFromFamily ast.first |] 
+let extractNodesFromAST intToToken tokenToString (ast : AST) = 
+    ast.map (extractNodesFromFamily intToToken tokenToString)

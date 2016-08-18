@@ -36,8 +36,8 @@ let str2line s = s |> Str |> Seq.singleton |> Line
 
 let printTextBox tabSize windowSize (tbSeq : seq<_>) =
 
-    /// Return new sequence, what has the same elements, what tbSeq has,
-    ///    with proper indent before each element.
+    /// Return new sequence with same elements as in tbSeq,
+    /// with proper indent before each element.
     let rec printIndentedSeq tbSeq indent =
         Seq.collect (function
             | Str s -> Seq.singleton (s, indent)
@@ -53,7 +53,7 @@ let printTextBox tabSize windowSize (tbSeq : seq<_>) =
     let write_spaces i = String.replicate i " "
 
     /// Convert obtained sequence to resulting string.
-    /// newline is true iff there was a line feed.
+    /// Newline is true if there was a line feed.
     let (text,_,_) =
         strSeq
         |> Seq.fold (fun (str_acc, newline, chars_in_line) (word,indent) -> 

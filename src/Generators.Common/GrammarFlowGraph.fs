@@ -6,18 +6,25 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
 open QuickGraph
 
-type GFGEdge =
+type GFGEdgeTag<'token> =
+    | Entry
+    | End
     | Call of int   // stores matching return node
-    | Scan of string
-    | Eps           // other edges (Entry, Return, etc.)
+    | Scan of 'token
+    | Eps
     override this.ToString() =
         match this with
+        | Entry -> "entry"
+        | End -> "end"
         | Call n -> string n
-        | Scan s -> s
+        | Scan s -> s.ToString()
         | Eps -> ""
 
-type GrammarFlowGraph (ruleList : Rule.t<Source.t,Source.t> list) as this =
-    inherit AdjacencyGraph<int, TaggedEdge<int, GFGEdge>>()
+type GFGEdge<'token>(s, e, t)=
+    inherit TaggedEdge<int, GFGEdgeTag<'token>>(s, e, t)
+
+type GrammarFlowGraph<'token> (ruleList : Rule.t<Source.t,Source.t> list, mapToToken) as this =   // temporary solution
+    inherit AdjacencyGraph<int, GFGEdge<'token>>()
 
     let nonTermToStates = new Dictionary<string, int * int>()  // nonTerm -> start/end nodes
     let stateToString = new Dictionary<int, string>()          // for visualization (TODO)
@@ -32,13 +39,13 @@ type GrammarFlowGraph (ruleList : Rule.t<Source.t,Source.t> list) as this =
         count                   
     
     let addEdge source target tag = 
-        this.AddEdge (new TaggedEdge<_, _>(source, target, tag)) |> ignore
+        this.AddEdge (new GFGEdge<_>(source, target, tag)) |> ignore
 
     let newEdges isTerm source (target : int option) (s: Source.t) =
         let final = ref dummyState
         if target.IsNone then final := newState() else final := target.Value
         if isTerm
-        then addEdge source !final (Scan s.text)
+        then addEdge source !final (Scan (mapToToken s.text))   // temporary solution
         else
             let startState, endState = nonTermToStates.[s.text]
             let returnState = ref dummyState
@@ -55,8 +62,8 @@ type GrammarFlowGraph (ruleList : Rule.t<Source.t,Source.t> list) as this =
             productionToStates startState endState right
         | PSeq (seq, _ , _) ->
             let entryState, exitState = newState(), newState()
-            addEdge startState entryState Eps
-            addEdge exitState endState.Value Eps 
+            addEdge startState entryState Entry
+            addEdge exitState endState.Value End
             let rec seqToStates source target = function
                 | hd :: [] -> productionToStates source target hd.rule
                 | hd :: tl -> let newstate = productionToStates source None hd.rule
@@ -81,6 +88,9 @@ type GrammarFlowGraph (ruleList : Rule.t<Source.t,Source.t> list) as this =
                 finalState := endState
     do
         rulesToGFG ()
+    
+    member this.InitState = !initState
+    member this.FinalState = !finalState
 
     member this.PrintToDot output =
         let head = "digraph GFG { \n"

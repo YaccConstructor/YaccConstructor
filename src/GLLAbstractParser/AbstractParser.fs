@@ -35,7 +35,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
     else
         let slots = parser.Slots
         let errors = new SysDict<int64, SysDict<int<nodeMeasure>, Vertex*int>>()   
-        let setU = Array.zeroCreate<SysDict<int, SysDict<int64, ResizeArray<int<nodeMeasure>>>>> (input.VertexCount )///1
+        let setU = Array.zeroCreate<SysDict<int, SysDict<int64, ResizeArray<int<nodeMeasure>>>>> (input.VertexCount)///1
         let structures = new ParserStructures<'TokenType>(input.VertexCount, parser.StartRule)
         let setR = structures.SetR
         let epsilonNode = structures.EpsilonNode
@@ -259,16 +259,13 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                 let newR = ref !structures.CurrentR
 
                                 if !structures.CurrentN = structures.Dummy
-                                then 
-                                    newN := getNodeT oe
-                                else 
-                                    newR := getNodeT oe
+                                then newN := getNodeT oe
+                                else newR := getNodeT oe
 
                                 let newVertexInInput = oe.Target
                                 let newLabel = packLabel rule (position + 1)
                                 if !newR <> structures.Dummy
-                                then 
-                                    newN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy newLabel !newN !newR
+                                then newN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy newLabel !newN !newR
 
                                 structures.PushContext newVertexInInput newLabel !currentGSSNode !newN !newR
                     else 
@@ -281,7 +278,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                         currentGSSNode := create !currentVertexInInput label !currentGSSNode !structures.CurrentN
 
                         for edge in input.OutEdges !currentVertexInInput do
-                            let curToken = parser.TokenToNumber ( edge.Tag)
+                            let curToken = parser.TokenToNumber edge.Tag
 
                             let index = getIndex curSymbol curToken
                             let key =  int((int32 curSymbol <<< 16) ||| int32 (curToken - parser.NonTermCount))    
@@ -349,6 +346,12 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     if true//checkConj res 
                     then        
                             let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
+//                            setU |> Array.sumBy (fun s -> if s <> null 
+//                                                            then s.Values |> Seq.sumBy (fun s -> if s <> null 
+//                                                                                                   then s.Values |> Seq.sumBy (fun r -> if r <> null then r.Count else 0)
+//                                                                                                   else 0)
+//                                                            else 0)
+//                            |> printfn "%A" 
                             //printf "%A" r1
                             (*let isSubpath l1 l2 =
                                 List.length l1 <= List.length l2 

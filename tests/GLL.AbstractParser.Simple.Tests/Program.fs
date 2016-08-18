@@ -834,7 +834,9 @@ type ``GLL abstract parser tests`` () =
 
     member this.PerformanceTestFullGraphUnambBraces() =
         printfn "----------Unamb brackets---------------"
-        for i in 2 .. 40 do
+        let g = this.GetFullGraph 2 [GLL.BadLeftRecursion.B 0] (GLL.BadLeftRecursion.RNGLR_EOF 2) true           
+        let r = GLL.BadLeftRecursion.buildAbstractAst g
+        for i in 1 .. 60 do
             let g = this.GetFullGraph i [GLL.StrangeBrackets.LBR 0; GLL.StrangeBrackets.RBR 1] (GLL.StrangeBrackets.RNGLR_EOF 2) true
             let start = System.DateTime.Now            
             let r = GLL.StrangeBrackets.buildAbstractAst g
@@ -850,7 +852,9 @@ type ``GLL abstract parser tests`` () =
             
     member this.PerformanceTestFullGraphAmbBraces() =
         printfn "----------Amb brackets---------------"
-        for i in 2 .. 40 do
+        let g = this.GetFullGraph 2 [GLL.BadLeftRecursion.B 0] (GLL.BadLeftRecursion.RNGLR_EOF 2) true           
+        let r = GLL.BadLeftRecursion.buildAbstractAst g
+        for i in 1 .. 60 do
             let g = this.GetFullGraph i [GLL.Brackets2.LBR 0; GLL.Brackets2.RBR 1] (GLL.Brackets2.RNGLR_EOF 2) true
             let start = System.DateTime.Now            
             let r = GLL.Brackets2.buildAbstractAst g
@@ -867,7 +871,9 @@ type ``GLL abstract parser tests`` () =
 
     member this.PerformanceTestFullGraphBadLeftRec() =
         printfn "----------BAD---------------"
-        for i in 2 .. 40 do
+        let g = this.GetFullGraph 2 [GLL.BadLeftRecursion.B 0] (GLL.BadLeftRecursion.RNGLR_EOF 2) true           
+        let r = GLL.BadLeftRecursion.buildAbstractAst g
+        for i in 1 .. 60 do
             let g = this.GetFullGraph i [GLL.BadLeftRecursion.B 0] (GLL.BadLeftRecursion.RNGLR_EOF 2) true
             let start = System.DateTime.Now            
             let r = GLL.BadLeftRecursion.buildAbstractAst g
@@ -883,12 +889,14 @@ type ``GLL abstract parser tests`` () =
     
     member this.PerformanceTestLinearUnambBraces() =
         printfn "----------Unamb brackets---------------"
-        for i in 100 .. 50 .. 1000 do
+        for i in 100 .. 50 .. 5000 do
             let g = this.GetLineraBrackets i (GLL.StrangeBrackets.LBR 0) (GLL.StrangeBrackets.RBR 1) (GLL.StrangeBrackets.RNGLR_EOF 2)
-            let start = System.DateTime.Now            
-            let r = GLL.StrangeBrackets.buildAbstractAst g
-            let time = (System.DateTime.Now - start).TotalMilliseconds
-            match r with 
+            let start = System.DateTime.Now
+            let r = ref (Unchecked.defaultof<_>)
+            for i in 0..4 do            
+                r := GLL.StrangeBrackets.buildAbstractAst g
+            let time = (System.DateTime.Now - start).TotalMilliseconds / 5.0
+            match !r with 
             | Error str ->
                 printfn "Error: %A" str
             
@@ -962,9 +970,9 @@ type ``GLL abstract parser tests`` () =
 //        let step = 20
         let tokens = 
             [GLL.StrangeBrackets.LBR 1; GLL.StrangeBrackets.RBR 2]            
-            @ (List.init 2 (fun _ -> GLL.StrangeBrackets.ANY 3))
+            //@ (List.init 2 (fun _ -> GLL.StrangeBrackets.ANY 3))
             @ [GLL.StrangeBrackets.LBR 1; GLL.StrangeBrackets.RBR 2]
-            @ (List.init 2 (fun _ -> GLL.StrangeBrackets.ANY 3))
+            //@ (List.init 2 (fun _ -> GLL.StrangeBrackets.ANY 3))
             |> Array.ofList
         let vCount = 1500
         let tokenTypeCount = 3
@@ -1194,17 +1202,19 @@ let f x =
     //System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
     let t = new ``GLL abstract parser tests``()
     let f () = 
-//               t.PerformanceTestFullGraphBadLeftRec()
-//               t.PerformanceTestFullGraphUnambBraces()
-//               t.PerformanceTestFullGraphAmbBraces()
-               t.PerformanceTestLinearBadLeftRec()
+               //t.PerformanceTestFullGraphBadLeftRec()
+               //t.PerformanceTestFullGraphUnambBraces()
+               //t.PerformanceTestFullGraphAmbBraces()
+//               t.PerformanceTestLinearBadLeftRec()
                t.PerformanceTestLinearUnambBraces()
-               t.PerformanceTestLinearAmbBraces()
+//               t.PerformanceTestLinearAmbBraces()
               //_35_Expression() //
     //let th = new System.Threading.Thread(f, 10000000)
     //th.Start()
     f()
     0
+
+(*
 ++++++++++
 1050:2.22569
 

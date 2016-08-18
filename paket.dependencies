@@ -31,7 +31,7 @@ nuget NUnit.Runners
 nuget FSharpx.Core
 nuget OpenCL.Net 2.2.9.0 framework: >= net45
 nuget YC.PrettyPrinter 0.0.5 framework: >= net45
-nuget YC.QuickGraph 3.7.1 framework: >= net45
+nuget YC.QuickGraph 3.7.2 framework: >= net45
 nuget YC.Utils.SourceText
 
 nuget FsLexYacc 6.0.0 framework: >= net45

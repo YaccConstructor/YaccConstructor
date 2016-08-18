@@ -1,7 +1,0 @@
-[<Start>]
-s: simple1 | simple2 
-
-simple1: A B any* B A
-simple2: B B any+ C C
-
-any: A | B | C | D

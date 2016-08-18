@@ -233,7 +233,7 @@ let printTableGLL
 
         print "let private rulesStart = "
         printArr rulesStart (print "%d")
-        print "let probs = "
+        print "let private probabilities = "
         printArr grammar.probability (print "%A")
         printBr "let startRule = %d" grammar.startRule
         printBr "let indexatorFullCount = %d" indexator.fullCount
@@ -263,7 +263,7 @@ let printTableGLL
             printBr "let buildAst : (seq<Token> -> ParserCommon.ParseResult<_>) ="
             printBrInd 1 "buildAst<Token> parserSource"
         else
-            printBr "let buildAbstractAst : (AbstractAnalysis.Common.BioParserInputGraph<Token> -> int -> ParserCommon.ParseResult<_>) ="
+            printBr "let buildAbstractAst : (AbstractAnalysis.Common.ParserInputGraph<Token> -> ParserCommon.ParseResult<_>) ="
             printBrInd 1 "buildAbstractAst<Token> parserSource"
         printBr ""
         res.ToString()

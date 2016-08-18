@@ -168,9 +168,9 @@ let main args =
 //    0
 
 
-//    let nvidiaOneThread, nvidiaParallel, nvidiaProvider = getGpuOptions nvidiaPlatformName
+    let nvidiaOneThread, nvidiaParallel, nvidiaProvider = getGpuOptions nvidiaPlatformName
 //    let intelOptions, intelProvider = getGpuOptions intelPlatformName
-    let amdOneThreadOptions, amdParallel, amdProvider = getGpuOptions amdPlatformName
+//    let amdOneThreadOptions, amdParallel, amdProvider = getGpuOptions amdPlatformName
 //    let defaultOptions, dafeultProvider = getGpuOptions defaultPlatformName
     let cudaOneThread: GPUCuda = { doParallelFlush = false }
     let cudaParallel: GPUCuda = { doParallelFlush = true }

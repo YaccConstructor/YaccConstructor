@@ -1,0 +1,17 @@
+Alea.CUDA.Fody
+Alea.CUDA.IL
+Alea.CUDA.Unbound
+Alea.IL
+Fody
+FSharp.Core
+FSharp.Quotations.Evaluator
+FSharpx.Collections
+FSPowerPack.Community
+FSPowerPack.Core.Community
+FSPowerPack.Linq.Community
+FSPowerPack.Metadata.Community
+FSPowerPack.Parallel.Seq.Community
+OpenCL.Net
+YC.PrettyPrinter
+Alea.CUDA
+Brahma.FSharp

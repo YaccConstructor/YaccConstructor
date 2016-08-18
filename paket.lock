@@ -64,7 +64,7 @@ NUGET
     SourceLink.Fake (1.1)
     YC.PrettyPrinter (0.0.5)
       FSharp.Core
-    YC.QuickGraph (3.7.1)
+    YC.QuickGraph (3.7.2)
       DotNet.Contracts
       DotParser (>= 1.0.5)
       FSharp.Core
@@ -72,5 +72,5 @@ NUGET
       FSharp.Core (4.0.0.1)
 GITHUB
   remote: fsharp/FAKE
-    modules/Octokit/Octokit.fsx (57b7731e3386ae98806970506ff731872f3c9260)
+    modules/Octokit/Octokit.fsx (cd7849e12cf4a6619863671828ed1b0418e90d7f)
       Octokit (>= 0.20)

@@ -9,12 +9,19 @@ open FSharpx.Collections.Experimental
 [<Measure>] type vertexMeasure
 [<Measure>] type nodeMeasure
 [<Measure>] type labelMeasure
+[<Measure>] type stackMeasure
 
 [<Struct>]
 type Vertex =
     val Level            : int
     val NontermLabel     : int
     new (level, nonterm) = {Level = level; NontermLabel = nonterm}
+
+[<Struct>]
+type CallStackVertex =
+    val ReturnLabel : int
+    val Predecessor : int<stackMeasure>
+    new (label, pred) = {ReturnLabel = label; Predecessor = pred}
 
 [<Struct>]
 type Context(*<'TokenType>*) =
@@ -27,6 +34,14 @@ type Context(*<'TokenType>*) =
     new (index, label, vertex, ast, curR) = {Index = index; Label = label; Vertex = vertex; Ast = ast; CurrentR = curR} // Path = List.empty<ParserEdge<'TokenType*ref<bool>>>
     //new (index, label, vertex, ast, path) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Path = path}
 
+[<Struct>]
+type ContextGFG =
+    val Index           : int
+    val Label           : int<labelMeasure>
+    val Vertex          : Vertex
+    val CallStackVertex : int<stackMeasure>
+    val Ast             : int<nodeMeasure>
+    new (index, label, vertex, csVertex, ast) = {Index = index; Label = label; Vertex = vertex; CallStackVertex = csVertex; Ast = ast}
 
 type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
@@ -216,6 +231,7 @@ type ParserStructures<'TokenType> (inputLength : int, currentRule : int)=
     member this.SppfNodes = sppfNodes
     member this.DummyAST = dummyAST
     member this.PushContext = pushContext
+    member this.ContainsContext = containsContext
     member this.AddContext = addContext
     member this.ContainsEdge = containsEdge
     member this.GetTreeExtension = getTreeExtension

@@ -597,4 +597,5 @@ docs/tools/FSharp.Formatting.svclog
 *.yrd.fs
 tests/GLLParser.Simple.Tests/*.dot
 tests/GLL.AbstractParser.Simple.Tests/*.dot
+!tests/Gll.AbstractParserGFG.Tests/Emb.yrd.fs
 **/log*.txt

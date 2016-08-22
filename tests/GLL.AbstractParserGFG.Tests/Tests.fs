@@ -17,7 +17,7 @@ let buildAst = Yard.Generators.GLL.AbstractParserGFG.buildAbstractAst
 type ``Tests`` () =
     
     let yardFE = new YardFrontend()
-    let path = @"..\..\"
+    let path = @"..\..\..\GLL.AbstractParserGFG.Tests\"
 
     [<Test>]
     member this.``test``() =
@@ -28,13 +28,13 @@ type ``Tests`` () =
             | "A" -> A 0
             | _ -> failwith "Unexpected token"
 
-        let graph = new GrammarFlowGraph<Token> (eqGrammar.grammar.[0].rules, map)
+        let graph = new GrammarFlowGraph<Token> (eqGrammar.grammar.[0].rules, map, RNGLR_EOF 0)
         //graph.PrintToDot "GFG.dot"
         let ast =  buildAst parserSource graph
         
         match ast with
         | Error str -> Assert.Fail str
         | Success tree -> 
-            tree.AstToDot numToString tokenToNumber tokenData "sppf.dot"
+            tree.AstToDot numToString tokenToNumber tokenData @"sppf.dot"
 
         Assert.IsFalse false

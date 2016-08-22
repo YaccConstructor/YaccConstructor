@@ -1,6 +1,7 @@
 ﻿module Yard.Generators.GLL.AbstractParserGFG
 open Yard.Generators.GLL 
 open System 
+open System.IO
 
 open Yard.Generators.GLL
 open Yard.Generators.Common.ASTGLL
@@ -208,6 +209,23 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                             let resTree = structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy (u.NontermLabel*1<labelMeasure>) sppfNodeOnEdge z 
                             let newVertex = new Vertex(level, slot)
                             addContext setU i (u.NontermLabel*1<labelMeasure>) newVertex resTree //!currentPath
+        
+        let finalMatching (curRight : INode) nontermName finalState findSppfNode findSppfPackedNode currentGSSNode currentVertexInInput (pop : Vertex -> int -> int<nodeMeasure> -> unit)  = 
+            match curRight with
+            | :? TerminalNode as t ->
+                structures.CurrentN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy !structures.CurrentLabel !structures.CurrentR !structures.CurrentN
+                let r = (sppfNodes.Item (int !structures.CurrentN)) :?> NonTerminalNode 
+                pop !currentGSSNode !currentVertexInInput !structures.CurrentN
+            | :? NonTerminalNode as r ->
+                if (r.Name = nontermName) && (!currentVertexInInput = finalState)
+                then 
+                    match !structures.ResultAST with
+                        | None ->  
+                            structures.ResultAST := Some r
+                        | Some a -> 
+                             a.AddChild r.First                                         
+                pop !currentGSSNode !currentVertexInInput !structures.CurrentN
+            | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
 
         let table = parser.Table
         
@@ -349,20 +367,73 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     let curRight =  sppfNodes.Item (int !structures.CurrentN) 
                     let r = curRight.getExtension ()
                     //if Array.exists ((=) r) finalExtensions then finalPaths.Add !currentPath
-                    structures.FinalMatching
+                    finalMatching
                         curRight 
                         parser.LeftSide.[parser.StartRule]
-                        finalExtensions
+                        input.FinalState
                         findSppfNode
                         findSppfPackedNode
                         currentGSSNode
                         currentVertexInInput
                         pop
+        
+//        let log (file: StreamWriter) isDisp =
+//            if isDisp 
+//            then file.WriteLine "Dispatcher"
+//            else file.WriteLine "Processing"
+//            
+//            let spaces = "    "
+//            let writeSpaces i = for j in 1 .. i do file.Write spaces
+//            
+//            let writeNum i name n = 
+//                writeSpaces i
+//                file.WriteLine (name + ": " + string n) 
+//            
+//            let writeLabel i (l: int<labelMeasure>) =
+//                writeSpaces i     
+//                file.WriteLine ("Label: " + (string <| getRule l) + " " + (string <| getPosition l))
+//
+//            let writeVertex i (v: Vertex) =
+//                writeSpaces i 
+//                file.WriteLine ("Vertex: ")                
+//                writeLabel (i + 1) (v.NontermLabel * 1<labelMeasure>)              
+//                writeNum (i + 1) "Level" v.Level
+//            
+//            let writeContext i (context: ContextGFG) = 
+//                writeSpaces i
+//                file.WriteLine ("Context:")                
+//                writeNum (i + 1) "InputPos" context.Index                
+//                writeLabel (i + 1) context.Label                
+//                writeVertex (i + 1) context.Vertex            
+//                writeNum (i + 1) "SPPF node" (int context.Ast)
+//                     
+//            let writeSetR i =
+//                writeSpaces i
+//                file.WriteLine "Queue:"
+//                for context in setR do
+//                    writeContext (i + 1) context
+//                    file.WriteLine ""
+//            
+//            writeSetR 1
+//            writeNum 1 "InputPos" !currentVertexInInput
+//            writeVertex 1 !currentGSSNode
+//            writeLabel 1 !structures.CurrentLabel
+//            writeNum 1 "CurrentN" (int !structures.CurrentN) 
+//            file.WriteLine "-----------------------------------"
+//            structures.CurrentR := 
                   
         let control () =
-             while not !stop do
-                closure()
-                if !condition then dispatcher() else processing()
+            //let file = new StreamWriter(@"C:\Users\User\log.txt")
+            while not !stop do
+               closure()
+               if !condition 
+               then 
+                   dispatcher() 
+                   //log file true
+               else 
+                   processing()
+                   //log file false
+            //file.Close()
         control()
 
         let rec checkConj (ast : obj) : bool = 

@@ -23,7 +23,7 @@ type GFGEdgeTag<'token> =
 type GFGEdge<'token>(s, e, t)=
     inherit TaggedEdge<int, GFGEdgeTag<'token>>(s, e, t)
 
-type GrammarFlowGraph<'token> (ruleList : Rule.t<Source.t,Source.t> list, mapToToken) as this =   // temporary solution
+type GrammarFlowGraph<'token> (ruleList : Rule.t<Source.t,Source.t> list, mapToToken, EOF) as this =   // temporary solution
     inherit AdjacencyGraph<int, GFGEdge<'token>>()
 
     let nonTermToStates = new Dictionary<string, int * int>()  // nonTerm -> start/end nodes
@@ -86,6 +86,10 @@ type GrammarFlowGraph<'token> (ruleList : Rule.t<Source.t,Source.t> list, mapToT
             then 
                 initState := startState
                 finalState := endState
+        let finalEdge = this.Edges |> Seq.find (fun e -> e.Target = !finalState)
+        let src = finalEdge.Source
+        this.RemoveEdge finalEdge |> ignore
+        this.AddEdge (new GFGEdge<_>(src, !finalState, Scan EOF)) |> ignore
     do
         rulesToGFG ()
     

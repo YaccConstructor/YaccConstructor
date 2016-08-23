@@ -209,7 +209,7 @@ let buildAutomaton (ddg: DDG<_,_>) (initialFsaMap: FSAMap<_>) controlData approx
         match node.Type with
         | ExitNode(_) ->
             let result = Map.find node.Id state.UnboundResults
-            result.NfaToDfa
+            result.NfaToDfa()
         | _ -> propagate traverser state
 
     let initState = {

@@ -5,6 +5,9 @@ type ParserSource<'TokenType> ( table             : (int*int)[][][]
                                 , genLiteral      : string -> int -> 'TokenType option
                                 , numToString     : int -> string
                                 , tokenData       : 'TokenType -> obj
+                                , leftSide        : int[]
+                                , startRule       : int
+                                , eofIndex        : int
                               ) = 
     
     member this.Table              = table
@@ -12,3 +15,6 @@ type ParserSource<'TokenType> ( table             : (int*int)[][][]
     member this.GenLiteral         = genLiteral 
     member this.TokenData          = tokenData
     member this.NumToString        = numToString
+    member this.LeftSide           = leftSide
+    member this.StartRule          = startRule
+    member this.EofIndex           = eofIndex

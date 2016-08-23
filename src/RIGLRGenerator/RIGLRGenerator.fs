@@ -69,6 +69,6 @@ type RIGLR() =
             use out = new StreamWriter(output) 
             out.WriteLine(strTable)
             out.Close()
-
+            
             box ()
         override this.Generate definition = this.Generate (definition, "")

@@ -108,11 +108,21 @@ let printTable
             printBrInd 1 "| L_%s _ -> %d" (indexator.getLiteralName i) i
         printBr ""
         
+        printBr "let startRule = %A" grammar.startRule
+        printBr "let eofIndex = %d" grammar.indexator.eofIndex
+        printBr "let leftSide = %A" grammar.rules.leftSideArr
+        let epsilonRules = new System.Collections.Generic.List<_>()
+        for i in 0 .. grammar.rules.rulesCount - 1 do
+            if (grammar.rules.rightSide i).Length = 0
+            then epsilonRules.Add i 
+        printBr "let epsilonRules = %A" <| epsilonRules.ToArray()
+        printBr ""
+
         printBr "let table: (int*int)[][][] = "
         printTableArr table (fun e -> print "%A" e)      
         printBr ""
-
-        printBr "let private parserSource = new ParserSource<Token> (table, tokenToNumber, genLiteral, numToString, tokenData)"
+        
+        printBr "let private parserSource = new ParserSource<Token> (table, tokenToNumber, genLiteral, numToString, tokenData, leftSide, startRule, eofIndex)"
         res.ToString()
 
     printTable()

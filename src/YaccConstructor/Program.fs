@@ -1,18 +1,18 @@
-﻿//   Copyright 2013, 2014 YaccConstructor Software Foundation
+﻿////   Copyright 2013, 2014 YaccConstructor Software Foundation
+////
+////   Licensed under the Apache License, Version 2.0 (the "License");
+////   you may not use this file except in compliance with the License.
+////   You may obtain a copy of the License at
+////
+////       http://www.apache.org/licenses/LICENSE-2.0
+////
+////   Unless required by applicable law or agreed to in writing, software
+////   distributed under the License is distributed on an "AS IS" BASIS,
+////   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+////   See the License for the specific language governing permissions and
+////   limitations under the License.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-
-module YaccConstructor.Program
+//module YaccConstructor.Program
 
 open Mono.Addins
 open Yard.Core
@@ -44,7 +44,38 @@ let log (e:System.Exception) msg =
     "\nMessage:\n  " + msg
     |> printfn "%s"
 
+
+
+open Argu
+
+type CLIArguments =
+    | [<AltCommandLine("-f")>] F of feName:string option
+    | [<AltCommandLine("-af")>] Af
+    | [<AltCommandLine("-g")>] G of generatorName:string
+    | [<AltCommandLine("-ag")>] Ag
+    | [<AltCommandLine("-c")>] C of conversionName:string
+    | [<AltCommandLine("-ac")>] Ac
+    | [<AltCommandLine("-d")>] D of userD:string
+    | [<AltCommandLine("-u")>] U of userR:string
+    | [<AltCommandLine("-i")>] I of path:string
+with
+    interface IArgParserTemplate with
+        member s.Usage =
+            match s with
+            | F _ -> "Frontend name. Use -af to list available."
+            | Af _ -> "Available frontends"
+            | G _ -> "Generator name. Use -ag to list available."
+            | Ag _ -> "Available generators"
+            | C _ -> "Conversion applied in order. Use -ac to list available."
+            | Ac _ -> "Available conversions"
+            | D _ -> "User defined constants for YardFrontend lexer."
+            | U _ -> "Remove previously defined constants for YardFrontend lexer."
+            | I _ -> "Input grammar"
+// 
+
 let () =
+ 
+     
     let feName = ref None
     let generatorName = ref None
     let generatorParams = ref None
@@ -66,7 +97,6 @@ let () =
     let addinFrontendNames = Seq.map (fun (elem : Frontend) -> elem.Name) addinFrontends |> Seq.toArray
     let addinConversionNames = Seq.map (fun (elem : Conversion) -> elem.Name) addinConversions |> Seq.toArray
     let addinGeneratorNames = Seq.map (fun (elem : Generator) -> elem.Name) addinGenerators |> Seq.toArray
-
     let userDefs = ref []
     let userDefsStr = ref ""
 
@@ -88,37 +118,64 @@ let () =
             Some tmpName
         else None
 
+    let generatorNameD = 
+            match !generatorName with
+            |Some x->x
+            |None->""
+
     let generateSomething = ref true
 
     let printItems iName items deft =
-        fun _ ->
             generateSomething := false
             printfn "\nAvailable %s: " iName
             Seq.map (fun x -> x + (if Some x = deft then " (default)" else "")) items
             |> String.concat "\n    "
             |> fun x -> printf "    %s\n" x
+    
+        
+    let argv = System.Environment.GetCommandLineArgs()
+    let parser = ArgumentParser.Create<CLIArguments>()
+    let args = parser.Parse argv.[1..]
 
-    let commandLineSpecs =
-        ["-f", ArgType.String (fun s -> feName := Some s), "Frontend name. Use -af to list available."
-         "-af", ArgType.Unit (printItems "frontends" addinFrontendNames !feName), "Available frontends"
-         "-g", ArgType.String 
-            (fun s -> 
-                match Array.toList (s.Split ' ') with
+
+    feName := args.GetResult (<@ F @>, defaultValue = !feName)
+    
+
+    let genString= args.GetResult (<@ G @>, defaultValue = generatorNameD)
+    let gen = 
+        match Array.toList (genString.Split ' ') with
                 | name::[] -> generatorName := Some name; generatorParams := None
                 | name::parameters -> generatorName := Some name; generatorParams := Some (String.concat " " parameters)
                 | _ -> failwith "You need to specify generator name"
-            ), "Generator name. Use -ag to list available."
-         "-ag", ArgType.Unit (printItems "generators" addinGeneratorNames !generatorName), "Available generators"
-         "-c", ArgType.String (fun s -> conversions.Add s), "Conversion applied in order. Use -ac to list available."
-         "-ac", ArgType.Unit (printItems "conversions" addinConversionNames None), "Available conversions"
-         "-D", ArgType.String (fun s -> userDefs := !userDefs @ [s]), "User defined constants for YardFrontend lexer."
-         "-U", ArgType.String (fun s -> userDefs := List.filter ((<>) s) !userDefs), 
-                "Remove previously defined constants for YardFrontend lexer."
-         "-i", ArgType.String (fun s ->
-                                   testFile := System.IO.Path.GetFileName s |> Some
-                                   testsPath := System.IO.Path.GetDirectoryName s |> Some), "Input grammar"         
-         ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
-    ArgParser.Parse commandLineSpecs
+   
+
+    
+    for c in args.GetResults <@ C @> do
+        conversions.Add c
+
+
+    for c in  args.GetResults <@ D @> do
+        userDefs := !userDefs@[c]
+
+    for c in args.GetResults <@ U @> do
+        userDefs := List.filter((<>) c) !userDefs
+
+    
+    let getI =
+         if args.Contains <@ I @> then 
+            args.GetResult <@ I @> |> fun s ->testFile := System.IO.Path.GetFileName s |> Some
+                                              testsPath := System.IO.Path.GetDirectoryName s |> Some
+    
+    let printFE =
+        if args.Contains <@ Af @> then
+            printItems "frontends" addinFrontendNames !feName
+    let printGen = 
+        if args.Contains <@ Ag @> then
+            printItems "generators" addinGeneratorNames !generatorName
+    let printCon = 
+        if args.Contains <@ Ac @> then
+            printItems "conversions" addinConversionNames None
+
 
 
     let run () =

@@ -5,7 +5,6 @@ open AbstractAnalysis.Common
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 open QuickGraph
-open QuickGraph.FSA.FsaApproximation
 open QuickGraph.FSA.GraphBasedFsa
 
 //let printSmbString (x:char*Position<_>) = 
@@ -150,7 +149,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<FSA<_> -> _>) eofToken =
     res
 
 let Tokenize (fstLexer : FST<_,_>) (actions : array<FSA<_> -> _>) (alphabet: HashSet<_>) eofToken (inputFst : FST<_,_>) =    
-    let inputFstLexer = FST<_,_>.Compos(inputFst, fstLexer, alphabet) 
+    let inputFstLexer = FST<_,_>.Compose(inputFst, fstLexer, alphabet) 
     let epsRes = 
         match inputFstLexer with
         | Success fst -> 

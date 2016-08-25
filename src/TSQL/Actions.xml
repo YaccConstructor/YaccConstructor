@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<actions>
-	<insert group-id="ReSharper" position="last">
-		<action-group id="Plugins.TSQL" text="TSQL">
-			<action id="Plugins.TSQL.About" text="About"/>
-			<!-- to break up elements use <separator/> -->
-		</action-group>
-	</insert>
-</actions>

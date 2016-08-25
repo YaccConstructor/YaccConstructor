@@ -129,7 +129,8 @@ and [<AllowNullLiteral>]
     new (edge) = new Path (edge, null, 1)
 
 let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : ParserInputGraph<'TokenType>) =
-    let startV, finalV, innerGraph =
+    // let startV, finalV, innerGraph =
+    let startVList, finalVList, innerGraph =
         let verticesMap = Array.zeroCreate (Seq.max tokens.Vertices + 1)            
         for i in tokens.Vertices do
              verticesMap.[i] <- new VInfo<_> (i)
@@ -138,15 +139,21 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         |> Seq.map (fun e -> new QuickGraph.TaggedEdge<_,_>(verticesMap.[e.Source], verticesMap.[e.Target], e.Tag))
         |> g.AddVerticesAndEdgeRange
         |> ignore
-        verticesMap.[tokens.InitState], verticesMap.[tokens.FinalState], g
-    
+        [ for initS in tokens.InitStates -> verticesMap.[initS] ],
+        [ for finalS in tokens.FinalStates -> verticesMap.[finalS] ],
+        g
+        //verticesMap.[tokens.InitState], verticesMap.[tokens.FinalState], g
+            
     let nodes = new BlockResizeArray<AstNode>()
     let terminals = new BlockResizeArray<'TokenType>()
     let startState = 0
     let inline getEpsilon i = new Epsilon(-1-i)
     let startNonTerm = parserSource.LeftSide.[parserSource.StartRule]
     let verticesToProcess = new Queue<_>()
-    verticesToProcess.Enqueue (startV)
+    
+    for startV in startVList do
+        verticesToProcess.Enqueue (startV)
+    
     let mutable errorIndex = -1
     let outEdgesInnerGraph = Array.init (Seq.max tokens.Vertices + 1) (fun _ -> [||])
     for v in innerGraph.Vertices do
@@ -382,7 +389,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         then new Tree<_>([||], getEpsilon startNonTerm, parserSource.Rules) |> Success
         else Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string")
     else
-        let _,_ = addVertex startV startState startV.unprocessedGssVertices
+        for startV in startVList do
+            addVertex startV startState startV.unprocessedGssVertices |> ignore 
+
         while errorIndex = -1 && verticesToProcess.Count > 0 do
             let curV = verticesToProcess.Dequeue()
             processVertex curV
@@ -391,19 +400,45 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             Error (errorIndex - 1, Unchecked.defaultof<'TokenType>, "Parse error")
         else
             let root = ref None
-            let addTreeTop res =
-                let children = new Family(parserSource.StartRule, new Nodes([|res|]))
-                new AST(children, null)
-            for v in innerGraph.Edges |> Seq.filter (fun e -> e.Target = finalV) |> Seq.collect (fun e -> e.Source.processedGssVertices) do
+            let addTreeTop resList =
+                let children = resList |> Array.map (fun x -> new Family(parserSource.StartRule, new Nodes([|x|])))
+                new AST(children)
+
+            let vertices = innerGraph.Edges |> Seq.filter (fun e -> List.exists (fun f -> f = e.Target) finalVList) |> Seq.collect (fun e -> e.Source.processedGssVertices)
+            
+            let rootList = new BlockResizeArray<_>()
+            for v in vertices do
                 if parserSource.AccStates.[v.State]
                 then
-                    root := Some nodes.Length
-                    let nonEpsilonEdge = v.OutEdges.FirstOrDefault(fun x -> x.Ast >= 0)
-                    if nonEpsilonEdge <> Unchecked.defaultof<_>
-                    then
-                        nodes.[nonEpsilonEdge.Ast]
-                        |> addTreeTop
-                        |> nodes.Add
+                    let rL = v.OutEdges 
+                                    |> Seq.filter (fun e -> e.Dest.State = startState && e.Ast >= 0 && e <> Unchecked.defaultof<_>) 
+                                    |> Seq.map (fun e -> e.Ast)
+                    for ast in rL do
+                        rootList.Add nodes.[ast]
+//                        
+            //assert (rootList.Length = 1) // single acc state
+
+            root := Some nodes.Length
+            rootList.ToArray() |> addTreeTop |> nodes.Add
+
+//            for ast in rootList do
+//                root := Some nodes.Length
+//                [|ast|]
+//                |> addTreeTop
+//                |> nodes.Add
+
+//            // old
+//            for v in vertices do
+//                if parserSource.AccStates.[v.State]
+//                then
+//                    root := Some nodes.Length //!
+//                    let nonEpsilonEdge = v.OutEdges.FirstOrDefault(fun x -> x.Ast >= 0)
+//                    if nonEpsilonEdge <> Unchecked.defaultof<_>
+//                    then
+//                        [|nodes.[nonEpsilonEdge.Ast]|]
+//                        |> addTreeTop
+//                        |> nodes.Add
+
             match !root with
             | None -> 
                 let states = 
@@ -417,10 +452,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             | Some res -> 
                 try 
                     let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
-//                    tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
+                    //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
 //
 //                    let gssInitVertices = 
-//                       innerGraph.Edges |> Seq.collect (fun e -> e.Source.processedGssVertices)
+//                    innerGraph.Edges |> Seq.filter (fun e -> List.exists (fun f -> f = e.Target) finalVList) |> Seq.collect (fun e -> e.Source.processedGssVertices)
 //
 //                    drawDot parserSource.TokenToNumber terminals parserSource.LeftSide gssInitVertices parserSource.NumToString parserSource.ErrorIndex "../../../Tests/AbstractRNGLR/DOT/gss.dot"
 

@@ -1,6 +1,0 @@
-﻿[<Start>]
-start: statement+
-statement: if_statement | simple_statement
-if_statement: IF cond THEN statement+ (ELSE statement+)? ENDIF
-simple_statement: cond SEMICOLON
-cond: A | B | C | D | E | F | G | H

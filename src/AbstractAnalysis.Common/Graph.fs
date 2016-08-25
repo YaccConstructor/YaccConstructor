@@ -14,15 +14,7 @@ type LexerEdge<'l ,'br  when 'l: equality> (s,e,t) =
 
 type DAG<'l,'br  when 'l: equality> () =
     inherit AdjacencyGraph<int, LexerEdge<'l,'br>>()
-    let mutable startV = None
-
-    member this.AddEdgeForsed (e:LexerEdge<'l,'br>) =        
-        this.AddVertex e.Source |> ignore
-        this.AddVertex e.Target |> ignore
-        this.AddEdge e |> ignore
-
-    member this.AddEdgesForsed (edges:#seq<LexerEdge<_,_>>) =
-        Seq.iter this.AddEdgeForsed edges
+    let mutable startV = None   
 
     member this.StartVertex 
         with get () = match startV with Some v -> v | _ -> failwith "Start vertex is not defined!"
@@ -73,22 +65,19 @@ type LexerInnerGraph<'br> (g:LexerInputGraph<'br>) as this =
                         | i                  -> new LexerEdge<_,_>(!counter,(incr counter; !counter),Some(ss.[i],br.Value))
                     )
         let newEdges = g.Edges |> Array.ofSeq |> Array.collect splitEdge
-        this.AddEdgesForsed(newEdges)
+        this.AddVerticesAndEdgeRange(newEdges) |> ignore
         this.StartVertex <- g.StartVertex
 
     do convert()
 
-type ParserEdge<'token>(s,e,t)=
+type ParserEdge<'token>(s, e, t)=
     inherit TaggedEdge<int, 'token>(s,e,t)
-
-type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) =
+    
+type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) = 
     inherit AdjacencyGraph<int,ParserEdge<'token>>()
 
-    member val InitState = initialVertices.[0]
-    member val FinalState = finalVertices.[0]
-
-    member val InitStates = initialVertices
-    member val FinalStates = finalVertices
+    member val InitStates = initialVertices 
+    member val FinalStates = finalVertices with get, set
 
     member this.PrintToDot name (tokenToString : 'token -> string) = 
         use out = new System.IO.StreamWriter (name : string)
@@ -103,7 +92,7 @@ type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) =
                 let tokenName = e.Tag |> tokenToString
                 out.WriteLine (e.Source.ToString() + " -> " + e.Target.ToString() + "[label=\"" + tokenName + "\"]")
         out.WriteLine("}")
-        out.Close()
+        out.Close()      
 
     new (initial : int, final : int) = 
         ParserInputGraph<_>([|initial|], [|final|])

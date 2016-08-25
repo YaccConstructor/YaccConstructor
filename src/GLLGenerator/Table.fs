@@ -76,32 +76,39 @@ type Table (grammar : FinalGrammar) =
         let result = num - grammar.indexator.nonTermCount
         result
             
-//для каждого правила вывода заданной грамматики A → α (где под α понимается цепочка в правой части правила) выполняются следующие действия:
-//Для каждого терминала a ∈ FIRST(α) добавить правило A → α к M[A, a]
-//Если ε ∈ FIRST(α), то для каждого b ∈ FOLLOW(A) добавить A → α к M[A, b]
-//ε ∈ FIRST(α) и $ ∈ FOLLOW(A), добавить A → α к M[A, $]
-//Все пустые ячейки — ошибка во входном слове
     let _table = 
+        let inline pack left right : int =  int((int32 left <<< 16) ||| int32 right)
         newRightSideForStartRule()
+        let result = new System.Collections.Generic.Dictionary<int, ResizeArray<int>>()
         let length1 = grammar.indexator.nonTermCount
         let length2 = grammar.indexator.fullCount - grammar.indexator.nonTermCount
-        let arr = Array2D.create length1 length2 (List.empty<int>)
-        let result = Array.create (length1 * length2) (Array.empty<int>)
         let firsts = firstForChain
         for i = 0 to grammar.rules.rulesCount - 1 do
             let curFirst = Set.toArray firsts.[i]
             let curNTerm = grammar.rules.leftSide i
             for j = 0 to curFirst.Length - 1 do
-                arr.[curNTerm, getTableIndex curFirst.[j]] <- i :: arr.[curNTerm, getTableIndex curFirst.[j]]
+                let key = pack curNTerm (getTableIndex curFirst.[j])
+                if result.ContainsKey(key)
+                then
+                    result.[key].Add i
+                else
+                    let ra = new ResizeArray<int>()
+                    ra.Add i
+                    result.Add(key, ra) 
             if grammar.epsilonRules.[i]
             then 
                 let curFollow = Set.toArray follow.[curNTerm]
                 for j = 0 to curFollow.Length - 1 do
-                    arr.[curNTerm, getTableIndex curFollow.[j]] <- i :: arr.[curNTerm, getTableIndex curFollow.[j]] 
-        let temp = arr                 
-        for i = 0 to length1 - 1 do
-            for j = 0 to length2 - 1 do
-                result.[length2 * i + j] <- List.toArray arr.[i,j]
+                    let key = pack curNTerm (getTableIndex curFollow.[j])
+                    if result.ContainsKey(key)
+                    then
+                        result.[key].Add i
+                    else
+                        let ra = new ResizeArray<int>()
+                        ra.Add i
+                        result.Add(key, ra) 
+                     
+        
         result
     
 

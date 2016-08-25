@@ -4,33 +4,27 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
-    <rshVer>9.1.20150522.81235</rshVer>
-    <NuGetNetNum Condition=" '$(TargetFrameworkVersion)' == 'v4.5' ">45</NuGetNetNum>
-    <NuGetNetNum Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">40</NuGetNetNum>
-    <TargetFSharpCoreVersion Condition=" '$(TargetFrameworkVersion)' == 'v4.5' ">4.3.0.0</TargetFSharpCoreVersion>
-    <TargetFSharpCoreVersion Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">4.3.0.0</TargetFSharpCoreVersion>
     <FsYardPath>$(SolutionDir)\packages\YC.FsYARD.0.2.8.7\tools\FsYARD\FsYard.targets</FsYardPath>
-    <YCToolsPath>$(SolutionDir)\packages\YC.Tools.0.0.6.10\lib\net40\</YCToolsPath>
 </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath Condition=" '$(TargetFrameworkVersion)' == 'v4.5' ">$(SolutionDir)..\Bin\Debug\v40\</OutputPath>
-    <OutputPath Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">$(SolutionDir)..\Bin\Debug\v40\</OutputPath>
+    <OutputPath Condition=" '$(TargetFrameworkVersion)' == 'v4.5' ">$(SolutionDir)Bin\Debug\v40\</OutputPath>
+    <OutputPath Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">$(SolutionDir)Bin\Debug\v40\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <!--DocumentationFile>bin\Debug\FsYaccFrontend.XML</DocumentationFile-->
+    <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <OutputPath Condition=" '$(TargetFrameworkVersion)' == 'v4.5' ">$(SolutionDir)..\Bin\Release\v40\</OutputPath>
-    <OutputPath Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">$(SolutionDir)..\Bin\Release\v40\</OutputPath>
+    <OutputPath Condition=" '$(TargetFrameworkVersion)' == 'v4.5' ">$(SolutionDir)Bin\Release\v40\</OutputPath>
+    <OutputPath Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">$(SolutionDir)Bin\Release\v40\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <!--DocumentationFile>bin\Release\FsYaccFrontend.XML</DocumentationFile-->
+    <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
 </Project>

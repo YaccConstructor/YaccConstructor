@@ -1,4 +1,7 @@
-YaccConstructor
+[![Issue Stats](http://issuestats.com/github/YaccConstructor/YaccConstructor/badge/issue)](http://issuestats.com/github/YaccConstructor/YaccConstructor)
+[![Issue Stats](http://issuestats.com/github/YaccConstructor/YaccConstructor/badge/pr)](http://issuestats.com/github/YaccConstructor/YaccConstructor)
+![Repository Size](https://reposs.herokuapp.com/?path=YaccConstructor/YaccConstructor)
+YaccConstructor 
 ===============
 
 Main repository of YaccConstructor project. Platform for parser generators and other grammarware research and development.

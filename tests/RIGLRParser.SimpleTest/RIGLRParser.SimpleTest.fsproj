@@ -127,8 +127,12 @@
   </Choose>
   <Import Project="..\..\.paket\paket.targets" />
   <ItemGroup>
-    <Compile Include="LexCommon.fs" />
+    <None Include="Chaos.yrd" />
+    <Compile Include="Chaos.yrd.fs" />
+    <None Include="Expr.yrd" />
+    <Compile Include="Expr.yrd.fs" />
     <Compile Include="grammar7_7.yrd.fs" />
+    <Compile Include="LexCommon.fs" />
     <Compile Include="RIGLRParserSimpleTest.fs" />
     <None Include="paket.references" />
   </ItemGroup>

@@ -91,14 +91,14 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
     let getNodeT termNum pos =
         let checkNode (node: AstNode) =
             match node with
-            | :? Terminal as t -> t.TokenNumber = pos && (parser.TokenToNumber (Seq.item t.TokenNumber tokens) = termNum)//termNum && t.Pos = pos
+            | :? Terminal as t -> t.TokenNumber = pos 
+                                  && (parser.TokenToNumber (Seq.item t.TokenNumber tokens) = termNum)
             | _ -> false
         let termNodeNum = findSppfNode checkNode
         match termNodeNum with
         | Some i -> i
-        | None -> addNode (Terminal(pos))//(Terminal (termNum, pos))
-        
-    
+        | None -> addNode (Terminal(pos))
+            
     let getNodeN pos prod children =
         let nonTerm = leftSide.[prod]
         let checkNode (node: AstNode) =
@@ -113,10 +113,14 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
         | None -> addNode (new AST(family, [||], pos))
                  
     let getPointer nodes set =
+        //let uniqueNodes = nodes |> List.distinct
         let pointerNum = set |> Seq.tryFind (fun i -> pointers.[int i] = nodes)
         match pointerNum with
         | Some i -> i
         | None -> createPointer nodes set
+    
+    let isIntersect list1 list2 =
+        Set.intersect (set list1) (set list2) |> Set.isEmpty |> not
 
     let shift state vertex (pointer: int<ptr>) tokenNum pos =
         let termNode = getNodeT tokenNum pos
@@ -148,8 +152,7 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
             if index = 0
             then ptr := getPointer [!nonTermNode] setW
             else ptr := getPointer (nodes.[.. index - 1] @ [!nonTermNode]) setW
-        addContext (new Context(state, vertex, !ptr)) queue
-        
+        addContext (new Context(state, vertex, !ptr)) queue         
     
     let pop vertex (pointer: int<ptr>) queue =
         let currentVertex = verticies.[int vertex]
@@ -160,9 +163,12 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
             then setP.[vertex].Add pointer
         else setP.Add (vertex, new ResizeArray<_>([pointer]))
         for edge in currentVertex.Edges do
-            let ptr = getPointer (pointers.[snd edge |> int] @ pointers.[int pointer]) setW
-            addContext (new Context(returnState, fst edge, ptr)) queue 
-            
+            let left, right = pointers.[snd edge |> int], pointers.[int pointer]
+            if not (isIntersect left right)
+            then
+                let ptr = getPointer (left @ right) setW
+                addContext (new Context(returnState, fst edge, ptr)) queue 
+    
     let push state label currentVertex pointer queue =
         nextSetW.Add pointer |> ignore
         let vertexNum = setP.Keys |> Seq.tryFind (fun i -> verticies.[int i].Label = label)        
@@ -174,8 +180,11 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
             then
                 vertex.Edges.Add (currentVertex, pointer)
                 for p in setF do
-                    let ptr = getPointer (pointers.[int pointer] @ pointers.[int p]) setW
-                    addContext (new Context(state, i, ptr)) queue
+                    let left, right = pointers.[int pointer], pointers.[int p]
+                    if not (isIntersect left right)  //p <> pointer
+                    then
+                        let ptr = getPointer (left @ right) setW
+                        addContext (new Context(state, i, ptr)) queue
         | None ->
             verticies.Add (new Vertex(label, new ResizeArray<_>([currentVertex, pointer])))
             let newVertexNum = (verticies.Count - 1) * 1<vertex>
@@ -231,8 +240,7 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
         reductions.Clear()
         setN.Clear()
 
-    let rec run pos =                                        
-        //tokenEnum.MoveNext() |> ignore        
+    let rec run pos =                                                      
         if tokenEnum.MoveNext()
         then
             refreshSets()

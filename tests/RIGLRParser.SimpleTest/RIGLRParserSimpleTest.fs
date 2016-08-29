@@ -6,6 +6,8 @@ open Yard.Generators.RIGLR.Parser
 open NUnit.Framework
 
 open RIGLR.grammar7_7
+open RIGLR.Chaos
+open RIGLR.Expr
 
 let dir = @"..\..\..\data\RIGLR\"
 let outDir = @"..\.."
@@ -29,6 +31,16 @@ let runTest parser input fileName intToString leftSide tokToNum tokenData =
 type ``Tests`` () =
     
     [<Test>]
-    member this.``test`` () =
-        let parser = buildAst
-        runTest parser "grammar7_7.txt" "sppf.dot" numToString leftSide tokenToNumber (Some tokenData)
+    member this.``example`` () =
+        let parser = RIGLR.grammar7_7.buildAst
+        runTest parser "grammar7_7.txt" "sppf.dot" RIGLR.grammar7_7.numToString RIGLR.grammar7_7.leftSide RIGLR.grammar7_7.tokenToNumber (Some RIGLR.grammar7_7.tokenData)
+
+    [<Test>] 
+    member this.``chaos``() =
+        let parser = RIGLR.Chaos.buildAst
+        runTest parser "chaos.txt" "sppfC.dot" RIGLR.Chaos.numToString RIGLR.Chaos.leftSide RIGLR.Chaos.tokenToNumber (Some RIGLR.Chaos.tokenData)
+
+    [<Test>]
+    member this.``expr``() =
+        let parser = RIGLR.Expr.buildAst
+        runTest parser "Expr.txt" "sppfE.dot" RIGLR.Expr.numToString RIGLR.Expr.leftSide RIGLR.Expr.tokenToNumber (Some RIGLR.Expr.tokenData)

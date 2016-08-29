@@ -43,6 +43,8 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
     let setN = new HashSet<int>()
     let setW = new HashSet<int<ptr>>()
     let reductions = new Dictionary<int<ptr> * int, int>()
+    let nonTermChildren = new Dictionary<int, ResizeArray<int list>>()
+    
     setP.Add (0<vertex>, new ResizeArray<_>())
     pointers.Add []
 
@@ -109,11 +111,18 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
         let family = new Family(prod, new Nodes(nodes))
         let nonTermNodeNum = findSppfNode checkNode
         match nonTermNodeNum with
-        | Some i -> addFamily sppfNodes.[i] family; i
-        | None -> addNode (new AST(family, [||], pos))
+        | Some i ->
+            if not (nonTermChildren.[i].Contains children)
+            then 
+                addFamily sppfNodes.[i] family
+                nonTermChildren.[i].Add children
+            i
+        | None -> 
+            let newNodeNum = addNode (new AST(family, [||], pos))
+            nonTermChildren.Add (newNodeNum, new ResizeArray<_>([children]))
+            newNodeNum
                  
-    let getPointer nodes set =
-        //let uniqueNodes = nodes |> List.distinct
+    let getPointer nodes set =        
         let pointerNum = set |> Seq.tryFind (fun i -> pointers.[int i] = nodes)
         match pointerNum with
         | Some i -> i
@@ -239,6 +248,7 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
         setP.Clear()
         reductions.Clear()
         setN.Clear()
+        nonTermChildren.Clear()
 
     let rec run pos =                                                      
         if tokenEnum.MoveNext()
@@ -269,5 +279,3 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
     createEpsNodesAndPtr()
     run 0
     getResult()
-
-    

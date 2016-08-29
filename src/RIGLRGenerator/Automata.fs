@@ -122,6 +122,7 @@ type RIA(grammar: FinalGrammar) as this =
     inherit FSA<RIAEdge>()
     do
         let IRIA = IRIA(grammar)
+        IRIA.PrintToDOT ("iria.dot", (fun x -> x.ToString()))
         IRIA.RemoveEdgeIf
              (
                  fun edge ->
@@ -158,8 +159,8 @@ type RCA(grammar: FinalGrammar) as this =
   
         let i = ref 0
         let popStatesSet = new HashSet<_>()
-        for ria in baseRIA :: RIAs do            
-            let newLabels = new Dictionary<_, _>()
+        let newLabels = new Dictionary<_, _>()
+        for ria in baseRIA :: RIAs do                        
             ria.Vertices |> Seq.iter (fun v -> newLabels.Add (v, !i); incr i)
             for edge in ria.Edges do
                 match edge.Tag with
@@ -173,12 +174,15 @@ type RCA(grammar: FinalGrammar) as this =
                 | _ ->  addEdge newLabels edge
             ria.FinalState |> Seq.iter (fun s -> popStatesSet.Add newLabels.[s] |> ignore)
         popStates <- Set.ofSeq popStatesSet
+        let newFinalStates = baseRIA.FinalState |> Seq.map (fun s -> newLabels.[s])
+        this.FinalState <- new ResizeArray<_>(newFinalStates)
     do
         let removeEmbeddedRec = new RemoveEmbeddedRecursion (grammar)
         removeEmbeddedRec.ConvertGrammar()
         
         let terminalized = removeEmbeddedRec.TerminalizedNonTerms
         let baseRIA = new RIA(grammar)
+        baseRIA.PrintToDOT ("RIADot.dot", (fun x -> x.ToString()))
         let initNonTerm = baseRIA.InitNonTerm
 
         if terminalized.Count > 0 
@@ -196,10 +200,11 @@ type RCA(grammar: FinalGrammar) as this =
                                            new RIA(grammar)
                                    )
                 joinRIAs terminalized baseRIA RIAs          
-        else this.AddVerticesAndEdgeRange baseRIA.Edges |> ignore        
-        this.InitState <- baseRIA.InitState
-        this.FinalState <- baseRIA.FinalState                 
-
+        else 
+            this.AddVerticesAndEdgeRange baseRIA.Edges |> ignore   
+            this.FinalState <- baseRIA.FinalState             
+        this.InitState <- baseRIA.InitState        
+                         
     member val PopStates = popStates with get
                     
     //                 R-actions                 p-actions                  shifts

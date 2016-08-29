@@ -3,8 +3,8 @@
 open Yard.Generators.Common.FinalGrammar
 
 let printTable 
-    (grammar: FinalGrammar) table moduleName (tokenType: Map<_,_>)
-    (res: System.Text.StringBuilder) positionType caseSensitive isAbstract =
+    (grammar: FinalGrammar) table moduleName (tokenType: Map<_,_>) (finalState: int list)
+    (popStates: Set<int>) (res: System.Text.StringBuilder) positionType caseSensitive isAbstract =
 
     let inline print (x: 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
@@ -37,6 +37,25 @@ let printTable
                     print "  "                               
             printer table.[i]
         printBr "|]"
+    
+    let leftSide = Array.zeroCreate grammar.rules.rulesCount
+    for i = 0 to grammar.rules.rulesCount - 1 do
+        leftSide.[i] <- grammar.rules.leftSide i
+
+    let rulesArr = Array.zeroCreate grammar.rules.rulesCount
+    for i = 0 to grammar.rules.rulesCount - 1 do
+        rulesArr.[i] <- grammar.rules.rightSide i
+
+    let totalRulesLength = rulesArr |> Array.sumBy (fun x -> x.Length)
+    let rules = Array.zeroCreate totalRulesLength
+    let rulesStart = Array.zeroCreate <| grammar.rules.rulesCount + 1
+    let mutable cur = 0
+    for i = 0 to grammar.rules.rulesCount - 1 do
+        rulesStart.[i] <- cur
+        for j = 0 to rulesArr.[i].Length - 1 do
+            rules.[cur] <- rulesArr.[i].[j]
+            cur <- cur + 1
+    rulesStart.[grammar.rules.rulesCount] <- cur
 
     let printTable () =
         let indexator = grammar.indexator
@@ -110,6 +129,12 @@ let printTable
         
         printBr "let startRule = %A" grammar.startRule
         printBr "let eofIndex = %d" grammar.indexator.eofIndex
+        print "let private rules = "
+        printArr rules (print "%d")
+        print "let private rulesStart = "
+        printArr rulesStart (print "%d")
+        printBr "let finalState = %A" finalState
+        printBr "let popStates = set %A" (Seq.toArray popStates)
         printBr "let leftSide = %A" grammar.rules.leftSideArr
         let epsilonRules = new System.Collections.Generic.List<_>()
         for i in 0 .. grammar.rules.rulesCount - 1 do
@@ -122,7 +147,11 @@ let printTable
         printTableArr table (fun e -> print "%A" e)      
         printBr ""
         
-        printBr "let private parserSource = new ParserSource<Token> (table, tokenToNumber, genLiteral, numToString, tokenData, leftSide, startRule, eofIndex)"
+        printBr "let private parserSource = new ParserSource<Token> (table, tokenToNumber, genLiteral, numToString, tokenData, rules, rulesStart, leftSide, startRule, eofIndex, popStates, finalState)"
+        printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
+        printBrInd 1 "buildAst<Token> parserSource"
+        printBr ""
+        
         res.ToString()
 
     printTable()

@@ -62,9 +62,12 @@ type RIGLR() =
             let print (x : 'a) =
                 Printf.kprintf (fun s -> res.Append(s) |> ignore) x             
             
-            println "module %s" "RIGLR.Parse" 
-            println "open Yard.Generators.RIGLR"                              
-            let strTable = printTable grammar table moduleName tokenType res int false false
+            println "module %s" moduleName 
+            println "open Yard.Generators.RIGLR"
+            println "open Yard.Generators.RIGLR.Parser"
+            println "open Yard.Generators.Common.AST"                              
+            let strTable = printTable grammar table moduleName tokenType (Seq.toList RCA.FinalState)
+                                      RCA.PopStates res int false false
             
             use out = new StreamWriter(output) 
             out.WriteLine(strTable)

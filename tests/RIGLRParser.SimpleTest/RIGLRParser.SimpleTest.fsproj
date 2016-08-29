@@ -114,15 +114,28 @@
       </ItemGroup>
     </When>
   </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
+        <Reference Include="FSharpx.Collections.Experimental">
+          <HintPath>..\..\packages\FSharpx.Collections.Experimental\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
   <Import Project="..\..\.paket\paket.targets" />
   <ItemGroup>
+    <Compile Include="LexCommon.fs" />
+    <Compile Include="grammar7_7.yrd.fs" />
     <Compile Include="RIGLRParserSimpleTest.fs" />
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit\lib\net45\nunit.framework.dll</HintPath>
+      <HintPath>..\..\packages\NUnit\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -130,6 +143,16 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\AST.Common\Common.AST.fsproj">
+      <Name>Common.AST</Name>
+      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\RIGLRCommon\RIGLRCommon.fsproj">
+      <Name>RIGLRCommon</Name>
+      <Project>{43889e87-5ea7-4f34-85b3-3ec7cf871bbc}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\RIGLRParser\RIGLRParser.fsproj">
       <Name>RIGLRParser</Name>
       <Project>{b0c650c2-7d12-4791-82d4-c042aa89f0ff}</Project>

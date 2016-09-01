@@ -33,7 +33,6 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
     let leftSide = parser.LeftSide
     
     let dummyPtr = 0<ptr>
-    //let epsNodesCount = ref 0
 
     let verticies = new ResizeArray<Vertex>( [new Vertex(-1<state>, new ResizeArray<_>())] )  
     let pointers = new ResizeArray<int list>()
@@ -128,13 +127,6 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
         match pointerNum with
         | Some i -> i
         | None -> createPointer nodes set
-    
-    let isIntersect list1 list2 = false
-//        let intersect = Set.intersect (set list1) (set list2) 
-//        let epsilonNodes = [for i in 0 .. !epsNodesCount - 1 -> i] |> set
-//        let fff = epsilonNodes |> Set.difference intersect |> Set.isEmpty |> not
-//        if fff then is := true
-//        fff
 
     let shift state vertex (pointer: int<ptr>) tokenNum pos =
         let termNode = getNodeT tokenNum pos
@@ -175,13 +167,10 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
         then
             if not (setP.[vertex].Contains pointer)
             then setP.[vertex].Add pointer
-        //else setP.Add (vertex, new ResizeArray<_>([pointer]))
         for edge in currentVertex.Edges do
-            let left, right = pointers.[snd edge |> int], pointers.[int pointer]
-            if not (isIntersect left right)
-            then
-                let ptr = getPointer (left @ right) setW
-                addContext (new Context(returnState, fst edge, ptr)) queue 
+            let left, right = pointers.[snd edge |> int], pointers.[int pointer]            
+            let ptr = getPointer (left @ right) setW
+            addContext (new Context(returnState, fst edge, ptr)) queue 
     
     let push state label currentVertex pointer queue =
         nextSetW.Add pointer |> ignore
@@ -195,10 +184,8 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
                 vertex.Edges.Add (currentVertex, pointer)
                 for p in setF do
                     let left, right = pointers.[int pointer], pointers.[int p]
-                    if not (isIntersect left right)  //p <> pointer 
-                    then
-                        let ptr = getPointer (left @ right) setW
-                        addContext (new Context(state, i, ptr)) queue
+                    let ptr = getPointer (left @ right) setW
+                    addContext (new Context(state, i, ptr)) queue
         | None ->
             verticies.Add (new Vertex(label, new ResizeArray<_>([currentVertex, pointer])))
             let newVertexNum = (verticies.Count - 1) * 1<vertex>
@@ -213,8 +200,7 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
                 let family = new Family(i, new Nodes( [|epsNode|] ))
                 let nonTermNode = new AST(family, [||], Seq.length tokens)
                 let pointerNum = createPointer [addNode nonTermNode] setW
-                epsPointers.Add (i, pointerNum)
-                //incr epsNodesCount
+                epsPointers.Add (i, pointerNum)                
 
     let step token pos (queue: Queue<Context>) (table: (int * int)[][][]) =
         while queue.Count <> 0 do
@@ -278,7 +264,7 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
                                                      && context.Vertex = 0<vertex>)
         match acceptContext with
         | Some context ->
-            let root = sppfNodes.[pointers.[int context.Pointer].[0]]
+            let root = sppfNodes.[pointers.[int context.Pointer].[0]] 
             Success (new Tree<_>(Seq.toArray tokens, root, rules))                      
         | None -> Error("nope")
 

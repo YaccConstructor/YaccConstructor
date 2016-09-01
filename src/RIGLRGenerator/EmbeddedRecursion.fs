@@ -27,9 +27,11 @@ type RemoveEmbeddedRecursion (grammar: FinalGrammar) =
             let specialTerm = getSpecialTerm nonTerm
             match cycleType with
                 | B -> 
-                    for i in 0 .. lastIndex do
-                        if rightSide.[i] = nonTerm
-                        then rightSide.[i] <- specialTerm
+                    if rightSide.Length > 1
+                    then
+                        for i in 1 .. lastIndex do
+                            if rightSide.[i] = nonTerm
+                            then rightSide.[i] <- specialTerm
                 | L -> replaceAt lastIndex specialTerm rightSide
                 | R -> replaceAt 0 specialTerm rightSide 
 

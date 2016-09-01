@@ -5,7 +5,7 @@ open Yard.Generators.RIGLR.Parser
 
 open NUnit.Framework
 
-open RIGLR.grammar7_7
+open RIGLR.Grammar7
 open RIGLR.Chaos
 open RIGLR.Expr
 open RIGLR.Brackets
@@ -33,8 +33,8 @@ type ``Tests`` () =
     
     [<Test>]
     member this.``example`` () =
-        let parser = RIGLR.grammar7_7.buildAst
-        runTest parser "grammar7_7.txt" "sppfEx.dot" RIGLR.grammar7_7.numToString RIGLR.grammar7_7.leftSide RIGLR.grammar7_7.tokenToNumber (Some RIGLR.grammar7_7.tokenData)
+        let parser = RIGLR.Grammar7.buildAst
+        runTest parser "Grammar7.txt" "sppfEx.dot" RIGLR.Grammar7.numToString RIGLR.Grammar7.leftSide RIGLR.Grammar7.tokenToNumber (Some RIGLR.Grammar7.tokenData)
 
     [<Test>] 
     member this.``chaos``() =
@@ -47,6 +47,6 @@ type ``Tests`` () =
         runTest parser "Expr.txt" "sppfE.dot" RIGLR.Expr.numToString RIGLR.Expr.leftSide RIGLR.Expr.tokenToNumber (Some RIGLR.Expr.tokenData)
 
     [<Test>]
-    member this.``lbr_a_rbr`` () =
+    member this.``brackets`` () =
         let parser = RIGLR.Brackets.buildAst
         runTest parser "lbr_a_rbr.txt" "sppfB.dot" RIGLR.Brackets.numToString RIGLR.Brackets.leftSide RIGLR.Brackets.tokenToNumber (Some RIGLR.Brackets.tokenData)        

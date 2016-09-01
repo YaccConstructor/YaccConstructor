@@ -131,9 +131,10 @@
     <Compile Include="Chaos.yrd.fs" />
     <None Include="Expr.yrd" />
     <Compile Include="Expr.yrd.fs" />
-    <None Include="lbr_a_rbr.yrd" />
-    <Compile Include="lbr_a_rbr.yrd.fs" />
-    <Compile Include="grammar7_7.yrd.fs" />
+    <None Include="Brackets.yrd" />
+    <Compile Include="Brackets.yrd.fs" />
+    <None Include="Grammar7.yrd" />
+    <Compile Include="Grammar7.yrd.fs" />
     <Compile Include="LexCommon.fs" />
     <Compile Include="RIGLRParserSimpleTest.fs" />
     <None Include="paket.references" />

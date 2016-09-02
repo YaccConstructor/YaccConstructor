@@ -47,15 +47,15 @@ let log (e:System.Exception) msg =
 open Argu
 
 type CLIArguments =
-    | [<Unique; AltCommandLine("-f", "-frontend")>] Frontend of feName:string
-    | [<AltCommandLine("-af", "-availableFrontends")>] AvailableFrontends
-    | [<Unique; AltCommandLine("-g", "-generator")>] Generator of generatorName:string 
-    | [<AltCommandLine("-ag", "-availableGenerators")>] AvailableGenerators
-    | [<AltCommandLine("-c", "-conversion")>] Conversion of conversionName:string
-    | [<AltCommandLine("-ac", "-availableConversions")>] AvailableConversions
-    | [<AltCommandLine("-d", "-defConstant")>] DefConstant of userD:string
-    | [<AltCommandLine("-u", "-undefConstant")>] UndefConstant of userR:string
-    | [<Unique; AltCommandLine("-i", "-input")>] Input of path:string
+    | [<Unique; AltCommandLine("-f")>] Frontend of feName:string
+    | [<AltCommandLine("-af")>] AvailableFrontends
+    | [<Unique; AltCommandLine("-g")>] Generator of generatorName:string 
+    | [<AltCommandLine("-ag")>] AvailableGenerators
+    | [<AltCommandLine("-c")>] Conversion of conversionName:string
+    | [<AltCommandLine("-ac")>] AvailableConversions
+    | [<AltCommandLine("-d")>] DefConstant of userD:string
+    | [<AltCommandLine("-u")>] UndefConstant of userR:string
+    | [<Unique; AltCommandLine("-i")>] Input of path:string
 with
     interface IArgParserTemplate with   
         member s.Usage =
@@ -128,19 +128,24 @@ let () =
     let args = parser.Parse argv.[1..]
     for res in args.GetAllResults() do
         match res with 
-            |Frontend fe -> feName := Some fe
-            |AvailableFrontends -> printItems "frontends" addinFrontendNames !feName
-            |Generator g -> match Array.toList (g.Split ' ') with
-                            | name::[] -> generatorName := Some name; generatorParams := None
-                            | name::parameters -> generatorName := Some name; generatorParams := Some (String.concat " " parameters)
-                            | _ -> failwith "You need to specify generator name"
-            |AvailableGenerators -> printItems "generators" addinGeneratorNames !generatorName
-            |Conversion c -> conversions.Add c
-            |AvailableConversions -> printItems "frontends" addinFrontendNames !feName
-            |DefConstant d -> userDefs := !userDefs@[d]
-            |UndefConstant u -> userDefs := List.filter((<>) u) !userDefs
-            |Input i -> testFile := System.IO.Path.GetFileName i |> Some
-                        testsPath := System.IO.Path.GetDirectoryName i |> Some
+            | Frontend fe -> feName := Some fe
+            | AvailableFrontends -> printItems "frontends" addinFrontendNames !feName
+            | Generator g -> match Array.toList (g.Split ' ') with
+                                | name::[] -> 
+                                    generatorName := Some name
+                                    generatorParams := None
+                                | name::parameters -> 
+                                    generatorName := Some name
+                                    generatorParams := Some (String.concat " " parameters)
+                                | _ -> failwith "You need to specify generator name"
+            | AvailableGenerators -> printItems "generators" addinGeneratorNames !generatorName
+            | Conversion c -> conversions.Add c
+            | AvailableConversions -> printItems "frontends" addinFrontendNames !feName
+            | DefConstant d -> userDefs := !userDefs@[d]
+            | UndefConstant u -> userDefs := List.filter((<>) u) !userDefs
+            | Input i -> 
+                testFile := System.IO.Path.GetFileName i |> Some
+                testsPath := System.IO.Path.GetDirectoryName i |> Some
 
 
     let run () =

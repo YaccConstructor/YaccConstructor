@@ -44,6 +44,32 @@ let log (e:System.Exception) msg =
     "\nMessage:\n  " + msg
     |> printfn "%s"
 
+open Argu
+
+type CLIArguments =
+    | [<Unique; AltCommandLine("-f")>] Frontend of feName:string
+    | [<AltCommandLine("-af")>] AvailableFrontends
+    | [<Unique; AltCommandLine("-g")>] Generator of generatorName:string 
+    | [<AltCommandLine("-ag")>] AvailableGenerators
+    | [<AltCommandLine("-c")>] Conversion of conversionName:string
+    | [<AltCommandLine("-ac")>] AvailableConversions
+    | [<AltCommandLine("-d")>] DefConstant of userD:string
+    | [<AltCommandLine("-u")>] UndefConstant of userR:string
+    | [<Unique; AltCommandLine("-i")>] Input of path:string
+with
+    interface IArgParserTemplate with   
+        member s.Usage =
+            match s with
+            | Frontend _ -> "Frontend name. Use -af to list available."
+            | AvailableFrontends _ -> "Available frontends"
+            | Generator _ -> "Generator name. Use -ag to list available."
+            | AvailableGenerators _ -> "Available generators"
+            | Conversion _ -> "Conversion applied in order. Use -ac to list available."
+            | AvailableConversions _ -> "Available conversions"
+            | DefConstant _ -> "User defined constants for YardFrontend lexer."
+            | UndefConstant _ -> "Remove previously defined constants for YardFrontend lexer."
+            | Input _ -> "Input grammar"
+
 let () =
     let feName = ref None
     let generatorName = ref None
@@ -91,34 +117,35 @@ let () =
     let generateSomething = ref true
 
     let printItems iName items deft =
-        fun _ ->
             generateSomething := false
             printfn "\nAvailable %s: " iName
             Seq.map (fun x -> x + (if Some x = deft then " (default)" else "")) items
             |> String.concat "\n    "
             |> fun x -> printf "    %s\n" x
 
-    let commandLineSpecs =
-        ["-f", ArgType.String (fun s -> feName := Some s), "Frontend name. Use -af to list available."
-         "-af", ArgType.Unit (printItems "frontends" addinFrontendNames !feName), "Available frontends"
-         "-g", ArgType.String 
-            (fun s -> 
-                match Array.toList (s.Split ' ') with
-                | name::[] -> generatorName := Some name; generatorParams := None
-                | name::parameters -> generatorName := Some name; generatorParams := Some (String.concat " " parameters)
-                | _ -> failwith "You need to specify generator name"
-            ), "Generator name. Use -ag to list available."
-         "-ag", ArgType.Unit (printItems "generators" addinGeneratorNames !generatorName), "Available generators"
-         "-c", ArgType.String (fun s -> conversions.Add s), "Conversion applied in order. Use -ac to list available."
-         "-ac", ArgType.Unit (printItems "conversions" addinConversionNames None), "Available conversions"
-         "-D", ArgType.String (fun s -> userDefs := !userDefs @ [s]), "User defined constants for YardFrontend lexer."
-         "-U", ArgType.String (fun s -> userDefs := List.filter ((<>) s) !userDefs), 
-                "Remove previously defined constants for YardFrontend lexer."
-         "-i", ArgType.String (fun s ->
-                                   testFile := System.IO.Path.GetFileName s |> Some
-                                   testsPath := System.IO.Path.GetDirectoryName s |> Some), "Input grammar"         
-         ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
-    ArgParser.Parse commandLineSpecs
+    let argv = System.Environment.GetCommandLineArgs()
+    let parser = ArgumentParser.Create<CLIArguments>(errorHandler = ProcessExiter())
+    let args = parser.Parse argv.[1..]
+    for res in args.GetAllResults() do
+        match res with 
+        | Frontend fe -> feName := Some fe
+        | AvailableFrontends -> printItems "frontends" addinFrontendNames !feName
+        | Generator g -> match Array.toList (g.Split ' ') with
+                         | name::[] -> 
+                            generatorName := Some name
+                            generatorParams := None
+                         | name::parameters -> 
+                            generatorName := Some name
+                            generatorParams := Some (String.concat " " parameters)
+                         | _ -> failwith "You need to specify generator name"
+        | AvailableGenerators -> printItems "generators" addinGeneratorNames !generatorName
+        | Conversion c -> conversions.Add c
+        | AvailableConversions -> printItems "frontends" addinFrontendNames !feName
+        | DefConstant d -> userDefs := !userDefs@[d]
+        | UndefConstant u -> userDefs := List.filter((<>) u) !userDefs
+        | Input i -> 
+            testFile := System.IO.Path.GetFileName i |> Some
+            testsPath := System.IO.Path.GetDirectoryName i |> Some
 
 
     let run () =

@@ -1,5 +1,6 @@
 source https://nuget.org/api/v2
 
+nuget argu
 nuget ExtCore 0.8.43
 nuget FsCheck 0.9.2.0 framework: >= net40
 nuget Mono.Addins

@@ -26,6 +26,11 @@ type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
     | Error of string
 
+let hashptr (nodes: int list) =
+    let sum = ref (int64 nodes.Length + 1L)
+    nodes |> List.iter (fun x -> sum := !sum * 17L + (int64 x))
+    !sum
+
 let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'TokenType>) =
     let tokenEnum = tokens.GetEnumerator()
     let table = parser.Table
@@ -41,7 +46,7 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
     let setU = new HashSet<Context>()
     let setP = new Dictionary<int<vertex>, ResizeArray<int<ptr>>>()
     let setN = new HashSet<int>()
-    let setW = new HashSet<int<ptr>>()
+    let setW = new Dictionary<int64, ResizeArray<int<ptr>>>()
     let reductions = new Dictionary<int<ptr> * int, int>()
     let nonTermChildren = new Dictionary<int, ResizeArray<int list>>()
     
@@ -49,12 +54,13 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
     pointers.Add []
 
     let nextSetU = new HashSet<Context>([new Context(0<state>, 0<vertex>, dummyPtr)])
-    let nextSetW = new HashSet<int<ptr>>()
+    let nextSetW = new Dictionary<int64, ResizeArray<int<ptr>>>()
 
-    let createPointer nodes (set: HashSet<_>) =
+    let createPointer nodes (set: Dictionary<_, ResizeArray<int<ptr>>>) =
         pointers.Add nodes
         let newPtrNum = (pointers.Count - 1) * 1<ptr>
-        set.Add newPtrNum |> ignore
+        let hashKey = hashptr nodes
+        set.Add (hashKey, new ResizeArray<_>([newPtrNum])) |> ignore
         newPtrNum
     
     let addNode node =
@@ -122,11 +128,20 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
             nonTermChildren.Add (newNodeNum, new ResizeArray<_>([children]))
             newNodeNum
                  
-    let getPointer nodes set =        
-        let pointerNum = set |> Seq.tryFind (fun i -> pointers.[int i] = nodes)
-        match pointerNum with
-        | Some i -> i
-        | None -> createPointer nodes set
+    let getPointer nodes (set: Dictionary<_, ResizeArray<int<ptr>>>) =        
+        let hashKey = hashptr nodes
+        if set.ContainsKey hashKey
+        then 
+            let ptrsWithSameHash = set.[hashKey]
+            let x = ptrsWithSameHash.Find (fun p -> nodes = pointers.[int p])
+            if int x = 0 && (not nodes.IsEmpty)
+            then
+                pointers.Add nodes
+                let newPtrNum = (pointers.Count - 1) * 1<ptr>  
+                ptrsWithSameHash.Add newPtrNum    
+                newPtrNum   
+            else x
+        else createPointer nodes set 
 
     let shift state vertex (pointer: int<ptr>) tokenNum pos =
         let termNode = getNodeT tokenNum pos
@@ -170,10 +185,14 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
         for edge in currentVertex.Edges do
             let left, right = pointers.[snd edge |> int], pointers.[int pointer]            
             let ptr = getPointer (left @ right) setW
-            addContext (new Context(returnState, fst edge, ptr)) queue 
+            addContext (new Context(returnState, fst edge, ptr)) queue
     
     let push state label currentVertex pointer queue =
-        nextSetW.Add pointer |> ignore
+        let hashKey = hashptr pointers.[int pointer]
+        if nextSetW.ContainsKey hashKey
+        then nextSetW.[hashKey].Add pointer
+        else nextSetW.Add (hashKey, new ResizeArray<_>([pointer]))
+
         let vertexNum = setP.Keys |> Seq.tryFind (fun i -> verticies.[int i].Label = label)        
         match vertexNum with
         | Some i ->
@@ -187,7 +206,7 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
                     let ptr = getPointer (left @ right) setW
                     addContext (new Context(state, i, ptr)) queue
         | None ->
-            verticies.Add (new Vertex(label, new ResizeArray<_>([currentVertex, pointer])))
+            verticies.Add (new Vertex(label, new ResizeArray<_>([(currentVertex, pointer)])))
             let newVertexNum = (verticies.Count - 1) * 1<vertex>
             addContext (new Context(state, newVertexNum, dummyPtr)) queue
             setP.Add (newVertexNum, new ResizeArray<_>())                          
@@ -234,7 +253,7 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
         setU.Clear()
         setU.UnionWith nextSetU
         setW.Clear()
-        setW.UnionWith nextSetW
+        for v in nextSetW do setW.Add (v.Key, v.Value)
         nextSetU.Clear()
         nextSetW.Clear()
         setP.Clear()
@@ -254,7 +273,7 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
             refreshSets()
             step -1 pos (new Queue<_>(setU)) table
     
-    let getResult () =                
+    let getResult () =           
         sppfNodes |> Seq.iter (fun node -> match node with   // lol
                                            | :? AST as ast -> ast.pos <- -1
                                            | _ -> ())
@@ -266,7 +285,7 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
         | Some context ->
             let root = sppfNodes.[pointers.[int context.Pointer].[0]] 
             Success (new Tree<_>(Seq.toArray tokens, root, rules))                      
-        | None -> Error("nope")
+        | None -> Error "nope"
 
     createEpsNodesAndPtr()
     run 0

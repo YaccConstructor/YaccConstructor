@@ -145,6 +145,9 @@ type RCA(grammar: FinalGrammar) as this =
     let joinRIAs (terminalized: Dictionary<_, _>) (baseRIA: RIA) (RIAs: list<RIA>) =
         let termToStartState = new Dictionary<int, int>(RIAs.Length)
         let riaStartInRCA = ref baseRIA.VertexCount
+        let newLabels = new Dictionary<_, _>()           
+        let popStatesSet = new HashSet<_>()
+        let i = ref 0
 
         if terminalized.ContainsKey baseRIA.InitNonTerm
         then termToStartState.Add (terminalized.[baseRIA.InitNonTerm], 0)
@@ -152,30 +155,32 @@ type RCA(grammar: FinalGrammar) as this =
             termToStartState.Add (terminalized.[ria.InitNonTerm], !riaStartInRCA)
             riaStartInRCA := !riaStartInRCA + ria.VertexCount
         
-        let addEdge (newLabels: Dictionary<_, _>) (e: EdgeFSA<_>) =
-            new EdgeFSA<_>(newLabels.[e.Source], newLabels.[e.Target], e.Tag)
-            |> this.AddVerticesAndEdge 
-            |> ignore
-  
-        let i = ref 0
-        let popStatesSet = new HashSet<_>()
-        let newLabels = new Dictionary<_, _>()
-        for ria in baseRIA :: RIAs do                        
+        let addEdge (newLabels: Dictionary<_, _>) (edge: EdgeFSA<_>) =
+            let add src target tag =
+                new EdgeFSA<_>(src, target, tag)
+                |> this.AddVerticesAndEdge 
+                |> ignore
+
+            let newSource, newTarget = newLabels.[edge.Source], newLabels.[edge.Target]
+            match edge.Tag with
+            | Smbl(Sh(n)) as shift -> 
+                if termToStartState.ContainsKey n
+                then
+                    let pushTag = Smbl(Push(newTarget))
+                    add newSource termToStartState.[n] pushTag
+                else add newSource newTarget shift
+            | _  as tag -> add newSource newTarget tag
+        
+        let addRIA (ria: RIA) =
             ria.Vertices |> Seq.iter (fun v -> newLabels.Add (v, !i); incr i)
-            for edge in ria.Edges do
-                match edge.Tag with
-                | Smbl(Sh(n)) -> 
-                    if termToStartState.ContainsKey n
-                    then
-                        let pushTag = Smbl(Push(newLabels.[edge.Target]))
-                        new EdgeFSA<_>(newLabels.[edge.Source], termToStartState.[n], pushTag)
-                        |> this.AddVerticesAndEdge |> ignore
-                    else addEdge newLabels edge
-                | _ ->  addEdge newLabels edge
+            ria.Edges |> Seq.iter (fun e -> addEdge newLabels e)
             ria.FinalState |> Seq.iter (fun s -> popStatesSet.Add newLabels.[s] |> ignore)
-        popStates <- Set.ofSeq popStatesSet
-        let newFinalStates = baseRIA.FinalState |> Seq.map (fun s -> newLabels.[s])
-        this.FinalState <- new ResizeArray<_>(newFinalStates)
+        
+        addRIA baseRIA
+        this.FinalState <- new ResizeArray<_>(baseRIA.FinalState |> Seq.map (fun s -> newLabels.[s]))
+        newLabels.Clear()
+        RIAs |> List.iter (fun ria -> addRIA ria; newLabels.Clear())
+        popStates <- Set.ofSeq popStatesSet        
     do
         let removeEmbeddedRec = new RemoveEmbeddedRecursion (grammar)
         removeEmbeddedRec.ConvertGrammar()

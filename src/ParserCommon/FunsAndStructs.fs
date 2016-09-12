@@ -29,10 +29,10 @@ module CommonFuns =
     let inline getState (packed : int64<vertexMeasure>) = int <| ((int64 packed) >>> 32)
 
     let inline packEdgePos edge position : int<positionInInput>  =
-        (*if (edge < 65536) && (position < 65536) then *)LanguagePrimitives.Int32WithMeasure((int position <<< 16) ||| int edge)
-        (*else failwith "Edge or position is greater then 65535!!"*)
+        if (edge < 65536) && (position < 65536) then LanguagePrimitives.Int32WithMeasure((int position <<< 16) ||| int edge)
+        else failwith "Edge or position is greater then 65535!!"
     let inline getEdge (packedValue : int<positionInInput>)      = int (int packedValue &&& 0xffff)
-    let inline getPosOnEdge (packedValue : int<positionInInput>) = int packedValue >>> 16 
+    let inline getPosOnEdge (packedValue : int<positionInInput>) = int (uint32 packedValue >>> 16)
 
     let inline packLabelNew rule position : int<labelMeasure>   = LanguagePrimitives.Int32WithMeasure((int rule <<< 16) ||| int position)                               
     let inline getRuleNew (packedValue : int<labelMeasure>)     = int packedValue >>> 16
@@ -47,6 +47,8 @@ type Vertex =
     val NontermLabel     : int<labelMeasure>
     new (level, nonterm) = {Level = level; NontermLabel = nonterm}
 
+[<Struct>]
+[<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
 type GSSVertexNFA =
     /// Position in input graph (Packed edge+position)
     val PositionInInput  : int<positionInInput>

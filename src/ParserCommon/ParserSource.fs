@@ -87,45 +87,23 @@ type ParserSourceGLL<'TokenType> (eof                : 'TokenType
 
 type FSAParserSourceGLL ( states             : array<array<int * int<state>>>
                         , startState         : int<state>
-                        , finalState         : int<state>
+                        , isFinalState       : int -> bool
                         , nontermCount       : int
                         , numIsTerminal      : int -> bool
-                        , numIsEpsilon       : int -> bool
-                        , numToString        : int -> string
+                        //, numIsEpsilon       : int -> bool
+                        , stateToNontermName : int -> string
                         , firstSet           : Set<int>
                         ) =
-    (*
-    let length =
-        let res = Array.zeroCreate <| (rulesStart.Length - 1)
-        for i=0 to res.Length-1 do
-            res.[i] <- rulesStart.[i+1] - rulesStart.[i]
-        res
-    let _states : int [][]= Array.zeroCreate length.Length
-    do for i = 0 to length.Length-1 do
-        _rules.[i] <- Array.zeroCreate length.[i]
-        for j = 0 to length.[i] - 1 do
-            _rules.[i].[j] <- rules.[rulesStart.[i] + j]
-    
-    let printrules () =
-                printfn "\nrules:"
-                for i = 0 to rulesCount - 1 do
-                    printf "%4d: %s = " i <| numToString (leftSide.[i])
-                    for j = 0 to _rules.[i].Length - 1 do
-                        printf "%s " <| numToString (_rules.[i].[j])
-                    printfn ""
-
-    do printrules()
-    *)
 
     let getFirstSetItem state token = 
-        int( (int state <<< 16) ||| (token - nontermCount) )
+        int( (int state <<< 16) ||| (token - states.Length) )
 
     member this.FirstSet           = firstSet
     member this.States             = states
-    member this.FinalState         = finalState
+    member this.IsFinalState       = isFinalState
     member this.StartState         = startState
     member this.NonTermCount       = nontermCount
     member this.NumIsTerminal      = numIsTerminal
-    member this.NumIsEpsilon       = numIsEpsilon
-    member this.NumToString        = numToString
+    //member this.NumIsEpsilon       = numIsEpsilon
+    member this.StateToNontermName        = stateToNontermName
     member this.GetFirstSetItem    = getFirstSetItem

@@ -35,6 +35,35 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(FSharpPowerPackSourcesRoot)\..\lkg\FSharp.PowerPack-$(LkgVersion)\bin\FSharp.PowerPack.targets" />
+  <ItemGroup>
+    <FsLex Include="fsyacclex.fsl">
+      <OtherFlags>--lexlib Microsoft.FSharp.Text.Lexing </OtherFlags>
+    </FsLex>
+    <FsYacc Include="fsyaccpars.fsy">
+      <OtherFlags>--internal --module FSharp.PowerPack.FsYacc.Parser --lexlib Microsoft.FSharp.Text.Lexing  --parslib Microsoft.FSharp.Text.Parsing</OtherFlags>
+    </FsYacc>
+    <Compile Include="assemblyinfo.Common.fs" />
+    <Compile Include="assemblyinfo.fsyacc.exe.fs">
+      <Link>assemblyinfo.fsyacc.exe.fs</Link>
+    </Compile>
+    <Compile Include="Lexing.fsi" />
+    <Compile Include="Lexing.fs" />
+    <Compile Include="Parsing.fsi" />
+    <Compile Include="Parsing.fs" />
+    <Compile Include="Arg.fsi" />
+    <Compile Include="Arg.fs" />
+    <Compile Include="fsyaccast.fs" />
+    <Compile Include="fsyaccpars.fs" />
+    <Compile Include="fsyacclex.fs" />
+    <Compile Include="fsyacc.fs" />
+    <None Include="paket.references" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+  </ItemGroup>
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v2.0' Or $(TargetFrameworkVersion) == 'v3.0' Or $(TargetFrameworkVersion) == 'v3.5')">
       <ItemGroup>
@@ -100,33 +129,4 @@
       </ItemGroup>
     </When>
   </Choose>
-  <ItemGroup>
-    <FsLex Include="fsyacclex.fsl">
-      <OtherFlags>--lexlib Microsoft.FSharp.Text.Lexing </OtherFlags>
-    </FsLex>
-    <FsYacc Include="fsyaccpars.fsy">
-      <OtherFlags>--internal --module FSharp.PowerPack.FsYacc.Parser --lexlib Microsoft.FSharp.Text.Lexing  --parslib Microsoft.FSharp.Text.Parsing</OtherFlags>
-    </FsYacc>
-    <Compile Include="assemblyinfo.Common.fs" />
-    <Compile Include="assemblyinfo.fsyacc.exe.fs">
-      <Link>assemblyinfo.fsyacc.exe.fs</Link>
-    </Compile>
-    <Compile Include="Lexing.fsi" />
-    <Compile Include="Lexing.fs" />
-    <Compile Include="Parsing.fsi" />
-    <Compile Include="Parsing.fs" />
-    <Compile Include="Arg.fsi" />
-    <Compile Include="Arg.fs" />
-    <Compile Include="fsyaccast.fs" />
-    <Compile Include="fsyaccpars.fs" />
-    <Compile Include="fsyacclex.fs" />
-    <Compile Include="fsyacc.fs" />
-    <None Include="paket.references" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-  </ItemGroup>
 </Project>

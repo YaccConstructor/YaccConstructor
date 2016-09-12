@@ -18,6 +18,8 @@ type CompressedArray<'t> = Yard.Generators.GLL.ParserCommon.CompressedArray<'t>
 
 let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) = 
     //let shift = input.Shift
+    //let numberOfDescr = ref 0
+    let numberOfReusedDescr = ref 0
     if input.EdgeCount = 0 then failwith ("This grammar does not accept empty input.") else
     let result = new System.Collections.Generic.HashSet<_>()
     let dummyEdge = input.EdgeCount
@@ -87,6 +89,9 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         if not <| containsContext inputVertex state vertex 
         then
             pushContext inputVertex state vertex len
+            //incr numberOfDescr
+        //else 
+        //    incr numberOfReusedDescr 
 
     /// Checks for existing of edge in edges set. If not adds it to edges set.
     let containsEdge (startVertex : GSSVertexNFA) (endVertex : GSSVertexNFA) (state : int<state>) (len : uint16) =
@@ -140,10 +145,11 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
             if not <| containsEdge newVertex currentVertex stateToContinue len
             then//no such edge between vertices
                 let vertexKey = packVertexFSA index nonTermName
-                if setP.ContainsKey(vertexKey)
+                let cond, poped = setP.TryGetValue vertexKey
+                if cond
                 then// aready poped for current index and nonterm
                     // add contexts for each position in input
-                    setP.[vertexKey].DoForAll (fun (newIndex, l) ->
+                    poped.DoForAll (fun (newIndex, l) ->
                         addContext newIndex stateToContinue currentVertex (len + l))
         else//need to create new edge, vertex and context
             containsEdge newVertex currentVertex stateToContinue len |> ignore
@@ -155,28 +161,30 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         let curIndex = !currentIndex
         let curLen = !currentLength
 
-        if curVertex.NontermState <> parser.StartState
+        let outEdges = edges.[int curVertex.NontermState].[curVertex.PositionInInput]
+            
+        if outEdges <> null && outEdges.Count <> 0
         then
             let vertexKey = packVertexFSA curVertex.PositionInInput curVertex.NontermState
 
-            if setP.ContainsKey vertexKey
+            let cond, value = setP.TryGetValue vertexKey
+            if cond
             then
-                setP.[vertexKey].Add (curIndex, curLen)
+                value.Add (curIndex, curLen)
             else
                 let newList = new ResizableUsualOne<_>((curIndex, curLen))
                 setP.Add(vertexKey, newList)
 
-            let outEdges = edges.[int curVertex.NontermState].[curVertex.PositionInInput]
-                
-            for stateТonterm in outEdges do
-                let state = stateТonterm.Key  
-                for nontermPosLen in stateТonterm.Value do
+            for stateТoNonterm in outEdges do
+                let state = stateТoNonterm.Key  
+                for nontermPosLen in stateТoNonterm.Value do
                     let nonterm = nontermPosLen.Key
                     for position,length in nontermPosLen.Value do
                         let adjacentVertex = new GSSVertexNFA(position, nonterm)
                         addContext curIndex state adjacentVertex (curLen + length)
-        else//Nowhere to pop. Reached end of start state.
-            //  Need to add derivation to results.
+
+        if curVertex.NontermState = parser.StartState
+        then
             let leftEdge, leftPos =
                 getEdge curVertex.PositionInInput,
                 getPosOnEdge curVertex.PositionInInput
@@ -211,7 +219,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                 oEdges.ForEach (fun outEdge ->
                     let newIndex = packEdgePos outEdge 0
                     pushContext newIndex nextState !currentGSSNode newLength)
-            else//reached end of input. 
+            else//reached end of input.
                 // put dummyIndex in stack
                 let dummyIndex = packEdgePos dummyEdge curEdge
                 pushContext dummyIndex nextState !currentGSSNode newLength
@@ -237,15 +245,20 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         condition := true
         let outEdges = parser.States.[int !currentState]
 
-        if Array.isEmpty outEdges
+        if Array.isEmpty outEdges 
         then// Rule finished.
             pop ()
         else// Rule isn't finished.
             // Process each next edge and state.
             // Although process each edge that comes from the state in wich we can come by epsilon edge.
+
+            if !currentState |> int |> parser.IsFinalState
+            then// Current state is final
+                pop ()
+            
             let curEdge = CommonFuns.getEdge !currentIndex
             let curPos = CommonFuns.getPosOnEdge !currentIndex// + shift
-
+            
             if curEdge = dummyEdge then ()(*we reached end of input, but current state is not final*) else
 
             for curSymbol, nextState in outEdges do
@@ -254,11 +267,13 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                     let curToken = input.Edges.[curEdge].Tokens.[curPos] 
                     if curToken = curSymbol
                     then eatTerm nextState curEdge curPos
+                (* no epsilon edges
                 elif parser.NumIsEpsilon curSymbol
                 then//found epsilon edge
                     pushContext !currentIndex nextState !currentGSSNode !currentLength
-                elif (parser.NumToString curSymbol).Equals("any")
-                then//found any rule
+                *)
+                elif (parser.StateToNontermName curSymbol).Equals("any")
+                then//found "any" rule
                     eatTerm nextState curEdge curPos
                 else//current grammar symbol is nonterminal
                     let curNonterm = curSymbol*1<state>
@@ -273,6 +288,9 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
             while not !stop do
             if !condition then dispatch() else handle()
     control()
+
+    //printfn "Number of descriptors: %i" !numberOfDescr
+    //printfn "Number of reused descriptors: %i" !numberOfReusedDescr 
                  
     match result.Count with
         | 0 -> Error ("String was not parsed")

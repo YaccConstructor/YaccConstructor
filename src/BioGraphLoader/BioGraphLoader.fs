@@ -94,6 +94,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
                 let newV = !cnt
                 [| new BioGraphEdge(e.Source, e.Target, e.Tag.str.[shift..], e.Tag.length, e.Tag.id) |]
             else [|e|])
+        
         |> Array.collect 
             (fun e -> 
                 if e.Tag.length <= templateLengthHightLimit
@@ -142,9 +143,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
             x
             |> Array.Parallel.map (fun vs ->
                 vs
-                |> Array.collect (fun v ->
-                    ug.AdjacentEdges v
-                    |> Array.ofSeq)
+                |> Array.collect (ug.AdjacentEdges >> Array.ofSeq)
                 |> (fun c -> new HashSet<_>(c))
                 |> Array.ofSeq )
             //|> Array.filter (fun x -> x.Length > 1)
@@ -200,8 +199,22 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
         longEdges
         |> Seq.map (fun e -> e.Tag.str)
         |> Array.ofSeq
+    
 
     printfn "L %A" (Seq.length components)
+
+    let getInfo prefix index = 
+        ">" + prefix + index.ToString() + "\n"
+
+    let printStringsToFASTA path prefix lines =
+        lines
+        |> Seq.mapi (fun i line -> (getInfo prefix i) + line)
+        |> (fun x -> File.AppendAllLines(path, x))
+
+    (*components.[0]
+    |> Array.map (fun x ->
+        x.Tag.str)
+    |> printStringsToFASTA "componentEdges.fa" ""*)
 
     components
     |> Array.Parallel.map

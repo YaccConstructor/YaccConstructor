@@ -64,7 +64,7 @@ let FSA_r16s_H22_H23_SearchConfig =
             | 'C' | 'c' -> GLLFSA.r16s.H22_H23.C ()
             | 'G' | 'g' -> GLLFSA.r16s.H22_H23.G ()
             | _ -> GLLFSA.r16s.H22_H23.U ()
-            | x ->   failwithf "Strange symbol in input: %A" x
+            //| x ->   failwithf "Strange symbol in input: %A" x
             (*match ch with
             | 'A' | 'a' -> GLL.r16s.H22_H23.A ()                
             | 'K' | 'k' -> GLL.r16s.H22_H23.K ()
@@ -80,7 +80,7 @@ let FSA_r16s_H22_H23_SearchConfig =
     
     new SearchConfig(GLLFSA.r16s.H22_H23.buildAbstract(*, GLL.r16s.H22_H23.buildAbstractAst*), getSmb, 
                         //300, 550, 14, GLL.r16s.H22_H23.numToString)
-                     318, 370, 14, GLLFSA.r16s.H22_H23.numToString)
+                     318, 370, 14, GLLFSA.r16s.H22_H23.stateToNontermName)
                         //0 , 10, 14, GLL.r16s.H22_H23.numToString)
                         //400, 550, 14, GLL.r16s.H22_H23.numToString)
                         //800, 910, 14, GLL.r16s.H22_H23.numToString)

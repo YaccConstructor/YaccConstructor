@@ -29,36 +29,51 @@ let printEdgesToFASTA path numToString prefix edges =
     |> List.mapi (fun i line -> (getInfo prefix i) + line)
     |> (fun x -> File.AppendAllLines(path, x))
 
-let printPathsToFASTA path (res:(List<List<BioParserEdge>> * (BioParserEdge * BioParserEdge * (int * int * uint16) [])) []) i numToString = 
+let printPathsToFASTA path (res:(List<List<BioParserEdge>> * (BioParserEdge * BioParserEdge * (int * int * int) [])) []) i numToString = 
     //let rec splitLine (line:string) =
     //    if line.Length <= maxLineLength then [line] else
     //    (line.Substring (0, maxLineLength))::(splitLine (line.Substring maxLineLength))
 
-    let printResult j ((paths:List<List<BioParserEdge>>), ((startE:BioParserEdge), finalE, poss)) = 
+    let printResult j ((paths:List<List<BioParserEdge>>), (startE, finalE, poss)) = 
         let prefix = "Graph" + i.ToString() + ".Subgraph" + j.ToString()+ "."
-        let startfinal =
-            poss
-            |> Array.map (fun (sp,fp,(l:uint16)) -> 
-                            if startE = finalE then 
-                                (edgeToString numToString startE).Substring (sp,(fp-sp+1)),
-                                "",l
-                            else 
-                                (edgeToString numToString startE).Substring sp,
-                                (if fp < 0 then "" else (edgeToString numToString finalE).Substring (0,fp+1)),
-                                l)
+        let lenToBegEnd = new Dictionary<int,List<_>>()
+        
+        poss
+        |> Array.iter (fun (startPos, finalPos, length) -> 
+            let prefixPostfix = 
+                if length = 0 && startE = finalE && startPos <= finalPos
+                then
+                    (edgeToString numToString startE).Substring (startPos, (finalPos - startPos + 1))
+                    , ""
+                else
+                    (edgeToString numToString startE).Substring startPos
+                    , (edgeToString numToString finalE).Substring (0, finalPos + 1)
+                    
+            let cond, value = lenToBegEnd.TryGetValue length
+            if cond
+            then
+                value.Add prefixPostfix
+            else
+                lenToBegEnd.Add (length, new List<_>([prefixPostfix]))
+            )
         let lines =
             if paths.Count = 0 then
-                startfinal |> Array.map (fun (start,final,l) -> start + final)
+                lenToBegEnd.Values
+                |> Seq.collect (fun prefixPostfix -> 
+                    prefixPostfix
+                    |> Seq.collect (fun (prefix, postfix) -> [prefix + postfix]))
+                |> Array.ofSeq
             else
                 paths
                 |> Seq.collect (fun path ->
-                    startfinal
-                    |> Array.map (fun (start,final,l) -> 
-                        let line = pathToString numToString path
-                        if line.Length = int l then 
-                            start + line + final
-                        else failwith "some length is not eq res length")
-                    )
+                    let line = pathToString numToString path
+                    let cond, value = lenToBegEnd.TryGetValue line.Length
+                    if cond
+                    then
+                        value
+                        |> Seq.map (fun (prefix, postfix) -> prefix + line + postfix)
+                    else
+                        failwith "some length is not eq res length")
                 |> Array.ofSeq
 
         printStringsToFASTA path prefix lines

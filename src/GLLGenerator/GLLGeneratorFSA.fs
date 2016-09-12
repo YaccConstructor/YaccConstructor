@@ -85,7 +85,7 @@ type GLLFSA() =
             let println (x : 'a) =
                 Printf.kprintf (fun s -> res.Append(s).Append "\n" |> ignore) x
             let print (x : 'a) =
-                Printf.kprintf (fun s -> res.Append(s) |> ignore) x
+                Printf.kprintf (res.Append >> ignore) x
             let _class  =
                 match moduleName with
                 | "" -> if isAbstract then "AbstractParse" else "Parse"
@@ -193,10 +193,13 @@ type GLLFSA() =
                     println "    | %s() -> %i" tokenNumber.Key tokenNumber.Value
                 println ""
 
-                println "let numToString = function"
+                println "let stateToNontermName = function"
                 for tokenNumber in termToInt do
                     println "    | %i -> \"%s\"" tokenNumber.Value tokenNumber.Key
-                for numberNonterm in fsa.IntToString do
+                let sortedStateToNontermName = 
+                    fsa.StateToNontermName
+                    |> Seq.sortBy (fun x -> x.Key)
+                for numberNonterm in sortedStateToNontermName do
                     println "    | %i -> \"%s\"" numberNonterm.Key numberNonterm.Value
                 println "    | _ -> \"\"\n"
 
@@ -204,11 +207,11 @@ type GLLFSA() =
                 for i in termToInt.Values do
                     println "    | %i -> true" i
                 println "    | _ -> false\n"
-
+                (*
                 println "let numIsEpsilon = function"
                 println "    | %i -> true" !eps
                 println "    | _ -> false\n"
-
+                *)
                 println "let statesToConvert ="
                 fsaStates    
                 |> List.iteri (fun i state -> printState state (i = 0) (i = fsaStates.Length-1))
@@ -218,15 +221,22 @@ type GLLFSA() =
                 println "%s " "    |> Array.Parallel.map (fun x -> "
                 println "%s " "        x"
                 println "%s " "        |> Array.map (fun (x,y) -> x, y * 1<state>))"
+                println ""
 
                 println "let startState = %i * 1<state>" fsa.StartState
-                println "let finalState = %i * 1<state>" fsa.FinalState
+                
+                println "let isFinalState = function"
+                fsa.FinalStates
+                |> Seq.sort
+                |> Seq.iter (fun state ->
+                    println "    | %i -> true" state )
+                println "    | _ -> false\n"
+
                 println "let nontermCount = %i\n" fsa.NontermCount
                 
             let printFirstSet () =
-                
                 let inline pack state token =
-                    if (int state < 65536) && (int token - fsa.NontermCount < 65536) then int( (int state <<< 16) ||| (token - fsa.NontermCount) )
+                    if (int state < 65536) && (int token - fsa.NontermCount < 65536) then int( (int state <<< 16) ||| (token - fsa.States.Length) )
                         else failwith "State or token is greater then 65535!!"
                 println "let firstSet ="
                 
@@ -256,7 +266,7 @@ type GLLFSA() =
                 println ""
             
             let printParser () =
-                println "let private parserSource = new FSAParserSourceGLL (states, startState, finalState, nontermCount, numIsTerminal, numIsEpsilon, numToString, firstSet)"
+                println "let private parserSource = new FSAParserSourceGLL (states, startState, isFinalState, nontermCount, numIsTerminal, numIsEpsilon, stateToNontermName, firstSet)"
 
             let printFuns () =
                 println "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> ParserCommon.ParseResult<_>) ="

@@ -102,7 +102,7 @@ type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) =
 type BioParserEdge(s : int, e : int, l : int, t : int[]) =
     member this.Start = s
     member this.End = e
-    member this.RealLenght = l
+    member this.RealLength = l
     member this.Tokens = t 
     override this.ToString () = (this.Start.ToString()) + "- "+ (this.Tokens.[0].ToString()) + " ->" + (this.End.ToString()) 
       
@@ -110,7 +110,9 @@ type BioParserInputGraph(edges : BioParserEdge[]) =
 //    inherit AdjacencyGraph<int, TaggedEdge<int, int[]>>()
 //    do
 //        edges |> Array.map (fun e -> new TaggedEdge<_,_>(e.s, e.e, e.Tokens))
-    let pack2to32 edge position = ((int position <<< 16) ||| int edge)
+    let pack2to32 edge position =
+        if (edge < 65536) && (position < 65536) then ((int position <<< 16) ||| int edge)
+        else failwith "Edge or position is greater then 65535!!"
     let edgs = Array.zeroCreate edges.Length
     let shift = ref 0//-1
     let vertexCount = ref 0
@@ -132,7 +134,7 @@ type BioParserInputGraph(edges : BioParserEdge[]) =
                 newV
         edges
         |> Array.iteri (fun i e -> 
-            let edg = new BioParserEdge(getV e.Start, getV e.End, e.RealLenght, e.Tokens)
+            let edg = new BioParserEdge(getV e.Start, getV e.End, e.RealLength, e.Tokens)
             edgs.[i] <- edg
             chainLen.[i] <- e.Tokens.Length
             //shift := 0//max !shift (e.Tokens.Length - e.RealLenght)

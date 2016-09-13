@@ -20,7 +20,7 @@ do()
 [<Extension>]
 type RIGLR() = 
     inherit Generator()
-        override this.Name = "hello"
+        override this.Name = "RIGLRGenerator"
         override this.Constraints = [|noEbnf; noMeta; noInnerAlt; (*noLiterals;*) noInnerAlt; noBrackets; needAC; singleModule|]
         override this.Generate (definition, args) =   
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")

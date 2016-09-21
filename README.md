@@ -16,6 +16,16 @@ Build status:
 | 371_15 | [![371_15 build status](https://ci.appveyor.com/api/projects/status/s8myouu45sunv2xh/branch/371_15?svg=true)](https://ci.appveyor.com/project/gsvgit/yaccconstructor/branch/371_15)| |
 
 
+Packages:
+
+| Package | |
+|-------- |------|
+| YC.SDK  | [![NuGet Status](http://img.shields.io/nuget/v/YC.SDK.svg?style=flat)](https://www.nuget.org/packages/YC.SDK/) |
+| YC.SDK.Runtime| [![NuGet Status](http://img.shields.io/nuget/v/YC.SDK.Runtime.svg?style=flat)](https://www.nuget.org/packages/YC.SDK.Runtime/) |
+
+
+
+
 Develop
 ==============
 

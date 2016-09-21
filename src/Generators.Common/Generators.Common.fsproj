@@ -8,7 +8,7 @@
     <ProjectGuid>f46a55cf-a97f-4dfc-9483-340c631c80fe</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Generators.Common</RootNamespace>
-    <AssemblyName>Generators.Common</AssemblyName>
+    <AssemblyName>YC.Generators.Common</AssemblyName>
     <Name>Generators.Common</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <TargetFrameworkProfile />

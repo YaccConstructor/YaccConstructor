@@ -8,7 +8,7 @@
     <ProjectGuid>bd40477e-7ceb-4ff4-b53f-05316f3bb6d8</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>GLLAbstractParser</RootNamespace>
-    <AssemblyName>GLLAbstractParser</AssemblyName>
+    <AssemblyName>YC.GLLAbstractParser</AssemblyName>
     <Name>GLLAbstractParser</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <TargetFrameworkProfile />

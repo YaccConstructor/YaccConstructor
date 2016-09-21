@@ -8,7 +8,7 @@
     <ProjectGuid>{3148144c-1649-440e-a9b4-1d5c41677262}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>YardPrinter</RootNamespace>
-    <AssemblyName>YardPrinter</AssemblyName>
+    <AssemblyName>YC.YardPrinter</AssemblyName>
     <Name>YardPrinter</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

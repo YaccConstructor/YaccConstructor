@@ -8,7 +8,7 @@
     <ProjectGuid>43889e87-5ea7-4f34-85b3-3ec7cf871bbc</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>RIGLRCommon</RootNamespace>
-    <AssemblyName>RIGLRCommon</AssemblyName>
+    <AssemblyName>YC.RIGLRCommon</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>RIGLRCommon</Name>
     <TargetFrameworkProfile />

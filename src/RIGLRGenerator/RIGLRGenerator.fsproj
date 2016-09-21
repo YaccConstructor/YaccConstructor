@@ -8,7 +8,7 @@
     <ProjectGuid>5e1f6ba9-9c96-48c4-b17b-021a2394b01a</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>RIGLRGenerator</RootNamespace>
-    <AssemblyName>RIGLRGenerator</AssemblyName>
+    <AssemblyName>YC.RIGLRGenerator</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>RIGLRGenerator</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>

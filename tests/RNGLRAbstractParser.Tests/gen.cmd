@@ -1,4 +1,4 @@
-..\..\bin\Release\v40\AbstractLexer.Generator.exe Lexer.fsl -o Lexer.fs
+..\..\bin\Release\v40\YC.AbstractLexer.Generator.exe Lexer.fsl -o Lexer.fs
 
 del log.txt
 

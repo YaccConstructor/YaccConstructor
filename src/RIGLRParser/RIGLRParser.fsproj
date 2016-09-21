@@ -8,7 +8,7 @@
     <ProjectGuid>b0c650c2-7d12-4791-82d4-c042aa89f0ff</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>RIGLRParser</RootNamespace>
-    <AssemblyName>RIGLRParser</AssemblyName>
+    <AssemblyName>YC.RIGLRParser</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>RIGLRParser</Name>
     <TargetFrameworkProfile />

@@ -1,0 +1,38 @@
+type file
+id YC.SDK.Runtime
+title YC.SDK.Runtime
+owners
+    YaccConstructor
+authors 
+    YaccConstructor
+projectUrl
+    http://github.com/YaccConstructor/YaccConstructor
+iconUrl
+    https://raw.githubusercontent.com/YaccConstructor/YaccConstructor/master/docs/files/img/logo.png
+licenseUrl
+    http://github.com/YaccConstructor/YaccConstructor/blob/master/LICENSE.txt
+requireLicenseAcceptance
+    false
+copyright
+    Copyright YaccConstructor 2016
+tags
+    YaccConstructor YC FSharp parsing
+summary
+    YaccConstructor runtime
+description
+    YaccConstructor runtime
+files
+    ../../Bin/Release/v40/YC.*.dll ==> lib/net45
+    !../../Bin/Release/v40/YC.QuickGraph*
+    !../../Bin/Release/v40/YC.Utils.SourceText.*
+    !../../Bin/Release/v40/YC.PrettyPrinter.*
+
+
+dependencies
+    FSharp.Core >= 4.3.0
+    Argu >= LOCKEDVERSION
+    YC.QuickGraph >= LOCKEDVERSION
+    YC.Utils.SourceText >= LOCKEDVERSION
+    Mono.Addins >= LOCKEDVERSION
+    FSharpx.Collections.Experimental >= LOCKEDVERSION
+    YC.PrettyPrinter >= LOCKEDVERSION

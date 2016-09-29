@@ -77,7 +77,7 @@ let filterRnaParsingResult (graph:BioParserInputGraph) lowLengthLimit highLength
                         if rpos <= lpos && le = re
                         then
                             -1 * newLength
-                        elif le = re
+                        elif newLength < 0 && le = re
                         then
                             0
                         else
@@ -142,7 +142,7 @@ let searchInBioGraphs (searchCfg : SearchConfig) graphs agentsCount =
 
                                 match parseResult with
                                 | Success1 result ->
-                                    printfn "SearchWithoutSPPF succed"
+                                    printfn "SearchWithoutSPPF succeed"
                                     let res = result |> filterRnaParsingResult graph searchCfg.LowLengthLimit searchCfg.HighLengthLimit
                                     printPathsToFASTA ".\\result.fa" res i searchCfg.NumToString
                                 | Success _ -> failwith "Result is success but it is unexpected success"

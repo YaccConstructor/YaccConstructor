@@ -16,11 +16,11 @@ let pathToString numToString path =
     |> ResizeArray.fold (fun string e -> string + edgeToString numToString e) ""
 
 let getInfo prefix index = 
-    ">" + prefix + index.ToString() + "\n"
+    ">" + prefix + index.ToString()
 
 let printStringsToFASTA path prefix lines =
     lines
-    |> Seq.mapi (fun i line -> (getInfo prefix i) + line)
+    |> Seq.mapi (fun i (sourceInfo, line) -> (getInfo prefix i) + " " + sourceInfo + "\n" + line)
     |> (fun x -> File.AppendAllLines(path, x))
 
 let printEdgesToFASTA path numToString prefix edges =
@@ -34,21 +34,27 @@ let printPathsToFASTA path (res:(List<List<BioParserEdge>> * (BioParserEdge * Bi
     //    if line.Length <= maxLineLength then [line] else
     //    (line.Substring (0, maxLineLength))::(splitLine (line.Substring maxLineLength))
 
-    let printResult j ((paths:List<List<BioParserEdge>>), (startE, finalE, poss)) = 
+    let printResult j ((paths:List<List<BioParserEdge>>), (startE : BioParserEdge, finalE : BioParserEdge, poss)) = 
         let prefix = "Graph" + i.ToString() + ".Subgraph" + j.ToString()+ "."
         let lenToBegEnd = new Dictionary<int,List<_>>()
         
         poss
         |> Array.iter (fun (startPos, finalPos, length) -> 
             let prefixPostfix = 
-                if length = 0 && startE = finalE && startPos <= finalPos
+                if startE = finalE && length = 0 && startPos < finalPos
                 then
-                    (edgeToString numToString startE).Substring (startPos, (finalPos - startPos + 1))
+                    sprintf "%i:%i -> %i:%i"
+                        startE.SourceId (startE.SourceStartPos + startPos)
+                        startE.SourceId (startE.SourceStartPos + finalPos)
+                    , (edgeToString numToString startE).Substring (startPos, (finalPos - startPos + 1))
                     , ""
                 else
-                    (edgeToString numToString startE).Substring startPos
+                    sprintf "%i:%i -> %i:%i"
+                        startE.SourceId (startE.SourceStartPos + startPos)
+                        finalE.SourceId (finalE.SourceStartPos + finalPos)
+                    , (edgeToString numToString startE).Substring startPos
                     , (edgeToString numToString finalE).Substring (0, finalPos + 1)
-                    
+
             let cond, value = lenToBegEnd.TryGetValue length
             if cond
             then
@@ -61,7 +67,7 @@ let printPathsToFASTA path (res:(List<List<BioParserEdge>> * (BioParserEdge * Bi
                 lenToBegEnd.Values
                 |> Seq.collect (fun prefixPostfix -> 
                     prefixPostfix
-                    |> Seq.collect (fun (prefix, postfix) -> [prefix + postfix]))
+                    |> Seq.collect (fun (sourceInfo, prefix, postfix) -> [sourceInfo, prefix + postfix]))
                 |> Array.ofSeq
             else
                 paths
@@ -71,7 +77,7 @@ let printPathsToFASTA path (res:(List<List<BioParserEdge>> * (BioParserEdge * Bi
                     if cond
                     then
                         value
-                        |> Seq.map (fun (prefix, postfix) -> prefix + line + postfix)
+                        |> Seq.map (fun (sourceInfo, prefix, postfix) -> sourceInfo, prefix + line + postfix)
                     else
                         failwith "some length is not eq res length")
                 |> Array.ofSeq

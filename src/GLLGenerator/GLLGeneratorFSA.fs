@@ -266,7 +266,7 @@ type GLLFSA() =
                 println ""
             
             let printParser () =
-                println "let private parserSource = new FSAParserSourceGLL (states, startState, isFinalState, nontermCount, numIsTerminal, numIsEpsilon, stateToNontermName, firstSet)"
+                println "let private parserSource = new FSAParserSourceGLL (states, startState, isFinalState, nontermCount, numIsTerminal, stateToNontermName, firstSet)"
 
             let printFuns () =
                 println "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> ParserCommon.ParseResult<_>) ="

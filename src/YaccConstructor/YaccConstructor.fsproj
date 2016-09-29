@@ -25,7 +25,7 @@
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-i 16s.yrd -g "GLLFSAGenerator -module GLLFSA.r16s.H22_H23 -o 16s_H22_H23.yrd.fs -abstract true"</StartArguments>
+    <StartArguments>-i test.yrd -g "GLLFSAGenerator -module GLLFSA.r16s.H22_H23 -o 16s_H22_H23.yrd.fs -abstract true"</StartArguments>
     <StartWorkingDirectory>C:\Yacc Constructor</StartWorkingDirectory>
     <StartAction>Project</StartAction>
   </PropertyGroup>

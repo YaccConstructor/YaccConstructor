@@ -568,7 +568,7 @@ let genFirstSet fsa =
         else firstSet.Add(state, value) |> ignore
 
     let rec dfs (nonterm: int<state>) (state: int<state>) (callStack : Set<_>) : HashSet<string>= 
-        for symbol,nextState in fsa.States.[int state] do
+        for symbol,_ in fsa.States.[int state] do
             match symbol with
             | Nonterm nextNonterm -> 
                 if callStack.Contains nextNonterm
@@ -581,16 +581,18 @@ let genFirstSet fsa =
                         
                     addToResult nonterm res
             | Term term -> addToResult nonterm (new HashSet<_>([term]))
-            | Epsilon() -> dfs nonterm nextState callStack |> ignore
+            | _ -> failwith "Epsilon edge found while build first set"
+            //| Epsilon() -> dfs nonterm nextState callStack |> ignore
 
         if firstSet.ContainsKey nonterm then
             firstSet.[nonterm]
         else
-            failwith "sdfsf"
-
+            new HashSet<string>()
+            //failwith "first set wasnt counted"
+    (*
     for i in 0..nontermsCount - 1 do
         dfs (i * 1<state>) (i * 1<state>) (Set.empty) |> ignore
-
+    *)
     firstSet
 
 

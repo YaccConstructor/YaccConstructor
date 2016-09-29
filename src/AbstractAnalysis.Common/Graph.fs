@@ -99,11 +99,13 @@ type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) =
     new (initial : int, final : int) = 
         ParserInputGraph<_>([|initial|], [|final|])
  
-type BioParserEdge(s : int, e : int, l : int, t : int[]) =
+type BioParserEdge(s : int, e : int, l : int, t : int[], id : int, startPos : int) =
     member this.Start = s
     member this.End = e
     member this.RealLength = l
     member this.Tokens = t 
+    member this.SourceId = id
+    member this.SourceStartPos = startPos
     override this.ToString () = (this.Start.ToString()) + "- "+ (this.Tokens.[0].ToString()) + " ->" + (this.End.ToString()) 
       
 type BioParserInputGraph(edges : BioParserEdge[]) =
@@ -134,7 +136,7 @@ type BioParserInputGraph(edges : BioParserEdge[]) =
                 newV
         edges
         |> Array.iteri (fun i e -> 
-            let edg = new BioParserEdge(getV e.Start, getV e.End, e.RealLength, e.Tokens)
+            let edg = new BioParserEdge(getV e.Start, getV e.End, e.RealLength, e.Tokens, e.SourceId, e.SourceStartPos)
             edgs.[i] <- edg
             chainLen.[i] <- e.Tokens.Length
             //shift := 0//max !shift (e.Tokens.Length - e.RealLenght)

@@ -18,8 +18,13 @@ type CompressedArray<'t> = Yard.Generators.GLL.ParserCommon.CompressedArray<'t>
 
 let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) = 
     //let shift = input.Shift
-    //let numberOfDescr = ref 0
+
+    // debug
+    let numberOfDescr = ref 0
+    let numberOfGSSEdges = ref 0
+    let numberOfGSSNodes = ref 0
     let numberOfReusedDescr = ref 0
+
     if input.EdgeCount = 0 then failwith ("This grammar does not accept empty input.") else
     let result = new System.Collections.Generic.HashSet<_>()
     let dummyEdge = input.EdgeCount
@@ -63,7 +68,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         if setU.[inputIndex] <> null
         then
             let cond, current = setU.[inputIndex].TryGetValue state
-            if  cond
+            if cond
             then
                 if not (current |> Array.contains vertexKey)
                 then
@@ -89,9 +94,9 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         if not <| containsContext inputVertex state vertex 
         then
             pushContext inputVertex state vertex len
-            //incr numberOfDescr
-        //else 
-        //    incr numberOfReusedDescr 
+            incr numberOfDescr
+        else 
+            incr numberOfReusedDescr 
 
     /// Checks for existing of edge in edges set. If not adds it to edges set.
     let containsEdge (startVertex : GSSVertexNFA) (endVertex : GSSVertexNFA) (state : int<state>) (len : uint16) =
@@ -144,6 +149,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         then//such vertex already exist
             if not <| containsEdge newVertex currentVertex stateToContinue len
             then//no such edge between vertices
+                incr numberOfGSSEdges
                 let vertexKey = packVertexFSA index nonTermName
                 let cond, poped = setP.TryGetValue vertexKey
                 if cond
@@ -152,6 +158,8 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                     poped.DoForAll (fun (newIndex, l) ->
                         addContext newIndex stateToContinue currentVertex (len + l))
         else//need to create new edge, vertex and context
+            incr numberOfGSSEdges
+            incr numberOfGSSNodes
             containsEdge newVertex currentVertex stateToContinue len |> ignore
             addContext index nonTermName newVertex 0us
             
@@ -289,9 +297,11 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
             if !condition then dispatch() else handle()
     control()
 
-    //printfn "Number of descriptors: %i" !numberOfDescr
-    //printfn "Number of reused descriptors: %i" !numberOfReusedDescr 
-                 
+    printfn "Number of descriptors: %i" !numberOfDescr
+    printfn "Number of reused descriptors: %i" !numberOfReusedDescr 
+    printfn "Number of GSS nodes: %i" !numberOfGSSNodes
+    printfn "Number of GSS edges: %i" !numberOfGSSEdges
+                
     match result.Count with
         | 0 -> Error ("String was not parsed")
         | _ -> Success1 (Array.ofSeq result)

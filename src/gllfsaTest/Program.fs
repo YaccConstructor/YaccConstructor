@@ -5,25 +5,25 @@ open System.Collections.Generic
 let tokenizerWithoutMinimization token =
     match token with
     | 'A' -> WithoutMinimization.r16s.A()
-    | 'B' -> WithoutMinimization.r16s.B() 
+    (*| 'B' -> WithoutMinimization.r16s.B() 
     | 'C' -> WithoutMinimization.r16s.C()
     | 'D' -> WithoutMinimization.r16s.D()
     | 'E' -> WithoutMinimization.r16s.E()
     | 'F' -> WithoutMinimization.r16s.F()
     | 'L' -> WithoutMinimization.r16s.L()
-    | 'K' -> WithoutMinimization.r16s.K()
+    | 'K' -> WithoutMinimization.r16s.K()*)
     | _ -> failwith "wtf"
 
 let tokenizerWithMinimization token =
     match token with
     | 'A' -> WithMinimization.r16s.A()
-    | 'B' -> WithMinimization.r16s.B() 
+    (*| 'B' -> WithMinimization.r16s.B() 
     | 'C' -> WithMinimization.r16s.C()
     | 'D' -> WithMinimization.r16s.D()
     | 'E' -> WithMinimization.r16s.E()
     | 'F' -> WithMinimization.r16s.F()
     | 'L' -> WithMinimization.r16s.L()
-    | 'K' -> WithMinimization.r16s.K()
+    | 'K' -> WithMinimization.r16s.K()*)
     | _ -> failwith "wtf"
 
 let mEL = 500
@@ -82,8 +82,9 @@ let inline getPosOnEdge (packedValue : int) = int (uint32 packedValue >>> 16)
 
 let rec genS n = 
     let s = new System.Text.StringBuilder()
-    for i in 1..n do
-        s.Append "ALKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLK" |> ignore
+    for _ in 1..n do
+        s.Append "A" |> ignore
+        //s.Append "ALKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLK" |> ignore
         //s.Append "BLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLK" |> ignore
         //s.Append "CLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLK" |> ignore
         //s.Append "DLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLKLK" |> ignore
@@ -93,7 +94,7 @@ let rec genS n =
 
 [<EntryPoint>]
 let main argv = 
-    let lens = [1000;5000;10000;50000]
+    let lens = [100; 200; 300; 400; 500; 1000]
     for len in lens do
         let input = genS len
         let len = input.Length

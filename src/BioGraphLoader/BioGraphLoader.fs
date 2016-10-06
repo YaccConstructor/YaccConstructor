@@ -124,10 +124,11 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
    
     printfn "long edges %A" !leCount
 
-    let divisionOnComponents (edgs:BioGraphEdge []) =
-        let uGraph = new UndirectedGraph<_,_>(true)
-        uGraph.AddVerticesAndEdgeRange edgs
-        |> ignore
+    let uGraph = new UndirectedGraph<_,_>(true)
+    uGraph.AddVerticesAndEdgeRange edgs
+    |> ignore
+
+    let divisionOnComponents () =
         let algo = Algorithms.ConnectedComponents.ConnectedComponentsAlgorithm(uGraph)
         algo.Compute()    
         algo.ComponentCount |> printfn "Connected components count=%A"
@@ -153,7 +154,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
             //|> Array.filter (fun x -> x.Length > 1)
         components
     
-    let components = divisionOnComponents edgs
+    let components = divisionOnComponents ()
     (*
     let clustered1 = cluster edgs
 
@@ -220,6 +221,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
         x.Tag.str)
     |> printStringsToFASTA "componentEdges.fa" ""*)
 
+    edgs,
     components
     |> Array.Parallel.map
        (fun edges -> 
@@ -239,8 +241,9 @@ let loadGraphFormFileToBioParserInputGraph fileWithoutExt templateLengthHightLim
                 EList.Add(new BioParserEdge(e.Source, e.Target, e.Tag.length, tag, e.Tag.id, e.Tag.sourceStartPos))
             EList.ToArray()
             
-        new BioParserInputGraph(edges)
+        new BioParserInputGraph(edges, Set([]))
 
-    let gs,longEdges = loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit
-    gs |> Array.Parallel.map convert
+    let sourceDraph, gs, longEdges = loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit
+    sourceDraph
+    , gs |> Array.Parallel.map convert
     ,longEdges

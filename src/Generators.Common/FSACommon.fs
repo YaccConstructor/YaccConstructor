@@ -566,32 +566,34 @@ let genFirstSet fsa =
         if cond
         then set.UnionWith value
         else firstSet.Add(state, value) |> ignore
-
-    let rec dfs (nonterm: int<state>) (state: int<state>) (callStack : Set<_>) : HashSet<string>= 
-        for symbol,_ in fsa.States.[int state] do
-            match symbol with
-            | Nonterm nextNonterm -> 
-                if callStack.Contains nextNonterm
-                then ()
-                else 
-                    let res = 
-                        let cond,value = firstSet.TryGetValue nextNonterm
-                        if cond then value else
-                        dfs nextNonterm nextNonterm (callStack.Add nonterm)
-                        
-                    addToResult nonterm res
-            | Term term -> addToResult nonterm (new HashSet<_>([term]))
-            | _ -> failwith "Epsilon edge found while build first set"
-            //| Epsilon() -> dfs nonterm nextState callStack |> ignore
-
-        if firstSet.ContainsKey nonterm then
-            firstSet.[nonterm]
-        else
-            new HashSet<string>()
-            //failwith "first set wasnt counted"
     (*
-    for i in 0..nontermsCount - 1 do
-        dfs (i * 1<state>) (i * 1<state>) (Set.empty) |> ignore
+    let rec dfs (state: int<state>) (callStack : Set<_>) : int<state> list * HashSet<string> = 
+        if firstSet.ContainsKey state then
+            firstSet.[state]
+        else
+            let result = new HashSet<string>()
+
+            for symbol,_ in fsa.States.[int state] do
+                match symbol with
+                | Nonterm nextNonterm -> 
+                    if callStack.Contains nextNonterm
+                    then result.Add 
+                    else 
+                        let res = 
+                            let cond,value = firstSet.TryGetValue nextNonterm
+                            if cond then value else
+                            dfs nextNonterm nextNonterm (callStack.Add nonterm)
+                        
+                        addToResult nonterm res
+                | Term term -> addToResult nonterm (new HashSet<_>([term]))
+                | _ -> failwith "Epsilon edge found while build first set"
+                //| Epsilon() -> dfs nonterm nextState callStack |> ignore
+            
+                //failwith "first set wasnt counted"
+    
+    for states in fsa.StartStates do
+        for state in states do
+            dfs state (Set.empty) |> ignore
     *)
     firstSet
 
@@ -609,21 +611,20 @@ let printDot filePrintPath fsa =
         let currState = i*1<state>
         let hd =
             let label = stateToString fsa.StateToNontermName currState
-                         
-            if fsa.StartState = currState
-            then
-                sprintf "%i[label=\"%s\", style=filled, fillcolor=green]" currState label
+            
+            if finalStates.Contains currState && fsa.StartState = currState
+            then sprintf "%i[label=\"%s\", style=filled, fillcolor=brown]" currState label     
+            elif fsa.StartState = currState
+            then sprintf "%i[label=\"%s\", style=filled, fillcolor=green]" currState label
             elif finalStates.Contains currState
-            then
-                sprintf "%i[label=\"%s\", shape = doublecircle, style=filled, fillcolor=red]" currState label
+            then sprintf "%i[label=\"%s\", shape = doublecircle, style=filled, fillcolor=red]" currState label
             elif startStates.Contains currState
-            then
-                sprintf "%i[label=\"%s\", style=filled, fillcolor=yellow]" currState label
-            elif label = "" then 
+            then sprintf "%i[label=\"%s\", style=filled, fillcolor=yellow]" currState label
+            elif label = ""
+            then 
                 //sprintf "%i[label=\"%i\", style=filled, fillcolor=brown]" currState currState
                 sprintf "%i[label=\"\"]" currState 
-            else
-                sprintf "%i[label=\"%s\"]" currState label
+            else sprintf "%i[label=\"%s\"]" currState label
 
         let tl = 
             state

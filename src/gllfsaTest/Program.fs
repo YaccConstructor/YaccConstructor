@@ -36,7 +36,7 @@ let graphWithout (input:string) =
             let tag = x.ToCharArray() |> Array.map (tokenizerWithoutMinimization >> WithoutMinimization.r16s.tokenToNumber)
             new BioParserEdge(i, i+1, tag.Length, tag, 0, 0)
             )
-    new BioParserInputGraph(edges)
+    new BioParserInputGraph(edges, Set[])
 
 let graphWith (input:string) = 
     let edges = Array.init (input.Length / mEL + (if input.Length % mEL = 0 then 0 else 1)) (fun i -> input.Substring(i*mEL, if input.Substring(i*mEL).Length < mEL then input.Substring(i*mEL).Length else mEL))
@@ -46,7 +46,7 @@ let graphWith (input:string) =
             let tag = x.ToCharArray() |> Array.map (tokenizerWithMinimization >> WithMinimization.r16s.tokenToNumber)
             new BioParserEdge(i, i+1, tag.Length, tag, 0, 0)
             )
-    new BioParserInputGraph(edges)
+    new BioParserInputGraph(edges, Set[])
 (*
 let rec genS n = 
     let pref =  new System.Text.StringBuilder()

@@ -235,7 +235,8 @@ type GLLFSA() =
                 println "let nontermCount = %i\n" fsa.NontermCount
                 
             let printFirstSet () =
-                let inline pack state token =
+                println "let firstSet = Set[|1|]"
+                (*let inline pack state token =
                     if (int state < 65536) && (int token - fsa.NontermCount < 65536) then int( (int state <<< 16) ||| (token - fsa.States.Length) )
                         else failwith "State or token is greater then 65535!!"
                 println "let firstSet ="
@@ -263,6 +264,7 @@ type GLLFSA() =
                 for stateTerms in fsa.FirstSet do
                     printState stateTerms.Key stateTerms.Value (!i = 0) (!i = fsa.FirstSet.Count - 1)
                     incr i
+                *)
                 println ""
             
             let printParser () =

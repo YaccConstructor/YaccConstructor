@@ -26,4 +26,4 @@ references
 files
     ./../../Bin/Release/v40/YC.FsYacc.dll ==> lib/net45
 dependencies
-    FSharp.Core >= 4.3.0
+    FSharp.Core >= 4.0.0

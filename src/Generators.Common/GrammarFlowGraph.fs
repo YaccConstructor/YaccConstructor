@@ -61,15 +61,22 @@ type GrammarFlowGraph<'token> (ruleList : Rule.t<Source.t,Source.t> list, mapToT
             productionToStates startState endState left |> ignore
             productionToStates startState endState right
         | PSeq (seq, _ , _) ->
-            let entryState, exitState = newState(), newState()
-            addEdge startState entryState Entry
-            addEdge exitState endState.Value End
-            let rec seqToStates source target = function
-                | hd :: [] -> productionToStates source target hd.rule
-                | hd :: tl -> let newstate = productionToStates source None hd.rule
-                              seqToStates newstate target tl
-                | [] -> failwith "PSeq is empty"
-            seqToStates entryState (Some exitState) seq
+            if List.isEmpty seq
+            then
+                let epsState = newState()
+                addEdge startState epsState Entry
+                addEdge epsState endState.Value End
+                epsState
+            else
+                let entryState, exitState = newState(), newState()
+                addEdge startState entryState Entry
+                addEdge exitState endState.Value End
+                let rec seqToStates source target = function
+                    | hd :: [] -> productionToStates source target hd.rule
+                    | hd :: tl -> let newstate = productionToStates source None hd.rule
+                                  seqToStates newstate target tl
+                    | [] -> failwith "PSeq is empty"
+                seqToStates entryState (Some exitState) seq
         | PToken s | PLiteral s -> newEdges true startState endState s
         | PRef (rule, _) -> newEdges false startState endState rule  
         | _ -> failwith "Unexpected PType"

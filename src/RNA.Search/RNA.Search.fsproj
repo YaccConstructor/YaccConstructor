@@ -37,7 +37,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Release\RNA.Search.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
-    <StartArguments>--input "../../../tests/data/bio/synth_for_semen/simplification"</StartArguments>
+    <StartArguments>--input "../../../tests/data/bio/mix_1/late_pair_info_count"</StartArguments>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -67,7 +67,6 @@
     <Compile Include="R16S_19_27.fs" />
     <Compile Include="io.fs" />
     <Compile Include="structs.fs" />
-    <Compile Include="tblReader.fs" />
     <Compile Include="RNA.SearchFSA.fs" />
     <None Include="paket.references" />
     <Content Include="App.config" />
@@ -103,6 +102,11 @@
     <ProjectReference Include="..\GLLAbstractParser\GLLAbstractParser.fsproj">
       <Name>GLLAbstractParser</Name>
       <Project>{bd40477e-7ceb-4ff4-b53f-05316f3bb6d8}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\InfernalApi\InfernalApi.fsproj">
+      <Name>InfernalApi</Name>
+      <Project>{5c337db6-f5cc-4014-8bb7-3d66edf0eefc}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\ParserCommon\GLLParsers.Common.fsproj">

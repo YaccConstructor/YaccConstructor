@@ -212,7 +212,7 @@ let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
         FinalStates    = lastStates;
         LastStates     = new HashSet<_>(lastStates)}
 
-/// Removes epsilon edges from FA.
+/// Removes epsilon edges from FA using epsilon closure.
 let removeEpsilonEdges (fsa : InternalFSA) = 
     let epsilonClosure = Array.init (fsa.States.Length) (fun i -> new HashSet<_>())
 
@@ -418,7 +418,8 @@ let findEquivalenceClasses fsa =
     buildInv()
     let Class = Array.create (fsa.States.Length) 1
     let classesP = new ResizeArray<_>()
-    let finalSet = new ResizeArray<_>(fsa.LastStates)
+    //let finalSet = new ResizeArray<_>(fsa.LastStates)
+    let finalSet = new ResizeArray<_>(fsa.FinalStates)
     let others = new ResizeArray<_>()
     for state in 0..fsa.States.Length-1 do
         if finalSet.Contains (state*1<state>)
@@ -473,7 +474,7 @@ let findEquivalenceClasses fsa =
 
     classesP
 
-let minimizeFSA fsa = //(states : (EdgeSymbol * int<state>) [][]) (classes : ResizeArray<ResizeArray<int<state>>>) (nonterms : Set<_>) (stateStringDict : Dictionary<int<state>, string>) (startState:int<state>) (finalState:int<state>) = 
+let minimizeFSA fsa =
     let classes = findEquivalenceClasses fsa
 
     let sortClasses() =
@@ -558,49 +559,95 @@ let minimizeFSA fsa = //(states : (EdgeSymbol * int<state>) [][]) (classes : Res
     //statesToReturn, nonterms.Count, newStateStringDict, (stateToNewState.[int startState]*1<state>), (stateToNewState.[int finalState]*1<state>)
 
 let genFirstSet fsa =
-    let nontermsCount = fsa.StartStates.Length
-    let firstSet = new Dictionary<int<state>,HashSet<string>>()
+    let nontermToSet = new Dictionary<int<state>, int>()
 
-    let addToResult state value = 
-        let cond,set = firstSet.TryGetValue state
-        if cond
-        then set.UnionWith value
-        else firstSet.Add(state, value) |> ignore
-    (*
-    let rec dfs (state: int<state>) (callStack : Set<_>) : int<state> list * HashSet<string> = 
-        if firstSet.ContainsKey state then
-            firstSet.[state]
-        else
-            let result = new HashSet<string>()
+    let startStates = 
+        fsa.StartStates
+        |> Array.map (fun x -> (x |> Array.ofSeq).[0])
+        |> Array.distinct
 
-            for symbol,_ in fsa.States.[int state] do
+    let firstSet = 
+        startStates
+        |> Array.mapi(fun i state ->
+            let firstSetOfCurrentNonterm = new HashSet<_>()
+
+            let productions = 
+                fsa.States.[int state]
+                |> Array.collect (fun (symbol, nextState) ->
+                    match symbol with
+                    | Nonterm _ -> 
+                        [|symbol, nextState|]
+                    | Term _ ->
+                        firstSetOfCurrentNonterm.Add symbol |> ignore
+                        [||]
+                    | _ -> failwith "Epsilon edge found while build first set")
+
+            nontermToSet.Add(state, i)
+            if (fsa.FinalStates.Contains state) || fsa.States.[int state].Length = 0
+            then 
+                Epsilon() |> firstSetOfCurrentNonterm.Add |> ignore
+            state, firstSetOfCurrentNonterm, productions
+            )
+        |> ref
+
+    let unionWith (s1: HashSet<_>) (s2: HashSet<_>) = 
+        s2
+        |> Seq.fold(fun res st -> 
+            match st with
+            | Epsilon () -> res
+            | _ -> res || s1.Add st) false
+
+    let smthChanged = ref true
+    let dummyState = -1<state>
+
+    while (!smthChanged) do
+        smthChanged := false
+        firstSet :=
+            !firstSet
+            |> Array.map(fun (state, set, productions) ->
+                let productions = 
+                    productions
+                    |> Array.collect (fun (symbol, nextState) ->
+                        match symbol with
+                        | Nonterm nonterm ->
+                            let _, otherSet, _ = firstSet.Value.[nontermToSet.[nonterm]]
+
+                            let isContainsAllEpements = unionWith set otherSet
+                            smthChanged := !smthChanged || isContainsAllEpements
+                            
+                            if otherSet.Contains (Epsilon()) && nextState <> dummyState
+                            then
+                                smthChanged := true
+                                if (fsa.FinalStates.Contains nextState) || (fsa.States.[int nextState].Length = 0)
+                                then 
+                                    Epsilon() |> set.Add |> ignore
+
+                                Array.append (fsa.States.[int nextState]) [|symbol, dummyState|]
+                            else
+                                [|symbol, nextState|]
+                        | Term _ ->
+                            smthChanged := !smthChanged || set.Add symbol
+                            [||]
+                        | _ -> failwith "Epsilon edge found while build first set")
+
+                state, set, productions
+                )
+
+    !firstSet
+    |> Array.map(fun (state, set, _) ->
+        state, 
+            set
+            |> Seq.collect (fun symbol -> 
                 match symbol with
-                | Nonterm nextNonterm -> 
-                    if callStack.Contains nextNonterm
-                    then result.Add 
-                    else 
-                        let res = 
-                            let cond,value = firstSet.TryGetValue nextNonterm
-                            if cond then value else
-                            dfs nextNonterm nextNonterm (callStack.Add nonterm)
-                        
-                        addToResult nonterm res
-                | Term term -> addToResult nonterm (new HashSet<_>([term]))
-                | _ -> failwith "Epsilon edge found while build first set"
-                //| Epsilon() -> dfs nonterm nextState callStack |> ignore
-            
-                //failwith "first set wasnt counted"
-    
-    for states in fsa.StartStates do
-        for state in states do
-            dfs state (Set.empty) |> ignore
-    *)
-    firstSet
+                | Term t -> [t]
+                | Epsilon () -> []
+                | Nonterm n -> failwithf "Unexpected nonterm %i in FIRST SET" n
+                )
+            |> Array.ofSeq)
 
 
 let printDot filePrintPath fsa = 
     let strs = new ResizeArray<_>(["digraph G {\nnode [shape = circle]"])
-    let finalStates = fsa.FinalStates
     let startStates = 
         fsa.StartStates
         |> Array.fold (fun (x : HashSet<int<state>>) set ->
@@ -612,11 +659,11 @@ let printDot filePrintPath fsa =
         let hd =
             let label = stateToString fsa.StateToNontermName currState
             
-            if finalStates.Contains currState && fsa.StartState = currState
+            if fsa.FinalStates.Contains currState && fsa.StartState = currState
             then sprintf "%i[label=\"%s\", style=filled, fillcolor=brown]" currState label     
             elif fsa.StartState = currState
             then sprintf "%i[label=\"%s\", style=filled, fillcolor=green]" currState label
-            elif finalStates.Contains currState
+            elif fsa.FinalStates.Contains currState
             then sprintf "%i[label=\"%s\", shape = doublecircle, style=filled, fillcolor=red]" currState label
             elif startStates.Contains currState
             then sprintf "%i[label=\"%s\", style=filled, fillcolor=yellow]" currState label

@@ -1,4 +1,4 @@
-﻿module YC.Bio.RNA.tblReader
+﻿module TblReader
 
 open Microsoft.FSharp.Collections
 open System.IO

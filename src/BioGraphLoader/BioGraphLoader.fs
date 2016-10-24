@@ -6,6 +6,7 @@ open QuickGraph
 open System.IO
 open Microsoft.FSharp.Collections
 open System.Collections.Generic
+open InfernalApi
 
 module Array =
 
@@ -121,8 +122,27 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
                     [|new BioGraphEdge(e.Source, newEnd, str1, templateLengthHightLimit, e.Tag.id, e.Tag.sourceStartPos);
                       new BioGraphEdge(newStart, e.Target, str2, templateLengthHightLimit, e.Tag.id, startOfSecondEdge)|]  
             )
-   
     printfn "long edges %A" !leCount
+
+    let filterEdges edges = 
+        let toPrint =
+            edges
+            |> Array.filter(fun (edge : BioGraphEdge) -> edge.Tag.str.Length > 30)
+            |> Array.map (fun (edge : BioGraphEdge) ->
+                sprintf ">%i\n%s" edge.Tag.id edge.Tag.str)
+
+        File.WriteAllLines("edgesToFilter.fa", toPrint)
+        
+        let newEdgesSet = 
+            filterWithInfernal (System.AppDomain.CurrentDomain.BaseDirectory + "edgesToFilter.fa")
+            |> Array.map (fun (s, _,_) -> int s)
+            |> Set
+
+        edges
+        |> Array.filter (fun x -> 
+            newEdgesSet.Contains x.Tag.id || x.Tag.str.Length <= 30)
+
+    //let edgs = edgs |> filterEdges
 
     let uGraph = new UndirectedGraph<_,_>(true)
     uGraph.AddVerticesAndEdgeRange edgs

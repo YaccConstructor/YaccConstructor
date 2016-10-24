@@ -85,25 +85,29 @@ type ParserSourceGLL<'TokenType> (eof                : 'TokenType
     member this.Probabilities      = probabilities
     member this.EOF                = eof
 
-type FSAParserSourceGLL ( states             : array<array<int * int<state>>>
+type FSAParserSourceGLL ( outNonterms        : (int<state> * int<state>) [] []
                         , startState         : int<state>
-                        , isFinalState       : int -> bool
+                        , finalStates        : HashSet<int<state>>
                         , nontermCount       : int
                         , numIsTerminal      : int -> bool
                         //, numIsEpsilon       : int -> bool
                         , stateToNontermName : int -> string
-                        , firstSet           : Set<int>
+                        //, firstSet           : HashSet<int>
+                        , numOfAnyState      : int<state>
+                        , stateAndTokenToNewState : Dictionary<int, int<state>>
                         ) =
 
-    let getFirstSetItem state token = 
-        int( (int state <<< 16) ||| (token - states.Length) )
+    let getTermsDictionaryKey (state: int<state>) token = 
+        int( (int state <<< 16) ||| (token - outNonterms.Length) )
 
-    member this.FirstSet           = firstSet
-    member this.States             = states
-    member this.IsFinalState       = isFinalState
+    //member this.FirstSet           = firstSet
+    member this.OutNonterms        = outNonterms
+    member this.FinalStates       = finalStates
     member this.StartState         = startState
     member this.NonTermCount       = nontermCount
     member this.NumIsTerminal      = numIsTerminal
     //member this.NumIsEpsilon       = numIsEpsilon
-    member this.StateToNontermName        = stateToNontermName
-    member this.GetFirstSetItem    = getFirstSetItem
+    member this.StateToNontermName = stateToNontermName
+    member this.GetTermsDictionaryKey    = getTermsDictionaryKey
+    member this.NumOfAnyState      = numOfAnyState
+    member this.StateAndTokenToNewState = stateAndTokenToNewState 

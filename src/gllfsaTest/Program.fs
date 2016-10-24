@@ -1,52 +1,40 @@
 ﻿open AbstractAnalysis.Common
 open System
 open System.Collections.Generic
+open GLLFSA.test
 
-let tokenizerWithoutMinimization token =
+let tokenizer token =
     match token with
-    | 'A' -> WithoutMinimization.r16s.A()
-    (*| 'B' -> WithoutMinimization.r16s.B() 
-    | 'C' -> WithoutMinimization.r16s.C()
-    | 'D' -> WithoutMinimization.r16s.D()
-    | 'E' -> WithoutMinimization.r16s.E()
-    | 'F' -> WithoutMinimization.r16s.F()
-    | 'L' -> WithoutMinimization.r16s.L()
-    | 'K' -> WithoutMinimization.r16s.K()*)
-    | _ -> failwith "wtf"
-
-let tokenizerWithMinimization token =
-    match token with
-    | 'A' -> WithMinimization.r16s.A()
-    (*| 'B' -> WithMinimization.r16s.B() 
-    | 'C' -> WithMinimization.r16s.C()
-    | 'D' -> WithMinimization.r16s.D()
-    | 'E' -> WithMinimization.r16s.E()
-    | 'F' -> WithMinimization.r16s.F()
-    | 'L' -> WithMinimization.r16s.L()
-    | 'K' -> WithMinimization.r16s.K()*)
+    | 'A' -> GLLFSA.test.A()
+    (*| 'B' -> GLLFSA.test.B() 
+    | 'C' -> GLLFSA.test.C()
+    | 'D' -> GLLFSA.test.D()
+    | 'E' -> GLLFSA.test.E()
+    | 'F' -> GLLFSA.test.F()
+    | 'L' -> GLLFSA.test.L()
+    | 'K' -> GLLFSA.test.K()*)
     | _ -> failwith "wtf"
 
 let mEL = 500
 
-let graphWithout (input:string) = 
+let graph (input:string) = 
     let edges = Array.init (input.Length / mEL + (if input.Length % mEL = 0 then 0 else 1)) (fun i -> input.Substring(i*mEL, if input.Substring(i*mEL).Length < mEL then input.Substring(i*mEL).Length else mEL))
     let edges = 
         edges
         |> Array.mapi (fun i x ->
-            let tag = x.ToCharArray() |> Array.map (tokenizerWithoutMinimization >> WithoutMinimization.r16s.tokenToNumber)
+            let tag = x.ToCharArray() |> Array.map (tokenizer >> GLLFSA.test.tokenToNumber)
             new BioParserEdge(i, i+1, tag.Length, tag, 0, 0)
             )
     new BioParserInputGraph(edges, Set[])
 
-let graphWith (input:string) = 
-    let edges = Array.init (input.Length / mEL + (if input.Length % mEL = 0 then 0 else 1)) (fun i -> input.Substring(i*mEL, if input.Substring(i*mEL).Length < mEL then input.Substring(i*mEL).Length else mEL))
+let graphTT = 
+    let edges = [|3; 3; 3|]
     let edges = 
         edges
-        |> Array.mapi (fun i x ->        
-            let tag = x.ToCharArray() |> Array.map (tokenizerWithMinimization >> WithMinimization.r16s.tokenToNumber)
-            new BioParserEdge(i, i+1, tag.Length, tag, 0, 0)
+        |> Array.mapi (fun i tag ->        
+            new BioParserEdge(i, i+1, 1, [|tag|], 0, 0)
             )
-    new BioParserInputGraph(edges, Set[])
+    new BioParserInputGraph(edges, Set[0])
 (*
 let rec genS n = 
     let pref =  new System.Text.StringBuilder()
@@ -94,7 +82,7 @@ let rec genS n =
 
 [<EntryPoint>]
 let main argv = 
-    let lens = [100; 200; 300; 400; 500; 1000]
+    (*let lens = [100; 200; 300; 400; 500; 1000]
     for len in lens do
         let input = genS len
         let len = input.Length
@@ -103,7 +91,7 @@ let main argv =
         GC.Collect()
 
         let start = System.DateTime.Now
-        WithoutMinimization.r16s.buildAbstract (gwo) |> ignore
+        GLLFSA.test.buildAbstract (gwo) |> ignore
         let time1 = System.DateTime.Now - start
         
         GC.Collect()
@@ -112,5 +100,7 @@ let main argv =
         WithMinimization.r16s.buildAbstract (gwi) |> ignore
         let time2 = System.DateTime.Now - start
         printfn "%A %A %A" len time1 time2
-    
+    *)
+    let r = buildAbstract graphTT
+
     0

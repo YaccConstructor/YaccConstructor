@@ -135,32 +135,42 @@ type GLLFSA() =
             
             let termToInt = new Dictionary<string,int>()
 
+            let inline pack state token =
+                if (int state < 65536) && (int token - fsa.States.Length < 65536)
+                then int( (int state <<< 16) ||| (token - fsa.States.Length) )
+                else failwith "State or token is greater then 65535!!"
+
             let printFSA () = 
                 let nextInt = ref fsa.States.Length
                 let eps = ref -1
+                let stateTokenNewState = new ResizeArray<_>()
                            
-                let fsaStates = 
+                let fsaStatesOutNonterms = 
                     fsa.States
-                    |> Array.map (fun x ->
+                    |> Array.mapi (fun i x ->
                         x
-                        |> Array.map (fun (symbol,state) -> 
+                        |> Array.collect (fun (symbol,state) -> 
                             match symbol with
-                                | Nonterm s -> s.ToString(), state
+                                | Nonterm s -> [|s.ToString(), state|]
                                 | Term s -> 
                                     let cond, value = termToInt.TryGetValue s
                                     if cond then
-                                        value.ToString(), state
+                                        stateTokenNewState.Add(i, value, state)
+                                    //    value.ToString(), state
                                     else
                                         termToInt.Add(s,!nextInt)
+                                        stateTokenNewState.Add(i, !nextInt, state)
                                         incr nextInt
-                                        (!nextInt-1).ToString(), state
-                                | Epsilon() ->
-                                    if !eps = -1 then
+                                    //    (!nextInt-1).ToString(), state
+                                    [||]
+                                | Epsilon() -> failwith "Found epsilon edge while print fsa."
+                                    (*if !eps = -1 then
                                         eps := !nextInt
                                         incr nextInt
                                         (!nextInt-1).ToString(), state
                                     else
-                                        (!eps).ToString(), state))
+                                        (!eps).ToString(), state*)
+                                        ))
                     |> List.ofSeq
 
                 let printState (state:(string * int<state>) []) isFirst isLast =
@@ -170,7 +180,7 @@ type GLLFSA() =
                     let printEdge (str,state) isFirst isLast = 
                         let prefix = if isFirst then "[|" else ""
                         let postfix = if isLast then "|]" else ";"
-                        print "%s%s,%s%s" prefix str (state.ToString()) postfix
+                        print "%s%s<state>,%s<state>%s" prefix str (state.ToString()) postfix
                     
                     print "%s" prefix
 
@@ -201,85 +211,112 @@ type GLLFSA() =
                     |> Seq.sortBy (fun x -> x.Key)
                 for numberNonterm in sortedStateToNontermName do
                     println "    | %i -> \"%s\"" numberNonterm.Key numberNonterm.Value
-                println "    | _ -> \"\"\n"
+                println "    | _ -> \"\""
+                println ""
 
-                println "let numIsTerminal = function"
+                let numOfAnyState = 
+                    sortedStateToNontermName
+                    |> Seq.tryFind (fun x -> x.Value.Equals("any"))
+                    |> (fun x -> 
+                        match x with
+                        | Some i -> i.Key
+                        | _ -> -1<state>)
+
+                println "let private numOfAnyState = %i<state>" numOfAnyState
+                println ""
+
+                println "let private numIsTerminal = function"
                 for i in termToInt.Values do
                     println "    | %i -> true" i
-                println "    | _ -> false\n"
+                println "    | _ -> false"
+                println ""
                 (*
                 println "let numIsEpsilon = function"
                 println "    | %i -> true" !eps
                 println "    | _ -> false\n"
                 *)
-                println "let statesToConvert ="
-                fsaStates    
-                |> List.iteri (fun i state -> printState state (i = 0) (i = fsaStates.Length-1))
-                println ""
-                println "%s " "let states = "
-                println "%s " "    statesToConvert"
-                println "%s " "    |> Array.Parallel.map (fun x -> "
-                println "%s " "        x"
-                println "%s " "        |> Array.map (fun (x,y) -> x, y * 1<state>))"
+
+                println "let private stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int, int<state>>()"
+                for state, token, newState in stateTokenNewState do
+                    println "stateAndTokenToNewState.Add(%i, %i<state>)" (pack state token) newState
                 println ""
 
-                println "let startState = %i * 1<state>" fsa.StartState
-                
-                println "let isFinalState = function"
-                fsa.FinalStates
-                |> Seq.sort
-                |> Seq.iter (fun state ->
-                    println "    | %i -> true" state )
-                println "    | _ -> false\n"
+                println "let private outNonterms ="
+                fsaStatesOutNonterms    
+                |> List.iteri (fun i state -> printState state (i = 0) (i = fsaStatesOutNonterms.Length-1))
+                println ""
+//                println "let states = "
+//                println "    outNontermsToConvert"
+//                println "    |> Array.Parallel.map (fun x -> "
+//                println "        x"
+//                println "        |> Array.map (fun (x,y) -> x, y * 1<state>))"
+//                println ""
 
-                println "let nontermCount = %i\n" fsa.NontermCount
-                
-            let printFirstSet () =
-                println "let firstSet = Set[|1|]"
-                (*let inline pack state token =
-                    if (int state < 65536) && (int token - fsa.NontermCount < 65536) then int( (int state <<< 16) ||| (token - fsa.States.Length) )
-                        else failwith "State or token is greater then 65535!!"
-                println "let firstSet ="
-                
-                let printState state (terms : HashSet<string>) isFirst isLast = 
-                    let prefix = if isFirst then "  set[|" else "       "
-                    let postfix = if isLast then "|]" else ";"
+                println "let private startState = %i<state>" fsa.StartState
+                println ""
 
-                    let printTerm term isFirst isLast =
-                        //let prefix = if isFirst then "" else "      "
-                        let postfix = if isLast then "" else ";"
-                        let packedValue = pack state <| termToInt.[term]
-                        print "%i%s"  packedValue postfix
+                let printFinalStates () =
+                    let printState state isFirst isLast = 
+                        let prefix = if isFirst then "  new System.Collections.Generic.HashSet<int<state>>(\n     [|" else "       "
+                        let postfix = if isLast then "|])" else ";"
 
-                    print "%s" prefix
+                        println "%s%i<state>%s" prefix state postfix
 
                     let i = ref 0
-                    for term in terms do
-                        printTerm term (!i = 0) (!i = terms.Count - 1)
+                    for state in fsa.FinalStates do
+                        printState state (!i = 0) (!i = fsa.FinalStates.Count - 1)
                         incr i
 
-                    println "%s" postfix
-
-                let i = ref 0
-                for stateTerms in fsa.FirstSet do
-                    printState stateTerms.Key stateTerms.Value (!i = 0) (!i = fsa.FirstSet.Count - 1)
-                    incr i
-                *)
+                println "let private finalStates ="
+                printFinalStates ()
                 println ""
+
+                println "let private nontermCount = %i" fsa.NontermCount
+                
+//            let printFirstSet () =
+//                println "let firstSet ="
+//                
+//                let printState state (terms : string []) isFirst isLast = 
+//                    let prefix = if isFirst then "  new System.Collections.Generic.HashSet<int>(\n     [|" else "       "
+//                    let postfix = if isLast then "|])" else ";"
+//
+//                    let printTerm term isFirst isLast =
+//                        //let prefix = if isFirst then "" else "      "
+//                        let postfix = if isLast then "" else ";"
+//                        let packedValue = pack state <| termToInt.[term]
+//                        print "%i%s"  packedValue postfix
+//
+//                    print "%s" prefix
+//
+//                    let i = ref 0
+//                    for term in terms do
+//                        printTerm term (!i = 0) (!i = terms.Length - 1)
+//                        incr i
+//
+//                    println "%s" postfix
+//
+//                let i = ref 0
+//                for state, stateTerms in fsa.FirstSet do
+//                    printState state stateTerms (!i = 0) (!i = fsa.FirstSet.Length - 1)
+//                    incr i
             
             let printParser () =
-                println "let private parserSource = new FSAParserSourceGLL (states, startState, isFinalState, nontermCount, numIsTerminal, stateToNontermName, firstSet)"
+                println "let private parserSource = new FSAParserSourceGLL (outNonterms, startState, finalStates, nontermCount, numIsTerminal, stateToNontermName, numOfAnyState, stateAndTokenToNewState)"
 
             let printFuns () =
                 println "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> ParserCommon.ParseResult<_>) ="
                 println "    Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput.buildAbstract parserSource"
 
+            
+            let printItem printer = 
+                printer ()
+                println ""
 
             printHeaders moduleName fullPath light isAbstract
-            printFSA ()
-            printFirstSet ()
-            printParser ()
-            printFuns ()
+            printItem printFSA
+            //printItem printFirstSet
+            printItem printParser
+            printItem printFuns
 
             let res = 
                 match definition.foot with

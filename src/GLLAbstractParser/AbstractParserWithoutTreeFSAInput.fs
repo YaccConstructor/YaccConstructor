@@ -13,12 +13,63 @@ open Yard.Generators.GLL.ParserCommon.CommonFuns
 type SysDict<'k,'v> = System.Collections.Generic.Dictionary<'k,'v>
 type Queue<'t> = System.Collections.Generic.Queue<'t>
 type CompressedArray<'t> = Yard.Generators.GLL.ParserCommon.CompressedArray<'t>
-     
+
+/// For debuging
+type EdgeOfGSS = 
+    {
+        startVertex : GSSVertexNFA
+        endVertex : GSSVertexNFA
+        state : int<state>
+        len : uint16
+    }
+/// For debuging
+let printEdges fileName (edges : System.Collections.Generic.HashSet<EdgeOfGSS>) =
+    let toPrint = new ResizeArray<_>(["digraph G {\nnode [shape = circle]"])
+    let edgs = new ResizeArray<_>()
+    let nodes = new ResizeArray<_>()
+    
+    let getStrFromVertex (v : GSSVertexNFA) = 
+        let edgeOfInput = CommonFuns.getEdge v.PositionInInput
+        let posOnEdgeOfInput = CommonFuns.getPosOnEdge v.PositionInInput
+        
+        sprintf "St:%i;Edg:%i;Pos:%i" v.NontermState edgeOfInput posOnEdgeOfInput
+
+    for edge in edges do
+        let endName = getStrFromVertex edge.endVertex
+        let startName = getStrFromVertex edge.startVertex
+        let edgeName = sprintf "ContinueSt:%i,Len:%i" edge.state edge.len
+
+        edgeName |> edgs.Add
+
+        if nodes.Contains endName |> not then
+            endName |> nodes.Add
+            let nName = sprintf "%i[label=\"%s\"]" (nodes.Count-1) endName
+            nName |> toPrint.Add
+
+        if nodes.Contains startName |> not then
+            startName |> nodes.Add
+            let nName = sprintf "%i[label=\"%s\"]" (nodes.Count-1) startName
+            nName |> toPrint.Add
+
+        let startId = nodes.IndexOf startName
+        let endId = nodes.IndexOf endName
+
+        let edge = sprintf "%i -> %i [label=\"%s\",color=blue]; \n" startId endId edgeName
+
+        toPrint.Add edge
+
+    toPrint.Add "}"
+
+    System.IO.File.WriteAllLines(fileName, toPrint)
+
 
 
 let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) = 
     //let shift = input.Shift
-    
+    //let edgesOfGSS = new System.Collections.Generic.HashSet<_>()
+
+    let anyNonterm = parser.NumOfAnyState
+
     if input.EdgeCount = 0 then failwith ("This grammar does not accept empty input.") else
     let result = new System.Collections.Generic.HashSet<_>()
     let dummyEdge = input.EdgeCount
@@ -92,7 +143,15 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
     /// Checks for existing of edge in edges set. If not adds it to edges set.
     let containsEdge (startVertex : GSSVertexNFA) (endVertex : GSSVertexNFA) (state : int<state>) (len : uint16) =
         let outEdges = edges.[int(startVertex.NontermState)].[startVertex.PositionInInput]
-
+        (* debug
+        edgesOfGSS.Add(
+            {
+                startVertex = startVertex
+                endVertex = endVertex
+                state = state
+                len  = len
+            }) |> ignore 
+        *)
         let cond, dict = 
             if outEdges <> null
             then
@@ -108,6 +167,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                         else
                             let newPosLen = Array.append posLen [|endVertex.PositionInInput,len|]
                             dictStateKey.[endVertex.NontermState] <- newPosLen
+                                                        
                             false, None
                     else
                         let arr = [|endVertex.PositionInInput,len|]
@@ -220,76 +280,49 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                 let dummyIndex = packEdgePos dummyEdge curEdge
                 pushContext dummyIndex nextState !currentGSSNode newLength
 
-    let condition = ref true 
-    let stop = ref false
+    while setR.Count <> 0 do
+        currentContext := setR.Pop()
+        currentIndex   := currentContext.Value.Index
+        currentGSSNode := currentContext.Value.Vertex
+        currentState   := currentContext.Value.State
+        currentLength  := currentContext.Value.Length
+        
+        let outEdges = parser.OutNonterms.[int !currentState]
 
-    let dispatch () =
-        let get() = setR.Pop()
-
-        if setR.Count <> 0
-        then// Queue of descriptors isn't empty.
-            currentContext := get()
-            currentIndex := currentContext.Value.Index
-            currentGSSNode := currentContext.Value.Vertex
-            currentState := currentContext.Value.State
-            currentLength := currentContext.Value.Length
-            condition := false
-        else 
-            stop := true  
-                  
-    let handle () =  
-        condition := true
-        let outEdges = parser.States.[int !currentState]
-
-        if Array.isEmpty outEdges 
-        then// Rule finished.
+        if !currentState |> parser.FinalStates.Contains
+        then// Current state is final
             pop ()
-        else// Rule isn't finished.
-            // Process each next edge and state.
-            // Although process each edge that comes from the state in wich we can come by epsilon edge.
-
-            if !currentState |> int |> parser.IsFinalState
-            then// Current state is final
-                pop ()
             
-            let curEdge = CommonFuns.getEdge !currentIndex
-            let curPos = CommonFuns.getPosOnEdge !currentIndex// + shift
+        let curEdge = CommonFuns.getEdge !currentIndex
+        let curPos = CommonFuns.getPosOnEdge !currentIndex// + shift
             
-            if curEdge = dummyEdge then ()(*we reached end of input, but current state is not final*) else
+        if curEdge = dummyEdge then(*we reached end of input*) () else
 
-            for curSymbol, nextState in outEdges do
-                if parser.NumIsTerminal curSymbol
-                then//current grammar symbol is terminal
-                    let curToken = input.Edges.[curEdge].Tokens.[curPos] 
-                    if curToken = curSymbol
-                    then eatTerm nextState curEdge curPos
-                (* no epsilon edges
-                elif parser.NumIsEpsilon curSymbol
-                then//found epsilon edge
-                    pushContext !currentIndex nextState !currentGSSNode !currentLength
-                *)
-                elif (parser.StateToNontermName curSymbol).Equals("any")
-                then//found "any" rule
-                    eatTerm nextState curEdge curPos
-                else//current grammar symbol is nonterminal
-                    let curNonterm = curSymbol*1<state>
-                    (*let curToken = input.Edges.[curEdge].Tokens.[curPos] 
-                    if parser.FirstSet.Contains <| parser.GetFirstSetItem (int curNonterm) curToken
-                    then// Found nonterninal in rule, and it have derivation starting with current token.
-                        // Create new descriptors.
-                        create nextState curNonterm  *) //current 16s grammar first set contains all states and tokens
-                    create nextState curNonterm
+        let curToken = input.Edges.[curEdge].Tokens.[curPos]
+        let dictionaryKey = parser.GetTermsDictionaryKey !currentState curToken
+                
+        let cond, nextState = parser.StateAndTokenToNewState.TryGetValue dictionaryKey
+        if cond
+        then
+            eatTerm nextState curEdge curPos
 
-    let control () =
-            while not !stop do
-            if !condition then dispatch() else handle()
-    control()
-    
+        for curNonterm, nextState in outEdges do
+            if curNonterm = anyNonterm
+            then//found "any" rule
+                eatTerm nextState curEdge curPos
+            else
+//                let curToken = input.Edges.[curEdge].Tokens.[curPos] 
+//                if parser.FirstSet.Contains <| parser.GetFirstSetItem (int curNonterm) curToken
+//                then// Found nonterninal in rule, and it have derivation starting with current token.
+//                    // Create new descriptors.
+                create nextState curNonterm
+
 //    printfn "Number of descriptors: %i" !numberOfDescr
 //    printfn "Number of reused descriptors: %i" !numberOfReusedDescr 
 //    printfn "Number of GSS nodes: %i" !numberOfGSSNodes
 //    printfn "Number of GSS edges: %i" !numberOfGSSEdges
-                
+    //printEdges "GSS.dot" edgesOfGSS
+          
     match result.Count with
         | 0 -> Error ("String was not parsed")
         | _ -> Success1 (Array.ofSeq result)

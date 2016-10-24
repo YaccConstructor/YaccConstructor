@@ -6,12 +6,12 @@ open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput
 open YC.Bio.RNA.Search.Structs
-open YC.Bio.RNA.tblReader
 open YC.Bio.RNA.IO
 open Microsoft.FSharp.Collections
 open System.IO
 open System.Collections.Generic
 open System.Diagnostics
+open InfernalApi
 
 let filterRnaParsingResult (graph : BioParserInputGraph) lowLengthLimit highLengthLimit (res : ResultStruct []) = 
     let filteredByLength = 
@@ -53,38 +53,38 @@ let filterRnaParsingResult (graph : BioParserInputGraph) lowLengthLimit highLeng
     
     let subgraphs = 
         filteredByLength |> Array.map (fun ((le, re), poss) -> 
-                                let lengths = new HashSet<uint16>()
+            let lengths = new HashSet<uint16>()
                                 
-                                let newPoss = 
-                                    poss
-                                    |> Array.map (fun (lpos, rpos, pathLength) -> 
-                                           let leftEdgePartOfPath = graph.Edges.[le].RealLength - lpos
-                                           let rightEdgePartOfPath = rpos + 1
-                                           let newLength = (int pathLength) - leftEdgePartOfPath - rightEdgePartOfPath
-                                           lpos, rpos, 
-                                           if rpos <= lpos && le = re then -1 * newLength
-                                           elif newLength < 0 && le = re then 0
-                                           else newLength)
-                                    |> Array.groupBy (fun (_, _, len) -> len)
-                                    |> Array.map (fun (len, values) -> 
-                                           let mostLeft = ref graph.Edges.[le].RealLength
-                                           let mostRight = ref -1
+            let newPoss = 
+                poss
+                |> Array.map (fun (lpos, rpos, pathLength) -> 
+                        let leftEdgePartOfPath = graph.Edges.[le].RealLength - lpos
+                        let rightEdgePartOfPath = rpos + 1
+                        let newLength = (int pathLength) - leftEdgePartOfPath - rightEdgePartOfPath
+                        lpos, rpos, 
+                        if rpos <= lpos && le = re then -1 * newLength
+                        elif newLength < 0 && le = re then 0
+                        else newLength)
+                |> Array.groupBy (fun (_, _, len) -> len)
+                |> Array.map (fun (len, values) -> 
+                        let mostLeft = ref graph.Edges.[le].RealLength
+                        let mostRight = ref -1
                                            
-                                           let pathLength = 
-                                               if len < 0 then len * -1
-                                               else len
-                                           lengths.Add(uint16 pathLength) |> ignore
-                                           values |> Array.iter (fun (lpos, rpos, _) -> 
-                                                         if lpos < !mostLeft then mostLeft := lpos
-                                                         if rpos > !mostRight then mostRight := rpos)
-                                           !mostLeft, !mostRight, pathLength)
+                        let pathLength = 
+                            if len < 0 then len * -1
+                            else len
+                        lengths.Add(uint16 pathLength) |> ignore
+                        values |> Array.iter (fun (lpos, rpos, _) -> 
+                                        if lpos < !mostLeft then mostLeft := lpos
+                                        if rpos > !mostRight then mostRight := rpos)
+                        !mostLeft, !mostRight, pathLength)
                                 
-                                let toReturn = graph.Edges.[le], graph.Edges.[re], newPoss
-                                let s = getPaths graph.Edges.[le].End graph.Edges.[re].Start lengths
-                                if ResizeArray.isEmpty s 
-                                   && not (graph.Edges.[le].End = graph.Edges.[re].Start || le = re) then 
-                                    failwith "No paths with expected length found."
-                                else s, toReturn)
+            let toReturn = graph.Edges.[le], graph.Edges.[re], newPoss
+            let s = getPaths graph.Edges.[le].End graph.Edges.[re].Start lengths
+            if ResizeArray.isEmpty s 
+                && not (graph.Edges.[le].End = graph.Edges.[re].Start || le = re) then 
+                failwith "No paths with expected length found."
+            else s, toReturn)
     
     subgraphs
 
@@ -225,18 +225,10 @@ let getSubgraphs (edges : BioGraphEdge []) (startEdges : Dictionary<int,int>) (l
             )
     res
 
-let filterResultWithInfernal filename = 
-    let workingDir = System.AppDomain.CurrentDomain.BaseDirectory + @"..\..\..\infernal\"
+let filterResult filename =
     let resultFileFullName = System.AppDomain.CurrentDomain.BaseDirectory + filename
     
-    let runInfernal() = 
-        let startInfo = new ProcessStartInfo()
-        startInfo.FileName <- "cmscan.exe"
-        startInfo.Arguments <- sprintf "--anytrunc --noali --tblout log.txt archaea.cm \"%s\"" resultFileFullName
-        startInfo.WorkingDirectory <- workingDir
-        Process.Start(startInfo).WaitForExit()
-    //runInfernal()
-    let tbl = getTbl (workingDir + "log.txt")
+    let tbl = filterWithInfernal resultFileFullName
     let graphNameToBegEnd = new Dictionary<_, _>()
     File.ReadAllLines(resultFileFullName)
     |> Array.pairwise
@@ -273,13 +265,13 @@ let searchMiddle path agentsCount =
     //printLongEdges @"C:\CM\long_edges.fa" longEdges
     let graphs = 
         //graphs.[435..435]
-        graphs.[5..]
+        graphs.[1..]
     //graphs.[1500..]
     //graphs.[5000..5050]
     //graphs.[4071..4072]
     //graphs.[0..1]
 
-    //searchInBioGraphs searchCfg graphs agentsCount |> printfn "%A"
+    searchInBioGraphs searchCfg graphs agentsCount |> printfn "%A"
     sourceGraph
 
 let searchBeginning agentsCount sourceGraph = 
@@ -301,7 +293,7 @@ let searchBeginning agentsCount sourceGraph =
             eList.ToArray()
         new BioParserInputGraph(edges, startEdges |> Set)
     
-    let startEdges = filterResultWithInfernal "R16S_19_27_result.fa"
+    let startEdges = filterResult "R16S_19_27_result.fa"
     let subgraphs = 
         getSubgraphs sourceGraph startEdges searchCfg.HighLengthLimit searchCfg.LengthOfBeinning
     
@@ -313,7 +305,7 @@ let searchBeginning agentsCount sourceGraph =
 
 let searchMain path agentsCount = 
     let sourceGraph = searchMiddle path agentsCount
-    searchBeginning agentsCount sourceGraph
+    //searchBeginning agentsCount sourceGraph
     ()
 
 /// Divides input on edges 1 to 10 symbols

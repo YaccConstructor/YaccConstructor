@@ -598,3 +598,10 @@ docs/tools/FSharp.Formatting.svclog
 tests/GLLParser.Simple.Tests/*.dot
 tests/GLL.AbstractParser.Simple.Tests/*.dot
 **/log*.txt
+src/gllfsaTest/initialNFA.dot
+src/gllfsaTest/minimizedDFA.dot
+src/gllfsaTest/withoutEpsilon.dot
+src/gllfsaTest/DFA.dot
+src/gllfsaTest/test.fs
+src/RNA.Search/R16S_19_27.fs
+src/RNA.Search/R16S_1_18.fs

@@ -31,7 +31,6 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
-    <Compile Include="TreeProcessor.fs" />
     <Compile Include="AbstractParserWithoutTreeFSAInput.fs" />
     <None Include="paket.references" />
   </ItemGroup>

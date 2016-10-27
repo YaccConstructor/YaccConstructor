@@ -1,2 +1,2 @@
-### 0.3.0.0 - Unreleased
-* Fheeee
+### 0.1.0.0-beta
+* First version of SDK

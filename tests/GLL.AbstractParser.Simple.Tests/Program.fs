@@ -70,9 +70,58 @@ open GLL.ParseLongCycle_BAD
 open GLL.ParseLongest
 open GLL.ParseMixed
 open GLL.ParseOmit
+open System.Collections.Generic
+open System.Linq
 //open GLL.ParseOrder
 
 let outputDir = ""//@"../../../src/GLL.AbstractParser.SimpleTest/"
+
+type elt = T of char | N of char
+
+let parseGraphCYK (grph: ParserInputGraph<_>) =
+    let grm = 
+        [
+            N 's', [T 'l'; N 'b']
+            N 'b', [N 's'; T 'r']
+            N 's', [N 's'; N 's']
+            N 's', []
+            N 'l', [T '(']
+            N 'r', [T ')']
+        ]
+    let r = [for v in grph.Vertices -> (N 's', v , v)] @ [for e in grph.Edges do for n in [N 'l'; N 'r'] do yield (n, e.Source, e.Target)] |> System.Collections.Generic.HashSet<_>
+    printfn "Start r size:%A" r.Count
+    let _new = new System.Collections.Generic.HashSet<_>(r)
+    let whileCount = ref 0
+    let for1Count = ref 0
+    let for2Count = ref 0
+    let for3Count = ref 0
+    while _new.Count <> 0 do
+        incr whileCount
+        let x = _new.First()
+        _new.Remove x |> ignore
+        let (_n,n,m) = x
+        for (_m,n',n) in Seq.filter (fun (_,_,x) -> x = n) r do
+            incr for1Count
+            for (_n',_) in (grm |> List.filter (fun (_,r) -> r = [_m; _n])) do                
+                if r.Contains((_n',n',m)) |> not
+                then 
+                    incr for2Count
+                    _new.Add(_n',n',m)|>ignore
+                    r.Add(_n',n',m)|>ignore
+        for (_m,m,m') in Seq.filter (fun (_,_,x) -> x = n) r do
+            for (_m',_) in (grm |> List.filter (fun (_,r) -> r = [_n; _m])) do
+                if r.Contains((_m',n,m')) |> not
+                then 
+                    incr for3Count
+                    _new.Add(_m',n,m')|>ignore
+                    r.Add(_m',n,m')|>ignore
+
+
+    printfn "While: %A" !whileCount
+    printfn "For 1: %A" !for1Count
+    printfn "For 2: %A" !for2Count
+    printfn "For 3: %A" !for3Count
+    r
 
 let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)
@@ -794,14 +843,14 @@ type ``GLL abstract parser tests`` () =
     member this.GetFullGraph n tokens eof allPath =
         let graph = new ParserInputGraph<_>([|0 .. n - 1|],[|n|])
         for i in 0 .. n - 1 do
-            [for t in tokens do 
+            [for t in [eof] do//tokens do 
                 yield! [for j in 0 .. n - 1 do if i <> j then yield edg i j t ]]
             |> graph.AddVerticesAndEdgeRange
             |> ignore
 
-        [for i in 0 .. n - 1 -> edg i n eof] 
-        |> graph.AddVerticesAndEdgeRange
-        |> ignore
+//        [for i in 0 .. n - 1 -> edg i n eof] 
+//        |> graph.AddVerticesAndEdgeRange
+//        |> ignore
 
         graph
 
@@ -1202,11 +1251,13 @@ let f x =
     //System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
     let t = new ``GLL abstract parser tests``()
     let f () = 
+                let r = parseGraphCYK (t.GetFullGraph 4 [] GLL.Brackets2.RNGLR_EOF  true)
+                printfn "Result size: %A" r.Count
                //t.PerformanceTestFullGraphBadLeftRec()
                //t.PerformanceTestFullGraphUnambBraces()
                //t.PerformanceTestFullGraphAmbBraces()
 //               t.PerformanceTestLinearBadLeftRec()
-               t.PerformanceTestLinearUnambBraces()
+               //t.PerformanceTestLinearUnambBraces()
 //               t.PerformanceTestLinearAmbBraces()
               //_35_Expression() //
     //let th = new System.Threading.Thread(f, 10000000)

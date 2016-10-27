@@ -180,6 +180,8 @@ Target "GenTests:GLL" (fun _ ->
                          runCmd @"tests\GLL.AbstractParser.Simple.Tests\gen.cmd"
                       )
 
+Target "GenTests:RIGLR" (fun _ -> runCmd @"tests\RIGLRParser.SimpleTest\gen.cmd")
+
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner
 
@@ -423,6 +425,7 @@ Target "All" DoNothing
   ==> "Build:YardFrontend"
   ==> "GenTests:RNGLR"
   ==> "GenTests:GLL"
+  ==> "GenTests:RIGLR"
   ==> "Build:All"
   //==> "CopyBinaries"
   ==> "RunTests"

@@ -5,10 +5,10 @@ type AstNode =
     interface
     end
 
-type Terminal (tokenNumber : int) =
+type Terminal (tokenNumber: int)  =
     interface AstNode
-    member this.TokenNumber = tokenNumber
-
+    member this.TokenNumber = tokenNumber 
+    
 type Epsilon (epsilonNonTerm : int) =
     interface AstNode
     member this.EpsilonNonTerm = epsilonNonTerm
@@ -23,6 +23,7 @@ type AST =
     val mutable other : Family[]
     val mutable pos : int
     new (f, o) = {pos = -1; first = f; other = o}
+    new (f, o, p) = {first = f; other = o; pos = p}
     member inline this.findFamily f =
         if f this.first 
         then Some this.first

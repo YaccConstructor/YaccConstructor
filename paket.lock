@@ -1,5 +1,6 @@
 NUGET
   remote: https://www.nuget.org/api/v2
+    Argu (3.2)
     DotNet.Contracts (1.10.20606.1)
     DotParser (1.0.6)
       FSharp.Core
@@ -72,5 +73,5 @@ NUGET
       FSharp.Core (4.0.0.1)
 GITHUB
   remote: fsharp/FAKE
-    modules/Octokit/Octokit.fsx (bf0b3d929a50e5cba157376200e2dc58522f3e37)
+    modules/Octokit/Octokit.fsx (73589a85a5e30a2c78d61efccdd3446a99483142)
       Octokit (>= 0.20)

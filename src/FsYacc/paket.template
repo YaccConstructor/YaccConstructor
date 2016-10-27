@@ -1,0 +1,29 @@
+type file
+id YC.Tools.Runtime
+title YC.Tools.Runtime
+owners
+    YaccConstructor
+authors 
+    YaccConstructor
+projectUrl
+    http://github.com/YaccConstructor/YaccConstructor
+iconUrl
+    https://raw.githubusercontent.com/YaccConstructor/YaccConstructor/master/docs/files/img/logo.png
+licenseUrl
+    http://github.com/YaccConstructor/YaccConstructor/blob/master/LICENSE.txt
+requireLicenseAcceptance
+    false
+copyright
+    Copyright YaccConstructor 2016
+tags
+    YaccConstructor YC FSharp parsing
+summary
+    3rd party tools runtime 
+description
+    3rd party tools runtime
+references
+    YC.FsYacc.dll
+files
+    ./../../Bin/Release/v40/YC.FsYacc.dll ==> lib/net45
+dependencies
+    FSharp.Core >= 4.3.0

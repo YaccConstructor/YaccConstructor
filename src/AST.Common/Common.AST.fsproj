@@ -8,7 +8,7 @@
     <ProjectGuid>f61cae49-b511-431a-bc1b-49a04c38bee9</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>AST.Common</RootNamespace>
-    <AssemblyName>AST.Common</AssemblyName>
+    <AssemblyName>YC.AST.Common</AssemblyName>
     <Name>Common.AST</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <TargetFrameworkProfile />

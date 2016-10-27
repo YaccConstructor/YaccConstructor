@@ -197,7 +197,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         let newVertex = new GSSVertexNFA(index, nonTermName)
 
         if edges.[int nonTermName].[index] <> null
-        then//such vertex already exist
+        then//such GSS vertex already exist
             if not <| containsEdge newVertex currentVertex stateToContinue len
             then//no such edge between vertices
                 let vertexKey = packVertexFSA index nonTermName

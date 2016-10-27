@@ -1,20 +1,2 @@
-stem<s>: 
-      A stem<s> U
-    | U stem<s> A
-    | C stem<s> G
-    | G stem<s> C
-    | G stem<s> U
-    | U stem<s> G
-    | s
-
-any: A | U | G | C
-
-any2 : any*
-
 [<Start>]
-full: folded any?
-
-a_5_8 : any*[5..8]
-a_1_3 : any*[1..3]
-
-folded: stem<(a_1_3 stem<any*[7..10]> a_1_3 stem<a_5_8> any*[3..6] stem<a_5_8>)> 
+full: A A A A

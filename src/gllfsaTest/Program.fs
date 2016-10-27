@@ -2,6 +2,7 @@
 open System
 open System.Collections.Generic
 open GLLFSA.test
+open Yard.Generators.GLL.ParserCommon
 
 let tokenizer token =
     match token with
@@ -28,11 +29,11 @@ let graph (input:string) =
     new BioParserInputGraph(edges, Set[])
 
 let graphTT = 
-    let edges = [|3; 3; 3|]
+    let edges = [|[|5|]; [|5|]; [|5|]; [|5|]|]
     let edges = 
         edges
         |> Array.mapi (fun i tag ->        
-            new BioParserEdge(i, i+1, 1, [|tag|], 0, 0)
+            new BioParserEdge(i, i+1, 1, tag, 0, 0)
             )
     new BioParserInputGraph(edges, Set[0])
 (*
@@ -101,6 +102,12 @@ let main argv =
         let time2 = System.DateTime.Now - start
         printfn "%A %A %A" len time1 time2
     *)
-    let r = buildAbstract graphTT
+    match GLLFSA.test.buildAbstract graphTT with
+    | Success1 result -> 
+        printfn "SearchWithoutSPPF succeed"
+        for res in result do
+            printfn "%i %i %i %i %i" res.le res.lpos res.re res.rpos res.length
+
+    | _ -> printfn "Input parsing failed."
 
     0

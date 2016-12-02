@@ -46,7 +46,7 @@ NUGET
     NLog.Config (2.0.1.2) - framework: >= net40
       NLog (>= 2.0.1.2)
     NuGet.CommandLine (3.4.3)
-    NUnit (2.6.3) - framework: >= net40
+    NUnit (3.4.1)
     NUnit.ConsoleRunner (3.4.1)
     NUnit.Extension.NUnitProjectLoader (3.4.1)
     NUnit.Extension.NUnitV2Driver (3.4.1)

@@ -29,7 +29,7 @@ files
 
 
 dependencies
-    FSharp.Core >= 4.3.0
+    FSharp.Core >= 4.0.0
     Argu >= LOCKEDVERSION
     YC.QuickGraph >= LOCKEDVERSION
     YC.Utils.SourceText >= LOCKEDVERSION

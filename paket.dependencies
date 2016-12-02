@@ -9,7 +9,6 @@ nuget FSharp.Formatting
 nuget FSharpx.Text.StructuredFormat
 nuget NUnit.Runners
 nuget FSharpx.Core
-nuget QuickGraph 3.6.61119.7 framework: >= net45
 nuget YC.PrettyPrinter
 nuget YC.QuickGraph 3.7.3 framework: >= net45
 nuget YC.Utils.SourceText

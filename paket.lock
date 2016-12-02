@@ -20,7 +20,7 @@ NUGET
       FSharp.Control.AsyncSeq
     FSharpx.Collections (1.15.1)
       FSharp.Core
-    FSharpx.Collections.Experimental (1.15.1)
+    FSharpx.Collections.Experimental (1.15.1) - framework: >= net45
       FSharp.Core
       FSharpx.Collections (>= 1.15.1)
     FSharpx.Core (1.8.32)
@@ -62,7 +62,6 @@ NUGET
       NUnit.Extension.VSProjectLoader (>= 3.4.1)
     Octokit (0.21.1)
       Microsoft.Net.Http  - framework: net10, net11, net20, net30, net35, net40, net40-full
-    QuickGraph (3.6.61119.7) - framework: >= net45
     SourceLink.Fake (1.1)
     YC.PrettyPrinter (0.0.5)
       FSharp.Core

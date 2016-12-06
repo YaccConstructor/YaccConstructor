@@ -1,8 +1,9 @@
-﻿module Yard.Generators.Common.ASTGLL
+﻿module Yard.Generators.Common.ASTGLLFSA
 open System
 open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
 open AbstractAnalysis.Common
+open Yard.Generators.GLL.MeasureTypes
 
 [<Measure>] type extension
 
@@ -16,7 +17,7 @@ type INode =
 [<AllowNullLiteral>]
 type NonTerminalNode =
     val Extension : int64<extension>
-    val Name      : int
+    val Name      : int<state>
     val mutable First     : PackedNode 
     val mutable Others    : ResizeArray<PackedNode> 
     member this.AddChild (child : PackedNode) : unit = 
@@ -31,8 +32,6 @@ type NonTerminalNode =
         else this.First <- child
     interface INode with
         member this.getExtension () = this.Extension
-    
-
     new (name, extension) = {Name = name; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
     
 and TerminalNode =
@@ -42,16 +41,22 @@ and TerminalNode =
         member this.getExtension () = this.Extension
     new (name, extension) = {Name = name; Extension = extension}
 
+and EpsilonNode =
+    val Extension : int64<extension>
+    interface INode with
+        member this.getExtension () = this.Extension
+    new (extension) = {Extension = extension}
+
 and PackedNode = 
-    val Production : int
+    val State : int<state>
     val Left : INode
     val Right : INode
     interface INode with
         member this.getExtension () = this.Right.getExtension ()
-    new (p, l, r) = {Production = p; Left = l; Right = r}
+    new (state, left, right) = {State = state; Left = left; Right = right}
 
 and IntermidiateNode = 
-    val Slot      : int
+    val State     : int<state>
     val Extension : int64<extension>
     val mutable First     : PackedNode
     val mutable Others    : ResizeArray<PackedNode>
@@ -67,10 +72,10 @@ and IntermidiateNode =
                 this.Others <- new ResizeArray<PackedNode>()
                 this.Others.Add child
         else this.First <- child
-    new (slot, extension) = {Slot = slot; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
+    new (state, extension) = {State = state; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
     
 
-type private DotNodeType = Packed | NonTerminal | Intermidiate | Terminal
+type private DotNodeType = Packed | NonTerminal | Intermidiate | Terminal | Epsilon
 
 type ReducedTree = 
     Term of string * TerminalNode
@@ -90,8 +95,8 @@ type NumNode<'vtype> =
     new (num, node) = {Num = num; Node = node} 
 
 [<AllowNullLiteral>]
-type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
-    member this.AstToDot (indToString : int -> string) (tokenToNumber : 'TokenType -> int) (tokenData : 'TokenType -> obj) (path : string) =
+type Tree<'TokenType> (root : INode) =
+    member this.AstToDot (indToString : int -> string) (path : string) =
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
 
@@ -105,6 +110,7 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
                 | Intermidiate -> ",shape=box"
                 | Packed -> ",shape=point"
                 | Terminal -> ",shape=box"
+                | Epsilon -> ",shape=box"
                 | NonTerminal -> ",shape=oval"
             let color =
                 if not isAmbiguous then ""
@@ -128,7 +134,6 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
             let key = ref 0
             if !num <> -1
             then
-
                 if currentPair.Node <> null && used.TryGetValue(currentPair.Node, key)
                 then
                     createEdge currentPair.Num !key false ""
@@ -139,11 +144,13 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
                     | :? NonTerminalNode as a -> 
                         if a.Others <> null
                         then
-                            createNode !num true NonTerminal (indToString a.Name)
+                            createNode !num true NonTerminal (indToString (int a.Name))
                         else    
-                            createNode !num false NonTerminal (indToString a.Name)
+                            createNode !num false NonTerminal (indToString (int a.Name))
                         createEdge currentPair.Num !num false ""
-                        nodeQueue.Enqueue(new NumNode<INode>(!num, a.First))
+                        if a.First <> Unchecked.defaultof<_>
+                        then
+                            nodeQueue.Enqueue(new NumNode<INode>(!num, a.First))
                         if a.Others <> null
                         then
                             for n in a.Others do
@@ -154,9 +161,11 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
                         if not <| isDummy p.Left then nodeQueue.Enqueue(new NumNode<INode>(!num, p.Left))
                         if not <| isDummy p.Right then nodeQueue.Enqueue(new NumNode<INode>(!num, p.Right))
                     | :? IntermidiateNode as i ->
-                        createNode !num false Intermidiate ((getRule i.Slot).ToString() + " " + (getPosition i.Slot).ToString())
+                        createNode !num false Intermidiate (i.State.ToString()(* + " " + (getPosition i.Slot).ToString()*))
                         createEdge currentPair.Num !num false ""
-                        nodeQueue.Enqueue(new NumNode<INode>(!num, i.First))
+                        if i.First <> Unchecked.defaultof<_>
+                        then
+                            nodeQueue.Enqueue(new NumNode<INode>(!num, i.First))
                         if i.Others <> null
                         then
                             for nodes in i.Others do
@@ -164,16 +173,23 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
                     | :? TerminalNode as t ->
                         if t.Extension <> packExtension -1 -1 
                         then
-                            if t.Name <> -1
+                            if t.Name <> -2
                             then
-                                createNode !num false Terminal ("t " +  (indToString <| tokenToNumber tokens.[t.Name])) 
+                                createNode !num false Terminal (indToString t.Name)
                                 createEdge currentPair.Num !num false ""
                             else
-                                createNode !num false Terminal ("epsilon")
+                                createNode !num false Terminal ("dummy")
                                 createEdge currentPair.Num !num false ""
                         else
                             ()
-//                            createNode !num false Terminal ("dummy")
+                    | :? EpsilonNode as e ->
+                        if e.Extension <> packExtension -1 -1 
+                        then
+                            createNode !num false Epsilon ("epsilon")
+                            createEdge currentPair.Num !num false ""
+                        else
+                            ()
+                    //                            createNode !num false Terminal ("dummy")
 //                            createEdge currentPair.Num !num false ""
 
                     | null -> ()
@@ -181,8 +197,10 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
             else
                 let a = currentPair.Node :?> NonTerminalNode
                 num := !num + 1
-                createNode !num false NonTerminal (indToString a.Name)
-                nodeQueue.Enqueue(new NumNode<INode>(!num, a.First))
+                createNode !num false NonTerminal (indToString (int a.Name))
+                if a.First <> Unchecked.defaultof<_>
+                then
+                    nodeQueue.Enqueue(new NumNode<INode>(!num, a.First))
                 if a.Others <> Unchecked.defaultof<_>
                 then
                     for n in a.Others do
@@ -190,7 +208,7 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
         out.WriteLine("}")
         out.Close()
 
-    member this.ReduceTree (tokenToNumber : 'TokenType -> int) (indToString : int -> string) : ReducedTree =
+    (*member this.ReduceTree (tokenToNumber : 'TokenType -> int) (indToString : int -> string) : ReducedTree =
         let rec cleanTree (st : INode)  =             
             match st with 
             | :? IntermidiateNode as i ->
@@ -205,7 +223,7 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
                 Seq.append (cleanTree p.Left) (cleanTree p.Right)
             | :? NonTerminalNode as n ->
                 let child = cleanTree n.First
-                seq{yield ReducedTree.NonTerm(indToString n.Name, n, Seq.toList child )}
+                seq{yield ReducedTree.NonTerm(indToString (int n.Name), n, Seq.toList child )}
             | _ -> failwith "Unexpected node type."
         Seq.head <| (cleanTree root)
 
@@ -274,7 +292,8 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
                 | _ -> ()
         out.WriteLine("}")
         out.Close()
-
+    *)
+    (*
     /// Returns all paths found for specific nonterminal
     member this.GetStrings nTerm numToString = 
         //todo: add cycle detection
@@ -374,6 +393,7 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
             index := i
             extractPath q.[i] |> res.UnionWith
         Seq.toList res
+    *)
     (*
     member this.GetPath nTerm numToString = 
         let q = new ResizeArray<_>()
@@ -431,7 +451,7 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
             index := i
             extractPath q.[i]
         res
-    *)        
+    
     member this.CountCounters  =
         let nodesCount = ref 0
         let edgesCount = ref 0
@@ -498,3 +518,4 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
                     for n in a.Others do
                         nodeQueue.Enqueue(new NumNode<_>(!num, n))
         !nodesCount, !edgesCount, !termsCount, !ambiguityCount 
+    *)

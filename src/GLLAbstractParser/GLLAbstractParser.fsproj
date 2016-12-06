@@ -45,6 +45,11 @@
       <Project>{f2e8eda4-c13f-4f8d-b858-d5ef4fb8a06d}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\ParserStructures\MeasureTypes.fsproj">
+      <Name>MeasureTypes</Name>
+      <Project>{aedd1b6d-1187-426e-a733-1fbfc6834916}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

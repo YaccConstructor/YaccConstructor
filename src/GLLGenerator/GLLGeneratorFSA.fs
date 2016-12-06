@@ -123,7 +123,8 @@ type GLLFSA() =
 //                            println "open Yard.Generators.GLL.Parser"
                     println "open Yard.Generators.GLL"
                     //println "open Yard.Generators.Common.ASTGLL"
-                    println "open Yard.Generators.GLL.ParserCommon\n"
+                    println "open Yard.Generators.GLL.ParserCommon"
+                    println "open Yard.Generators.GLL.MeasureTypes\n"
 
                     match definition.head with
                     | None -> ()
@@ -303,10 +304,16 @@ type GLLFSA() =
             let printParser () =
                 println "let private parserSource = new FSAParserSourceGLL (outNonterms, startState, finalStates, nontermCount, numIsTerminal, stateToNontermName, numOfAnyState, stateAndTokenToNewState)"
 
-            let printFuns () =
-                println "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> ParserCommon.ParseResult<_>) ="
-                println "    Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput.buildAbstract parserSource"
-
+            let printFuns isAbstract () =
+                if isAbstract
+                then
+                    println "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> ParserCommon.ParseResult<_>) ="
+                    println "    Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput.buildAbstract parserSource"
+                else
+                    //println "let buildAST : (FSAParserSourceGLL -> seq<int> -> ParseResult<'a>) ="
+                    //println "    Yard.Generators.GLL.ParserFSA.buildAST parserSource"
+                    println "let buildAST (input : seq<int>) ="
+                    println "    Yard.Generators.GLL.ParserFSA.buildAST parserSource input"
             
             let printItem printer = 
                 printer ()
@@ -316,7 +323,7 @@ type GLLFSA() =
             printItem printFSA
             //printItem printFirstSet
             printItem printParser
-            printItem printFuns
+            printItem (printFuns isAbstract)
 
             let res = 
                 match definition.foot with

@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\..\Bin\Debug\v40\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Debug\Parser.Common.XML</DocumentationFile>
@@ -28,7 +28,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\..\Bin\Release\v40\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\Parser.Common.XML</DocumentationFile>
@@ -55,6 +55,11 @@
     <Content Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ParserStructures\MeasureTypes.fsproj">
+      <Name>MeasureTypes</Name>
+      <Project>{aedd1b6d-1187-426e-a733-1fbfc6834916}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

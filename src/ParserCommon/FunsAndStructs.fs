@@ -2,16 +2,10 @@
 
 open AbstractAnalysis.Common
 open Yard.Generators.Common.ASTGLL
+open Yard.Generators.Common.ASTGLLFSA
 open FSharpx.Collections.Experimental
 open System.Collections.Generic
-
-[<Measure>] type vertexMeasure
-[<Measure>] type nodeMeasure
-[<Measure>] type labelMeasure
-[<Measure>] type positionInInput
-[<Measure>] type state
-[<Measure>] type length
-[<Measure>] type leftPosition
+open Yard.Generators.GLL.MeasureTypes
 
 module CommonFuns = 
 
@@ -49,7 +43,7 @@ type Vertex =
 
 [<Struct>]
 [<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
-type GSSVertexNFA =
+type GSSVertexFSA =
     /// Position in input graph (Packed edge+position)
     val PositionInInput  : int<positionInInput>
     /// Nonterminal
@@ -61,7 +55,7 @@ type Context(*<'TokenType>*) =
     val Index         : int
     val Label         : int<labelMeasure>
     val Vertex        : Vertex
-    val Ast           : int<nodeMeasure>
+    val Ast           : int<node>
     val Probability   : float
     val SLength       : int   
     //val Path          : List<ParserEdge<'TokenType*ref<bool>>>
@@ -92,13 +86,13 @@ type Context2 =
 
 [<Struct>]
 [<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
-type ContextFSA =
+type AbstractContextFSA =
     /// Position in input graph (packed edge+position).
     val Index         : int<positionInInput>
     /// Current state of FSA.
     val State         : int<state>
     /// Current GSS node.
-    val Vertex        : GSSVertexNFA
+    val Vertex        : GSSVertexFSA
     /// 4 values packed in one int64: leftEdge, leftPos, rightEdge, rightPos.
     //val LeftPos       : int<leftPosition>
     /// Length of current result
@@ -110,10 +104,33 @@ type ContextFSA =
                                 //"; LeftPos:" + (this.LeftPos.ToString()) +
                                 "; Len:" + (this.Length.ToString())
 
+[<Struct>]
+[<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
+type ContextFSA =
+    /// Position in input.
+    val Index         : int<positionInInput>
+    /// Current state of FSA.
+    val State         : int<state>
+    /// Current GSS node.
+    val Vertex        : GSSVertexFSA
+    val CurrentN      : int<node>
+    new (index, state, vertex, currentN) = {Index = index; State = state; Vertex = vertex; CurrentN = currentN}
+    override this.ToString () = "Edge:" + (CommonFuns.getEdge(this.Index).ToString()) +
+                                "; PosOnEdge:" + (CommonFuns.getPosOnEdge(this.Index).ToString()) +
+                                "; State:" + (this.State.ToString())
+
 type ParseResult<'a> =
     | Success of Tree<'a>
     | Success1 of 'a[]
     | Error of string
+
+type FSAParseResult<'a> =
+    | Success of Tree<'a>
+    | Error of string
+
+type TypeOfNode = 
+    | Nonterm of int<state>
+    | Intermed of int<state>
 
 [<Struct>]
 type ResultStruct =
@@ -135,14 +152,14 @@ type CompressedArray<'t>(l : int[], f : _ -> 't, shift) =
             a.[edg].[shift + pos]
         and set i v = a.[(CommonFuns.getEdge i)].[shift + (CommonFuns.getPosOnEdge i)] <- v
 
-      
+(*
 type ParserStructures<'TokenType> (currentRule : int)=
-    let sppfNodes = new BlockResizeArray<INode>()
+    let sppfNodes = new BlockResizeArray<ASTGLL.INode>()
     let dummyAST = new TerminalNode(-1, packExtension -1 -1)
-    let setP = new Dictionary<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<nodeMeasure>>>(500)//list<int<nodeMeasure>>> (500)
+    let setP = new Dictionary<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<node>>>(500)//list<int<node>>> (500)
     let epsilonNode = new TerminalNode(-1, packExtension 0 0)
     let setR = new System.Collections.Generic. Queue<Context>(100)  
-    let dummy = 0<nodeMeasure>
+    let dummy = 0<node>
     let currentN = ref <| dummy
     let currentR = ref <| dummy
     let resultAST = ref None
@@ -152,7 +169,7 @@ type ParserStructures<'TokenType> (currentRule : int)=
 
     let currentLabel = ref <| (CommonFuns.packLabelNew currentRule 0)
     
-    let getTreeExtension (node : int<nodeMeasure>) =
+    let getTreeExtension (node : int<node>) =
         match sppfNodes.Item (int node) with
         | :? TerminalNode as t ->
             t.Extension
@@ -164,8 +181,8 @@ type ParserStructures<'TokenType> (currentRule : int)=
 
     let getNodeP 
         findSppfNode 
-        (findSppfPackedNode : _ -> _ -> _ -> _ -> INode -> INode -> int<nodeMeasure>) 
-        dummy (label : int<labelMeasure>) (left : int<nodeMeasure>) (right : int<nodeMeasure>) : int<nodeMeasure> =
+        (findSppfPackedNode : _ -> _ -> _ -> _ -> INode -> INode -> int<node>) 
+        dummy (label : int<labelMeasure>) (left : int<node>) (right : int<node>) : int<node> =
             let currentRight = sppfNodes.Item (int right)  
             let rightExt = getTreeExtension right           
             if left <> dummy
@@ -180,7 +197,7 @@ type ParserStructures<'TokenType> (currentRule : int)=
                 ignore <| findSppfPackedNode y label rightExt rightExt dummyAST currentRight 
                 y
       //CompressedArray<Dictionary<_, Dictionary<_, ResizeArray<_>>>>                           
-    let containsContext (setU : Dictionary<_, Dictionary<_, ResizeArray<_>>>[]) inputIndex (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
+    let containsContext (setU : Dictionary<_, Dictionary<_, ResizeArray<_>>>[]) inputIndex (label : int<labelMeasure>) (vertex : Vertex) (ast : int<node>) =
         let vertexKey = CommonFuns.pack vertex.Level vertex.NontermLabel
         if setU.[inputIndex] <> Unchecked.defaultof<_>
         then
@@ -197,14 +214,14 @@ type ParserStructures<'TokenType> (currentRule : int)=
                     else
                         true
                 else 
-                    let arr = new ResizeArray<int<nodeMeasure>>()
+                    let arr = new ResizeArray<int<node>>()
                     arr.Add ast
                     current.Add(vertexKey, arr)                    
                     false
             else 
                 let dict = new Dictionary<_, ResizeArray<_>>()
                 setU.[inputIndex].Add(int label, dict)
-                let arr = new ResizeArray<int<nodeMeasure>>()
+                let arr = new ResizeArray<int<node>>()
                 arr.Add ast
                 dict.Add(vertexKey, arr) 
                 false
@@ -213,7 +230,7 @@ type ParserStructures<'TokenType> (currentRule : int)=
             setU.[inputIndex] <- dict1
             let dict2 = new Dictionary<_, ResizeArray<_>>()
             dict1.Add(int label, dict2)
-            let arr = new ResizeArray<int<nodeMeasure>>()
+            let arr = new ResizeArray<int<node>>()
             arr.Add ast
             dict2.Add(vertexKey, arr)
             false
@@ -251,7 +268,7 @@ type ParserStructures<'TokenType> (currentRule : int)=
                     d.Add(e.NontermLabel, l)
                     false, None
             else
-                let newDict1 = new Dictionary<int<nodeMeasure>, Dictionary<_, ResizeArray<_>>>()
+                let newDict1 = new Dictionary<int<node>, Dictionary<_, ResizeArray<_>>>()
                 let newDict2 = new Dictionary<_, ResizeArray<_>>()
                 let newArr = new ResizeArray<_>()
                 newArr.Add(e.Level)
@@ -259,7 +276,7 @@ type ParserStructures<'TokenType> (currentRule : int)=
                 newDict1.Add(ast, newDict2)
                 false, Some newDict1   
 
-    let finalMatching (curRight : INode) nontermName finalExtensions findSppfNode findSppfPackedNode currentGSSNode currentVertexInInput (pop : Vertex -> int -> int<nodeMeasure> -> unit)  = 
+    let finalMatching (curRight : INode) nontermName finalExtensions findSppfNode findSppfPackedNode currentGSSNode currentVertexInInput (pop : Vertex -> int -> int<node> -> unit)  = 
         match curRight with
         | :? TerminalNode as t ->
             currentN := getNodeP findSppfNode findSppfPackedNode dummy !currentLabel !currentR !currentN
@@ -292,3 +309,4 @@ type ParserStructures<'TokenType> (currentRule : int)=
     member this.ResultAST = resultAST
     member this.CurrentLabel = currentLabel
     member this.FinalMatching = finalMatching
+*)

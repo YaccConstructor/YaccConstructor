@@ -1,5 +1,6 @@
 ﻿namespace Yard.Generators.GLL.ParserCommon
 open System.Collections.Generic
+open Yard.Generators.GLL.MeasureTypes
 
 type ParserSourceGLL<'TokenType> (eof                : 'TokenType
                                 , tokenToNumber      : 'TokenType -> int
@@ -110,4 +111,4 @@ type FSAParserSourceGLL ( outNonterms        : (int<state> * int<state>) [] []
     member this.StateToNontermName = stateToNontermName
     member this.GetTermsDictionaryKey    = getTermsDictionaryKey
     member this.NumOfAnyState      = numOfAnyState
-    member this.StateAndTokenToNewState = stateAndTokenToNewState 
+    member this.StateAndTokenToNewState = stateAndTokenToNewState

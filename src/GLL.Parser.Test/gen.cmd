@@ -1,0 +1,1 @@
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i test.yrd -g "GLLFSAGenerator -module GLL.test -o test.fs -abstract false" >> generationLog.txt

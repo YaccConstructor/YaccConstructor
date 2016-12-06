@@ -9,6 +9,7 @@ open Yard.Generators.Common.DataStructures
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
+open Yard.Generators.GLL.MeasureTypes
 
 type SysDict<'k,'v> = System.Collections.Generic.Dictionary<'k,'v>
 type Queue<'t> = System.Collections.Generic.Queue<'t>
@@ -17,8 +18,8 @@ type CompressedArray<'t> = Yard.Generators.GLL.ParserCommon.CompressedArray<'t>
 /// For debuging
 type EdgeOfGSS = 
     {
-        startVertex : GSSVertexNFA
-        endVertex : GSSVertexNFA
+        startVertex : GSSVertexFSA
+        endVertex : GSSVertexFSA
         state : int<state>
         len : uint16
     }
@@ -28,7 +29,7 @@ let printEdges fileName (edges : System.Collections.Generic.HashSet<EdgeOfGSS>) 
     let edgs = new ResizeArray<_>()
     let nodes = new ResizeArray<_>()
     
-    let getStrFromVertex (v : GSSVertexNFA) = 
+    let getStrFromVertex (v : GSSVertexFSA) = 
         let edgeOfInput = CommonFuns.getEdge v.PositionInInput
         let posOnEdgeOfInput = CommonFuns.getPosOnEdge v.PositionInInput
         
@@ -93,8 +94,8 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
     let currentIndex = ref (-1<positionInInput>)
     let currentLength = ref 0us
     //let currentLeftPosition = ref -1<leftPosition>
-    let currentGSSNode = ref <| new GSSVertexNFA(-1<positionInInput>,-1<state>)
-    let currentContext = ref <| new ContextFSA(!currentIndex, !currentState, !currentGSSNode,!currentLength)
+    let currentGSSNode = ref <| new GSSVertexFSA(-1<positionInInput>,-1<state>)
+    let currentContext = ref <| new AbstractContextFSA(!currentIndex, !currentState, !currentGSSNode,!currentLength)
 
     let startContexts = 
         input.InitialPositions
@@ -102,13 +103,13 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         |> Array.Parallel.map(fun e -> 
             let pos = e * 1<positionInInput>
             //let leftPos = e * 1<leftPosition>
-            let vertex = new GSSVertexNFA(pos, !currentState)
-            new ContextFSA(pos, !currentState, vertex, !currentLength))
+            let vertex = new GSSVertexFSA(pos, !currentState)
+            new AbstractContextFSA(pos, !currentState, vertex, !currentLength))
     /// Stack of contexts
-    let setR = new System.Collections.Generic.Stack<ContextFSA>(startContexts)  
+    let setR = new System.Collections.Generic.Stack<AbstractContextFSA>(startContexts)  
                  
     /// Checks for existing of context in SetU. If not adds it to SetU.
-    let containsContext (inputIndex: int<positionInInput>) (state : int<state>) (vertex : GSSVertexNFA) =
+    let containsContext (inputIndex: int<positionInInput>) (state : int<state>) (vertex : GSSVertexFSA) =
         let vertexKey = CommonFuns.pack vertex.PositionInInput vertex.NontermState
         if setU.[inputIndex] <> null
         then
@@ -132,7 +133,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
 
     /// Adds new context to stack (setR)
     let pushContext (inputVertex : int<positionInInput>) (state : int<state>) vertex len =
-        setR.Push(new ContextFSA(inputVertex, state, vertex, len))
+        setR.Push(new AbstractContextFSA(inputVertex, state, vertex, len))
 
     /// Adds new context to stack (setR) if it is first occurrence of this context (if SetU doesn't contain it).
     let addContext (inputVertex : int<positionInInput>) (state : int<state>) vertex len =
@@ -141,7 +142,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
             pushContext inputVertex state vertex len
 
     /// Checks for existing of edge in edges set. If not adds it to edges set.
-    let containsEdge (startVertex : GSSVertexNFA) (endVertex : GSSVertexNFA) (state : int<state>) (len : uint16) =
+    let containsEdge (startVertex : GSSVertexFSA) (endVertex : GSSVertexFSA) (state : int<state>) (len : uint16) =
         let outEdges = edges.[int(startVertex.NontermState)].[startVertex.PositionInInput]
         (* debug
         edgesOfGSS.Add(
@@ -194,7 +195,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         let index = !currentIndex
         let currentVertex = !currentGSSNode
         let len = !currentLength
-        let newVertex = new GSSVertexNFA(index, nonTermName)
+        let newVertex = new GSSVertexFSA(index, nonTermName)
 
         if edges.[int nonTermName].[index] <> null
         then//such GSS vertex already exist
@@ -236,7 +237,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                 for nontermPosLen in stateТoNonterm.Value do
                     let nonterm = nontermPosLen.Key
                     for position,length in nontermPosLen.Value do
-                        let adjacentVertex = new GSSVertexNFA(position, nonterm)
+                        let adjacentVertex = new GSSVertexFSA(position, nonterm)
                         addContext curIndex state adjacentVertex (curLen + length)
 
         if curVertex.NontermState = parser.StartState
@@ -324,6 +325,6 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
     //printEdges "GSS.dot" edgesOfGSS
           
     match result.Count with
-        | 0 -> Error ("String was not parsed")
+        | 0 -> ParseResult.Error ("String was not parsed")
         | _ -> Success1 (Array.ofSeq result)
             

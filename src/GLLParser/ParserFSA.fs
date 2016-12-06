@@ -96,13 +96,25 @@ let buildAST (parser : FSAParserSourceGLL) (input : seq<int>) =
     let currentN = ref dummyNode
     let currentR = ref dummyNode
 
-    let packedNodes = new Dictionary<int, int<node>>()
+    
     //Array.zeroCreate<IntDictionary<IntDictionary<ResizableUsualOne<LblNodePair>>>> (inputLength + 1)
-    let inline fIntermed x y z = x * (input.Length + 1) * (input.Length + 1) + y * (input.Length + 1) + z
-    let inline fNonterm x y z = (x * (input.Length + 1) * (input.Length + 1) + y * (input.Length + 1) + z) * -1
+    let inline fIntermed x y z =
+        x
+        * (input.Length + 1) 
+        * (input.Length + 1)
+        + y
+        * (input.Length + 1)
+        + z
+    let inline fNonterm x y z = (x
+                                 * (input.Length + 1)
+                                 * (input.Length + 1)
+                                 + y
+                                 * (input.Length + 1)
+                                 + z)
+                                 * -1
     let inline getKeyForPackedNode x y z w =
         x
-        * parser.StateAndTokenToNewState.Count
+        * (input.Length + 1)
         * (input.Length + 1)
         * (input.Length + 1)
         + y
@@ -114,6 +126,7 @@ let buildAST (parser : FSAParserSourceGLL) (input : seq<int>) =
     //let nonTerminalNodes = Array3D.zeroCreate<int<node>> parser.NonTermCount (inputLength + 1) (inputLength + 1)
 
     //we can use dictionary <extension, dict>
+    let packedNodes = new Dictionary<int, int<node>>()
     let intermidiateNodes = new Dictionary<int, int<node>>()
     let terminalNodes = new BlockResizeArray<int<node>>()
     let epsilonNodes = new BlockResizeArray<int<node>>()
@@ -164,8 +177,7 @@ let buildAST (parser : FSAParserSourceGLL) (input : seq<int>) =
                 num  
             else n
 
-    let findSppfPackedNode parent (state : int<state>) leftExtension rightExtension (left : INode) (right : INode)  = 
-        //let rule = getRule label
+    let findSppfPackedNode parent (state : int<state>) leftExtension rightExtension (left : INode) (right : INode) =
         let createNode () =
             let newNode = new PackedNode(state, left, right)
             sppfNodes.Add(newNode)
@@ -178,20 +190,31 @@ let buildAST (parser : FSAParserSourceGLL) (input : seq<int>) =
                 n.AddChild newNode
             | :? IntermidiateNode as i ->
                 i.AddChild newNode
-            | _ -> ()
+            | _ -> failwith "adjf;sawf"
             num
-        printf "hehe"
-        let i = getLeftExtension leftExtension
-        let j = getRightExtension leftExtension
-        let k = getRightExtension rightExtension
-        let key = getKeyForPackedNode i j k (int state)
-        //Array.zeroCreate<IntDictionary<IntDictionary<int>>> (inputLength + 1)            
-        let contains, d1 = packedNodes.TryGetValue key
-        if contains then d1
-        else
-            let newNode = createNode()
-            packedNodes.Add(key, newNode)
-            newNode 
+
+        //let i = getLeftExtension leftExtension
+        //let j = getRightExtension leftExtension
+        //let k = getRightExtension rightExtension
+        //let key = getKeyForPackedNode i j k (int state)
+        //let contains, d1 = packedNodes.TryGetValue key
+        //if contains
+        //then
+//            match (sppfNodes.Item (int d1)) with
+//            | :? PackedNode as p ->
+//                match (sppfNodes.Item (int parent)) with
+//                | :? NonTerminalNode as n ->
+//                    n.AddChild p
+//                | :? IntermidiateNode as i ->
+//                    i.AddChild p
+//                | _ -> failwith "adjf;sawf"
+//            | _ -> failwith "adjf;sawf"
+//            d1
+        //else
+        let newNode = createNode()
+
+        //packedNodes.Add(key, newNode)
+        newNode 
     
              
     let getNodeT symbol (pos : int<positionInInput>) =
@@ -230,12 +253,12 @@ let buildAST (parser : FSAParserSourceGLL) (input : seq<int>) =
             let lExtL, _ = getLeftExtension extL, getRightExtension extL
             let y = findSppfNode t lExtL rExtR
             let extra = findSppfPackedNode y state extL extR currL currR
+            if extra = -1<node> then failwith "boom"
             y
         else
-            //let extL = currL.getExtension ()
-            //let lExtL, rExtL = getLeftExtension extL, getRightExtension extL
             let y = findSppfNode t lExtR rExtR
             let extra = findSppfPackedNode y state extR extR dummyAST currR
+            if extra = -1<node> then failwith "boom"
             y
 
     let getNodes state nontermState (currentN : int<node>) (currentR : int<node>) = 
@@ -430,7 +453,7 @@ let buildAST (parser : FSAParserSourceGLL) (input : seq<int>) =
                 then// aready poped for current index and nonterm
                     // add contexts for each position in input
                     poped.DoForAll (fun node ->
-                        let y,nonterm = getNodes stateToContinue nonTermState currentNode node
+                        let y,nonterm = getNodes stateToContinue currentVertex.NontermState currentNode node
                         if nonterm <> dummyNode
                         then
                             let x = (sppfNodes.Item (int nonterm))

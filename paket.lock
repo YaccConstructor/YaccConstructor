@@ -73,5 +73,5 @@ NUGET
       FSharp.Core (4.0.0.1)
 GITHUB
   remote: fsharp/FAKE
-    modules/Octokit/Octokit.fsx (3121e610f04d4c9839f44326ab4ca02e28eb15a2)
+    modules/Octokit/Octokit.fsx (1007029093164e0cde8dd6a1a12c0d81447b7ee8)
       Octokit (>= 0.20)

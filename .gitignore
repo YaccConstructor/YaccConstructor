@@ -597,6 +597,7 @@ docs/tools/FSharp.Formatting.svclog
 *.yrd.fs
 tests/GLLParser.Simple.Tests/*.dot
 tests/GLL.AbstractParser.Simple.Tests/*.dot
+!tests/Gll.AbstractParserGFG.Tests/Emb.yrd.fs
 **/log*.txt
 src/CYKMatrix/Fody_ToBeDeleted.txt
 src/CYKMatrix/InstallationDummyFile.txt

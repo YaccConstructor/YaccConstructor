@@ -86,6 +86,7 @@ type RNGLR() =
                     | "true" -> true
                     | "false" -> false
                     | value -> failwithf "Unexpected %s value %s" name value
+            let mutable printPos = true
 
             for opt, value in pairs do
                 match opt with
@@ -114,6 +115,7 @@ type RNGLR() =
                         | "scala" -> Scala
                         | s -> failwithf "Language %s is not supported" s
                 | "-abstract" -> isAbstractParsingMode := getBoolValue "abstract" value
+                | "-bindSrc" -> printPos <- getBoolValue "bindSrc" value
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
             let mutable newDefinition = initialConvert definition
@@ -173,7 +175,7 @@ type RNGLR() =
                         | s -> "RNGLR",s
             let printHeaders moduleName fullPath light output targetLanguage =
                 let fsHeaders() = 
-                    println "%s" <| getPosFromSource fullPath dummyPos (defaultSource output)
+                    println "%s" <| getPosFromSource printPos fullPath dummyPos (defaultSource output)
                     println "module %s"
                     <|  match moduleName with
                         | "" -> "RNGLR.Parse"
@@ -202,8 +204,8 @@ type RNGLR() =
                     match definition.head with
                     | None -> ()
                     | Some (s : Source.t) ->
-                        println "%s" <| getPosFromSource fullPath dummyPos s
-                        println "%s" <| s.text + getPosFromSource fullPath dummyPos (defaultSource output)
+                        println "%s" <| getPosFromSource printPos fullPath dummyPos s
+                        println "%s" <| s.text + getPosFromSource printPos fullPath dummyPos (defaultSource output)
 
                 let scalaHeaders () =
 
@@ -223,14 +225,14 @@ type RNGLR() =
                 then tables
                 else 
                     tables + printTranslator grammar newDefinition.grammar.[0].rules 
-                                    positionType fullPath output dummyPos caseSensitive !isAbstractParsingMode !needHighlighting
+                                    positionType fullPath output dummyPos caseSensitive !isAbstractParsingMode !needHighlighting printPos
 
             let res = 
                 match definition.foot with
                 | None -> res
                 | Some (s : Source.t) ->
-                    res + (getPosFromSource fullPath dummyPos s + "\n"
-                                + s.text + getPosFromSource fullPath dummyPos (defaultSource output) + "\n")
+                    res + (getPosFromSource printPos fullPath dummyPos s + "\n"
+                                + s.text + getPosFromSource printPos fullPath dummyPos (defaultSource output) + "\n")
             let res =
                 match targetLanguage with
                 | FSharp ->

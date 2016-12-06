@@ -1,0 +1,6 @@
+[<Start>]
+x3 : x1
+x1 : x0 | x2
+x2 : LBR x1 r
+x0 : A
+r  : RBR 

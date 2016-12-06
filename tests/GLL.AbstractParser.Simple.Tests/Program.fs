@@ -1071,6 +1071,27 @@ type ``GLL abstract parser tests`` () =
             ] |> ignore
         qGraph
 
+    member this.getGraphForAvg n k lbr rbr eof =
+        let qGraph = new ParserInputGraph<_>([|0..n-1|], [|n|])
+
+        for l in 1..k do
+            [for i in 0 .. n - l - 1 -> edg i (i + l) (lbr i)]
+            @ [for i in 0 .. n - l - 1 -> edg (i + l) i  (rbr i)]
+            |> qGraph.AddVerticesAndEdgeRange
+            |> ignore
+           
+            for i in n - l .. n - 1 do
+                [edg i (l - (n - 1 - i) - 1) (lbr 1)
+                ; edg (l - (n - 1 - i) - 1) i (rbr 1)]
+                |> qGraph.AddVerticesAndEdgeRange
+                |> ignore
+
+        [for i in 0 .. n - 1 -> edg i n (eof 0)]
+        |> qGraph.AddVerticesAndEdgeRange
+        |> ignore
+
+        qGraph
+
     member this.getTwoCycledGraph n all lbr rbr eof =
         let qGraph = new ParserInputGraph<_>((if all then [|0..5 * n - 2|] else [|3|]), [|5 * n - 1|])
 
@@ -1114,6 +1135,17 @@ type ``GLL abstract parser tests`` () =
         |> ignore
 
         qGraph
+
+    member this._AvgPerfTest_unamb () =    
+        //let g1 = this.getGraphForAvg 3 2 GLL.Brackets2.LBR GLL.Brackets2.RBR GLL.Brackets2.RNGLR_EOF       
+        //g1.PrintToDot "ooo.dot" string
+        for i in 2000 .. 100 .. 8000 do 
+            let g = this.getGraphForAvg i 1 GLL.Brackets2.LBR GLL.Brackets2.RBR GLL.Brackets2.RNGLR_EOF       
+            let start = System.DateTime.Now
+            for i in 0..4 do
+                let res = GLL.Brackets2.buildAbstractAst g 
+                ()
+            printfn "%A: %A" i ((System.DateTime.Now - start).TotalMilliseconds/5.0)
 
     member this._Brackets_performance_all_amb () =        
         for i in 200 .. 100 .. 2000 do 
@@ -1251,8 +1283,9 @@ let f x =
     //System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
     let t = new ``GLL abstract parser tests``()
     let f () = 
-                let r = parseGraphCYK (t.GetFullGraph 4 [] GLL.Brackets2.RNGLR_EOF  true)
-                printfn "Result size: %A" r.Count
+                t._AvgPerfTest_unamb()
+                //let r = parseGraphCYK (t.GetFullGraph 4 [] GLL.Brackets2.RNGLR_EOF  true)
+                //printfn "Result size: %A" r.Count
                //t.PerformanceTestFullGraphBadLeftRec()
                //t.PerformanceTestFullGraphUnambBraces()
                //t.PerformanceTestFullGraphAmbBraces()

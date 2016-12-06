@@ -32,6 +32,7 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <Compile Include="AbstractParser.fs" />
+    <Compile Include="AbstractParserGFG.fs" />
     <None Include="app.config" />
     <None Include="paket.references" />
   </ItemGroup>
@@ -39,6 +40,11 @@
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
       <Name>AbstractAnalysis.Common</Name>
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\FsYacc\FsYacc.fsproj">

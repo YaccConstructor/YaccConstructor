@@ -528,9 +528,9 @@ let buildAST (parser : FSAParserSourceGLL) (input : seq<int>) =
     //printEdges "GSS.dot" edgesOfGSS
           
     match !result with
-        | None -> Error ("String was not parsed")
+        | None -> FSAParseResult.Error ("String was not parsed")
         | Some node -> 
             let r1 = new Tree<_> (node)
             r1.AstToDot parser.StateToNontermName "ASTforAutomaton.dot"
-            Success (r1)
+            FSAParseResult.Success (r1)
             

@@ -8,3 +8,4 @@
 [<Measure>] type length
 [<Measure>] type leftPosition
 [<Measure>] type nonterm
+[<Measure>] type extension

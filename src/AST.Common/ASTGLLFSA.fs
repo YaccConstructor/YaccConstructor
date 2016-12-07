@@ -5,9 +5,6 @@ open Yard.Generators.Common.DataStructures
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.MeasureTypes
 
-[<Measure>] type extension
-
-
 [<AllowNullLiteral>]
 type INode = 
     interface
@@ -516,3 +513,6 @@ type Tree<'TokenType> (root : INode) =
                         nodeQueue.Enqueue(new NumNode<_>(!num, n))
         !nodesCount, !edgesCount, !termsCount, !ambiguityCount 
     *)
+type FSAParseResult<'a> =
+    | Success of Tree<'a>
+    | Error of string

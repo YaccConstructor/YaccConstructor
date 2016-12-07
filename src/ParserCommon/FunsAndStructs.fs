@@ -2,7 +2,6 @@
 
 open AbstractAnalysis.Common
 open Yard.Generators.Common.ASTGLL
-open Yard.Generators.Common.ASTGLLFSA
 open FSharpx.Collections.Experimental
 open System.Collections.Generic
 open Yard.Generators.GLL.MeasureTypes
@@ -124,10 +123,6 @@ type ParseResult<'a> =
     | Success1 of 'a[]
     | Error of string
 
-type FSAParseResult<'a> =
-    | Success of Tree<'a>
-    | Error of string
-
 type TypeOfNode = 
     | Nonterm of int<state>
     | Intermed of int<state>
@@ -152,9 +147,9 @@ type CompressedArray<'t>(l : int[], f : _ -> 't, shift) =
             a.[edg].[shift + pos]
         and set i v = a.[(CommonFuns.getEdge i)].[shift + (CommonFuns.getPosOnEdge i)] <- v
 
-(*
+
 type ParserStructures<'TokenType> (currentRule : int)=
-    let sppfNodes = new BlockResizeArray<ASTGLL.INode>()
+    let sppfNodes = new BlockResizeArray<INode>()
     let dummyAST = new TerminalNode(-1, packExtension -1 -1)
     let setP = new Dictionary<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<node>>>(500)//list<int<node>>> (500)
     let epsilonNode = new TerminalNode(-1, packExtension 0 0)
@@ -309,4 +304,3 @@ type ParserStructures<'TokenType> (currentRule : int)=
     member this.ResultAST = resultAST
     member this.CurrentLabel = currentLabel
     member this.FinalMatching = finalMatching
-*)

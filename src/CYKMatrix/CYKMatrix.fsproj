@@ -89,6 +89,7 @@
     <Compile Include="CYKMatrixOkhotin.fs" />
     <Compile Include="CYKMatrixBFS.fs" />
     <Compile Include="CYKMatrix.fs" />
+    <Compile Include="GraphParsing.fs" />
     <Compile Include="Main.fs" />
     <None Include="FodyWeavers.xml" />
   </ItemGroup>

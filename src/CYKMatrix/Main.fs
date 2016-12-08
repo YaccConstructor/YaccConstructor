@@ -8,6 +8,7 @@ open Alea.CUDA
 
 open Util
 open CYKMatrix
+open GraphParsing
 
 
 
@@ -45,7 +46,47 @@ let isAnswerValid (matrix: ProbabilityMatrix.T) strLen searchLen =
         |> List.forall (fun cell -> Probability.isZero matrix.[cell])
 
 
+let graphParsingPrint (matrix: ProbabilityMatrix.T) =
+    let rowLength = matrix.Nrow
+    let colLength = matrix.Ncol
+    for i in [ 0..rowLength - 1 ] do
+        for j in [ 0..colLength - 1 ] do
+            let cell = Cell.create i j
+            printf "%.8f  " <| Probability.unwrap matrix.[cell]
+        printfn ""
+    printfn ""
 
+
+
+let graphParsingTest1 =
+    let graph = GraphParsing.Graph.T(new Dictionary<(int*int), ResizeArray<char>>(), 2)
+    graph.AddEdge(1, 2, 'a')
+    graph.AddEdge(2, 1, 'a')
+    let A = NonTerminal "A"
+    let B = NonTerminal "B"
+    let S = NonTerminal "S"
+    let nonterminals = [| A; B; S |]
+
+    let rawHeadsToProbs = List.map (fun (nt, prob) -> nt, Probability.create prob)
+
+    let crl = new Dictionary<NonTerminal * NonTerminal, (NonTerminal * Probability.T) list>()
+    [ (A, B), [ S, 1.0 ]
+      (A, A), [ B, 1.0 ] ]
+    |> List.map (fun (nts, heads) -> nts, rawHeadsToProbs heads)
+    |> Seq.iter crl.Add
+
+    let srl = new Dictionary<char, (NonTerminal * Probability.T) list>()
+    [ 'a', [ A, 1.0 ] ]
+    |> List.map (fun (c, heads) -> c, rawHeadsToProbs heads)
+    |> Seq.iter srl.Add
+
+    let erl: NonTerminal list = []
+
+    let rules = new RulesHolder(crl, srl, erl)
+
+    let recognizeMatrix = recognizeGraph graph rules nonterminals S
+    
+    graphParsingPrint recognizeMatrix
 
 
 [<EntryPoint>]
@@ -317,5 +358,8 @@ let main args =
 
 //    System.Console.ReadLine() |> ignore
 //    System.Console.ReadLine() |> ignore
+
+    graphParsingTest1
+
     System.Console.ReadLine() |> ignore
     0

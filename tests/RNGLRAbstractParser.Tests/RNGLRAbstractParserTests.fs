@@ -638,6 +638,21 @@ type ``RNGLR abstract parser tests`` () =
 
         test RNGLR.AandB.buildAstAbstract qGraph 23 22 0 11 1
 
+    [<Test>]
+    member this._errorDispachingTest() =
+        let qGraph = new ParserInputGraph<_>(0, 6)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.ErrorSupport.NUM 0)
+            edg 1 2 (RNGLR.ErrorSupport.NUM 0)
+            edg 2 3 (RNGLR.ErrorSupport.NOT_NUM 1)          
+            edg 3 4 (RNGLR.ErrorSupport.NOT_NUM 1)          
+            edg 4 5 (RNGLR.ErrorSupport.NUM 0) 
+            edg 5 6 (RNGLR.ErrorSupport.RNGLR_EOF 0)
+            ] |> ignore
+        match RNGLR.ErrorSupport.buildAstAbstract qGraph with 
+            | Success(_) -> Assert.Pass()
+            | Error(_, _, _) -> Assert.Fail("Error skipping is not successful")
+
     member this.``Not Ambigous Simple Calc. Branch. Perf`` i inpLength isLoop =  
         let tpl x =
             [

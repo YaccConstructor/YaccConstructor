@@ -28,7 +28,8 @@ type ParserSource<'TokenType> (gotos : int[][]
                                , numToString : int -> string
                                , errorIndex : int
                                , errorRulesExists : bool
-                               , ?tokenData: 'TokenType -> obj) =
+                               , ?tokenData: 'TokenType -> obj
+                               , ?errorToken: 'TokenType) =
     let length =
         let res = Array.zeroCreate <| (rulesStart.Length - 1)
         for i=0 to res.Length-1 do
@@ -55,4 +56,5 @@ type ParserSource<'TokenType> (gotos : int[][]
     member this.NumToString = numToString
     member this.TokenData = tokenData
     member this.ErrorIndex = errorIndex
+    member this.ErrorToken = errorToken
     member this.ErrorRulesExists = errorRulesExists

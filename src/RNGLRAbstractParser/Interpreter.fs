@@ -129,6 +129,13 @@ and [<AllowNullLiteral>]
     new (edge) = new Path (edge, null, 1)
 
 let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : ParserInputGraph<'TokenType>) =
+    if parserSource.ErrorToken.IsSome then
+        let edges = tokens.Edges |> Seq.map(fun edge -> (edge.Source, edge.Target)) |> Seq.toList 
+        printf "%A" edges
+        for tokenEdge in edges do
+            let errorEdge = new ParserEdge<_>(fst tokenEdge, snd tokenEdge, parserSource.ErrorToken.Value)
+            do tokens.AddEdge errorEdge |> ignore
+
     // let startV, finalV, innerGraph =
     let startVList, finalVList, innerGraph =
         let verticesMap = Array.zeroCreate (Seq.max tokens.Vertices + 1)            

@@ -129,11 +129,11 @@ and [<AllowNullLiteral>]
     new (edge) = new Path (edge, null, 1)
 
 let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : ParserInputGraph<'TokenType>) =
-    if parserSource.ErrorToken.IsSome then
-        let edges = tokens.Edges |> Seq.map(fun edge -> (edge.Source, edge.Target)) |> Seq.toList 
-        printf "%A" edges
+    if parserSource.ErrorRulesExists then
+        let edges = tokens.Edges |> Seq.map(fun edge -> (edge.Source, edge.Target, edge.Tag)) |> Seq.toList 
         for tokenEdge in edges do
-            let errorEdge = new ParserEdge<_>(fst tokenEdge, snd tokenEdge, parserSource.ErrorToken.Value)
+            let source, target, token = tokenEdge
+            let errorEdge = new ParserEdge<_>(source, target, parserSource.CreateErrorToken token)
             do tokens.AddEdge errorEdge |> ignore
 
     // let startV, finalV, innerGraph =
@@ -389,6 +389,12 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         if v.passingReductions.Count > 0
         then
             handlePassingReductions v
+
+    let isErrorToken (token : 'TokenType) = 
+        if parserSource.ErrorRulesExists then
+            parserSource.TokenToNumber token = parserSource.ErrorIndex
+        else
+            false
 
     if tokens.EdgeCount = 0
     then

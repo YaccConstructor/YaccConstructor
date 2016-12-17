@@ -171,9 +171,12 @@ let printTables
                     | None -> failwithf "Type of token %s in not defined" name
 
             printBrInd 1 "| %s%s" name 
-            <|  match type' with
-                | None -> ""
-                | Some s -> " of (" + s + ")"
+            <|  if name <> "ERROR" then
+                    match type' with
+                    | None -> ""
+                    | Some s -> " of (" + s + ")"
+                else
+                    " of (Token)"
 
         let literalType = 
             match defaultType with
@@ -288,13 +291,17 @@ let printTables
         for i = indexator.termsStart to indexator.termsEnd do
             if indexator.indexToTerm i = "ERROR" then
                 errorIndex <- i
-
         let errorRulesExists = errorIndex <> -1  
                 
         printBrInd 0 "let errorIndex = %d" errorIndex
         printBrInd 0 "let errorRulesExists = %b" errorRulesExists
+
+        printBrInd 0 "let createErrorToken (token: Token) = ERROR token"
         
-        printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists%s)" (if isAbstractParsingMode then ", tokenData" else "")
+        printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists%s%s)"
+            (if isAbstractParsingMode then ", tokenData = tokenData" else "")
+            (if errorRulesExists then ", createErrorToken = createErrorToken" else "")
+
 
         if isAbstractParsingMode
         then

@@ -283,9 +283,16 @@ let printTables
         printBrInd 2 "accStates.[i] <- List.exists ((=) i) small_acc"
 
         printBrInd 0 "let eofIndex = %d" grammar.indexator.eofIndex
-    
-        printBrInd 0 "let errorIndex = %d" grammar.errorIndex
-        printBrInd 0 "let errorRulesExists = %b" grammar.errorRulesExists
+
+        let mutable errorIndex = -1      
+        for i = indexator.termsStart to indexator.termsEnd do
+            if indexator.indexToTerm i = "ERROR" then
+                errorIndex <- i
+
+        let errorRulesExists = errorIndex <> -1  
+                
+        printBrInd 0 "let errorIndex = %d" errorIndex
+        printBrInd 0 "let errorRulesExists = %b" errorRulesExists
         
         printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists%s)" (if isAbstractParsingMode then ", tokenData" else "")
 

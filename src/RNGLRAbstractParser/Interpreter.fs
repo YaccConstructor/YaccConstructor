@@ -133,8 +133,15 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         let edges = tokens.Edges |> Seq.map(fun edge -> (edge.Source, edge.Target, edge.Tag)) |> Seq.toList 
         for tokenEdge in edges do
             let source, target, token = tokenEdge
-            let errorEdge = new ParserEdge<_>(source, target, parserSource.CreateErrorToken token)
-            do tokens.AddEdge errorEdge |> ignore
+            if parserSource.TokenToNumber token <> parserSource.EofIndex then
+                let errorEdge = new ParserEdge<_>(source, target, parserSource.CreateErrorToken token)
+                do tokens.AddEdge errorEdge |> ignore
+
+    let isErrorToken (token : 'TokenType) = 
+        if parserSource.ErrorRulesExists then
+            parserSource.TokenToNumber token = parserSource.ErrorIndex
+        else
+            false
 
     // let startV, finalV, innerGraph =
     let startVList, finalVList, innerGraph =
@@ -396,6 +403,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         else
             false
 
+
+
     if tokens.EdgeCount = 0
     then
         if parserSource.AcceptEmptyInput
@@ -464,7 +473,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state. Possible errors: (" + states + ")")
             | Some res -> 
                 try 
-                    let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
+                    let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString, isErrorToken = isErrorToken)
                     //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
 //
 //                    let gssInitVertices = 

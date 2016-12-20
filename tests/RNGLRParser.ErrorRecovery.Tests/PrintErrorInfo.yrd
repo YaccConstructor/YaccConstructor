@@ -1,4 +1,0 @@
-﻿[<Start>]
-a: A e1=e1 B e2=e2 C {e1 + e2}
-e1: e=error {printfn "e1: skipped %A " e.tokens; -1} | {0}
-e2: e=error {printfn "e2: error on %A " e.errorOn; -2} | {0}

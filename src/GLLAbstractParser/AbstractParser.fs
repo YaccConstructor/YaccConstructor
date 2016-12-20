@@ -59,7 +59,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let edges = Array2D.zeroCreate<SysDict<int<nodeMeasure>, SysDict<int, ResizeArray<int>>>> slots.Count (input.VertexCount )
         let terminalNodes = Array3D.zeroCreate<int<nodeMeasure>> input.VertexCount input.VertexCount parser.TermCount  
         let currentGSSNode = ref <| dummyGSSNode
-        let currentContext = ref <| new Context(*<_>*)(!currentVertexInInput, !structures.CurrentLabel, !currentGSSNode, structures.Dummy, structures.Dummy) //without *1<labelMeasure>
+        let currentContext = ref <| new Context(*<_>*)(!currentVertexInInput, !structures.CurrentLabel, !currentGSSNode, structures.Dummy(*, structures.Dummy*)) //without *1<labelMeasure>
         
         let finalExtensions =
             let len = input.FinalStates.Length
@@ -267,7 +267,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                                 if !newR <> structures.Dummy
                                 then newN := structures.GetNodeP findSppfNode findSppfPackedNode structures.Dummy newLabel !newN !newR
 
-                                structures.PushContext newVertexInInput newLabel !currentGSSNode !newN !newR
+                                structures.PushContext newVertexInInput newLabel !currentGSSNode !newN (*!newR*)
                     else 
                         let getIndex nTerm term = 
                             let mutable index = nTerm

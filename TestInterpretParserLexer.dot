@@ -1,0 +1,18 @@
+digraph G {
+rankdir = LR
+node [shape = circle]
+0[style=filled, fillcolor=green]
+5[shape = doublecircle, style=filled, fillcolor=red]
+{ rank=same; 0 }
+{ rank=min; 0 }
+{ rank=same; 5 }
+{ rank=max; 5 }
+0 -> 2 [label="PLUS: [0, {+_br: +(0,1)}42] ;"]; 
+0 -> 1 [label="LBRACE: [0, {(_br: (2(0,1)}21] ;"]; 
+2 -> 3 [label="NUM: [42, {3_br: 3)(0,1)}63] ;"]; 
+1 -> 6 [label="NUM: [21, {2_br: (2(1,2)}45] ;[45, {3_br: 3)(0,1)}66] ;"]; 
+6 -> 4 [label="RBRACE: [66, {)_br: 3)(1,2)}76] ;"]; 
+3 -> 4 [label="RBRACE: [63, {)_br: 3)(1,2)}76] ;"]; 
+4 -> 5 [label="RNGLR_EOF"]; 
+
+}

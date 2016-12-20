@@ -1,0 +1,831 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="ValidateSolutionConfiguration;ValidateToolsVersions;ValidateProjects" DefaultTargets="Build">
+  <PropertyGroup>
+    <MSBuildToolsPath32>C:\Program Files (x86)\MSBuild\12.0\bin\</MSBuildToolsPath32>
+    <MSBuildToolsRoot>C:\Program Files (x86)\MSBuild\</MSBuildToolsRoot>
+    <MSBuildFrameworkToolsPath>C:\Windows\Microsoft.NET\Framework\v4.0.30319\</MSBuildFrameworkToolsPath>
+    <MSBuildFrameworkToolsPath32>C:\Windows\Microsoft.NET\Framework\v4.0.30319\</MSBuildFrameworkToolsPath32>
+    <MSBuildFrameworkToolsRoot>C:\Windows\Microsoft.NET\Framework\</MSBuildFrameworkToolsRoot>
+    <MSBuildRuntimeVersion>4.0.30319</MSBuildRuntimeVersion>
+    <FrameworkSDKRoot>C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\</FrameworkSDKRoot>
+    <SDK35ToolsPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\</SDK35ToolsPath>
+    <SDK40ToolsPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\</SDK40ToolsPath>
+    <VCTargetsPath>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\</VCTargetsPath>
+    <VCTargetsPath10>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\</VCTargetsPath10>
+    <VCTargetsPath11>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V110\</VCTargetsPath11>
+    <VCTargetsPath12>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\</VCTargetsPath12>
+    <VisualStudioVersion>12.0</VisualStudioVersion>
+    <WindowsSDK80Path>C:\Program Files (x86)\Windows Kits\8.1\</WindowsSDK80Path>
+    <Platform>Any CPU</Platform>
+    <AspNetConfiguration>Release</AspNetConfiguration>
+    <SolutionDir>D:\YC\YaccConstructor\src\</SolutionDir>
+    <SolutionExt>.sln</SolutionExt>
+    <SolutionFileName>YC.Minimal.sln</SolutionFileName>
+    <SolutionName>YC.Minimal</SolutionName>
+    <SolutionPath>D:\YC\YaccConstructor\src\YC.Minimal.sln</SolutionPath>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <CurrentSolutionConfigurationContents>
+      <SolutionConfiguration xmlns="">
+  <ProjectConfiguration Project="{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}" AbsolutePath="D:\YC\YaccConstructor\src\Common\Common.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}" AbsolutePath="D:\YC\YaccConstructor\src\Constraints\Constraints.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{96AB0183-84E1-4A2E-8896-9EAD2C8CF6A4}" AbsolutePath="D:\YC\YaccConstructor\src\Conversions\Conversions.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}" AbsolutePath="D:\YC\YaccConstructor\src\YaccConstructor\YaccConstructor.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{1C719CD3-0559-4A12-8B57-F58053947DC1}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRCommon\RNGLRCommon.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{5BAF0FBA-31B7-406D-BEA4-1BCC1418A63F}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRGenerator\RNGLRGenerator.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{1B09EACC-608A-4965-8B46-2746FAC220FC}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRParser\RNGLRParser.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{3148144C-1649-440E-A9B4-1D5C41677262}" AbsolutePath="D:\YC\YaccConstructor\src\YardPrinter\YardPrinter.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{FC9A166C-780D-4D15-B366-CA06277C803D}" AbsolutePath="D:\YC\YaccConstructor\src\Helper\Helper.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{58497973-2AE7-4E48-A6FC-9ED7A5C6CCE6}" AbsolutePath="D:\YC\YaccConstructor\src\FsYacc\FsYacc.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{17103A48-DB90-4101-92EE-7B2719DB2CF0}" AbsolutePath="D:\YC\YaccConstructor\src\FsYaccFrontend\FsYaccFrontend.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{BD2284A5-AA4D-442D-B4FB-E43B2FE9DD2A}" AbsolutePath="D:\YC\YaccConstructor\src\AbstractLexer.Generator\AbstractLexer.Generator.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{F61CAE49-B511-431A-BC1B-49A04C38BEE9}" AbsolutePath="D:\YC\YaccConstructor\src\AST.Common\Common.AST.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{F46A55CF-A97F-4DFC-9483-340C631C80FE}" AbsolutePath="D:\YC\YaccConstructor\src\Generators.Common\Common.Generators.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{A9A5C115-0680-44B3-A87E-5ECF4C93814E}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph\QuickGraph.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{960C14D1-EDBD-40E5-8AE6-25E311551B87}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Data\QuickGraph.Data.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{BD5D18DE-1C9D-4314-A777-21AA683EEACE}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{4B220E23-A7E0-4222-83F5-C785F7C66B33}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{595D6322-637A-4A36-97F1-D53F3F9ECEA7}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{8756690F-8138-495A-A368-39AFB9029823}" AbsolutePath="D:\YC\YaccConstructor\src\GLLGenerator\GLLGenerator.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{8826810A-DC59-46E6-8978-21E273DB1236}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\DotParser\DotParser.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{4049CF0A-8F86-48B7-98BA-D062625BA281}" AbsolutePath="D:\YC\YaccConstructor\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+</SolutionConfiguration>
+    </CurrentSolutionConfigurationContents>
+  </PropertyGroup>
+  <ItemDefinitionGroup />
+  <ItemGroup>
+    <SolutionConfiguration Include="Debug|Any CPU">
+      <Configuration>Debug</Configuration>
+      <Platform>Any CPU</Platform>
+      <Content>
+        <SolutionConfiguration xmlns="">
+  <ProjectConfiguration Project="{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}" AbsolutePath="D:\YC\YaccConstructor\src\Common\Common.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}" AbsolutePath="D:\YC\YaccConstructor\src\Constraints\Constraints.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{96AB0183-84E1-4A2E-8896-9EAD2C8CF6A4}" AbsolutePath="D:\YC\YaccConstructor\src\Conversions\Conversions.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}" AbsolutePath="D:\YC\YaccConstructor\src\YaccConstructor\YaccConstructor.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{1C719CD3-0559-4A12-8B57-F58053947DC1}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRCommon\RNGLRCommon.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{5BAF0FBA-31B7-406D-BEA4-1BCC1418A63F}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRGenerator\RNGLRGenerator.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{1B09EACC-608A-4965-8B46-2746FAC220FC}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRParser\RNGLRParser.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{3148144C-1649-440E-A9B4-1D5C41677262}" AbsolutePath="D:\YC\YaccConstructor\src\YardPrinter\YardPrinter.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{FC9A166C-780D-4D15-B366-CA06277C803D}" AbsolutePath="D:\YC\YaccConstructor\src\Helper\Helper.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{58497973-2AE7-4E48-A6FC-9ED7A5C6CCE6}" AbsolutePath="D:\YC\YaccConstructor\src\FsYacc\FsYacc.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{17103A48-DB90-4101-92EE-7B2719DB2CF0}" AbsolutePath="D:\YC\YaccConstructor\src\FsYaccFrontend\FsYaccFrontend.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{BD2284A5-AA4D-442D-B4FB-E43B2FE9DD2A}" AbsolutePath="D:\YC\YaccConstructor\src\AbstractLexer.Generator\AbstractLexer.Generator.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{F61CAE49-B511-431A-BC1B-49A04C38BEE9}" AbsolutePath="D:\YC\YaccConstructor\src\AST.Common\Common.AST.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{F46A55CF-A97F-4DFC-9483-340C631C80FE}" AbsolutePath="D:\YC\YaccConstructor\src\Generators.Common\Common.Generators.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{A9A5C115-0680-44B3-A87E-5ECF4C93814E}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph\QuickGraph.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{960C14D1-EDBD-40E5-8AE6-25E311551B87}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Data\QuickGraph.Data.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{BD5D18DE-1C9D-4314-A777-21AA683EEACE}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{4B220E23-A7E0-4222-83F5-C785F7C66B33}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{595D6322-637A-4A36-97F1-D53F3F9ECEA7}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{8756690F-8138-495A-A368-39AFB9029823}" AbsolutePath="D:\YC\YaccConstructor\src\GLLGenerator\GLLGenerator.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{8826810A-DC59-46E6-8978-21E273DB1236}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\DotParser\DotParser.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{4049CF0A-8F86-48B7-98BA-D062625BA281}" AbsolutePath="D:\YC\YaccConstructor\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+</SolutionConfiguration>
+      </Content>
+    </SolutionConfiguration>
+    <SolutionConfiguration Include="Debug|x86">
+      <Configuration>Debug</Configuration>
+      <Platform>x86</Platform>
+      <Content>
+        <SolutionConfiguration xmlns="">
+  <ProjectConfiguration Project="{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}" AbsolutePath="D:\YC\YaccConstructor\src\Common\Common.fsproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}" AbsolutePath="D:\YC\YaccConstructor\src\Constraints\Constraints.fsproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{96AB0183-84E1-4A2E-8896-9EAD2C8CF6A4}" AbsolutePath="D:\YC\YaccConstructor\src\Conversions\Conversions.fsproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}" AbsolutePath="D:\YC\YaccConstructor\src\YaccConstructor\YaccConstructor.fsproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{1C719CD3-0559-4A12-8B57-F58053947DC1}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRCommon\RNGLRCommon.fsproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{5BAF0FBA-31B7-406D-BEA4-1BCC1418A63F}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRGenerator\RNGLRGenerator.fsproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{1B09EACC-608A-4965-8B46-2746FAC220FC}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRParser\RNGLRParser.fsproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{3148144C-1649-440E-A9B4-1D5C41677262}" AbsolutePath="D:\YC\YaccConstructor\src\YardPrinter\YardPrinter.fsproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{FC9A166C-780D-4D15-B366-CA06277C803D}" AbsolutePath="D:\YC\YaccConstructor\src\Helper\Helper.fsproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{58497973-2AE7-4E48-A6FC-9ED7A5C6CCE6}" AbsolutePath="D:\YC\YaccConstructor\src\FsYacc\FsYacc.fsproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{17103A48-DB90-4101-92EE-7B2719DB2CF0}" AbsolutePath="D:\YC\YaccConstructor\src\FsYaccFrontend\FsYaccFrontend.fsproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{BD2284A5-AA4D-442D-B4FB-E43B2FE9DD2A}" AbsolutePath="D:\YC\YaccConstructor\src\AbstractLexer.Generator\AbstractLexer.Generator.fsproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{F61CAE49-B511-431A-BC1B-49A04C38BEE9}" AbsolutePath="D:\YC\YaccConstructor\src\AST.Common\Common.AST.fsproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{F46A55CF-A97F-4DFC-9483-340C631C80FE}" AbsolutePath="D:\YC\YaccConstructor\src\Generators.Common\Common.Generators.fsproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{A9A5C115-0680-44B3-A87E-5ECF4C93814E}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph\QuickGraph.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{960C14D1-EDBD-40E5-8AE6-25E311551B87}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Data\QuickGraph.Data.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{BD5D18DE-1C9D-4314-A777-21AA683EEACE}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{4B220E23-A7E0-4222-83F5-C785F7C66B33}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{595D6322-637A-4A36-97F1-D53F3F9ECEA7}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{8756690F-8138-495A-A368-39AFB9029823}" AbsolutePath="D:\YC\YaccConstructor\src\GLLGenerator\GLLGenerator.fsproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{8826810A-DC59-46E6-8978-21E273DB1236}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\DotParser\DotParser.fsproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{4049CF0A-8F86-48B7-98BA-D062625BA281}" AbsolutePath="D:\YC\YaccConstructor\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+</SolutionConfiguration>
+      </Content>
+    </SolutionConfiguration>
+    <SolutionConfiguration Include="Release20|Any CPU">
+      <Configuration>Release20</Configuration>
+      <Platform>Any CPU</Platform>
+      <Content>
+        <SolutionConfiguration xmlns="">
+  <ProjectConfiguration Project="{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}" AbsolutePath="D:\YC\YaccConstructor\src\Common\Common.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}" AbsolutePath="D:\YC\YaccConstructor\src\Constraints\Constraints.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{96AB0183-84E1-4A2E-8896-9EAD2C8CF6A4}" AbsolutePath="D:\YC\YaccConstructor\src\Conversions\Conversions.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}" AbsolutePath="D:\YC\YaccConstructor\src\YaccConstructor\YaccConstructor.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{1C719CD3-0559-4A12-8B57-F58053947DC1}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRCommon\RNGLRCommon.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{5BAF0FBA-31B7-406D-BEA4-1BCC1418A63F}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRGenerator\RNGLRGenerator.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{1B09EACC-608A-4965-8B46-2746FAC220FC}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRParser\RNGLRParser.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{3148144C-1649-440E-A9B4-1D5C41677262}" AbsolutePath="D:\YC\YaccConstructor\src\YardPrinter\YardPrinter.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{FC9A166C-780D-4D15-B366-CA06277C803D}" AbsolutePath="D:\YC\YaccConstructor\src\Helper\Helper.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{58497973-2AE7-4E48-A6FC-9ED7A5C6CCE6}" AbsolutePath="D:\YC\YaccConstructor\src\FsYacc\FsYacc.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{17103A48-DB90-4101-92EE-7B2719DB2CF0}" AbsolutePath="D:\YC\YaccConstructor\src\FsYaccFrontend\FsYaccFrontend.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{BD2284A5-AA4D-442D-B4FB-E43B2FE9DD2A}" AbsolutePath="D:\YC\YaccConstructor\src\AbstractLexer.Generator\AbstractLexer.Generator.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{F61CAE49-B511-431A-BC1B-49A04C38BEE9}" AbsolutePath="D:\YC\YaccConstructor\src\AST.Common\Common.AST.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{F46A55CF-A97F-4DFC-9483-340C631C80FE}" AbsolutePath="D:\YC\YaccConstructor\src\Generators.Common\Common.Generators.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{A9A5C115-0680-44B3-A87E-5ECF4C93814E}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph\QuickGraph.csproj" BuildProjectInSolution="True">Release20|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{960C14D1-EDBD-40E5-8AE6-25E311551B87}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Data\QuickGraph.Data.csproj" BuildProjectInSolution="True">Release20|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{BD5D18DE-1C9D-4314-A777-21AA683EEACE}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{4B220E23-A7E0-4222-83F5-C785F7C66B33}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{595D6322-637A-4A36-97F1-D53F3F9ECEA7}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj" BuildProjectInSolution="True">Release20|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{8756690F-8138-495A-A368-39AFB9029823}" AbsolutePath="D:\YC\YaccConstructor\src\GLLGenerator\GLLGenerator.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{8826810A-DC59-46E6-8978-21E273DB1236}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\DotParser\DotParser.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{4049CF0A-8F86-48B7-98BA-D062625BA281}" AbsolutePath="D:\YC\YaccConstructor\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+</SolutionConfiguration>
+      </Content>
+    </SolutionConfiguration>
+    <SolutionConfiguration Include="Release20|x86">
+      <Configuration>Release20</Configuration>
+      <Platform>x86</Platform>
+      <Content>
+        <SolutionConfiguration xmlns="">
+  <ProjectConfiguration Project="{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}" AbsolutePath="D:\YC\YaccConstructor\src\Common\Common.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}" AbsolutePath="D:\YC\YaccConstructor\src\Constraints\Constraints.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{96AB0183-84E1-4A2E-8896-9EAD2C8CF6A4}" AbsolutePath="D:\YC\YaccConstructor\src\Conversions\Conversions.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}" AbsolutePath="D:\YC\YaccConstructor\src\YaccConstructor\YaccConstructor.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{1C719CD3-0559-4A12-8B57-F58053947DC1}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRCommon\RNGLRCommon.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{5BAF0FBA-31B7-406D-BEA4-1BCC1418A63F}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRGenerator\RNGLRGenerator.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{1B09EACC-608A-4965-8B46-2746FAC220FC}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRParser\RNGLRParser.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{3148144C-1649-440E-A9B4-1D5C41677262}" AbsolutePath="D:\YC\YaccConstructor\src\YardPrinter\YardPrinter.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{FC9A166C-780D-4D15-B366-CA06277C803D}" AbsolutePath="D:\YC\YaccConstructor\src\Helper\Helper.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{58497973-2AE7-4E48-A6FC-9ED7A5C6CCE6}" AbsolutePath="D:\YC\YaccConstructor\src\FsYacc\FsYacc.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{17103A48-DB90-4101-92EE-7B2719DB2CF0}" AbsolutePath="D:\YC\YaccConstructor\src\FsYaccFrontend\FsYaccFrontend.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{BD2284A5-AA4D-442D-B4FB-E43B2FE9DD2A}" AbsolutePath="D:\YC\YaccConstructor\src\AbstractLexer.Generator\AbstractLexer.Generator.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{F61CAE49-B511-431A-BC1B-49A04C38BEE9}" AbsolutePath="D:\YC\YaccConstructor\src\AST.Common\Common.AST.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{F46A55CF-A97F-4DFC-9483-340C631C80FE}" AbsolutePath="D:\YC\YaccConstructor\src\Generators.Common\Common.Generators.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{A9A5C115-0680-44B3-A87E-5ECF4C93814E}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph\QuickGraph.csproj" BuildProjectInSolution="True">Release20|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{960C14D1-EDBD-40E5-8AE6-25E311551B87}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Data\QuickGraph.Data.csproj" BuildProjectInSolution="True">Release20|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{BD5D18DE-1C9D-4314-A777-21AA683EEACE}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{4B220E23-A7E0-4222-83F5-C785F7C66B33}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{595D6322-637A-4A36-97F1-D53F3F9ECEA7}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj" BuildProjectInSolution="True">Release20|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{8756690F-8138-495A-A368-39AFB9029823}" AbsolutePath="D:\YC\YaccConstructor\src\GLLGenerator\GLLGenerator.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{8826810A-DC59-46E6-8978-21E273DB1236}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\DotParser\DotParser.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{4049CF0A-8F86-48B7-98BA-D062625BA281}" AbsolutePath="D:\YC\YaccConstructor\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+</SolutionConfiguration>
+      </Content>
+    </SolutionConfiguration>
+    <SolutionConfiguration Include="Release|Any CPU">
+      <Configuration>Release</Configuration>
+      <Platform>Any CPU</Platform>
+      <Content>
+        <SolutionConfiguration xmlns="">
+  <ProjectConfiguration Project="{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}" AbsolutePath="D:\YC\YaccConstructor\src\Common\Common.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}" AbsolutePath="D:\YC\YaccConstructor\src\Constraints\Constraints.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{96AB0183-84E1-4A2E-8896-9EAD2C8CF6A4}" AbsolutePath="D:\YC\YaccConstructor\src\Conversions\Conversions.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}" AbsolutePath="D:\YC\YaccConstructor\src\YaccConstructor\YaccConstructor.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{1C719CD3-0559-4A12-8B57-F58053947DC1}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRCommon\RNGLRCommon.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{5BAF0FBA-31B7-406D-BEA4-1BCC1418A63F}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRGenerator\RNGLRGenerator.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{1B09EACC-608A-4965-8B46-2746FAC220FC}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRParser\RNGLRParser.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{3148144C-1649-440E-A9B4-1D5C41677262}" AbsolutePath="D:\YC\YaccConstructor\src\YardPrinter\YardPrinter.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{FC9A166C-780D-4D15-B366-CA06277C803D}" AbsolutePath="D:\YC\YaccConstructor\src\Helper\Helper.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{58497973-2AE7-4E48-A6FC-9ED7A5C6CCE6}" AbsolutePath="D:\YC\YaccConstructor\src\FsYacc\FsYacc.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{17103A48-DB90-4101-92EE-7B2719DB2CF0}" AbsolutePath="D:\YC\YaccConstructor\src\FsYaccFrontend\FsYaccFrontend.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{BD2284A5-AA4D-442D-B4FB-E43B2FE9DD2A}" AbsolutePath="D:\YC\YaccConstructor\src\AbstractLexer.Generator\AbstractLexer.Generator.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{F61CAE49-B511-431A-BC1B-49A04C38BEE9}" AbsolutePath="D:\YC\YaccConstructor\src\AST.Common\Common.AST.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{F46A55CF-A97F-4DFC-9483-340C631C80FE}" AbsolutePath="D:\YC\YaccConstructor\src\Generators.Common\Common.Generators.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{A9A5C115-0680-44B3-A87E-5ECF4C93814E}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph\QuickGraph.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{960C14D1-EDBD-40E5-8AE6-25E311551B87}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Data\QuickGraph.Data.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{BD5D18DE-1C9D-4314-A777-21AA683EEACE}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{4B220E23-A7E0-4222-83F5-C785F7C66B33}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{595D6322-637A-4A36-97F1-D53F3F9ECEA7}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{8756690F-8138-495A-A368-39AFB9029823}" AbsolutePath="D:\YC\YaccConstructor\src\GLLGenerator\GLLGenerator.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{8826810A-DC59-46E6-8978-21E273DB1236}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\DotParser\DotParser.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{4049CF0A-8F86-48B7-98BA-D062625BA281}" AbsolutePath="D:\YC\YaccConstructor\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+</SolutionConfiguration>
+      </Content>
+    </SolutionConfiguration>
+    <SolutionConfiguration Include="Release|x86">
+      <Configuration>Release</Configuration>
+      <Platform>x86</Platform>
+      <Content>
+        <SolutionConfiguration xmlns="">
+  <ProjectConfiguration Project="{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}" AbsolutePath="D:\YC\YaccConstructor\src\Common\Common.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}" AbsolutePath="D:\YC\YaccConstructor\src\Constraints\Constraints.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{96AB0183-84E1-4A2E-8896-9EAD2C8CF6A4}" AbsolutePath="D:\YC\YaccConstructor\src\Conversions\Conversions.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}" AbsolutePath="D:\YC\YaccConstructor\src\YaccConstructor\YaccConstructor.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{1C719CD3-0559-4A12-8B57-F58053947DC1}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRCommon\RNGLRCommon.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{5BAF0FBA-31B7-406D-BEA4-1BCC1418A63F}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRGenerator\RNGLRGenerator.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{1B09EACC-608A-4965-8B46-2746FAC220FC}" AbsolutePath="D:\YC\YaccConstructor\src\RNGLRParser\RNGLRParser.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{3148144C-1649-440E-A9B4-1D5C41677262}" AbsolutePath="D:\YC\YaccConstructor\src\YardPrinter\YardPrinter.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{FC9A166C-780D-4D15-B366-CA06277C803D}" AbsolutePath="D:\YC\YaccConstructor\src\Helper\Helper.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{58497973-2AE7-4E48-A6FC-9ED7A5C6CCE6}" AbsolutePath="D:\YC\YaccConstructor\src\FsYacc\FsYacc.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{17103A48-DB90-4101-92EE-7B2719DB2CF0}" AbsolutePath="D:\YC\YaccConstructor\src\FsYaccFrontend\FsYaccFrontend.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{BD2284A5-AA4D-442D-B4FB-E43B2FE9DD2A}" AbsolutePath="D:\YC\YaccConstructor\src\AbstractLexer.Generator\AbstractLexer.Generator.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{F61CAE49-B511-431A-BC1B-49A04C38BEE9}" AbsolutePath="D:\YC\YaccConstructor\src\AST.Common\Common.AST.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{F46A55CF-A97F-4DFC-9483-340C631C80FE}" AbsolutePath="D:\YC\YaccConstructor\src\Generators.Common\Common.Generators.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{A9A5C115-0680-44B3-A87E-5ECF4C93814E}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph\QuickGraph.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{960C14D1-EDBD-40E5-8AE6-25E311551B87}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Data\QuickGraph.Data.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{BD5D18DE-1C9D-4314-A777-21AA683EEACE}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{4B220E23-A7E0-4222-83F5-C785F7C66B33}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{595D6322-637A-4A36-97F1-D53F3F9ECEA7}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj" BuildProjectInSolution="True">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{8756690F-8138-495A-A368-39AFB9029823}" AbsolutePath="D:\YC\YaccConstructor\src\GLLGenerator\GLLGenerator.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{8826810A-DC59-46E6-8978-21E273DB1236}" AbsolutePath="D:\YC\YaccConstructor\src\..\QuickGraph\src\DotParser\DotParser.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{4049CF0A-8F86-48B7-98BA-D062625BA281}" AbsolutePath="D:\YC\YaccConstructor\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj" BuildProjectInSolution="False">Release|AnyCPU</ProjectConfiguration>
+</SolutionConfiguration>
+      </Content>
+    </SolutionConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\Common\Common.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\Constraints\Constraints.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\Conversions\Conversions.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\YaccConstructor\YaccConstructor.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\RNGLRCommon\RNGLRCommon.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\RNGLRGenerator\RNGLRGenerator.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\RNGLRParser\RNGLRParser.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\YardPrinter\YardPrinter.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\Helper\Helper.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\FsYacc\FsYacc.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\FsYaccFrontend\FsYaccFrontend.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\AbstractLexer.Generator\AbstractLexer.Generator.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\AST.Common\Common.AST.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\Generators.Common\Common.Generators.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph\QuickGraph.csproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Data\QuickGraph.Data.csproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\GLLGenerator\GLLGenerator.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\..\QuickGraph\src\DotParser\DotParser.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+    <ProjectReference Include="D:\YC\YaccConstructor\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Release; Platform=AnyCPU</AdditionalProperties>
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectReference>
+  </ItemGroup>
+  <Target Name="ValidateSolutionConfiguration">
+    <Error Condition="('$(CurrentSolutionConfigurationContents)' == '') and ('$(SkipInvalidConfigurations)' != 'true')" Text="The specified solution configuration &quot;$(Configuration)|$(Platform)&quot; is invalid. Please specify a valid solution configuration using the Configuration and Platform properties (e.g. MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform=&quot;Any CPU&quot;) or leave those properties blank to use the default solution configuration." Code="MSB4126" HelpKeyword="MSBuild.SolutionInvalidSolutionConfiguration" />
+    <Warning Condition="('$(CurrentSolutionConfigurationContents)' == '') and ('$(SkipInvalidConfigurations)' == 'true')" Text="The specified solution configuration &quot;$(Configuration)|$(Platform)&quot; is invalid. Please specify a valid solution configuration using the Configuration and Platform properties (e.g. MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform=&quot;Any CPU&quot;) or leave those properties blank to use the default solution configuration." Code="MSB4126" HelpKeyword="MSBuild.SolutionInvalidSolutionConfiguration" />
+    <Message Condition="'$(CurrentSolutionConfigurationContents)' != ''" Text="Building solution configuration &quot;$(Configuration)|$(Platform)&quot;." />
+  </Target>
+  <Target Name="ValidateToolsVersions">
+    <Error Condition="'$(MSBuildToolsVersion)' == '2.0' and ('$(ProjectToolsVersion)' != '2.0' and '$(ProjectToolsVersion)' != '')" Text="The tools version &quot;$(MSBuildToolsVersion)&quot; of the solution does not support building projects with a different tools version." Code="MSB4149" HelpKeyword="MSBuild.SolutionToolsVersionDoesNotSupportProjectToolsVersion" />
+  </Target>
+  <Target Name="ValidateProjects">
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;Common&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;Common&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;Constraints&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;Constraints&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;Conversions&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;Conversions&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;YaccConstructor&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;YaccConstructor&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;RNGLRCommon&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;RNGLRCommon&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;RNGLRGenerator&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;RNGLRGenerator&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;RNGLRParser&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;RNGLRParser&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;YardPrinter&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;YardPrinter&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;Helper&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;Helper&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;FsYacc&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;FsYacc&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;FsYaccFrontend&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;FsYaccFrontend&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;AbstractLexer.Generator&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;AbstractLexer.Generator&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;Common.AST&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;Common.AST&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;Common.Generators&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;Common.Generators&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;GLLGenerator&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;GLLGenerator&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release20') and ('$(Platform)' == 'x86') " Text="The project &quot;GLLGenerator&quot; is not selected for building in solution configuration &quot;Release20|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;DotParser&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;DotParser&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release20') and ('$(Platform)' == 'x86') " Text="The project &quot;DotParser&quot; is not selected for building in solution configuration &quot;Release20|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;AbstractAnalysis.Common&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;AbstractAnalysis.Common&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release20') and ('$(Platform)' == 'x86') " Text="The project &quot;AbstractAnalysis.Common&quot; is not selected for building in solution configuration &quot;Release20|x86&quot;." />
+  </Target>
+  <Target Name="GetSolutionConfigurationContents" Outputs="$(SolutionConfigurationContents)" />
+  <Target Name="Build" Outputs="@(CollectedBuildOutput)">
+    <MSBuild Projects="@(ProjectReference)" BuildInParallel="True" Properties="BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" SkipNonexistentProjects="%(ProjectReference.SkipNonexistentProjects)">
+      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="Clean">
+    <MSBuild Projects="@(ProjectReference-&gt;Reverse())" Targets="Clean" BuildInParallel="True" Properties="BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" SkipNonexistentProjects="%(ProjectReference.SkipNonexistentProjects)" />
+  </Target>
+  <Target Name="Rebuild" Outputs="@(CollectedBuildOutput)">
+    <MSBuild Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" Properties="BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" SkipNonexistentProjects="%(ProjectReference.SkipNonexistentProjects)">
+      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="Publish">
+    <MSBuild Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" Properties="BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" SkipNonexistentProjects="%(ProjectReference.SkipNonexistentProjects)" />
+  </Target>
+  <Target Name="Common" Outputs="@(CommonBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Common\Common.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="CommonBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="Common:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Common\Common.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="Common:Rebuild" Outputs="@(CommonBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Common\Common.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="CommonBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="Common:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Common\Common.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="Constraints" Outputs="@(ConstraintsBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Constraints\Constraints.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="ConstraintsBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="Constraints:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Constraints\Constraints.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="Constraints:Rebuild" Outputs="@(ConstraintsBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Constraints\Constraints.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="ConstraintsBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="Constraints:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Constraints\Constraints.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="Conversions" Outputs="@(ConversionsBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Conversions\Conversions.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="ConversionsBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="Conversions:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Conversions\Conversions.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="Conversions:Rebuild" Outputs="@(ConversionsBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Conversions\Conversions.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="ConversionsBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="Conversions:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Conversions\Conversions.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="YaccConstructor" Outputs="@(YaccConstructorBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\YaccConstructor\YaccConstructor.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="YaccConstructorBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="YaccConstructor:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\YaccConstructor\YaccConstructor.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="YaccConstructor:Rebuild" Outputs="@(YaccConstructorBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\YaccConstructor\YaccConstructor.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="YaccConstructorBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="YaccConstructor:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\YaccConstructor\YaccConstructor.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="RNGLRCommon" Outputs="@(RNGLRCommonBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\RNGLRCommon\RNGLRCommon.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="RNGLRCommonBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="RNGLRCommon:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\RNGLRCommon\RNGLRCommon.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="RNGLRCommon:Rebuild" Outputs="@(RNGLRCommonBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\RNGLRCommon\RNGLRCommon.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="RNGLRCommonBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="RNGLRCommon:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\RNGLRCommon\RNGLRCommon.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="RNGLRGenerator" Outputs="@(RNGLRGeneratorBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\RNGLRGenerator\RNGLRGenerator.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="RNGLRGeneratorBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="RNGLRGenerator:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\RNGLRGenerator\RNGLRGenerator.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="RNGLRGenerator:Rebuild" Outputs="@(RNGLRGeneratorBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\RNGLRGenerator\RNGLRGenerator.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="RNGLRGeneratorBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="RNGLRGenerator:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\RNGLRGenerator\RNGLRGenerator.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="RNGLRParser" Outputs="@(RNGLRParserBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\RNGLRParser\RNGLRParser.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="RNGLRParserBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="RNGLRParser:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\RNGLRParser\RNGLRParser.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="RNGLRParser:Rebuild" Outputs="@(RNGLRParserBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\RNGLRParser\RNGLRParser.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="RNGLRParserBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="RNGLRParser:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\RNGLRParser\RNGLRParser.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="YardPrinter" Outputs="@(YardPrinterBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\YardPrinter\YardPrinter.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="YardPrinterBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="YardPrinter:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\YardPrinter\YardPrinter.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="YardPrinter:Rebuild" Outputs="@(YardPrinterBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\YardPrinter\YardPrinter.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="YardPrinterBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="YardPrinter:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\YardPrinter\YardPrinter.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="Helper" Outputs="@(HelperBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Helper\Helper.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="HelperBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="Helper:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Helper\Helper.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="Helper:Rebuild" Outputs="@(HelperBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Helper\Helper.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="HelperBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="Helper:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Helper\Helper.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="FsYacc" Outputs="@(FsYaccBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\FsYacc\FsYacc.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="FsYaccBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="FsYacc:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\FsYacc\FsYacc.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="FsYacc:Rebuild" Outputs="@(FsYaccBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\FsYacc\FsYacc.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="FsYaccBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="FsYacc:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\FsYacc\FsYacc.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="FsYaccFrontend" Outputs="@(FsYaccFrontendBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\FsYaccFrontend\FsYaccFrontend.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="FsYaccFrontendBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="FsYaccFrontend:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\FsYaccFrontend\FsYaccFrontend.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="FsYaccFrontend:Rebuild" Outputs="@(FsYaccFrontendBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\FsYaccFrontend\FsYaccFrontend.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="FsYaccFrontendBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="FsYaccFrontend:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\FsYaccFrontend\FsYaccFrontend.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="AbstractLexer_Generator" Outputs="@(AbstractLexer_GeneratorBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\AbstractLexer.Generator\AbstractLexer.Generator.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="AbstractLexer_GeneratorBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="AbstractLexer_Generator:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\AbstractLexer.Generator\AbstractLexer.Generator.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="AbstractLexer_Generator:Rebuild" Outputs="@(AbstractLexer_GeneratorBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\AbstractLexer.Generator\AbstractLexer.Generator.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="AbstractLexer_GeneratorBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="AbstractLexer_Generator:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\AbstractLexer.Generator\AbstractLexer.Generator.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="Common_AST" Outputs="@(Common_ASTBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\AST.Common\Common.AST.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="Common_ASTBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="Common_AST:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\AST.Common\Common.AST.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="Common_AST:Rebuild" Outputs="@(Common_ASTBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\AST.Common\Common.AST.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="Common_ASTBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="Common_AST:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\AST.Common\Common.AST.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="Common_Generators" Outputs="@(Common_GeneratorsBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Generators.Common\Common.Generators.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="Common_GeneratorsBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="Common_Generators:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Generators.Common\Common.Generators.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="Common_Generators:Rebuild" Outputs="@(Common_GeneratorsBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Generators.Common\Common.Generators.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="Common_GeneratorsBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="Common_Generators:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\Generators.Common\Common.Generators.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="QuickGraph" Outputs="@(QuickGraphBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph\QuickGraph.csproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="QuickGraphBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="QuickGraph:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph\QuickGraph.csproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="QuickGraph:Rebuild" Outputs="@(QuickGraphBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph\QuickGraph.csproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="QuickGraphBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="QuickGraph:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph\QuickGraph.csproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="QuickGraph_Data" Outputs="@(QuickGraph_DataBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Data\QuickGraph.Data.csproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="QuickGraph_DataBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="QuickGraph_Data:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Data\QuickGraph.Data.csproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="QuickGraph_Data:Rebuild" Outputs="@(QuickGraph_DataBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Data\QuickGraph.Data.csproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="QuickGraph_DataBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="QuickGraph_Data:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Data\QuickGraph.Data.csproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="QuickGraph_FSA" Outputs="@(QuickGraph_FSABuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="QuickGraph_FSABuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="QuickGraph_FSA:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="QuickGraph_FSA:Rebuild" Outputs="@(QuickGraph_FSABuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="QuickGraph_FSABuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="QuickGraph_FSA:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FSA\QuickGraph.FSA.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="QuickGraph_FST" Outputs="@(QuickGraph_FSTBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="QuickGraph_FSTBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="QuickGraph_FST:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="QuickGraph_FST:Rebuild" Outputs="@(QuickGraph_FSTBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="QuickGraph_FSTBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="QuickGraph_FST:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.FST\QuickGraph.FST.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="QuickGraph_Graphviz" Outputs="@(QuickGraph_GraphvizBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="QuickGraph_GraphvizBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="QuickGraph_Graphviz:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="QuickGraph_Graphviz:Rebuild" Outputs="@(QuickGraph_GraphvizBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="QuickGraph_GraphvizBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="QuickGraph_Graphviz:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="GLLGenerator" Outputs="@(GLLGeneratorBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\GLLGenerator\GLLGenerator.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="GLLGeneratorBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="GLLGenerator:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\GLLGenerator\GLLGenerator.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="GLLGenerator:Rebuild" Outputs="@(GLLGeneratorBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\GLLGenerator\GLLGenerator.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="GLLGeneratorBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="GLLGenerator:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\GLLGenerator\GLLGenerator.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="DotParser" Outputs="@(DotParserBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\DotParser\DotParser.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="DotParserBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="DotParser:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\DotParser\DotParser.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="DotParser:Rebuild" Outputs="@(DotParserBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\DotParser\DotParser.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="DotParserBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="DotParser:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\..\QuickGraph\src\DotParser\DotParser.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="AbstractAnalysis_Common" Outputs="@(AbstractAnalysis_CommonBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="AbstractAnalysis_CommonBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="AbstractAnalysis_Common:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="AbstractAnalysis_Common:Rebuild" Outputs="@(AbstractAnalysis_CommonBuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="AbstractAnalysis_CommonBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="AbstractAnalysis_Common:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'D:\YC\YaccConstructor\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Release; Platform=AnyCPU;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+</Project>

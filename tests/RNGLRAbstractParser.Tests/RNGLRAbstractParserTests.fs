@@ -23,6 +23,9 @@ open RNGLR.SimpleCalc
 open RNGLR.PrettySimpleCalc
 open Yard.Generators.RNGLR.AbstractParser
 open Yard.Generators.ARNGLR.Parser
+open Yard.Generators.Common.AstNode
+open Microsoft.FSharp.Collections
+open System.Collections.Generic
 
 open QuickGraph.FSA.GraphBasedFsa
 
@@ -637,6 +640,63 @@ type ``RNGLR abstract parser tests`` () =
             ] |> ignore
 
         test RNGLR.AandB.buildAstAbstract qGraph 23 22 0 11 1
+
+    member private this.toLinearGraph(tokens: 'a seq) = 
+        let qGraph = new ParserInputGraph<_>(0, Seq.length tokens)
+        do tokens
+            |> Seq.mapi (fun i t -> edg i (i + 1) t)
+            |> qGraph.AddVerticesAndEdgeRange
+            |> ignore
+        qGraph
+
+    [<Test>]
+    member this._errorDispachingTest() =
+        let qGraph = this.toLinearGraph [
+                                        RNGLR.ErrorSupport.NUM 1
+                                        RNGLR.ErrorSupport.NUM 2
+                                        RNGLR.ErrorSupport.NOT_NUM 3
+                                        RNGLR.ErrorSupport.NOT_NUM 4          
+                                        RNGLR.ErrorSupport.NUM 5
+                                        RNGLR.ErrorSupport.RNGLR_EOF 0]
+        match RNGLR.ErrorSupport.buildAstAbstract qGraph with 
+            | Success(_) -> Assert.Pass()
+            | Error(_, _, _) -> Assert.Fail("Error skipping is not successful")
+  
+
+    [<Test>]
+    member this._errorDispatchingBestTreeFindingGeneratesSameTokenOrderTest() =
+        let tokens = [
+                     RNGLR.ErrorSupport.NOT_NUM 1                                        
+                     RNGLR.ErrorSupport.NUM 2
+                     RNGLR.ErrorSupport.NUM 3
+                     RNGLR.ErrorSupport.NOT_NUM 4                                        
+                     RNGLR.ErrorSupport.NOT_NUM 5                                        
+                     RNGLR.ErrorSupport.NUM 6                                    
+                     RNGLR.ErrorSupport.NOT_NUM 7                                        
+                     RNGLR.ErrorSupport.NUM 8                                        
+                     RNGLR.ErrorSupport.RNGLR_EOF 0] |> Seq.ofList
+
+        let qGraph = this.toLinearGraph  tokens
+        match RNGLR.ErrorSupport.buildAstAbstract qGraph with 
+            | Success(tree) ->
+                tree.ChooseBestAst()
+                let tokensGenerated = new ResizeArray<_>()
+                let rec recordTokens (node : AstNode) = 
+                    match node with
+                    | :? Terminal as t -> tokensGenerated.Add <| tree.IsErrorToken tree.Tokens.[t.TokenNumber] 
+                    | :? AST as ast ->
+                        if ast.other = null then
+                            ast.first.nodes.doForAll recordTokens
+                        else
+                            Assert.Fail "More than one family found"
+                    | _ -> ()
+                recordTokens tree.Root
+                let generatedTokensHaveSameErrorsOrder = 
+                    tokens
+                    |> Seq.take (Seq.length tokens - 1)
+                    |> Seq.forall2 (fun t e -> match t with RNGLR.ErrorSupport.NUM _ -> not e | _ -> e)
+                Assert.IsTrue (tokensGenerated |> generatedTokensHaveSameErrorsOrder)                
+            | Error(_, _, _) -> Assert.Fail("Error skipping is not successful")
 
     member this.``Not Ambigous Simple Calc. Branch. Perf`` i inpLength isLoop =  
         let tpl x =

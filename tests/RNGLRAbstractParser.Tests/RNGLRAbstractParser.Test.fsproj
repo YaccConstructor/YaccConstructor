@@ -77,6 +77,7 @@
     <!--Compile Include="Epsilons2.yrd.fs" /-->
     <Compile Include="Stars2.yrd.fs" />
     <Compile Include="StrangeBrackets.yrd.fs" />
+    <Compile Include="ErrorSupport.yrd.fs" />
     <Compile Include="RNGLRAbstractParserTests.fs" />
     <None Include="paket.references" />
     <None Include="app.config" />

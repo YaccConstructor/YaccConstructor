@@ -1,0 +1,3 @@
+﻿[<Start>]
+s: (NUM | ERROR+)+
+q: NOT_NUM

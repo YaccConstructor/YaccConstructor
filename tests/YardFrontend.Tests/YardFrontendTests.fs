@@ -482,34 +482,6 @@ type ``Yardfrontend label tests`` () =
             "[<Start>]s: @lbl[12.3](T);"
             (defaultDefinition rules)
             
-    
-    [<Test>]
-    member test.``weight test incorrect input`` () =
-        // must fail
-        try
-            let rules: Rule.t<_,_> list  =
-                [{name = dummyPos"s";
-                  args = [];
-                  body = PSeq ([{omit = false;
-                                 rule = PToken (getSource "T" 16 16);
-                                 binding = None;
-                                 checker = None;}],None,Some {label = "@lbl";
-                                                              weight = None;});
-                  isPublic = true;
-                  isStart = true;
-                  metaArgs = [];
-                }]
-            let smth = defaultDefinition rules |> parserTest "[<Start>]s: @lbl[q](T);"
-                  
-            Assert.IsTrue(false)
-        with 
-        | ex ->
-            //let expected = "Parse error on position (0,17) on token q: illegal weight. Number expected."
-            //let expected = "Parse error on position ((0,17)-(0,18)) on token [|LIDENT q|]: Parse Error"
-            let expected = "Parse error on position :((0,0)-(0,23)). \n  Incorrect construction! Closed bracket is not found!: "
-            let actual = ex.Message
-            printfn "%s" ex.Message
-            Assert.AreEqual(expected, actual)
 
 [<TestFixture>]
 type ``Yardfrontend token tests`` () =

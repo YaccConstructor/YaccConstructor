@@ -228,38 +228,23 @@ type Tree<'TokenType> (tokens : array<'TokenType>
         let rec getMinErrorsSubtree(ast: AstNode) =
             let inline handleFamily (family: Family) = 
                 family.nodes.map getMinErrorsSubtree
-                |> Array.choose id
                 |> Array.sum                
             match ast with
-            | :? Epsilon -> Some 0
+            | :? Epsilon -> 0
             | :? Terminal as t ->
-                 if this.IsErrorToken tokens.[t.TokenNumber] then Some 1 else Some 0
+                 if this.IsErrorToken tokens.[t.TokenNumber] then 1 else 0
             | :? AST as ast ->
                 let inline familyHasNoCycles (family: Family) = 
                     family.nodes.isForAll (Tree<_>.smaller ast.pos)
 
-                let errors =
+                let (subAst, errorsCount) =
                     ast.map (fun family -> (family, handleFamily family))
                     |> Array.filter (fun (f, _) -> familyHasNoCycles f)
-              
-                let minErrorsOfSubnodessCount =
-                    errors                   
-                    |> Array.map snd
-                    |> Array.fold (fun minErrs errs ->
-                                       match minErrs with
-                                       | Some m -> Some <| min m errs
-                                       | None -> Some <| errs
-                                   ) None
-                match minErrorsOfSubnodessCount with
-                | Some minErr ->
-                    let familyWithMinErrors =
-                         errors
-                         |> Array.find (fun (_, errs) ->  errs = minErr)
-                         |> fst
-                    ast.first <- familyWithMinErrors
-                | None -> ()
+                    |> Array.minBy snd
+                ast.first <- subAst
                 ast.other <- null
-                minErrorsOfSubnodessCount       
+                errorsCount
+                //minErrorsOfSubnodessCount       
             | _ -> failwith ""    
 
         do getMinErrorsSubtree root |> ignore

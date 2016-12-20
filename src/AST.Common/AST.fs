@@ -214,9 +214,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>
         this.FilterChildren handleChildren
     
     member private this.ContainsErrors() =
-        match isErrorToken with
-        | Some(isError)-> tokens |> Array.exists isError 
-        | None -> false
+        tokens |> Array.exists this.IsErrorToken 
 
     member this.ChooseBestAst() = 
         if this.ContainsErrors() then
@@ -237,12 +235,12 @@ type Tree<'TokenType> (tokens : array<'TokenType>
             | :? Terminal as t ->
                  if this.IsErrorToken tokens.[t.TokenNumber] then Some 1 else Some 0
             | :? AST as ast ->
-                let inline familyHaveNoCycles (family: Family) = 
+                let inline familyHasNoCycles (family: Family) = 
                     family.nodes.isForAll (Tree<_>.smaller ast.pos)
 
                 let errors =
                     ast.map (fun family -> (family, handleFamily family))
-                    |> Array.filter (fun (f, _) -> familyHaveNoCycles f)
+                    |> Array.filter (fun (f, _) -> familyHasNoCycles f)
               
                 let minErrorsOfSubnodessCount =
                     errors                   

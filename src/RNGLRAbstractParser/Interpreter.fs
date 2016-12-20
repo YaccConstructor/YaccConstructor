@@ -135,13 +135,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             let source, target, token = tokenEdge
             if parserSource.TokenToNumber token <> parserSource.EofIndex then
                 let errorEdge = new ParserEdge<_>(source, target, parserSource.CreateErrorToken token)
-                do tokens.AddEdge errorEdge |> ignore
+                tokens.AddEdge errorEdge |> ignore
 
     let isErrorToken (token : 'TokenType) = 
-        if parserSource.ErrorRulesExists then
-            parserSource.TokenToNumber token = parserSource.ErrorIndex
-        else
-            false
+        parserSource.ErrorRulesExists && parserSource.TokenToNumber token = parserSource.ErrorIndex 
 
     // let startV, finalV, innerGraph =
     let startVList, finalVList, innerGraph =
@@ -396,14 +393,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         if v.passingReductions.Count > 0
         then
             handlePassingReductions v
-
-    let isErrorToken (token : 'TokenType) = 
-        if parserSource.ErrorRulesExists then
-            parserSource.TokenToNumber token = parserSource.ErrorIndex
-        else
-            false
-
-
 
     if tokens.EdgeCount = 0
     then

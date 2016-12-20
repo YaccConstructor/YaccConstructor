@@ -171,7 +171,6 @@ Target "Gen:YardFrontend" (fun _ -> runCmd @"src\YardFrontend\gen.cmd")
 Target "GenTests:RNGLR" (fun _ -> 
                             runCmd @"tests\RNGLRAbstractParser.Tests\gen.cmd"
                             runCmd @"tests\RNGLRAbstractParser.Tests\gen_lex.cmd"
-                            runCmd @"tests\RNGLRParser.ErrorRecovery.Tests\gen.cmd"
                             runCmd @"tests\RNGLRParser.Simple.Tests\gen.cmd"
                         )
 

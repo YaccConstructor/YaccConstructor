@@ -85,6 +85,7 @@ type NumNode =
 
 [<AllowNullLiteral>]
 type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
+    member this.Root = root
     member this.tokens = toks
     member this.AstToDot (indToString : int -> string) (tokenToNumber : 'TokenType -> int) (tokenData : 'TokenType -> obj) (path : string) =
         use out = new System.IO.StreamWriter (path : string)

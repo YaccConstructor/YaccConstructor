@@ -51,15 +51,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '60', 60)" onmouseover="showTip(event, '60', 60)">
+          <code onmouseout="hideTip(event, '716', 716)" onmouseover="showTip(event, '716', 716)">
             new(tokens, root, rules)
           </code>
-          <div class="tip" id="60">
+          <div class="tip" id="716">
             <strong>Signature:</strong> (tokens:&#39;TokenType array * root:AstNode * rules:int [] []) -&gt; Tree&lt;&#39;TokenType&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L145-145" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L150-150" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -70,11 +70,11 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '61', 61)" onmouseover="showTip(event, '61', 61)">
+          <code onmouseout="hideTip(event, '717', 717)" onmouseover="showTip(event, '717', 717)">
             new(...)
           </code>
-          <div class="tip" id="61">
-            <strong>Signature:</strong> (tokens:&#39;TokenType array * root:AstNode * rules:int [] [] * _leftSide:int array option * _numToString:(int -&gt; string) option) -&gt; Tree&lt;&#39;TokenType&gt;<br />
+          <div class="tip" id="717">
+            <strong>Signature:</strong> (tokens:&#39;TokenType array * root:AstNode * rules:int [] [] * _leftSide:int array option * _numToString:(int -&gt; string) option * isErrorToken:(&#39;TokenType -&gt; bool) option) -&gt; Tree&lt;&#39;TokenType&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
@@ -97,15 +97,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '62', 62)" onmouseover="showTip(event, '62', 62)">
+          <code onmouseout="hideTip(event, '718', 718)" onmouseover="showTip(event, '718', 718)">
             AstToDot(...)
           </code>
-          <div class="tip" id="62">
+          <div class="tip" id="718">
             <strong>Signature:</strong> (indToString:(int -&gt; string)) -&gt; (tokenToNumber:(&#39;TokenType -&gt; int)) -&gt; (tokenData:(&#39;TokenType -&gt; obj) option) -&gt; (leftSide:int array) -&gt; path:string -&gt; unit<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L872-872" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L918-918" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -115,15 +115,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '63', 63)" onmouseover="showTip(event, '63', 63)">
+          <code onmouseout="hideTip(event, '719', 719)" onmouseover="showTip(event, '719', 719)">
             CalculateStatistics(nonterminal)
           </code>
-          <div class="tip" id="63">
+          <div class="tip" id="719">
             <strong>Signature:</strong> nonterminal:string -&gt; int * int * double<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L344-344" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L390-390" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -133,15 +133,33 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '64', 64)" onmouseover="showTip(event, '64', 64)">
-            ChooseLongestMatch()
+          <code onmouseout="hideTip(event, '720', 720)" onmouseover="showTip(event, '720', 720)">
+            ChooseBestAst()
           </code>
-          <div class="tip" id="64">
+          <div class="tip" id="720">
             <strong>Signature:</strong> unit -&gt; unit<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L230-230" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L219-219" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '721', 721)" onmouseover="showTip(event, '721', 721)">
+            ChooseLongestMatch()
+          </code>
+          <div class="tip" id="721">
+            <strong>Signature:</strong> unit -&gt; unit<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L276-276" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -156,15 +174,15 @@ Eliminate cycles.</p>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '65', 65)" onmouseover="showTip(event, '65', 65)">
+          <code onmouseout="hideTip(event, '722', 722)" onmouseover="showTip(event, '722', 722)">
             ChooseSingleAst()
           </code>
-          <div class="tip" id="65">
+          <div class="tip" id="722">
             <strong>Signature:</strong> unit -&gt; unit<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L207-207" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L253-253" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -176,69 +194,15 @@ Eliminate cycles.</p>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '66', 66)" onmouseover="showTip(event, '66', 66)">
-            collectErrors(tokenToRange)
+          <code onmouseout="hideTip(event, '723', 723)" onmouseover="showTip(event, '723', 723)">
+            ChooseSingleAstWhenHaveErrors()
           </code>
-          <div class="tip" id="66">
-            <strong>Signature:</strong> (tokenToRange:(&#39;TokenType -&gt; &#39;?7463 * &#39;?7463)) -&gt; ResizeArray&lt;&#39;?7463 * &#39;?7463 * &#39;TokenType []&gt;<br />
-                      </div>
-        </td>
-        <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L577-577" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '67', 67)" onmouseover="showTip(event, '67', 67)">
-            collectWarnings(tokenToRange)
-          </code>
-          <div class="tip" id="67">
-            <strong>Signature:</strong> (tokenToRange:(&#39;TokenType -&gt; &#39;?7450 * &#39;?7450)) -&gt; ResizeArray&lt;(&#39;?7450 * &#39;?7450) * int []&gt;<br />
-                      </div>
-        </td>
-        <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L483-483" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '68', 68)" onmouseover="showTip(event, '68', 68)">
-            CountCounters()
-          </code>
-          <div class="tip" id="68">
-            <strong>Signature:</strong> unit -&gt; int * int * int * int * int<br />
-                      </div>
-        </td>
-        <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L952-952" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '69', 69)" onmouseover="showTip(event, '69', 69)">
-            EliminateCycles()
-          </code>
-          <div class="tip" id="69">
+          <div class="tip" id="723">
             <strong>Signature:</strong> unit -&gt; unit<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L181-181" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L226-226" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -248,15 +212,87 @@ Eliminate cycles.</p>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '70', 70)" onmouseover="showTip(event, '70', 70)">
+          <code onmouseout="hideTip(event, '724', 724)" onmouseover="showTip(event, '724', 724)">
+            collectErrors(tokenToRange)
+          </code>
+          <div class="tip" id="724">
+            <strong>Signature:</strong> (tokenToRange:(&#39;TokenType -&gt; &#39;?7647 * &#39;?7647)) -&gt; ResizeArray&lt;&#39;?7647 * &#39;?7647 * &#39;TokenType []&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L623-623" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '725', 725)" onmouseover="showTip(event, '725', 725)">
+            collectWarnings(tokenToRange)
+          </code>
+          <div class="tip" id="725">
+            <strong>Signature:</strong> (tokenToRange:(&#39;TokenType -&gt; &#39;?7634 * &#39;?7634)) -&gt; ResizeArray&lt;(&#39;?7634 * &#39;?7634) * int []&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L529-529" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '726', 726)" onmouseover="showTip(event, '726', 726)">
+            CountCounters()
+          </code>
+          <div class="tip" id="726">
+            <strong>Signature:</strong> unit -&gt; int * int * int * int * int<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L998-998" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '727', 727)" onmouseover="showTip(event, '727', 727)">
+            EliminateCycles()
+          </code>
+          <div class="tip" id="727">
+            <strong>Signature:</strong> unit -&gt; unit<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L191-191" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '728', 728)" onmouseover="showTip(event, '728', 728)">
             FindNonterminalsByInd(nonterminal)
           </code>
-          <div class="tip" id="70">
+          <div class="tip" id="728">
             <strong>Signature:</strong> nonterminal:int -&gt; AST []<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L306-306" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L352-352" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -266,15 +302,15 @@ Eliminate cycles.</p>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '71', 71)" onmouseover="showTip(event, '71', 71)">
+          <code onmouseout="hideTip(event, '729', 729)" onmouseover="showTip(event, '729', 729)">
             FindNonterminalsByString(nonterminal)
           </code>
-          <div class="tip" id="71">
+          <div class="tip" id="729">
             <strong>Signature:</strong> nonterminal:string -&gt; AST []<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L309-309" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L355-355" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -284,15 +320,15 @@ Eliminate cycles.</p>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '72', 72)" onmouseover="showTip(event, '72', 72)">
+          <code onmouseout="hideTip(event, '730', 730)" onmouseover="showTip(event, '730', 730)">
             GetForestWithToken(...)
           </code>
-          <div class="tip" id="72">
-            <strong>Signature:</strong> tokRange:&#39;?7477 -&gt; (tokenToRange:(&#39;TokenType -&gt; seq&lt;&#39;?7477&gt;)) -&gt; Tree&lt;&#39;TokenType&gt; list<br />
+          <div class="tip" id="730">
+            <strong>Signature:</strong> tokRange:&#39;?7661 -&gt; (tokenToRange:(&#39;TokenType -&gt; seq&lt;&#39;?7661&gt;)) -&gt; Tree&lt;&#39;TokenType&gt; list<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L829-829" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L875-875" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -305,15 +341,15 @@ tokRange - range of token  tokenToRange - mapping from token to range</p>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '73', 73)" onmouseover="showTip(event, '73', 73)">
+          <code onmouseout="hideTip(event, '731', 731)" onmouseover="showTip(event, '731', 731)">
             GetNextTree(unprocessed inputFilter)
           </code>
-          <div class="tip" id="73">
+          <div class="tip" id="731">
             <strong>Signature:</strong> (unprocessed:Terminal list) -&gt; (inputFilter:(Family -&gt; bool)) -&gt; Tree&lt;&#39;TokenType&gt; * Terminal list<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L740-740" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L786-786" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -327,15 +363,15 @@ unprocessed - list of number of tokens that need process.  inputFilter is a func
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '74', 74)" onmouseover="showTip(event, '74', 74)">
+          <code onmouseout="hideTip(event, '732', 732)" onmouseover="showTip(event, '732', 732)">
             getStructuredTokensFromFamily(family)
           </code>
-          <div class="tip" id="74">
+          <div class="tip" id="732">
             <strong>Signature:</strong> family:Family -&gt; TS&lt;&#39;TokenType&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L533-533" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L579-579" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -345,15 +381,15 @@ unprocessed - list of number of tokens that need process.  inputFilter is a func
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '75', 75)" onmouseover="showTip(event, '75', 75)">
+          <code onmouseout="hideTip(event, '733', 733)" onmouseover="showTip(event, '733', 733)">
             GetTokens(ast)
           </code>
-          <div class="tip" id="75">
+          <div class="tip" id="733">
             <strong>Signature:</strong> ast:AST -&gt; TS&lt;&#39;TokenType&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L562-562" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L608-608" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -363,15 +399,15 @@ unprocessed - list of number of tokens that need process.  inputFilter is a func
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '76', 76)" onmouseover="showTip(event, '76', 76)">
+          <code onmouseout="hideTip(event, '734', 734)" onmouseover="showTip(event, '734', 734)">
             GetTypeOfExpression(nonterminals)
           </code>
-          <div class="tip" id="76">
+          <div class="tip" id="734">
             <strong>Signature:</strong> (nonterminals:string []) -&gt; string []<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L315-315" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L361-361" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -381,15 +417,33 @@ unprocessed - list of number of tokens that need process.  inputFilter is a func
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '77', 77)" onmouseover="showTip(event, '77', 77)">
+          <code onmouseout="hideTip(event, '735', 735)" onmouseover="showTip(event, '735', 735)">
+            IsErrorToken(token)
+          </code>
+          <div class="tip" id="735">
+            <strong>Signature:</strong> token:&#39;TokenType -&gt; bool<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L159-159" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '736', 736)" onmouseover="showTip(event, '736', 736)">
             Order
           </code>
-          <div class="tip" id="77">
+          <div class="tip" id="736">
             <strong>Signature:</strong> AST []<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L148-148" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L153-153" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -400,15 +454,15 @@ unprocessed - list of number of tokens that need process.  inputFilter is a func
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '78', 78)" onmouseover="showTip(event, '78', 78)">
+          <code onmouseout="hideTip(event, '737', 737)" onmouseover="showTip(event, '737', 737)">
             PrintAst()
           </code>
-          <div class="tip" id="78">
+          <div class="tip" id="737">
             <strong>Signature:</strong> unit -&gt; unit<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L709-709" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L755-755" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -418,15 +472,15 @@ unprocessed - list of number of tokens that need process.  inputFilter is a func
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '79', 79)" onmouseover="showTip(event, '79', 79)">
+          <code onmouseout="hideTip(event, '738', 738)" onmouseover="showTip(event, '738', 738)">
             Root
           </code>
-          <div class="tip" id="79">
+          <div class="tip" id="738">
             <strong>Signature:</strong> AstNode<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L149-149" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L154-154" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -437,15 +491,15 @@ unprocessed - list of number of tokens that need process.  inputFilter is a func
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '80', 80)" onmouseover="showTip(event, '80', 80)">
+          <code onmouseout="hideTip(event, '739', 739)" onmouseover="showTip(event, '739', 739)">
             RulesCount
           </code>
-          <div class="tip" id="80">
+          <div class="tip" id="739">
             <strong>Signature:</strong> int<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L150-150" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L155-155" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -456,15 +510,15 @@ unprocessed - list of number of tokens that need process.  inputFilter is a func
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '81', 81)" onmouseover="showTip(event, '81', 81)">
+          <code onmouseout="hideTip(event, '740', 740)" onmouseover="showTip(event, '740', 740)">
             SpecifyLeftSide(ls)
           </code>
-          <div class="tip" id="81">
+          <div class="tip" id="740">
             <strong>Signature:</strong> (ls:int array option) -&gt; unit<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L157-157" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L167-167" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -474,15 +528,15 @@ unprocessed - list of number of tokens that need process.  inputFilter is a func
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '82', 82)" onmouseover="showTip(event, '82', 82)">
+          <code onmouseout="hideTip(event, '741', 741)" onmouseover="showTip(event, '741', 741)">
             SpecifyNumToString(nts)
           </code>
-          <div class="tip" id="82">
+          <div class="tip" id="741">
             <strong>Signature:</strong> (nts:(int -&gt; string) option) -&gt; unit<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L154-154" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L164-164" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -492,15 +546,15 @@ unprocessed - list of number of tokens that need process.  inputFilter is a func
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '83', 83)" onmouseover="showTip(event, '83', 83)">
+          <code onmouseout="hideTip(event, '742', 742)" onmouseover="showTip(event, '742', 742)">
             Tokens
           </code>
-          <div class="tip" id="83">
+          <div class="tip" id="742">
             <strong>Signature:</strong> &#39;TokenType array<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L151-151" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L156-156" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -511,15 +565,15 @@ unprocessed - list of number of tokens that need process.  inputFilter is a func
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '84', 84)" onmouseover="showTip(event, '84', 84)">
+          <code onmouseout="hideTip(event, '743', 743)" onmouseover="showTip(event, '743', 743)">
             TokensCount
           </code>
-          <div class="tip" id="84">
+          <div class="tip" id="743">
             <strong>Signature:</strong> int<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L152-152" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L157-157" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -530,15 +584,15 @@ unprocessed - list of number of tokens that need process.  inputFilter is a func
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '85', 85)" onmouseover="showTip(event, '85', 85)">
+          <code onmouseout="hideTip(event, '744', 744)" onmouseover="showTip(event, '744', 744)">
             Translate(...)
           </code>
-          <div class="tip" id="85">
-            <strong>Signature:</strong> (funs:(obj [] -&gt; &#39;Position * &#39;Position -&gt; obj) array) -&gt; (leftSides:int array) -&gt; (concat:(obj list -&gt; obj) array) -&gt; (epsilons:Tree&lt;&#39;?7470&gt; array) -&gt; (tokenToRange:(&#39;TokenType -&gt; &#39;Position * &#39;Position)) -&gt; zeroPosition:&#39;Position -&gt; clearAST:bool -&gt; errDict:ErrorDictionary&lt;&#39;TokenType&gt; -&gt; obj<br />
-                          <strong>Type parameters:</strong> '?7470          </div>
+          <div class="tip" id="744">
+            <strong>Signature:</strong> (funs:(obj [] -&gt; &#39;Position * &#39;Position -&gt; obj) array) -&gt; (leftSides:int array) -&gt; (concat:(obj list -&gt; obj) array) -&gt; (epsilons:Tree&lt;&#39;?7654&gt; array) -&gt; (tokenToRange:(&#39;TokenType -&gt; &#39;Position * &#39;Position)) -&gt; zeroPosition:&#39;Position -&gt; clearAST:bool -&gt; errDict:ErrorDictionary&lt;&#39;TokenType&gt; -&gt; obj<br />
+                          <strong>Type parameters:</strong> '?7654          </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L619-619" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L665-665" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -548,15 +602,15 @@ unprocessed - list of number of tokens that need process.  inputFilter is a func
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '86', 86)" onmouseover="showTip(event, '86', 86)">
+          <code onmouseout="hideTip(event, '745', 745)" onmouseover="showTip(event, '745', 745)">
             TraverseWithRanges(...)
           </code>
-          <div class="tip" id="86">
+          <div class="tip" id="745">
             <strong>Signature:</strong> (tokenToRange:(&#39;TokenType -&gt; &#39;Position * &#39;Position)) -&gt; (dispose:(int -&gt; unit)) -&gt; (handleCycleNode:(AST -&gt; unit)) -&gt; (f:(int -&gt; BlockResizeArray&lt;&#39;Position * &#39;Position&gt; -&gt; unit)) -&gt; unit<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L407-407" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L453-453" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -577,15 +631,15 @@ and having no children family, where each node has smaller position.</p>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '87', 87)" onmouseover="showTip(event, '87', 87)">
+          <code onmouseout="hideTip(event, '746', 746)" onmouseover="showTip(event, '746', 746)">
             FamilyToTokens
           </code>
-          <div class="tip" id="87">
+          <div class="tip" id="746">
             <strong>Signature:</strong> Dictionary&lt;Family,Terminal list&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L492-492" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L538-538" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -596,15 +650,15 @@ and having no children family, where each node has smaller position.</p>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '88', 88)" onmouseover="showTip(event, '88', 88)">
+          <code onmouseout="hideTip(event, '747', 747)" onmouseover="showTip(event, '747', 747)">
             GetTokensFromFamily(family)
           </code>
-          <div class="tip" id="88">
+          <div class="tip" id="747">
             <strong>Signature:</strong> family:Family -&gt; Terminal list<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L493-493" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/AST.Common/AST.fs#L539-539" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>

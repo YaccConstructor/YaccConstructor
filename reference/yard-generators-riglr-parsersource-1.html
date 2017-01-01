@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>ParserSource<'TokenType> - YaccConstructor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content=""/>
+    <meta name="author" content="YaccConstructor software foundation"/>
+
+    <script src="https://code.jquery.com/jquery-1.8.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.8.23/jquery-ui.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
+    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet"/>
+
+    <link type="text/css" rel="stylesheet" href="/YaccConstructor/content/style.css" />
+    <script type="text/javascript" src="/YaccConstructor/content/tips.js"></script>
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li><a href="http://fsharp.org">fsharp.org</a></li>
+          <li><a href="http://github.com/YaccConstructor/YaccConstructor">github page</a></li>
+        </ul>
+        <h3 class="muted"><a href="/YaccConstructor/index.html">YaccConstructor</a></h3>
+      </div>
+      <hr />
+      <div class="row">
+        <div class="span9" id="main">
+          
+
+
+
+<h1>ParserSource<'TokenType></h1>
+<p>
+  <span>Namespace: Yard.Generators.RIGLR</span><br />
+</p>
+<div class="xmldoc">
+</div>
+  <h3>Constructors</h3>
+  <table class="table table-bordered member-list">
+    <thead>
+      <tr><td>Constructor</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '922', 922)" onmouseover="showTip(event, '922', 922)">
+            new(...)
+          </code>
+          <div class="tip" id="922">
+            <strong>Signature:</strong> (table:(int * int) [] [] [] * tokenToNumber:(&#39;TokenType -&gt; int) * genLiteral:(string -&gt; int -&gt; &#39;TokenType option) * numToString:(int -&gt; string) * tokenData:(&#39;TokenType -&gt; obj) * rules:int [] * rulesStart:int [] * leftSide:int [] * startRule:int * eofIndex:int * popStates:Set&lt;int&gt; * finalState:int list) -&gt; ParserSource&lt;&#39;TokenType&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/RIGLRCommon/ParserSource.fs#L3-3" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>.ctor</code></p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <h3>Instance members</h3>
+  <table class="table table-bordered member-list">
+    <thead>
+      <tr><td>Instance member</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '923', 923)" onmouseover="showTip(event, '923', 923)">
+            EofIndex
+          </code>
+          <div class="tip" id="923">
+            <strong>Signature:</strong> int<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/RIGLRCommon/ParserSource.fs#L36-36" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_EofIndex</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '924', 924)" onmouseover="showTip(event, '924', 924)">
+            FinalState
+          </code>
+          <div class="tip" id="924">
+            <strong>Signature:</strong> int list<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/RIGLRCommon/ParserSource.fs#L38-38" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_FinalState</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '925', 925)" onmouseover="showTip(event, '925', 925)">
+            GenLiteral
+          </code>
+          <div class="tip" id="925">
+            <strong>Signature:</strong> string -&gt; int -&gt; &#39;TokenType option<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/RIGLRCommon/ParserSource.fs#L30-30" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_GenLiteral</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '926', 926)" onmouseover="showTip(event, '926', 926)">
+            LeftSide
+          </code>
+          <div class="tip" id="926">
+            <strong>Signature:</strong> int []<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/RIGLRCommon/ParserSource.fs#L34-34" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_LeftSide</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '927', 927)" onmouseover="showTip(event, '927', 927)">
+            NumToString
+          </code>
+          <div class="tip" id="927">
+            <strong>Signature:</strong> int -&gt; string<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/RIGLRCommon/ParserSource.fs#L33-33" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_NumToString</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '928', 928)" onmouseover="showTip(event, '928', 928)">
+            PopStates
+          </code>
+          <div class="tip" id="928">
+            <strong>Signature:</strong> Set&lt;int&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/RIGLRCommon/ParserSource.fs#L37-37" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_PopStates</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '929', 929)" onmouseover="showTip(event, '929', 929)">
+            Rules
+          </code>
+          <div class="tip" id="929">
+            <strong>Signature:</strong> int [] []<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/RIGLRCommon/ParserSource.fs#L32-32" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_Rules</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '930', 930)" onmouseover="showTip(event, '930', 930)">
+            StartRule
+          </code>
+          <div class="tip" id="930">
+            <strong>Signature:</strong> int<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/RIGLRCommon/ParserSource.fs#L35-35" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_StartRule</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '931', 931)" onmouseover="showTip(event, '931', 931)">
+            Table
+          </code>
+          <div class="tip" id="931">
+            <strong>Signature:</strong> (int * int) [] [] []<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/RIGLRCommon/ParserSource.fs#L28-28" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_Table</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '932', 932)" onmouseover="showTip(event, '932', 932)">
+            TokenData
+          </code>
+          <div class="tip" id="932">
+            <strong>Signature:</strong> &#39;TokenType -&gt; obj<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/RIGLRCommon/ParserSource.fs#L31-31" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_TokenData</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '933', 933)" onmouseover="showTip(event, '933', 933)">
+            TokenToNumber
+          </code>
+          <div class="tip" id="933">
+            <strong>Signature:</strong> &#39;TokenType -&gt; int<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/RIGLRCommon/ParserSource.fs#L29-29" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_TokenToNumber</code></p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+        </div>
+        <div class="span3">
+          <img src="/YaccConstructor/img/logo.png" alt="F# Project" style="width:150px;margin:10px" />  
+          <ul class="nav nav-list" id="menu" style="margin-top: 20px;">
+            <li class="nav-header">YaccConstructor</li>
+            <li><a href="/YaccConstructor/index.html">Home page</a></li>
+            <li class="divider"></li>
+            <li><a href="http://nuget.org/packages/YaccConstructor">Get Library via NuGet</a></li>
+            <li><a href="http://github.com/YaccConstructor/YaccConstructor">Source Code on GitHub</a></li>
+            <li><a href="/YaccConstructor/license.html">License</a></li>
+            <li><a href="/YaccConstructor/release-notes.html">Release Notes</a></li>
+            
+            <li class="nav-header">Getting started</li>
+            <li><a href="/YaccConstructor/tutorial.html">Sample tutorial</a></li>
+
+            <li class="nav-header">Documentation</li>
+            <li><a href="/YaccConstructor/reference/index.html">API Reference</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <a href="http://github.com/YaccConstructor/YaccConstructor"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"/></a>
+  </body>
+  </html>

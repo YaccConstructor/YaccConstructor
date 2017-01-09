@@ -3,8 +3,13 @@
 open VDS.RDF
 open VDS.RDF.Parsing
 
-let loadFromTTL (file:string) =
+let loadFromFile (file:string) =
     let g = new Graph()
-    let ttlparser = new TurtleParser()
-    ttlparser.Load(g, file)
+    if (System.IO.Path.GetExtension file).ToLower() = "ttl"
+    then        
+        let ttlparser = new TurtleParser()
+        ttlparser.Load(g, file)
+    else
+        FileLoader.Load(g, file)        
+        
     g

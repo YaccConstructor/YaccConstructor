@@ -50,6 +50,33 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <Import Project="..\..\.paket\paket.targets" />
+  <ItemGroup>
+    <Compile Include="Parser.fs" />
+    <None Include="paket.references" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
+      <Name>Common.AST</Name>
+      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RIGLRCommon\RIGLRCommon.fsproj">
+      <Name>RIGLRCommon</Name>
+      <Project>{43889e87-5ea7-4f34-85b3-3ec7cf871bbc}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v2.0' Or $(TargetFrameworkVersion) == 'v3.0' Or $(TargetFrameworkVersion) == 'v3.5')">
       <ItemGroup>
@@ -118,6 +145,17 @@
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
       <ItemGroup>
+        <Reference Include="FSharpx.Collections">
+          <HintPath>..\..\packages\FSharpx.Collections\lib\net40\FSharpx.Collections.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
         <Reference Include="FSharpx.Collections.Experimental">
           <HintPath>..\..\packages\FSharpx.Collections.Experimental\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
           <Private>True</Private>
@@ -126,31 +164,4 @@
       </ItemGroup>
     </When>
   </Choose>
-  <ItemGroup>
-    <Compile Include="Parser.fs" />
-    <None Include="paket.references" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
-      <Name>Common.AST</Name>
-      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\RIGLRCommon\RIGLRCommon.fsproj">
-      <Name>RIGLRCommon</Name>
-      <Project>{43889e87-5ea7-4f34-85b3-3ec7cf871bbc}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-  </ItemGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

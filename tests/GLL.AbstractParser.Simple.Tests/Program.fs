@@ -1281,21 +1281,22 @@ type ``GLL abstract parser tests`` () =
 [<EntryPoint>]
 let f x =
     //System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
-    let t = new ``GLL abstract parser tests``()
-    let f () = 
-                t._AvgPerfTest_unamb()
-                //let r = parseGraphCYK (t.GetFullGraph 4 [] GLL.Brackets2.RNGLR_EOF  true)
-                //printfn "Result size: %A" r.Count
-               //t.PerformanceTestFullGraphBadLeftRec()
-               //t.PerformanceTestFullGraphUnambBraces()
-               //t.PerformanceTestFullGraphAmbBraces()
-//               t.PerformanceTestLinearBadLeftRec()
-               //t.PerformanceTestLinearUnambBraces()
-//               t.PerformanceTestLinearAmbBraces()
-              //_35_Expression() //
-    //let th = new System.Threading.Thread(f, 10000000)
-    //th.Start()
-    f()
+    let f = YC.GLL.Abstarct.Tests.RDFPerformance.loadFromTTL @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\1.1.ttl"
+//    let t = new ``GLL abstract parser tests``()
+//    let f () = 
+//                t._AvgPerfTest_unamb()
+//                //let r = parseGraphCYK (t.GetFullGraph 4 [] GLL.Brackets2.RNGLR_EOF  true)
+//                //printfn "Result size: %A" r.Count
+//               //t.PerformanceTestFullGraphBadLeftRec()
+//               //t.PerformanceTestFullGraphUnambBraces()
+//               //t.PerformanceTestFullGraphAmbBraces()
+////               t.PerformanceTestLinearBadLeftRec()
+//               //t.PerformanceTestLinearUnambBraces()
+////               t.PerformanceTestLinearAmbBraces()
+//              //_35_Expression() //
+//    //let th = new System.Threading.Thread(f, 10000000)
+//    //th.Start()
+//    f()
     0
 
 (*

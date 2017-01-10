@@ -1,0 +1,7 @@
+[<Start>]
+s1 : s
+s : b s {""}
+  | {""}
+b : SCO b SCOR
+  | b SCOR
+  | SCO SCOR

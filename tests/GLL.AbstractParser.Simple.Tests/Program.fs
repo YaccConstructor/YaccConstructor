@@ -1281,19 +1281,20 @@ type ``GLL abstract parser tests`` () =
 [<EntryPoint>]
 let f x =
     //System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
-    for p in 
-        [
-         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\1.1.ttl"
-         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
-         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\pizza.owl"
-         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf" 
-         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\people_pets.rdf"
-        ] do
-
-            let f = 
-                YC.GLL.Abstarct.Tests.RDFPerformance.loadFromFile p
-                 
-            printfn "triples in %A: %A" (System.IO.Path.GetFileName p) f.Triples.Count
+//    for p in 
+//        [
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\1.1.ttl"
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\pizza.owl"
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf" 
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\people_pets.rdf"
+//        ] do
+//
+//            let f = 
+//                YC.GLL.Abstarct.Tests.RDFPerformance.loadFromFile p
+//                 
+//            printfn "triples in %A: %A" (System.IO.Path.GetFileName p) f.Triples.Count
+    YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf"
 //    let t = new ``GLL abstract parser tests``()
 //    let f () = 
 //                t._AvgPerfTest_unamb()

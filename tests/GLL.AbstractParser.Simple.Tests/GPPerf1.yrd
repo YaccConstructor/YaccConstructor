@@ -1,0 +1,10 @@
+[<Start>]
+s1 : s
+
+s : SCO s SCOR {""}
+  | T s TR {""}
+  | m
+
+m : {""}
+
+f : OTHER

@@ -101,6 +101,7 @@
     <Compile Include="Conj2.yrd.fs" />
     <Compile Include="Conj3.yrd.fs" />
     <Compile Include="Brackets2.yrd.fs" />
+    <Compile Include="GPPerf1.yrd.fs" />
     <Compile Include="RDFPerformance.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

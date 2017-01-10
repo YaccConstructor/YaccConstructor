@@ -1295,7 +1295,8 @@ let f x =
 //                 
 //            printfn "triples in %A: %A" (System.IO.Path.GetFileName p) f.Triples.Count
     //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf"
-    YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
+    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
+    YC.GLL.Abstarct.Tests.RDFPerformance.performTests()
 //    let t = new ``GLL abstract parser tests``()
 //    let f () = 
 //                t._AvgPerfTest_unamb()

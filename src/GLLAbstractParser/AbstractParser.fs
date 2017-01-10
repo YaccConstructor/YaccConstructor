@@ -19,7 +19,10 @@ type M =
     val lbl : int<labelMeasure>
     new (p,l) = {pos = p; lbl = l}
 
+let rootCount = ref 0
+
 let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input : ParserInputGraph<'TokenType>) : ParserCommon.ParseResult<_> = 
+    rootCount := 0
     (*let input = input
     let input = 
         let h = input.Edges |> Seq.map (fun e -> new ParserEdge<'TokenType * ref<bool>>(e.Source, e.Target, (e.Tag , ref false)))
@@ -352,12 +355,13 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     
                     if true//checkConj res 
                     then  
-                            printfn "count: %A" nonTerminalNodes.Count
+                            //printfn "count: %A" nonTerminalNodes.Count
                             let roots = 
                                 nonTerminalNodes.Values
                                 |> Seq.map (fun i -> (sppfNodes.[int i] :?> NonTerminalNode).Name)
                                 |> Seq.filter ((=)4)
-                            Seq.length roots |> printfn "%A" 
+                            //Seq.length roots |> printfn "%A" 
+                            rootCount := Seq.length roots
                             let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
 //                            setU |> Array.sumBy (fun s -> if s <> null 
 //                                                            then s.Values |> Seq.sumBy (fun s -> if s <> null 

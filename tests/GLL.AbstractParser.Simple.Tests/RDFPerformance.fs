@@ -36,6 +36,7 @@ let loadFromFile (file:string) =
 
 let getParseInputGraph file =    
     let g = loadFromFile file
+    let triples = g.Triples.Count
     let edgs = getEdges g
     let edg f t (l: string) = 
         match l.ToLower() with
@@ -51,8 +52,8 @@ let getParseInputGraph file =
                 new ParserEdge<_>(t, f, GLL.GPPerf1.SCOR 1)
             ]
 
-        | _ -> // [ new ParserEdge<_>(f, t, GLL.GPPerf1.OTHER 0)]
-               []
+        | _ -> [ new ParserEdge<_>(f, t, GLL.GPPerf1.OTHER 0)]
+               //[]
         
     let allVs = edgs |> Array.collect (fun (f,l,t) -> [|f;t|]) |> Set.ofArray |> Array.ofSeq
     let eofV = Array.max allVs + 1
@@ -62,7 +63,7 @@ let getParseInputGraph file =
     let g = new ParserInputGraph<_>(allVs, [|eofV|])
     g.AddVerticesAndEdgeRange edges |> ignore
     //g.PrintToDot "input1.dot" (fun s -> (((string s).Split '.' |> Array.rev).[0].Split '+' |> Array.rev).[0])
-    g
+    g, triples
 
 let  getTestGraph () =
     let qGraph = new ParserInputGraph<_>([|0;2|], [|4|])
@@ -82,9 +83,9 @@ let  getTestGraph () =
     qGraph
 
          
-let parse file =
+let processFile file =
     let cnt = 3
-    let g = 
+    let g, triples = 
         getParseInputGraph file
         //getTestGraph ()
     //g.PrintToDot "input2.dot" (fun s -> (((string s).Split '.' |> Array.rev).[0].Split '+' |> Array.rev).[0])
@@ -93,9 +94,17 @@ let parse file =
         let res = GLL.GPPerf1.buildAbstractAst g
         match res with
         | Success t -> 
-            printfn "Success with: %A" t.CountCounters
+            printfn "Success"
             //t.AstToDot GLL.GPPerf1.numToString  GLL.GPPerf1.tokenToNumber GLL.GPPerf1.tokenData "outt.dot"
         | _ -> printfn "res: %A" res
         ()
     let time = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
-    printfn "time: %A" time
+    System.IO.Path.GetFileNameWithoutExtension file, triples, time, !Yard.Generators.GLL.AbstractParser.rootCount
+
+let performTests () =
+    let basePath = @"..\..\..\data\RDF\"
+    let files = System.IO.Directory.GetFiles basePath    
+    files 
+    |> Array.map processFile
+    |> Array.sortBy (fun (_,_,x,_) -> x)
+    |> Array.iter (printfn "%A")    

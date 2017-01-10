@@ -51,7 +51,8 @@ let getParseInputGraph file =
                 new ParserEdge<_>(t, f, GLL.GPPerf1.SCOR 1)
             ]
 
-        | _ -> [ new ParserEdge<_>(f, t, GLL.GPPerf1.OTHER 0)]
+        | _ -> // [ new ParserEdge<_>(f, t, GLL.GPPerf1.OTHER 0)]
+               []
         
     let allVs = edgs |> Array.collect (fun (f,l,t) -> [|f;t|]) |> Set.ofArray |> Array.ofSeq
     let eofV = Array.max allVs + 1
@@ -60,18 +61,40 @@ let getParseInputGraph file =
         @ [for i in allVs -> new ParserEdge<_>(i, eofV, GLL.GPPerf1.RNGLR_EOF 2)]
     let g = new ParserInputGraph<_>(allVs, [|eofV|])
     g.AddVerticesAndEdgeRange edges |> ignore
+    //g.PrintToDot "input1.dot" (fun s -> (((string s).Split '.' |> Array.rev).[0].Split '+' |> Array.rev).[0])
     g
-     
+
+let  getTestGraph () =
+    let qGraph = new ParserInputGraph<_>([|0;2|], [|4|])
+    let edg f t l = new ParserEdge<_>(f, t, l) 
+    qGraph.AddVerticesAndEdgeRange
+        [edg 0 1 (GLL.GPPerf1.T 6)
+         edg 1 0 (GLL.GPPerf1.TR 1)
+         edg 2 3 (GLL.GPPerf1.T 2)
+         edg 3 2 (GLL.GPPerf1.TR 3)
+         edg 3 1 (GLL.GPPerf1.T 4)
+         edg 1 3 (GLL.GPPerf1.TR 5)
+         edg 0 4 (GLL.GPPerf1.RNGLR_EOF 0)
+         edg 1 4 (GLL.GPPerf1.RNGLR_EOF 0)
+         edg 2 4 (GLL.GPPerf1.RNGLR_EOF 0)
+         edg 3 4 (GLL.GPPerf1.RNGLR_EOF 0)
+        ] |> ignore
+    qGraph
+
+         
 let parse file =
     let cnt = 3
-    let g = getParseInputGraph file
+    let g = 
+        getParseInputGraph file
+        //getTestGraph ()
+    //g.PrintToDot "input2.dot" (fun s -> (((string s).Split '.' |> Array.rev).[0].Split '+' |> Array.rev).[0])
     let start = System.DateTime.Now
     for i in 0..cnt-1 do
         let res = GLL.GPPerf1.buildAbstractAst g
         match res with
         | Success t -> 
             printfn "Success with: %A" t.CountCounters
-            t.AstToDot GLL.GPPerf1.numToString  GLL.GPPerf1.tokenToNumber GLL.GPPerf1.tokenData "outt.dot"
+            //t.AstToDot GLL.GPPerf1.numToString  GLL.GPPerf1.tokenToNumber GLL.GPPerf1.tokenData "outt.dot"
         | _ -> printfn "res: %A" res
         ()
     let time = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)

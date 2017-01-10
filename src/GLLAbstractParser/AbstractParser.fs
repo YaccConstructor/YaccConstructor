@@ -59,7 +59,13 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
         let edges = Array2D.zeroCreate<SysDict<int<nodeMeasure>, SysDict<int, ResizeArray<int>>>> slots.Count (input.VertexCount )
         let terminalNodes = Array3D.zeroCreate<int<nodeMeasure>> input.VertexCount input.VertexCount parser.TermCount  
         let currentGSSNode = ref <| dummyGSSNode
-        let currentContext = ref <| new Context(*<_>*)(!currentVertexInInput, !structures.CurrentLabel, !currentGSSNode, structures.Dummy(*, structures.Dummy*)) //without *1<labelMeasure>
+        for v in input.InitStates do
+            //let oEdges = outEdges.[v]
+            //for e in oEdges do
+                setR.Enqueue(new Context(v, !structures.CurrentLabel, !currentGSSNode, structures.Dummy))
+        let currentContext = 
+            ref <| setR.Dequeue()
+            //ref <| new Context(*<_>*)(!currentVertexInInput, !structures.CurrentLabel, !currentGSSNode, structures.Dummy(*, structures.Dummy*)) //without *1<labelMeasure>
         
         let finalExtensions =
             let len = input.FinalStates.Length
@@ -297,6 +303,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                     let curRight =  sppfNodes.Item (int !structures.CurrentN) 
                     let r = curRight.getExtension ()
                     //if Array.exists ((=) r) finalExtensions then finalPaths.Add !currentPath
+                    
                     structures.FinalMatching
                         curRight 
                         parser.LeftSide.[parser.StartRule]
@@ -344,7 +351,13 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
 //                            printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16) 
                     
                     if true//checkConj res 
-                    then        
+                    then  
+                            printfn "count: %A" nonTerminalNodes.Count
+                            let roots = 
+                                nonTerminalNodes.Values
+                                |> Seq.map (fun i -> (sppfNodes.[int i] :?> NonTerminalNode).Name)
+                                |> Seq.filter ((=)4)
+                            Seq.length roots |> printfn "%A" 
                             let r1 = new Tree<_> (tokens.ToArray(), res, parser.rules)
 //                            setU |> Array.sumBy (fun s -> if s <> null 
 //                                                            then s.Values |> Seq.sumBy (fun s -> if s <> null 

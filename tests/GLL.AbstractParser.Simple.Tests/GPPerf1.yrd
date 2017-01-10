@@ -1,8 +1,8 @@
 [<Start>]
 s1 : s
 
-s : SCO s SCOR {""}
-  | T s TR {""}
+s : SCOR s SCO {""}
+  | TR s T {""}
   | m
 
 m : {""}

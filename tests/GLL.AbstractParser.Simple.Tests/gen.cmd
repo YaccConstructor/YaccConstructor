@@ -90,3 +90,9 @@ for %%i in (Attrs, Cond, Counter, Cycle, Eps2, Epsilon, Expr, First, ListEps, Lo
 
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i "..\YC.GrammarZOO\SQL\TSQL\mssql_abstract.yrd" -c ExpandEbnf -c Linearize -c ExpandMeta ^
         -g "GLLGenerator -pos int -token int -abstract true -module GLL.MsSqlParser -o MsSqlParser.yrd.fs " >> log.txt
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Brackets2.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "GLLGenerator -pos int -token int -module GLL.Brackets2 -translate false -o Brackets2.yrd.fs -abstract true" >> log.txt
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i GPPerf1.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "GLLGenerator -pos int -token int -module GLL.GPPerf1 -translate false -o GPPerf1.yrd.fs -abstract true" >> log.txt

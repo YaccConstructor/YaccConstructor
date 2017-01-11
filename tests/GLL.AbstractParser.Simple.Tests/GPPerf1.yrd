@@ -3,7 +3,8 @@ s1 : s
 
 s : SCOR s SCO {""}
   | TR s T {""}
-  | m
+  | SCOR SCO {""}
+  | TR T {""}
 
 m : {""}
 

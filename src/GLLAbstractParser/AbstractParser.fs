@@ -345,7 +345,12 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 if errors.Count <> 0 then
                     for e in errors do
                         printfn "Position %d rule %d" (getLeft e.Key) (getRight e.Key >>> 16)
-                
+                let roots = 
+                    nonTerminalNodes.Values
+                    |> Seq.map (fun i -> (sppfNodes.[int i] :?> NonTerminalNode).Name)
+                    |> Seq.filter ((=)4)
+                //Seq.length roots |> printfn "%A" 
+                rootCount := Seq.length roots
                 Error ("String was not parsed")
             | Some res -> 
 //                    let t =  

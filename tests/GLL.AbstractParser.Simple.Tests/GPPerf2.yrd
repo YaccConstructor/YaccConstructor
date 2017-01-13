@@ -1,8 +1,9 @@
 [<Start>]
-s1 : s
+s1 : b SCO
 
-s : b SCO* | SCOR* b 
 
-b : SCOR b SCO | SCOR SCO
+b : SCOR b SCO  | SCOR SCO 
+
+s: OTHER | T | TR
 
 f: OTHER | T | TR

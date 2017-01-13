@@ -348,7 +348,8 @@ let buildAbstractAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (input :
                 let roots = 
                     nonTerminalNodes.Values
                     |> Seq.map (fun i -> (sppfNodes.[int i] :?> NonTerminalNode).Name)
-                    |> Seq.filter ((=)4)
+                    |> Seq.filter (fun x -> x = 4 (*|| x = 0*))
+                //printfn "count: %A" nonTerminalNodes.Count
                 //Seq.length roots |> printfn "%A" 
                 rootCount := Seq.length roots
                 Error ("String was not parsed")

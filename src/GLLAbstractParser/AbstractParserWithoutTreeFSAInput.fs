@@ -13,61 +13,8 @@ open YC.GLL.GSS
 
 type SysDict<'k,'v> = System.Collections.Generic.Dictionary<'k,'v>
 type Queue<'t> = System.Collections.Generic.Queue<'t>
-type CompressedArray<'t> = Yard.Generators.GLL.ParserCommon.CompressedArray<'t>
-
-/// For debuging
-type EdgeOfGSS = 
-    {
-        startVertex : GSSVertexNFA
-        endVertex : GSSVertexNFA
-        state : int<positionInGrammar>
-        len : uint16
-    }
-/// For debuging
-let printEdges fileName (edges : System.Collections.Generic.HashSet<EdgeOfGSS>) =
-    let toPrint = new ResizeArray<_>(["digraph G {\nnode [shape = circle]"])
-    let edgs = new ResizeArray<_>()
-    let nodes = new ResizeArray<_>()
-    
-    let getStrFromVertex (v : GSSVertexNFA) = 
-        let edgeOfInput = CommonFuns.getEdge v.PositionInInput
-        let posOnEdgeOfInput = CommonFuns.getPosOnEdge v.PositionInInput
-        
-        sprintf "St:%i;Edg:%i;Pos:%i" v.NontermState edgeOfInput posOnEdgeOfInput
-
-    for edge in edges do
-        let endName = getStrFromVertex edge.endVertex
-        let startName = getStrFromVertex edge.startVertex
-        let edgeName = sprintf "ContinueSt:%i,Len:%i" edge.state edge.len
-
-        edgeName |> edgs.Add
-
-        if nodes.Contains endName |> not then
-            endName |> nodes.Add
-            let nName = sprintf "%i[label=\"%s\"]" (nodes.Count-1) endName
-            nName |> toPrint.Add
-
-        if nodes.Contains startName |> not then
-            startName |> nodes.Add
-            let nName = sprintf "%i[label=\"%s\"]" (nodes.Count-1) startName
-            nName |> toPrint.Add
-
-        let startId = nodes.IndexOf startName
-        let endId = nodes.IndexOf endName
-
-        let edge = sprintf "%i -> %i [label=\"%s\",color=blue]; \n" startId endId edgeName
-
-        toPrint.Add edge
-
-    toPrint.Add "}"
-
-    System.IO.File.WriteAllLines(fileName, toPrint)
-
-
 
 let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) = 
-    //let shift = input.Shift
-    //let edgesOfGSS = new System.Collections.Generic.HashSet<_>()
 
     let anyNonterm = parser.NumOfAnyState
 
@@ -111,8 +58,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
     let addContext (inputVertex : int<positionInInput>) (state : int<positionInGrammar>) (vertex:GSSVertex) len =
         if not <| vertex.ContainsContext inputVertex state
         then pushContext inputVertex state vertex len
-
-        
+    
     ///Creates new descriptors.(Calls when found nonterninal in rule(on current input edge, or on some of next)))
     let create (stateToContinue : int<positionInGrammar>) (posInGrammar : int<positionInGrammar>) =
         let index = !currentIndex

@@ -23,8 +23,7 @@ type GSSVertex (posInGrammar: int<positionInGrammar>, posInInput: int<positionIn
     member this.ContainsContext (inputIndex: int<positionInInput>) (state : int<positionInGrammar>) =
         let cond, current = setU.TryGetValue state
         if cond
-        then
-            true            
+        then true            
         else
             setU.Add(state, inputIndex)
             false

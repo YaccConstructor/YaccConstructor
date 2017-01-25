@@ -1,0 +1,2 @@
+[<Start>]
+s<<arg>> : r=s<<(arg * 2)>> A {r}| A {arg}

@@ -1,0 +1,2 @@
+[<Start>]
+s : l=A* r=A* { (l : _ list).Length, (r : _ list).Length }

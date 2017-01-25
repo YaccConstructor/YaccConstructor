@@ -1,0 +1,5 @@
+[<Start>]
+s: e2 NUM
+e: NUM
+pl: PLUS
+e2: e pl

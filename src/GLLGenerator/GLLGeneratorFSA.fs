@@ -173,14 +173,14 @@ type GLLFSA() =
                                         ))
                     |> List.ofSeq
 
-                let printState (state:(string * int<state>) []) isFirst isLast =
+                let printState (state:(string * int<positionInGrammar>) []) isFirst isLast =
                     let prefix = if isFirst then "  [|" else "    "
                     let postfix = if isLast then " |]" else ";"
 
                     let printEdge (str,state) isFirst isLast = 
                         let prefix = if isFirst then "[|" else ""
                         let postfix = if isLast then "|]" else ";"
-                        print "%s%s<state>,%s<state>%s" prefix str (state.ToString()) postfix
+                        print "%s%s<positionInGrammar>,%s<positionInGrammar>%s" prefix str (state.ToString()) postfix
                     
                     print "%s" prefix
 
@@ -220,9 +220,9 @@ type GLLFSA() =
                     |> (fun x -> 
                         match x with
                         | Some i -> i.Key
-                        | _ -> -1<state>)
+                        | _ -> -1<positionInGrammar>)
 
-                println "let private numOfAnyState = %i<state>" numOfAnyState
+                println "let private numOfAnyState = %i<positionInGrammar>" numOfAnyState
                 println ""
 
                 println "let private numIsTerminal = function"
@@ -236,9 +236,9 @@ type GLLFSA() =
                 println "    | _ -> false\n"
                 *)
 
-                println "let private stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int, int<state>>()"
+                println "let private stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int, int<positionInGrammar>>()"
                 for state, token, newState in stateTokenNewState do
-                    println "stateAndTokenToNewState.Add(%i, %i<state>)" (pack state token) newState
+                    println "stateAndTokenToNewState.Add(%i, %i<positionInGrammar>)" (pack state token) newState
                 println ""
 
                 println "let private outNonterms ="
@@ -249,18 +249,18 @@ type GLLFSA() =
 //                println "    outNontermsToConvert"
 //                println "    |> Array.Parallel.map (fun x -> "
 //                println "        x"
-//                println "        |> Array.map (fun (x,y) -> x, y * 1<state>))"
+//                println "        |> Array.map (fun (x,y) -> x, y * 1<positionInGrammar>))"
 //                println ""
 
-                println "let private startState = %i<state>" fsa.StartState
+                println "let private startState = %i<positionInGrammar>" fsa.StartState
                 println ""
 
                 let printFinalStates () =
                     let printState state isFirst isLast = 
-                        let prefix = if isFirst then "  new System.Collections.Generic.HashSet<int<state>>(\n     [|" else "       "
+                        let prefix = if isFirst then "  new System.Collections.Generic.HashSet<int<positionInGrammar>>(\n     [|" else "       "
                         let postfix = if isLast then "|])" else ";"
 
-                        println "%s%i<state>%s" prefix state postfix
+                        println "%s%i<positionInGrammar>%s" prefix state postfix
 
                     let i = ref 0
                     for state in fsa.FinalStates do

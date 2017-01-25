@@ -41,27 +41,34 @@ let getParseInputGraph t' tr' sco' scor' other' eof' file =
     let edg f t (l: string) = 
         match l.ToLower() with
         | "#type" -> 
-            [
+            [|
                 new ParserEdge<_>(f, t, t' 0) 
                 new ParserEdge<_>(t, f, tr' 0)
-            ]
+            |]
 
         | "#subclassof" -> 
-            [
+            [|
                 new ParserEdge<_>(f, t, sco' 1) 
                 new ParserEdge<_>(t, f, scor' 1)
-            ]
+            |]
 
-        | _ -> [ new ParserEdge<_>(f, t, other' 0)]
-               //[]
+        | _ -> //[| new ParserEdge<_>(f, t, other' 0)|]
+               [||]
         
     let allVs = edgs |> Array.collect (fun (f,l,t) -> [|f;t|]) |> Set.ofArray |> Array.ofSeq
-    let eofV = Array.max allVs + 1
-    let edges = 
-        [for (f,l,t) in edgs do yield! edg f t l]
-        @ [for i in allVs -> new ParserEdge<_>(i, eofV, eof' 2)]
+    let eofV = allVs.Length //Array.max allVs + 1
+        
     let g = new ParserInputGraph<_>(allVs, [|eofV|])
-    g.AddVerticesAndEdgeRange edges |> ignore
+    
+    
+    [|for (f,l,t) in edgs -> edg f t l |]
+    |> Array.concat
+    |> g.AddVerticesAndEdgeRange
+    |> ignore
+    allVs |> Array.Parallel.map (fun i -> new ParserEdge<_>(i, eofV, eof' 2))
+    |> g.AddVerticesAndEdgeRange
+    |> ignore
+    
     //g.PrintToDot "input1.dot" (fun s -> (((string s).Split '.' |> Array.rev).[0].Split '+' |> Array.rev).[0])
     g, triples
 
@@ -84,12 +91,12 @@ let  getTestGraph () =
 
          
 let processFile file =
-    let cnt = 3
+    let cnt = 1
     let g1, triples1 = 
         getParseInputGraph GLL.GPPerf1.T GLL.GPPerf1.TR GLL.GPPerf1.SCO GLL.GPPerf1.SCOR GLL.GPPerf1.OTHER GLL.GPPerf1.RNGLR_EOF file
-    let g2, triples1 = 
-        getParseInputGraph GLL.GPPerf2.T GLL.GPPerf2.TR GLL.GPPerf2.SCO GLL.GPPerf2.SCOR GLL.GPPerf2.OTHER GLL.GPPerf2.RNGLR_EOF file
-        //getTestGraph ()
+//    let g2, triples1 = 
+//        getParseInputGraph GLL.GPPerf2.T GLL.GPPerf2.TR GLL.GPPerf2.SCO GLL.GPPerf2.SCOR GLL.GPPerf2.OTHER GLL.GPPerf2.RNGLR_EOF file
+//        //getTestGraph ()
     //g.PrintToDot "input2.dot" (fun s -> (((string s).Split '.' |> Array.rev).[0].Split '+' |> Array.rev).[0])
     let start = System.DateTime.Now
     for i in 0..cnt-1 do
@@ -103,17 +110,17 @@ let processFile file =
     let time1 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
     let root1 = !Yard.Generators.GLL.AbstractParser.rootCount
 
-    let start = System.DateTime.Now
-    for i in 0..cnt-1 do
-        let res = GLL.GPPerf2.buildAbstractAst g2
-        match res with
-        | Success t -> 
-            printfn "Success"
-            //t.AstToDot GLL.GPPerf1.numToString  GLL.GPPerf1.tokenToNumber GLL.GPPerf1.tokenData "outt.dot"
-        | _ -> printfn "res: %A" res
-        ()
-    let time2 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
-    let root2 = !Yard.Generators.GLL.AbstractParser.rootCount
+//    let start = System.DateTime.Now
+//    for i in 0..cnt-1 do
+//        let res = GLL.GPPerf2.buildAbstractAst g2
+//        match res with
+//        | Success t -> 
+//            printfn "Success"
+//            //t.AstToDot GLL.GPPerf1.numToString  GLL.GPPerf1.tokenToNumber GLL.GPPerf1.tokenData "outt.dot"
+//        | _ -> printfn "res: %A" res
+//        ()
+    let time2 = 0.0//(System.DateTime.Now - start).TotalMilliseconds / (float cnt)
+    let root2 = 0 //!Yard.Generators.GLL.AbstractParser.rootCount
 
     System.IO.Path.GetFileNameWithoutExtension file, triples1, time1, root1, time2, root2
 

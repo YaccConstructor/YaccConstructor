@@ -61,11 +61,9 @@
     <Compile Include="SimpleBranch.yrd.fs" />
     <Compile Include="BadLeftRecursion.yrd.fs" />
     <Compile Include="SimpleAmb.yrd.fs" />
-    <Compile Include="SimpleleftRecursion.yrd.fs" />
     <Compile Include="SimpleRightNull.yrd.fs" />
     <Compile Include="SimpleRightRecursion.yrd.fs" />
     <Compile Include="Brackets.yrd.fs" />
-    <Compile Include="Brackets2.yrd.fs" />
     <Compile Include="Calc.yrd.fs" />
     <Compile Include="CroppedBrackets.yrd.fs" />
     <Compile Include="Eps.yrd.fs" />
@@ -97,11 +95,8 @@
     <Compile Include="Longest.yrd.fs" />
     <Compile Include="Mixed.yrd.fs" />
     <Compile Include="Omit.yrd.fs" />
-    <Compile Include="Conj1.yrd.fs" />
-    <Compile Include="Conj2.yrd.fs" />
-    <Compile Include="Conj3.yrd.fs" />
-    <Compile Include="Brackets2.yrd.fs" />
     <Compile Include="Program.fs" />
+    <None Include="SimpleLeftRecursion.yrd" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">

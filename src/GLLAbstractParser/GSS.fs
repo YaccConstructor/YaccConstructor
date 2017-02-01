@@ -4,7 +4,7 @@ open Yard.Generators.GLL.ParserCommon
 
 type GSSVertex (posInGrammar: int<positionInGrammar>, posInInput: int<positionInInput>) =    
 
-    let setU = new System.Collections.Generic.Dictionary<int<positionInGrammar>, int<positionInInput>>()
+    let setU = new System.Collections.Generic.Dictionary<int<positionInGrammar>, ResizeArray<int<positionInInput>>>()
     let setP = new ResizeArray<int<positionInInput>*uint16>() 
     
     override this.Equals y = 
@@ -23,9 +23,14 @@ type GSSVertex (posInGrammar: int<positionInGrammar>, posInInput: int<positionIn
     member this.ContainsContext (inputIndex: int<positionInInput>) (state : int<positionInGrammar>) =
         let cond, current = setU.TryGetValue state
         if cond
-        then true            
+        then 
+            if current.Contains inputIndex
+            then true
+            else 
+             current.Add inputIndex
+             false
         else
-            setU.Add(state, inputIndex)
+            setU.Add(state, new ResizeArray<_>([inputIndex]))
             false
 
 [<Struct>]

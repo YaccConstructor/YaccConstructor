@@ -55,12 +55,12 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         setR.Push(new ContextFSA<_>(inputVertex, state, vertex, len))
 
     /// Adds new context to stack (setR) if it is first occurrence of this context (if SetU doesn't contain it).
-    let addContext (inputVertex : int<positionInInput>) (state : int<positionInGrammar>) (vertex:GSSVertex) len =
-        if not <| vertex.ContainsContext inputVertex state
-        then pushContext inputVertex state vertex len
+    let addContext posInInput posInGrammar gssVertex len =
+        if not <| vertex.ContainsContext posInInput posInGrammar
+        then pushContext posInInput posInGrammar gssVertex len
     
     ///Creates new descriptors.(Calls when found nonterninal in rule(on current input edge, or on some of next)))
-    let create (stateToContinue : int<positionInGrammar>) (posInGrammar : int<positionInGrammar>) =
+    let create stateToContinue posInGrammar =
         let index = !currentIndex
         let currentVertex = !currentGSSNode
         let len = !currentLength

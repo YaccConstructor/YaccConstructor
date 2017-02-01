@@ -43,10 +43,10 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         |> Array.rev
         |> Array.Parallel.map(fun e -> 
             let pos = e * 1<positionInInput>
-            //let leftPos = e * 1<leftPosition>
             let vertex = new GSSVertex(!currentState, pos)
             gss.AddVertex vertex |> ignore
             new ContextFSA<_>(pos, !currentState, vertex, !currentLength))
+
     /// Stack of contexts
     let setR = new System.Collections.Generic.Stack<ContextFSA<_>>(startContexts)  
                  
@@ -70,7 +70,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
 
         if startV.P.Count > 0
         then startV.P |> ResizeArray.iter(fun (newIndex, l) -> addContext newIndex stateToContinue currentVertex (len + l))        
-        else addContext index posInGrammar newVertex 0us
+        else addContext index posInGrammar startV 0us
             
     /// 
     let pop () =
@@ -96,10 +96,8 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                 let edge = getEdge curIndex
                 let pos = getPosOnEdge curIndex
                 if edge = dummyEdge
-                then
-                    pos, input.ChainLength.[pos]
-                else
-                    edge, pos
+                then pos, input.ChainLength.[pos]
+                else edge, pos
             result.Add(new ResultStruct(leftEdge,
                                         leftPos,
                                         rightEdge,
@@ -124,7 +122,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                     let newIndex = packEdgePos outEdge 0
                     pushContext newIndex nextState !currentGSSNode newLength)
             else//reached end of input.
-                // put dummyIndex in stack
+                //put dummyIndex in stack
                 let dummyIndex = packEdgePos dummyEdge curEdge
                 pushContext dummyIndex nextState !currentGSSNode newLength
 
@@ -151,8 +149,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                 
         let cond, nextState = parser.StateAndTokenToNewState.TryGetValue dictionaryKey
         if cond
-        then
-            eatTerm nextState curEdge curPos
+        then eatTerm nextState curEdge curPos
 
         for curNonterm, nextState in outEdges do
             if curNonterm = anyNonterm

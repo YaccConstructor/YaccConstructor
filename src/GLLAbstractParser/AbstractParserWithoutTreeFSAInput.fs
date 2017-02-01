@@ -51,12 +51,12 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
     let setR = new System.Collections.Generic.Stack<ContextFSA<_>>(startContexts)  
                  
     /// Adds new context to stack (setR)
-    let pushContext (inputVertex : int<positionInInput>) (state : int<positionInGrammar>) vertex len =
-        setR.Push(new ContextFSA<_>(inputVertex, state, vertex, len))
+    let pushContext posInInput posInGrammar gssVertex len =
+        setR.Push(new ContextFSA<_>(posInInput, posInGrammar, gssVertex, len))
 
     /// Adds new context to stack (setR) if it is first occurrence of this context (if SetU doesn't contain it).
-    let addContext posInInput posInGrammar gssVertex len =
-        if not <| vertex.ContainsContext posInInput posInGrammar
+    let addContext posInInput posInGrammar (gssVertex:GSSVertex) len =
+        if not <| gssVertex.ContainsContext posInInput posInGrammar
         then pushContext posInInput posInGrammar gssVertex len
     
     ///Creates new descriptors.(Calls when found nonterninal in rule(on current input edge, or on some of next)))
@@ -65,7 +65,6 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         let currentVertex = !currentGSSNode
         let len = !currentLength
         let newVertex = new GSSVertex(posInGrammar, index)
-
         let exists, startV = gss.ContainsEdge(newVertex, currentVertex, stateToContinue, len)        
 
         if startV.P.Count > 0

@@ -43,7 +43,7 @@ type GSS () =
     inherit QuickGraph.AdjacencyGraph<GSSVertex,QuickGraph.TaggedEdge<GSSVertex,GSSEdgeLbl>>(true)
     /// Checks for existing of edge in gss edges set. If not adds it to edges set.
     member this.ContainsEdge (startVertex:GSSVertex, endVertex:GSSVertex, stateToContinue : int<positionInGrammar>, len : uint16) =
-        let mutable realStartVertex = startVertex
+        let mutable realStartVertex = if startVertex = endVertex then endVertex else startVertex
         let cond, edges = this.TryGetEdges(startVertex, endVertex)
         let exists = 
             cond 
@@ -52,8 +52,9 @@ type GSS () =
              if edg.IsSome then realStartVertex <- edg.Value.Source
              edg.IsSome
         if not exists
-        then this.AddVerticesAndEdge(new QuickGraph.TaggedEdge<_,_>(startVertex,endVertex, new GSSEdgeLbl(stateToContinue, len))) |> ignore
+        then this.AddVerticesAndEdge(new QuickGraph.TaggedEdge<_,_>(realStartVertex, endVertex, new GSSEdgeLbl(stateToContinue, len))) |> ignore
         exists, realStartVertex
+
     member this.ToDot fileName =
         // Should use standart printing!!!
         //QuickGraph.Graphviz.GraphvizAlgorithm(this).Generate()        

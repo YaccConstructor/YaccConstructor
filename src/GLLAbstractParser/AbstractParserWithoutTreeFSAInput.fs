@@ -41,7 +41,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
     let startContexts = 
         input.InitialPositions
         |> Array.rev
-        |> Array.Parallel.map(fun e -> 
+        |> Array.map(fun e -> 
             let pos = e * 1<positionInInput>
             let vertex = new GSSVertex(!currentState, pos)
             gss.AddVertex vertex |> ignore

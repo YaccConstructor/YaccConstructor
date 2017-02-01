@@ -70,7 +70,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
 
         if startV.P.Count > 0
         then startV.P |> ResizeArray.iter(fun (newIndex, l) -> addContext newIndex stateToContinue currentVertex (len + l))        
-        else addContext index posInGrammar startV 0us
+        else addContext index stateToContinue startV 0us
             
     /// 
     let pop () =

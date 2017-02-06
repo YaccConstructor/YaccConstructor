@@ -10,6 +10,7 @@ open FSharpx.Collections.Experimental
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
 open AbstractAnalysis.Common
+open Yard.Generators.GLL.MeasureTypes
 
 
 let inline packExtension left right : int64<extension> =  LanguagePrimitives.Int64WithMeasure ((int64 left <<< 32) ||| int64 right)
@@ -366,8 +367,8 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
     control()
 
     match !structures.ResultAST with
-        | None -> Error ("String was not parsed")
+        | None -> ParseResult.Error ("String was not parsed")
         | Some res -> 
             let r1 = new Tree<_> (tokens, res, parser.rules)
             //r1.AstToDot parser.NumToString parser.TokenToNumber parser.TokenData "AST123456.dot"
-            Success (r1)
+            ParseResult.Success (r1)

@@ -1,6 +1,7 @@
 ﻿module YC.GLL.GSS
 
 open Yard.Generators.GLL.ParserCommon
+open Yard.Generators.GLL.MeasureTypes
 
 type GSSVertex (posInGrammar: int<positionInGrammar>, posInInput: int<positionInInput>) =    
 

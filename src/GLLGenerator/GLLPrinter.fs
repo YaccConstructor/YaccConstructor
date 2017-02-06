@@ -8,7 +8,8 @@ let printGLL (fsa : FSA)
              (outFileName : string)
              (tokenType : Map<string,string option>)
              moduleName
-             light = 
+             light 
+             isAbstract = 
     let dummyPos = char 0
     let res = new System.Text.StringBuilder()
     let nextInt = ref fsa.States.Length
@@ -39,6 +40,7 @@ let printGLL (fsa : FSA)
 
         println "open Yard.Generators.GLL"
         println "open Yard.Generators.GLL.ParserCommon"
+        println "open Yard.Generators.GLL.MeasureTypes"
 
     let printToken () = 
         let defaultType = tokenType.TryFind "_"
@@ -131,9 +133,14 @@ let printGLL (fsa : FSA)
     let printParser () =
         println "let private parserSource = new FSAParserSourceGLL (outNonterms, startState, finalStates, nontermCount, numIsTerminal, stateToNontermName, numOfAnyState, stateAndTokenToNewState)"
 
-    let printFun () =
-        println "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> ParserCommon.ParseResult<_>) ="
-        println "    Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput.buildAbstract parserSource"
+    let printFun isAbstract () =
+        if isAbstract
+        then
+            println "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> ParserCommon.ParseResult<_>) ="
+            println "    Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput.buildAbstract parserSource"
+        else
+            println "let buildAST (input : seq<int>) ="
+            println "    Yard.Generators.GLL.ParserFSA.buildAST parserSource input"
              
     let fsaStatesOutNonterms = 
         fsa.States
@@ -183,6 +190,6 @@ let printGLL (fsa : FSA)
     printItem printFinalStates
     printItem printNontermCount
     printItem printParser
-    printItem printFun
+    printItem (printFun isAbstract)
 
     res

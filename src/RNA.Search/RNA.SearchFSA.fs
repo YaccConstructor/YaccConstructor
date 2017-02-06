@@ -128,8 +128,8 @@ let searchInBioGraphs (searchCfg : SearchConfig) graphs agentsCount =
                                     result 
                                     |> filterRnaParsingResult graph searchCfg.LowLengthLimit searchCfg.HighLengthLimit
                                 printPathsToFASTA (".\\" + searchCfg.OutFileName) res i searchCfg.NumToString
-                            | Success _ -> failwith "Result is success but it is unexpected success"
-                            | Error _ -> printfn "Input parsing failed."
+                            | ParseResult.Success _ -> failwith "Result is success but it is unexpected success"
+                            | ParseResult.Error _ -> printfn "Input parsing failed."
                         with e -> printfn "ERROR in bio graph parsing! %A" e.Message
                         return! loop n
                     | Die ch -> ch.Reply()

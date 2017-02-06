@@ -47,7 +47,7 @@ type GLLFSA() =
             //let mutable needTranslate = getBoolOption "translate" false
             let mutable light = getBoolOption "light" true
             //let mutable printInfiniteEpsilonPath = getOption "infEpsPath" "" id
-            //let mutable isAbstract = getBoolOption "abstract" true
+            let mutable isAbstract = getBoolOption "abstract" true
             //let mutable withoutTree = ref <| getBoolOption "withoutTree" true
             let mutable outFileName =
                 let fstVal = getOption "output" (definition.info.fileName + ".fs") id
@@ -69,7 +69,7 @@ type GLLFSA() =
                 //| "-translate" -> needTranslate <- getBoolValue "translate" value
                 | "-light" -> light <- getBoolValue "light" value
                 //| "-infEpsPath" -> printInfiniteEpsilonPath <- value
-                //| "-abstract" -> isAbstract <- getBoolValue "abstract" value
+                | "-abstract" -> isAbstract <- getBoolValue "abstract" value
                 //| "-withoutTree" -> withoutTree := getBoolValue "withoutTree" value
                 | value -> failwithf "Unexpected %s option" value
                  
@@ -77,7 +77,7 @@ type GLLFSA() =
             
             use out = new System.IO.StreamWriter (outFileName)
             // TODO: write foot of definition
-            let generatedCode = printGLL fsa outFileName tokenType moduleName light
+            let generatedCode = printGLL fsa outFileName tokenType moduleName light isAbstract
             out.WriteLine generatedCode
             out.Flush()
             out.Close()

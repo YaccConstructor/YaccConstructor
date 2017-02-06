@@ -10,6 +10,7 @@ open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
 open YC.GLL.GSS
+open Yard.Generators.GLL.MeasureTypes
 
 type SysDict<'k,'v> = System.Collections.Generic.Dictionary<'k,'v>
 type Queue<'t> = System.Collections.Generic.Queue<'t>
@@ -168,6 +169,6 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
     //printEdges "GSS.dot" edgesOfGSS
           
     match result.Count with
-        | 0 -> Error ("String was not parsed")
+        | 0 -> ParseResult.Error ("String was not parsed")
         | _ -> Success1 (Array.ofSeq result)
             

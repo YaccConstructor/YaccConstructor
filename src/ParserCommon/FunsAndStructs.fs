@@ -4,15 +4,7 @@ open AbstractAnalysis.Common
 open Yard.Generators.Common.ASTGLL
 open FSharpx.Collections.Experimental
 open System.Collections.Generic
-
-[<Measure>] type gssVertex
-[<Measure>] type nodeMeasure
-/// GLL slot or state of FA or smth else
-[<Measure>] type positionInGrammar 
-[<Measure>] type positionInInput
-[<Measure>] type length
-[<Measure>] type leftPosition
-
+open Yard.Generators.GLL.MeasureTypes
 
 module CommonFuns = 
 
@@ -50,7 +42,7 @@ type Vertex =
 
 [<Struct>]
 [<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
-type GSSVertexNFA =
+type GSSVertexFSA =
     /// Position in input graph (Packed edge+position)
     val PositionInInput  : int<positionInInput>
     /// Nonterminal
@@ -111,10 +103,29 @@ type ContextFSA<'GSSVertex> =
                                 //"; LeftPos:" + (this.LeftPos.ToString()) +
                                 "; Len:" + (this.Length.ToString())
 
+[<Struct>]
+[<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
+type ContextFSA =
+    /// Position in input.
+    val Index         : int<positionInInput>
+    /// Current state of FSA.
+    val State         : int<positionInGrammar>
+    /// Current GSS node.
+    val Vertex        : GSSVertexFSA
+    val CurrentN      : int<nodeMeasure>
+    new (index, state, vertex, currentN) = {Index = index; State = state; Vertex = vertex; CurrentN = currentN}
+    override this.ToString () = "Edge:" + (CommonFuns.getEdge(this.Index).ToString()) +
+                                "; PosOnEdge:" + (CommonFuns.getPosOnEdge(this.Index).ToString()) +
+                                "; State:" + (this.State.ToString())
+
 type ParseResult<'a> =
     | Success of Tree<'a>
     | Success1 of 'a[]
     | Error of string
+
+type TypeOfNode = 
+    | Nonterm of int<positionInGrammar>
+    | Intermed of int<positionInGrammar>
 
 [<Struct>]
 type ResultStruct =
@@ -136,7 +147,7 @@ type CompressedArray<'t>(l : int[], f : _ -> 't, shift) =
             a.[edg].[shift + pos]
         and set i v = a.[(CommonFuns.getEdge i)].[shift + (CommonFuns.getPosOnEdge i)] <- v
 
-      
+
 type ParserStructures<'TokenType> (currentRule : int)=
     let sppfNodes = new BlockResizeArray<INode>()
     let dummyAST = new TerminalNode(-1, packExtension -1 -1)

@@ -9,65 +9,13 @@ open Yard.Generators.Common.DataStructures
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
+open YC.GLL.GSS
 open Yard.Generators.GLL.MeasureTypes
 
 type SysDict<'k,'v> = System.Collections.Generic.Dictionary<'k,'v>
 type Queue<'t> = System.Collections.Generic.Queue<'t>
-type CompressedArray<'t> = Yard.Generators.GLL.ParserCommon.CompressedArray<'t>
-
-/// For debuging
-type EdgeOfGSS = 
-    {
-        startVertex : GSSVertexFSA
-        endVertex : GSSVertexFSA
-        state : int<state>
-        len : uint16
-    }
-/// For debuging
-let printEdges fileName (edges : System.Collections.Generic.HashSet<EdgeOfGSS>) =
-    let toPrint = new ResizeArray<_>(["digraph G {\nnode [shape = circle]"])
-    let edgs = new ResizeArray<_>()
-    let nodes = new ResizeArray<_>()
-    
-    let getStrFromVertex (v : GSSVertexFSA) = 
-        let edgeOfInput = CommonFuns.getEdge v.PositionInInput
-        let posOnEdgeOfInput = CommonFuns.getPosOnEdge v.PositionInInput
-        
-        sprintf "St:%i;Edg:%i;Pos:%i" v.NontermState edgeOfInput posOnEdgeOfInput
-
-    for edge in edges do
-        let endName = getStrFromVertex edge.endVertex
-        let startName = getStrFromVertex edge.startVertex
-        let edgeName = sprintf "ContinueSt:%i,Len:%i" edge.state edge.len
-
-        edgeName |> edgs.Add
-
-        if nodes.Contains endName |> not then
-            endName |> nodes.Add
-            let nName = sprintf "%i[label=\"%s\"]" (nodes.Count-1) endName
-            nName |> toPrint.Add
-
-        if nodes.Contains startName |> not then
-            startName |> nodes.Add
-            let nName = sprintf "%i[label=\"%s\"]" (nodes.Count-1) startName
-            nName |> toPrint.Add
-
-        let startId = nodes.IndexOf startName
-        let endId = nodes.IndexOf endName
-
-        let edge = sprintf "%i -> %i [label=\"%s\",color=blue]; \n" startId endId edgeName
-
-        toPrint.Add edge
-
-    toPrint.Add "}"
-
-    System.IO.File.WriteAllLines(fileName, toPrint)
-
-
 
 let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) = 
-    //let shift = input.Shift
-    //let edgesOfGSS = new System.Collections.Generic.HashSet<_>()
 
     let anyNonterm = parser.NumOfAnyState
 
@@ -80,13 +28,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
              r.[input.Edges.[i].Start].Add i
         r
 
-    /// Descriptors
-    let setU = new CompressedArray<SysDict<int<state>, int64[]>>(Array.concat([input.ChainLength;[|input.EdgeCount|]]), (fun _ -> null ),0)
-    /// Poped elements
-    let setP = new SysDict<int64<vertexMeasure>, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<positionInInput>*uint16>>(500)
-    /// Edges of GSS:
-    /// |vertex| --- stateToContinue, length ---> |vertex|
-    let edges = Array.init parser.NonTermCount (fun _ -> new CompressedArray<SysDict<int<state>, SysDict<int<state>, (int<positionInInput> * uint16)[]>>> (input.ChainLength, (fun _ -> null),0))
+    let gss = new GSS()
 
     /// State of FSA.
     let currentState = ref <| parser.StartState
@@ -94,123 +36,41 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
     let currentIndex = ref (-1<positionInInput>)
     let currentLength = ref 0us
     //let currentLeftPosition = ref -1<leftPosition>
-    let currentGSSNode = ref <| new GSSVertexFSA(-1<positionInInput>,-1<state>)
-    let currentContext = ref <| new AbstractContextFSA(!currentIndex, !currentState, !currentGSSNode,!currentLength)
+    let currentGSSNode = ref <| new GSSVertex(-1<positionInGrammar>, -1<positionInInput>)
+    let currentContext = ref <| new ContextFSA<GSSVertex>(!currentIndex, !currentState, !currentGSSNode,!currentLength)
 
     let startContexts = 
         input.InitialPositions
         |> Array.rev
-        |> Array.Parallel.map(fun e -> 
+        |> Array.map(fun e -> 
             let pos = e * 1<positionInInput>
-            //let leftPos = e * 1<leftPosition>
-            let vertex = new GSSVertexFSA(pos, !currentState)
-            new AbstractContextFSA(pos, !currentState, vertex, !currentLength))
-    /// Stack of contexts
-    let setR = new System.Collections.Generic.Stack<AbstractContextFSA>(startContexts)  
-                 
-    /// Checks for existing of context in SetU. If not adds it to SetU.
-    let containsContext (inputIndex: int<positionInInput>) (state : int<state>) (vertex : GSSVertexFSA) =
-        let vertexKey = CommonFuns.pack vertex.PositionInInput vertex.NontermState
-        if setU.[inputIndex] <> null
-        then
-            let cond, current = setU.[inputIndex].TryGetValue state
-            if cond
-            then
-                if not (current |> Array.contains vertexKey)
-                then
-                    setU.[inputIndex].[state] <- Array.append current [|vertexKey|]
-                    false
-                else
-                    true
-            else
-                setU.[inputIndex].Add(state, [|vertexKey|])
-                false
-        else 
-            let dict1 = new SysDict<_, _>()
-            setU.[inputIndex] <- dict1
-            dict1.Add(state, [|vertexKey|])
-            false
+            let vertex = new GSSVertex(!currentState, pos)
+            gss.AddVertex vertex |> ignore
+            new ContextFSA<_>(pos, !currentState, vertex, !currentLength))
 
+    /// Stack of contexts
+    let setR = new System.Collections.Generic.Stack<ContextFSA<_>>(startContexts)  
+                 
     /// Adds new context to stack (setR)
-    let pushContext (inputVertex : int<positionInInput>) (state : int<state>) vertex len =
-        setR.Push(new AbstractContextFSA(inputVertex, state, vertex, len))
+    let pushContext posInInput posInGrammar gssVertex len =
+        setR.Push(new ContextFSA<_>(posInInput, posInGrammar, gssVertex, len))
 
     /// Adds new context to stack (setR) if it is first occurrence of this context (if SetU doesn't contain it).
-    let addContext (inputVertex : int<positionInInput>) (state : int<state>) vertex len =
-        if not <| containsContext inputVertex state vertex 
-        then
-            pushContext inputVertex state vertex len
-
-    /// Checks for existing of edge in edges set. If not adds it to edges set.
-    let containsEdge (startVertex : GSSVertexFSA) (endVertex : GSSVertexFSA) (state : int<state>) (len : uint16) =
-        let outEdges = edges.[int(startVertex.NontermState)].[startVertex.PositionInInput]
-        (* debug
-        edgesOfGSS.Add(
-            {
-                startVertex = startVertex
-                endVertex = endVertex
-                state = state
-                len  = len
-            }) |> ignore 
-        *)
-        let cond, dict = 
-            if outEdges <> null
-            then
-                let cond, dictStateKey = outEdges.TryGetValue state
-                if cond
-                then
-                    let cond, posLen = dictStateKey.TryGetValue endVertex.NontermState
-                    if cond
-                    then
-                        if posLen |> Array.contains (endVertex.PositionInInput,len) 
-                        then
-                            true, None
-                        else
-                            let newPosLen = Array.append posLen [|endVertex.PositionInInput,len|]
-                            dictStateKey.[endVertex.NontermState] <- newPosLen
-                                                        
-                            false, None
-                    else
-                        let arr = [|endVertex.PositionInInput,len|]
-                        dictStateKey.Add(endVertex.NontermState, arr)
-                        false, None 
-                else
-                    let d1 = new SysDict<int<state>, _>()
-                    let arr = [|endVertex.PositionInInput,len|]
-                    d1.Add(endVertex.NontermState, arr)
-                    outEdges.Add(state, d1)
-                    false, None
-            else 
-                let d1 = new SysDict<int<_>, SysDict<int<state>, _>>()
-                let d2 = new SysDict<int<state>, _>()
-                let arr = [|endVertex.PositionInInput,len|]
-                d2.Add(endVertex.NontermState, arr)
-                d1.Add(state, d2)
-                false, Some d1
-        if dict.IsSome then edges.[int startVertex.NontermState].[startVertex.PositionInInput] <- dict.Value
-        cond
-        
+    let addContext posInInput posInGrammar (gssVertex:GSSVertex) len =
+        if not <| gssVertex.ContainsContext posInInput posInGrammar
+        then pushContext posInInput posInGrammar gssVertex len
+    
     ///Creates new descriptors.(Calls when found nonterninal in rule(on current input edge, or on some of next)))
-    let create (stateToContinue : int<state>) (nonTermName : int<state>) =
+    let create stateToContinue posInGrammar =
         let index = !currentIndex
         let currentVertex = !currentGSSNode
         let len = !currentLength
-        let newVertex = new GSSVertexFSA(index, nonTermName)
+        let newVertex = new GSSVertex(posInGrammar, index)
+        let exists, startV = gss.ContainsEdge(newVertex, currentVertex, stateToContinue, len)        
 
-        if edges.[int nonTermName].[index] <> null
-        then//such GSS vertex already exist
-            if not <| containsEdge newVertex currentVertex stateToContinue len
-            then//no such edge between vertices
-                let vertexKey = packVertexFSA index nonTermName
-                let cond, poped = setP.TryGetValue vertexKey
-                if cond
-                then// aready poped for current index and nonterm
-                    // add contexts for each position in input
-                    poped.DoForAll (fun (newIndex, l) ->
-                        addContext newIndex stateToContinue currentVertex (len + l))
-        else//need to create new edge, vertex and context
-            containsEdge newVertex currentVertex stateToContinue len |> ignore
-            addContext index nonTermName newVertex 0us
+        if startV.P.Count > 0
+        then startV.P |> ResizeArray.iter(fun (newIndex, l) -> addContext newIndex stateToContinue currentVertex (len + l))        
+        else addContext index posInGrammar startV 0us
             
     /// 
     let pop () =
@@ -218,29 +78,16 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         let curIndex = !currentIndex
         let curLen = !currentLength
 
-        let outEdges = edges.[int curVertex.NontermState].[curVertex.PositionInInput]
+        let outEdges = gss.OutEdges curVertex |> Array.ofSeq
             
-        if outEdges <> null && outEdges.Count <> 0
+        if outEdges <> null && outEdges.Length <> 0
         then
-            let vertexKey = packVertexFSA curVertex.PositionInInput curVertex.NontermState
+            let vertexKey = packVertexFSA curVertex.PositionInInput curVertex.PositionInGrammar
+            let value = curVertex.P.Add (curIndex, curLen)
+            for e in outEdges do
+                addContext curIndex e.Tag.StateToContinue e.Target (curLen + e.Tag.LengthOfProcessedString)
 
-            let cond, value = setP.TryGetValue vertexKey
-            if cond
-            then
-                value.Add (curIndex, curLen)
-            else
-                let newList = new ResizableUsualOne<_>((curIndex, curLen))
-                setP.Add(vertexKey, newList)
-
-            for stateТoNonterm in outEdges do
-                let state = stateТoNonterm.Key  
-                for nontermPosLen in stateТoNonterm.Value do
-                    let nonterm = nontermPosLen.Key
-                    for position,length in nontermPosLen.Value do
-                        let adjacentVertex = new GSSVertexFSA(position, nonterm)
-                        addContext curIndex state adjacentVertex (curLen + length)
-
-        if curVertex.NontermState = parser.StartState
+        if curVertex.PositionInGrammar = parser.StartState
         then
             let leftEdge, leftPos =
                 getEdge curVertex.PositionInInput,
@@ -249,10 +96,8 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                 let edge = getEdge curIndex
                 let pos = getPosOnEdge curIndex
                 if edge = dummyEdge
-                then
-                    pos, input.ChainLength.[pos]
-                else
-                    edge, pos
+                then pos, input.ChainLength.[pos]
+                else edge, pos
             result.Add(new ResultStruct(leftEdge,
                                         leftPos,
                                         rightEdge,
@@ -277,7 +122,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                     let newIndex = packEdgePos outEdge 0
                     pushContext newIndex nextState !currentGSSNode newLength)
             else//reached end of input.
-                // put dummyIndex in stack
+                //put dummyIndex in stack
                 let dummyIndex = packEdgePos dummyEdge curEdge
                 pushContext dummyIndex nextState !currentGSSNode newLength
 
@@ -304,8 +149,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
                 
         let cond, nextState = parser.StateAndTokenToNewState.TryGetValue dictionaryKey
         if cond
-        then
-            eatTerm nextState curEdge curPos
+        then eatTerm nextState curEdge curPos
 
         for curNonterm, nextState in outEdges do
             if curNonterm = anyNonterm

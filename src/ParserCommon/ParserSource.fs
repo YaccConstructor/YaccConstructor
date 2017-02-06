@@ -86,19 +86,19 @@ type ParserSourceGLL<'TokenType> (eof                : 'TokenType
     member this.Probabilities      = probabilities
     member this.EOF                = eof
 
-type FSAParserSourceGLL ( outNonterms        : (int<state> * int<state>) [] []
-                        , startState         : int<state>
-                        , finalStates        : HashSet<int<state>>
+type FSAParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<positionInGrammar>) [] []
+                        , startState         : int<positionInGrammar>
+                        , finalStates        : HashSet<int<positionInGrammar>>
                         , nontermCount       : int
                         , numIsTerminal      : int -> bool
                         //, numIsEpsilon       : int -> bool
                         , stateToNontermName : int -> string
                         //, firstSet           : HashSet<int>
-                        , numOfAnyState      : int<state>
-                        , stateAndTokenToNewState : Dictionary<int, int<state>>
+                        , numOfAnyState      : int<positionInGrammar>
+                        , stateAndTokenToNewState : Dictionary<int, int<positionInGrammar>>
                         ) =
 
-    let getTermsDictionaryKey (state: int<state>) token = 
+    let getTermsDictionaryKey (state: int<positionInGrammar>) token = 
         int( (int state <<< 16) ||| (token - outNonterms.Length) )
 
     //member this.FirstSet           = firstSet

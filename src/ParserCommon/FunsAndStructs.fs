@@ -13,13 +13,13 @@ module CommonFuns =
     let inline getRight (long : int64) = int <| ((int64 long) &&& 0xffffffffL)
     let inline getLeft (long : int64)  = int <| ((int64 long) >>> 32)
 
-    let inline packVertex level label: int64<vertexMeasure>  =  LanguagePrimitives.Int64WithMeasure ((int64 level <<< 32) ||| int64 label)
-    let inline getIndex1Vertex (long : int64<vertexMeasure>) = int <| ((int64 long) &&& 0xffffffffL)
-    let inline getIndex2Vertex (long : int64<vertexMeasure>) = int <| ((int64 long) >>> 32)
+    let inline packVertex level label: int64<gssVertex>  =  LanguagePrimitives.Int64WithMeasure ((int64 level <<< 32) ||| int64 label)
+    let inline getIndex1Vertex (long : int64<gssVertex>) = int <| ((int64 long) &&& 0xffffffffL)
+    let inline getIndex2Vertex (long : int64<gssVertex>) = int <| ((int64 long) >>> 32)
 
-    let inline packVertexFSA position state: int64<vertexMeasure>  = LanguagePrimitives.Int64WithMeasure ((int64 position <<< 32) ||| int64 state)
-    let inline getPosition (packed : int64<vertexMeasure>) = int <| ((int64 packed) &&& 0xffffffffL)
-    let inline getState (packed : int64<vertexMeasure>) = int <| ((int64 packed) >>> 32)
+    let inline packVertexFSA position state: int64<gssVertex>  = LanguagePrimitives.Int64WithMeasure ((int64 position <<< 32) ||| int64 state)
+    let inline getPosition (packed : int64<gssVertex>) = int <| ((int64 packed) &&& 0xffffffffL)
+    let inline getState (packed : int64<gssVertex>) = int <| ((int64 packed) >>> 32)
 
     let inline packEdgePos edge position : int<positionInInput>  =
         if (edge < 65536) && (position < 65536) then LanguagePrimitives.Int32WithMeasure((int position <<< 16) ||| int edge)
@@ -27,9 +27,9 @@ module CommonFuns =
     let inline getEdge (packedValue : int<positionInInput>)      = int (int packedValue &&& 0xffff)
     let inline getPosOnEdge (packedValue : int<positionInInput>) = int (uint32 packedValue >>> 16)
 
-    let inline packLabelNew rule position : int<labelMeasure>   = LanguagePrimitives.Int32WithMeasure((int rule <<< 16) ||| int position)                               
-    let inline getRuleNew (packedValue : int<labelMeasure>)     = int packedValue >>> 16
-    let inline getPositionNew (packedValue : int<labelMeasure>) = int (int packedValue &&& 0xffff)
+    let inline packLabelNew rule position : int<positionInGrammar>   = LanguagePrimitives.Int32WithMeasure((int rule <<< 16) ||| int position)                               
+    let inline getRuleNew (packedValue : int<positionInGrammar>)     = int packedValue >>> 16
+    let inline getPositionNew (packedValue : int<positionInGrammar>) = int (int packedValue &&& 0xffff)
 
 [<Struct>]
 [<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
@@ -37,7 +37,7 @@ type Vertex =
     /// Position in input graph (Packed edge+position)
     val Level            : int<positionInInput>
     /// Nonterminal
-    val NontermLabel     : int<labelMeasure>
+    val NontermLabel     : int<positionInGrammar>
     new (level, nonterm) = {Level = level; NontermLabel = nonterm}
 
 [<Struct>]
@@ -46,15 +46,15 @@ type GSSVertexFSA =
     /// Position in input graph (Packed edge+position)
     val PositionInInput  : int<positionInInput>
     /// Nonterminal
-    val NontermState     : int<state>
+    val NontermState     : int<positionInGrammar>
     new (positionInInput, nonterm) = {PositionInInput = positionInInput; NontermState = nonterm}
 
 [<Struct>]
 type Context(*<'TokenType>*) =
     val Index         : int
-    val Label         : int<labelMeasure>
+    val Label         : int<positionInGrammar>
     val Vertex        : Vertex
-    val Ast           : int<node>
+    val Ast           : int<nodeMeasure>
     val Probability   : float
     val SLength       : int   
     //val Path          : List<ParserEdge<'TokenType*ref<bool>>>
@@ -68,7 +68,7 @@ type Context2 =
     /// Position in input graph (packed edge+position).
     val Index         : int<positionInInput>
     /// Current rule and position in it (packed rule+position).
-    val Label         : int<labelMeasure>
+    val Label         : int<positionInGrammar>
     /// Current GSS node.
     val Vertex        : Vertex
     /// 4 values packed in one int64: leftEdge, leftPos, rightEdge, rightPos.
@@ -85,13 +85,13 @@ type Context2 =
 
 [<Struct>]
 [<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
-type AbstractContextFSA =
+type ContextFSA<'GSSVertex> =
     /// Position in input graph (packed edge+position).
     val Index         : int<positionInInput>
     /// Current state of FSA.
-    val State         : int<state>
+    val State         : int<positionInGrammar>
     /// Current GSS node.
-    val Vertex        : GSSVertexFSA
+    val Vertex        : 'GSSVertex
     /// 4 values packed in one int64: leftEdge, leftPos, rightEdge, rightPos.
     //val LeftPos       : int<leftPosition>
     /// Length of current result
@@ -109,10 +109,10 @@ type ContextFSA =
     /// Position in input.
     val Index         : int<positionInInput>
     /// Current state of FSA.
-    val State         : int<state>
+    val State         : int<positionInGrammar>
     /// Current GSS node.
     val Vertex        : GSSVertexFSA
-    val CurrentN      : int<node>
+    val CurrentN      : int<nodeMeasure>
     new (index, state, vertex, currentN) = {Index = index; State = state; Vertex = vertex; CurrentN = currentN}
     override this.ToString () = "Edge:" + (CommonFuns.getEdge(this.Index).ToString()) +
                                 "; PosOnEdge:" + (CommonFuns.getPosOnEdge(this.Index).ToString()) +
@@ -124,8 +124,8 @@ type ParseResult<'a> =
     | Error of string
 
 type TypeOfNode = 
-    | Nonterm of int<state>
-    | Intermed of int<state>
+    | Nonterm of int<positionInGrammar>
+    | Intermed of int<positionInGrammar>
 
 [<Struct>]
 type ResultStruct =
@@ -151,10 +151,10 @@ type CompressedArray<'t>(l : int[], f : _ -> 't, shift) =
 type ParserStructures<'TokenType> (currentRule : int)=
     let sppfNodes = new BlockResizeArray<INode>()
     let dummyAST = new TerminalNode(-1, packExtension -1 -1)
-    let setP = new Dictionary<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<node>>>(500)//list<int<node>>> (500)
+    let setP = new Dictionary<int64, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<nodeMeasure>>>(500)//list<int<nodeMeasure>>> (500)
     let epsilonNode = new TerminalNode(-1, packExtension 0 0)
     let setR = new System.Collections.Generic. Queue<Context>(100)  
-    let dummy = 0<node>
+    let dummy = 0<nodeMeasure>
     let currentN = ref <| dummy
     let currentR = ref <| dummy
     let resultAST = ref None
@@ -164,7 +164,7 @@ type ParserStructures<'TokenType> (currentRule : int)=
 
     let currentLabel = ref <| (CommonFuns.packLabelNew currentRule 0)
     
-    let getTreeExtension (node : int<node>) =
+    let getTreeExtension (node : int<nodeMeasure>) =
         match sppfNodes.Item (int node) with
         | :? TerminalNode as t ->
             t.Extension
@@ -176,8 +176,8 @@ type ParserStructures<'TokenType> (currentRule : int)=
 
     let getNodeP 
         findSppfNode 
-        (findSppfPackedNode : _ -> _ -> _ -> _ -> INode -> INode -> int<node>) 
-        dummy (label : int<labelMeasure>) (left : int<node>) (right : int<node>) : int<node> =
+        (findSppfPackedNode : _ -> _ -> _ -> _ -> INode -> INode -> int<nodeMeasure>) 
+        dummy (label : int<positionInGrammar>) (left : int<nodeMeasure>) (right : int<nodeMeasure>) : int<nodeMeasure> =
             let currentRight = sppfNodes.Item (int right)  
             let rightExt = getTreeExtension right           
             if left <> dummy
@@ -192,7 +192,7 @@ type ParserStructures<'TokenType> (currentRule : int)=
                 ignore <| findSppfPackedNode y label rightExt rightExt dummyAST currentRight 
                 y
       //CompressedArray<Dictionary<_, Dictionary<_, ResizeArray<_>>>>                           
-    let containsContext (setU : Dictionary<_, Dictionary<_, ResizeArray<_>>>[]) inputIndex (label : int<labelMeasure>) (vertex : Vertex) (ast : int<node>) =
+    let containsContext (setU : Dictionary<_, Dictionary<_, ResizeArray<_>>>[]) inputIndex (label : int<positionInGrammar>) (vertex : Vertex) (ast : int<nodeMeasure>) =
         let vertexKey = CommonFuns.pack vertex.Level vertex.NontermLabel
         if setU.[inputIndex] <> Unchecked.defaultof<_>
         then
@@ -209,14 +209,14 @@ type ParserStructures<'TokenType> (currentRule : int)=
                     else
                         true
                 else 
-                    let arr = new ResizeArray<int<node>>()
+                    let arr = new ResizeArray<int<nodeMeasure>>()
                     arr.Add ast
                     current.Add(vertexKey, arr)                    
                     false
             else 
                 let dict = new Dictionary<_, ResizeArray<_>>()
                 setU.[inputIndex].Add(int label, dict)
-                let arr = new ResizeArray<int<node>>()
+                let arr = new ResizeArray<int<nodeMeasure>>()
                 arr.Add ast
                 dict.Add(vertexKey, arr) 
                 false
@@ -225,13 +225,13 @@ type ParserStructures<'TokenType> (currentRule : int)=
             setU.[inputIndex] <- dict1
             let dict2 = new Dictionary<_, ResizeArray<_>>()
             dict1.Add(int label, dict2)
-            let arr = new ResizeArray<int<node>>()
+            let arr = new ResizeArray<int<nodeMeasure>>()
             arr.Add ast
             dict2.Add(vertexKey, arr)
             false
         //else true
 //CompressedArray<System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>>
-    let addContext (setU ) (inputVertex : int) (label : int<labelMeasure>) vertex ast =
+    let addContext (setU ) (inputVertex : int) (label : int<positionInGrammar>) vertex ast =
         if not <| containsContext setU inputVertex label vertex ast
         then
             setR.Enqueue(new Context(inputVertex, label, vertex, ast (*, currentPath*)))
@@ -263,7 +263,7 @@ type ParserStructures<'TokenType> (currentRule : int)=
                     d.Add(e.NontermLabel, l)
                     false, None
             else
-                let newDict1 = new Dictionary<int<node>, Dictionary<_, ResizeArray<_>>>()
+                let newDict1 = new Dictionary<int<nodeMeasure>, Dictionary<_, ResizeArray<_>>>()
                 let newDict2 = new Dictionary<_, ResizeArray<_>>()
                 let newArr = new ResizeArray<_>()
                 newArr.Add(e.Level)
@@ -271,7 +271,7 @@ type ParserStructures<'TokenType> (currentRule : int)=
                 newDict1.Add(ast, newDict2)
                 false, Some newDict1   
 
-    let finalMatching (curRight : INode) nontermName finalExtensions findSppfNode findSppfPackedNode currentGSSNode currentVertexInInput (pop : Vertex -> int -> int<node> -> unit)  = 
+    let finalMatching (curRight : INode) nontermName finalExtensions findSppfNode findSppfPackedNode currentGSSNode currentVertexInInput (pop : Vertex -> int -> int<nodeMeasure> -> unit)  = 
         match curRight with
         | :? TerminalNode as t ->
             currentN := getNodeP findSppfNode findSppfPackedNode dummy !currentLabel !currentR !currentN

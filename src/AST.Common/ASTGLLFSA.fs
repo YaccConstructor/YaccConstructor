@@ -14,7 +14,7 @@ type INode =
 [<AllowNullLiteral>]
 type NonTerminalNode =
     val Extension : int64<extension>
-    val Name      : int<state>
+    val Name      : int<positionInGrammar>
     val mutable First     : PackedNode 
     val mutable Others    : ResizeArray<PackedNode> 
     member this.AddChild (child : PackedNode) : unit = 
@@ -45,7 +45,7 @@ and EpsilonNode =
     new (extension) = {Extension = extension}
 
 and PackedNode = 
-    val State : int<state>
+    val State : int<positionInGrammar>
     val Left : INode
     val Right : INode
     interface INode with
@@ -53,7 +53,7 @@ and PackedNode =
     new (state, left, right) = {State = state; Left = left; Right = right}
 
 and IntermidiateNode = 
-    val State     : int<state>
+    val State     : int<positionInGrammar>
     val Extension : int64<extension>
     val mutable First     : PackedNode
     val mutable Others    : ResizeArray<PackedNode>

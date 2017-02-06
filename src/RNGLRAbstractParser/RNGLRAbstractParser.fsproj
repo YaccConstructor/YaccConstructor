@@ -116,6 +116,11 @@
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
       <ItemGroup>
+        <Reference Include="YC.QuickGraph">
+          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
         <Reference Include="YC.QuickGraph.Data">
           <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.Data.dll</HintPath>
           <Private>True</Private>
@@ -143,11 +148,6 @@
         </Reference>
         <Reference Include="YC.QuickGraph.Petri">
           <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.Petri.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-        <Reference Include="YC.QuickGraph">
-          <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>

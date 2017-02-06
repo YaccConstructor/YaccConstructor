@@ -25,8 +25,8 @@
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-i 16strna.yrd -g "GLLFSAGenerator -module GLLFSA.r16s.H22_H23 -o 16s_H22_H23.yrd.fs -abstract false"</StartArguments>
-    <StartWorkingDirectory>C:\Yacc Constructor</StartWorkingDirectory>
+    <StartArguments>-i test.yrd -g "GLLGenerator -token unit -module GLLFSA.test -o test.fs -abstract true"</StartArguments>
+    <StartWorkingDirectory>C:\Code\Yacc Constructor</StartWorkingDirectory>
     <StartAction>Project</StartAction>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">

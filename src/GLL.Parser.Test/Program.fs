@@ -3,6 +3,7 @@ open System
 open System.Collections.Generic
 open GLL.test
 open Yard.Generators.GLL.ParserCommon
+open Yard.Generators.Common.ASTGLLFSA
 
 (*let tokenizer token =
     match token with
@@ -105,7 +106,7 @@ let main argv =
     *)
     let input =  [|6;6|]
     match GLL.test.buildAST input with
-    | Success tree -> 
+    | FSAParseResult.Success tree -> 
         printfn "Parsing succeed"
         //for res in result do
         //    printfn "%i %i %i %i %i" res.le res.lpos res.re res.rpos res.length

@@ -22,8 +22,7 @@ type FSA(ruleList : Rule.t<Source.t,Source.t> list) =
         |> minimizeFSA
         |> printDot @".\FSA4minimized.dot"
     //let firstSet = genFirstSet fsa
-    do
-        ()
+
     member this.States = fsa.States
     member this.StartState = fsa.StartState
     member this.FinalStates = fsa.FinalStates

@@ -11,29 +11,29 @@ open Yard.Generators.Common
 
 open Microsoft.FSharp.Collections
 
-[<Measure>] type state
+[<Measure>] type positionInGrammar
 
 let epsilon = "Epsilon"
 
 [<StructuralEquality;StructuralComparison>]
 type EdgeSymbol =
     | Term of string
-    | Nonterm of int<state>
+    | Nonterm of int<positionInGrammar>
     | Epsilon of unit
 
 type InternalFSA = {
-    States             : (EdgeSymbol * int<state>) [] []
+    States             : (EdgeSymbol * int<positionInGrammar>) [] []
     Alphabet           : Set<EdgeSymbol>
-    StateToNontermName : Dictionary<int<state>,string>
-    StartState         : int<state>
-    StartStates        : HashSet<int<state>> []
-    //FirstStates        : int<state> list list
-    LastStates         : HashSet<int<state>>
-    FinalStates        : HashSet<int<state>>
-    //Dictionary<int<state>, int>
+    StateToNontermName : Dictionary<int<positionInGrammar>,string>
+    StartState         : int<positionInGrammar>
+    StartStates        : HashSet<int<positionInGrammar>> []
+    //FirstStates        : int<positionInGrammar> list list
+    LastStates         : HashSet<int<positionInGrammar>>
+    FinalStates        : HashSet<int<positionInGrammar>>
+    //Dictionary<int<positionInGrammar>, int>
 }
 
-let stateToString (nontermStringDict : Dictionary<int<state>, string>) state =
+let stateToString (nontermStringDict : Dictionary<int<positionInGrammar>, string>) state =
         let opt, value = nontermStringDict.TryGetValue state
         if opt then value else ""
 
@@ -44,20 +44,20 @@ let symbolToString nontermStringDict s =
         | Epsilon() -> "Epsilon"
 
 let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
-    let states = new ResizeArray<(EdgeSymbol * int<state>) list>()
+    let states = new ResizeArray<(EdgeSymbol * int<positionInGrammar>) list>()
     let alphabet = new HashSet<EdgeSymbol>()
-    let nonterms = new Dictionary<string, int<state>>()
-    let stateToNontermName = new Dictionary<int<state>, string>()
-    let dummyState = -1<state>
+    let nonterms = new Dictionary<string, int<positionInGrammar>>()
+    let stateToNontermName = new Dictionary<int<positionInGrammar>, string>()
+    let dummyState = -1<positionInGrammar>
     let startComponent = ref -1
 
-    let newEpsilonEdge (firstState : int<state>) (finalState : int<state>) = 
+    let newEpsilonEdge (firstState : int<positionInGrammar>) (finalState : int<positionInGrammar>) = 
         () |> Epsilon |> alphabet.Add |> ignore    
         states.Item (int firstState) <- states.Item (int firstState) @ [Epsilon(), finalState]
     
-    let newState() : int<state> = 
+    let newState() : int<positionInGrammar> = 
         states.Add []
-        (states.Count-1) * 1<state>
+        (states.Count-1) * 1<positionInGrammar>
 
     let sourse_tToSymbol isTerm (token : Source.t) =
         if isTerm
@@ -76,7 +76,7 @@ let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
                 stateToNontermName.Add (state,token.text)
                 Nonterm state
 
-    let newEdge isTerm firstState (finalState : int<state> option) (s : Source.t option) =
+    let newEdge isTerm firstState (finalState : int<positionInGrammar> option) (s : Source.t option) =
         let symbol =
             if s.IsNone
             then
@@ -92,7 +92,7 @@ let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
             states.[int firstState] <- states.[int firstState] @ [symbol, !final]
         !final
 
-    let rec productionToStates (firstState : int<state>) (finalState : int<state> option) prod : int<state> =
+    let rec productionToStates (firstState : int<positionInGrammar>) (finalState : int<positionInGrammar> option) prod : int<positionInGrammar> =
         let nNewEdges firstState finalState prod = function 
             | 0  -> newEpsilonEdge firstState finalState
             | 1  -> productionToStates firstState (Some finalState) prod |> ignore
@@ -196,9 +196,9 @@ let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
     
     let lastStates = 
         lastStates
-        |> Array.fold (fun (x : HashSet<int<state>>) set ->
+        |> Array.fold (fun (x : HashSet<int<positionInGrammar>>) set ->
             x.UnionWith set
-            x) (new HashSet<int<state>>())
+            x) (new HashSet<int<positionInGrammar>>())
 
     {   States = 
             states
@@ -206,7 +206,7 @@ let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
             |> Array.ofSeq;
         Alphabet = set alphabet;
         StateToNontermName = stateToNontermName;
-        StartState = startComponent.Value * 1<state>;
+        StartState = startComponent.Value * 1<positionInGrammar>;
         StartStates    = startStates;
         //FirstStates    = firstStates;
         FinalStates    = lastStates;
@@ -251,12 +251,12 @@ let removeEpsilonEdges (fsa : InternalFSA) =
             |> Array.collect (fun (symbol, state) ->
                 match symbol with
                 | Epsilon() -> 
-                    let cond, value = startStates.TryGetValue (i*1<state>)
+                    let cond, value = startStates.TryGetValue (i*1<positionInGrammar>)
                     if cond then
                         startStates.Add(state, value)
                     if finalStates.Contains state
                     then 
-                        i*1<state> |> finalStates.Add |> ignore
+                        i*1<positionInGrammar> |> finalStates.Add |> ignore
                     [||]
                 | _ ->
                     state
@@ -266,7 +266,7 @@ let removeEpsilonEdges (fsa : InternalFSA) =
                     |> Array.ofSeq)
             |> (fun x ->
                 if Array.isEmpty x
-                then (i*1<state>) |> lastStates.Add |> ignore
+                then (i*1<positionInGrammar>) |> lastStates.Add |> ignore
                 x)
                 )
     
@@ -290,7 +290,7 @@ let removeEpsilonEdges (fsa : InternalFSA) =
 
 /// Converts NFA without epsilon edges to DFA
 let toDFA fsa = 
-    let getOutSets (set: HashSet<int<state>>) =
+    let getOutSets (set: HashSet<int<positionInGrammar>>) =
         let newSets = new Dictionary<_,HashSet<_>>()
         for state in set do
             for symbol,nextState in fsa.States.[int state] do
@@ -304,18 +304,18 @@ let toDFA fsa =
     
     let newStates = new ResizeArray<_>()
     let newStartStates = new ResizeArray<HashSet<_>>()
-    let newStartState = ref -1<state>
+    let newStartState = ref -1<positionInGrammar>
     let startStates = fsa.StartStates
     let queue = new Queue<_>()
-    let statesEliminationSet = new ResizeArray<HashSet<int<state>>>()
+    let statesEliminationSet = new ResizeArray<HashSet<int<positionInGrammar>>>()
 
     startStates
     |> Array.iteri (fun i s ->
         queue.Enqueue s
-        new HashSet<_>([statesEliminationSet.Count * 1<state>]) |> newStartStates.Add |> ignore
+        new HashSet<_>([statesEliminationSet.Count * 1<positionInGrammar>]) |> newStartStates.Add |> ignore
         if i = int fsa.StartState
         then
-            newStartState := statesEliminationSet.Count * 1<state>
+            newStartState := statesEliminationSet.Count * 1<positionInGrammar>
         statesEliminationSet.Add s
         )
 
@@ -347,19 +347,19 @@ let toDFA fsa =
     let newLastStates = new HashSet<_>()
     let finalStates = fsa.FinalStates
     let lastStates = fsa.LastStates
-    let stateToNewState = Array.create (fsa.States.Length) 0<state>
+    let stateToNewState = Array.create (fsa.States.Length) 0<positionInGrammar>
 
     statesEliminationSet
     |> ResizeArray.iteri (fun stateNum set ->
         for st in set do
             if finalStates.Contains st
             then 
-                stateNum*1<state> |> newFinalStates.Add |> ignore
+                stateNum*1<positionInGrammar> |> newFinalStates.Add |> ignore
 
             if lastStates.Contains st
             then 
-                stateNum*1<state> |> newLastStates.Add |> ignore
-            stateToNewState.[int st] <- stateNum*1<state>)
+                stateNum*1<positionInGrammar> |> newLastStates.Add |> ignore
+            stateToNewState.[int st] <- stateNum*1<positionInGrammar>)
             
     let newStates = 
         newStates
@@ -368,11 +368,11 @@ let toDFA fsa =
             |> ResizeArray.map(fun (symbol, state) ->
                 (match symbol with
                 | Nonterm i -> stateToNewState.[int i] |> Nonterm
-                | _ -> symbol), state*1<state>)
+                | _ -> symbol), state*1<positionInGrammar>)
             |> ResizeArray.toArray)
         |> ResizeArray.toArray
     
-    let stateToNontermName = new Dictionary<int<state>,string>()
+    let stateToNontermName = new Dictionary<int<positionInGrammar>,string>()
 
     let newAlphabet = 
         fsa.Alphabet
@@ -422,9 +422,9 @@ let findEquivalenceClasses fsa =
     let finalSet = new ResizeArray<_>(fsa.FinalStates)
     let others = new ResizeArray<_>()
     for state in 0..fsa.States.Length-1 do
-        if finalSet.Contains (state*1<state>)
+        if finalSet.Contains (state*1<positionInGrammar>)
         then Class.[state] <- 0
-        else others.Add (state*1<state>)
+        else others.Add (state*1<positionInGrammar>)
     classesP.Add(finalSet)
     classesP.Add(others)
 
@@ -438,7 +438,7 @@ let findEquivalenceClasses fsa =
         let classNumber, symbol = queue.Dequeue()
         let statesOfCurrentClass = classesP.[classNumber]
         ///class -> prevStatesForCurrentClass
-        let involved = new Dictionary<int,ResizeArray<int<state>>>()
+        let involved = new Dictionary<int,ResizeArray<int<positionInGrammar>>>()
 
         for curState in statesOfCurrentClass do
             if inv.[int curState].ContainsKey symbol then
@@ -447,8 +447,8 @@ let findEquivalenceClasses fsa =
                     let cond, value = involved.TryGetValue classOfPrevState
                     if cond
                     then
-                        value.Add (prevState*1<state>)
-                    else involved.Add(classOfPrevState, new ResizeArray<_>([(prevState*1<state>)]))
+                        value.Add (prevState*1<positionInGrammar>)
+                    else involved.Add(classOfPrevState, new ResizeArray<_>([(prevState*1<positionInGrammar>)]))
             
         for keyValue in involved do
             let classOfPrevState, states = keyValue.Key, keyValue.Value
@@ -483,9 +483,9 @@ let minimizeFSA fsa =
 
         let nonterms =
             fsa.StartStates
-            |> Array.fold (fun (x : HashSet<int<state>>) set ->
+            |> Array.fold (fun (x : HashSet<int<positionInGrammar>>) set ->
                 x.UnionWith set
-                x) (new HashSet<int<state>>())
+                x) (new HashSet<int<positionInGrammar>>())
 
         for classNumber in 0..classes.Count-1 do
             if classes.[classNumber].Count <> 0 then
@@ -513,14 +513,14 @@ let minimizeFSA fsa =
                 let newNextState = stateToNewState.[int nextState]
                 let newSymbol = 
                     match symbol with
-                    | Nonterm nonterm -> stateToNewState.[int nonterm]*1<state> |> Nonterm
+                    | Nonterm nonterm -> stateToNewState.[int nonterm]*1<positionInGrammar> |> Nonterm
                     | _ -> symbol
                 newStatesSets.[classNumber].Add (newSymbol,newNextState) |> ignore
     
     let statesToReturn = 
         newStatesSets
         |> Array.map (fun set ->
-            [|for symbol,i in set -> symbol,i*1<state>|])
+            [|for symbol,i in set -> symbol,i*1<positionInGrammar>|])
     
     let stateToNontermName = new Dictionary<_,_>()
 
@@ -528,13 +528,13 @@ let minimizeFSA fsa =
         let newState = stateToNewState.[int keyValue.Key]
         let string = keyValue.Value
 
-        let cond, value = stateToNontermName.TryGetValue (newState*1<state>)
+        let cond, value = stateToNontermName.TryGetValue (newState*1<positionInGrammar>)
         if cond
         then
-            stateToNontermName.Remove(newState*1<state>) |> ignore
-            stateToNontermName.Add(newState*1<state>, value + string)
+            stateToNontermName.Remove(newState*1<positionInGrammar>) |> ignore
+            stateToNontermName.Add(newState*1<positionInGrammar>, value + string)
         else
-            stateToNontermName.Add(newState*1<state>, string)
+            stateToNontermName.Add(newState*1<positionInGrammar>, string)
     
     let newStartStates = 
         fsa.StartStates
@@ -542,24 +542,24 @@ let minimizeFSA fsa =
             let newStates = new HashSet<_>()
 
             for st in states do
-                stateToNewState.[int st]*1<state> |> newStates.Add |> ignore
+                stateToNewState.[int st]*1<positionInGrammar> |> newStates.Add |> ignore
             newStates)
 
     let newFinalStates = new HashSet<_>()
         
     for state in fsa.FinalStates do
-        stateToNewState.[int state]*1<state> |> newFinalStates.Add |> ignore
+        stateToNewState.[int state]*1<positionInGrammar> |> newFinalStates.Add |> ignore
 
     {fsa with
         States = statesToReturn;
         StateToNontermName = stateToNontermName;
-        StartState = stateToNewState.[int fsa.StartState]*1<state>;
+        StartState = stateToNewState.[int fsa.StartState]*1<positionInGrammar>;
         StartStates    = newStartStates;
         FinalStates    = newFinalStates}
-    //statesToReturn, nonterms.Count, newStateStringDict, (stateToNewState.[int startState]*1<state>), (stateToNewState.[int finalState]*1<state>)
+    //statesToReturn, nonterms.Count, newStateStringDict, (stateToNewState.[int startState]*1<positionInGrammar>), (stateToNewState.[int finalState]*1<positionInGrammar>)
 
 let genFirstSet fsa =
-    let nontermToSet = new Dictionary<int<state>, int>()
+    let nontermToSet = new Dictionary<int<positionInGrammar>, int>()
 
     let startStates = 
         fsa.StartStates
@@ -598,7 +598,7 @@ let genFirstSet fsa =
             | _ -> res || s1.Add st) false
 
     let smthChanged = ref true
-    let dummyState = -1<state>
+    let dummyState = -1<positionInGrammar>
 
     while (!smthChanged) do
         smthChanged := false
@@ -650,12 +650,12 @@ let printDot filePrintPath fsa =
     let strs = new ResizeArray<_>(["digraph G {\nnode [shape = circle]"])
     let startStates = 
         fsa.StartStates
-        |> Array.fold (fun (x : HashSet<int<state>>) set ->
+        |> Array.fold (fun (x : HashSet<int<positionInGrammar>>) set ->
             x.UnionWith set
-            x) (new HashSet<int<state>>())
+            x) (new HashSet<int<positionInGrammar>>())
     fsa.States
     |> Array.iteri (fun i state ->
-        let currState = i*1<state>
+        let currState = i*1<positionInGrammar>
         let hd =
             let label = stateToString fsa.StateToNontermName currState
             

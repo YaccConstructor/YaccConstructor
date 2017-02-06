@@ -38,11 +38,8 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
-    <Compile Include="PrintTranslator.fs" />
-    <Compile Include="Table.fs" />
-    <Compile Include="PrintTable.fs" />
-    <Compile Include="GllGenerator.fs" />
-    <Compile Include="GLLGeneratorFSA.fs" />
+    <Compile Include="GLLPrinter.fs" />
+    <Compile Include="GLLGenerator.fs" />
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>

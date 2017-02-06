@@ -12,7 +12,6 @@ open Yard.Generators.GLL.ParserCommon.CommonFuns
 open YC.GLL.GSS
 open Yard.Generators.GLL.MeasureTypes
 
-type SysDict<'k,'v> = System.Collections.Generic.Dictionary<'k,'v>
 type Queue<'t> = System.Collections.Generic.Queue<'t>
 
 let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) = 
@@ -23,7 +22,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
     let result = new System.Collections.Generic.HashSet<_>()
     let dummyEdge = input.EdgeCount
     let outEdges = 
-        let r = Array.init<_> input.VertexCount (fun _ -> new System.Collections.Generic.List<int>())
+        let r = Array.init<_> input.VertexCount (fun _ -> new ResizeArray<_>())
         for i in 0..input.EdgeCount - 1 do
              r.[input.Edges.[i].Start].Add i
         r
@@ -37,7 +36,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
     let currentLength = ref 0us
     //let currentLeftPosition = ref -1<leftPosition>
     let currentGSSNode = ref <| new GSSVertex(-1<positionInGrammar>, -1<positionInInput>)
-    let currentContext = ref <| new ContextFSA<GSSVertex>(!currentIndex, !currentState, !currentGSSNode,!currentLength)
+    let currentContext = ref <| new ContextFSA<GSSVertex>(!currentIndex, !currentState, !currentGSSNode, !currentLength)
 
     let startContexts = 
         input.InitialPositions
@@ -166,7 +165,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
 //    printfn "Number of reused descriptors: %i" !numberOfReusedDescr 
 //    printfn "Number of GSS nodes: %i" !numberOfGSSNodes
 //    printfn "Number of GSS edges: %i" !numberOfGSSEdges
-    //printEdges "GSS.dot" edgesOfGSS
+    gss.ToDot "GSS.dot"
           
     match result.Count with
         | 0 -> ParseResult.Error ("String was not parsed")

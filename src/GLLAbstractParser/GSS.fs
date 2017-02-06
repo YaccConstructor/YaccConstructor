@@ -57,44 +57,19 @@ type GSS () =
         exists, realStartVertex
 
     member this.ToDot fileName =
-        // Should use standart printing!!!
-        //QuickGraph.Graphviz.GraphvizAlgorithm(this).Generate()        
-        let toPrint = new ResizeArray<_>(["digraph G {\nnode [shape = circle]"])
-        let edgs = new ResizeArray<_>()
-        let nodes = new ResizeArray<_>()
-    
         let getStrFromVertex (v : GSSVertex) = 
             let edgeOfInput = CommonFuns.getEdge v.PositionInInput
             let posOnEdgeOfInput = CommonFuns.getPosOnEdge v.PositionInInput
-        
             sprintf "St:%i;Edg:%i;Pos:%i" v.PositionInGrammar edgeOfInput posOnEdgeOfInput
 
-        for edge in this.Edges do
-            let endName = getStrFromVertex edge.Target
-            let startName = getStrFromVertex edge.Source
-            let edgeName = sprintf "ContinueSt:%i,Len:%i" edge.Tag.StateToContinue edge.Tag.LengthOfProcessedString
-
-            edgeName |> edgs.Add
-
-            if nodes.Contains endName |> not then
-                endName |> nodes.Add
-                let nName = sprintf "%i[label=\"%s\"]" (nodes.Count-1) endName
-                nName |> toPrint.Add
-
-            if nodes.Contains startName |> not then
-                startName |> nodes.Add
-                let nName = sprintf "%i[label=\"%s\"]" (nodes.Count-1) startName
-                nName |> toPrint.Add
-
-            let startId = nodes.IndexOf startName
-            let endId = nodes.IndexOf endName
-
-            let edge = sprintf "%i -> %i [label=\"%s\",color=blue]; \n" startId endId edgeName
-
-            toPrint.Add edge
-
-        toPrint.Add "}"
-
-        System.IO.File.WriteAllLines(fileName, toPrint)
+        let printer = QuickGraph.Graphviz.GraphvizAlgorithm(this)
+        printer.CommonVertexFormat.Shape <- QuickGraph.Graphviz.Dot.GraphvizVertexShape.Circle
+        printer.FormatEdge.Add(fun (e:QuickGraph.Graphviz.FormatEdgeEventArgs<_,_>) -> 
+                                   e.EdgeFormatter.Label.Value <- sprintf "ContinueSt:%i,Len:%i" e.Edge.Tag.StateToContinue e.Edge.Tag.LengthOfProcessedString)      
+        printer.FormatVertex.Add(fun (v:QuickGraph.Graphviz.FormatVertexEventArgs<_>) ->
+                                     v.VertexFormatter.Label <- getStrFromVertex v.Vertex)  
+        let str = printer.Generate()        
+            
+        System.IO.File.WriteAllText(fileName, str)
 
 

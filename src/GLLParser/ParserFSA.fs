@@ -9,7 +9,6 @@ open Yard.Generators.Common.DataStructures
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
-open Yard.Generators.GLL.MeasureTypes
 open System.Collections.Generic
 open FSharpx.Collections.Experimental
 

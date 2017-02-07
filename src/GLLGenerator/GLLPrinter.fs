@@ -40,7 +40,7 @@ let printGLL (fsa : FSA)
 
         println "open Yard.Generators.GLL"
         println "open Yard.Generators.GLL.ParserCommon"
-        println "open Yard.Generators.GLL.MeasureTypes"
+        println "open AbstractAnalysis.Common"
 
     let printToken () = 
         let defaultType = tokenType.TryFind "_"

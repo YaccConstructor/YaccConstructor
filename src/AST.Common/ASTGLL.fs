@@ -3,8 +3,6 @@ open System
 open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
 open AbstractAnalysis.Common
-open Yard.Generators.GLL.MeasureTypes
-
 
 
 [<AllowNullLiteral>]

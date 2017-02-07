@@ -1,7 +1,7 @@
 ﻿module YC.GLL.GSS
 
 open Yard.Generators.GLL.ParserCommon
-open Yard.Generators.GLL.MeasureTypes
+open AbstractAnalysis.Common
 open QuickGraph
 open QuickGraph.Graphviz
 

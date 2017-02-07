@@ -4,7 +4,6 @@ open AbstractAnalysis.Common
 open Yard.Generators.Common.ASTGLL
 open FSharpx.Collections.Experimental
 open System.Collections.Generic
-open Yard.Generators.GLL.MeasureTypes
 
 module CommonFuns = 
 
@@ -87,19 +86,19 @@ type Context2 =
 [<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
 type ContextFSA<'GSSVertex> =
     /// Position in input graph (packed edge+position).
-    val Index         : int<positionInInput>
+    val PosInInput         : int<positionInInput>
     /// Current state of FSA.
-    val State         : int<positionInGrammar>
+    val PosInGrammar         : int<positionInGrammar>
     /// Current GSS node.
-    val Vertex        : 'GSSVertex
+    val GssVertex        : 'GSSVertex
     /// 4 values packed in one int64: leftEdge, leftPos, rightEdge, rightPos.
     //val LeftPos       : int<leftPosition>
     /// Length of current result
     val Length        : uint16
-    new (index, state, vertex, len) = {Index = index; State = state; Vertex = vertex; Length = len}
-    override this.ToString () = "Edge:" + (CommonFuns.getEdge(this.Index).ToString()) +
-                                "; PosOnEdge:" + (CommonFuns.getPosOnEdge(this.Index).ToString()) +
-                                "; State:" + (this.State.ToString()) +
+    new (index, state, vertex, len) = {PosInInput = index; PosInGrammar = state; GssVertex = vertex; Length = len}
+    override this.ToString () = "Edge:" + (CommonFuns.getEdge(this.PosInInput).ToString()) +
+                                "; PosOnEdge:" + (CommonFuns.getPosOnEdge(this.PosInInput).ToString()) +
+                                "; State:" + (this.PosInGrammar.ToString()) +
                                 //"; LeftPos:" + (this.LeftPos.ToString()) +
                                 "; Len:" + (this.Length.ToString())
 

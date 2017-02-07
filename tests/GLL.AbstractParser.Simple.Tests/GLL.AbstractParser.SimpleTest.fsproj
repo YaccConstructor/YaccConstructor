@@ -95,6 +95,7 @@
     <Compile Include="Mixed.yrd.fs" />
     <Compile Include="Omit.yrd.fs" />
     <Compile Include="LinearInputTests.fs" />
+    <Compile Include="SimpleGraphInputTests.fs" />
     <Compile Include="Program.fs" />
     <None Include="SimpleLeftRecursion.yrd" />
   </ItemGroup>

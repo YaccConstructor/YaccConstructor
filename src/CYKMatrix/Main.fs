@@ -84,8 +84,9 @@ let graphParsingTest1 =
 
     let rules = new RulesHolder(crl, srl, erl)
 
-    let recognizeMatrix = recognizeGraph graph naiveSquareMatrix rules nonterminals S
+    let (recognizeMatrix, multCount) = recognizeGraph graph naiveSquareMatrix rules nonterminals S
     
+    printfn "Multiplacation count: %d" multCount
     graphParsingPrint recognizeMatrix
 
 

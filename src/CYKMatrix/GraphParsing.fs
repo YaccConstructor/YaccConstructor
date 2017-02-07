@@ -67,10 +67,16 @@
         
         parsingMatrix
 
-    let naiveSquareMatrix (matrix: ParsingMatrix) (allRules: RulesHolder) =
-
+    let naiveSquareMatrix (matrix: ParsingMatrix) (allRules: RulesHolder) isChanged =
         let unionArrays (arr1: float []) (arr2: float []) (size: int) =
-            Array.init size (fun i -> if arr1.[i] > 0.0 then 1.0 else arr2.[i])
+            let modificator i =
+                if arr1.[i] <> arr2.[i]
+                then isChanged := true
+
+                if arr1.[i] > 0.0
+                then 1.0
+                else arr2.[i]
+            Array.init size modificator
 
         let multArrays (from1: Probability.InnerType.T []) (from2: Probability.InnerType.T []) matricesSize actualColCount =        
                 let calculateCell (n, i, j) = 
@@ -113,9 +119,13 @@
                   S =
 
         let parsingMatrix = initParsingMatrix graph allRules nonterminals
+        let isChanged = ref true
+        let mutable multCount = 0
 
-        for i in [1..graph.numberOfVertices] do
-            squareMatrix parsingMatrix allRules
+        while !isChanged do
+            isChanged := false
+            squareMatrix parsingMatrix allRules isChanged
+            multCount <- multCount + 1
 
-        parsingMatrix.[S]
+        (parsingMatrix.[S], multCount)
 

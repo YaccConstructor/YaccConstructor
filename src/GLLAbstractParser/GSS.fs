@@ -2,6 +2,8 @@
 
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.MeasureTypes
+open QuickGraph
+open QuickGraph.Graphviz
 
 type GSSVertex (posInGrammar: int<positionInGrammar>, posInInput: int<positionInInput>) =    
 
@@ -41,7 +43,7 @@ type GSSEdgeLbl =
     new (stateToContinue, len) = {StateToContinue = stateToContinue; LengthOfProcessedString = len}
 
 type GSS () =
-    inherit QuickGraph.AdjacencyGraph<GSSVertex,QuickGraph.TaggedEdge<GSSVertex,GSSEdgeLbl>>(true)
+    inherit AdjacencyGraph<GSSVertex, TaggedEdge<GSSVertex, GSSEdgeLbl>>(true)
     /// Checks for existing of edge in gss edges set. If not adds it to edges set.
     member this.ContainsEdge (startVertex:GSSVertex, endVertex:GSSVertex, stateToContinue : int<positionInGrammar>, len : uint16) =
         let mutable realStartVertex = if startVertex = endVertex then endVertex else startVertex
@@ -57,17 +59,15 @@ type GSS () =
         exists, realStartVertex
 
     member this.ToDot fileName =
-        let getStrFromVertex (v : GSSVertex) = 
+        let getStrFromVertex (v: GSSVertex) = 
             let edgeOfInput = CommonFuns.getEdge v.PositionInInput
             let posOnEdgeOfInput = CommonFuns.getPosOnEdge v.PositionInInput
             sprintf "St:%i;Edg:%i;Pos:%i" v.PositionInGrammar edgeOfInput posOnEdgeOfInput
 
-        let printer = QuickGraph.Graphviz.GraphvizAlgorithm(this)
-        printer.CommonVertexFormat.Shape <- QuickGraph.Graphviz.Dot.GraphvizVertexShape.Circle
-        printer.FormatEdge.Add(fun (e:QuickGraph.Graphviz.FormatEdgeEventArgs<_,_>) -> 
-                                   e.EdgeFormatter.Label.Value <- sprintf "ContinueSt:%i,Len:%i" e.Edge.Tag.StateToContinue e.Edge.Tag.LengthOfProcessedString)      
-        printer.FormatVertex.Add(fun (v:QuickGraph.Graphviz.FormatVertexEventArgs<_>) ->
-                                     v.VertexFormatter.Label <- getStrFromVertex v.Vertex)  
+        let printer = GraphvizAlgorithm(this)
+        printer.CommonVertexFormat.Shape <- Dot.GraphvizVertexShape.Ellipse
+        printer.FormatEdge.Add(fun (e:FormatEdgeEventArgs<_,_>) -> e.EdgeFormatter.Label.Value <- sprintf "ContSt:%i,Len:%i" e.Edge.Tag.StateToContinue e.Edge.Tag.LengthOfProcessedString)
+        printer.FormatVertex.Add(fun (v:FormatVertexEventArgs<_>) -> v.VertexFormatter.Label <- getStrFromVertex v.Vertex)  
         let str = printer.Generate()        
             
         System.IO.File.WriteAllText(fileName, str)

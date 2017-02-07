@@ -66,61 +66,89 @@ type LinearInput (initialPositions, input:array<int<token>>) =
 
     new (input:array<int<token>>) = LinearInput ([|0<positionInInput>|], input)
 
-type BioParserEdge(s : int, e : int, l : int, t : int[], id : int, startPos : int) =
-    member this.Start = s
-    member this.End = e
-    member this.RealLength = l
-    member this.Tokens = t 
-    member this.SourceId = id
-    member this.SourceStartPos = startPos
-    override this.ToString () = (this.Start.ToString()) + "- "+ (this.Tokens.[0].ToString()) + " ->" + (this.End.ToString()) 
-      
-type BioParserInputGraph(edges : BioParserEdge[], initialEdges : Set<int>) =
-//    inherit AdjacencyGraph<int, TaggedEdge<int, int[]>>()
-//    do
-//        edges |> Array.map (fun e -> new TaggedEdge<_,_>(e.s, e.e, e.Tokens))
-    let pack2to32 edge position =
-        if (edge < 65536) && (position < 65536) then ((int position <<< 16) ||| int edge)
-        else failwith "Edge or position is greater then 65535!!"
-    let edgs = Array.zeroCreate edges.Length
-    let vertexCount = ref 0
-    /// Length of each edge
-    let chainLen = Array.zeroCreate edges.Length
-    let initialPositions = new ResizeArray<_>()
-    let finalVertex = ref 0
-    do        
-        let cnt = ref 0
-        let initialVertCnt = ref 0
-        let vMap = new System.Collections.Generic.Dictionary<_,_>()
-        let getV x = 
-            let f,v = vMap.TryGetValue x
-            if f 
-            then v
-            else       
-                let newV = !cnt                
-                vMap.Add(x, newV)
-                incr cnt
-                newV
-        edges
-        |> Array.iteri (fun i e -> 
-            let edg = new BioParserEdge(getV e.Start, getV e.End, e.RealLength, e.Tokens, e.SourceId, e.SourceStartPos)
-            edgs.[i] <- edg
-            chainLen.[i] <- e.Tokens.Length
-            //shift := 0//max !shift (e.Tokens.Length - e.RealLenght)
-            if initialEdges.IsEmpty || initialEdges.Contains(i)
-            then
-                for j in 0..e.Tokens.Length - 1 do
-                    initialPositions.Add(pack2to32 i j))
-        vertexCount := vMap.Count
-    
-    member this.Edges  with get () = edgs
-    member this.InitialPositions with get () = initialPositions.ToArray()
-    member this.FinalVertex with get () = !finalVertex
-    /// Lengths of edges.
-    member this.ChainLength with get () = chainLen
-    member this.EdgeCount with get () = edgs.Length
-    member this.VertexCount with get () = !vertexCount
-    member this.Shift with get () = 0
+type SimpleGraphInput<'tagType> (initialPositions, getTokenFromTag:'tagType -> int<token>) =
+    inherit AdjacencyGraph<int, TaggedEdge<int, 'tagType>>()
+    interface IParserInput with
+        member this.InitialPositions = initialPositions
+        member this.ForAllOutgoingEdges curPosInInput pFun =
+            let outEdges = int curPosInInput |> this.OutEdges
+            outEdges
+            |> Seq.iter 
+                (fun e ->
+                    pFun (getTokenFromTag e.Tag) (e.Target * 1<positionInInput>)
+                )
+
+//type EdgeCompressedGraphInput<'tagType> (initialPositions, getTokensFromTag:'tagType -> int<token>) =
+//    inherit AdjacencyGraph<int, TaggedEdge<int, 'tagType>>()
+//    interface IParserInput with
+//        member this.InitialPositions = initialPositions
+//        member this.ForAllOutgoingEdges curPosInInput pFun =
+//            let pack2to32 edge position =
+//                if (edge < 65536) && (position < 65536) then ((int position <<< 16) ||| int edge)
+//                else failwith "Edge or position is greater then 65535!!"
+//            let outEdges = int curPosInInput |> this.OutEdges
+//            outEdges
+//            |> Seq.iter 
+//                (fun e ->
+//                    pFun (getTokenFromTag e.Tag) (e.Target *1<positionInInput>)
+//                )
 
 
-
+//type BioParserEdge(s : int, e : int, l : int, t : int[], id : int, startPos : int) =
+//    member this.Start = s
+//    member this.End = e
+//    member this.RealLength = l
+//    member this.Tokens = t 
+//    member this.SourceId = id
+//    member this.SourceStartPos = startPos
+//    override this.ToString () = (this.Start.ToString()) + "- "+ (this.Tokens.[0].ToString()) + " ->" + (this.End.ToString()) 
+//      
+//type BioParserInputGraph(edges : BioParserEdge[], initialEdges : Set<int>) =
+////    inherit AdjacencyGraph<int, TaggedEdge<int, int[]>>()
+////    do
+////        edges |> Array.map (fun e -> new TaggedEdge<_,_>(e.s, e.e, e.Tokens))
+//    let pack2to32 edge position =
+//        if (edge < 65536) && (position < 65536) then ((int position <<< 16) ||| int edge)
+//        else failwith "Edge or position is greater then 65535!!"
+//    let edgs = Array.zeroCreate edges.Length
+//    let vertexCount = ref 0
+//    /// Length of each edge
+//    let chainLen = Array.zeroCreate edges.Length
+//    let initialPositions = new ResizeArray<_>()
+//    let finalVertex = ref 0
+//    do        
+//        let cnt = ref 0
+//        let initialVertCnt = ref 0
+//        let vMap = new System.Collections.Generic.Dictionary<_,_>()
+//        let getV x = 
+//            let f,v = vMap.TryGetValue x
+//            if f 
+//            then v
+//            else       
+//                let newV = !cnt                
+//                vMap.Add(x, newV)
+//                incr cnt
+//                newV
+//        edges
+//        |> Array.iteri (fun i e -> 
+//            let edg = new BioParserEdge(getV e.Start, getV e.End, e.RealLength, e.Tokens, e.SourceId, e.SourceStartPos)
+//            edgs.[i] <- edg
+//            chainLen.[i] <- e.Tokens.Length
+//            //shift := 0//max !shift (e.Tokens.Length - e.RealLenght)
+//            if initialEdges.IsEmpty || initialEdges.Contains(i)
+//            then
+//                for j in 0..e.Tokens.Length - 1 do
+//                    initialPositions.Add(pack2to32 i j))
+//        vertexCount := vMap.Count
+//    
+//    member this.Edges  with get () = edgs
+//    member this.InitialPositions with get () = initialPositions.ToArray()
+//    member this.FinalVertex with get () = !finalVertex
+//    /// Lengths of edges.
+//    member this.ChainLength with get () = chainLen
+//    member this.EdgeCount with get () = edgs.Length
+//    member this.VertexCount with get () = !vertexCount
+//    member this.Shift with get () = 0
+//
+//
+//

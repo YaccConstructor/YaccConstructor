@@ -11,12 +11,7 @@ open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
 open YC.GLL.GSS
 
-let findVertices (gss:GSS) state =    
-    gss.Vertices
-    |> Seq.filter (fun v -> v.PositionInGrammar = state)
-
 let parse (parser : FSAParserSourceGLL) (input : IParserInput) = 
-
     let gss = new GSS()
 
     let startContexts = 
@@ -82,8 +77,20 @@ let parse (parser : FSAParserSourceGLL) (input : IParserInput) =
             )
 
     gss
-         
+       
+let findVertices (gss:GSS) state =    
+    gss.Vertices
+    |> Seq.filter (fun v -> v.PositionInGrammar = state)
+             
 let isPsrsed (parser : FSAParserSourceGLL) (input : LinearInput) = 
     let gss = parse parser input
     findVertices gss parser.StartState
     |> Seq.exists (fun v -> v.U.Values |> Seq.exists (fun a -> a |> ResizeArray.exists (fun i -> int i = input.Input.Length)))
+
+let getAllRangesForState gss state =
+    findVertices gss state
+    |> Seq.collect (fun v -> v.U.Values |> Seq.collect (fun a -> a |> ResizeArray.map (fun i ->  v.PositionInInput, i)))
+
+let getAllRangesForStartState (parser : FSAParserSourceGLL) (input : IParserInput) = 
+    let gss = parse parser input
+    getAllRangesForState gss parser.StartState

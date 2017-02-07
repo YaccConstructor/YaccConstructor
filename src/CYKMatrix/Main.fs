@@ -84,7 +84,7 @@ let graphParsingTest1 =
 
     let rules = new RulesHolder(crl, srl, erl)
 
-    let recognizeMatrix = recognizeGraph graph rules nonterminals S
+    let recognizeMatrix = recognizeGraph graph naiveSquareMatrix rules nonterminals S
     
     graphParsingPrint recognizeMatrix
 
@@ -209,8 +209,8 @@ let main args =
 //    0
 
 
-    let nvidiaOneThread, nvidiaParallel, nvidiaProvider = getGpuOptions nvidiaPlatformName
-//    let intelOptions, intelProvider = getGpuOptions intelPlatformName
+//    let nvidiaOneThread, nvidiaParallel, nvidiaProvider = getGpuOptions nvidiaPlatformName
+    let intelOptions, intelParallel, intelProvider = getGpuOptions intelPlatformName
 //    let amdOneThreadOptions, amdParallel, amdProvider = getGpuOptions amdPlatformName
 //    let defaultOptions, dafeultProvider = getGpuOptions defaultPlatformName
     let cudaOneThread: GPUCuda = { doParallelFlush = false }

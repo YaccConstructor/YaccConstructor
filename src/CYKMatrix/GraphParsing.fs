@@ -32,40 +32,18 @@
 
     type ParsingMatrix = Dictionary<NonTerminal, ProbabilityMatrix.T>
 
-    let unionArrays (arr1: float []) (arr2: float []) (size: int) =
-        Array.init size (fun i -> if arr1.[i] > 0.0 then 1.0 else arr2.[i])
-
-    let unionWithOneCell (arr: float []) (v1: int) (v2: int) (matrixSize: int) =
-        Array.init (matrixSize * matrixSize) (fun i -> if arr.[i] > 0.0
-                                                       then 1.0
-                                                       else 
-                                                           let row = i / matrixSize
-                                                           let col = i - row * matrixSize
-                                                           if (v1 - 1 = row) && (v2 - 1 = col)
-                                                           then 1.0
-                                                           else 0.0)
-
-    let multArrays (from1: Probability.InnerType.T []) (from2: Probability.InnerType.T []) matricesSize actualColCount =        
-            let calculateCell (n, i, j) = 
-                let skipMatrices = n * matricesSize * matricesSize
-                let skipRows = skipMatrices + i * matricesSize
-                let skipColumns = skipMatrices + j * matricesSize                
-                Array.fold2 (fun b v1 v2 -> Probability.innerSumm b <| Probability.innerMult v1 v2)
-                            Probability.InnerType.zero
-                            from1.[skipRows..skipRows + matricesSize - 1] 
-                            from2.[skipColumns..skipColumns + matricesSize - 1]
-
-            // todo: recurr
-            let getNIJ x = 
-                let n = x / (matricesSize * matricesSize)
-                let i = (x - n * matricesSize * matricesSize) / matricesSize
-                let j = x - n * matricesSize * matricesSize - i * matricesSize
-                n, i, j
-            Array.init (matricesSize * actualColCount) (fun x -> calculateCell <| getNIJ x)
-
     let initParsingMatrix (graph:Graph.T)
                   (allRules: RulesHolder)
                   nonterminals =
+        let unionWithOneCell (arr: float []) (v1: int) (v2: int) (matrixSize: int) =
+            Array.init (matrixSize * matrixSize) (fun i -> if arr.[i] > 0.0
+                                                           then 1.0
+                                                           else 
+                                                               let row = i / matrixSize
+                                                               let col = i - row * matrixSize
+                                                               if (v1 - 1 = row) && (v2 - 1 = col)
+                                                               then 1.0
+                                                               else 0.0)
         let parsingMatrix = new ParsingMatrix ()
         do 
             (
@@ -89,24 +67,47 @@
         
         parsingMatrix
 
-    let squareParsingMatrix (parsingMatrix: ParsingMatrix)
-                            (allRules: RulesHolder) =
+    let naiveSquareMatrix (matrix: ParsingMatrix) (allRules: RulesHolder) =
+
+        let unionArrays (arr1: float []) (arr2: float []) (size: int) =
+            Array.init size (fun i -> if arr1.[i] > 0.0 then 1.0 else arr2.[i])
+
+        let multArrays (from1: Probability.InnerType.T []) (from2: Probability.InnerType.T []) matricesSize actualColCount =        
+                let calculateCell (n, i, j) = 
+                    let skipMatrices = n * matricesSize * matricesSize
+                    let skipRows = skipMatrices + i * matricesSize
+                    let skipColumns = skipMatrices + j * matricesSize                
+                    Array.fold2 (fun b v1 v2 -> Probability.innerSumm b <| Probability.innerMult v1 v2)
+                                Probability.InnerType.zero
+                                from1.[skipRows..skipRows + matricesSize - 1] 
+                                from2.[skipColumns..skipColumns + matricesSize - 1]
+
+                // todo: recurr
+                let getNIJ x = 
+                    let n = x / (matricesSize * matricesSize)
+                    let i = (x - n * matricesSize * matricesSize) / matricesSize
+                    let j = x - n * matricesSize * matricesSize - i * matricesSize
+                    n, i, j
+                Array.init (matricesSize * actualColCount) (fun x -> calculateCell <| getNIJ x)
+
         let nontermPairs = allRules.ComplexTails
         for (nt1, nt2) in nontermPairs do
-
-            let arr1 = parsingMatrix.[nt1].GetSubArray id false parsingMatrix.[nt1].WholeMatrix
-            let arr2 = parsingMatrix.[nt2].GetSubArray id true parsingMatrix.[nt2].WholeMatrix
-            let resultArray = multArrays arr1 arr2 parsingMatrix.[nt1].Size parsingMatrix.[nt1].Size
-            let resultMatix = ProbabilityMatrix.create parsingMatrix.[nt1].Size resultArray
+            let size = matrix.[nt1].Size
+            let arr1 = matrix.[nt1].GetSubArray id false matrix.[nt1].WholeMatrix
+            let arr2 = matrix.[nt2].GetSubArray id true matrix.[nt2].WholeMatrix
+            let resultArray = multArrays arr1 arr2 size size
+            let resultMatix = ProbabilityMatrix.create size resultArray
 
             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                let curArray = parsingMatrix.[nonTerm].GetSubArray id false parsingMatrix.[nonTerm].WholeMatrix
+                let curArray = matrix.[nonTerm].GetSubArray id false matrix.[nonTerm].WholeMatrix
                 let updatedArray = unionArrays (resultMatix.GetSubArray id false resultMatix.WholeMatrix) curArray curArray.Length
-                let updatedMatrix = ProbabilityMatrix.create parsingMatrix.[nt1].Size updatedArray
-                parsingMatrix.Remove(nonTerm) |> ignore
-                parsingMatrix.Add(nonTerm, updatedMatrix)
+                let updatedMatrix = ProbabilityMatrix.create matrix.[nonTerm].Size updatedArray
+                matrix.Remove(nonTerm) |> ignore
+                matrix.Add(nonTerm, updatedMatrix)
+
 
     let recognizeGraph (graph:Graph.T)
+                  squareMatrix
                   (allRules: RulesHolder)
                   nonterminals
                   S =
@@ -114,7 +115,7 @@
         let parsingMatrix = initParsingMatrix graph allRules nonterminals
 
         for i in [1..graph.numberOfVertices] do
-            squareParsingMatrix parsingMatrix allRules
+            squareMatrix parsingMatrix allRules
 
         parsingMatrix.[S]
 

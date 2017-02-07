@@ -1,2 +1,3 @@
 [<Start>]
-full: A A A A
+full: A s A
+s: s s | A

@@ -55,11 +55,6 @@
     <Content Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DataStructures\DataStructures.fsproj">
-      <Name>DataStructures</Name>
-      <Project>{3d13b6cd-3702-4395-b3bc-4e52189f90b0}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

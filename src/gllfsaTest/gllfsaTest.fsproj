@@ -62,11 +62,6 @@
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\DataStructures\DataStructures.fsproj">
-      <Name>DataStructures</Name>
-      <Project>{3d13b6cd-3702-4395-b3bc-4e52189f90b0}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\GLLAbstractParser\GLLAbstractParser.fsproj">
       <Name>GLLAbstractParser</Name>
       <Project>{bd40477e-7ceb-4ff4-b53f-05316f3bb6d8}</Project>

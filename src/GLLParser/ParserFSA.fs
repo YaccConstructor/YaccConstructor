@@ -15,6 +15,12 @@ open FSharpx.Collections.Experimental
 
 type CompressedArray<'t> = Yard.Generators.GLL.ParserCommon.CompressedArray<'t>
 
+let measureStateToNonterm (state : int<positionInGrammar>) =
+    (int state)*1<nonterm>
+
+let measureNontermToState (nonterm : int<nonterm>) =
+    (int nonterm)*1<positionInGrammar>
+
 /// For debuging
 type EdgeOfGSS = 
     {

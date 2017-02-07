@@ -3,7 +3,7 @@
 open System.Collections.Generic
 open Yard.Generators.Common.FSA
 open Yard.Generators.Common.FSA.Common
-open Yard.Generators.Common.DataStructures
+open AbstractAnalysis.Common
 
 let printGLL (fsa : FSA)
              (outFileName : string)
@@ -17,6 +17,7 @@ let printGLL (fsa : FSA)
     let stateTokenNewState = new ResizeArray<_>()
     let termToInt = new Dictionary<string,int>()
     
+
     let inline pack state token =
         if (int state < 65536) && (int token - fsa.States.Length < 65536)
         then int( (int state <<< 16) ||| (token - fsa.States.Length) )
@@ -26,7 +27,7 @@ let printGLL (fsa : FSA)
         Printf.kprintf (fun s -> res.Append(s).Append "\n" |> ignore) x
     let print (x : 'a) =
         Printf.kprintf (res.Append >> ignore) x
-    
+
     let printHeaders () =
         let fileName = outFileName.Substring(0, outFileName.IndexOf("."))
         println "module %s"
@@ -38,7 +39,8 @@ let printGLL (fsa : FSA)
         println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
         println "open Yard.Generators.GLL"
         println "open Yard.Generators.GLL.ParserCommon"
-        println "open Yard.Generators.Common.DataStructures"
+        println "open AbstractAnalysis.Common"
+
 
     let printToken () = 
         let defaultType = tokenType.TryFind "_"
@@ -59,7 +61,7 @@ let printGLL (fsa : FSA)
     let printTokenToNumber () = 
         println "let tokenToNumber = function"
         for tokenNumber in termToInt do
-            println "    | %s() -> %i" tokenNumber.Key tokenNumber.Value
+            println "    | %s _ -> %i" tokenNumber.Key tokenNumber.Value
 
     let printStateToNontermName (sortedStateToNontermName : seq<KeyValuePair<int<positionInGrammar>, string>>) () = 
         println "let stateToNontermName = function"
@@ -129,7 +131,7 @@ let printGLL (fsa : FSA)
         println "let private nontermCount = %i" fsa.NontermCount
     
     let printParser () =
-        println "let private parserSource = new FSAParserSourceGLL (outNonterms, startState, finalStates, nontermCount, numIsTerminal, stateToNontermName, anyNonterm, stateAndTokenToNewState)"
+        println "let parserSource = new FSAParserSourceGLL (outNonterms, startState, finalStates, nontermCount, numIsTerminal, stateToNontermName, anyNonterm, stateAndTokenToNewState)"
 
     let printFun isAbstract () =
         if isAbstract
@@ -188,6 +190,6 @@ let printGLL (fsa : FSA)
     printItem printFinalStates
     printItem printNontermCount
     printItem printParser
-    printItem (printFun isAbstract)
+    //printItem (printFun isAbstract)
 
     res

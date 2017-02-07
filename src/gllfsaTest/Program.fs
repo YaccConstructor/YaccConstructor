@@ -102,12 +102,19 @@ let main argv =
         let time2 = System.DateTime.Now - start
         printfn "%A %A %A" len time1 time2
     *)
-    match GLLFSA.test.buildAbstract graphTT with
-    | Success1 result -> 
-        printfn "SearchWithoutSPPF succeed"
-        for res in result do
-            printfn "%i %i %i %i %i" res.le res.lpos res.re res.rpos res.length
 
-    | _ -> printfn "Input parsing failed."
+    let res = 
+        Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput.isParsed GLLFSA.test.parserSource (new LinearInput([|6<token>;6<token>;6<token>;6<token>;6<token>|]))
+        
+
+    printfn "R=%A" res
+//
+//    | Success1 result -> 
+//        printfn "SearchWithoutSPPF succeed"
+//        for res in result do
+//            ()
+//            //printfn "%i %i %i %i %i" res.le res.lpos res.re res.rpos res.length
+//
+//    | _ -> printfn "Input parsing failed."
 
     0

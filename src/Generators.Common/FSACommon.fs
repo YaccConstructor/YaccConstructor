@@ -9,6 +9,7 @@ open Yard.Generators.Common.Epsilon
 open Yard.Generators.Common.SymbolSets
 open Yard.Generators.Common
 open Yard.Generators.Common.DataStructures
+open AbstractAnalysis.Common
 
 [<StructuralEquality;StructuralComparison>]
 type EdgeSymbol =

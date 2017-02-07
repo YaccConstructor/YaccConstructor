@@ -78,7 +78,8 @@ type GLLFSA() =
             use out = new System.IO.StreamWriter (outFileName)
             // TODO: write foot of definition
             let generatedCode = printGLL fsa outFileName tokenType moduleName light isAbstract
-            out.WriteLine generatedCode
+
+            out.WriteLine (generatedCode.ToString().Replace("\r\n", "\n").Replace("\n", "\r\n"))
             out.Flush()
             out.Close()
             eprintfn "Generation time: %A" <| System.DateTime.Now - start

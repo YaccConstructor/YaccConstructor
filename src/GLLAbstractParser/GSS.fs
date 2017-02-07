@@ -2,6 +2,9 @@
 
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.Common.DataStructures
+open AbstractAnalysis.Common
+open QuickGraph
+open QuickGraph.Graphviz
 
 type GSSVertex (nonterm: int<nonterm>, posInInput: int<positionInInput>) =    
 
@@ -41,7 +44,7 @@ type GSSEdgeLbl =
     new (stateToContinue, len) = {StateToContinue = stateToContinue; LengthOfProcessedString = len}
 
 type GSS () =
-    inherit QuickGraph.AdjacencyGraph<GSSVertex,QuickGraph.TaggedEdge<GSSVertex,GSSEdgeLbl>>(true)
+    inherit AdjacencyGraph<GSSVertex, TaggedEdge<GSSVertex, GSSEdgeLbl>>(true)
     /// Checks for existing of edge in gss edges set. If not adds it to edges set.
     member this.ContainsEdge (startVertex:GSSVertex, endVertex:GSSVertex, stateToContinue : int<positionInGrammar>, len : uint16) =
         let mutable realStartVertex = if startVertex = endVertex then endVertex else startVertex
@@ -57,44 +60,17 @@ type GSS () =
         exists, realStartVertex
 
     member this.ToDot fileName =
-        // Should use standart printing!!!
-        //QuickGraph.Graphviz.GraphvizAlgorithm(this).Generate()        
-        let toPrint = new ResizeArray<_>(["digraph G {\nnode [shape = circle]"])
-        let edgs = new ResizeArray<_>()
-        let nodes = new ResizeArray<_>()
-    
-        let getStrFromVertex (v : GSSVertex) = 
+        let getStrFromVertex (v: GSSVertex) = 
             let edgeOfInput = CommonFuns.getEdge v.PositionInInput
             let posOnEdgeOfInput = CommonFuns.getPosOnEdge v.PositionInInput
-        
             sprintf "St:%i;Edg:%i;Pos:%i" v.Nonterm edgeOfInput posOnEdgeOfInput
 
-        for edge in this.Edges do
-            let endName = getStrFromVertex edge.Target
-            let startName = getStrFromVertex edge.Source
-            let edgeName = sprintf "ContinueSt:%i,Len:%i" edge.Tag.StateToContinue edge.Tag.LengthOfProcessedString
-
-            edgeName |> edgs.Add
-
-            if nodes.Contains endName |> not then
-                endName |> nodes.Add
-                let nName = sprintf "%i[label=\"%s\"]" (nodes.Count-1) endName
-                nName |> toPrint.Add
-
-            if nodes.Contains startName |> not then
-                startName |> nodes.Add
-                let nName = sprintf "%i[label=\"%s\"]" (nodes.Count-1) startName
-                nName |> toPrint.Add
-
-            let startId = nodes.IndexOf startName
-            let endId = nodes.IndexOf endName
-
-            let edge = sprintf "%i -> %i [label=\"%s\",color=blue]; \n" startId endId edgeName
-
-            toPrint.Add edge
-
-        toPrint.Add "}"
-
-        System.IO.File.WriteAllLines(fileName, toPrint)
+        let printer = GraphvizAlgorithm(this)
+        printer.CommonVertexFormat.Shape <- Dot.GraphvizVertexShape.Ellipse
+        printer.FormatEdge.Add(fun (e:FormatEdgeEventArgs<_,_>) -> e.EdgeFormatter.Label.Value <- sprintf "ContSt:%i,Len:%i" e.Edge.Tag.StateToContinue e.Edge.Tag.LengthOfProcessedString)
+        printer.FormatVertex.Add(fun (v:FormatVertexEventArgs<_>) -> v.VertexFormatter.Label <- getStrFromVertex v.Vertex)  
+        let str = printer.Generate()        
+            
+        System.IO.File.WriteAllText(fileName, str)
 
 

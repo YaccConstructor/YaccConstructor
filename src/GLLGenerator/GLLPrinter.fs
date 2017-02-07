@@ -61,7 +61,7 @@ let printGLL (fsa : FSA)
     let printTokenToNumber () = 
         println "let tokenToNumber = function"
         for tokenNumber in termToInt do
-            println "    | %s() -> %i" tokenNumber.Key tokenNumber.Value
+            println "    | %s _ -> %i" tokenNumber.Key tokenNumber.Value
 
     let printStateToNontermName (sortedStateToNontermName : seq<KeyValuePair<'a, string>>) () = 
         println "let stateToNontermName = function"

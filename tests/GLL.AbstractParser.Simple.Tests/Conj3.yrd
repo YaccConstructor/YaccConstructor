@@ -1,5 +1,0 @@
-[<Start>]
-start: s & r
-s: s s | A s B | {None} 
-b: A | B
-r: b b | b b b | b b b b

@@ -28,7 +28,7 @@ let parse (parser : FSAParserSourceGLL) (input : IParserInput) =
             new ContextFSA<_>(pos, parser.StartState, vertex, 0us))
 
     /// Stack of contexts
-    let setR = new System.Collections.Generic.Stack<ContextFSA<_>>(startContexts)  
+    let setR = new System.Collections.Generic.Stack<ContextFSA<_>>(startContexts)
                  
     /// Adds new context to stack (setR)
     let pushContext posInInput posInGrammar gssVertex len =
@@ -71,15 +71,15 @@ let parse (parser : FSAParserSourceGLL) (input : IParserInput) =
         /// Nonterminal transitions. Move pointer in grammar. Position in input is not changed.
         for curNonterm, nextState in possibleNontermMoviesInGrammar do            
             create currentContext nextState curNonterm
-        
+
         /// Terminal transitions.
-        input.ForAllOutgoingEdges 
-            currentContext.PosInInput 
+        input.ForAllOutgoingEdges
+            currentContext.PosInInput
             (fun nextToken nextPosInInput -> 
                 let isTransitionPossible, nextPosInGrammar = parser.StateAndTokenToNewState.TryGetValue (parser.GetTermsDictionaryKey currentContext.PosInGrammar (int nextToken))
                 if isTransitionPossible
                 then pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex (currentContext.Length + 1us)
-            )        
+            )
 
     gss
          

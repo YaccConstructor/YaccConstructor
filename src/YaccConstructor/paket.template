@@ -1,0 +1,27 @@
+type file
+id YC.SDK
+title YC.SDK
+owners
+    YaccConstructor
+authors 
+    YaccConstructor
+projectUrl
+    http://github.com/YaccConstructor/YaccConstructor
+iconUrl
+    https://raw.githubusercontent.com/YaccConstructor/YaccConstructor/master/docs/files/img/logo.png
+licenseUrl
+    http://github.com/YaccConstructor/YaccConstructor/blob/master/LICENSE.txt
+requireLicenseAcceptance
+    false
+copyright
+    Copyright YaccConstructor 2016
+tags
+    YaccConstructor YC FSharp parsing
+summary
+    YaccConstructor tool set
+description
+    YaccConstructor tool set
+files
+    ./../../Bin/Release/v40/*.dll ==> tools
+    ./../../Bin/Release/v40/*.exe ==> tools
+    ./../../Bin/Release/v40/*.config ==> tools

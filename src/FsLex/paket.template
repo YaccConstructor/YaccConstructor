@@ -1,0 +1,29 @@
+type file
+id YC.Tools
+title YC.Tools
+owners
+    YaccConstructor
+authors 
+    YaccConstructor
+projectUrl
+    http://github.com/YaccConstructor/YaccConstructor
+iconUrl
+    https://raw.githubusercontent.com/YaccConstructor/YaccConstructor/master/docs/files/img/logo.png
+licenseUrl
+    http://github.com/YaccConstructor/YaccConstructor/blob/master/LICENSE.txt
+requireLicenseAcceptance
+    false
+copyright
+    Copyright YaccConstructor 2016
+tags
+    YaccConstructor YC FSharp parsing
+summary
+    3rd party tools
+description
+    3rd party tools
+files
+    ./../../Bin/Release/v40/YC.FsYacc.exe ==> tools
+    ./../../Bin/Release/v40/YC.FsYacc.exe.config ==> tools
+    ./../../Bin/Release/v40/YC.FsLex.exe ==> tools
+    ./../../Bin/Release/v40/YC.FsLex.exe.config ==> tools
+    ./../../Bin/Release/v40/FSharp.Core.dll ==> tools

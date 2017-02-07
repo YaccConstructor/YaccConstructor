@@ -9,6 +9,7 @@ open FSharpx.Collections.Experimental
 [<Measure>] type vertexMeasure
 [<Measure>] type nodeMeasure
 [<Measure>] type labelMeasure
+[<Measure>] type stackMeasure
 
 [<Struct>]
 type Vertex =
@@ -17,16 +18,30 @@ type Vertex =
     new (level, nonterm) = {Level = level; NontermLabel = nonterm}
 
 [<Struct>]
+type CallStackVertex =
+    val ReturnLabel : int
+    val Predecessor : int<stackMeasure>
+    new (label, pred) = {ReturnLabel = label; Predecessor = pred}
+
+[<Struct>]
 type Context(*<'TokenType>*) =
     val Index         : int
     val Label         : int<labelMeasure>
     val Vertex        : Vertex
     val Ast           : int<nodeMeasure>
-    val CurrentR      : int<nodeMeasure>
+    //val CurrentR      : int<nodeMeasure>
     //val Path          : List<ParserEdge<'TokenType*ref<bool>>>
-    new (index, label, vertex, ast, curR) = {Index = index; Label = label; Vertex = vertex; Ast = ast; CurrentR = curR} // Path = List.empty<ParserEdge<'TokenType*ref<bool>>>
+    new (index, label, vertex, ast(*, curR*)) = {Index = index; Label = label; Vertex = vertex; Ast = ast(*; CurrentR = curR*)} // Path = List.empty<ParserEdge<'TokenType*ref<bool>>>
     //new (index, label, vertex, ast, path) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Path = path}
 
+[<Struct>]
+type ContextGFG =
+    val Index           : int
+    val Label           : int<labelMeasure>
+    val Vertex          : Vertex
+    val CallStackVertex : int<stackMeasure>
+    val Ast             : int<nodeMeasure>
+    new (index, label, vertex, csVertex, ast) = {Index = index; Label = label; Vertex = vertex; CallStackVertex = csVertex; Ast = ast}
 
 type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
@@ -136,13 +151,13 @@ type ParserStructures<'TokenType> (inputLength : int, currentRule : int)=
                 false
         else true
 
-    let pushContext (inputVertex : int) (label : int<labelMeasure>) vertex ast curR =
-        setR.Enqueue(new Context(inputVertex, label, vertex, ast, curR))
+    let pushContext (inputVertex : int) (label : int<labelMeasure>) vertex ast (*curR*) =
+        setR.Enqueue(new Context(inputVertex, label, vertex, ast(*, curR*)))
         
     let addContext (setU : System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>[]) (inputVertex : int) (label : int<labelMeasure>) vertex ast (*currentPath*) =
         if not <| containsContext setU inputVertex label vertex ast
         then
-            setR.Enqueue(new Context(inputVertex, label, vertex, ast, dummy(*, currentPath*)))
+            setR.Enqueue(new Context(inputVertex, label, vertex, ast(*, dummy, currentPath*)))
 
     let containsEdge (dict1 : System.Collections.Generic.Dictionary<int<nodeMeasure>, System.Collections.Generic.Dictionary<int, ResizeArray<int>>>) ast (e : Vertex) =
         if dict1 <> Unchecked.defaultof<_>
@@ -216,6 +231,7 @@ type ParserStructures<'TokenType> (inputLength : int, currentRule : int)=
     member this.SppfNodes = sppfNodes
     member this.DummyAST = dummyAST
     member this.PushContext = pushContext
+    member this.ContainsContext = containsContext
     member this.AddContext = addContext
     member this.ContainsEdge = containsEdge
     member this.GetTreeExtension = getTreeExtension

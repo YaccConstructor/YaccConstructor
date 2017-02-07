@@ -1,0 +1,3 @@
+[<Start>]
+s : a s C | B
+a : A | {}

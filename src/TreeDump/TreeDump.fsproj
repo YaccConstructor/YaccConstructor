@@ -8,7 +8,7 @@
     <ProjectGuid>{99dfb4e9-46c5-4767-9646-ba49b2b6a664}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>TreeDump</RootNamespace>
-    <AssemblyName>TreeDump</AssemblyName>
+    <AssemblyName>YC.TreeDump</AssemblyName>
     <Name>TreeDump</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

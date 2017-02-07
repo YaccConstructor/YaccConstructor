@@ -8,7 +8,7 @@
     <ProjectGuid>f2e8eda4-c13f-4f8d-b858-d5ef4fb8a06d</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Parser.Common</RootNamespace>
-    <AssemblyName>Parser.Common</AssemblyName>
+    <AssemblyName>YC.Parser.Common</AssemblyName>
     <Name>GLLParsers.Common</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
   </PropertyGroup>

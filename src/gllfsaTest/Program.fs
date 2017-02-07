@@ -104,8 +104,8 @@ let main argv =
     *)
 
     let res = 
-        GLLFSA.test.buildAbstract (new LinearInput([|6<token>;6<token>;6<token>;6<token>|])) 
-        |> Array.ofSeq
+        Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput.isPsrsed GLLFSA.test.parserSource (new LinearInput([|6<token>;6<token>;6<token>;6<token>;6<token>|]))
+        
 
     printfn "R=%A" res
 //

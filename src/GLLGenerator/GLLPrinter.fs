@@ -131,7 +131,7 @@ let printGLL (fsa : FSA)
         println "let private nontermCount = %i" fsa.NontermCount
     
     let printParser () =
-        println "let private parserSource = new FSAParserSourceGLL (outNonterms, startState, finalStates, nontermCount, numIsTerminal, stateToNontermName, numOfAnyState, stateAndTokenToNewState)"
+        println "let parserSource = new FSAParserSourceGLL (outNonterms, startState, finalStates, nontermCount, numIsTerminal, stateToNontermName, numOfAnyState, stateAndTokenToNewState)"
 
     let printFun isAbstract () =
         if isAbstract
@@ -190,6 +190,6 @@ let printGLL (fsa : FSA)
     printItem printFinalStates
     printItem printNontermCount
     printItem printParser
-    printItem (printFun isAbstract)
+    //printItem (printFun isAbstract)
 
     res

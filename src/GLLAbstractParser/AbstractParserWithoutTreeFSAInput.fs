@@ -83,6 +83,7 @@ let parse (parser : FSAParserSourceGLL) (input : IParserInput) =
 
     gss
          
-let buildAbstract (parser : FSAParserSourceGLL) (input : IParserInput) = 
+let isPsrsed (parser : FSAParserSourceGLL) (input : LinearInput) = 
     let gss = parse parser input
     findVertices gss parser.StartState
+    |> Seq.exists (fun v -> v.U.Values |> Seq.exists (fun a -> a |> ResizeArray.exists (fun i -> int i = input.Input.Length)))

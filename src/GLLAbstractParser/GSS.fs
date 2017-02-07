@@ -1,24 +1,24 @@
 ﻿module YC.GLL.GSS
 
 open Yard.Generators.GLL.ParserCommon
-open Yard.Generators.GLL.MeasureTypes
+open Yard.Generators.Common.DataStructures
 
-type GSSVertex (posInGrammar: int<positionInGrammar>, posInInput: int<positionInInput>) =    
+type GSSVertex (nonterm: int<nonterm>, posInInput: int<positionInInput>) =    
 
     let setU = new System.Collections.Generic.Dictionary<int<positionInGrammar>, ResizeArray<int<positionInInput>>>()
     let setP = new ResizeArray<int<positionInInput>*uint16>() 
     
     override this.Equals y = 
         y :? GSSVertex 
-        && this.PositionInGrammar = (y :?> GSSVertex).PositionInGrammar
+        && this.Nonterm = (y :?> GSSVertex).Nonterm
         && this.PositionInInput = (y :?> GSSVertex).PositionInInput
 
-    override this.GetHashCode() = hash (this.PositionInGrammar, this.PositionInInput)
+    override this.GetHashCode() = hash (this.Nonterm, this.PositionInInput)
     
     member this.U = setU
     member this.P = setP
     member this.PositionInInput = posInInput
-    member this.PositionInGrammar = posInGrammar
+    member this.Nonterm = nonterm
 
     /// Checks for existing of context in SetU. If not adds it to SetU.
     member this.ContainsContext (inputIndex: int<positionInInput>) (state : int<positionInGrammar>) =
@@ -67,7 +67,7 @@ type GSS () =
             let edgeOfInput = CommonFuns.getEdge v.PositionInInput
             let posOnEdgeOfInput = CommonFuns.getPosOnEdge v.PositionInInput
         
-            sprintf "St:%i;Edg:%i;Pos:%i" v.PositionInGrammar edgeOfInput posOnEdgeOfInput
+            sprintf "St:%i;Edg:%i;Pos:%i" v.Nonterm edgeOfInput posOnEdgeOfInput
 
         for edge in this.Edges do
             let endName = getStrFromVertex edge.Target

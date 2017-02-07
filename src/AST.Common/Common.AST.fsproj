@@ -32,7 +32,6 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <Compile Include="AstNode.fs" />
-    <Compile Include="DataStructures.fs" />
     <Compile Include="AST.fs" />
     <Compile Include="ASTGLLFSA.fs" />
     <Compile Include="ASTGLL.fs" />
@@ -65,9 +64,9 @@
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\ParserStructures\MeasureTypes.fsproj">
-      <Name>MeasureTypes</Name>
-      <Project>{aedd1b6d-1187-426e-a733-1fbfc6834916}</Project>
+    <ProjectReference Include="..\DataStructures\DataStructures.fsproj">
+      <Name>DataStructures</Name>
+      <Project>{3d13b6cd-3702-4395-b3bc-4e52189f90b0}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

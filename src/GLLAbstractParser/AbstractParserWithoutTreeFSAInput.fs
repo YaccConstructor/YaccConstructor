@@ -4,20 +4,17 @@ open System
 open Microsoft.FSharp.Collections
 
 open Yard.Generators.GLL
-open Yard.Generators.Common.ASTGLL
 open Yard.Generators.Common.DataStructures
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
 open YC.GLL.GSS
-open Yard.Generators.GLL.MeasureTypes
 
 type SysDict<'k,'v> = System.Collections.Generic.Dictionary<'k,'v>
 type Queue<'t> = System.Collections.Generic.Queue<'t>
 
 let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) = 
-
-    let anyNonterm = parser.NumOfAnyState
+    let anyNonterm = parser.AnyNonterm
 
     if input.EdgeCount = 0 then failwith ("This grammar does not accept empty input.") else
     let result = new System.Collections.Generic.HashSet<_>()
@@ -36,7 +33,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
     let currentIndex = ref (-1<positionInInput>)
     let currentLength = ref 0us
     //let currentLeftPosition = ref -1<leftPosition>
-    let currentGSSNode = ref <| new GSSVertex(-1<positionInGrammar>, -1<positionInInput>)
+    let currentGSSNode = ref <| new GSSVertex(-1<nonterm>, -1<positionInInput>)
     let currentContext = ref <| new ContextFSA<GSSVertex>(!currentIndex, !currentState, !currentGSSNode,!currentLength)
 
     let startContexts = 
@@ -44,7 +41,7 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         |> Array.rev
         |> Array.map(fun e -> 
             let pos = e * 1<positionInInput>
-            let vertex = new GSSVertex(!currentState, pos)
+            let vertex = new GSSVertex(measureStateToNonterm !currentState, pos)
             gss.AddVertex vertex |> ignore
             new ContextFSA<_>(pos, !currentState, vertex, !currentLength))
 
@@ -61,16 +58,16 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
         then pushContext posInInput posInGrammar gssVertex len
     
     ///Creates new descriptors.(Calls when found nonterninal in rule(on current input edge, or on some of next)))
-    let create stateToContinue posInGrammar =
+    let create stateToContinue nonterm =
         let index = !currentIndex
         let currentVertex = !currentGSSNode
         let len = !currentLength
-        let newVertex = new GSSVertex(posInGrammar, index)
+        let newVertex = new GSSVertex(nonterm, index)
         let exists, startV = gss.ContainsEdge(newVertex, currentVertex, stateToContinue, len)        
 
         if startV.P.Count > 0
         then startV.P |> ResizeArray.iter(fun (newIndex, l) -> addContext newIndex stateToContinue currentVertex (len + l))        
-        else addContext index posInGrammar startV 0us
+        else addContext index (measureNontermToState nonterm) startV 0us
             
     /// 
     let pop () =
@@ -82,12 +79,12 @@ let buildAbstract (parser : FSAParserSourceGLL) (input : BioParserInputGraph) =
             
         if outEdges <> null && outEdges.Length <> 0
         then
-            let vertexKey = packVertexFSA curVertex.PositionInInput curVertex.PositionInGrammar
+            let vertexKey = packVertexFSA curVertex.PositionInInput curVertex.Nonterm
             let value = curVertex.P.Add (curIndex, curLen)
             for e in outEdges do
                 addContext curIndex e.Tag.StateToContinue e.Target (curLen + e.Tag.LengthOfProcessedString)
 
-        if curVertex.PositionInGrammar = parser.StartState
+        if curVertex.Nonterm = measureStateToNonterm parser.StartState
         then
             let leftEdge, leftPos =
                 getEdge curVertex.PositionInInput,

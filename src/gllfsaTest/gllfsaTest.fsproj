@@ -62,6 +62,11 @@
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\DataStructures\DataStructures.fsproj">
+      <Name>DataStructures</Name>
+      <Project>{3d13b6cd-3702-4395-b3bc-4e52189f90b0}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\GLLAbstractParser\GLLAbstractParser.fsproj">
       <Name>GLLAbstractParser</Name>
       <Project>{bd40477e-7ceb-4ff4-b53f-05316f3bb6d8}</Project>
@@ -70,11 +75,6 @@
     <ProjectReference Include="..\ParserCommon\GLLParsers.Common.fsproj">
       <Name>GLLParsers.Common</Name>
       <Project>{f2e8eda4-c13f-4f8d-b858-d5ef4fb8a06d}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\ParserStructures\MeasureTypes.fsproj">
-      <Name>MeasureTypes</Name>
-      <Project>{aedd1b6d-1187-426e-a733-1fbfc6834916}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

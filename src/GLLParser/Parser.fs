@@ -10,7 +10,7 @@ open FSharpx.Collections.Experimental
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
 open AbstractAnalysis.Common
-open Yard.Generators.GLL.MeasureTypes
+open Yard.Generators.Common.DataStructures
 
 
 let inline packExtension left right : int64<extension> =  LanguagePrimitives.Int64WithMeasure ((int64 left <<< 32) ||| int64 right)

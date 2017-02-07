@@ -46,6 +46,11 @@
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\DataStructures\DataStructures.fsproj">
+      <Name>DataStructures</Name>
+      <Project>{3d13b6cd-3702-4395-b3bc-4e52189f90b0}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
       <Name>RNGLRCommon</Name>
       <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>

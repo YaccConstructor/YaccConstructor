@@ -1,6 +1,6 @@
 ﻿namespace Yard.Generators.GLL.ParserCommon
 open System.Collections.Generic
-open Yard.Generators.GLL.MeasureTypes
+open Yard.Generators.Common.DataStructures
 
 type ParserSourceGLL<'TokenType> (eof                : 'TokenType
                                 , tokenToNumber      : 'TokenType -> int
@@ -86,7 +86,7 @@ type ParserSourceGLL<'TokenType> (eof                : 'TokenType
     member this.Probabilities      = probabilities
     member this.EOF                = eof
 
-type FSAParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<positionInGrammar>) [] []
+type FSAParserSourceGLL ( outNonterms        : (int<nonterm> * int<positionInGrammar>) [] []
                         , startState         : int<positionInGrammar>
                         , finalStates        : HashSet<int<positionInGrammar>>
                         , nontermCount       : int
@@ -94,7 +94,7 @@ type FSAParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<pos
                         //, numIsEpsilon       : int -> bool
                         , stateToNontermName : int -> string
                         //, firstSet           : HashSet<int>
-                        , numOfAnyState      : int<positionInGrammar>
+                        , anyNonterm         : int<nonterm>
                         , stateAndTokenToNewState : Dictionary<int, int<positionInGrammar>>
                         ) =
 
@@ -102,13 +102,13 @@ type FSAParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<pos
         int( (int state <<< 16) ||| (token - outNonterms.Length) )
 
     //member this.FirstSet           = firstSet
-    member this.OutNonterms        = outNonterms
-    member this.FinalStates       = finalStates
-    member this.StartState         = startState
-    member this.NonTermCount       = nontermCount
-    member this.NumIsTerminal      = numIsTerminal
+    member this.OutNonterms             = outNonterms
+    member this.FinalStates             = finalStates
+    member this.StartState              = startState
+    member this.NonTermCount            = nontermCount
+    member this.NumIsTerminal           = numIsTerminal
     //member this.NumIsEpsilon       = numIsEpsilon
-    member this.StateToNontermName = stateToNontermName
-    member this.GetTermsDictionaryKey    = getTermsDictionaryKey
-    member this.NumOfAnyState      = numOfAnyState
+    member this.StateToNontermName      = stateToNontermName
+    member this.GetTermsDictionaryKey   = getTermsDictionaryKey
+    member this.AnyNonterm              = anyNonterm
     member this.StateAndTokenToNewState = stateAndTokenToNewState

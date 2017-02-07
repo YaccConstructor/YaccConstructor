@@ -16,7 +16,6 @@ let findVertices (gss:GSS) state =
     |> Seq.filter (fun v -> v.PositionInGrammar = state)
 
 let parse (parser : FSAParserSourceGLL) (input : IParserInput) = 
-    //if input.EdgeCount = 0 then failwith ("This grammar does not accept empty input.") else
 
     let gss = new GSS()
 
@@ -73,7 +72,7 @@ let parse (parser : FSAParserSourceGLL) (input : IParserInput) =
         for curNonterm, nextState in possibleNontermMoviesInGrammar do            
             create currentContext nextState curNonterm
         
-        ///Terminal transitions.
+        /// Terminal transitions.
         input.ForAllOutgoingEdges 
             currentContext.PosInInput 
             (fun nextToken nextPosInInput -> 

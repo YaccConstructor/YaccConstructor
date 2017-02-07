@@ -63,27 +63,6 @@ type Context(*<'TokenType>*) =
 
 [<Struct>]
 [<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
-type Context2 =
-    /// Position in input graph (packed edge+position).
-    val Index         : int<positionInInput>
-    /// Current rule and position in it (packed rule+position).
-    val Label         : int<positionInGrammar>
-    /// Current GSS node.
-    val Vertex        : Vertex
-    /// 4 values packed in one int64: leftEdge, leftPos, rightEdge, rightPos.
-    val Extension     : int64<extension>
-    /// Length of current result
-    val Length        : uint16
-    new (index, label, vertex, ext, len) = {Index = index; Label = label; Vertex = vertex; Extension = ext; Length = len}
-    override this.ToString () = "Edge:" + (CommonFuns.getEdge(this.Index).ToString()) +
-                                "; PosOnEdge:" + (CommonFuns.getPosOnEdge(this.Index).ToString()) +
-                                "; Rule:" + (CommonFuns.getRuleNew(this.Label).ToString()) +
-                                "; PosInRule:" + (CommonFuns.getPositionNew(this.Label).ToString()) +
-                                "; Ext:" + (this.Extension.ToString()) +
-                                "; Len:" + (this.Length.ToString())
-
-[<Struct>]
-[<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
 type ContextFSA<'GSSVertex> =
     /// Position in input graph (packed edge+position).
     val PosInInput         : int<positionInInput>

@@ -216,15 +216,19 @@ type ``GLL parser tests with simple lexer`` () =
         let res = isParsed parser input
         shouldBeTrue res
 
-//    [<Test>]
-//    member test.``Lol calc``() =
-//        let parser = GLL.ParseLolCalc.parserSource
-//        runTest parser "LolCalc.txt" GLL.ParseLolCalc.numToString "LolCalc.dot"
+    [<Test>]
+    member test.``Lol calc``() =
+        let parser = GLL.ParseLolCalc.parserSource
+        let input  = getLinearInput "LolCalc.txt" GLL.ParseLolCalc.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
 //    [<Test>]
 //    member test.``Calc``() =
 //        let parser = GLL.ParseCalc.parserSource
-//        runTest parser "Calc.txt" GLL.ParseCalc.numToString "Calc.dot"
+//        let input  = getLinearInput "Calc.txt" GLL.ParseCalc.stringToNumber
+//        let res = isParsed parser input
+//        shouldBeTrue res
 
     [<Test>]
     member test.``Long cycle``() =

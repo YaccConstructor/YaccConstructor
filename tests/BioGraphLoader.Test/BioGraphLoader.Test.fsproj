@@ -43,11 +43,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\..\src\BioGraphLoader\BioGraphLoader.fsproj">
-      <Name>BioGraphLoader</Name>
-      <Project>{ffbc56cc-6fa9-40fa-bf23-5404fd5e2d4a}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

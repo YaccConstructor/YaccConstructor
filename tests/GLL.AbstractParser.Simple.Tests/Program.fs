@@ -589,7 +589,6 @@ type ``GLL abstract parser tests`` () =
         shouldBeTrue res
         
 
-[<EntryPoint>]
 let f x =
     System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
     let t = new ``GLL abstract parser tests``()   

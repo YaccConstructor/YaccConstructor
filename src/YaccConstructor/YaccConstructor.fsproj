@@ -33,7 +33,6 @@
     <StartArguments>-i 16strna.yrd -g "GLLFSAGenerator -module GLLFSA.r16s.H22_H23 -o 16s_H22_H23.yrd.fs -abstract false"</StartArguments>
     <RemoteDebugEnabled>false</RemoteDebugEnabled>
     <RemoteDebugMachine />
-    <OutputPath>C:\Users\Eugene\Source\Repos\YaccConstructor\src\..\Bin\Release\v40\</OutputPath>
     <StartWorkingDirectory>C:\Yacc Constructor</StartWorkingDirectory>
   </PropertyGroup>
   <Import Project="../YC.targets" />

@@ -171,7 +171,6 @@ Target "Gen:YardFrontend" (fun _ -> runCmd @"src\YardFrontend\gen.cmd")
 Target "GenTests:RNGLR" (fun _ -> 
                             runCmd @"tests\RNGLRAbstractParser.Tests\gen.cmd"
                             runCmd @"tests\RNGLRAbstractParser.Tests\gen_lex.cmd"
-                            runCmd @"tests\RNGLRParser.ErrorRecovery.Tests\gen.cmd"
                             runCmd @"tests\RNGLRParser.Simple.Tests\gen.cmd"
                         )
 
@@ -181,6 +180,8 @@ Target "GenTests:GLL" (fun _ ->
                          (*runCmd @"tests\GLLParser.Simple.Tests\gen.cmd"
                            runCmd @"tests\GLL.AbstractParser.Simple.Tests\gen.cmd"*)
                       )
+
+Target "GenTests:RIGLR" (fun _ -> runCmd @"tests\RIGLRParser.SimpleTest\gen.cmd")
 
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner
@@ -425,6 +426,7 @@ Target "All" DoNothing
   ==> "Build:YardFrontend"
   ==> "GenTests:RNGLR"
   ==> "GenTests:GLL"
+  ==> "GenTests:RIGLR"
   ==> "Build:All"
   //==> "CopyBinaries"
   ==> "RunTests"

@@ -1,3 +1,0 @@
-[<Start>]
-a: A res=b D {res}
-b: B{1} | r=error{-1}

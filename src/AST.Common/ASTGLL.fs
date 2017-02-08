@@ -89,6 +89,7 @@ type NumNode<'vtype> =
 
 [<AllowNullLiteral>]
 type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
+    member this.Root = root
     member this.AstToDot (indToString : int -> string) (tokenToNumber : 'TokenType -> int) (tokenData : 'TokenType -> obj) (path : string) =
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")

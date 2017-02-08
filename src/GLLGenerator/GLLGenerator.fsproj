@@ -8,7 +8,7 @@
     <ProjectGuid>8756690f-8138-495a-a368-39afb9029823</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>GLLGenerator</RootNamespace>
-    <AssemblyName>GLLGenerator</AssemblyName>
+    <AssemblyName>YC.GLLGenerator</AssemblyName>
     <Name>GLLGenerator</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>

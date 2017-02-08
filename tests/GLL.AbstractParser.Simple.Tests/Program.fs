@@ -77,10 +77,105 @@ let outputDir = ""//@"../../../src/GLL.AbstractParser.SimpleTest/"
 
 type elt = T of char | N of char
 
+let parseGraphCYK (grph: ParserInputGraph<_>) =
+    let grm = 
+        [
+            N 's', [T 'l'; N 'b']
+            N 'b', [N 's'; T 'r']
+            N 's', [N 's'; N 's']
+            N 's', []
+            N 'l', [T '(']
+            N 'r', [T ')']
+        ]
+    let r = [for v in grph.Vertices -> (N 's', v , v)] @ [for e in grph.Edges do for n in [N 'l'; N 'r'] do yield (n, e.Source, e.Target)] |> System.Collections.Generic.HashSet<_>
+    printfn "Start r size:%A" r.Count
+    let _new = new System.Collections.Generic.HashSet<_>(r)
+    let whileCount = ref 0
+    let for1Count = ref 0
+    let for2Count = ref 0
+    let for3Count = ref 0
+    while _new.Count <> 0 do
+        incr whileCount
+        let x = _new.First()
+        _new.Remove x |> ignore
+        let (_n,n,m) = x
+        for (_m,n',n) in Seq.filter (fun (_,_,x) -> x = n) r do
+            incr for1Count
+            for (_n',_) in (grm |> List.filter (fun (_,r) -> r = [_m; _n])) do                
+                if r.Contains((_n',n',m)) |> not
+                then 
+                    incr for2Count
+                    _new.Add(_n',n',m)|>ignore
+                    r.Add(_n',n',m)|>ignore
+        for (_m,m,m') in Seq.filter (fun (_,_,x) -> x = n) r do
+            for (_m',_) in (grm |> List.filter (fun (_,r) -> r = [_n; _m])) do
+                if r.Contains((_m',n,m')) |> not
+                then 
+                    incr for3Count
+                    _new.Add(_m',n,m')|>ignore
+                    r.Add(_m',n,m')|>ignore
+
+
+    printfn "While: %A" !whileCount
+    printfn "For 1: %A" !for1Count
+    printfn "For 2: %A" !for2Count
+    printfn "For 3: %A" !for3Count
+    r
+
 let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)
 
 let rnd = new System.Random()
+
+//let newRandGraph (initialGraph:ParserInputGraph<_>) (tokens:array<_>) addEdges =
+//    let vertices = initialGraph.VertexCount
+//    for i in 0 .. addEdges - 1 do
+//        let token = tokens.[rnd.Next(0,tokens.Length-1)]
+//        let visited = Array.init vertices false
+//        let fromV = rnd.Next(0,vertices-1)
+//        let rec addEdg  =            
+//            if initialGraph.OutEdges(fromV) |> Seq.exists(fun e -> e.Tag = token) |> not
+//            then initialGraph.
+
+
+let newRandomGraph vCount eCount (tokens:array<_>) eof =
+    let result = new ParserInputGraph<_>([|0..vCount-1|], [|vCount|])
+    for i in 0..vCount-1 do result.AddVerticesAndEdge(edg i vCount eof) |> ignore
+    let rec addEdg added = 
+        if added <> eCount
+        then
+            let token = tokens.[rnd.Next(0,tokens.Length) % tokens.Length]
+            //printfn "T:%A" token
+            let fromV = rnd.Next(0,vCount-1)
+            if result.OutEdges(fromV) |> Seq.exists(fun e -> e.Tag = token) |> not
+            then 
+                result.AddVerticesAndEdge(edg fromV (rnd.Next(0,vCount-1)) token)
+                |> ignore
+                addEdg (added + 1)
+            else addEdg added
+    addEdg 0
+    result
+
+let newRandomGraph2 (initialGraph:ParserInputGraph<_>) eCount (tokens:array<_>) eof =
+    let vCount = initialGraph.VertexCount
+    let result = initialGraph    
+    let rec addEdg added = 
+        if added <> eCount
+        then
+            let token = tokens.[rnd.Next(0,tokens.Length) % tokens.Length]
+            //printfn "T:%A" token
+            let fromV = rnd.Next(0,vCount-1)
+            if result.OutEdges(fromV) |> Seq.exists(fun e -> e.Tag = token) |> not
+            then 
+                result.AddVerticesAndEdge(edg fromV (rnd.Next(0,vCount-1)) token)
+                |> ignore
+                addEdg (added + 1)
+            else addEdg added
+    addEdg 0
+    //printfn "V:%A E:%A" result.VertexCount result.EdgeCount
+    result
+
+
 
 //let test buildAbstractAst qGraph (intToString : int -> string) (fileName : string) nodesCount edgesCount termsCount ambiguityCount tokenData tokenToNum = 
 //    let r = buildAbstractAst qGraph
@@ -511,6 +606,368 @@ let rnd = new System.Random()
 //
 //        test GLL.ParseOrder.buildAbstractAst qGraph GLL.ParseOrder.numToString "Order.dot"
 //
+    member this.GetFullGraph n tokens eof allPath =
+        let graph = new ParserInputGraph<_>([|0 .. n - 1|],[|n|])
+        for i in 0 .. n - 1 do
+            [for t in [eof] do//tokens do 
+                yield! [for j in 0 .. n - 1 do if i <> j then yield edg i j t ]]
+            |> graph.AddVerticesAndEdgeRange
+            |> ignore
+
+//        [for i in 0 .. n - 1 -> edg i n eof] 
+//        |> graph.AddVerticesAndEdgeRange
+//        |> ignore
+
+        graph
+
+    member this.GetLineraBrackets n lbr rbr eof =
+        let graph = new ParserInputGraph<_>(0, n + 1)
+        for i in 0 .. 2 .. n - 1 do
+            [ edg i (i + 1) lbr 
+              edg (i + 1) (i + 2) rbr]
+            |> graph.AddVerticesAndEdgeRange
+            |> ignore
+
+        edg n (n + 1) eof
+        |> graph.AddVerticesAndEdge
+        |> ignore
+
+        graph
+    
+    member this.GetLineraForBad n =
+        let graph = new ParserInputGraph<_>(0, n)
+        for i in 0 .. n - 2 do
+            edg i (i + 1) (GLL.BadLeftRecursion.B 0) 
+            |> graph.AddVerticesAndEdge
+            |> ignore
+
+        edg (n - 1) n (GLL.BadLeftRecursion.RNGLR_EOF 1)
+        |> graph.AddVerticesAndEdge
+        |> ignore
+
+        graph
+
+    member this.PerformanceTestFullGraphUnambBraces() =
+        printfn "----------Unamb brackets---------------"
+        let g = this.GetFullGraph 2 [GLL.BadLeftRecursion.B 0] (GLL.BadLeftRecursion.RNGLR_EOF 2) true           
+        let r = GLL.BadLeftRecursion.buildAbstractAst g
+        for i in 1 .. 60 do
+            let g = this.GetFullGraph i [GLL.StrangeBrackets.LBR 0; GLL.StrangeBrackets.RBR 1] (GLL.StrangeBrackets.RNGLR_EOF 2) true
+            let start = System.DateTime.Now            
+            let r = GLL.StrangeBrackets.buildAbstractAst g
+            let time = (System.DateTime.Now - start).TotalMilliseconds
+            match r with 
+            | Error str ->
+                printfn "Error"
+            
+            | Success tree ->
+                let nodes,_,_,_ = tree.CountCounters
+                printfn "%A: %A: %A" i time nodes
+                //tree.AstToDot GLL.StrangeBrackets.numToString GLL.StrangeBrackets.tokenToNumber GLL.StrangeBrackets.tokenData "Nondet.dot"
+            
+    member this.PerformanceTestFullGraphAmbBraces() =
+        printfn "----------Amb brackets---------------"
+        let g = this.GetFullGraph 2 [GLL.BadLeftRecursion.B 0] (GLL.BadLeftRecursion.RNGLR_EOF 2) true           
+        let r = GLL.BadLeftRecursion.buildAbstractAst g
+        for i in 1 .. 60 do
+            let g = this.GetFullGraph i [GLL.Brackets2.LBR 0; GLL.Brackets2.RBR 1] (GLL.Brackets2.RNGLR_EOF 2) true
+            let start = System.DateTime.Now            
+            let r = GLL.Brackets2.buildAbstractAst g
+            let time = (System.DateTime.Now - start).TotalMilliseconds
+            match r with 
+            | Error str ->
+                printfn "Error"
+            
+            | Success tree ->
+                let nodes,_,_,_ = tree.CountCounters
+                printfn "%A: %A : %A" i time nodes
+                //tree.AstToDot GLL.StrangeBrackets.numToString GLL.StrangeBrackets.tokenToNumber GLL.StrangeBrackets.tokenData "Nondet.dot"
+    
+
+    member this.PerformanceTestFullGraphBadLeftRec() =
+        printfn "----------BAD---------------"
+        let g = this.GetFullGraph 2 [GLL.BadLeftRecursion.B 0] (GLL.BadLeftRecursion.RNGLR_EOF 2) true           
+        let r = GLL.BadLeftRecursion.buildAbstractAst g
+        for i in 1 .. 60 do
+            let g = this.GetFullGraph i [GLL.BadLeftRecursion.B 0] (GLL.BadLeftRecursion.RNGLR_EOF 2) true
+            let start = System.DateTime.Now            
+            let r = GLL.BadLeftRecursion.buildAbstractAst g
+            let time = (System.DateTime.Now - start).TotalMilliseconds
+            match r with 
+            | Error str ->
+                printfn "Error"
+            
+            | Success tree ->
+                let nodes,_,_,_ = tree.CountCounters
+                printfn "%A: %A : %A" i time nodes
+                //tree.AstToDot GLL.StrangeBrackets.numToString GLL.StrangeBrackets.tokenToNumber GLL.StrangeBrackets.tokenData "Nondet.dot"
+    
+    member this.PerformanceTestLinearUnambBraces() =
+        printfn "----------Unamb brackets---------------"
+        for i in 100 .. 50 .. 5000 do
+            let g = this.GetLineraBrackets i (GLL.StrangeBrackets.LBR 0) (GLL.StrangeBrackets.RBR 1) (GLL.StrangeBrackets.RNGLR_EOF 2)
+            let start = System.DateTime.Now
+            let r = ref (Unchecked.defaultof<_>)
+            for i in 0..4 do            
+                r := GLL.StrangeBrackets.buildAbstractAst g
+            let time = (System.DateTime.Now - start).TotalMilliseconds / 5.0
+            match !r with 
+            | Error str ->
+                printfn "Error: %A" str
+            
+            | Success tree ->
+                let nodes,_,_,_ = tree.CountCounters
+                printfn "%A: %A: %A" i time nodes
+                //tree.AstToDot GLL.StrangeBrackets.numToString GLL.StrangeBrackets.tokenToNumber GLL.StrangeBrackets.tokenData "Nondet.dot"
+            
+    member this.PerformanceTestLinearAmbBraces() =
+        printfn "----------Amb brackets---------------"
+        for i in 100 .. 50 .. 1000 do
+            let g = this.GetLineraBrackets i (GLL.Brackets2.LBR 0) (GLL.Brackets2.RBR 1) (GLL.Brackets2.RNGLR_EOF 2)
+            let start = System.DateTime.Now            
+            let r = GLL.Brackets2.buildAbstractAst g
+            let time = (System.DateTime.Now - start).TotalMilliseconds
+            match r with 
+            | Error str ->
+                printfn "Error"
+            
+            | Success tree ->
+                let nodes,_,_,_ = tree.CountCounters
+                printfn "%A: %A : %A" i time nodes
+                //tree.AstToDot GLL.StrangeBrackets.numToString GLL.StrangeBrackets.tokenToNumber GLL.StrangeBrackets.tokenData "Nondet.dot"
+    
+
+    member this.PerformanceTestLinearBadLeftRec() =
+        printfn "----------BAD---------------"
+        for i in 1 .. 100 do
+            let g = this.GetLineraForBad i
+            let start = System.DateTime.Now            
+            let r = GLL.BadLeftRecursion.buildAbstractAst g
+            let time = (System.DateTime.Now - start).TotalMilliseconds
+            match r with 
+            | Error str ->
+                printfn "Error"
+            
+            | Success tree ->
+                let nodes,_,_,_ = tree.CountCounters
+                printfn "%A: %A : %A" i time nodes
+                //tree.AstToDot GLL.StrangeBrackets.numToString GLL.StrangeBrackets.tokenToNumber GLL.StrangeBrackets.tokenData "Nondet.dot"
+    
+    [<Test>]
+    member this._57_random_unambiguous_edges_function () =    
+        let tokens = [|GLL.StrangeBrackets.LBR 1; GLL.StrangeBrackets.RBR 2|]
+        let vCount = 1000
+        let innerCyclesCount = 10
+        for i in vCount..50..2*vCount do
+            let cumulitiveTime = ref 0.0 
+            printfn ""
+            for j in 0..innerCyclesCount-1 do
+                let input = newRandomGraph vCount i tokens (GLL.StrangeBrackets.RNGLR_EOF 0)
+                let start = System.DateTime.Now
+                let res = GLL.StrangeBrackets.buildAbstractAst input
+                cumulitiveTime := !cumulitiveTime + (System.DateTime.Now - start).TotalMilliseconds
+                match res with
+                | Success _ -> printf "+"
+                | _ -> printf "!"
+            printfn ""
+            printfn "%A:%A" i (!cumulitiveTime / (float innerCyclesCount))
+
+
+    [<Test>]
+    member this._58_random_unambiguous_edges_function () =    
+//        let tokens = 
+//            [GLL.StrangeBrackets.LBR 1; GLL.StrangeBrackets.RBR 2]
+//            @ (List.init 2 (fun _ -> GLL.StrangeBrackets.ANY 3))
+//            |> Array.ofList
+//        let vCount = 2000
+//        let tokenTypeCount = 3
+//        let innerCyclesCount = 1
+//        let step = 20
+        let tokens = 
+            [GLL.StrangeBrackets.LBR 1; GLL.StrangeBrackets.RBR 2]            
+            //@ (List.init 2 (fun _ -> GLL.StrangeBrackets.ANY 3))
+            @ [GLL.StrangeBrackets.LBR 1; GLL.StrangeBrackets.RBR 2]
+            //@ (List.init 2 (fun _ -> GLL.StrangeBrackets.ANY 3))
+            |> Array.ofList
+        let vCount = 1500
+        let tokenTypeCount = 3
+        let innerCyclesCount = 1
+        let step = 20
+        let result = new ParserInputGraph<_>([|0..vCount-1|], [|vCount|])
+        for i in 0..vCount-1 do result.AddVerticesAndEdge(edg i vCount (GLL.StrangeBrackets.RNGLR_EOF 0)) |> ignore                
+        for i in vCount::(List.init (((tokenTypeCount * vCount)/step) - 1) (fun i -> step)) do
+            let cumulitiveTime = ref 0.0 
+            //printfn ""            
+            let input = newRandomGraph2 result i tokens (GLL.StrangeBrackets.RNGLR_EOF 0)
+            for j in 0..innerCyclesCount-1 do
+                let start = System.DateTime.Now
+                let res = GLL.StrangeBrackets.buildAbstractAst input
+                cumulitiveTime := !cumulitiveTime + (System.DateTime.Now - start).TotalMilliseconds
+//                match res with
+//                | Success _ -> printf "+"
+//                | _ -> printf "!"
+            //printfn ""
+            printfn "%A:%A" result.EdgeCount (!cumulitiveTime / (float innerCyclesCount))
+
+    
+    member this._Brackets_demo () =
+        let qGraph = new ParserInputGraph<_>(0, 10)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (GLL.Brackets2.LBR 1)            
+            edg 2 3 (GLL.Brackets2.RBR 3)
+            edg 3 4 (GLL.Brackets2.LBR 4)
+            edg 5 6 (GLL.Brackets2.RBR 6)
+            edg 6 7 (GLL.Brackets2.LBR 7)            
+            edg 8 9 (GLL.Brackets2.RBR 9)
+            edg 9 10 (GLL.Brackets2.RNGLR_EOF 0)
+            ] |> ignore
+
+        test GLL.Brackets2.buildAbstractAst qGraph GLL.Brackets2.numToString "Brackets2.dot" 14 15 5 1 GLL.Brackets2.tokenData GLL.Brackets2.tokenToNumber
+
+    member this.getFullGraph (n) =
+        let qGraph = new ParserInputGraph<_>([|0..n-1|], [|n|])
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (GLL.Brackets2.LBR 1)            
+            edg 2 3 (GLL.Brackets2.RBR 3)
+            edg 3 4 (GLL.Brackets2.LBR 4)
+            edg 5 6 (GLL.Brackets2.RBR 6)
+            edg 6 7 (GLL.Brackets2.LBR 7)            
+            edg 8 9 (GLL.Brackets2.RBR 9)
+            edg 9 10 (GLL.Brackets2.RNGLR_EOF 0)
+            ] |> ignore
+        qGraph
+
+    member this.getGraphForAvg n k lbr rbr eof =
+        let qGraph = new ParserInputGraph<_>([|0..n-1|], [|n|])
+
+        for l in 1..k do
+            [for i in 0 .. n - l - 1 -> edg i (i + l) (lbr i)]
+            @ [for i in 0 .. n - l - 1 -> edg (i + l) i  (rbr i)]
+            |> qGraph.AddVerticesAndEdgeRange
+            |> ignore
+           
+            for i in n - l .. n - 1 do
+                [edg i (l - (n - 1 - i) - 1) (lbr 1)
+                ; edg (l - (n - 1 - i) - 1) i (rbr 1)]
+                |> qGraph.AddVerticesAndEdgeRange
+                |> ignore
+
+        [for i in 0 .. n - 1 -> edg i n (eof 0)]
+        |> qGraph.AddVerticesAndEdgeRange
+        |> ignore
+
+        qGraph
+
+    member this.getTwoCycledGraph n all lbr rbr eof =
+        let qGraph = new ParserInputGraph<_>((if all then [|0..5 * n - 2|] else [|3|]), [|5 * n - 1|])
+
+        [for i in 0 .. 3 * n - 2 -> edg i (i + 1) (lbr i)]
+        |> qGraph.AddVerticesAndEdgeRange
+        |> ignore
+           
+        [edg (3 * n - 1) 0 (lbr 0)]
+        |> qGraph.AddVerticesAndEdgeRange
+        |> ignore
+
+        [for i in 3 * n .. 5 * n - 3 -> edg i (i + 1) (rbr i)]
+        |> qGraph.AddVerticesAndEdgeRange
+        |> ignore
+
+        [edg (5 * n - 2) 0 (rbr 0)
+         edg 0 (3 * n) (rbr 0)
+        ]
+        |> qGraph.AddVerticesAndEdgeRange
+        |> ignore
+
+        [for i in 0 .. 5 * n - 2 -> edg i (5 * n - 1) (eof 0)]
+        |> qGraph.AddVerticesAndEdgeRange
+        |> ignore
+
+        qGraph
+
+    member this.getLinearGraph n all lbr rbr eof =
+        let qGraph = new ParserInputGraph<_>((if all then [|0 .. n * 2|] else [|0|]), [|n * 2 + 1|])
+
+        [for i in 0 .. n -> edg i (i + 1) (lbr i)]
+        |> qGraph.AddVerticesAndEdgeRange
+        |> ignore
+           
+        [for i in n .. 2 * n -> edg i (i + 1) (rbr i)]
+        |> qGraph.AddVerticesAndEdgeRange
+        |> ignore
+
+        [for i in 0 .. 2 * n -> edg i (2 * n + 1) (eof 0)]
+        |> qGraph.AddVerticesAndEdgeRange
+        |> ignore
+
+        qGraph
+
+    member this._AvgPerfTest_unamb () =    
+        //let g1 = this.getGraphForAvg 3 2 GLL.Brackets2.LBR GLL.Brackets2.RBR GLL.Brackets2.RNGLR_EOF       
+        //g1.PrintToDot "ooo.dot" string
+        for i in 2000 .. 100 .. 8000 do 
+            let g = this.getGraphForAvg i 1 GLL.Brackets2.LBR GLL.Brackets2.RBR GLL.Brackets2.RNGLR_EOF       
+            let start = System.DateTime.Now
+            for i in 0..4 do
+                let res = GLL.Brackets2.buildAbstractAst g 
+                ()
+            printfn "%A: %A" i ((System.DateTime.Now - start).TotalMilliseconds/5.0)
+
+    member this._Brackets_performance_all_amb () =        
+        for i in 200 .. 100 .. 2000 do 
+            let g = this.getTwoCycledGraph i true GLL.Brackets2.LBR GLL.Brackets2.RBR GLL.Brackets2.RNGLR_EOF       
+            let start = System.DateTime.Now
+            for i in 0..4 do
+                let res = GLL.Brackets2.buildAbstractAst g 
+                ()
+            printfn "%A: %A" i ((System.DateTime.Now - start).TotalMilliseconds/5.0)
+
+     member this._Brackets_performance_all_unamb () =        
+        for i in 200 .. 100 .. 2000 do 
+            let g = this.getTwoCycledGraph i true GLL.StrangeBrackets.LBR GLL.StrangeBrackets.RBR GLL.StrangeBrackets.RNGLR_EOF       
+            let start = System.DateTime.Now
+            for i in 0..4 do
+                let res = GLL.StrangeBrackets.buildAbstractAst g 
+                ()
+            printfn "%A: %A" i ((System.DateTime.Now - start).TotalMilliseconds/5.0)
+
+    member this._Brackets_performance_single_unamb () =        
+        for i in 200 .. 100 .. 2000 do 
+            let g = this.getTwoCycledGraph i false GLL.Brackets2.LBR GLL.Brackets2.RBR GLL.Brackets2.RNGLR_EOF       
+            let start = System.DateTime.Now
+            for i in 0..4 do
+                let res = GLL.Brackets2.buildAbstractAst g 
+                ()
+            printfn "%A: %A" i ((System.DateTime.Now - start).TotalMilliseconds/5.0)
+
+    member this._Brackets_performance_single_amb () =        
+        for i in 200 .. 100 .. 2000 do 
+            let g = this.getTwoCycledGraph i false GLL.StrangeBrackets.LBR GLL.StrangeBrackets.RBR GLL.StrangeBrackets.RNGLR_EOF       
+            let start = System.DateTime.Now
+            for i in 0..4 do
+                let res = GLL.StrangeBrackets.buildAbstractAst g 
+                ()
+            printfn "%A: %A" i ((System.DateTime.Now - start).TotalMilliseconds/5.0)
+
+    member this._Brackets_performance_Linear_all_unamb () =        
+        for i in 200 .. 50 .. 4000 do 
+            let g = this.getLinearGraph i true GLL.StrangeBrackets.LBR GLL.StrangeBrackets.RBR GLL.StrangeBrackets.RNGLR_EOF       
+            let start = System.DateTime.Now
+            for i in 0..4 do
+                let res = GLL.StrangeBrackets.buildAbstractAst g 
+                ()
+            printfn "%A: %A" i ((System.DateTime.Now - start).TotalMilliseconds/5.0)
+
+     member this._Brackets_performance_Linear_single_unamb () =        
+        for i in 200 .. 100 .. 4000 do 
+            let g = this.getLinearGraph i false GLL.StrangeBrackets.LBR GLL.StrangeBrackets.RBR GLL.StrangeBrackets.RNGLR_EOF       
+            let start = System.DateTime.Now
+            for i in 0..4 do
+                let res = GLL.StrangeBrackets.buildAbstractAst g 
+                ()
+            printfn "%A: %A" i ((System.DateTime.Now - start).TotalMilliseconds/5.0)
+
+
 //    [<Test>]
 //    member this._45_SimpleRightRecursion () =
 //        let qGraph = new ParserInputGraph<_>(0, 4)
@@ -585,6 +1042,22 @@ let rnd = new System.Random()
 [<EntryPoint>]
 let f x =
     //System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
+//    for p in 
+//        [
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\1.1.ttl"
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\pizza.owl"
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf" 
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\people_pets.rdf"
+//        ] do
+//
+//            let f = 
+//                YC.GLL.Abstarct.Tests.RDFPerformance.loadFromFile p
+//                 
+//            printfn "triples in %A: %A" (System.IO.Path.GetFileName p) f.Triples.Count
+    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf"
+    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
+    YC.GLL.Abstarct.Tests.RDFPerformance.performTests()
     //let t = new ``GLL abstract parser tests``()
     let f () = ()
     //let th = new System.Threading.Thread(f, 10000000)
@@ -592,3 +1065,42 @@ let f x =
     f()
     0
 
+
+////               t.PerformanceTestLinearBadLeftRec()
+//               //t.PerformanceTestLinearUnambBraces()
+////               t.PerformanceTestLinearAmbBraces()
+
+(*
+++++++++++
+1050:2.22569
+
+++++++++++
+1100:3.00639
+
+++++++++++
+1150:18.99244
+
+++++++++++
+1200:22.32902
+
+++++++++++
+1250:157.24992
+
+++++++++++
+1300:550.44073
+
+++++++++++
+1350:1427.97743
+
+++++++++++
+1400:5150.66121
+
+++++++++++
+1450:5017.79941
+
+++++++++++
+1500:20857.22014
+
++
+
+*)

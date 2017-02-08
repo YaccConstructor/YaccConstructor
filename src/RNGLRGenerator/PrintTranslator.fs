@@ -27,22 +27,25 @@ open YC.PrettyPrinter.StructuredFormat
 open Yard.Generators.Common.Epsilon
 open HighlightingPrinter
 
-let getPosFromSource fullPath dummyPos (src : Source.t) =
+let getPosFromSource printPositions fullPath dummyPos (src : Source.t) =
     let file =
         if fullPath then src.file
         else
             let start = src.file.LastIndexOfAny [|'\\'; '/'|] + 1
             src.file.Substring start
-    if file = "" then
+    if printPositions
+    then 
+      if file = "" then
         printfn "Source without filename: %s" <| src.ToString()
         "\n"
-    elif src.startPos.line = -1 then sprintf "\n# %c \"%s\"" dummyPos file
-    else sprintf "\n# %d \"%s\"" src.startPos.line file
+      elif src.startPos.line = -1 then sprintf "\n# %c \"%s\"" dummyPos file
+      else sprintf "\n# %d \"%s\"" src.startPos.line file
+    else "\n"
 
 let defaultSource output = new Source.t("", new Source.Position(0,-1,0), new Source.Position(), output)
 
 let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list)
-        positionType fullPath output dummyPos caseSensitive isAbstractParsingMode isHighlightingMode =
+        positionType fullPath output dummyPos caseSensitive isAbstractParsingMode isHighlightingMode printPositions =
     let tab = 4
 
     let rules = grammar.rules
@@ -193,7 +196,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                     strings.[0] <- String.replicate ac.startPos.column " " + strings.[0]
                     strings
                     |> List.ofArray
-                    |> (fun l -> getPosFromSource fullPath dummyPos ac ::l)
+                    |> (fun l -> getPosFromSource printPositions fullPath dummyPos ac ::l)
                     |> List.map wordL
                     |> aboveListL
             let innerNum = ref -1
@@ -205,7 +208,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                     match e.checker with
                     | None -> [prod -- wordL ("|> List.iter (fun (" + var + ") -> ")]
                     | Some ch ->
-                        let res = prod -- wordL ("|> List.iter (fun (" + var + ") -> " + getPosFromSource fullPath dummyPos ch)
+                        let res = prod -- wordL ("|> List.iter (fun (" + var + ") -> " + getPosFromSource printPositions fullPath dummyPos ch)
                         let cond = wordL <| "if (" + ch.text + ") then (" 
                         [res; cond]
                     //-- wordL (" do")
@@ -230,9 +233,9 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         @@-- (wordL "box ("
               @@-- (wordL "(" ++ printArgsDeclare rule.args
                     @@-- getProductionLayout (ref -1) rule.body
-                    @@-- wordL (")" + getPosFromSource fullPath dummyPos rule.name)
+                    @@-- wordL (")" + getPosFromSource printPositions fullPath dummyPos rule.name)
                     @@-- wordL (" : '_rnglr_type_" + nonTermName + ")")
-                    -- wordL (getPosFromSource fullPath dummyPos (defaultSource output))
+                    -- wordL (getPosFromSource printPositions fullPath dummyPos (defaultSource output))
                     //@@-- wordL ("")
                     )
              )

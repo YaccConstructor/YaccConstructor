@@ -8,7 +8,7 @@
     <ProjectGuid>1548a831-3a8d-489d-8592-dda12fbc3ea4</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>GLLParser</RootNamespace>
-    <AssemblyName>GLLParser</AssemblyName>
+    <AssemblyName>YC.GLLParser</AssemblyName>
     <Name>GLLParser</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
   </PropertyGroup>

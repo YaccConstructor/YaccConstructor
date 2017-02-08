@@ -67,7 +67,12 @@ type ErrorNode<'TokenType> =
 type ErrorDictionary<'TokenType> = Dictionary<Family, ErrorNode<'TokenType>>
 
 [<AllowNullLiteral>]
-type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[][], _leftSide : array<int> option, _numToString : (int -> string) option) =
+type Tree<'TokenType> (tokens : array<'TokenType>
+                       , root : AstNode
+                       , rules : int[][]
+                       , _leftSide : array<int> option
+                       , _numToString : (int -> string) option
+                       , ?isErrorToken : 'TokenType -> bool) =
     let rootFamily, isEpsilonTree =
         match root with
         | :? AST as ast -> ast, false
@@ -150,6 +155,11 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
     member this.RulesCount = rules.GetLength(0)
     member this.Tokens = tokens
     member this.TokensCount = tokens.Length
+    
+    member this.IsErrorToken (token :'TokenType) =
+        match isErrorToken with
+        | Some _isErrorToken -> _isErrorToken token
+        | None -> false
 
     member this.SpecifyNumToString nts = 
         numToString := nts 
@@ -202,7 +212,44 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                 children.other <- arr.[1..arr.Length-1]
                     
         this.FilterChildren handleChildren
-                
+    
+    member private this.ContainsErrors() =
+        tokens |> Array.exists this.IsErrorToken 
+
+    member this.ChooseBestAst() = 
+        if this.ContainsErrors() then
+            this.ChooseSingleAstWhenHaveErrors()
+        else 
+            this.ChooseLongestMatch()
+
+    // Chooses ast without cycles with minimum number of error nodes in it
+    member this.ChooseSingleAstWhenHaveErrors () =
+        // For each node chooses node without cylces with minimum number of error nodes
+        let rec getMinErrorsSubtree(ast: AstNode) =
+            let inline handleFamily (family: Family) = 
+                family.nodes.map getMinErrorsSubtree
+                |> Array.sum                
+            match ast with
+            | :? Epsilon -> 0
+            | :? Terminal as t ->
+                 if this.IsErrorToken tokens.[t.TokenNumber] then 1 else 0
+            | :? AST as ast ->
+                let inline familyHasNoCycles (family: Family) = 
+                    family.nodes.isForAll (Tree<_>.smaller ast.pos)
+
+                let (subAst, errorsCount) =
+                    ast.map (fun family -> (family, handleFamily family))
+                    |> Array.filter (fun (f, _) -> familyHasNoCycles f)
+                    |> Array.minBy snd
+                ast.first <- subAst
+                ast.other <- null
+                errorsCount
+                //minErrorsOfSubnodessCount       
+            | _ -> failwith ""    
+
+        do getMinErrorsSubtree root |> ignore
+
+
     /// Choose first correct subtree without cycles.
     member this.ChooseSingleAst () =
         let handleChildren (children : AST) =

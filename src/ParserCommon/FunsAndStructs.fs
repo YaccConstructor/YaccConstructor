@@ -210,9 +210,11 @@ type ParserStructures<'TokenType> (currentRule : int)=
         //else true
 //CompressedArray<System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>>
     let addContext (setU ) (inputVertex : int) (label : int<positionInGrammar>) vertex ast =
+        setR.Enqueue(new Context(inputVertex, label, vertex, ast(*, curR*)))
+        
         if not <| containsContext setU inputVertex label vertex ast
         then
-            setR.Enqueue(new Context(inputVertex, label, vertex, ast (*, currentPath*)))
+            setR.Enqueue(new Context(inputVertex, label, vertex, ast(*, dummy, currentPath*)))
 
     let containsEdge (dict1 : Dictionary<_, Dictionary<_, ResizeArray<_>>>) ast (e : Vertex) =
         if dict1 <> Unchecked.defaultof<_>
@@ -273,6 +275,8 @@ type ParserStructures<'TokenType> (currentRule : int)=
     member this.SetR = setR
     member this.SppfNodes = sppfNodes
     member this.DummyAST = dummyAST
+    member this.PushContext = pushContext
+    member this.ContainsContext = containsContext
     member this.AddContext = addContext
     member this.ContainsEdge = containsEdge
     member this.GetTreeExtension = getTreeExtension

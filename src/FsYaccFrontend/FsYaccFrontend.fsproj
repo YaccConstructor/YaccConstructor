@@ -8,7 +8,7 @@
     <ProjectGuid>{17103a48-db90-4101-92ee-7b2719db2cf0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>FsYaccFrontend</RootNamespace>
-    <AssemblyName>FsYaccFrontend</AssemblyName>
+    <AssemblyName>YC.FsYaccFrontend</AssemblyName>
     <Name>FsYaccFrontend</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
   </PropertyGroup>

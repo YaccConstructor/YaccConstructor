@@ -8,7 +8,7 @@
     <ProjectGuid>bd40477e-7ceb-4ff4-b53f-05316f3bb6d8</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>GLLAbstractParser</RootNamespace>
-    <AssemblyName>GLLAbstractParser</AssemblyName>
+    <AssemblyName>YC.GLLAbstractParser</AssemblyName>
     <Name>GLLAbstractParser</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <TargetFrameworkProfile />
@@ -39,6 +39,11 @@
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
       <Name>AbstractAnalysis.Common</Name>
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\AST.Common\Common.AST.fsproj">

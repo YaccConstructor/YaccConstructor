@@ -1,0 +1,1556 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY dc "http://purl.org/dc/elements/1.1/" >
+    <!ENTITY dl "http://ontology.dumontierlab.com/" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<rdf:RDF xmlns="http://ontology.dumontierlab.com/atom-primitive"
+     xml:base="http://ontology.dumontierlab.com/atom-primitive"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:dl="http://ontology.dumontierlab.com/"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="">
+        <dc:description rdf:datatype="&xsd;string"
+            >An ontology of the atoms of chemical elements.</dc:description>
+        <dc:title rdf:datatype="&xsd;string">Atom Ontology (primitive)</dc:title>
+        <owl:versionInfo rdf:datatype="&xsd;string">1.0</owl:versionInfo>
+        <dc:creator rdf:datatype="&xsd;string"
+            >Michel Dumontier</dc:creator>
+        <dc:creator rdf:datatype="&xsd;string">Mykola Konyk</dc:creator>
+        <dc:date rdf:datatype="&xsd;date">2007-04-10</dc:date>
+        <rdfs:seeAlso rdf:resource="http://www.daml.org/2003/01/periodictable/PeriodicTable.owl"/>
+        <dc:format rdf:datatype="&xsd;string"
+            >application/rdf+xml</dc:format>
+        <dc:language rdf:datatype="&xsd;string">en</dc:language>
+        <dc:publisher rdf:datatype="&xsd;string">Dumontier Lab</dc:publisher>
+        <owl:imports>
+            <owl:Ontology rdf:about="http://ontology.dumontierlab.com/annotation"/>
+        </owl:imports>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////
+    //
+    //   OWL Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#ActiniumAtom -->
+
+    <owl:Class rdf:about="&dl;ActiniumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Actinium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#AluminiumAtom -->
+
+    <owl:Class rdf:about="&dl;AluminiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Aluminium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#AmericiumAtom -->
+
+    <owl:Class rdf:about="&dl;AmericiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Americium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#AntimonyAtom -->
+
+    <owl:Class rdf:about="&dl;AntimonyAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Antimony Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#ArgonAtom -->
+
+    <owl:Class rdf:about="&dl;ArgonAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Argon Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#ArsenicAtom -->
+
+    <owl:Class rdf:about="&dl;ArsenicAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Arsenic Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#AstatineAtom -->
+
+    <owl:Class rdf:about="&dl;AstatineAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Astatine Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#Atom -->
+
+    <owl:Class rdf:about="&dl;Atom">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >A particle that retains all the chemical properties of a given element.</rdfs:comment>
+        <rdfs:label rdf:datatype="&xsd;string">atom</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#AtomProperty -->
+
+    <owl:Class rdf:about="&dl;AtomProperty">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >A property of an atom.</rdfs:comment>
+        <rdfs:label rdf:datatype="&xsd;string">atom property</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#AtomicNumber -->
+
+    <owl:Class rdf:about="&dl;AtomicNumber">
+        <rdfs:label rdf:datatype="&xsd;string">atomic number</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >The number of protons in an atom.</rdfs:comment>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;AtomProperty"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#BariumAtom -->
+
+    <owl:Class rdf:about="&dl;BariumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Barium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#BerkeliumAtom -->
+
+    <owl:Class rdf:about="&dl;BerkeliumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Berkelium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#BerylliumAtom -->
+
+    <owl:Class rdf:about="&dl;BerylliumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Beryllium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#BismuthAtom -->
+
+    <owl:Class rdf:about="&dl;BismuthAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Bismuth Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#BohriumAtom -->
+
+    <owl:Class rdf:about="&dl;BohriumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Bohrium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#BoronAtom -->
+
+    <owl:Class rdf:about="&dl;BoronAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Boron Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#BromineAtom -->
+
+    <owl:Class rdf:about="&dl;BromineAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Bromine Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#CadmiumAtom -->
+
+    <owl:Class rdf:about="&dl;CadmiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Cadmium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#CaesiumAtom -->
+
+    <owl:Class rdf:about="&dl;CaesiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Caesium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#CalciumAtom -->
+
+    <owl:Class rdf:about="&dl;CalciumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Calcium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#CaliforniumAtom -->
+
+    <owl:Class rdf:about="&dl;CaliforniumAtom">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >Californium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#CarbonAtom -->
+
+    <owl:Class rdf:about="&dl;CarbonAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Carbon Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#CeriumAtom -->
+
+    <owl:Class rdf:about="&dl;CeriumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Cerium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#ChlorineAtom -->
+
+    <owl:Class rdf:about="&dl;ChlorineAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Chlorine Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#ChromiumAtom -->
+
+    <owl:Class rdf:about="&dl;ChromiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Chromium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#CobaltAtom -->
+
+    <owl:Class rdf:about="&dl;CobaltAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Cobalt Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#CopperAtom -->
+
+    <owl:Class rdf:about="&dl;CopperAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Copper Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#CuriumAtom -->
+
+    <owl:Class rdf:about="&dl;CuriumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Curium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#DubniumAtom -->
+
+    <owl:Class rdf:about="&dl;DubniumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Dubnium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#DysprosiumAtom -->
+
+    <owl:Class rdf:about="&dl;DysprosiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Dysprosium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#EinsteiniumAtom -->
+
+    <owl:Class rdf:about="&dl;EinsteiniumAtom">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >Einsteinium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#ErbiumAtom -->
+
+    <owl:Class rdf:about="&dl;ErbiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Erbium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#EuropiumAtom -->
+
+    <owl:Class rdf:about="&dl;EuropiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Europium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#FermiumAtom -->
+
+    <owl:Class rdf:about="&dl;FermiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Fermium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#FluorineAtom -->
+
+    <owl:Class rdf:about="&dl;FluorineAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Fluorine Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#FormalCharge -->
+
+    <owl:Class rdf:about="&dl;FormalCharge">
+        <rdfs:label rdf:datatype="&xsd;string">formal charge</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >The difference between the number of valence electrons that a neutral atom would have and the number of electrons that belong to it.</rdfs:comment>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;AtomProperty"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#FranciumAtom -->
+
+    <owl:Class rdf:about="&dl;FranciumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Francium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#GadoliniumAtom -->
+
+    <owl:Class rdf:about="&dl;GadoliniumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Gadolinium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#GalliumAtom -->
+
+    <owl:Class rdf:about="&dl;GalliumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Gallium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#GermaniumAtom -->
+
+    <owl:Class rdf:about="&dl;GermaniumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Germanium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#GoldAtom -->
+
+    <owl:Class rdf:about="&dl;GoldAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Gold Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#HafniumAtom -->
+
+    <owl:Class rdf:about="&dl;HafniumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Hafnium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#HassiumAtom -->
+
+    <owl:Class rdf:about="&dl;HassiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Hassium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#HeliumAtom -->
+
+    <owl:Class rdf:about="&dl;HeliumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Helium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#HolmiumAtom -->
+
+    <owl:Class rdf:about="&dl;HolmiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Holmium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#Hybridization -->
+
+    <owl:Class rdf:about="&dl;Hybridization">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >The overlap of atomic orbitals to form hybrid orbitals suitable for the qualitative description of atomic bonding properties.</rdfs:comment>
+        <rdfs:label rdf:datatype="&xsd;string">hybridization</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;AtomProperty"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#HydrogenAtom -->
+
+    <owl:Class rdf:about="&dl;HydrogenAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Hydrogen Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#ImplicitValence -->
+
+    <owl:Class rdf:about="&dl;ImplicitValence">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >implicit valence</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string"></rdfs:comment>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;AtomProperty"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#IndiumAtom -->
+
+    <owl:Class rdf:about="&dl;IndiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Indium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#IodineAtom -->
+
+    <owl:Class rdf:about="&dl;IodineAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Iodine Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#IridiumAtom -->
+
+    <owl:Class rdf:about="&dl;IridiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Iridium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#IronAtom -->
+
+    <owl:Class rdf:about="&dl;IronAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Iron Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#KryptonAtom -->
+
+    <owl:Class rdf:about="&dl;KryptonAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Krypton Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#LanthanumAtom -->
+
+    <owl:Class rdf:about="&dl;LanthanumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Lanthanum Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#LawrenciumAtom -->
+
+    <owl:Class rdf:about="&dl;LawrenciumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Lawrencium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#LeadAtom -->
+
+    <owl:Class rdf:about="&dl;LeadAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Lead Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#LithiumAtom -->
+
+    <owl:Class rdf:about="&dl;LithiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Lithium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#LutetiumAtom -->
+
+    <owl:Class rdf:about="&dl;LutetiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Lutetium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#MagnesiumAtom -->
+
+    <owl:Class rdf:about="&dl;MagnesiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Magnesium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#ManganeseAtom -->
+
+    <owl:Class rdf:about="&dl;ManganeseAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Manganese Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#MeitneriumAtom -->
+
+    <owl:Class rdf:about="&dl;MeitneriumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Meitnerium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#MendeleviumAtom -->
+
+    <owl:Class rdf:about="&dl;MendeleviumAtom">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >Mendelevium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#MercuryAtom -->
+
+    <owl:Class rdf:about="&dl;MercuryAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Mercury Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#MolybdenumAtom -->
+
+    <owl:Class rdf:about="&dl;MolybdenumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Molybdenum Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#NeodymiumAtom -->
+
+    <owl:Class rdf:about="&dl;NeodymiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Neodymium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#NeonAtom -->
+
+    <owl:Class rdf:about="&dl;NeonAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Neon Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#NeptuniumAtom -->
+
+    <owl:Class rdf:about="&dl;NeptuniumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Neptunium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#NickelAtom -->
+
+    <owl:Class rdf:about="&dl;NickelAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Nickel Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#NiobiumAtom -->
+
+    <owl:Class rdf:about="&dl;NiobiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Niobium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#NitrogenAtom -->
+
+    <owl:Class rdf:about="&dl;NitrogenAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Nitrogen Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#NobeliumAtom -->
+
+    <owl:Class rdf:about="&dl;NobeliumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Nobelium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#OsmiumAtom -->
+
+    <owl:Class rdf:about="&dl;OsmiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Osmium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#OxygenAtom -->
+
+    <owl:Class rdf:about="&dl;OxygenAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Oxygen Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#PalladiumAtom -->
+
+    <owl:Class rdf:about="&dl;PalladiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Palladium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#PhosphorusAtom -->
+
+    <owl:Class rdf:about="&dl;PhosphorusAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Phosphorus Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#PlatinumAtom -->
+
+    <owl:Class rdf:about="&dl;PlatinumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Platinum Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#PlutoniumAtom -->
+
+    <owl:Class rdf:about="&dl;PlutoniumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Plutonium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#PoloniumAtom -->
+
+    <owl:Class rdf:about="&dl;PoloniumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Polonium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#PotassiumAtom -->
+
+    <owl:Class rdf:about="&dl;PotassiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Potassium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#PraseodymiumAtom -->
+
+    <owl:Class rdf:about="&dl;PraseodymiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >Praseodymium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#PromethiumAtom -->
+
+    <owl:Class rdf:about="&dl;PromethiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Promethium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#ProtactiniumAtom -->
+
+    <owl:Class rdf:about="&dl;ProtactiniumAtom">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >Protactinium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#RadiumAtom -->
+
+    <owl:Class rdf:about="&dl;RadiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Radium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#RadonAtom -->
+
+    <owl:Class rdf:about="&dl;RadonAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Radon Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#RheniumAtom -->
+
+    <owl:Class rdf:about="&dl;RheniumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Rhenium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#RhodiumAtom -->
+
+    <owl:Class rdf:about="&dl;RhodiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Rhodium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#RubidiumAtom -->
+
+    <owl:Class rdf:about="&dl;RubidiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Rubidium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#RutheniumAtom -->
+
+    <owl:Class rdf:about="&dl;RutheniumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Ruthenium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#RutherfordiumAtom -->
+
+    <owl:Class rdf:about="&dl;RutherfordiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >Rutherfordium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#SamariumAtom -->
+
+    <owl:Class rdf:about="&dl;SamariumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Samarium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#ScandiumAtom -->
+
+    <owl:Class rdf:about="&dl;ScandiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Scandium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#SeaborgiumAtom -->
+
+    <owl:Class rdf:about="&dl;SeaborgiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Seaborgium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#SeleniumAtom -->
+
+    <owl:Class rdf:about="&dl;SeleniumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Selenium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#SiliconAtom -->
+
+    <owl:Class rdf:about="&dl;SiliconAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Silicon Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#SilverAtom -->
+
+    <owl:Class rdf:about="&dl;SilverAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Silver Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#SodiumAtom -->
+
+    <owl:Class rdf:about="&dl;SodiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Sodium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#StrontiumAtom -->
+
+    <owl:Class rdf:about="&dl;StrontiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Strontium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#SulfurAtom -->
+
+    <owl:Class rdf:about="&dl;SulfurAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Sulfur Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#TantalumAtom -->
+
+    <owl:Class rdf:about="&dl;TantalumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Tantalum Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#TechnetiumAtom -->
+
+    <owl:Class rdf:about="&dl;TechnetiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Technetium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#TelluriumAtom -->
+
+    <owl:Class rdf:about="&dl;TelluriumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Tellurium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#TerbiumAtom -->
+
+    <owl:Class rdf:about="&dl;TerbiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Terbium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#ThalliumAtom -->
+
+    <owl:Class rdf:about="&dl;ThalliumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Thallium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#ThoriumAtom -->
+
+    <owl:Class rdf:about="&dl;ThoriumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Thorium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#ThuliumAtom -->
+
+    <owl:Class rdf:about="&dl;ThuliumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Thulium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#TinAtom -->
+
+    <owl:Class rdf:about="&dl;TinAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Tin Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#TitaniumAtom -->
+
+    <owl:Class rdf:about="&dl;TitaniumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Titanium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#TungstenAtom -->
+
+    <owl:Class rdf:about="&dl;TungstenAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Tungsten Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#UnunbiumAtom -->
+
+    <owl:Class rdf:about="&dl;UnunbiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Ununbium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#UnunhexiumAtom -->
+
+    <owl:Class rdf:about="&dl;UnunhexiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Ununhexium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#UnunniliumAtom -->
+
+    <owl:Class rdf:about="&dl;UnunniliumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Ununnilium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#UnunoctiumAtom -->
+
+    <owl:Class rdf:about="&dl;UnunoctiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Ununoctium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#UnunpentiumAtom -->
+
+    <owl:Class rdf:about="&dl;UnunpentiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >Ununpentium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#UnunquadiumAtom -->
+
+    <owl:Class rdf:about="&dl;UnunquadiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >Ununquadium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#UnunseptiumAtom -->
+
+    <owl:Class rdf:about="&dl;UnunseptiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >Ununseptium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#UnuntriumAtom -->
+
+    <owl:Class rdf:about="&dl;UnuntriumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Ununtrium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#UnununiumAtom -->
+
+    <owl:Class rdf:about="&dl;UnununiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Unununium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#UraniumAtom -->
+
+    <owl:Class rdf:about="&dl;UraniumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Uranium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#VanadiumAtom -->
+
+    <owl:Class rdf:about="&dl;VanadiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Vanadium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#XenonAtom -->
+
+    <owl:Class rdf:about="&dl;XenonAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Xenon Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#YtterbiumAtom -->
+
+    <owl:Class rdf:about="&dl;YtterbiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Ytterbium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#YttriumAtom -->
+
+    <owl:Class rdf:about="&dl;YttriumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Yttrium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#ZincAtom -->
+
+    <owl:Class rdf:about="&dl;ZincAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Zinc Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- Class: http://ontology.dumontierlab.com/atom-primitive#ZirconiumAtom -->
+
+    <owl:Class rdf:about="&dl;ZirconiumAtom">
+        <rdfs:label rdf:datatype="&xsd;string">Zirconium Atom</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////
+    //
+    //   OWL Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- Object property: http://ontology.dumontierlab.com/atom-primitive#hasAtomicNumber -->
+
+    <owl:ObjectProperty rdf:about="&dl;hasAtomicNumber">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >A relation between an atom and its atomic number.</rdfs:comment>
+        <rdfs:label rdf:datatype="&xsd;string"
+            >has atomic number</rdfs:label>
+        <rdfs:subPropertyOf>
+            <owl:ObjectProperty rdf:about="&dl;hasAtomicProperty"/>
+        </rdfs:subPropertyOf>
+        <rdfs:domain>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:domain>
+        <rdfs:range>
+            <owl:Class rdf:about="&dl;AtomicNumber"/>
+        </rdfs:range>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- Object property: http://ontology.dumontierlab.com/atom-primitive#hasAtomicProperty -->
+
+    <owl:ObjectProperty rdf:about="&dl;hasAtomicProperty">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >has atomic property</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >A relation between an atom and a property of the atom.</rdfs:comment>
+        <rdfs:domain>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:domain>
+        <rdfs:range>
+            <owl:Class rdf:about="&dl;AtomProperty"/>
+        </rdfs:range>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- Object property: http://ontology.dumontierlab.com/atom-primitive#hasFormalCharge -->
+
+    <owl:ObjectProperty rdf:about="&dl;hasFormalCharge">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >A relation between an atom and its formal charge.</rdfs:comment>
+        <rdfs:label rdf:datatype="&xsd;string"
+            >has formal charge</rdfs:label>
+        <rdfs:subPropertyOf>
+            <owl:ObjectProperty rdf:about="&dl;hasAtomicProperty"/>
+        </rdfs:subPropertyOf>
+        <rdfs:domain>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:domain>
+        <rdfs:range>
+            <owl:Class rdf:about="&dl;FormalCharge"/>
+        </rdfs:range>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- Object property: http://ontology.dumontierlab.com/atom-primitive#hasHybridization -->
+
+    <owl:ObjectProperty rdf:about="&dl;hasHybridization">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >A relation between an atom and its hybridization value.</rdfs:comment>
+        <rdfs:label rdf:datatype="&xsd;string"
+            >has hybridization</rdfs:label>
+        <rdfs:subPropertyOf>
+            <owl:ObjectProperty rdf:about="&dl;hasAtomicProperty"/>
+        </rdfs:subPropertyOf>
+        <rdfs:domain>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:domain>
+        <rdfs:range>
+            <owl:Class rdf:about="&dl;Hybridization"/>
+        </rdfs:range>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- Object property: http://ontology.dumontierlab.com/atom-primitive#hasImplicitValence -->
+
+    <owl:ObjectProperty rdf:about="&dl;hasImplicitValence">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >has atomic number</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >A relation between an atom and its implicit valence.</rdfs:comment>
+        <rdfs:subPropertyOf>
+            <owl:ObjectProperty rdf:about="&dl;hasAtomicProperty"/>
+        </rdfs:subPropertyOf>
+        <rdfs:domain>
+            <owl:Class rdf:about="&dl;Atom"/>
+        </rdfs:domain>
+        <rdfs:range>
+            <owl:Class rdf:about="&dl;ImplicitValence"/>
+        </rdfs:range>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////
+    //
+    //   OWL Annotation Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:AnnotationProperty rdf:about="&dc;date"/>
+    <owl:AnnotationProperty rdf:about="&dc;publisher"/>
+    <owl:AnnotationProperty rdf:about="&dc;title"/>
+    <owl:AnnotationProperty rdf:about="&dc;description"/>
+    <owl:AnnotationProperty rdf:about="&dc;language"/>
+    <owl:AnnotationProperty rdf:about="&dc;format"/>
+    <owl:AnnotationProperty rdf:about="&dc;creator"/>
+</rdf:RDF>

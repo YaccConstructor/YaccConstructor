@@ -129,11 +129,17 @@ and [<AllowNullLiteral>]
     new (edge) = new Path (edge, null, 1)
 
 let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : ParserInputGraph<'TokenType>) =
-    (*let incomingEdges = new Dictionary<_,_>()
-    tokens.Vertices |> Seq.iter(fun v -> incomingEdges.Add(v,0))
-    tokens.Edges
-    |> Seq.iter (fun e -> incomingEdges.[e.Target] <- incomingEdges.[e.Target] + 1)
-    *)
+    if parserSource.ErrorRulesExists then
+        let edges = tokens.Edges |> Seq.map(fun edge -> (edge.Source, edge.Target, edge.Tag)) |> Seq.toList 
+        for tokenEdge in edges do
+            let source, target, token = tokenEdge
+            if parserSource.TokenToNumber token <> parserSource.EofIndex then
+                let errorEdge = new ParserEdge<_>(source, target, parserSource.CreateErrorToken token)
+                tokens.AddEdge errorEdge |> ignore
+
+    let isErrorToken (token : 'TokenType) = 
+        parserSource.ErrorRulesExists && parserSource.TokenToNumber token = parserSource.ErrorIndex 
+
     let startVList, finalVList, innerGraph =
         let verticesMap = Array.zeroCreate (Seq.max tokens.Vertices + 1)            
         for i in tokens.Vertices do
@@ -447,7 +453,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state. Possible errors: (" + states + ")")
             | Some res -> 
                 try 
-                    let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)
+                    let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString, isErrorToken = isErrorToken)
                     tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
 //
 //                    let gssInitVertices = 

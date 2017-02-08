@@ -57,6 +57,11 @@ let printGLL (fsa : FSA)
             <|  match type' with
                 | None -> ""
                 | Some s -> " of (" + s + ")"
+    
+    let printStringToNumber () = 
+        println "let stringToNumber = function"
+        for tokenNumber in termToInt do
+            println "    | \"%s\" -> %i" tokenNumber.Key tokenNumber.Value
 
     let printTokenToNumber () = 
         println "let tokenToNumber = function"
@@ -180,6 +185,7 @@ let printGLL (fsa : FSA)
 
     printItem printHeaders
     printItem printToken
+    printItem printStringToNumber
     printItem printTokenToNumber
     printItem (printStateToNontermName sortedStateToNontermName)
     printItem (printAnyNonterm anyNonterm)

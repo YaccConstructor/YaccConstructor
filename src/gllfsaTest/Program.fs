@@ -17,7 +17,7 @@ let tokenizer token =
     | _ -> failwith "wtf"
 
 let mEL = 500
-
+(*
 let graph (input:string) = 
     let edges = Array.init (input.Length / mEL + (if input.Length % mEL = 0 then 0 else 1)) (fun i -> input.Substring(i*mEL, if input.Substring(i*mEL).Length < mEL then input.Substring(i*mEL).Length else mEL))
     let edges = 
@@ -36,6 +36,7 @@ let graphTT =
             new BioParserEdge(i, i+1, 1, tag, 0, 0)
             )
     new BioParserInputGraph(edges, Set[0])
+    *)
 (*
 let rec genS n = 
     let pref =  new System.Text.StringBuilder()

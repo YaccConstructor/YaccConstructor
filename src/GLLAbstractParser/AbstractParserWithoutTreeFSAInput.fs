@@ -52,11 +52,12 @@ let parse (parser : FSAParserSourceGLL) (input : IParserInput) =
     let pop (curContext:ContextFSA<_>) =
         let curGssVertex = curContext.GssVertex
         let outEdges = gss.OutEdges curGssVertex |> Array.ofSeq
-            
+        
+        curGssVertex.P.Add (curContext.PosInInput, curContext.Length)
         if outEdges <> null && outEdges.Length <> 0
         then
             let vertexKey = packVertexFSA curGssVertex.PositionInInput curGssVertex.Nonterm
-            let value = curGssVertex.P.Add (curContext.PosInInput, curContext.Length)
+            
             for e in outEdges do
                 addContext curContext.PosInInput e.Tag.StateToContinue e.Target (curContext.Length + e.Tag.LengthOfProcessedString)
 
@@ -85,12 +86,13 @@ let parse (parser : FSAParserSourceGLL) (input : IParserInput) =
        
 let findVertices (gss:GSS) state =    
     gss.Vertices
-    |> Seq.filter (fun v -> v.PositionInGrammar = state)
+    |> Seq.filter (fun v -> v.Nonterm = measureStateToNonterm state)
              
 let isParsed (parser : FSAParserSourceGLL) (input : LinearInput) = 
     let gss = parse parser input
     findVertices gss parser.StartState
-    |> Seq.exists (fun v -> v.U.Values |> Seq.exists (fun a -> a |> ResizeArray.exists (fun i -> int i = input.Input.Length)))
+    //|> Seq.exists (fun v -> v.U.Values |> Seq.exists (fun a -> a |> ResizeArray.exists (fun i -> int i = input.Input.Length)))
+    |> Seq.exists (fun v -> v.P |> Seq.exists (fun (pos,_) -> int pos = input.Input.Length))
 
 let getAllRangesForState gss state =
     findVertices gss state

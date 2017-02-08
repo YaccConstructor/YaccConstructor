@@ -9,7 +9,6 @@ open System.Collections.Generic
 open InfernalApi
 
 module Array =
-
     /// Returns a sequence that yields chunks of length n.
     /// Each chunk is returned as a list.
     let split length (a: array<'T>) =
@@ -251,7 +250,6 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHightLimit =
          qGraph)
     , longEdges
     
-            
 let loadGraphFormFileToBioParserInputGraph fileWithoutExt templateLengthHightLimit tokenizer =
     let convert (g:AdjacencyGraph<_,BioGraphEdge>) =
         let edges =

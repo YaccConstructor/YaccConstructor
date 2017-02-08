@@ -1,6 +1,7 @@
 ﻿namespace AbstractAnalysis.Common
 
 open QuickGraph
+open System.Runtime.CompilerServices
 
 [<Measure>] type token
 
@@ -24,7 +25,7 @@ type LexerEdge<'l ,'br  when 'l: equality> (s,e,t) =
     member this.Label = l
 
 type IParserInput =
-    abstract member InitialPositions: array<int<positionInInput>>
+    abstract member InitialPositions: array<int<positionInInput>>    
     abstract member ForAllOutgoingEdges: int<positionInInput> -> (int<token> -> int<positionInInput> -> unit) -> unit
 
 type ParserEdge<'token>(s, e, t)=
@@ -58,6 +59,7 @@ type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) =
 type LinearInput (initialPositions, input:array<int<token>>) =
     interface IParserInput with
         member this.InitialPositions = initialPositions
+        [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
         member this.ForAllOutgoingEdges curPosInInput pFun =
             if int curPosInInput < input.Length
             then pFun input.[int curPosInInput] (curPosInInput + 1<positionInInput>)
@@ -70,6 +72,7 @@ type SimpleGraphInput<'tagType> (initialPositions, getTokenFromTag:'tagType -> i
     inherit AdjacencyGraph<int, TaggedEdge<int, 'tagType>>()
     interface IParserInput with
         member this.InitialPositions = initialPositions
+        [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
         member this.ForAllOutgoingEdges curPosInInput pFun =
             let outEdges = int curPosInInput |> this.OutEdges
             outEdges
@@ -78,77 +81,45 @@ type SimpleGraphInput<'tagType> (initialPositions, getTokenFromTag:'tagType -> i
                     pFun (getTokenFromTag e.Tag) (e.Target * 1<positionInInput>)
                 )
 
-//type EdgeCompressedGraphInput<'tagType> (initialPositions, getTokensFromTag:'tagType -> int<token>) =
-//    inherit AdjacencyGraph<int, TaggedEdge<int, 'tagType>>()
-//    interface IParserInput with
-//        member this.InitialPositions = initialPositions
-//        member this.ForAllOutgoingEdges curPosInInput pFun =
-//            let pack2to32 edge position =
-//                if (edge < 65536) && (position < 65536) then ((int position <<< 16) ||| int edge)
-//                else failwith "Edge or position is greater then 65535!!"
-//            let outEdges = int curPosInInput |> this.OutEdges
-//            outEdges
-//            |> Seq.iter 
-//                (fun e ->
-//                    pFun (getTokenFromTag e.Tag) (e.Target *1<positionInInput>)
-//                )
+type EdgeCompressedGraphInput<'tagType> (protoGraph:AdjacencyGraph<int, TaggedEdge<int, 'tagType>>, getTokensFromTag:'tagType -> array<int<token>>) =
+    let packPosition edge position =
+        if (edge < 65536) && (position < 65536) then ((int position <<< 16) ||| int edge) * 1<positionInInput>
+        else failwith "Edge or position is greater then 65535!!"
+    let edges = protoGraph.Edges |> Array.ofSeq
+    let initialPositions = 
+        let buf = new ResizeArray<_>()
+        edges
+        |> Array.iteri (fun i e ->
+            buf.Add(packPosition -1 e.Source)
+            buf.Add(packPosition -1 e.Target)
+            for j in 1 .. (getTokensFromTag e.Tag).Length - 1 do
+                buf.Add (packPosition i j)
+            )
+        buf.ToArray()
 
-
-//type BioParserEdge(s : int, e : int, l : int, t : int[], id : int, startPos : int) =
-//    member this.Start = s
-//    member this.End = e
-//    member this.RealLength = l
-//    member this.Tokens = t 
-//    member this.SourceId = id
-//    member this.SourceStartPos = startPos
-//    override this.ToString () = (this.Start.ToString()) + "- "+ (this.Tokens.[0].ToString()) + " ->" + (this.End.ToString()) 
-//      
-//type BioParserInputGraph(edges : BioParserEdge[], initialEdges : Set<int>) =
-////    inherit AdjacencyGraph<int, TaggedEdge<int, int[]>>()
-////    do
-////        edges |> Array.map (fun e -> new TaggedEdge<_,_>(e.s, e.e, e.Tokens))
-//    let pack2to32 edge position =
-//        if (edge < 65536) && (position < 65536) then ((int position <<< 16) ||| int edge)
-//        else failwith "Edge or position is greater then 65535!!"
-//    let edgs = Array.zeroCreate edges.Length
-//    let vertexCount = ref 0
-//    /// Length of each edge
-//    let chainLen = Array.zeroCreate edges.Length
-//    let initialPositions = new ResizeArray<_>()
-//    let finalVertex = ref 0
-//    do        
-//        let cnt = ref 0
-//        let initialVertCnt = ref 0
-//        let vMap = new System.Collections.Generic.Dictionary<_,_>()
-//        let getV x = 
-//            let f,v = vMap.TryGetValue x
-//            if f 
-//            then v
-//            else       
-//                let newV = !cnt                
-//                vMap.Add(x, newV)
-//                incr cnt
-//                newV
-//        edges
-//        |> Array.iteri (fun i e -> 
-//            let edg = new BioParserEdge(getV e.Start, getV e.End, e.RealLength, e.Tokens, e.SourceId, e.SourceStartPos)
-//            edgs.[i] <- edg
-//            chainLen.[i] <- e.Tokens.Length
-//            //shift := 0//max !shift (e.Tokens.Length - e.RealLenght)
-//            if initialEdges.IsEmpty || initialEdges.Contains(i)
-//            then
-//                for j in 0..e.Tokens.Length - 1 do
-//                    initialPositions.Add(pack2to32 i j))
-//        vertexCount := vMap.Count
-//    
-//    member this.Edges  with get () = edgs
-//    member this.InitialPositions with get () = initialPositions.ToArray()
-//    member this.FinalVertex with get () = !finalVertex
-//    /// Lengths of edges.
-//    member this.ChainLength with get () = chainLen
-//    member this.EdgeCount with get () = edgs.Length
-//    member this.VertexCount with get () = !vertexCount
-//    member this.Shift with get () = 0
-//
-//
-//
+    interface IParserInput with
+        member this.InitialPositions = initialPositions
+        member this.ForAllOutgoingEdges curPosInInput pFun =
+            let inline getEdge (packedValue : int<positionInInput>)      = int (int packedValue &&& 0xffff)
+            let inline getPosOnEdge (packedValue : int<positionInInput>) = int (uint32 packedValue >>> 16)
+            let eId = getEdge curPosInInput
+            if  eId = -1
+            then 
+                let vId = getPosOnEdge curPosInInput                
+                protoGraph.OutEdges vId
+                |> Seq.iter (fun e -> 
+                    let nextPos =
+                        if (getTokensFromTag e.Tag).Length = 1
+                        then packPosition -1 e.Target
+                        else packPosition (Array.findIndex ((=)e) edges) 1
+                    pFun (getTokensFromTag e.Tag).[0] nextPos
+                    )
+            else
+                let e = edges.[eId]
+                let posOnEdge = getPosOnEdge curPosInInput
+                let tokens = getTokensFromTag e.Tag
+                let nextPos =
+                    if posOnEdge = tokens.Length - 1
+                    then packPosition -1 e.Target
+                    else packPosition eId (posOnEdge + 1)
+                pFun tokens.[posOnEdge] nextPos

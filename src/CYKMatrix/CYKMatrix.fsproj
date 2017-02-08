@@ -72,6 +72,13 @@
       </PropertyGroup>
     </When>
   </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <PropertyGroup>
+        <__paket__Alea_CUDA_targets>Alea.CUDA</__paket__Alea_CUDA_targets>
+      </PropertyGroup>
+    </When>
+  </Choose>
   <ItemGroup>
     <Content Include="Fody_ToBeDeleted.txt">
       <Paket>True</Paket>
@@ -108,7 +115,7 @@
   -->
   <Import Project="..\..\.paket\paket.targets" />
   <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
       <ItemGroup>
         <Reference Include="Alea.CUDA">
           <HintPath>..\..\packages\Alea.CUDA\lib\net40\Alea.CUDA.dll</HintPath>
@@ -154,6 +161,11 @@
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
       <ItemGroup>
+        <Reference Include="Brahma">
+          <HintPath>..\..\packages\Brahma.FSharp\lib\net45\Brahma.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
         <Reference Include="Brahma.Agents">
           <HintPath>..\..\packages\Brahma.FSharp\lib\net45\Brahma.Agents.dll</HintPath>
           <Private>True</Private>
@@ -191,11 +203,6 @@
         </Reference>
         <Reference Include="Brahma.OpenCL">
           <HintPath>..\..\packages\Brahma.FSharp\lib\net45\Brahma.OpenCL.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-        <Reference Include="Brahma">
-          <HintPath>..\..\packages\Brahma.FSharp\lib\net45\Brahma.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -364,7 +371,7 @@
       </ItemGroup>
     </When>
   </Choose>
-  <Import Project="..\..\packages\Alea.CUDA\build\Alea.CUDA.targets" Condition="Exists('..\..\packages\Alea.CUDA\build\Alea.CUDA.targets')" Label="Paket" />
+  <Import Project="..\..\packages\Alea.CUDA\build\$(__paket__Alea_CUDA_targets).targets" Condition="Exists('..\..\packages\Alea.CUDA\build\$(__paket__Alea_CUDA_targets).targets')" Label="Paket" />
   <Import Project="..\..\packages\Fody\build\$(__paket__Fody_targets).targets" Condition="Exists('..\..\packages\Fody\build\$(__paket__Fody_targets).targets')" Label="Paket" />
   <Import Project="..\..\packages\OpenCL.Net\build\$(__paket__OpenCL_Net_targets).targets" Condition="Exists('..\..\packages\OpenCL.Net\build\$(__paket__OpenCL_Net_targets).targets')" Label="Paket" />
 </Project>

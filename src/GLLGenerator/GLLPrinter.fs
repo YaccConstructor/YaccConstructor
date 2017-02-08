@@ -62,6 +62,7 @@ let printGLL (fsa : FSA)
         println "let stringToNumber = function"
         for tokenNumber in termToInt do
             println "    | \"%s\" -> %i" tokenNumber.Key tokenNumber.Value
+        println "    | _ -> -1"
 
     let printTokenToNumber () = 
         println "let tokenToNumber = function"

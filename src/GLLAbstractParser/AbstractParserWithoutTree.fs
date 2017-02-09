@@ -61,8 +61,21 @@ let parse (parser : FSAParserSourceGLL) (input : IParserInput) =
             for e in outEdges do
                 addContext curContext.PosInInput e.Tag.StateToContinue e.Target (curContext.Length + e.Tag.LengthOfProcessedString)
 
+    let processed = ref 0
+    let mlnCount = ref 0
+    let startTime = ref System.DateTime.Now
+
     while setR.Count <> 0 do
         let currentContext = setR.Pop()
+
+        incr processed
+        if !processed = 10000000
+        then
+            incr mlnCount            
+            printfn "%A mlns of D procesed. %A D/sec" (!mlnCount * 10) (!processed / int (System.DateTime.Now - !startTime).TotalMilliseconds * 1000)
+            processed := 0
+            startTime :=  System.DateTime.Now
+
         let possibleNontermMovesInGrammar = parser.OutNonterms.[int currentContext.PosInGrammar]
 
         /// Current state is final

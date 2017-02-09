@@ -5,6 +5,7 @@ open Yard.Generators.Common.DataStructures
 open AbstractAnalysis.Common
 open QuickGraph
 open QuickGraph.Graphviz
+open System.Collections.Generic
 
 type GSSVertex (nonterm: int<nonterm>, posInInput: int<positionInInput>) =    
 

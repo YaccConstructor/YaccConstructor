@@ -70,9 +70,9 @@ let processFile file =
     let cnt = 1
     let g1, triples1 = 
         getParseInputGraph (GLL.GPPerf1.stringToNumber >> ((*) 1<token>)) file
-    let g2, triples1 = 
-        getParseInputGraph (GLL.GPPerf2.stringToNumber >> ((*) 1<token>)) file
-        
+//    let g2, triples1 = 
+//        getParseInputGraph (GLL.GPPerf2.stringToNumber >> ((*) 1<token>)) file
+//        
     let start = System.DateTime.Now
     let root1 =
         [for i in 0..cnt-1 ->
@@ -85,13 +85,14 @@ let processFile file =
     let root2 =
         [for i in 0..cnt-1 ->
             Yard.Generators.GLL.AbstractParserWithoutTree.getAllRangesForStartState GLL.GPPerf2.parserSource g1
+            [-1]
             |> Seq.length]
     let time2 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
 
     System.IO.Path.GetFileNameWithoutExtension file, triples1, time1, root1.[0], time2, root2.[0]
 
 let performTests () =
-    let basePath = @"..\..\..\data\RDF\"
+    let basePath = @"..\..\..\data\RDF\big"
     let files = System.IO.Directory.GetFiles basePath    
     files 
     |> Array.map processFile

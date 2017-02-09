@@ -1,1 +1,0 @@
-..\..\Bin\Debug\v40\YC.YaccConstructor.exe -i test.yrd -g "GLLGenerator -token unit -module GLLFSA.test -o test.fs -abstract true" >> generationLog.txt

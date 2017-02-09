@@ -220,6 +220,7 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
                 match nodeType with
                 | Terminal -> ",shape=box"
                 | NonTerminal -> ",shape=point"
+                | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
             let color = ""
             out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + color + shape + "]")
 
@@ -261,7 +262,7 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
                             createNode !num false Terminal ("epsilon")
                             createEdge currentPair.Num !num false ""
                        
-                    | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
+                    //| x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
             else
                 num := !num + 1
                 match currentPair.Node with
@@ -299,6 +300,8 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
                 then
                     for ch in i.Others do
                         findNodes ch
+            | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
+
         findNodes root
         let results = Dictionary<INode,_>()
         let index = ref 0
@@ -367,6 +370,7 @@ type Tree<'TokenType> (tokens : 'TokenType[], root : INode, rules : int[][]) =
                     results.Remove i |> ignore
                     results.Add(i, paths)
                     paths
+            | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
         
         for i in 0..q.Count-1 do
             index := i

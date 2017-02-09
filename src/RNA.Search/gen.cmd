@@ -1,2 +1,0 @@
-..\..\Bin\Release\v40\YC.YaccConstructor.exe -i ..\YC.GrammarZOO\Bio\16s\R16S_1_18.yrd -g "GLLFSAGenerator -module GLLFSA.R16S_1_18 -o R16S_1_18.fs -abstract true" >> generationLog.txt
-..\..\Bin\Release\v40\YC.YaccConstructor.exe -i ..\YC.GrammarZOO\Bio\16s\R16S_19_27.yrd -g "GLLFSAGenerator -module GLLFSA.R16S_19_27 -o R16S_19_27.fs -abstract true" >> generationLog.txt

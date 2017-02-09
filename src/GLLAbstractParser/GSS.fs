@@ -8,7 +8,8 @@ open QuickGraph.Graphviz
 
 type GSSVertex (nonterm: int<nonterm>, posInInput: int<positionInInput>) =    
 
-    let setU = new System.Collections.Generic.Dictionary<int<positionInGrammar>, ResizeArray<int<positionInInput>>>()
+    let setU = new System.Collections.Generic.Dictionary<int<positionInGrammar>, 
+                                                         System.Collections.Generic.Dictionary<uint16,ResizeArray<int<positionInInput>>>>()
     let setP = new ResizeArray<int<positionInInput>*uint16>() 
     
     override this.Equals y = 
@@ -24,17 +25,25 @@ type GSSVertex (nonterm: int<nonterm>, posInInput: int<positionInInput>) =
     member this.Nonterm = nonterm
 
     /// Checks for existing of context in SetU. If not adds it to SetU.
-    member this.ContainsContext (inputIndex: int<positionInInput>) (state : int<positionInGrammar>) =
-        let cond, current = setU.TryGetValue state
+    member this.ContainsContext (inputIndex: int<positionInInput>) (state : int<positionInGrammar>) (len : uint16)=
+        let cond, dict2 = setU.TryGetValue state
         if cond
-        then 
-            if current.Contains inputIndex
-            then true
-            else 
-             current.Add inputIndex
-             false
+        then
+            let cond2, current = dict2.TryGetValue len
+            if cond2
+            then
+                if current.Contains inputIndex
+                then true
+                else 
+                    current.Add inputIndex
+                    false
+            else
+                dict2.Add(len, new ResizeArray<_>([inputIndex]))
+                false
         else
-            setU.Add(state, new ResizeArray<_>([inputIndex]))
+            let d1 = new System.Collections.Generic.Dictionary<_,_>()
+            d1.Add(len, new ResizeArray<_>([inputIndex]))
+            setU.Add(state, d1)
             false
 
 [<Struct>]

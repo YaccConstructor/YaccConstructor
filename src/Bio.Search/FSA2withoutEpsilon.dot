@@ -12,6 +12,8 @@ node [shape = circle]
 1[label="full", style=filled, fillcolor=green]
 1 -> 193 [label="folded",color=green]; 
 
+1 -> 192 [label="folded",color=green]; 
+
 2[label="folded", style=filled, fillcolor=yellow]
 2 -> 194 [label="root2",color=green]; 
 
@@ -58,6 +60,8 @@ node [shape = circle]
 6 -> 231 [label="A"]; 
 
 6 -> 234 [label="any",color=green]; 
+
+6 -> 233 [label="any",color=green]; 
 
 7[label="s2", style=filled, fillcolor=yellow]
 7 -> 244 [label="yard_rule_stem_3",color=green]; 
@@ -212,8 +216,12 @@ node [shape = circle]
 19[label="any_1_2", style=filled, fillcolor=yellow]
 19 -> 394 [label="any",color=green]; 
 
+19 -> 393 [label="any",color=green]; 
+
 20[label="any_1_3", style=filled, fillcolor=yellow]
 20 -> 396 [label="any",color=green]; 
+
+20 -> 395 [label="any",color=green]; 
 
 21[label="any_2_3", style=filled, fillcolor=yellow]
 21 -> 399 [label="any",color=green]; 
@@ -258,8 +266,6 @@ node [shape = circle]
 30 -> 442 [label="G"]; 
 
 30 -> 444 [label="A"]; 
-
-30 -> 446 [label="",color=blue]; 
 
 30 -> 446 [label="any",color=green]; 
 
@@ -330,8 +336,6 @@ node [shape = circle]
 
 37 -> 510 [label="A"]; 
 
-37 -> 512 [label="",color=blue]; 
-
 37 -> 512 [label="any",color=green]; 
 
 38[label="yard_rule_stem_e1_14", style=filled, fillcolor=yellow]
@@ -354,8 +358,6 @@ node [shape = circle]
 
 39 -> 530 [label="A"]; 
 
-39 -> 532 [label="",color=blue]; 
-
 39 -> 532 [label="any",color=green]; 
 
 40[label="yard_rule_stem_15", style=filled, fillcolor=yellow]
@@ -374,8 +376,6 @@ node [shape = circle]
 40 -> 547 [label="G"]; 
 
 40 -> 549 [label="A"]; 
-
-40 -> 551 [label="",color=blue]; 
 
 40 -> 551 [label="any",color=green]; 
 
@@ -503,8 +503,6 @@ node [shape = circle]
 
 50 -> 671 [label="A"]; 
 
-50 -> 673 [label="",color=blue]; 
-
 50 -> 673 [label="any",color=green]; 
 
 51[label="yard_rule_stem_e1_25", style=filled, fillcolor=yellow]
@@ -526,8 +524,6 @@ node [shape = circle]
 52 -> 689 [label="G"]; 
 
 52 -> 691 [label="A"]; 
-
-52 -> 693 [label="",color=blue]; 
 
 52 -> 693 [label="any",color=green]; 
 
@@ -664,8 +660,6 @@ node [shape = circle]
 
 65 -> 837 [label="A"]; 
 
-65 -> 839 [label="",color=blue]; 
-
 65 -> 839 [label="any",color=green]; 
 
 66[label="yard_rule_stem_e1_33", style=filled, fillcolor=yellow]
@@ -687,8 +681,6 @@ node [shape = circle]
 67 -> 855 [label="G"]; 
 
 67 -> 857 [label="A"]; 
-
-67 -> 859 [label="",color=blue]; 
 
 67 -> 859 [label="any",color=green]; 
 
@@ -715,8 +707,6 @@ node [shape = circle]
 
 70 -> 878 [label="A"]; 
 
-70 -> 880 [label="",color=blue]; 
-
 70 -> 880 [label="any",color=green]; 
 
 71[label="yard_rule_stem_e1_45", style=filled, fillcolor=yellow]
@@ -738,8 +728,6 @@ node [shape = circle]
 72 -> 896 [label="G"]; 
 
 72 -> 898 [label="A"]; 
-
-72 -> 900 [label="",color=blue]; 
 
 72 -> 900 [label="any",color=green]; 
 
@@ -782,8 +770,6 @@ node [shape = circle]
 
 75 -> 935 [label="A"]; 
 
-75 -> 937 [label="",color=blue]; 
-
 75 -> 937 [label="any",color=green]; 
 
 76[label="yard_rule_stem_42", style=filled, fillcolor=yellow]
@@ -825,8 +811,6 @@ node [shape = circle]
 
 78 -> 972 [label="A"]; 
 
-78 -> 974 [label="",color=blue]; 
-
 78 -> 974 [label="any",color=green]; 
 
 79[label="yard_rule_stem_e1_37", style=filled, fillcolor=yellow]
@@ -848,8 +832,6 @@ node [shape = circle]
 80 -> 990 [label="G"]; 
 
 80 -> 992 [label="A"]; 
-
-80 -> 994 [label="",color=blue]; 
 
 80 -> 994 [label="any",color=green]; 
 
@@ -895,8 +877,6 @@ node [shape = circle]
 
 84 -> 1030 [label="A"]; 
 
-84 -> 1032 [label="",color=blue]; 
-
 84 -> 1032 [label="any",color=green]; 
 
 85[label="yard_rule_stem_e1_51", style=filled, fillcolor=yellow]
@@ -918,8 +898,6 @@ node [shape = circle]
 86 -> 1048 [label="G"]; 
 
 86 -> 1050 [label="A"]; 
-
-86 -> 1052 [label="",color=blue]; 
 
 86 -> 1052 [label="any",color=green]; 
 
@@ -984,8 +962,6 @@ node [shape = circle]
 
 91 -> 1113 [label="A"]; 
 
-91 -> 1115 [label="",color=blue]; 
-
 91 -> 1115 [label="any",color=green]; 
 
 92[label="yard_rule_stem_61", style=filled, fillcolor=yellow]
@@ -1004,8 +980,6 @@ node [shape = circle]
 92 -> 1130 [label="G"]; 
 
 92 -> 1132 [label="A"]; 
-
-92 -> 1134 [label="",color=blue]; 
 
 92 -> 1134 [label="any",color=green]; 
 
@@ -1029,8 +1003,6 @@ node [shape = circle]
 
 94 -> 1152 [label="A"]; 
 
-94 -> 1154 [label="",color=blue]; 
-
 94 -> 1154 [label="any",color=green]; 
 
 95[label="yard_rule_stem_e1_56", style=filled, fillcolor=yellow]
@@ -1052,8 +1024,6 @@ node [shape = circle]
 96 -> 1170 [label="G"]; 
 
 96 -> 1172 [label="A"]; 
-
-96 -> 1174 [label="",color=blue]; 
 
 96 -> 1174 [label="any",color=green]; 
 
@@ -1095,8 +1065,6 @@ node [shape = circle]
 99 -> 1207 [label="G"]; 
 
 99 -> 1209 [label="A"]; 
-
-99 -> 1211 [label="",color=blue]; 
 
 99 -> 1211 [label="any",color=green]; 
 
@@ -1208,8 +1176,6 @@ node [shape = circle]
 
 109 -> 1320 [label="A"]; 
 
-109 -> 1322 [label="",color=blue]; 
-
 109 -> 1322 [label="any",color=green]; 
 
 110[label="yard_rule_stem_69", style=filled, fillcolor=yellow]
@@ -1276,8 +1242,6 @@ node [shape = circle]
 
 115 -> 1380 [label="A"]; 
 
-115 -> 1382 [label="",color=blue]; 
-
 115 -> 1382 [label="any",color=green]; 
 
 116[label="yard_rule_stem_e1_73", style=filled, fillcolor=yellow]
@@ -1299,8 +1263,6 @@ node [shape = circle]
 117 -> 1398 [label="G"]; 
 
 117 -> 1400 [label="A"]; 
-
-117 -> 1402 [label="",color=blue]; 
 
 117 -> 1402 [label="any",color=green]; 
 
@@ -1406,8 +1368,6 @@ node [shape = circle]
 
 125 -> 1501 [label="A"]; 
 
-125 -> 1503 [label="",color=blue]; 
-
 125 -> 1503 [label="any",color=green]; 
 
 126[label="yard_rule_stem_81", style=filled, fillcolor=yellow]
@@ -1452,8 +1412,6 @@ node [shape = circle]
 
 129 -> 1541 [label="A"]; 
 
-129 -> 1543 [label="",color=blue]; 
-
 129 -> 1543 [label="any",color=green]; 
 
 130[label="yard_rule_stem_84", style=filled, fillcolor=yellow]
@@ -1472,8 +1430,6 @@ node [shape = circle]
 130 -> 1558 [label="G"]; 
 
 130 -> 1560 [label="A"]; 
-
-130 -> 1562 [label="",color=blue]; 
 
 130 -> 1562 [label="any",color=green]; 
 
@@ -1616,8 +1572,6 @@ node [shape = circle]
 
 145 -> 1690 [label="A"]; 
 
-145 -> 1692 [label="",color=blue]; 
-
 145 -> 1692 [label="any",color=green]; 
 
 146[label="yard_rule_stem_98", style=filled, fillcolor=yellow]
@@ -1678,8 +1632,6 @@ node [shape = circle]
 
 149 -> 1746 [label="A"]; 
 
-149 -> 1748 [label="",color=blue]; 
-
 149 -> 1748 [label="any",color=green]; 
 
 150[label="yard_rule_stem_e1_92", style=filled, fillcolor=yellow]
@@ -1701,8 +1653,6 @@ node [shape = circle]
 151 -> 1764 [label="G"]; 
 
 151 -> 1766 [label="A"]; 
-
-151 -> 1768 [label="",color=blue]; 
 
 151 -> 1768 [label="any",color=green]; 
 
@@ -1813,8 +1763,6 @@ node [shape = circle]
 161 -> 1876 [label="G"]; 
 
 161 -> 1878 [label="A"]; 
-
-161 -> 1880 [label="",color=blue]; 
 
 161 -> 1880 [label="any",color=green]; 
 
@@ -1989,8 +1937,6 @@ node [shape = circle]
 
 176 -> 2052 [label="A"]; 
 
-176 -> 2054 [label="",color=blue]; 
-
 176 -> 2054 [label="any",color=green]; 
 
 177[label="yard_rule_stem_e1_113", style=filled, fillcolor=yellow]
@@ -2012,8 +1958,6 @@ node [shape = circle]
 178 -> 2070 [label="G"]; 
 
 178 -> 2072 [label="A"]; 
-
-178 -> 2074 [label="",color=blue]; 
 
 178 -> 2074 [label="any",color=green]; 
 
@@ -2135,8 +2079,6 @@ node [shape = circle]
 
 186 -> 2188 [label="A"]; 
 
-186 -> 2190 [label="",color=blue]; 
-
 186 -> 2190 [label="any",color=green]; 
 
 187[label="yard_rule_stem_118", style=filled, fillcolor=yellow]
@@ -2169,9 +2111,7 @@ node [shape = circle]
 
 191[label="", shape = doublecircle, style=filled, fillcolor=red]
 192[label="", shape = doublecircle, style=filled, fillcolor=red]
-193[label=""]
-193 -> 192 [label="",color=blue]; 
-
+193[label="", shape = doublecircle, style=filled, fillcolor=red]
 193 -> 192 [label="any",color=green]; 
 
 194[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -2287,47 +2227,45 @@ node [shape = circle]
 234[label=""]
 234 -> 235 [label="any",color=green]; 
 
-234 -> 233 [label="",color=blue]; 
+234 -> 233 [label="any",color=green]; 
 
 235[label=""]
 235 -> 236 [label="any",color=green]; 
 
-235 -> 233 [label="",color=blue]; 
+235 -> 233 [label="any",color=green]; 
 
 236[label=""]
-236 -> 233 [label="",color=blue]; 
-
 236 -> 233 [label="any",color=green]; 
 
 237[label=""]
 237 -> 239 [label="any",color=green]; 
 
-238[label=""]
+238[label="", shape = doublecircle, style=filled, fillcolor=red]
 238 -> 240 [label="any",color=green]; 
 
-238 -> 216 [label="",color=blue]; 
+238 -> 216 [label="any",color=green]; 
 
 239[label=""]
 239 -> 238 [label="any",color=green]; 
 
-240[label=""]
+239 -> 216 [label="any",color=green]; 
+
+240[label="", shape = doublecircle, style=filled, fillcolor=red]
 240 -> 241 [label="any",color=green]; 
 
-240 -> 216 [label="",color=blue]; 
+240 -> 216 [label="any",color=green]; 
 
-241[label=""]
+241[label="", shape = doublecircle, style=filled, fillcolor=red]
 241 -> 242 [label="any",color=green]; 
 
-241 -> 216 [label="",color=blue]; 
+241 -> 216 [label="any",color=green]; 
 
-242[label=""]
+242[label="", shape = doublecircle, style=filled, fillcolor=red]
 242 -> 243 [label="any",color=green]; 
 
-242 -> 216 [label="",color=blue]; 
+242 -> 216 [label="any",color=green]; 
 
-243[label=""]
-243 -> 216 [label="",color=blue]; 
-
+243[label="", shape = doublecircle, style=filled, fillcolor=red]
 243 -> 216 [label="any",color=green]; 
 
 244[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -2380,10 +2318,10 @@ node [shape = circle]
 261[label=""]
 261 -> 245 [label="G"]; 
 
-262[label=""]
+262[label="", shape = doublecircle, style=filled, fillcolor=red]
 262 -> 266 [label="any",color=green]; 
 
-262 -> 245 [label="",color=blue]; 
+262 -> 245 [label="any",color=green]; 
 
 263[label=""]
 263 -> 264 [label="any",color=green]; 
@@ -2394,19 +2332,19 @@ node [shape = circle]
 265[label=""]
 265 -> 262 [label="any",color=green]; 
 
-266[label=""]
+265 -> 245 [label="any",color=green]; 
+
+266[label="", shape = doublecircle, style=filled, fillcolor=red]
 266 -> 267 [label="any",color=green]; 
 
-266 -> 245 [label="",color=blue]; 
+266 -> 245 [label="any",color=green]; 
 
-267[label=""]
+267[label="", shape = doublecircle, style=filled, fillcolor=red]
 267 -> 268 [label="any",color=green]; 
 
-267 -> 245 [label="",color=blue]; 
+267 -> 245 [label="any",color=green]; 
 
-268[label=""]
-268 -> 245 [label="",color=blue]; 
-
+268[label="", shape = doublecircle, style=filled, fillcolor=red]
 268 -> 245 [label="any",color=green]; 
 
 269[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -2746,7 +2684,7 @@ node [shape = circle]
 387[label=""]
 387 -> 390 [label="any",color=green]; 
 
-387 -> 386 [label="",color=blue]; 
+387 -> 386 [label="any",color=green]; 
 
 388[label=""]
 388 -> 389 [label="any",color=green]; 
@@ -2754,36 +2692,32 @@ node [shape = circle]
 389[label=""]
 389 -> 387 [label="any",color=green]; 
 
+389 -> 386 [label="any",color=green]; 
+
 390[label=""]
 390 -> 391 [label="any",color=green]; 
 
-390 -> 386 [label="",color=blue]; 
+390 -> 386 [label="any",color=green]; 
 
 391[label=""]
 391 -> 392 [label="any",color=green]; 
 
-391 -> 386 [label="",color=blue]; 
+391 -> 386 [label="any",color=green]; 
 
 392[label=""]
-392 -> 386 [label="",color=blue]; 
-
 392 -> 386 [label="any",color=green]; 
 
 393[label="", shape = doublecircle, style=filled, fillcolor=red]
-394[label=""]
-394 -> 393 [label="",color=blue]; 
-
+394[label="", shape = doublecircle, style=filled, fillcolor=red]
 394 -> 393 [label="any",color=green]; 
 
 395[label="", shape = doublecircle, style=filled, fillcolor=red]
-396[label=""]
+396[label="", shape = doublecircle, style=filled, fillcolor=red]
 396 -> 397 [label="any",color=green]; 
 
-396 -> 395 [label="",color=blue]; 
+396 -> 395 [label="any",color=green]; 
 
-397[label=""]
-397 -> 395 [label="",color=blue]; 
-
+397[label="", shape = doublecircle, style=filled, fillcolor=red]
 397 -> 395 [label="any",color=green]; 
 
 398[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -2791,23 +2725,21 @@ node [shape = circle]
 399 -> 398 [label="any_1_2",color=green]; 
 
 400[label="", shape = doublecircle, style=filled, fillcolor=red]
-401[label=""]
+401[label="", shape = doublecircle, style=filled, fillcolor=red]
 401 -> 403 [label="any",color=green]; 
 
-401 -> 400 [label="",color=blue]; 
+401 -> 400 [label="any",color=green]; 
 
 402[label=""]
 402 -> 401 [label="any",color=green]; 
 
-403[label=""]
-403 -> 400 [label="",color=blue]; 
+402 -> 400 [label="any",color=green]; 
 
+403[label="", shape = doublecircle, style=filled, fillcolor=red]
 403 -> 400 [label="any",color=green]; 
 
 404[label="", shape = doublecircle, style=filled, fillcolor=red]
-405[label=""]
-405 -> 404 [label="",color=blue]; 
-
+405[label="", shape = doublecircle, style=filled, fillcolor=red]
 405 -> 404 [label="any",color=green]; 
 
 406[label=""]
@@ -2815,6 +2747,8 @@ node [shape = circle]
 
 407[label=""]
 407 -> 405 [label="any",color=green]; 
+
+407 -> 404 [label="any",color=green]; 
 
 408[label="", shape = doublecircle, style=filled, fillcolor=red]
 409[label=""]
@@ -2836,10 +2770,10 @@ node [shape = circle]
 416 -> 415 [label="any_5_7",color=green]; 
 
 417[label="", shape = doublecircle, style=filled, fillcolor=red]
-418[label=""]
+418[label="", shape = doublecircle, style=filled, fillcolor=red]
 418 -> 427 [label="any",color=green]; 
 
-418 -> 417 [label="",color=blue]; 
+418 -> 417 [label="any",color=green]; 
 
 419[label=""]
 419 -> 420 [label="any",color=green]; 
@@ -2865,9 +2799,9 @@ node [shape = circle]
 426[label=""]
 426 -> 418 [label="any",color=green]; 
 
-427[label=""]
-427 -> 417 [label="",color=blue]; 
+426 -> 417 [label="any",color=green]; 
 
+427[label="", shape = doublecircle, style=filled, fillcolor=red]
 427 -> 417 [label="any",color=green]; 
 
 428[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -2920,12 +2854,12 @@ node [shape = circle]
 445[label=""]
 445 -> 429 [label="G"]; 
 
-446[label=""]
+446[label="", style=filled, fillcolor=yellow]
 446 -> 447 [label="s6",color=green]; 
 
-447[label=""]
-447 -> 429 [label="",color=blue]; 
+446 -> 429 [label="s6",color=green]; 
 
+447[label="", shape = doublecircle, style=filled, fillcolor=red]
 447 -> 429 [label="any",color=green]; 
 
 448[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -3040,24 +2974,24 @@ node [shape = circle]
 487[label=""]
 487 -> 489 [label="any",color=green]; 
 
-487 -> 486 [label="",color=blue]; 
+487 -> 486 [label="any",color=green]; 
 
 488[label=""]
 488 -> 487 [label="any",color=green]; 
 
+488 -> 486 [label="any",color=green]; 
+
 489[label=""]
 489 -> 490 [label="any",color=green]; 
 
-489 -> 486 [label="",color=blue]; 
+489 -> 486 [label="any",color=green]; 
 
 490[label=""]
 490 -> 491 [label="any",color=green]; 
 
-490 -> 486 [label="",color=blue]; 
+490 -> 486 [label="any",color=green]; 
 
 491[label=""]
-491 -> 486 [label="",color=blue]; 
-
 491 -> 486 [label="any",color=green]; 
 
 492[label=""]
@@ -3114,12 +3048,12 @@ node [shape = circle]
 511[label=""]
 511 -> 495 [label="G"]; 
 
-512[label=""]
+512[label="", style=filled, fillcolor=yellow]
 512 -> 513 [label="yard_rule_stem_e1_14",color=green]; 
 
-513[label=""]
-513 -> 495 [label="",color=blue]; 
+512 -> 495 [label="yard_rule_stem_e1_14",color=green]; 
 
+513[label="", shape = doublecircle, style=filled, fillcolor=red]
 513 -> 495 [label="any",color=green]; 
 
 514[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -3172,12 +3106,12 @@ node [shape = circle]
 531[label=""]
 531 -> 515 [label="G"]; 
 
-532[label=""]
+532[label="", style=filled, fillcolor=yellow]
 532 -> 533 [label="yard_rule_stem_15",color=green]; 
 
-533[label=""]
-533 -> 515 [label="",color=blue]; 
+532 -> 515 [label="yard_rule_stem_15",color=green]; 
 
+533[label="", shape = doublecircle, style=filled, fillcolor=red]
 533 -> 515 [label="any",color=green]; 
 
 534[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -3229,15 +3163,15 @@ node [shape = circle]
 550[label=""]
 550 -> 534 [label="G"]; 
 
-551[label=""]
+551[label="", style=filled, fillcolor=yellow]
 551 -> 552 [label="C"]; 
 
 552[label=""]
 552 -> 553 [label="U"]; 
 
-553[label=""]
-553 -> 554 [label="",color=blue]; 
+552 -> 554 [label="U"]; 
 
+553[label=""]
 553 -> 554 [label="any",color=green]; 
 
 554[label=""]
@@ -3246,9 +3180,9 @@ node [shape = circle]
 555[label=""]
 555 -> 556 [label="A"]; 
 
-556[label=""]
-556 -> 534 [label="",color=blue]; 
+555 -> 534 [label="A"]; 
 
+556[label="", shape = doublecircle, style=filled, fillcolor=red]
 556 -> 534 [label="any",color=green]; 
 
 557[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -3579,12 +3513,12 @@ node [shape = circle]
 672[label=""]
 672 -> 656 [label="G"]; 
 
-673[label=""]
+673[label="", style=filled, fillcolor=yellow]
 673 -> 674 [label="yard_rule_stem_e1_25",color=green]; 
 
-674[label=""]
-674 -> 656 [label="",color=blue]; 
+673 -> 656 [label="yard_rule_stem_e1_25",color=green]; 
 
+674[label="", shape = doublecircle, style=filled, fillcolor=red]
 674 -> 656 [label="any",color=green]; 
 
 675[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -3637,12 +3571,12 @@ node [shape = circle]
 692[label=""]
 692 -> 676 [label="G"]; 
 
-693[label=""]
+693[label="", style=filled, fillcolor=yellow]
 693 -> 694 [label="yard_rule_stem_26",color=green]; 
 
-694[label=""]
-694 -> 676 [label="",color=blue]; 
+693 -> 676 [label="yard_rule_stem_26",color=green]; 
 
+694[label="", shape = doublecircle, style=filled, fillcolor=red]
 694 -> 676 [label="any",color=green]; 
 
 695[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -3749,10 +3683,10 @@ node [shape = circle]
 730[label=""]
 730 -> 714 [label="G"]; 
 
-731[label=""]
+731[label="", shape = doublecircle, style=filled, fillcolor=red]
 731 -> 739 [label="any",color=green]; 
 
-731 -> 714 [label="",color=blue]; 
+731 -> 714 [label="any",color=green]; 
 
 732[label=""]
 732 -> 733 [label="any",color=green]; 
@@ -3775,9 +3709,9 @@ node [shape = circle]
 738[label=""]
 738 -> 731 [label="any",color=green]; 
 
-739[label=""]
-739 -> 714 [label="",color=blue]; 
+738 -> 714 [label="any",color=green]; 
 
+739[label="", shape = doublecircle, style=filled, fillcolor=red]
 739 -> 714 [label="any",color=green]; 
 
 740[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -3904,7 +3838,7 @@ node [shape = circle]
 783[label=""]
 783 -> 792 [label="any",color=green]; 
 
-783 -> 782 [label="",color=blue]; 
+783 -> 782 [label="any",color=green]; 
 
 784[label=""]
 784 -> 785 [label="any",color=green]; 
@@ -3930,14 +3864,14 @@ node [shape = circle]
 791[label=""]
 791 -> 783 [label="any",color=green]; 
 
+791 -> 782 [label="any",color=green]; 
+
 792[label=""]
 792 -> 793 [label="any",color=green]; 
 
-792 -> 782 [label="",color=blue]; 
+792 -> 782 [label="any",color=green]; 
 
 793[label=""]
-793 -> 782 [label="",color=blue]; 
-
 793 -> 782 [label="any",color=green]; 
 
 794[label=""]
@@ -4061,12 +3995,12 @@ node [shape = circle]
 838[label=""]
 838 -> 822 [label="G"]; 
 
-839[label=""]
+839[label="", style=filled, fillcolor=yellow]
 839 -> 840 [label="yard_rule_stem_e1_33",color=green]; 
 
-840[label=""]
-840 -> 822 [label="",color=blue]; 
+839 -> 822 [label="yard_rule_stem_e1_33",color=green]; 
 
+840[label="", shape = doublecircle, style=filled, fillcolor=red]
 840 -> 822 [label="any",color=green]; 
 
 841[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -4119,12 +4053,12 @@ node [shape = circle]
 858[label=""]
 858 -> 842 [label="G"]; 
 
-859[label=""]
+859[label="", style=filled, fillcolor=yellow]
 859 -> 860 [label="yard_rule_stem_21",color=green]; 
 
-860[label=""]
-860 -> 842 [label="",color=blue]; 
+859 -> 842 [label="yard_rule_stem_21",color=green]; 
 
+860[label="", shape = doublecircle, style=filled, fillcolor=red]
 860 -> 842 [label="any",color=green]; 
 
 861[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -4178,12 +4112,12 @@ node [shape = circle]
 879[label=""]
 879 -> 863 [label="G"]; 
 
-880[label=""]
+880[label="", style=filled, fillcolor=yellow]
 880 -> 881 [label="yard_rule_stem_e1_45",color=green]; 
 
-881[label=""]
-881 -> 863 [label="",color=blue]; 
+880 -> 863 [label="yard_rule_stem_e1_45",color=green]; 
 
+881[label="", shape = doublecircle, style=filled, fillcolor=red]
 881 -> 863 [label="any",color=green]; 
 
 882[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -4236,12 +4170,12 @@ node [shape = circle]
 899[label=""]
 899 -> 883 [label="G"]; 
 
-900[label=""]
+900[label="", style=filled, fillcolor=yellow]
 900 -> 901 [label="yard_rule_stem_46",color=green]; 
 
-901[label=""]
-901 -> 883 [label="",color=blue]; 
+900 -> 883 [label="yard_rule_stem_46",color=green]; 
 
+901[label="", shape = doublecircle, style=filled, fillcolor=red]
 901 -> 883 [label="any",color=green]; 
 
 902[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -4343,12 +4277,12 @@ node [shape = circle]
 936[label=""]
 936 -> 920 [label="G"]; 
 
-937[label=""]
+937[label="", style=filled, fillcolor=yellow]
 937 -> 938 [label="yard_rule_stem_42",color=green]; 
 
-938[label=""]
-938 -> 920 [label="",color=blue]; 
+937 -> 920 [label="yard_rule_stem_42",color=green]; 
 
+938[label="", shape = doublecircle, style=filled, fillcolor=red]
 938 -> 920 [label="any",color=green]; 
 
 939[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -4450,12 +4384,12 @@ node [shape = circle]
 973[label=""]
 973 -> 957 [label="G"]; 
 
-974[label=""]
+974[label="", style=filled, fillcolor=yellow]
 974 -> 975 [label="yard_rule_stem_e1_37",color=green]; 
 
-975[label=""]
-975 -> 957 [label="",color=blue]; 
+974 -> 957 [label="yard_rule_stem_e1_37",color=green]; 
 
+975[label="", shape = doublecircle, style=filled, fillcolor=red]
 975 -> 957 [label="any",color=green]; 
 
 976[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -4508,12 +4442,12 @@ node [shape = circle]
 993[label=""]
 993 -> 977 [label="G"]; 
 
-994[label=""]
+994[label="", style=filled, fillcolor=yellow]
 994 -> 995 [label="yard_rule_stem_38",color=green]; 
 
-995[label=""]
-995 -> 977 [label="",color=blue]; 
+994 -> 977 [label="yard_rule_stem_38",color=green]; 
 
+995[label="", shape = doublecircle, style=filled, fillcolor=red]
 995 -> 977 [label="any",color=green]; 
 
 996[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -4616,12 +4550,12 @@ node [shape = circle]
 1031[label=""]
 1031 -> 1015 [label="G"]; 
 
-1032[label=""]
+1032[label="", style=filled, fillcolor=yellow]
 1032 -> 1033 [label="yard_rule_stem_e1_51",color=green]; 
 
-1033[label=""]
-1033 -> 1015 [label="",color=blue]; 
+1032 -> 1015 [label="yard_rule_stem_e1_51",color=green]; 
 
+1033[label="", shape = doublecircle, style=filled, fillcolor=red]
 1033 -> 1015 [label="any",color=green]; 
 
 1034[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -4674,12 +4608,12 @@ node [shape = circle]
 1051[label=""]
 1051 -> 1035 [label="G"]; 
 
-1052[label=""]
+1052[label="", style=filled, fillcolor=yellow]
 1052 -> 1053 [label="yard_rule_stem_52",color=green]; 
 
-1053[label=""]
-1053 -> 1035 [label="",color=blue]; 
+1052 -> 1035 [label="yard_rule_stem_52",color=green]; 
 
+1053[label="", shape = doublecircle, style=filled, fillcolor=red]
 1053 -> 1035 [label="any",color=green]; 
 
 1054[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -4855,12 +4789,12 @@ node [shape = circle]
 1114[label=""]
 1114 -> 1098 [label="G"]; 
 
-1115[label=""]
+1115[label="", style=filled, fillcolor=yellow]
 1115 -> 1116 [label="yard_rule_stem_61",color=green]; 
 
-1116[label=""]
-1116 -> 1098 [label="",color=blue]; 
+1115 -> 1098 [label="yard_rule_stem_61",color=green]; 
 
+1116[label="", shape = doublecircle, style=filled, fillcolor=red]
 1116 -> 1098 [label="any",color=green]; 
 
 1117[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -4912,7 +4846,7 @@ node [shape = circle]
 1133[label=""]
 1133 -> 1117 [label="G"]; 
 
-1134[label=""]
+1134[label="", style=filled, fillcolor=yellow]
 1134 -> 1135 [label="yard_rule_stem_e2_55",color=green]; 
 
 1135[label=""]
@@ -4968,12 +4902,12 @@ node [shape = circle]
 1153[label=""]
 1153 -> 1137 [label="G"]; 
 
-1154[label=""]
+1154[label="", style=filled, fillcolor=yellow]
 1154 -> 1155 [label="yard_rule_stem_e1_56",color=green]; 
 
-1155[label=""]
-1155 -> 1137 [label="",color=blue]; 
+1154 -> 1137 [label="yard_rule_stem_e1_56",color=green]; 
 
+1155[label="", shape = doublecircle, style=filled, fillcolor=red]
 1155 -> 1137 [label="any",color=green]; 
 
 1156[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -5026,12 +4960,12 @@ node [shape = circle]
 1173[label=""]
 1173 -> 1157 [label="G"]; 
 
-1174[label=""]
+1174[label="", style=filled, fillcolor=yellow]
 1174 -> 1175 [label="yard_rule_stem_57",color=green]; 
 
-1175[label=""]
-1175 -> 1157 [label="",color=blue]; 
+1174 -> 1157 [label="yard_rule_stem_57",color=green]; 
 
+1175[label="", shape = doublecircle, style=filled, fillcolor=red]
 1175 -> 1157 [label="any",color=green]; 
 
 1176[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -5133,7 +5067,7 @@ node [shape = circle]
 1210[label=""]
 1210 -> 1194 [label="G"]; 
 
-1211[label=""]
+1211[label="", style=filled, fillcolor=yellow]
 1211 -> 1212 [label="yard_rule_stem_21",color=green]; 
 
 1212[label=""]
@@ -5380,9 +5314,9 @@ node [shape = circle]
 1297[label=""]
 1297 -> 1298 [label="h7",color=green]; 
 
-1298[label=""]
-1298 -> 1299 [label="",color=blue]; 
+1297 -> 1299 [label="h7",color=green]; 
 
+1298[label=""]
 1298 -> 1299 [label="any",color=green]; 
 
 1299[label=""]
@@ -5394,9 +5328,9 @@ node [shape = circle]
 1301[label=""]
 1301 -> 1302 [label="h12",color=green]; 
 
-1302[label=""]
-1302 -> 1280 [label="",color=blue]; 
+1301 -> 1280 [label="h12",color=green]; 
 
+1302[label="", shape = doublecircle, style=filled, fillcolor=red]
 1302 -> 1280 [label="any",color=green]; 
 
 1303[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -5450,12 +5384,12 @@ node [shape = circle]
 1321[label=""]
 1321 -> 1305 [label="G"]; 
 
-1322[label=""]
+1322[label="", style=filled, fillcolor=yellow]
 1322 -> 1323 [label="yard_rule_stem_69",color=green]; 
 
-1323[label=""]
-1323 -> 1305 [label="",color=blue]; 
+1322 -> 1305 [label="yard_rule_stem_69",color=green]; 
 
+1323[label="", shape = doublecircle, style=filled, fillcolor=red]
 1323 -> 1305 [label="any",color=green]; 
 
 1324[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -5510,9 +5444,9 @@ node [shape = circle]
 1341[label=""]
 1341 -> 1342 [label="yard_rule_stem_21",color=green]; 
 
-1342[label=""]
-1342 -> 1324 [label="",color=blue]; 
+1341 -> 1324 [label="yard_rule_stem_21",color=green]; 
 
+1342[label="", shape = doublecircle, style=filled, fillcolor=red]
 1342 -> 1324 [label="any",color=green]; 
 
 1343[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -5622,12 +5556,12 @@ node [shape = circle]
 1381[label=""]
 1381 -> 1365 [label="G"]; 
 
-1382[label=""]
+1382[label="", style=filled, fillcolor=yellow]
 1382 -> 1383 [label="yard_rule_stem_e1_73",color=green]; 
 
-1383[label=""]
-1383 -> 1365 [label="",color=blue]; 
+1382 -> 1365 [label="yard_rule_stem_e1_73",color=green]; 
 
+1383[label="", shape = doublecircle, style=filled, fillcolor=red]
 1383 -> 1365 [label="any",color=green]; 
 
 1384[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -5680,12 +5614,12 @@ node [shape = circle]
 1401[label=""]
 1401 -> 1385 [label="G"]; 
 
-1402[label=""]
+1402[label="", style=filled, fillcolor=yellow]
 1402 -> 1403 [label="yard_rule_stem_74",color=green]; 
 
-1403[label=""]
-1403 -> 1385 [label="",color=blue]; 
+1402 -> 1385 [label="yard_rule_stem_74",color=green]; 
 
+1403[label="", shape = doublecircle, style=filled, fillcolor=red]
 1403 -> 1385 [label="any",color=green]; 
 
 1404[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -5969,12 +5903,12 @@ node [shape = circle]
 1502[label=""]
 1502 -> 1486 [label="G"]; 
 
-1503[label=""]
+1503[label="", style=filled, fillcolor=yellow]
 1503 -> 1504 [label="yard_rule_stem_81",color=green]; 
 
-1504[label=""]
-1504 -> 1486 [label="",color=blue]; 
+1503 -> 1486 [label="yard_rule_stem_81",color=green]; 
 
+1504[label="", shape = doublecircle, style=filled, fillcolor=red]
 1504 -> 1486 [label="any",color=green]; 
 
 1505[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -6029,9 +5963,9 @@ node [shape = circle]
 1522[label=""]
 1522 -> 1523 [label="h15",color=green]; 
 
-1523[label=""]
-1523 -> 1505 [label="",color=blue]; 
+1522 -> 1505 [label="h15",color=green]; 
 
+1523[label="", shape = doublecircle, style=filled, fillcolor=red]
 1523 -> 1505 [label="any",color=green]; 
 
 1524[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -6085,12 +6019,12 @@ node [shape = circle]
 1542[label=""]
 1542 -> 1526 [label="G"]; 
 
-1543[label=""]
+1543[label="", style=filled, fillcolor=yellow]
 1543 -> 1544 [label="yard_rule_stem_84",color=green]; 
 
-1544[label=""]
-1544 -> 1526 [label="",color=blue]; 
+1543 -> 1526 [label="yard_rule_stem_84",color=green]; 
 
+1544[label="", shape = doublecircle, style=filled, fillcolor=red]
 1544 -> 1526 [label="any",color=green]; 
 
 1545[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -6142,7 +6076,7 @@ node [shape = circle]
 1561[label=""]
 1561 -> 1545 [label="G"]; 
 
-1562[label=""]
+1562[label="", style=filled, fillcolor=yellow]
 1562 -> 1563 [label="h4",color=green]; 
 
 1563[label=""]
@@ -6151,9 +6085,9 @@ node [shape = circle]
 1564[label=""]
 1564 -> 1565 [label="h16",color=green]; 
 
-1565[label=""]
-1565 -> 1566 [label="",color=blue]; 
+1564 -> 1566 [label="h16",color=green]; 
 
+1565[label=""]
 1565 -> 1566 [label="any",color=green]; 
 
 1566[label=""]
@@ -6504,12 +6438,12 @@ node [shape = circle]
 1691[label=""]
 1691 -> 1675 [label="G"]; 
 
-1692[label=""]
+1692[label="", style=filled, fillcolor=yellow]
 1692 -> 1693 [label="yard_rule_stem_98",color=green]; 
 
-1693[label=""]
-1693 -> 1675 [label="",color=blue]; 
+1692 -> 1675 [label="yard_rule_stem_98",color=green]; 
 
+1693[label="", shape = doublecircle, style=filled, fillcolor=red]
 1693 -> 1675 [label="any",color=green]; 
 
 1694[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -6666,12 +6600,12 @@ node [shape = circle]
 1747[label=""]
 1747 -> 1731 [label="G"]; 
 
-1748[label=""]
+1748[label="", style=filled, fillcolor=yellow]
 1748 -> 1749 [label="yard_rule_stem_e1_92",color=green]; 
 
-1749[label=""]
-1749 -> 1731 [label="",color=blue]; 
+1748 -> 1731 [label="yard_rule_stem_e1_92",color=green]; 
 
+1749[label="", shape = doublecircle, style=filled, fillcolor=red]
 1749 -> 1731 [label="any",color=green]; 
 
 1750[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -6724,12 +6658,12 @@ node [shape = circle]
 1767[label=""]
 1767 -> 1751 [label="G"]; 
 
-1768[label=""]
+1768[label="", style=filled, fillcolor=yellow]
 1768 -> 1769 [label="yard_rule_stem_93",color=green]; 
 
-1769[label=""]
-1769 -> 1751 [label="",color=blue]; 
+1768 -> 1751 [label="yard_rule_stem_93",color=green]; 
 
+1769[label="", shape = doublecircle, style=filled, fillcolor=red]
 1769 -> 1751 [label="any",color=green]; 
 
 1770[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -6967,10 +6901,10 @@ node [shape = circle]
 1852[label=""]
 1852 -> 1836 [label="G"]; 
 
-1853[label=""]
+1853[label="", shape = doublecircle, style=filled, fillcolor=red]
 1853 -> 1860 [label="any",color=green]; 
 
-1853 -> 1836 [label="",color=blue]; 
+1853 -> 1836 [label="any",color=green]; 
 
 1854[label=""]
 1854 -> 1855 [label="any",color=green]; 
@@ -6990,9 +6924,9 @@ node [shape = circle]
 1859[label=""]
 1859 -> 1853 [label="any",color=green]; 
 
-1860[label=""]
-1860 -> 1836 [label="",color=blue]; 
+1859 -> 1836 [label="any",color=green]; 
 
+1860[label="", shape = doublecircle, style=filled, fillcolor=red]
 1860 -> 1836 [label="any",color=green]; 
 
 1861[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -7046,12 +6980,12 @@ node [shape = circle]
 1879[label=""]
 1879 -> 1863 [label="G"]; 
 
-1880[label=""]
+1880[label="", style=filled, fillcolor=yellow]
 1880 -> 1881 [label="yard_rule_stem_104",color=green]; 
 
-1881[label=""]
-1881 -> 1863 [label="",color=blue]; 
+1880 -> 1863 [label="yard_rule_stem_104",color=green]; 
 
+1881[label="", shape = doublecircle, style=filled, fillcolor=red]
 1881 -> 1863 [label="any",color=green]; 
 
 1882[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -7115,7 +7049,7 @@ node [shape = circle]
 1902[label=""]
 1902 -> 1909 [label="any",color=green]; 
 
-1902 -> 1901 [label="",color=blue]; 
+1902 -> 1901 [label="any",color=green]; 
 
 1903[label=""]
 1903 -> 1904 [label="any",color=green]; 
@@ -7135,9 +7069,9 @@ node [shape = circle]
 1908[label=""]
 1908 -> 1902 [label="any",color=green]; 
 
-1909[label=""]
-1909 -> 1901 [label="",color=blue]; 
+1908 -> 1901 [label="any",color=green]; 
 
+1909[label=""]
 1909 -> 1901 [label="any",color=green]; 
 
 1910[label=""]
@@ -7544,12 +7478,12 @@ node [shape = circle]
 2053[label=""]
 2053 -> 2037 [label="G"]; 
 
-2054[label=""]
+2054[label="", style=filled, fillcolor=yellow]
 2054 -> 2055 [label="yard_rule_stem_e1_113",color=green]; 
 
-2055[label=""]
-2055 -> 2037 [label="",color=blue]; 
+2054 -> 2037 [label="yard_rule_stem_e1_113",color=green]; 
 
+2055[label="", shape = doublecircle, style=filled, fillcolor=red]
 2055 -> 2037 [label="any",color=green]; 
 
 2056[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -7602,12 +7536,12 @@ node [shape = circle]
 2073[label=""]
 2073 -> 2057 [label="G"]; 
 
-2074[label=""]
+2074[label="", style=filled, fillcolor=yellow]
 2074 -> 2075 [label="yard_rule_stem_114",color=green]; 
 
-2075[label=""]
-2075 -> 2057 [label="",color=blue]; 
+2074 -> 2057 [label="yard_rule_stem_114",color=green]; 
 
+2075[label="", shape = doublecircle, style=filled, fillcolor=red]
 2075 -> 2057 [label="any",color=green]; 
 
 2076[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -7936,12 +7870,12 @@ node [shape = circle]
 2189[label=""]
 2189 -> 2173 [label="G"]; 
 
-2190[label=""]
+2190[label="", style=filled, fillcolor=yellow]
 2190 -> 2191 [label="yard_rule_stem_118",color=green]; 
 
-2191[label=""]
-2191 -> 2173 [label="",color=blue]; 
+2190 -> 2173 [label="yard_rule_stem_118",color=green]; 
 
+2191[label="", shape = doublecircle, style=filled, fillcolor=red]
 2191 -> 2173 [label="any",color=green]; 
 
 2192[label="", shape = doublecircle, style=filled, fillcolor=red]
@@ -8032,7 +7966,7 @@ node [shape = circle]
 2223[label=""]
 2223 -> 2230 [label="any",color=green]; 
 
-2223 -> 2222 [label="",color=blue]; 
+2223 -> 2222 [label="any",color=green]; 
 
 2224[label=""]
 2224 -> 2225 [label="any",color=green]; 
@@ -8052,9 +7986,9 @@ node [shape = circle]
 2229[label=""]
 2229 -> 2223 [label="any",color=green]; 
 
-2230[label=""]
-2230 -> 2222 [label="",color=blue]; 
+2229 -> 2222 [label="any",color=green]; 
 
+2230[label=""]
 2230 -> 2222 [label="any",color=green]; 
 
 }

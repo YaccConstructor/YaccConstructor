@@ -32,7 +32,7 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <Compile Include="GSS.fs" />
-    <Compile Include="AbstractParserWithoutTreeFSAInput.fs" />
+    <Compile Include="AbstractParserWithoutTree.fs" />
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>

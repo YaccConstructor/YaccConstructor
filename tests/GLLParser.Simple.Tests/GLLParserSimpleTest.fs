@@ -78,7 +78,7 @@ let getLinearInput path tokenToInt =
 //            Assert.Pass()
 
 let isParsed parserSource input = 
-    Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput.isParsed parserSource input
+    Yard.Generators.GLL.AbstractParserWithoutTree.isParsed parserSource input
 
 let shouldBeTrue res = 
     Assert.AreEqual(res, true, "Nodes count mismatch")        

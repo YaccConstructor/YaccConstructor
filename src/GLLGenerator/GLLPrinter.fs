@@ -9,8 +9,8 @@ let printGLL (fsa : FSA)
              (outFileName : string)
              (tokenType : Map<string,string option>)
              moduleName
-             light 
-             isAbstract = 
+             light =
+             //isAbstract = 
     let dummyPos = char 0
     let res = new System.Text.StringBuilder()
     let nextInt = ref fsa.States.Length
@@ -143,7 +143,7 @@ let printGLL (fsa : FSA)
         if isAbstract
         then
             println "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> ParserCommon.ParseResult<_>) ="
-            println "    Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput.buildAbstract parserSource"
+            println "    Yard.Generators.GLL.AbstractParserWithoutTree.buildAbstract parserSource"
         else
             println "let buildAST (input : seq<int>) ="
             println "    Yard.Generators.GLL.ParserFSA.buildAST parserSource input"

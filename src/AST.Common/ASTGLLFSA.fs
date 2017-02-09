@@ -13,7 +13,7 @@ type INode =
 [<AllowNullLiteral>]
 type NonTerminalNode =
     val Extension : int64<extension>
-    val Name      : int<positionInGrammar>
+    val Name      : int<nonterm>
     val mutable First     : PackedNode 
     val mutable Others    : ResizeArray<PackedNode> 
     member this.AddChild (child : PackedNode) : unit = 
@@ -73,9 +73,9 @@ and IntermidiateNode =
 
 type private DotNodeType = Packed | NonTerminal | Intermidiate | Terminal | Epsilon
 
-type ReducedTree = 
-    Term of string * TerminalNode
-    | NonTerm of string * NonTerminalNode * list<ReducedTree>
+//type ReducedTree = 
+//    Term of string * TerminalNode
+//    | NonTerm of string * NonTerminalNode * list<ReducedTree>
 
 let inline packExtension left right : int64<extension> =  LanguagePrimitives.Int64WithMeasure ((int64 left <<< 32) ||| int64 right)
 let inline getRightExtension (long : int64<extension>) = int <| ((int64 long) &&& 0xffffffffL)

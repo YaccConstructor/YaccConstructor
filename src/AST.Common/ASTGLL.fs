@@ -4,7 +4,6 @@ open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
 open AbstractAnalysis.Common
 
-
 [<AllowNullLiteral>]
 type INode = 
     interface

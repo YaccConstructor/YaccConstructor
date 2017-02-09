@@ -4,6 +4,7 @@ open AbstractAnalysis.Common
 open Yard.Generators.Common.ASTGLL
 open FSharpx.Collections.Experimental
 open System.Collections.Generic
+open Yard.Generators.Common.DataStructures
 
 module CommonFuns = 
 
@@ -45,8 +46,8 @@ type GSSVertexFSA =
     /// Position in input graph (Packed edge+position)
     val PositionInInput  : int<positionInInput>
     /// Nonterminal
-    val NontermState     : int<positionInGrammar>
-    new (positionInInput, nonterm) = {PositionInInput = positionInInput; NontermState = nonterm}
+    val Nonterm     : int<nonterm>
+    new (positionInInput, nonterm) = {PositionInInput = positionInInput; Nonterm = nonterm}
 
 [<Struct>]
 type Context(*<'TokenType>*) =
@@ -102,7 +103,7 @@ type ParseResult<'a> =
     | Error of string
 
 type TypeOfNode = 
-    | Nonterm of int<positionInGrammar>
+    | Nonterm of int<nonterm>
     | Intermed of int<positionInGrammar>
 
 [<Struct>]

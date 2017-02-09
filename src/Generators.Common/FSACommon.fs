@@ -1,19 +1,15 @@
 ﻿module Yard.Generators.Common.FSA.Common
 
-
 open System.Collections.Generic
+open Microsoft.FSharp.Collections
 
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Generators.Common.Epsilon
 open Yard.Generators.Common.SymbolSets
 open Yard.Generators.Common
-
-open Microsoft.FSharp.Collections
-
-[<Measure>] type positionInGrammar
-
-let epsilon = "Epsilon"
+open Yard.Generators.Common.DataStructures
+open AbstractAnalysis.Common
 
 [<StructuralEquality;StructuralComparison>]
 type EdgeSymbol =
@@ -234,44 +230,44 @@ let removeEpsilonEdges (fsa : InternalFSA) =
         else
             currentSet
 
-    let startStates = new Dictionary<_,_>()
+    let startStatesToComponentNum = new Dictionary<_,_>()
 
     fsa.StartStates
-    |> Array.iteri (fun i states ->
+    |> Array.iteri (fun componentNum states ->
         for st in states do
-            startStates.Add(st, i))
+            startStatesToComponentNum.Add(st, componentNum))
     
     let finalStates = fsa.FinalStates
     let lastStates  = fsa.LastStates
 
     let newStates = 
         fsa.States
-        |> Array.mapi (fun i edges ->
+        |> Array.mapi (fun currentState edges ->
             edges
-            |> Array.collect (fun (symbol, state) ->
+            |> Array.collect (fun (symbol, nextState) ->
                 match symbol with
                 | Epsilon() -> 
-                    let cond, value = startStates.TryGetValue (i*1<positionInGrammar>)
-                    if cond then
-                        startStates.Add(state, value)
-                    if finalStates.Contains state
+                    let isStartState, componentNum = startStatesToComponentNum.TryGetValue (currentState*1<positionInGrammar>)
+                    if isStartState && startStatesToComponentNum.ContainsKey nextState |> not then
+                        startStatesToComponentNum.Add(nextState, componentNum)
+                    if finalStates.Contains nextState
                     then 
-                        i*1<positionInGrammar> |> finalStates.Add |> ignore
+                        currentState*1<positionInGrammar> |> finalStates.Add |> ignore
                     [||]
                 | _ ->
-                    state
+                    nextState
                     |> getEpsilonClosure
                     |> Seq.map (fun stateToAdd ->
                         symbol, stateToAdd)
                     |> Array.ofSeq)
             |> (fun x ->
                 if Array.isEmpty x
-                then (i*1<positionInGrammar>) |> lastStates.Add |> ignore
+                then (currentState*1<positionInGrammar>) |> lastStates.Add |> ignore
                 x)
                 )
     
     let startStates =
-        startStates
+        startStatesToComponentNum
         |> Seq.groupBy (fun x -> x.Value)
         |> Seq.sortBy (fun (groupN,_) -> groupN)
         |> Seq.map (fun (_,states) ->

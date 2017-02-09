@@ -3,6 +3,7 @@
 open System.Collections.Generic
 open Yard.Generators.Common.FSA
 open Yard.Generators.Common.FSA.Common
+open AbstractAnalysis.Common
 
 let printGLL (fsa : FSA)
              (outFileName : string)
@@ -13,10 +14,10 @@ let printGLL (fsa : FSA)
     let dummyPos = char 0
     let res = new System.Text.StringBuilder()
     let nextInt = ref fsa.States.Length
-    //let eps = ref -1
     let stateTokenNewState = new ResizeArray<_>()
     let termToInt = new Dictionary<string,int>()
     
+
     let inline pack state token =
         if (int state < 65536) && (int token - fsa.States.Length < 65536)
         then int( (int state <<< 16) ||| (token - fsa.States.Length) )
@@ -26,10 +27,9 @@ let printGLL (fsa : FSA)
         Printf.kprintf (fun s -> res.Append(s).Append "\n" |> ignore) x
     let print (x : 'a) =
         Printf.kprintf (res.Append >> ignore) x
-    
+
     let printHeaders () =
         let fileName = outFileName.Substring(0, outFileName.IndexOf("."))
-        //println "%s" <| getPosFromSource fullPath dummyPos (defaultSource output)
         println "module %s"
         <|  match moduleName with
             | "" -> "GLL.Parser" + fileName
@@ -37,10 +37,10 @@ let printGLL (fsa : FSA)
         if not light then
             println "#light \"off\""
         println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
-
         println "open Yard.Generators.GLL"
         println "open Yard.Generators.GLL.ParserCommon"
         println "open AbstractAnalysis.Common"
+
 
     let printToken () = 
         let defaultType = tokenType.TryFind "_"
@@ -57,13 +57,19 @@ let printGLL (fsa : FSA)
             <|  match type' with
                 | None -> ""
                 | Some s -> " of (" + s + ")"
+    
+    let printStringToNumber () = 
+        println "let stringToNumber = function"
+        for tokenNumber in termToInt do
+            println "    | \"%s\" -> %i" tokenNumber.Key tokenNumber.Value
+        println "    | _ -> -1"
 
     let printTokenToNumber () = 
         println "let tokenToNumber = function"
         for tokenNumber in termToInt do
             println "    | %s _ -> %i" tokenNumber.Key tokenNumber.Value
 
-    let printStateToNontermName (sortedStateToNontermName : seq<KeyValuePair<'a, string>>) () = 
+    let printStateToNontermName (sortedStateToNontermName : seq<KeyValuePair<int<positionInGrammar>, string>>) () = 
         println "let stateToNontermName = function"
         for tokenNumber in termToInt do
             println "    | %i -> \"%s\"" tokenNumber.Value tokenNumber.Key
@@ -72,8 +78,8 @@ let printGLL (fsa : FSA)
             println "    | %i -> \"%s\"" numberNonterm.Key numberNonterm.Value
         println "    | _ -> \"\""
     
-    let printNumOfAnyState numOfAnyState () =
-        println "let private numOfAnyState = %i<positionInGrammar>" numOfAnyState
+    let printAnyNonterm anyNonterm () =
+        println "let private anyNonterm = %i<nonterm>" anyNonterm
 
     let printNumIsTerminal () =
         println "let private numIsTerminal = function"
@@ -86,14 +92,14 @@ let printGLL (fsa : FSA)
         for state, token, newState in stateTokenNewState do
             println "stateAndTokenToNewState.Add(%i, %i<positionInGrammar>)" (pack state token) newState
 
-    let printState (state:(string * int<positionInGrammar>) []) isFirst isLast =
+    let printState (state:(int<nonterm> * int<positionInGrammar>) []) isFirst isLast =
         let prefix = if isFirst then "  [|" else "    "
         let postfix = if isLast then " |]" else ";"
 
-        let printEdge (str,state) isFirst isLast = 
+        let printEdge (edge,state) isFirst isLast = 
             let prefix = if isFirst then "[|" else ""
             let postfix = if isLast then "|]" else ";"
-            print "%s%s<positionInGrammar>,%s<positionInGrammar>%s" prefix str (state.ToString()) postfix
+            print "%s%s<nonterm>,%s<positionInGrammar>%s" prefix (edge.ToString()) (state.ToString()) postfix
                     
         print "%s" prefix
 
@@ -131,7 +137,7 @@ let printGLL (fsa : FSA)
         println "let private nontermCount = %i" fsa.NontermCount
     
     let printParser () =
-        println "let parserSource = new FSAParserSourceGLL (outNonterms, startState, finalStates, nontermCount, numIsTerminal, stateToNontermName, numOfAnyState, stateAndTokenToNewState)"
+        println "let parserSource = new FSAParserSourceGLL (outNonterms, startState, finalStates, nontermCount, numIsTerminal, stateToNontermName, anyNonterm, stateAndTokenToNewState)"
 
     let printFun isAbstract () =
         if isAbstract
@@ -148,7 +154,7 @@ let printGLL (fsa : FSA)
             x
             |> Array.collect (fun (symbol,state) -> 
                 match symbol with
-                    | Nonterm s -> [|s.ToString(), state|]
+                    | Nonterm s -> [|(int s) * 1<nonterm>, state|]
                     | Term s -> 
                         let cond, value = termToInt.TryGetValue s
                         if cond then
@@ -166,7 +172,7 @@ let printGLL (fsa : FSA)
         fsa.StateToNontermName
         |> Seq.sortBy (fun x -> x.Key)
 
-    let numOfAnyState = 
+    let anyNonterm = 
         sortedStateToNontermName
         |> Seq.tryFind (fun x -> x.Value.Equals("any"))
         |> (fun x -> 
@@ -180,9 +186,10 @@ let printGLL (fsa : FSA)
 
     printItem printHeaders
     printItem printToken
+    printItem printStringToNumber
     printItem printTokenToNumber
     printItem (printStateToNontermName sortedStateToNontermName)
-    printItem (printNumOfAnyState numOfAnyState)
+    printItem (printAnyNonterm anyNonterm)
     printItem printNumIsTerminal
     printItem printStateAndTokenToNewState
     printItem (printOutNonterms fsaStatesOutNonterms)

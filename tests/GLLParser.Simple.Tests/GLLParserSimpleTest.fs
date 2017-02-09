@@ -1,5 +1,7 @@
 ﻿module GLLParserSimpleTest
 
+open AbstractAnalysis.Common
+
 open Yard.Generators.GLL
 open Yard.Generators.GLL.Parser 
 open NUnit.Framework
@@ -11,7 +13,7 @@ open GLL.BadLeftRecursion
 open GLL.Brackets
 open GLL.Eps
 open GLL.Eps2
-open GLL.ListEps
+//open GLL.ListEps
 open GLL.Mixed
 open GLL.ParseAttrs
 //open GLL.ParseCalc
@@ -36,173 +38,244 @@ open GLL.SimpleRightRecursion
 open GLL.PrettySimpleCalc
 open Yard.Generators.GLL.ParserCommon
 
-let run path astBuilder =
-    let tokens = LexCommon.tokens(path)
-    astBuilder tokens
+//let run path astBuilder =
+//    let tokens = LexCommon.tokens(path)
+//    astBuilder tokens
 
-let dir = @"../../../Tests/GLL/"
+let dir = @"../../../data/GLL/"
+//let dir = @"C:/Code/YaccConstructor/tests/data/GLL/"
 let outDir = @"../../../src/GLLParser.SimpleTest/"
 
-let runTest parser input (intToString : int -> string) (fileName : string) nodesCount edgesCount termsCount ambiguityCount tokToNum tokenData = 
-    let path = dir + input
-    let r = run path parser
-    match r with
-        | Error _ ->
-            printfn "Error"
-            Assert.Fail("Parsing finished with error!")
-        | Success tree ->
-            let n, e, t, a = tree.CountCounters 
-            printfn "%d %d %d %d" n e t a
-            tree.AstToDot intToString  tokToNum tokenData (outDir + fileName)
-            Assert.AreEqual(nodesCount, n, "Nodes count mismatch")
-            Assert.AreEqual(edgesCount, e, "Edges count mismatch")
-            Assert.AreEqual(termsCount, t, "Terms count mismatch")
-            Assert.AreEqual(ambiguityCount, a, "Ambiguities count mismatch")
-            //tree.AstToDot intToString (outDir + outFileName)
-            tree.AstToDot intToString  tokToNum tokenData (outDir + fileName)
-            Assert.Pass()
-            
+let getTokens path =
+    System.IO.File.ReadAllText(dir + path)
+        .Split([|' '|])
+        |> Array.filter ((<>) "")
+
+let getLinearInput path tokenToInt = 
+    new LinearInput(
+            getTokens path
+            |> Array.map (tokenToInt >> (fun x -> x * 1<token>)))
+
+
+
+//let runTest parser input (intToString : int -> string) (fileName : string) nodesCount edgesCount termsCount ambiguityCount tokToNum tokenData = 
+//    let path = dir + input
+//    let r = run path parser
+//    match r with
+//        | Error _ ->
+//            printfn "Error"
+//            Assert.Fail("Parsing finished with error!")
+//        | Success tree ->
+//            let n, e, t, a = tree.CountCounters 
+//            printfn "%d %d %d %d" n e t a
+//            tree.AstToDot intToString  tokToNum tokenData (outDir + fileName)
+//            Assert.AreEqual(nodesCount, n, "Nodes count mismatch")
+//            Assert.AreEqual(edgesCount, e, "Edges count mismatch")
+//            Assert.AreEqual(termsCount, t, "Terms count mismatch")
+//            Assert.AreEqual(ambiguityCount, a, "Ambiguities count mismatch")
+//            //tree.AstToDot intToString (outDir + outFileName)
+//            tree.AstToDot intToString  tokToNum tokenData (outDir + fileName)
+//            Assert.Pass()
+
+let isParsed parserSource input = 
+    Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput.isParsed parserSource input
+
+let shouldBeTrue res = 
+    Assert.AreEqual(res, true, "Nodes count mismatch")        
             
 
 [<TestFixture>]
-[<Ignore("Ignore a fixture. GLL should be fixed")>]
+//[<Ignore("Ignore a fixture. GLL should be fixed")>]
 type ``GLL parser tests with simple lexer`` () =
 
     [<Test>]
     member test.``Bad left rec``() =
-        let parser = GLL.BadLeftRecursion.buildAst
-        runTest parser "BBB.txt" GLL.BadLeftRecursion.numToString "BadLeftRec.dot" 33 45 5 1 GLL.BadLeftRecursion.tokenToNumber GLL.BadLeftRecursion.tokenData
+        let parser = GLL.BadLeftRecursion.parserSource
+        let input  = getLinearInput "BBB.txt" GLL.BadLeftRecursion.stringToNumber
+        let res = isParsed parser input
+
+        shouldBeTrue res
 
     [<Test>]
     member test.``SimpleAmb``() =
-        let parser = GLL.SimpleAmb.buildAst
-        runTest parser "SimpleAmb.txt" GLL.SimpleAmb.numToString "SimpleAmb.dot" 18 21 5 1 GLL.SimpleAmb.tokenToNumber GLL.SimpleAmb.tokenData
-
+        let parser = GLL.SimpleAmb.parserSource
+        let input  = getLinearInput "SimpleAmb.txt" GLL.SimpleAmb.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``Simple left rec``() =
-        let parser = GLL.SimpleLeftRecursion.buildAst
-        runTest parser "BBB.txt" GLL.SimpleLeftRecursion.numToString "SimpleLeftRec.dot" 19 21 5 0 GLL.SimpleLeftRecursion.tokenToNumber GLL.SimpleLeftRecursion.tokenData
+        let parser = GLL.SimpleLeftRecursion.parserSource
+        let input  = getLinearInput "BBB.txt" GLL.SimpleLeftRecursion.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``Attrs``() =
-        let parser = GLL.ParseAttrs.buildAst
-        runTest parser "Attrs.txt" GLL.ParseAttrs.numToString "Attrs.dot" 29 33 7 0 GLL.ParseAttrs.tokenToNumber GLL.ParseAttrs.tokenData
+        let parser = GLL.ParseAttrs.parserSource
+        let input  = getLinearInput "Attrs.txt" GLL.ParseAttrs.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``Brackets``() =
-        let parser = GLL.Brackets.buildAst
-        runTest parser "Brackets.txt" GLL.Brackets.numToString "Brackets.dot" 46 54 11 1 GLL.Brackets.tokenToNumber GLL.Brackets.tokenData
+        let parser = GLL.Brackets.parserSource
+        let input  = getLinearInput "Brackets.txt" GLL.Brackets.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``Simple right rec``() =
-        let parser = GLL.SimpleRightRecursion.buildAst
-        runTest parser "BBB.txt" GLL.SimpleRightRecursion.numToString "SimpleRightRec.dot" 15 15 5 0 GLL.SimpleRightRecursion.tokenToNumber GLL.SimpleRightRecursion.tokenData
+        let parser = GLL.SimpleRightRecursion.parserSource
+        let input  = getLinearInput "BBB.txt" GLL.SimpleRightRecursion.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``Complex right null``() =
-        let parser = GLL.ParseComplexRightNull.buildAst
-        runTest parser "ComplexRightNull.txt" GLL.ParseComplexRightNull.numToString "ComplexRightNull.dot" 35 42 8 1 GLL.ParseComplexRightNull.tokenToNumber GLL.ParseComplexRightNull.tokenData
+        let parser = GLL.ParseComplexRightNull.parserSource
+        let input  = getLinearInput "ComplexRightNull.txt" GLL.ParseComplexRightNull.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``Counter``() =
-        let parser = GLL.ParseCounter.buildAst
-        runTest parser "Counter.txt" GLL.ParseCounter.numToString "Counter.dot" 21 21 7 0 GLL.ParseCounter.tokenToNumber GLL.ParseCounter.tokenData
+        let parser = GLL.ParseCounter.parserSource
+        let input  = getLinearInput "Counter.txt" GLL.ParseCounter.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``Cycle``() =
-        let parser = GLL.ParseCycle.buildAst
-        runTest parser "Cycle.txt" GLL.ParseCycle.numToString "Cycle.dot" 15 18 4 1 GLL.ParseCycle.tokenToNumber GLL.ParseCycle.tokenData
+        let parser = GLL.ParseCycle.parserSource
+        let input  = getLinearInput "Cycle.txt" GLL.ParseCycle.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``Eps``() =
-        let parser = GLL.Eps.buildAst
-        runTest parser "Eps.txt" GLL.Eps.numToString "Eps.dot" 19 21 5 0 GLL.Eps.tokenToNumber GLL.Eps.tokenData
+        let parser = GLL.Eps.parserSource
+        let input  = getLinearInput "Eps.txt" GLL.Eps.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``Eps2``() =
-        let parser = GLL.Eps2.buildAst
-        runTest parser "Eps2.txt" GLL.Eps2.numToString "Eps2.dot" 26 30 6 0 GLL.Eps2.tokenToNumber GLL.Eps2.tokenData
+        let parser = GLL.Eps2.parserSource
+        let input  = getLinearInput "Eps2.txt" GLL.Eps2.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``Epsilon``() =
-        let parser = GLL.ParseEpsilon.buildAst
-        runTest parser "Epsilon.txt" GLL.ParseEpsilon.numToString "Epsilon.dot" 21 24 5 0 GLL.ParseEpsilon.tokenToNumber GLL.ParseEpsilon.tokenData
+        let parser = GLL.ParseEpsilon.parserSource
+        let input  = getLinearInput "Epsilon.txt" GLL.ParseEpsilon.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``Expr``() =
-        let parser = GLL.ParseExpr.buildAst
-        runTest parser "Expr.txt" GLL.ParseExpr.numToString "Expr.dot" 36 45 7 1 GLL.ParseExpr.tokenToNumber GLL.ParseExpr.tokenData
+        let parser = GLL.ParseExpr.parserSource
+        let input  = getLinearInput "Expr.txt" GLL.ParseExpr.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``First``() =
-        let parser = GLL.ParseFirst.buildAst
-        runTest parser "First.txt" GLL.ParseFirst.numToString "First.dot" 21 21 7 0 GLL.ParseFirst.tokenToNumber GLL.ParseFirst.tokenData
+        let parser = GLL.ParseFirst.parserSource
+        let input  = getLinearInput "First.txt" GLL.ParseFirst.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
 //////////////////create input for this test//////////////////
     [<Test>]
     member test.``InfEpsilon``() =
-        let parser = GLL.ParseInfEpsilon.buildAst
-        runTest parser "Epsilon.txt" GLL.ParseInfEpsilon.numToString "InfEpsilon.dot" 17 21 4 1 GLL.ParseInfEpsilon.tokenToNumber GLL.ParseInfEpsilon.tokenData
+        let parser = GLL.ParseInfEpsilon.parserSource
+        let input  = getLinearInput "Epsilon.txt" GLL.ParseInfEpsilon.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``List``() =
-        let parser = GLL.ParseList.buildAst
-        runTest parser "List.txt" GLL.ParseList.numToString "List.dot" 51 60 11 0 GLL.ParseList.tokenToNumber GLL.ParseList.tokenData
+        let parser = GLL.ParseList.parserSource
+        let input  = getLinearInput "List.txt" GLL.ParseList.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``ListEps``() =
-        let parser = GLL.ListEps.buildAst
-        runTest parser "ListEps.txt" GLL.ListEps.numToString "ListEps.dot" 33 39 7 0 GLL.ListEps.tokenToNumber GLL.ListEps.tokenData
+        let parser = GLL.ListEps.parserSource
+        let input  = getLinearInput "ListEps.txt" GLL.ListEps.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``Order``() =
-        let parser = GLL.ParseOrder.buildAst
-        runTest parser "Order.txt" GLL.ParseOrder.numToString "Order.dot" 58 72 10 0 GLL.ParseOrder.tokenToNumber GLL.ParseOrder.tokenData
+        let parser = GLL.ParseOrder.parserSource
+        let input  = getLinearInput "Order.txt" GLL.ParseOrder.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
-//    [<Test>]
-//    member test.``Lol calc``() =
-//        let parser = GLL.ParseLolCalc.buildAst
-//        runTest parser "LolCalc.txt" GLL.ParseLolCalc.numToString "LolCalc.dot"
+    [<Test>]
+    member test.``Lol calc``() =
+        let parser = GLL.ParseLolCalc.parserSource
+        let input  = getLinearInput "LolCalc.txt" GLL.ParseLolCalc.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
 //    [<Test>]
 //    member test.``Calc``() =
-//        let parser = GLL.ParseCalc.buildAst
-//        runTest parser "Calc.txt" GLL.ParseCalc.numToString "Calc.dot"
+//        let parser = GLL.ParseCalc.parserSource
+//        let input  = getLinearInput "Calc.txt" GLL.ParseCalc.stringToNumber
+//        let res = isParsed parser input
+//        shouldBeTrue res
 
     [<Test>]
     member test.``Long cycle``() =
-        let parser = GLL.ParseLongCycle.buildAst
-        runTest parser "LongCycle.txt" GLL.ParseLongCycle.numToString "LongCycle.dot" 14 18 3 1 GLL.ParseLongCycle.tokenToNumber GLL.ParseLongCycle.tokenData
+        let parser = GLL.ParseLongCycle.parserSource
+        let input  = getLinearInput "LongCycle.txt" GLL.ParseLongCycle.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
          
     [<Test>]
     member test.``Longest``() =
-        let parser = GLL.ParseLongest.buildAst
-        runTest parser "Longest.txt" GLL.ParseLongest.numToString "Longest.dot" 91 123 14 1 GLL.ParseLongest.tokenToNumber GLL.ParseLongest.tokenData
+        let parser = GLL.ParseLongest.parserSource
+        let input  = getLinearInput "Longest.txt" GLL.ParseLongest.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``Mixed``() =
-        let parser = GLL.Mixed.buildAst
-        runTest parser "Mixed.txt" GLL.Mixed.numToString "Mixed.dot" 24 27 6 0 GLL.Mixed.tokenToNumber GLL.Mixed.tokenData
+        let parser = GLL.Mixed.parserSource
+        let input  = getLinearInput "Mixed.txt" GLL.Mixed.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``Omit``() =
-        let parser = GLL.ParseOmit.buildAst
-        runTest parser "Omit.txt" GLL.ParseOmit.numToString "Omit.dot" 26 30 6 0 GLL.ParseOmit.tokenToNumber GLL.ParseOmit.tokenData
+        let parser = GLL.ParseOmit.parserSource
+        let input  = getLinearInput "Omit.txt" GLL.ParseOmit.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``Simple right null``() =
-        let parser = GLL.ParseSimpleRightNull.buildAst
-        runTest parser "SimpleRightNull.txt" GLL.ParseSimpleRightNull.numToString "SimpleRightNull.dot" 22 24 6 0 GLL.ParseSimpleRightNull.tokenToNumber GLL.ParseSimpleRightNull.tokenData
+        let parser = GLL.ParseSimpleRightNull.parserSource
+        let input  = getLinearInput "SimpleRightNull.txt" GLL.ParseSimpleRightNull.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``Cond``() =
-        let parser = GLL.ParseCond.buildAst
-        runTest parser "Cond.txt" GLL.ParseCond.numToString "Cond.dot" 44 57 7 1 GLL.ParseCond.tokenToNumber GLL.ParseCond.tokenData
+        let parser = GLL.ParseCond.parserSource
+        let input  = getLinearInput "Cond.txt" GLL.ParseCond.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
 
     [<Test>]
     member test.``Pretty simple calc seq input``() =
-        let parser = GLL.PrettySimpleCalc.buildAst
-        runTest parser "PrettyCalc1.txt" GLL.PrettySimpleCalc.numToString "PrettySimpleCalc1.dot" 21 24 5 0 GLL.PrettySimpleCalc.tokenToNumber GLL.PrettySimpleCalc.tokenData
-
+        let parser = GLL.PrettySimpleCalc.parserSource
+        let input  = getLinearInput "PrettyCalc1.txt" GLL.PrettySimpleCalc.stringToNumber
+        let res = isParsed parser input
+        shouldBeTrue res
    

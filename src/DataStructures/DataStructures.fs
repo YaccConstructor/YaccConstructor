@@ -17,6 +17,20 @@ module Yard.Generators.Common.DataStructures
 open System
 open Microsoft.FSharp.Collections
 
+[<Measure>] type gssVertex
+[<Measure>] type nodeMeasure
+[<Measure>] type positionInInput
+[<Measure>] type positionInGrammar
+[<Measure>] type length
+[<Measure>] type leftPosition
+[<Measure>] type nonterm
+[<Measure>] type extension
+
+let measureStateToNonterm (state : int<positionInGrammar>) =
+    (int state)*1<nonterm>
+
+let measureNontermToState (nonterm : int<nonterm>) =
+    (int nonterm)*1<positionInGrammar>
 
 [<Struct>]
 type UsualOne<'T> =

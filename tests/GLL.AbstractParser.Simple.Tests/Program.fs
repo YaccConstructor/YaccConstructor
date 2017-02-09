@@ -193,24 +193,29 @@ let newRandomGraph2 (initialGraph:ParserInputGraph<_>) eCount (tokens:array<_>) 
 //            Assert.AreEqual(termsCount, t, "Terms count mismatch") 
 //            Assert.AreEqual(ambiguityCount, amb, "Ambiguities count mismatch")
 //            Assert.Pass()
-     
 
+let isParsed parserSource input = 
+    Yard.Generators.GLL.AbstractParserWithoutTreeFSAInput.isParsed parserSource input
 
-//[<TestFixture>]
-//type ``GLL abstract parser tests`` () =
-//
-//    [<Test>]
-//    member this._01_PrettySimpleCalc_SequenceInput () =
-//        let qGraph = new ParserInputGraph<_>(0, 4)
-//        qGraph.AddVerticesAndEdgeRange
-//            [edg 0 1 (GLL.PrettySimpleCalc.NUM 1)
-//             edg 1 2 (GLL.PrettySimpleCalc.PLUS 2)
-//             edg 2 3 (GLL.PrettySimpleCalc.NUM 3)
-//             edg 3 4 (GLL.PrettySimpleCalc.RNGLR_EOF 0)
-//             ] |> ignore
-//
-//        test GLL.PrettySimpleCalc.buildAbstractAst qGraph GLL.PrettySimpleCalc.numToString "PrettySimpleCalcSeq.dot" 21 24 5 0 GLL.PrettySimpleCalc.tokenData GLL.PrettySimpleCalc.tokenToNumber
-//
+let shouldBeTrue res = 
+    Assert.AreEqual(res, true, "Nodes count mismatch")
+
+[<TestFixture>]
+type ``GLL abstract parser tests`` () =
+
+    [<Test>]
+    member this._01_PrettySimpleCalc_SequenceInput () =
+        let input = 
+            new LinearInput(
+                Array.map (GLL.PrettySimpleCalc.tokenToNumber >> (fun x -> x * 1<token>))
+                    [|GLL.PrettySimpleCalc.NUM 1;
+                      GLL.PrettySimpleCalc.PLUS 2;
+                      GLL.PrettySimpleCalc.NUM 3|])
+
+        let res = isParsed GLL.PrettySimpleCalc.parserSource input
+
+        shouldBeTrue res
+
 //    [<Test>]
 //    member this._06_NotAmbigousSimpleCalc_Loop () =
 //        let qGraph = new ParserInputGraph<_>([|0|] , [|4|] )
@@ -281,7 +286,7 @@ let newRandomGraph2 (initialGraph:ParserInputGraph<_>) eCount (tokens:array<_>) 
 //             ] |> ignore
 //        
 //        test GLL.NotAmbigousSimpleCalcWith2Ops.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalcWith2Ops.numToString "NotAmbigousSimpleCalcWith2Ops2.dot" 0 0 0 0
-//
+
 //    [<Test>]
 //    member this._16_Stars_Loop () =
 //        let qGraph = new ParserInputGraph<_>(0, 2)
@@ -620,17 +625,18 @@ let newRandomGraph2 (initialGraph:ParserInputGraph<_>) eCount (tokens:array<_>) 
 //
 //        test GLL.SimpleRightRecursion.buildAbstractAst qGraph GLL.SimpleRightRecursion.numToString "SimpleRightRecursion.dot" 15 15 5 0 GLL.SimpleRightRecursion.tokenData GLL.SimpleRightRecursion.tokenToNumber
 //
-//    [<Test>]
-//    member this._46_BadLeftRecursion () =
-//        let qGraph = new ParserInputGraph<_>(0, 4)
-//        qGraph.AddVerticesAndEdgeRange
-//            [edg 0 1 (GLL.BadLeftRecursion.B 1)
-//             edg 1 2 (GLL.BadLeftRecursion.B 2)
-//             edg 2 3 (GLL.BadLeftRecursion.B 3)
-//             edg 3 4 (GLL.BadLeftRecursion.RNGLR_EOF 0)
-//             ] |> ignore
-//
-//        test GLL.BadLeftRecursion.buildAbstractAst qGraph GLL.BadLeftRecursion.numToString "BadLeftRecursion.dot" 33 45 5 1 GLL.BadLeftRecursion.tokenData GLL.BadLeftRecursion.tokenToNumber
+    [<Test>]
+    member this._46_BadLeftRecursion () =
+        let input = 
+            new LinearInput(
+                Array.map (GLL.BadLeftRecursion.tokenToNumber >> (fun x -> x * 1<token>))
+                    [|GLL.BadLeftRecursion.B 1;
+                      GLL.BadLeftRecursion.B 2;
+                      GLL.BadLeftRecursion.B 3|])
+
+        let res = isParsed GLL.BadLeftRecursion.parserSource input
+
+        shouldBeTrue res
 //
 //    [<Test>]
 //    member this._47_SimpleAmb () =
@@ -666,24 +672,24 @@ let newRandomGraph2 (initialGraph:ParserInputGraph<_>) eCount (tokens:array<_>) 
 //             ] |> ignore
 //
 //        test GLL.SimpleLeftRecursion.buildAbstractAst qGraph GLL.SimpleLeftRecursion.numToString "SimpleLeftRecursion.dot" 19 21 5 0 GLL.SimpleLeftRecursion.tokenData GLL.SimpleLeftRecursion.tokenToNumber
-//
-//    [<Test>]
-//    member this._50_SimpleBranch () =
-//        let qGraph = new ParserInputGraph<_>(0, 3)
-//        qGraph.AddVerticesAndEdgeRange
-//            [edg 0 1 (GLL.ParseSimpleBranch.A 1)
-//             edg 1 2 (GLL.ParseSimpleBranch.C 2)
-//             edg 1 2 (GLL.ParseSimpleBranch.B 3)
-//             edg 2 3 (GLL.ParseSimpleBranch.RNGLR_EOF 0)
-//             ] |> ignore
-//
-//        test GLL.ParseSimpleBranch.buildAbstractAst qGraph GLL.ParseSimpleBranch.numToString "SimpleBranch.dot" 14 15 5 1 GLL.ParseSimpleBranch.tokenData GLL.ParseSimpleBranch.tokenToNumber
 
-[<EntryPoint>]
+    [<Test>]
+    member this._50_SimpleBranch () =
+        let input = 
+            new LinearInput(
+                Array.map (GLL.ParseSimpleBranch.tokenToNumber >> (fun x -> x * 1<token>))
+                    [|GLL.ParseSimpleBranch.Token.A 1;
+                      GLL.ParseSimpleBranch.Token.B 1|])
+
+        let res = isParsed GLL.ParseSimpleBranch.parserSource input
+
+        shouldBeTrue res
+        
+
 let f x =
-    //System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
-//    for p in 
-//        [
+    System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
+    let t = new ``GLL abstract parser tests``()   
+
 //         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\1.1.ttl"
 //         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
 //         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\pizza.owl"
@@ -698,11 +704,6 @@ let f x =
     //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf"
     //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
     YC.GLL.Abstarct.Tests.RDFPerformance.performTests()
-    //let t = new ``GLL abstract parser tests``()
-    let f () = ()
-    //let th = new System.Threading.Thread(f, 10000000)
-    //th.Start()
-    f()
     0
 
 

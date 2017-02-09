@@ -9,10 +9,17 @@ open Yard.Generators.Common.DataStructures
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
+open Yard.Generators.Common.DataStructures
 open System.Collections.Generic
 open FSharpx.Collections.Experimental
 
 type CompressedArray<'t> = Yard.Generators.GLL.ParserCommon.CompressedArray<'t>
+
+let measureStateToNonterm (state : int<positionInGrammar>) =
+    (int state)*1<nonterm>
+
+let measureNontermToState (nonterm : int<nonterm>) =
+    (int nonterm)*1<positionInGrammar>
 
 /// For debuging
 type EdgeOfGSS = 
@@ -32,7 +39,7 @@ let printEdges fileName (edges : System.Collections.Generic.HashSet<EdgeOfGSS>) 
         let edgeOfInput = CommonFuns.getEdge v.PositionInInput
         let posOnEdgeOfInput = CommonFuns.getPosOnEdge v.PositionInInput
         
-        sprintf "St:%i;Edg:%i;Pos:%i" v.NontermState edgeOfInput posOnEdgeOfInput
+        sprintf "St:%i;Edg:%i;Pos:%i" v.Nonterm edgeOfInput posOnEdgeOfInput
 
     for edge in edges do
         let endName = getStrFromVertex edge.endVertex
@@ -81,14 +88,14 @@ let buildAST (parser : FSAParserSourceGLL) (input : seq<int>) =
     let setP = new Dictionary<int64<gssVertex>, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<nodeMeasure>>>(500)
     /// Edges of GSS:
     /// |vertex| --- stateToContinue, node ---> |vertex|
-    let edges = Array.init parser.NonTermCount (fun _ -> Array.zeroCreate<Dictionary<int<positionInGrammar>, Dictionary<int<positionInGrammar>, (int<positionInInput> * int<nodeMeasure>)[]>>> input.Length)
+    let edges = Array.init parser.NonTermCount (fun _ -> Array.zeroCreate<Dictionary<int<positionInGrammar>, Dictionary<int<nonterm>, (int<positionInInput> * int<nodeMeasure>)[]>>> input.Length)
 
     /// State of FSA.
     let currentState = ref <| parser.StartState
     /// Position in input.
     let currentIndex = ref (-1<positionInInput>)
     //let currentLength = ref 0us
-    let currentGSSNode = ref <| new GSSVertexFSA(-1<positionInInput>,-1<positionInGrammar>)
+    let currentGSSNode = ref <| new GSSVertexFSA(-1<positionInInput>,-1<nonterm>)
     
     let dummyNode = -1<nodeMeasure>
     let dummyAST = new TerminalNode(-1, packExtension -1 -1)
@@ -135,7 +142,7 @@ let buildAST (parser : FSAParserSourceGLL) (input : seq<int>) =
 
     let startContext = 
         let pos = 0<positionInInput>
-        let vertex = new GSSVertexFSA(pos, !currentState)
+        let vertex = new GSSVertexFSA(pos, measureStateToNonterm !currentState)
         new ContextFSA(pos, !currentState, vertex, !currentN)
     
     (*
@@ -287,7 +294,7 @@ let buildAST (parser : FSAParserSourceGLL) (input : seq<int>) =
              
     /// Checks for existing of context in SetU. If not adds it to SetU.
     let containsContext (inputIndex: int<positionInInput>) (state : int<positionInGrammar>) (vertex : GSSVertexFSA) (node : int<nodeMeasure>)=
-        let vertexKey = CommonFuns.pack vertex.PositionInInput vertex.NontermState
+        let vertexKey = CommonFuns.pack vertex.PositionInInput vertex.Nonterm
         if setU.[int inputIndex] <> null
         then
             let cond1, vertexToNodes = setU.[int inputIndex].TryGetValue state
@@ -330,7 +337,7 @@ let buildAST (parser : FSAParserSourceGLL) (input : seq<int>) =
 
     /// Checks for existing of edge in edges set. If not adds it to edges set.
     let containsEdge (startVertex : GSSVertexFSA) (endVertex : GSSVertexFSA) (state : int<positionInGrammar>) (node : int<nodeMeasure>) =
-        let outEdges = edges.[int startVertex.NontermState].[int startVertex.PositionInInput]
+        let outEdges = edges.[int startVertex.Nonterm].[int startVertex.PositionInInput]
         (* debug
         edgesOfGSS.Add(
             {
@@ -346,7 +353,7 @@ let buildAST (parser : FSAParserSourceGLL) (input : seq<int>) =
                 let cond, dictStateKey = outEdges.TryGetValue state
                 if cond
                 then
-                    let cond, posLen = dictStateKey.TryGetValue endVertex.NontermState
+                    let cond, posLen = dictStateKey.TryGetValue endVertex.Nonterm
                     if cond
                     then
                         if posLen |> Array.contains (endVertex.PositionInInput,node) 
@@ -354,35 +361,35 @@ let buildAST (parser : FSAParserSourceGLL) (input : seq<int>) =
                             true, None
                         else
                             let newPosLen = Array.append posLen [|endVertex.PositionInInput,node|]
-                            dictStateKey.[endVertex.NontermState] <- newPosLen
+                            dictStateKey.[endVertex.Nonterm] <- newPosLen
                                                         
                             false, None
                     else
                         let arr = [|endVertex.PositionInInput,node|]
-                        dictStateKey.Add(endVertex.NontermState, arr)
+                        dictStateKey.Add(endVertex.Nonterm, arr)
                         false, None 
                 else
-                    let d1 = new Dictionary<int<positionInGrammar>, _>()
+                    let d1 = new Dictionary<int<_>, _>()
                     let arr = [|endVertex.PositionInInput,node|]
-                    d1.Add(endVertex.NontermState, arr)
+                    d1.Add(endVertex.Nonterm, arr)
                     outEdges.Add(state, d1)
                     false, None
             else 
-                let d1 = new Dictionary<int<_>, Dictionary<int<positionInGrammar>, _>>()
-                let d2 = new Dictionary<int<positionInGrammar>, _>()
+                let d1 = new Dictionary<int<_>, Dictionary<int<_>, _>>()
+                let d2 = new Dictionary<int<_>, _>()
                 let arr = [|endVertex.PositionInInput,node|]
-                d2.Add(endVertex.NontermState, arr)
+                d2.Add(endVertex.Nonterm, arr)
                 d1.Add(state, d2)
                 false, Some d1
-        if dict.IsSome then edges.[int startVertex.NontermState].[int startVertex.PositionInInput] <- dict.Value
+        if dict.IsSome then edges.[int startVertex.Nonterm].[int startVertex.PositionInInput] <- dict.Value
         cond
 
     let rec pop (curVertex : GSSVertexFSA) curIndex newNode =
-        let outEdges = edges.[int curVertex.NontermState].[int curVertex.PositionInInput]
+        let outEdges = edges.[int curVertex.Nonterm].[int curVertex.PositionInInput]
             
         if outEdges <> null && outEdges.Count <> 0
         then
-            let vertexKey = packVertexFSA curVertex.PositionInInput curVertex.NontermState
+            let vertexKey = packVertexFSA curVertex.PositionInInput curVertex.Nonterm
 
             let cond, value = setP.TryGetValue vertexKey
             if cond
@@ -408,7 +415,7 @@ let buildAST (parser : FSAParserSourceGLL) (input : seq<int>) =
         let node = sppfNodes.Item (int newNode)
         let nodeExt = node.getExtension()
         let lExt, rExt = getLeftExtension nodeExt, getRightExtension nodeExt
-        if (lExt = 0)&&(rExt = input.Length)&&(curVertex.NontermState = parser.StartState)
+        if (lExt = 0)&&(rExt = input.Length)&&(curVertex.Nonterm = measureStateToNonterm parser.StartState)
         then//startNonterminal
             if !result = None
             then
@@ -436,23 +443,23 @@ let buildAST (parser : FSAParserSourceGLL) (input : seq<int>) =
             |> ignore *)
 
     ///Creates new descriptors.(Called when found nonterninal in rule(on current input edge, or on some of next)))
-    let create (stateToContinue : int<positionInGrammar>) (nonTermState : int<positionInGrammar>) =
+    let create (stateToContinue : int<positionInGrammar>) (nonterm : int<nonterm>) =
         let index = !currentIndex
         let currentVertex = !currentGSSNode
-        let newVertex = new GSSVertexFSA(index, nonTermState)
+        let newVertex = new GSSVertexFSA(index, nonterm)
         let currentNode = !currentN
 
-        if edges.[int nonTermState].[int index] <> null
+        if edges.[int nonterm].[int index] <> null
         then//such GSS vertex already exist
             if not <| containsEdge newVertex currentVertex stateToContinue currentNode
             then//no such edge between vertices
-                let vertexKey = packVertexFSA index nonTermState
+                let vertexKey = packVertexFSA index nonterm
                 let cond, poped = setP.TryGetValue vertexKey
                 if cond
                 then// aready poped for current index and nonterm
                     // add contexts for each position in input
                     poped.DoForAll (fun node ->
-                        let y,nonterm = getNodes stateToContinue currentVertex.NontermState currentNode node
+                        let y,nonterm = getNodes stateToContinue currentVertex.Nonterm currentNode node
                         if nonterm <> dummyNode
                         then
                             let x = (sppfNodes.Item (int nonterm))
@@ -463,12 +470,12 @@ let buildAST (parser : FSAParserSourceGLL) (input : seq<int>) =
                         addContext newIndex stateToContinue currentVertex y)
         else//need to create new edge, vertex and context
             containsEdge newVertex currentVertex stateToContinue currentNode |> ignore
-            addContext index nonTermState newVertex dummyNode
+            addContext index (measureNontermToState nonterm) newVertex dummyNode
 
     /// Moves positions in input and grammar by 1.
     let eatTerm term nextState =
         let newR = getNodeT term !currentIndex
-        let y, nontermNode = getNodes nextState (!currentGSSNode).NontermState !currentN newR
+        let y, nontermNode = getNodes nextState (!currentGSSNode).Nonterm !currentN newR
         //currentN := y
         
         if nontermNode <> dummyNode
@@ -491,7 +498,7 @@ let buildAST (parser : FSAParserSourceGLL) (input : seq<int>) =
         if (!currentN = dummyNode)&&(!currentState |> parser.FinalStates.Contains)
         then 
             let eps = getNodeT epsilon !currentIndex
-            let _, nontermNode = getNodes !currentState (!currentGSSNode).NontermState dummyNode eps
+            let _, nontermNode = getNodes !currentState (!currentGSSNode).Nonterm dummyNode eps
             pop !currentGSSNode !currentIndex nontermNode
 
         let outEdges = parser.OutNonterms.[int !currentState]

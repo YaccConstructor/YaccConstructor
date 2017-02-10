@@ -1,11 +1,9 @@
 [<Start>]
-s1 : s
+s1: s
 
 s : SCOR s SCO {""}
   | TR s T {""}
   | SCOR SCO {""}
   | TR T {""}
-
-m : {""}
 
 f : OTHER

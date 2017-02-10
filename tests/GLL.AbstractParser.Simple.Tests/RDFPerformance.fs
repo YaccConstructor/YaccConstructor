@@ -92,7 +92,7 @@ let processFile file =
     System.IO.Path.GetFileNameWithoutExtension file, triples1, time1, root1.[0], time2, root2.[0]
 
 let performTests () =
-    let basePath = @"..\..\..\data\RDF\big"
+    let basePath = @"..\..\..\data\RDF"
     let files = System.IO.Directory.GetFiles basePath    
     files 
     |> Array.map processFile

@@ -651,4 +651,5 @@ tests/data/AbstractRNGLR/json/JSON_test_1.dot
 tests/data/AbstractRNGLR/json/JSON_test_2.dot
 tests/data/AbstractRNGLR/DOT/sppf.dot
 
-src/glltest/*
+src/glltest/*.dot
+src/glltest/test.fs

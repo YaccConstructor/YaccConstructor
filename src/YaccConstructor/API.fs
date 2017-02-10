@@ -147,7 +147,7 @@ let run grammarFile frontendName generatorName generatorParams conversions userD
 
             match generatorParams with
             | None -> 
-                printfn "%A" <| !ilTree
+                //printfn "%A" <| !ilTree
                 gen.Generate(!ilTree, generateToFile)
             | Some genParams -> gen.Generate(!ilTree, generateToFile, genParams)
         //with

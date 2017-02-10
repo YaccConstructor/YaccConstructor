@@ -136,7 +136,7 @@ type ``Conversions tests`` () =
            match Seq.tryFind (fun (elem : Generator) -> elem.Name = "TreeDump") GeneratorsManager with
            | Some gen -> gen    
            | None -> failwith "TreeDump is not found."
-        printfn "%A\n" (generator.Generate ilTreeConverted)
+        printfn "%A\n" (generator.Generate(ilTreeConverted,true))
 #endif
 
         //treeDump.Generate expected |> string |> printfn "%s"

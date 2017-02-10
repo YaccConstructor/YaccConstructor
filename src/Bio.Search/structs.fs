@@ -6,6 +6,8 @@ open YC.Bio.GraphLoader
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.AbstractParserWithoutTree
+open System
+open System.Collections.Generic
 
 //open Yard.Generators.GLL.AbstractParserWithoutTree
 type WhatShouldISearch = 
@@ -31,7 +33,7 @@ type SearchConfig =
     val Tokenizer : char -> int<token>
     val HighLengthLimit : int
     val LowLengthLimit : int
-    val NumToString : int -> string
+    val NumToString : Dictionary<int<positionInGrammar>,string>
     val LengthOfBeinning : int
     val OutFileName : string
     new(parserSource, getSmb, lowLengthLimit, highLengthLimit, lengthOfBeinning, numToString, outFileName) = 
@@ -44,27 +46,15 @@ type SearchConfig =
           OutFileName = outFileName }
 
 let FSA_R16S_1_18_SearchConfig = 
-    let tokenizer ch = 
-        match ch with
-        | 'A' | 'a' -> GLL.R16S_1_18.A()
-        | 'U' | 'u' | 'T' | 't' -> GLL.R16S_1_18.U()
-        | 'C' | 'c' -> GLL.R16S_1_18.C()
-        | 'G' | 'g' -> GLL.R16S_1_18.G()
-        | _ -> GLL.R16S_1_18.U()
-        |> GLL.R16S_1_18.tokenToNumber 
+    let tokenizer (ch : char) = 
+        GLL.R16S_1_18.stringToNumber.[Char.ToUpper(ch).ToString()]
         |> (fun x -> x * 1<token>)
     new SearchConfig(GLL.R16S_1_18.parserSource, tokenizer, 535, 545, 20, GLL.R16S_1_18.stateToNontermName, 
                      "R16S_1_18_result.fa")
 
 let FSA_R16S_19_27_SearchConfig = 
-    let tokenizer ch = 
-        match ch with
-        | 'A' | 'a' -> GLL.R16S_19_27.A()
-        | 'U' | 'u' | 'T' | 't' -> GLL.R16S_19_27.U()
-        | 'C' | 'c' -> GLL.R16S_19_27.C()
-        | 'G' | 'g' -> GLL.R16S_19_27.G()
-        | _ -> GLL.R16S_19_27.U()
-        |> GLL.R16S_19_27.tokenToNumber
+    let tokenizer ch =
+        GLL.R16S_19_27.stringToNumber.[Char.ToUpper(ch).ToString()]
         |> (fun x -> x * 1<token>)
     new SearchConfig(GLL.R16S_19_27.parserSource, tokenizer, 318, 370, 0, GLL.R16S_19_27.stateToNontermName, 
                      "R16S_19_27_result.fa")

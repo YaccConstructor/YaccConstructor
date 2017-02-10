@@ -42,9 +42,9 @@ open System.Collections.Generic
 //    let tokens = LexCommon.tokens(path)
 //    astBuilder tokens
 
-//let dir = @"../../../data/GLL/"
+let dir = @"../../../data/GLL/"
 let dirFiles = @"C:/Code/YaccConstructor/tests/GLL.AbstractParser.Simple.Tests/"
-let dir = @"C:/Code/YaccConstructor/tests/data/GLL/"
+//let dir = @"C:/Code/YaccConstructor/tests/data/GLL/"
 let outDir = @"../../../src/GLLParser.SimpleTest/"
 
 let getTokens path =
@@ -83,19 +83,19 @@ let isParsed parserSource input =
 
 let shouldBeTrue res = 
     Assert.AreEqual(res, true, "Nodes count mismatch")        
-            
-
+         
+let getParcerSource grammarFile =    
+    YaccConstructor.API.generate (dirFiles + grammarFile)
+                                 "YardFrontend" "GLLGenerator" 
+                                 None
+                                 ["ExpandMeta"]
+                                 [] :?> ParserSourceGLL
 [<TestFixture>]
-//[<Ignore("Ignore a fixture. GLL should be fixed")>]
 type ``GLL parser tests with simple lexer`` () =
 
     [<Test>]
     member test.``Bad left rec``() =
-        let parser = YaccConstructor.API.generate (dirFiles + "BadLeftRecursion.yrd")
-                                                  "YardFrontend" "GLLGenerator" 
-                                                  (Some "-pos int -token int -module GLL.BadLeftRecursion  -o BadLeftRecursion.yrd.fs") 
-                                                  ["ExpandMeta"]
-                                                  [] :?> ParserSourceGLL
+        let parser = getParcerSource "BadLeftRecursion.yrd"
         let input  = getLinearInput "BBB.txt" GLL.BadLeftRecursion.stringToNumber
         let res = isParsed parser input
 

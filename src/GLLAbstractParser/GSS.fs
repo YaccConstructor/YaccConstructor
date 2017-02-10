@@ -7,10 +7,11 @@ open QuickGraph
 open QuickGraph.Graphviz
 open System.Collections.Generic.Customized
 
+[<Measure>] type compressedPosInInputAndGrammar
+
 type GSSVertex (nonterm: int<nonterm>, posInInput: int<positionInInput>) =    
 
-    let setU = new System.Collections.Generic.Dictionary<int<positionInGrammar>, 
-                                                         System.Collections.Generic.Dictionary<uint16,ResizeArray<int<positionInInput>>>>()
+    let setU = new Dictionary<int64<compressedPosInInputAndGrammar>,HashSet<uint16>>()
     let setP = new ResizeArray<int<positionInInput>*uint16>() 
     
     override this.Equals y = 
@@ -24,27 +25,21 @@ type GSSVertex (nonterm: int<nonterm>, posInInput: int<positionInInput>) =
     member this.P = setP
     member this.PositionInInput = posInInput
     member this.Nonterm = nonterm
+    member this.GetUncompressetPositions (compressedPos: int64<compressedPosInInputAndGrammar>) =
+        (CommonFuns.getLeft (int64 compressedPos)) * 1<positionInInput>
+        , (CommonFuns.getRight (int64 compressedPos)) * 1<positionInGrammar>
 
     /// Checks for existing of context in SetU. If not adds it to SetU.
-    member this.ContainsContext (inputIndex: int<positionInInput>) (state : int<positionInGrammar>) (len : uint16)=
-        let cond, dict2 = setU.TryGetValue state
-        //let inline pack (inputIndex: int<positionInInput>) (state : int<positionInGrammar>) : int64 = ((int64 left <<< 32) ||| int64 right)
-        then
-            let cond2, current = dict2.TryGetValue len
-            if cond2
-            then
-                if current.Contains inputIndex
-                then true
-                else 
-                    current.Add inputIndex
-                    false
-            else
-                dict2.Add(len, new ResizeArray<_>([inputIndex]))
-                false
-        else
-            let d1 = new System.Collections.Generic.Dictionary<_,_>()
-            d1.Add(len, new ResizeArray<_>([inputIndex]))
-            setU.Add(state, d1)
+    member this.ContainsContext (posInInput: int<positionInInput>) (posInGrammar : int<positionInGrammar>) (len : uint16)=
+        let compressPositions (posInInput: int<positionInInput>) (posInGrammar : int<positionInGrammar>) =
+            CommonFuns.pack posInInput posInGrammar 
+            |> FSharp.Core.LanguagePrimitives.Int64WithMeasure  
+        let cond, data = compressPositions posInInput posInGrammar |> setU.TryGetValue 
+        if cond
+        then not <| data.Add len
+        else 
+            setU.Add(compressPositions posInInput posInGrammar, new HashSet<_>([len]))
+            false
 
 [<Struct>]
 type GSSEdgeLbl =

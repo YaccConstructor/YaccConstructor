@@ -56,9 +56,8 @@ let parse (parser : FSAParserSourceGLL) (input : IParserInput) =
         curGssVertex.P.Add (curContext.PosInInput, curContext.Length)
         if outEdges <> null && outEdges.Length <> 0
         then
-            let vertexKey = packVertexFSA curGssVertex.PositionInInput curGssVertex.Nonterm
-            
             for e in outEdges do
+                let vertexKey = packVertexFSA curGssVertex.PositionInInput curGssVertex.Nonterm
                 addContext curContext.PosInInput e.Tag.StateToContinue e.Target (curContext.Length + e.Tag.LengthOfProcessedString)
 
     let processed = ref 0
@@ -106,11 +105,9 @@ let isParsed (parser : FSAParserSourceGLL) (input : LinearInput) =
     findVertices gss parser.StartState
     |> Seq.exists (fun v -> v.P |> Seq.exists (fun (pos,_) -> int pos = input.Input.Length))
 
-
 let getAllRangesForState gss state =
     findVertices gss state
-    |> Seq.collect (fun v -> v.U.Values |> Seq.collect (fun a -> a |> Seq.collect (fun x -> x.Value |> ResizeArray.map (fun i -> v.PositionInInput, i))))
-    //|> Seq.collect (fun v -> v.U.Values |> Seq.collect (fun a -> a |> Seq.map (fun i ->  v.PositionInInput, i)))
+    |> Seq.collect (fun v -> v.U |> Seq.collect (fun kvp -> kvp.Value |> Seq.map (fun x -> v.PositionInInput, v.GetUncompressetPositions kvp.Key |> fst)))    
 
 let getAllRangesForStartState (parser : FSAParserSourceGLL) (input : IParserInput) = 
     let gss = parse parser input
@@ -118,7 +115,7 @@ let getAllRangesForStartState (parser : FSAParserSourceGLL) (input : IParserInpu
 
 let getAllRangesForStateWithLength gss state =
     findVertices gss state
-    |> Seq.collect (fun v -> v.U.Values |> Seq.collect (fun a -> a |> Seq.collect (fun x -> x.Value |> ResizeArray.map (fun i -> v.PositionInInput, i, x.Key))))
+    |> Seq.collect (fun v -> v.U |> Seq.collect (fun kvp -> kvp.Value |> Seq.map (fun x -> v.PositionInInput, v.GetUncompressetPositions kvp.Key |> fst, x)))
 
 let getAllRangesForStartStateWithLength (parser : FSAParserSourceGLL) (input : IParserInput) = 
     let gss = parse parser input

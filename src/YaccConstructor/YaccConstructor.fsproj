@@ -25,12 +25,12 @@
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-i test.yrd -g "GLLGenerator -pos int -token int -abstract false -module GLL.Parse.test -o test.yrd.fs"</StartArguments>
+    <StartArguments>-i test.yrd -g "GLLGenerator -pos int -token int -module GLL.Parse.test -o test.yrd.fs"</StartArguments>
     <StartWorkingDirectory>C:\Code\Yacc Constructor</StartWorkingDirectory>
     <StartAction>Project</StartAction>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <StartArguments>-i 16strna.yrd -g "GLLFSAGenerator -module GLLFSA.r16s.H22_H23 -o 16s_H22_H23.yrd.fs -abstract false"</StartArguments>
+    <StartArguments>-i 16strna.yrd -g "GLLFSAGenerator -module GLLFSA.r16s.H22_H23 -o 16s_H22_H23.yrd.fs"</StartArguments>
     <RemoteDebugEnabled>false</RemoteDebugEnabled>
     <RemoteDebugMachine />
     <StartWorkingDirectory>C:\Yacc Constructor</StartWorkingDirectory>
@@ -59,7 +59,10 @@
         -->
   <Import Project="..\..\.paket\paket.targets" />
   <ItemGroup>
-    <Compile Include="Program.fs" />
+    <Compile Include="Addin.fs" />
+    <Compile Include="Common.fs" />
+    <Compile Include="API.fs" />
+    <Compile Include="YaccConstructor.fs" />
     <None Include="paket.references" />
     <None Include="YaccConstructor.addins">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -21,7 +21,7 @@ module CommonFuns =
     let inline getPosition (packed : int64<gssVertex>) = int <| ((int64 packed) &&& 0xffffffffL)
     let inline getState (packed : int64<gssVertex>) = int <| ((int64 packed) >>> 32)
 
-    let inline packEdgePos edge position : int<positionInInput>  =
+    let inline packEdgePos edge position : int<positionInGrammar>  =
         if (edge < 65536) && (position < 65536) then LanguagePrimitives.Int32WithMeasure((int position <<< 16) ||| int edge)
         else failwith "Edge or position is greater then 65535!!"
     let inline getEdge (packedValue : int<positionInInput>)      = int (int packedValue &&& 0xffff)
@@ -35,7 +35,7 @@ module CommonFuns =
 [<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
 type Vertex =
     /// Position in input graph (Packed edge+position)
-    val Level            : int<positionInInput>
+    val Level            : int<positionInGrammar>
     /// Nonterminal
     val NontermLabel     : int<positionInGrammar>
     new (level, nonterm) = {Level = level; NontermLabel = nonterm}
@@ -46,7 +46,7 @@ type GSSVertexFSA =
     /// Position in input graph (Packed edge+position)
     val PositionInInput  : int<positionInInput>
     /// Nonterminal
-    val Nonterm     : int<nonterm>
+    val Nonterm     : int<positionInGrammar>
     new (positionInInput, nonterm) = {PositionInInput = positionInInput; Nonterm = nonterm}
 
 [<Struct>]
@@ -103,7 +103,7 @@ type ParseResult<'a> =
     | Error of string
 
 type TypeOfNode = 
-    | Nonterm of int<nonterm>
+    | Nonterm of int<positionInGrammar>
     | Intermed of int<positionInGrammar>
 
 [<Struct>]

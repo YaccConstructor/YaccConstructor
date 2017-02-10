@@ -27,7 +27,7 @@ type msg =
 
 [<Struct>]
 type SearchConfig = 
-    val ParserSource : FSAParserSourceGLL
+    val ParserSource : ParserSourceGLL
     val Tokenizer : char -> int<token>
     val HighLengthLimit : int
     val LowLengthLimit : int

@@ -29,5 +29,6 @@ do()
 type YardPrinter() = 
     inherit Generator()
         override this.Name = "YardPrinter"
-        override this.Generate t = Generator.generate t :> obj
+        override this.Generate(t,f) = Generator.generate t :> obj
+        override this.Generate(t,_,_) = Generator.generate t :> obj
         override this.Constraints = [||]

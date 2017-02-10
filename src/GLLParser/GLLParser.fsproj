@@ -31,7 +31,6 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <Compile Include="Parser.fs" />
-    <Compile Include="ParserFSA.fs" />
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>

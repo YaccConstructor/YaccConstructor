@@ -11,12 +11,12 @@ open Yard.Generators.GLL.ParserCommon.CommonFuns
 open YC.GLL.GSS
 
 let measureStateToNonterm (state : int<positionInGrammar>) =
-    (int state)*1<nonterm>
+    (int state)*1<positionInGrammar>
 
-let measureNontermToState (nonterm : int<nonterm>) =
+let measureNontermToState (nonterm : int<positionInGrammar>) =
     (int nonterm)*1<positionInGrammar>
 
-let parse (parser : FSAParserSourceGLL) (input : IParserInput) = 
+let parse (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss = new GSS()
 
     let startContexts = 
@@ -88,7 +88,7 @@ let findVertices (gss:GSS) state =
     gss.Vertices
     |> Seq.filter (fun v -> v.Nonterm = measureStateToNonterm state)
              
-let isParsed (parser : FSAParserSourceGLL) (input : LinearInput) = 
+let isParsed (parser : ParserSourceGLL) (input : LinearInput) = 
     let gss = parse parser input
     findVertices gss parser.StartState
     //|> Seq.exists (fun v -> v.U.Values |> Seq.exists (fun a -> a |> ResizeArray.exists (fun i -> int i = input.Input.Length)))
@@ -99,7 +99,7 @@ let getAllRangesForState gss state =
     findVertices gss state
     |> Seq.collect (fun v -> v.U.Values |> Seq.collect (fun a -> a |> Seq.collect (fun x -> x.Value |> ResizeArray.map (fun i -> v.PositionInInput, i))))
 
-let getAllRangesForStartState (parser : FSAParserSourceGLL) (input : IParserInput) = 
+let getAllRangesForStartState (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss = parse parser input
     getAllRangesForState gss parser.StartState
 
@@ -107,6 +107,6 @@ let getAllRangesForStateWithLength gss state =
     findVertices gss state
     |> Seq.collect (fun v -> v.U.Values |> Seq.collect (fun a -> a |> Seq.collect (fun x -> x.Value |> ResizeArray.map (fun i -> v.PositionInInput, i, x.Key))))
 
-let getAllRangesForStartStateWithLength (parser : FSAParserSourceGLL) (input : IParserInput) = 
+let getAllRangesForStartStateWithLength (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss = parse parser input
     getAllRangesForStateWithLength gss parser.StartState

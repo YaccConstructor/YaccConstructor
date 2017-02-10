@@ -11,7 +11,6 @@ open System.Runtime.CompilerServices
 [<Measure>] type positionInGrammar
 [<Measure>] type length
 [<Measure>] type leftPosition
-[<Measure>] type nonterm
 [<Measure>] type extension
 
 type LexerEdge<'l ,'br  when 'l: equality> (s,e,t) =

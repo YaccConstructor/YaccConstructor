@@ -37,13 +37,14 @@ open GLL.SimpleAmb
 open GLL.SimpleRightRecursion
 open GLL.PrettySimpleCalc
 open Yard.Generators.GLL.ParserCommon
-
+open System.Collections.Generic
 //let run path astBuilder =
 //    let tokens = LexCommon.tokens(path)
 //    astBuilder tokens
 
-let dir = @"../../../data/GLL/"
-//let dir = @"C:/Code/YaccConstructor/tests/data/GLL/"
+//let dir = @"../../../data/GLL/"
+let dirFiles = @"C:/Code/YaccConstructor/tests/GLL.AbstractParser.Simple.Tests/"
+let dir = @"C:/Code/YaccConstructor/tests/data/GLL/"
 let outDir = @"../../../src/GLLParser.SimpleTest/"
 
 let getTokens path =
@@ -51,10 +52,10 @@ let getTokens path =
         .Split([|' '|])
         |> Array.filter ((<>) "")
 
-let getLinearInput path tokenToInt = 
+let getLinearInput path (tokenToInt : Dictionary<string,int>) = 
     new LinearInput(
             getTokens path
-            |> Array.map (tokenToInt >> (fun x -> x * 1<token>)))
+            |> Array.map (fun x -> tokenToInt.[x] * 1<token>))
 
 
 
@@ -90,7 +91,11 @@ type ``GLL parser tests with simple lexer`` () =
 
     [<Test>]
     member test.``Bad left rec``() =
-        let parser = GLL.BadLeftRecursion.parserSource
+        let parser = YaccConstructor.API.generate (dirFiles + "BadLeftRecursion.yrd")
+                                                  "YardFrontend" "GLLGenerator" 
+                                                  (Some "-pos int -token int -module GLL.BadLeftRecursion  -o BadLeftRecursion.yrd.fs") 
+                                                  ["ExpandMeta"]
+                                                  [] :?> ParserSourceGLL
         let input  = getLinearInput "BBB.txt" GLL.BadLeftRecursion.stringToNumber
         let res = isParsed parser input
 

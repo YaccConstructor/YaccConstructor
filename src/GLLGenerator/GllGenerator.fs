@@ -18,11 +18,11 @@ open System.Collections.Generic
 [<assembly:AddinDependency ("YaccConstructor", "1.0")>]
 do()
 [<Extension>]
-type GLLFSA() = 
+type GLL() = 
     inherit Generator()
         override this.Name = "GLLGenerator"
         override this.Constraints = [|noMeta; noBrackets; singleModule|]
-        override this.Generate (definition, args) =
+        override this.Generate (definition, generateToFile, args) =
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
             let pairs = Array.zeroCreate <| args.Length / 2
@@ -75,14 +75,16 @@ type GLLFSA() =
                  
             let fsa = new FSA(definition.grammar.[0].rules)
             
-            use out = new System.IO.StreamWriter (outFileName)
-            // TODO: write foot of definition
-            let generatedCode = printGLL fsa outFileName tokenType moduleName light //isAbstract
-
-            out.WriteLine (generatedCode.ToString().Replace("\r\n", "\n").Replace("\n", "\r\n"))
-            out.Flush()
-            out.Close()
+            let generatedCode, parserSource = getGLLparserSource fsa outFileName tokenType moduleName light generateToFile//isAbstract
+            
+            if generateToFile
+            then
+                use out = new System.IO.StreamWriter (outFileName)
+                // TODO: write foot of definition
+                out.WriteLine (generatedCode.ToString().Replace("\r\n", "\n").Replace("\n", "\r\n"))
+                out.Flush()
+                out.Close()
             eprintfn "Generation time: %A" <| System.DateTime.Now - start
             
-            box ()
-        override this.Generate definition = this.Generate (definition, "")
+            box parserSource
+        override this.Generate(definition, generateTofile) = this.Generate (definition, generateTofile, "")

@@ -600,10 +600,8 @@ tests/GLL.AbstractParser.Simple.Tests/*.dot
 !tests/Gll.AbstractParserGFG.Tests/Emb.yrd.fs
 **/log*.txt
 
-src/gllfsaTest/*.dot
-src/gllfsaTest/test.fs
-src/RNA.Search/R16S_19_27.fs
-src/RNA.Search/R16S_1_18.fs
+src/Bio.Search/R16S_19_27.fs
+src/Bio.Search/R16S_1_18.fs
 src/GLL.Parser.Test/*.dot
 src/GLL.Parser.Test/test.fs
 src/CYKMatrix/Fody_ToBeDeleted.txt
@@ -652,3 +650,5 @@ tests/RNGLRAbstractParser.Tests/кк
 tests/data/AbstractRNGLR/json/JSON_test_1.dot
 tests/data/AbstractRNGLR/json/JSON_test_2.dot
 tests/data/AbstractRNGLR/DOT/sppf.dot
+
+src/glltest/*

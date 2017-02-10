@@ -103,6 +103,11 @@
       <Project>{f2e8eda4-c13f-4f8d-b858-d5ef4fb8a06d}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\YaccConstructor\YaccConstructor.fsproj">
+      <Name>YaccConstructor</Name>
+      <Project>{e9a0e63b-ead7-43de-8823-13faa6b2b972}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" />
   <Choose>

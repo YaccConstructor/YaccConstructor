@@ -17,6 +17,7 @@ NUGET
     FSharp.Formatting (2.14.4)
       FSharp.Compiler.Service (2.0.0.6)
       FSharpVSPowerTools.Core (>= 2.3 < 2.4)
+    FSharp.TypeProviders.StarterPack (1.1.3.88)
     FSharpVSPowerTools.Core (2.3)
       FSharp.Compiler.Service (>= 2.0.0.3)
     FSharpx.Collections (1.15.2) - framework: >= net45
@@ -139,7 +140,7 @@ NUGET
     System.Runtime.Extensions (4.3) - framework: >= net35
     System.Runtime.Handles (4.3) - framework: >= net463
     System.Runtime.InteropServices (4.3) - framework: >= net463
-      System.Runtime (>= 4.3) - framework: net462, >= net463, dnxcore50, netstandard11, netstandard12, netstandard13, >= netstandard15
+      System.Runtime (>= 4.3) - framework: net462, >= net463, dnxcore50, netstandard11, netstandard12, netstandard13, >= netstandard15, netcore11
     System.Runtime.InteropServices.RuntimeInformation (4.3) - framework: >= net463
     System.Runtime.Loader (4.3) - framework: >= net463
     System.Runtime.Numerics (4.3) - framework: >= net463

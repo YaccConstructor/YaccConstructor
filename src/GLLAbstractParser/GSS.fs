@@ -6,7 +6,7 @@ open AbstractAnalysis.Common
 open QuickGraph
 open QuickGraph.Graphviz
 
-type GSSVertex (nonterm: int<nonterm>, posInInput: int<positionInInput>) =    
+type GSSVertex (nonterm: int<positionInGrammar>, posInInput: int<positionInInput>) =    
 
     let setU = new System.Collections.Generic.Dictionary<int<positionInGrammar>, 
                                                          System.Collections.Generic.Dictionary<uint16,ResizeArray<int<positionInInput>>>>()

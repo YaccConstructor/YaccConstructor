@@ -63,6 +63,11 @@
       <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\ParserCommon\GLLParsers.Common.fsproj">
+      <Name>GLLParsers.Common</Name>
+      <Project>{f2e8eda4-c13f-4f8d-b858-d5ef4fb8a06d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

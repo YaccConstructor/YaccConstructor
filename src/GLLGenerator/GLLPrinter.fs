@@ -4,12 +4,14 @@ open System.Collections.Generic
 open Yard.Generators.Common.FSA
 open Yard.Generators.Common.FSA.Common
 open AbstractAnalysis.Common
+open Yard.Generators.GLL.ParserCommon
 
-let printGLL (fsa : FSA)
+let getGLLparserSource (fsa : FSA)
              (outFileName : string)
              (tokenType : Map<string,string option>)
              moduleName
-             light =
+             light 
+             generateToFile =
              //isAbstract = 
     let dummyPos = char 0
     let res = new System.Text.StringBuilder()
@@ -59,47 +61,49 @@ let printGLL (fsa : FSA)
                 | Some s -> " of (" + s + ")"
     
     let printStringToNumber () = 
-        println "let stringToNumber = function"
-        for tokenNumber in termToInt do
-            println "    | \"%s\" -> %i" tokenNumber.Key tokenNumber.Value
-        println "    | _ -> -1"
+        if generateToFile then
+            println "let stringToNumber = new System.Collections.Generic.Dictionary<_,_>()"
+            for tokenNumber in termToInt do
+                println "stringToNumber.Add(\"%s\",%i)" tokenNumber.Key tokenNumber.Value
 
-    let printTokenToNumber () = 
-        println "let tokenToNumber = function"
-        for tokenNumber in termToInt do
-            println "    | %s _ -> %i" tokenNumber.Key tokenNumber.Value
+//    let printTokenToNumber () = 
+//        if generateToFile then
+//            println "let tokenToNumber = new System.Collections.Generic.Dictionary<_,_>()"
+//            for tokenNumber in termToInt do
+//                println "tokenToNumber.Add(%s _ -> %i" tokenNumber.Key tokenNumber.Value
 
     let printStateToNontermName (sortedStateToNontermName : seq<KeyValuePair<int<positionInGrammar>, string>>) () = 
-        println "let stateToNontermName = function"
-        for tokenNumber in termToInt do
-            println "    | %i -> \"%s\"" tokenNumber.Value tokenNumber.Key
+        if generateToFile then
+            println "let stateToNontermName = new System.Collections.Generic.Dictionary<_,_>()"
+            for tokenNumber in termToInt do
+                println "stateToNontermName.Add(%i<positionInGrammar>,\"%s\")" tokenNumber.Value tokenNumber.Key
         
-        for numberNonterm in sortedStateToNontermName do
-            println "    | %i -> \"%s\"" numberNonterm.Key numberNonterm.Value
-        println "    | _ -> \"\""
+            for numberNonterm in sortedStateToNontermName do
+                println "stateToNontermName.Add(%i<positionInGrammar>,\"%s\")" numberNonterm.Key numberNonterm.Value
+
+
     
     let printAnyNonterm anyNonterm () =
-        println "let private anyNonterm = %i<nonterm>" anyNonterm
+        println "let private anyNonterm = %i<positionInGrammar>" anyNonterm
 
     let printNumIsTerminal () =
-        println "let private numIsTerminal = function"
+        println "let private terminalNums = new System.Collections.Generic.HashSet<_>()"
         for i in termToInt.Values do
-            println "    | %i -> true" i
-        println "    | _ -> false"
+            println "terminalNums.Add(%i) |> ignore" i
 
     let printStateAndTokenToNewState () =
         println "let private stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int, int<positionInGrammar>>()"
         for state, token, newState in stateTokenNewState do
             println "stateAndTokenToNewState.Add(%i, %i<positionInGrammar>)" (pack state token) newState
 
-    let printState (state:(int<nonterm> * int<positionInGrammar>) []) isFirst isLast =
+    let printState (state:(int<positionInGrammar> * int<positionInGrammar>) []) isFirst isLast =
         let prefix = if isFirst then "  [|" else "    "
         let postfix = if isLast then " |]" else ";"
 
         let printEdge (edge,state) isFirst isLast = 
             let prefix = if isFirst then "[|" else ""
             let postfix = if isLast then "|]" else ";"
-            print "%s%s<nonterm>,%s<positionInGrammar>%s" prefix (edge.ToString()) (state.ToString()) postfix
+            print "%s%s<positionInGrammar>,%s<positionInGrammar>%s" prefix (edge.ToString()) (state.ToString()) postfix
                     
         print "%s" prefix
 
@@ -115,7 +119,7 @@ let printGLL (fsa : FSA)
     let printOutNonterms fsaStatesOutNonterms () =
         println "let private outNonterms ="
         fsaStatesOutNonterms    
-        |> List.iteri (fun i state -> printState state (i = 0) (i = fsaStatesOutNonterms.Length-1))
+        |> Array.iteri (fun i state -> printState state (i = 0) (i = fsaStatesOutNonterms.Length-1))
 
     let printStartState () = 
         println "let private startState = %i<positionInGrammar>" fsa.StartState
@@ -137,7 +141,7 @@ let printGLL (fsa : FSA)
         println "let private nontermCount = %i" fsa.NontermCount
     
     let printParser () =
-        println "let parserSource = new FSAParserSourceGLL (outNonterms, startState, finalStates, nontermCount, numIsTerminal, stateToNontermName, anyNonterm, stateAndTokenToNewState)"
+        println "let parserSource = new ParserSourceGLL (outNonterms, startState, finalStates, nontermCount, terminalNums, stateToNontermName, anyNonterm, stateAndTokenToNewState)"
 
     let printFun isAbstract () =
         if isAbstract
@@ -154,8 +158,8 @@ let printGLL (fsa : FSA)
             x
             |> Array.collect (fun (symbol,state) -> 
                 match symbol with
-                    | Nonterm s -> [|(int s) * 1<nonterm>, state|]
-                    | Term s -> 
+                    | EdgeSymbol.Nonterm s -> [|(int s) * 1<positionInGrammar>, state|]
+                    | EdgeSymbol.Term s -> 
                         let cond, value = termToInt.TryGetValue s
                         if cond then
                             stateTokenNewState.Add(i, value, state)
@@ -164,9 +168,8 @@ let printGLL (fsa : FSA)
                             stateTokenNewState.Add(i, !nextInt, state)
                             incr nextInt
                         [||]
-                    | Epsilon() -> failwith "Found epsilon edge while print fsa."
+                    | EdgeSymbol.Epsilon() -> failwith "Found epsilon edge while print fsa."
                             ))
-        |> List.ofSeq
 
     let sortedStateToNontermName = 
         fsa.StateToNontermName
@@ -184,19 +187,37 @@ let printGLL (fsa : FSA)
         printer ()
         println ""
 
-    printItem printHeaders
-    printItem printToken
-    printItem printStringToNumber
-    printItem printTokenToNumber
-    printItem (printStateToNontermName sortedStateToNontermName)
-    printItem (printAnyNonterm anyNonterm)
-    printItem printNumIsTerminal
-    printItem printStateAndTokenToNewState
-    printItem (printOutNonterms fsaStatesOutNonterms)
-    printItem printStartState
-    printItem printFinalStates
-    printItem printNontermCount
-    printItem printParser
+    if generateToFile
+    then
+        printItem printHeaders
+        printItem printToken
+        printItem printStringToNumber
+//        printItem printTokenToNumber
+        printItem (printStateToNontermName sortedStateToNontermName)
+        printItem (printAnyNonterm anyNonterm)
+        printItem printNumIsTerminal
+        printItem printStateAndTokenToNewState
+        printItem (printOutNonterms fsaStatesOutNonterms)
+        printItem printStartState
+        printItem printFinalStates
+        printItem printNontermCount
+        printItem printParser
     //printItem (printFun isAbstract)
 
-    res
+    let terminalNums = new HashSet<_>(termToInt.Values)
+    let stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int, int<positionInGrammar>>()
+    for state, token, newState in stateTokenNewState do
+        stateAndTokenToNewState.Add((pack state token), newState)
+
+
+    let parserSource = new ParserSourceGLL(fsaStatesOutNonterms
+                                         , fsa.StartState
+                                         , fsa.FinalStates
+                                         , fsa.NontermCount
+                                         , terminalNums
+                                         , fsa.StateToNontermName
+                                         , (int anyNonterm)* 1<positionInGrammar>
+                                         , stateAndTokenToNewState)
+
+
+    res, parserSource

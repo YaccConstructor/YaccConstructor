@@ -2,7 +2,7 @@
 namespace System
 open System.Reflection
 
-[<assembly: AssemblyTitleAttribute("BioGraphLoader")>]
+[<assembly: AssemblyTitleAttribute("Bio.GraphLoader")>]
 [<assembly: AssemblyProductAttribute("YaccConstructor")>]
 [<assembly: AssemblyDescriptionAttribute("Platform for parser generators and other grammarware research and development.")>]
 [<assembly: AssemblyVersionAttribute("0.1.0.1")>]
@@ -10,7 +10,7 @@ open System.Reflection
 do ()
 
 module internal AssemblyVersionInformation =
-    let [<Literal>] AssemblyTitle = "BioGraphLoader"
+    let [<Literal>] AssemblyTitle = "Bio.GraphLoader"
     let [<Literal>] AssemblyProduct = "YaccConstructor"
     let [<Literal>] AssemblyDescription = "Platform for parser generators and other grammarware research and development."
     let [<Literal>] AssemblyVersion = "0.1.0.1"

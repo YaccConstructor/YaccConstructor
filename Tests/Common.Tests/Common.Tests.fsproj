@@ -8,8 +8,8 @@
     <ProjectGuid>{42244dcc-4326-4e7a-bb6b-ccd8ca544d85}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Common.Test</RootNamespace>
-    <AssemblyName>YC.Common.Test</AssemblyName>
-    <Name>Common.Test</Name>
+    <AssemblyName>YC.Common.Tests</AssemblyName>
+    <Name>Common.Tests</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>

@@ -33,7 +33,7 @@ open Mono.Addins
 
 [<SetUpFixture>]
 type SetUp()=
-    [<SetUp>]
+    [<OneTimeSetUp>]
     member this.SetUp () =
         AddinManager.Initialize()
         AddinManager.Registry.Update()

@@ -8,8 +8,8 @@
     <ProjectGuid>{8eaac2a1-d03a-4f42-9182-d294a3db9fdf}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Conversions.Test</RootNamespace>
-    <AssemblyName>YC.Conversions.Test</AssemblyName>
-    <Name>Conversions.Test</Name>
+    <AssemblyName>YC.Conversions.Tests</AssemblyName>
+    <Name>Conversions.Tests</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
@@ -86,6 +86,11 @@
     <ProjectReference Include="..\..\src\TreeDump\TreeDump.fsproj">
       <Name>TreeDump</Name>
       <Project>{99dfb4e9-46c5-4767-9646-ba49b2b6a664}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\YardFrontend\YardFrontend.fsproj">
+      <Name>YardFrontend</Name>
+      <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\src\YardPrinter\YardPrinter.fsproj">

@@ -3,6 +3,12 @@
     open TPMatrices
     open System
     open System.Collections.Generic
+    open Yard.Core
+    open Yard.Core.IL
+    open Yard.Core.IL.Production
+    open Yard.Core.IL.Definition
+    open Yard.Core.Helpers
+    open Conversions.TransformAux
 
     module Graph = 
         type T(_graph: Dictionary<int * int, ResizeArray<char>>, _numberOfVertices: int) =
@@ -117,7 +123,6 @@
                   (allRules: RulesHolder)
                   nonterminals
                   S =
-
         let parsingMatrix = initParsingMatrix graph allRules nonterminals
         let isChanged = ref true
         let mutable multCount = 0
@@ -129,3 +134,60 @@
 
         (parsingMatrix.[S], multCount)
 
+
+    let recognize (graph:Graph.T)
+                  squareMatrix
+                  (loadIL:t<Source.t, Source.t>)
+                  nonterminals
+                  S =
+        let grammar = loadIL.grammar
+        
+        let crl = new Dictionary<NonTerminal * NonTerminal, ResizeArray<NonTerminal*Probability.T>>()
+        let srl = new Dictionary<char, ResizeArray<NonTerminal*Probability.T>>()
+        let crl_result = new Dictionary<NonTerminal * NonTerminal, (NonTerminal * Probability.T) list>()
+        let srl_result = new Dictionary<char, (NonTerminal * Probability.T) list>()
+        let erl_result: NonTerminal list = []
+
+        let probOne = Probability.create 1.0
+
+        for module' in grammar do
+            for r in module'.rules do
+                let nonterm = NonTerminal <| Source.toString r.name           //is this nonterm name?
+                match r.body with
+                | PSeq([elem],_,_) ->
+                    match elem.rule with
+                    | PToken src ->
+                        let tokenChar = (Source.toString src).[0]             //need token to be a char
+                        if not <| srl.ContainsKey tokenChar
+                        then
+                            srl.Add(tokenChar, new ResizeArray<NonTerminal*Probability.T>())
+                        if not <| srl.[tokenChar].Contains (nonterm, probOne)
+                        then
+                            srl.[tokenChar].Add (nonterm, probOne)
+                    | _ ->
+                        assert false
+                        
+                | PSeq([e1; e2],_,_) ->
+                    match e1.rule, e2.rule with 
+                    | PRef (name1, _), PRef (name2, _) ->
+                        let nonterm1 = NonTerminal <| Source.toString name1
+                        let nonterm2 = NonTerminal <| Source.toString name2
+                        if not <| crl.ContainsKey (nonterm1, nonterm2)
+                        then
+                            crl.Add((nonterm1, nonterm2), new ResizeArray<NonTerminal*Probability.T>())
+                        if not <| crl.[(nonterm1, nonterm2)].Contains (nonterm, probOne)
+                        then
+                            crl.[(nonterm1, nonterm2)].Add (nonterm, probOne)                     
+                    | _ -> assert false                
+                | _ -> assert false
+
+        for key in crl.Keys do
+            let list = Seq.toList crl.[key]
+            crl_result.Add(key, list)
+        for key in srl.Keys do
+            let list = Seq.toList srl.[key]
+            srl_result.Add(key, list)
+        
+        let rulesHolder = new RulesHolder(crl_result, srl_result, erl_result)
+
+        recognizeGraph graph squareMatrix rulesHolder nonterminals S

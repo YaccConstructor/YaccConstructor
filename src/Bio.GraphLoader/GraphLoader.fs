@@ -7,6 +7,7 @@ open System.IO
 open Microsoft.FSharp.Collections
 open System.Collections.Generic
 open InfernalApi
+open System.Runtime.CompilerServices
 
 module Array =
     /// Returns a sequence that yields chunks of length n.
@@ -21,7 +22,7 @@ module Array =
 
 [<Struct>]
 type BioGraphEdgeLbl=
-    val str: string
+    val str: array<int<token>>
     val length : int
     val id : int
     val sourceStartPos : int
@@ -29,22 +30,73 @@ type BioGraphEdgeLbl=
         {str=_s; length=_l; id = _sourceId; sourceStartPos = _sourceStartPos}
     //new (_s, _id) = {str=_s; length=_s.Length; id=_id}
 
-let newEdge source target str len sourceId sourceStartPos = 
-    new TaggedEdge<_,_>(source, target, new BioGraphEdgeLbl(str, len, sourceId, sourceStartPos))
+[<Measure>] type vNumInOriginalGraph
+[<Measure>] type posInSubgraph
 
-//type BioGraphEdge(s,e,t) =
-//    inherit TaggedEdge<int, BioGraphEdgeLbl>(s,e,t)
-//    new (s,e,str,l, sourceId, sourceStartPos) =
-//        BioGraphEdge(s,e,new BioGraphEdgeLbl(str,l, sourceId, sourceStartPos))
-//    //new (s,e,str,id) = BioGraphEdge(s,e,new BioGraphEdgeLbl(str,id))
+type EdgeCompressedGraphInput (edges: array<TaggedEdge<int<vNumInOriginalGraph>, BioGraphEdgeLbl>>, tokenizer:char -> int<token>) as this =
+    inherit AdjacencyGraph<int<vNumInOriginalGraph>,TaggedEdge<int<vNumInOriginalGraph>,BioGraphEdgeLbl>>()
+    let vMap = new Dictionary<_,_>()
+    let vBackMap = new ResizeArray<_>()
+    do 
+        this.AddVerticesAndEdgeRange edges |> ignore
+        this.Vertices
+        |> Seq.iteri (fun i v ->
+            vMap.Add(v, i * 1<posInSubgraph>)
+            vBackMap.Add v
+        )
+//    let eTokens =
+//        edges
+//        |> Array.map (fun e -> e.Tag.str.ToCharArray() |> Array.map tokenizer)
+    let packPosition edge (position: int<posInSubgraph>) =
+        if (edge < 65536) && (int position < 65536) then ((int edge <<< 16) ||| int position) * 1<positionInInput>
+        else failwithf "Edge or position is greater then 65535: edge: %A; pos: %A" edge position
+    let initialPositions = 
+        let buf = new ResizeArray<_>()
+        edges
+        |> Array.iteri (fun i e ->
+            buf.Add(packPosition -1 vMap.[e.Source])
+            buf.Add(packPosition -1 vMap.[e.Target])
+            for j in 1 .. e.Tag.str.Length - 1 do
+                buf.Add (packPosition i (j * 1<posInSubgraph>))
+            )
+        buf.ToArray()
 
-//let bioEdgeToUndirected (e:BioGraphEdge) = 
-//    new TaggedUndirectedEdge<int,double>(e.Source, e.Target, 1.0)
+    interface IParserInput with
+        member this.InitialPositions = initialPositions
+        [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+        member this.ForAllOutgoingEdges curPosInInput pFun =
+            let inline getPosOnEdge (packedValue : int<positionInInput>) = int (int packedValue &&& 0xffff) * 1<posInSubgraph>
+            let inline getEdge (packedValue : int<positionInInput>) = 
+                int (int packedValue >>> 16) 
+            let eId = getEdge curPosInInput
+            if  eId = -1
+            then 
+                let vId = getPosOnEdge curPosInInput
+                this.OutEdges vBackMap.[int vId]
+                |> Seq.iter (fun e -> 
+                    let nextPos =
+                        if e.Tag.str.Length = 1
+                        then packPosition -1 vMap.[e.Target]
+                        else packPosition (Array.findIndex ((=)e) edges) 1<posInSubgraph>
+                    pFun e.Tag.str.[0] nextPos
+                    )
+            else
+                let e = edges.[eId]
+                let posOnEdge = getPosOnEdge curPosInInput
+                let tokens = e.Tag.str
+                let nextPos =
+                    if posOnEdge = (tokens.Length - 1) * 1<posInSubgraph>
+                    then packPosition -1 vMap.[e.Target]
+                    else packPosition eId (posOnEdge + 1<posInSubgraph>)
+                pFun tokens.[int posOnEdge] nextPos
 
 let undirectedToBioEdge (e:TaggedEdge<int,BioGraphEdgeLbl>) = 
     new TaggedEdge<int,BioGraphEdgeLbl>(e.Source, e.Target, e.Tag)
 
-let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit =
+let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit tokenizer =
+    let newEdge source target str len sourceId sourceStartPos = 
+        new TaggedEdge<int<vNumInOriginalGraph>,_>(source * 1<vNumInOriginalGraph>, target * 1<vNumInOriginalGraph>, new BioGraphEdgeLbl(str, len, sourceId, sourceStartPos))
+
     let lblsExt = ".sqn"
     let graphStrauctureExt = ".grp"
     let maxComponentSize = 90000
@@ -91,14 +143,14 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit =
     let edgs = 
         edges       
         |> Array.Parallel.map (fun (id,start,ending,length) -> 
-            newEdge start ending edgesСontent.[id] length id 0)
+            newEdge start ending (edgesСontent.[id].ToCharArray() |> Array.map tokenizer) length id 0)
         |> Array.collect (fun e -> 
             let shift = e.Tag.str.Length - e.Tag.length
             if shift <> 0 
             then
                 incr cnt 
                 let newV = !cnt
-                [| newEdge e.Source e.Target e.Tag.str.[shift..] e.Tag.length e.Tag.id shift |]
+                [| newEdge (int e.Source) (int e.Target) e.Tag.str.[shift..] e.Tag.length e.Tag.id shift |]
             else [|e|])
         
         |> Array.collect 
@@ -113,16 +165,19 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit =
                 else 
                     longEdges.Add e
                     incr leCount
-                    let str1 = e.Tag.str.Substring(0, templateLengthHighLimit)
+                    let str1 = 
+                        e.Tag.str.[0 .. templateLengthHighLimit]
+                        
                     let startOfSecondEdge= e.Tag.str.Length - templateLengthHighLimit
-                    let str2 = e.Tag.str.Substring(startOfSecondEdge)
+                    let str2 = e.Tag.str.[startOfSecondEdge ..]
                     incr cnt
                     let newEnd = !cnt
                     incr cnt
                     let newStart = !cnt
-                    [|newEdge e.Source newEnd str1 templateLengthHighLimit e.Tag.id e.Tag.sourceStartPos;
-                      newEdge newStart e.Target str2 templateLengthHighLimit e.Tag.id startOfSecondEdge|]  
+                    [|newEdge (int e.Source) newEnd str1 templateLengthHighLimit e.Tag.id e.Tag.sourceStartPos;
+                      newEdge newStart (int e.Target) str2 templateLengthHighLimit e.Tag.id startOfSecondEdge|]  
             )
+                    
     printfn "long edges %A" !leCount
 
     let filterEdges edges = 
@@ -130,7 +185,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit =
             edges
             |> Array.filter(fun (edge : TaggedEdge<_,BioGraphEdgeLbl>) -> edge.Tag.str.Length > 30)
             |> Array.map (fun (edge : TaggedEdge<_,BioGraphEdgeLbl>) ->
-                sprintf ">%i\n%s" edge.Tag.id edge.Tag.str)
+                sprintf ">%i\n%A" edge.Tag.id edge.Tag.str)
 
         File.WriteAllLines("edgesToFilter.fa", toPrint)
         
@@ -164,7 +219,6 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit =
                     |> Array.map (fun kvp -> kvp.Key))
                 |> Array.filter(fun a -> a.Length > 1)
                 |> Array.sortBy (Array.length >> ((*)-1))
-                //|> Array.sortBy (Array.length)
             
             x
             |> Array.Parallel.map (fun vs ->
@@ -172,7 +226,6 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit =
                 |> Array.collect (uGraph.AdjacentEdges >> Array.ofSeq)
                 |> (fun c -> new HashSet<_>(c))
                 |> Array.ofSeq )
-            //|> Array.filter (fun x -> x.Length > 1)
         components
     
     let components = divisionOnComponents ()
@@ -237,33 +290,14 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit =
         |> Seq.mapi (fun i line -> (getInfo prefix i) + line)
         |> (fun x -> File.AppendAllLines(path, x))
 
-    (*components.[0]
-    |> Array.map (fun x ->
-        x.Tag.str)
-    |> printStringsToFASTA "componentEdges.fa" ""*)
-
     edgs,
     components
     |> Array.Parallel.map
-       (fun edges -> 
-         let qGraph = new QuickGraph.AdjacencyGraph<_,_>()
-         qGraph.AddVerticesAndEdgeRange edges
-         |> ignore
-         qGraph)
+       (fun edges -> new EdgeCompressedGraphInput(edges, tokenizer))
     , longEdges
     
 let loadGraph fileWithoutExt templateLengthHighLimit tokenizer =
-//    let convert (g:AdjacencyGraph<_,BioGraphEdge>) =
-//        let edges =
-//            let EList = new ResizeArray<_>()
-//            for e in g.Edges do
-//                let tag = e.Tag.str.ToCharArray() |> Array.map tokenizer
-//                EList.Add(new BioParserEdge(e.Source, e.Target, e.Tag.length, tag, e.Tag.id, e.Tag.sourceStartPos))
-//            EList.ToArray()
-//            
-//        new BioParserInputGraph(edges, Set([]))
-
-    let sourceDraph, gs, longEdges = loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit
+    let sourceDraph, gs, longEdges = loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit tokenizer
     sourceDraph
     , gs // |> Array.Parallel.map convert
     ,longEdges

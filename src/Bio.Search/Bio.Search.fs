@@ -106,7 +106,7 @@ let graphConvert (graph : AdjacencyGraph<int,TaggedEdge<_,BioGraphEdgeLbl>>) =
     newGraph.AddVerticesAndEdgeRange(newEdges) |> ignore
     newGraph, !min
 
-let searchInBioGraphs (searchCfg : SearchConfig) (graphs : AdjacencyGraph<int,TaggedEdge<_,BioGraphEdgeLbl>> []) agentsCount = 
+let searchInBioGraphs (searchCfg : SearchConfig) (graphs : EdgeCompressedGraphInput[]) agentsCount = 
     let start = System.DateTime.Now
     
     let agent name = 
@@ -120,12 +120,12 @@ let searchInBioGraphs (searchCfg : SearchConfig) (graphs : AdjacencyGraph<int,Ta
                             printfn "\nSearch in agent %A. Graph %A." name i
                             printfn "Vertices: %A Edges: %A" graph.VertexCount graph.EdgeCount
 
-                            let newGraph, shift = graphConvert graph
+                            //let newGraph, shift = graphConvert graph
 
-                            let parserInputGraph = new EdgeCompressedGraphInput<_>(newGraph,(fun x -> x.str.ToCharArray() |> Array.map searchCfg.Tokenizer))
+                            //let parserInputGraph = new EdgeCompressedGraphInput<_>(newGraph,(fun x -> x.str.ToCharArray() |> Array.map searchCfg.Tokenizer))
 
                             let parseResult = 
-                                getAllRangesForStartStateWithLength searchCfg.ParserSource parserInputGraph
+                                getAllRangesForStartStateWithLength searchCfg.ParserSource graph
                                 |> Array.ofSeq
                             //             debug
                             (*printfn ""
@@ -148,19 +148,19 @@ let searchInBioGraphs (searchCfg : SearchConfig) (graphs : AdjacencyGraph<int,Ta
 
                             if parseResult.Length = 0 then failwith "Input parsing failed." else
                             printfn "SearchWithoutSPPF succeed"
-                            let res = 
-                                parseResult 
-                                |> Array.map (fun (left, right, len) -> 
-                                    let leftEdge = getEdge left
-                                    let rightEdge = getEdge right
-
-                                    let leftPos = getPosOnEdge left
-                                    let rightPos = getPosOnEdge right
-
-                                    new ResultStruct(leftEdge, leftPos, rightEdge, rightPos, len))
-                                |> filterRnaParsingResult newGraph searchCfg.LowLengthLimit searchCfg.HighLengthLimit
-
-                            printPathsToFASTA newGraph (".\\" + searchCfg.OutFileName) res i shift
+//                            let res = 
+//                                parseResult 
+//                                |> Array.map (fun (left, right, len) -> 
+//                                    let leftEdge = getEdge left
+//                                    let rightEdge = getEdge right
+//
+//                                    let leftPos = getPosOnEdge left
+//                                    let rightPos = getPosOnEdge right
+//
+//                                    new ResultStruct(leftEdge, leftPos, rightEdge, rightPos, len))
+//                                |> filterRnaParsingResult newGraph searchCfg.LowLengthLimit searchCfg.HighLengthLimit
+//
+//                            printPathsToFASTA newGraph (".\\" + searchCfg.OutFileName) res i shift
                         with e -> printfn "ERROR in bio graph parsing! %A" e.Message
                         return! loop n
                     | Die ch -> ch.Reply()

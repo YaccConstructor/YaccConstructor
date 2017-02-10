@@ -24,7 +24,7 @@ type CLIArguments =
             | Agents _ -> "Specify a number of agents for parallel processing."
 
 type msg = 
-    | Data of int * AdjacencyGraph<int,TaggedEdge<int,BioGraphEdgeLbl>>
+    | Data of int * EdgeCompressedGraphInput
     | Die of AsyncReplyChannel<unit>
 
 [<Struct>]

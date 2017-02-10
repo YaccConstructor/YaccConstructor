@@ -11,13 +11,14 @@ open System.Collections.Generic.Customized
 
 type GSSVertex (nonterm: int<positionInGrammar>, posInInput: int<positionInInput>) =    
 
-    let setU = new Dictionary<int64<compressedPosInInputAndGrammar>,HashSet<uint16>>()
+    let setU = new System.Collections.Generic.Dictionary<int64<compressedPosInInputAndGrammar>,HashSet<uint16>>()
     let setP = new ResizeArray<int<positionInInput>*uint16>() 
     
-    override this.Equals y = 
+    override this.Equals y =
         y :? GSSVertex 
-        && this.Nonterm = (y :?> GSSVertex).Nonterm
-        && this.PositionInInput = (y :?> GSSVertex).PositionInInput
+        && (let y = y :?> GSSVertex 
+            this.Nonterm = y.Nonterm
+            && this.PositionInInput = y .PositionInInput)
 
     override this.GetHashCode() = hash (this.Nonterm, this.PositionInInput)
     
@@ -31,14 +32,14 @@ type GSSVertex (nonterm: int<positionInGrammar>, posInInput: int<positionInInput
 
     /// Checks for existing of context in SetU. If not adds it to SetU.
     member this.ContainsContext (posInInput: int<positionInInput>) (posInGrammar : int<positionInGrammar>) (len : uint16)=
-        let compressPositions (posInInput: int<positionInInput>) (posInGrammar : int<positionInGrammar>) =
+        let compressedPositions =
             CommonFuns.pack posInInput posInGrammar 
             |> FSharp.Core.LanguagePrimitives.Int64WithMeasure  
-        let cond, data = compressPositions posInInput posInGrammar |> setU.TryGetValue 
+        let cond, data = setU.TryGetValue compressedPositions
         if cond
         then not <| data.Add len
         else 
-            setU.Add(compressPositions posInInput posInGrammar, new HashSet<_>([len]))
+            setU.Add(compressedPositions, new HashSet<_>([|len|]))
             false
 
 [<Struct>]
@@ -52,15 +53,25 @@ type GSS () =
     /// Checks for existing of edge in gss edges set. If not adds it to edges set.
     member this.ContainsEdge (startVertex:GSSVertex, endVertex:GSSVertex, stateToContinue : int<positionInGrammar>, len : uint16) =
         let mutable realStartVertex = if startVertex = endVertex then endVertex else startVertex
-        let cond, edges = this.TryGetEdges(startVertex, endVertex)
-        let exists = 
-            cond 
-            && 
-             let edg = edges |> Seq.tryFind (fun e -> e.Tag.LengthOfProcessedString = len && e.Tag.StateToContinue = stateToContinue)
-             if edg.IsSome then realStartVertex <- edg.Value.Source
-             edg.IsSome
-        if not exists
-        then this.AddVerticesAndEdge(new QuickGraph.TaggedEdge<_,_>(realStartVertex, endVertex, new GSSEdgeLbl(stateToContinue, len))) |> ignore
+        let cond, outEdges = this.TryGetOutEdges startVertex
+        let edges =
+            if cond then
+                outEdges
+                |> Array.ofSeq
+                |> Array.filter (fun e -> e.Target = endVertex && e.Tag.LengthOfProcessedString = len && e.Tag.StateToContinue = stateToContinue)
+            else [||]
+        //let cond, edges = this.TryGetEdges(startVertex, endVertex)
+//        let exists = 
+//            cond 
+//            && 
+//             let edg = edges |> Seq.tryFind (fun e -> e.Tag.LengthOfProcessedString = len && e.Tag.StateToContinue = stateToContinue)
+//             if edg.IsSome then realStartVertex <- edg.Value.Source
+//             edg.IsSome
+//        if not exists
+        let exists = edges.Length > 0
+        if exists
+        then realStartVertex <- edges.[0].Source
+        else this.AddVerticesAndEdge(new QuickGraph.TaggedEdge<_,_>(realStartVertex, endVertex, new GSSEdgeLbl(stateToContinue, len))) |> ignore
         exists, realStartVertex
 
     member this.ToDot fileName =

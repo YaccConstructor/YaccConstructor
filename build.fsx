@@ -52,9 +52,6 @@ let ycCoreSolutionFile  = "YC.Core.sln"
 let ycMinimalSolutionFile  = "YC.Minimal.sln"
 let ycYardFrontendSolutionFile  = "YC.YardFrontend.sln"
 
-// Pattern specifying assemblies to be tested using NUnit
-let testAssemblies = "tests/**/bin/Release/*Tests*.dll"
-
 // Git configuration (used for publishing documentation in gh-pages branch)
 // The profile where the project is posted
 let gitOwner = "YaccConstructor" 
@@ -186,7 +183,10 @@ Target "GenTests:RIGLR" (fun _ -> runCmd @"tests\RIGLRParser.SimpleTest\gen.cmd"
 // Run the unit tests using test runner
 
 Target "RunTests" (fun _ ->
-    !! testAssemblies
+    // Pattern specifying assemblies to be tested using NUnit
+    let testAssemblies = !! "tests/**/bin/Release/*Tests*.dll" ++ "tests/**/bin/Release/*Tests*.exe"
+
+    testAssemblies
     |> NUnit3 (fun p ->
         { p with
             ShadowCopy = false

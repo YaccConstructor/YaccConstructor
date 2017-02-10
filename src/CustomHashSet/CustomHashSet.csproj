@@ -44,9 +44,11 @@
   <ItemGroup>
     <Compile Include="BitHelper.cs" />
     <Compile Include="CustomizedHashSet.cs" />
+    <Compile Include="Dictionary.cs" />
     <Compile Include="HashHelpers.cs" />
     <Compile Include="HashSetEqualityComparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ThrowHelper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

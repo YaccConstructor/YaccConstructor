@@ -34,8 +34,6 @@ let filterRnaParsingResult (graph : AdjacencyGraph<int,TaggedEdge<_,BioGraphEdge
             |> Seq.max
             |> int
     
-
-       
         let rec dfs start curLength = 
             let toReturn = new List<List<TaggedEdge<_,_>>>()
             for edge in graph.OutEdges start do

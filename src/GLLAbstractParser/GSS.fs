@@ -5,7 +5,7 @@ open Yard.Generators.Common.DataStructures
 open AbstractAnalysis.Common
 open QuickGraph
 open QuickGraph.Graphviz
-open System.Collections.Generic
+open System.Collections.Generic.Customized
 
 type GSSVertex (nonterm: int<nonterm>, posInInput: int<positionInInput>) =    
 
@@ -28,7 +28,7 @@ type GSSVertex (nonterm: int<nonterm>, posInInput: int<positionInInput>) =
     /// Checks for existing of context in SetU. If not adds it to SetU.
     member this.ContainsContext (inputIndex: int<positionInInput>) (state : int<positionInGrammar>) (len : uint16)=
         let cond, dict2 = setU.TryGetValue state
-        if cond
+        //let inline pack (inputIndex: int<positionInInput>) (state : int<positionInGrammar>) : int64 = ((int64 left <<< 32) ||| int64 right)
         then
             let cond2, current = dict2.TryGetValue len
             if cond2
@@ -45,7 +45,6 @@ type GSSVertex (nonterm: int<nonterm>, posInInput: int<positionInInput>) =
             let d1 = new System.Collections.Generic.Dictionary<_,_>()
             d1.Add(len, new ResizeArray<_>([inputIndex]))
             setU.Add(state, d1)
-            false
 
 [<Struct>]
 type GSSEdgeLbl =

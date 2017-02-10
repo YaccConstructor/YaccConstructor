@@ -78,7 +78,7 @@ let buildAST (parser : ParserSourceGLL) (input : seq<int>) =
     if input.Length = 0 then failwith ("Input sequence is empty.") else
     let epsilon = -1
     let result = ref None
-    let endOfInput = input.Length * 1<positionInGrammar>
+    let endOfInput = input.Length * 1<positionInInput>
     
 
     /// Descriptors
@@ -88,14 +88,14 @@ let buildAST (parser : ParserSourceGLL) (input : seq<int>) =
     let setP = new Dictionary<int64<gssVertex>, Yard.Generators.Common.DataStructures.ResizableUsualOne<int<nodeMeasure>>>(500)
     /// Edges of GSS:
     /// |vertex| --- stateToContinue, node ---> |vertex|
-    let edges = Array.init parser.NonTermCount (fun _ -> Array.zeroCreate<Dictionary<int<positionInGrammar>, Dictionary<int<positionInGrammar>, (int<positionInGrammar> * int<nodeMeasure>)[]>>> input.Length)
+    let edges = Array.init parser.NonTermCount (fun _ -> Array.zeroCreate<Dictionary<int<positionInGrammar>, Dictionary<int<positionInGrammar>, (int<positionInInput> * int<nodeMeasure>)[]>>> input.Length)
 
     /// State of FSA.
     let currentState = ref <| parser.StartState
     /// Position in input.
-    let currentIndex = ref (-1<positionInGrammar>)
+    let currentIndex = ref (-1<positionInInput>)
     //let currentLength = ref 0us
-    let currentGSSNode = ref <| new GSSVertexFSA(-1<positionInGrammar>,-1<positionInGrammar>)
+    let currentGSSNode = ref <| new GSSVertexFSA(-1<positionInInput>,-1<positionInGrammar>)
     
     let dummyNode = -1<nodeMeasure>
     let dummyAST = new TerminalNode(-1, packExtension -1 -1)
@@ -141,7 +141,7 @@ let buildAST (parser : ParserSourceGLL) (input : seq<int>) =
     let currentContext = ref <| new ContextFSA(!currentIndex, !currentState, !currentGSSNode, !currentN)
 
     let startContext = 
-        let pos = 0<positionInGrammar>
+        let pos = 0<positionInInput>
         let vertex = new GSSVertexFSA(pos, measureStateToNonterm !currentState)
         new ContextFSA(pos, !currentState, vertex, !currentN)
     
@@ -223,7 +223,7 @@ let buildAST (parser : ParserSourceGLL) (input : seq<int>) =
         newNode 
     
              
-    let getNodeT symbol (pos : int<positionInGrammar>) =
+    let getNodeT symbol (pos : int<positionInInput>) =
         let index = int pos
         if symbol = epsilon
         then
@@ -293,7 +293,7 @@ let buildAST (parser : ParserSourceGLL) (input : seq<int>) =
         y, x
              
     /// Checks for existing of context in SetU. If not adds it to SetU.
-    let containsContext (inputIndex: int<positionInGrammar>) (state : int<positionInGrammar>) (vertex : GSSVertexFSA) (node : int<nodeMeasure>)=
+    let containsContext (inputIndex: int<positionInInput>) (state : int<positionInGrammar>) (vertex : GSSVertexFSA) (node : int<nodeMeasure>)=
         let vertexKey = CommonFuns.pack vertex.PositionInInput vertex.Nonterm
         if setU.[int inputIndex] <> null
         then
@@ -326,11 +326,11 @@ let buildAST (parser : ParserSourceGLL) (input : seq<int>) =
             false
 
     /// Adds new context to stack (setR)
-    let pushContext (inputIndex : int<positionInGrammar>) (state : int<positionInGrammar>) vertex node =
+    let pushContext (inputIndex : int<positionInInput>) (state : int<positionInGrammar>) vertex node =
         setR.Push(new ContextFSA(inputIndex, state, vertex, node))
 
     /// Adds new context to stack (setR) if it is first occurrence of this context (if SetU doesn't contain it).
-    let addContext (inputVertex : int<positionInGrammar>) (state : int<positionInGrammar>) vertex node =
+    let addContext (inputVertex : int<positionInInput>) (state : int<positionInGrammar>) vertex node =
         if not <| containsContext inputVertex state vertex node
         then
             pushContext inputVertex state vertex node
@@ -463,10 +463,10 @@ let buildAST (parser : ParserSourceGLL) (input : seq<int>) =
                         if nonterm <> dummyNode
                         then
                             let x = (sppfNodes.Item (int nonterm))
-                            let newIndex = (1<positionInGrammar>) * getRightExtension (x.getExtension())
+                            let newIndex = (1<positionInInput>) * getRightExtension (x.getExtension())
                             pop currentVertex newIndex nonterm
                         let x = (sppfNodes.Item (int y))
-                        let newIndex = (1<positionInGrammar>) * getRightExtension (x.getExtension())
+                        let newIndex = (1<positionInInput>) * getRightExtension (x.getExtension())
                         addContext newIndex stateToContinue currentVertex y)
         else//need to create new edge, vertex and context
             containsEdge newVertex currentVertex stateToContinue currentNode |> ignore
@@ -480,9 +480,9 @@ let buildAST (parser : ParserSourceGLL) (input : seq<int>) =
         
         if nontermNode <> dummyNode
         then
-            pop !currentGSSNode (!currentIndex + 1<positionInGrammar>) nontermNode 
+            pop !currentGSSNode (!currentIndex + 1<positionInInput>) nontermNode 
         
-        pushContext (!currentIndex + 1<positionInGrammar>) nextState !currentGSSNode y
+        pushContext (!currentIndex + 1<positionInInput>) nextState !currentGSSNode y
     
     let getNewDescriptor() =
         currentContext := setR.Pop()

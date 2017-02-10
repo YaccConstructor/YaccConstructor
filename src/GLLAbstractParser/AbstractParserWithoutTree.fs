@@ -56,13 +56,25 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) =
         curGssVertex.P.Add (curContext.PosInInput, curContext.Length)
         if outEdges <> null && outEdges.Length <> 0
         then
-            let vertexKey = packVertexFSA curGssVertex.PositionInInput curGssVertex.Nonterm
-            
             for e in outEdges do
+                let vertexKey = packVertexFSA curGssVertex.PositionInInput curGssVertex.Nonterm
                 addContext curContext.PosInInput e.Tag.StateToContinue e.Target (curContext.Length + e.Tag.LengthOfProcessedString)
+
+    let processed = ref 0
+    let mlnCount = ref 0
+    let startTime = ref System.DateTime.Now
 
     while setR.Count <> 0 do
         let currentContext = setR.Pop()
+
+        incr processed
+        if !processed = 10000000
+        then
+            incr mlnCount            
+            printfn "%A mlns of D procesed. %A D/sec" (!mlnCount * 10) (!processed / int (System.DateTime.Now - !startTime).TotalMilliseconds * 1000)
+            processed := 0
+            startTime :=  System.DateTime.Now
+
         let possibleNontermMovesInGrammar = parser.OutNonterms.[int currentContext.PosInGrammar]
 
         /// Current state is final
@@ -91,13 +103,11 @@ let findVertices (gss:GSS) state =
 let isParsed (parser : ParserSourceGLL) (input : LinearInput) = 
     let gss = parse parser input
     findVertices gss parser.StartState
-    //|> Seq.exists (fun v -> v.U.Values |> Seq.exists (fun a -> a |> ResizeArray.exists (fun i -> int i = input.Input.Length)))
     |> Seq.exists (fun v -> v.P |> Seq.exists (fun (pos,_) -> int pos = input.Input.Length))
-
 
 let getAllRangesForState gss state =
     findVertices gss state
-    |> Seq.collect (fun v -> v.U.Values |> Seq.collect (fun a -> a |> Seq.collect (fun x -> x.Value |> ResizeArray.map (fun i -> v.PositionInInput, i))))
+    |> Seq.collect (fun v -> v.U |> Seq.collect (fun kvp -> kvp.Value |> Seq.map (fun x -> v.PositionInInput, v.GetUncompressetPositions kvp.Key |> fst)))    
 
 let getAllRangesForStartState (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss = parse parser input
@@ -105,7 +115,7 @@ let getAllRangesForStartState (parser : ParserSourceGLL) (input : IParserInput) 
 
 let getAllRangesForStateWithLength gss state =
     findVertices gss state
-    |> Seq.collect (fun v -> v.U.Values |> Seq.collect (fun a -> a |> Seq.collect (fun x -> x.Value |> ResizeArray.map (fun i -> v.PositionInInput, i, x.Key))))
+    |> Seq.collect (fun v -> v.U |> Seq.collect (fun kvp -> kvp.Value |> Seq.map (fun x -> v.PositionInInput, v.GetUncompressetPositions kvp.Key |> fst, x)))
 
 let getAllRangesForStartStateWithLength (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss = parse parser input

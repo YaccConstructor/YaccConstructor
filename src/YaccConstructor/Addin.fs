@@ -8,6 +8,8 @@ open Microsoft.FSharp.Text
 open System.IO
 open System.Reflection
 
+[<assembly:AddinRoot ("YaccConstructor", "1.0")>]
+
 AddinManager.Initialize()    
 //let x = AddinManager.Registry.RegistryPath
 //printfn "%A" x

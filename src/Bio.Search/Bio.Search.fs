@@ -295,8 +295,9 @@ let searchMiddle path agentsCount =
         loadGraph path 545(*searchCfg.HighLengthLimit*) searchCfg.Tokenizer // (GLL.tRNA.RNGLR_EOF 0)
     //printLongEdges @"C:\CM\long_edges.fa" longEdges
     let graphs = 
+        graphs.[0..]
         //graphs.[435..435]
-        graphs.[10..50]
+        // graphs.[10..50]
     //graphs.[1500..]
     //graphs.[5000..5050]
     //graphs.[4071..4072]

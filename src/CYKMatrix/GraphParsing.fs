@@ -135,13 +135,13 @@
         (parsingMatrix.[S], multCount)
 
 
-    let recognize (graph:Graph.T)
+    let graphParse (graph:Graph.T)
                   squareMatrix
-                  (loadIL:t<Source.t, Source.t>)
-                  nonterminals
-                  S =
+                  (loadIL:t<Source.t, Source.t>) =
         let grammar = loadIL.grammar
         
+        let S = ref (NonTerminal "")
+        let nonterminals = new ResizeArray<NonTerminal>()
         let crl = new Dictionary<NonTerminal * NonTerminal, ResizeArray<NonTerminal*Probability.T>>()
         let srl = new Dictionary<char, ResizeArray<NonTerminal*Probability.T>>()
         let crl_result = new Dictionary<NonTerminal * NonTerminal, (NonTerminal * Probability.T) list>()
@@ -152,7 +152,14 @@
 
         for module' in grammar do
             for r in module'.rules do
-                let nonterm = NonTerminal <| Source.toString r.name           //is this nonterm name?
+                let nonterm = NonTerminal <| Source.toString r.name
+                if not <| nonterminals.Contains nonterm
+                then
+                    nonterminals.Add nonterm
+                    if r.isStart
+                    then
+                        S := nonterm
+
                 match r.body with
                 | PSeq([elem],_,_) ->
                     match elem.rule with
@@ -171,7 +178,13 @@
                     match e1.rule, e2.rule with 
                     | PRef (name1, _), PRef (name2, _) ->
                         let nonterm1 = NonTerminal <| Source.toString name1
+                        if not <| nonterminals.Contains nonterm1
+                        then
+                            nonterminals.Add nonterm1
                         let nonterm2 = NonTerminal <| Source.toString name2
+                        if not <| nonterminals.Contains nonterm2
+                        then
+                            nonterminals.Add nonterm2
                         if not <| crl.ContainsKey (nonterm1, nonterm2)
                         then
                             crl.Add((nonterm1, nonterm2), new ResizeArray<NonTerminal*Probability.T>())
@@ -190,4 +203,4 @@
         
         let rulesHolder = new RulesHolder(crl_result, srl_result, erl_result)
 
-        recognizeGraph graph squareMatrix rulesHolder nonterminals S
+        recognizeGraph graph squareMatrix rulesHolder nonterminals !S

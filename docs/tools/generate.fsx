@@ -82,7 +82,7 @@ let binaries =
     let conventionBased = 
         directoryInfo (sprintf "%s/../src/" bin)
         |> subDirectories
-        |> Array.map (fun d -> bin @@ (sprintf "Release/v40/%s.dll" d.Name))
+        |> Array.map (fun d -> bin @@ (sprintf "Release/v40/YC.%s.dll" d.Name))
         |> List.ofArray
 
     conventionBased @ manuallyAdded

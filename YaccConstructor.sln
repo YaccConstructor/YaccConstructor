@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{370FB9E2-14CC-44C0-8160-6A6066F12B26}"
 	ProjectSection(SolutionItems) = preProject
@@ -38,9 +38,9 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AbstractLexer.Generator", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{E144E776-6206-4B83-8964-C93386BAA644}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common.Test", "tests\Common.Tests\Common.Test.fsproj", "{42244DCC-4326-4E7A-BB6B-CCD8CA544D85}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common.Tests", "tests\Common.Tests\Common.Tests.fsproj", "{42244DCC-4326-4E7A-BB6B-CCD8CA544D85}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Conversions.Test", "tests\Conversions.Tests\Conversions.Test.fsproj", "{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Conversions.Tests", "tests\Conversions.Tests\Conversions.Tests.fsproj", "{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TreeDump", "src\TreeDump\TreeDump.fsproj", "{99DFB4E9-46C5-4767-9646-BA49B2B6A664}"
 EndProject

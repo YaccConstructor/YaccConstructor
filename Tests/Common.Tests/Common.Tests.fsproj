@@ -8,8 +8,8 @@
     <ProjectGuid>{42244dcc-4326-4e7a-bb6b-ccd8ca544d85}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Common.Test</RootNamespace>
-    <AssemblyName>YC.Common.Test</AssemblyName>
-    <Name>Common.Test</Name>
+    <AssemblyName>YC.Common.Tests</AssemblyName>
+    <Name>Common.Tests</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
@@ -63,14 +63,49 @@
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\Conversions\Conversions.fsproj">
+      <Name>Conversions</Name>
+      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\FsYaccFrontend\FsYaccFrontend.fsproj">
+      <Name>FsYaccFrontend</Name>
+      <Project>{17103a48-db90-4101-92ee-7b2719db2cf0}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\FsYacc\FsYacc.fsproj">
       <Name>FsYacc</Name>
       <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\GLLGenerator\GLLGenerator.fsproj">
+      <Name>GLLGenerator</Name>
+      <Project>{8756690f-8138-495a-a368-39afb9029823}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\RIGLRGenerator\RIGLRGenerator.fsproj">
+      <Name>RIGLRGenerator</Name>
+      <Project>{5e1f6ba9-9c96-48c4-b17b-021a2394b01a}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\RNGLRGenerator\RNGLRGenerator.fsproj">
+      <Name>RNGLRGenerator</Name>
+      <Project>{5baf0fba-31b7-406d-bea4-1bcc1418a63f}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\TreeDump\TreeDump.fsproj">
+      <Name>TreeDump</Name>
+      <Project>{99dfb4e9-46c5-4767-9646-ba49b2b6a664}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\YardFrontend\YardFrontend.fsproj">
       <Name>YardFrontend</Name>
       <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\YardPrinter\YardPrinter.fsproj">
+      <Name>YardPrinter</Name>
+      <Project>{3148144c-1649-440e-a9b4-1d5c41677262}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

@@ -69,7 +69,7 @@ let getParseInputGraph tokenizer file =
 let processFile file =
     let cnt = 1
     let g1, triples1 = 
-        getParseInputGraph (GLL.GPPerf1.stringToNumber >> ((*) 1<token>)) file
+        getParseInputGraph (fun s -> GLL.GPPerf1.stringToNumber.[s] * 1<token>) file
 //    let g2, triples1 = 
 //        getParseInputGraph (GLL.GPPerf2.stringToNumber >> ((*) 1<token>)) file
 //        
@@ -84,7 +84,7 @@ let processFile file =
     let start = System.DateTime.Now
     let root2 =
         [for i in 0..cnt-1 ->
-            Yard.Generators.GLL.AbstractParserWithoutTree.getAllRangesForStartState GLL.GPPerf2.parserSource g1
+            //Yard.Generators.GLL.AbstractParserWithoutTree.getAllRangesForStartState GLL.GPPerf2.parserSource g2
             [-1]
             |> Seq.length]
     let time2 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)

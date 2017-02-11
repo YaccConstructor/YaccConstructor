@@ -57,7 +57,6 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) =
         if outEdges <> null && outEdges.Length <> 0
         then
             for e in outEdges do
-                let vertexKey = packVertexFSA curGssVertex.PositionInInput curGssVertex.Nonterm
                 addContext curContext.PosInInput e.Tag.StateToContinue e.Target (curContext.Length + e.Tag.LengthOfProcessedString)
 
     let processed = ref 0
@@ -103,7 +102,7 @@ let findVertices (gss:GSS) state =
 let isParsed (parser : ParserSourceGLL) (input : LinearInput) = 
     let gss = parse parser input
     findVertices gss parser.StartState
-    |> Seq.exists (fun v -> v.P |> Seq.exists (fun p -> int p.posInInput = input.Input.Length))
+    |> Seq.exists (fun v -> v.P |> ResizeArray.exists (fun p -> int p.posInInput = input.Input.Length))
 
 let getAllRangesForState gss state =
     findVertices gss state

@@ -159,6 +159,7 @@ let removeImmediateRecursion (rule:Rule) =
        body = createAlt newNonTermProductions
        isStart = false
        isPublic = false
+       isInline = false
        args = []
        metaArgs = [] }]
 

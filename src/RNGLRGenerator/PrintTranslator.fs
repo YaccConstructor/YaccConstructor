@@ -273,6 +273,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 body    = PSeq([], Some <| new Source.t("parserRange"), None)
                 isStart = false
                 isPublic = false
+                isInline = false
                 metaArgs= []
             }
         wordL ("let _rnglr_extra_array, " + ruleName + ", " + concatsName + " = ")

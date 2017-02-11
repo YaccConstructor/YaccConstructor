@@ -55,6 +55,7 @@ let private changeRule (oldRule : Rule.t<_,_>) (elemList : elem<Source.t, Source
             body = PSeq(elemList, Some <| new Source.t(actionCode), None)
             isStart = oldRule.isStart
             isPublic = oldRule.isPublic
+            isInline = oldRule.isInline
             metaArgs = []
         }
     newRule
@@ -94,6 +95,7 @@ let createHighlightingRule name newElem actionCode =
             body = PSeq([newElem], Some <| actionCode, None)
             isStart = false
             isPublic = false
+            isInline = false
             metaArgs = []
         }
     newRule

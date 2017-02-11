@@ -29,7 +29,7 @@ let rec extractOneRule (rule:Rule.t<_,_>) =
     | PConj (a,b) -> let name = Namer.newName Namer.Names.conjunction
                      PRef(genNewSourceWithRange name a, list2opt <| createParams attrs),
                      (extractOneRule {name=genNewSourceWithRange name a; args=attrs;
-                                             body=PAlt(a, b); isStart=false; isPublic=false; metaArgs=[]})
+                                             body=PAlt(a, b); isStart=false; isPublic=false;isInline = false;  metaArgs=[]})
     | a   -> a, []
     let body, rules = expandBody rule.args rule.body
     {rule with body=body}::rules

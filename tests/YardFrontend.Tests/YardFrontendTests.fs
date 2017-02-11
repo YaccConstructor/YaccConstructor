@@ -412,6 +412,7 @@ type ``YardFrontend Complete tests`` () =
                         Some (getSource "res" 71 74), None)
                 isStart = true
                 isPublic = false
+                isInline = false
                 metaArgs = []
             }; { 
                 name = dummyPos"e"
@@ -427,6 +428,7 @@ type ``YardFrontend Complete tests`` () =
                         Some (getSource "(value n |> int) + i" 94 114), None)
                 isStart = false
                 isPublic = false
+                isInline = false
                 metaArgs = []
             }]
         completeTest
@@ -476,6 +478,7 @@ type ``Yardfrontend label tests`` () =
                                                         weight = Some 12.3;});
             isStart = true;
             isPublic = false;
+            isInline = false
             metaArgs = [];
             }]
         parserTest

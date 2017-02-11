@@ -85,6 +85,7 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
     res
 %}
 
+%token INLINE
 %token COLON
 %token <Range> SEMICOLON
 %token COMMA
@@ -234,15 +235,18 @@ rule_nlist: rule semi_opt rule_nlist { $1::$3 } | { [] }
 
 rule_delim: COLON {$1} | EQUAL {$1}
 
-rule: start_rule_sign_opt access_modifier_opt LIDENT formal_meta_param_opt param_list rule_delim alts
+inline_opt: INLINE { true } | {false}
+
+rule: start_rule_sign_opt access_modifier_opt inline_opt LIDENT formal_meta_param_opt param_list rule_delim alts
             { 
                 {
                     Rule.isStart = $1
                     Rule.isPublic = $2
-                    Rule.name = $3
-                    Rule.metaArgs = getList $4
-                    Rule.body = $7
-                    Rule.args = $5
+                    Rule.isInline = $3
+                    Rule.name = $4
+                    Rule.metaArgs = getList $5
+                    Rule.args = $6
+                    Rule.body = $8
                 }
             }
 

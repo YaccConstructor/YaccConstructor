@@ -45,7 +45,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) =
         let exists, startV = gss.ContainsEdge(newVertex, curContext.GssVertex, stateToContinue, curContext.Length)        
 
         if startV.P.Count > 0
-        then startV.P |> ResizeArray.iter(fun (newIndex, l) -> addContext newIndex stateToContinue curContext.GssVertex (curContext.Length + l))        
+        then startV.P |> ResizeArray.iter(fun p -> addContext p.posInInput stateToContinue curContext.GssVertex (curContext.Length + p.additionalData))        
         else addContext curContext.PosInInput (measureNontermToState nonterm) startV 0us
             
     /// 
@@ -53,7 +53,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) =
         let curGssVertex = curContext.GssVertex
         let outEdges = gss.OutEdges curGssVertex |> Array.ofSeq
         
-        curGssVertex.P.Add (curContext.PosInInput, curContext.Length)
+        curGssVertex.P.Add (new PoppedData(curContext.PosInInput, curContext.Length))
         if outEdges <> null && outEdges.Length <> 0
         then
             for e in outEdges do
@@ -103,7 +103,7 @@ let findVertices (gss:GSS) state =
 let isParsed (parser : ParserSourceGLL) (input : LinearInput) = 
     let gss = parse parser input
     findVertices gss parser.StartState
-    |> Seq.exists (fun v -> v.P |> Seq.exists (fun (pos,_) -> int pos = input.Input.Length))
+    |> Seq.exists (fun v -> v.P |> Seq.exists (fun p -> int p.posInInput = input.Input.Length))
 
 let getAllRangesForState gss state =
     findVertices gss state

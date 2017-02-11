@@ -7,12 +7,19 @@ open QuickGraph
 open QuickGraph.Graphviz
 open System.Collections.Generic.Customized
 
+[<Struct>]
+type PoppedData =
+    val posInInput: int<positionInInput>
+    val additionalData: uint16
+
+    new (pos, d) = {posInInput = pos; additionalData = d}
+
 [<Measure>] type compressedPosInInputAndGrammar
 
 type GSSVertex (nonterm: int<positionInGrammar>, posInInput: int<positionInInput>) =    
 
     let setU = new System.Collections.Generic.Dictionary<int64<compressedPosInInputAndGrammar>,HashSet<uint16>>()
-    let setP = new ResizeArray<int<positionInInput>*uint16>() 
+    let setP = new ResizeArray<PoppedData>() 
     
     override this.Equals y =
         y :? GSSVertex 
@@ -60,14 +67,6 @@ type GSS () =
                 |> Array.ofSeq
                 |> Array.filter (fun e -> e.Target = endVertex && e.Tag.LengthOfProcessedString = len && e.Tag.StateToContinue = stateToContinue)
             else [||]
-        //let cond, edges = this.TryGetEdges(startVertex, endVertex)
-//        let exists = 
-//            cond 
-//            && 
-//             let edg = edges |> Seq.tryFind (fun e -> e.Tag.LengthOfProcessedString = len && e.Tag.StateToContinue = stateToContinue)
-//             if edg.IsSome then realStartVertex <- edg.Value.Source
-//             edg.IsSome
-//        if not exists
         let exists = edges.Length > 0
         if exists
         then realStartVertex <- edges.[0].Source

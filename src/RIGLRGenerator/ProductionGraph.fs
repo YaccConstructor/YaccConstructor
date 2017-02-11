@@ -47,5 +47,6 @@ type ProductionGraph(grammar: FinalGrammar) as this =
                     args = []; 
                     isStart = true; 
                     isPublic = false; 
+                    isInline = false;
                     metaArgs = []}
         ProductionGraph(new FinalGrammar([rule], true))

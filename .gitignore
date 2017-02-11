@@ -651,5 +651,6 @@ tests/data/AbstractRNGLR/json/JSON_test_1.dot
 tests/data/AbstractRNGLR/json/JSON_test_2.dot
 tests/data/AbstractRNGLR/DOT/sppf.dot
 src/Bio.Search/R16S_19_27.fs
+src/Bio.Search/*.dot
 src/glltest/*.dot
 src/glltest/test.fs

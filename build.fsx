@@ -173,6 +173,7 @@ Target "GenTests:RNGLR" (fun _ ->
 
 Target "GenTests:GLL" (fun _ ->
                             runCmd @"src\Bio.Search\gen.cmd"
+                            runCmd @"src\glltest\gen.cmd"
                             runCmd @"tests\GLLParser.Simple.Tests\gen.cmd"
                             runCmd @"tests\GLL.AbstractParser.Simple.Tests\gen.cmd"
                       )

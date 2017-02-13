@@ -69,7 +69,7 @@ let getParseInputGraph tokenizer file =
 let processFile file =
     let cnt = 1
     let g1, triples1 = 
-        getParseInputGraph (GLL.GPPerf1.stringToNumber >> ((*) 1<token>)) file
+        getParseInputGraph (fun x -> GLL.GPPerf1.stringToNumber.[x] * 1<token>) file
 //    let g2, triples1 = 
 //        getParseInputGraph (GLL.GPPerf2.stringToNumber >> ((*) 1<token>)) file
 //        

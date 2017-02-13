@@ -117,12 +117,35 @@ let rnd = new System.Random()
 //    Yard.Generators.GLL.AbstractParserWithoutTree.isParsed parserSource input
 //
 //let shouldBeTrue res = 
-//    Assert.AreEqual(res, true, "Nodes count mismatch")
-//
-//[<TestFixture>]
-//type ``GLL abstract parser tests`` () =
+    Assert.AreEqual(res, true, "Error.")
 
-//    [<Test>]
+
+let test edges tokenizer parserSource = 
+    let edg b e (tag: string) = 
+        [| new TaggedEdge<_,_>(b, e, (tokenizer tag) * 1<token>) |]
+
+    let allVs = edges |> Array.collect (fun (b,e,_) -> [|b * 1<positionInGrammar>; e * 1<positionInGrammar>|]) |> Set.ofArray |> Array.ofSeq
+
+    let g = new SimpleGraphInput<_>(allVs, id)
+
+    [|for (b,e,t) in edges -> edg b e t |]
+    |> Array.concat
+    |> g.AddVerticesAndEdgeRange
+    |> ignore
+
+    let res = Yard.Generators.GLL.AbstractParserWithoutTree.isParsed parserSource g
+
+    shouldBeTrue res
+
+        let edges = [|0, 1, "NUM";
+                      1, 2, "PLUS";
+                      2, 3, "NUM"|]
+        
+        test edges GLL.PrettySimpleCalc.stringToNumber GLL.PrettySimpleCalc.parserSource
+
+        
+    
+        
 //    member this._01_PrettySimpleCalc_SequenceInput () =
         Assert.True(true);
 //        let input = 

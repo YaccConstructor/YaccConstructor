@@ -25,15 +25,15 @@
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-i test.yrd -g "GLLGenerator -pos int -token int -module GLL.Parse.test -o test.yrd.fs"</StartArguments>
+    <StartArguments>-i test.yrd -g "GLLGenerator  -token unit -module GLL.Parse.test"</StartArguments>
     <StartWorkingDirectory>C:\Code\Yacc Constructor</StartWorkingDirectory>
     <StartAction>Project</StartAction>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <StartArguments>-i 16strna.yrd -g "GLLFSAGenerator -module GLLFSA.r16s.H22_H23 -o 16s_H22_H23.yrd.fs"</StartArguments>
+    <StartArguments>-i test.yrd -g "GLLGenerator -token unit -module GLL.H22_H23"</StartArguments>
     <RemoteDebugEnabled>false</RemoteDebugEnabled>
     <RemoteDebugMachine />
-    <StartWorkingDirectory>C:\Yacc Constructor</StartWorkingDirectory>
+    <StartWorkingDirectory>C:\Code\Yacc Constructor</StartWorkingDirectory>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" />

@@ -38,33 +38,7 @@
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="SimpleAmb.yrd.fs" />
-    <Compile Include="BadLeftRecursion.yrd.fs" />
-    <Compile Include="SimpleLeftRecursion.yrd.fs" />
-    <Compile Include="SimpleRightRecursion.yrd.fs" />
-    <Compile Include="Attrs.yrd.fs" />
-    <Compile Include="Brackets.yrd.fs" />
-    <Compile Include="ComplexRightNull.yrd.fs" />
-    <Compile Include="Counter.yrd.fs" />
-    <Compile Include="Cycle.yrd.fs" />
-    <Compile Include="Eps.yrd.fs" />
-    <Compile Include="Eps2.yrd.fs" />
-    <Compile Include="Epsilon.yrd.fs" />
-    <Compile Include="Expr.yrd.fs" />
-    <Compile Include="First.yrd.fs" />
-    <Compile Include="InfEpsilon.yrd.fs" />
-    <Compile Include="List.yrd.fs" />
-    <Compile Include="ListEps.yrd.fs" />
-    <Compile Include="LolCalc.yrd.fs" />
-    <Compile Include="LongCycle.yrd.fs" />
-    <Compile Include="Longest.yrd.fs" />
-    <Compile Include="Mixed.yrd.fs" />
-    <Compile Include="Omit.yrd.fs" />
-    <Compile Include="SimpleRightNull.yrd.fs" />
     <Compile Include="LexCommon.fs" />
-    <Compile Include="Cond.yrd.fs" />
-    <Compile Include="Order.yrd.fs" />
-    <Compile Include="PrettySimpleCalc.yrd.fs" />
     <Compile Include="GLLParserSimpleTest.fs" />
     <None Include="paket.references" />
   </ItemGroup>

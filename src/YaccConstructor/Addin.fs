@@ -38,10 +38,16 @@ let mutable private currentFrontendNames = createFrontendNamesInitialization()
 let mutable private currentConversionNames = createConversionNamesInitialization()
 let mutable private currentGeneratorNames = createGeneratorNamesInitialization()
 
-let GetFrontends() = currentFrontends.Value
-let GetConversions() = currentConversions.Value
-let GetGenerators() = currentGenerators.Value
-let GetFrontendNames() = currentFrontendNames.Value
-let GetConversionNames() = currentConversionNames.Value
-let GetGeneratorNames() = currentGeneratorNames.Value
+let getX (x : 'a []) = 
+    if x.Length = 0
+    then 
+        failwith "Something wrong with Addin Manager."
+    else x
+
+let GetFrontends() = getX currentFrontends.Value
+let GetConversions() = getX currentConversions.Value
+let GetGenerators() = getX currentGenerators.Value
+let GetFrontendNames() = getX currentFrontendNames.Value
+let GetConversionNames() = getX currentConversionNames.Value
+let GetGeneratorNames() = getX currentGeneratorNames.Value
 

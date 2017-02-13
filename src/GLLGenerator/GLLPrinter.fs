@@ -16,13 +16,13 @@ let getGLLparserSource (fsa : FSA)
     let dummyPos = char 0
     let res = new System.Text.StringBuilder()
     let nextInt = ref fsa.States.Length
-    let stateTokenNewState = new ResizeArray<_>()
-    let termToInt = new Dictionary<string,int>()
+    let stateTokenNewState = new ResizeArray<int * int<token>* int<positionInGrammar>>()
+    let stringToToken = new Dictionary<string,int<token>>()
     
 
-    let inline pack state token =
+    let inline pack state (token : int<token>) =
         if (int state < 65536) && (int token - fsa.States.Length < 65536)
-        then int( (int state <<< 16) ||| (token - fsa.States.Length) )
+        then int( (int state <<< 16) ||| (int token - fsa.States.Length) )
         else failwith "State or token is greater then 65535!!"
 
     let println (x : 'a) =
@@ -47,24 +47,23 @@ let getGLLparserSource (fsa : FSA)
     let printToken () = 
         let defaultType = tokenType.TryFind "_"
         println "type Token ="
-        for token in termToInt.Keys do
+        for str in stringToToken.Keys do
             let type' =
-                match tokenType.TryFind token with
+                match tokenType.TryFind str with
                 | Some t -> t
                 | None ->
                     match defaultType with
                     | Some t -> t
-                    | None -> failwithf "Type of token %s in not defined" token
-            println "    | %s%s" token
+                    | None -> failwithf "Type of token %s in not defined" str
+            println "    | %s%s" str
             <|  match type' with
                 | None -> ""
                 | Some s -> " of (" + s + ")"
     
-    let printStringToNumber () = 
-        if generateToFile then
-            println "let stringToNumber = new System.Collections.Generic.Dictionary<_,_>()"
-            for tokenNumber in termToInt do
-                println "stringToNumber.Add(\"%s\",%i)" tokenNumber.Key tokenNumber.Value
+    let printStringToToken () = 
+        println "let stringToToken = new System.Collections.Generic.Dictionary<_,_>()"
+        for tokenNumber in stringToToken do
+            println "stringToToken.Add(\"%s\",%i<token>)" tokenNumber.Key tokenNumber.Value
 
 //    let printTokenToNumber () = 
 //        if generateToFile then
@@ -75,7 +74,7 @@ let getGLLparserSource (fsa : FSA)
     let printStateToNontermName (sortedStateToNontermName : seq<KeyValuePair<int<positionInGrammar>, string>>) () = 
         if generateToFile then
             println "let stateToNontermName = new System.Collections.Generic.Dictionary<_,_>()"
-            for tokenNumber in termToInt do
+            for tokenNumber in stringToToken do
                 println "stateToNontermName.Add(%i<positionInGrammar>,\"%s\")" tokenNumber.Value tokenNumber.Key
         
             for numberNonterm in sortedStateToNontermName do
@@ -86,10 +85,10 @@ let getGLLparserSource (fsa : FSA)
     let printAnyNonterm anyNonterm () =
         println "let private anyNonterm = %i<positionInGrammar>" anyNonterm
 
-    let printNumIsTerminal () =
+    let printTerminalNums () =
         println "let private terminalNums = new System.Collections.Generic.HashSet<_>()"
-        for i in termToInt.Values do
-            println "terminalNums.Add(%i) |> ignore" i
+        for i in stringToToken.Values do
+            println "terminalNums.Add(%i<token>) |> ignore" i
 
     let printStateAndTokenToNewState () =
         println "let private stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int, int<positionInGrammar>>()"
@@ -141,7 +140,7 @@ let getGLLparserSource (fsa : FSA)
         println "let private nontermCount = %i" fsa.NontermCount
     
     let printParser () =
-        println "let parserSource = new ParserSourceGLL (outNonterms, startState, finalStates, nontermCount, terminalNums, stateToNontermName, anyNonterm, stateAndTokenToNewState)"
+        println "let parserSource = new ParserSourceGLL (outNonterms, startState, finalStates, nontermCount, terminalNums, stateToNontermName, anyNonterm, stateAndTokenToNewState,stringToToken)"
 
     let printFun isAbstract () =
         if isAbstract
@@ -160,12 +159,12 @@ let getGLLparserSource (fsa : FSA)
                 match symbol with
                     | EdgeSymbol.Nonterm s -> [|(int s) * 1<positionInGrammar>, state|]
                     | EdgeSymbol.Term s -> 
-                        let cond, value = termToInt.TryGetValue s
+                        let cond, value = stringToToken.TryGetValue s
                         if cond then
                             stateTokenNewState.Add(i, value, state)
                         else
-                            termToInt.Add(s,!nextInt)
-                            stateTokenNewState.Add(i, !nextInt, state)
+                            stringToToken.Add(s,(!nextInt)*1<token>)
+                            stateTokenNewState.Add(i, (!nextInt)*1<token>, state)
                             incr nextInt
                         [||]
                     | EdgeSymbol.Epsilon() -> failwith "Found epsilon edge while print fsa."
@@ -191,11 +190,11 @@ let getGLLparserSource (fsa : FSA)
     then
         printItem printHeaders
         printItem printToken
-        printItem printStringToNumber
+        printItem printStringToToken
 //        printItem printTokenToNumber
         printItem (printStateToNontermName sortedStateToNontermName)
         printItem (printAnyNonterm anyNonterm)
-        printItem printNumIsTerminal
+        printItem printTerminalNums
         printItem printStateAndTokenToNewState
         printItem (printOutNonterms fsaStatesOutNonterms)
         printItem printStartState
@@ -204,7 +203,7 @@ let getGLLparserSource (fsa : FSA)
         printItem printParser
     //printItem (printFun isAbstract)
 
-    let terminalNums = new HashSet<_>(termToInt.Values)
+    let terminalNums = new HashSet<_>(stringToToken.Values)
     let stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int, int<positionInGrammar>>()
     for state, token, newState in stateTokenNewState do
         stateAndTokenToNewState.Add((pack state token), newState)
@@ -217,7 +216,8 @@ let getGLLparserSource (fsa : FSA)
                                          , terminalNums
                                          , fsa.StateToNontermName
                                          , (int anyNonterm)* 1<positionInGrammar>
-                                         , stateAndTokenToNewState)
+                                         , stateAndTokenToNewState
+                                         , stringToToken)
 
 
     res, parserSource

@@ -9,6 +9,7 @@ open Yard.Generators.GLL.AbstractParserWithoutTree
 open System
 open System.Collections.Generic
 
+let grammarsDir = @"../../src/YC.GrammarZOO/Bio/16s/"
 //open Yard.Generators.GLL.AbstractParserWithoutTree
 type WhatShouldISearch = 
     | R16S_1_18
@@ -45,16 +46,24 @@ type SearchConfig =
           LengthOfBeinning = lengthOfBeinning
           OutFileName = outFileName }
 
+let getParserSource grammarFile =    
+    YaccConstructor.API.generate (grammarsDir + grammarFile)
+                                 "YardFrontend" "GLLGenerator" 
+                                 None
+                                 ["ExpandMeta"]
+                                 [] :?> ParserSourceGLL
+
 let FSA_R16S_1_18_SearchConfig = 
-    let tokenizer (ch : char) = 
-        GLL.R16S_1_18.stringToNumber.[Char.ToUpper(ch).ToString()]
-        |> (fun x -> x * 1<token>)
-    new SearchConfig(GLL.R16S_1_18.parserSource, tokenizer, 535, 545, 20, GLL.R16S_1_18.stateToNontermName, 
+    let parserSource = getParserSource "R16S_1_18.yrd"
+    let tokenizer =
+        (fun x -> Char.ToUpper(x).ToString()) >> (parserSource.StringToToken)
+    new SearchConfig(parserSource, tokenizer, 535, 545, 20, parserSource.StateToNontermName, 
                      "R16S_1_18_result.fa")
 
+
 let FSA_R16S_19_27_SearchConfig = 
-    let tokenizer ch =
-        GLL.R16S_19_27.stringToNumber.[Char.ToUpper(ch).ToString()]
-        |> (fun x -> x * 1<token>)
-    new SearchConfig(GLL.R16S_19_27.parserSource, tokenizer, 318, 370, 0, GLL.R16S_19_27.stateToNontermName, 
+    let parserSource = getParserSource "R16S_19_27.yrd"
+    let tokenizer =
+        (fun x -> Char.ToUpper(x).ToString()) >> (parserSource.StringToToken)
+    new SearchConfig(parserSource, tokenizer, 318, 370, 0, parserSource.StateToNontermName, 
                      "R16S_19_27_result.fa")

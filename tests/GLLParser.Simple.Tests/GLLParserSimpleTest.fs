@@ -15,9 +15,9 @@ open System.Collections.Generic
 //    let tokens = LexCommon.tokens(path)
 //    astBuilder tokens
 
-//let inputFilesPath = @"../../../data/GLL/"
+let inputFilesPath = @"../../../data/GLL/"
 let grammarFilesPath = @"C:/Code/YaccConstructor/tests/GLLParser.Simple.Tests/"
-let inputFilesPath = @"C:/Code/YaccConstructor/tests/data/GLL/"
+//let inputFilesPath = @"C:/Code/YaccConstructor/tests/data/GLL/"
 //let outDir = @"../../../src/GLLParser.SimpleTest/"
 
 let getTokens path =

@@ -9,6 +9,7 @@ open Alea.CUDA
 open Util
 open CYKMatrix
 open GraphParsing
+open QuickGraph
 
 
 
@@ -59,9 +60,12 @@ let graphParsingPrint (matrix: ProbabilityMatrix.T) =
 
 
 let graphParsingTest1 =
-    let graph = GraphParsing.Graph.T(new Dictionary<(int*int), ResizeArray<int>>(), 2)
-    graph.AddEdge(1, 2, 0)
-    graph.AddEdge(2, 1, 0)
+    let graph = new AdjacencyGraph<int, TaggedEdge<int, int>>()
+    graph.AddVertex(0) |> ignore
+    graph.AddVertex(1) |> ignore
+
+    graph.AddEdge(new TaggedEdge<int, int>(0, 1, 0)) |> ignore
+    graph.AddEdge(new TaggedEdge<int, int>(1, 0, 0)) |> ignore
     let A = NonTerminal "A"
     let B = NonTerminal "B"
     let S = NonTerminal "S"

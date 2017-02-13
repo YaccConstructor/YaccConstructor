@@ -9,36 +9,11 @@
     open Yard.Core.IL.Definition
     open Yard.Core.Helpers
     open Conversions.TransformAux
-
-    module Graph = 
-        type T(_graph: Dictionary<int * int, ResizeArray<int>>, _numberOfVertices: int) =
-            member this.graph = _graph
-
-            member this.numberOfVertices = _numberOfVertices
-
-            member this.IsCorrectVertex (v: int) =
-                (1 <= v) && (v <= this.numberOfVertices)
-
-            member this.AddEdge (v1: int, v2: int, label: int) =
-                assert (this.IsCorrectVertex(v1) && this.IsCorrectVertex(v2))
-                if not <| this.graph.ContainsKey (v1, v2)
-                then
-                    this.graph.Add((v1, v2), new ResizeArray<int>())
-                if not <| this.graph.[(v1,v2)].Contains label
-                then
-                    this.graph.[(v1,v2)].Add(label)
-
-            member this.GetEdges () =
-                this.graph.Keys
-
-            member this.GetLabels (v1: int, v2: int) =
-                assert (this.IsCorrectVertex(v1) && this.IsCorrectVertex(v2))
-                this.graph.[(v1, v2)]
-
+    open QuickGraph
 
     type ParsingMatrix = Dictionary<NonTerminal, ProbabilityMatrix.T>
 
-    let initParsingMatrix (graph:Graph.T)
+    let initParsingMatrix (graph:AdjacencyGraph<int, TaggedEdge<int, int>>)
                   (allRules: RulesHolder)
                   nonterminals =
         let unionWithOneCell (arr: float []) (v1: int) (v2: int) (matrixSize: int) =
@@ -47,29 +22,28 @@
                                                            else 
                                                                let row = i / matrixSize
                                                                let col = i - row * matrixSize
-                                                               if (v1 - 1 = row) && (v2 - 1 = col)
+                                                               if (v1 = row) && (v2 = col)      //need terminals to be integers from 0 to (matrixSize - 1)
                                                                then 1.0
                                                                else 0.0)
         let parsingMatrix = new ParsingMatrix ()
         do 
             (
                 nonterminals 
-                |> Seq.map (fun x -> x, ProbabilityMatrix.empty (graph.numberOfVertices))
+                |> Seq.map (fun x -> x, ProbabilityMatrix.empty (graph.VertexCount))
             )
             |> Seq.iter parsingMatrix.Add
 
-        for (v1, v2) in graph.GetEdges() do
-            let labels = graph.GetLabels(v1, v2)
-            for label in labels do
-                if allRules.IsSimpleTail label
-                then
-                    let simpleNonterminals = allRules.HeadsBySimpleTail label
-                    for (simpleNonterminal, _) in simpleNonterminals do
-                        let arr = parsingMatrix.[simpleNonterminal].GetSubArray id false parsingMatrix.[simpleNonterminal].WholeMatrix
-                        let updatedArr = unionWithOneCell arr v1 v2 graph.numberOfVertices
-                        let updatedMatrix = ProbabilityMatrix.create parsingMatrix.[simpleNonterminal].Size updatedArr
-                        parsingMatrix.Remove(simpleNonterminal) |> ignore
-                        parsingMatrix.Add(simpleNonterminal, updatedMatrix)
+        for edg in graph.Edges do
+            let label = edg.Tag
+            if allRules.IsSimpleTail label
+            then
+                let simpleNonterminals = allRules.HeadsBySimpleTail label
+                for (simpleNonterminal, _) in simpleNonterminals do
+                    let arr = parsingMatrix.[simpleNonterminal].GetSubArray id false parsingMatrix.[simpleNonterminal].WholeMatrix
+                    let updatedArr = unionWithOneCell arr edg.Source edg.Target graph.VertexCount
+                    let updatedMatrix = ProbabilityMatrix.create parsingMatrix.[simpleNonterminal].Size updatedArr
+                    parsingMatrix.Remove(simpleNonterminal) |> ignore
+                    parsingMatrix.Add(simpleNonterminal, updatedMatrix)
         
         parsingMatrix
 
@@ -118,7 +92,7 @@
                 matrix.Add(nonTerm, updatedMatrix)
 
 
-    let recognizeGraph (graph:Graph.T)
+    let recognizeGraph (graph:AdjacencyGraph<int, TaggedEdge<int, int>>)
                   squareMatrix
                   (allRules: RulesHolder)
                   nonterminals
@@ -135,7 +109,7 @@
         (parsingMatrix.[S], multCount)
 
 
-    let graphParse (graph:Graph.T)
+    let graphParse (graph:AdjacencyGraph<int, TaggedEdge<int, int>>)
                   squareMatrix
                   (loadIL:t<Source.t, Source.t>) =
         let grammar = loadIL.grammar

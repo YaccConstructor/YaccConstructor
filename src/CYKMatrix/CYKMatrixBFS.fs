@@ -6,19 +6,19 @@
 //    let multiplicationCounter = ref 0
 
     let recognize options
-                  strToParse
+                  (inputToParse: int list)
                   (allRules: RulesHolder) 
                   nonterminals 
                   S 
                   maxSearchLength = 
                   
-        let stringSize = String.length strToParse
+        let inputSize = inputToParse.Length
         
         // bottom-left triangle and diagonal of tMatrixes and pMatrixes are not used
-        // upper-right triangle of size (stringSize - maxSearchLength) is not used
-        let matrices = new MatrixHolder(nonterminals, allRules.ComplexTails, stringSize, options)
+        // upper-right triangle of size (inputSize - maxSearchLength) is not used
+        let matrices = new MatrixHolder(nonterminals, allRules.ComplexTails, inputSize, options)
 
-        let matrixSizeExponent = (log (double stringSize + 1.)) / (log 2.) |> ceil |> int
+        let matrixSizeExponent = (log (double inputSize + 1.)) / (log 2.) |> ceil |> int
         let matrixSize = (1 <<< matrixSizeExponent)    
 
         let layerIsRedundant (layer: SubMatrix.T []) =
@@ -50,7 +50,7 @@
             let matricesSize = layer.[0].Size
             let halfMatricesSize = int(matricesSize / 2)
 
-            let needToShortenNextLayers = layer.[Array.length layer - 1].LeftSubmatrix.Top.Column > stringSize 
+            let needToShortenNextLayers = layer.[Array.length layer - 1].LeftSubmatrix.Top.Column > inputSize 
 
             let firstSubLayerWithExtras = layer |> Array.collect (fun matrix -> [|matrix.LeftSubmatrix; matrix.RightSubmatrix|])
             let firstSubLayer = 
@@ -89,7 +89,7 @@
 
         let constructLayer layerNum = 
             let matricesSize = 1 <<< layerNum   
-            let matricesCount = (double stringSize + 1.) / double(matricesSize) - 1. |> ceil |> int
+            let matricesCount = (double inputSize + 1.) / double(matricesSize) - 1. |> ceil |> int
 
             let firstTopCell = Cell.create 0 (2 * matricesSize)
             let firstInLayer = SubMatrix.create firstTopCell matricesSize
@@ -99,7 +99,7 @@
         let layerSearchUpperBound = (log (double maxSearchLength + 1.)) / (log 2.) |> ceil |> int
         let layerSizeUpperBound = matrixSizeExponent - 1
 
-        let stringOfNonterminals = strToParse |> List.ofSeq |> List.map allRules.HeadsBySimpleTail
+        let stringOfNonterminals = inputToParse |> List.ofSeq |> List.map allRules.HeadsBySimpleTail
         matrices.initTDiagonalWith stringOfNonterminals
 
         for i in 1..(min layerSearchUpperBound layerSizeUpperBound) do

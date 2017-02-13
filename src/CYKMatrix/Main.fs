@@ -14,14 +14,14 @@ open GraphParsing
 
 
 
-let printMatrix (matrix: ProbabilityMatrix.T) strLen searchLen = 
+let printMatrix (matrix: ProbabilityMatrix.T) inputLen searchLen = 
     let rowLength = matrix.Nrow
     let colLength = matrix.Ncol
     for i in [ 0..rowLength - 1 ] do
         for j in [ 0..colLength - 1 ] do
             let cell = Cell.create i j
-            if i <= strLen && j <= strLen && j > i && j - i <= searchLen then 
-                //                    if i <= strLen && j <= strLen && j > i then
+            if i <= inputLen && j <= inputLen && j > i && j - i <= searchLen then 
+                //                    if i <= inputLen && j <= inputLen && j > i then
                 //                        printf "%b  " <| Probability.unwrap matrix.[i, j]
                 printf "%.8f  " <| Probability.unwrap matrix.[cell]
             else 
@@ -31,13 +31,13 @@ let printMatrix (matrix: ProbabilityMatrix.T) strLen searchLen =
         printfn ""
     printfn ""
     
-let isAnswerValid (matrix: ProbabilityMatrix.T) strLen searchLen = 
+let isAnswerValid (matrix: ProbabilityMatrix.T) inputLen searchLen = 
     let rowLength = matrix.Nrow
     let colLength = matrix.Ncol
-    if rowLength <> colLength || rowLength <> strLen + 1 then false
+    if rowLength <> colLength || rowLength <> inputLen + 1 then false
     else 
         let redundantCell (cell: Cell.T) = 
-            cell.Row > strLen || cell.Column > strLen || cell.Column <= cell.Row 
+            cell.Row > inputLen || cell.Column > inputLen || cell.Column <= cell.Row 
             || cell.Column - cell.Row > searchLen
         [ 0..rowLength - 1 ]
         |> List.map (fun i -> [ 0..colLength - 1 ] |> List.map (fun j -> Cell.create i j))
@@ -59,9 +59,9 @@ let graphParsingPrint (matrix: ProbabilityMatrix.T) =
 
 
 let graphParsingTest1 =
-    let graph = GraphParsing.Graph.T(new Dictionary<(int*int), ResizeArray<char>>(), 2)
-    graph.AddEdge(1, 2, 'a')
-    graph.AddEdge(2, 1, 'a')
+    let graph = GraphParsing.Graph.T(new Dictionary<(int*int), ResizeArray<int>>(), 2)
+    graph.AddEdge(1, 2, 0)
+    graph.AddEdge(2, 1, 0)
     let A = NonTerminal "A"
     let B = NonTerminal "B"
     let S = NonTerminal "S"
@@ -75,8 +75,8 @@ let graphParsingTest1 =
     |> List.map (fun (nts, heads) -> nts, rawHeadsToProbs heads)
     |> Seq.iter crl.Add
 
-    let srl = new Dictionary<char, (NonTerminal * Probability.T) list>()
-    [ 'a', [ A, 1.0 ] ]
+    let srl = new Dictionary<int, (NonTerminal * Probability.T) list>()
+    [ 0, [ A, 1.0 ] ]
     |> List.map (fun (c, heads) -> c, rawHeadsToProbs heads)
     |> Seq.iter srl.Add
 
@@ -111,14 +111,14 @@ let main args =
     |> List.map (fun (nts, heads) -> nts, rawHeadsToProbs heads)
     |> Seq.iter crl.Add
 
-    //        let srl = new Dictionary<char, (NonTerminal * Probability.T) list>()
-    //        ['a', [A, true]; 'b', [B, true]; 'c', [B, true]] 
+    //        let srl = new Dictionary<int, (NonTerminal * Probability.T) list>()
+    //        [0, [A, true]; 1, [B, true]; 2, [B, true]] 
     //        |> List.map (fun (c, heads) -> c, rawHeadsToProbs heads)
     //        |> Seq.iter srl.Add
-    let srl = new Dictionary<char, (NonTerminal * Probability.T) list>()
-    [ 'a', [ A, 0.2; B, 0.1 ]
-      'b', [ B, 0.4 ]
-      'c', [ B, 0.3 ] ]
+    let srl = new Dictionary<int, (NonTerminal * Probability.T) list>()
+    [ 0, [ A, 0.2; B, 0.1 ]
+      1, [ B, 0.4 ]
+      2, [ B, 0.3 ] ]
     |> List.map (fun (c, heads) -> c, rawHeadsToProbs heads)
     |> Seq.iter srl.Add
 
@@ -130,30 +130,30 @@ let main args =
     //    BB -> B B, 1.
     //
     //    A -> A A, 0.8
-    //    A -> 'a', 0.2
+    //    A -> 0, 0.2
     //
     //    B -> B B, 0.2
-    //    B -> 'b', 0.4
-    //    B -> 'c', 0.3
-    //    B -> 'a', 0.1
+    //    B -> 1, 0.4
+    //    B -> 2, 0.3
+    //    B -> 0, 0.1
 
     let rules = new RulesHolder(crl, srl, erl)
 
     
     
 
-    let checkOneType task check taskType str searchLen = 
+    let checkOneType task check taskType (input:int list) searchLen = 
         let n = 100
         let doOne i =
             let stopWatch = System.Diagnostics.Stopwatch.StartNew()
-            task str searchLen |> ignore
+            task input searchLen |> ignore
             stopWatch.Stop()
 //            GC.Collect()
             let time = stopWatch.Elapsed.TotalMilliseconds
             printfn "%f" time
             time
         let time = [1..n] |> List.map doOne |> List.min
-        printfn "type: %s, str length: %i, search length: %i, time(ms): %f." taskType (String.length str) searchLen time
+        printfn "type: %s, input length: %i, search length: %i, time(ms): %f." taskType input.Length searchLen time
          
 
 
@@ -231,50 +231,50 @@ let main args =
 //    let toCheck2 = (myAlg |> addCuda 128 cudaParallel |> add_1DBrahma 64 nvidiaParallel |> addFast 64 |> addParallel 1)
     let toCheck3 = (myAlg |> addCuda 64 cudaParallel |> addParallel 1)
 
-    let checkTime str searchLen = 
+    let checkTime input searchLen = 
 
         checkOneType 
-            (fun str searchLen -> recognize toCheck3 str rules nonterminals S searchLen ) 
-            (fun toCheck -> isAnswerValid toCheck) "my" str searchLen
+            (fun input searchLen -> recognize toCheck3 input rules nonterminals S searchLen ) 
+            (fun toCheck -> isAnswerValid toCheck) "my" input searchLen
             
 //        checkOneType 
-//            (fun str searchLen -> recognize bestOption str rules nonterminals S searchLen ) 
-//            (fun toCheck -> isAnswerValid toCheck) "128, 64, parallel" str searchLen
+//            (fun input searchLen -> recognize bestOption input rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "128, 64, parallel" input searchLen
 //        checkOneType 
-//            (fun str searchlen -> recognize (myAlg |> addCuda 128 cudaOneThread |> addBrahma 16 nvidiaOneThread) str rules nonterminals S searchlen ) 
-//            (fun tocheck -> isAnswerValid tocheck) "128, 64, parallel" str searchLen
+//            (fun input searchlen -> recognize (myAlg |> addCuda 128 cudaOneThread |> addBrahma 16 nvidiaOneThread) input rules nonterminals S searchlen ) 
+//            (fun tocheck -> isAnswerValid tocheck) "128, 64, parallel" input searchLen
 //        checkOneType 
-//            (fun str searchLen -> recognize (myAlg |> addFast 64 |> addParallel 1) str rules nonterminals S searchLen ) 
-//            (fun toCheck -> isAnswerValid toCheck) "fast 64, par" str searchLen
+//            (fun input searchLen -> recognize (myAlg |> addFast 64 |> addParallel 1) input rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "fast 64, par" input searchLen
 //        checkOneType 
-//            (fun str searchLen -> recognize (myAlg |> addFast 64) str rules nonterminals S searchLen ) 
-//            (fun toCheck -> isAnswerValid toCheck) "fast 64" str searchLen
+//            (fun input searchLen -> recognize (myAlg |> addFast 64) input rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "fast 64" input searchLen
 //        checkOneType 
-//            (fun str searchLen -> recognize myAlg str rules nonterminals S searchLen ) 
-//            (fun toCheck -> isAnswerValid toCheck) "my, vanilla" str searchLen
+//            (fun input searchLen -> recognize myAlg input rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "my, vanilla" input searchLen
 
 //        checkOneType 
-//            (fun str searchLen -> recognize (okhotinAlg |> addCuda 64 cudaParallel |> addParallel 16) str rules nonterminals S searchLen ) 
-//            (fun toCheck -> isAnswerValid toCheck) "okhotin, Gpu, par" str searchLen
+//            (fun input searchLen -> recognize (okhotinAlg |> addCuda 64 cudaParallel |> addParallel 16) input rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "okhotin, Gpu, par" input searchLen
 //        checkOneType 
-//            (fun str searchLen -> recognize (okhotinAlg |> addCuda 64 cudaOneThread) str rules nonterminals S searchLen ) 
-//            (fun toCheck -> isAnswerValid toCheck) "okhotin, Gpu, seq" str searchLen
+//            (fun input searchLen -> recognize (okhotinAlg |> addCuda 64 cudaOneThread) input rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "okhotin, Gpu, seq" input searchLen
 //        checkOneType 
-//            (fun str searchLen -> recognize (okhotinAlg |> addFast 64 |> addParallel 16) str rules nonterminals S searchLen ) 
-//            (fun toCheck -> isAnswerValid toCheck) "okhotin, fast, par" str searchLen
+//            (fun input searchLen -> recognize (okhotinAlg |> addFast 64 |> addParallel 16) input rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "okhotin, fast, par" input searchLen
 //        checkOneType 
-//            (fun str searchLen -> recognize (okhotinAlg |> addFast 64) str rules nonterminals S searchLen ) 
-//            (fun toCheck -> isAnswerValid toCheck) "okhotin, fast 64" str searchLen
+//            (fun input searchLen -> recognize (okhotinAlg |> addFast 64) input rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "okhotin, fast 64" input searchLen
 //        checkOneType 
-//            (fun str searchLen -> recognize okhotinAlg str rules nonterminals S searchLen ) 
-//            (fun toCheck -> isAnswerValid toCheck) "okhotin, vanilla" str searchLen
+//            (fun input searchLen -> recognize okhotinAlg input rules nonterminals S searchLen ) 
+//            (fun toCheck -> isAnswerValid toCheck) "okhotin, vanilla" input searchLen
 
 
-    let check str searchLen param1 param2 = 
-        let toCheck1    = recognize param1 str rules nonterminals S searchLen 
-        let toCheck2    = recognize param2 str rules nonterminals S searchLen 
-        assert (isAnswerValid toCheck1 (String.length str) searchLen)
-        assert (isAnswerValid toCheck2 (String.length str) searchLen)
+    let check input searchLen param1 param2 = 
+        let toCheck1    = recognize param1 input rules nonterminals S searchLen 
+        let toCheck2    = recognize param2 input rules nonterminals S searchLen 
+        assert (isAnswerValid toCheck1 input.Length searchLen)
+        assert (isAnswerValid toCheck2 input.Length searchLen)
         let printcellDiff (cell: Cell.T) =
             let v1 = Probability.unwrap toCheck1.[cell]
             let v2 = Probability.unwrap toCheck2.[cell]
@@ -302,16 +302,16 @@ let main args =
 //        printcellDiff <| Cell.create 1 68
 //        printcellDiff <| Cell.create 1 69
                         
-//        printMatrix toCheck1 (String.length str) searchLen 
-//        printMatrix toCheck2 (String.length str) searchLen 
+//        printMatrix toCheck1 input.Length searchLen 
+//        printMatrix toCheck2 input.Length searchLen 
 
         if not sameAnswers
         then failwith "different answers"
 
-    let checkMultiplicationNumber strLen param = 
-        let str = (String.replicate strLen "a")
+    let checkMultiplicationNumber inputLen param = 
+        let input = List.replicate inputLen 0
         let testParam = { param with Options.mode = Mode.Test }
-        recognize testParam str rules nonterminals S strLen |> ignore
+        recognize testParam input rules nonterminals S inputLen |> ignore
         printfn ""
     
 //    let toCheckOptions = amdNewOptions
@@ -321,22 +321,22 @@ let main args =
 //    let toCheck = (myAlg |> addBrahma 2 nvidiaOneThread)
     let toCheck = (myAlg)
 
-//    check "abb"      2
-//    check "abb"      3    s
-//    check "aaabbcc"  5
-//    check "aaabb"    5
-    check "aaaaabbb" 6 okhotinAlg toCheck
-    check "aaaabbbbbb" 6 okhotinAlg toCheck
-//    check "aaaabbbbbbbbbbb" 10
-//    check "aaaabbbbbbbbbbbbbbb" 10
-//    check "aaaabb" 6
-//    check "aaaabb" 6
-//    check "aaaabb" 5
-//    check "aaaabb" 4
-//    check "aaaabb" 3
-//    check "aaaabb" 2
-//    check "aaaabb" 1
-//    check "aaaabb" 0
+//    check [0;1;1]      2
+//    check [0;1;1]"      3    s
+//    check [0;0;0;1;1;2;2]  5
+//    check [0;0;0;1;1]    5
+    check [0;0;0;0;0;1;1;1] 6 okhotinAlg toCheck
+    check [0;0;0;0;1;1;1;1;1;1] 6 okhotinAlg toCheck
+//    check [0;0;0;0;1;1;1;1;1;1;1;1;1;1;1] 10
+//    check [0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1] 10
+//    check [0;0;0;0;1;1] 6
+//    check [0;0;0;0;1;1] 6
+//    check [0;0;0;0;1;1] 5
+//    check [0;0;0;0;1;1] 4
+//    check [0;0;0;0;1;1] 3
+//    check [0;0;0;0;1;1] 2
+//    check [0;0;0;0;1;1] 1
+//    check [0;0;0;0;1;1] 0
 //    check (String.replicate 23 "abb") 69 okhotinAlg toCheck
 //    check (String.replicate 350 "abb") 800 bestOption (myAlg |> addFast 64 |> addParallel 1) 
 

@@ -11,7 +11,7 @@
     open Conversions.TransformAux
 
     module Graph = 
-        type T(_graph: Dictionary<int * int, ResizeArray<char>>, _numberOfVertices: int) =
+        type T(_graph: Dictionary<int * int, ResizeArray<int>>, _numberOfVertices: int) =
             member this.graph = _graph
 
             member this.numberOfVertices = _numberOfVertices
@@ -19,11 +19,11 @@
             member this.IsCorrectVertex (v: int) =
                 (1 <= v) && (v <= this.numberOfVertices)
 
-            member this.AddEdge (v1: int, v2: int, label: char) =
+            member this.AddEdge (v1: int, v2: int, label: int) =
                 assert (this.IsCorrectVertex(v1) && this.IsCorrectVertex(v2))
                 if not <| this.graph.ContainsKey (v1, v2)
                 then
-                    this.graph.Add((v1, v2), new ResizeArray<char>())
+                    this.graph.Add((v1, v2), new ResizeArray<int>())
                 if not <| this.graph.[(v1,v2)].Contains label
                 then
                     this.graph.[(v1,v2)].Add(label)
@@ -143,9 +143,9 @@
         let S = ref (NonTerminal "")
         let nonterminals = new ResizeArray<NonTerminal>()
         let crl = new Dictionary<NonTerminal * NonTerminal, ResizeArray<NonTerminal*Probability.T>>()
-        let srl = new Dictionary<char, ResizeArray<NonTerminal*Probability.T>>()
+        let srl = new Dictionary<int, ResizeArray<NonTerminal*Probability.T>>()
         let crl_result = new Dictionary<NonTerminal * NonTerminal, (NonTerminal * Probability.T) list>()
-        let srl_result = new Dictionary<char, (NonTerminal * Probability.T) list>()
+        let srl_result = new Dictionary<int, (NonTerminal * Probability.T) list>()
         let erl_result: NonTerminal list = []
 
         let probOne = Probability.create 1.0
@@ -164,13 +164,13 @@
                 | PSeq([elem],_,_) ->
                     match elem.rule with
                     | PToken src ->
-                        let tokenChar = (Source.toString src).[0]             //need token to be a char
-                        if not <| srl.ContainsKey tokenChar
+                        let token = (Source.toString src).[0] |> int
+                        if not <| srl.ContainsKey token
                         then
-                            srl.Add(tokenChar, new ResizeArray<NonTerminal*Probability.T>())
-                        if not <| srl.[tokenChar].Contains (nonterm, probOne)
+                            srl.Add(token, new ResizeArray<NonTerminal*Probability.T>())
+                        if not <| srl.[token].Contains (nonterm, probOne)
                         then
-                            srl.[tokenChar].Add (nonterm, probOne)
+                            srl.[token].Add (nonterm, probOne)
                     | _ ->
                         assert false
                         

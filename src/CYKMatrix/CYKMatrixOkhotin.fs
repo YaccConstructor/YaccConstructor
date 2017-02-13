@@ -9,22 +9,22 @@
 //    let multiplicationCounter = ref 0
 
     let recognize options
-                  strToParse
+                  (inputToParse: int list)
                   (allRules: RulesHolder)  
                   nonterminals
                   S 
                   maxSearchLength = 
                                     
-        let stringSize = String.length strToParse
+        let inputSize = inputToParse.Length
 
-        let strSizeExponent = (System.Math.Log (double stringSize + 1.)) / (System.Math.Log 2.) |> System.Math.Ceiling |> int
-        let roundedSize = (1 <<< strSizeExponent) - 1
+        let inputSizeExponent = (System.Math.Log (double inputSize + 1.)) / (System.Math.Log 2.) |> System.Math.Ceiling |> int
+        let roundedSize = (1 <<< inputSizeExponent) - 1
     
         // bottom-left triangle and diagonal of tMatrix and pMatrix are not used
-        // upper-right triangle of size (stringSize - maxSearchLength) is not used
-        let matrices = new MatrixHolder(nonterminals, allRules.ComplexTails, stringSize, options)
+        // upper-right triangle of size (inputSize - maxSearchLength) is not used
+        let matrices = new MatrixHolder(nonterminals, allRules.ComplexTails, inputSize, options)
         
-        let matrixSizeExponent = (log (double stringSize + 1.)) / (log 2.) |> ceil |> int
+        let matrixSizeExponent = (log (double inputSize + 1.)) / (log 2.) |> ceil |> int
         let matrixSize = (1 <<< matrixSizeExponent)                  
                                     
         let completeP where from1 from2 = 
@@ -42,28 +42,28 @@
     
         let rec compute l m =
             let mid = int (l + m) / 2
-            if m - l >= 4 && mid < stringSize + 1 then 
+            if m - l >= 4 && mid < inputSize + 1 then 
                 let doLeft = Action( fun () -> compute l mid )
                 let doRight = Action( fun () -> compute mid m )
                 Parallel.Invoke(doLeft, doRight)
             elif m - l >= 4 then
                 compute l mid
 
-            if mid < stringSize + 1 then
+            if mid < inputSize + 1 then
                 completeT (l, mid, mid, m)
 
         and completeT (l1, m1, l2, m2) =
             assert (m1 - l1 = m2 - l2)
 
             if m1 - l1 = 1 && m1 = l2 then
-                let currentChar = strToParse.[l1]
+                let currentChar = inputToParse.[l1]
                 let nonterminals = allRules.HeadsBySimpleTail currentChar
                 let cell = Cell.create l1 (l1 + 1)
 
                 matrices.updateTCellWith cell nonterminals
 
             else if m1 - l1 = 1 && m1 < l2 then
-                assert (m2 <= stringSize + 1)
+                assert (m2 <= inputSize + 1)
                 let cell = Cell.create l1 l2
 
                 let headProbsFromTail (tail, tailProb) = 
@@ -75,7 +75,7 @@
                 matrices.refreshTCells headProbsFromTail [| cell |]
                  
             else if m1 - l1 > 1 then
-                assert (l2 < stringSize + 1)
+                assert (l2 < inputSize + 1)
 
                 let mid1 = (l1 + m1) / 2
                 let mid2 = (l2 + m2) / 2
@@ -97,7 +97,7 @@
                     completeP d1 b1 c 
                     completeT d1
 
-                    if mid2 <= stringSize then
+                    if mid2 <= inputSize then
                         completeP d2 c b2 
                         completeT d2 
 

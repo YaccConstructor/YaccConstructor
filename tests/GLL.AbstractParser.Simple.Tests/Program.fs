@@ -23,52 +23,6 @@ open AbstractAnalysis.Common
 open Yard.Generators.Common.ASTGLL
 open Yard.Generators.GLL.ParserCommon
 
-open GLL.SimpleRightRecursion
-open GLL.BadLeftRecursion
-open GLL.SimpleAmb
-
-open GLL.SimpleRightNull
-//open GLL.SimpleLeftRecursion
-open GLL.ParseSimpleBranch
-
-open GLL.Brackets
-open GLL.CroppedBrackets
-open GLL.Eps
-
-open GLL.FirstEps
-open GLL.List
-open GLL.NotAmbigousSimpleCalc
-
-open GLL.NotAmbigousSimpleCalcWith2Ops
-open GLL.ParseCalc
-open GLL.ParseSimpleCalc
-
-open GLL.PrettySimpleCalc
-open GLL.SimpleCalcWithNTerm
-open GLL.SimpleCalcWithNTerms_2
-
-open GLL.SimpleCalcWithNTerms_3
-open GLL.SimpleCalcWithNTerms_4
-open GLL.Stars
-
-open GLL.StrangeBrackets
-open GLL.Stars2
-
-//open GLL.ParseAttrs
-open GLL.ParseCalc
-open GLL.ParseCond
-open GLL.ParseCounter
-open GLL.ParseCycle
-open GLL.ParseEps2
-open GLL.ParseEpsilon
-open GLL.ParseExpr
-open GLL.ParseFirst
-open GLL.ParseLolCalc
-open GLL.ParseLongCycle
-open GLL.ParseLongCycle_BAD
-open GLL.ParseLongest
-open GLL.ParseMixed
-open GLL.ParseOmit
 open System.Collections.Generic
 open System.Linq
 //open GLL.ParseOrder
@@ -117,37 +71,37 @@ let rnd = new System.Random()
 //    Yard.Generators.GLL.AbstractParserWithoutTree.isParsed parserSource input
 //
 //let shouldBeTrue res = 
-    Assert.AreEqual(res, true, "Error.")
+//    Assert.AreEqual(res, true, "Error.")
 
 
-let test edges tokenizer parserSource = 
-    let edg b e (tag: string) = 
-        [| new TaggedEdge<_,_>(b, e, (tokenizer tag) * 1<token>) |]
-
-    let allVs = edges |> Array.collect (fun (b,e,_) -> [|b * 1<positionInGrammar>; e * 1<positionInGrammar>|]) |> Set.ofArray |> Array.ofSeq
-
-    let g = new SimpleGraphInput<_>(allVs, id)
-
-    [|for (b,e,t) in edges -> edg b e t |]
-    |> Array.concat
-    |> g.AddVerticesAndEdgeRange
-    |> ignore
-
-    let res = Yard.Generators.GLL.AbstractParserWithoutTree.isParsed parserSource g
-
-    shouldBeTrue res
-
-        let edges = [|0, 1, "NUM";
-                      1, 2, "PLUS";
-                      2, 3, "NUM"|]
-        
-        test edges GLL.PrettySimpleCalc.stringToNumber GLL.PrettySimpleCalc.parserSource
-
-        
-    
-        
+//let test edges tokenizer parserSource = 
+//    let edg b e (tag: string) = 
+//        [| new TaggedEdge<_,_>(b, e, (tokenizer tag) * 1<token>) |]
+//
+//    let allVs = edges |> Array.collect (fun (b,e,_) -> [|b * 1<positionInGrammar>; e * 1<positionInGrammar>|]) |> Set.ofArray |> Array.ofSeq
+//
+//    let g = new SimpleGraphInput<_>(allVs, id)
+//
+//    [|for (b,e,t) in edges -> edg b e t |]
+//    |> Array.concat
+//    |> g.AddVerticesAndEdgeRange
+//    |> ignore
+//
+//    let res = Yard.Generators.GLL.AbstractParserWithoutTree.isParsed parserSource g
+//
+//    shouldBeTrue res
+//
+//        let edges = [|0, 1, "NUM";
+//                      1, 2, "PLUS";
+//                      2, 3, "NUM"|]
+//        
+//        test edges GLL.PrettySimpleCalc.stringToNumber GLL.PrettySimpleCalc.parserSource
+//
+//        
+//    
+//        
 //    member this._01_PrettySimpleCalc_SequenceInput () =
-        Assert.True(true);
+//        Assert.True(true);
 //        let input = 
 //            new LinearInput(
 //                Array.map (fun x -> GLL.PrettySimpleCalc.tokenToNumber.[x] * 1<token>)
@@ -631,7 +585,7 @@ let test edges tokenizer parserSource =
 [<EntryPoint>]
 let f x =
     System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
-    //let t = new ``GLL abstract parser tests``()   
+//    let t = new ``GLL abstract parser tests``()   
 
 //         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\1.1.ttl"
 //         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
@@ -650,7 +604,7 @@ let f x =
     0
 
 
-////               t.PerformanceTestLinearBadLeftRec()
-//               //t.PerformanceTestLinearUnambBraces()
-////               t.PerformanceTestLinearAmbBraces()
+//               t.PerformanceTestLinearBadLeftRec()
+//               t.PerformanceTestLinearUnambBraces()
+//               t.PerformanceTestLinearAmbBraces()
 

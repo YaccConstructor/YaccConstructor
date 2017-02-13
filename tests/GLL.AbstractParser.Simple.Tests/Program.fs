@@ -98,10 +98,10 @@ let rnd = new System.Random()
 //        test edges GLL.PrettySimpleCalc.stringToNumber GLL.PrettySimpleCalc.parserSource
 //
 //        
-//    
-//        
-//    member this._01_PrettySimpleCalc_SequenceInput () =
-//        Assert.True(true);
+[<TestFixture>]
+type ``GLL abstract parser tests``() =  
+    member this._01_PrettySimpleCalc_SequenceInput () =
+        Assert.True(true);
 //        let input = 
 //            new LinearInput(
 //                Array.map (fun x -> GLL.PrettySimpleCalc.tokenToNumber.[x] * 1<token>)
@@ -585,7 +585,7 @@ let rnd = new System.Random()
 [<EntryPoint>]
 let f x =
     System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
-//    let t = new ``GLL abstract parser tests``()   
+    let t = new ``GLL abstract parser tests``()   
 
 //         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\1.1.ttl"
 //         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"

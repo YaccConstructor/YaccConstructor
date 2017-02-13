@@ -84,7 +84,7 @@ let processFile file =
     let start = System.DateTime.Now
     let root2 =
         [for i in 0..cnt-1 ->
-            Yard.Generators.GLL.AbstractParserWithoutTree.getAllRangesForStartState GLL.GPPerf2.parserSource g1
+            //Yard.Generators.GLL.AbstractParserWithoutTree.getAllRangesForStartState GLL.GPPerf2.parserSource g2
             [-1]
             |> Seq.length]
     let time2 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)

@@ -39,6 +39,7 @@ let initialConvert (def : Definition.t<_,_>) =
                             args = rule.args
                             metaArgs = []
                             isPublic=false
+                            isInline = false
                             body = PRef(rule.name, rule.args |> createParams |> list2opt)
                         }
                     startRule::{rule with isStart = false}::res

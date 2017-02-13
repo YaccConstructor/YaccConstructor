@@ -125,14 +125,14 @@ and skipSpaces  = parse blank {lexbuf}
 and  main = parse
        blank  { main lexbuf }
      | '\n' { newline lexbuf; main lexbuf }
-	 | ".." {DOUBLEDOT <| lex2source lexbuf}
-     | ['-']?digit+('.'digit+)?(['e''E']digit+)? { NUMBER <| lex2source lexbuf }	 
+     | ".." {DOUBLEDOT <| lex2source lexbuf}
+     | ['-']?digit+('.'digit+)?(['e''E']digit+)? { NUMBER <| lex2source lexbuf }     
      | '-'  {MINUS <| lex2source lexbuf}
      | ':'  {COLON <| lex2source lexbuf}
      | ';'  {SEMICOLON <| lex2source lexbuf}
      | ','  {COMMA <| lex2source lexbuf}     
      | '|'  {BAR <| lex2source lexbuf}
-     | '='  {EQUAL <| lex2source lexbuf}	 
+     | '='  {EQUAL <| lex2source lexbuf}     
      | '*'  {STAR <| lex2source lexbuf}
      | "[<Start>]" { START_RULE_SIGN <| lex2source lexbuf}
      | "[<AllPublic>]" { ALL_PUBLIC <| lex2source lexbuf}
@@ -145,8 +145,9 @@ and  main = parse
      | "tokens" ws '{' [^'}']* '}' { countNewLines lexbuf
                                      TOKENS_BLOCK <| lex2source lexbuf}
      | "module" { MODULE <| lex2source lexbuf}
-     | "private" { PRIVATE <| lex2source lexbuf}
-     | "public" { PUBLIC <| lex2source lexbuf}
+     | "private" { PRIVATE <| lex2source lexbuf }
+     | "public" { PUBLIC <| lex2source lexbuf }
+     | "inline" { INLINE <| lex2source lexbuf }
      | '+'  {PLUS <| lex2source lexbuf}
      | '?'  {QUESTION <| lex2source lexbuf}
      | sharpline {SHARPLINE <| lex2source lexbuf }   
@@ -186,8 +187,8 @@ and  main = parse
        }
     | "<"  {LESS <| lex2source lexbuf}
     | ">"  {GREAT <| lex2source lexbuf}
-	| "(:" {STARTREPEAT <| lex2source lexbuf}
-	| ":)" {ENDREPEAT <| lex2source lexbuf}
+    | "(:" {STARTREPEAT <| lex2source lexbuf}
+    | ":)" {ENDREPEAT <| lex2source lexbuf}
     | '"'
       { reset_string_buffer();
         let string_start = lexbuf.StartPos in
@@ -204,7 +205,7 @@ and  main = parse
       }
     | "(" {LPAREN <| lex2source lexbuf}
     | ")" {RPAREN <| lex2source lexbuf}
-	| "&" {AND <| lex2source lexbuf}
+    | "&" {AND <| lex2source lexbuf}
     | _
        { raise(Lexical_error
                 ("illegal character " + (*String.escaped*)LexBuffer<_>.LexemeString(lexbuf),

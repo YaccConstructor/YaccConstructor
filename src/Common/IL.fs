@@ -167,12 +167,13 @@ module Rule =
         /// Can this rule be seen from another module.
         /// It's true if ('public' is used before rule) or (module is marked as AllPublic and rule isn't marked as private)
         isPublic : bool
+        isInline : bool
         /// List of meta-arguments - names of rules, parametrizing this rule.
         metaArgs: 'patt list
     }
 
     let defaultRule name body =
-        {name = name; body = body; args = []; isStart = false; isPublic = false; metaArgs = []}
+        {name = name; body = body; args = []; isStart = false; isPublic = false; isInline = false; metaArgs = []}
 
 module Grammar =  
     type Module<'patt,'expr> = {

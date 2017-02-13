@@ -21,7 +21,7 @@ do()
 type GLL() = 
     inherit Generator()
         override this.Name = "GLLGenerator"
-        override this.Constraints = [|noMeta; noBrackets; singleModule|]
+        override this.Constraints = [|noMeta; singleModule|]
         override this.Generate (definition, generateToFile, args) =
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")

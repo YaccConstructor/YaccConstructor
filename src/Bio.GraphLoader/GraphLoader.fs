@@ -8,6 +8,7 @@ open Microsoft.FSharp.Collections
 open System.Collections.Generic
 open InfernalApi
 open System.Runtime.CompilerServices
+open QuickGraph.Graphviz
 
 module Array =
     /// Returns a sequence that yields chunks of length n.
@@ -33,7 +34,7 @@ type BioGraphEdgeLbl=
 [<Measure>] type vNumInOriginalGraph
 [<Measure>] type posInSubgraph
 
-type EdgeCompressedGraphInput (edges: array<TaggedEdge<int<vNumInOriginalGraph>, BioGraphEdgeLbl>>, tokenizer:char -> int<token>) as this =
+type EdgeCompressedGraphInput (edges: array<TaggedEdge<int<vNumInOriginalGraph>, BioGraphEdgeLbl>>) as this =
     inherit AdjacencyGraph<int<vNumInOriginalGraph>,TaggedEdge<int<vNumInOriginalGraph>,BioGraphEdgeLbl>>()
     let vMap = new Dictionary<_,_>()
     let vBackMap = new ResizeArray<_>()
@@ -44,12 +45,14 @@ type EdgeCompressedGraphInput (edges: array<TaggedEdge<int<vNumInOriginalGraph>,
             vMap.Add(v, i * 1<posInSubgraph>)
             vBackMap.Add v
         )
-//    let eTokens =
-//        edges
-//        |> Array.map (fun e -> e.Tag.str.ToCharArray() |> Array.map tokenizer)
+
     let packPosition edge (position: int<posInSubgraph>) =
         if (edge < 65536) && (int position < 65536) then ((int edge <<< 16) ||| int position) * 1<positionInInput>
         else failwithf "Edge or position is greater then 65535: edge: %A; pos: %A" edge position
+
+    let getPosOnEdge (packedValue : int<positionInInput>) = int (int packedValue &&& 0xffff) * 1<posInSubgraph>
+    let getEdge (packedValue : int<positionInInput>) = int (int packedValue >>> 16) 
+
     let initialPositions = 
         let buf = new ResizeArray<_>()
         edges
@@ -61,13 +64,26 @@ type EdgeCompressedGraphInput (edges: array<TaggedEdge<int<vNumInOriginalGraph>,
             )
         buf.ToArray()
 
+    member this.GetEdgeFromPackedPod (p:int<positionInInput>) =
+        if getEdge p <> -1 then Some edges.[getEdge p] else None
+    member this.GetPosOnEdgeFromPackedPod (p:int<positionInInput>) =
+        getPosOnEdge p
+    member this.VerticesBackMap = vBackMap
+
+    member this.ToDot (fileName:string) =
+        let printer = GraphvizAlgorithm(this)
+        printer.CommonVertexFormat.Shape <- Dot.GraphvizVertexShape.Ellipse
+        printer.FormatEdge.Add(fun (e:FormatEdgeEventArgs<_,_>) -> e.EdgeFormatter.Label.Value <- sprintf "id:%i,Len:%i" e.Edge.Tag.id e.Edge.Tag.str.Length)
+        printer.FormatVertex.Add(fun (v:FormatVertexEventArgs<_>) -> v.VertexFormatter.Label <- string v.Vertex)  
+        let str = printer.Generate()        
+            
+        System.IO.File.WriteAllText(fileName, str)
+
     interface IParserInput with
         member this.InitialPositions = initialPositions
         [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
         member this.ForAllOutgoingEdges curPosInInput pFun =
-            let inline getPosOnEdge (packedValue : int<positionInInput>) = int (int packedValue &&& 0xffff) * 1<posInSubgraph>
-            let inline getEdge (packedValue : int<positionInInput>) = 
-                int (int packedValue >>> 16) 
+            
             let eId = getEdge curPosInInput
             if  eId = -1
             then 
@@ -140,8 +156,20 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit tokenizer =
     |> Array.iter (fun (id,s,e,l) -> incr outDegree.[s])
     printfn "Number of vertices with outDegree greater than 4 %A" (outDegree |> Array.sumBy (fun n -> if !n > 4 then 1 else 0))
     *)
+
+    let forFilter =
+        System.IO.File.ReadAllLines(@"C:\gsv\projects\YC\YaccConstructor\src\Bio.Search\data\a1")
+        |> Seq.map (fun s -> s.Trim() |> int)
+        |> Set.ofSeq
+        |> Array.ofSeq
+        |> fun a -> new HashSet<_>(a)
+
     let edgs = 
-        edges       
+        edges
+        |> fun a -> printfn "before filtering^ %A" a.Length; a
+        |> Array.filter (fun (id,start,ending,length) -> length <= 50 || (forFilter.Contains id))
+        |> Array.filter (fun (id,start,ending,length) -> start <> ending || length > 50) // rm short loops
+        |> fun a -> printfn "after filtering^ %A" a.Length; a
         |> Array.Parallel.map (fun (id,start,ending,length) -> 
             newEdge start ending (edgesСontent.[id].ToCharArray() |> Array.map tokenizer) length id 0)
         |> Array.collect (fun e -> 
@@ -288,12 +316,12 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit tokenizer =
     let printStringsToFASTA path prefix lines =
         lines
         |> Seq.mapi (fun i line -> (getInfo prefix i) + line)
-        |> (fun x -> File.AppendAllLines(path, x))
+        |> (fun x -> File.AppendAllLines(path, x))       
 
     edgs,
     components
     |> Array.Parallel.map
-       (fun edges -> new EdgeCompressedGraphInput(edges, tokenizer))
+       (fun edges -> new EdgeCompressedGraphInput(edges))
     , longEdges
     
 let loadGraph fileWithoutExt templateLengthHighLimit tokenizer =

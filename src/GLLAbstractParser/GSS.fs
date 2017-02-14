@@ -30,7 +30,9 @@ type GSSVertex (nonterm: int<positionInGrammar>, posInInput: int<positionInInput
     override this.GetHashCode() = hash (this.Nonterm, this.PositionInInput)
     
     member this.U = setU
-    member this.P = setP
+    member this.P with get () = setP
+    member this.AddP d = 
+        setP.Add d
     member this.PositionInInput = posInInput
     member this.Nonterm = nonterm
     member this.GetUncompressetPositions (compressedPos: int64<compressedPosInInputAndGrammar>) =

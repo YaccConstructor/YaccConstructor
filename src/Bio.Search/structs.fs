@@ -46,6 +46,11 @@ type SearchConfig =
           LengthOfBeinning = lengthOfBeinning
           OutFileName = outFileName }
 
+type toPostProcessMSG =
+    | PData of EdgeCompressedGraphInput * SearchConfig * array<int<positionInInput>*int<positionInInput>*uint16>
+    | PDie of AsyncReplyChannel<unit>
+
+
 let getParserSource grammarFile =    
     YaccConstructor.API.generate (grammarsDir + grammarFile)
                                  "YardFrontend" "GLLGenerator" 
@@ -55,15 +60,36 @@ let getParserSource grammarFile =
 
 let FSA_R16S_1_18_SearchConfig = 
     let parserSource = getParserSource "R16S_1_18.yrd"
-    let tokenizer =
-        (fun x -> Char.ToUpper(x).ToString()) >> (parserSource.StringToToken)
-    new SearchConfig(parserSource, tokenizer, 535, 545, 20, parserSource.IntToString, 
-                     "R16S_1_18_result.fa")
+    let tokenizer (ch : char) =
+        let ch = 
+            let ch = Char.ToUpper(ch)
+            if ch = 'T'
+            then 'U'
+            elif Array.contains ch [|'A';'C';'G';'U';|]
+            then ch
+            else 'G'
+        parserSource.StringToToken.[ch.ToString()]
+        |> (fun x -> x * 1<token>)
+    let nTs = new Dictionary<_,_>()
+    parserSource.StringToToken
+    |> Seq.iter (fun kvp -> nTs.Add(kvp.Value,kvp.Key))
+    new SearchConfig(parserSource, tokenizer, 535, 545, 20, nTs, "R16S_1_18_result.fa")
 
 
 let FSA_R16S_19_27_SearchConfig = 
     let parserSource = getParserSource "R16S_19_27.yrd"
-    let tokenizer =
-        (fun x -> Char.ToUpper(x).ToString()) >> (parserSource.StringToToken)
-    new SearchConfig(parserSource, tokenizer, 318, 370, 0, parserSource.IntToString, 
-                     "R16S_19_27_result.fa")
+    let tokenizer (ch : char) =
+        let ch = 
+            let ch = Char.ToUpper(ch)
+            if ch = 'T'
+            then 'U'
+            elif Array.contains ch [|'A';'C';'G';'U';|]
+            then ch
+            else 'G'
+        parserSource.StringToToken.[ch.ToString()]
+        |> (fun x -> x * 1<token>)
+    let nTs = new Dictionary<_,_>()
+    parserSource.StringToToken
+    |> Seq.iter (fun kvp -> nTs.Add(kvp.Value,kvp.Key))
+    new SearchConfig(parserSource, tokenizer, 300, 370, 0, nTs, "R16S_19_27_result.fa")
+

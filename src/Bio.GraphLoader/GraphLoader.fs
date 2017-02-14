@@ -6,7 +6,6 @@ open QuickGraph
 open System.IO
 open Microsoft.FSharp.Collections
 open System.Collections.Generic
-open InfernalApi
 open System.Runtime.CompilerServices
 open QuickGraph.Graphviz
 
@@ -184,12 +183,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit tokenizer =
         |> Array.collect 
             (fun e -> 
                 if e.Tag.length <= templateLengthHighLimit
-                then 
-                    //printfn "%A" e.Tag.length
-                    //if e.Tag.length <= 100//templateLengthHighLimit - 100
-                    (*then*) [|e|]
-                    (*else deletedEdges.Add e
-                         [||]*)
+                then [|e|]
                 else 
                     longEdges.Add e
                     incr leCount
@@ -207,26 +201,6 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit tokenizer =
             )
                     
     printfn "long edges %A" !leCount
-
-    let filterEdges edges = 
-        let toPrint =
-            edges
-            |> Array.filter(fun (edge : TaggedEdge<_,BioGraphEdgeLbl>) -> edge.Tag.str.Length > 30)
-            |> Array.map (fun (edge : TaggedEdge<_,BioGraphEdgeLbl>) ->
-                sprintf ">%i\n%A" edge.Tag.id edge.Tag.str)
-
-        File.WriteAllLines("edgesToFilter.fa", toPrint)
-        
-        let newEdgesSet = 
-            filterWithInfernal (System.AppDomain.CurrentDomain.BaseDirectory + "edgesToFilter.fa")
-            |> Array.map (fun (s, _,_) -> int s)
-            |> Set
-
-        edges
-        |> Array.filter (fun x -> 
-            newEdgesSet.Contains x.Tag.id || x.Tag.str.Length <= 30)
-
-    //let edgs = edgs |> filterEdges
 
     let uGraph = new UndirectedGraph<_,_>(true)
     uGraph.AddVerticesAndEdgeRange edgs
@@ -257,51 +231,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit tokenizer =
         components
     
     let components = divisionOnComponents ()
-    (*
-    let clustered1 = cluster edgs
 
-    let index = ref 1000000
-
-    let toCluster1 = 
-        clustered1.[0]
-        |> Array.collect (fun e -> if e.Tag.length <= 100
-                                   then [|e|]
-                                   else deletedEdges.Add e
-                                        let edge1 = new BioGraphEdge(e.Source, !index, e.Tag.str, e.Tag.length, !index)
-                                        incr index
-                                        let edge2 = new BioGraphEdge(!index, e.Target, e.Tag.str, e.Tag.length, !index)
-                                        incr index
-                                        [|(*edge1; edge2*)|])
-    let components = cluster toCluster1
-    *)
-    //print deleted edges 
-    (*
-    let printDeleted = 
-        let maxLineLength = 80
-        let resultPath = ".\\result.fa"
-
-        let rec splitLine (line:string) =
-            if line.Length <= maxLineLength then [line] else
-            (line.Substring (0, maxLineLength))::(splitLine (line.Substring maxLineLength))
-        
-
-        let info = ">Deleted"
-        
-        let index = ref 0
-        let toPrint = 
-            deletedEdges
-            |> Seq.collect (fun e -> let line = e.Tag.str
-                                     let header = info + (!index).ToString()
-                                     index := !index + 1
-                                     header::(splitLine line))
-        File.AppendAllLines(resultPath, toPrint)
-        *)
-
-//    let avgl = components |> Array.map (fun c -> c |> Array.averageBy (fun x -> float x.Tag.length))
-//    let suml = components |> Array.map (fun c -> c |> Array.sumBy (fun x -> x.Tag.length))
-//            
-//    printfn "Avg %A" (avgl)
-//    printfn "Sum %A" (suml)
     let longEdges = 
         longEdges
         |> Seq.map (fun e -> e.Tag.str)

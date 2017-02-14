@@ -83,7 +83,7 @@ let filterRnaParsingResult (graph : EdgeCompressedGraphInput) (searchCfg : Searc
 
     result
 
-let pathToString (searchCfg : SearchConfig) (edges: ResizeArray<TaggedEdge<_,BioGraphEdgeLbl>>) =
+let pathToString (searchCfg : SearchConfig) id (edges: ResizeArray<TaggedEdge<_,BioGraphEdgeLbl>>) =
     let data =
         edges
         |> ResizeArray.map (fun e -> e.Tag.str |> Array.map (fun i -> searchCfg.NumToString.[int i]) |> String.concat "")
@@ -93,25 +93,28 @@ let pathToString (searchCfg : SearchConfig) (edges: ResizeArray<TaggedEdge<_,Bio
         edges
         |> ResizeArray.map(fun e -> e.Tag.id |> string )
         |> String.concat "; "
-    "> " + metadata + "\n" + data + "\n"
+    "> " + id + " | " + metadata + "\n" + data + "\n"
 
 let parsingResultsProcessor () =
-        MailboxProcessor.Start(fun inbox -> 
-            let rec loop n = 
-                async { 
-                    let! msg = inbox.Receive()
-                    match msg with
-                    | PData(graph, cfg, res) -> 
-                        try 
-                            let pathToPrint = filterRnaParsingResult graph cfg res
-                            pathToPrint
-                            |> ResizeArray.map (pathToString cfg)
-                            |> fun strs -> System.IO.File.AppendAllLines(cfg.OutFileName, strs)
-                        with e -> printfn "ERROR in parsing results postprocessing! %A" e.Message
-                        return! loop n
-                    | PDie ch -> ch.Reply()
-                }
-            loop 0)
+    let edgesGlobalCounter = ref 0
+    MailboxProcessor.Start(fun inbox -> 
+        let rec loop n = 
+            async { 
+                let! msg = inbox.Receive()
+                match msg with
+                | PData(graph, cfg, res) -> 
+                    try 
+                        let pathToPrint = filterRnaParsingResult graph cfg res
+                        pathToPrint
+                        |> ResizeArray.map (fun e -> 
+                            incr edgesGlobalCounter
+                            pathToString cfg (string !edgesGlobalCounter) e)
+                        |> fun strs -> System.IO.File.AppendAllLines(cfg.OutFileName, strs)
+                    with e -> printfn "ERROR in parsing results postprocessing! %A" e.Message
+                    return! loop n
+                | PDie ch -> ch.Reply()
+            }
+        loop 0)
     
 let searchInBioGraphs (searchCfg : SearchConfig) (graphs : EdgeCompressedGraphInput[]) agentsCount = 
     let start = System.DateTime.Now

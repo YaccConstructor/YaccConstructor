@@ -63,7 +63,7 @@
   </Target>
   -->
   <ItemGroup>
-    <Compile Include="filter.fs" />
+    <Compile Include="InfernalInteraction.fs" />
     <Compile Include="structs.fs" />
     <Compile Include="Bio.Search.fs" />
     <None Include="paket.references" />

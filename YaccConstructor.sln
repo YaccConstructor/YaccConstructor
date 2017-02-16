@@ -95,6 +95,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardFrontend.Test", "tests\
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLL.AbstractParser.SimpleTest", "tests\GLL.AbstractParser.Simple.Tests\GLL.AbstractParser.SimpleTest.fsproj", "{61A3B851-03A0-4A87-B786-D21DFE03B9DD}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GraphParsing.Test", "tests\GraphParsing.Test\GraphParsing.Test.fsproj", "{DD1E36EF-AB54-42E0-B8EF-AE98ADFDF6AC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -249,6 +251,10 @@ Global
 		{61A3B851-03A0-4A87-B786-D21DFE03B9DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61A3B851-03A0-4A87-B786-D21DFE03B9DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61A3B851-03A0-4A87-B786-D21DFE03B9DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD1E36EF-AB54-42E0-B8EF-AE98ADFDF6AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD1E36EF-AB54-42E0-B8EF-AE98ADFDF6AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD1E36EF-AB54-42E0-B8EF-AE98ADFDF6AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD1E36EF-AB54-42E0-B8EF-AE98ADFDF6AC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -291,5 +297,6 @@ Global
 		{D65BDE42-D396-458C-BE08-104477314657} = {CE8B1DCB-DF7D-4223-89F9-99F289E61447}
 		{5936D84D-A842-43B3-97FD-E2C6990E77DB} = {CE8B1DCB-DF7D-4223-89F9-99F289E61447}
 		{61A3B851-03A0-4A87-B786-D21DFE03B9DD} = {CE8B1DCB-DF7D-4223-89F9-99F289E61447}
+		{DD1E36EF-AB54-42E0-B8EF-AE98ADFDF6AC} = {CE8B1DCB-DF7D-4223-89F9-99F289E61447}
 	EndGlobalSection
 EndGlobal

@@ -71,14 +71,14 @@ let getGLLparserSource (fsa : FSA)
 //            for tokenNumber in termToInt do
 //                println "tokenToNumber.Add(%s _ -> %i" tokenNumber.Key tokenNumber.Value
 
-    let printStateToNontermName (sortedStateToNontermName : seq<KeyValuePair<int<positionInGrammar>, string>>) () = 
+    let printIntToString (sortedStateToNontermName : seq<KeyValuePair<int<positionInGrammar>, string>>) () = 
         if generateToFile then
-            println "let stateToNontermName = new System.Collections.Generic.Dictionary<_,_>()"
+            println "let intToString = new System.Collections.Generic.Dictionary<_,_>()"
             for tokenNumber in stringToToken do
-                println "stateToNontermName.Add(%i<positionInGrammar>,\"%s\")" tokenNumber.Value tokenNumber.Key
+                println "intToString.Add(%i,\"%s\")" tokenNumber.Value tokenNumber.Key
         
             for numberNonterm in sortedStateToNontermName do
-                println "stateToNontermName.Add(%i<positionInGrammar>,\"%s\")" numberNonterm.Key numberNonterm.Value
+                println "intToString.Add(%i,\"%s\")" numberNonterm.Key numberNonterm.Value
 
 
     
@@ -140,7 +140,7 @@ let getGLLparserSource (fsa : FSA)
         println "let private nontermCount = %i" fsa.NontermCount
     
     let printParser () =
-        println "let parserSource = new ParserSourceGLL (outNonterms, startState, finalStates, nontermCount, terminalNums, stateToNontermName, anyNonterm, stateAndTokenToNewState,stringToToken)"
+        println "let parserSource = new ParserSourceGLL (outNonterms, startState, finalStates, nontermCount, terminalNums, intToString, anyNonterm, stateAndTokenToNewState,stringToToken)"
 
     let printFun isAbstract () =
         if isAbstract
@@ -192,7 +192,7 @@ let getGLLparserSource (fsa : FSA)
         printItem printToken
         printItem printStringToToken
 //        printItem printTokenToNumber
-        printItem (printStateToNontermName sortedStateToNontermName)
+        printItem (printIntToString sortedStateToNontermName)
         printItem (printAnyNonterm anyNonterm)
         printItem printTerminalNums
         printItem printStateAndTokenToNewState
@@ -208,13 +208,20 @@ let getGLLparserSource (fsa : FSA)
     for state, token, newState in stateTokenNewState do
         stateAndTokenToNewState.Add((pack state token), newState)
 
+    let intToString = new Dictionary<int, string>()
+    
+    for tokenNumber in stringToToken do
+        intToString.Add(int tokenNumber.Value, tokenNumber.Key)
+        
+    for numberNonterm in sortedStateToNontermName do
+        intToString.Add(int numberNonterm.Key, numberNonterm.Value)
 
     let parserSource = new ParserSourceGLL(fsaStatesOutNonterms
                                          , fsa.StartState
                                          , fsa.FinalStates
                                          , fsa.NontermCount
                                          , terminalNums
-                                         , fsa.StateToNontermName
+                                         , intToString
                                          , (int anyNonterm)* 1<positionInGrammar>
                                          , stateAndTokenToNewState
                                          , stringToToken)

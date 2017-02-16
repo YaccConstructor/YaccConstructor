@@ -3,7 +3,7 @@
 open AbstractAnalysis.Common
 
 open Yard.Generators.GLL
-open Yard.Generators.GLL.Parser 
+//open Yard.Generators.GLL.Parser 
 open NUnit.Framework
 open Yard.Generators
 open LexCommon
@@ -32,10 +32,10 @@ let getLinearInput path (stringToToken : string -> int<token>) =
             )
 
 let isParsed parserSource input = 
-    Yard.Generators.GLL.AbstractParserWithoutTree.isParsed parserSource input
+    Yard.Generators.GLL.AbstractParser.isParsed parserSource input
 
 let shouldBeTrue res = 
-    Assert.AreEqual(res, true, "Nodes count mismatch")        
+    Assert.AreEqual(res, true, "Not parsed")        
 
          
 let getParserSource grammarFile =    

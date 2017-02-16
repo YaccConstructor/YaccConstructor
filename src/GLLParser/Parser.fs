@@ -198,28 +198,7 @@ let buildAST (parser : ParserSourceGLL) (input : seq<int>) =
                 i.AddChild newNode
             | _ -> failwith "adjf;sawf"
             num
-
-        //let i = getLeftExtension leftExtension
-        //let j = getRightExtension leftExtension
-        //let k = getRightExtension rightExtension
-        //let key = getKeyForPackedNode i j k (int state)
-        //let contains, d1 = packedNodes.TryGetValue key
-        //if contains
-        //then
-//            match (sppfNodes.Item (int d1)) with
-//            | :? PackedNode as p ->
-//                match (sppfNodes.Item (int parent)) with
-//                | :? NonTerminalNode as n ->
-//                    n.AddChild p
-//                | :? IntermidiateNode as i ->
-//                    i.AddChild p
-//                | _ -> failwith "adjf;sawf"
-//            | _ -> failwith "adjf;sawf"
-//            d1
-        //else
         let newNode = createNode()
-
-        //packedNodes.Add(key, newNode)
         newNode 
     
              
@@ -484,7 +463,7 @@ let buildAST (parser : ParserSourceGLL) (input : seq<int>) =
         
         pushContext (!currentIndex + 1<positionInInput>) nextState !currentGSSNode y
     
-    let getNewDescriptor() =
+    let popDescriptor() =
         currentContext := setR.Pop()
         currentIndex   := currentContext.Value.Index
         currentGSSNode := currentContext.Value.Vertex
@@ -493,15 +472,15 @@ let buildAST (parser : ParserSourceGLL) (input : seq<int>) =
         currentR       := dummyNode
 
     while setR.Count <> 0 do
-        getNewDescriptor()
+        popDescriptor()
+        let outEdges = parser.OutNonterms.[int !currentState]
 
-        if (!currentN = dummyNode)&&(!currentState |> parser.FinalStates.Contains)
+        if (!currentN = dummyNode(*we are in first state of nonterminal*)(* it is the same: len = 0us *))&&(!currentState |> parser.FinalStates.Contains)
         then 
             let eps = getNodeT epsilon !currentIndex
             let _, nontermNode = getNodes !currentState (!currentGSSNode).Nonterm dummyNode eps
             pop !currentGSSNode !currentIndex nontermNode
-
-        let outEdges = parser.OutNonterms.[int !currentState]
+                   
     
         if !currentIndex <> endOfInput then
             let curToken = input.[int !currentIndex]
@@ -537,6 +516,6 @@ let buildAST (parser : ParserSourceGLL) (input : seq<int>) =
         | None -> FSAParseResult.Error ("String was not parsed")
         | Some node -> 
             let r1 = new Tree<_> (node)
-            r1.AstToDot parser.StateToNontermName "ASTforAutomaton.dot"
+            r1.AstToDot parser.IntToString "ASTforAutomaton.dot"
             FSAParseResult.Success (r1)
             

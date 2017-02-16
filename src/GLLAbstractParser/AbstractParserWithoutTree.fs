@@ -10,12 +10,6 @@ open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
 open YC.GLL.GSS
 
-let measureStateToNonterm (state : int<positionInGrammar>) =
-    (int state)*1<positionInGrammar>
-
-let measureNontermToState (nonterm : int<positionInGrammar>) =
-    (int nonterm)*1<positionInGrammar>
-
 let parse (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss = new GSS()
 
@@ -23,7 +17,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) =
         input.InitialPositions
         |> Array.rev
         |> Array.map(fun pos -> 
-            let vertex = new GSSVertex(measureStateToNonterm parser.StartState, pos)
+            let vertex = new GSSVertex(parser.StartState, pos)
             gss.AddVertex vertex |> ignore
             new ContextFSA<_>(pos, parser.StartState, vertex, 0us))
 
@@ -42,11 +36,14 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) =
     ///Creates new descriptors.(Calls when found nonterninal in rule(on current input edge, or on some of next)))
     let create (curContext:ContextFSA<_>) stateToContinue nonterm =        
         let newVertex = new GSSVertex(nonterm, curContext.PosInInput)
-        let exists, startV = gss.ContainsEdge(newVertex, curContext.GssVertex, stateToContinue, curContext.Length)        
+        let vertexExists, edgeExists, startV = gss.ContainsVertAndEdge(newVertex, curContext.GssVertex, stateToContinue, curContext.Length)        
 
-        if startV.P.Count > 0
-        then startV.P |> ResizeArray.iter(fun p -> addContext p.posInInput stateToContinue curContext.GssVertex (curContext.Length + p.additionalData))        
-        else addContext curContext.PosInInput (measureNontermToState nonterm) startV 0us
+        if vertexExists
+        then
+            if startV.P.Count > 0
+            then startV.P |> ResizeArray.iter(fun p -> addContext p.posInInput stateToContinue curContext.GssVertex (curContext.Length + p.data))        
+        else
+            addContext curContext.PosInInput nonterm startV 0us
             
     /// 
     let pop (curContext:ContextFSA<_>) =
@@ -57,7 +54,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) =
         if outEdges <> null && outEdges.Length <> 0
         then
             for e in outEdges do
-                addContext curContext.PosInInput e.Tag.StateToContinue e.Target (curContext.Length + e.Tag.LengthOfProcessedString)
+                addContext curContext.PosInInput e.Tag.StateToContinue e.Target (curContext.Length + e.Tag.Data)
 
     let processed = ref 0
     let mlnCount = ref 0
@@ -97,7 +94,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) =
        
 let findVertices (gss:GSS) state =    
     gss.Vertices
-    |> Seq.filter (fun v -> v.Nonterm = measureStateToNonterm state)
+    |> Seq.filter (fun v -> v.Nonterm = state)
              
 let isParsed (parser : ParserSourceGLL) (input : LinearInput) = 
     let gss = parse parser input

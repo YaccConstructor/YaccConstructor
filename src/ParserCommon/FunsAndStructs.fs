@@ -62,6 +62,10 @@ type Context(*<'TokenType>*) =
     new (index, label, vertex, ast) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Probability = 1.0; SLength = 1}
     //new (index, label, vertex, ast, path) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Path = path}
 
+type ParseData = 
+    | TreeNode of int<nodeMeasure>
+    | Length of uint16
+
 [<Struct>]
 [<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
 type ContextFSA<'GSSVertex> =
@@ -74,13 +78,13 @@ type ContextFSA<'GSSVertex> =
     /// 4 values packed in one int64: leftEdge, leftPos, rightEdge, rightPos.
     //val LeftPos       : int<leftPosition>
     /// Length of current result
-    val Length        : uint16
-    new (index, state, vertex, len) = {PosInInput = index; PosInGrammar = state; GssVertex = vertex; Length = len}
+    val Data        : ParseData
+    new (index, state, vertex, data) = {PosInInput = index; PosInGrammar = state; GssVertex = vertex; Data = data}
     override this.ToString () = "Edge:" + (CommonFuns.getEdge(this.PosInInput).ToString()) +
                                 "; PosOnEdge:" + (CommonFuns.getPosOnEdge(this.PosInInput).ToString()) +
                                 "; State:" + (this.PosInGrammar.ToString()) +
                                 //"; LeftPos:" + (this.LeftPos.ToString()) +
-                                "; Len:" + (this.Length.ToString())
+                                "; Len:" + (this.Data.ToString())
 
 [<Struct>]
 [<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]

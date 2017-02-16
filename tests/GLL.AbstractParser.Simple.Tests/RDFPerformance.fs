@@ -5,7 +5,7 @@ open VDS.RDF.Parsing
 
 open QuickGraph
 open AbstractAnalysis.Common
-open Yard.Generators.GLL.AbstractParserWithoutTree
+open Yard.Generators.GLL.AbstractParser
 open Yard.Generators.Common.ASTGLL
 open Yard.Generators.GLL.ParserCommon
 
@@ -76,7 +76,7 @@ let processFile file =
     let start = System.DateTime.Now
     let root1 =
         [for i in 0..cnt-1 ->
-            Yard.Generators.GLL.AbstractParserWithoutTree.getAllRangesForStartState GLL.GPPerf1.parserSource g1
+            Yard.Generators.GLL.AbstractParser.getAllRangesForStartState GLL.GPPerf1.parserSource g1
             |> Seq.length]
     
     let time1 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)

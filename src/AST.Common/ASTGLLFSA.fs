@@ -31,7 +31,7 @@ type NonTerminalNode =
     new (name, extension) = {Name = name; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
     
 and TerminalNode =
-    val Name : int
+    val Name : int<token>
     val Extension : int64<extension>
     interface INode with
         member this.getExtension () = this.Extension
@@ -92,7 +92,7 @@ type NumNode<'vtype> =
 
 [<AllowNullLiteral>]
 type Tree<'TokenType> (root : INode) =
-    member this.AstToDot (indToString : Dictionary<int<positionInGrammar>,_>) (path : string) =
+    member this.AstToDot (indToString : Dictionary<int,_>) (path : string) =
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
 
@@ -139,7 +139,7 @@ type Tree<'TokenType> (root : INode) =
                     match currentPair.Node with 
                     | :? NonTerminalNode as a -> 
                         let isAmbiguous = a.Others <> null
-                        createNode !num isAmbiguous NonTerminal (sprintf "%s,%i,%i" (indToString.[a.Name]) (getLeftExtension a.Extension) (getRightExtension a.Extension))
+                        createNode !num isAmbiguous NonTerminal (sprintf "%s,%i,%i" (indToString.[int a.Name]) (getLeftExtension a.Extension) (getRightExtension a.Extension))
                         createEdge currentPair.Num !num false ""
                         if a.First <> Unchecked.defaultof<_>
                         then
@@ -166,9 +166,9 @@ type Tree<'TokenType> (root : INode) =
                     | :? TerminalNode as t ->
                         if t.Extension <> packExtension -1 -1 
                         then
-                            if t.Name <> -2
+                            if t.Name <> -2<token>
                             then
-                                createNode !num false Terminal (sprintf "%s,%i,%i" (indToString.[t.Name*1<positionInGrammar>]) (getLeftExtension t.Extension) (getRightExtension t.Extension))
+                                createNode !num false Terminal (sprintf "%s,%i,%i" (indToString.[int t.Name]) (getLeftExtension t.Extension) (getRightExtension t.Extension))
                                 createEdge currentPair.Num !num false ""
                             else
                                 createNode !num false Terminal ("dummy")
@@ -190,7 +190,7 @@ type Tree<'TokenType> (root : INode) =
             else
                 let a = currentPair.Node :?> NonTerminalNode
                 num := !num + 1
-                createNode !num (a.Others <> Unchecked.defaultof<_>) NonTerminal (indToString.[a.Name])
+                createNode !num (a.Others <> Unchecked.defaultof<_>) NonTerminal (indToString.[int a.Name])
                 if a.First <> Unchecked.defaultof<_>
                 then
                     nodeQueue.Enqueue(new NumNode<INode>(!num, a.First))

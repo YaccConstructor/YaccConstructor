@@ -5,7 +5,7 @@ open QuickGraph
 open YC.Bio.GraphLoader
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
-open Yard.Generators.GLL.AbstractParserWithoutTree
+open Yard.Generators.GLL.AbstractParser
 open System
 open System.Collections.Generic
 
@@ -34,7 +34,7 @@ type SearchConfig =
     val Tokenizer : char -> int<token>
     val HighLengthLimit : int
     val LowLengthLimit : int
-    val NumToString : Dictionary<int<positionInGrammar>,string>
+    val NumToString : Dictionary<int,string>
     val LengthOfBeinning : int
     val OutFileName : string
     new(parserSource, getSmb, lowLengthLimit, highLengthLimit, lengthOfBeinning, numToString, outFileName) = 
@@ -57,7 +57,7 @@ let FSA_R16S_1_18_SearchConfig =
     let parserSource = getParserSource "R16S_1_18.yrd"
     let tokenizer =
         (fun x -> Char.ToUpper(x).ToString()) >> (parserSource.StringToToken)
-    new SearchConfig(parserSource, tokenizer, 535, 545, 20, parserSource.StateToNontermName, 
+    new SearchConfig(parserSource, tokenizer, 535, 545, 20, parserSource.IntToString, 
                      "R16S_1_18_result.fa")
 
 
@@ -65,5 +65,5 @@ let FSA_R16S_19_27_SearchConfig =
     let parserSource = getParserSource "R16S_19_27.yrd"
     let tokenizer =
         (fun x -> Char.ToUpper(x).ToString()) >> (parserSource.StringToToken)
-    new SearchConfig(parserSource, tokenizer, 318, 370, 0, parserSource.StateToNontermName, 
+    new SearchConfig(parserSource, tokenizer, 318, 370, 0, parserSource.IntToString, 
                      "R16S_19_27_result.fa")

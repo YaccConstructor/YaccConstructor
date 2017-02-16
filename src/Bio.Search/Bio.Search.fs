@@ -6,7 +6,7 @@ open System
 open YC.Bio.GraphLoader
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
-open Yard.Generators.GLL.AbstractParserWithoutTree
+open Yard.Generators.GLL.AbstractParser
 open YC.Bio.RNA.Search.Structs
 open YC.Bio.RNA.IO
 open Microsoft.FSharp.Collections

@@ -452,7 +452,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
         match f this.Root false with
         | Err msg -> failwith msg
 
-    member this.ExtractMinimalLengthPathTree (ext : int64<extension>) =
+    member this.ExtractMinimalLengthPathTree (ext : int64<extension>) : Tree<'TokenType> =
     
         let getNonTermNode (start : obj) (ext : int64<extension>) : ResNode =
             let mutable been : list<obj> = []
@@ -537,48 +537,65 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
 
         match getNonTermNode root ext with
         | Error msg -> failwith msg
-        | None -> Option.None
+        | None -> failwith "Thete is no such nodes in the tree"
         | Suc node -> 
             let newRoot = new NonTerminalNode (node.Name, node.Extension)
             let getNodesOfMinLenTree (node : NonTerminalNode) =
+                let mutable been : list<obj> = []
                 let rec f (curr : obj) (len : int) (nodes : list<obj>) =
                     match curr with
                         | :? TerminalNode as node ->
-                            if node.Extension <> packExtension -1 -1
+                            if List.contains curr been
                             then
-                                (len + 1, List.append nodes [node] )
-                            else
                                 (len, nodes)
+                            else
+                                if node.Extension <> packExtension -1 -1
+                                then
+                                    (len + 1, List.append nodes [node] )
+                                else
+                                    (len, nodes)
                         | :? PackedNode as node ->
-                            let lenl, ndsl = f node.Left len nodes
-                            let lenr, ndsr = f node.Right len nodes
-                            (lenr + lenl, List.append (List.append ndsl ndsr) [node] )
+                            if List.contains curr been
+                            then
+                                (len, nodes)
+                            else
+                                let lenl, ndsl = f node.Left len nodes
+                                let lenr, ndsr = f node.Right len nodes
+                                (lenr + lenl, List.append (List.append ndsl ndsr) [node] )
                         | :? NonTerminalNode as node ->
-                            let ln, nods = f node.First len nodes
-                            let mutable min = ln
-                            let mutable ndes = nods
-                            if node.Others <> null
+                            if List.contains curr been
                             then
-                                for t in node.Others do
-                                    let lnn, nds = f t  len nodes
-                                    if lnn < min
-                                    then
-                                        min <- lnn
-                                        ndes <- nds
-                            (min, List.append ndes [node])
+                                (len, nodes)
+                            else
+                                let ln, nods = f node.First len nodes
+                                let mutable min = ln
+                                let mutable ndes = nods
+                                if node.Others <> null
+                                then
+                                    for t in node.Others do
+                                        let lnn, nds = f t  len nodes
+                                        if lnn < min
+                                        then
+                                            min <- lnn
+                                            ndes <- nds
+                                (min, List.append ndes [node])
                         | :? IntermidiateNode as node ->
-                            let ln, nods = f node.First len nodes
-                            let mutable min = ln
-                            let mutable ndes = nods
-                            if node.Others <> null
+                            if List.contains curr been
                             then
-                                for t in node.Others do
-                                    let lnn, nds = f t len nodes
-                                    if lnn < min
-                                    then
-                                        min <- lnn
-                                        ndes <- nds
-                            (min, List.append ndes [node])
+                                (len, nodes)
+                            else
+                                let ln, nods = f node.First len nodes
+                                let mutable min = ln
+                                let mutable ndes = nods
+                                if node.Others <> null
+                                then
+                                    for t in node.Others do
+                                        let lnn, nds = f t len nodes
+                                        if lnn < min
+                                        then
+                                            min <- lnn
+                                            ndes <- nds
+                                (min, List.append ndes [node])
                 let _, nodes = f node 0 []
                 (nodes)
             let nodes = getNodesOfMinLenTree node
@@ -667,4 +684,4 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                         newRoot.AddChild pckd
                 | Option.None -> failwith "there is no nodes in tree"
             let newTree = new Tree<'TokenType> (toks, newRoot, rules)
-            Some(newTree)
+            newTree

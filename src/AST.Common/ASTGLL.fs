@@ -452,7 +452,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
         match f this.Root false with
         | Err msg -> failwith msg
 
-    member this.ExtractMinimalLengthPathTree (ext : int64<extension>) : Tree<'TokenType> =
+    member this.ExtractMinimalLengthPathTree (ext : int64<extension>) =
     
         let getNonTermNode (start : obj) (ext : int64<extension>) : ResNode =
             let mutable been : list<obj> = []

@@ -100,9 +100,14 @@ let runInfernal tool args =
         let stdoutx = p.StandardOutput.ReadToEnd();         
         let stderrx = p.StandardError.ReadToEnd(); 
         p.WaitForExit()
+        printfn "%A" stdoutx
         let erCode = p.ExitCode
-        printfn "%A" stderrx 
         printfn "Infernal exited with code %A" erCode
+        if  erCode <> 0
+        then
+            failwithf "Infernal failed with code %A. Arguments: %A" erCode (tool + args)
+            printfn "%A" stderrx 
+        
     
     runInfernal()
 

@@ -118,7 +118,8 @@ let parsingResultsProcessor () =
             }
         loop 0)
     
-let searchInBioGraphs (searchCfg : SearchConfig) (graphs : EdgeCompressedGraphInput[]) agentsCount = 
+let searchInBioGraphs (searchCfg : SearchConfig) (graphs : EdgeCompressedGraphInput[]) agentsCount =
+    printfn "Total graph to porcess: %A" graphs.Length 
     let start = System.DateTime.Now
     let postprocessor = parsingResultsProcessor ()
     let agent name = 
@@ -151,7 +152,7 @@ let searchInBioGraphs (searchCfg : SearchConfig) (graphs : EdgeCompressedGraphIn
     graphs 
     |> Array.iteri (fun i graph -> 
         let agentId = 
-            if graph.VertexCount < 100
+            if agentsCount > 1 && graph.VertexCount < 100
             then 1 + i % (agentsCount - 1)
             else 0
         Data(i, graph) |> agents.[agentId].Post)
@@ -159,7 +160,6 @@ let searchInBioGraphs (searchCfg : SearchConfig) (graphs : EdgeCompressedGraphIn
     postprocessor.PostAndReply PDie
 
     printfn "Total time = %A" (System.DateTime.Now - start)
-    0
 
 let printLongEdges path edges = 
     let toPrint = 
@@ -173,9 +173,8 @@ let printLongEdges path edges =
 let searchMiddle (searchCfg:SearchConfig) agentsCount graphs = 
     let graphs =
         graphs
-        |> Array.filter (fun (g:EdgeCompressedGraphInput) -> g.Edges |> Seq.sumBy (fun e -> e.Tag.str.Length) > int (float searchCfg.LowLengthLimit / 1.8))
-    printfn "Total graph to porcess: %A" graphs.Length
-    searchInBioGraphs searchCfg graphs agentsCount |> printfn "%A"
+        |> Array.filter (fun (g:EdgeCompressedGraphInput) -> g.Edges |> Seq.sumBy (fun e -> e.Tag.str.Length) > int (float searchCfg.LowLengthLimit / 1.8))    
+    searchInBioGraphs searchCfg graphs agentsCount
 
 let score (searchCfg : SearchConfig) =
     let scoredByInfernal = 
@@ -186,7 +185,7 @@ let score (searchCfg : SearchConfig) =
 
 let searchMain path agentsCount =     
     let searchCfg = FSA_R16S_19_27_SearchConfig
-    let sourceGraph, graphs, longEdges = loadGraph path searchCfg.HighLengthLimit searchCfg.Tokenizer    
+    let sourceGraph, graphs, longEdges = loadInitialGraph path searchCfg.HighLengthLimit searchCfg.Tokenizer    
     searchMiddle searchCfg agentsCount graphs
     
     let middleScoredByInfernal = score searchCfg
@@ -195,19 +194,29 @@ let searchMain path agentsCount =
         middleScoredByInfernal
         |> Array.map (fun d -> 
             let edsIds = d.DescriptionOfTarget.Value.Split([|' ';';'|], StringSplitOptions.RemoveEmptyEntries) |> Array.map int
-            d, sourceGraph |> Array.filter (fun e -> Array.contains e.Tag.id edsIds)
+            d, edsIds |> Array.map (fun id -> sourceGraph |> Array.find (fun e -> e.Tag.id = id))
             )
+    
+    let headMidle = new ResizeArray<_>()
+    let midleEdgesToProcess = 
+        let ready,toProcess = midleEdgesScordByInfernal |> Array.partition (fun (d,_) -> d.ModelFrom < 5)
+        ready |> Array.iter (fun (d,edgs) -> headMidle.Add (new ResizeArray<_>(edgs)))
+        toProcess
 
     let g = sourceGraph.ToAdjacencyGraph(true)
     let headsAndTails =
-        midleEdgesScordByInfernal
+        midleEdgesToProcess
         |> Array.map (fun (d,edgs) -> 
             let headsFinalV = edgs.[0].Source
             let headsLengthLim = d.ModelFrom + 10
             let heads = 
-                getPaths g false headsFinalV (fun (curE:TaggedEdge<_,_>) curL -> curL >= headsLengthLim) headsLengthLim
-                |> ResizeArray.concat
-                |> Array.ofSeq
+                let paths = getPaths g false headsFinalV (fun (curE:TaggedEdge<_,_>) curL -> curL >= headsLengthLim) headsLengthLim
+                let toParse, other = 
+                    if paths.Count <= 5
+                    then paths, new ResizeArray<_>()
+                    else paths |> ResizeArray.partition (fun p -> p.Count > 1)
+                other |> ResizeArray.iter (fun p -> p.AddRange edgs; headMidle.Add p)
+                toParse |> ResizeArray.concat |> Array.ofSeq
 
             let tailsStartV = edgs.[edgs.Length - 1].Target
             let tailsLengthLim = 1600 - d.ModelTo 
@@ -223,18 +232,18 @@ let searchMain path agentsCount =
         |> Array.collect (fun (h,(_,m),t) -> [|h; [|m.[0]|]|])
         |> Array.concat
         |> fun a -> new HashSet<_>(a)
-        |> Array.ofSeq
     
     let edgesForTailsSearch =
         headsAndTails
         |> Array.collect (fun (h,(_,m),t) -> [|[|m.[m.Length-1]|];t|])
         |> Array.concat
         |> fun a -> new HashSet<_>(a)
-        |> Array.ofSeq
+
+    let graphs = splitToConnectedSubgraphs edgesForHeadsSearch
 
     let searchCfg = FSA_R16S_1_18_SearchConfig
 
-    //searchBeginning agentsCount sourceGraph
+    searchInBioGraphs searchCfg graphs 1
     ()
 
 let printPairs path pairs = 

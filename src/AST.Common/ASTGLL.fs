@@ -452,7 +452,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
         match f this.Root false with
         | Err msg -> failwith msg
 
-    member this.ExtractMinimalLengthPathTree (ext : int64<extension>) =
+    member this.ExtractMinimalLengthPathTree (ext : int64<extension>) : Tree<'TokenType> =
     
         let getNonTermNode (start : obj) (ext : int64<extension>) : ResNode =
             let mutable been : list<obj> = []
@@ -501,7 +501,6 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                                         then
                                             is <- true
                                             match cu with Suc(x) -> nd <- x
-                                        else do()
                                     if is
                                     then
                                         Suc(nd)
@@ -526,7 +525,6 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                                         then
                                             is <- true
                                             match cu with Suc(x) -> nd <- x
-                                        else do()
                                     if is
                                     then
                                         Suc(nd)
@@ -567,8 +565,6 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                                     then
                                         min <- lnn
                                         ndes <- nds
-                                    else do()
-                            else do()
                             (min, List.append ndes [node])
                         | :? IntermidiateNode as node ->
                             let ln, nods = f node.First len nodes
@@ -582,8 +578,6 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                                     then
                                         min <- lnn
                                         ndes <- nds
-                                    else do()
-                            else do()
                             (min, List.append ndes [node])
                 let _, nodes = f node 0 []
                 (nodes)

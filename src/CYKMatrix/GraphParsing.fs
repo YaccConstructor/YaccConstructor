@@ -13,16 +13,18 @@
 
     type ParsingMatrix = Dictionary<NonTerminal, ProbabilityMatrix.T>
 
-    let initParsingMatrix (graph:AdjacencyGraph<int, TaggedEdge<int, int>>)
+    let initParsingMatrix (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
                   (allRules: RulesHolder)
                   nonterminals =
+        let vertexToInt = new Dictionary<_,_>()
+        let mutable procVertices = 0
         let unionWithOneCell (arr: float []) (v1: int) (v2: int) (matrixSize: int) =
             Array.init (matrixSize * matrixSize) (fun i -> if arr.[i] > 0.0
                                                            then 1.0
                                                            else 
                                                                let row = i / matrixSize
                                                                let col = i - row * matrixSize
-                                                               if (v1 = row) && (v2 = col)      //need terminals to be integers from 0 to (matrixSize - 1)
+                                                               if (v1 = row) && (v2 = col)      //need graph vertices to be integers from 0 to (matrixSize - 1)
                                                                then 1.0
                                                                else 0.0)
         let parsingMatrix = new ParsingMatrix ()
@@ -33,6 +35,10 @@
             )
             |> Seq.iter parsingMatrix.Add
 
+        for vertex in graph.Vertices do
+            vertexToInt.Add(vertex, procVertices)
+            procVertices <- procVertices + 1
+
         for edg in graph.Edges do
             let label = edg.Tag
             if allRules.IsSimpleTail label
@@ -40,12 +46,12 @@
                 let simpleNonterminals = allRules.HeadsBySimpleTail label
                 for (simpleNonterminal, _) in simpleNonterminals do
                     let arr = parsingMatrix.[simpleNonterminal].GetSubArray id false parsingMatrix.[simpleNonterminal].WholeMatrix
-                    let updatedArr = unionWithOneCell arr edg.Source edg.Target graph.VertexCount
+                    let updatedArr = unionWithOneCell arr vertexToInt.[edg.Source] vertexToInt.[edg.Target] graph.VertexCount
                     let updatedMatrix = ProbabilityMatrix.create parsingMatrix.[simpleNonterminal].Size updatedArr
                     parsingMatrix.Remove(simpleNonterminal) |> ignore
                     parsingMatrix.Add(simpleNonterminal, updatedMatrix)
         
-        parsingMatrix
+        parsingMatrix, vertexToInt
 
     let naiveSquareMatrix (matrix: ParsingMatrix) (allRules: RulesHolder) isChanged =
         let unionArrays (arr1: float []) (arr2: float []) (size: int) =
@@ -92,12 +98,12 @@
                 matrix.Add(nonTerm, updatedMatrix)
 
 
-    let recognizeGraph (graph:AdjacencyGraph<int, TaggedEdge<int, int>>)
+    let recognizeGraph (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
                   squareMatrix
                   (allRules: RulesHolder)
                   nonterminals
                   S =
-        let parsingMatrix = initParsingMatrix graph allRules nonterminals
+        let parsingMatrix, vertexToInt = initParsingMatrix graph allRules nonterminals
         let isChanged = ref true
         let mutable multCount = 0
 
@@ -106,20 +112,21 @@
             squareMatrix parsingMatrix allRules isChanged
             multCount <- multCount + 1
 
-        (parsingMatrix.[S], multCount)
+        (parsingMatrix.[S], vertexToInt, multCount)    
 
-
-    let graphParse (graph:AdjacencyGraph<int, TaggedEdge<int, int>>)
+    let graphParse (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
                   squareMatrix
-                  (loadIL:t<Source.t, Source.t>) =
+                  (loadIL:t<Source.t, Source.t>)
+                  tokenToInt =
         let grammar = loadIL.grammar
+        let mutable tokensCount = 0
         
         let S = ref (NonTerminal "")
         let nonterminals = new ResizeArray<NonTerminal>()
         let crl = new Dictionary<NonTerminal * NonTerminal, ResizeArray<NonTerminal*Probability.T>>()
-        let srl = new Dictionary<int, ResizeArray<NonTerminal*Probability.T>>()
+        let srl = new Dictionary<int<AbstractAnalysis.Common.token>, ResizeArray<NonTerminal*Probability.T>>()
         let crl_result = new Dictionary<NonTerminal * NonTerminal, (NonTerminal * Probability.T) list>()
-        let srl_result = new Dictionary<int, (NonTerminal * Probability.T) list>()
+        let srl_result = new Dictionary<int<AbstractAnalysis.Common.token>, (NonTerminal * Probability.T) list>()
         let erl_result: NonTerminal list = []
 
         let probOne = Probability.create 1.0
@@ -138,15 +145,16 @@
                 | PSeq([elem],_,_) ->
                     match elem.rule with
                     | PToken src ->
-                        let token = (Source.toString src).[0] |> int
-                        if not <| srl.ContainsKey token
+                        let token = Source.toString src
+                        let intToken = tokenToInt token
+                        if not <| srl.ContainsKey intToken
                         then
-                            srl.Add(token, new ResizeArray<NonTerminal*Probability.T>())
-                        if not <| srl.[token].Contains (nonterm, probOne)
+                            srl.Add(intToken, new ResizeArray<NonTerminal*Probability.T>())
+                        if not <| srl.[intToken].Contains (nonterm, probOne)
                         then
-                            srl.[token].Add (nonterm, probOne)
+                            srl.[intToken].Add (nonterm, probOne)
                     | _ ->
-                        assert false
+                        failwith "Given grammar is not in normal form."
                         
                 | PSeq([e1; e2],_,_) ->
                     match e1.rule, e2.rule with 
@@ -165,8 +173,8 @@
                         if not <| crl.[(nonterm1, nonterm2)].Contains (nonterm, probOne)
                         then
                             crl.[(nonterm1, nonterm2)].Add (nonterm, probOne)                     
-                    | _ -> assert false                
-                | _ -> assert false
+                    | _ -> failwith "Given grammar is not in normal form."               
+                | _ -> failwith "Given grammar is not in normal form."
 
         for key in crl.Keys do
             let list = Seq.toList crl.[key]

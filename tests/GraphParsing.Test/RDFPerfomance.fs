@@ -1,80 +1,42 @@
-﻿module RDFPerfomance
+﻿module YC.GraphParsing.Tests.RDFPerfomance
 
 open VDS.RDF
 open VDS.RDF.Parsing
+open YC.GLL.Abstarct.Tests.RDFPerformance
+open Yard.Core
 
 open QuickGraph
 open CYKMatrix
 
-let getEdges (g:Graph) =
-    let vMap = new System.Collections.Generic.Dictionary<_,_>()
-    let mutable id = -1
-    [|   
-        for t in g.Triples ->
-            let from = t.Object
-            let _to = t.Subject
-            let lbl = t.Predicate
-            let getId v = if vMap.ContainsKey v then vMap.[v] else (id <- id + 1; vMap.Add(v, id); id)
-            
-            getId from
-            ,(lbl :?> UriNode).Uri.Fragment
-            , getId _to
-    |]
+let tokenizer str =
+    match str with
+    | "SCOR" -> 1<AbstractAnalysis.Common.token>
+    | "TR" -> 2<AbstractAnalysis.Common.token>
+    | "OTHER" -> 3<AbstractAnalysis.Common.token>
+    | "SCO" -> 4<AbstractAnalysis.Common.token>
+    | "T" -> 5<AbstractAnalysis.Common.token>
+    | _ -> -1<AbstractAnalysis.Common.token>
 
-let loadFromFile (file:string) =
-    let g = new Graph()
-    if (System.IO.Path.GetExtension file).ToLower() = "ttl"
-    then
-        let ttlparser = new TurtleParser()
-        ttlparser.Load(g, file)
-    else
-        FileLoader.Load(g, file)
-    g
-
-let getParseInputGraph tokenizer file =
-    let g = loadFromFile file
-    let triples = g.Triples.Count
-    let edgs = getEdges g
-    let edg f t (l: string) = 
-        match l.ToLower() with
-        | "#type" -> 
-            [|
-                new TaggedEdge<_,_>(f, t, tokenizer "T") 
-                new TaggedEdge<_,_>(t, f, tokenizer "TR")
-            |]
-
-        | "#subclassof" -> 
-            [|
-                new TaggedEdge<_,_>(f, t, tokenizer "SCO") 
-                new TaggedEdge<_,_>(t, f, tokenizer "SCOR")
-            |]
-
-        | _ -> [| new TaggedEdge<_,_>(f, t, tokenizer "OTHER")|]
-        
-    let allVs = edgs |> Array.collect (fun (f,l,t) -> [|f * 1<positionInInput>; t * 1<positionInInput>|]) |> Set.ofArray |> Array.ofSeq
-    let eofV = allVs.Length
-
-    let g = new SimpleGraphInput<_>(allVs, id)
-
-    [|for (f,l,t) in edgs -> edg f t l |]
-    |> Array.concat
-    |> g.AddVerticesAndEdgeRange
-    |> ignore
-    
-    g, triples
-
-let processFile file =
+let processFile file grammarFile =
     let cnt = 1
     let g1, triples1 = 
-        getParseInputGraph (fun x -> GLL.GPPerf1.stringToToken.[x]) file
+        getParseInputGraph tokenizer file (fun _ -> new AdjacencyGraph<_,_>())
 //    let g2, triples1 = 
 //        getParseInputGraph (GLL.GPPerf2.stringToNumber >> ((*) 1<token>)) file
-//        
+//
+    let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+    let loadIL = fe.ParseGrammar grammarFile
+    (*let cnfConv = new Conversions.ToCNF.ToCNF()
+    let cnfIL = 
+        {
+            loadIL
+                with grammar = cnfConv.ConvertGrammar (loadIL.grammar, [||])                               
+        }*)
+     
     let start = System.DateTime.Now
     let root1 =
         [for i in 0..cnt-1 ->
-            Yard.Generators.GLL.AbstractParserWithoutTree.getAllRangesForStartState GLL.GPPerf1.parserSource g1
-            |> Seq.length]
+            GraphParsing.graphParse <| g1 <| GraphParsing.naiveSquareMatrix <| loadIL <| tokenizer]
     
     let time1 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
     
@@ -92,6 +54,6 @@ let performTests () =
     let basePath = @"..\..\..\data\RDF"
     let files = System.IO.Directory.GetFiles basePath 
     files 
-    |> Array.map processFile
+    |> Array.map (fun rdffile -> processFile rdffile "..\..\..\GLL.AbstractParser.Simple.Tests\GPPerf1_cnf.yrd")
     |> Array.sortBy (fun (_,_,x,_,_,_) -> x)
     |> Array.iter (printfn "%A")

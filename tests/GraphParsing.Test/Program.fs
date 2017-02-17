@@ -3,7 +3,7 @@
 open System.IO
 open QuickGraph
 open NUnit.Framework
-open RDFPerfomance
+open YC.GraphParsing.Tests.RDFPerfomance
 
 [<TestFixture>]
 type ``Graph parsing tests``() =  
@@ -14,5 +14,5 @@ type ``Graph parsing tests``() =
 let f x =
     System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
     let t = new ``Graph parsing tests``()
-    RDFPerfomance.performTests ()
+    YC.GraphParsing.Tests.RDFPerfomance.performTests ()
     0

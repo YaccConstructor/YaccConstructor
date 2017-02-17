@@ -9,7 +9,7 @@
 //    let multiplicationCounter = ref 0
 
     let recognize options
-                  (inputToParse: int list)
+                  (inputToParse: int<AbstractAnalysis.Common.token> list)
                   (allRules: RulesHolder)  
                   nonterminals
                   S 

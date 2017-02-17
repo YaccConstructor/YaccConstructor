@@ -34,7 +34,7 @@ let loadFromFile (file:string) =
         FileLoader.Load(g, file)       
     g
 
-let getParseInputGraph tokenizer file =    
+let getParseInputGraph tokenizer file (graphMaker: _ -> #AdjacencyGraph<_,_>) =    
     let g = loadFromFile file
     let triples = g.Triples.Count
     let edgs = getEdges g
@@ -57,7 +57,7 @@ let getParseInputGraph tokenizer file =
     let allVs = edgs |> Array.collect (fun (f,l,t) -> [|f * 1<positionInInput>; t * 1<positionInInput>|]) |> Set.ofArray |> Array.ofSeq
     let eofV = allVs.Length
         
-    let g = new SimpleGraphInput<_>(allVs, id)
+    let g = graphMaker allVs
     
     [|for (f,l,t) in edgs -> edg f t l |]
     |> Array.concat
@@ -69,7 +69,7 @@ let getParseInputGraph tokenizer file =
 let processFile file =
     let cnt = 1
     let g1, triples1 = 
-        getParseInputGraph (fun x -> GLL.GPPerf1.stringToToken.[x]) file
+        getParseInputGraph (fun x -> GLL.GPPerf1.stringToToken.[x]) file (fun allVs -> new SimpleGraphInput<_>(allVs, id))
 //    let g2, triples1 = 
 //        getParseInputGraph (GLL.GPPerf2.stringToNumber >> ((*) 1<token>)) file
 //        

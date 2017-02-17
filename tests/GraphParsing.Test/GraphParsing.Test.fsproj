@@ -54,9 +54,34 @@
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
+      <Name>AbstractAnalysis.Common</Name>
+      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Common\Common.fsproj">
+      <Name>Common (Core\Common)</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Conversions\Conversions.fsproj">
+      <Name>Conversions</Name>
+      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\CYKMatrix\CYKMatrix.fsproj">
       <Name>CYKMatrix</Name>
       <Project>{484ba235-43b9-4105-86e8-0e8053cf07b0}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\YardFrontend\YardFrontend.fsproj">
+      <Name>YardFrontend</Name>
+      <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\GLL.AbstractParser.Simple.Tests\GLL.AbstractParser.SimpleTest.fsproj">
+      <Name>GLL.AbstractParser.SimpleTest</Name>
+      <Project>{61a3b851-03a0-4a87-b786-d21dfe03b9dd}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

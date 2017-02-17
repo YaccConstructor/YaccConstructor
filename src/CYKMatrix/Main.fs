@@ -60,12 +60,12 @@ let graphParsingPrint (matrix: ProbabilityMatrix.T) =
 
 
 let graphParsingTest1 =
-    let graph = new AdjacencyGraph<int, TaggedEdge<int, int>>()
+    let graph = new AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>()
     graph.AddVertex(0) |> ignore
     graph.AddVertex(1) |> ignore
 
-    graph.AddEdge(new TaggedEdge<int, int>(0, 1, 0)) |> ignore
-    graph.AddEdge(new TaggedEdge<int, int>(1, 0, 0)) |> ignore
+    graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(0, 1, 2*1<AbstractAnalysis.Common.token>)) |> ignore
+    graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(1, 0, 2*1<AbstractAnalysis.Common.token>)) |> ignore
     let A = NonTerminal "A"
     let B = NonTerminal "B"
     let S = NonTerminal "S"
@@ -79,8 +79,8 @@ let graphParsingTest1 =
     |> List.map (fun (nts, heads) -> nts, rawHeadsToProbs heads)
     |> Seq.iter crl.Add
 
-    let srl = new Dictionary<int, (NonTerminal * Probability.T) list>()
-    [ 0, [ A, 1.0 ] ]
+    let srl = new Dictionary< int<AbstractAnalysis.Common.token>, (NonTerminal * Probability.T) list>()
+    [ 2*1<AbstractAnalysis.Common.token>, [ A, 1.0 ] ]
     |> List.map (fun (c, heads) -> c, rawHeadsToProbs heads)
     |> Seq.iter srl.Add
 
@@ -88,7 +88,7 @@ let graphParsingTest1 =
 
     let rules = new RulesHolder(crl, srl, erl)
 
-    let (recognizeMatrix, multCount) = recognizeGraph graph naiveSquareMatrix rules nonterminals S
+    let (recognizeMatrix, vertexToInt, multCount) = recognizeGraph graph naiveSquareMatrix rules nonterminals S
     
     printfn "Multiplacation count: %d" multCount
     graphParsingPrint recognizeMatrix
@@ -119,10 +119,10 @@ let main args =
     //        [0, [A, true]; 1, [B, true]; 2, [B, true]] 
     //        |> List.map (fun (c, heads) -> c, rawHeadsToProbs heads)
     //        |> Seq.iter srl.Add
-    let srl = new Dictionary<int, (NonTerminal * Probability.T) list>()
-    [ 0, [ A, 0.2; B, 0.1 ]
-      1, [ B, 0.4 ]
-      2, [ B, 0.3 ] ]
+    let srl = new Dictionary<int<AbstractAnalysis.Common.token>, (NonTerminal * Probability.T) list>()
+    [ 0*1<AbstractAnalysis.Common.token>, [ A, 0.2; B, 0.1 ]
+      1*1<AbstractAnalysis.Common.token>, [ B, 0.4 ]
+      2*1<AbstractAnalysis.Common.token>, [ B, 0.3 ] ]
     |> List.map (fun (c, heads) -> c, rawHeadsToProbs heads)
     |> Seq.iter srl.Add
 
@@ -146,7 +146,7 @@ let main args =
     
     
 
-    let checkOneType task check taskType (input:int list) searchLen = 
+    let checkOneType task check taskType (input:int<AbstractAnalysis.Common.token> list) searchLen = 
         let n = 100
         let doOne i =
             let stopWatch = System.Diagnostics.Stopwatch.StartNew()
@@ -235,7 +235,7 @@ let main args =
 //    let toCheck2 = (myAlg |> addCuda 128 cudaParallel |> add_1DBrahma 64 nvidiaParallel |> addFast 64 |> addParallel 1)
     let toCheck3 = (myAlg |> addCuda 64 cudaParallel |> addParallel 1)
 
-    let checkTime input searchLen = 
+    let checkTime (input:int<AbstractAnalysis.Common.token> list) searchLen = 
 
         checkOneType 
             (fun input searchLen -> recognize toCheck3 input rules nonterminals S searchLen ) 
@@ -313,7 +313,7 @@ let main args =
         then failwith "different answers"
 
     let checkMultiplicationNumber inputLen param = 
-        let input = List.replicate inputLen 0
+        let input = List.replicate inputLen (0*1<AbstractAnalysis.Common.token>)
         let testParam = { param with Options.mode = Mode.Test }
         recognize testParam input rules nonterminals S inputLen |> ignore
         printfn ""
@@ -329,8 +329,8 @@ let main args =
 //    check [0;1;1]"      3    s
 //    check [0;0;0;1;1;2;2]  5
 //    check [0;0;0;1;1]    5
-    check [0;0;0;0;0;1;1;1] 6 okhotinAlg toCheck
-    check [0;0;0;0;1;1;1;1;1;1] 6 okhotinAlg toCheck
+//    check [0;0;0;0;0;1;1;1] 6 okhotinAlg toCheck
+//    check [0;0;0;0;1;1;1;1;1;1] 6 okhotinAlg toCheck
 //    check [0;0;0;0;1;1;1;1;1;1;1;1;1;1;1] 10
 //    check [0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1] 10
 //    check [0;0;0;0;1;1] 6

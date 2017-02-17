@@ -319,7 +319,9 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
         let rec f (current : obj) (prevAble : bool) : ResVert =
             match current with
             | :? TerminalNode as cur ->
-                been <- List.append been [cur]
+                if not (List.contains current been)
+                then
+                    been <- List.append been [cur]
                 Others(Term(cur), true, cur.Extension)
             | :? PackedNode as cur ->
                 if List.contains current been
@@ -400,10 +402,8 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                                         cur.Others.Insert(i,pckd)
                                 | Err msg -> errer <- (true, msg)
                         if fst errer
-                        then
-                            Err (snd errer)
-                        else
-                            Others(NonTerm(cur), false, cur.Extension)
+                        then Err (snd errer)
+                        else Others(NonTerm(cur), false, cur.Extension)
                     | Err msg -> Err msg
             | :? IntermidiateNode as cur ->
                 if List.contains current been
@@ -432,7 +432,6 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                             let mutable errer = (false, "")
                             if cur.Others <> Unchecked.defaultof<_>
                             then
-
                                 for i in 0..cur.Others.Count - 1 do
                                     let rs = f (cur.Others.Item i) false
                                     match rs with
@@ -443,10 +442,8 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                                             cur.Others.Insert(i,pckd)
                                     | Err msg -> errer <- (true, msg)
                             if fst errer
-                            then
-                                Err (snd errer)
-                            else
-                                Others(Inter(cur), false, cur.Extension)
+                            then Err (snd errer)
+                            else Others(Inter(cur), false, cur.Extension)
                         |Err msg -> Err msg
             | _ -> Err "Unexpected type of node"
         match f this.Root false with
@@ -473,64 +470,73 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                             been <- List.append been [node]
                             let l = f node.Left
                             if l <> None
-                            then
-                                l
-                            else
-                                let r = f node.Right
-                                r
+                            then l
+                            else f node.Right
                     | :? NonTerminalNode as node ->
                         if List.contains current been
                         then
                             None
                         else
+                            let mutable errmsg = (false, "")
                             been <- List.append been [node]
                             if node.Extension = ext
                             then
                                 Suc(node)
                             else
-                                let fst = f node.First
-                                if fst <> None
+                                let first = f node.First
+                                if first <> None
                                 then
-                                    fst
+                                    first
                                 else
                                     let mutable is = false
                                     let mutable nd = node
-                                    for t in node.Others do
-                                        let cu = f t
-                                        if cu <> None
-                                        then
-                                            is <- true
-                                            match cu with Suc(x) -> nd <- x
-                                    if is
+                                    if  node.Others <> null
                                     then
-                                        Suc(nd)
+                                        for t in node.Others do
+                                            let cu = f t
+                                            if cu <> None
+                                            then
+                                                is <- true
+                                                match cu with 
+                                                | Suc(x) -> nd <- x
+                                                | Error msg -> errmsg <- (true, msg)
+                                    if (fst errmsg)
+                                    then Error (snd errmsg)
                                     else
-                                        None
+                                        if is
+                                        then Suc(nd)
+                                        else None
                     | :? IntermidiateNode as node ->
                         if List.contains current been
                         then
                             None
                         else
+                            let mutable errmsg = (false, "")
                             been <- List.append been [node]
-                            let fst = f node.First
-                            if fst <> None
+                            let first = f node.First
+                            if first <> None
                                 then
-                                    fst
+                                    first
                                 else
                                     let mutable is = false
                                     let mutable nd = new NonTerminalNode(1, ext)
-                                    for t in node.Others do
-                                        let cu = f t
-                                        if cu <> None
-                                        then
-                                            is <- true
-                                            match cu with Suc(x) -> nd <- x
-                                    if is
+                                    if  node.Others <> null
                                     then
-                                        Suc(nd)
+                                        for t in node.Others do
+                                            let cu = f t
+                                            if cu <> None
+                                            then
+                                                is <- true
+                                                match cu with 
+                                                | Suc(x) -> nd <- x
+                                                | Error msg -> errmsg <- (true, msg)
+                                    if (fst errmsg)
+                                    then Error (snd errmsg)
                                     else
-                                        None
-                    | _ -> None
+                                        if is
+                                        then Suc(nd)
+                                        else None
+                    | _ -> Error "Unexpected node type"
                 else
                     Error "There is no nodes in tree"
             f root
@@ -624,8 +630,8 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                                         | :? INode as rt ->
                                             let vrt = new PackedNode(node.Production, lt, rt)
                                             Option<obj>.Some(vrt)
-                                | Option.None -> failwith "packed node doesn't have enoght children"
-                            | Option.None -> failwith "packed node doesn't have enoght children"                                
+                                | Option.None -> failwith "Packed node doesn't have enoght children"
+                            | Option.None -> failwith "Packed node doesn't have enoght children"                                
 
                         else
                             Option.None
@@ -668,12 +674,14 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                                             | :? PackedNode as pckd ->
                                                 vrt.AddChild pckd
                             | Option.None ->
-                                for t in node.Others do
-                                    match f t with
-                                    | Option.Some nxt ->
-                                        match nxt with
-                                        | :? PackedNode as pckd ->
-                                            vrt.AddChild pckd
+                                if  node.Others <> null
+                                then
+                                    for t in node.Others do
+                                        match f t with
+                                        | Option.Some nxt ->
+                                            match nxt with
+                                            | :? PackedNode as pckd ->
+                                                vrt.AddChild pckd
                             Option<obj>.Some(vrt)
                         else
                             Option.None
@@ -682,6 +690,7 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                     match vrt with
                     | :? PackedNode as pckd ->
                         newRoot.AddChild pckd
-                | Option.None -> failwith "there is no nodes in tree"
+                    | :? _ -> failwith "Unexpected type of node"
+                | Option.None -> failwith "There is no nodes in tree"
             let newTree = new Tree<'TokenType> (toks, newRoot, rules)
             newTree

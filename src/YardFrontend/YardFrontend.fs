@@ -27,7 +27,10 @@ type YardFrontend() =
         override this.Name = "YardFrontend"
         override this.ParseGrammar t = 
             match t with
-            | (:? System.String as s) -> Main.ParseFile s
+            | (:? System.String as s) -> 
+                let inliner = new Conversions.ExpandInline.ReplaceInline()                
+                let g = Main.ParseFile s
+                { g with grammar = inliner.ConvertGrammar g.grammar }
             | _ -> failwithf "File name expected as argumnet for YardFrontend.ParseGrammar, but got: %A" t
         override this.ProductionTypes =
             List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)

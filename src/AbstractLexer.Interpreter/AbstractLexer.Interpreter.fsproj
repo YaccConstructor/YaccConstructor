@@ -35,7 +35,6 @@
   <ItemGroup>
     <Compile Include="EpsClosure.fs" />
     <Compile Include="Interpreter.fs" />
-    <None Include="App.config" />
     <Content Include="paket.references" />
   </ItemGroup>
   <ItemGroup>

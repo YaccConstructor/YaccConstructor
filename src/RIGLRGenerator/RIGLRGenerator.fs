@@ -22,7 +22,7 @@ type RIGLR() =
     inherit Generator()
         override this.Name = "RIGLRGenerator"
         override this.Constraints = [|noEbnf; noMeta; noInnerAlt; (*noLiterals;*) noInnerAlt; noBrackets; needAC; singleModule|]
-        override this.Generate (definition, args) =   
+        override this.Generate (definition, generateToFile, args) =   
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
             let pairs = Array.zeroCreate <| args.Length / 2
             for i = 0 to pairs.Length - 1 do
@@ -74,4 +74,4 @@ type RIGLR() =
             out.Close()
             
             box ()
-        override this.Generate definition = this.Generate (definition, "")
+        override this.Generate(definition, generateToFile) = this.Generate (definition, generateToFile, "")

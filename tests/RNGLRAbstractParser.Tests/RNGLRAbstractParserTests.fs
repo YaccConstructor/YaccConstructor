@@ -29,27 +29,12 @@ open System.Collections.Generic
 
 open QuickGraph.FSA.GraphBasedFsa
 
-let baseInputGraphsPath = @"../../../data/AbstractRNGLR/DOT"
+let baseInputGraphsPath = "../../../data/AbstractRNGLR/DOT"
 
 let path name = System.IO.Path.Combine(baseInputGraphsPath, name)
 
 let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)
-
-let loadLexerInputGraph gFile =
-    
-    let dot = File.ReadAllText(System.IO.Path.Combine(baseInputGraphsPath, gFile))
-    let vertexFunc = fun v attrs -> int v
-    let edgeFunc = fun v1 v2 (attrs: System.Collections.Generic.IDictionary<string, string>) -> new TaggedEdge<_,_>(v1, v2, (attrs.Item("label"), attrs.Item("label")))
-    let qGraph = AdjacencyGraph<_,_>.LoadDot(dot, new System.Func<_,_,_>(vertexFunc), new System.Func<_,_,_,_>(edgeFunc))
-
-    let lexerInputG = new LexerInputGraph<_>()
-    lexerInputG.StartVertex <- 0
-    qGraph.Edges
-    |> Seq.map (fun e -> new LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag)))
-    |> lexerInputG.AddVerticesAndEdgeRange
-    |> ignore
-    lexerInputG
 
 let test buildAstAbstract qGraph nodesCount edgesCount epsilonsCount termsCount ambiguityCount = 
     let r = (new Parser<_>()).Parse  buildAstAbstract qGraph

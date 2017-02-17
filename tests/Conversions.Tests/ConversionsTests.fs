@@ -36,7 +36,7 @@ exception FEError of string
 [<assembly:AddinRoot ("YaccConstructor", "1.0")>]
 do()
 
-[<SetUp>]
+[<OneTimeSetUp>]
 let f () = 
     AddinManager.Initialize()    
     AddinManager.Registry.Update(null)
@@ -44,7 +44,7 @@ let f () =
 let ConversionsManager = AddinManager.GetExtensionObjects (typeof<Conversion>) |> Seq.cast<Conversion>
 let FrontendsManager = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
 
-let conversionTestPath = @"../../../Tests/Conversions/"
+let conversionTestPath = @"../../../data/Conversions/"
 let GeneratorsManager = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator>
 
 let getFrontend name =       
@@ -136,7 +136,7 @@ type ``Conversions tests`` () =
            match Seq.tryFind (fun (elem : Generator) -> elem.Name = "TreeDump") GeneratorsManager with
            | Some gen -> gen    
            | None -> failwith "TreeDump is not found."
-        printfn "%A\n" (generator.Generate ilTreeConverted)
+        printfn "%A\n" (generator.Generate(ilTreeConverted,true))
 #endif
 
         //treeDump.Generate expected |> string |> printfn "%s"

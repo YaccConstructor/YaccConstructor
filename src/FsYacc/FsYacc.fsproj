@@ -56,9 +56,7 @@
     <Compile Include="fsyaccpars.fs" />
     <Compile Include="fsyacclex.fs" />
     <Compile Include="fsyacc.fs" />
-    <None Include="App.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

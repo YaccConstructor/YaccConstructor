@@ -75,7 +75,7 @@ let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  =
             //printfn "u: %s" bfsFor
             updatedRules.Add bfsFor |> ignore        
             let emptyRule = {Rule.t.name = new Source.t(""); Rule.t.args = []; Rule.t.body = PSeq([], None, None)
-                            ;Rule.t.isPublic = false; Rule.t.metaArgs = []; Rule.isStart = false
+                            ;Rule.t.isPublic = false; Rule.t.isInline = false; Rule.t.metaArgs = []; Rule.isStart = false
                             }
             let ruleFor = ref emptyRule
             if rulesMap.TryGetValue(bfsFor, ruleFor) then

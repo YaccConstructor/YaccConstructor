@@ -34,14 +34,12 @@ let private replaceInline (rules : Rule.t<_,_> list) =
         ] |> dict
     let inlines = 
         rules
-        |> List.fold
-            (fun inlines cur ->
-                match cur.body with
-                | PRef (_, None) | PToken _ | PLiteral _ ->
-                    (cur.name.text, cur.body)::inlines
-                | _ -> inlines)
-            []
-        |> closure
+        |> List.choose
+            (fun cur ->
+                if cur.isInline   
+                then Some (cur.name.text, cur.body)
+                else None)
+        |> dict
     
     let rec modifyBody = function
         | PSeq (elems, ac, l) ->
@@ -51,15 +49,19 @@ let private replaceInline (rules : Rule.t<_,_> list) =
         | PAlt (l,r) -> PAlt(modifyBody l, modifyBody r)
         | PConj (l,r) -> PConj(modifyBody l, modifyBody r)
         | PRef (name,_) as prev ->
-            if inlines.ContainsKey name.text then inlines.[name.text]
+            if inlines.ContainsKey name.text then modifyBody inlines.[name.text]
             else prev
-        | PMetaRef (name,_,_) as prev ->
-            if inlines.ContainsKey name.text then inlines.[name.text]
-            else prev
+        | PMetaRef (name,x,args) as prev ->
+            if inlines.ContainsKey name.text then modifyBody inlines.[name.text]
+            else PMetaRef(name,x, List.map modifyBody args)
         | PMany x -> PMany <| modifyBody x
         | PSome x -> PSome <| modifyBody x
         | POpt x -> POpt <| modifyBody x
-        | x -> x
+        | PRepet (x,i,j) -> PRepet (modifyBody x, i, j)
+        | PLiteral _ 
+        | PPerm _ 
+        | PToken _ as x -> x
+        //| x -> x
         
     rules
     |> List.choose

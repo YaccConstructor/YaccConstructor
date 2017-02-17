@@ -16,7 +16,8 @@ module Yard.Generators.Common.DataStructures
 
 open System
 open Microsoft.FSharp.Collections
-        
+
+
 [<Struct>]
 type UsualOne<'T> =
     val mutable first : 'T
@@ -44,7 +45,12 @@ type ResizableUsualOne<'T> =
     member this.DoForAll f = 
         f this.first
         if !this.other <> null then !this.other |> ResizeArray.iter f
-
+    member this.Length ()= 
+        if !this.other = null
+        then 
+            1
+        else
+            ResizeArray.length (!this.other)
 [<Struct>]
 type ResizableUsualFive<'T when 'T:equality> =
     val mutable first  : 'T

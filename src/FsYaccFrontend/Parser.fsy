@@ -68,6 +68,7 @@ rule : IDENT COLON yard_option_11 alternative yard_list_12 {
                      and body=if opt_alts=[] then alt
                               else PAlt(alt, List.reduce (fun acc prod -> PAlt(acc, prod)) opt_alts)
                      and isStart=false
+                     and isInline = false
                      and isPublic=false
                      and metaArgs=[] } }
 

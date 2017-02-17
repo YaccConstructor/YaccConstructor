@@ -40,7 +40,6 @@
   <ItemGroup>
     <Compile Include="Graph.fs" />
     <None Include="paket.references" />
-    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

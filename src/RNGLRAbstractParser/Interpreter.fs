@@ -36,7 +36,7 @@ type ParseResult<'TokenType> =
 [<AllowNullLiteral>]
 type Vertex (state : int, level : int) =
     let out = new ResizeArray<Edge>(4)
-    let passingReductions = new HashSet<_>()
+    let passingReductions = new ResizeArray<_>(10)
     member this.Level = level
     member this.OutEdges = out
     member this.State = state

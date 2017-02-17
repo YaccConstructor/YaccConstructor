@@ -147,7 +147,8 @@ let genNewSourceWithRange (name : string) (body : t<_,_>) =
         | POpt b -> getBegin b
         | PToken t -> t
         | PMetaRef (n,_,_) -> n
-        | PPerm _ | PRepet _ as x -> failwithf "Unrealized construction: %A" x
+        | PRepet (b,_,_) -> getBegin b
+        | PPerm _  as x -> failwithf "Unrealized construction: %A" x
     let oldSource = getBegin body
     new Source.t(name, oldSource)
 

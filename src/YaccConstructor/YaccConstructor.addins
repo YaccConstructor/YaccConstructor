@@ -23,7 +23,5 @@
 
 <Addins>
 	<!--Directory include-subdirs="true"></Directory-->
-	 
-    <Directory>C:\Users\Ekaterina\YaccConstructor\src\GrahamBackend\obj\Debug</Directory>
-	
+    <Directory>..\..\..\..\Bin\Release\v40</Directory>
 </Addins>

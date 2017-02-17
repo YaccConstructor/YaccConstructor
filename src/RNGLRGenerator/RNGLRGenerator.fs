@@ -42,7 +42,7 @@ type RNGLR() =
     inherit Generator()
         override this.Name = "RNGLRGenerator"
         override this.Constraints = [|noEbnf; noMeta; noInnerAlt; (*noLiterals;*) noInnerAlt; noBrackets; needAC; singleModule|]
-        override this.Generate (definition, args) =
+        override this.Generate (definition, generateToFile, args) =
             let start = DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
             let pairs = Array.zeroCreate <| args.Length / 2
@@ -252,4 +252,4 @@ type RNGLR() =
             eprintfn "Generation time: %A" <| DateTime.Now - start
             //(new YardPrinter()).Generate newDefinition
             box ()
-        override this.Generate definition = this.Generate (definition, "")
+        override this.Generate(definition, gtf )= this.Generate (definition, gtf, "")

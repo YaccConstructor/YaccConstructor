@@ -29,5 +29,7 @@ do()
 type TreeDump() = 
     inherit Generator()
         override this.Name = "TreeDump"
-        override this.Generate t = (sprintf "%A" t) :> obj
+        override this.Generate(t,_) = (sprintf "%A" t) :> obj
+        override this.Generate(t,_,_) = (sprintf "%A" t) :> obj
         override this.Constraints = [||]
+        member this.Generate t = (sprintf "%A" t) :> obj

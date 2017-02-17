@@ -1,13 +1,12 @@
 source https://nuget.org/api/v2
 
-nuget argu
+nuget Argu
 nuget Alea.CUDA.Fody 2.2.0.3307 framework: >= net45
 nuget Alea.CUDA.Unbound 2.2.0.3307 framework: >= net45
 nuget Brahma.FSharp
 nuget dotNetRDF
 nuget ExtCore 0.8.43
 nuget FsCheck 0.9.2.0 framework: >= net40
-nuget FSPowerPack.Community 3.0.0.0 framework: >= net45
 nuget Mono.Addins
 nuget FSharp.Formatting
 
@@ -16,7 +15,7 @@ nuget NUnit
 nuget NUnit.Runners
 nuget FSharpx.Core
 nuget Virtuosity.Fody
-nuget YC.QuickGraph 3.7.2 framework: >= net45
+nuget YC.QuickGraph 3.7.3 framework: >= net45
 nuget YC.Utils.SourceText
 
 nuget FsLexYacc 6.0.0 framework: >= net45

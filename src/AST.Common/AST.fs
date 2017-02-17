@@ -243,8 +243,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>
                     |> Array.minBy snd
                 ast.first <- subAst
                 ast.other <- null
-                errorsCount
-                //minErrorsOfSubnodessCount       
+                errorsCount      
             | _ -> failwith ""    
 
         do getMinErrorsSubtree root |> ignore

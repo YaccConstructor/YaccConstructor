@@ -13,6 +13,40 @@ open System.IO
 open System.Collections.Generic
 open System.Diagnostics
 
+type AssemblyOf16s<'v> (id:int, edges:ResizeArray<TaggedEdge<'v,BioGraphEdgeLbl>>, ?infernalData:YC.Bio.InfernalInteraction.InfernalData, ?head, ?middle, ?tail) =
+    member val Id = id with get
+    member val InfernalData = infernalData with get, set
+    member val Edges = edges with get, set
+    member val Middle = middle.IsSome && middle.Value with get, set
+    member val Head = head.IsSome && head.Value with get, set
+    member val Tail = tail.IsSome && tail.Value with get, set
+    member this.Full with get() = this.Head && this.Middle && this.Tail
+
+    member this.ConvertToString (longEdges:array<TaggedEdge<_,BioGraphEdgeLbl>>, searchCfg:SearchConfig) =
+        let data =
+            let getStr (e:TaggedEdge<_,BioGraphEdgeLbl>) =
+                let longE = longEdges |> Array.tryFind (fun e' -> e'.Tag.id = Math.Abs e.Tag.id)
+                match longE with
+                | None -> e.Tag.str
+                | Some e' -> 
+                    let bound = 
+                        match this.InfernalData with
+                        | None -> 800
+                        | Some d -> if e.Tag.id < 0  then d.ModelFrom else 1600 - d.ModelTo
+                    if e.Tag.id < 0 
+                    then e'.Tag.str.[max 0 e'.Tag.str.Length - bound ..]
+                    else e'.Tag.str.[0 .. min bound (e'.Tag.str.Length - 1)]
+                 
+            this.Edges
+            |> ResizeArray.map (fun e -> e.Tag.str |> Array.map (fun i -> searchCfg.NumToString.[int i]) |> String.concat "")
+            |> String.concat ""
+
+        let metadata =
+            edges
+            |> ResizeArray.map(fun e -> e.Tag.id |> string )
+            |> String.concat "; "
+        "> " + string this.Id + " " + metadata + "\n" + data + "\n"
+        
 let getPaths (graph:AdjacencyGraph<_,TaggedEdge<_,BioGraphEdgeLbl>>) isForward s condToStop maxLength = 
     let rec dfs start curLength = 
         let toReturn = new List<List<TaggedEdge<_,_>>>()
@@ -85,19 +119,7 @@ let filterRnaParsingResult (graph : EdgeCompressedGraphInput) (searchCfg : Searc
 
     result
 
-let pathToString (searchCfg : SearchConfig) id (edges: ResizeArray<TaggedEdge<_,BioGraphEdgeLbl>>) =
-    let data =
-        edges
-        |> ResizeArray.map (fun e -> e.Tag.str |> Array.map (fun i -> searchCfg.NumToString.[int i]) |> String.concat "")
-        |> String.concat ""
-
-    let metadata =
-        edges
-        |> ResizeArray.map(fun e -> e.Tag.id |> string )
-        |> String.concat "; "
-    "> " + id + " " + metadata + "\n" + data + "\n"
-
-let parsingResultsProcessor () =
+let parsingResultsProcessor (assembliesOf16s:ResizeArray<_>) longEdges =
     let edgesGlobalCounter = ref 0
     MailboxProcessor.Start(fun inbox -> 
         let rec loop n = 
@@ -110,7 +132,9 @@ let parsingResultsProcessor () =
                         pathToPrint
                         |> ResizeArray.map (fun e -> 
                             incr edgesGlobalCounter
-                            pathToString cfg (string !edgesGlobalCounter) e)
+                            let a = new AssemblyOf16s<_>(!edgesGlobalCounter, e, middle = true)
+                            assembliesOf16s.Add a
+                            a.ConvertToString (longEdges, cfg))
                         |> fun strs -> System.IO.File.AppendAllLines(cfg.OutFileName, strs)
                     with e -> printfn "ERROR in parsing results postprocessing! %A" e.Message
                     return! loop n
@@ -118,10 +142,10 @@ let parsingResultsProcessor () =
             }
         loop 0)
     
-let searchInBioGraphs (searchCfg : SearchConfig) (graphs : EdgeCompressedGraphInput[]) agentsCount =
+let searchInBioGraphs (searchCfg : SearchConfig) (graphs : EdgeCompressedGraphInput[]) assembliesOf16s agentsCount longEdges =
     printfn "Total graph to porcess: %A" graphs.Length 
     let start = System.DateTime.Now
-    let postprocessor = parsingResultsProcessor ()
+    let postprocessor = parsingResultsProcessor assembliesOf16s longEdges
     let agent name = 
         MailboxProcessor.Start(fun inbox -> 
             let rec loop n = 
@@ -170,80 +194,100 @@ let printLongEdges path edges =
         |> Array.collect id
     File.AppendAllLines(path, toPrint)
 
-let searchMiddle (searchCfg:SearchConfig) agentsCount graphs = 
+let searchMiddle (searchCfg:SearchConfig) agentsCount assembliesOf16s graphs longEdges = 
     let graphs =
         graphs
         |> Array.filter (fun (g:EdgeCompressedGraphInput) -> g.Edges |> Seq.sumBy (fun e -> e.Tag.str.Length) > int (float searchCfg.LowLengthLimit / 1.8))    
-    searchInBioGraphs searchCfg graphs agentsCount
+    searchInBioGraphs searchCfg graphs assembliesOf16s agentsCount longEdges
 
-let score (searchCfg : SearchConfig) =
+let score (searchCfg : SearchConfig) (assembliesOf16s:ResizeArray<AssemblyOf16s<_>>) =
     let scoredByInfernal = 
         YC.Bio.InfernalInteraction.getScores searchCfg.OutFileName
         |> Array.ofSeq
-        |> Array.filter (fun d -> d.ModelFrom < 3 || d.SeqFrom < 3)
-    scoredByInfernal    
+        |> Array.iter (fun d -> 
+            let a = assembliesOf16s |> ResizeArray.tryFind (fun a -> try a.Id = int d.TargetName with _ -> try a.Id = int d.QueryName with _ -> false) 
+            match a with
+            | Some a -> a.InfernalData <- Some d 
+            | None -> printfn "assembly with id = %A not found" d.QueryName)
+        assembliesOf16s
+        |> ResizeArray.filter (fun a -> a.InfernalData.IsSome && (a.InfernalData.Value.ModelFrom < 3 || a.InfernalData.Value.SeqFrom < 3))
+    scoredByInfernal
 
 let searchMain path agentsCount =     
+    let assembliesOf16s = new ResizeArray<_>()
     let searchCfg = FSA_R16S_19_27_SearchConfig
     let sourceGraph, graphs, longEdges = loadInitialGraph path searchCfg.HighLengthLimit searchCfg.Tokenizer    
-    searchMiddle searchCfg agentsCount graphs
+    searchMiddle searchCfg agentsCount assembliesOf16s graphs longEdges
     
-    let middleScoredByInfernal = score searchCfg
+    let assembliesOf16s = score searchCfg assembliesOf16s
 
-    let midleEdgesScordByInfernal = 
-        middleScoredByInfernal
-        |> Array.map (fun d -> 
-            let edsIds = d.DescriptionOfTarget.Value.Split([|' ';';'|], StringSplitOptions.RemoveEmptyEntries) |> Array.map int
-            d, edsIds |> Array.map (fun id -> sourceGraph |> Array.find (fun e -> e.Tag.id = id))
-            )
+//    let midleEdgesScordByInfernal = 
+//        middleScoredByInfernal
+//        |> Array.map (fun d -> 
+//            let edsIds = d.DescriptionOfTarget.Value.Split([|' ';';'|], StringSplitOptions.RemoveEmptyEntries) |> Array.map int
+//            d, edsIds |> Array.map (fun id -> sourceGraph |> Array.find (fun e -> e.Tag.id = id))
+//            )
+//    
+//    let headMidle = new ResizeArray<_>()
+//
+//    let assembliesOf16s = 
+//        let r = new ResizeArray<_>()
+//        midleEdgesScordByInfernal
+//        |> Array.iter(fun (d,e) -> new AssemblyOf16s<_>(d,e,middle=true) |> r.Add)
+//        r
+
+    assembliesOf16s
+    |> ResizeArray.iter (fun a -> 
+        if a.InfernalData.Value.ModelFrom < 5 then a.Head <- true
+        if a.Edges.[0].Tag.id < 0 then a.Head <- true // First edge is a part of long edges
+        if a.InfernalData.Value.ModelTo > 1500 then a.Tail <- true
+        if longEdges |> Array.exists( fun e -> e.Tag.id = a.Edges.[a.Edges.Count - 1].Tag.id) then a.Tail <- true
+        )
     
-    let headMidle = new ResizeArray<_>()
-    let midleEdgesToProcess = 
-        let ready,toProcess = midleEdgesScordByInfernal |> Array.partition (fun (d,_) -> d.ModelFrom < 5)
-        ready |> Array.iter (fun (d,edgs) -> headMidle.Add (new ResizeArray<_>(edgs)))
-        toProcess
+    assembliesOf16s |> ResizeArray.map (fun a -> a.ConvertToString (longEdges, searchCfg)) |> (fun f -> System.IO.File.WriteAllLines ("AAAA.fa", f))
+
+    let midleEdgesToProcess = assembliesOf16s |> ResizeArray.filter (fun a -> not a.Full) |> Array.ofSeq
 
     let g = sourceGraph.ToAdjacencyGraph(true)
     let headsAndTails =
         midleEdgesToProcess
-        |> Array.map (fun (d,edgs) -> 
-            let headsFinalV = edgs.[0].Source
-            let headsLengthLim = d.ModelFrom + 10
+        |> Array.map (fun a -> 
+            let headsFinalV = a.Edges.[0].Source
+            let headsLengthLim = a.InfernalData.Value.ModelFrom + 10
             let heads = 
                 let paths = getPaths g false headsFinalV (fun (curE:TaggedEdge<_,_>) curL -> curL >= headsLengthLim) headsLengthLim
-                let toParse, other = 
-                    if paths.Count <= 5
-                    then paths, new ResizeArray<_>()
-                    else paths |> ResizeArray.partition (fun p -> p.Count > 1)
-                other |> ResizeArray.iter (fun p -> p.AddRange edgs; headMidle.Add p)
-                toParse |> ResizeArray.concat |> Array.ofSeq
+                paths
+                |> ResizeArray.concat
+                |> Array.ofSeq
 
-            let tailsStartV = edgs.[edgs.Length - 1].Target
-            let tailsLengthLim = 1600 - d.ModelTo 
+            let tailsStartV = a.Edges.[a.Edges.Count - 1].Target
+            let tailsLengthLim = 1600 - a.InfernalData.Value.ModelTo 
             let tails = 
                 getPaths g true tailsStartV (fun (curE:TaggedEdge<_,_>) curL -> curL >= tailsLengthLim) tailsLengthLim
                 |> ResizeArray.concat
                 |> Array.ofSeq
-            heads, (d,edgs), tails
+            heads, a, tails
             )
+
+    headsAndTails |> Array.iter (fun (h,m,t) -> printfn "%A - %A" h.Length t.Length)
 
     let edgesForHeadsSearch =
         headsAndTails
-        |> Array.collect (fun (h,(_,m),t) -> [|h; [|m.[0]|]|])
+        |> Array.collect (fun (h,a,t) -> [|h; [|a.Edges.[0]|]|])
         |> Array.concat
         |> fun a -> new HashSet<_>(a)
-    
-    let edgesForTailsSearch =
-        headsAndTails
-        |> Array.collect (fun (h,(_,m),t) -> [|[|m.[m.Length-1]|];t|])
-        |> Array.concat
-        |> fun a -> new HashSet<_>(a)
-
+//    
+//    let edgesForTailsSearch =
+//        headsAndTails
+//        |> Array.collect (fun (h,(_,m),t) -> [|[|m.[m.Length-1]|];t|])
+//        |> Array.concat
+//        |> fun a -> new HashSet<_>(a)
+//
     let graphs = splitToConnectedSubgraphs edgesForHeadsSearch
-
+    let assembliesOf16sHeads = new ResizeArray<_>()
     let searchCfg = FSA_R16S_1_18_SearchConfig
-
-    searchInBioGraphs searchCfg graphs 1
+    searchInBioGraphs searchCfg graphs assembliesOf16sHeads 1 longEdges
+    let assembliesOf16sHeads = score searchCfg assembliesOf16sHeads
     ()
 
 let printPairs path pairs = 

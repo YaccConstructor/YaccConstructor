@@ -73,7 +73,7 @@ let FSA_R16S_1_18_SearchConfig =
     let nTs = new Dictionary<_,_>()
     parserSource.StringToToken
     |> Seq.iter (fun kvp -> nTs.Add(kvp.Value,kvp.Key))
-    new SearchConfig(parserSource, tokenizer, 535, 545, 20, nTs, "R16S_1_18_result.fa")
+    new SearchConfig(parserSource, tokenizer, 360, 390, 20, nTs, "R16S_1_18_result.fa")
 
 
 let FSA_R16S_19_27_SearchConfig = 

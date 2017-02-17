@@ -229,7 +229,7 @@ let loadInitialGraph fileWithoutExt templateLengthHighLimit tokenizer =
     let sourceEdges, longEdges = loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit tokenizer
     let longEdges = 
         longEdges
-        |> Seq.map (fun e -> e.Tag.str)
+        //|> Seq.map (fun e -> e.Tag.str)
         |> Array.ofSeq
 
     let getInfo prefix index = 

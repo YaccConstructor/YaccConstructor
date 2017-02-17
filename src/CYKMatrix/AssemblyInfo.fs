@@ -10,7 +10,7 @@ open System.Reflection
 do ()
 
 module internal AssemblyVersionInformation =
-    let [<Literal>] AssemblyTitle = "FsYARD"
+    let [<Literal>] AssemblyTitle = "CYKMatrix"
     let [<Literal>] AssemblyProduct = "YaccConstructor"
     let [<Literal>] AssemblyDescription = "Platform for parser generators and other grammarware research and development."
     let [<Literal>] AssemblyVersion = "0.1.0.1"

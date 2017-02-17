@@ -70,6 +70,21 @@ and IntermidiateNode =
 
 type private DotNodeType = Packed | NonTerminal | Intermidiate | Terminal
 
+type private NotPacked =
+    | NonTerm  of NonTerminalNode
+    | Term of TerminalNode
+    | Inter of IntermidiateNode
+
+type private ResVert =
+    | Pack of PackedNode * bool
+    | Others of NotPacked * bool * int64<extension>
+    | Err of string
+
+type private ResNode =
+    | Suc of NonTerminalNode
+    | None
+    | Error of string
+
 let inline packExtension left right : int64<extension> =  LanguagePrimitives.Int64WithMeasure ((int64 left <<< 32) ||| int64 right)
 let inline getRightExtension (long : int64<extension>) = int <| ((int64 long) &&& 0xffffffffL)
 let inline getLeftExtension (long : int64<extension>)  = int <| ((int64 long) >>> 32)
@@ -290,4 +305,392 @@ type Tree<'TokenType> (toks : array<'TokenType>, root : obj, rules : int[][]) =
                 then
                     for n in a.Others do
                         nodeQueue.Enqueue(new NumNode(!num, n))
-        !nodesCount, !edgesCount, !termsCount, !ambiguityCount 
+        !nodesCount, !edgesCount, !termsCount, !ambiguityCount
+
+    member this.Minimise : unit =
+
+        let getNxtNd (node : NotPacked) : INode =
+            match node with
+            | NonTerm(trt) -> trt :> INode
+            | Term(trt) -> trt :> INode
+            | Inter(trt) -> trt :> INode
+
+        let mutable been : list<obj> = []
+        let rec f (current : obj) (prevAble : bool) : ResVert =
+            match current with
+            | :? TerminalNode as cur ->
+                if not (List.contains current been)
+                then
+                    been <- List.append been [cur]
+                Others(Term(cur), true, cur.Extension)
+            | :? PackedNode as cur ->
+                if List.contains current been
+                then
+                    Pack(cur, false)
+                else
+                    been <- List.append been [cur]
+                    let l = f cur.Left true
+                    let r = f cur.Right true
+                    match l, r with
+                    | Others(vrtl, isl, extl), Others(vrtr, isr, extr) ->
+                        if extl = packExtension -1 -1 then
+                            if prevAble
+                            then
+                                Others(vrtr, isr, extr)
+                            else
+                                let trt = getNxtNd vrtr
+                                let vrt = new PackedNode(cur.Production, cur.Left, trt)
+                                Pack(vrt, true)
+                        elif extr = packExtension -1 -1 then
+                            if prevAble
+                            then
+                                Others(vrtl, isl, extl)
+                            else
+                                let trt = getNxtNd vrtl
+                                let vrt = new PackedNode(cur.Production, trt, cur.Right)
+                                Pack(vrt, true)
+                        else
+                            if isl || isr
+                            then
+                                let vrt = new PackedNode(cur.Production, (if isl then getNxtNd vrtl else cur.Left), (if isr then getNxtNd vrtr else cur.Right) )
+                                Pack (vrt, true)
+                            else
+                                Pack (cur, false)
+                    | Pack(vrtl, isl), Others(vrtr, isr, extr) ->
+                        if extr = packExtension -1 -1
+                        then
+                            l
+                        else
+                            let vrt = new PackedNode(cur.Production, vrtl, (if isr then getNxtNd vrtr else cur.Right) )
+                            Pack (vrt, true)
+                    | Others(vrtl, isl, extl), Pack(vrtr, isr) ->
+                        if extl = packExtension -1 -1
+                        then
+                            r
+                        else
+                            let vrt = new PackedNode(cur.Production, (if isl then getNxtNd vrtl else cur.Left), vrtr )
+                            Pack (vrt, true)
+                    | Pack(vrtl, isl), Pack(vrtr, isr) ->
+                        let vrt = new PackedNode(cur.Production, vrtl, vrtr)
+                        Pack (vrt, true)
+                    | _, Err msg -> Err msg
+                    | Err msg, _ -> Err msg
+                    | Err msg, Err msg2 -> Err (msg + " and " + msg2)
+            | :? NonTerminalNode as cur ->
+                if List.contains current been
+                then
+                    Others(NonTerm(cur), false, cur.Extension)
+                else
+                    been <- List.append been [cur]
+                    let fs = f cur.First false
+                    match fs with
+                    | Pack(pckd, is) ->
+                        if is
+                        then
+                            cur.First <- pckd
+                        let mutable errer = (false, "")
+                        if cur.Others <> Unchecked.defaultof<_>
+                        then
+
+                            for i in 0..cur.Others.Count - 1 do
+                                let rs = f (cur.Others.Item i) false
+                                match rs with
+                                | Pack(pckd, is) ->
+                                    if is
+                                    then
+                                        cur.Others.RemoveAt i
+                                        cur.Others.Insert(i,pckd)
+                                | Err msg -> errer <- (true, msg)
+                        if fst errer
+                        then Err (snd errer)
+                        else Others(NonTerm(cur), false, cur.Extension)
+                    | Err msg -> Err msg
+            | :? IntermidiateNode as cur ->
+                if List.contains current been
+                then
+                    Others(Inter(cur), false, cur.Extension)
+                else
+                    been <- List.append been [cur]
+                    if cur.Others = Unchecked.defaultof<_>
+                    then
+                        let res = f cur.First true
+                        match res with
+                        | Others(_, _, _) ->
+                            res
+                        | Pack(vrt, is) ->
+                            if is
+                            then res
+                            else Pack(vrt, true)
+                        | Err msg -> Err msg                      
+                    else
+                        let fs = f cur.First false
+                        match fs with
+                        | Pack(pckd, is) ->
+                            if is
+                            then
+                                cur.First <- pckd
+                            let mutable errer = (false, "")
+                            if cur.Others <> Unchecked.defaultof<_>
+                            then
+                                for i in 0..cur.Others.Count - 1 do
+                                    let rs = f (cur.Others.Item i) false
+                                    match rs with
+                                    | Pack(pckd, is) ->
+                                        if is
+                                        then
+                                            cur.Others.RemoveAt i
+                                            cur.Others.Insert(i,pckd)
+                                    | Err msg -> errer <- (true, msg)
+                            if fst errer
+                            then Err (snd errer)
+                            else Others(Inter(cur), false, cur.Extension)
+                        |Err msg -> Err msg
+            | _ -> Err "Unexpected type of node"
+        match f this.Root false with
+        | Err msg -> failwith msg
+
+    member this.ExtractMinimalLengthPathTree (ext : int64<extension>) : Tree<'TokenType> =
+    
+        let getNonTermNode (start : obj) (ext : int64<extension>) : ResNode =
+            let mutable been : list<obj> = []
+            let rec f (current : obj) =
+                if current <> null 
+                then
+                    match current with
+                    | :? TerminalNode as node ->
+                        if not (List.contains current been)
+                        then
+                            been <- List.append been [node]
+                        None
+                    | :? PackedNode as node ->
+                        if List.contains current been
+                        then
+                            None
+                        else
+                            been <- List.append been [node]
+                            let l = f node.Left
+                            if l <> None
+                            then l
+                            else f node.Right
+                    | :? NonTerminalNode as node ->
+                        if List.contains current been
+                        then
+                            None
+                        else
+                            let mutable errmsg = (false, "")
+                            been <- List.append been [node]
+                            if node.Extension = ext
+                            then
+                                Suc(node)
+                            else
+                                let first = f node.First
+                                if first <> None
+                                then
+                                    first
+                                else
+                                    let mutable is = false
+                                    let mutable nd = node
+                                    if  node.Others <> null
+                                    then
+                                        for t in node.Others do
+                                            let cu = f t
+                                            if cu <> None
+                                            then
+                                                is <- true
+                                                match cu with 
+                                                | Suc(x) -> nd <- x
+                                                | Error msg -> errmsg <- (true, msg)
+                                    if (fst errmsg)
+                                    then Error (snd errmsg)
+                                    else
+                                        if is
+                                        then Suc(nd)
+                                        else None
+                    | :? IntermidiateNode as node ->
+                        if List.contains current been
+                        then
+                            None
+                        else
+                            let mutable errmsg = (false, "")
+                            been <- List.append been [node]
+                            let first = f node.First
+                            if first <> None
+                                then
+                                    first
+                                else
+                                    let mutable is = false
+                                    let mutable nd = new NonTerminalNode(1, ext)
+                                    if  node.Others <> null
+                                    then
+                                        for t in node.Others do
+                                            let cu = f t
+                                            if cu <> None
+                                            then
+                                                is <- true
+                                                match cu with 
+                                                | Suc(x) -> nd <- x
+                                                | Error msg -> errmsg <- (true, msg)
+                                    if (fst errmsg)
+                                    then Error (snd errmsg)
+                                    else
+                                        if is
+                                        then Suc(nd)
+                                        else None
+                    | _ -> Error "Unexpected node type"
+                else
+                    Error "There is no nodes in tree"
+            f root
+
+        match getNonTermNode root ext with
+        | Error msg -> failwith msg
+        | None -> failwith "Thete is no such nodes in the tree"
+        | Suc node -> 
+            let newRoot = new NonTerminalNode (node.Name, node.Extension)
+            let getNodesOfMinLenTree (node : NonTerminalNode) =
+                let mutable been : list<obj> = []
+                let rec f (curr : obj) (len : int) (nodes : list<obj>) =
+                    match curr with
+                        | :? TerminalNode as node ->
+                            if List.contains curr been
+                            then
+                                (len, nodes)
+                            else
+                                if node.Extension <> packExtension -1 -1
+                                then
+                                    (len + 1, List.append nodes [node] )
+                                else
+                                    (len, nodes)
+                        | :? PackedNode as node ->
+                            if List.contains curr been
+                            then
+                                (len, nodes)
+                            else
+                                let lenl, ndsl = f node.Left len nodes
+                                let lenr, ndsr = f node.Right len nodes
+                                (lenr + lenl, List.append (List.append ndsl ndsr) [node] )
+                        | :? NonTerminalNode as node ->
+                            if List.contains curr been
+                            then
+                                (len, nodes)
+                            else
+                                let ln, nods = f node.First len nodes
+                                let mutable min = ln
+                                let mutable ndes = nods
+                                if node.Others <> null
+                                then
+                                    for t in node.Others do
+                                        let lnn, nds = f t  len nodes
+                                        if lnn < min
+                                        then
+                                            min <- lnn
+                                            ndes <- nds
+                                (min, List.append ndes [node])
+                        | :? IntermidiateNode as node ->
+                            if List.contains curr been
+                            then
+                                (len, nodes)
+                            else
+                                let ln, nods = f node.First len nodes
+                                let mutable min = ln
+                                let mutable ndes = nods
+                                if node.Others <> null
+                                then
+                                    for t in node.Others do
+                                        let lnn, nds = f t len nodes
+                                        if lnn < min
+                                        then
+                                            min <- lnn
+                                            ndes <- nds
+                                (min, List.append ndes [node])
+                let _, nodes = f node 0 []
+                (nodes)
+            let nodes = getNodesOfMinLenTree node
+            let makeTree (oldNode : obj) =
+                let rec f (cur : obj) =
+                    match cur with
+                    | :? TerminalNode as node->
+                        if (List.contains cur nodes)
+                        then
+                            let vrt = new TerminalNode (node.Name, node.Extension)
+                            Option<obj>.Some(vrt)
+                        else
+                            Option.None
+                    | :? PackedNode as node->
+                        if (List.contains cur nodes)
+                        then
+                            match f node.Left with
+                            | Option.Some x -> 
+                                let l = x
+                                match f node.Right with
+                                | Option.Some x -> 
+                                    let r = x
+                                    match l with
+                                    | :? INode as lt ->
+                                        match r with
+                                        | :? INode as rt ->
+                                            let vrt = new PackedNode(node.Production, lt, rt)
+                                            Option<obj>.Some(vrt)
+                                | Option.None -> failwith "Packed node doesn't have enoght children"
+                            | Option.None -> failwith "Packed node doesn't have enoght children"                                
+
+                        else
+                            Option.None
+                    | :? NonTerminalNode as node ->
+                        if (List.contains cur nodes)
+                        then
+                            let vrt = new NonTerminalNode (node.Name, node.Extension)
+                            let fst = f node.First
+                            match fst with
+                            | Option.Some nxt ->
+                                match nxt with
+                                | :? PackedNode as pckd ->
+                                    vrt.AddChild pckd
+                            | Option.None ->
+                                for t in node.Others do
+                                    match f t with
+                                    | Option.Some nxt ->
+                                        match nxt with
+                                        | :? PackedNode as pckd ->
+                                            vrt.AddChild pckd
+                            Option<obj>.Some(vrt)
+                        else
+                            Option.None
+                    | :? IntermidiateNode as node ->
+                        if (List.contains cur nodes)
+                        then
+                            let vrt = new IntermidiateNode (node.Slot, node.Extension)
+                            let fst = f node.First
+                            match fst with
+                            | Option.Some nxt ->
+                                match nxt with
+                                | :? PackedNode as pckd ->
+                                    vrt.AddChild pckd
+                                if node.Others <> null
+                                then
+                                    for t in node.Others do
+                                        match f t with
+                                        | Option.Some nxt ->
+                                            match nxt with
+                                            | :? PackedNode as pckd ->
+                                                vrt.AddChild pckd
+                            | Option.None ->
+                                if  node.Others <> null
+                                then
+                                    for t in node.Others do
+                                        match f t with
+                                        | Option.Some nxt ->
+                                            match nxt with
+                                            | :? PackedNode as pckd ->
+                                                vrt.AddChild pckd
+                            Option<obj>.Some(vrt)
+                        else
+                            Option.None
+                match f oldNode with
+                | Option.Some vrt ->
+                    match vrt with
+                    | :? PackedNode as pckd ->
+                        newRoot.AddChild pckd
+                    | :? _ -> failwith "Unexpected type of node"
+                | Option.None -> failwith "There is no nodes in tree"
+            let newTree = new Tree<'TokenType> (toks, newRoot, rules)
+            newTree

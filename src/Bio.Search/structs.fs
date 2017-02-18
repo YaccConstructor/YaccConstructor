@@ -9,7 +9,7 @@ open Yard.Generators.GLL.AbstractParser
 open System
 open System.Collections.Generic
 
-let grammarsDir = @"../../src/YC.GrammarZOO/Bio/16s/"
+let grammarsDir = @"../../../src/YC.GrammarZOO/Bio/16s/"
 //open Yard.Generators.GLL.AbstractParserWithoutTree
 type WhatShouldISearch = 
     | R16S_1_18
@@ -18,11 +18,13 @@ type WhatShouldISearch =
 type CLIArguments = 
     | [<NoAppSettings; Mandatory; AltCommandLine("-i")>] Input of string
     | Agents of int
+    | TmpDir of string
     interface IArgParserTemplate with
         member s.Usage = 
             match s with
             | Input _ -> "Specify a graph for processing."
             | Agents _ -> "Specify a number of agents for parallel processing."
+            | TmpDir _ -> "Specify a directory for temp output files."
 
 type msg = 
     | Data of int * EdgeCompressedGraphInput
@@ -34,15 +36,13 @@ type SearchConfig =
     val Tokenizer : char -> int<token>
     val HighLengthLimit : int
     val LowLengthLimit : int
-    val NumToString : Dictionary<int,string>
     val LengthOfBeinning : int
     val OutFileName : string
-    new(parserSource, getSmb, lowLengthLimit, highLengthLimit, lengthOfBeinning, numToString, outFileName) = 
+    new(parserSource, getSmb, lowLengthLimit, highLengthLimit, lengthOfBeinning, outFileName) = 
         { ParserSource = parserSource
           Tokenizer = getSmb
           HighLengthLimit = highLengthLimit
           LowLengthLimit = lowLengthLimit
-          NumToString = numToString
           LengthOfBeinning = lengthOfBeinning
           OutFileName = outFileName }
 
@@ -58,8 +58,12 @@ let getParserSource grammarFile =
                                  ["ExpandMeta"]
                                  [] :?> ParserSourceGLL
 
+let parserSourceHead = getParserSource "R16S_1_18.yrd"
+let parserSourceMiddle = getParserSource "R16S_19_27.yrd"
+let parserSourceTail = getParserSource "R16S_1_18.yrd"
+
 let FSA_R16S_1_18_SearchConfig = 
-    let parserSource = getParserSource "R16S_1_18.yrd"
+    
     let tokenizer (ch : char) =
         let ch = 
             let ch = Char.ToUpper(ch)
@@ -68,16 +72,26 @@ let FSA_R16S_1_18_SearchConfig =
             elif Array.contains ch [|'A';'C';'G';'U';|]
             then ch
             else 'G'
-        parserSource.StringToToken.[ch.ToString()]
-        |> (fun x -> x * 1<token>)
-    let nTs = new Dictionary<_,_>()
-    parserSource.StringToToken
-    |> Seq.iter (fun kvp -> nTs.Add(kvp.Value,kvp.Key))
-    new SearchConfig(parserSource, tokenizer, 360, 390, 20, nTs, "R16S_1_18_result.fa")
+        parserSourceHead.StringToToken (ch.ToString())
+    new SearchConfig(parserSourceMiddle, tokenizer, 360, 390, 20, "R16S_1_18_result.fa")
+
+
+let FSA_R16S_tail_SearchConfig = 
+    //let parserSource = getParserSource "R16S_1_18.yrd"
+    let tokenizer (ch : char) =
+        let ch = 
+            let ch = Char.ToUpper(ch)
+            if ch = 'T'
+            then 'U'
+            elif Array.contains ch [|'A';'C';'G';'U';|]
+            then ch
+            else 'G'
+        parserSourceMiddle.StringToToken (ch.ToString())
+    new SearchConfig(parserSourceMiddle, tokenizer, 360, 390, 20, "R16S_tail_result.fa")
 
 
 let FSA_R16S_19_27_SearchConfig = 
-    let parserSource = getParserSource "R16S_19_27.yrd"
+    //let parserSource = getParserSource "R16S_19_27.yrd"
     let tokenizer (ch : char) =
         let ch = 
             let ch = Char.ToUpper(ch)
@@ -86,11 +100,7 @@ let FSA_R16S_19_27_SearchConfig =
             elif Array.contains ch [|'A';'C';'G';'U';|]
             then ch
             else 'G'
-        parserSource.StringToToken.[ch.ToString()]
-        |> (fun x -> x * 1<token>)
-    let nTs = new Dictionary<_,_>()
-    parserSource.StringToToken
-    |> Seq.iter (fun kvp -> nTs.Add(kvp.Value,kvp.Key))
+        parserSourceMiddle.StringToToken(ch.ToString())
     //D = 30
-    new SearchConfig(parserSource, tokenizer, 300, 370, 0, nTs, "R16S_19_27_result.fa")
+    new SearchConfig(parserSourceMiddle, tokenizer, 300, 370, 0, "R16S_19_27_result.fa")
 

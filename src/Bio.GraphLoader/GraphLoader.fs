@@ -167,14 +167,13 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit tokenizer =
         
         |> Array.collect 
             (fun e -> 
+                let templateLengthHighLimit = 1000
                 if e.Tag.length <= templateLengthHighLimit
                 then [|e|]
                 else 
                     longEdges.Add e
                     incr leCount
-                    let str1 = 
-                        e.Tag.str.[0 .. templateLengthHighLimit]
-                        
+                    let str1 = e.Tag.str.[0 .. templateLengthHighLimit]
                     let startOfSecondEdge= e.Tag.str.Length - templateLengthHighLimit
                     let str2 = e.Tag.str.[startOfSecondEdge ..]
                     incr cnt

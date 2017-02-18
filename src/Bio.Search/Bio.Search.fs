@@ -38,7 +38,7 @@ type AssemblyOf16s<'v> (id:int, edges:ResizeArray<TaggedEdge<'v,BioGraphEdgeLbl>
                     else e'.Tag.str.[0 .. min bound (e'.Tag.str.Length - 1)]
                  
             this.Edges
-            |> ResizeArray.map (fun e -> e.Tag.str |> Array.map (fun i -> searchCfg.NumToString.[int i]) |> String.concat "")
+            |> ResizeArray.map (fun e -> e.Tag.str |> Array.map (fun i -> searchCfg.ParserSource.IntToString.[int i]) |> String.concat "")
             |> String.concat ""
 
         let metadata =
@@ -173,13 +173,18 @@ let searchInBioGraphs (searchCfg : SearchConfig) (graphs : EdgeCompressedGraphIn
             loop 0)
     
     let agents = Array.init agentsCount (sprintf "searchAgent%A" >> agent)
-    graphs 
-    |> Array.iteri (fun i graph -> 
-        let agentId = 
-            if agentsCount > 1 && graph.VertexCount < 100
-            then 1 + i % (agentsCount - 1)
-            else 0
-        Data(i, graph) |> agents.[agentId].Post)
+    let qToProcess = Queue<_>(graphs |> Array.mapi (fun i x -> (i, x)))
+    while qToProcess.Count > 0 do
+        agents
+        |> Array.iter (fun a ->
+            if a.CurrentQueueLength < 10
+            then 
+                for i in 0..9 do
+                    if qToProcess.Count > 0 
+                    then
+                        let (i,graph) = qToProcess.Dequeue()
+                        Data(i, graph) |> a.Post)            
+        
     agents |> Array.iter (fun a -> a.PostAndReply Die)
     postprocessor.PostAndReply PDie
 
@@ -221,21 +226,6 @@ let searchMain path agentsCount =
     
     let assembliesOf16s = score searchCfg assembliesOf16s
 
-//    let midleEdgesScordByInfernal = 
-//        middleScoredByInfernal
-//        |> Array.map (fun d -> 
-//            let edsIds = d.DescriptionOfTarget.Value.Split([|' ';';'|], StringSplitOptions.RemoveEmptyEntries) |> Array.map int
-//            d, edsIds |> Array.map (fun id -> sourceGraph |> Array.find (fun e -> e.Tag.id = id))
-//            )
-//    
-//    let headMidle = new ResizeArray<_>()
-//
-//    let assembliesOf16s = 
-//        let r = new ResizeArray<_>()
-//        midleEdgesScordByInfernal
-//        |> Array.iter(fun (d,e) -> new AssemblyOf16s<_>(d,e,middle=true) |> r.Add)
-//        r
-
     assembliesOf16s
     |> ResizeArray.iter (fun a -> 
         if a.InfernalData.Value.ModelFrom < 5 then a.Head <- true
@@ -257,25 +247,68 @@ let searchMain path agentsCount =
             let heads = 
                 let paths = getPaths g false headsFinalV (fun (curE:TaggedEdge<_,_>) curL -> curL >= headsLengthLim) headsLengthLim
                 paths
-                |> ResizeArray.concat
                 |> Array.ofSeq
 
             let tailsStartV = a.Edges.[a.Edges.Count - 1].Target
             let tailsLengthLim = 1600 - a.InfernalData.Value.ModelTo 
             let tails = 
                 getPaths g true tailsStartV (fun (curE:TaggedEdge<_,_>) curL -> curL >= tailsLengthLim) tailsLengthLim
-                |> ResizeArray.concat
                 |> Array.ofSeq
             heads, a, tails
             )
 
     headsAndTails |> Array.iter (fun (h,m,t) -> printfn "%A - %A" h.Length t.Length)
+    let searchCfg = FSA_R16S_1_18_SearchConfig
 
-    let edgesForHeadsSearch =
-        headsAndTails
-        |> Array.collect (fun (h,a,t) -> [|h; [|a.Edges.[0]|]|])
-        |> Array.concat
-        |> fun a -> new HashSet<_>(a)
+    let assembliesOf16sHeads = new ResizeArray<AssemblyOf16s<_>>()
+    let assembliesOf16sTails = new ResizeArray<AssemblyOf16s<_>>()
+
+    let cnt = ref 0
+
+    headsAndTails 
+    |> Array.iter (fun (h,_,t) -> 
+        h |> Array.iter (fun h -> 
+        if h.Count > 0 && assembliesOf16sHeads |> ResizeArray.exists(fun a -> a.Edges |> Seq.compareWith (fun x y -> if x = y then 0 else 1) h |> ((=)0)) |> not
+        then assembliesOf16sHeads.Add (new AssemblyOf16s<_>(!cnt, ResizeArray.rev h, head = true))
+        incr cnt)
+        t |> Array.iter (fun t ->
+        if t.Count > 0 && assembliesOf16sTails |> ResizeArray.exists(fun a -> a.Edges |> Seq.compareWith (fun x y -> if x = y then 0 else 1) t |> ((=)0)) |> not
+        then assembliesOf16sTails.Add (new AssemblyOf16s<_>(!cnt, new ResizeArray<_>(t), head = true))
+        incr cnt)
+        )
+
+    assembliesOf16sHeads |> ResizeArray.map (fun a -> a.ConvertToString(longEdges, searchCfg)) |> fun s -> System.IO.File.WriteAllLines(searchCfg.OutFileName,s)
+    let assembliesOf16sHeads = score searchCfg assembliesOf16sHeads
+    assembliesOf16sTails |> ResizeArray.map (fun a -> a.ConvertToString(longEdges, searchCfg)) |> fun s -> System.IO.File.WriteAllLines(FSA_R16S_tail_SearchConfig.OutFileName,s)
+    let assembliesOf16sTails = score FSA_R16S_tail_SearchConfig assembliesOf16sTails
+
+    let assembliesOf16sHeadsMiddles = new ResizeArray<AssemblyOf16s<_>>()
+
+    let cnt = ref assembliesOf16s.Count
+
+    assembliesOf16s
+    |> ResizeArray.iter (fun a -> 
+        if a.Head
+        then assembliesOf16sHeadsMiddles.Add a
+        else 
+            let heads =
+                assembliesOf16sHeads
+                |> ResizeArray.filter (fun ah -> ah.Edges.[ah.Edges.Count - 1].Target = a.Edges.[0].Source)
+            if heads.Count > 0
+            then
+                heads
+                |> ResizeArray.iter (fun h -> 
+                    incr cnt
+                    h.Edges.AddRange a.Edges
+                    assembliesOf16sHeadsMiddles.Add(new AssemblyOf16s<_>(!cnt, h.Edges, head = true, middle=true)))
+            else assembliesOf16sHeadsMiddles.Add a
+        )
+
+//    let edgesForHeadsSearch =
+//        headsAndTails
+//        |> Array.collect (fun (h,a,t) -> [|h; [|a.Edges.[0]|]|])
+//        |> Array.concat
+//        |> fun a -> new HashSet<_>(a)
 //    
 //    let edgesForTailsSearch =
 //        headsAndTails
@@ -283,11 +316,10 @@ let searchMain path agentsCount =
 //        |> Array.concat
 //        |> fun a -> new HashSet<_>(a)
 //
-    let graphs = splitToConnectedSubgraphs edgesForHeadsSearch
-    let assembliesOf16sHeads = new ResizeArray<_>()
-    let searchCfg = FSA_R16S_1_18_SearchConfig
-    searchInBioGraphs searchCfg graphs assembliesOf16sHeads 1 longEdges
-    let assembliesOf16sHeads = score searchCfg assembliesOf16sHeads
+    //let graphs = splitToConnectedSubgraphs edgesForHeadsSearch    
+    //
+    //searchInBioGraphs searchCfg graphs assembliesOf16sHeads 1 longEdges
+    //let assembliesOf16sHeads = score searchCfg assembliesOf16sHeads
     ()
 
 let printPairs path pairs = 
@@ -300,6 +332,7 @@ let main argv =
     let args = argParser.Parse argv
     //let appSetting = argParser.ParseConfiguration (ConfigurationReader.FromAppSettingsFile("C:\YCInfernal\src\RNA.Search\App.config"))
     let agentsCount = args.GetResult(<@ Agents @>, defaultValue = 1) //appSetting.GetResult(<@Agents@>, defaultValue = 1))
+    let tmDir = args.GetResult(<@ TmpDir @>, defaultValue = "BioSearchOut")
     let inputGraphPath = 
         args.GetResult <@ Input @> 
         |> (fun s -> 

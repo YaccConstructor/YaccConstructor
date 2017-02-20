@@ -9,24 +9,22 @@ open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
 open Yard.Generators.Common.ASTGLLFSA
-//open YC.GLL.GSS
+open YC.GLL.GSS
 
-type SPPF(lengthOfInput : int, finalStates : HashSet<int<positionInGrammar>>) =
-    let hashIntermed x y z =
-        x
+type SPPF(lengthOfInput : int, startState : int<positionInGrammar>, finalStates : HashSet<int<positionInGrammar>>) =
+    let hashIntermed lExt rExt state =   
+        lExt
         * (lengthOfInput + 1) 
         * (lengthOfInput + 1)
-        + y
+        + rExt
         * (lengthOfInput + 1)
-        + z
+        + state
 
-    let hashNonterm x y z = (x
-                                 * (lengthOfInput + 1)
-                                 * (lengthOfInput + 1)
-                                 + y
-                                 * (lengthOfInput + 1)
-                                 + z)
-                                 * -1
+    let hashNonterm lExt rExt state =
+        (lExt * (lengthOfInput + 1) * (lengthOfInput + 1)
+         + rExt * (lengthOfInput + 1)
+         + state)
+         * -1
 
     let getKeyForPackedNode x y z w =
         x
@@ -50,7 +48,8 @@ type SPPF(lengthOfInput : int, finalStates : HashSet<int<positionInGrammar>>) =
     let intermidiateNodes = new Dictionary<int, int<nodeMeasure>>()
     let terminalNodes = new BlockResizeArray<int<nodeMeasure>>()
     let epsilonNodes = new BlockResizeArray<int<nodeMeasure>>()
-    member this.Nodes = new BlockResizeArray<INode>()
+    let nodes = new BlockResizeArray<INode>()
+    member this.Nodes = nodes
 
     member this.FindSppfNode (t : TypeOfNode) lExt rExt : int<nodeMeasure> =
         match t with 
@@ -96,7 +95,7 @@ type SPPF(lengthOfInput : int, finalStates : HashSet<int<positionInGrammar>>) =
         newNode 
     
 
-    member this.GetNodeT (symbol : int<token>) (pos : int<positionInInput>) =
+    member this.GetNodeT (symbol : int<token>) (pos : int<positionInInput>) (nextPos : int<positionInInput>) =
         let index = int pos
         if symbol = epsilon
         then
@@ -114,7 +113,7 @@ type SPPF(lengthOfInput : int, finalStates : HashSet<int<positionInGrammar>>) =
             then
                 TreeNode(terminalNodes.Item index)
             else
-                let t = new TerminalNode(symbol, packExtension index (index + 1))
+                let t = new TerminalNode(symbol, packExtension index nextPos)
                 this.Nodes.Add t
                 let res = this.Nodes.Length - 1
                 terminalNodes.[index] <- ((this.Nodes.Length - 1)*1<nodeMeasure>)
@@ -129,7 +128,7 @@ type SPPF(lengthOfInput : int, finalStates : HashSet<int<positionInGrammar>>) =
         then
             let currL = this.Nodes.Item (int currentN)
             let extL = currL.getExtension ()
-            let lExtL, _ = getLeftExtension extL, getRightExtension extL
+            let lExtL = getLeftExtension extL//, getRightExtension extL
             let y = this.FindSppfNode t lExtL rExtR
             let extra = this.FindSppfPackedNode y state extL extR currL currR
             if extra = -1<nodeMeasure> then failwith "boom"
@@ -164,3 +163,15 @@ type SPPF(lengthOfInput : int, finalStates : HashSet<int<positionInGrammar>>) =
             else
                 this.GetNodeP state (Intermed state) currentN currentR
         y, x
+
+    member this.GetRoots (gss : GSS) startPosition = 
+        let gssRoot = 
+            gss.Vertices
+            |> Seq.filter (fun vert -> vert.Nonterm = startState && vert.PositionInInput = startPosition)
+            |> (fun x -> (Array.ofSeq x).[0])
+        
+        gssRoot.P
+        |> Seq.map (fun x -> match x.data with
+                             | TreeNode n -> this.Nodes.Item (int n)
+                             | _ -> failwith "wrongType")
+        |> Array.ofSeq

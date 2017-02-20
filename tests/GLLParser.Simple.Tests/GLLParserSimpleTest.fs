@@ -9,6 +9,7 @@ open Yard.Generators
 open LexCommon
 open Microsoft.FSharp.Collections
 
+open YaccConstructor.API
 open Yard.Generators.GLL.ParserCommon
 open System.Collections.Generic
 //let run path astBuilder =
@@ -39,11 +40,11 @@ let shouldBeTrue res =
 
          
 let getParserSource grammarFile =    
-    YaccConstructor.API.generate (grammarFilesPath + grammarFile)
-                                 "YardFrontend" "GLLGenerator" 
-                                 None
-                                 ["ExpandMeta"]
-                                 [] :?> ParserSourceGLL
+    generate (grammarFilesPath + grammarFile)
+             "YardFrontend" "GLLGenerator" 
+             None
+             ["ExpandMeta"]
+             [] :?> ParserSourceGLL
 
 let runTest grammarFile inputFile =
     let parser = getParserSource grammarFile

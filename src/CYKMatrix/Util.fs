@@ -188,7 +188,7 @@
 
             //todo: optimize not used space
             let data = matrix
-//            member this.InnerValue = data
+            member this.InnerValue = data
 
             member this.Nrow = size
             member this.Ncol = size

@@ -18,15 +18,6 @@
                   nonterminals =
         let vertexToInt = new Dictionary<_,_>()
         let mutable procVertices = 0
-        let unionWithOneCell (arr: float []) (v1: int) (v2: int) (matrixSize: int) =
-            Array.init (matrixSize * matrixSize) (fun i -> if arr.[i] > 0.0
-                                                           then 1.0
-                                                           else 
-                                                               let row = i / matrixSize
-                                                               let col = i - row * matrixSize
-                                                               if (v1 = row) && (v2 = col)      //need graph vertices to be integers from 0 to (matrixSize - 1)
-                                                               then 1.0
-                                                               else 0.0)
         let parsingMatrix = new ParsingMatrix ()
         do 
             (
@@ -45,57 +36,44 @@
             then
                 let simpleNonterminals = allRules.HeadsBySimpleTail label
                 for (simpleNonterminal, _) in simpleNonterminals do
-                    let arr = parsingMatrix.[simpleNonterminal].GetSubArray id false parsingMatrix.[simpleNonterminal].WholeMatrix
-                    let updatedArr = unionWithOneCell arr vertexToInt.[edg.Source] vertexToInt.[edg.Target] graph.VertexCount
-                    let updatedMatrix = ProbabilityMatrix.create parsingMatrix.[simpleNonterminal].Size updatedArr
-                    parsingMatrix.Remove(simpleNonterminal) |> ignore
-                    parsingMatrix.Add(simpleNonterminal, updatedMatrix)
+                    let data = parsingMatrix.[simpleNonterminal].InnerValue
+                    let row = vertexToInt.[edg.Source]
+                    let col = vertexToInt.[edg.Target]
+                    let updadetInd = graph.VertexCount * row + col
+                    data.SetValue(1.0, updadetInd)
         
         parsingMatrix, vertexToInt
 
     let naiveSquareMatrix (matrix: ParsingMatrix) (allRules: RulesHolder) isChanged =
-        let unionArrays (arr1: float []) (arr2: float []) (size: int) =
-            let modificator i =
-                if arr1.[i] <> arr2.[i]
-                then isChanged := true
+        let unionArrays (curArr: Probability.InnerType.T []) (updArr: Probability.InnerType.T []) (arrSize: int) =
+            for ind in 0..arrSize - 1 do
+                if curArr.[ind] = 0.0 && updArr.[ind] > 0.0
+                then
+                    isChanged := true
+                    curArr.SetValue(1.0, ind)
 
-                if arr1.[i] > 0.0
-                then 1.0
-                else arr2.[i]
-            Array.init size modificator
-
-        let multArrays (from1: Probability.InnerType.T []) (from2: Probability.InnerType.T []) matricesSize actualColCount =        
-                let calculateCell (n, i, j) = 
-                    let skipMatrices = n * matricesSize * matricesSize
-                    let skipRows = skipMatrices + i * matricesSize
-                    let skipColumns = skipMatrices + j * matricesSize                
+        let multArrays (from1: Probability.InnerType.T []) (from2: Probability.InnerType.T []) matricesSize =        
+                let calculateCell x =
+                    let i = x / matricesSize
+                    let j = x - i * matricesSize 
+                    let skipRows = i * matricesSize
+                    let skipColumns = j * matricesSize                
                     Array.fold2 (fun b v1 v2 -> Probability.innerSumm b <| Probability.innerMult v1 v2)
                                 Probability.InnerType.zero
                                 from1.[skipRows..skipRows + matricesSize - 1] 
                                 from2.[skipColumns..skipColumns + matricesSize - 1]
 
-                // todo: recurr
-                let getNIJ x = 
-                    let n = x / (matricesSize * matricesSize)
-                    let i = (x - n * matricesSize * matricesSize) / matricesSize
-                    let j = x - n * matricesSize * matricesSize - i * matricesSize
-                    n, i, j
-                Array.init (matricesSize * actualColCount) (fun x -> calculateCell <| getNIJ x)
+                Array.init (matricesSize * matricesSize) (fun x -> calculateCell <| x)
 
         let nontermPairs = allRules.ComplexTails
         for (nt1, nt2) in nontermPairs do
             let size = matrix.[nt1].Size
             let arr1 = matrix.[nt1].GetSubArray id false matrix.[nt1].WholeMatrix
             let arr2 = matrix.[nt2].GetSubArray id true matrix.[nt2].WholeMatrix
-            let resultArray = multArrays arr1 arr2 size size
-            let resultMatix = ProbabilityMatrix.create size resultArray
+            let resultArray = multArrays arr1 arr2 size
 
             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                let curArray = matrix.[nonTerm].GetSubArray id false matrix.[nonTerm].WholeMatrix
-                let updatedArray = unionArrays (resultMatix.GetSubArray id false resultMatix.WholeMatrix) curArray curArray.Length
-                let updatedMatrix = ProbabilityMatrix.create matrix.[nonTerm].Size updatedArray
-                matrix.Remove(nonTerm) |> ignore
-                matrix.Add(nonTerm, updatedMatrix)
+                unionArrays matrix.[nonTerm].InnerValue resultArray (size*size) 
 
 
     let recognizeGraph (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
@@ -120,7 +98,6 @@
                   tokenToInt =
         let grammar = loadIL.grammar
         let mutable tokensCount = 0
-        
         let S = ref (NonTerminal "")
         let nonterminals = new ResizeArray<NonTerminal>()
         let crl = new Dictionary<NonTerminal * NonTerminal, ResizeArray<NonTerminal*Probability.T>>()

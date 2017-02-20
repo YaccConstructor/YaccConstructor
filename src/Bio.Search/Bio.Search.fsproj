@@ -64,7 +64,7 @@
   -->
   <ItemGroup>
     <Compile Include="InfernalInteraction.fs" />
-    <Compile Include="structs.fs" />
+    <Compile Include="Configuration.fs" />
     <Compile Include="Bio.Search.fs" />
     <None Include="paket.references" />
     <Content Include="App.config" />

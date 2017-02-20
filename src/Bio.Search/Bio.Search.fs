@@ -7,13 +7,13 @@ open YC.Bio.GraphLoader
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.AbstractParser
-open YC.Bio.RNA.Search.Structs
+open YC.Bio.RNA.Search.Configuration
 open Microsoft.FSharp.Collections
 open System.IO
 open System.Collections.Generic
 open System.Diagnostics
 
-type AssemblyOf16s<'v> (id:int, edges:ResizeArray<TaggedEdge<'v,BioGraphEdgeLbl>>, ?infernalData:YC.Bio.InfernalInteraction.InfernalData, ?head, ?middle, ?tail) =
+type AssemblyOf16s<'v> (id:int, edges:ResizeArray<TaggedEdge<'v,BioGraphEdgeLbl<char>>>, ?infernalData:YC.Bio.InfernalInteraction.InfernalData, ?head, ?middle, ?tail) =
     member val Id = id with get
     member val InfernalData = infernalData with get, set
     member val Edges = edges with get, set
@@ -22,9 +22,9 @@ type AssemblyOf16s<'v> (id:int, edges:ResizeArray<TaggedEdge<'v,BioGraphEdgeLbl>
     member val Tail = tail.IsSome && tail.Value with get, set
     member this.Full with get() = this.Head && this.Middle && this.Tail
 
-    member this.ConvertToString (longEdges:array<TaggedEdge<_,BioGraphEdgeLbl>>, searchCfg:SearchConfig) =
+    member this.ConvertToString (longEdges:array<TaggedEdge<_,BioGraphEdgeLbl<_>>>) =
         let data =
-            let getStr (e:TaggedEdge<_,BioGraphEdgeLbl>) =
+            let getStr (e:TaggedEdge<_,BioGraphEdgeLbl<_>>) =
                 let longE = longEdges |> Array.tryFind (fun e' -> e'.Tag.id = Math.Abs e.Tag.id)
                 match longE with
                 | None -> e.Tag.str
@@ -38,7 +38,7 @@ type AssemblyOf16s<'v> (id:int, edges:ResizeArray<TaggedEdge<'v,BioGraphEdgeLbl>
                     else e'.Tag.str.[0 .. min bound (e'.Tag.str.Length - 1)]
                  
             this.Edges
-            |> ResizeArray.map (fun e -> e.Tag.str |> Array.map (fun i -> searchCfg.ParserSource.IntToString.[int i]) |> String.concat "")
+            |> ResizeArray.map (fun e -> new String(e.Tag.str))
             |> String.concat ""
 
         let metadata =
@@ -47,7 +47,7 @@ type AssemblyOf16s<'v> (id:int, edges:ResizeArray<TaggedEdge<'v,BioGraphEdgeLbl>
             |> String.concat "; "
         "> " + string this.Id + " " + metadata + "\n" + data + "\n"
         
-let getPaths (graph:AdjacencyGraph<_,TaggedEdge<_,BioGraphEdgeLbl>>) isForward s condToStop maxLength = 
+let getPaths (graph:AdjacencyGraph<_,TaggedEdge<_,BioGraphEdgeLbl<_>>>) isForward s condToStop maxLength = 
     let rec dfs start curLength = 
         let toReturn = new List<List<TaggedEdge<_,_>>>()
         let edges =
@@ -119,40 +119,45 @@ let filterRnaParsingResult (graph : EdgeCompressedGraphInput) (searchCfg : Searc
 
     result
 
-let parsingResultsProcessor (assembliesOf16s:ResizeArray<_>) longEdges =
+let parsingResultsProcessor (config:Config) (assembliesOf16s:ResizeArray<_>) =
     let edgesGlobalCounter = ref 0
+    let fileInTmpDir file = System.IO.Path.Combine(config.TempDirectory, file)
     MailboxProcessor.Start(fun inbox -> 
         let rec loop n = 
             async { 
                 let! msg = inbox.Receive()
                 match msg with
-                | PData(graph, cfg, res) -> 
+                | Data(graph, cfg, res) -> 
                     try 
                         let pathToPrint = filterRnaParsingResult graph cfg res
                         pathToPrint
                         |> ResizeArray.map (fun e -> 
                             incr edgesGlobalCounter
-                            let a = new AssemblyOf16s<_>(!edgesGlobalCounter, e, middle = true)
+                            let a = 
+                                new AssemblyOf16s<_>(
+                                    !edgesGlobalCounter
+                                    , e |> ResizeArray.map (fun e -> config.OriginalEdges |> Array.find (fun e' -> e'.Tag.id = e.Tag.id))
+                                    , middle = true)
                             assembliesOf16s.Add a
-                            a.ConvertToString (longEdges, cfg))
-                        |> fun strs -> System.IO.File.AppendAllLines(cfg.OutFileName, strs)
+                            a.ConvertToString (config.LongEdges))
+                        |> fun strs -> System.IO.File.AppendAllLines(fileInTmpDir cfg.OutFileName, strs)
                     with e -> printfn "ERROR in parsing results postprocessing! %A" e.Message
                     return! loop n
-                | PDie ch -> ch.Reply()
+                | Die ch -> ch.Reply()
             }
         loop 0)
     
-let searchInBioGraphs (searchCfg : SearchConfig) (graphs : EdgeCompressedGraphInput[]) assembliesOf16s agentsCount longEdges =
+let searchInBioGraphs (searchCfg : SearchConfig) (config:Config) (graphs : EdgeCompressedGraphInput[]) assembliesOf16s =
     printfn "Total graph to porcess: %A" graphs.Length 
     let start = System.DateTime.Now
-    let postprocessor = parsingResultsProcessor assembliesOf16s longEdges
+    let postprocessor = parsingResultsProcessor config assembliesOf16s
     let agent name = 
         MailboxProcessor.Start(fun inbox -> 
             let rec loop n = 
                 async { 
                     let! msg = inbox.Receive()
                     match msg with
-                    | Data(i, graph) -> 
+                    | Data(i, graph:EdgeCompressedGraphInput) -> 
                         try 
                             printfn "\nSearch in agent %A. Graph %A." name i
                             printfn "Vertices: %A Edges: %A" graph.VertexCount graph.EdgeCount
@@ -164,7 +169,7 @@ let searchInBioGraphs (searchCfg : SearchConfig) (graphs : EdgeCompressedGraphIn
                             then failwith "Input parsing failed."
                             else 
                                 printfn "SearchWithoutSPPF succeed. Count = %A" parseResult.Length
-                                postprocessor.Post(PData(graph, searchCfg, parseResult))
+                                postprocessor.Post(Data(graph, searchCfg, parseResult))
 
                         with e -> printfn "ERROR in bio graph parsing! %A" e.Message
                         return! loop n
@@ -172,7 +177,7 @@ let searchInBioGraphs (searchCfg : SearchConfig) (graphs : EdgeCompressedGraphIn
                 }
             loop 0)
     
-    let agents = Array.init agentsCount (sprintf "searchAgent%A" >> agent)
+    let agents = Array.init config.AgentsCount (sprintf "searchAgent%A" >> agent)
     let qToProcess = Queue<_>(graphs |> Array.mapi (fun i x -> (i, x)))
     while qToProcess.Count > 0 do
         agents
@@ -186,7 +191,7 @@ let searchInBioGraphs (searchCfg : SearchConfig) (graphs : EdgeCompressedGraphIn
                         Data(i, graph) |> a.Post)            
         
     agents |> Array.iter (fun a -> a.PostAndReply Die)
-    postprocessor.PostAndReply PDie
+    postprocessor.PostAndReply Die
 
     printfn "Total time = %A" (System.DateTime.Now - start)
 
@@ -199,15 +204,9 @@ let printLongEdges path edges =
         |> Array.collect id
     File.AppendAllLines(path, toPrint)
 
-let searchMiddle (searchCfg:SearchConfig) agentsCount assembliesOf16s graphs longEdges = 
-    let graphs =
-        graphs
-        |> Array.filter (fun (g:EdgeCompressedGraphInput) -> g.Edges |> Seq.sumBy (fun e -> e.Tag.str.Length) > int (float searchCfg.LowLengthLimit / 1.8))    
-    searchInBioGraphs searchCfg graphs assembliesOf16s agentsCount longEdges
-
-let score (searchCfg : SearchConfig) (assembliesOf16s:ResizeArray<AssemblyOf16s<_>>) =
+let score file (assembliesOf16s:ResizeArray<AssemblyOf16s<_>>) =
     let scoredByInfernal = 
-        YC.Bio.InfernalInteraction.getScores searchCfg.OutFileName
+        YC.Bio.InfernalInteraction.getScores file
         |> Array.ofSeq
         |> Array.iter (fun d -> 
             let a = assembliesOf16s |> ResizeArray.tryFind (fun a -> try a.Id = int d.TargetName with _ -> try a.Id = int d.QueryName with _ -> false) 
@@ -218,13 +217,20 @@ let score (searchCfg : SearchConfig) (assembliesOf16s:ResizeArray<AssemblyOf16s<
         |> ResizeArray.filter (fun a -> a.InfernalData.IsSome && (a.InfernalData.Value.ModelFrom < 3 || a.InfernalData.Value.SeqFrom < 3))
     scoredByInfernal
 
-let searchMain path agentsCount =     
+let searchMain (config:Config) =     
     let assembliesOf16s = new ResizeArray<_>()
-    let searchCfg = FSA_R16S_19_27_SearchConfig
-    let sourceGraph, graphs, longEdges = loadInitialGraph path searchCfg.HighLengthLimit searchCfg.Tokenizer    
-    searchMiddle searchCfg agentsCount assembliesOf16s graphs longEdges
+    let searchCfg = config.MiddleSearchConfig
+    let sourceGraph, graphs, longEdges = loadInitialGraph config.InputGraphPath searchCfg.HighLengthLimit searchCfg.Tokenizer    
+    config.OriginalEdges <- sourceGraph
+    config.LongEdges <- longEdges
+    let graphs =
+        graphs
+        |> Array.filter (fun (g:EdgeCompressedGraphInput) -> g.Edges |> Seq.sumBy (fun e -> e.Tag.str.Length) > int (float searchCfg.LowLengthLimit / 1.8))    
+    searchInBioGraphs searchCfg config graphs assembliesOf16s 
     
-    let assembliesOf16s = score searchCfg assembliesOf16s
+    let fileInTmpDir file = System.IO.Path.Combine(config.TempDirectory, file)
+
+    let assembliesOf16s = score (fileInTmpDir searchCfg.OutFileName) assembliesOf16s
 
     assembliesOf16s
     |> ResizeArray.iter (fun a -> 
@@ -234,7 +240,7 @@ let searchMain path agentsCount =
         if longEdges |> Array.exists( fun e -> e.Tag.id = a.Edges.[a.Edges.Count - 1].Tag.id) then a.Tail <- true
         )
     
-    assembliesOf16s |> ResizeArray.map (fun a -> a.ConvertToString (longEdges, searchCfg)) |> (fun f -> System.IO.File.WriteAllLines ("AAAA.fa", f))
+    //assembliesOf16s |> ResizeArray.map (fun a -> a.ConvertToString (longEdges)) |> (fun f -> System.IO.File.WriteAllLines ( "AAAA.fa", f))
 
     let midleEdgesToProcess = assembliesOf16s |> ResizeArray.filter (fun a -> not a.Full) |> Array.ofSeq
 
@@ -258,29 +264,29 @@ let searchMain path agentsCount =
             )
 
     headsAndTails |> Array.iter (fun (h,m,t) -> printfn "%A - %A" h.Length t.Length)
-    let searchCfg = FSA_R16S_1_18_SearchConfig
+    let searchCfg = config.HeadSearchConfig
 
     let assembliesOf16sHeads = new ResizeArray<AssemblyOf16s<_>>()
-    let assembliesOf16sTails = new ResizeArray<AssemblyOf16s<_>>()
-
+    
     let cnt = ref 0
 
     headsAndTails 
     |> Array.iter (fun (h,_,t) -> 
-        h |> Array.iter (fun h -> 
-        if h.Count > 0 && assembliesOf16sHeads |> ResizeArray.exists(fun a -> a.Edges |> Seq.compareWith (fun x y -> if x = y then 0 else 1) h |> ((=)0)) |> not
-        then assembliesOf16sHeads.Add (new AssemblyOf16s<_>(!cnt, ResizeArray.rev h, head = true))
-        incr cnt)
-        t |> Array.iter (fun t ->
-        if t.Count > 0 && assembliesOf16sTails |> ResizeArray.exists(fun a -> a.Edges |> Seq.compareWith (fun x y -> if x = y then 0 else 1) t |> ((=)0)) |> not
-        then assembliesOf16sTails.Add (new AssemblyOf16s<_>(!cnt, new ResizeArray<_>(t), head = true))
-        incr cnt)
+        h |> Array.iter (fun h ->
+            let h = ResizeArray.rev h
+            if h.Count > 0 && assembliesOf16sHeads |> ResizeArray.exists(fun a -> a.Edges |> Seq.compareWith (fun x y -> if x = y then 0 else 1) h |> ((=)0)) |> not
+            then assembliesOf16sHeads.Add (new AssemblyOf16s<_>(!cnt, h, head = true))
+            incr cnt)
+//        t |> Array.iter (fun t ->
+//        if t.Count > 0 && assembliesOf16sTails |> ResizeArray.exists(fun a -> a.Edges |> Seq.compareWith (fun x y -> if x = y then 0 else 1) t |> ((=)0)) |> not
+//        then assembliesOf16sTails.Add (new AssemblyOf16s<_>(!cnt, new ResizeArray<_>(t), head = true))
+//        incr cnt)
         )
 
-    assembliesOf16sHeads |> ResizeArray.map (fun a -> a.ConvertToString(longEdges, searchCfg)) |> fun s -> System.IO.File.WriteAllLines(searchCfg.OutFileName,s)
-    let assembliesOf16sHeads = score searchCfg assembliesOf16sHeads
-    assembliesOf16sTails |> ResizeArray.map (fun a -> a.ConvertToString(longEdges, searchCfg)) |> fun s -> System.IO.File.WriteAllLines(FSA_R16S_tail_SearchConfig.OutFileName,s)
-    let assembliesOf16sTails = score FSA_R16S_tail_SearchConfig assembliesOf16sTails
+    assembliesOf16sHeads |> ResizeArray.map (fun a -> a.ConvertToString(longEdges)) |> fun s -> System.IO.File.WriteAllLines((fileInTmpDir searchCfg.OutFileName),s)
+    let assembliesOf16sHeads = score (fileInTmpDir searchCfg.OutFileName) assembliesOf16sHeads
+//    assembliesOf16sTails |> ResizeArray.map (fun a -> a.ConvertToString(longEdges)) |> fun s -> System.IO.File.WriteAllLines((fileInTmpDir config.TailSearchConfig.OutFileName),s)
+//    let assembliesOf16sTails = score (fileInTmpDir config.TailSearchConfig.OutFileName) assembliesOf16sTails
 
     let assembliesOf16sHeadsMiddles = new ResizeArray<AssemblyOf16s<_>>()
 
@@ -300,26 +306,55 @@ let searchMain path agentsCount =
                 |> ResizeArray.iter (fun h -> 
                     incr cnt
                     h.Edges.AddRange a.Edges
-                    assembliesOf16sHeadsMiddles.Add(new AssemblyOf16s<_>(!cnt, h.Edges, head = true, middle=true)))
+                    assembliesOf16sHeadsMiddles.Add(new AssemblyOf16s<_>(!cnt, h.Edges, head = true, middle = true)))
             else assembliesOf16sHeadsMiddles.Add a
         )
 
+    assembliesOf16sHeadsMiddles |> ResizeArray.map (fun a -> a.ConvertToString(longEdges)) |> fun s -> System.IO.File.WriteAllLines(fileInTmpDir "BBBBB",s)
 //    let edgesForHeadsSearch =
 //        headsAndTails
 //        |> Array.collect (fun (h,a,t) -> [|h; [|a.Edges.[0]|]|])
 //        |> Array.concat
 //        |> fun a -> new HashSet<_>(a)
 //    
-//    let edgesForTailsSearch =
-//        headsAndTails
-//        |> Array.collect (fun (h,(_,m),t) -> [|[|m.[m.Length-1]|];t|])
-//        |> Array.concat
-//        |> fun a -> new HashSet<_>(a)
-//
-    //let graphs = splitToConnectedSubgraphs edgesForHeadsSearch    
-    //
-    //searchInBioGraphs searchCfg graphs assembliesOf16sHeads 1 longEdges
-    //let assembliesOf16sHeads = score searchCfg assembliesOf16sHeads
+    let edgesForTailsSearch = new HashSet<_> ()
+    
+    headsAndTails
+    |> Array.iter 
+        (fun (h, m, t) ->
+            edgesForTailsSearch.Add m.Edges.[m.Edges.Count - 1] |> ignore
+            t |> Array.iter (fun a -> a |> ResizeArray.iter (fun x -> edgesForTailsSearch.Add x |> ignore)))
+
+    let graphs = splitToConnectedSubgraphs edgesForTailsSearch config.TailSearchConfig.Tokenizer
+    let assembliesOf16sTails = new ResizeArray<AssemblyOf16s<_>>()
+
+    searchInBioGraphs config.TailSearchConfig config graphs assembliesOf16sTails
+    printfn "Tails Length = %A" assembliesOf16sTails.Count
+    let assembliesOf16sTails = score (fileInTmpDir searchCfg.OutFileName) assembliesOf16sTails
+
+    let cnt = ref assembliesOf16s.Count
+    let assembliesOf16sFull = new ResizeArray<_>()
+
+    assembliesOf16sHeadsMiddles
+    |> ResizeArray.iter (fun a -> 
+        if a.Full
+        then assembliesOf16sFull.Add a
+        else 
+            let tails =
+                assembliesOf16sTails
+                |> ResizeArray.filter (fun at -> at.Edges.[0].Source = a.Edges.[a.Edges.Count - 1].Target || at.Edges.[0] = a.Edges.[a.Edges.Count - 1])
+            if tails.Count > 0
+            then
+                tails
+                |> ResizeArray.iter (fun t -> 
+                    incr cnt
+                    a.Edges.AddRange (if t.Edges.[0] = a.Edges.[a.Edges.Count - 1] then t.Edges.ToArray().[1..] else t.Edges.ToArray())
+                    assembliesOf16sFull.Add(new AssemblyOf16s<_>(!cnt, a.Edges, head = true, middle = true, tail = true)))
+            else assembliesOf16sFull.Add a
+        )
+
+    assembliesOf16sFull |> ResizeArray.map (fun a -> a.ConvertToString(longEdges)) |> fun s -> System.IO.File.WriteAllLines(fileInTmpDir "FULL",s)
+
     ()
 
 let printPairs path pairs = 
@@ -328,14 +363,6 @@ let printPairs path pairs =
 
 [<EntryPoint>]
 let main argv = 
-    let argParser = ArgumentParser.Create<CLIArguments>()
-    let args = argParser.Parse argv
-    //let appSetting = argParser.ParseConfiguration (ConfigurationReader.FromAppSettingsFile("C:\YCInfernal\src\RNA.Search\App.config"))
-    let agentsCount = args.GetResult(<@ Agents @>, defaultValue = 1) //appSetting.GetResult(<@Agents@>, defaultValue = 1))
-    let tmDir = args.GetResult(<@ TmpDir @>, defaultValue = "BioSearchOut")
-    let inputGraphPath = 
-        args.GetResult <@ Input @> 
-        |> (fun s -> 
-        System.IO.Path.Combine(System.IO.Path.GetDirectoryName s, System.IO.Path.GetFileNameWithoutExtension s))
-    searchMain inputGraphPath agentsCount
+    let config = new Config(argv)    
+    searchMain config
     0

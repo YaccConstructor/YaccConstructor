@@ -21,8 +21,8 @@ module Array =
         |]
 
 [<Struct>]
-type BioGraphEdgeLbl=
-    val str: array<int<token>>
+type BioGraphEdgeLbl<'token>=
+    val str: array<'token>
     val length : int
     val id : int
     val sourceStartPos : int
@@ -33,8 +33,8 @@ type BioGraphEdgeLbl=
 [<Measure>] type vNumInOriginalGraph
 [<Measure>] type posInSubgraph
 
-type EdgeCompressedGraphInput (edges: array<TaggedEdge<int<vNumInOriginalGraph>, BioGraphEdgeLbl>>) as this =
-    inherit AdjacencyGraph<int<vNumInOriginalGraph>,TaggedEdge<int<vNumInOriginalGraph>,BioGraphEdgeLbl>>()
+type EdgeCompressedGraphInput (edges: array<TaggedEdge<int<vNumInOriginalGraph>, BioGraphEdgeLbl<int<token>>>>) as this =
+    inherit AdjacencyGraph<int<vNumInOriginalGraph>,TaggedEdge<int<vNumInOriginalGraph>,BioGraphEdgeLbl<int<token>>>>()
     let vMap = new Dictionary<_,_>()
     let vBackMap = new ResizeArray<_>()
     do 
@@ -105,9 +105,9 @@ type EdgeCompressedGraphInput (edges: array<TaggedEdge<int<vNumInOriginalGraph>,
                     else packPosition eId (posOnEdge + 1<posInSubgraph>)
                 pFun tokens.[int posOnEdge] nextPos
 
-let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit tokenizer =
+let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit =
     let newEdge source target str len sourceId sourceStartPos = 
-        new TaggedEdge<int<vNumInOriginalGraph>,_>(source * 1<vNumInOriginalGraph>, target * 1<vNumInOriginalGraph>, new BioGraphEdgeLbl(str, len, sourceId, sourceStartPos))
+        new TaggedEdge<int<vNumInOriginalGraph>,_>(source * 1<vNumInOriginalGraph>, target * 1<vNumInOriginalGraph>, new BioGraphEdgeLbl<_>(str, len, sourceId, sourceStartPos))
 
     let lblsExt = ".sqn"
     let graphStrauctureExt = ".grp"
@@ -155,7 +155,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit tokenizer =
         |> Array.filter (fun (id,start,ending,length) -> start <> ending || length > 15) // rm short loops
         |> fun a -> printfn "after filtering^ %A" a.Length; a
         |> Array.Parallel.map (fun (id,start,ending,length) -> 
-            newEdge start ending (edgesСontent.[id].ToCharArray() |> Array.map tokenizer) length id 0)
+            newEdge start ending (edgesСontent.[id].ToCharArray()) length id 0)
         |> Array.collect (fun e -> 
             let shift = e.Tag.str.Length - e.Tag.length
             if shift <> 0 
@@ -189,7 +189,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit tokenizer =
     , longEdges
 
 
-let splitToConnectedSubgraphs edgs =
+let splitToConnectedSubgraphs edgs tokenizer =
     let uGraph = new UndirectedGraph<_,_>(true)
     uGraph.AddVerticesAndEdgeRange edgs
     |> ignore
@@ -219,13 +219,17 @@ let splitToConnectedSubgraphs edgs =
         components
     
     divisionOnComponents ()
-    |> Array.Parallel.map (fun edges -> new EdgeCompressedGraphInput(edges))
-
-    
+    |> Array.Parallel.map (fun edges -> 
+        let tokenizedEdges = 
+            edges 
+            |> Array.map (fun (e: TaggedEdge<_,BioGraphEdgeLbl<_>>) -> 
+                new TaggedEdge<_,_>(e.Source, e.Target, new BioGraphEdgeLbl<_>(e.Tag.str |> Array.map tokenizer, e.Tag.length, e.Tag.id, e.Tag.sourceStartPos))
+            )
+        new EdgeCompressedGraphInput(tokenizedEdges))
     
 let loadInitialGraph fileWithoutExt templateLengthHighLimit tokenizer =
     
-    let sourceEdges, longEdges = loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit tokenizer
+    let sourceEdges, longEdges = loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit
     let longEdges = 
         longEdges
         //|> Seq.map (fun e -> e.Tag.str)
@@ -240,5 +244,5 @@ let loadInitialGraph fileWithoutExt templateLengthHighLimit tokenizer =
         |> (fun x -> File.AppendAllLines(path, x))
 
     sourceEdges
-    , splitToConnectedSubgraphs sourceEdges
+    , splitToConnectedSubgraphs sourceEdges tokenizer
     , longEdges    

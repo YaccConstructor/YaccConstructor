@@ -113,7 +113,10 @@ let runInfernal tool args =
 let getScores inputFile = 
     let arch = "archaea"
     let bact = "bacteria"
-    let outFile cm = System.IO.Path.GetFileNameWithoutExtension inputFile + "_" + cm
+    let outFile cm = 
+        let file = System.IO.Path.GetFileNameWithoutExtension inputFile + "_" + cm
+        let path = System.IO.Path.GetDirectoryName inputFile
+        System.IO.Path.Combine(path, file)
     let args cm = 
         sprintf "--anytrunc --noali --tblout \"%s\" %s \"%s\" " (outFile cm |> inWorkingDir) (cm + ".cm" |> inInfernalWorkingDir) (inputFile |> inWorkingDir)
     runInfernal "cmsearch.exe" (args arch)

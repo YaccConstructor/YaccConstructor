@@ -8,6 +8,7 @@ open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.AbstractParser
 open System
 open System.Collections.Generic
+open Microsoft.FSharp.Collections
 
 type CLIArguments = 
     | [<NoAppSettings; Mandatory; AltCommandLine("-i")>] Input of string
@@ -47,6 +48,23 @@ type Config (argv) =
     
     let grammarsDir = @"../../../src/YC.GrammarZOO/Bio/16s/"
 
+    let fileInTmpDir file = System.IO.Path.Combine(tmpDir, file)
+
+    let startTime = ref System.DateTime.Now
+
+    let timing = new ResizeArray<_>()
+
+    let lap name =
+        let last = 
+            if timing.Count = 0
+            then !startTime
+            else 
+                let (name,delta,abs) = timing.[timing.Count - 1]
+                abs
+        let cur = System.DateTime.Now
+        printfn "Step: %A. Duartion: %A. Finished: %A" name (cur - last) cur
+        timing.Add((name, cur - last, cur))
+
     let getParserSource grammarFile =    
         YaccConstructor.API.generate (System.IO.Path.Combine(grammarsDir, grammarFile))
                                      "YardFrontend" "GLLGenerator" 
@@ -70,18 +88,19 @@ type Config (argv) =
             strToToken (ch.ToString())
 
     let R16SHeadSearchConfig = 
-        new SearchConfig(parserSourceMiddle, mkTokenizer parserSourceMiddle.StringToToken, 360, 390, "R16S_1_18_result.fa")
+        new SearchConfig(parserSourceMiddle, mkTokenizer parserSourceMiddle.StringToToken, 360, 390, fileInTmpDir "R16S_1_18_result.fa")
 
     let R16STailSearchConfig = 
-        new SearchConfig(parserSourceTail, mkTokenizer parserSourceTail.StringToToken , 460, 490, "R16S_tail_result.fa")
+        new SearchConfig(parserSourceTail, mkTokenizer parserSourceTail.StringToToken , 270, 300,(*460, 490,*) fileInTmpDir "R16S_tail_result.fa")
 
     let R16SMiddleSearchConfig = 
         //D = 30
-        new SearchConfig(parserSourceMiddle, mkTokenizer parserSourceMiddle.StringToToken, 300, 370, "R16S_19_27_result.fa")
+        new SearchConfig(parserSourceMiddle, mkTokenizer parserSourceMiddle.StringToToken, 300, 370, fileInTmpDir "R16S_19_27_result.fa")
 
     do
         if System.IO.Directory.Exists tmpDir |> not
         then System.IO.Directory.CreateDirectory tmpDir |> ignore
+        startTime := System.DateTime.Now
 
     member val TempDirectory = tmpDir with get
     member val AgentsCount = agentsCount with get
@@ -89,6 +108,12 @@ type Config (argv) =
     member val HeadSearchConfig = R16SHeadSearchConfig with get
     member val MiddleSearchConfig = R16SMiddleSearchConfig with get
     member val TailSearchConfig = R16STailSearchConfig with get
+    member val FileForHeadAndMiddles = fileInTmpDir "HeadMiddle.fa" with get
+    member val FileForFull = fileInTmpDir "Full.fa" with get
+    member this.GetTiming () = timing
+    member this.PrintTiming () =
+        timing |> ResizeArray.iter (fun (name,delta,abs) -> printfn "Step: %A. Duartion: %A. Finished: %A" name delta abs)
+    member this.Lap name = lap name
 
     member val OriginalEdges:array<TaggedEdge<int<vNumInOriginalGraph>,BioGraphEdgeLbl<char>>> = [||] with get, set
     member val LongEdges:array<TaggedEdge<int<vNumInOriginalGraph>,BioGraphEdgeLbl<char>>> = [||] with get, set

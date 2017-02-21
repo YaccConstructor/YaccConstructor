@@ -222,20 +222,24 @@ let printLongEdges path edges =
     File.AppendAllLines(path, toPrint)
 
 let score file (assembliesOf16s:ResizeArray<AssemblyOf16s<_>>) =
+    assembliesOf16s |> ResizeArray.iter (fun a -> a.InfernalData <- None)
     let scoredByInfernal = 
         YC.Bio.InfernalInteraction.getScores file
         |> Array.ofSeq
         |> Array.iter (fun d -> 
             let a = assembliesOf16s |> ResizeArray.tryFind (fun a -> try a.Id = int d.TargetName with _ -> try a.Id = int d.QueryName with _ -> false) 
             match a with
-            | Some a -> a.InfernalData <- Some d 
+            | Some a -> 
+                if a.InfernalData.IsNone 
+                   || (a.InfernalData.IsSome && a.InfernalData.Value.Bias > d.Bias) 
+                then a.InfernalData <- Some d 
             | None -> printfn "assembly with id = %A not found" d.TargetName)
         assembliesOf16s
         |> ResizeArray.filter 
             (fun a -> 
                   a.InfernalData.IsSome 
                && (a.InfernalData.Value.ModelFrom < 3 || a.InfernalData.Value.SeqFrom < 3) 
-               && (a.InfernalData.Value.Bias < 10.0)
+               && (a.InfernalData.Value.Bias < 6.0)
                //&& (a.InfernalData.Value.ModelTo >= 1420 || a.InfernalData.Value.SeqTo >= (a.Edges |> ResizeArray.fold (fun b e -> b + e.Tag.str.Length) 0) - 10 )
             )
     scoredByInfernal
@@ -348,6 +352,7 @@ let searchMain (config:Config) =
             new AssemblyOf16s<_>(!cnt, edges, head = true, middle = true))
 
     assembliesOf16sHeadsMiddles |> ResizeArray.map (fun a -> a.ConvertToString(longEdges)) |> fun s -> System.IO.File.WriteAllLines(config.FileForHeadAndMiddles,s)
+    let assembliesOf16sHeadsMiddles = score config.FileForHeadAndMiddles assembliesOf16sHeadsMiddles
     
     config.Lap "Heads and middles combining"
     
@@ -383,9 +388,20 @@ let searchMain (config:Config) =
 
     let final = score config.FileForFull assembliesOf16sFull
     
-    final|> ResizeArray.map (fun a -> a.ConvertToString(longEdges, true)) |> fun s -> System.IO.File.WriteAllLines(config.FileForScoredFull, s)
+    printfn "Total befor filtering: %A" final.Count
 
-    config.Lap "Total"
+    final
+    |> ResizeArray.filter 
+        (fun a ->
+            match a.InfernalData with
+            | Some d -> 
+                d.ModelTo - d.ModelFrom > 1000
+                //&& d.Bias <= 10.0
+            | _ -> false
+            )
+    |> ResizeArray.map (fun a -> a.ConvertToString(longEdges, true)) |> fun s -> System.IO.File.WriteAllLines(config.FileForScoredFull, s)
+
+    config.Lap "Final tails processing"
     config.PrintTiming ()
     ()
 

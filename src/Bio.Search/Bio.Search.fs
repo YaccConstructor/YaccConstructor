@@ -22,7 +22,11 @@ type AssemblyOf16s<'v> (id:int, edges:ResizeArray<TaggedEdge<'v,BioGraphEdgeLbl<
     member val Tail = tail.IsSome && tail.Value with get, set
     member this.Full with get() = this.Head && this.Middle && this.Tail
 
-    member this.ConvertToString (longEdges:array<TaggedEdge<_,BioGraphEdgeLbl<_>>>) =
+    member this.EqualsPath (path:ResizeArray<TaggedEdge<'v,BioGraphEdgeLbl<char>>>) =
+        path.Count = this.Edges.Count
+        && (path |> Seq.compareWith (fun x y -> if x = y then 0 else 1) this.Edges |> ((=)0))
+
+    member this.ConvertToString (longEdges:array<TaggedEdge<_,BioGraphEdgeLbl<_>>>, ?trancate) =
         let data =
             let getStr (e:TaggedEdge<_,BioGraphEdgeLbl<_>>) =
                 let longE = longEdges |> Array.tryFind (fun e' -> e'.Tag.id = Math.Abs e.Tag.id)
@@ -40,6 +44,20 @@ type AssemblyOf16s<'v> (id:int, edges:ResizeArray<TaggedEdge<'v,BioGraphEdgeLbl<
             this.Edges
             |> ResizeArray.map (fun e -> new String(e.Tag.str))
             |> String.concat ""
+            |> fun s ->
+                if trancate.IsSome && trancate.Value
+                then
+                    let startPos = 
+                        match this.InfernalData with
+                        | Some d -> max 0 (d.SeqFrom - d.ModelFrom)
+                        | _ -> 0
+                    let lenght =
+                        match this.InfernalData with
+                        | Some d -> d.SeqTo - startPos
+                        | _ -> s.Length - startPos 
+                    s.Substring(startPos, lenght)
+                else s
+
 
         let metadata =
             edges
@@ -211,14 +229,42 @@ let score file (assembliesOf16s:ResizeArray<AssemblyOf16s<_>>) =
             let a = assembliesOf16s |> ResizeArray.tryFind (fun a -> try a.Id = int d.TargetName with _ -> try a.Id = int d.QueryName with _ -> false) 
             match a with
             | Some a -> a.InfernalData <- Some d 
-            | None -> printfn "assembly with id = %A not found" d.QueryName)
+            | None -> printfn "assembly with id = %A not found" d.TargetName)
         assembliesOf16s
         |> ResizeArray.filter 
             (fun a -> 
                   a.InfernalData.IsSome 
                && (a.InfernalData.Value.ModelFrom < 3 || a.InfernalData.Value.SeqFrom < 3) 
-               && (a.InfernalData.Value.Bias < 10.0))
+               && (a.InfernalData.Value.Bias < 10.0)
+               //&& (a.InfernalData.Value.ModelTo >= 1420 || a.InfernalData.Value.SeqTo >= (a.Edges |> ResizeArray.fold (fun b e -> b + e.Tag.str.Length) 0) - 10 )
+            )
     scoredByInfernal
+
+let mergeAssemblies (left:ResizeArray<AssemblyOf16s<_>>) (right:ResizeArray<AssemblyOf16s<_>>) (result:ResizeArray<AssemblyOf16s<_>>) newAssenbly =
+    let used = new HashSet<_>()
+    left
+    |> ResizeArray.iter (fun h -> 
+        let tails =
+            right
+            |> ResizeArray.filter (fun t -> t.Edges.[0].Source = h.Edges.[h.Edges.Count - 1].Target || t.Edges.[0] = h.Edges.[h.Edges.Count - 1])
+        if tails.Count > 0
+        then
+            tails
+            |> ResizeArray.iter (fun t ->
+                used.Add t |> ignore
+                let newPath = new ResizeArray<_>(h.Edges)
+                newPath.AddRange (if t.Edges.[0] = h.Edges.[h.Edges.Count - 1] then t.Edges.ToArray().[1..] else t.Edges.ToArray())
+                result.Add(newAssenbly newPath))
+        else result.Add h
+        )
+    right |> ResizeArray.iter (fun a -> if used.Contains a |> not then result.Add a)
+    let copy = new ResizeArray<AssemblyOf16s<_>>()
+    result
+    |> ResizeArray.iter (fun a -> 
+        if copy.Exists(fun b -> a.EqualsPath b.Edges) |> not
+        then copy.Add a)
+    result.Clear()
+    result.AddRange copy
 
 let searchMain (config:Config) =     
     let assembliesOf16s = new ResizeArray<_>()
@@ -244,12 +290,10 @@ let searchMain (config:Config) =
     |> ResizeArray.iter (fun a -> 
         if a.InfernalData.Value.ModelFrom < 5 then a.Head <- true
         if a.Edges.[0].Tag.id < 0 then a.Head <- true // First edge is a part of long edges
-        if a.InfernalData.Value.ModelTo > 1500 then a.Tail <- true
-        if longEdges |> Array.exists( fun e -> e.Tag.id = a.Edges.[a.Edges.Count - 1].Tag.id) then a.Tail <- true
+        if a.InfernalData.Value.ModelTo >= 1420 then a.Tail <- true
+        if longEdges |> Array.exists (fun e -> e.Tag.id = a.Edges.[a.Edges.Count - 1].Tag.id) then a.Tail <- true
         )
     
-    //assembliesOf16s |> ResizeArray.map (fun a -> a.ConvertToString (longEdges)) |> (fun f -> System.IO.File.WriteAllLines ( "AAAA.fa", f))
-
     let midleEdgesToProcess = assembliesOf16s |> ResizeArray.filter (fun a -> not a.Full) |> Array.ofSeq
 
     let g = sourceGraph.ToAdjacencyGraph(true)
@@ -271,7 +315,6 @@ let searchMain (config:Config) =
             heads, a, tails
             )
 
-    headsAndTails |> Array.iter (fun (h,m,t) -> printfn "%A - %A" h.Length t.Length)
     let searchCfg = config.HeadSearchConfig
 
     let assembliesOf16sHeads = new ResizeArray<AssemblyOf16s<_>>()
@@ -282,53 +325,30 @@ let searchMain (config:Config) =
     |> Array.iter (fun (h,_,t) -> 
         h |> Array.iter (fun h ->
             let h = ResizeArray.rev h
-            if h.Count > 0 && assembliesOf16sHeads |> ResizeArray.exists(fun a -> a.Edges |> Seq.compareWith (fun x y -> if x = y then 0 else 1) h |> ((=)0)) |> not
+            if h.Count > 0 && assembliesOf16sHeads |> ResizeArray.exists(fun a -> a.EqualsPath h) |> not
             then assembliesOf16sHeads.Add (new AssemblyOf16s<_>(!cnt, h, head = true))
             incr cnt)
-//        t |> Array.iter (fun t ->
-//        if t.Count > 0 && assembliesOf16sTails |> ResizeArray.exists(fun a -> a.Edges |> Seq.compareWith (fun x y -> if x = y then 0 else 1) t |> ((=)0)) |> not
-//        then assembliesOf16sTails.Add (new AssemblyOf16s<_>(!cnt, new ResizeArray<_>(t), head = true))
-//        incr cnt)
         )
 
     config.Lap "Heads and tails preparing"
 
     assembliesOf16sHeads |> ResizeArray.map (fun a -> a.ConvertToString(longEdges)) |> fun s -> System.IO.File.WriteAllLines(searchCfg.OutFileName,s)
     let assembliesOf16sHeads = score searchCfg.OutFileName assembliesOf16sHeads
-//    assembliesOf16sTails |> ResizeArray.map (fun a -> a.ConvertToString(longEdges)) |> fun s -> System.IO.File.WriteAllLines((fileInTmpDir config.TailSearchConfig.OutFileName),s)
-//    let assembliesOf16sTails = score (fileInTmpDir config.TailSearchConfig.OutFileName) assembliesOf16sTails
 
     config.Lap "Heads scoring with Infernal"
 
     let assembliesOf16sHeadsMiddles = new ResizeArray<AssemblyOf16s<_>>()
 
-    let cnt = ref assembliesOf16s.Count
-
-    assembliesOf16s
-    |> ResizeArray.iter (fun a -> 
-        if a.Head
-        then assembliesOf16sHeadsMiddles.Add a
-        else 
-            let heads =
-                assembliesOf16sHeads
-                |> ResizeArray.filter (fun ah -> ah.Edges.[ah.Edges.Count - 1].Target = a.Edges.[0].Source)
-            if heads.Count > 0
-            then
-                heads
-                |> ResizeArray.iter (fun h -> 
-                    incr cnt
-                    h.Edges.AddRange a.Edges
-                    assembliesOf16sHeadsMiddles.Add(new AssemblyOf16s<_>(!cnt, h.Edges, head = true, middle = true)))
-            else assembliesOf16sHeadsMiddles.Add a
-        )
+    mergeAssemblies
+        assembliesOf16sHeads
+        assembliesOf16s
+        assembliesOf16sHeadsMiddles
+        (fun edges -> 
+            incr cnt
+            new AssemblyOf16s<_>(!cnt, edges, head = true, middle = true))
 
     assembliesOf16sHeadsMiddles |> ResizeArray.map (fun a -> a.ConvertToString(longEdges)) |> fun s -> System.IO.File.WriteAllLines(config.FileForHeadAndMiddles,s)
-//    let edgesForHeadsSearch =
-//        headsAndTails
-//        |> Array.collect (fun (h,a,t) -> [|h; [|a.Edges.[0]|]|])
-//        |> Array.concat
-//        |> fun a -> new HashSet<_>(a)
-//    
+    
     config.Lap "Heads and middles combining"
     
     let edgesForTailsSearch = new HashSet<_> ()
@@ -347,30 +367,24 @@ let searchMain (config:Config) =
     config.Lap "Tails parsing"
 
     printfn "Tails Length = %A" assembliesOf16sTails.Count
-    let assembliesOf16sTails = score searchCfg.OutFileName assembliesOf16sTails
+    let assembliesOf16sTails = score config.TailSearchConfig.OutFileName assembliesOf16sTails
 
-    let cnt = ref assembliesOf16s.Count
     let assembliesOf16sFull = new ResizeArray<_>()
 
-    assembliesOf16sHeadsMiddles
-    |> ResizeArray.iter (fun a -> 
-        if a.Full
-        then assembliesOf16sFull.Add a
-        else 
-            let tails =
-                assembliesOf16sTails
-                |> ResizeArray.filter (fun at -> at.Edges.[0].Source = a.Edges.[a.Edges.Count - 1].Target || at.Edges.[0] = a.Edges.[a.Edges.Count - 1])
-            if tails.Count > 0
-            then
-                tails
-                |> ResizeArray.iter (fun t -> 
-                    incr cnt
-                    a.Edges.AddRange (if t.Edges.[0] = a.Edges.[a.Edges.Count - 1] then t.Edges.ToArray().[1..] else t.Edges.ToArray())
-                    assembliesOf16sFull.Add(new AssemblyOf16s<_>(!cnt, a.Edges, head = true, middle = true, tail = true)))
-            else assembliesOf16sFull.Add a
-        )
+    mergeAssemblies
+        assembliesOf16sHeadsMiddles
+        assembliesOf16sTails
+        assembliesOf16sFull
+        (fun edges -> 
+            incr cnt
+            new AssemblyOf16s<_>(!cnt, edges, head = true, middle = true, tail = true))
 
     assembliesOf16sFull |> ResizeArray.map (fun a -> a.ConvertToString(longEdges)) |> fun s -> System.IO.File.WriteAllLines(config.FileForFull, s)
+
+    let final = score config.FileForFull assembliesOf16sFull
+    
+    final|> ResizeArray.map (fun a -> a.ConvertToString(longEdges, true)) |> fun s -> System.IO.File.WriteAllLines(config.FileForScoredFull, s)
+
     config.Lap "Total"
     config.PrintTiming ()
     ()

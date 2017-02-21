@@ -91,7 +91,7 @@ type Config (argv) =
         new SearchConfig(parserSourceMiddle, mkTokenizer parserSourceMiddle.StringToToken, 360, 390, fileInTmpDir "R16S_1_18_result.fa")
 
     let R16STailSearchConfig = 
-        new SearchConfig(parserSourceTail, mkTokenizer parserSourceTail.StringToToken , 270, 300,(*460, 490,*) fileInTmpDir "R16S_tail_result.fa")
+        new SearchConfig(parserSourceTail, mkTokenizer parserSourceTail.StringToToken , (*(*h29*)390, 420*) (*h30*) 270, 300,(*460, 490,*) fileInTmpDir "R16S_tail_result.fa")
 
     let R16SMiddleSearchConfig = 
         //D = 30
@@ -110,6 +110,7 @@ type Config (argv) =
     member val TailSearchConfig = R16STailSearchConfig with get
     member val FileForHeadAndMiddles = fileInTmpDir "HeadMiddle.fa" with get
     member val FileForFull = fileInTmpDir "Full.fa" with get
+    member val FileForScoredFull = fileInTmpDir "SFull.fa" with get
     member this.GetTiming () = timing
     member this.PrintTiming () =
         timing |> ResizeArray.iter (fun (name,delta,abs) -> printfn "Step: %A. Duartion: %A. Finished: %A" name delta abs)

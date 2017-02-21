@@ -238,7 +238,7 @@ let score file (assembliesOf16s:ResizeArray<AssemblyOf16s<_>>) =
         |> ResizeArray.filter 
             (fun a -> 
                   a.InfernalData.IsSome 
-               && (a.InfernalData.Value.ModelFrom < 3 || a.InfernalData.Value.SeqFrom < 3) 
+               //&& (a.InfernalData.Value.ModelFrom < 3 || a.InfernalData.Value.SeqFrom < 3) 
                && (a.InfernalData.Value.Bias < 6.0)
                //&& (a.InfernalData.Value.ModelTo >= 1420 || a.InfernalData.Value.SeqTo >= (a.Edges |> ResizeArray.fold (fun b e -> b + e.Tag.str.Length) 0) - 10 )
             )
@@ -404,10 +404,6 @@ let searchMain (config:Config) =
     config.Lap "Final tails processing"
     config.PrintTiming ()
     ()
-
-let printPairs path pairs = 
-    let x = pairs |> Array.collect (fun (x, y) -> [| x; y |])
-    File.AppendAllLines(path, x)
 
 [<EntryPoint>]
 let main argv = 

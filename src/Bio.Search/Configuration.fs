@@ -114,6 +114,10 @@ type Config (argv) =
     member this.GetTiming () = timing
     member this.PrintTiming () =
         timing |> ResizeArray.iter (fun (name,delta,abs) -> printfn "Step: %A. Duartion: %A. Finished: %A" name delta abs)
+        try
+            let (_,_,startTime) = timing.[0]
+            printfn "Total: %A" (System.DateTime.Now - startTime)
+        with _ -> ()
     member this.Lap name = lap name
 
     member val OriginalEdges:array<TaggedEdge<int<vNumInOriginalGraph>,BioGraphEdgeLbl<char>>> = [||] with get, set

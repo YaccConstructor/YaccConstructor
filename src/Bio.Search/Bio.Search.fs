@@ -337,16 +337,19 @@ let searchMain (config:Config) =
     
     let cnt = ref 0
 
+    let tailsCount = ref 0
+
     headsAndTails 
     |> Array.iter (fun (h,_,t) -> 
         h |> Array.iter (fun h ->
             let h = ResizeArray.rev h
             if h.Count > 0 && assembliesOf16sHeads |> ResizeArray.exists(fun a -> a.EqualsPath h) |> not
             then assembliesOf16sHeads.Add (new AssemblyOf16s<_>(!cnt, h, head = true))
+            tailsCount := !tailsCount + t.Length
             incr cnt)
         )
 
-    config.Lap "Heads and tails preparing"
+    config.Lap (sprintf "Heads and tails preparing. Tails %A" !tailsCount)
 
     assembliesOf16sHeads |> ResizeArray.map (fun a -> a.ConvertToString(longEdges)) |> fun s -> System.IO.File.WriteAllLines(searchCfg.OutFileName,s)
     let assembliesOf16sHeads = score searchCfg.OutFileName config.HedsBias assembliesOf16sHeads
@@ -397,8 +400,12 @@ let searchMain (config:Config) =
         for (s,e) in startEndVertices do
             getPaths g true s (fun (curE:TaggedEdge<_,_>) curL -> curE.Target = e || curL <= 100) 100
             |> ResizeArray.filter (fun edgs -> edgs.Count > 0 && edgs.[edgs.Count - 1 ].Target = e)
-            |> Seq.minBy (fun edgs -> edgs.Count)
-            |> fun p -> gags.Add(s,p)
+            |> fun r -> 
+                if r.Count > 0
+                then 
+                    r
+                    |> Seq.minBy (fun edgs -> edgs.Count) 
+                    |> fun p -> gags.Add(s,p)
         gags
 
     let assembliesOf16sFull = new ResizeArray<_>()

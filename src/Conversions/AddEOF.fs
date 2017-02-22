@@ -88,6 +88,7 @@ let addEOF (ruleList: Rule.t<Source.t, Source.t> list) =
                     args=[]
                     isStart=true
                     isPublic=false
+                    isInline = false
                     metaArgs=[] 
                     body=   [{
                                 omit=false

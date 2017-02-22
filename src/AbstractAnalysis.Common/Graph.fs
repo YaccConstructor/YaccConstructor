@@ -1,6 +1,17 @@
 ﻿namespace AbstractAnalysis.Common
 
 open QuickGraph
+open System.Runtime.CompilerServices
+
+[<Measure>] type token
+
+[<Measure>] type gssVertex
+[<Measure>] type nodeMeasure
+[<Measure>] type positionInInput
+[<Measure>] type positionInGrammar
+[<Measure>] type length
+[<Measure>] type leftPosition
+[<Measure>] type extension
 
 type LexerEdge<'l ,'br  when 'l: equality> (s,e,t) =
     inherit TaggedEdge<int,Option<'l*'br>>(s,e,t)
@@ -12,63 +23,9 @@ type LexerEdge<'l ,'br  when 'l: equality> (s,e,t) =
     member this.BackRef = br
     member this.Label = l
 
-type DAG<'l,'br  when 'l: equality> () =
-    inherit AdjacencyGraph<int, LexerEdge<'l,'br>>()
-    let mutable startV = None   
-
-    member this.StartVertex 
-        with get () = match startV with Some v -> v | _ -> failwith "Start vertex is not defined!"
-        and set (v:int) = startV <- Some v
-
-type LexerInputGraph<'br> () =
-    inherit DAG<string,'br>()    
-
-    member this.PrintToDot name = 
-        use out = new System.IO.StreamWriter (name : string)
-        out.WriteLine("digraph AST {")
-        out.WriteLine "rankdir=LR"
-        for i=0 to this.VertexCount-1 do
-            out.Write (i.ToString() + "; ")
-        out.WriteLine()
-        for i in this.Vertices do
-            let edges = this.OutEdges i
-            for e in edges do
-                let tokenName = 
-                    match e.Tag with
-                    | Some pair -> fst pair
-                    | None -> ""
-                out.WriteLine (e.Source.ToString() + " -> " + e.Target.ToString() + "[label=\"" + tokenName + "\"]")
-        out.WriteLine("}")
-        out.Close()
-
-type LexerInnerGraph<'br> (g:LexerInputGraph<'br>) as this =
-    inherit DAG<char,'br>()
-    let convert () =
-        let counter = g.Vertices |> Seq.max |> ref
-        let splitEdge (edg:LexerEdge<_,'br>) =
-            let start = edg.Source
-            let _end = edg.Target
-            let str = edg.Label
-            let br = edg.BackRef
-            match str with
-            | Some("") -> [|new LexerEdge<_,_> (start,_end,None)|]
-            | None -> [|new LexerEdge<_,_> (start,_end,None)|]
-            | Some(s) ->
-                let l = s.Length
-                let ss = s.ToCharArray()
-                Array.init l 
-                    (fun i ->
-                        match i with
-                        | 0 when (l = 1)     -> new LexerEdge<_,_>(start,_end, Some(ss.[i],br.Value))
-                        | 0                  -> new LexerEdge<_,_>(start,(incr counter; !counter),Some(ss.[i],br.Value))
-                        | i when (i = l - 1) -> new LexerEdge<_,_>(!counter,_end,Some(ss.[i],br.Value))
-                        | i                  -> new LexerEdge<_,_>(!counter,(incr counter; !counter),Some(ss.[i],br.Value))
-                    )
-        let newEdges = g.Edges |> Array.ofSeq |> Array.collect splitEdge
-        this.AddVerticesAndEdgeRange(newEdges) |> ignore
-        this.StartVertex <- g.StartVertex
-
-    do convert()
+type IParserInput =
+    abstract member InitialPositions: array<int<positionInInput>>    
+    abstract member ForAllOutgoingEdges: int<positionInInput> -> (int<token> -> int<positionInInput> -> unit) -> unit
 
 type ParserEdge<'token>(s, e, t)=
     inherit TaggedEdge<int, 'token>(s,e,t)
@@ -79,7 +36,7 @@ type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) =
     member val InitStates = initialVertices 
     member val FinalStates = finalVertices with get, set
 
-    member this.PrintToDot name (tokenToString : 'token -> string) = 
+    member this.PrintToDot name (numToString: 'token -> string) (*(tokenToString : 'token -> string) (numToToken : int -> 'token)*) = 
         use out = new System.IO.StreamWriter (name : string)
         out.WriteLine("digraph AST {")
         out.WriteLine "rankdir=LR"
@@ -89,10 +46,36 @@ type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) =
         for i in this.Vertices do
             let edges = this.OutEdges i
             for e in edges do
-                let tokenName = e.Tag |> tokenToString
+                let tokenName = e.Tag |> numToString(*numToToken |> tokenToString*)
                 out.WriteLine (e.Source.ToString() + " -> " + e.Target.ToString() + "[label=\"" + tokenName + "\"]")
         out.WriteLine("}")
         out.Close()      
 
     new (initial : int, final : int) = 
         ParserInputGraph<_>([|initial|], [|final|])
+ 
+
+type LinearInput (initialPositions, input:array<int<token>>) =
+    interface IParserInput with
+        member this.InitialPositions = initialPositions
+        [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+        member this.ForAllOutgoingEdges curPosInInput pFun =
+            if int curPosInInput < input.Length
+            then pFun input.[int curPosInInput] (curPosInInput + 1<positionInInput>)
+
+    member this.Input = input
+
+    new (input:array<int<token>>) = LinearInput ([|0<positionInInput>|], input)
+
+type SimpleGraphInput<'tagType> (initialPositions, getTokenFromTag:'tagType -> int<token>) =
+    inherit AdjacencyGraph<int, TaggedEdge<int, 'tagType>>()
+    interface IParserInput with
+        member this.InitialPositions = initialPositions
+        [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+        member this.ForAllOutgoingEdges curPosInInput pFun =
+            let outEdges = int curPosInInput |> this.OutEdges
+            outEdges
+            |> Seq.iter 
+                (fun e ->
+                    pFun (getTokenFromTag e.Tag) (e.Target * 1<positionInInput>)
+                )

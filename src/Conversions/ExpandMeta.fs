@@ -74,7 +74,12 @@ let getKey module' key =
         |PMetaRef (name, args, metaArgs) ->
             name.text + metaArgsToString metaArgs + argsToString args
         |PLiteral src -> src.text
-        |PRepet _ -> failwith "Repetition was not realized yet"
+        |PRepet (body,x,y) -> //failwith "Repetition was not realized yet"
+                              match x,y with
+                              |Some lower, Some upper -> sprintf "(%s)*[%i..%i]" (getProdKey body) lower upper
+                              |None, Some upper ->  sprintf "(%s)*[..%i]" (getProdKey body) upper
+                              |Some lower, None ->  sprintf "(%s)*[%i..]" (getProdKey body) lower
+                              |None, None ->  sprintf "(%s)*[..]" (getProdKey body)
         |PPerm src ->
             src
             |> List.map getProdKey
@@ -183,7 +188,9 @@ let expandRule =
                         (PRef(name, attrs), resRuleList)
                     else expandMetaRef name attrs metaArgs key module' metaRules expanded resRuleList
                 | PPerm _ -> failwith "Unrealised meta-expanding of permutation"
-                | PRepet _ -> failwith "Unrealised meta-expanding of repetition"
+                | PRepet (body,x,y) -> //failwith "Unrealised meta-expanding of repetition"
+                                       let a, b = simpleExpand body
+                                       applyToRes PRepet <| ((a, x, y),b)
             if not <| expanded.ContainsKey key then
                 expanded.Add(key, newRule)
 //            printfn "%A\n: \t%A\n\n:\t%A\n=========================\n" body rule resRuleList
@@ -212,7 +219,8 @@ let expandRule =
                 PRef(name, attrs) |> tryReplaceActual formalToAct (Source.toString name)
             else PMetaRef(name, attrs, List.map replace metaArgs)
         | PPerm _ -> failwith "Unrealised meta-expanding of permutation"
-        | PRepet _ -> failwith "Unrealised meta-expanding of repetition"
+        | PRepet (body,x,y) -> //failwith "Unrealised meta-expanding of repetition"
+                               PRepet  <| (replace body, x, y)
 
     fun body (module' : string) metaRules expanded ->
         expandBody body module' metaRules expanded []

@@ -42,7 +42,7 @@ let createDefaultElem rulProd = createSimpleElem rulProd None
 
 let createRule name args body _public mArgs = 
     { Rule.name = name     ; Rule.args = args      ; Rule.body = body
-    ; Rule.isStart = _public ; Rule.metaArgs = mArgs; Rule.isPublic = false
+    ; Rule.isStart = _public ; Rule.metaArgs = mArgs; Rule.isInline = false; Rule.isPublic = false
     }
 
 /// Non-start rule with empty meta-arguments list

@@ -36,7 +36,19 @@ let private expandRepet (ruleList: Rule.t<_,_> list) =
            
     let rec expandBody attrs = function        
         | PSeq(elements, actionCode, l) -> 
-            ( elements |> List.map (fun elem -> { elem with rule = expandBody attrs elem.rule }) ,actionCode, l) |> PSeq        
+            PSeq(elements |>List.map (fun e -> {e with rule = expandBody attrs e.rule}) , actionCode, l)
+//            elements |> List.fold (fun (res, attrs) elem ->
+//                match elem.rule with
+////                | PRepet _ | PSeq _ |PAlt _ | PMany _ |PSome _ |POpt _ | PMetaRef _ as x -> 
+////                    let newName = Namer.newName Namer.Names.repeat
+////                    toExpand.Enqueue({name = dummyPos newName; args=attrs; body=elem.rule;
+////                                        isStart=false; isPublic=false; metaArgs=[]})                    
+////                    { elem with rule = PRef(dummyPos newName, list2opt <| createParams attrs) }
+//                | _ -> elem
+//                |> fun newElem -> newElem::res, if elem.binding.IsSome then attrs@[elem.binding.Value] else attrs
+//                 ) ([], attrs)
+//                |> fst |> List.rev
+//                |> fun elems -> PSeq (elems, actionCode, l)
         | PAlt(left, right) -> PAlt(expandBody attrs left, expandBody attrs right)
         | PConj(left, right) -> PConj(expandBody attrs left, expandBody attrs right)
         | PMany x -> PMany(expandBody attrs x)
@@ -45,7 +57,7 @@ let private expandRepet (ruleList: Rule.t<_,_> list) =
         | PRepet (r, a, b) as x -> 
             let newName = Namer.newName Namer.Names.repeat
             toExpand.Enqueue({name = dummyPos newName; args=attrs; body=r;
-                                isStart=false; isPublic=false; metaArgs=[]})
+                                isStart=false; isPublic=false; isInline = false; metaArgs=[]})
             handleRepeat <| PRepet (PRef(dummyPos newName, list2opt <| createParams attrs), a, b)
         | PToken _ | PLiteral _  | PRef _  as x -> x
         | PPerm _ -> failwith "Unsupported rule in Repetion!"        

@@ -45,7 +45,7 @@ let private expandBrackets (ruleList: Rule.t<_, _> list) =
                         | PSeq(subelements, subActionCode, l) when List.length subelements > 1 || subActionCode <> None ->
                             let newName = newName()
                             toExpand.Enqueue({name= genNewSourceWithRange newName elem.rule; args=attrs;
-                                                body=elem.rule; isStart=false; isPublic=false; metaArgs=[]})
+                                                body=elem.rule; isStart=false; isPublic=false; isInline = false; metaArgs=[]})
                             { elem with rule = PRef(genNewSourceWithRange newName elem.rule, list2opt <| createParams attrs) }
                         | _ -> elem
                     newElem::res, if elem.binding.IsSome then attrs@[elem.binding.Value] else attrs

@@ -46,7 +46,6 @@
     <Compile Include="NoAlt.fs" />
     <Compile Include="NoConj.fs" />
     <Compile Include="Constraints.fs" />
-    <None Include="app.config" />
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>

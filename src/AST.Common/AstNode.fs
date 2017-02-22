@@ -55,6 +55,7 @@ type AST =
             for i = 0 to this.other.Length-1 do
                 res.[i+1] <- f this.other.[i]
         res
+
     new (fs : array<_>) = 
         let other = 
             if fs.Length > 1 

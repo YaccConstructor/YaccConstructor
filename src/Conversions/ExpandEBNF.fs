@@ -101,6 +101,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                     body = newBody
                     isStart=false
                     isPublic=false
+                    isInline = false
                     metaArgs = metaArgs
                 }) :: !addedBnfRules
             newRule
@@ -130,6 +131,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                  body= newBody
                  isStart=false
                  isPublic=false
+                 isInline = false
                  metaArgs = metaArgs
                 }) :: !addedBnfRules
             newRule
@@ -149,6 +151,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                  body= newBody
                  isStart=false
                  isPublic=false
+                 isInline = false
                  metaArgs = metaArgs
                 }) :: !addedBnfRules
             newRule

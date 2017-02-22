@@ -469,7 +469,7 @@ Tests/sbt/graphs_old/ms/*.dot
 Tests/sbt/graphs_old/pl/*.dot
 Tests/sbt/ready/*.dot
 Tests/AbstractPerformance/TSQL/*/*.dot
-src/RNGLRApplication/res.dot
+src/RNGLRApplication/*.dot
 # Guidance Automation Toolkit
 *.gpState
 
@@ -599,6 +599,11 @@ tests/GLLParser.Simple.Tests/*.dot
 tests/GLL.AbstractParser.Simple.Tests/*.dot
 !tests/Gll.AbstractParserGFG.Tests/Emb.yrd.fs
 **/log*.txt
+
+src/Bio.Search/R16S_19_27.fs
+src/Bio.Search/R16S_1_18.fs
+src/GLL.Parser.Test/*.dot
+src/GLL.Parser.Test/test.fs
 src/CYKMatrix/Fody_ToBeDeleted.txt
 src/CYKMatrix/InstallationDummyFile.txt
 tests/GLL.AbstractParser.Simple.Tests/00
@@ -621,3 +626,31 @@ tests/RNGLRAbstractParser.Tests/кк
 2
 tests/data/AbstractRNGLR/json/JSON_test_1.dot
 tests/data/AbstractRNGLR/json/JSON_test_2.dot
+
+src/CYKMatrix/Fody_ToBeDeleted.txt
+src/CYKMatrix/InstallationDummyFile.txt
+tests/GLL.AbstractParser.Simple.Tests/00
+tests/GLL.AbstractParser.Simple.Tests/1
+tests/GLL.AbstractParser.Simple.Tests/gen_bio.cmd
+tests/GLL.AbstractParser.Simple.Tests/gen_graph.cmd
+tests/GLL.AbstractParser.Simple.Tests/genGraph.cmd
+tests/GLL.AbstractParser.Simple.Tests/ww
+tests/GLLParser.Simple.Tests/a.cmd
+tests/GLLParser.Simple.Tests/gen1.cmd
+tests/GLLParser.Simple.Tests/genDBG.cmd
+tests/RIGLRParser.SimpleTest/dot.dot
+tests/RIGLRParser.SimpleTest/iria.dot
+tests/RIGLRParser.SimpleTest/RIADot.dot
+tests/RNGLRAbstractParser.Tests/gen_bio1.cmd
+tests/RNGLRAbstractParser.Tests/gen1.cmd
+tests/RNGLRAbstractParser.Tests/t
+tests/RNGLRAbstractParser.Tests/кк
+1
+2
+tests/data/AbstractRNGLR/json/JSON_test_1.dot
+tests/data/AbstractRNGLR/json/JSON_test_2.dot
+tests/data/AbstractRNGLR/DOT/sppf.dot
+src/Bio.Search/R16S_19_27.fs
+src/Bio.Search/*.dot
+src/glltest/*.dot
+src/glltest/test.fs

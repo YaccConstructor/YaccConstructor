@@ -46,6 +46,7 @@ let simpleRules nonTerm body : Rule.t<_,_> list =
         body = body
         isStart = true
         isPublic = false
+        isInline = false
         metaArgs = []
     }]
 
@@ -56,6 +57,7 @@ let metaRules nonTerm body args : Rule.t<_,_> list =
         body = body
         isStart = false
         isPublic = false
+        isInline = false
         metaArgs = args
     }]
 

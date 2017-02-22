@@ -390,23 +390,23 @@ let searchMain (config:Config) =
     printfn "Tails Length = %A" assembliesOf16sTails.Count
     let assembliesOf16sTails = score config.TailSearchConfig.OutFileName config.TailsBias assembliesOf16sTails
 
-    let gaps =
-        let startEndVertices = new HashSet<_>()
-        for h in assembliesOf16sHeadsMiddles do
-            for t in assembliesOf16sTails do
-                if t.InfernalData.Value.ModelFrom - h.InfernalData.Value.ModelTo > 10
-                then startEndVertices.Add (h.Edges.[h.Edges.Count-1].Target, t.Edges.[0].Source) |> ignore
-        let gags = new Dictionary<_,_>()
-        for (s,e) in startEndVertices do
-            getPaths g true s (fun (curE:TaggedEdge<_,_>) curL -> curE.Target = e || curL <= 100) 100
-            |> ResizeArray.filter (fun edgs -> edgs.Count > 0 && edgs.[edgs.Count - 1 ].Target = e)
-            |> fun r -> 
-                if r.Count > 0
-                then 
-                    r
-                    |> Seq.minBy (fun edgs -> edgs.Count) 
-                    |> fun p -> gags.Add(s,p)
-        gags
+//    let gaps =
+//        let startEndVertices = new HashSet<_>()
+//        for h in assembliesOf16sHeadsMiddles do
+//            for t in assembliesOf16sTails do
+//                if t.InfernalData.Value.ModelFrom - h.InfernalData.Value.ModelTo > 10
+//                then startEndVertices.Add (h.Edges.[h.Edges.Count-1].Target, t.Edges.[0].Source) |> ignore
+//        let gags = new Dictionary<_,_>()
+//        for (s,e) in startEndVertices do
+//            getPaths g true s (fun (curE:TaggedEdge<_,_>) curL -> curE.Target = e || curL <= 100) 100
+//            |> ResizeArray.filter (fun edgs -> edgs.Count > 0 && edgs.[edgs.Count - 1 ].Target = e)
+//            |> fun r -> 
+//                if r.Count > 0
+//                then 
+//                    r
+//                    |> Seq.minBy (fun edgs -> edgs.Count) 
+//                    |> fun p -> gags.Add(s,(p,e))
+//        gags
 
     let assembliesOf16sFull = new ResizeArray<_>()
 
@@ -414,7 +414,8 @@ let searchMain (config:Config) =
         assembliesOf16sHeadsMiddles
         assembliesOf16sTails
         assembliesOf16sFull
-        gaps
+        //gaps
+        (new Dictionary<_,_>())
         (fun edges -> 
             incr cnt
             new AssemblyOf16s<_>(!cnt, edges, head = true, middle = true, tail = true))

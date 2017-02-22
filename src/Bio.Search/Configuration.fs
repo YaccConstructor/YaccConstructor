@@ -52,7 +52,7 @@ type Config (argv) =
     let agentsCount = args.GetResult(<@ Agents @>, defaultValue = 1)
 
     let finalBias = args.GetResult(<@ FinalBias @>, defaultValue = 4.0)
-    let headsBias = args.GetResult(<@ HeadsBias @>, defaultValue = 0.3)
+    let headsBias = args.GetResult(<@ HeadsBias @>, defaultValue = 0.5)
     let middlesBias = args.GetResult(<@ MiddlesBias @>, defaultValue = 4.0) 
     let tailsBias = args.GetResult(<@ TailsBias @>, defaultValue = 1.0)
     let headMiddleBias = args.GetResult(<@ HeadsMiddlesBias @>, defaultValue = 6.0)

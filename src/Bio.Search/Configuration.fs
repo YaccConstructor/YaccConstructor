@@ -14,12 +14,14 @@ type CLIArguments =
     | [<NoAppSettings; Mandatory; AltCommandLine("-i")>] Input of string
     | Agents of int
     | TmpDir of string
+    | [<AltCommandLine("-fb")>]FinalBias of float
     interface IArgParserTemplate with
         member s.Usage = 
             match s with
             | Input _ -> "Specify a graph for processing."
             | Agents _ -> "Specify a number of agents for parallel processing."
             | TmpDir _ -> "Specify a directory for temp output files."
+            | FinalBias _ -> "Specify a hight limit of bias for final filtering."
 
 [<Struct>]
 type SearchConfig = 
@@ -40,7 +42,8 @@ type Config (argv) =
     let argParser = ArgumentParser.Create<CLIArguments>()
     let args = argParser.Parse argv
     let agentsCount = args.GetResult(<@ Agents @>, defaultValue = 1)
-    let tmpDir = args.GetResult(<@ TmpDir @>, defaultValue = "../../BioSearchOut")
+    let finalBias = args.GetResult(<@ FinalBias @>, defaultValue = 4.0)
+    let tmpDir = args.GetResult(<@ TmpDir @>, defaultValue = "BioSearchOut")
     let inputGraphPath = 
         args.GetResult <@ Input @> 
         |> (fun s -> 
@@ -62,7 +65,7 @@ type Config (argv) =
                 let (name,delta,abs) = timing.[timing.Count - 1]
                 abs
         let cur = System.DateTime.Now
-        printfn "Step: %A. Duartion: %A. Finished: %A" name (cur - last) cur
+        printfn "Step: %A. Duration: %A. Finished: %A" name (cur - last) cur
         timing.Add((name, cur - last, cur))
 
     let getParserSource grammarFile =    
@@ -91,7 +94,17 @@ type Config (argv) =
         new SearchConfig(parserSourceMiddle, mkTokenizer parserSourceMiddle.StringToToken, 360, 390, fileInTmpDir "R16S_1_18_result.fa")
 
     let R16STailSearchConfig = 
-        new SearchConfig(parserSourceTail, mkTokenizer parserSourceTail.StringToToken , (*(*h29*)390, 420*) (*h30*) 270, 300,(*460, 490,*) fileInTmpDir "R16S_tail_result.fa")
+        new SearchConfig(
+            parserSourceTail
+            , mkTokenizer parserSourceTail.StringToToken
+            , //h29
+              //390, 420
+              //h30
+              270, 300
+              //any 80 + h30
+              //350, 380
+              (*460, 490,*)
+            , fileInTmpDir "R16S_tail_result.fa")
 
     let R16SMiddleSearchConfig = 
         //D = 30
@@ -101,7 +114,8 @@ type Config (argv) =
         if System.IO.Directory.Exists tmpDir |> not
         then System.IO.Directory.CreateDirectory tmpDir |> ignore
         startTime := System.DateTime.Now
-
+    
+    member val FinalBias = finalBias with get
     member val TempDirectory = tmpDir with get
     member val AgentsCount = agentsCount with get
     member val InputGraphPath = inputGraphPath with get

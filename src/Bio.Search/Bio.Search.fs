@@ -244,23 +244,35 @@ let score file (assembliesOf16s:ResizeArray<AssemblyOf16s<_>>) =
             )
     scoredByInfernal
 
-let mergeAssemblies (left:ResizeArray<AssemblyOf16s<_>>) (right:ResizeArray<AssemblyOf16s<_>>) (result:ResizeArray<AssemblyOf16s<_>>) newAssenbly =
+let mergeAssemblies 
+        (left:ResizeArray<AssemblyOf16s<_>>) 
+        (right:ResizeArray<AssemblyOf16s<_>>) 
+        (result:ResizeArray<AssemblyOf16s<_>>) 
+        (gaps:Dictionary<_,ResizeArray<TaggedEdge<_,BioGraphEdgeLbl<_>>>>) 
+        newAssenbly =
     let used = new HashSet<_>()
-    left
-    |> ResizeArray.iter (fun h -> 
+    let rec addTails (h:ResizeArray<TaggedEdge<_,_>>) repeat = 
         let tails =
             right
-            |> ResizeArray.filter (fun t -> t.Edges.[0].Source = h.Edges.[h.Edges.Count - 1].Target || t.Edges.[0] = h.Edges.[h.Edges.Count - 1])
+            |> ResizeArray.filter (fun t -> t.Edges.[0].Source = h.[h.Count - 1].Target || t.Edges.[0] = h.[h.Count - 1])
         if tails.Count > 0
         then
             tails
             |> ResizeArray.iter (fun t ->
                 used.Add t |> ignore
-                let newPath = new ResizeArray<_>(h.Edges)
-                newPath.AddRange (if t.Edges.[0] = h.Edges.[h.Edges.Count - 1] then t.Edges.ToArray().[1..] else t.Edges.ToArray())
+                let newPath = new ResizeArray<_>(h)
+                newPath.AddRange (if t.Edges.[0] = h.[h.Count - 1] then t.Edges.ToArray().[1..] else t.Edges.ToArray())
                 result.Add(newAssenbly newPath))
-        else result.Add h
-        )
+        else
+            let flg, gag = gaps.TryGetValue h.[h.Count - 1].Target
+            if flg
+            then  
+                let newHead = new ResizeArray<_>(h)
+                newHead.AddRange gag
+                addTails newHead false
+            else result.Add(newAssenbly h)
+    left
+    |> ResizeArray.iter (fun h -> addTails h.Edges true )
     right |> ResizeArray.iter (fun a -> if used.Contains a |> not then result.Add a)
     let copy = new ResizeArray<AssemblyOf16s<_>>()
     result
@@ -347,6 +359,7 @@ let searchMain (config:Config) =
         assembliesOf16sHeads
         assembliesOf16s
         assembliesOf16sHeadsMiddles
+        (new Dictionary<_,_>())
         (fun edges -> 
             incr cnt
             new AssemblyOf16s<_>(!cnt, edges, head = true, middle = true))
@@ -374,12 +387,27 @@ let searchMain (config:Config) =
     printfn "Tails Length = %A" assembliesOf16sTails.Count
     let assembliesOf16sTails = score config.TailSearchConfig.OutFileName assembliesOf16sTails
 
+    let gaps =
+        let startEndVertices = new HashSet<_>()
+        for h in assembliesOf16sHeadsMiddles do
+            for t in assembliesOf16sTails do
+                if t.InfernalData.Value.ModelFrom - h.InfernalData.Value.ModelTo > 10
+                then startEndVertices.Add (h.Edges.[h.Edges.Count-1].Target, t.Edges.[0].Source) |> ignore
+        let gags = new Dictionary<_,_>()
+        for (s,e) in startEndVertices do
+            getPaths g true s (fun (curE:TaggedEdge<_,_>) curL -> curE.Target = e || curL <= 100) 100
+            |> ResizeArray.filter (fun edgs -> edgs.Count > 0 && edgs.[edgs.Count - 1 ].Target = e)
+            |> Seq.minBy (fun edgs -> edgs.Count)
+            |> fun p -> gags.Add(s,p)
+        gags
+
     let assembliesOf16sFull = new ResizeArray<_>()
 
     mergeAssemblies
         assembliesOf16sHeadsMiddles
         assembliesOf16sTails
         assembliesOf16sFull
+        gaps
         (fun edges -> 
             incr cnt
             new AssemblyOf16s<_>(!cnt, edges, head = true, middle = true, tail = true))
@@ -388,7 +416,7 @@ let searchMain (config:Config) =
 
     let final = score config.FileForFull assembliesOf16sFull
     
-    printfn "Total befor filtering: %A" final.Count
+    printfn "Total before filtering: %A" final.Count
 
     final
     |> ResizeArray.filter 
@@ -396,7 +424,7 @@ let searchMain (config:Config) =
             match a.InfernalData with
             | Some d -> 
                 d.ModelTo - d.ModelFrom > 1000
-                //&& d.Bias <= 10.0
+                && d.Bias <= config.FinalBias
             | _ -> false
             )
     |> ResizeArray.map (fun a -> a.ConvertToString(longEdges, true)) |> fun s -> System.IO.File.WriteAllLines(config.FileForScoredFull, s)

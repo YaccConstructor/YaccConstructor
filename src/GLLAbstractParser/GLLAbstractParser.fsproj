@@ -34,6 +34,7 @@
     <Compile Include="SPPF.fs" />
     <Compile Include="GSS.fs" />
     <Compile Include="AbstractParser.fs" />
+    <Compile Include="AbstractParserCF.fs" />
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>

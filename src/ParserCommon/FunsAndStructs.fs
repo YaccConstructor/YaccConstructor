@@ -101,6 +101,18 @@ type ContextFSA =
                                 "; PosOnEdge:" + (CommonFuns.getPosOnEdge(this.Index).ToString()) +
                                 "; State:" + (this.State.ToString())
 
+[<Struct>]
+type ContextCF<'GSSVertex> =
+    val PosInGrammar    :   int<positionInGrammar>
+    val PosInInput      :   int<positionInGrammar>
+    val GssParser       :   'GSSVertex
+    val GssInput        :   'GSSVertex
+    // val Data  (maybe)
+    new (posInGrammar, posInInput, vertexParser, vertexInput) = 
+        {PosInGrammar = posInGrammar; PosInInput = posInInput; GssParser = vertexParser; GssInput = vertexInput}
+    override this.ToString () = "" 
+       
+
 type ParseResult<'a> =
     | Success of Tree<'a>
     | Success1 of 'a[]

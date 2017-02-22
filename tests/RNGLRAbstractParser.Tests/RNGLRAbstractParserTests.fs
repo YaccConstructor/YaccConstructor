@@ -103,6 +103,7 @@ let perfTest2 parse graph =
 //        else Assert.Fail(sprintf "Test %s should not produce sucess parsing result but it is produce." inputFilePath)
 
 [<TestFixture>]
+[<Ignore("")>]
 type ``RNGLR abstract parser tests`` () =
 
     [<Test>]

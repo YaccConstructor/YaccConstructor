@@ -52,6 +52,7 @@ let runTest grammarFile inputFile =
     shouldBeTrue res
 
 [<TestFixture>]
+[<Ignore("")>]
 type ``GLL parser tests with simple lexer`` () =
 
     [<Test>]

@@ -30,6 +30,7 @@ open ConversionsTests
 open Yard.Core.Helpers
 
 [<TestFixture>]
+[<Ignore("")>]
 type ``Expand inner alts tests`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "ExpandInnerAlt")
     let path f = System.IO.Path.Combine(basePath, f)

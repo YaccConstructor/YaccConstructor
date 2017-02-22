@@ -39,6 +39,7 @@ type SetUp()=
         AddinManager.Registry.Update()
 
 [<TestFixture>]
+[<Ignore("")>]
 type ``Conversions expand metarules tests`` () =
     
     let basePath = System.IO.Path.Combine(conversionTestPath, "Meta")

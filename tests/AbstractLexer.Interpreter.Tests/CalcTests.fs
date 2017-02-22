@@ -35,7 +35,7 @@ let calcTokenizationTest file eCount vCount countEdgesArray =
     | Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" file e)
                              
 [<TestFixture>]
-[<Ignore("")>]
+[<Ignore("Temporarily disabled for branches merge")>]
 type ``Lexer Calc Fst Tests`` () =            
     [<Test>]
     member this.``Load graph test from DOT`` () =

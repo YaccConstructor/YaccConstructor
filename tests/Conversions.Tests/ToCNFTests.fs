@@ -31,7 +31,7 @@ open ConversionsTests
 open Yard.Core.Helpers
 
 [<TestFixture>]
-[<Ignore("")>]
+[<Ignore("Temporarily disabled for branches merge")>]
 type ``CNF tests`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "ToCNF")
     let path f = System.IO.Path.Combine(basePath, f)

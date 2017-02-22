@@ -10,7 +10,7 @@ open ConversionsTests
 open Yard.Core.Helpers
 
 [<TestFixture>]
-[<Ignore("")>]
+[<Ignore("Temporarily disabled for branches merge")>]
 type ``Expand repeat tests`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "ExpandRepeat")
     let path f = System.IO.Path.Combine(basePath, f)

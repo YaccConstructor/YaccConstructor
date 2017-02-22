@@ -52,7 +52,7 @@ let runTest grammarFile inputFile =
     shouldBeTrue res
 
 [<TestFixture>]
-[<Ignore("")>]
+[<Ignore("Temporarily disabled for branches merge")>]
 type ``GLL parser tests with simple lexer`` () =
 
     [<Test>]

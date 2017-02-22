@@ -8,7 +8,7 @@ open ConversionsTests
 open Yard.Core.Helpers
 
 [<TestFixture>]
-[<Ignore("")>]
+[<Ignore("Temporarily disabled for branches merge")>]
 type ``Conversions eliminate left recursion tests`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "EliminateLeftRecursion")    
 

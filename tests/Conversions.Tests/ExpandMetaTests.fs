@@ -39,7 +39,7 @@ type SetUp()=
         AddinManager.Registry.Update()
 
 [<TestFixture>]
-[<Ignore("")>]
+[<Ignore("Temporarily disabled for branches merge")>]
 type ``Conversions expand metarules tests`` () =
     
     let basePath = System.IO.Path.Combine(conversionTestPath, "Meta")

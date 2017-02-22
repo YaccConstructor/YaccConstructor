@@ -24,4 +24,5 @@
 <Addins>
 	<!--Directory include-subdirs="true"></Directory-->
     <Directory>..\..\..\..\Bin\Release\v40</Directory>
+    <Directory>C:\Code\YaccConstructor\Bin\Release\v40</Directory>
 </Addins>

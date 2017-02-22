@@ -156,13 +156,23 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
             create currentContext nextState curNonterm
 
         /// Terminal transitions.
+//        input.ForAllOutgoingEdges
+//            currentContext.PosInInput
+//            (fun nextToken nextPosInInput -> 
+//                let isTransitionPossible, nextPosInGrammar = parser.StateAndTokenToNewState.TryGetValue (parser.GetTermsDictionaryKey currentContext.PosInGrammar (int nextToken))
+//                if isTransitionPossible
+//                then eatTerm currentContext nextToken nextPosInInput nextPosInGrammar
+//                   //pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex (currentContext.Length + 1us)
+//            )
         input.ForAllOutgoingEdges
             currentContext.PosInInput
             (fun nextToken nextPosInInput -> 
-                let isTransitionPossible, nextPosInGrammar = parser.StateAndTokenToNewState.TryGetValue (parser.GetTermsDictionaryKey currentContext.PosInGrammar (int nextToken))
+                let isTransitionPossible, positions = parser.StateAndTokenToNewState.TryGetValue (parser.GetTermsDictionaryKey currentContext.PosInGrammar (int nextToken))
                 if isTransitionPossible
-                then eatTerm currentContext nextToken nextPosInInput nextPosInGrammar
-                   //pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex (currentContext.Length + 1us)
+                then 
+                    for nextPosInGrammar in positions do
+                        eatTerm currentContext nextToken nextPosInInput nextPosInGrammar
+                    //pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex (currentContext.Length + 1us)
             )
 
     gss

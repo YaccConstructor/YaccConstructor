@@ -40,6 +40,7 @@ let symbolToString nontermStringDict s =
         | Epsilon() -> "Epsilon"
 
 let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
+    let counter = [|0; 0; 0; 0; 0; 0; 0; 0; 0; 0|]
     let states = new ResizeArray<(EdgeSymbol * int<positionInGrammar>) list>()
     let alphabet = new HashSet<EdgeSymbol>()
     let nonterms = new Dictionary<string, int<positionInGrammar>>()
@@ -145,6 +146,7 @@ let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
 
         match prod with
         |PAlt (left, right) ->
+            counter.[0] <- counter.[0] + 1
             let finalState =
                 if finalState.IsNone
                 then
@@ -155,6 +157,7 @@ let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
             productionToStates firstState finalState left |> ignore
             productionToStates firstState finalState right
         | PSeq (s, _, _) ->
+            counter.[1] <- counter.[1] + 1
             let rec seqToStates first final = function
                 | [hd] -> productionToStates first final hd.rule
                 | hd :: tl ->
@@ -162,13 +165,27 @@ let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
                     seqToStates newstate final tl
                 | [] -> newEdge false first final None
             seqToStates firstState finalState s
-        | PToken s | PLiteral s -> newEdge true firstState finalState (Some s)
-        | PRef (rule,_) -> newEdge false firstState finalState (Some rule)
-        | PMetaRef _ -> failwith "Metaref found!!!"
-        | PMany expr -> proccessRepet expr (Some 0) None
-        | PRepet (expr, lower, upper) -> proccessRepet expr lower upper
-        | PSome expr -> proccessRepet expr (Some 1) None
-        | POpt expr -> proccessRepet expr (Some 0) (Some 1)
+        | PToken s | PLiteral s -> 
+            counter.[2] <- counter.[2] + 1
+            newEdge true firstState finalState (Some s)
+        | PRef (rule,_) -> 
+            counter.[3] <- counter.[3] + 1
+            newEdge false firstState finalState (Some rule)
+        | PMetaRef _ -> 
+            //counter.[4] <- counter.[4] + 1
+            failwith "Metaref found!!!"
+        | PMany expr -> 
+            //counter.[5] <- counter.[5] + 1
+            proccessRepet expr (Some 0) None
+        | PRepet (expr, lower, upper) -> 
+            counter.[6] <- counter.[6] + 1
+            proccessRepet expr lower upper
+        | PSome expr ->
+            //counter.[7] <- counter.[7] + 1
+            proccessRepet expr (Some 1) None
+        | POpt expr -> 
+            //counter.[8] <- counter.[8] + 1
+            proccessRepet expr (Some 0) (Some 1)
         | x -> failwithf "Unexpected construction %A in grammar" x       
         
     ruleList
@@ -195,6 +212,8 @@ let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
         |> Array.fold (fun (x : HashSet<int<positionInGrammar>>) set ->
             x.UnionWith set
             x) (new HashSet<int<positionInGrammar>>())
+    
+    printfn "%A" counter
 
     {   States = 
             states

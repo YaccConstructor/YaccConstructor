@@ -290,12 +290,12 @@ let filterResult filename =
     result
 
 let searchMiddle path agentsCount = 
-    let searchCfg = FSA_R16S_19_27_SearchConfig
+    let searchCfg = FSA_R16S_1_18_SearchConfig//FSA_R16S_19_27_SearchConfig
     let sourceGraph, graphs, longEdges = 
         loadGraph path 545(*searchCfg.HighLengthLimit*) searchCfg.Tokenizer // (GLL.tRNA.RNGLR_EOF 0)
     //printLongEdges @"C:\CM\long_edges.fa" longEdges
     let graphs = 
-        graphs.[0..]
+        graphs.[10..10]
         //graphs.[435..435]
         // graphs.[10..50]
     //graphs.[1500..]

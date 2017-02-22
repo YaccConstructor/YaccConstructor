@@ -21,7 +21,7 @@ do()
 type GLL() = 
     inherit Generator()
         override this.Name = "GLLGenerator"
-        override this.Constraints = [|noMeta; singleModule|]
+        override this.Constraints = [|noMeta; singleModule|]//[|noEbnf; noMeta; noInnerAlt; noBrackets; singleModule|]
         override this.Generate (definition, generateToFile, args) =
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
@@ -49,6 +49,7 @@ type GLL() =
             //let mutable printInfiniteEpsilonPath = getOption "infEpsPath" "" id
             //let mutable isAbstract = getBoolOption "abstract" true
             //let mutable withoutTree = ref <| getBoolOption "withoutTree" true
+            let mutable debugPrint = false
             let mutable outFileName =
                 let fstVal = getOption "output" (definition.info.fileName + ".fs") id
                 getOption "o" fstVal id
@@ -71,9 +72,10 @@ type GLL() =
                 //| "-infEpsPath" -> printInfiniteEpsilonPath <- value
                 //| "-abstract" -> isAbstract <- getBoolValue "abstract" value
                 //| "-withoutTree" -> withoutTree := getBoolValue "withoutTree" value
+                | "-debug" -> debugPrint <- getBoolValue "debug" value
                 | value -> failwithf "Unexpected %s option" value
                  
-            let fsa = new FSA(definition.grammar.[0].rules)
+            let fsa = new FSA(definition.grammar.[0].rules, debugPrint)
             
             let generatedCode, parserSource = getGLLparserSource fsa outFileName tokenType moduleName light generateToFile//isAbstract
             

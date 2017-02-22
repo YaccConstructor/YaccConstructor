@@ -10,7 +10,7 @@ type ParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<positi
                      , terminalNums       : HashSet<int<token>>
                      , intToString        : Dictionary<int,string>
                      , anyNonterm         : int<positionInGrammar>
-                     , stateAndTokenToNewState : Dictionary<int, int<positionInGrammar>>
+                     , stateAndTokenToNewState : Dictionary<int, int<positionInGrammar>[]>
                      , stringToToken      : Dictionary<string,int<token>>
                      ) =
 

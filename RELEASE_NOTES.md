@@ -1,3 +1,6 @@
+### 0.2.0.0-alpha1
+* GLL reworked!!!
+
 ### 0.1.0.1
 * Issue #204
 

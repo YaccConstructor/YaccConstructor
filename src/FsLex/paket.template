@@ -23,7 +23,6 @@ description
     3rd party tools
 files
     ./../../Bin/Release/v40/YC.FsYacc.exe ==> tools
-    ./../../Bin/Release/v40/YC.FsYacc.exe.config ==> tools
     ./../../Bin/Release/v40/YC.FsLex.exe ==> tools
     ./../../Bin/Release/v40/YC.FsLex.exe.config ==> tools
     ./../../Bin/Release/v40/FSharp.Core.dll ==> tools

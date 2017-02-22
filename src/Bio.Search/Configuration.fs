@@ -15,6 +15,10 @@ type CLIArguments =
     | Agents of int
     | TmpDir of string
     | [<AltCommandLine("-fb")>]FinalBias of float
+    | [<AltCommandLine("-hb")>]HeadsBias of float
+    | [<AltCommandLine("-mb")>]MiddlesBias of float
+    | [<AltCommandLine("-tb")>]TailsBias of float
+    | [<AltCommandLine("-hmb")>]HeadsMiddlesBias of float
     interface IArgParserTemplate with
         member s.Usage = 
             match s with
@@ -22,6 +26,10 @@ type CLIArguments =
             | Agents _ -> "Specify a number of agents for parallel processing."
             | TmpDir _ -> "Specify a directory for temp output files."
             | FinalBias _ -> "Specify a hight limit of bias for final filtering."
+            | HeadsBias _ -> "Specify a hight limit of bias for heads filtering."
+            | TailsBias _ -> "Specify a hight limit of bias for tailss filtering."
+            | HeadsMiddlesBias _ -> "Specify a hight limit of bias for concatenated heads-middles  filtering."
+            | MiddlesBias _ -> "Specify a hight limit of bias for middless filtering."
 
 [<Struct>]
 type SearchConfig = 
@@ -42,7 +50,12 @@ type Config (argv) =
     let argParser = ArgumentParser.Create<CLIArguments>()
     let args = argParser.Parse argv
     let agentsCount = args.GetResult(<@ Agents @>, defaultValue = 1)
+
     let finalBias = args.GetResult(<@ FinalBias @>, defaultValue = 4.0)
+    let headsBias = args.GetResult(<@ HeadsBias @>, defaultValue = 0.5)
+    let middlesBias = args.GetResult(<@ MiddlesBias @>, defaultValue = 4.0) 
+    let tailsBias = args.GetResult(<@ TailsBias @>, defaultValue = 1.0)
+    let headMiddleBias = args.GetResult(<@ HeadsMiddlesBias @>, defaultValue = 4.0)
     let tmpDir = args.GetResult(<@ TmpDir @>, defaultValue = "BioSearchOut")
     let inputGraphPath = 
         args.GetResult <@ Input @> 
@@ -116,6 +129,10 @@ type Config (argv) =
         startTime := System.DateTime.Now
     
     member val FinalBias = finalBias with get
+    member val HedsBias = headsBias with get
+    member val MiddlesBias = middlesBias with get
+    member val TailsBias = tailsBias with get
+    member val HeadsMiddlesBias = headMiddleBias with get
     member val TempDirectory = tmpDir with get
     member val AgentsCount = agentsCount with get
     member val InputGraphPath = inputGraphPath with get
@@ -140,6 +157,3 @@ type Config (argv) =
 type msg<'data> = 
     | Data of 'data
     | Die of AsyncReplyChannel<unit>
-
-
-

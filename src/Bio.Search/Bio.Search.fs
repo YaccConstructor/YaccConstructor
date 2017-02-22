@@ -221,7 +221,7 @@ let printLongEdges path edges =
         |> Array.collect id
     File.AppendAllLines(path, toPrint)
 
-let score file (assembliesOf16s:ResizeArray<AssemblyOf16s<_>>) =
+let score file bias (assembliesOf16s:ResizeArray<AssemblyOf16s<_>>) =
     assembliesOf16s |> ResizeArray.iter (fun a -> a.InfernalData <- None)
     let scoredByInfernal = 
         YC.Bio.InfernalInteraction.getScores file
@@ -239,7 +239,7 @@ let score file (assembliesOf16s:ResizeArray<AssemblyOf16s<_>>) =
             (fun a -> 
                   a.InfernalData.IsSome 
                //&& (a.InfernalData.Value.ModelFrom < 3 || a.InfernalData.Value.SeqFrom < 3) 
-               && (a.InfernalData.Value.Bias < 6.0)
+               && (a.InfernalData.Value.Bias < bias)
                //&& (a.InfernalData.Value.ModelTo >= 1420 || a.InfernalData.Value.SeqTo >= (a.Edges |> ResizeArray.fold (fun b e -> b + e.Tag.str.Length) 0) - 10 )
             )
     scoredByInfernal
@@ -298,7 +298,7 @@ let searchMain (config:Config) =
     
     config.Lap "Middles parsing"
 
-    let assembliesOf16s = score searchCfg.OutFileName assembliesOf16s
+    let assembliesOf16s = score searchCfg.OutFileName config.MiddlesBias assembliesOf16s
 
     config.Lap "Middles scoring with Infernal"
 
@@ -349,7 +349,7 @@ let searchMain (config:Config) =
     config.Lap "Heads and tails preparing"
 
     assembliesOf16sHeads |> ResizeArray.map (fun a -> a.ConvertToString(longEdges)) |> fun s -> System.IO.File.WriteAllLines(searchCfg.OutFileName,s)
-    let assembliesOf16sHeads = score searchCfg.OutFileName assembliesOf16sHeads
+    let assembliesOf16sHeads = score searchCfg.OutFileName config.HedsBias assembliesOf16sHeads
 
     config.Lap "Heads scoring with Infernal"
 
@@ -365,7 +365,7 @@ let searchMain (config:Config) =
             new AssemblyOf16s<_>(!cnt, edges, head = true, middle = true))
 
     assembliesOf16sHeadsMiddles |> ResizeArray.map (fun a -> a.ConvertToString(longEdges)) |> fun s -> System.IO.File.WriteAllLines(config.FileForHeadAndMiddles,s)
-    let assembliesOf16sHeadsMiddles = score config.FileForHeadAndMiddles assembliesOf16sHeadsMiddles
+    let assembliesOf16sHeadsMiddles = score config.FileForHeadAndMiddles config.HeadsMiddlesBias assembliesOf16sHeadsMiddles
     
     config.Lap "Heads and middles combining"
     
@@ -385,7 +385,7 @@ let searchMain (config:Config) =
     config.Lap "Tails parsing"
 
     printfn "Tails Length = %A" assembliesOf16sTails.Count
-    let assembliesOf16sTails = score config.TailSearchConfig.OutFileName assembliesOf16sTails
+    let assembliesOf16sTails = score config.TailSearchConfig.OutFileName config.TailsBias assembliesOf16sTails
 
     let gaps =
         let startEndVertices = new HashSet<_>()
@@ -414,7 +414,7 @@ let searchMain (config:Config) =
 
     assembliesOf16sFull |> ResizeArray.map (fun a -> a.ConvertToString(longEdges)) |> fun s -> System.IO.File.WriteAllLines(config.FileForFull, s)
 
-    let final = score config.FileForFull assembliesOf16sFull
+    let final = score config.FileForFull config.FinalBias assembliesOf16sFull
     
     printfn "Total before filtering: %A" final.Count
 
@@ -424,7 +424,6 @@ let searchMain (config:Config) =
             match a.InfernalData with
             | Some d -> 
                 d.ModelTo - d.ModelFrom > 1000
-                && d.Bias <= config.FinalBias
             | _ -> false
             )
     |> ResizeArray.map (fun a -> a.ConvertToString(longEdges, true)) |> fun s -> System.IO.File.WriteAllLines(config.FileForScoredFull, s)

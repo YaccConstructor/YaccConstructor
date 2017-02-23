@@ -29,6 +29,7 @@ Develop
 ==============
 
 * Read [code style](https://docs.google.com/document/d/1Ta21jY09Z_kDFcWCPmKdd_LxfzrDOSZ_D0b9yFeBoZg/edit?usp=sharing)
+* We use [git lfs](https://git-lfs.github.com/), so install it first.
 * Get sources. We use submodules, so use ``git clone --recursive`` 
 * Run ``build.cmd`` to perform initial build.
 * Use MS VS 2015 to develop. Main solution is ``YaccConstructor.sln``. You can create your own solutions.

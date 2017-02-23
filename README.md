@@ -12,7 +12,6 @@ Build status:
 |--------|------|------|
 | Master | [![Master build status](https://ci.appveyor.com/api/projects/status/s8myouu45sunv2xh/branch/master?svg=true)](https://ci.appveyor.com/project/gsvgit/yaccconstructor/branch/master)| |
 | Dev | [![Dev build status](https://ci.appveyor.com/api/projects/status/s8myouu45sunv2xh/branch/dev?svg=true)](https://ci.appveyor.com/project/gsvgit/yaccconstructor/branch/dev)| |
-| bio | [![bio build status](https://ci.appveyor.com/api/projects/status/s8myouu45sunv2xh/branch/bio?svg=true)](https://ci.appveyor.com/project/gsvgit/yaccconstructor/branch/bio)| |
 | GLL-FSA | [![GLL-FSA build status](https://ci.appveyor.com/api/projects/status/s8myouu45sunv2xh/branch/GLL-FSA?svg=true)](https://ci.appveyor.com/project/gsvgit/yaccconstructor/branch/GLL-FSA)| |
 
 

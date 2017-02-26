@@ -10,6 +10,9 @@
     open Yard.Core.Helpers
     open Conversions.TransformAux
     open QuickGraph
+    open Alea.CUDA
+    open Alea.CUDA.CULib
+
 
     type ParsingMatrix = Dictionary<NonTerminal, ProbabilityMatrix.T>
 
@@ -73,8 +76,59 @@
             let resultArray = multArrays arr1 arr2 size
 
             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                unionArrays matrix.[nonTerm].InnerValue resultArray (size*size) 
+                unionArrays matrix.[nonTerm].InnerValue resultArray (size*size)
 
+    let cublasSquareMatrix (matrix: ParsingMatrix) (allRules: RulesHolder) isChanged =
+        let unionArrays (curArr: Probability.InnerType.T []) (updArr: Probability.InnerType.T []) (arrSize: int) =
+            for ind in 0..arrSize - 1 do
+                if curArr.[ind] = 0.0 && updArr.[ind] > 0.0
+                then
+                    isChanged := true
+                    curArr.SetValue(1.0, ind)
+
+        let multArrays (from1: Probability.InnerType.T []) (from2: Probability.InnerType.T []) (matricesSize:int) =        
+
+                let transa = cublasOperation_t.CUBLAS_OP_N
+                let transb = cublasOperation_t.CUBLAS_OP_N
+
+                let dalpha = 1.
+                let dbeta = 0.
+
+                let multiplicationResult =
+                    let (mult1:DeviceMemory<float>) = Worker.Default.Malloc(matricesSize * matricesSize)
+                    let (mult2:DeviceMemory<float>) = Worker.Default.Malloc(matricesSize * matricesSize)
+                    let (result:DeviceMemory<float>) = Worker.Default.Malloc(matricesSize * matricesSize)
+                    mult1.Scatter(from1)
+                    mult2.Scatter(from2) 
+
+                    CUBLAS.Default.Dgemm(transa, 
+                                            transb, 
+                                            matricesSize, 
+                                            matricesSize, 
+                                            matricesSize, 
+                                            dalpha, 
+                                            mult2.Ptr, 
+                                            matricesSize, 
+                                            mult1.Ptr, 
+                                            matricesSize, 
+                                            dbeta, 
+                                            result.Ptr, 
+                                            matricesSize)
+
+                    let result = result.Gather()  
+                    result
+
+                multiplicationResult
+
+        let nontermPairs = allRules.ComplexTails
+        for (nt1, nt2) in nontermPairs do
+            let size = matrix.[nt1].Size
+            let arr1 = matrix.[nt1].GetSubArray id false matrix.[nt1].WholeMatrix
+            let arr2 = matrix.[nt2].GetSubArray id true matrix.[nt2].WholeMatrix
+            let resultArray = multArrays arr1 arr2 size
+
+            for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
+                unionArrays matrix.[nonTerm].InnerValue resultArray (size*size) 
 
     let recognizeGraph (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
                   squareMatrix

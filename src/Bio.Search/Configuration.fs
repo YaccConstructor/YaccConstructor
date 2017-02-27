@@ -10,10 +10,16 @@ open System
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 
+let extendFileName origFile postfix = 
+    let file = System.IO.Path.GetFileNameWithoutExtension origFile + "_" + postfix
+    let path = System.IO.Path.GetDirectoryName origFile
+    System.IO.Path.Combine(path, file)
+
 type CLIArguments = 
     | [<NoAppSettings; Mandatory; AltCommandLine("-i")>] Input of string
     | Agents of int
     | TmpDir of string
+    | PathToGrammar of string
     | [<AltCommandLine("-fb")>]FinalBias of float
     | [<AltCommandLine("-hb")>]HeadsBias of float
     | [<AltCommandLine("-mb")>]MiddlesBias of float
@@ -30,6 +36,7 @@ type CLIArguments =
             | TailsBias _ -> "Specify a hight limit of bias for tailss filtering."
             | HeadsMiddlesBias _ -> "Specify a hight limit of bias for concatenated heads-middles  filtering."
             | MiddlesBias _ -> "Specify a hight limit of bias for middless filtering."
+            | PathToGrammar _ -> "Specify path to grammar."
 
 [<Struct>]
 type SearchConfig = 
@@ -51,18 +58,18 @@ type Config (argv) =
     let args = argParser.Parse argv
     let agentsCount = args.GetResult(<@ Agents @>, defaultValue = 1)
 
+
     let finalBias = args.GetResult(<@ FinalBias @>, defaultValue = 4.0)
     let headsBias = args.GetResult(<@ HeadsBias @>, defaultValue = 0.5)
     let middlesBias = args.GetResult(<@ MiddlesBias @>, defaultValue = 4.0) 
     let tailsBias = args.GetResult(<@ TailsBias @>, defaultValue = 1.0)
     let headMiddleBias = args.GetResult(<@ HeadsMiddlesBias @>, defaultValue = 6.0)
     let tmpDir = args.GetResult(<@ TmpDir @>, defaultValue = "BioSearchOut")
+    let grammarsDir = args.GetResult(<@ PathToGrammar @>, defaultValue = @"../../../src/YC.GrammarZOO/Bio/16s/")
     let inputGraphPath = 
         args.GetResult <@ Input @> 
         |> (fun s -> 
-        System.IO.Path.Combine(System.IO.Path.GetDirectoryName s, System.IO.Path.GetFileNameWithoutExtension s))
-    
-    let grammarsDir = @"../../../src/YC.GrammarZOO/Bio/16s/"
+        System.IO.Path.Combine(System.IO.Path.GetDirectoryName s, System.IO.Path.GetFileNameWithoutExtension s))    
 
     let fileInTmpDir file = System.IO.Path.Combine(tmpDir, file)
 

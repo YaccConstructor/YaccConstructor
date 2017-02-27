@@ -48,7 +48,23 @@ type ``Graph parsing tests``() =
 
         let rules = new RulesHolder(crl, srl, erl)
 
-        let (recognizeMatrix, vertexToInt, multCount) = GraphParsing.recognizeGraph graph GraphParsing.naiveSquareMatrix rules nonterminals S
+        let createEmptyMatrix = ProbabilityMatrix.empty
+
+        let getInnerValue (matrix: ProbabilityMatrix.T) = matrix.InnerValue
+
+        let toArray (matrix: ProbabilityMatrix.T) = matrix.GetSubArray id false matrix.WholeMatrix
+
+        let innerSum f1 f2 = f1 + f2
+
+        let innerMult f1 f2 = f1 * f2
+
+        let innerZero = 0.0
+
+        let innerOne = 1.0
+
+        let (recognizeMatrix, vertexToInt, multCount) =
+            GraphParsing.recognizeGraph<ProbabilityMatrix.T, float> <| graph <| GraphParsing.naiveSquareMatrix<ProbabilityMatrix.T, float> <| rules <| nonterminals <| S <| createEmptyMatrix <| 
+                getInnerValue <| toArray <|innerSum <| innerMult <| innerZero <| innerOne
     
         printfn "Multiplacation count: %d" multCount
         graphParsingPrint recognizeMatrix

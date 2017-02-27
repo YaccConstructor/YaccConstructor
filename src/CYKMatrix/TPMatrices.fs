@@ -5,6 +5,8 @@ open Microsoft.FSharp.Quotations
 open System.Collections.Generic
 open System.Threading
 
+open Alea.CUDA.Utilities.Array2D
+
 open Brahma.FSharp.OpenCL.Core
 open Brahma.FSharp.OpenCL.Extensions
 open Brahma.OpenCL
@@ -400,13 +402,19 @@ open Util
                       
             let getFastSubMatrix nt (submatrix: SubMatrix.T) =
                 let valueGetter = (getTMatrix nt).SubMatrixValuesGetter false submatrix
-                Matrix.init submatrix.Size submatrix.Size (fun x y -> Cell.create x y |> valueGetter |> float)
+                Array2D.init submatrix.Size submatrix.Size (fun x y -> Cell.create x y |> valueGetter |> float)
 
             let doOne (task, nts) =
                 let nt1, nt2 = nts
                 let from1 = getFastSubMatrix nt1 task.from1
                 let from2 = getFastSubMatrix nt2 task.from2
-                let result = from1 * from2                
+                
+                let result =  Array2D.create task.from1.Size task.from1.Size 0.0
+                for i in 0 .. task.from1.Size - 1 do
+                   for j in 0 .. task.from1.Size - 1 do
+                     for k in 0 .. task.from1.Size - 1 do
+                       result.[i,j] <- result.[i,j] + from1.[i,k] * from2.[k,j]
+
                 (getPMatrix nts).AddSubmatrixByGetter task.where (fun cell -> Probability.create result.[cell.Row, cell.Column])  
 
 

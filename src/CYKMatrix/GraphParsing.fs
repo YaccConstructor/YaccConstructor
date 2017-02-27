@@ -12,20 +12,23 @@
     open QuickGraph
     open Alea.CUDA
     open Alea.CUDA.CULib
+    open Alea.CUDA.Utilities
+    open MathNet.Numerics.LinearAlgebra.Single
 
+    type ParsingMatrix<'MatrixType> = Dictionary<NonTerminal, 'MatrixType>
 
-    type ParsingMatrix = Dictionary<NonTerminal, ProbabilityMatrix.T>
-
-    let initParsingMatrix (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
+    let initParsingMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> (graph: AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
                   (allRules: RulesHolder)
-                  nonterminals =
+                  nonterminals
+                  createEmptyMatrix
+                  (getInnerValue : 'MatrixType -> 'InnerType[]) =
         let vertexToInt = new Dictionary<_,_>()
         let mutable procVertices = 0
-        let parsingMatrix = new ParsingMatrix ()
+        let parsingMatrix = new ParsingMatrix<'MatrixType> ()
         do 
             (
                 nonterminals 
-                |> Seq.map (fun x -> x, ProbabilityMatrix.empty (graph.VertexCount))
+                |> Seq.map (fun x -> x, createEmptyMatrix (graph.VertexCount))
             )
             |> Seq.iter parsingMatrix.Add
 
@@ -39,7 +42,7 @@
             then
                 let simpleNonterminals = allRules.HeadsBySimpleTail label
                 for (simpleNonterminal, _) in simpleNonterminals do
-                    let data = parsingMatrix.[simpleNonterminal].InnerValue
+                    let data = getInnerValue parsingMatrix.[simpleNonterminal]
                     let row = vertexToInt.[edg.Source]
                     let col = vertexToInt.[edg.Target]
                     let updadetInd = graph.VertexCount * row + col
@@ -47,36 +50,38 @@
         
         parsingMatrix, vertexToInt
 
-    let naiveSquareMatrix (matrix: ParsingMatrix) (allRules: RulesHolder) isChanged =
-        let unionArrays (curArr: Probability.InnerType.T []) (updArr: Probability.InnerType.T []) (arrSize: int) =
+    let naiveSquareMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> (matrix: ParsingMatrix<'MatrixType>) (allRules: RulesHolder) isChanged matrixSize
+             getInnerValue toArray (innerSum: 'InnerType -> 'InnerType -> 'InnerType) (innerMult: 'InnerType -> 'InnerType -> 'InnerType) (innerZero: 'InnerType) (innerOne: 'InnerType) =
+        let unionArrays (curArr: 'InnerType []) (updArr: 'InnerType []) (arrSize: int) =
             for ind in 0..arrSize - 1 do
-                if curArr.[ind] = 0.0 && updArr.[ind] > 0.0
+                if curArr.[ind] = innerZero && updArr.[ind] > innerZero
                 then
                     isChanged := true
-                    curArr.SetValue(1.0, ind)
+                    curArr.[ind] <- innerOne
 
-        let multArrays (from1: Probability.InnerType.T []) (from2: Probability.InnerType.T []) matricesSize =        
+        let multArrays (from1: 'InnerType []) (from2: 'InnerType []) =        
                 let calculateCell x =
-                    let i = x / matricesSize
-                    let j = x - i * matricesSize 
-                    let skipRows = i * matricesSize
-                    let skipColumns = j * matricesSize                
-                    Array.fold2 (fun b v1 v2 -> Probability.innerSumm b <| Probability.innerMult v1 v2)
-                                Probability.InnerType.zero
-                                from1.[skipRows..skipRows + matricesSize - 1] 
-                                from2.[skipColumns..skipColumns + matricesSize - 1]
+                    let i = x / matrixSize
+                    let j = x - i * matrixSize 
+                    let skipRows = i * matrixSize
+                    let skipColumns = j * matrixSize                
+                    Array.fold2 (fun b v1 v2 -> innerSum b <| innerMult v1 v2)
+                                innerZero
+                                from1.[skipRows..skipRows + matrixSize - 1] 
+                                from2.[skipColumns..skipColumns + matrixSize - 1]
 
-                Array.init (matricesSize * matricesSize) (fun x -> calculateCell <| x)
+                Array.init (matrixSize * matrixSize) (fun x -> calculateCell <| x)
 
         let nontermPairs = allRules.ComplexTails
         for (nt1, nt2) in nontermPairs do
-            let size = matrix.[nt1].Size
-            let arr1 = matrix.[nt1].GetSubArray id false matrix.[nt1].WholeMatrix
-            let arr2 = matrix.[nt2].GetSubArray id true matrix.[nt2].WholeMatrix
-            let resultArray = multArrays arr1 arr2 size
+            let arr1 = toArray matrix.[nt1]
+            let arr2 = toArray matrix.[nt2]
+            let resultArray = multArrays arr1 arr2
 
             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                unionArrays matrix.[nonTerm].InnerValue resultArray (size*size)
+                unionArrays (getInnerValue matrix.[nonTerm]) resultArray (matrixSize*matrixSize)
+
+(*    let worker = Worker.Default
 
     let cublasSquareMatrix (matrix: ParsingMatrix) (allRules: RulesHolder) isChanged =
         let unionArrays (curArr: Probability.InnerType.T []) (updArr: Probability.InnerType.T []) (arrSize: int) =
@@ -94,10 +99,10 @@
                 let dalpha = 1.
                 let dbeta = 0.
 
-                let multiplicationResult =
-                    let (mult1:DeviceMemory<float>) = Worker.Default.Malloc(matricesSize * matricesSize)
-                    let (mult2:DeviceMemory<float>) = Worker.Default.Malloc(matricesSize * matricesSize)
-                    let (result:DeviceMemory<float>) = Worker.Default.Malloc(matricesSize * matricesSize)
+                let multiplicationResult =               
+                    let (mult1:DeviceMemory<float>) = worker.Malloc(matricesSize * matricesSize)
+                    let (mult2:DeviceMemory<float>) = worker.Malloc(matricesSize * matricesSize)
+                    let (result:DeviceMemory<float>) = worker.Malloc(matricesSize * matricesSize)
                     mult1.Scatter(from1)
                     mult2.Scatter(from2) 
 
@@ -115,8 +120,8 @@
                                             result.Ptr, 
                                             matricesSize)
 
-                    let result = result.Gather()  
-                    result
+                    let resultArr = result.Gather()  
+                    resultArr
 
                 multiplicationResult
 
@@ -128,28 +133,34 @@
             let resultArray = multArrays arr1 arr2 size
 
             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                unionArrays matrix.[nonTerm].InnerValue resultArray (size*size) 
+                unionArrays matrix.[nonTerm].InnerValue resultArray (size*size)*) 
 
-    let recognizeGraph (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
-                  squareMatrix
+    let recognizeGraph<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
+                  (squareMatrix:ParsingMatrix<'MatrixType> -> RulesHolder -> bool ref -> int -> ('MatrixType -> 'InnerType []) -> ('MatrixType -> 'InnerType [])
+                        -> ('InnerType -> 'InnerType -> 'InnerType) -> ('InnerType -> 'InnerType -> 'InnerType) -> 'InnerType -> 'InnerType -> unit)
                   (allRules: RulesHolder)
                   nonterminals
-                  S =
-        let parsingMatrix, vertexToInt = initParsingMatrix graph allRules nonterminals
+                  S 
+                  createEmptyMatrix
+                  getInnerValue 
+                  toArray innerSum innerMult innerZero innerOne =
+        let parsingMatrix, vertexToInt = initParsingMatrix<'MatrixType, 'InnerType> graph allRules nonterminals createEmptyMatrix getInnerValue
+        let matrixSize = graph.VertexCount
         let isChanged = ref true
         let mutable multCount = 0
 
         while !isChanged do
             isChanged := false
-            squareMatrix parsingMatrix allRules isChanged
+            squareMatrix parsingMatrix allRules isChanged matrixSize getInnerValue toArray innerSum innerMult innerZero innerOne
             multCount <- multCount + 1
 
         (parsingMatrix.[S], vertexToInt, multCount)    
 
-    let graphParse (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
+    let graphParse<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
                   squareMatrix
                   (loadIL:t<Source.t, Source.t>)
-                  tokenToInt =
+                  tokenToInt 
+                  createEmptyMatrix getInnerValue toArray innerSum innerMult innerZero innerOne =
         let grammar = loadIL.grammar
         let mutable tokensCount = 0
         let S = ref (NonTerminal "")
@@ -216,4 +227,4 @@
         
         let rulesHolder = new RulesHolder(crl_result, srl_result, erl_result)
 
-        recognizeGraph graph squareMatrix rulesHolder nonterminals !S
+        recognizeGraph<'MatrixType, 'InnerType> graph squareMatrix rulesHolder nonterminals !S  createEmptyMatrix getInnerValue toArray innerSum innerMult innerZero innerOne

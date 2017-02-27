@@ -241,6 +241,7 @@ let score file bias longEdges (assembliesOf16s:ResizeArray<AssemblyOf16s<_>>) =
                   a.InfernalData.IsSome 
                //&& (a.InfernalData.Value.ModelFrom < 3 || a.InfernalData.Value.SeqFrom < 3) 
                && (a.InfernalData.Value.Bias < bias)
+               && (a.InfernalData.Value.E_value < 1.0e-100) 
                //&& (a.InfernalData.Value.ModelTo >= 1420 || a.InfernalData.Value.SeqTo >= (a.Edges |> ResizeArray.fold (fun b e -> b + e.Tag.str.Length) 0) - 10 )
             )
 

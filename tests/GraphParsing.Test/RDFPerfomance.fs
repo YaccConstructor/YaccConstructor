@@ -4,6 +4,7 @@ open VDS.RDF
 open VDS.RDF.Parsing
 open YC.GLL.Abstarct.Tests.RDFPerformance
 open Yard.Core
+open Util
 
 open QuickGraph
 open CYKMatrix
@@ -39,11 +40,26 @@ let processFile file grammarFile =
             loadIL
                 with grammar = cnfConv.ConvertGrammar (loadIL.grammar, [||])                               
         }*)
+    
+    let createEmptyMatrix = ProbabilityMatrix.empty
+
+    let getInnerValue (matrix: ProbabilityMatrix.T) = matrix.InnerValue
+
+    let toArray (matrix: ProbabilityMatrix.T) = matrix.GetSubArray id false matrix.WholeMatrix
+
+    let innerSum f1 f2 = f1 + f2
+
+    let innerMult f1 f2 = f1 * f2
+
+    let innerZero = 0.0
+
+    let innerOne = 1.0
      
     let start = System.DateTime.Now
     let root1 =
         [for i in 0..cnt-1 ->
-            let (parsingMatrix, _, _) = GraphParsing.graphParse <| g1 <| GraphParsing.naiveSquareMatrix <| loadIL <| tokenizer
+            let (parsingMatrix, _, _) = GraphParsing.graphParse <| g1 <| GraphParsing.naiveSquareMatrix<ProbabilityMatrix.T, float> <| loadIL
+                                          <| tokenizer <| createEmptyMatrix <| getInnerValue <| toArray <| innerSum <| innerMult <| innerZero <| innerOne
             parsingMatrix]
     
     let time1 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)

@@ -79,7 +79,9 @@ let getPaths (graph:AdjacencyGraph<_,TaggedEdge<_,BioGraphEdgeLbl<_>>>) isForwar
             if newLength < maxLength then 
                 let paths = dfs (if isForward then edge.Target else edge.Source) newLength
                 paths |> ResizeArray.iter (fun (x : List<_>) -> x.Add edge)
-                toReturn.AddRange paths
+                toReturn.AddRange 
+                    paths
+                    //(if toReturn.Count > 500 then (*((*printf "@@@" ; *)paths.ToArray().[0..10])*)[||] else paths.ToArray())
         toReturn
         
     let paths = dfs s 0 |> ResizeArray.map ResizeArray.rev    
@@ -88,21 +90,30 @@ let getPaths (graph:AdjacencyGraph<_,TaggedEdge<_,BioGraphEdgeLbl<_>>>) isForwar
 let filterRnaParsingResult (graph : EdgeCompressedGraphInput) (searchCfg : SearchConfig) res = 
     let result = new ResizeArray<_>()
 
-    res
-    |> Array.filter (fun (f,t,l) -> int l >= searchCfg.LowLengthLimit && int l <= searchCfg.HighLengthLimit)
-    |> Array.groupBy (fun (f,t,l) -> 
-            let start =
-                match graph.GetEdgeFromPackedPod f with
-                | Some v -> v.Target, Some v
-                | None -> graph.VerticesBackMap.[int (graph.GetPosOnEdgeFromPackedPod f)], None
-            let _end =
-                match graph.GetEdgeFromPackedPod t with
-                | Some v -> v.Source, Some v
-                | None -> graph.VerticesBackMap.[int (graph.GetPosOnEdgeFromPackedPod t)], None
-            start, _end)
+    let x1 = 
+        res
+        |> Array.filter (fun (f,t,l) -> int l >= searchCfg.LowLengthLimit && int l <= searchCfg.HighLengthLimit)
+        |> Array.groupBy (fun (f,t,l) -> 
+                let start =
+                    match graph.GetEdgeFromPackedPod f with
+                    | Some v -> v.Target, Some v
+                    | None -> graph.VerticesBackMap.[int (graph.GetPosOnEdgeFromPackedPod f)], None
+                let _end =
+                    match graph.GetEdgeFromPackedPod t with
+                    | Some v -> v.Source, Some v
+                    | None -> graph.VerticesBackMap.[int (graph.GetPosOnEdgeFromPackedPod t)], None
+                start, _end)
+    x1
     |> Array.iter (fun ((eFrom, eTo), a) ->
         let lengths =
-            a |> Array.map (fun (f,t,l) -> 
+            a 
+            |> fun a -> 
+                printfn "A Length = %A" a.Length
+                let r = new HashSet<_>(a) 
+                printfn "R Length = %A" r.Count
+                r
+            |> Array.ofSeq
+            |> Array.map (fun (f,t,l) -> 
                 let prefixLength = 
                     match snd eFrom with
                     | Some v -> v.Tag.str.Length - (int <| graph.GetPosOnEdgeFromPackedPod f)
@@ -147,6 +158,7 @@ let parsingResultsProcessor (config:Config) (assembliesOf16s:ResizeArray<_>) =
                 | Data(graph, cfg, res) -> 
                     try 
                         let pathToPrint = filterRnaParsingResult graph cfg res
+                        printfn "Path to print: %A. Queue: %A" pathToPrint.Count inbox.CurrentQueueLength
                         pathToPrint
                         |> ResizeArray.map (fun e -> 
                             incr edgesGlobalCounter
@@ -160,7 +172,9 @@ let parsingResultsProcessor (config:Config) (assembliesOf16s:ResizeArray<_>) =
                         |> fun strs -> System.IO.File.AppendAllLines(cfg.OutFileName, strs)
                     with e -> printfn "ERROR in parsing results postprocessing! %A" e.Message
                     return! loop n
-                | Die ch -> ch.Reply()
+                | Die ch -> 
+                    printfn "Posprocessor finished!"
+                    ch.Reply()
             }
         loop 0)
     
@@ -190,7 +204,9 @@ let searchInBioGraphs (searchCfg : SearchConfig) (config:Config) (graphs : EdgeC
 
                         with e -> printfn "ERROR in bio graph parsing! %A" e.Message
                         return! loop n
-                    | Die ch -> ch.Reply()
+                    | Die ch -> 
+                        printfn "Graph parser agent %A finished!" name
+                        ch.Reply()
                 }
             loop 0)
     
@@ -241,7 +257,7 @@ let score file bias longEdges (assembliesOf16s:ResizeArray<AssemblyOf16s<_>>) =
                   a.InfernalData.IsSome 
                //&& (a.InfernalData.Value.ModelFrom < 3 || a.InfernalData.Value.SeqFrom < 3) 
                && (a.InfernalData.Value.Bias < bias)
-               && (a.InfernalData.Value.E_value < 1.0e-100) 
+               //&& (a.InfernalData.Value.E_value < 1.0e-100) 
                //&& (a.InfernalData.Value.ModelTo >= 1420 || a.InfernalData.Value.SeqTo >= (a.Edges |> ResizeArray.fold (fun b e -> b + e.Tag.str.Length) 0) - 10 )
             )
 
@@ -295,6 +311,14 @@ let searchMain (config:Config) =
     let graphs =
         graphs
         |> Array.filter (fun (g:EdgeCompressedGraphInput) -> g.Edges |> Seq.sumBy (fun e -> e.Tag.str.Length) > int (float searchCfg.LowLengthLimit / 1.8))    
+
+    longEdges 
+    |> Array.collect (fun e -> 
+        e.Tag.str
+        |> Array.split 6000
+        |> Array.map (fun a -> new String(a))
+        )
+    |> printLongEdges config.FileForLongEdges
 
     config.Lap "Data preparing"
 

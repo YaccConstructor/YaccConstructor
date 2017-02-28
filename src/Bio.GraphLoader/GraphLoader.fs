@@ -152,7 +152,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit =
         edges
         |> fun a -> printfn "before filtering^ %A" a.Length; a
         |> Array.filter (fun (id,start,ending,length) -> length <= 50 || (forFilter.Contains id))
-        |> Array.filter (fun (id,start,ending,length) -> start <> ending || length > 15) // rm short loops
+        |> Array.filter (fun (id,start,ending,length) -> start <> ending || length > 35) // rm short loops
         |> fun a -> printfn "after filtering^ %A" a.Length; a
         |> Array.Parallel.map (fun (id,start,ending,length) -> 
             newEdge start ending (edgesСontent.[id].ToCharArray()) length id 0)

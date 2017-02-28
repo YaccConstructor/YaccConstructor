@@ -128,7 +128,7 @@ type Config (argv) =
 
     let R16SMiddleSearchConfig = 
         //D = 30
-        new SearchConfig(parserSourceMiddle, mkTokenizer parserSourceMiddle.StringToToken, 300, 370, fileInTmpDir "R16S_19_27_result.fa")
+        new SearchConfig(parserSourceMiddle, mkTokenizer parserSourceMiddle.StringToToken, 300, 330, fileInTmpDir "R16S_19_27_result.fa")
 
     do
         if System.IO.Directory.Exists tmpDir |> not
@@ -149,6 +149,7 @@ type Config (argv) =
     member val FileForHeadAndMiddles = fileInTmpDir "HeadMiddle.fa" with get
     member val FileForFull = fileInTmpDir "Full.fa" with get
     member val FileForScoredFull = fileInTmpDir "SFull.fa" with get
+    member val FileForLongEdges = fileInTmpDir "LongEdges.fa" with get
     member this.GetTiming () = timing
     member this.PrintTiming () =
         timing |> ResizeArray.iter (fun (name,delta,abs) -> printfn "Step: %A. Duartion: %A. Finished: %A" name delta abs)

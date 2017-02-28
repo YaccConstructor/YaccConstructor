@@ -315,7 +315,7 @@ let searchMain (config:Config) =
     longEdges 
     |> Array.collect (fun e -> 
         e.Tag.str
-        |> Array.split 6000
+        |> Array.split 2000
         |> Array.map (fun a -> new String(a))
         )
     |> printLongEdges config.FileForLongEdges

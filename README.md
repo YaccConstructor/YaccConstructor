@@ -4,7 +4,7 @@
 YaccConstructor 
 ===============
 
-Main repository of YaccConstructor project. Platform for parser generators and other grammarware research and development.
+Platform for parser generators and other grammarware research and development. GLL, RNGLR, graph parsing algorithms, and many others are included.
 
 Build status:
 

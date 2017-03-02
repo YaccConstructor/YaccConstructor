@@ -6,28 +6,28 @@
 >NZ_DS996397.1 Desulfovibrio piger ATCC 29098 Scfld442 genomic scaffold, whole genome shotgun sequence
 >NZ_ABZS01000228.1 Sulfurihydrogenibium yellowstonense SS-5 gcontig_18, whole genome shotgun sequence
 >gi|42516522|ref|NC_002967.9| Treponema denticola ATCC 35405 chromosome, complete genome
->gi|33598993|ref|NC_002927.3| Bordetella bronchiseptica RB50 chromosome, complete genome
+-+>gi|33598993|ref|NC_002927.3| Bordetella bronchiseptica RB50 chromosome, complete genome
 >gi|30248031|ref|NC_004757.1| Nitrosomonas europaea ATCC 19718 chromosome, complete genome
 >gi|163845603|ref|NC_010175.1| Chloroflexus aurantiacus J-10-fl chromosome, complete genome
 >gi|15805042|ref|NC_001263.1| Deinococcus radiodurans R1 chromosome 1, complete sequence
 >gi|29374661|ref|NC_004668.1| Enterococcus faecalis V583 chromosome, complete genome
 >gi|15668172|ref|NC_000909.1| Methanocaldococcus jannaschii DSM 2661 chromosome, complete genome
 >gi|11497621|ref|NC_000917.1| Archaeoglobus fulgidus DSM 4304 chromosome, complete genome
->gi|18311643|ref|NC_003364.1| Pyrobaculum aerophilum str. IM2 chromosome, complete genome
++->gi|18311643|ref|NC_003364.1| Pyrobaculum aerophilum str. IM2 chromosome, complete genome
 >gi|400756305|ref|NC_002939.5| Geobacter sulfurreducens PCA chromosome, complete genome
 >gi|14589963|ref|NC_000961.1| Pyrococcus horikoshii OT3 chromosome, complete genome
 >gi|17227497|ref|NC_003272.1| Nostoc sp. PCC 7120 chromosome, complete genome
->gi|24473558|ref|NC_003106.2| Sulfolobus tokodaii str. 7 chromosome, complete genome
->NC_007951.1 Burkholderia xenovorans LB400 chromosome 1, complete sequence
++->gi|24473558|ref|NC_003106.2| Sulfolobus tokodaii str. 7 chromosome, complete genome
+--+>NC_007951.1 Burkholderia xenovorans LB400 chromosome 1, complete sequence
 >gi|564825954|ref|NC_003911.12| Ruegeria pomeroyi DSS-3, complete genome
 >gi|18976372|ref|NC_003413.1| Pyrococcus furiosus DSM 3638 chromosome, complete genome
 >gi|20088899|ref|NC_003552.1| Methanosarcina acetivorans C2A chromosome, complete genome
->gi|20093440|ref|NC_003551.1| Methanopyrus kandleri AV19, complete genome
++->gi|20093440|ref|NC_003551.1| Methanopyrus kandleri AV19, complete genome
 >gi|19703352|ref|NC_003454.1| Fusobacterium nucleatum subsp. nucleatum ATCC 25586 chromosome, complete genome
 >gi|21672841|ref|NC_002932.3| Chlorobium tepidum TLS chromosome, complete genome
->gi|125972525|ref|NC_009012.1| Clostridium thermocellum ATCC 27405 chromosome, complete genome
+--+>gi|125972525|ref|NC_009012.1| Clostridium thermocellum ATCC 27405 chromosome, complete genome
 >gi|38349555|ref|NC_005213.1| Nanoarchaeum equitans Kin4-M chromosome, complete genome
->gi|45357563|ref|NC_005791.1| Methanococcus maripaludis S2 chromosome, complete genome
+-+>gi|45357563|ref|NC_005791.1| Methanococcus maripaludis S2 chromosome, complete genome
 >gi|283856168|ref|NC_006526.2| Zymomonas mobilis subsp. mobilis ZM4 chromosome, complete genome
 >gi|225849564|ref|NC_012440.1| Persephonella marina EX-H1 chromosome, complete genome
 >gi|189345558|ref|NC_010803.1| Chlorobium limicola DSM 245 chromosome, complete genome
@@ -38,8 +38,8 @@
 >gi|150002608|ref|NC_009614.1| Bacteroides vulgatus ATCC 8482 chromosome, complete genome
 >gi|146295085|ref|NC_009437.1| Caldicellulosiruptor saccharolyticus DSM 8903 chromosome, complete genome
 >gi|167036431|ref|NC_010321.1| Thermoanaerobacter pseudethanolicus ATCC 33223 chromosome, complete genome
->gi|156936795|ref|NC_009776.1| Ignicoccus hospitalis KIN4/I chromosome, complete genome
->gi|145590267|ref|NC_009376.1| Pyrobaculum arsenaticum DSM 13514 chromosome, complete genome
++->gi|156936795|ref|NC_009776.1| Ignicoccus hospitalis KIN4/I chromosome, complete genome
++->gi|145590267|ref|NC_009376.1| Pyrobaculum arsenaticum DSM 13514 chromosome, complete genome
 >gi|145592566|ref|NC_009380.1| Salinispora tropica CNB-440 chromosome, complete genome
 >gi|159896533|ref|NC_009972.1| Herpetosiphon aurantiacus DSM 785 chromosome, complete genome
 >gi|148269145|ref|NC_009486.1| Thermotoga petrophila RKU-1 chromosome, complete genome
@@ -48,7 +48,7 @@
 >gi|134045046|ref|NC_009135.1| Methanococcus maripaludis C5 chromosome, complete genome
 >gi|152998555|ref|NC_009665.1| Shewanella baltica OS185 chromosome, complete genome
 >gi|217971216|ref|NC_011663.1| Shewanella baltica OS223 chromosome, complete genome
->gi|126458628|ref|NC_009073.1| Pyrobaculum calidifontis JCM 11548, complete genome
++->gi|126458628|ref|NC_009073.1| Pyrobaculum calidifontis JCM 11548, complete genome
 >gi|226225406|ref|NC_012489.1| Gemmatimonas aurantiaca T-27, complete genome
 >gi|188995955|ref|NC_010730.1| Sulfurihydrogenibium sp. YO3AOP1 chromosome, complete genome
 >gi|195952380|ref|NC_011126.1| Hydrogenobaculum sp. Y04AAS1 chromosome, complete genome
@@ -60,5 +60,5 @@
 >gi|225871699|ref|NC_012483.1| Acidobacterium capsulatum ATCC 51196 chromosome, complete genome
 >gi|217966449|ref|NC_011661.1| Dictyoglomus turgidum DSM 6724 chromosome, complete genome
 >gi|222528057|ref|NC_012034.1| Caldicellulosiruptor bescii DSM 6725 chromosome, complete genome
-->gi|32470666|ref|NC_005027.1| Rhodopirellula baltica SH 1 chromosome, complete genome
->gi|34556458|ref|NC_005090.1| Wolinella succinogenes DSM 1740 chromosome, complete genome
+>gi|32470666|ref|NC_005027.1| Rhodopirellula baltica SH 1 chromosome, complete genome
+--+>gi|34556458|ref|NC_005090.1| Wolinella succinogenes DSM 1740 chromosome, complete genome

@@ -13,15 +13,16 @@
     open Alea.CUDA
     open Alea.CUDA.CULib
     open Alea.CUDA.Utilities
-    open MathNet.Numerics.LinearAlgebra.Single
+    open MathNet.Numerics.LinearAlgebra.Double
 
     type ParsingMatrix<'MatrixType> = Dictionary<NonTerminal, 'MatrixType>
 
     let initParsingMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> (graph: AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
                   (allRules: RulesHolder)
                   nonterminals
-                  createEmptyMatrix
-                  (getInnerValue : 'MatrixType -> 'InnerType[]) =
+                  createEmptyMatrix 
+                  (getInnerValue : 'MatrixType -> 'InnerType[]) 
+                  (innerOne: 'InnerType) =
         let vertexToInt = new Dictionary<_,_>()
         let mutable procVertices = 0
         let parsingMatrix = new ParsingMatrix<'MatrixType> ()
@@ -46,12 +47,13 @@
                     let row = vertexToInt.[edg.Source]
                     let col = vertexToInt.[edg.Target]
                     let updadetInd = graph.VertexCount * row + col
-                    data.SetValue(1.0, updadetInd)
+                    data.[updadetInd] <- innerOne
         
         parsingMatrix, vertexToInt
 
-    let naiveSquareMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> (matrix: ParsingMatrix<'MatrixType>) (allRules: RulesHolder) isChanged matrixSize
-             getInnerValue toArray (innerSum: 'InnerType -> 'InnerType -> 'InnerType) (innerMult: 'InnerType -> 'InnerType -> 'InnerType) (innerZero: 'InnerType) (innerOne: 'InnerType) =
+    let naiveSquareMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> getInnerValue toArray (innerSum: 'InnerType -> 'InnerType -> 'InnerType)
+                (innerMult: 'InnerType -> 'InnerType -> 'InnerType) (innerZero: 'InnerType) (innerOne: 'InnerType)
+                (matrix: ParsingMatrix<'MatrixType>) (allRules: RulesHolder) isChanged matrixSize =
         let unionArrays (curArr: 'InnerType []) (updArr: 'InnerType []) (arrSize: int) =
             for ind in 0..arrSize - 1 do
                 if curArr.[ind] = innerZero && updArr.[ind] > innerZero
@@ -80,6 +82,25 @@
 
             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
                 unionArrays (getInnerValue matrix.[nonTerm]) resultArray (matrixSize*matrixSize)
+
+    let sparseSquareMatrix (matrix: ParsingMatrix<SparseMatrix>) (allRules: RulesHolder) isChanged matrixSize =
+        let unionArrays (curArr: float []) (updArr: float []) (arrSize: int) =
+            for ind in 0..arrSize - 1 do
+                if curArr.[ind] = 0.0 && updArr.[ind] > 0.0
+                then
+                    isChanged := true
+                    curArr.[ind] <- 1.0
+
+        let nontermPairs = allRules.ComplexTails
+        for (nt1, nt2) in nontermPairs do
+            let matrix1 = matrix.[nt1]
+            let matrix2 = matrix.[nt2]
+            let resultMatrix = matrix1.Multiply(matrix2)
+            let resultArray = resultMatrix.AsRowMajorArray()
+            
+            for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
+                let curArray = matrix.[nonTerm].AsRowMajorArray()
+                unionArrays curArray resultArray (matrixSize*matrixSize)
 
 (*    let worker = Worker.Default
 
@@ -136,22 +157,21 @@
                 unionArrays matrix.[nonTerm].InnerValue resultArray (size*size)*) 
 
     let recognizeGraph<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
-                  (squareMatrix:ParsingMatrix<'MatrixType> -> RulesHolder -> bool ref -> int -> ('MatrixType -> 'InnerType []) -> ('MatrixType -> bool -> 'InnerType [])
-                        -> ('InnerType -> 'InnerType -> 'InnerType) -> ('InnerType -> 'InnerType -> 'InnerType) -> 'InnerType -> 'InnerType -> unit)
+                  (squareMatrix:ParsingMatrix<'MatrixType> -> RulesHolder -> bool ref -> int  -> unit)
                   (allRules: RulesHolder)
                   nonterminals
                   S 
-                  createEmptyMatrix
+                  createEmptyMatrix 
                   getInnerValue 
-                  toArray innerSum innerMult innerZero innerOne =
-        let parsingMatrix, vertexToInt = initParsingMatrix<'MatrixType, 'InnerType> graph allRules nonterminals createEmptyMatrix getInnerValue
+                  (innerOne: 'InnerType) =
+        let parsingMatrix, vertexToInt = initParsingMatrix<'MatrixType, 'InnerType> graph allRules nonterminals createEmptyMatrix getInnerValue innerOne
         let matrixSize = graph.VertexCount
         let isChanged = ref true
         let mutable multCount = 0
 
         while !isChanged do
             isChanged := false
-            squareMatrix parsingMatrix allRules isChanged matrixSize getInnerValue toArray innerSum innerMult innerZero innerOne
+            squareMatrix parsingMatrix allRules isChanged matrixSize
             multCount <- multCount + 1
 
         (parsingMatrix.[S], vertexToInt, multCount)    
@@ -160,7 +180,9 @@
                   squareMatrix
                   (loadIL:t<Source.t, Source.t>)
                   tokenToInt 
-                  createEmptyMatrix getInnerValue toArray innerSum innerMult innerZero innerOne =
+                  createEmptyMatrix 
+                  getInnerValue 
+                  (innerOne: 'InnerType) =
         let grammar = loadIL.grammar
         let mutable tokensCount = 0
         let S = ref (NonTerminal "")
@@ -227,4 +249,5 @@
         
         let rulesHolder = new RulesHolder(crl_result, srl_result, erl_result)
 
-        recognizeGraph<'MatrixType, 'InnerType> graph squareMatrix rulesHolder nonterminals !S  createEmptyMatrix getInnerValue toArray innerSum innerMult innerZero innerOne
+        recognizeGraph<'MatrixType, 'InnerType> graph squareMatrix rulesHolder nonterminals !S  createEmptyMatrix getInnerValue innerOne
+

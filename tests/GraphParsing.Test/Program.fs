@@ -7,23 +7,20 @@ open YC.GraphParsing.Tests.RDFPerfomance
 open Util
 open System.Collections.Generic
 open GraphParsing
+open MathNet.Numerics.LinearAlgebra.Double
 
 let graphParsingTestPath = "..\..\..\GraphParsing.Test"
 
-let createEmptyMatrix = ProbabilityMatrix.empty
-
-let getInnerValue (matrix: ProbabilityMatrix.T) = matrix.InnerValue
-
-let toArray (matrix: ProbabilityMatrix.T) (isTranspose: bool) = matrix.GetSubArray id isTranspose matrix.WholeMatrix
-
-let innerSum f1 f2 = f1 + f2
-
-let innerMult f1 f2 = f1 * f2
-
-let innerZero = 0.0
-
-let innerOne = 1.0
-
+//ProbabilityMatrix<float> functions
+let createEmptyMatrixProbability = ProbabilityMatrix.empty
+let getInnerValueProbability (matrix: ProbabilityMatrix.T) = matrix.InnerValue
+let toArrayProbability (matrix: ProbabilityMatrix.T) (isTranspose: bool) = matrix.GetSubArray id isTranspose matrix.WholeMatrix
+let innerSumFloat f1 f2 = f1 + f2
+let innerMultFloat f1 f2 = f1 * f2
+let innerZeroFloat = 0.0
+let innerOneFloat = 1.0
+let naiveSquareFunction = naiveSquareMatrix<ProbabilityMatrix.T, float> getInnerValueProbability
+                             <| toArrayProbability <| innerSumFloat <| innerMultFloat <| innerZeroFloat <| innerOneFloat
 let graphParsingPrint (matrix: ProbabilityMatrix.T) =
     let rowLength = matrix.Nrow
     let colLength = matrix.Ncol
@@ -34,9 +31,19 @@ let graphParsingPrint (matrix: ProbabilityMatrix.T) =
         printfn ""
     printfn ""
 
+//SparseMatrix<float> functions
+let createEmptyMatrixSparse size = SparseMatrix.Create(size, size, 0.0)
+let getInnerValueSparse (matrix: SparseMatrix) = matrix.AsRowMajorArray() //why null?
+let parsingArrayPrint (arr: float []) matrixSize =
+    for i in [ 0..matrixSize - 1 ] do
+        for j in [ 0..matrixSize - 1 ] do
+            printfn "%.8f  " arr.[i*matrixSize + j]
+        printfn ""
+    printfn ""
+
 [<TestFixture>]
 type ``Graph parsing tests``() =  
-    member this._01_SimpleRecognizerTest () =
+    member this._01_SimpleNaiveRecognizerTest () =
         let graph = new AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>()
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
@@ -59,12 +66,12 @@ type ``Graph parsing tests``() =
         let erl: NonTerminal list = []
         let rules = new RulesHolder(crl, srl, erl)
         let (recognizeMatrix, vertexToInt, multCount) =
-            GraphParsing.recognizeGraph<ProbabilityMatrix.T, float> <| graph <| GraphParsing.naiveSquareMatrix<ProbabilityMatrix.T, float> <| rules <| nonterminals <| S <| createEmptyMatrix <| 
-                getInnerValue <| toArray <|innerSum <| innerMult <| innerZero <| innerOne
+            GraphParsing.recognizeGraph<ProbabilityMatrix.T, float> <| graph <| naiveSquareFunction <| rules <| nonterminals <| S <| createEmptyMatrixProbability <| 
+                getInnerValueProbability <| innerOneFloat
         printfn "Multiplacation count: %d" multCount
         graphParsingPrint recognizeMatrix
 
-    member this._02_SimpleRecognizerTest2 () =
+    member this._02_SimpleNaiveRecognizerTest2 () =
         let graph = new AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>()
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
@@ -80,12 +87,12 @@ type ``Graph parsing tests``() =
                 | "A" -> 1<AbstractAnalysis.Common.token>
                 | _ -> -1<AbstractAnalysis.Common.token>
 
-        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> <| graph <| naiveSquareMatrix<ProbabilityMatrix.T, float> <| loadIL
-                                          <| tokenizer <| createEmptyMatrix <| getInnerValue <| toArray <| innerSum <| innerMult <| innerZero <| innerOne
+        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> <| graph <| naiveSquareFunction <| loadIL
+                                          <| tokenizer <| createEmptyMatrixProbability <| getInnerValueProbability <| innerOneFloat
         printfn "Multiplacation count: %d" multCount
         graphParsingPrint parsingMatrix
 
-    member this._03_SimpleLoopTest3 () =
+    member this._03_SimpleNaiveLoopTest () =
         let graph = new AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>()
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
@@ -105,17 +112,39 @@ type ``Graph parsing tests``() =
                 | "A" -> 1<AbstractAnalysis.Common.token>
                 | _ -> -1<AbstractAnalysis.Common.token>
 
-        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> <| graph <| naiveSquareMatrix<ProbabilityMatrix.T, float> <| loadIL
-                                          <| tokenizer <| createEmptyMatrix <| getInnerValue <| toArray <| innerSum <| innerMult <| innerZero <| innerOne
+        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> <| graph <| naiveSquareFunction <| loadIL
+                                          <| tokenizer <| createEmptyMatrixProbability <| getInnerValueProbability <| innerOneFloat
         printfn "Multiplacation count: %d" multCount
         graphParsingPrint parsingMatrix
+
+    member this._04_SimpleSparseRecognizerTest () =
+        let graph = new AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>()
+        graph.AddVertex(0) |> ignore
+        graph.AddVertex(1) |> ignore
+        graph.AddVertex(2) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(0, 1, 1<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(1, 2, 1<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(2, 0, 1<AbstractAnalysis.Common.token>)) |> ignore
+        let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "SimpleGrammar_cnf.yrd")
+        let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+        let loadIL = fe.ParseGrammar grammarPath
+        let tokenizer str =
+            match str with
+                | "A" -> 1<AbstractAnalysis.Common.token>
+                | _ -> -1<AbstractAnalysis.Common.token>
+
+        let (parsingMatrix, _, multCount) = graphParse<SparseMatrix, float> <| graph <| sparseSquareMatrix <| loadIL
+                                          <| tokenizer <| createEmptyMatrixSparse <| getInnerValueSparse <| innerOneFloat
+        printfn "Multiplacation count: %d" multCount
+        parsingArrayPrint (getInnerValueSparse parsingMatrix) parsingMatrix.RowCount
 
 [<EntryPoint>]
 let f x =
     System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
     let t = new ``Graph parsing tests``()
-//    t._01_SimpleRecognizerTest ()
-//    t._02_SimpleRecognizerTest2 ()
-//    t._03_SimpleLoopTest3 ()
+//    t._01_SimpleNaiveRecognizerTest ()
+//    t._02_SimpleNaiveRecognizerTest2 ()
+//    t._03_SimpleNaiveLoopTest ()
+    t._04_SimpleSparseRecognizerTest ()
 //    YC.GraphParsing.Tests.RDFPerfomance.performTests ()
     0

@@ -39,7 +39,7 @@ let processFile file grammarFile =
     let cnfIL = 
         {
             loadIL
-                with grammar = cnfConv.ConvertGrammar (loadIL.grammar, [||])                               
+                with grammar = cnfConv.ConvertGrammar (loadIL.grammar, [||])
         }*)
     
     let createEmptyMatrix = ProbabilityMatrix.empty
@@ -55,12 +55,14 @@ let processFile file grammarFile =
     let innerZero = 0.0
 
     let innerOne = 1.0
-     
+    
+    let naiveSquareFunction = naiveSquareMatrix<ProbabilityMatrix.T, float> getInnerValue <| toArray <| innerSum <| innerMult <| innerZero <| innerOne
+
     let start = System.DateTime.Now
     let root1 =
         [for i in 0..cnt-1 ->
-            let (parsingMatrix, _, _) = graphParse<ProbabilityMatrix.T, float> <| g1 <| naiveSquareMatrix<ProbabilityMatrix.T, float> <| loadIL
-                                          <| tokenizer <| createEmptyMatrix <| getInnerValue <| toArray <| innerSum <| innerMult <| innerZero <| innerOne
+            let (parsingMatrix, _, _) = graphParse<ProbabilityMatrix.T, float> <| g1 <| naiveSquareFunction <| loadIL
+                                          <| tokenizer <| createEmptyMatrix <| getInnerValue <| innerOne
             parsingMatrix]
     
     let time1 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)

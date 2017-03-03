@@ -65,6 +65,7 @@ type Context(*<'TokenType>*) =
 type ParseData = 
     | TreeNode of int<nodeMeasure>
     | Length of uint16
+    | Empty
 
 [<Struct>]
 [<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
@@ -101,16 +102,22 @@ type ContextFSA =
                                 "; PosOnEdge:" + (CommonFuns.getPosOnEdge(this.Index).ToString()) +
                                 "; State:" + (this.State.ToString())
 
+// well-named boolean type for the grammar switch
+type GrammarSelector = Left | Right with 
+    member this.neg = match this with | Left -> Right | Right -> Left
+
 [<Struct>]
 type ContextCF<'GSSVertex> =
-    val PosInGrammar    :   int<positionInGrammar>
-    val PosInInput      :   int<positionInGrammar>
-    val GssParser       :   'GSSVertex
-    val GssInput        :   'GSSVertex
-    // val Data  (maybe)
-    new (posInGrammar, posInInput, vertexParser, vertexInput) = 
-        {PosInGrammar = posInGrammar; PosInInput = posInInput; GssParser = vertexParser; GssInput = vertexInput}
-    override this.ToString () = "" 
+    val PosInGrammar1       :   int<positionInGrammar>
+    val PosInGrammar2       :   int<positionInGrammar>
+    val GssVertex1          :   'GSSVertex
+    val GssVertex2          :   'GSSVertex
+    val Data                :   ParseData
+    new (posInGrammar1, posInGrammar2, gssVertex1, gssVertex2) = 
+        {PosInGrammar1 = posInGrammar1; PosInGrammar2 = posInGrammar2; GssVertex1 = gssVertex1; GssVertex2 = gssVertex2; Data = Empty}
+    member this.GetInfo selector =         
+        match selector with | Left -> (this.PosInGrammar1, this.GssVertex1) | Right -> (this.PosInGrammar2, this.GssVertex2)
+    override this.ToString () = ""
        
 
 type ParseResult<'a> =

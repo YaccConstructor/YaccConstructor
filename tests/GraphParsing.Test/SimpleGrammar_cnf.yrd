@@ -1,0 +1,5 @@
+[<Start>]
+s: a b
+
+b: a a
+a: A

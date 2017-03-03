@@ -74,8 +74,8 @@
 
         let nontermPairs = allRules.ComplexTails
         for (nt1, nt2) in nontermPairs do
-            let arr1 = toArray matrix.[nt1]
-            let arr2 = toArray matrix.[nt2]
+            let arr1 = toArray matrix.[nt1] false
+            let arr2 = toArray matrix.[nt2] true
             let resultArray = multArrays arr1 arr2
 
             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
@@ -136,7 +136,7 @@
                 unionArrays matrix.[nonTerm].InnerValue resultArray (size*size)*) 
 
     let recognizeGraph<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
-                  (squareMatrix:ParsingMatrix<'MatrixType> -> RulesHolder -> bool ref -> int -> ('MatrixType -> 'InnerType []) -> ('MatrixType -> 'InnerType [])
+                  (squareMatrix:ParsingMatrix<'MatrixType> -> RulesHolder -> bool ref -> int -> ('MatrixType -> 'InnerType []) -> ('MatrixType -> bool -> 'InnerType [])
                         -> ('InnerType -> 'InnerType -> 'InnerType) -> ('InnerType -> 'InnerType -> 'InnerType) -> 'InnerType -> 'InnerType -> unit)
                   (allRules: RulesHolder)
                   nonterminals

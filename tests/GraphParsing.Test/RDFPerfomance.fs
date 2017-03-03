@@ -8,6 +8,7 @@ open Util
 
 open QuickGraph
 open CYKMatrix
+open GraphParsing
 
 let tokenizer str =
     match str with
@@ -45,7 +46,7 @@ let processFile file grammarFile =
 
     let getInnerValue (matrix: ProbabilityMatrix.T) = matrix.InnerValue
 
-    let toArray (matrix: ProbabilityMatrix.T) = matrix.GetSubArray id false matrix.WholeMatrix
+    let toArray (matrix: ProbabilityMatrix.T) (isTranspose: bool) = matrix.GetSubArray id isTranspose matrix.WholeMatrix
 
     let innerSum f1 f2 = f1 + f2
 
@@ -58,7 +59,7 @@ let processFile file grammarFile =
     let start = System.DateTime.Now
     let root1 =
         [for i in 0..cnt-1 ->
-            let (parsingMatrix, _, _) = GraphParsing.graphParse <| g1 <| GraphParsing.naiveSquareMatrix<ProbabilityMatrix.T, float> <| loadIL
+            let (parsingMatrix, _, _) = graphParse<ProbabilityMatrix.T, float> <| g1 <| naiveSquareMatrix<ProbabilityMatrix.T, float> <| loadIL
                                           <| tokenizer <| createEmptyMatrix <| getInnerValue <| toArray <| innerSum <| innerMult <| innerZero <| innerOne
             parsingMatrix]
     
@@ -71,6 +72,6 @@ let performTests () =
     let basePath = @"..\..\..\data\RDF"
     let files = System.IO.Directory.GetFiles basePath 
     files 
-    |> Array.map (fun rdffile -> processFile rdffile "..\..\..\GLL.AbstractParser.Simple.Tests\GPPerf1_cnf.yrd")
+    |> Array.map (fun rdffile -> processFile rdffile "..\..\..\GraphParsing.Test\GPPerf1_cnf.yrd")
     |> Array.sortBy (fun (_,_,x,_) -> x)
     |> Array.iter (printfn "%A")

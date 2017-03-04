@@ -228,15 +228,6 @@ let searchInBioGraphs (searchCfg : SearchConfig) (config:Config) (graphs : EdgeC
 
     printfn "Total time = %A" (System.DateTime.Now - start)
 
-let printLongEdges path edges = 
-    let toPrint = 
-        edges
-        |> Array.mapi (fun i x -> 
-               [| ">Long" + i.ToString()
-                  x |])
-        |> Array.collect id
-    File.AppendAllLines(path, toPrint)
-
 let score file bias longEdges (assembliesOf16s:ResizeArray<AssemblyOf16s<_>>) =
     assembliesOf16s |> ResizeArray.map (fun a -> a.ConvertToString(longEdges)) |> fun s -> System.IO.File.WriteAllLines(file,s)
     assembliesOf16s |> ResizeArray.iter (fun a -> a.InfernalData <- None)
@@ -256,7 +247,7 @@ let score file bias longEdges (assembliesOf16s:ResizeArray<AssemblyOf16s<_>>) =
             (fun a -> 
                   a.InfernalData.IsSome 
                //&& (a.InfernalData.Value.ModelFrom < 3 || a.InfernalData.Value.SeqFrom < 3) 
-               && (a.InfernalData.Value.Bias < bias)
+               //&& (a.InfernalData.Value.Bias < bias)
                //&& (a.InfernalData.Value.E_value < 1.0e-100) 
                //&& (a.InfernalData.Value.ModelTo >= 1420 || a.InfernalData.Value.SeqTo >= (a.Edges |> ResizeArray.fold (fun b e -> b + e.Tag.str.Length) 0) - 10 )
             )
@@ -302,33 +293,46 @@ let mergeAssemblies
     result.Clear()
     result.AddRange copy
 
+let printLongEdges path edges = 
+    let toPrint = 
+        edges
+        |> Array.mapi (fun i x -> [| ">" + i.ToString(); x |])
+        |> Array.collect id
+    File.AppendAllLines(path, toPrint)
+
 let searchMain (config:Config) =     
     let assembliesOf16s = new ResizeArray<_>()
-    let searchCfg = config.MiddleSearchConfig
-    let sourceGraph, graphs, longEdges = loadInitialGraph config.InputGraphPath searchCfg.HighLengthLimit searchCfg.Tokenizer    
+    let sourceGraph, (graphs, edges), longEdges = loadInitialGraph config.InputGraphPath config.MiddleSearchConfig.HighLengthLimit config.MiddleSearchConfig.Tokenizer    
     config.OriginalEdges <- sourceGraph
     config.LongEdges <- longEdges
     let graphs =
         graphs
-        |> Array.filter (fun (g:EdgeCompressedGraphInput) -> g.Edges |> Seq.sumBy (fun e -> e.Tag.str.Length) > int (float searchCfg.LowLengthLimit / 1.8))    
-
-    longEdges 
-    |> Array.collect (fun e -> 
-        e.Tag.str
-        |> Array.split 2000
-        |> Array.map (fun a -> new String(a))
-        )
-    |> printLongEdges config.FileForLongEdges
+        |> Array.filter (fun (g:EdgeCompressedGraphInput) -> g.Edges |> Seq.sumBy (fun e -> e.Tag.str.Length) > int (float config.MiddleSearchConfig.LowLengthLimit / 1.8))
+        //|> Array.partition (fun (g:EdgeCompressedGraphInput) -> g.EdgeCount > 1)
 
     config.Lap "Data preparing"
 
-    searchInBioGraphs searchCfg config graphs assembliesOf16s 
+    searchInBioGraphs config.MiddleSearchConfig config graphs assembliesOf16s 
     
     config.Lap "Middles parsing"
 
-    let assembliesOf16s = score searchCfg.OutFileName config.MiddlesBias longEdges assembliesOf16s
+    let globalResultCount = ref assembliesOf16s.Count
+
+    let assembliesOf16s = score config.MiddleSearchConfig.OutFileName config.MiddlesBias longEdges assembliesOf16s
 
     config.Lap "Middles scoring with Infernal"
+
+    let assembiesOfLongEdges = 
+        Array.concat [|longEdges; edges|]
+        |> Array.collect (fun e -> 
+            e.Tag.str
+            |> Array.split 2000
+            |> Array.map (fun a -> new TaggedEdge<_,_>(-1, -1, new BioGraphEdgeLbl<_>(a, e.Tag.length, e.Tag.id, e.Tag.sourceStartPos)))
+            |> Array.map (fun a -> incr globalResultCount; new AssemblyOf16s<_>(!globalResultCount, new ResizeArray<_>([a]) ,head=true,middle=true,tail=true))
+            )
+        |> ResizeArray<_>
+
+    let assembiesOfLongEdges = score config.FileForLongEdges config.MiddlesBias [||] assembiesOfLongEdges
 
     assembliesOf16s
     |> ResizeArray.iter (fun a -> 
@@ -361,9 +365,7 @@ let searchMain (config:Config) =
 
     let searchCfg = config.HeadSearchConfig
 
-    let assembliesOf16sHeads = new ResizeArray<AssemblyOf16s<_>>()
-    
-    let cnt = ref 0
+    let assembliesOf16sHeads = new ResizeArray<AssemblyOf16s<_>>()    
 
     let tailsCount = ref 0
 
@@ -372,9 +374,9 @@ let searchMain (config:Config) =
         h |> Array.iter (fun h ->
             let h = ResizeArray.rev h
             if h.Count > 0 && assembliesOf16sHeads |> ResizeArray.exists(fun a -> a.EqualsPath h) |> not
-            then assembliesOf16sHeads.Add (new AssemblyOf16s<_>(!cnt, h, head = true))
+            then assembliesOf16sHeads.Add (new AssemblyOf16s<_>(!globalResultCount, h, head = true))
             tailsCount := !tailsCount + t.Length
-            incr cnt)
+            incr globalResultCount)
         )
 
     config.Lap (sprintf "Heads and tails preparing. Tails %A" !tailsCount)
@@ -391,77 +393,77 @@ let searchMain (config:Config) =
         assembliesOf16sHeadsMiddles
         (new Dictionary<_,_>())
         (fun edges -> 
-            incr cnt
-            new AssemblyOf16s<_>(!cnt, edges, head = true, middle = true))
+            incr globalResultCount
+            new AssemblyOf16s<_>(!globalResultCount, edges, head = true, middle = true))
 
     //assembliesOf16sHeadsMiddles |> ResizeArray.map (fun a -> a.ConvertToString(longEdges)) |> fun s -> System.IO.File.WriteAllLines(config.FileForHeadAndMiddles,s)
     let assembliesOf16sHeadsMiddles = score config.FileForHeadAndMiddles config.HeadsMiddlesBias longEdges assembliesOf16sHeadsMiddles
     
     config.Lap "Heads and middles combining"
     
-    let edgesForTailsSearch = new HashSet<_> ()
-    
-    headsAndTails
-    |> Array.iter 
-        (fun (h, m, t) ->
-            edgesForTailsSearch.Add m.Edges.[m.Edges.Count - 1] |> ignore
-            t |> Array.iter (fun a -> a |> ResizeArray.iter (fun x -> edgesForTailsSearch.Add x |> ignore)))
-
-    let graphs = splitToConnectedSubgraphs edgesForTailsSearch config.TailSearchConfig.Tokenizer
-    let assembliesOf16sTails = new ResizeArray<AssemblyOf16s<_>>()
-
-    searchInBioGraphs config.TailSearchConfig config graphs assembliesOf16sTails
-
-    config.Lap "Tails parsing"
-
-    printfn "Tails Length = %A" assembliesOf16sTails.Count
-    let assembliesOf16sTails = score config.TailSearchConfig.OutFileName config.TailsBias longEdges assembliesOf16sTails
-
-//    let gaps =
-//        let startEndVertices = new HashSet<_>()
-//        for h in assembliesOf16sHeadsMiddles do
-//            for t in assembliesOf16sTails do
-//                if t.InfernalData.Value.ModelFrom - h.InfernalData.Value.ModelTo > 10
-//                then startEndVertices.Add (h.Edges.[h.Edges.Count-1].Target, t.Edges.[0].Source) |> ignore
-//        let gags = new Dictionary<_,_>()
-//        for (s,e) in startEndVertices do
-//            getPaths g true s (fun (curE:TaggedEdge<_,_>) curL -> curE.Target = e || curL <= 100) 100
-//            |> ResizeArray.filter (fun edgs -> edgs.Count > 0 && edgs.[edgs.Count - 1 ].Target = e)
-//            |> fun r -> 
-//                if r.Count > 0
-//                then 
-//                    r
-//                    |> Seq.minBy (fun edgs -> edgs.Count) 
-//                    |> fun p -> gags.Add(s,(p,e))
-//        gags
-
-    let assembliesOf16sFull = new ResizeArray<_>()
-
-    mergeAssemblies
-        assembliesOf16sHeadsMiddles
-        assembliesOf16sTails
-        assembliesOf16sFull
-        //gaps
-        (new Dictionary<_,_>())
-        (fun edges -> 
-            incr cnt
-            new AssemblyOf16s<_>(!cnt, edges, head = true, middle = true, tail = true))
-
-    //assembliesOf16sFull |> ResizeArray.map (fun a -> a.ConvertToString(longEdges)) |> fun s -> System.IO.File.WriteAllLines(config.FileForFull, s)
-
-    let final = score config.FileForFull config.FinalBias longEdges assembliesOf16sFull
-    
-    printfn "Total before filtering: %A" final.Count
-
-    final
-    |> ResizeArray.filter 
-        (fun a ->
-            match a.InfernalData with
-            | Some d -> 
-                d.ModelTo - d.ModelFrom > 1000
-            | _ -> false
-            )
-    |> ResizeArray.map (fun a -> a.ConvertToString(longEdges, true)) |> fun s -> System.IO.File.WriteAllLines(config.FileForScoredFull, s)
+//    let edgesForTailsSearch = new HashSet<_> ()
+//    
+//    headsAndTails
+//    |> Array.iter 
+//        (fun (h, m, t) ->
+//            edgesForTailsSearch.Add m.Edges.[m.Edges.Count - 1] |> ignore
+//            t |> Array.iter (fun a -> a |> ResizeArray.iter (fun x -> edgesForTailsSearch.Add x |> ignore)))
+//
+//    let graphs = splitToConnectedSubgraphs edgesForTailsSearch config.TailSearchConfig.Tokenizer
+//    let assembliesOf16sTails = new ResizeArray<AssemblyOf16s<_>>()
+//
+//    searchInBioGraphs config.TailSearchConfig config graphs assembliesOf16sTails
+//
+//    config.Lap "Tails parsing"
+//
+//    printfn "Tails Length = %A" assembliesOf16sTails.Count
+//    let assembliesOf16sTails = score config.TailSearchConfig.OutFileName config.TailsBias longEdges assembliesOf16sTails
+//
+////    let gaps =
+////        let startEndVertices = new HashSet<_>()
+////        for h in assembliesOf16sHeadsMiddles do
+////            for t in assembliesOf16sTails do
+////                if t.InfernalData.Value.ModelFrom - h.InfernalData.Value.ModelTo > 10
+////                then startEndVertices.Add (h.Edges.[h.Edges.Count-1].Target, t.Edges.[0].Source) |> ignore
+////        let gags = new Dictionary<_,_>()
+////        for (s,e) in startEndVertices do
+////            getPaths g true s (fun (curE:TaggedEdge<_,_>) curL -> curE.Target = e || curL <= 100) 100
+////            |> ResizeArray.filter (fun edgs -> edgs.Count > 0 && edgs.[edgs.Count - 1 ].Target = e)
+////            |> fun r -> 
+////                if r.Count > 0
+////                then 
+////                    r
+////                    |> Seq.minBy (fun edgs -> edgs.Count) 
+////                    |> fun p -> gags.Add(s,(p,e))
+////        gags
+//
+//    let assembliesOf16sFull = new ResizeArray<_>()
+//
+//    mergeAssemblies
+//        assembliesOf16sHeadsMiddles
+//        assembliesOf16sTails
+//        assembliesOf16sFull
+//        //gaps
+//        (new Dictionary<_,_>())
+//        (fun edges -> 
+//            incr globalResultCount
+//            new AssemblyOf16s<_>(!globalResultCount, edges, head = true, middle = true, tail = true))
+//
+//    //assembliesOf16sFull |> ResizeArray.map (fun a -> a.ConvertToString(longEdges)) |> fun s -> System.IO.File.WriteAllLines(config.FileForFull, s)
+//
+//    let final = score config.FileForFull config.FinalBias longEdges assembliesOf16sFull
+//    
+//    printfn "Total before filtering: %A" final.Count
+//
+//    final
+//    |> ResizeArray.filter 
+//        (fun a ->
+//            match a.InfernalData with
+//            | Some d -> 
+//                d.ModelTo - d.ModelFrom > 1000
+//            | _ -> false
+//            )
+//    |> ResizeArray.map (fun a -> a.ConvertToString(longEdges, true)) |> fun s -> System.IO.File.WriteAllLines(config.FileForScoredFull, s)
 
     config.Lap "Final tails processing"
     config.PrintTiming ()

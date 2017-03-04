@@ -152,7 +152,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit =
         edges
         |> fun a -> printfn "before filtering^ %A" a.Length; a
         |> Array.filter (fun (id,start,ending,length) -> length <= 50 || (forFilter.Contains id))
-        |> Array.filter (fun (id,start,ending,length) -> start <> ending || length > 35) // rm short loops
+        |> Array.filter (fun (id,start,ending,length) -> start <> ending || length > 15) // rm short loops
         |> fun a -> printfn "after filtering^ %A" a.Length; a
         |> Array.Parallel.map (fun (id,start,ending,length) -> 
             newEdge start ending (edgesСontent.[id].ToCharArray()) length id 0)
@@ -194,7 +194,7 @@ let splitToConnectedSubgraphs edgs tokenizer =
     uGraph.AddVerticesAndEdgeRange edgs
     |> ignore
 
-    let divisionOnComponents () =
+    let divisionOnComponents () =        
         let algo = Algorithms.ConnectedComponents.ConnectedComponentsAlgorithm(uGraph)
         algo.Compute()    
         algo.ComponentCount |> printfn "Connected components count=%A"
@@ -218,14 +218,22 @@ let splitToConnectedSubgraphs edgs tokenizer =
                 |> Array.ofSeq )
         components
     
-    divisionOnComponents ()
-    |> Array.Parallel.map (fun edges -> 
-        let tokenizedEdges = 
-            edges 
-            |> Array.map (fun (e: TaggedEdge<_,BioGraphEdgeLbl<_>>) -> 
-                new TaggedEdge<_,_>(e.Source, e.Target, new BioGraphEdgeLbl<_>(e.Tag.str |> Array.map tokenizer, e.Tag.length, e.Tag.id, e.Tag.sourceStartPos))
-            )
-        new EdgeCompressedGraphInput(tokenizedEdges))
+    let edges = new ResizeArray<_>()
+
+    let graphs = 
+        divisionOnComponents ()
+        |> Array.partition (fun eds -> eds.Length > 1)
+        |> fun (c,e) -> 
+            edges.AddRange e
+            c
+        |> Array.Parallel.map (fun edges -> 
+            let tokenizedEdges = 
+                edges 
+                |> Array.map (fun (e: TaggedEdge<_,BioGraphEdgeLbl<_>>) -> 
+                    new TaggedEdge<_,_>(e.Source, e.Target, new BioGraphEdgeLbl<_>(e.Tag.str |> Array.map tokenizer, e.Tag.length, e.Tag.id, e.Tag.sourceStartPos))
+                )
+            new EdgeCompressedGraphInput(tokenizedEdges))
+    graphs, (edges |> Array.concat)
     
 let loadInitialGraph fileWithoutExt templateLengthHighLimit tokenizer =
     

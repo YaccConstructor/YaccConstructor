@@ -10,9 +10,9 @@ Build status:
 
 | Branch | .NET | Mono |
 |--------|------|------|
-| Master | [![Master build status](https://ci.appveyor.com/api/projects/status/s8myouu45sunv2xh/branch/master?svg=true)](https://ci.appveyor.com/project/gsvgit/yaccconstructor/branch/master)| |
-| Dev | [![Dev build status](https://ci.appveyor.com/api/projects/status/s8myouu45sunv2xh/branch/dev?svg=true)](https://ci.appveyor.com/project/gsvgit/yaccconstructor/branch/dev)| |
-| GLL-FSA | [![GLL-FSA build status](https://ci.appveyor.com/api/projects/status/s8myouu45sunv2xh/branch/GLL-FSA?svg=true)](https://ci.appveyor.com/project/gsvgit/yaccconstructor/branch/GLL-FSA)| |
+| Master | [![Master build status](https://ci.appveyor.com/api/projects/status/s8myouu45sunv2xh/branch/master?svg=true)](https://ci.appveyor.com/project/gsvgit/yaccconstructor/branch/master)| [![Build Status](https://travis-ci.org/YaccConstructor/YaccConstructor.svg?branch=master)](https://travis-ci.org/YaccConstructor/YaccConstructor)|
+| Dev | [![Dev build status](https://ci.appveyor.com/api/projects/status/s8myouu45sunv2xh/branch/dev?svg=true)](https://ci.appveyor.com/project/gsvgit/yaccconstructor/branch/dev)| [![Build Status](https://travis-ci.org/YaccConstructor/YaccConstructor.svg?branch=dev)](https://travis-ci.org/YaccConstructor/YaccConstructor) |
+| GLL-FSA | [![GLL-FSA build status](https://ci.appveyor.com/api/projects/status/s8myouu45sunv2xh/branch/GLL-FSA?svg=true)](https://ci.appveyor.com/project/gsvgit/yaccconstructor/branch/GLL-FSA)| [![Build Status](https://travis-ci.org/YaccConstructor/YaccConstructor.svg?branch=gll_fsa)](https://travis-ci.org/YaccConstructor/YaccConstructor)|
 
 
 Packages:

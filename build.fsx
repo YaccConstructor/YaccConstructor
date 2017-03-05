@@ -161,20 +161,26 @@ let runCmd cmdFile =
     if retCode <> 0
     then failwithf "Execution of %A failed!" cmdFile
 
-Target "Gen:FsYaccFrontend" (fun _ -> runCmd @"src\FsYaccFrontend\gen.cmd")
+let runShell shellFile =
+#if MONO
+    runCmd ("./" + shellFile + ".sh")
+#else
+    runCmd (shellFile + ".bat")
+#endif
 
-Target "Gen:YardFrontend" (fun _ -> runCmd @"src\YardFrontend\gen.cmd")
+Target "Gen:FsYaccFrontend" (fun _ -> runShell @"src\FsYaccFrontend\gen")
+
+Target "Gen:YardFrontend" (fun _ -> runShell @"src\YardFrontend\gen")
 
 Target "GenTests:RNGLR" (fun _ -> 
-                            runCmd @"tests\RNGLRAbstractParser.Tests\gen.cmd"
-                            runCmd @"tests\RNGLRAbstractParser.Tests\gen_lex.cmd"
-                            runCmd @"tests\RNGLRParser.Simple.Tests\gen.cmd"
+                            runShell @"tests\RNGLRAbstractParser.Tests\gen"
+                            runShell @"tests\RNGLRAbstractParser.Tests\gen_lex"
+                            runShell @"tests\RNGLRParser.Simple.Tests\gen"
                         )
 
-Target "GenTests:GLL" (fun _ -> runCmd @"tests\GLL.AbstractParser.Simple.Tests\gen.cmd"
-                      )
+Target "GenTests:GLL" (fun _ -> runShell @"tests\GLL.AbstractParser.Simple.Tests\gen")
 
-Target "GenTests:RIGLR" (fun _ -> runCmd @"tests\RIGLRParser.SimpleTest\gen.cmd")
+Target "GenTests:RIGLR" (fun _ -> runShell @"tests\RIGLRParser.SimpleTest\gen")
 
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner

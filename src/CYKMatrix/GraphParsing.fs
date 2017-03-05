@@ -21,7 +21,7 @@
                   (allRules: RulesHolder)
                   nonterminals
                   createEmptyMatrix 
-                  (getInnerValue : 'MatrixType -> 'InnerType[]) 
+                  (matrixSetValue : 'MatrixType -> int -> int -> 'InnerType -> unit) 
                   (innerOne: 'InnerType) =
         let vertexToInt = new Dictionary<_,_>()
         let mutable procVertices = 0
@@ -43,23 +43,23 @@
             then
                 let simpleNonterminals = allRules.HeadsBySimpleTail label
                 for (simpleNonterminal, _) in simpleNonterminals do
-                    let data = getInnerValue parsingMatrix.[simpleNonterminal]
                     let row = vertexToInt.[edg.Source]
                     let col = vertexToInt.[edg.Target]
-                    let updadetInd = graph.VertexCount * row + col
-                    data.[updadetInd] <- innerOne
-        
+                    matrixSetValue parsingMatrix.[simpleNonterminal] row col innerOne
+
         parsingMatrix, vertexToInt
 
-    let naiveSquareMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> getInnerValue toArray (innerSum: 'InnerType -> 'InnerType -> 'InnerType)
+    let naiveSquareMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> matrixSetValue toArray (innerSum: 'InnerType -> 'InnerType -> 'InnerType)
                 (innerMult: 'InnerType -> 'InnerType -> 'InnerType) (innerZero: 'InnerType) (innerOne: 'InnerType)
                 (matrix: ParsingMatrix<'MatrixType>) (allRules: RulesHolder) isChanged matrixSize =
-        let unionArrays (curArr: 'InnerType []) (updArr: 'InnerType []) (arrSize: int) =
-            for ind in 0..arrSize - 1 do
+        let unionArrays (matrix: 'MatrixType) (curArr: 'InnerType []) (updArr: 'InnerType []) (matrixSize: int) =
+            for ind in 0..matrixSize*matrixSize - 1 do
                 if curArr.[ind] = innerZero && updArr.[ind] > innerZero
                 then
                     isChanged := true
-                    curArr.[ind] <- innerOne
+                    let i = ind / matrixSize
+                    let j = ind - i * matrixSize
+                    matrixSetValue matrix i j innerOne
 
         let multArrays (from1: 'InnerType []) (from2: 'InnerType []) =        
                 let calculateCell x =
@@ -81,26 +81,25 @@
             let resultArray = multArrays arr1 arr2
 
             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                unionArrays (getInnerValue matrix.[nonTerm]) resultArray (matrixSize*matrixSize)
+                unionArrays matrix.[nonTerm] (toArray matrix.[nonTerm] false) resultArray matrixSize
 
     let sparseSquareMatrix (matrix: ParsingMatrix<SparseMatrix>) (allRules: RulesHolder) isChanged matrixSize =
-        let unionArrays (curArr: float []) (updArr: float []) (arrSize: int) =
-            for ind in 0..arrSize - 1 do
-                if curArr.[ind] = 0.0 && updArr.[ind] > 0.0
-                then
-                    isChanged := true
-                    curArr.[ind] <- 1.0
+        let unionArrays (matrix: SparseMatrix) (updMatrix: MathNet.Numerics.LinearAlgebra.Matrix<float>) (matrixSize: int) =
+            for i in 0..(matrixSize - 1) do
+                for j in 0..(matrixSize - 1) do
+                    if matrix.At(i, j) = 0.0 && updMatrix.At(i, j) > 0.0
+                    then
+                        isChanged := true
+                        matrix.At(i, j, 1.0)
 
         let nontermPairs = allRules.ComplexTails
         for (nt1, nt2) in nontermPairs do
             let matrix1 = matrix.[nt1]
             let matrix2 = matrix.[nt2]
             let resultMatrix = matrix1.Multiply(matrix2)
-            let resultArray = resultMatrix.AsRowMajorArray()
             
             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                let curArray = matrix.[nonTerm].AsRowMajorArray()
-                unionArrays curArray resultArray (matrixSize*matrixSize)
+                unionArrays matrix.[nonTerm] resultMatrix matrixSize
 
 (*    let worker = Worker.Default
 
@@ -162,9 +161,9 @@
                   nonterminals
                   S 
                   createEmptyMatrix 
-                  getInnerValue 
+                  matrixSetValue 
                   (innerOne: 'InnerType) =
-        let parsingMatrix, vertexToInt = initParsingMatrix<'MatrixType, 'InnerType> graph allRules nonterminals createEmptyMatrix getInnerValue innerOne
+        let parsingMatrix, vertexToInt = initParsingMatrix<'MatrixType, 'InnerType> graph allRules nonterminals createEmptyMatrix matrixSetValue innerOne
         let matrixSize = graph.VertexCount
         let isChanged = ref true
         let mutable multCount = 0
@@ -181,7 +180,7 @@
                   (loadIL:t<Source.t, Source.t>)
                   tokenToInt 
                   createEmptyMatrix 
-                  getInnerValue 
+                  matrixSetValue
                   (innerOne: 'InnerType) =
         let grammar = loadIL.grammar
         let mutable tokensCount = 0
@@ -249,5 +248,5 @@
         
         let rulesHolder = new RulesHolder(crl_result, srl_result, erl_result)
 
-        recognizeGraph<'MatrixType, 'InnerType> graph squareMatrix rulesHolder nonterminals !S  createEmptyMatrix getInnerValue innerOne
+        recognizeGraph<'MatrixType, 'InnerType> graph squareMatrix rulesHolder nonterminals !S  createEmptyMatrix matrixSetValue innerOne
 

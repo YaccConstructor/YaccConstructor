@@ -13,13 +13,13 @@ let graphParsingTestPath = "..\..\..\GraphParsing.Test"
 
 //ProbabilityMatrix<float> functions
 let createEmptyMatrixProbability = ProbabilityMatrix.empty
-let getInnerValueProbability (matrix: ProbabilityMatrix.T) = matrix.InnerValue
+let matrixSetValueProbability (matrix: ProbabilityMatrix.T) (i: int) (j: int) (value: float) = matrix.InnerValue.[i*matrix.Size + j] <- value
 let toArrayProbability (matrix: ProbabilityMatrix.T) (isTranspose: bool) = matrix.GetSubArray id isTranspose matrix.WholeMatrix
 let innerSumFloat f1 f2 = f1 + f2
 let innerMultFloat f1 f2 = f1 * f2
 let innerZeroFloat = 0.0
 let innerOneFloat = 1.0
-let naiveSquareFunction = naiveSquareMatrix<ProbabilityMatrix.T, float> getInnerValueProbability
+let naiveSquareFunction = naiveSquareMatrix<ProbabilityMatrix.T, float> matrixSetValueProbability
                              <| toArrayProbability <| innerSumFloat <| innerMultFloat <| innerZeroFloat <| innerOneFloat
 let graphParsingPrint (matrix: ProbabilityMatrix.T) =
     let rowLength = matrix.Nrow
@@ -27,17 +27,17 @@ let graphParsingPrint (matrix: ProbabilityMatrix.T) =
     for i in [ 0..rowLength - 1 ] do
         for j in [ 0..colLength - 1 ] do
             let cell = Cell.create i j
-            printf "%.8f  " <| Probability.unwrap matrix.[cell]
+            printf "%.1f  " <| Probability.unwrap matrix.[cell]
         printfn ""
     printfn ""
 
 //SparseMatrix<float> functions
 let createEmptyMatrixSparse size = SparseMatrix.Create(size, size, 0.0)
-let getInnerValueSparse (matrix: SparseMatrix) = matrix.AsRowMajorArray() //why null?
-let parsingArrayPrint (arr: float []) matrixSize =
-    for i in [ 0..matrixSize - 1 ] do
-        for j in [ 0..matrixSize - 1 ] do
-            printfn "%.8f  " arr.[i*matrixSize + j]
+let matrixSetValueSparse (matrix: SparseMatrix) (i: int) (j: int) (value: float) = matrix.At(i, j, value)
+let sparsePrint (matrix: SparseMatrix) =
+    for i in 0..(matrix.RowCount - 1) do
+        for j in 0..(matrix.ColumnCount - 1) do
+            printf "%.1f  " <| matrix.At(i, j)
         printfn ""
     printfn ""
 
@@ -67,7 +67,7 @@ type ``Graph parsing tests``() =
         let rules = new RulesHolder(crl, srl, erl)
         let (recognizeMatrix, vertexToInt, multCount) =
             GraphParsing.recognizeGraph<ProbabilityMatrix.T, float> <| graph <| naiveSquareFunction <| rules <| nonterminals <| S <| createEmptyMatrixProbability <| 
-                getInnerValueProbability <| innerOneFloat
+                matrixSetValueProbability <| innerOneFloat
         printfn "Multiplacation count: %d" multCount
         graphParsingPrint recognizeMatrix
 
@@ -88,7 +88,7 @@ type ``Graph parsing tests``() =
                 | _ -> -1<AbstractAnalysis.Common.token>
 
         let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> <| graph <| naiveSquareFunction <| loadIL
-                                          <| tokenizer <| createEmptyMatrixProbability <| getInnerValueProbability <| innerOneFloat
+                                          <| tokenizer <| createEmptyMatrixProbability <| matrixSetValueProbability <| innerOneFloat
         printfn "Multiplacation count: %d" multCount
         graphParsingPrint parsingMatrix
 
@@ -113,7 +113,7 @@ type ``Graph parsing tests``() =
                 | _ -> -1<AbstractAnalysis.Common.token>
 
         let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> <| graph <| naiveSquareFunction <| loadIL
-                                          <| tokenizer <| createEmptyMatrixProbability <| getInnerValueProbability <| innerOneFloat
+                                          <| tokenizer <| createEmptyMatrixProbability <| matrixSetValueProbability <| innerOneFloat
         printfn "Multiplacation count: %d" multCount
         graphParsingPrint parsingMatrix
 
@@ -134,9 +134,34 @@ type ``Graph parsing tests``() =
                 | _ -> -1<AbstractAnalysis.Common.token>
 
         let (parsingMatrix, _, multCount) = graphParse<SparseMatrix, float> <| graph <| sparseSquareMatrix <| loadIL
-                                          <| tokenizer <| createEmptyMatrixSparse <| getInnerValueSparse <| innerOneFloat
+                                          <| tokenizer <| createEmptyMatrixSparse <| matrixSetValueSparse <| innerOneFloat
         printfn "Multiplacation count: %d" multCount
-        parsingArrayPrint (getInnerValueSparse parsingMatrix) parsingMatrix.RowCount
+        sparsePrint parsingMatrix
+
+    member this._05_SimpleSparseLoopTest () =
+        let graph = new AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>()
+        graph.AddVertex(0) |> ignore
+        graph.AddVertex(1) |> ignore
+        graph.AddVertex(2) |> ignore
+        graph.AddVertex(3) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(0, 0, 1<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(0, 1, 1<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(1, 2, 1<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(1, 3, 1<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(2, 3, 1<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(3, 2, 1<AbstractAnalysis.Common.token>)) |> ignore
+        let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "SimpleGrammar_cnf.yrd")
+        let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+        let loadIL = fe.ParseGrammar grammarPath
+        let tokenizer str =
+            match str with
+                | "A" -> 1<AbstractAnalysis.Common.token>
+                | _ -> -1<AbstractAnalysis.Common.token>
+
+        let (parsingMatrix, _, multCount) = graphParse<SparseMatrix, float> <| graph <| sparseSquareMatrix <| loadIL
+                                          <| tokenizer <| createEmptyMatrixSparse <| matrixSetValueSparse <| innerOneFloat
+        printfn "Multiplacation count: %d" multCount
+        sparsePrint parsingMatrix
 
 [<EntryPoint>]
 let f x =
@@ -145,6 +170,7 @@ let f x =
 //    t._01_SimpleNaiveRecognizerTest ()
 //    t._02_SimpleNaiveRecognizerTest2 ()
 //    t._03_SimpleNaiveLoopTest ()
-    t._04_SimpleSparseRecognizerTest ()
+//    t._04_SimpleSparseRecognizerTest ()
+//    t._05_SimpleSparseLoopTest ()
 //    YC.GraphParsing.Tests.RDFPerfomance.performTests ()
     0

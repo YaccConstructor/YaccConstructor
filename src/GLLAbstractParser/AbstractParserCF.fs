@@ -47,9 +47,8 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
         then pushContext posInGrammar1 posInGrammar2 gssVertex1 gssVertex2
     
     /// Makes pop-action with specified grammar and gss (position in the second grammar doesn't change) 
-    let rec pop masterGrammar (curContext: ContextCF<_>) posInSlaveGrammar =
-        let grammar, gss = getGrammarInfo masterGrammar  
-        let _, gssVertexMaster = masterGrammar |> curContext.GetInfo      
+    let rec pop masterGrammar (curContext: ContextCF<_>) gssVertexMaster posInSlaveGrammar =
+        let grammar, gss = getGrammarInfo masterGrammar              
         let _, gssVertexSlave = masterGrammar.neg |> curContext.GetInfo
         
         let outEdges = gss.OutEdges gssVertexMaster |> Array.ofSeq        
@@ -59,7 +58,7 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
             for e in outEdges do
                 if e.Tag.StateToContinue |> grammar.FinalStates.Contains
                 then
-                    pop masterGrammar curContext posInSlaveGrammar 
+                    pop masterGrammar curContext e.Target posInSlaveGrammar 
                 addContext e.Tag.StateToContinue posInSlaveGrammar e.Target gssVertexSlave
     
     let create masterGrammar (curContext: ContextCF<_>) stateToContinue nonterm =  
@@ -78,7 +77,7 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
                 |> ResizeArray.iter(fun p -> 
                     if stateToContinue |> grammar.FinalStates.Contains
                     then
-                        pop masterGrammar curContext (toGrammarPos p.posInInput)
+                        pop masterGrammar curContext gssVertexMaster (toGrammarPos p.posInInput)
                     addContext stateToContinue (toGrammarPos p.posInInput) gssVertexMaster gssVertexSlave)      
         else addContext nonterm posInSlaveGrammar startV gssVertexSlave
 

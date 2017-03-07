@@ -172,5 +172,5 @@ let f x =
 //    t._03_SimpleNaiveLoopTest ()
 //    t._04_SimpleSparseRecognizerTest ()
 //    t._05_SimpleSparseLoopTest ()
-//    YC.GraphParsing.Tests.RDFPerfomance.performTests ()
+    YC.GraphParsing.Tests.RDFPerfomance.performTests ()
     0

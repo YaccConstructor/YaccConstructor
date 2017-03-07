@@ -101,6 +101,21 @@
             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
                 unionArrays matrix.[nonTerm] resultMatrix matrixSize
 
+    let sparseSquareMatrix2 (matrix: ParsingMatrix<SparseMatrix>) (allRules: RulesHolder) isChanged matrixSize =
+        printfn("Begin Squaring")
+        let nontermPairs = allRules.ComplexTails
+        for (nt1, nt2) in nontermPairs do
+            let matrix1 = matrix.[nt1]
+            let matrix2 = matrix.[nt2]
+            let resultMatrix = matrix1.Multiply(matrix2)
+            
+            for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
+                let nonZ = matrix.[nonTerm].NonZerosCount
+                matrix.[nonTerm].PointwiseMaximum(resultMatrix, matrix.[nonTerm])
+                if (nonZ <> matrix.[nonTerm].NonZerosCount)
+                then
+                    isChanged := true
+
 (*    let worker = Worker.Default
 
     let cublasSquareMatrix (matrix: ParsingMatrix) (allRules: RulesHolder) isChanged =
@@ -164,6 +179,7 @@
                   matrixSetValue 
                   (innerOne: 'InnerType) =
         let parsingMatrix, vertexToInt = initParsingMatrix<'MatrixType, 'InnerType> graph allRules nonterminals createEmptyMatrix matrixSetValue innerOne
+        printfn("Matrix initialized")
         let matrixSize = graph.VertexCount
         let isChanged = ref true
         let mutable multCount = 0

@@ -54,7 +54,7 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
         let outEdges = gss.OutEdges gssVertexMaster |> Array.ofSeq        
         gssVertexMaster.P.Add (new PoppedData(toInputPos posInSlaveGrammar, Empty))
         if outEdges <> null && outEdges.Length <> 0
-        then
+        then  
             for e in outEdges do
                 if e.Tag.StateToContinue |> grammar.FinalStates.Contains
                 then
@@ -80,5 +80,31 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
                         pop masterGrammar curContext gssVertexMaster (toGrammarPos p.posInInput)
                     addContext stateToContinue (toGrammarPos p.posInInput) gssVertexMaster gssVertexSlave)      
         else addContext nonterm posInSlaveGrammar startV gssVertexSlave
+
+    let handleFinalStates masterGrammar (currentContext: ContextCF<_>) =
+        let grammar, _ = getGrammarInfo masterGrammar
+        let posInMasterGrammar, gssVertexMaster = masterGrammar |> currentContext.GetInfo
+        let posInSlaveGrammar, _ = masterGrammar.neg |> currentContext.GetInfo
+        
+        if posInMasterGrammar |> grammar.FinalStates.Contains
+        then pop masterGrammar currentContext gssVertexMaster posInSlaveGrammar
+
+    let handleNontermTransitions masterGrammar (currentContext: ContextCF<_>) =
+        let grammar, _ = getGrammarInfo masterGrammar
+        let posInMasterGrammar, gssVertexmaster = masterGrammar |> currentContext.GetInfo
+        let possibleNontermMovesInGrammar = grammar.OutNonterms.[int posInMasterGrammar]
+
+        for curNonterm, nextState in possibleNontermMovesInGrammar do            
+            create masterGrammar currentContext nextState curNonterm
+
+    let handleTerminalTransitions (currentContext: ContextCF<_>) =
+        // it is impossible to get state's out terms from ParserSourceGLL-info
+        // need to add "outTerms" to ParserSource or use FSA directly 
+        ()
+
+    while setR.Count <> 0 do
+        let currentContext = setR.Pop()
+        ()
+
 
     (gssLeft, gssRight)

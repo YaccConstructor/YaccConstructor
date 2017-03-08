@@ -1,4 +1,7 @@
-language: fsharp
+language: csharp
+
+mono:
+  - latest
 
 sudo: false  # use the new container-based Travis infrastructure 
 

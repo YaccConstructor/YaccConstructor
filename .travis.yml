@@ -1,4 +1,6 @@
-language: fsharp
+language: csharp
+
+solution: YaccConstructor.sln
 
 mono:
   - latest

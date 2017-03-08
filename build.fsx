@@ -165,7 +165,7 @@ let runShell shellFile =
 #if MONO
     runCmd ("./" + shellFile + ".sh")
 #else
-    runCmd (shellFile + ".bat")
+    runCmd (shellFile + ".cmd")
 #endif
 
 Target "Gen:FsYaccFrontend" (fun _ -> runShell @"src\FsYaccFrontend\gen")

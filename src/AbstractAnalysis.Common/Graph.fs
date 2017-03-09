@@ -28,10 +28,10 @@ type IParserInput =
     abstract member ForAllOutgoingEdges: int<positionInInput> -> (int<token> -> int<positionInInput> -> unit) -> unit
 
 type ParserEdge<'token>(s, e, t)=
-    inherit TaggedEdge<int, 'token>(s,e,t)
+    inherit TaggedEdge<int, 'token>(s, e, t)
     
 type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) = 
-    inherit AdjacencyGraph<int,ParserEdge<'token>>()
+    inherit AdjacencyGraph<int, ParserEdge<'token>>()
 
     member val InitStates = initialVertices 
     member val FinalStates = finalVertices with get, set
@@ -40,7 +40,7 @@ type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) =
         use out = new System.IO.StreamWriter (name : string)
         out.WriteLine("digraph AST {")
         out.WriteLine "rankdir=LR"
-        for i=0 to this.VertexCount-1 do
+        for i = 0 to this.VertexCount - 1 do
             out.Write (i.ToString() + "; ")
         out.WriteLine()
         for i in this.Vertices do
@@ -53,6 +53,10 @@ type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) =
 
     new (initial : int, final : int) = 
         ParserInputGraph<_>([|initial|], [|final|])
+
+    new (n : int) =
+        let allVerticles = [|for i in 0 .. n - 1 -> i|]
+        ParserInputGraph<_>(allVerticles, allVerticles)
  
 
 type LinearInput (initialPositions, input:array<int<token>>) =

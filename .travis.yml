@@ -1,7 +1,5 @@
 language: csharp
 
-solution: YaccConstructor.sln
-
 mono:
   - latest
 
@@ -9,6 +7,9 @@ sudo: false  # use the new container-based Travis infrastructure
 
 before_install:
   - chmod +x build.sh
- 
+
+install:
+  - nuget install FSharp.Core
+
 script: 
   - ./build.sh All

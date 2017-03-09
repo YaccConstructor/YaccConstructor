@@ -157,13 +157,17 @@ Target "Build:YardFrontend" (fun _ ->
 // Gen frontends, tests etc
 
 let runCmd cmdFile =
+#if MONO
+    let retCode = Fake.ProcessHelper.Shell.Exec("bash", args = System.IO.Path.GetFullPath(cmdFile), dir = System.IO.Path.GetDirectoryName (System.IO.Path.GetFullPath cmdFile))
+#else
     let retCode = Fake.ProcessHelper.Shell.Exec(System.IO.Path.GetFullPath(cmdFile), dir = System.IO.Path.GetDirectoryName (System.IO.Path.GetFullPath cmdFile))
+#endif
     if retCode <> 0
     then failwithf "Execution of %A failed!" cmdFile
 
 let runShell shellFile =
 #if MONO
-    runCmd ("." @@ shellFile + ".sh")
+    runCmd (shellFile + ".sh")
 #else
     runCmd (shellFile + ".cmd")
 #endif

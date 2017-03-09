@@ -163,7 +163,7 @@ let runCmd cmdFile =
 
 let runShell shellFile =
 #if MONO
-    runCmd ("./" + shellFile + ".sh")
+    runCmd ("bash " + shellFile + ".sh")
 #else
     runCmd (shellFile + ".cmd")
 #endif

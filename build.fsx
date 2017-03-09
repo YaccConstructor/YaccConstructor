@@ -157,7 +157,7 @@ Target "Build:YardFrontend" (fun _ ->
 // Gen frontends, tests etc
 
 let runCmd cmdFile =
-    let retCode = Fake.ProcessHelper.Shell.Exec(System.IO.Path.GetFullPath(cmdFile), dir = System.IO.Path.GetDirectoryName cmdFile)
+    let retCode = Fake.ProcessHelper.Shell.Exec(System.IO.Path.GetFullPath(cmdFile), dir = System.IO.Path.GetDirectoryName (System.IO.Path.GetFullPath cmdFile))
     if retCode <> 0
     then failwithf "Execution of %A failed!" cmdFile
 

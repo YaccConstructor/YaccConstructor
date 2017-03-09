@@ -127,6 +127,7 @@ type Tree<'TokenType> (roots : INode[], unpackPos) =
         for root in roots do
             nodeQueue.Enqueue(new NumNode<INode>(!num, root)) //!!!!!!!!!!!!!!!!! we build ast only for one of roots
         let isDummy (n:INode) = match n with :? TerminalNode as t -> t.Extension = packExtension -1 -1 | _ -> false
+
         while nodeQueue.Count <> 0 do
             let currentPair = nodeQueue.Dequeue()
             let key = ref 0
@@ -454,6 +455,7 @@ type Tree<'TokenType> (roots : INode[], unpackPos) =
         let edgesCount = ref 0
         let termsCount = ref 0
         let ambiguityCount = ref 0
+        let isDummy (n:INode) = match n with :? TerminalNode as t -> t.Extension = packExtension -1 -1 | _ -> false
 
         let nodeQueue = new Queue<_>()
         let visited = new HashSet<_>()
@@ -478,12 +480,13 @@ type Tree<'TokenType> (roots : INode[], unpackPos) =
                         for n in a.Others do
                             nodeQueue.Enqueue(n)
                 | :? PackedNode as p ->
-                    nodeQueue.Enqueue(p.Left)
+                    if not <| isDummy p.Left then nodeQueue.Enqueue(p.Left)
                     nodeQueue.Enqueue(p.Right)
                 | :? IntermidiateNode as i ->
                     nodeQueue.Enqueue(i.First)
-                    if i.Others <> Unchecked.defaultof<ResizeArray<PackedNode>>
+                    if i.Others <> Unchecked.defaultof<_>
                     then
+                        incr ambiguityCount
                         for nodes in i.Others do
                             nodeQueue.Enqueue(nodes)
                 | :? TerminalNode as t ->

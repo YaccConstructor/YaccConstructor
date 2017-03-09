@@ -44,35 +44,39 @@ type SPPF(lengthOfInput : int, startState : int<positionInGrammar>, finalStates 
         | _ -> failwith "Wrong type"
 
     let nonTerminalNodes = new Dictionary<int, int<nodeMeasure>>()
-    let packedNodes = new Dictionary<int, int<nodeMeasure>>()
+    //let packedNodes = new Dictionary<int, int<nodeMeasure>>()
     let intermidiateNodes = new Dictionary<int, int<nodeMeasure>>()
     let terminalNodes = new BlockResizeArray<int<nodeMeasure>>()
     let epsilonNodes = new BlockResizeArray<int<nodeMeasure>>()
     let nodes = new BlockResizeArray<INode>()
     member this.Nodes = nodes
+    member this.TerminalNodes = terminalNodes
+    member this.NonTerminalNodes = nonTerminalNodes
+    member this.IntermidiateNodes = intermidiateNodes
+    member this.EpsilonNodes = epsilonNodes
 
     member this.FindSppfNode (t : TypeOfNode) lExt rExt : int<nodeMeasure> =
         match t with 
         | Nonterm state ->
             let key = hashNonterm lExt rExt (int state)
-            let contains, n = nonTerminalNodes.TryGetValue key
+            let contains, n = this.NonTerminalNodes.TryGetValue key
             if not contains
             then
                 let newNode = new NonTerminalNode(state, (packExtension lExt rExt))
                 this.Nodes.Add(newNode)
                 let num = (this.Nodes.Length - 1)*1<nodeMeasure>
-                nonTerminalNodes.Add(key, num)
+                this.NonTerminalNodes.Add(key, num)
                 num
             else n
         | Intermed state -> 
             let key = hashIntermed lExt rExt (int state)
-            let contains, n = intermidiateNodes.TryGetValue key
+            let contains, n = this.IntermidiateNodes.TryGetValue key
             if not contains
             then
                 let newNode = new IntermidiateNode(state, (packExtension lExt rExt))
                 this.Nodes.Add(newNode)
                 let num = (this.Nodes.Length - 1)*1<nodeMeasure>
-                intermidiateNodes.Add(key, num)
+                this.IntermidiateNodes.Add(key, num)
                 num  
             else n
 
@@ -96,27 +100,29 @@ type SPPF(lengthOfInput : int, startState : int<positionInGrammar>, finalStates 
     
 
     member this.GetNodeT (symbol : int<token>) (pos : int<positionInInput>) (nextPos : int<positionInInput>) =
-        let index = int pos
+        let index = int pos + 1
         if symbol = epsilon
         then
-            if epsilonNodes.Item index <> Unchecked.defaultof<int<nodeMeasure>>
+            if this.EpsilonNodes.Item index <> Unchecked.defaultof<int<nodeMeasure>>
             then
-                TreeNode(epsilonNodes.Item index)
+                TreeNode(this.EpsilonNodes.Item index)
             else
                 let t = new EpsilonNode(packExtension index index)
                 this.Nodes.Add t
                 let res = this.Nodes.Length - 1
-                epsilonNodes.[index] <- ((this.Nodes.Length - 1)*1<nodeMeasure>)
+                this.EpsilonNodes.[index] <- ((this.Nodes.Length - 1)*1<nodeMeasure>)
                 TreeNode(res * 1<nodeMeasure>)
         else
-            if terminalNodes.Item index <> Unchecked.defaultof<int<nodeMeasure>>
+            if this.TerminalNodes.Item index <> Unchecked.defaultof<int<nodeMeasure>>
             then
-                TreeNode(terminalNodes.Item index)
+                TreeNode(this.TerminalNodes.Item index)
             else
                 let t = new TerminalNode(symbol, packExtension index nextPos)
                 this.Nodes.Add t
                 let res = this.Nodes.Length - 1
-                terminalNodes.[index] <- ((this.Nodes.Length - 1)*1<nodeMeasure>)
+                let curr = this.TerminalNodes.[index]
+                this.TerminalNodes.[index] <- ((this.Nodes.Length - 1)*1<nodeMeasure>)
+                let New = this.TerminalNodes.[index]
                 TreeNode(res * 1<nodeMeasure>)
     
     member this.GetNodeP (state : int<positionInGrammar>) (t : TypeOfNode) currentN currentR = 

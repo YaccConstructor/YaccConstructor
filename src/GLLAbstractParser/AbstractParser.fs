@@ -168,7 +168,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
     gss, 
         if buildTree
         then 
-            Some <| new Tree<_>(sppf.GetRoots gss input.InitialPositions.[0], input.GetRealPosition)
+            Some <| new Tree<_>(sppf.GetRoots gss input.InitialPositions.[0], input.PositionToString)
         else
             None
        

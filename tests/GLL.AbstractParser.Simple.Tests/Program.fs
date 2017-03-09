@@ -79,11 +79,24 @@ let test grammarFile inputFile nodesCount edgesCount termsCount ambiguityCount =
     Assert.Pass()
       
 [<TestFixture>]
-type ``GLL abstract parser tests``() =  
+type ``GLL abstract parser tests``() =
+    [<Test>]  
     member this._01_PrettySimpleCalc_SequenceInput () =
         test "PrettySimpleCalc.yrd" 
              "PrettySimpleCalc.txt"
-             1 1 1 1
+             15 14 3 0
+    
+    [<Test>]  
+    member this._02_SimpleRec_1length () =
+        test "SimpleRec.yrd" 
+             "SimpleRec1.txt"
+             15 14 3 0
+
+    [<Test>]  
+    member this._03_SimpleRec_2length () =
+        test "SimpleRec.yrd" 
+             "SimpleRec2.txt"
+             15 14 3 0
 
     [<Test>]
     member this._06_NotAmbigousSimpleCalc_Loop () =
@@ -453,26 +466,26 @@ type ``GLL abstract parser tests``() =
 //
 //        shouldBeTrue res
         
-[<EntryPoint>]
-let f x =
-    System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
-    let t = new ``GLL abstract parser tests``()   
-
-//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\1.1.ttl"
-//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
-//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\pizza.owl"
-//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf" 
-//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\people_pets.rdf"
-//        ] do
+//[<EntryPoint>]
+//let f x =
+//    System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
+//    let t = new ``GLL abstract parser tests``()   
 //
-//            let f = 
-//                YC.GLL.Abstarct.Tests.RDFPerformance.loadFromFile p
-//                 
-//            printfn "triples in %A: %A" (System.IO.Path.GetFileName p) f.Triples.Count
-    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf"
-    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
-    YC.GLL.Abstarct.Tests.RDFPerformance.performTests()
-    0
+////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\1.1.ttl"
+////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
+////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\pizza.owl"
+////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf" 
+////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\people_pets.rdf"
+////        ] do
+////
+////            let f = 
+////                YC.GLL.Abstarct.Tests.RDFPerformance.loadFromFile p
+////                 
+////            printfn "triples in %A: %A" (System.IO.Path.GetFileName p) f.Triples.Count
+//    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf"
+//    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
+//    YC.GLL.Abstarct.Tests.RDFPerformance.performTests()
+//    0
 
 
 //               t.PerformanceTestLinearBadLeftRec()

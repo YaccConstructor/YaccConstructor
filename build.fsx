@@ -168,19 +168,19 @@ let runShell shellFile =
     runCmd (shellFile + ".cmd")
 #endif
 
-Target "Gen:FsYaccFrontend" (fun _ -> runShell @"src\FsYaccFrontend\gen")
+Target "Gen:FsYaccFrontend" (fun _ -> runShell <| "src" @@ "FsYaccFrontend" @@ "gen")
 
-Target "Gen:YardFrontend" (fun _ -> runShell @"src\YardFrontend\gen")
+Target "Gen:YardFrontend" (fun _ -> runShell <| "src" @@ "YardFrontend" @@ "gen")
 
 Target "GenTests:RNGLR" (fun _ -> 
-                            runShell @"tests\RNGLRAbstractParser.Tests\gen"
-                            runShell @"tests\RNGLRAbstractParser.Tests\gen_lex"
-                            runShell @"tests\RNGLRParser.Simple.Tests\gen"
+                            runShell <| "tests" @@ "RNGLRAbstractParser.Tests" @@ "gen"
+                            runShell <| "tests" @@ "RNGLRAbstractParser.Tests" @@ "gen_lex"
+                            runShell <| "tests" @@ "RNGLRParser.Simple.Tests" @@ "gen"
                         )
 
-Target "GenTests:GLL" (fun _ -> runShell @"tests\GLL.AbstractParser.Simple.Tests\gen")
+Target "GenTests:GLL" (fun _ -> runShell <| "tests" @@ "GLL.AbstractParser.Simple.Tests" @@ "gen")
 
-Target "GenTests:RIGLR" (fun _ -> runShell @"tests\RIGLRParser.SimpleTest\gen")
+Target "GenTests:RIGLR" (fun _ -> runShell <| "tests" @@ "RIGLRParser.SimpleTest" @@ "gen")
 
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner

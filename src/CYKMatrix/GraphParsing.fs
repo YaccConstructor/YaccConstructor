@@ -52,7 +52,7 @@
     let naiveSquareMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> matrixSetValue toArray (innerSum: 'InnerType -> 'InnerType -> 'InnerType)
                 (innerMult: 'InnerType -> 'InnerType -> 'InnerType) (innerZero: 'InnerType) (innerOne: 'InnerType)
                 (matrix: ParsingMatrix<'MatrixType>) (allRules: RulesHolder) isChanged matrixSize =
-        let unionArrays (matrix: 'MatrixType) (curArr: 'InnerType []) (updArr: 'InnerType []) (matrixSize: int) =
+        let unionArrays (matrix: 'MatrixType) (curArr: 'InnerType []) (updArr: 'InnerType []) =
             for ind in 0..matrixSize*matrixSize - 1 do
                 if curArr.[ind] = innerZero && updArr.[ind] > innerZero
                 then
@@ -81,10 +81,10 @@
             let resultArray = multArrays arr1 arr2
 
             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                unionArrays matrix.[nonTerm] (toArray matrix.[nonTerm] false) resultArray matrixSize
+                unionArrays matrix.[nonTerm] (toArray matrix.[nonTerm] false) resultArray
 
     let sparseSquareMatrix (matrix: ParsingMatrix<SparseMatrix>) (allRules: RulesHolder) isChanged matrixSize =
-        let unionArrays (matrix: SparseMatrix) (updMatrix: MathNet.Numerics.LinearAlgebra.Matrix<float>) (matrixSize: int) =
+        let unionArrays (matrix: SparseMatrix) (updMatrix: MathNet.Numerics.LinearAlgebra.Matrix<float>) =
             for i in 0..(matrixSize - 1) do
                 for j in 0..(matrixSize - 1) do
                     if matrix.At(i, j) = 0.0 && updMatrix.At(i, j) > 0.0
@@ -99,10 +99,9 @@
             let resultMatrix = matrix1.Multiply(matrix2)
             
             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                unionArrays matrix.[nonTerm] resultMatrix matrixSize
+                unionArrays matrix.[nonTerm] resultMatrix
 
     let sparseSquareMatrix2 (matrix: ParsingMatrix<SparseMatrix>) (allRules: RulesHolder) isChanged matrixSize =
-        printfn("Begin Squaring")
         let nontermPairs = allRules.ComplexTails
         for (nt1, nt2) in nontermPairs do
             let matrix1 = matrix.[nt1]
@@ -116,17 +115,24 @@
                 then
                     isChanged := true
 
-(*    let worker = Worker.Default
+    let worker = Worker.Default
 
-    let cublasSquareMatrix (matrix: ParsingMatrix) (allRules: RulesHolder) isChanged =
-        let unionArrays (curArr: Probability.InnerType.T []) (updArr: Probability.InnerType.T []) (arrSize: int) =
-            for ind in 0..arrSize - 1 do
+    let cudaSquareMatrix<'MatrixType> matrixSetValue toArray (matrix: ParsingMatrix<'MatrixType>) (allRules: RulesHolder) isChanged matrixSize =
+        
+        let (mult1:DeviceMemory<float>) = worker.Malloc((int)(matrixSize * matrixSize)) //need to do malloc only once per graph parsing
+        let (mult2:DeviceMemory<float>) = worker.Malloc((int)(matrixSize * matrixSize))
+        let (result:DeviceMemory<float>) = worker.Malloc((int)(matrixSize * matrixSize))
+
+        let unionArrays (matrix: 'MatrixType) (curArr: float []) (updArr: float []) =
+            for ind in 0..matrixSize*matrixSize - 1 do
                 if curArr.[ind] = 0.0 && updArr.[ind] > 0.0
                 then
                     isChanged := true
-                    curArr.SetValue(1.0, ind)
+                    let i = ind / matrixSize
+                    let j = ind - i * matrixSize
+                    matrixSetValue matrix i j 1.0
 
-        let multArrays (from1: Probability.InnerType.T []) (from2: Probability.InnerType.T []) (matricesSize:int) =        
+        let multArrays (from1: float []) (from2: float []) =
 
                 let transa = cublasOperation_t.CUBLAS_OP_N
                 let transb = cublasOperation_t.CUBLAS_OP_N
@@ -135,25 +141,23 @@
                 let dbeta = 0.
 
                 let multiplicationResult =               
-                    let (mult1:DeviceMemory<float>) = worker.Malloc(matricesSize * matricesSize)
-                    let (mult2:DeviceMemory<float>) = worker.Malloc(matricesSize * matricesSize)
-                    let (result:DeviceMemory<float>) = worker.Malloc(matricesSize * matricesSize)
+                    
                     mult1.Scatter(from1)
-                    mult2.Scatter(from2) 
+                    mult2.Scatter(from2)
 
                     CUBLAS.Default.Dgemm(transa, 
                                             transb, 
-                                            matricesSize, 
-                                            matricesSize, 
-                                            matricesSize, 
-                                            dalpha, 
+                                            matrixSize, 
+                                            matrixSize, 
+                                            matrixSize, 
+                                            dalpha,
                                             mult2.Ptr, 
-                                            matricesSize, 
+                                            matrixSize, 
                                             mult1.Ptr, 
-                                            matricesSize, 
+                                            matrixSize, 
                                             dbeta, 
                                             result.Ptr, 
-                                            matricesSize)
+                                            matrixSize) // mult1 and mult2 swaped because Dgemm expect column-major matrices
 
                     let resultArr = result.Gather()  
                     resultArr
@@ -162,13 +166,12 @@
 
         let nontermPairs = allRules.ComplexTails
         for (nt1, nt2) in nontermPairs do
-            let size = matrix.[nt1].Size
-            let arr1 = matrix.[nt1].GetSubArray id false matrix.[nt1].WholeMatrix
-            let arr2 = matrix.[nt2].GetSubArray id true matrix.[nt2].WholeMatrix
-            let resultArray = multArrays arr1 arr2 size
+            let arr1 = toArray matrix.[nt1] false
+            let arr2 = toArray matrix.[nt2] false
+            let resultArray = multArrays arr1 arr2
 
             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                unionArrays matrix.[nonTerm].InnerValue resultArray (size*size)*) 
+                unionArrays matrix.[nonTerm] (toArray matrix.[nonTerm] false) resultArray
 
     let recognizeGraph<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
                   (squareMatrix:ParsingMatrix<'MatrixType> -> RulesHolder -> bool ref -> int  -> unit)
@@ -179,12 +182,13 @@
                   matrixSetValue 
                   (innerOne: 'InnerType) =
         let parsingMatrix, vertexToInt = initParsingMatrix<'MatrixType, 'InnerType> graph allRules nonterminals createEmptyMatrix matrixSetValue innerOne
-        printfn("Matrix initialized")
+//        printfn("Matrix initialized")
         let matrixSize = graph.VertexCount
         let isChanged = ref true
         let mutable multCount = 0
 
         while !isChanged do
+//           printfn("Multiplication step started")
             isChanged := false
             squareMatrix parsingMatrix allRules isChanged matrixSize
             multCount <- multCount + 1

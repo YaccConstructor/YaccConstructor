@@ -21,6 +21,7 @@ let innerZeroFloat = 0.0
 let innerOneFloat = 1.0
 //let naiveSquareFunction = naiveSquareMatrix<ProbabilityMatrix.T, float> matrixSetValueProbability
 //                             <| toArrayProbability <| innerSumFloat <| innerMultFloat <| innerZeroFloat <| innerOneFloat
+let cudaSquareFunction = cudaSquareMatrix<ProbabilityMatrix.T> <| matrixSetValueProbability <| toArrayProbability
 
 //SparseMatrix<float> functions
 let createEmptyMatrixSparse size = SparseMatrix.Create(size, size, 0.0)
@@ -51,7 +52,7 @@ let processFile file grammarFile =
     let g1, triples1 = 
         getParseInputGraph tokenizer file (fun _ -> new AdjacencyGraph<_,_>())
 
-    printfn("Graph loaded")
+//    printfn("Graph loaded")
     let fe = new Yard.Frontends.YardFrontend.YardFrontend()
     let loadIL = fe.ParseGrammar grammarFile
     (*let cnfConv = new Conversions.ToCNF.ToCNF()
@@ -62,31 +63,40 @@ let processFile file grammarFile =
         }*)
 
 
-//    let start = System.DateTime.Now
-//    let root1 =
-//        [for i in 0..cnt-1 ->
-//            let (parsingMatrix, _, _) = graphParse<ProbabilityMatrix.T, float> <| g1 <| naiveSquareFunction <| loadIL
-//                                          <| tokenizer <| createEmptyMatrixProbability <| matrixSetValueProbability <| innerOneFloat
-//            parsingMatrix]
-//    
-//    let time1 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
-//    let countOfPairs1 = probabilityAnalyzer root1.[0]
+    (*let start = System.DateTime.Now
+    let root1 =
+        [for i in 0..cnt-1 ->
+            let (parsingMatrix, _, _) = graphParse<ProbabilityMatrix.T, float> g1 naiveSquareFunction loadIL
+                                          tokenizer createEmptyMatrixProbability matrixSetValueProbability innerOneFloat
+            parsingMatrix]
+    
+    let time1 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
+    let countOfPairs1 = probabilityAnalyzer root1.[0]*)
 
     let start = System.DateTime.Now
     let root2 =
         [for i in 0..cnt-1 ->
-            let (parsingMatrix, _, _) = graphParse<SparseMatrix, float> <| g1 <| sparseSquareMatrix2 <| loadIL
-                                          <| tokenizer <| createEmptyMatrixSparse <| matrixSetValueSparse <| innerOneFloat
+            let (parsingMatrix, _, _) = graphParse<SparseMatrix, float> g1 sparseSquareMatrix2 loadIL
+                                          tokenizer createEmptyMatrixSparse matrixSetValueSparse innerOneFloat
             parsingMatrix]
     let time2 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
     let countOfPairs2 = sparseAnalyzer root2.[0]
 
-    System.IO.Path.GetFileNameWithoutExtension file, triples1(*, time1, countOfPairs1*), time2, countOfPairs2
+    let start = System.DateTime.Now
+    let root3 =
+        [for i in 0..cnt-1 ->
+            let (parsingMatrix, _, _) = graphParse<ProbabilityMatrix.T, float>  g1  cudaSquareFunction  loadIL
+                                          tokenizer createEmptyMatrixProbability matrixSetValueProbability innerOneFloat
+            parsingMatrix]
+    let time3 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
+    let countOfPairs3 = probabilityAnalyzer root3.[0]
+
+    System.IO.Path.GetFileNameWithoutExtension file, triples1, (*time1, countOfPairs1,*) time2, countOfPairs2, time3, countOfPairs3
 
 let performTests () =
-    let basePath = @"..\..\..\data\RDF\big"
+    let basePath = @"..\..\..\data\RDF"
     let files = System.IO.Directory.GetFiles basePath 
     files 
     |> Array.map (fun rdffile -> processFile rdffile "..\..\..\GraphParsing.Test\GPPerf1_cnf.yrd")
-    |> Array.sortBy (fun (_,_,x,_) -> x)
+    |> Array.sortBy (fun (_,_,x,_,_,_(*,_,_*)) -> x)
     |> Array.iter (printfn "%A")

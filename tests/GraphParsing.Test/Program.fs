@@ -21,6 +21,7 @@ let innerZeroFloat = 0.0
 let innerOneFloat = 1.0
 let naiveSquareFunction = naiveSquareMatrix<ProbabilityMatrix.T, float> matrixSetValueProbability
                              <| toArrayProbability <| innerSumFloat <| innerMultFloat <| innerZeroFloat <| innerOneFloat
+let cudaSquareFunction = cudaSquareMatrix<ProbabilityMatrix.T> <| matrixSetValueProbability <| toArrayProbability
 let graphParsingPrint (matrix: ProbabilityMatrix.T) =
     let rowLength = matrix.Nrow
     let colLength = matrix.Ncol
@@ -68,7 +69,7 @@ type ``Graph parsing tests``() =
         let (recognizeMatrix, vertexToInt, multCount) =
             GraphParsing.recognizeGraph<ProbabilityMatrix.T, float> <| graph <| naiveSquareFunction <| rules <| nonterminals <| S <| createEmptyMatrixProbability <| 
                 matrixSetValueProbability <| innerOneFloat
-        printfn "Multiplacation count: %d" multCount
+        printfn "Naive Multiplacation count: %d" multCount
         graphParsingPrint recognizeMatrix
 
     member this._02_SimpleNaiveRecognizerTest2 () =
@@ -89,7 +90,7 @@ type ``Graph parsing tests``() =
 
         let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> <| graph <| naiveSquareFunction <| loadIL
                                           <| tokenizer <| createEmptyMatrixProbability <| matrixSetValueProbability <| innerOneFloat
-        printfn "Multiplacation count: %d" multCount
+        printfn "Naive Multiplacation count: %d" multCount
         graphParsingPrint parsingMatrix
 
     member this._03_SimpleNaiveLoopTest () =
@@ -114,7 +115,7 @@ type ``Graph parsing tests``() =
 
         let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> <| graph <| naiveSquareFunction <| loadIL
                                           <| tokenizer <| createEmptyMatrixProbability <| matrixSetValueProbability <| innerOneFloat
-        printfn "Multiplacation count: %d" multCount
+        printfn "Naive Multiplacation count: %d" multCount
         graphParsingPrint parsingMatrix
 
     member this._04_SimpleSparseRecognizerTest () =
@@ -135,7 +136,7 @@ type ``Graph parsing tests``() =
 
         let (parsingMatrix, _, multCount) = graphParse<SparseMatrix, float> <| graph <| sparseSquareMatrix <| loadIL
                                           <| tokenizer <| createEmptyMatrixSparse <| matrixSetValueSparse <| innerOneFloat
-        printfn "Multiplacation count: %d" multCount
+        printfn "Sparse Multiplacation count: %d" multCount
         sparsePrint parsingMatrix
 
     member this._05_SimpleSparseLoopTest () =
@@ -160,8 +161,54 @@ type ``Graph parsing tests``() =
 
         let (parsingMatrix, _, multCount) = graphParse<SparseMatrix, float> <| graph <| sparseSquareMatrix <| loadIL
                                           <| tokenizer <| createEmptyMatrixSparse <| matrixSetValueSparse <| innerOneFloat
-        printfn "Multiplacation count: %d" multCount
+        printfn "Sparse Multiplacation count: %d" multCount
         sparsePrint parsingMatrix
+
+    member this._06_SimpleCudaRecognizerTest () =
+        let graph = new AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>()
+        graph.AddVertex(0) |> ignore
+        graph.AddVertex(1) |> ignore
+        graph.AddVertex(2) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(0, 1, 1<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(1, 2, 1<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(2, 0, 1<AbstractAnalysis.Common.token>)) |> ignore
+        let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "SimpleGrammar_cnf.yrd")
+        let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+        let loadIL = fe.ParseGrammar grammarPath
+        let tokenizer str =
+            match str with
+                | "A" -> 1<AbstractAnalysis.Common.token>
+                | _ -> -1<AbstractAnalysis.Common.token>
+
+        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> <| graph <| cudaSquareFunction <| loadIL
+                                          <| tokenizer <| createEmptyMatrixProbability <| matrixSetValueProbability <| innerOneFloat
+        printfn "CUDA Multiplacation count: %d" multCount
+        graphParsingPrint parsingMatrix
+
+    member this._07_SimpleCudaLoopTest () =
+        let graph = new AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>()
+        graph.AddVertex(0) |> ignore
+        graph.AddVertex(1) |> ignore
+        graph.AddVertex(2) |> ignore
+        graph.AddVertex(3) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(0, 0, 1<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(0, 1, 1<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(1, 2, 1<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(1, 3, 1<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(2, 3, 1<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(3, 2, 1<AbstractAnalysis.Common.token>)) |> ignore
+        let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "SimpleGrammar_cnf.yrd")
+        let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+        let loadIL = fe.ParseGrammar grammarPath
+        let tokenizer str =
+            match str with
+                | "A" -> 1<AbstractAnalysis.Common.token>
+                | _ -> -1<AbstractAnalysis.Common.token>
+
+        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> <| graph <| cudaSquareFunction <| loadIL
+                                          <| tokenizer <| createEmptyMatrixProbability <| matrixSetValueProbability <| innerOneFloat
+        printfn "CUDA Multiplacation count: %d" multCount
+        graphParsingPrint parsingMatrix
 
 [<EntryPoint>]
 let f x =
@@ -172,5 +219,7 @@ let f x =
 //    t._03_SimpleNaiveLoopTest ()
 //    t._04_SimpleSparseRecognizerTest ()
 //    t._05_SimpleSparseLoopTest ()
-    YC.GraphParsing.Tests.RDFPerfomance.performTests ()
+//    t._06_SimpleCudaRecognizerTest ()
+//    t._07_SimpleCudaLoopTest ()
+//    YC.GraphParsing.Tests.RDFPerfomance.performTests ()
     0

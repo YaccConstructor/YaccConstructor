@@ -7,6 +7,7 @@ open FSharp.PowerPack.FsLex.AST
 open FSharp.PowerPack.FsLex.Parser
 open Internal.Utilities
 open Internal.Utilities.Text.Lexing
+open Microsoft.FSharp
 open System.Text
 
 let escape c = 

@@ -172,6 +172,10 @@ let runShell shellFile =
     runCmd (shellFile + ".cmd")
 #endif
 
+Target "Gen:FsLex" (fun _ -> runShell <| "src" @@ "FsLex" @@ "gen")
+
+Target "Gen:FsYacc" (fun _ -> runShell <| "src" @@ "FsYacc" @@ "gen")
+
 Target "Gen:FsYaccFrontend" (fun _ -> runShell <| "src" @@ "FsYaccFrontend" @@ "gen")
 
 Target "Gen:YardFrontend" (fun _ -> runShell <| "src" @@ "YardFrontend" @@ "gen")
@@ -426,6 +430,8 @@ Target "All" DoNothing
 "Clean"
   ==> "AssemblyInfo"
   ==> "Build:Core"
+  ==> "Gen:FsLex"
+  ==> "Gen:FsYacc"
   ==> "Gen:FsYaccFrontend"
   ==> "Build:Minimal"
   ==> "Gen:YardFrontend"

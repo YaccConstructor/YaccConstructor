@@ -1,5 +1,6 @@
-
-rm log.txt
+if [ -f log.exe ] then
+    rm log.txt
+fi
 
 for i in Epsilon Longest InfEpsilon
 do

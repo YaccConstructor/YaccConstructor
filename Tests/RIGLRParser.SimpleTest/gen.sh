@@ -1,4 +1,6 @@
-del log.txt
+if [ -f log.exe ] then
+    rm log.txt
+fi
 
 for i in Chaos Expr Brackets Grammar7
 do

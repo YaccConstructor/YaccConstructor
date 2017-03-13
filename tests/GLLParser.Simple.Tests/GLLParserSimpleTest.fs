@@ -74,13 +74,14 @@ type ``GLL parser tests with simple lexer`` () =
 
     [<Test>]
     member test.``Bad left rec``() =
-        runTest "BadLeftRecursion.yrd" "BBB.txt"
+        //runTest "BadLeftRecursion.yrd" "BBB.txt"
         checkAst "BadLeftRecursion.yrd" "BBB.txt"
-            1 1 1 1
+            19 24 3 1
 
     [<Test>]
     member test.``SimpleAmb``() =
-        runTest "SimpleAmb.yrd" "SimpleAmb.txt"
+        checkAst "SimpleAmb.yrd" "SimpleAmb.txt"
+            19 24 3 1
 
     [<Test>]
     member test.``Simple left rec``() =

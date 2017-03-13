@@ -30,6 +30,18 @@ type SPPF(lengthOfInput : int, startState : int<positionInGrammar>, finalStates 
          + int64 rExt * int64 (lengthOfInput + 1)
          + int64 symbol)
          * int64 -1
+    let hashPacked x y z w = 
+        int64 x
+        * int64 (lengthOfInput + 1)
+        * int64 (lengthOfInput + 1) 
+        * int64 (lengthOfInput + 1) + 
+        int64 y 
+        * int64 (lengthOfInput + 1) 
+        * int64 (lengthOfInput + 1) + 
+        int64 z 
+        * int64 (lengthOfInput + 1) + 
+        int64 w
+
     let dummyNode = -1<nodeMeasure>
     let dummyAST = new TerminalNode(-1<token>, packExtension -1 -1)
     let epsilon = -1<token>
@@ -38,7 +50,7 @@ type SPPF(lengthOfInput : int, startState : int<positionInGrammar>, finalStates 
         | _ -> failwith "Wrong type"
 
     let nonTerminalNodes = new Dictionary<int64, int<nodeMeasure>>()
-    //let packedNodes = new Dictionary<int, int<nodeMeasure>>()
+    let packedNodes = new Dictionary<int64, int<nodeMeasure>>()
     let intermidiateNodes = new Dictionary<int64, int<nodeMeasure>>()
     let terminalNodes = new Dictionary<int64, int<nodeMeasure>>()
     let epsilonNodes = new Dictionary<int, int<nodeMeasure>>()//new BlockResizeArray<int<nodeMeasure>>()
@@ -48,6 +60,7 @@ type SPPF(lengthOfInput : int, startState : int<positionInGrammar>, finalStates 
     member this.NonTerminalNodes = nonTerminalNodes
     member this.IntermidiateNodes = intermidiateNodes
     member this.EpsilonNodes = epsilonNodes
+    member this.PackedNodes = packedNodes
 
     member this.FindSppfNode (t : TypeOfNode) lExt rExt : int<nodeMeasure> =
         match t with 
@@ -90,8 +103,19 @@ type SPPF(lengthOfInput : int, startState : int<positionInGrammar>, finalStates 
                 i.AddChild newNode
             | _ -> failwith "adjf;sawf"
             num
+        
+//        let i = getLeftExtension leftExtension
+//        let j = getRightExtension leftExtension
+//        let k = getRightExtension rightExtension
+//        let key = hashPacked i j k (int state)
+//        
+//        let contains, d1 = packedNodes.TryGetValue key
+//        if contains then d1
+//        else
         let newNode = createNode()
-        newNode 
+//        packedNodes.Add(key, newNode)
+        newNode
+
     
 
     member this.GetNodeT (symbol : int<token>) (pos : int<positionInInput>) (nextPos : int<positionInInput>) =
@@ -172,7 +196,7 @@ type SPPF(lengthOfInput : int, startState : int<positionInGrammar>, finalStates 
             |> Seq.filter (fun vert -> vert.Nonterm = startState && vert.PositionInInput = startPosition)
             |> (fun x -> (Array.ofSeq x).[0])
         
-        gssRoot.P
+        gssRoot.P.SetP
         |> Seq.map (fun x -> match x.data with
                              | TreeNode n -> this.Nodes.Item (int n)
                              | _ -> failwith "wrongType")

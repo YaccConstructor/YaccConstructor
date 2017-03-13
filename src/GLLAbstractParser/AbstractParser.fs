@@ -87,7 +87,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
             then
 //                if startV.P.Count > 0
 //                then 
-                startV.P
+                startV.P.SetP
                 |> ResizeArray.iter(fun p -> 
                     if buildTree
                     then 
@@ -117,12 +117,21 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
             then
                 pop nextPosInInput currentContext.GssVertex nontermNode 
         
-            pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex y
+            if parser.MultipleInEdges.[int nextPosInGrammar]
+            then 
+                addContext nextPosInInput nextPosInGrammar currentContext.GssVertex y
+            else
+                pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex y
         else
             if nextPosInGrammar |> parser.FinalStates.Contains
             then
                 pop nextPosInInput currentContext.GssVertex (summLengths currentContext.Data (Length(1us)))
-            pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex (summLengths currentContext.Data (Length(1us)))
+            
+            if parser.MultipleInEdges.[int nextPosInGrammar]
+            then 
+                addContext nextPosInInput nextPosInGrammar currentContext.GssVertex (summLengths currentContext.Data (Length(1us)))
+            else
+                pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex (summLengths currentContext.Data (Length(1us)))
     let processed = ref 0
     let mlnCount = ref 0
     let startTime = ref System.DateTime.Now
@@ -186,7 +195,7 @@ let buildAst (parser : ParserSourceGLL) (input : IParserInput) =
 let isParsed (parser : ParserSourceGLL) (input : LinearInput) = 
     let gss, _ = parse parser input false
     findVertices gss parser.StartState
-    |> Seq.exists (fun v -> v.P |> ResizeArray.exists (fun p -> int p.posInInput = input.Input.Length))
+    |> Seq.exists (fun v -> v.P.SetP |> ResizeArray.exists (fun p -> int p.posInInput = input.Input.Length))
 
 let getAllRangesForState gss state =
     findVertices gss state

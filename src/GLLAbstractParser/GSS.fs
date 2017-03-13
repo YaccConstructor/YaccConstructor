@@ -16,10 +16,18 @@ type PoppedData =
 
 [<Measure>] type compressedPosInInputAndGrammar
 
+type PopSet () = 
+    let setP = new ResizeArray<PoppedData>() 
+
+    member this.SetP = setP
+    member this.Add x = 
+        if (setP.Contains x) |> not
+        then setP.Add x
+
 type GSSVertex (nonterm: int<positionInGrammar>, posInInput: int<positionInInput>) =    
 
     let setU = new System.Collections.Generic.Dictionary<int64<compressedPosInInputAndGrammar>,HashSet<ParseData>>()
-    let setP = new ResizeArray<PoppedData>() 
+    let setP = new PopSet() 
     
     override this.Equals y =
         y :? GSSVertex 

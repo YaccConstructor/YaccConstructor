@@ -46,22 +46,22 @@
       <Link>assemblyinfo.Common.fs</Link>
     </Compile>
     <Compile Include="assemblyinfo.fslex.exe.fs" />
-    <Compile Include="..\FSYacc\Lexing.fsi">
+    <Compile Include="..\FsYacc\Lexing.fsi">
       <Link>lexing.fsi</Link>
     </Compile>
-    <Compile Include="..\FSYacc\Lexing.fs">
+    <Compile Include="..\FsYacc\Lexing.fs">
       <Link>lexing.fs</Link>
     </Compile>
-    <Compile Include="..\FSYacc\Parsing.fsi">
+    <Compile Include="..\FsYacc\Parsing.fsi">
       <Link>parsing.fsi</Link>
     </Compile>
-    <Compile Include="..\FSYacc\Parsing.fs">
+    <Compile Include="..\FsYacc\Parsing.fs">
       <Link>parsing.fs</Link>
     </Compile>
-    <Compile Include="..\FSYacc\Arg.fsi">
+    <Compile Include="..\FsYacc\Arg.fsi">
       <Link>arg.fsi</Link>
     </Compile>
-    <Compile Include="..\FSYacc\Arg.fs">
+    <Compile Include="..\FsYacc\Arg.fs">
       <Link>arg.fs</Link>
     </Compile>
     <Compile Include="fslexast.fs" />

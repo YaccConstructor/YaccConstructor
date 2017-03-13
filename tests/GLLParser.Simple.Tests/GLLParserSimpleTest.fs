@@ -12,13 +12,15 @@ open Microsoft.FSharp.Collections
 open YaccConstructor.API
 open Yard.Generators.GLL.ParserCommon
 open System.Collections.Generic
+open Yard.Generators.GLL.AbstractParser
+
 //let run path astBuilder =
 //    let tokens = LexCommon.tokens(path)
 //    astBuilder tokens
 
-let inputFilesPath = @"../../../data/GLL/"
+//let inputFilesPath = @"../../../data/GLL/"
 let grammarFilesPath = @"C:/Code/YaccConstructor/tests/GLLParser.Simple.Tests/"
-//let inputFilesPath = @"C:/Code/YaccConstructor/tests/data/GLL/"
+let inputFilesPath = @"C:/Code/YaccConstructor/tests/data/GLL/"
 //let outDir = @"../../../src/GLLParser.SimpleTest/"
 
 let getTokens path =
@@ -52,12 +54,29 @@ let runTest grammarFile inputFile =
     let res = isParsed parser input
     shouldBeTrue res
 
+let checkAst grammarFile inputFile nodesCount edgesCount termsCount ambiguityCount = 
+    let parser = getParserSource grammarFile
+    let input  = getLinearInput inputFile parser.StringToToken
+    let tree = buildAst parser input
+    printfn "%A" tree
+    tree.AstToDot parser.IntToString (grammarFilesPath + inputFile + ".dot")
+    let n, e, t, amb = tree.CountCounters
+    //printfn "%d %d %d %d" n e t amb
+    Assert.AreEqual(nodesCount, n, sprintf "Nodes expected:%i, found:%i." nodesCount n)
+    Assert.AreEqual(edgesCount, e, sprintf "Edges expected:%i, found:%i." edgesCount e)
+    Assert.AreEqual(termsCount, t, sprintf "Terms expected:%i, found:%i." termsCount t) 
+    Assert.AreEqual(ambiguityCount, amb, sprintf "Ambiguities expected:%i, found:%i." ambiguityCount amb)
+    Assert.Pass()
+
+
 [<TestFixture>]
 type ``GLL parser tests with simple lexer`` () =
 
     [<Test>]
     member test.``Bad left rec``() =
         runTest "BadLeftRecursion.yrd" "BBB.txt"
+        checkAst "BadLeftRecursion.yrd" "BBB.txt"
+            1 1 1 1
 
     [<Test>]
     member test.``SimpleAmb``() =

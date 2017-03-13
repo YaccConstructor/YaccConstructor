@@ -125,7 +125,7 @@ type Tree<'TokenType> (roots : INode[], unpackPos) =
         let num = ref -1
         let rootsLeft = ref roots.Length
         for root in roots do
-            nodeQueue.Enqueue(new NumNode<INode>(!num, root)) //!!!!!!!!!!!!!!!!! we build ast only for one of roots
+            nodeQueue.Enqueue(new NumNode<INode>(!num, root))
         let isDummy (n:INode) = match n with :? TerminalNode as t -> t.Extension = packExtension -1 -1 | _ -> false
 
         while nodeQueue.Count <> 0 do

@@ -250,8 +250,8 @@ let getGLLparserSource (fsa : FSA)
                                          , intToString
                                          , (int anyNonterm)* 1<positionInGrammar>
                                          , stateAndTokenToNewState
-                                         , stringToToken
-                                         , multipleInEdges)
+                                         , (stringToToken
+                                         , multipleInEdges))
 
 
     res, parserSource

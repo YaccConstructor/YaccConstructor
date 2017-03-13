@@ -61,8 +61,8 @@ let checkAst grammarFile inputFile nodesCount edgesCount termsCount ambiguityCou
     printfn "%A" tree
     tree.AstToDot parser.IntToString (grammarFilesPath + inputFile + ".dot")
     let n, e, t, amb = tree.CountCounters
-    //printfn "%d %d %d %d" n e t amb
-    Assert.AreEqual(nodesCount, n, sprintf "Nodes expected:%i, found:%i." nodesCount n)
+    printfn "%d %d %d %d" n e t amb
+    Assert.AreEqual(nodesCount, n, sprintf "Nodes expected:%i, found:%i. %i %i %i" nodesCount n e t amb)
     Assert.AreEqual(edgesCount, e, sprintf "Edges expected:%i, found:%i." edgesCount e)
     Assert.AreEqual(termsCount, t, sprintf "Terms expected:%i, found:%i." termsCount t) 
     Assert.AreEqual(ambiguityCount, amb, sprintf "Ambiguities expected:%i, found:%i." ambiguityCount amb)
@@ -81,77 +81,78 @@ type ``GLL parser tests with simple lexer`` () =
     [<Test>]
     member test.``SimpleAmb``() =
         checkAst "SimpleAmb.yrd" "SimpleAmb.txt"
-            19 24 3 1
+            10 11 3 1
 
     [<Test>]
     member test.``Simple left rec``() =
-        runTest "SimpleLeftRecursion.yrd" "BBB.txt"
-
+        checkAst "SimpleLeftRecursion.yrd" "BBB.txt"
+            9 8 3 0
     [<Test>]
     member test.``Attrs``() =
-        runTest "Attrs.yrd" "Attrs.txt"
+        checkAst "Attrs.yrd" "Attrs.txt"
+            15 14 5 0
 
     [<Test>]
     member test.``Brackets``() =
-        runTest "Brackets.yrd" "Brackets.txt"
-
+        checkAst "Brackets.yrd" "Brackets.txt"
+            34 36 9 1
     [<Test>]
     member test.``Simple right rec``() =
-        runTest "SimpleRightRecursion.yrd" "BBB.txt"
-
+        checkAst "SimpleRightRecursion.yrd" "BBB.txt"
+            15 14 5 0
     [<Test>]
     member test.``Complex right null``() =
-        runTest "ComplexRightNull.yrd" "ComplexRightNull.txt"
-
+        checkAst "ComplexRightNull.yrd" "ComplexRightNull.txt"
+            15 14 5 0
     [<Test>]
     member test.``Counter``() =
-        runTest "Counter.yrd" "Counter.txt"
-
+        checkAst "Counter.yrd" "Counter.txt"
+            15 14 5 0
     [<Test>]
     member test.``Cycle``() =
-        runTest "Cycle.yrd" "Cycle.txt"
-
+        checkAst "Cycle.yrd" "Cycle.txt"
+            15 14 5 0
     [<Test>]
     member test.``Eps``() =
-        runTest "Eps.yrd" "Eps.txt"
-
+        checkAst "Eps.yrd" "Eps.txt"
+            15 14 5 0
     [<Test>]
     member test.``Eps2``() =
-        runTest "Eps2.yrd" "Eps2.txt"
-
+        checkAst "Eps2.yrd" "Eps2.txt"
+            15 14 5 0
     [<Test>]
     member test.``Epsilon``() =
-        runTest "Epsilon.yrd" "Epsilon.txt"
-
+        checkAst "Epsilon.yrd" "Epsilon.txt"
+            15 14 5 0
     [<Test>]
     member test.``Expr``() =
-        runTest "Expr.yrd" "Expr.txt"
-
+        checkAst "Expr.yrd" "Expr.txt"
+            15 14 5 0
     [<Test>]
     member test.``First``() =
-        runTest "First.yrd" "First.txt"
-
+        checkAst "First.yrd" "First.txt"
+            15 14 5 0
 //////////////////create input for this test//////////////////
     [<Test>]
     member test.``InfEpsilon``() =
-        runTest "InfEpsilon.yrd" "Epsilon.txt"
-
+        checkAst "InfEpsilon.yrd" "Epsilon.txt"
+            15 14 5 0
     [<Test>]
     member test.``List``() =
-        runTest "List.yrd" "List.txt"
-
+        checkAst "List.yrd" "List.txt"
+            15 14 5 0
     [<Test>]
     member test.``ListEps``() =
-        runTest "ListEps.yrd" "ListEps.txt"
-
+        checkAst "ListEps.yrd" "ListEps.txt"
+            15 14 5 0
     [<Test>]
     member test.``Order``() =
-        runTest "Order.yrd" "Order.txt"
-
+        checkAst "Order.yrd" "Order.txt"
+            15 14 5 0
     [<Test>]
     member test.``Lol calc``() =
-        runTest "LolCalc.yrd" "LolCalc.txt"
-
+        checkAst "LolCalc.yrd" "LolCalc.txt"
+            15 14 5 0
 //    [<Test>]
 //    member test.``Calc``() =
 //        runTest ParseCalc.parserSource
@@ -161,29 +162,29 @@ type ``GLL parser tests with simple lexer`` () =
 
     [<Test>]
     member test.``Long cycle``() =
-        runTest "LongCycle.yrd" "LongCycle.txt"
-         
+        checkAst "LongCycle.yrd" "LongCycle.txt"
+             15 14 5 0
     [<Test>]
     member test.``Longest``() =
-        runTest "Longest.yrd" "Longest.txt"
-
+        checkAst "Longest.yrd" "Longest.txt"
+            15 14 5 0
     [<Test>]
     member test.``Mixed``() =
-        runTest "Mixed.yrd" "Mixed.txt"
-
+        checkAst "Mixed.yrd" "Mixed.txt"
+            15 14 5 0
     [<Test>]
     member test.``Omit``() =
-        runTest "Omit.yrd" "Omit.txt"
-
+        checkAst "Omit.yrd" "Omit.txt"
+            15 14 5 0
     [<Test>]
     member test.``Simple right null``() =
-        runTest "SimpleRightNull.yrd" "SimpleRightNull.txt"
-
+        checkAst "SimpleRightNull.yrd" "SimpleRightNull.txt"
+            15 14 5 0
     [<Test>]
     member test.``Cond``() =
-        runTest "Cond.yrd" "Cond.txt"
-
+        checkAst "Cond.yrd" "Cond.txt"
+            15 14 5 0
     [<Test>]
     member test.``Pretty simple calc seq input``() =
-        runTest "PrettySimpleCalc.yrd" "PrettyCalc1.txt"
-   
+        checkAst "PrettySimpleCalc.yrd" "PrettyCalc1.txt"
+            15 14 5 0

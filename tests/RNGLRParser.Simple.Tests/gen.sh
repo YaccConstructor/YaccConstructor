@@ -1,4 +1,3 @@
-
 [ -f log.txt ] && rm log.txt
 
 for i in Epsilon Longest InfEpsilon

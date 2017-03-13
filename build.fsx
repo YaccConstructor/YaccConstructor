@@ -429,9 +429,9 @@ Target "All" DoNothing
 
 "Clean"
   ==> "AssemblyInfo"
-  ==> "Build:Core"
   ==> "Gen:FsLex"
   ==> "Gen:FsYacc"
+  ==> "Build:Core"
   ==> "Gen:FsYaccFrontend"
   ==> "Build:Minimal"
   ==> "Gen:YardFrontend"

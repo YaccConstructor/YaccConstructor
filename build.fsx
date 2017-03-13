@@ -181,21 +181,21 @@ Target "Gen:FsYaccFrontend" (fun _ -> runShell <| "src" @@ "FsYaccFrontend" @@ "
 Target "Gen:YardFrontend" (fun _ -> runShell <| "src" @@ "YardFrontend" @@ "gen")
 
 Target "GenTests:RNGLR" (fun _ -> 
-                            runShell <| "tests" @@ "RNGLRAbstractParser.Tests" @@ "gen"
-                            runShell <| "tests" @@ "RNGLRAbstractParser.Tests" @@ "gen_lex"
-                            runShell <| "tests" @@ "RNGLRParser.Simple.Tests" @@ "gen"
+                            runShell <| "Tests" @@ "RNGLRAbstractParser.Tests" @@ "gen"
+                            runShell <| "Tests" @@ "RNGLRAbstractParser.Tests" @@ "gen_lex"
+                            runShell <| "Tests" @@ "RNGLRParser.Simple.Tests" @@ "gen"
                         )
 
-Target "GenTests:GLL" (fun _ -> runShell <| "tests" @@ "GLL.AbstractParser.Simple.Tests" @@ "gen")
+Target "GenTests:GLL" (fun _ -> runShell <| "Tests" @@ "GLL.AbstractParser.Simple.Tests" @@ "gen")
 
-Target "GenTests:RIGLR" (fun _ -> runShell <| "tests" @@ "RIGLRParser.SimpleTest" @@ "gen")
+Target "GenTests:RIGLR" (fun _ -> runShell <| "Tests" @@ "RIGLRParser.SimpleTest" @@ "gen")
 
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner
 
 Target "RunTests" (fun _ ->
     // Pattern specifying assemblies to be tested using NUnit
-    let testAssemblies = !! "tests/**/bin/Release/*Tests*.dll" ++ "tests/**/bin/Release/*Tests*.exe"
+    let testAssemblies = !! "Tests/**/bin/Release/*Tests*.dll" ++ "Tests/**/bin/Release/*Tests*.exe"
 
     testAssemblies
     |> NUnit3 (fun p ->
@@ -203,7 +203,7 @@ Target "RunTests" (fun _ ->
             ShadowCopy = false
             DisposeRunners = true
             TimeOut = TimeSpan.FromMinutes 20.
-            WorkingDir = "tests/YardFrontend.Tests/bin/Release/"
+            WorkingDir = "Tests/YardFrontend.Tests/bin/Release/"
         })
 )
 

@@ -1,4 +1,5 @@
-if [ -f log.exe ] then
+if [-f log.exe ]
+then
     rm log.txt
 fi
 

@@ -95,14 +95,14 @@ let getGLLparserSource (fsa : FSA)
         for state, token, newState in stateTokenNewState do
             println "stateAndTokenToNewState.Add(%i, %i<positionInGrammar>)" (pack state token) newState
 
-    let printState (state:(int<positionInGrammar> * int<positionInGrammar>) []) isFirst isLast =
+    let printState (state:('a * int<positionInGrammar>) []) labelMeasure isFirst isLast =
         let prefix = if isFirst then "  [|" else "    "
         let postfix = if isLast then " |]" else ";"
 
         let printEdge (edge,state) isFirst isLast = 
             let prefix = if isFirst then "[|" else ""
             let postfix = if isLast then "|]" else ";"
-            print "%s%s<positionInGrammar>,%s<positionInGrammar>%s" prefix (edge.ToString()) (state.ToString()) postfix
+            print "%s%A%s,%s<positionInGrammar>%s" prefix edge labelMeasure (state.ToString()) postfix
                     
         print "%s" prefix
 
@@ -111,14 +111,14 @@ let getGLLparserSource (fsa : FSA)
             print "[||]"
         else
             state
-            |> Array.iteri (fun i edge -> printEdge edge (i = 0) (i = state.Length-1))
+            |> Array.iteri (fun i edge -> printEdge edge (i = 0) (i = state.Length - 1))
 
         println "%s" postfix
-
-    let printOutNonterms fsaStatesOutNonterms () =
-        println "let private outNonterms ="
-        fsaStatesOutNonterms    
-        |> Array.iteri (fun i state -> printState state (i = 0) (i = fsaStatesOutNonterms.Length-1))
+    
+    let printOutSymbols arrayName measureName fsaStatesOutSymbols =
+        println "let private %s =" arrayName
+        fsaStatesOutSymbols    
+        |> Array.iteri (fun i state -> printState state measureName (i = 0) (i = fsaStatesOutSymbols.Length - 1))        
 
     let printStartState () = 
         println "let private startState = %i<positionInGrammar>" fsa.StartState
@@ -140,7 +140,7 @@ let getGLLparserSource (fsa : FSA)
         println "let private nontermCount = %i" fsa.NontermCount
     
     let printParser () =
-        println "let parserSource = new ParserSourceGLL (outNonterms, startState, finalStates, nontermCount, terminalNums, intToString, anyNonterm, stateAndTokenToNewState,stringToToken)"
+        println "let parserSource = new ParserSourceGLL (outTerms, outNonterms, startState, finalStates, nontermCount, terminalNums, intToString, anyNonterm, stateAndTokenToNewState,stringToToken)"
 
     let printFun isAbstract () =
         if isAbstract
@@ -151,24 +151,30 @@ let getGLLparserSource (fsa : FSA)
             println "let buildAST (input : seq<int>) ="
             println "    Yard.Generators.GLL.ParserFSA.buildAST parserSource input"
              
-    let fsaStatesOutNonterms = 
+    let fsaStatesOutNonterms, fsaStatesOutTerms = 
         fsa.States
         |> Array.mapi (fun i x ->
             x
-            |> Array.collect (fun (symbol,state) -> 
-                match symbol with
-                    | EdgeSymbol.Nonterm s -> [|(int s) * 1<positionInGrammar>, state|]
-                    | EdgeSymbol.Term s -> 
-                        let cond, value = stringToToken.TryGetValue s
-                        if cond then
-                            stateTokenNewState.Add(i, value, state)
-                        else
-                            stringToToken.Add(s,(!nextInt)*1<token>)
-                            stateTokenNewState.Add(i, (!nextInt)*1<token>, state)
-                            incr nextInt
-                        [||]
-                    | EdgeSymbol.Epsilon() -> failwith "Found epsilon edge while print fsa."
-                            ))
+            |> Array.fold 
+                   (fun (ns, ts) (symbol, state) -> 
+                        match symbol with
+                            | EdgeSymbol.Nonterm s -> (((int s) * 1<positionInGrammar>, state) :: ns, ts)
+                            | EdgeSymbol.Term s -> 
+                                let cond, value = stringToToken.TryGetValue s
+                                if cond then
+                                    stateTokenNewState.Add(i, value, state)
+                                else
+                                    stringToToken.Add(s,(!nextInt)*1<token>)
+                                    stateTokenNewState.Add(i, (!nextInt)*1<token>, state)
+                                    incr nextInt
+                                (ns, (s, state) :: ts)
+                            | EdgeSymbol.Epsilon() -> failwith "Found epsilon edge while print fsa.") 
+                   ([], [])
+            |> fun (l1, l2) -> (List.toArray l1, List.toArray l2))
+        |> Array.unzip
+    
+    let printOutNonterms () = printOutSymbols "outNonterms" "<positionInGrammar>" fsaStatesOutNonterms
+    let printOutTerms () = printOutSymbols "outTerms" "" fsaStatesOutTerms
 
     let sortedStateToNontermName = 
         fsa.StateToNontermName
@@ -196,7 +202,8 @@ let getGLLparserSource (fsa : FSA)
         printItem (printAnyNonterm anyNonterm)
         printItem printTerminalNums
         printItem printStateAndTokenToNewState
-        printItem (printOutNonterms fsaStatesOutNonterms)
+        printItem printOutTerms
+        printItem printOutNonterms
         printItem printStartState
         printItem printFinalStates
         printItem printNontermCount
@@ -216,7 +223,8 @@ let getGLLparserSource (fsa : FSA)
     for numberNonterm in sortedStateToNontermName do
         intToString.Add(int numberNonterm.Key, numberNonterm.Value)
 
-    let parserSource = new ParserSourceGLL(fsaStatesOutNonterms
+    let parserSource = new ParserSourceGLL(fsaStatesOutTerms
+                                         , fsaStatesOutNonterms
                                          , fsa.StartState
                                          , fsa.FinalStates
                                          , fsa.NontermCount

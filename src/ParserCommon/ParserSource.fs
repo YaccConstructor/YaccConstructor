@@ -3,7 +3,8 @@ open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
 open AbstractAnalysis.Common
 
-type ParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<positionInGrammar>) [] []
+type ParserSourceGLL (outTerms            : (string * int<positionInGrammar>) [] []
+                     , outNonterms        : (int<positionInGrammar> * int<positionInGrammar>) [] []
                      , startState         : int<positionInGrammar>
                      , finalStates        : HashSet<int<positionInGrammar>>
                      , nontermCount       : int
@@ -24,7 +25,8 @@ type ParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<positi
             value
         else
             failwith "Such string is not in a grammar alphabet."
-
+    
+    member this.OutTerms                = outTerms
     member this.OutNonterms             = outNonterms
     member this.FinalStates             = finalStates
     member this.StartState              = startState

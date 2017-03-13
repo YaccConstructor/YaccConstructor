@@ -110,7 +110,7 @@ Target "AssemblyInfo" (fun _ ->
 // src folder to support multiple project outputs
 Target "CopyBinaries" (fun _ ->
     !! "src/**/*.??proj"
-    |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) @@ "bin/Release", "bin" @@ (System.IO.Path.GetFileNameWithoutExtension f)))
+    |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) @@ "bin/Release", "Bin" @@ (System.IO.Path.GetFileNameWithoutExtension f)))
     |>  Seq.iter (fun (fromDir, toDir) -> CopyDir toDir fromDir (fun _ -> true))
 )
 
@@ -230,7 +230,7 @@ Target "SourceLink" (fun _ ->
 Target "NuGet" (fun _ ->
     Paket.Pack(fun p -> 
         { p with
-            OutputPath = "bin"
+            OutputPath = "Bin"
             Version = release.NugetVersion
             ReleaseNotes = toLines release.Notes})
 )
@@ -238,7 +238,7 @@ Target "NuGet" (fun _ ->
 Target "PublishNuget" (fun _ ->
     Paket.Push(fun p -> 
         { p with
-            WorkingDir = "bin" })
+            WorkingDir = "Bin" })
 )
 
 

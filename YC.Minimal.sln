@@ -34,6 +34,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsYaccFrontend", "src\FsYac
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AbstractAnalysis.Common", "src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj", "{4049CF0A-8F86-48B7-98BA-D062625BA281}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLLParsers.Common", "src\ParserCommon\GLLParsers.Common.fsproj", "{F2E8EDA4-C13F-4F8D-B858-D5EF4FB8A06D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -200,6 +202,18 @@ Global
 		{4049CF0A-8F86-48B7-98BA-D062625BA281}.Release20|Any CPU.Build.0 = Release|Any CPU
 		{4049CF0A-8F86-48B7-98BA-D062625BA281}.Release20|x86.ActiveCfg = Release|Any CPU
 		{4049CF0A-8F86-48B7-98BA-D062625BA281}.Release20|x86.Build.0 = Release|Any CPU
+		{F2E8EDA4-C13F-4F8D-B858-D5EF4FB8A06D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2E8EDA4-C13F-4F8D-B858-D5EF4FB8A06D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2E8EDA4-C13F-4F8D-B858-D5EF4FB8A06D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F2E8EDA4-C13F-4F8D-B858-D5EF4FB8A06D}.Debug|x86.Build.0 = Debug|Any CPU
+		{F2E8EDA4-C13F-4F8D-B858-D5EF4FB8A06D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2E8EDA4-C13F-4F8D-B858-D5EF4FB8A06D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2E8EDA4-C13F-4F8D-B858-D5EF4FB8A06D}.Release|x86.ActiveCfg = Release|Any CPU
+		{F2E8EDA4-C13F-4F8D-B858-D5EF4FB8A06D}.Release|x86.Build.0 = Release|Any CPU
+		{F2E8EDA4-C13F-4F8D-B858-D5EF4FB8A06D}.Release20|Any CPU.ActiveCfg = Release|Any CPU
+		{F2E8EDA4-C13F-4F8D-B858-D5EF4FB8A06D}.Release20|Any CPU.Build.0 = Release|Any CPU
+		{F2E8EDA4-C13F-4F8D-B858-D5EF4FB8A06D}.Release20|x86.ActiveCfg = Release|Any CPU
+		{F2E8EDA4-C13F-4F8D-B858-D5EF4FB8A06D}.Release20|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,8 +5,15 @@ module internal FSharp.PowerPack.FsLex.Lexer
   
 open FSharp.PowerPack.FsLex.AST
 open FSharp.PowerPack.FsLex.Parser
+
+#if INTERNALIZED_POWER_PACK
 open Internal.Utilities
 open Internal.Utilities.Text.Lexing
+#else
+open Microsoft.FSharp
+open Microsoft.FSharp.Text.Lexing
+#endif
+
 open System.Text
 
 let escape c = 

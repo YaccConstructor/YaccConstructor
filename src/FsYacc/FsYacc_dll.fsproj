@@ -36,13 +36,15 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(FSharpPowerPackSourcesRoot)\..\lkg\FSharp.PowerPack-$(LkgVersion)\bin\FSharp.PowerPack.targets" />
-  <ItemGroup>
+  <ItemGroup><!--
     <FsLex Include="fsyacclex.fsl">
-      <OtherFlags>--lexlib Microsoft.FSharp.Text.Lexing </OtherFlags>
+      <OtherFlags>- -lexlib Microsoft.FSharp.Text.Lexing </OtherFlags>
     </FsLex>
     <FsYacc Include="fsyaccpars.fsy">
-      <OtherFlags>--internal --module FSharp.PowerPack.FsYacc.Parser --lexlib Microsoft.FSharp.Text.Lexing  --parslib Microsoft.FSharp.Text.Parsing</OtherFlags>
-    </FsYacc>
+      <OtherFlags>- -internal - -module FSharp.PowerPack.FsYacc.Parser - -lexlib Microsoft.FSharp.Text.Lexing  - -parslib Microsoft.FSharp.Text.Parsing</OtherFlags>
+    </FsYacc>-->
+    <None Include="fsyacclex.fsl"/>
+    <None Include="fsyaccpars.fsy"/>
     <Compile Include="assemblyinfo.Common.fs" />
     <Compile Include="assemblyinfo.fsyacc.exe.fs">
       <Link>assemblyinfo.fsyacc.exe.fs</Link>

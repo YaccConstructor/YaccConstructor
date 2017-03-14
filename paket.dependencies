@@ -4,6 +4,7 @@ nuget Argu
 nuget dotNetRDF
 nuget ExtCore 0.8.43
 nuget FsCheck 0.9.2.0 framework: >= net40
+nuget FSharp.Core
 nuget Mono.Addins
 nuget FSharp.Formatting
 

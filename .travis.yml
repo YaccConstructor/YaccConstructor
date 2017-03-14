@@ -1,9 +1,12 @@
 language: csharp
 
+mono:
+  - latest
+
 sudo: false  # use the new container-based Travis infrastructure 
 
 before_install:
   - chmod +x build.sh
- 
+
 script: 
   - ./build.sh All

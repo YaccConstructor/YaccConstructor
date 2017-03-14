@@ -203,7 +203,7 @@ Target "RunTests" (fun _ ->
             ShadowCopy = false
             DisposeRunners = true
             TimeOut = TimeSpan.FromMinutes 20.
-            WorkingDir = "Tests/YardFrontend.Tests/bin/Release/"
+            WorkingDir = "tests/YardFrontend.Tests/bin/Release/"
         })
 )
 

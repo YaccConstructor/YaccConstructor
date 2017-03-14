@@ -18,7 +18,6 @@ type SetUp()=
         AddinManager.Registry.Update()
 
 [<TestFixture>]
-[<Ignore("Temporarily disabled for branches merge")>]
 type ``Components loader tests`` () =
     [<Test>]
     member test.``All generators`` () =        
@@ -90,7 +89,6 @@ type ``Components loader tests`` () =
         Assert.AreEqual(VerificatedGenerators |> List.map (fun vg ->   vg |> snd),allGettingGenerators)
 
 [<TestFixture>]
-[<Ignore("Temporarily disabled for branches merge")>]
 type ``Checker test`` () =
     let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> Frontend
     let basePath = @"..\..\..\data\Checkers\"

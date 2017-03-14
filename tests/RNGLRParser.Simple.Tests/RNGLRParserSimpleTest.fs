@@ -24,7 +24,6 @@ let inline translate (f : TranslateArguments<_,_> -> 'b -> 'c) (ast : 'b) =
     f args ast
 
 [<TestFixture>]
-[<Ignore("Temporarily disabled for branches merge")>]
 type ``RNGLR parser tests with simple lexer`` () =
 
     let translateAndCheck toDot translateFunction (expected : List<_>) (ast : Tree<_>) file errors = 

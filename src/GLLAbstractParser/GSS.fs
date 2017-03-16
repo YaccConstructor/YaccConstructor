@@ -22,7 +22,11 @@ type PopSet () =
     member this.SetP = setP
     member this.Add x = 
         if (setP.Contains x) |> not
-        then setP.Add x
+        then 
+            setP.Add x
+            true
+        else
+            false
 
 type GSSVertex (nonterm: int<positionInGrammar>, posInInput: int<positionInInput>) =    
 

@@ -84,6 +84,11 @@ type ``GLL parser tests with simple lexer`` () =
             10 11 3 1
 
     [<Test>]
+    member test.``SimpleAmb2``() =
+        checkAst "SimpleAmb2.yrd" "SimpleAmb.txt"
+            12 13 3 1
+
+    [<Test>]
     member test.``Simple left rec``() =
         checkAst "SimpleLeftRecursion.yrd" "BBB.txt"
             9 8 3 0
@@ -99,35 +104,35 @@ type ``GLL parser tests with simple lexer`` () =
     [<Test>]
     member test.``Simple right rec``() =
         checkAst "SimpleRightRecursion.yrd" "BBB.txt"
-            15 14 5 0
+            15 15 3 0
     [<Test>]
     member test.``Complex right null``() =
         checkAst "ComplexRightNull.yrd" "ComplexRightNull.txt"
-            15 14 5 0
+            32 37 5 1
     [<Test>]
     member test.``Counter``() =
         checkAst "Counter.yrd" "Counter.txt"
-            15 14 5 0
+            35 40 5 0
     [<Test>]
     member test.``Cycle``() =
         checkAst "Cycle.yrd" "Cycle.txt"
-            15 14 5 0
+            7 7 2 1
     [<Test>]
     member test.``Eps``() =
         checkAst "Eps.yrd" "Eps.txt"
-            15 14 5 0
+            10 9 2 0
     [<Test>]
     member test.``Eps2``() =
         checkAst "Eps2.yrd" "Eps2.txt"
-            15 14 5 0
-    [<Test>]
-    member test.``Epsilon``() =
-        checkAst "Epsilon.yrd" "Epsilon.txt"
-            15 14 5 0
+            10 9 2 0
+//    [<Test>]
+//    member test.``Epsilon``() =
+//        checkAst "Epsilon.yrd" "Epsilon.txt"
+//            15 14 5 0
     [<Test>]
     member test.``Expr``() =
         checkAst "Expr.yrd" "Expr.txt"
-            15 14 5 0
+            24 27 5 1
     [<Test>]
     member test.``First``() =
         checkAst "First.yrd" "First.txt"
@@ -136,23 +141,23 @@ type ``GLL parser tests with simple lexer`` () =
     [<Test>]
     member test.``InfEpsilon``() =
         checkAst "InfEpsilon.yrd" "Epsilon.txt"
-            15 14 5 0
+            3 2 1 0
     [<Test>]
     member test.``List``() =
         checkAst "List.yrd" "List.txt"
-            15 14 5 0
+            37 36 9 0
     [<Test>]
     member test.``ListEps``() =
         checkAst "ListEps.yrd" "ListEps.txt"
-            15 14 5 0
+            24 24 5 1
     [<Test>]
     member test.``Order``() =
         checkAst "Order.yrd" "Order.txt"
-            15 14 5 0
-    [<Test>]
-    member test.``Lol calc``() =
-        checkAst "LolCalc.yrd" "LolCalc.txt"
-            15 14 5 0
+            38 37 8 0
+//    [<Test>]
+//    member test.``Lol calc``() =
+//        checkAst "LolCalc.yrd" "LolCalc.txt"
+//            15 14 5 0
 //    [<Test>]
 //    member test.``Calc``() =
 //        runTest ParseCalc.parserSource
@@ -163,28 +168,28 @@ type ``GLL parser tests with simple lexer`` () =
     [<Test>]
     member test.``Long cycle``() =
         checkAst "LongCycle.yrd" "LongCycle.txt"
-             15 14 5 0
+             6 6 1 1
     [<Test>]
     member test.``Longest``() =
         checkAst "Longest.yrd" "Longest.txt"
-            15 14 5 0
+            24 25 6 0
     [<Test>]
     member test.``Mixed``() =
         checkAst "Mixed.yrd" "Mixed.txt"
-            15 14 5 0
+            16 16 4 0
     [<Test>]
     member test.``Omit``() =
         checkAst "Omit.yrd" "Omit.txt"
-            15 14 5 0
+            22 20 4 0
     [<Test>]
     member test.``Simple right null``() =
         checkAst "SimpleRightNull.yrd" "SimpleRightNull.txt"
-            15 14 5 0
+            27 28 5 0
     [<Test>]
     member test.``Cond``() =
         checkAst "Cond.yrd" "Cond.txt"
-            15 14 5 0
+            42 47 5 1
     [<Test>]
     member test.``Pretty simple calc seq input``() =
         checkAst "PrettySimpleCalc.yrd" "PrettyCalc1.txt"
-            15 14 5 0
+            15 14 3 0

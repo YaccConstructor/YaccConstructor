@@ -500,7 +500,10 @@ type Tree<'TokenType> (roots : INode[], unpackPos) =
                         for nodes in i.Others do
                             nodeQueue.Enqueue(nodes)
                 | :? TerminalNode as t ->
-                    incr termsCount                        
+                    incr termsCount   
+                | :? EpsilonNode as e ->
+                    incr termsCount   
+                                             
                 | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
 
         !nodesCount, !edgesCount, !termsCount, !ambiguityCount 

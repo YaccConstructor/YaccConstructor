@@ -225,8 +225,8 @@ let getGLLparserSource (fsa : FSA)
         printItem printStartState
         printItem printFinalStates
         printItem printNontermCount
-        printItem printParser
         printItem (printMultipleInEdges multipleInEdges)
+        printItem printParser
     //printItem (printFun isAbstract)
 
     let terminalNums = new HashSet<_>(stringToToken.Values)
@@ -250,8 +250,8 @@ let getGLLparserSource (fsa : FSA)
                                          , intToString
                                          , (int anyNonterm)* 1<positionInGrammar>
                                          , stateAndTokenToNewState
-                                         , (stringToToken
-                                         , multipleInEdges))
+                                         , stringToToken
+                                         , multipleInEdges)
 
 
     res, parserSource

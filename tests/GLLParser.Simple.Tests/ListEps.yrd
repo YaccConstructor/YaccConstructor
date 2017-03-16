@@ -1,6 +1,6 @@
 list <item separator>:
 { [] }
-| hd=item tl=(-separator item)* {hd::tl}
+| item (-separator item)*
 
 [<Start>]
 s: (n PLUS?)*

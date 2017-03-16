@@ -57,7 +57,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
     let rec pop (posInInput:int<positionInInput>) (gssVertex : GSSVertex) (newData : ParseData)=
         let outEdges = gss.OutEdges gssVertex |> Array.ofSeq
         
-        gssVertex.P.Add (new PoppedData(posInInput, newData))
+        if new PoppedData(posInInput, newData) |> gssVertex.P.Add |> not then () else
         if outEdges <> null && outEdges.Length <> 0
         then
             for e in outEdges do

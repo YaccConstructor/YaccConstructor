@@ -654,3 +654,6 @@ src/Bio.Search/R16S_19_27.fs
 src/Bio.Search/*.dot
 src/glltest/*.dot
 src/glltest/test.fs
+
+
+tests/GLL*/*.pdf

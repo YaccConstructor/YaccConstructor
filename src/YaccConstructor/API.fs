@@ -193,32 +193,32 @@ List of available frontends, generators and conversions can be obtained by -af -
     
 
 let generate grammarFile frontendName generatorName generatorParams conversions userDefs = 
-    try
-        gen grammarFile frontendName generatorName generatorParams conversions userDefs false
-    with
-    | InvalidFEName frontendName as e  -> 
-        "Frontend with name " + frontendName + " is not available. Run \"Main.exe -af\" for get all available frontends.\n" 
-        |> logf e
-    | InvalidGenName genName as e->
-        "Generator with name " + genName + " is not available. Run \"Main.exe -ag\" for get all available generators.\n"
-        |> logf e
-    | EmptyArg argName as e ->
-        sprintf "Argument can not be empty: %s\n\nYou need to specify frontend, generator and input grammar. Example:
-YaccConstructor.exe -f YardFrontend -c BuildAST -g YardPrinter -i ../../../Tests/Conversions/buildast_1.yrd \n
-List of available frontends, generators and conversions can be obtained by -af -ag -ac keys" argName
-        |> logf e
-    | FEError error as e ->
-        "Frontend error: " + error + "\n"
-        |> logf e
-    | GenError error as e  ->
-        "Generator error: " + error + "\n"
-        |> logf e
-    | CheckerError error as e  ->
-        error + "\n"
-        |> logf e
-    | :? System.IO.IOException as e -> 
-        "Could not read input file.\n"
-        |> logf e
-    | x -> "Correct this or above construction. Pay attention to the punctuation.\n"
-        |> logf x
+//    try
+    gen grammarFile frontendName generatorName generatorParams conversions userDefs false
+//    with
+//    | InvalidFEName frontendName as e  -> 
+//        "Frontend with name " + frontendName + " is not available. Run \"Main.exe -af\" for get all available frontends.\n" 
+//        |> logf e
+//    | InvalidGenName genName as e->
+//        "Generator with name " + genName + " is not available. Run \"Main.exe -ag\" for get all available generators.\n"
+//        |> logf e
+//    | EmptyArg argName as e ->
+//        sprintf "Argument can not be empty: %s\n\nYou need to specify frontend, generator and input grammar. Example:
+//YaccConstructor.exe -f YardFrontend -c BuildAST -g YardPrinter -i ../../../Tests/Conversions/buildast_1.yrd \n
+//List of available frontends, generators and conversions can be obtained by -af -ag -ac keys" argName
+//        |> logf e
+//    | FEError error as e ->
+//        "Frontend error: " + error + "\n"
+//        |> logf e
+//    | GenError error as e  ->
+//        "Generator error: " + error + "\n"
+//        |> logf e
+//    | CheckerError error as e  ->
+//        error + "\n"
+//        |> logf e
+//    | :? System.IO.IOException as e -> 
+//        "Could not read input file.\n"
+//        |> logf e
+//    | x -> "Correct this or above construction. Pay attention to the punctuation.\n"
+//        |> logf x
     

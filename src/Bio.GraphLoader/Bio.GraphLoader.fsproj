@@ -43,11 +43,6 @@
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\InfernalApi\InfernalApi.fsproj">
-      <Name>InfernalApi</Name>
-      <Project>{5c337db6-f5cc-4014-8bb7-3d66edf0eefc}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

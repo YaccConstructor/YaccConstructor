@@ -139,8 +139,20 @@ let getGLLparserSource (fsa : FSA)
     let printNontermCount () =
         println "let private nontermCount = %i" fsa.NontermCount
     
+    let printMultipleInEdges (multipleInEdges : bool []) () =
+        println "let private multipleInEdges = "
+        print "    [|"
+        multipleInEdges
+        |> Array.iteri (fun i st -> 
+            if st then print "true"
+            else print "false"
+            if i <> multipleInEdges.Length - 1
+            then print "; ")
+        println "|]"
+     
+
     let printParser () =
-        println "let parserSource = new ParserSourceGLL (outTerms, outNonterms, startState, finalStates, nontermCount, terminalNums, intToString, anyNonterm, stateAndTokenToNewState,stringToToken)"
+        println "let parserSource = new ParserSourceGLL (outTerms, outNonterms, startState, finalStates, nontermCount, terminalNums, intToString, anyNonterm, stateAndTokenToNewState,stringToToken, multipleInEdges)"
 
     let printFun isAbstract () =
         if isAbstract
@@ -187,6 +199,19 @@ let getGLLparserSource (fsa : FSA)
             match x with
             | Some i -> i.Key
             | _ -> -1<positionInGrammar>)
+
+    let multipleInEdges = 
+        let inEdgesCount = Array.zeroCreate fsa.States.Length
+
+        fsa.States
+        |> Array.iter (fun edges -> 
+            edges
+            |> Array.iter (fun (_,nextState) -> 
+                inEdgesCount.[int nextState] <- inEdgesCount.[int nextState] + 1))
+
+        inEdgesCount
+        |> Array.map (fun x -> x > 1)
+
     
     let printItem printer = 
         printer ()
@@ -207,6 +232,7 @@ let getGLLparserSource (fsa : FSA)
         printItem printStartState
         printItem printFinalStates
         printItem printNontermCount
+        printItem (printMultipleInEdges multipleInEdges)
         printItem printParser
     //printItem (printFun isAbstract)
 
@@ -232,7 +258,8 @@ let getGLLparserSource (fsa : FSA)
                                          , intToString
                                          , (int anyNonterm)* 1<positionInGrammar>
                                          , stateAndTokenToNewState
-                                         , stringToToken)
+                                         , stringToToken
+                                         , multipleInEdges)
 
 
     res, parserSource

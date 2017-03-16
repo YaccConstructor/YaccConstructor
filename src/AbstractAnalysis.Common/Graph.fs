@@ -26,7 +26,7 @@ type LexerEdge<'l ,'br  when 'l: equality> (s,e,t) =
 type IParserInput =
     abstract member InitialPositions: array<int<positionInInput>>    
     abstract member ForAllOutgoingEdges: int<positionInInput> -> (int<token> -> int<positionInInput> -> unit) -> unit
-
+    abstract member PositionToString : int -> string
 type ParserEdge<'token>(s, e, t)=
     inherit TaggedEdge<int, 'token>(s,e,t)
     
@@ -57,6 +57,8 @@ type ParserInputGraph<'token>(initialVertices : int[], finalVertices : int[]) =
 
 type LinearInput (initialPositions, input:array<int<token>>) =
     interface IParserInput with
+        member x.PositionToString(pos: int): string = 
+            sprintf "%i" pos
         member this.InitialPositions = initialPositions
         [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
         member this.ForAllOutgoingEdges curPosInInput pFun =
@@ -79,3 +81,5 @@ type SimpleGraphInput<'tagType> (initialPositions, getTokenFromTag:'tagType -> i
                 (fun e ->
                     pFun (getTokenFromTag e.Tag) (e.Target * 1<positionInInput>)
                 )
+        member x.PositionToString(pos: int): string = 
+            sprintf "%i" pos

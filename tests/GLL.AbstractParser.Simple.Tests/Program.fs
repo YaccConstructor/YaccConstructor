@@ -19,9 +19,10 @@ open System.IO
 open QuickGraph
 open NUnit.Framework
 open AbstractAnalysis.Common
-//open Yard.Generators.GLL.AbstractParser
+open Yard.Generators.GLL.AbstractParser
 open Yard.Generators.Common.ASTGLL
 open Yard.Generators.GLL.ParserCommon
+open YaccConstructor.API
 
 open System.Collections.Generic
 open System.Linq
@@ -29,250 +30,135 @@ open System.Linq
 
 let outputDir = ""//@"../../../src/GLL.AbstractParser.SimpleTest/"
 
-type elt = T of char | N of char
+//let dataDir = @"../../../data/AbstractGLL/"
+//let grammarsDir = @"../../"
 
+let dataDir = @"C:/Code/YaccConstructor/tests/data/AbstractGLL/"
+let grammarsDir = @"C:/Code/YaccConstructor/tests/GLL.AbstractParser.Simple.Tests/"
 
 let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)
 
 let rnd = new System.Random()
 
-//let newRandGraph (initialGraph:ParserInputGraph<_>) (tokens:array<_>) addEdges =
-//    let vertices = initialGraph.VertexCount
-//    for i in 0 .. addEdges - 1 do
-//        let token = tokens.[rnd.Next(0,tokens.Length-1)]
-//        let visited = Array.init vertices false
-//        let fromV = rnd.Next(0,vertices-1)
-//        let rec addEdg  =            
-//            if initialGraph.OutEdges(fromV) |> Seq.exists(fun e -> e.Tag = token) |> not
-//            then initialGraph.
+let getInputGraph tokenizer inputFile =    
+    let edges = 
+        File.ReadAllLines (dataDir + inputFile)
+        |> Array.map (fun s -> let x = s.Split([|' '|])
+                               (int x.[0]), (int x.[1]), x.[2])
+    let edg (f : int) (t : string) (l : int) = 
+        new TaggedEdge<_,_>(f, l, tokenizer (t.ToUpper())) 
+      
+    let g = new SimpleGraphInput<_>([|0<positionInInput>|], id)
+    
+    [|for (first,last,tag) in edges -> edg first tag last |]
+    |> g.AddVerticesAndEdgeRange
+    |> ignore
+    
+    g 
 
+let getParserSource grammarFile =    
+    generate (grammarsDir + grammarFile)
+             "YardFrontend" "GLLGenerator" 
+             None
+             ["ExpandMeta"]
+             [] :?> ParserSourceGLL
 
-
-
-//let test buildAbstractAst qGraph (intToString : int -> string) (fileName : string) nodesCount edgesCount termsCount ambiguityCount tokenData tokenToNum = 
-//    let r = buildAbstractAst qGraph
-//    printfn "%A" r
-//    match r with
-//        | Error str ->
-//            printfn "Error"
-//            Assert.Fail("")
-//        | Success tree ->
-//            tree.AstToDot intToString tokenToNum tokenData (outputDir + fileName)
-//            let n, e, t, amb = tree.CountCounters
-//            printfn "%d %d %d %d" n e t amb
-//            Assert.AreEqual(nodesCount, n, "Nodes count mismatch")
-//            Assert.AreEqual(edgesCount, e, "Edges count mismatch")
-//            Assert.AreEqual(termsCount, t, "Terms count mismatch") 
-//            Assert.AreEqual(ambiguityCount, amb, "Ambiguities count mismatch")
-//            Assert.Pass()
-
-//let isParsed parserSource input = 
-//    Yard.Generators.GLL.AbstractParserWithoutTree.isParsed parserSource input
-//
-//let shouldBeTrue res = 
-//    Assert.AreEqual(res, true, "Error.")
-
-
-//let test edges tokenizer parserSource = 
-//    let edg b e (tag: string) = 
-//        [| new TaggedEdge<_,_>(b, e, (tokenizer tag) * 1<token>) |]
-//
-//    let allVs = edges |> Array.collect (fun (b,e,_) -> [|b * 1<positionInGrammar>; e * 1<positionInGrammar>|]) |> Set.ofArray |> Array.ofSeq
-//
-//    let g = new SimpleGraphInput<_>(allVs, id)
-//
-//    [|for (b,e,t) in edges -> edg b e t |]
-//    |> Array.concat
-//    |> g.AddVerticesAndEdgeRange
-//    |> ignore
-//
-//    let res = Yard.Generators.GLL.AbstractParserWithoutTree.isParsed parserSource g
-//
-//    shouldBeTrue res
-//
-//        let edges = [|0, 1, "NUM";
-//                      1, 2, "PLUS";
-//                      2, 3, "NUM"|]
-//        
-//        test edges GLL.PrettySimpleCalc.stringToNumber GLL.PrettySimpleCalc.parserSource
-//
-//        
+let test grammarFile inputFile nodesCount edgesCount termsCount ambiguityCount = 
+    let parser = getParserSource grammarFile
+    let input  = getInputGraph parser.StringToToken inputFile
+    let tree = buildAst parser input
+    printfn "%A" tree
+    tree.AstToDot parser.IntToString (grammarsDir + inputFile + ".dot")
+    let n, e, t, amb = tree.CountCounters
+    //printfn "%d %d %d %d" n e t amb
+    Assert.AreEqual(nodesCount, n, sprintf "Nodes expected:%i, found:%i." nodesCount n)
+    Assert.AreEqual(edgesCount, e, sprintf "Edges expected:%i, found:%i." edgesCount e)
+    Assert.AreEqual(termsCount, t, sprintf "Terms expected:%i, found:%i." termsCount t) 
+    Assert.AreEqual(ambiguityCount, amb, sprintf "Ambiguities expected:%i, found:%i." ambiguityCount amb)
+    Assert.Pass()
+      
 [<TestFixture>]
-type ``GLL abstract parser tests``() =  
+type ``GLL abstract parser tests``() =
+    [<Test>]  
     member this._01_PrettySimpleCalc_SequenceInput () =
-        Assert.True(true);
-//        let input = 
-//            new LinearInput(
-//                Array.map (fun x -> GLL.PrettySimpleCalc.tokenToNumber.[x] * 1<token>)
-//                    [|GLL.PrettySimpleCalc.NUM 1;
-//                      GLL.PrettySimpleCalc.PLUS 2;
-//                      GLL.PrettySimpleCalc.NUM 3|])
+        Assert.Pass()
+//        test "PrettySimpleCalc.yrd" 
+//             "PrettySimpleCalc.txt"
+//             15 14 3 0
+    
+//    [<Test>]  
+//    member this._02_SimpleRec_1length () =
+//        test "SimpleRec.yrd" 
+//             "SimpleRec1.txt"
+//             15 14 3 0
 //
-//        let res = isParsed GLL.PrettySimpleCalc.parserSource input
+//    [<Test>]  
+//    member this._03_SimpleRec_2length () =
+//        test "SimpleRec.yrd" 
+//             "SimpleRec2.txt"
+//             15 14 3 0
 //
-//        shouldBeTrue res
-
 //    [<Test>]
 //    member this._06_NotAmbigousSimpleCalc_Loop () =
-//        let qGraph = new ParserInputGraph<_>([|0|] , [|4|] )
-//        qGraph.AddVerticesAndEdgeRange
-//            [edg 0 1 (GLL.NotAmbigousSimpleCalc.NUM  1)
-//             edg 1 2 (GLL.NotAmbigousSimpleCalc.PLUS 2)
-//             edg 2 3 (GLL.NotAmbigousSimpleCalc.NUM 3)
-//             edg 3 4 (GLL.NotAmbigousSimpleCalc.RNGLR_EOF 4)
-//             edg 3 0 (GLL.NotAmbigousSimpleCalc.PLUS 5)
-//             ] |> ignore
-//        
-//        test GLL.NotAmbigousSimpleCalc.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalc.numToString "NotAmbigousSimpleCalc2.dot" 25 30 6 1 GLL.NotAmbigousSimpleCalc.tokenData GLL.NotAmbigousSimpleCalc.tokenToNumber
-//
+//        test "NotAmbigousSimpleCalc.yrd" 
+//             "NotAmbigousSimpleCalc_Loop.txt"
+//             25 30 6 1
 //    [<Test>]
 //    member this._07_NotAmbigousSimpleCalc_LoopInLoop () =
-//        let qGraph = new ParserInputGraph<_>(0, 6)
-//        qGraph.AddVerticesAndEdgeRange
-//            [edg 0 1 (GLL.NotAmbigousSimpleCalc.NUM  1)
-//             edg 1 2 (GLL.NotAmbigousSimpleCalc.PLUS 2)
-//             edg 2 3 (GLL.NotAmbigousSimpleCalc.NUM 3)
-//             edg 3 4 (GLL.NotAmbigousSimpleCalc.PLUS 4)
-//             edg 4 5 (GLL.NotAmbigousSimpleCalc.NUM 5)
-//             edg 5 0 (GLL.NotAmbigousSimpleCalc.PLUS 6)
-//             edg 5 2 (GLL.NotAmbigousSimpleCalc.STAR 7)
-//             edg 5 6 (GLL.NotAmbigousSimpleCalc.RNGLR_EOF 8)
-//             ] |> ignore
-//        
-//        test  
-//            GLL.NotAmbigousSimpleCalc.buildAbstractAst 
-//            qGraph 
-//            GLL.NotAmbigousSimpleCalc.numToString 
-//            "NotAmbigousSimpleCalcLoopLoop.dot" 
+//        test "NotAmbigousSimpleCalc.yrd" 
+//             "NotAmbigousSimpleCalc_LoopInLoop.txt"
 //            39 48 9 2 
-//            GLL.NotAmbigousSimpleCalc.tokenData
-//            GLL.NotAmbigousSimpleCalc.tokenToNumber
-//
+//        
 //
 //    [<Test>]
 //    member this._14_NotAmbigousSimpleCalcWith2Ops_Loop () =
-//        let qGraph = new ParserInputGraph<_>(0, 7)
-//        qGraph.AddVerticesAndEdgeRange
-//            [edg 0 1 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM  1)
-//             edg 1 2 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 2)
-//             edg 2 3 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 3)
-//             edg 3 4 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 4)
-//             edg 4 5 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 5)
-//             edg 5 2 (GLL.NotAmbigousSimpleCalcWith2Ops.MULT 6)
-//             edg 4 6 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 7)
-//             edg 6 7 (GLL.NotAmbigousSimpleCalcWith2Ops.RNGLR_EOF 0)
-//             ] |> ignore
-//        
-//        test GLL.NotAmbigousSimpleCalcWith2Ops.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalcWith2Ops.numToString "NotAmbigousSimpleCalcWith2Ops.dot" 0 0 0 0
+//        test "NotAmbigousSimpleCalcWith2Ops.yrd" 
+//             "NotAmbigousSimpleCalcWith2Ops_Loop.txt"
+//             0 0 0 0
 //
 //    [<Test>]
 //    member this._15_NotAmbigousSimpleCalcWith2Ops_Loops () =
-//        let qGraph = new ParserInputGraph<_>(0, 8)
-//        qGraph.AddVerticesAndEdgeRange
-//            [edg 0 1 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM  1)
-//             edg 1 2 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 2)
-//             edg 2 3 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 3)
-//             edg 2 4 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 4)
-//             edg 3 4 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 5)
-//             edg 4 5 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 6)
-//             edg 5 2 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 7)
-//             edg 4 6 (GLL.NotAmbigousSimpleCalcWith2Ops.PLUS 8)
-//             edg 6 7 (GLL.NotAmbigousSimpleCalcWith2Ops.NUM 9)
-//             edg 7 8 (GLL.NotAmbigousSimpleCalcWith2Ops.RNGLR_EOF 0)
-//             ] |> ignore
-//        
-//        test GLL.NotAmbigousSimpleCalcWith2Ops.buildAbstractAst qGraph GLL.NotAmbigousSimpleCalcWith2Ops.numToString "NotAmbigousSimpleCalcWith2Ops2.dot" 0 0 0 0
-
+//        test "NotAmbigousSimpleCalcWith2Ops.yrd" 
+//             "NotAmbigousSimpleCalcWith2Ops_Loops.txt"
+//             0 0 0 0
+//
 //    [<Test>]
 //    member this._16_Stars_Loop () =
-//        let qGraph = new ParserInputGraph<_>(0, 2)
-//        qGraph.AddVerticesAndEdgeRange
-//            [edg 0 0 (GLL.Stars.STAR 1)
-//             edg 0 1 (GLL.Stars.SEMI 2)
-//             edg 1 2 (GLL.Stars.RNGLR_EOF 3)
-//             ] |> ignore
+//        test "Stars.yrd" 
+//             "Stars_Loop.txt"
+//             19 24 4 1 
 //        
-//        test 
-//            GLL.Stars.buildAbstractAst 
-//            qGraph 
-//            GLL.Stars.numToString 
-//            "Stars_Loop.dot" 
-//            19 24 4 1 
-//            GLL.Stars.tokenData
-//            GLL.Stars.tokenToNumber
-//
 //    [<Test>]
 //    member this._17_Stars2_Loop () =
-//        let qGraph = new ParserInputGraph<_>(0, 1)
-//        qGraph.AddVerticesAndEdgeRange
-//            [edg 0 0 (GLL.Stars2.STAR 1)
-//             edg 0 1 (GLL.Stars2.RNGLR_EOF 2)
-//             ] |> ignore
+//        test "Stars2.yrd" 
+//             "Stars2_Loop.txt"
+//             23 33 3 2
 //        
-//        test 
-//            GLL.Stars2.buildAbstractAst 
-//            qGraph 
-//            GLL.Stars2.numToString 
-//            "Stars2.dot" 
-//            23 33 3 2
-//            GLL.Stars2.tokenData
-//            GLL.Stars2.tokenToNumber
-//
 //    [<Test>]
 //    member this._19_FirstEps () =
-//        let qGraph = new ParserInputGraph<_>(0, 3)
-//        qGraph.AddVerticesAndEdgeRange
-//           [edg 0 1 (GLL.FirstEps.Z 1)
-//            edg 1 2 (GLL.FirstEps.N 2)
-//            edg 2 3 (GLL.FirstEps.RNGLR_EOF 3)
-//            ] |> ignore
-//
-//        test 
-//            GLL.FirstEps.buildAbstractAst
-//            qGraph
-//            GLL.FirstEps.numToString 
-//            "FirstEps.dot" 
-//            26 30 6 0
-//            GLL.FirstEps.tokenData
-//            GLL.FirstEps.tokenToNumber
-//    
+//        test "FirstEps.yrd" 
+//             "FirstEps.txt"
+//             26 30 6 0
+//        
 //    [<Test>]
 //    member this._20_CroppedBrackets () =
-//        let qGraph = new ParserInputGraph<_>(0, 2)
-//        qGraph.AddVerticesAndEdgeRange
-//           [edg 0 0 (GLL.CroppedBrackets.LBR 1)
-//            edg 0 1 (GLL.CroppedBrackets.NUM 2)
-//            edg 1 1 (GLL.CroppedBrackets.RBR 3)
-//            edg 1 2 (GLL.CroppedBrackets.RNGLR_EOF 0)
-//            ] |> ignore
-//
-//        test GLL.CroppedBrackets.buildAbstractAst qGraph GLL.CroppedBrackets.numToString "CroppedBrackets.dot" 14 15 5 1 GLL.CroppedBrackets.tokenData GLL.CroppedBrackets.tokenToNumber
+//        test "CroppedBrackets.yrd" 
+//             "CroppedBrackets.txt"
+//             14 15 5 1
 //
 //    [<Test>]
 //    member this._21_Brackets () =
-//        let qGraph = new ParserInputGraph<_>(0, 2)
-//        qGraph.AddVerticesAndEdgeRange
-//           [edg 0 0 (GLL.Brackets.LBR 1)
-//            edg 0 1 (GLL.Brackets.NUM 2)
-//            edg 1 1 (GLL.Brackets.RBR 3)
-//            edg 1 2 (GLL.Brackets.RNGLR_EOF 0)
-//            ] |> ignore
-//
-//        test GLL.Brackets.buildAbstractAst qGraph GLL.Brackets.numToString "Brackets.dot" 14 15 5 1 GLL.Brackets.tokenData GLL.Brackets.tokenToNumber    
+//        test "Brackets.yrd" 
+//             "Brackets.txt"
+//             14 15 5 1  
 //
 //    [<Test>]
 //    member this._22_Brackets_BackEdge () =
-//        let qGraph = new ParserInputGraph<_>(0, 2)
-//        qGraph.AddVerticesAndEdgeRange
-//           [edg 0 0 (GLL.Brackets.LBR 1)
-//            edg 0 1 (GLL.Brackets.NUM 2)
-//            edg 1 1 (GLL.Brackets.RBR 3)
-//            edg 1 0 (GLL.Brackets.NUM 4)
-//            edg 1 2 (GLL.Brackets.RNGLR_EOF 0)
-//            ] |> ignore
-//
-//        test GLL.Brackets.buildAbstractAst qGraph GLL.Brackets.numToString "Brackets_backEdge.dot" 35 54 6 4 GLL.Brackets.tokenData GLL.Brackets.tokenToNumber
+//        test "Brackets.yrd" 
+//             "Brackets_BackEdge.txt"
+//             35 54 6 4
+
 //
 //    [<Test>]
 //    member this._24_UnambiguousBrackets_Circle () =
@@ -582,26 +468,26 @@ type ``GLL abstract parser tests``() =
 //
 //        shouldBeTrue res
         
-[<EntryPoint>]
-let f x =
-    System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
-    let t = new ``GLL abstract parser tests``()   
-
-//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\1.1.ttl"
-//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
-//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\pizza.owl"
-//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf" 
-//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\people_pets.rdf"
-//        ] do
+//[<EntryPoint>]
+//let f x =
+//    System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
+//    let t = new ``GLL abstract parser tests``()   
 //
-//            let f = 
-//                YC.GLL.Abstarct.Tests.RDFPerformance.loadFromFile p
-//                 
-//            printfn "triples in %A: %A" (System.IO.Path.GetFileName p) f.Triples.Count
-    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf"
-    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
-    YC.GLL.Abstarct.Tests.RDFPerformance.performTests()
-    0
+////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\1.1.ttl"
+////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
+////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\pizza.owl"
+////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf" 
+////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\people_pets.rdf"
+////        ] do
+////
+////            let f = 
+////                YC.GLL.Abstarct.Tests.RDFPerformance.loadFromFile p
+////                 
+////            printfn "triples in %A: %A" (System.IO.Path.GetFileName p) f.Triples.Count
+//    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf"
+//    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
+//    YC.GLL.Abstarct.Tests.RDFPerformance.performTests()
+//    0
 
 
 //               t.PerformanceTestLinearBadLeftRec()

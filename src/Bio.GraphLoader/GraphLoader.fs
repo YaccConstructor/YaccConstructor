@@ -80,6 +80,12 @@ type EdgeCompressedGraphInput (edges: array<TaggedEdge<int<vNumInOriginalGraph>,
 
     interface IParserInput with
         member this.InitialPositions = initialPositions
+        member x.PositionToString(pos: int): string = 
+            let inline getPosOnEdge (packedValue : int) =
+                int (int packedValue &&& 0xffff) * 1<posInSubgraph>
+            let inline getEdge (packedValue : int) = 
+                int (int packedValue >>> 16)
+            sprintf "E:%i P:%i" (getEdge pos) (getPosOnEdge pos)
         [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
         member this.ForAllOutgoingEdges curPosInInput pFun =
             

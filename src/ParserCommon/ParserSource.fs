@@ -12,11 +12,12 @@ type ParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<positi
                      , anyNonterm         : int<positionInGrammar>
                      , stateAndTokenToNewState : Dictionary<int, int<positionInGrammar>>
                      , stringToToken      : Dictionary<string,int<token>>
+                     , multipleInEdges    : bool []
                      ) =
 
     let getTermsDictionaryKey (state: int<positionInGrammar>) token = 
         int( (int state <<< 16) ||| (token - outNonterms.Length) )
-
+    
     let strToToken str = 
         let isExist, value = stringToToken.TryGetValue(str)
         if isExist
@@ -35,3 +36,4 @@ type ParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<positi
     member this.AnyNonterm              = anyNonterm
     member this.StateAndTokenToNewState = stateAndTokenToNewState
     member this.StringToToken           = strToToken
+    member this.MultipleInEdges         = multipleInEdges

@@ -171,7 +171,7 @@ Target "GenTests:RNGLR" (fun _ ->
                             runCmd @"tests\RNGLRParser.Simple.Tests\gen.cmd"
                         )
 
-Target "GenTests:GLL" (fun _ -> ()//runCmd @"tests\GLL.AbstractParser.Simple.Tests\gen.cmd"
+Target "GenTests:GLL" (fun _ -> runCmd @"tests\GLL.AbstractParser.Simple.Tests\gen.cmd"
                       )
 
 Target "GenTests:RIGLR" (fun _ -> runCmd @"tests\RIGLRParser.SimpleTest\gen.cmd")

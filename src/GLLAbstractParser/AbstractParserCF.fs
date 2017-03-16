@@ -52,7 +52,7 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
         let _, gssVertexSlave = masterGrammar.neg |> curContext.GetInfo
         
         let outEdges = gss.OutEdges gssVertexMaster |> Array.ofSeq        
-        gssVertexMaster.P.Add (new PoppedData(toInputPos posInSlaveGrammar, Empty))
+        gssVertexMaster.P.SetP.Add (new PoppedData(toInputPos posInSlaveGrammar, Empty))
         if outEdges <> null && outEdges.Length <> 0
         then  
             for e in outEdges do
@@ -73,7 +73,7 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
         then
             if not edgeExists
             then
-                startV.P
+                startV.P.SetP
                 |> ResizeArray.iter(fun p -> 
                     if stateToContinue |> grammar.FinalStates.Contains
                     then

@@ -27,10 +27,10 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
 
     let startContext =
         let s1, s2 = leftGrammar.StartState, rightGrammar.StartState
-        let vertexParser, vertexInput = new GSSVertex(s1, toInputPos s2), new GSSVertex(s2, toInputPos s1)
-        gssLeft.AddVertex vertexParser |> ignore
-        gssRight.AddVertex vertexInput |> ignore
-        new ContextCF<_>(s1, s2, vertexParser, vertexInput)
+        let vertexLeft, vertexRight = new GSSVertex(s1, toInputPos s2), new GSSVertex(s2, toInputPos s1)
+        gssLeft.AddVertex vertexLeft |> ignore
+        gssRight.AddVertex vertexRight |> ignore
+        new ContextCF<_>(s1, s2, vertexLeft, vertexRight)
 
     let setR = Stack<_>([startContext])
     
@@ -89,7 +89,7 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
         if posInMasterGrammar |> grammar.FinalStates.Contains
         then pop masterGrammar currentContext gssVertexMaster posInSlaveGrammar
 
-    let handleNontermTransitions masterGrammar (currentContext: ContextCF<_>) =
+    let makeNontermTransitions masterGrammar (currentContext: ContextCF<_>) =
         let grammar, _ = getGrammarInfo masterGrammar
         let posInMasterGrammar, gssVertexmaster = masterGrammar |> currentContext.GetInfo
         let possibleNontermMovesInGrammar = grammar.OutNonterms.[int posInMasterGrammar]
@@ -97,14 +97,20 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
         for curNonterm, nextState in possibleNontermMovesInGrammar do            
             create masterGrammar currentContext nextState curNonterm
 
-    let handleTerminalTransitions (currentContext: ContextCF<_>) =
-        // it is impossible to get state's out terms from ParserSourceGLL-info
-        // need to add "outTerms" to ParserSource or use FSA directly 
-        ()
+    let makeTermTransitions (currentContext: ContextCF<_>) =
+       let outTermsLeft, outTermsRight = 
+           leftGrammar.OutTerms.[int currentContext.PosInGrammar1], leftGrammar.OutTerms.[int currentContext.PosInGrammar2]
+       outTermsLeft |> Array.iter (fun (t1, s1) -> 
+                                       outTermsRight 
+                                       |> Array.filter (fun (t2, s2) -> t2 = t1)
+                                       |> Array.iter (fun (t2, s2) -> addContext s1 s2 currentContext.GssVertex1 currentContext.GssVertex2))
 
     while setR.Count <> 0 do
         let currentContext = setR.Pop()
-        ()
+        handleFinalStates Left currentContext
+        handleFinalStates Right currentContext
+        makeNontermTransitions Left currentContext
+        makeNontermTransitions Right currentContext
+        makeTermTransitions currentContext
 
-
-    (gssLeft, gssRight)
+    gssLeft, gssRight

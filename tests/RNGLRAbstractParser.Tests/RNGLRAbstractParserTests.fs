@@ -29,7 +29,7 @@ open System.Collections.Generic
 
 open QuickGraph.FSA.GraphBasedFsa
 
-let baseInputGraphsPath = "../../../data/AbstractRNGLR/DOT"
+let baseInputGraphsPath = "./data/AbstractRNGLR/DOT"
 
 let path name = System.IO.Path.Combine(baseInputGraphsPath, name)
 

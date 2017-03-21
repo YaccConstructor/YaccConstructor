@@ -44,7 +44,7 @@ let f () =
 let ConversionsManager = AddinManager.GetExtensionObjects (typeof<Conversion>) |> Seq.cast<Conversion>
 let FrontendsManager = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
 
-let conversionTestPath = @"../../../data/Conversions/"
+let conversionTestPath = @"./data/Conversions/"
 let GeneratorsManager = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator>
 
 let getFrontend name =       

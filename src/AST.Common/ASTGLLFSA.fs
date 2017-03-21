@@ -86,9 +86,9 @@ let inline getPosition (packedValue : int) = int (packedValue &&& 0xffff)
 
 [<Struct>]
 type NumNode<'vtype> =
-    val Num : int
+    val Ancestor : int
     val Node : 'vtype
-    new (num, node) = {Num = num; Node = node} 
+    new (ancestor, node) = {Ancestor = ancestor; Node = node} 
 
 [<AllowNullLiteral>]
 type Tree<'TokenType> (roots : INode[], unpackPos) =
@@ -131,88 +131,77 @@ type Tree<'TokenType> (roots : INode[], unpackPos) =
         let nodeQueue = new Queue<NumNode<INode>>()
         let used = new Dictionary<_,_>()
         let num = ref -1
-        let rootsLeft = ref roots.Length
         for root in roots do
-            nodeQueue.Enqueue(new NumNode<INode>(!num, root))
+            nodeQueue.Enqueue(new NumNode<INode>(-1, root))
         let isDummy (n:INode) = match n with :? TerminalNode as t -> t.Extension = packExtension -1 -1 | _ -> false
 
-        while nodeQueue.Count <> 0 do
+        while nodeQueue.Count <> 0  do
             let currentPair = nodeQueue.Dequeue()
             let key = ref 0
-            if !rootsLeft = 0
+            if currentPair.Node <> null && used.TryGetValue(currentPair.Node, key)
             then
-                if currentPair.Node <> null && used.TryGetValue(currentPair.Node, key)
+                if currentPair.Ancestor <> -1
                 then
-                    createEdge currentPair.Num !key false ""
-                else    
-                    num := !num + 1
-                    used.Add(currentPair.Node, !num)
-                    match currentPair.Node with 
-                    | :? NonTerminalNode as a -> 
-                        let isAmbiguous = a.Others <> null
-                        createNode false !num isAmbiguous NonTerminal (sprintf "%s,%s,%s" (indToString.[int a.Name]) (unpackPos <| getLeftExtension a.Extension) (unpackPos <| getRightExtension a.Extension))
-                        createEdge currentPair.Num !num false ""
-                        if a.First <> Unchecked.defaultof<_>
+                    createEdge currentPair.Ancestor !key false ""
+            else    
+                num := !num + 1
+                used.Add(currentPair.Node, !num)
+                match currentPair.Node with 
+                | :? NonTerminalNode as a -> 
+                    let isAmbiguous = a.Others <> null
+                    let isRoot = currentPair.Ancestor = -1
+                    createNode isRoot !num isAmbiguous NonTerminal (sprintf "%s,%s,%s" (indToString.[int a.Name]) (unpackPos <| getLeftExtension a.Extension) (unpackPos <| getRightExtension a.Extension))
+                    if not isRoot
+                    then
+                        createEdge currentPair.Ancestor !num false ""
+                    if a.First <> Unchecked.defaultof<_>
+                    then
+                        nodeQueue.Enqueue(new NumNode<INode>(!num, a.First))
+                    if a.Others <> null
+                    then
+                        for n in a.Others do
+                            nodeQueue.Enqueue(new NumNode<INode>(!num, n))
+                | :? PackedNode as p ->
+                    createNode false !num false Packed ""
+                    createEdge currentPair.Ancestor !num false ""
+                    if not <| isDummy p.Left then 
+                        nodeQueue.Enqueue(new NumNode<INode>(!num, p.Left))
+                    if not <| isDummy p.Right then 
+                        nodeQueue.Enqueue(new NumNode<INode>(!num, p.Right))
+                | :? IntermidiateNode as i ->
+                    createNode false !num false Intermidiate (sprintf "%i,%s,%s" i.State (unpackPos <| getLeftExtension i.Extension) (unpackPos <| getRightExtension i.Extension))
+                    createEdge currentPair.Ancestor !num false ""
+                    if i.First <> Unchecked.defaultof<_>
+                    then
+                        nodeQueue.Enqueue(new NumNode<INode>(!num, i.First))
+                    if i.Others <> null
+                    then
+                        for nodes in i.Others do
+                            nodeQueue.Enqueue(new NumNode<INode>(!num, nodes))
+                | :? TerminalNode as t ->
+                    if t.Extension <> packExtension -1 -1 
+                    then
+                        if t.Name <> -2<token>
                         then
-                            nodeQueue.Enqueue(new NumNode<INode>(!num, a.First))
-                        if a.Others <> null
-                        then
-                            for n in a.Others do
-                                nodeQueue.Enqueue(new NumNode<INode>(!num, n))
-                    | :? PackedNode as p ->
-                        createNode false !num false Packed ""
-                        createEdge currentPair.Num !num false ""
-                        if not <| isDummy p.Left then 
-                            nodeQueue.Enqueue(new NumNode<INode>(!num, p.Left))
-                        if not <| isDummy p.Right then 
-                            nodeQueue.Enqueue(new NumNode<INode>(!num, p.Right))
-                    | :? IntermidiateNode as i ->
-                        createNode false !num false Intermidiate (sprintf "%i,%s,%s" i.State (unpackPos <| getLeftExtension i.Extension) (unpackPos <| getRightExtension i.Extension))
-                        createEdge currentPair.Num !num false ""
-                        if i.First <> Unchecked.defaultof<_>
-                        then
-                            nodeQueue.Enqueue(new NumNode<INode>(!num, i.First))
-                        if i.Others <> null
-                        then
-                            for nodes in i.Others do
-                                nodeQueue.Enqueue(new NumNode<INode>(!num, nodes))
-                    | :? TerminalNode as t ->
-                        if t.Extension <> packExtension -1 -1 
-                        then
-                            if t.Name <> -2<token>
-                            then
-                                createNode false !num false Terminal (sprintf "%s,%s,%s" (indToString.[int t.Name]) (unpackPos <| getLeftExtension t.Extension) (unpackPos <| getRightExtension t.Extension))
-                                createEdge currentPair.Num !num false ""
-                            else
-                                createNode false !num false Terminal ("dummy")
-                                createEdge currentPair.Num !num false ""
+                            createNode false !num false Terminal (sprintf "%s,%s,%s" (indToString.[int t.Name]) (unpackPos <| getLeftExtension t.Extension) (unpackPos <| getRightExtension t.Extension))
+                            createEdge currentPair.Ancestor !num false ""
                         else
-                            ()
-                    | :? EpsilonNode as e ->
-                        if e.Extension <> packExtension -1 -1 
-                        then
-                            createNode false !num false Epsilon ((sprintf "epsilon,%s" (unpackPos <| getRightExtension e.Extension) ))
-                            createEdge currentPair.Num !num false ""
-                        else
-                            ()
-                    //                            createNode !num false Terminal ("dummy")
+                            createNode false !num false Terminal ("dummy")
+                            createEdge currentPair.Ancestor !num false ""
+                    else
+                        ()
+                | :? EpsilonNode as e ->
+                    if e.Extension <> packExtension -1 -1 
+                    then
+                        createNode false !num false Epsilon ((sprintf "epsilon,%s" (unpackPos <| getRightExtension e.Extension) ))
+                        createEdge currentPair.Ancestor !num false ""
+                    else
+                        ()
+                //                            createNode !num false Terminal ("dummy")
 //                            createEdge currentPair.Num !num false ""
 
-                    | null -> ()
-                    | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
-            else
-                decr rootsLeft
-                let a = currentPair.Node :?> NonTerminalNode
-                num := !num + 1
-                let isAmbiguous = (a.Others <> Unchecked.defaultof<_>)
-                createNode true !num isAmbiguous NonTerminal ((sprintf "%s,%s,%s" (indToString.[int a.Name]) (unpackPos <| getLeftExtension a.Extension) (unpackPos <| getRightExtension a.Extension)))
-                if a.First <> Unchecked.defaultof<_>
-                then
-                    nodeQueue.Enqueue(new NumNode<INode>(!num, a.First))
-                if a.Others <> Unchecked.defaultof<_>
-                then
-                    for n in a.Others do
-                        nodeQueue.Enqueue(new NumNode<INode>(!num, n))
+                | null -> ()
+                | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
         out.WriteLine("}")
         out.Close()
 

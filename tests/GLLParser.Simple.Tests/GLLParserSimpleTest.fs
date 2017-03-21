@@ -18,10 +18,18 @@ open Yard.Generators.GLL.AbstractParser
 //    let tokens = LexCommon.tokens(path)
 //    astBuilder tokens
 
-//let inputFilesPath = @"../../../data/GLL/"
-let grammarFilesPath = @"C:/Code/YaccConstructor/tests/GLLParser.Simple.Tests/"
-let inputFilesPath = @"C:/Code/YaccConstructor/tests/data/GLL/"
-//let outDir = @"../../../src/GLLParser.SimpleTest/"
+let needChangeDirectory = 
+    @"C:\Users\Artem Gorokhov\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory()
+
+let inputFilesPath = 
+    if needChangeDirectory
+    then @"C:/Code/YaccConstructor/tests/data/GLL/"
+    else @"./data/GLL/"
+let grammarFilesPath = 
+    if needChangeDirectory
+    then @"C:/Code/YaccConstructor/tests/GLLParser.Simple.Tests/"
+    else @"./GLLParser.Simple.Tests/"
+
 
 let getTokens path =
     System.IO.File.ReadAllText(inputFilesPath + path)

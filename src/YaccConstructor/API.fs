@@ -32,8 +32,7 @@ let logf e m =
 
 let eol = System.Environment.NewLine
 
-
-let run grammarFile frontendName generatorName generatorParams conversions userDefs generateToFile =
+let run grammar isFile frontendName generatorName generatorParams conversions userDefs generateToFile =
     let frontend =
         let fen = (Addin.GetFrontends())
         let _raise () = InvalidFEName frontendName |> raise
@@ -50,12 +49,14 @@ let run grammarFile frontendName generatorName generatorParams conversions userD
     // Parse grammar
     let ilTree =
         //try
+        if isFile then
             let defStr = String.concat ";" userDefs
             if System.String.IsNullOrEmpty defStr
-            then grammarFile
-            else grammarFile + "%" + defStr
+            then grammar
+            else grammar + "%" + defStr
             |> frontend.ParseGrammar
             |> ref
+        else grammar |> frontend.ParseGrammarString |> ref
         //with
         //| e -> FEError (e.Message + " " + e.StackTrace) |> raise
     Namer.initNamer ilTree.Value.grammar
@@ -159,7 +160,10 @@ let run grammarFile frontendName generatorName generatorParams conversions userD
     result
 
 let gen grammarFile frontendName generatorName generatorParams conversions userDefs generateToFile = 
-    run grammarFile frontendName generatorName generatorParams conversions userDefs generateToFile
+    run grammarFile true frontendName generatorName generatorParams conversions userDefs generateToFile
+
+let genStr grammar frontendName generatorName generatorParams conversions userDefs generateToFile =
+    run grammar false frontendName generatorName generatorParams conversions userDefs generateToFile
 
 let generateToFile grammarFile frontendName generatorName generatorParams conversions userDefs = 
     try
@@ -190,11 +194,42 @@ List of available frontends, generators and conversions can be obtained by -af -
         |> log e
     | x -> "Correct this or above construction. Pay attention to the punctuation.\n"
         |> log x
-    
 
+let generateToFileFromString grammarFile frontendName generatorName generatorParams 
+        conversions userDefs =
+        try
+            genStr grammarFile frontendName generatorName generatorParams conversions userDefs true 
+            |> ignore
+        with
+        | InvalidFEName frontendName as e  -> 
+            "Frontend with name " + frontendName + " is not available. Run \"Main.exe -af\" for get all available frontends.\n" 
+            |> log e
+        | InvalidGenName genName as e->
+            "Generator with name " + genName + " is not available. Run \"Main.exe -ag\" for get all available generators.\n"
+            |> log e
+        | EmptyArg argName as e ->
+            sprintf "Argument can not be empty: %s\n\nYou need to specify frontend, generator and input grammar. Example:
+    YaccConstructor.exe -f YardFrontend -c BuildAST -g YardPrinter -i ../../../Tests/Conversions/buildast_1.yrd \n
+    List of available frontends, generators and conversions can be obtained by -af -ag -ac keys" argName
+            |> log e
+        | FEError error as e ->
+            "Frontend error: " + error + "\n"
+            |> log e
+        | GenError error as e  ->
+            "Generator error: " + error + "\n"
+            |> log e
+        | CheckerError error as e  ->
+            error + "\n"
+            |> log e
+        | :? System.IO.IOException as e -> 
+            "Could not read input file.\n"
+            |> log e
+        | x -> "Correct this or above construction. Pay attention to the punctuation.\n"
+            |> log x
+    
 let generate grammarFile frontendName generatorName generatorParams conversions userDefs = 
     try
-        gen grammarFile frontendName generatorName generatorParams conversions userDefs false
+        genStr grammarFile frontendName generatorName generatorParams conversions userDefs false
     with
     | InvalidFEName frontendName as e  -> 
         "Frontend with name " + frontendName + " is not available. Run \"Main.exe -af\" for get all available frontends.\n" 
@@ -222,3 +257,30 @@ List of available frontends, generators and conversions can be obtained by -af -
     | x -> "Correct this or above construction. Pay attention to the punctuation.\n"
         |> logf x
     
+
+let generateFromString grammar frontendName generatorName generatorParams conversions userDefs = 
+    try
+        gen grammar frontendName generatorName generatorParams conversions userDefs false
+    with
+    | InvalidFEName frontendName as e  -> 
+        "Frontend with name " + frontendName + " is not available. Run \"Main.exe -af\" for get all available frontends.\n" 
+        |> logf e
+    | InvalidGenName genName as e->
+        "Generator with name " + genName + " is not available. Run \"Main.exe -ag\" for get all available generators.\n"
+        |> logf e
+    | EmptyArg argName as e ->
+        sprintf "Argument can not be empty: %s\n\nYou need to specify frontend, generator and input grammar. Example:
+YaccConstructor.exe -f YardFrontend -c BuildAST -g YardPrinter -i ../../../Tests/Conversions/buildast_1.yrd \n
+List of available frontends, generators and conversions can be obtained by -af -ag -ac keys" argName
+        |> logf e
+    | FEError error as e ->
+        "Frontend error: " + error + "\n"
+        |> logf e
+    | GenError error as e  ->
+        "Generator error: " + error + "\n"
+        |> logf e
+    | CheckerError error as e  ->
+        error + "\n"
+        |> logf e
+    | x -> "Correct this or above construction. Pay attention to the punctuation.\n"
+        |> logf x

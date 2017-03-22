@@ -35,3 +35,11 @@ type YardFrontend() =
         override this.ProductionTypes =
             List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
             |> List.map (fun unionCase -> unionCase.Name)
+
+    member this.ParseGrammarString t =
+        match t with
+        | (:? System.String as s) ->
+            let inliner = new Conversion.ExpandInline.ReplaceInline()
+            let g = Main.ParseText s ""
+            { g with grammar = inliner.ConvertGrammar g.grammar } 
+        | _ -> failwithf "String format expected as argument for YardFrontend.ParseGrammarString, but got: %A" t

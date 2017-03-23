@@ -3,15 +3,20 @@
 open TblReader
 open System.Diagnostics
 
-let filterWithInfernal resultFileFullName =
-    let workingDir = System.AppDomain.CurrentDomain.BaseDirectory + @"..\..\..\infernal\"
+
+//"cmscan.exe"
+// sprintf "--anytrunc --noali --tblout log.txt archaea.cm \"%s\"" resultFileFullName
+
+let runInfernal tool args =
+    let workingDir = System.AppDomain.CurrentDomain.BaseDirectory + @"..\..\..\lib\infernal\"
         
     let runInfernal() = 
         let startInfo = new ProcessStartInfo()
-        startInfo.FileName <- "cmscan.exe"
-        startInfo.Arguments <- sprintf "--anytrunc --noali --tblout log.txt archaea.cm \"%s\"" resultFileFullName
+        startInfo.FileName <- tool
+        startInfo.Arguments <- args
         startInfo.WorkingDirectory <- workingDir
         Process.Start(startInfo).WaitForExit()
-    //runInfernal()
+    
+    runInfernal()
 
-    getTbl (workingDir + "log.txt")
+let score inputFile outFile =

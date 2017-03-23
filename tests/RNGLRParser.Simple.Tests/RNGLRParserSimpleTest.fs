@@ -9,7 +9,7 @@ let run path astBuilder =
     let tokens = LexCommon.tokens(path)
     astBuilder tokens
 
-let dir = @"../../../data/RNGLR/"
+let dir = @"./data/RNGLR/"
 let inline printErr (num, token : 'a, msg) =
     printfn "Error in position %d on Token %A: %s" num token msg
     Assert.Fail(sprintf "Error in position %d on Token %A: %s" num token msg)

@@ -1,0 +1,3 @@
+0 1 NUM
+1 2 PLUS
+2 3 NUM

@@ -100,14 +100,16 @@ let () =
         | _           -> ()
 
     if !generateSomething = true
-    then 
-        generateToFile (System.IO.Path.Combine(testsPath.Value.Value, testFile.Value.Value))
-                       (feName.Value.Value)
-                       (generatorName.Value.Value)
-                       (generatorParams.Value)
-                       conversions
-                       userDefs.Value
-
+    then
+        try
+            generateToFile (System.IO.Path.Combine(testsPath.Value.Value, testFile.Value.Value))
+                           (feName.Value.Value)
+                           (generatorName.Value.Value)
+                           (generatorParams.Value)
+                           conversions
+                           userDefs.Value
+        with 
+            | _ -> ()
 
 //Tests. Please do not remove
 //YaccConstructor.exe -f AntlrFrontend -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/ANTLR/C.g

@@ -50,7 +50,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) =
         let curGssVertex = curContext.GssVertex
         let outEdges = gss.OutEdges curGssVertex |> Array.ofSeq
         
-        curGssVertex.P.Add (new PoppedData(curContext.PosInInput, curContext.Length))
+        curGssVertex.AddP (new PoppedData(curContext.PosInInput, curContext.Length))
         if outEdges <> null && outEdges.Length <> 0
         then
             for e in outEdges do

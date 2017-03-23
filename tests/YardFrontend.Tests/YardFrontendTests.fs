@@ -31,7 +31,7 @@ open NUnit.Framework
 
 module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
 
-let basePath subdir = System.IO.Path.Combine("../../../data/YardFrontend/", subdir)
+let basePath subdir = System.IO.Path.Combine("./data/YardFrontend/", subdir)
 
 let dummyPos s = new Source.t(s)
 

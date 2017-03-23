@@ -114,12 +114,19 @@ type ContextCF<'GSSVertex> =
     val GssVertex2          :   'GSSVertex
     val Data                :   ParseData
     new (posInGrammar1, posInGrammar2, gssVertex1, gssVertex2) = 
-        {PosInGrammar1 = posInGrammar1; PosInGrammar2 = posInGrammar2; GssVertex1 = gssVertex1; GssVertex2 = gssVertex2; Data = Empty}
+        {PosInGrammar1 = posInGrammar1; PosInGrammar2 = posInGrammar2; 
+         GssVertex1 = gssVertex1; GssVertex2 = gssVertex2; Data = Empty}
     member this.GetInfo selector =         
-        match selector with | Left -> (this.PosInGrammar1, this.GssVertex1) | Right -> (this.PosInGrammar2, this.GssVertex2)
-    override this.ToString () = ""
+        match selector with 
+        | Left -> (this.PosInGrammar1, this.GssVertex1) 
+        | Right -> (this.PosInGrammar2, this.GssVertex2)
+    override this.ToString () = sprintf 
+                                    "(%i; %i; (%s); (%s))" 
+                                    this.PosInGrammar1
+                                    this.PosInGrammar2
+                                    (this.GssVertex1.ToString ())
+                                    (this.GssVertex2.ToString())
        
-
 type ParseResult<'a> =
     | Success of Tree<'a>
     | Success1 of 'a[]

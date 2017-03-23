@@ -24,13 +24,13 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
     // choose the grammar constructions we want to work with
     let inline getGrammarInfo selector = 
         match selector with | Left -> (leftGrammar, gssLeft) | Right -> (rightGrammar, gssRight)
-
-    let startContext =
-        let s1, s2 = leftGrammar.StartState, rightGrammar.StartState
-        let vertexLeft, vertexRight = new GSSVertex(s1, toInputPos s2), new GSSVertex(s2, toInputPos s1)
-        gssLeft.AddVertex vertexLeft |> ignore
-        gssRight.AddVertex vertexRight |> ignore
-        new ContextCF<_>(s1, s2, vertexLeft, vertexRight)
+    
+    let s1, s2 = leftGrammar.StartState, rightGrammar.StartState
+    let vertexLeft, vertexRight = new GSSVertex(s1, toInputPos s2), new GSSVertex(s2, toInputPos s1)
+    gssLeft.AddVertex vertexLeft |> ignore
+    gssRight.AddVertex vertexRight |> ignore
+    
+    let startContext = new ContextCF<_>(s1, s2, vertexLeft, vertexRight)
 
     let setR = Stack<_>([startContext])
     
@@ -40,11 +40,15 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
    
     /// Adds descriptor of the form (p1, p2, v1, v2) to the stack (setR)
     /// if it's first occurrence of this descriptor (both U-sets doesn't contain corresponding values)
-    let addContext posInGrammar1 posInGrammar2 (gssVertex1: GSSVertex) (gssVertex2: GSSVertex) =
+    let addContext masterGrammar posInGrammar1 posInGrammar2 (gssVertex1: GSSVertex) (gssVertex2: GSSVertex) =
         if not <| 
-            gssVertex1.ContainsContext (toInputPos posInGrammar2) posInGrammar1 Empty
-            && gssVertex2.ContainsContext (toInputPos posInGrammar1) posInGrammar2 Empty
-        then pushContext posInGrammar1 posInGrammar2 gssVertex1 gssVertex2
+            (gssVertex1.ContainsContext (toInputPos posInGrammar2) posInGrammar1 Empty
+            && gssVertex2.ContainsContext (toInputPos posInGrammar1) posInGrammar2 Empty)
+        then
+            match masterGrammar with
+            | Left -> pushContext posInGrammar1 posInGrammar2 gssVertex1 gssVertex2
+            | Right -> pushContext posInGrammar2 posInGrammar1 gssVertex2 gssVertex1
+            
     
     /// Makes pop-action with specified grammar and gss (position in the second grammar doesn't change) 
     let rec pop masterGrammar (curContext: ContextCF<_>) gssVertexMaster posInSlaveGrammar =
@@ -59,7 +63,7 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
                 if e.Tag.StateToContinue |> grammar.FinalStates.Contains
                 then
                     pop masterGrammar curContext e.Target posInSlaveGrammar 
-                addContext e.Tag.StateToContinue posInSlaveGrammar e.Target gssVertexSlave
+                addContext masterGrammar e.Tag.StateToContinue posInSlaveGrammar e.Target gssVertexSlave
     
     let create masterGrammar (curContext: ContextCF<_>) stateToContinue nonterm =  
         let grammar, gss = getGrammarInfo masterGrammar
@@ -78,8 +82,8 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
                     if stateToContinue |> grammar.FinalStates.Contains
                     then
                         pop masterGrammar curContext gssVertexMaster (toGrammarPos p.posInInput)
-                    addContext stateToContinue (toGrammarPos p.posInInput) gssVertexMaster gssVertexSlave)      
-        else addContext nonterm posInSlaveGrammar startV gssVertexSlave
+                    addContext masterGrammar stateToContinue (toGrammarPos p.posInInput) gssVertexMaster gssVertexSlave)      
+        else addContext masterGrammar nonterm posInSlaveGrammar startV gssVertexSlave
 
     let handleFinalStates masterGrammar (currentContext: ContextCF<_>) =
         let grammar, _ = getGrammarInfo masterGrammar
@@ -103,14 +107,25 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
        outTermsLeft |> Array.iter (fun (t1, s1) -> 
                                        outTermsRight 
                                        |> Array.filter (fun (t2, s2) -> t2 = t1)
-                                       |> Array.iter (fun (t2, s2) -> addContext s1 s2 currentContext.GssVertex1 currentContext.GssVertex2))
+                                       |> Array.iter (fun (t2, s2) -> 
+                                                          addContext Left s1 s2 currentContext.GssVertex1 currentContext.GssVertex2))
+    
+    let isFinalContext (context: ContextCF<_>) =
+        int context.PosInGrammar1 = 1 
+        && int context.PosInGrammar2 = 1
+        && context.GssVertex1 = vertexLeft
+        && context.GssVertex2 = vertexRight
+    
+    let count = ref 0
 
     while setR.Count <> 0 do
         let currentContext = setR.Pop()
+        if isFinalContext currentContext 
+        then incr count            
         handleFinalStates Left currentContext
         handleFinalStates Right currentContext
         makeNontermTransitions Left currentContext
         makeNontermTransitions Right currentContext
         makeTermTransitions currentContext
 
-    gssLeft, gssRight
+    gssLeft, gssRight, !count

@@ -25,4 +25,5 @@ do()
 type Frontend() = //as this =
     abstract Name : string
     abstract ParseGrammar : obj -> Definition.t<Source.t,Source.t>
+    abstract ParseGrammarString : obj -> Definition.t<Source.t, Source.t>
     abstract ProductionTypes : string list

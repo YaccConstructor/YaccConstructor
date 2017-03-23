@@ -1,2 +1,2 @@
 [<Start>]
-s : A v=s {1 + v} | A {1}
+s : A s | A

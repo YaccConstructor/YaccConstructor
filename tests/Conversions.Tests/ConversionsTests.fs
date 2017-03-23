@@ -44,7 +44,7 @@ let f () =
 let ConversionsManager = AddinManager.GetExtensionObjects (typeof<Conversion>) |> Seq.cast<Conversion>
 let FrontendsManager = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
 
-let conversionTestPath = @"../../../data/Conversions/"
+let conversionTestPath = @"./data/Conversions/"
 let GeneratorsManager = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator>
 
 let getFrontend name =       
@@ -95,7 +95,6 @@ let runTest inputFile conversion expectedResult =
     Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
 
 [<TestFixture>]
-[<Ignore("Temporarily disabled for branches merge")>]
 type ``Conversions tests`` () =
     
     [<Test>]
@@ -145,7 +144,6 @@ type ``Conversions tests`` () =
         Assert.True(hasNotInnerSeq)
    
 [<TestFixture>]
-[<Ignore("Temporarily disabled for branches merge")>]
 type ``Expand top level alters`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "ExpandTopLevelAlters")
     let path f = System.IO.Path.Combine(basePath, f)

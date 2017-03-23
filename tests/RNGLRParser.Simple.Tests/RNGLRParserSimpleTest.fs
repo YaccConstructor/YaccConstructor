@@ -9,7 +9,7 @@ let run path astBuilder =
     let tokens = LexCommon.tokens(path)
     astBuilder tokens
 
-let dir = @"../../../data/RNGLR/"
+let dir = @"./data/RNGLR/"
 let inline printErr (num, token : 'a, msg) =
     printfn "Error in position %d on Token %A: %s" num token msg
     Assert.Fail(sprintf "Error in position %d on Token %A: %s" num token msg)
@@ -24,7 +24,6 @@ let inline translate (f : TranslateArguments<_,_> -> 'b -> 'c) (ast : 'b) =
     f args ast
 
 [<TestFixture>]
-[<Ignore("Temporarily disabled for branches merge")>]
 type ``RNGLR parser tests with simple lexer`` () =
 
     let translateAndCheck toDot translateFunction (expected : List<_>) (ast : Tree<_>) file errors = 
@@ -63,27 +62,27 @@ type ``RNGLR parser tests with simple lexer`` () =
 
     [<Test>]
     member test.``First grammar test``() =
-        runTest RNGLR.ParseFirst.buildAst "first.txt" printAst
+        runTest RNGLR.ParseFirst.buildAst "First.txt" printAst
 
     [<Test>]
     member test.``List test``() =
-        runTest RNGLR.ParseList.buildAst "list.txt" printAst
+        runTest RNGLR.ParseList.buildAst "List.txt" printAst
 
     [<Test>]
     member test.``Simple Right Null test``() =
-        runTest RNGLR.ParseSimpleRightNull.buildAst "simpleRightNull.txt" printAst
+        runTest RNGLR.ParseSimpleRightNull.buildAst "SimpleRightNull.txt" printAst
 
     [<Test>]
     member test.``Complex Right Null test``() =
-        runTest RNGLR.ParseComplexRightNull.buildAst "complexRightNull.txt" printAst 
+        runTest RNGLR.ParseComplexRightNull.buildAst "ComplexRightNull.txt" printAst 
 
     [<Test>]
     member test.``Counter test - simple for translator``() =
-        runTest RNGLR.ParseCounter.buildAst "counter.txt" (translateAndCheck RNGLR.ParseCounter.defaultAstToDot RNGLR.ParseCounter.translate [5])
+        runTest RNGLR.ParseCounter.buildAst "Counter.txt" (translateAndCheck RNGLR.ParseCounter.defaultAstToDot RNGLR.ParseCounter.translate [5])
 
     [<Test>]
     member test.``Calc test - simple for translator``() =
-        runTest RNGLR.ParseCalc.buildAst "calc.txt" (translateAndCheck RNGLR.ParseCalc.defaultAstToDot RNGLR.ParseCalc.translate <| List.replicate 8 105)
+        runTest RNGLR.ParseCalc.buildAst "Calc.txt" (translateAndCheck RNGLR.ParseCalc.defaultAstToDot RNGLR.ParseCalc.translate <| List.replicate 8 105)
 
     [<Test>]
     member test.``Translate with Attributes``() =
@@ -92,7 +91,7 @@ type ``RNGLR parser tests with simple lexer`` () =
             let res = (translate RNGLR.ParseAttrs.translate mAst errors) 3 : int list
             printfn "Result: %A" res
             Assert.AreEqual([48], res)
-        runTest RNGLR.ParseAttrs.buildAst "attrs.txt" processSuccess
+        runTest RNGLR.ParseAttrs.buildAst "Attrs.txt" processSuccess
 
     [<Test>]
     member test.``Parse empty string``() =
@@ -137,7 +136,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``AST, containing cycles``() =
         let parser = RNGLR.ParseCycle.buildAst
-        let path = dir + "cycle.txt"
+        let path = dir + "Cycle.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)

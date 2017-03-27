@@ -89,8 +89,14 @@ let test grammarFile inputFile nodesCount edgesCount termsCount ambiguityCount =
 [<TestFixture>]
 type ``GLL abstract parser tests``() =
     [<Test>]  
+    member this._04_PackedNodesCheck () =
+        test "PackedNodesCheck.yrd" 
+             "PackedNodesCheck.txt"
+             9 8 2 1
+
+
+    [<Test>]  
     member this._01_PrettySimpleCalc_SequenceInput () =
-        Assert.Pass()
         test "PrettySimpleCalc.yrd" 
              "PrettySimpleCalc.txt"
              15 14 3 0

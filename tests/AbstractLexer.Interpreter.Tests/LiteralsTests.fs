@@ -10,7 +10,7 @@ open YC.FST.AbstractLexing.Tests.CommonTestChecker
 open QuickGraph.FSA.GraphBasedFsa
 open System
 
-let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"
+let baseInputGraphsPath = "../../../tests/data/AbstractLexing/DOT"
 
 let transform x = (x, match x with |Smbl(y:char, _) when y <> (char 65535) -> Smbl(int y) |Smbl(y:char, _) when y = (char 65535) -> Smbl 65535 |_ -> Eps)
 let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)

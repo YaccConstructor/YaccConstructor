@@ -52,7 +52,7 @@ module Run =
 
    
 //    let filename = @"..\..\..\AntlrToYard\Parser.fsy" 
-    let filename = @"..\..\..\..\Tests\FsYacc\5.fsy" 
+    let filename = @"..\..\..\..\tests\data\FsYacc\5.fsy" 
 //    let content = System.IO.File.ReadAllText(filename)
 //    Lexer.source := content
 //    let reader = new System.IO.StringReader(content)

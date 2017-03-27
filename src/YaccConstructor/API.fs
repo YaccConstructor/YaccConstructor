@@ -55,7 +55,10 @@ let getIlTreeFromFile grammarFile userDefs (frontend : Frontend) =
 
 //parse grammar from string
 let getIlTreeFromStr grammar (frontend : Frontend) = 
-    grammar |> frontend.ParseGrammarString |> ref
+    try
+        grammar |> frontend.ParseGrammarString |> ref
+    with
+    | e -> FEError (e.Message + " " + e.StackTrace) |> raise
 
 // Let possible to know, after what conversion we lost reference to original code
 let checkSources name il isSourcesLost= 
@@ -129,12 +132,10 @@ let run ilTree generatorName conversions frontendName =
         else _raise ()
     gen
 
-let generateResult ilTree (generator : Generator) generatorParams genToFile =
-    match generatorParams with
-    | None -> generator.Generate(!ilTree, genToFile)
-    | Some genParams -> generator.Generate(!ilTree, genToFile, genParams)
+//let generateResult ilTree (generator : Generator) generatorParams genToFile =
+    
 
-let applyConstraints (generator : Generator) ilTree = 
+let applyConstraints (generator : Generator) ilTree generatorParams genToFile= 
     if not (IsSingleStartRule !ilTree) then
         raise <| CheckerError "Input grammar should contains only one start rule."
     try
@@ -144,22 +145,27 @@ let applyConstraints (generator : Generator) ilTree =
             if not <| constr.Check grammar then
                 eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
                 ilTree := {!ilTree with grammar = constr.Fix grammar}
-        ilTree
+        match generatorParams with
+        | None -> generator.Generate(!ilTree, genToFile)
+        | Some genParams -> generator.Generate(!ilTree, genToFile, genParams)
     with
         | e -> GenError e.Message |> raise
 
 let resultToFile generator ilTree generatorParams = 
-    generateResult (applyConstraints generator ilTree) generator generatorParams true
+    applyConstraints generator ilTree generatorParams true
 
-let resultToObj ilTree generator generatorParams =
-    generateResult (applyConstraints generator ilTree) generator generatorParams false
+let resultToObj generator ilTree generatorParams =
+    applyConstraints <| generator <| ilTree <| generatorParams <| false
 
-let gen grammarFile frontendName generatorName generatorParams conversions userDefs = 
+let gen grammarFile frontendName generatorName generatorParams conversions userDefs generateToFile = 
     try
         let frontend = getFrontend frontendName
         let ilTree = getIlTreeFromFile grammarFile userDefs frontend
         let generator = run ilTree generatorName conversions frontendName
-        resultToFile generator ilTree generatorParams
+        if generateToFile then
+            resultToFile generator ilTree generatorParams
+        else
+            resultToObj generator ilTree generatorParams
     with
     | InvalidFEName frontendName as e  -> 
         "Frontend with name " + frontendName + " is not available. Run \"Main.exe -af\" for get all available frontends.\n" 
@@ -216,7 +222,7 @@ List of available frontends, generators and conversions can be obtained by -af -
         |> log x
         *)
 let generateToFile grammarFile frontendName generatorName generatorParams conversions userDefs = 
-        gen grammarFile frontendName generatorName generatorParams conversions userDefs 
+        gen grammarFile frontendName generatorName generatorParams conversions userDefs true
         |> ignore
         (*
 let generateToFileFromString grammarFile frontendName generatorName generatorParams 
@@ -225,7 +231,7 @@ let generateToFileFromString grammarFile frontendName generatorName generatorPar
             |> ignore
     *)
 let generate grammarFile frontendName generatorName generatorParams conversions userDefs = 
-    gen grammarFile frontendName generatorName generatorParams conversions userDefs
+    gen grammarFile frontendName generatorName generatorParams conversions userDefs false
 
 (*let generateFromString grammar frontendName generatorName generatorParams conversions userDefs = 
     genStr grammar frontendName generatorName generatorParams conversions userDefs false

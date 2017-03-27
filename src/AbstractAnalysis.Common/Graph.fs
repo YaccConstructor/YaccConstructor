@@ -30,14 +30,14 @@ type LexerEdge<'l ,'br  when 'l: equality> (s,e,t) =
 type ParserEdge<'EdgeObject>(s, e, t)=
     inherit TaggedEdge<int, 'EdgeObject>(s, e, t)
 
-type ParserInputGraph<'EdgeObject>(initialVertices : int[], finalVertices : int[], ?edgeObjToString: ('EdgeObject -> string)) = 
+type ParserInputGraph<'EdgeObject>(initialVertices : int[], finalVertices : int[], ?edgeObjToToken: ('EdgeObject -> string)) = 
     inherit AdjacencyGraph<int, ParserEdge<'EdgeObject>>()
 
     let StringToToken str = str |> int
 
     member val InitStates = initialVertices 
     member val FinalStates = finalVertices with get, set
-    member val EdgeObjToString = match edgeObjToString with
+    member val EdgeObjToString = match edgeObjToToken with
                                     | Some func -> func
                                     | None -> fun value -> value.ToString()
 

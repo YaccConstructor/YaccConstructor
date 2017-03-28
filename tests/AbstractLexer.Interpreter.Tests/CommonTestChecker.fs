@@ -135,7 +135,7 @@ let ToDot (parserInputGraph : ParserInputGraph<_>) filePrintPath toStr =
     let strs =
             parserInputGraph.Edges
             |> Seq.map (fun edge ->
-                sprintf "%i -> %i [label=\"%s\"]; \n" edge.Source edge.Target  (toStr edge.Tag)) 
+                sprintf "%i -> %i [label=\"%s\"]; \n" edge.Source edge.Target (toStr edge.Tag)) 
                                       
     System.IO.File.WriteAllText(filePrintPath, s + (String.concat "" strs) + "\n}")
     ()

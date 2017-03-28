@@ -162,7 +162,7 @@ let NfaToDfa (inGraph: ParserInputGraph<_>)=
         |> Seq.toList
         |> List.sortBy (fun s -> s.Id)
     let res = 
-        let graph = new ParserInputGraph<_>((ruleNodes |> List.find (fun x -> x.IsStart)).Id, (ruleNodes |> List.find (fun x -> x.IsFinal)).Id)
+        let graph = new ParserInputGraph<_>((ruleNodes |> List.find (fun x -> x.IsStart)).Id, (ruleNodes |> List.find (fun x -> x.IsFinal)).Id, id)
         ruleNodes 
         |> List.collect (fun n -> n.Transitions |> List.map (fun (l,t) -> new ParserEdge<_>(n.Id,t.Id,l.Value)))
         |> graph.AddVerticesAndEdgeRange

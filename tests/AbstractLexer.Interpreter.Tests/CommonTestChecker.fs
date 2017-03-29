@@ -102,8 +102,8 @@ let checkArr expectedArr actualArr =
         Assert.Pass()
     else Assert.Fail ("Arrays have different length")
  
-let countEdges (parserInputGraph : ParserInputGraph<_>) =
-   parserInputGraph.Edges 
+let countEdges (SimpleInputGraph : SimpleInputGraph<_>) =
+   SimpleInputGraph.Edges 
     |> Seq.map (fun e -> 
                     match e.Tag with
                         | NUMBER(gr) 
@@ -118,22 +118,22 @@ let countEdges (parserInputGraph : ParserInputGraph<_>) =
                         | RNGLR_EOF _ -> 0) 
     |> Array.ofSeq 
 
-let ToDot (parserInputGraph : ParserInputGraph<_>) filePrintPath toStr =
+let ToDot (SimpleInputGraph : SimpleInputGraph<_>) filePrintPath toStr =
     let rank s l =
         "{ rank=" + s + "; " + (l |> string) + " }\n"
     let s = 
         "digraph G {\n" 
         + "rankdir = LR\n"
         + "node [shape = circle]\n"
-        + sprintf "%i[style=filled, fillcolor=green]\n" parserInputGraph.InitStates.[0]
-        + sprintf "%i[shape = doublecircle, style=filled, fillcolor=red]\n" parserInputGraph.FinalStates.[0]
-        + rank "same" parserInputGraph.InitStates.[0]
-        + rank "min" parserInputGraph.InitStates.[0]
-        + rank "same" parserInputGraph.FinalStates.[0] 
-        + rank "max" parserInputGraph.FinalStates.[0]
+        + sprintf "%i[style=filled, fillcolor=green]\n" SimpleInputGraph.InitStates.[0]
+        + sprintf "%i[shape = doublecircle, style=filled, fillcolor=red]\n" SimpleInputGraph.FinalStates.[0]
+        + rank "same" SimpleInputGraph.InitStates.[0]
+        + rank "min" SimpleInputGraph.InitStates.[0]
+        + rank "same" SimpleInputGraph.FinalStates.[0] 
+        + rank "max" SimpleInputGraph.FinalStates.[0]
     
     let strs =
-            parserInputGraph.Edges
+            SimpleInputGraph.Edges
             |> Seq.map (fun edge ->
                 sprintf "%i -> %i [label=\"%s\"]; \n" edge.Source edge.Target (toStr edge.Tag)) 
                                       

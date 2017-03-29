@@ -149,7 +149,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<FSA<_> -> _>) eofToken t
         | Some a -> a |> tokenToNumber
         | None -> -1
 
-    let res = new ParserInputGraph<_>(inputFstLexer.InitState.[0], inputFstLexer.FinalState.[0], unwrapOption)
+    let res = new SimpleInputGraph<_>(inputFstLexer.InitState.[0], inputFstLexer.FinalState.[0], unwrapOption)
     res.AddVerticesAndEdgeRange edgesParserGraph |> ignore  
     res
 
@@ -159,8 +159,8 @@ let Tokenize (fstLexer : FST<_, _>) (actions : array<FSA<_> -> _>) (alphabet: Ha
         match inputFstLexer with
         | Success fst -> 
             //fst.PrintToDOT (@"../../../src/AbstractLexer.Interpreter.Tests/Tests/CalcTestLexerCompos.dot", printSmbString)
-            let parserInputGraph = Interpret fst actions eofToken tagToToken
-            Success (EpsClosure.NfaToDfa parserInputGraph tagToToken)
+            let SimpleInputGraph = Interpret fst actions eofToken tagToToken
+            Success (EpsClosure.NfaToDfa SimpleInputGraph tagToToken)
         | Error errors -> Error errors
     
     epsRes 

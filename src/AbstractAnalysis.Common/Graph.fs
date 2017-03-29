@@ -33,7 +33,7 @@ type IParserInput =
 type ParserEdge<'tag>(s, e, t)=
     inherit TaggedEdge<int, 'tag>(s, e, t)
     
-type ParserInputGraph<'tag>(initialVertices : int[], finalVertices : int[], tagToToken : 'tag -> int) = 
+type SimpleInputGraph<'tag>(initialVertices : int[], finalVertices : int[], tagToToken : 'tag -> int) = 
     inherit AdjacencyGraph<int, ParserEdge<'tag>>()
 
     member val InitStates = initialVertices 
@@ -56,16 +56,21 @@ type ParserInputGraph<'tag>(initialVertices : int[], finalVertices : int[], tagT
         out.Close()      
 
     new (initial : int, final : int, tagToToken : 'tag -> int) = 
-        ParserInputGraph<_>([|initial|], [|final|], tagToToken)
+        SimpleInputGraph<_>([|initial|], [|final|], tagToToken)
 
     new (n : int, tagToToken : 'tag -> int) =
         let allVertices = [|for i in 0 .. n - 1 -> i|]
-        ParserInputGraph<_>(allVertices, allVertices, tagToToken)
+        SimpleInputGraph<_>(allVertices, allVertices, tagToToken)
+
+    new (initial : int<positionInInput>[], tagToToken : 'tag -> int) = 
+        let casted = Array.map(fun x -> int x) initial
+        SimpleInputGraph<_>(casted, casted, tagToToken)
  
     interface IParserInput with
         member this.InitialPositions = 
             Array.map(fun x -> x * 1<positionInInput>) this.InitStates
 
+        [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
         member this.ForAllOutgoingEdges curPosInInput pFun =
             let outEdges = int curPosInInput |> this.OutEdges
             outEdges |> Seq.iter
@@ -90,20 +95,3 @@ type LinearInput (initialPositions, input:array<int<token>>) =
     member this.Input = input
 
     new (input:array<int<token>>) = LinearInput ([|0<positionInInput>|], input)
-
-type SimpleGraphInput<'tagType> (initialPositions, getTokenFromTag:'tagType -> int<token>) =
-    inherit AdjacencyGraph<int, TaggedEdge<int, 'tagType>>()
-    interface IParserInput with
-        member this.InitialPositions = initialPositions
-        
-        [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
-        member this.ForAllOutgoingEdges curPosInInput pFun =
-            let outEdges = int curPosInInput |> this.OutEdges
-            outEdges
-            |> Seq.iter 
-                (fun e ->
-                    pFun (getTokenFromTag e.Tag) (e.Target * 1<positionInInput>)
-                )
-        
-        member this.PositionToString(pos: int): string = 
-            sprintf "%i" pos

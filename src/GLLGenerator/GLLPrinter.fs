@@ -157,7 +157,7 @@ let getGLLparserSource (fsa : FSA)
     let printFun isAbstract () =
         if isAbstract
         then
-            println "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> ParserCommon.ParseResult<_>) ="
+            println "let buildAbstract : (AbstractAnalysis.Common.BioSimpleInputGraph -> ParserCommon.ParseResult<_>) ="
             println "    Yard.Generators.GLL.AbstractParserWithoutTree.buildAbstract parserSource"
         else
             println "let buildAST (input : seq<int>) ="

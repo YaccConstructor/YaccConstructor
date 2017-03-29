@@ -42,22 +42,22 @@ let getParseInputGraph tokenizer file =
         match l.ToLower() with
         | "#type" -> 
             [|
-                new TaggedEdge<_,_>(f, t, tokenizer "T") 
-                new TaggedEdge<_,_>(t, f, tokenizer "TR")
+                new ParserEdge<_>(f, t, tokenizer "T") 
+                new ParserEdge<_>(t, f, tokenizer "TR")
             |]
 
         | "#subclassof" -> 
             [|
-                new TaggedEdge<_,_>(f, t, tokenizer "SCO") 
-                new TaggedEdge<_,_>(t, f, tokenizer "SCOR")
+                new ParserEdge<_>(f, t, tokenizer "SCO") 
+                new ParserEdge<_>(t, f, tokenizer "SCOR")
             |]
 
-        | _ -> [| new TaggedEdge<_,_>(f, t, tokenizer "OTHER")|]
+        | _ -> [| new ParserEdge<_>(f, t, tokenizer "OTHER")|]
         
     let allVs = edgs |> Array.collect (fun (f,l,t) -> [|f * 1<positionInInput>; t * 1<positionInInput>|]) |> Set.ofArray |> Array.ofSeq
     let eofV = allVs.Length
         
-    let g = new SimpleGraphInput<_>(allVs, id)
+    let g = new SimpleInputGraph<_>(allVs, id)
     
     [|for (f,l,t) in edgs -> edg f t l |]
     |> Array.concat
@@ -69,7 +69,7 @@ let getParseInputGraph tokenizer file =
 let processFile file =
     let cnt = 1
     let g1, triples1 = 
-        getParseInputGraph (fun x -> GLL.GPPerf1.stringToToken.[x]) file
+        getParseInputGraph (fun x -> GLL.GPPerf1.stringToToken.[x] |> int) file
 //    let g2, triples1 = 
 //        getParseInputGraph (GLL.GPPerf2.stringToNumber >> ((*) 1<token>)) file
 //        

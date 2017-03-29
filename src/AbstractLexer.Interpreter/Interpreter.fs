@@ -144,18 +144,23 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<FSA<_> -> _>) eofToken t
     for v in final do         
         new ParserEdge<_>(v, inputFstLexer.FinalState.[0], Some eofToken) |> edgesParserGraph.Add |> ignore
 
-    let res = new ParserInputGraph<_>(inputFstLexer.InitState.[0], inputFstLexer.FinalState.[0], tokenToNumber)
+    let unwrapOption x = 
+        match x with
+        | Some a -> a |> tokenToNumber
+        | None -> -1
+
+    let res = new ParserInputGraph<_>(inputFstLexer.InitState.[0], inputFstLexer.FinalState.[0], unwrapOption)
     res.AddVerticesAndEdgeRange edgesParserGraph |> ignore  
     res
 
-let Tokenize (fstLexer : FST<_,_>) (actions : array<FSA<_> -> _>) (alphabet: HashSet<_>) eofToken (inputFst : FST<_, _>) tokenToNumber =    
-    let inputFstLexer = FST<_,_>.Compose(inputFst, fstLexer, alphabet) 
+let Tokenize (fstLexer : FST<_, _>) (actions : array<FSA<_> -> _>) (alphabet: HashSet<_>) eofToken (inputFst : FST<_, _>) tagToToken =    
+    let inputFstLexer = FST<_, _>.Compose(inputFst, fstLexer, alphabet) 
     let epsRes = 
         match inputFstLexer with
         | Success fst -> 
             //fst.PrintToDOT (@"../../../src/AbstractLexer.Interpreter.Tests/Tests/CalcTestLexerCompos.dot", printSmbString)
-            let parserInputGraph = Interpret fst actions eofToken tokenToNumber
-            Success (EpsClosure.NfaToDfa parserInputGraph)
+            let parserInputGraph = Interpret fst actions eofToken tagToToken
+            Success (EpsClosure.NfaToDfa parserInputGraph tagToToken)
         | Error errors -> Error errors
     
     epsRes 

@@ -407,19 +407,22 @@ let actions () =
    |]
 
 
-let tokenToNum = function
-    | NUMBER _ -> 0
-    | MINUS _ -> 1
-    | LBRACE _ -> 2
-    | RBRACE _ -> 3
-    | DIV _ -> 4
-    | PLUS _ -> 5
-    | POW _ -> 6
-    | MULT _ -> 7
-    | LITERAL _ -> 8
-    | RNGLR_EOF _ -> 9
+let tokenToNum x = 
+    match x with
+    | Some a -> match a with
+                | NUMBER _ -> 0
+                | MINUS _ -> 1
+                | LBRACE _ -> 2
+                | RBRACE _ -> 3
+                | DIV _ -> 4
+                | PLUS _ -> 5
+                | POW _ -> 6
+                | MULT _ -> 7
+                | LITERAL _ -> 8
+                | RNGLR_EOF _ -> 9
+    | None -> -1
 
 let alphabet () = 
  new HashSet<_>([| Smbl 65535; Smbl 9; Smbl 10; Smbl 13; Smbl 32; Smbl 40; Smbl 41; Smbl 42; Smbl 43; Smbl 45; Smbl 47; Smbl 48; Smbl 49; Smbl 50; Smbl 51; Smbl 52; Smbl 53; Smbl 54; Smbl 55; Smbl 56; Smbl 57; Smbl 46; Smbl 69; Smbl 101;|])
 
-let tokenize eof approximation = Tokenize (fstLexer()) (actions()) (alphabet()) eof approximation AbstractParser.Tokens.tokenToNumber
+let tokenize eof approximation tokenToNum = Tokenize (fstLexer()) (actions()) (alphabet()) eof approximation tokenToNum

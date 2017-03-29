@@ -34,10 +34,11 @@ type ParserEdge<'tag>(s, e, t)=
     inherit TaggedEdge<int, 'tag>(s, e, t)
     
 type ParserInputGraph<'tag>(initialVertices : int[], finalVertices : int[], tagToToken : 'tag -> int) = 
-    inherit AdjacencyGraph<int,ParserEdge<'tag>>()
+    inherit AdjacencyGraph<int, ParserEdge<'tag>>()
 
     member val InitStates = initialVertices 
     member val FinalStates = finalVertices with get, set
+    member val TagToToken = tagToToken with get
 
     member this.PrintToDot name (tagToString: 'tag -> string) (*(tokenToString : 'token -> string) (numToToken : int -> 'token)*) = 
         use out = new System.IO.StreamWriter (name : string)
@@ -68,11 +69,11 @@ type ParserInputGraph<'tag>(initialVertices : int[], finalVertices : int[], tagT
         member this.ForAllOutgoingEdges curPosInInput pFun =
             let outEdges = int curPosInInput |> this.OutEdges
             outEdges |> Seq.iter
-                (fun e -> pFun ((tagToToken e.Tag) * 1<token>) (e.Target * 1<positionInInput>))
+                (fun e -> pFun ((this.TagToToken e.Tag) * 1<token>) (e.Target * 1<positionInInput>))
 
         member this.PositionToString (pos : int) =
             sprintf "%i" pos
-            
+
 
 type LinearInput (initialPositions, input:array<int<token>>) =
     interface IParserInput with

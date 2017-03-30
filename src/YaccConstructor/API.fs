@@ -119,11 +119,10 @@ let checkIlTree ilTree (gen : Generator) =
             if not <| constr.Check grammar then
                 eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
                 ilTree := {!ilTree with grammar = constr.Fix grammar}
-        ilTree
     with
         | e -> GenError e.Message |> raise
 
-let genToFile (generator : Generator) genParams ilTree =
+let genToFile ((generator : Generator), genParams, ilTree) =
     try
         match genParams with
         | None -> generator.Generate(!ilTree, true)
@@ -131,7 +130,7 @@ let genToFile (generator : Generator) genParams ilTree =
     with
         | e -> GenError e.Message |> raise
 
-let genToObj (generator : Generator) genParams ilTree =
+let genToObj ((generator : Generator), genParams, ilTree) =
     try
         match genParams with
         | None -> generator.Generate(!ilTree, false)
@@ -160,17 +159,42 @@ let applyConversions (ilTree : Definition.t<Source.t, Source.t> ref) (frontend :
         ilTree := applyConversion conv !ilTree
         checkSources conv !ilTree
 
+let prepareGrammarFromString frontendName grammarStr = 
+    let frontend = getFrontend frontendName
+    let ilTree = getIlTreeFromStr grammarStr frontend
+    (frontend, ilTree)
+
+let prepareGrammarFromFile frontendName grammarFile userDefs = 
+    let frontend = getFrontend frontendName
+    let ilTree = getIlTreeFromFile grammarFile frontend userDefs
+    (frontend, ilTree)
+
+let prepareResultForGeneration (frontend, ilTree) generatorName generatorParams conversions = 
+    applyConversions ilTree frontend conversions
+    let generator = prepareGenerator generatorName
+    checkIlTree ilTree generator
+    (generator, generatorParams, ilTree)
+
+//should be simplified with pipeline
+let GenerateFromStrToFile grammarStr frontendName generatorName generatorParams conversions = 
+    let preparedTuple = prepareGrammarFromString frontendName grammarStr
+    let preparedResult = prepareResultForGeneration preparedTuple generatorName generatorParams conversions
+    genToFile preparedResult |> ignore
+
+let GenerateFromStrToObj grammarStr frontendName generatorName generatorParams conversions = 
+    let preparedTuple = prepareGrammarFromString frontendName grammarStr
+    let preparedResult = prepareResultForGeneration preparedTuple generatorName generatorParams conversions
+    genToObj preparedResult
+
+
 let gen grammarFile frontendName generatorName generatorParams conversions userDefs generateToFile = 
     try
-        let frontend = getFrontend frontendName
-        let ilTree = getIlTreeFromFile grammarFile frontend userDefs
-        applyConversions ilTree frontend conversions
-        let generator = prepareGenerator generatorName
-        let checkedIl = checkIlTree ilTree generator
+        let preparedTuple = prepareGrammarFromFile frontendName grammarFile userDefs
+        let preparedResult = prepareResultForGeneration preparedTuple generatorName generatorParams conversions
         if generateToFile then
-            genToFile generator generatorParams checkedIl
+            genToFile preparedResult
         else
-            genToObj generator generatorParams checkedIl
+            genToObj preparedResult
     with
     | InvalidFEName frontendName as e  -> 
         "Frontend with name " + frontendName + " is not available. Run \"Main.exe -af\" for get all available frontends.\n" 

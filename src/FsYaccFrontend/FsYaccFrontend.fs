@@ -39,6 +39,8 @@ type FsYaccFrontend() =
             Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>
             |> List.ofArray
             |> List.map (fun unionCase -> unionCase.Name)
+        override this.ParseGrammarFromStr str = 
+            Main.ParseString str
     
 
 // For testing switch to Console App and then switch back to Class Library

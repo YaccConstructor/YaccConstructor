@@ -54,9 +54,9 @@ let getInputGraph tokenizer inputFile =
         |> Array.map (fun s -> let x = s.Split([|' '|])
                                (int x.[0]), (int x.[1]), x.[2])
     let edg (f : int) (t : string) (l : int) = 
-        new TaggedEdge<_,_>(f, l, tokenizer (t.ToUpper())) 
+        new ParserEdge<_>(f, l, tokenizer (t.ToUpper()) |> int) 
       
-    let g = new SimpleGraphInput<_>([|0<positionInInput>|], id)
+    let g = new SimpleInputGraph<_>([|0<positionInInput>|], id)
     
     [|for (first,last,tag) in edges -> edg first tag last |]
     |> g.AddVerticesAndEdgeRange

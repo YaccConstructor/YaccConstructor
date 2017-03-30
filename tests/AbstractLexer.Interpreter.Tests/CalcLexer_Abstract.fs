@@ -386,9 +386,9 @@ let actions () =
    [|
 
       (fun (gr : FSA<_>) ->
-                              None );
+                       None );
       (fun (gr : FSA<_>) ->
-                                                           NUMBER(gr) |> Some );
+                       NUMBER(gr) |> Some );
       (fun (gr : FSA<_>) ->
                        MINUS(gr) |> Some );
       (fun (gr : FSA<_>) ->
@@ -396,18 +396,33 @@ let actions () =
       (fun (gr : FSA<_>) ->
                        RBRACE(gr) |> Some );
       (fun (gr : FSA<_>) ->
-                       DIV(gr)|> Some );
+                       DIV(gr) |> Some );
       (fun (gr : FSA<_>) ->
-                       PLUS(gr)|> Some );
+                       PLUS(gr) |> Some );
       (fun (gr : FSA<_>) ->
-                        POW(gr)|> Some );
+                       POW(gr) |> Some );
       (fun (gr : FSA<_>) ->
-                       MULT(gr)|> Some );
+                       MULT(gr) |> Some );
 
    |]
 
 
+let tokenToNum x = 
+    match x with
+    | Some a -> match a with
+                | NUMBER _ -> 0
+                | MINUS _ -> 1
+                | LBRACE _ -> 2
+                | RBRACE _ -> 3
+                | DIV _ -> 4
+                | PLUS _ -> 5
+                | POW _ -> 6
+                | MULT _ -> 7
+                | LITERAL _ -> 8
+                | RNGLR_EOF _ -> 9
+    | None -> -1
+
 let alphabet () = 
  new HashSet<_>([| Smbl 65535; Smbl 9; Smbl 10; Smbl 13; Smbl 32; Smbl 40; Smbl 41; Smbl 42; Smbl 43; Smbl 45; Smbl 47; Smbl 48; Smbl 49; Smbl 50; Smbl 51; Smbl 52; Smbl 53; Smbl 54; Smbl 55; Smbl 56; Smbl 57; Smbl 46; Smbl 69; Smbl 101;|])
 
-let tokenize eof approximation = Tokenize (fstLexer()) (actions()) (alphabet()) eof approximation
+let tokenize eof approximation tokenToNum = Tokenize (fstLexer()) (actions()) (alphabet()) eof approximation tokenToNum

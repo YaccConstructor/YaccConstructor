@@ -17,7 +17,7 @@ type GraphAction<'br when 'br:equality> =
     val graph: FSA<'br>
     new (sa, ea, gr) = {startAct = sa; endActs = ea; graph = gr}   
 
-let Interpret (inputFstLexer: FST<_,_>) (actions: array<FSA<_> -> _>) eofToken =   
+let Interpret (inputFstLexer: FST<_,_>) (actions: array<FSA<_> -> _>) eofToken tokenToNumber =   
     let maxV = inputFstLexer.Vertices |> Seq.max |> ref
     let edgesParserGraph = new ResizeArray<_>()
          
@@ -144,18 +144,23 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<FSA<_> -> _>) eofToken =
     for v in final do         
         new ParserEdge<_>(v, inputFstLexer.FinalState.[0], Some eofToken) |> edgesParserGraph.Add |> ignore
 
-    let res = new ParserInputGraph<_>(inputFstLexer.InitState.[0], inputFstLexer.FinalState.[0])
+    let unwrapOption x = 
+        match x with
+        | Some a -> a |> tokenToNumber
+        | None -> -1
+
+    let res = new SimpleInputGraph<_>(inputFstLexer.InitState.[0], inputFstLexer.FinalState.[0], unwrapOption)
     res.AddVerticesAndEdgeRange edgesParserGraph |> ignore  
     res
 
-let Tokenize (fstLexer : FST<_,_>) (actions : array<FSA<_> -> _>) (alphabet: HashSet<_>) eofToken (inputFst : FST<_,_>) =    
-    let inputFstLexer = FST<_,_>.Compose(inputFst, fstLexer, alphabet) 
+let Tokenize (fstLexer : FST<_, _>) (actions : array<FSA<_> -> _>) (alphabet: HashSet<_>) eofToken (inputFst : FST<_, _>) tagToToken =    
+    let inputFstLexer = FST<_, _>.Compose(inputFst, fstLexer, alphabet) 
     let epsRes = 
         match inputFstLexer with
         | Success fst -> 
             //fst.PrintToDOT (@"../../../src/AbstractLexer.Interpreter.Tests/Tests/CalcTestLexerCompos.dot", printSmbString)
-            let parserInputGraph = Interpret fst actions eofToken
-            Success (EpsClosure.NfaToDfa parserInputGraph)
+            let SimpleInputGraph = Interpret fst actions eofToken tagToToken
+            Success (EpsClosure.NfaToDfa SimpleInputGraph tagToToken)
         | Error errors -> Error errors
     
     epsRes 

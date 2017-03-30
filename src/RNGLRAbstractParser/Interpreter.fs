@@ -128,7 +128,7 @@ and [<AllowNullLiteral>]
     new (head, tail) = new Path(head, tail, if tail = null then 1 else tail.Length + 1)
     new (edge) = new Path (edge, null, 1)
 
-let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : ParserInputGraph<'TokenType>) =
+let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : SimpleInputGraph<'TokenType>) =
     if parserSource.ErrorRulesExists then
         let edges = tokens.Edges |> Seq.map(fun edge -> (edge.Source, edge.Target, edge.Tag)) |> Seq.toList 
         for tokenEdge in edges do
@@ -563,7 +563,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 //    val pos : int    
 //    new (_prod, _remainLength, _path, _nonTerm, _pos) = {prod = _prod; remainLength = _remainLength; path = _path; nonTerm = _nonTerm; pos = _pos}
 //    
-//let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : ParserInputGraph<'TokenType>) =    
+//let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : SimpleInputGraph<'TokenType>) =    
 //    
 //    let incomingEdges = new Dictionary<_,_>()
 //    tokens.Vertices |> Seq.iter(fun v -> incomingEdges.Add(v,0))

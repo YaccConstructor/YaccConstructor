@@ -80,3 +80,25 @@ let ParseFile fileName =
             sprintf "error near line %d, character %d\nlast token: %s\n\n%s" pos.pos_lnum
                 (pos.pos_cnum - pos.pos_bol) (new System.String(lexbuf.Lexeme)) (e.ToString())
         failwith extendedMessage
+
+let ParseString str = 
+    Lexer.currentFile := ""
+    Lexer.source := str
+    let reader = new System.IO.StringReader(str)
+    let lexbuf = LexBuffer<_>.FromTextReader reader
+    lexbuf.EndPos <- lexbuf.EndPos.NextLine
+    try
+        let (res : System.Tuple<Source.t option, Source.t list, Source.t list, Grammar.t<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
+        let defHead = res.Item1
+        { Definition.empty
+            with
+                 head = defHead
+                 grammar = addBindings <| addStarts res.Item3 res.Item4
+            }
+    with e -> // when e.Message="parse error" -> 
+        fprintfn stderr "%A" e
+        let pos = lexbuf.EndPos
+        let extendedMessage =
+            sprintf "error near line %d, character %d\nlast token: %s\n\n%s" pos.pos_lnum
+                (pos.pos_cnum - pos.pos_bol) (new System.String(lexbuf.Lexeme)) (e.ToString())
+        failwith extendedMessage

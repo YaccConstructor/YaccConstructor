@@ -58,18 +58,28 @@ let rec _addBindings = function
 let addBindings (grammar: Grammar.t<Source.t, Source.t>) = 
     grammar |> mapGrammar (List.map (fun rule -> { rule with body=_addBindings rule.body } ))
 
-let ParseFile fileName =
+let LexBufferFromFile fileName = 
     let content = System.IO.File.ReadAllText fileName
+    let reader = new System.IO.StringReader(content)
     Lexer.currentFile := fileName
     Lexer.source := content
-    let reader = new System.IO.StringReader(content)
     let lexbuf = LexBuffer<_>.FromTextReader reader
     lexbuf.EndPos <- lexbuf.EndPos.NextLine
+    lexbuf
+
+let LexBufferFromString grammarStr = 
+    Lexer.currentFile := "Grammar from string"
+    Lexer.source := grammarStr
+    let lexbuf = LexBuffer<_>.FromString grammarStr
+    lexbuf.EndPos <- lexbuf.EndPos.NextLine
+    lexbuf
+
+let Parse lexbuf ilInfo = 
     try 
         let (res : System.Tuple<Source.t option, Source.t list, Source.t list, Grammar.t<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
         let defHead = res.Item1
         { Definition.empty
-            with info = {fileName = fileName}
+            with info = {fileName = ilInfo}
                  head = defHead
                  grammar = addBindings <| addStarts res.Item3 res.Item4
             }
@@ -81,24 +91,8 @@ let ParseFile fileName =
                 (pos.pos_cnum - pos.pos_bol) (new System.String(lexbuf.Lexeme)) (e.ToString())
         failwith extendedMessage
 
+let ParseFile fileName =
+    Parse (LexBufferFromFile fileName) fileName
+    
 let ParseString str = 
-    Lexer.currentFile := ""
-    Lexer.source := str
-    let reader = new System.IO.StringReader(str)
-    let lexbuf = LexBuffer<_>.FromTextReader reader
-    lexbuf.EndPos <- lexbuf.EndPos.NextLine
-    try
-        let (res : System.Tuple<Source.t option, Source.t list, Source.t list, Grammar.t<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
-        let defHead = res.Item1
-        { Definition.empty
-            with
-                 head = defHead
-                 grammar = addBindings <| addStarts res.Item3 res.Item4
-            }
-    with e -> // when e.Message="parse error" -> 
-        fprintfn stderr "%A" e
-        let pos = lexbuf.EndPos
-        let extendedMessage =
-            sprintf "error near line %d, character %d\nlast token: %s\n\n%s" pos.pos_lnum
-                (pos.pos_cnum - pos.pos_bol) (new System.String(lexbuf.Lexeme)) (e.ToString())
-        failwith extendedMessage
+    Parse (LexBufferFromString str) "Grammar from string"

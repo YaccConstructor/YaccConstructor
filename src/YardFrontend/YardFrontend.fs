@@ -35,10 +35,7 @@ type YardFrontend() =
         override this.ProductionTypes =
             List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
             |> List.map (fun unionCase -> unionCase.Name)
-        override this.ParseGrammarFromStr t =
-            match t with
-            | (:? System.String as s) ->
-                let inliner = new Conversions.ExpandInline.ReplaceInline()
-                let g = Main.ParseText s ""
-                { g with grammar = inliner.ConvertGrammar g.grammar}
-            | _ -> IL.Definition.empty
+        override this.ParseGrammarFromStr str =
+            let inliner = new Conversions.ExpandInline.ReplaceInline()
+            let g = Main.ParseText str "Grammar from string"
+            { g with grammar = inliner.ConvertGrammar g.grammar}

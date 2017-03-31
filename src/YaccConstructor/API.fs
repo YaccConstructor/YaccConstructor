@@ -29,46 +29,48 @@ let log e m =
 
 let eol = System.Environment.NewLine
 
-
-let run grammarFile frontendName generatorName generatorParams conversions userDefs generateToFile =
-    let frontend =
-        let fen = (Addin.GetFrontends())
-        let _raise () = InvalidFEName frontendName |> raise
-        if Array.exists (fun (elem : Frontend) -> elem.Name = frontendName) (Addin.GetFrontends())
-        then
-            try
-                match Array.tryFind (fun (elem : Frontend) -> elem.Name = frontendName) (Addin.GetFrontends()) with
-                | Some fe -> fe
-                | None -> failwith "Frontend is not found."
-            with
-            | _ -> _raise ()
-        else _raise ()
-
-    // Parse grammar
-    let ilTree =
+let getFrontend frontendName =
+    let fen = (Addin.GetFrontends())
+    let _raise () = InvalidFEName frontendName |> raise
+    if Array.exists (fun (elem : Frontend) -> elem.Name = frontendName) (Addin.GetFrontends())
+    then
         try
-            let defStr = String.concat ";" userDefs
-            if System.String.IsNullOrEmpty defStr
-            then grammarFile
-            else grammarFile + "%" + defStr
-            |> frontend.ParseGrammar
-            |> ref
+            match Array.tryFind (fun (elem : Frontend) -> elem.Name = frontendName) (Addin.GetFrontends()) with
+            | Some fe -> fe
+            | None -> failwith "Frontend is not found."
         with
-        | e -> FEError (e.Message + " " + e.StackTrace) |> raise
-    Namer.initNamer ilTree.Value.grammar
+        | _ -> _raise ()
+    else _raise ()
 
+let getIlTreeFromFile grammarFile (frontend : Frontend) userDefs = 
+    try
+        let defStr = String.concat ";" userDefs
+        if System.String.IsNullOrEmpty defStr
+        then grammarFile
+        else grammarFile + "%" + defStr
+        |> frontend.ParseGrammar
+        |> ref
+    with
+    | e -> FEError (e.Message + "\nFailed parsing grammar file: " + e.StackTrace) |> raise
+
+let getIlTreeFromStr grammarStr (frontend : Frontend) = 
+    try
+        ref (frontend.ParseGrammarFromStr grammarStr)
+    with
+    | e -> FEError (e.Message + "\nFailed parsing grammar string: " + e.StackTrace) |> raise
+
+let processErrors (errorList : (_ * 'a list) list) msg map delimiter =
+    if errorList.Length > 0 then
+        eprintfn  "%s" msg
+        errorList |> List.iter (fun (m, rules) ->
+            rules
+            |> List.map map
+            |> String.concat delimiter
+            |> eprintfn "Module %s:%s%s" (getModuleName m) eol
+        )
+
+let dealWithErrors ilTree = 
     let repeatedInnerRules, repeatedExportRules, undeclaredRules = GetUndeclaredNonterminalsList !ilTree
-
-    let processErrors (errorList : (_ * 'a list) list) msg map delimiter =
-        if errorList.Length > 0 then
-            eprintfn  "%s" msg
-            errorList |> List.iter (fun (m,rules) ->
-                rules
-                |> List.map map
-                |> String.concat delimiter
-                |> eprintfn "Module %s:%s%s" (getModuleName m) eol
-            )
-                    
     processErrors undeclaredRules
         "Input grammar contains some undeclared nonterminals:"
         (fun rule -> sprintf "%s (%s:%d:%d)" rule.text rule.file rule.startPos.line rule.startPos.column)
@@ -86,6 +88,59 @@ let run grammarFile frontendName generatorName generatorParams conversions userD
         (fun (rule, got, expected) -> sprintf "%s(%d,%d): %d (expected %d)" rule.text rule.startPos.line rule.startPos.column got expected)
         eol
 
+let applyConversion (convNameWithParams : string) (ilTree : Definition.t<Source.t, Source.t>) = 
+    let parameters = convNameWithParams.Split(' ')
+    if parameters.Length = 0 then failwith "Missing Conversion name"
+    else
+        {
+            ilTree with grammar = match Seq.tryFind (fun (elem : Conversion) -> elem.Name = parameters.[0]) (Addin.GetConversions()) with 
+                                  | Some conv -> conv.ConvertGrammar (ilTree.grammar, parameters.[1..parameters.Length - 1])
+                                  | None -> failwith <| "Conversion not found: " + parameters.[0]
+        }
+
+let prepareGenerator generatorName =
+    let _raise () = InvalidGenName generatorName |> raise
+    if Array.exists (fun (elem : Generator) -> elem.Name = generatorName) (Addin.GetGenerators())
+    then              
+        try
+            match Array.tryFind (fun (elem : Generator) -> elem.Name = generatorName) (Addin.GetGenerators()) with
+            | Some gen -> gen
+            | None -> failwith "TreeDump is not found."
+        with
+        | _ -> _raise ()
+    else _raise ()
+
+let checkIlTree ilTree (gen : Generator) =  
+    if not (IsSingleStartRule !ilTree) then
+        raise <| CheckerError "Input grammar should contains only one start rule."
+    try
+        for constr in gen.Constraints do
+            let grammar = ilTree.Value.grammar
+            if not <| constr.Check grammar then
+                eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
+                ilTree := {!ilTree with grammar = constr.Fix grammar}
+    with
+        | e -> GenError e.Message |> raise
+
+let genToFile ((generator : Generator), genParams, ilTree) =
+    try
+        match genParams with
+        | None -> generator.Generate(!ilTree, true)
+        | Some x -> generator.Generate(!ilTree, true, x)
+    with
+        | e -> GenError e.Message |> raise
+
+let genToObj ((generator : Generator), genParams, ilTree) =
+    try
+        match genParams with
+        | None -> generator.Generate(!ilTree, false)
+        | Some x -> generator.Generate(!ilTree, false, x) 
+    with
+        | e -> GenError e.Message |> raise
+
+let applyConversions (ilTree : Definition.t<Source.t, Source.t> ref) (frontend : Frontend) conversions =
+    Namer.initNamer ilTree.Value.grammar
+    dealWithErrors ilTree
     let lostSources = ref false
     // Let possible to know, after what conversion we lost reference to original code
     let checkSources name il = 
@@ -97,61 +152,49 @@ let run grammarFile frontendName generatorName generatorParams conversions userD
                 x
                 |> List.map(fun s -> s.text) |> String.concat "\n"
                 |> printfn "Lost sources after frontend or conversion %s:\n %s" name
+
     checkSources frontend.Name !ilTree
-
     // Apply Conversions
-    let apply_Conversion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>) = 
-        let parameters = convNameWithParams.Split(' ')
-            //printfn "Conversion: %s" convNameWithParams
-        if parameters.Length = 0 then failwith "Missing Conversion name"
-        else
-            {ilTree with grammar = match Seq.tryFind (fun (elem : Conversion) -> elem.Name = parameters.[0]) (Addin.GetConversions()) with 
-                                   | Some conv -> conv.ConvertGrammar (ilTree.grammar, parameters.[1..parameters.Length - 1])
-                                   | None -> failwith <| "Conversion not found: " + parameters.[0]
-            }
-
     for conv in conversions do
-        ilTree := apply_Conversion conv !ilTree
+        ilTree := applyConversion conv !ilTree
         checkSources conv !ilTree
 
-    let gen =
-        let _raise () = InvalidGenName generatorName |> raise
-        if Array.exists (fun (elem : Generator) -> elem.Name = generatorName) (Addin.GetGenerators())
-        then              
-            try
-                match Array.tryFind (fun (elem : Generator) -> elem.Name = generatorName) (Addin.GetGenerators()) with
-                | Some gen -> gen
-                | None -> failwith "TreeDump is not found."
-            with
-            | _ -> _raise ()
-        else _raise ()
-                               
-    // Generate something
-    let result =  
-        if not (IsSingleStartRule !ilTree) then
-           raise <| CheckerError "Input grammar should contains only one start rule."
-        try
-            //let gen = new Yard.Generators.RNGLR.RNGLR()
-            for constr in gen.Constraints do
-                let grammar = ilTree.Value.grammar
-                if not <| constr.Check grammar then
-                    eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
-                    ilTree := {!ilTree with grammar = constr.Fix grammar}
+let prepareGrammarFromString frontendName grammarStr = 
+    let frontend = getFrontend frontendName
+    let ilTree = getIlTreeFromStr grammarStr frontend
+    (frontend, ilTree)
 
-            match generatorParams with
-            | None -> 
-                gen.Generate(!ilTree, generateToFile)
-            | Some genParams -> gen.Generate(!ilTree, generateToFile, genParams)
-        with
-            | e -> GenError e.Message |> raise
-//                | Yard.Generators.GNESCCGenerator.StartRuleNotFound 
-//                    -> GenError "Start rule cannot be found in input grammar. Please, specify start rule."
-//                       |> raise
-    result
+let prepareGrammarFromFile frontendName grammarFile userDefs = 
+    let frontend = getFrontend frontendName
+    let ilTree = getIlTreeFromFile grammarFile frontend userDefs
+    (frontend, ilTree)
+
+let prepareResultForGeneration (frontend, ilTree) generatorName generatorParams conversions = 
+    applyConversions ilTree frontend conversions
+    let generator = prepareGenerator generatorName
+    checkIlTree ilTree generator
+    (generator, generatorParams, ilTree)
+
+//should be simplified with pipeline
+let GenerateFromStrToFile grammarStr frontendName generatorName generatorParams conversions = 
+    let preparedTuple = prepareGrammarFromString frontendName grammarStr
+    let preparedResult = prepareResultForGeneration preparedTuple generatorName generatorParams conversions
+    genToFile preparedResult |> ignore
+
+let GenerateFromStrToObj grammarStr frontendName generatorName generatorParams conversions = 
+    let preparedTuple = prepareGrammarFromString frontendName grammarStr
+    let preparedResult = prepareResultForGeneration preparedTuple generatorName generatorParams conversions
+    genToObj preparedResult
+
 
 let gen grammarFile frontendName generatorName generatorParams conversions userDefs generateToFile = 
     try
-        run grammarFile frontendName generatorName generatorParams conversions userDefs generateToFile
+        let preparedTuple = prepareGrammarFromFile frontendName grammarFile userDefs
+        let preparedResult = prepareResultForGeneration preparedTuple generatorName generatorParams conversions
+        if generateToFile then
+            genToFile preparedResult
+        else
+            genToObj preparedResult
     with
     | InvalidFEName frontendName as e  -> 
         "Frontend with name " + frontendName + " is not available. Run \"Main.exe -af\" for get all available frontends.\n" 

@@ -1,0 +1,40 @@
+﻿<Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net45</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../../src/Conversions/Namer.fs" />
+    <Compile Include="../../src/Conversions/TransformAux.fs" />
+    <Compile Include="../../src/Conversions/ExpandConjunction.fs" />
+    <Compile Include="../../src/Conversions/ExpandAlter.fs" />
+    <Compile Include="../../src/Conversions/ExpandBrackets.fs" />
+    <Compile Include="../../src/Conversions/AddEOF.fs" />
+    <Compile Include="../../src/Conversions/ReplaceLiterals.fs" />
+    <Compile Include="../../src/Conversions/LeaveLast.fs" />
+    <Compile Include="../../src/Conversions/BuildAST.fs" />
+    <Compile Include="../../src/Conversions/ExpandEBNF.fs" />
+    <Compile Include="../../src/Conversions/MergeAlter.fs" />
+    <Compile Include="../../src/Conversions/BuildAstSimple.fs" />
+    <Compile Include="../../src/Conversions/AddDefaultAC.fs" />
+    <Compile Include="../../src/Conversions/ExpandMeta.fs" />
+    <Compile Include="../../src/Conversions/EliminateLeftRecursion.fs" />
+    <Compile Include="../../src/Conversions/ExpandInnerAlt.fs" />
+    <Compile Include="../../src/Conversions/RemoveAC.fs" />
+    <Compile Include="../../src/Conversions/ReplaceInline.fs" />
+    <Compile Include="../../src/Conversions/Linearize.fs" />
+    <Compile Include="../../src/Conversions/ExpandRepet.fs" />
+    <Compile Include="../../src/Conversions/ToCNF.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" Version="4.1.*" />
+    <PackageReference Include="FSharp.NET.Sdk" Version="1.0.*" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.fsproj" />
+  </ItemGroup>
+
+</Project>

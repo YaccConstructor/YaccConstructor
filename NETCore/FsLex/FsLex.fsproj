@@ -1,0 +1,30 @@
+﻿<Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net45</TargetFramework>
+    <DefineConstants>INTERNALIZED_POWER_PACK;$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../src/FsLex/fslexlex.fsl"/>
+    <None Include="../../src/FsLex/fslexpars.fsy"/>
+    <Compile Include="../../src/FsLex/assemblyinfo.Common.fs" />
+    <Compile Include="../../src/FsLex/assemblyinfo.fslex.exe.fs" />
+    <Compile Include="../../src/FsLex/Lexing.fsi" />
+    <Compile Include="../../src/FsLex/Lexing.fs" />
+    <Compile Include="../../src/FsLex/Parsing.fsi" />
+    <Compile Include="../../src/FsLex/Parsing.fs" />
+    <Compile Include="../../src/FsLex/Arg.fsi" />
+    <Compile Include="../../src/FsLex/Arg.fs" />
+    <Compile Include="../../src/FsLex/fslexast.fs" />
+    <Compile Include="../../src/FsLex/fslexpars.fs" />
+    <Compile Include="../../src/FsLex/fslexlex.fs" />
+    <Compile Include="../../src/FsLex/fslex.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" Version="4.1.*" />
+    <PackageReference Include="FSharp.NET.Sdk" Version="1.0.*" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>

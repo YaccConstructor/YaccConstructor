@@ -1,0 +1,29 @@
+﻿<Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net45</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../src/FsYacc/fsyacclex.fsl"/>
+    <None Include="../../src/FsYacc/fsyaccpars.fsy"/>
+    <Compile Include="../../src/FsYacc/assemblyinfo.Common.fs" />
+    <Compile Include="../../src/FsYacc/assemblyinfo.fsyacc.exe.fs" />
+    <Compile Include="../../src/FsYacc/Lexing.fsi" />
+    <Compile Include="../../src/FsYacc/Lexing.fs" />
+    <Compile Include="../../src/FsYacc/Parsing.fsi" />
+    <Compile Include="../../src/FsYacc/Parsing.fs" />
+    <Compile Include="../../src/FsYacc/Arg.fsi" />
+    <Compile Include="../../src/FsYacc/Arg.fs" />
+    <Compile Include="../../src/FsYacc/fsyaccast.fs" />
+    <Compile Include="../../src/FsYacc/fsyaccpars.fs" />
+    <Compile Include="../../src/FsYacc/fsyacclex.fs" />
+    <Compile Include="../../src/FsYacc/fsyacc.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" Version="4.1.*" />
+    <PackageReference Include="FSharp.NET.Sdk" Version="1.0.*" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>

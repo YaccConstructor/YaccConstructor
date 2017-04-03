@@ -1,0 +1,33 @@
+﻿<Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net45</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../../Constraints/Common.fs" />
+    <Compile Include="../../Constraints/NoEbnf.fs" />
+    <Compile Include="../../Constraints/SingleModule.fs" />
+    <Compile Include="../../Constraints/NoMeta.fs" />
+    <Compile Include="../../Constraints/InCNF.fs" />
+    <Compile Include="../../Constraints/NeedAC.fs" />
+    <Compile Include="../../Constraints/NoInnerAlt.fs" />
+    <Compile Include="../../Constraints/NoBrackets.fs" />
+    <Compile Include="../../Constraints/NoLiterals.fs" />
+    <Compile Include="../../Constraints/NoAlt.fs" />
+    <Compile Include="../../Constraints/NoConj.fs" />
+    <Compile Include="../../Constraints/Constraints.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" Version="4.1.*" />
+    <PackageReference Include="FSharp.NET.Sdk" Version="1.0.*" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.fsproj" />
+    <ProjectReference Include="..\FsYacc\FsYacc.fsproj" />
+    <ProjectReference Include="..\Conversions\Conversions.fsproj" />
+  </ItemGroup>
+
+</Project>

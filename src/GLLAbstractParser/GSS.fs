@@ -28,6 +28,7 @@ type PopSet () =
         else
             false
 
+[<AllowNullLiteral>]
 type GSSVertex (nonterm: int<positionInGrammar>, posInInput: int<positionInInput>) =    
 
     let setU = new System.Collections.Generic.Dictionary<int64<compressedPosInInputAndGrammar>,HashSet<ParseData>>()
@@ -63,6 +64,30 @@ type GSSVertex (nonterm: int<positionInGrammar>, posInInput: int<positionInInput
             setU.Add(compressedPositions, new HashSet<_>([|newData|]))
             false
     override this.ToString () = sprintf "Nonterm: %i, Index: %i" this.Nonterm this.PositionInInput
+
+[<AllowNullLiteral>]
+type GSSVertexCF (nonterm: int<positionInGrammar>, posInInput: int<positionInInput>, vertex: GSSVertex) =
+    inherit GSSVertex (nonterm, posInInput)
+    
+    member this.Vertex = vertex
+    override this.Equals y =
+        y :? GSSVertexCF 
+           && (let y = y :?> GSSVertexCF 
+               this.Nonterm = y.Nonterm
+               && this.PositionInInput = y.PositionInInput
+               && this.Vertex = y.Vertex)
+    override this.GetHashCode() = hash (this.Nonterm, this.PositionInInput, this.Vertex)
+    override this.ToString () = 
+        let vertex = this.Vertex
+        let vertexStr = 
+            if vertex = null 
+            then "null" 
+            else sprintf "(N: %i, I: %i)" vertex.Nonterm vertex.PositionInInput
+        sprintf 
+            "Nonterm: %i, Index: %i, Vertex: %s" 
+            this.Nonterm 
+            this.PositionInInput
+            vertexStr
 
 [<Struct>]
 type GSSEdgeLbl =

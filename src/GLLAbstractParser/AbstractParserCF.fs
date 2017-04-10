@@ -26,11 +26,12 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
         match selector with | Left -> (leftGrammar, gssLeft) | Right -> (rightGrammar, gssRight)
     
     let s1, s2 = leftGrammar.StartState, rightGrammar.StartState
-    let vertexLeft, vertexRight = new GSSVertex(s1, toInputPos s2), new GSSVertex(s2, toInputPos s1)
+    let vertexLeft, vertexRight = 
+        new GSSVertexCF(s1, toInputPos s2, null), new GSSVertexCF(s2, toInputPos s1, null)
     gssLeft.AddVertex vertexLeft |> ignore
     gssRight.AddVertex vertexRight |> ignore
     
-    let startContext = new ContextCF<_>(s1, s2, vertexLeft, vertexRight)
+    let (startContext: ContextCF<GSSVertex>) = new ContextCF<_>(s1, s2, vertexLeft, vertexRight)
 
     let setR = Stack<_>([startContext])
     
@@ -70,7 +71,7 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
         let _, gssVertexMaster = masterGrammar |> curContext.GetInfo
         let posInSlaveGrammar, gssVertexSlave = masterGrammar.neg |> curContext.GetInfo      
         
-        let newVertex = new GSSVertex(nonterm, toInputPos posInSlaveGrammar)
+        let newVertex = new GSSVertexCF(nonterm, toInputPos posInSlaveGrammar, gssVertexSlave)
         let vertexExists, edgeExists, startV = gss.ContainsVertAndEdge(newVertex, gssVertexMaster, stateToContinue, Empty)        
 
         if vertexExists
@@ -110,18 +111,19 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
                                        |> Array.iter (fun (t2, s2) -> 
                                                           addContext Left s1 s2 currentContext.GssVertex1 currentContext.GssVertex2))
     
-    let isFinalContext (context: ContextCF<_>) =
+    let isFinalContext (context: ContextCF<GSSVertex>) =
         int context.PosInGrammar1 = 1 
         && int context.PosInGrammar2 = 1
-        && context.GssVertex1 = vertexLeft
-        && context.GssVertex2 = vertexRight
+        && (context.GssVertex1 :?> GSSVertexCF) = vertexLeft
+        && (context.GssVertex2 :?> GSSVertexCF) = vertexRight
     
     let count = ref 0
 
     while setR.Count <> 0 do
         let currentContext = setR.Pop()
-        if isFinalContext currentContext 
-        then incr count            
+        printfn "%s" <| currentContext.ToString()
+//        if isFinalContext currentContext
+//        then incr count            
         handleFinalStates Left currentContext
         handleFinalStates Right currentContext
         makeNontermTransitions Left currentContext

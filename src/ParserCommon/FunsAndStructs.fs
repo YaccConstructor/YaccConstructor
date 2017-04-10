@@ -107,7 +107,7 @@ type GrammarSelector = Left | Right with
     member this.neg = match this with | Left -> Right | Right -> Left
 
 [<Struct>]
-type ContextCF<'GSSVertex> =
+type ContextCF<'GSSVertex when 'GSSVertex: equality and 'GSSVertex: null> =
     val PosInGrammar1       :   int<positionInGrammar>
     val PosInGrammar2       :   int<positionInGrammar>
     val GssVertex1          :   'GSSVertex
@@ -116,16 +116,18 @@ type ContextCF<'GSSVertex> =
     new (posInGrammar1, posInGrammar2, gssVertex1, gssVertex2) = 
         {PosInGrammar1 = posInGrammar1; PosInGrammar2 = posInGrammar2; 
          GssVertex1 = gssVertex1; GssVertex2 = gssVertex2; Data = Empty}
-    member this.GetInfo selector =         
+    member this.GetInfo selector =      
         match selector with 
         | Left -> (this.PosInGrammar1, this.GssVertex1) 
-        | Right -> (this.PosInGrammar2, this.GssVertex2)
-    override this.ToString () = sprintf 
-                                    "(%i; %i; (%s); (%s))" 
-                                    this.PosInGrammar1
-                                    this.PosInGrammar2
-                                    (this.GssVertex1.ToString ())
-                                    (this.GssVertex2.ToString())
+        | Right -> (this.PosInGrammar2, this.GssVertex2)   
+    override this.ToString () = 
+        let vertexToStr vertex = if vertex <> null then vertex.ToString() else "null"
+        sprintf 
+            "(%i; %i; (%s); (%s))" 
+            this.PosInGrammar1
+            this.PosInGrammar2
+            (vertexToStr this.GssVertex1)
+            (vertexToStr this.GssVertex2)
        
 type ParseResult<'a> =
     | Success of Tree<'a>

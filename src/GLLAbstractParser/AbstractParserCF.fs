@@ -104,7 +104,7 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
 
     let makeTermTransitions (currentContext: ContextCF<_>) =
        let outTermsLeft, outTermsRight = 
-           leftGrammar.OutTerms.[int currentContext.PosInGrammar1], leftGrammar.OutTerms.[int currentContext.PosInGrammar2]
+           leftGrammar.OutTerms.[int currentContext.PosInGrammar1], rightGrammar.OutTerms.[int currentContext.PosInGrammar2]
        outTermsLeft |> Array.iter (fun (t1, s1) -> 
                                        outTermsRight 
                                        |> Array.filter (fun (t2, s2) -> t2 = t1)

@@ -95,3 +95,20 @@ type LinearInput (initialPositions, input:array<int<token>>) =
     member this.Input = input
 
     new (input:array<int<token>>) = LinearInput ([|0<positionInInput>|], input)
+
+type LinearIputWithErrors(input: int<token> array, errorTag) = 
+    interface IParserInput with
+        member x.PositionToString(pos: int): string = 
+            sprintf "%i" pos
+
+        member this.InitialPositions = [|0<positionInInput>|]
+        
+        [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+        member this.ForAllOutgoingEdges curPosInInput pFun =
+            if int curPosInInput < input.Length
+            then 
+                pFun input.[int curPosInInput] (curPosInInput + 1<positionInInput>)
+                pFun errorTag (curPosInInput + 1<positionInInput>)
+
+    member this.Input = input
+

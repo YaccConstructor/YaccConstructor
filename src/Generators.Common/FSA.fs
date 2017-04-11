@@ -26,3 +26,4 @@ type FSA(ruleList : Rule.t<Source.t,Source.t> list) =
     //member this.FirstSet = firstSet
     member this.StateToNontermName = fsa.StateToNontermName
     member this.PrintDot filePrintPath = printDot filePrintPath fsa
+    member this.RuleList = ruleList

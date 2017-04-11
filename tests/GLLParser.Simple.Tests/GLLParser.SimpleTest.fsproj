@@ -41,6 +41,9 @@
     <Compile Include="LexCommon.fs" />
     <Compile Include="GLLParserSimpleTest.fs" />
     <None Include="paket.references" />
+    <Compile Include="SimpleCalcWithErrors.yrd.fs" />
+    <Compile Include="SimpleCalcWithoutErrors.yrd.fs" />
+    <Compile Include="GLLToGLR.Test.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=4.4.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -70,6 +73,16 @@
     <ProjectReference Include="..\..\src\ParserCommon\GLLParsers.Common.fsproj">
       <Name>GLLParsers.Common</Name>
       <Project>{f2e8eda4-c13f-4f8d-b858-d5ef4fb8a06d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
+      <Name>RNGLRAbstractParser</Name>
+      <Project>{1873ea19-fab7-4d5f-b452-67c0b93c8b9b}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\RNGLRCommon\RNGLRCommon.fsproj">
+      <Name>RNGLRCommon</Name>
+      <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\src\YaccConstructor\YaccConstructor.fsproj">

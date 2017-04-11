@@ -26,6 +26,18 @@ type NonTerminalNode =
                 this.Others <- new ResizeArray<PackedNode>()
                 this.Others.Add child
         else this.First <- child
+
+    member this.MapChildren func =
+        seq {
+            if this.First <> Unchecked.defaultof<_>
+            then
+                yield func this.First
+                if this.Others <> Unchecked.defaultof<_>
+                then
+                    for child in this.Others do
+                        yield func child
+        }
+
     interface INode with
         member this.getExtension () = this.Extension
     new (name, extension) = {Name = name; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
@@ -68,6 +80,16 @@ and IntermidiateNode =
                 this.Others <- new ResizeArray<PackedNode>()
                 this.Others.Add child
         else this.First <- child
+    member this.MapChildren func =
+        seq {
+            if this.First <> Unchecked.defaultof<_>
+            then
+                yield func this.First
+                if this.Others <> Unchecked.defaultof<_>
+                then
+                    for child in this.Others do
+                        yield func child
+        }
     new (state, extension) = {State = state; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
     
 
@@ -496,6 +518,68 @@ type Tree<'TokenType> (roots : INode[], unpackPos) =
                 | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
 
         !nodesCount, !edgesCount, !termsCount, !ambiguityCount 
+
+    member this.ChooseSingleAst isErrorToken =
+        let rec handleNode (node: INode) =
+            match node with
+            | :? EpsilonNode -> 0
+            | :? TerminalNode as term -> if isErrorToken term.Name then 1 else 0
+            | :? NonTerminalNode as nonTerm -> 
+                let minNode, minValue =
+                    nonTerm.MapChildren (fun n -> n, handleNode n.Left + handleNode n.Right)
+                    |> Seq.minBy snd
+                nonTerm.First <- minNode
+                nonTerm.Others <- null
+                minValue
+            | :? PackedNode as packed ->
+                handleNode packed.Left + handleNode packed.Right
+            | :? IntermidiateNode as inter ->
+                inter.MapChildren handleNode |> Seq.sum
+        roots |> Array.map handleNode |> ignore
+
+    member this.StringRepr intToString = 
+        let ident i = String.replicate (i * 2) " "
+        let idented = sprintf "%s%s" << ident
+        let rec handleNode (node: INode) idents =
+                match node with
+                | :? EpsilonNode -> 
+                    sprintf "EPS\n" |> idented idents
+                | :? TerminalNode as term ->
+                    sprintf "T(%s)\n"
+                            <| intToString (int term.Name) 
+                        |> idented idents
+                | :? NonTerminalNode as nonTerm ->
+                    let chidrenStringified =
+                        nonTerm.MapChildren(fun packed -> handleNode packed <| idents + 1) |> String.concat ""
+                    sprintf "NT(%s):\n%s"
+                            <| intToString (int nonTerm.Name) 
+                            <| chidrenStringified
+                        |> idented idents
+                | :? PackedNode as packed ->
+                    let stringifyChild name node=
+                        sprintf "%s:\n%s"
+                                <| (name |> idented 1)
+                                <| handleNode node (idents + 2)
+                            |> idented idents
+                    sprintf "P:\n%s%s"
+                            <| stringifyChild "L" packed.Left                    
+                            <| stringifyChild "R" packed.Right
+                        |> idented idents
+                | :? IntermidiateNode as inter ->
+                    let childrenStringified = 
+                         inter.MapChildren(fun packed -> handleNode packed <| idents + 1) |> String.concat ""
+                    sprintf "IN:\n%s"
+                            <| childrenStringified
+                        |> idented idents                 
+        roots
+            |> Array.mapi (fun i r -> sprintf "R(%i):\n%s" i <| handleNode r 1)
+            |> String.concat ""
+
+    member this.SelectBiggestRoot() = 
+        roots
+        |> Array.map (fun root -> getRightExtension <| root.getExtension(), root)
+        |> Seq.maxBy fst
+        |> snd
 
 type FSAParseResult<'a> =
     | Success of Tree<'a>

@@ -37,7 +37,6 @@
     <Compile Include="ASTGLLFSA.fs" />
     <Compile Include="ASTGLL.fs" />
     <None Include="paket.references" />
-    <Compile Include="Conversions.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

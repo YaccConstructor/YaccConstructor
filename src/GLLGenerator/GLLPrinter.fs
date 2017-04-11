@@ -252,7 +252,7 @@ let getGLLparserSource (fsa : FSA)
             numberredRules.rightSideToRule
         with
             | ex ->
-                printfn "It would not possible to use translation because not having some necessary conversions with grammar"
+                printfn "It would not be possible to use translation because not having some necessary conversions in grammar"
                 fun _ -> failwith "Bad grammar"
     let parserSource = new ParserSourceGLL(fsaStatesOutNonterms
                                          , fsa.StartState

@@ -41,14 +41,14 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
    
     /// Adds descriptor of the form (p1, p2, v1, v2) to the stack (setR)
     /// if it's first occurrence of this descriptor (both U-sets doesn't contain corresponding values)
-    let addContext masterGrammar posInGrammar1 posInGrammar2 (gssVertex1: GSSVertex) (gssVertex2: GSSVertex) =
-        if not <| 
-            (gssVertex1.ContainsContext (toInputPos posInGrammar2) posInGrammar1 Empty
-            && gssVertex2.ContainsContext (toInputPos posInGrammar1) posInGrammar2 Empty)
-        then
-            match masterGrammar with
-            | Left -> pushContext posInGrammar1 posInGrammar2 gssVertex1 gssVertex2
-            | Right -> pushContext posInGrammar2 posInGrammar1 gssVertex2 gssVertex1
+    let rec addContext masterGrammar posInGrammar1 posInGrammar2 (gssVertex1: GSSVertex) (gssVertex2: GSSVertex) =
+        match masterGrammar with 
+        | Left ->
+            let contains1 = gssVertex1.ContainsContext (toInputPos posInGrammar2) posInGrammar1 Empty
+            let contains2 = gssVertex2.ContainsContext (toInputPos posInGrammar1) posInGrammar2 Empty
+            if not (contains1 && contains2)
+            then pushContext posInGrammar1 posInGrammar2 gssVertex1 gssVertex2
+        | Right -> addContext Left posInGrammar2 posInGrammar1 gssVertex2 gssVertex1
             
     
     /// Makes pop-action with specified grammar and gss (position in the second grammar doesn't change) 
@@ -131,3 +131,12 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
         makeTermTransitions currentContext
 
     gssLeft, gssRight, !count
+
+let findVertices (gss: GSS) state : seq<GSSVertex> =    
+    gss.Vertices
+    |> Seq.filter (fun v -> v.Nonterm = state)
+
+let getAllCompleteRangesForState gss state finalState =
+    findVertices gss state  
+    |> Seq.collect (fun v -> v.U |> Seq.choose (fun kvp -> let (pi, pg) = v.GetUncompressetPositions kvp.Key 
+                                                           in if pg = finalState then Some (v.PositionInInput, pi) else None))

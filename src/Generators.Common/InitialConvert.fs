@@ -14,7 +14,6 @@
 
 //  InitialConvert.fs contains methods, which must be applied to grammar
 //    to transform it to appliable for RNGLR or GLL form.
-
 module Yard.Generators.Common.InitialConvert
 
 open Yard.Core.IL
@@ -22,7 +21,7 @@ open Yard.Core.IL.Production
 open System.Collections.Generic
 open Yard.Core.Conversions.TransformAux
 
-let initialConvert (def : Definition.t<_,_>) =
+let convertRules (ruleList : Rule.t<_,_> list) =
     let addStartRule (ruleList : Rule.t<_,_> list) =
         let wasStart = ref false
         ruleList
@@ -88,7 +87,10 @@ let initialConvert (def : Definition.t<_,_>) =
             if not !iter then res
             else inner res
         inner ruleList
+    ruleList |> addStartRule |> splitAlters |> filterNonReachable
+
+let initialConvert (def : Definition.t<_,_>) =
     if def.grammar.Length > 1 then
         failwith "More than one module. Use 'Linearize' conversion"
-    let rules = def.grammar.Head.rules |> addStartRule |> splitAlters |> filterNonReachable
+    let rules = def.grammar.Head.rules |> convertRules
     {def with grammar = [{def.grammar.Head with rules=rules}]}

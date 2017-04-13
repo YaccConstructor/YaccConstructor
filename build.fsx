@@ -186,7 +186,10 @@ Target "GenTests:RNGLR" (fun _ ->
                             runShell <| "tests" @@ "RNGLRParser.Simple.Tests" @@ "gen"
                         )
 
-Target "GenTests:GLL" (fun _ -> runShell <| "tests" @@ "GLL.AbstractParser.Simple.Tests" @@ "gen")
+Target "GenTests:GLL" (fun _ ->
+                            runShell <| "tests" @@ "GLL.AbstractParser.Simple.Tests" @@ "gen"
+                            runShell <| "tests" @@ "GLLParser.Simple.Tests" @@ "genSimpleCalc"
+                        )
 
 Target "GenTests:RIGLR" (fun _ -> runShell <| "tests" @@ "RIGLRParser.SimpleTest" @@ "gen")
 

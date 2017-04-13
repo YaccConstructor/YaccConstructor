@@ -5,6 +5,8 @@ open Yard.Generators.Common.FSA
 open Yard.Generators.Common.FSA.Common
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
+open Yard.Generators.Common.InitialConvert
+open Yard.Generators.Common
 
 let getGLLparserSource (fsa : FSA)
              (outFileName : string)
@@ -242,6 +244,16 @@ let getGLLparserSource (fsa : FSA)
     for numberNonterm in sortedStateToNontermName do
         intToString.Add(int numberNonterm.Key, numberNonterm.Value)
 
+    let rightSideToRule = 
+        try
+            let newRuleList = fsa.RuleList |> convertRules
+            let indexator = new Indexator(newRuleList, true)
+            let numberredRules = new NumberedRules(newRuleList, indexator, true)
+            numberredRules.rightSideToRule
+        with
+            | ex ->
+                printfn "It would not be possible to use translation because not having some necessary conversions in grammar"
+                fun _ -> failwith "Bad grammar"
     let parserSource = new ParserSourceGLL(fsaStatesOutNonterms
                                          , fsa.StartState
                                          , fsa.FinalStates
@@ -251,7 +263,8 @@ let getGLLparserSource (fsa : FSA)
                                          , (int anyNonterm)* 1<positionInGrammar>
                                          , stateAndTokenToNewState
                                          , stringToToken
-                                         , multipleInEdges)
+                                         , multipleInEdges
+                                         , rightSideToRule=rightSideToRule)
 
 
     res, parserSource

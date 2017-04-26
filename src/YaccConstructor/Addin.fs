@@ -1,5 +1,5 @@
 ﻿module Addin
-open Mono.Addins
+
 open Yard.Core
 open Yard.Core.IL
 open Yard.Core.Helpers
@@ -8,7 +8,7 @@ open Microsoft.FSharp.Text
 open System.IO
 open System.Reflection
 
-[<assembly:AddinRoot ("YaccConstructor", "1.0")>]
+
 
 AddinManager.Initialize()    
 //let x = AddinManager.Registry.RegistryPath

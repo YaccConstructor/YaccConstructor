@@ -14,14 +14,14 @@
 
 namespace Yard.Frontends.YardFrontend
 
-open Mono.Addins
+
 open Yard.Core
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
 
-[<Extension>]
+
+
+
+
 type YardFrontend() = 
     inherit Frontend()
         override this.Name = "YardFrontend"

@@ -26,15 +26,15 @@ open Yard.Core.IL.Definition
 open Yard.Core.Helpers
 open Conversions.TransformAux
 open NUnit.Framework
-open Mono.Addins
+
 
 let dummyPos s = new Source.t(s)
 let dummyToken s = PToken <| new Source.t(s)
 
 exception FEError of string
 
-[<assembly:AddinRoot ("YaccConstructor", "1.0")>]
-do()
+
+
 
 [<OneTimeSetUp>]
 let f () = 

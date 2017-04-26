@@ -14,7 +14,7 @@
 
 module YaccConstructor.Program
 
-open Mono.Addins
+
 open Yard.Core
 open Yard.Core.IL
 open Yard.Core.Helpers
@@ -28,8 +28,8 @@ open Argu
 
 
 
-[<assembly:AddinRoot ("YaccConstructor", "1.0")>]
-do()
+
+
 
 let () =
     let feName = ref None

@@ -4,7 +4,7 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Core.IL.Production
-open Mono.Addins
+
 open Yard.Core.Namer
 open TransformAux
 
@@ -73,11 +73,11 @@ let private expandRepet (ruleList: Rule.t<_,_> list) =
     List.rev !expanded    
    
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
 
-[<Extension>]
+
+
+
+
 type ExpandExpand() = 
     inherit Conversion()
         override this.Name = "ExpandRepeat"

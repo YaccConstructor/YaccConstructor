@@ -4,4 +4,4 @@ open System.Reflection
 [<assembly:AssemblyCompany("F# PowerPack CodePlex Project")>]
 [<assembly:AssemblyTitle("fsyacc.exe")>]
 [<assembly:AssemblyProduct("F# Power Pack")>]
-do()
+

@@ -19,13 +19,13 @@
 namespace Yard.Generators.YardPrinter
 
 open Yard.Core
-open Mono.Addins
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
 
-[<Extension>]
+
+
+
+
+
 type YardPrinter() = 
     inherit Generator()
         override this.Name = "YardPrinter"

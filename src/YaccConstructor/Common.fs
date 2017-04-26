@@ -1,7 +1,7 @@
 ﻿module YaccConstructor.Common
 
 open Argu
-open Mono.Addins
+
 
 type CLIArguments =
     | [<Unique; AltCommandLine("-f")>] Frontend of feName:string

@@ -18,16 +18,16 @@
 namespace Yard.Frontends.FsYaccFrontend
 
 open Yard.Core
-open Mono.Addins
+
 
 /// Parser of FsYacc grammars. Usually it is files with .fsy extension.
 /// Also might work with OCamlYacc grammars(.mly) 
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
 
-[<Extension>]
+
+
+
+
 type FsYaccFrontend() = 
     inherit Frontend()
         override this.Name = "FsYaccFrontend"

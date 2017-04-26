@@ -20,7 +20,7 @@ open Production
 open Namer
 open TransformAux
 open Yard.Core.IL.Rule
-open Mono.Addins
+
 
 //let dummyPos s = new Source.t(s)
 
@@ -163,11 +163,11 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
     {rule with body=replaceEbnf rule.body (List.zip rule.args rule.args) rule.metaArgs}::(List.rev !addedBnfRules)
 
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
 
-[<Extension>]
+
+
+
+
 type ExpandEbnf() = 
     inherit Conversion()
         override this.Name = "ExpandEbnf"

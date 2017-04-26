@@ -8,7 +8,7 @@ open Yard.Core.Checkers
 open NUnit.Framework
 open System.Linq
 open System.IO
-open Mono.Addins
+
 
 [<SetUpFixture>]
 type SetUp()=

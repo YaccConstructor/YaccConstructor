@@ -1,6 +1,6 @@
 ﻿module YaccConstructor.API
 
-open Mono.Addins
+
 open Yard.Core
 open Yard.Core.IL
 open Yard.Core.Helpers

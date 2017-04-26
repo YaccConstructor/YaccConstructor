@@ -17,7 +17,7 @@ module Yard.Core.Conversions.RemoveAST
 open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
-open Mono.Addins
+
 
 let private removeAC (ruleList: Rule.t<Source.t, Source.t> list) =
     let rec inner (production: t<Source.t, Source.t>) =
@@ -38,11 +38,11 @@ let private removeAC (ruleList: Rule.t<Source.t, Source.t> list) =
     ruleList |> List.map (fun rule -> {rule with body=(inner rule.body) } )
 
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
 
-[<Extension>]
+
+
+
+
 type RemoveAC() =
     inherit Conversion()
     override this.Name = "RemoveAC"

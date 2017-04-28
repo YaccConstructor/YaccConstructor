@@ -14,6 +14,12 @@
     open Alea.CUDA.CULib
     open Alea.CUDA.Utilities
     open MathNet.Numerics.LinearAlgebra.Double
+    open ManagedCuda
+    open ManagedCuda.CudaSparse
+    open ManagedCuda.BasicTypes
+
+ 
+    let cntxt = new CudaContext()
 
     type ParsingMatrix<'MatrixType> = Dictionary<NonTerminal, 'MatrixType>
 
@@ -172,6 +178,24 @@
 
             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
                 unionArrays matrix.[nonTerm] (toArray matrix.[nonTerm] false) resultArray
+
+    let sparseCudaSquareMatrix (matrix: ParsingMatrix<SparseMatrix>) (allRules: RulesHolder) isChanged matrixSize =
+        let nontermPairs = allRules.ComplexTails
+        for (nt1, nt2) in nontermPairs do
+            let matrix1 = matrix.[nt1]
+            let matrix2 = matrix.[nt2]
+            //let resultMatrix = matrix1.Multiply(matrix2)
+            let handle = new 
+            CudaSparse.CudaSparseNativeMethods.cusparseCreate(handle)
+            ManagedCuda.CudaSparse.CudaSparseNativeMethods.cusparseScsrgemm()
+            
+            for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
+                let nonZ = matrix.[nonTerm].NonZerosCount
+                matrix.[nonTerm].PointwiseMaximum(resultMatrix, matrix.[nonTerm])
+                if (nonZ <> matrix.[nonTerm].NonZerosCount)
+                then
+                    isChanged := true
+    
 
     let recognizeGraph<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
                   (squareMatrix:ParsingMatrix<'MatrixType> -> RulesHolder -> bool ref -> int  -> unit)

@@ -9,13 +9,6 @@ open System.IO
 open System.Reflection
 
 
-
-AddinManager.Initialize()    
-//let x = AddinManager.Registry.RegistryPath
-//printfn "%A" x
-//System.IO.Directory.Delete(x, true)
-AddinManager.Registry.Update(null)
-
 let private createFrontendsInitialization() = 
     lazy( AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend> |> Seq.toArray )
 let private createConversionsInitialization() = 

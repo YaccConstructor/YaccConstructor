@@ -10,13 +10,6 @@ open System.Linq
 open System.IO
 
 
-[<SetUpFixture>]
-type SetUp()=
-    [<OneTimeSetUp>]
-    member this.SetUp () =
-        AddinManager.Initialize()
-        AddinManager.Registry.Update()
-
 [<TestFixture>]
 type ``Components loader tests`` () =
     [<Test>]

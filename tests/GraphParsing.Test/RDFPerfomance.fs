@@ -94,9 +94,10 @@ let processFile file grammarFile =
     System.IO.Path.GetFileNameWithoutExtension file, triples1, (*time1, countOfPairs1,*) time2, countOfPairs2, time3, countOfPairs3
 
 let performTests () =
-    let basePath = @"..\..\..\data\RDF"
+    (*let basePath = @"..\..\..\data\RDF"
     let files = System.IO.Directory.GetFiles basePath 
     files 
     |> Array.map (fun rdffile -> processFile rdffile "..\..\..\GraphParsing.Test\GPPerf1_cnf.yrd")
     |> Array.sortBy (fun (_,_,x,_,_,_(*,_,_*)) -> x)
-    |> Array.iter (printfn "%A")
+    |> Array.iter (printfn "%A")*)
+    sparseCudaSquareMatrix

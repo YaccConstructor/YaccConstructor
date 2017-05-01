@@ -17,9 +17,7 @@
     open ManagedCuda
     open ManagedCuda.CudaSparse
     open ManagedCuda.BasicTypes
-
- 
-    let cntxt = new CudaContext()
+    open Microsoft.FSharp.Core.Operators
 
     type ParsingMatrix<'MatrixType> = Dictionary<NonTerminal, 'MatrixType>
 
@@ -179,22 +177,90 @@
             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
                 unionArrays matrix.[nonTerm] (toArray matrix.[nonTerm] false) resultArray
 
-    let sparseCudaSquareMatrix (matrix: ParsingMatrix<SparseMatrix>) (allRules: RulesHolder) isChanged matrixSize =
-        let nontermPairs = allRules.ComplexTails
-        for (nt1, nt2) in nontermPairs do
-            let matrix1 = matrix.[nt1]
-            let matrix2 = matrix.[nt2]
-            //let resultMatrix = matrix1.Multiply(matrix2)
-            let handle = new 
-            CudaSparse.CudaSparseNativeMethods.cusparseCreate(handle)
-            ManagedCuda.CudaSparse.CudaSparseNativeMethods.cusparseScsrgemm()
-            
-            for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                let nonZ = matrix.[nonTerm].NonZerosCount
-                matrix.[nonTerm].PointwiseMaximum(resultMatrix, matrix.[nonTerm])
-                if (nonZ <> matrix.[nonTerm].NonZerosCount)
-                then
-                    isChanged := true
+    let sparseCudaSquareMatrix =
+
+        let csrValA = Array.init 4 (fun x -> 0.0)
+        let csrRowA = Array.init 5 (fun x -> 0)
+        let csrColIndA = Array.init 4 (fun x -> 0)
+        let csrValB = Array.init 4 (fun x -> 0.0)
+        let csrRowB = Array.init 5 (fun x -> 0)
+        let csrColIndB = Array.init 4 (fun x -> 0)
+
+        csrValA.[0] <- 5.0
+        csrValA.[1] <- 8.0
+        csrValA.[2] <- 3.0
+        csrValA.[3] <- 6.0
+        csrValB.[0] <- 5.0
+        csrValB.[1] <- 8.0
+        csrValB.[2] <- 3.0
+        csrValB.[3] <- 6.0
+        csrRowA.[0] <- 0
+        csrRowA.[1] <- 0
+        csrRowA.[2] <- 2
+        csrRowA.[3] <- 3
+        csrRowA.[4] <- 4
+        csrRowB.[0] <- 0
+        csrRowB.[1] <- 0
+        csrRowB.[2] <- 2
+        csrRowB.[3] <- 3
+        csrRowB.[4] <- 4
+        csrColIndA.[0] <- 0
+        csrColIndA.[1] <- 1
+        csrColIndA.[2] <- 2
+        csrColIndA.[3] <- 1
+        csrColIndB.[0] <- 0
+        csrColIndB.[1] <- 1
+        csrColIndB.[2] <- 2
+        csrColIndB.[3] <- 1
+
+        let sparsecntx = new cusparseContext()
+        let mutable refcnt = ref sparsecntx
+        CudaSparseNativeMethods.cusparseCreate(refcnt) |> ignore
+
+        let transa = cusparseOperation.NonTranspose
+        let transb = cusparseOperation.NonTranspose
+        let descrA = new cusparseMatDescr()
+        let descrB = new cusparseMatDescr()
+        let descrC = new cusparseMatDescr()
+        let refdescrA = ref descrA
+        CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrA) |> ignore
+        let refdescrB = ref descrB
+        CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrB) |> ignore
+        let refdescrC = ref descrC
+        CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrC) |> ignore
+
+        let mutable csrValPtrA : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(4*sizeof<float>))
+        csrValPtrA.CopyToDevice(csrValA)
+        let mutable csrRowPtrA : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(5*sizeof<int>))
+        csrRowPtrA.CopyToDevice(csrRowA)
+        let mutable csrColIndPtrA : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(4*sizeof<int>))
+        csrColIndPtrA.CopyToDevice(csrColIndA)
+        let mutable csrValPtrB : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(4*sizeof<float>))
+        csrValPtrB.CopyToDevice(csrValB)
+        let mutable csrRowPtrB : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(5*sizeof<int>))
+        csrRowPtrB.CopyToDevice(csrRowB)
+        let mutable csrColIndPtrB : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(4*sizeof<int>))
+        csrColIndPtrB.CopyToDevice(csrColIndB)
+        let mutable csrValPtrC : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(4*sizeof<float>))
+        let mutable csrRowPtrC : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(5*sizeof<int>))
+        let mutable csrColIndPtrC : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(4*sizeof<int>))
+        let mutable nnzTotalDevHostPtr : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(sizeof<int>))
+
+        let nnzC = ref 0
+
+        let status = CudaSparseNativeMethods.cusparseXcsrgemmNnz(!refcnt, transa, transb, 4, 4, 4, !refdescrA, 4, csrRowPtrA.DevicePointer, csrColIndPtrA.DevicePointer,
+                                                     !refdescrB, 4, csrRowPtrB.DevicePointer, csrColIndPtrB.DevicePointer,
+                                                     !refdescrC, csrRowPtrC.DevicePointer, nnzTotalDevHostPtr.DevicePointer)
+
+        if nnzTotalDevHostPtr <> null then
+            nnzTotalDevHostPtr.CopyToHost(nnzC)
+        else
+            printfn "null nnz"
+
+        printfn "%i" !nnzC
+        ()
+        
+
     
 
     let recognizeGraph<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)

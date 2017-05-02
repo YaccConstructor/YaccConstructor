@@ -23,9 +23,22 @@ let innerOneFloat = 1.0
 //                             <| toArrayProbability <| innerSumFloat <| innerMultFloat <| innerZeroFloat <| innerOneFloat
 let cudaSquareFunction = cudaSquareMatrix<ProbabilityMatrix.T> <| matrixSetValueProbability <| toArrayProbability
 
-//SparseMatrix<float> functions
+//Math.Net SparseMatrix<float> functions
 let createEmptyMatrixSparse size = SparseMatrix.Create(size, size, 0.0)
 let matrixSetValueSparse (matrix: SparseMatrix) (i: int) (j: int) (value: float) = matrix.At(i, j, value)
+
+//CuSparse MySparseMatrix<float> functions
+let createEmptyMatrixMySparse size = new MySparseMatrix(size, 0, Array.init 0 (fun x -> 0.0), Array.init 0 (fun x -> 0), Array.init 0 (fun x -> 0))
+let matrixSetValueMySparse (matrix: MySparseMatrix) (i: int) (j: int) (value: float) =
+    let csrVal = Array.init 1 (fun x -> 1.0)
+    let csrRow = Array.init (matrix.Size + 1) (fun x -> if x < i + 1 then 0 else 1)
+    let csrColInd = Array.init 1 (fun x -> j)
+
+    let oneCellMatrix = new MySparseMatrix(matrix.Size, 1, csrVal, csrRow, csrColInd)
+
+    let newMatrix = sparseCudaGeam matrix oneCellMatrix matrix.Size
+
+    //to do matrix <- newMatrix
 
 let tokenizer str =
     match str with
@@ -91,13 +104,21 @@ let processFile file grammarFile =
     let time3 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
     let countOfPairs3 = probabilityAnalyzer root3.[0]
 
+    let start = System.DateTime.Now
+    let root4 =
+        [for i in 0..cnt-1 ->
+            let (parsingMatrix, _, _) = graphParse<MySparseMatrix, float>  g1  sparseCudaSquareMatrix  loadIL
+                                          tokenizer createEmptyMatrixMySparse matrixSetValueMySparse innerOneFloat
+            parsingMatrix]
+    let time4 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
+    let countOfPairs4 = probabilityAnalyzer root3.[0]
+
     System.IO.Path.GetFileNameWithoutExtension file, triples1, (*time1, countOfPairs1,*) time2, countOfPairs2, time3, countOfPairs3
 
 let performTests () =
-    (*let basePath = @"..\..\..\data\RDF"
+    let basePath = @"..\..\..\data\RDF"
     let files = System.IO.Directory.GetFiles basePath 
     files 
     |> Array.map (fun rdffile -> processFile rdffile "..\..\..\GraphParsing.Test\GPPerf1_cnf.yrd")
     |> Array.sortBy (fun (_,_,x,_,_,_(*,_,_*)) -> x)
-    |> Array.iter (printfn "%A")*)
-    sparseCudaSquareMatrix
+    |> Array.iter (printfn "%A")

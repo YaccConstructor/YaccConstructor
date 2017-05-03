@@ -19,7 +19,6 @@ open Yard.Core.IL
 open TransformAux
 open Yard.Core.IL.Production
 
-
 let dummyPos s = new Source.t(s)
 
 let private expandInnerAlts (ruleList: Rule.t<_,_> list) = 
@@ -55,12 +54,6 @@ let private expandInnerAlts (ruleList: Rule.t<_,_> list) =
         expanded := { toExpandRule with body=expandedRule } :: !expanded
         ()
     List.rev !expanded
-
-
-
-
-
-
 
 type ExpandInnerAlt() = 
     inherit Conversion()

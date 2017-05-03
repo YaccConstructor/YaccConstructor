@@ -1,6 +1,5 @@
 ﻿namespace Yard.Generators.GLL
 
-
 open Yard.Core
 open IL
 open Constraints
@@ -12,11 +11,6 @@ open Printer
 open Yard.Generators.Common.FSA.Common
 
 open System.Collections.Generic
-
-
-
-
-
 
 type GLL() = 
     inherit Generator()

@@ -17,11 +17,6 @@ namespace Yard.Frontends.YardFrontend
 
 open Yard.Core
 
-
-
-
-
-
 type YardFrontend() = 
     inherit Frontend()
         override this.Name = "YardFrontend"

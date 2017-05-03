@@ -162,12 +162,6 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
         //| x -> x
     {rule with body=replaceEbnf rule.body (List.zip rule.args rule.args) rule.metaArgs}::(List.rev !addedBnfRules)
 
-
-
-
-
-
-
 type ExpandEbnf() = 
     inherit Conversion()
         override this.Name = "ExpandEbnf"

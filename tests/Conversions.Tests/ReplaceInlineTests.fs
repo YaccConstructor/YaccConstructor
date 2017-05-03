@@ -28,17 +28,19 @@ open Conversions.TransformAux
 open NUnit.Framework
 open ConversionsTests
 open Yard.Core.Helpers
+open Conversions.ExpandInline
 
 [<TestFixture>]
 type ``Inline tests`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "Inline")
     let fe = getFrontend("YardFrontend")
-    let conversion = "ReplaceInline"
+
     //[<Test>]
     member test.``Inline 1`` () =
-        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"inline1.yrd"))
+        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath, "inline1.yrd"))
         Namer.initNamer loadIL.grammar
-        let result = apply_Conversion conversion loadIL
+        let conv = new ReplaceInline()
+        let result = {loadIL with grammar = conv.ConvertGrammar loadIL.grammar}
         let rules = 
             (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}])

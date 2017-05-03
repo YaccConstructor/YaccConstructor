@@ -18,7 +18,6 @@ open System
 open System.IO
 open System.Text
 
-
 open Yard.Core
 open IL
 open Constraints
@@ -32,11 +31,6 @@ open TranslatorPrinter
 open Option
 open HighlightingPrinter
 open HighlightingConvertions
-
-
-
-
-
 
 type RNGLR() = 
     inherit Generator()

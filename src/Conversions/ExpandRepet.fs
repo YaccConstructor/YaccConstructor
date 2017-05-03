@@ -71,12 +71,6 @@ let private expandRepet (ruleList: Rule.t<_,_> list) =
         let expandedRule =  expandBody toExpandRule.args toExpandRule.body
         expanded:= { toExpandRule with body=expandedRule} :: !expanded                                       
     List.rev !expanded    
-   
-
-
-
-
-
 
 type ExpandExpand() = 
     inherit Conversion()

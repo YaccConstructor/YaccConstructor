@@ -18,7 +18,6 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
 
-
 let private removeAC (ruleList: Rule.t<Source.t, Source.t> list) =
     let rec inner (production: t<Source.t, Source.t>) =
         match production with
@@ -36,12 +35,6 @@ let private removeAC (ruleList: Rule.t<Source.t, Source.t> list) =
         | POpt p -> inner p |> POpt
 
     ruleList |> List.map (fun rule -> {rule with body=(inner rule.body) } )
-
-
-
-
-
-
 
 type RemoveAC() =
     inherit Conversion()

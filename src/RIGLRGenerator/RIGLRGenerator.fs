@@ -4,7 +4,6 @@ open System.Diagnostics
 open System.IO
 open System.Text
 
-
 open Yard.Core
 open Yard.Generators.Common
 open InitialConvert
@@ -12,11 +11,6 @@ open Yard.Generators.Common.FinalGrammar
 open Constraints
 open Automata
 open PrintTable
-
-
-
-
-
 
 type RIGLR() = 
     inherit Generator()

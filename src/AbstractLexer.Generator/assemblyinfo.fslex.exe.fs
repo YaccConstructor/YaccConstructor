@@ -5,4 +5,4 @@ open System.Reflection
 [<assembly:AssemblyCompany("F# PowerPack CodePlex Project")>]
 [<assembly:AssemblyTitle("fslex.exe")>]
 [<assembly:AssemblyProduct("F# Power Pack")>]
-
+do()

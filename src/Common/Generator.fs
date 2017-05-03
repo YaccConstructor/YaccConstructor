@@ -16,15 +16,9 @@ namespace Yard.Core
 
 open Yard.Core.IL
 
-
-
-
-
-
 [<AbstractClass>]
 type Generator() = //as this =
     abstract Name : string
-    
 
     abstract Generate : Definition.t<Source.t,Source.t> * bool -> obj      
     abstract Generate : Definition.t<Source.t,Source.t> * bool * string -> obj

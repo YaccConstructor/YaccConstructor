@@ -22,11 +22,20 @@
     type ParsingMatrix<'MatrixType> = Dictionary<NonTerminal, 'MatrixType>
 
     type MySparseMatrix(size : int, nnz : int, csrVal : float[], csrRow : int[], csrColInd : int[]) =
+        let mutable _Nnz = nnz
+        let mutable _CsrVal = csrVal
+        let mutable _CsrRow = csrRow
+        let mutable _CsrColInd = csrColInd
         member this.Size = size
-        member this.Nnz = nnz
-        member this.CsrVal = csrVal
-        member this.CsrRow = csrRow
-        member this.CsrColInd = csrColInd
+        member this.Nnz = _Nnz
+        member this.CsrVal = _CsrVal
+        member this.CsrRow = _CsrRow
+        member this.CsrColInd = _CsrColInd
+        member this.Update (nnz_upd : int, csrVal_upd : float[], csrRow_upd : int[], csrColInd_upd : int[]) = 
+            _Nnz <- nnz_upd
+            _CsrVal <- csrVal_upd
+            _CsrRow <- csrRow_upd
+            _CsrColInd <- csrColInd_upd
 
     let initParsingMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> (graph: AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
                   (allRules: RulesHolder)
@@ -189,172 +198,175 @@
         let nnzA = matrix1.Nnz
         let nnzB = matrix2.Nnz
 
-        let csrValA = matrix1.CsrVal
-        let csrRowA = matrix1.CsrRow
-        let csrColIndA = matrix1.CsrColInd
-        let csrValB = matrix2.CsrVal
-        let csrRowB = matrix2.CsrRow
-        let csrColIndB = matrix2.CsrColInd
-
-        let sparsecntx = new cusparseContext()
-        let mutable refcnt = ref sparsecntx
-        CudaSparseNativeMethods.cusparseCreate(refcnt) |> ignore
-
-        let transa = cusparseOperation.NonTranspose
-        let transb = cusparseOperation.NonTranspose
-        let descrA = new cusparseMatDescr()      
-        let descrB = new cusparseMatDescr()       
-        let descrC = new cusparseMatDescr()       
-        let refdescrA = ref descrA
-        CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrA) |> ignore
-        let refdescrB = ref descrB
-        CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrB) |> ignore
-        let refdescrC = ref descrC
-        CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrC) |> ignore
-
-        let mutable csrValPtrA : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(nnzA))
-        csrValPtrA.CopyToDevice(csrValA)
-        let mutable csrRowPtrA : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
-        csrRowPtrA.CopyToDevice(csrRowA)
-        let mutable csrColIndPtrA : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(nnzA))
-        csrColIndPtrA.CopyToDevice(csrColIndA)
-        let mutable csrValPtrB : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(nnzB))
-        csrValPtrB.CopyToDevice(csrValB)
-        let mutable csrRowPtrB : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
-        csrRowPtrB.CopyToDevice(csrRowB)
-        let mutable csrColIndPtrB : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(nnzB))
-        csrColIndPtrB.CopyToDevice(csrColIndB)
-
-        let mutable csrRowPtrC : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
-        let mutable nnzTotalDevHostPtr : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(1))
-
-        let nnzC = ref 0
-
-        let status1 = CudaSparseNativeMethods.cusparseXcsrgemmNnz(!refcnt, transa, transb, matrixSize, matrixSize, matrixSize,
-                                                !refdescrA, nnzA, csrRowPtrA.DevicePointer, csrColIndPtrA.DevicePointer,
-                                                !refdescrB, nnzB, csrRowPtrB.DevicePointer, csrColIndPtrB.DevicePointer,
-                                                !refdescrC, csrRowPtrC.DevicePointer, nnzTotalDevHostPtr.DevicePointer)
-
-
-        if nnzTotalDevHostPtr <> null then
-            nnzTotalDevHostPtr.CopyToHost(nnzC)
+        if (nnzA = 0 || nnzB = 0)
+        then
+            new MySparseMatrix(matrixSize, 0, Array.init 0 (fun x -> 0.0), Array.init 0 (fun x -> 0), Array.init 0 (fun x -> 0))
         else
-            printfn "null nnzTotalDevHostPtr"
 
-        printfn "%i" !nnzC
+            let csrValA = matrix1.CsrVal
+            let csrRowA = matrix1.CsrRow
+            let csrColIndA = matrix1.CsrColInd
+            let csrValB = matrix2.CsrVal
+            let csrRowB = matrix2.CsrRow
+            let csrColIndB = matrix2.CsrColInd
 
-        let csrRowC = Array.init (matrixSize + 1) (fun x -> 0)
-        csrRowPtrC.CopyToHost(csrRowC)
+            let sparsecntx = new cusparseContext()
+            let mutable refcnt = ref sparsecntx
+            CudaSparseNativeMethods.cusparseCreate(refcnt) |> ignore
 
-        let mutable csrColIndPtrC : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(!nnzC))
-        let mutable csrValPtrC : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(!nnzC))
+            let transa = cusparseOperation.NonTranspose
+            let transb = cusparseOperation.NonTranspose
+            let descrA = new cusparseMatDescr()      
+            let descrB = new cusparseMatDescr()       
+            let descrC = new cusparseMatDescr()       
+            let refdescrA = ref descrA
+            CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrA) |> ignore
+            let refdescrB = ref descrB
+            CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrB) |> ignore
+            let refdescrC = ref descrC
+            CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrC) |> ignore
+
+            let mutable csrValPtrA : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(nnzA))
+            csrValPtrA.CopyToDevice(csrValA)
+            let mutable csrRowPtrA : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
+            csrRowPtrA.CopyToDevice(csrRowA)
+            let mutable csrColIndPtrA : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(nnzA))
+            csrColIndPtrA.CopyToDevice(csrColIndA)
+            let mutable csrValPtrB : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(nnzB))
+            csrValPtrB.CopyToDevice(csrValB)
+            let mutable csrRowPtrB : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
+            csrRowPtrB.CopyToDevice(csrRowB)
+            let mutable csrColIndPtrB : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(nnzB))
+            csrColIndPtrB.CopyToDevice(csrColIndB)
+
+            let mutable csrRowPtrC : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
+            let mutable nnzTotalDevHostPtr : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(1))
+
+            let nnzC = ref 0
+
+            let status1 = CudaSparseNativeMethods.cusparseXcsrgemmNnz(!refcnt, transa, transb, matrixSize, matrixSize, matrixSize,
+                                                    !refdescrA, nnzA, csrRowPtrA.DevicePointer, csrColIndPtrA.DevicePointer,
+                                                    !refdescrB, nnzB, csrRowPtrB.DevicePointer, csrColIndPtrB.DevicePointer,
+                                                    !refdescrC, csrRowPtrC.DevicePointer, nnzTotalDevHostPtr.DevicePointer)
+
+
+            nnzTotalDevHostPtr.CopyToHost(nnzC)
+
+            if (!nnzC = 0)
+            then
+                let resultMatrix = new MySparseMatrix(matrixSize, 0, Array.init 0 (fun x -> 0.0), Array.init 0 (fun x -> 0), Array.init 0 (fun x -> 0))
+                resultMatrix
+            else
+                let csrRowC = Array.init (matrixSize + 1) (fun x -> 0)
+                csrRowPtrC.CopyToHost(csrRowC)
+
+                let mutable csrColIndPtrC : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(!nnzC))
+                let mutable csrValPtrC : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(!nnzC))
         
-        let status2 = CudaSparseNativeMethods.cusparseDcsrgemm(!refcnt, transa, transb, matrixSize, matrixSize, matrixSize,
-                                                !refdescrA, nnzA, csrValPtrA.DevicePointer, csrRowPtrA.DevicePointer, csrColIndPtrA.DevicePointer,
-                                                !refdescrB, nnzB, csrValPtrB.DevicePointer, csrRowPtrB.DevicePointer, csrColIndPtrB.DevicePointer,
-                                                !refdescrC, csrValPtrC.DevicePointer, csrRowPtrC.DevicePointer, csrColIndPtrC.DevicePointer)
+                let status2 = CudaSparseNativeMethods.cusparseDcsrgemm(!refcnt, transa, transb, matrixSize, matrixSize, matrixSize,
+                                                        !refdescrA, nnzA, csrValPtrA.DevicePointer, csrRowPtrA.DevicePointer, csrColIndPtrA.DevicePointer,
+                                                        !refdescrB, nnzB, csrValPtrB.DevicePointer, csrRowPtrB.DevicePointer, csrColIndPtrB.DevicePointer,
+                                                        !refdescrC, csrValPtrC.DevicePointer, csrRowPtrC.DevicePointer, csrColIndPtrC.DevicePointer)
 
         
-        printfn "%i" !nnzC
-        let csrValC = Array.init !nnzC (fun x -> 0.0)        
-        let csrColIndC = Array.init !nnzC (fun x -> 0)
+                let csrValC = Array.init !nnzC (fun x -> 0.0)        
+                let csrColIndC = Array.init !nnzC (fun x -> 0)
 
-        csrValPtrC.CopyToHost(csrValC)
-        csrRowPtrC.CopyToHost(csrRowC)
-        csrColIndPtrC.CopyToHost(csrColIndC)
+                csrValPtrC.CopyToHost(csrValC)
+                csrColIndPtrC.CopyToHost(csrColIndC)
 
 
-        let resultMatrix = new MySparseMatrix(matrixSize, !nnzC, csrValC, csrRowC, csrColIndC)
+                let resultMatrix = new MySparseMatrix(matrixSize, !nnzC, csrValC, csrRowC, csrColIndC)
 
-        resultMatrix
+                resultMatrix
 
     let sparseCudaGeam (matrix1 : MySparseMatrix) (matrix2 : MySparseMatrix) matrixSize =
         let nnzA = matrix1.Nnz
         let nnzB = matrix2.Nnz
 
-        let csrValA = matrix1.CsrVal
-        let csrRowA = matrix1.CsrRow
-        let csrColIndA = matrix1.CsrColInd
-        let csrValB = matrix2.CsrVal
-        let csrRowB = matrix2.CsrRow
-        let csrColIndB = matrix2.CsrColInd
-
-        let sparsecntx = new cusparseContext()
-        let mutable refcnt = ref sparsecntx
-        CudaSparseNativeMethods.cusparseCreate(refcnt) |> ignore
-
-        let transa = cusparseOperation.NonTranspose
-        let transb = cusparseOperation.NonTranspose
-        let descrA = new cusparseMatDescr()      
-        let descrB = new cusparseMatDescr()       
-        let descrC = new cusparseMatDescr()       
-        let refdescrA = ref descrA
-        CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrA) |> ignore
-        let refdescrB = ref descrB
-        CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrB) |> ignore
-        let refdescrC = ref descrC
-        CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrC) |> ignore
-
-        let mutable csrValPtrA : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(nnzA))
-        csrValPtrA.CopyToDevice(csrValA)
-        let mutable csrRowPtrA : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
-        csrRowPtrA.CopyToDevice(csrRowA)
-        let mutable csrColIndPtrA : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(nnzA))
-        csrColIndPtrA.CopyToDevice(csrColIndA)
-        let mutable csrValPtrB : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(nnzB))
-        csrValPtrB.CopyToDevice(csrValB)
-        let mutable csrRowPtrB : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
-        csrRowPtrB.CopyToDevice(csrRowB)
-        let mutable csrColIndPtrB : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(nnzB))
-        csrColIndPtrB.CopyToDevice(csrColIndB)
-
-        let mutable csrRowPtrC : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
-        let mutable nnzTotalDevHostPtr : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(1))
-
-        let nnzC = ref 0
-
-        let status1 = CudaSparseNativeMethods.cusparseXcsrgeamNnz(!refcnt, matrixSize, matrixSize,
-                                                !refdescrA, nnzA, csrRowPtrA.DevicePointer, csrColIndPtrA.DevicePointer,
-                                                !refdescrB, nnzB, csrRowPtrB.DevicePointer, csrColIndPtrB.DevicePointer,
-                                                !refdescrC, csrRowPtrC.DevicePointer, nnzTotalDevHostPtr.DevicePointer)
-
-        if nnzTotalDevHostPtr <> null then
-            nnzTotalDevHostPtr.CopyToHost(nnzC)
+        if (nnzA = 0)
+        then
+            let resultMatrix = new MySparseMatrix(matrixSize, 0, Array.init 0 (fun x -> 0.0), Array.init 0 (fun x -> 0), Array.init 0 (fun x -> 0))
+            resultMatrix.Update(matrix2.Nnz, matrix2.CsrVal, matrix2.CsrRow, matrix2.CsrColInd)
+            resultMatrix
         else
-            printfn "null nnzTotalDevHostPtr"
+            if (nnzB = 0)
+            then
+                let resultMatrix = new MySparseMatrix(matrixSize, 0, Array.init 0 (fun x -> 0.0), Array.init 0 (fun x -> 0), Array.init 0 (fun x -> 0))
+                resultMatrix.Update(matrix1.Nnz, matrix1.CsrVal, matrix1.CsrRow, matrix1.CsrColInd)
+                resultMatrix
+            else
+                let csrValA = matrix1.CsrVal
+                let csrRowA = matrix1.CsrRow
+                let csrColIndA = matrix1.CsrColInd
+                let csrValB = matrix2.CsrVal
+                let csrRowB = matrix2.CsrRow
+                let csrColIndB = matrix2.CsrColInd
 
-        printfn "%i" !nnzC
+                let sparsecntx = new cusparseContext()
+                let mutable refcnt = ref sparsecntx
+                CudaSparseNativeMethods.cusparseCreate(refcnt) |> ignore
 
-        let csrRowC = Array.init (matrixSize + 1) (fun x -> 0)
-        csrRowPtrC.CopyToHost(csrRowC)
+                let transa = cusparseOperation.NonTranspose
+                let transb = cusparseOperation.NonTranspose
+                let descrA = new cusparseMatDescr()      
+                let descrB = new cusparseMatDescr()       
+                let descrC = new cusparseMatDescr()       
+                let refdescrA = ref descrA
+                CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrA) |> ignore
+                let refdescrB = ref descrB
+                CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrB) |> ignore
+                let refdescrC = ref descrC
+                CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrC) |> ignore
 
-        let mutable csrColIndPtrC : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(!nnzC))
-        let mutable csrValPtrC : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(!nnzC))
+                let mutable csrValPtrA : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(nnzA))
+                csrValPtrA.CopyToDevice(csrValA)
+                let mutable csrRowPtrA : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
+                csrRowPtrA.CopyToDevice(csrRowA)
+                let mutable csrColIndPtrA : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(nnzA))
+                csrColIndPtrA.CopyToDevice(csrColIndA)
+                let mutable csrValPtrB : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(nnzB))
+                csrValPtrB.CopyToDevice(csrValB)
+                let mutable csrRowPtrB : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
+                csrRowPtrB.CopyToDevice(csrRowB)
+                let mutable csrColIndPtrB : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(nnzB))
+                csrColIndPtrB.CopyToDevice(csrColIndB)
 
-        let mutable alpha_dev : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(1))
-        let mutable beta_dev : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(1))
-        let alpha_host = Array.init 1 (fun x -> 1.0)
-        let beta_host = Array.init 1 (fun x -> 1.0)
-        alpha_dev.CopyToDevice(alpha_host)
-        beta_dev.CopyToDevice(beta_host)
+                let mutable csrRowPtrC : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
+                let mutable nnzTotalDevHostPtr : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(1))
+
+                let nnzC = ref 0
+
+                let status1 = CudaSparseNativeMethods.cusparseXcsrgeamNnz(!refcnt, matrixSize, matrixSize,
+                                                        !refdescrA, nnzA, csrRowPtrA.DevicePointer, csrColIndPtrA.DevicePointer,
+                                                        !refdescrB, nnzB, csrRowPtrB.DevicePointer, csrColIndPtrB.DevicePointer,
+                                                        !refdescrC, csrRowPtrC.DevicePointer, nnzTotalDevHostPtr.DevicePointer)
+
+                nnzTotalDevHostPtr.CopyToHost(nnzC)
+
+                let csrRowC = Array.init (matrixSize + 1) (fun x -> 0)
+                csrRowPtrC.CopyToHost(csrRowC)
+
+                let mutable csrColIndPtrC : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(!nnzC))
+                let mutable csrValPtrC : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(!nnzC))
+
+                let alpha_ref = ref 1.0
+                let beta_ref = ref 1.0
+
+                let status2 = CudaSparseNativeMethods.cusparseDcsrgeam(!refcnt, matrixSize, matrixSize, alpha_ref,
+                                                        !refdescrA, nnzA, csrValPtrA.DevicePointer, csrRowPtrA.DevicePointer, csrColIndPtrA.DevicePointer,
+                                                        beta_ref, !refdescrB, nnzB, csrValPtrB.DevicePointer, csrRowPtrB.DevicePointer, csrColIndPtrB.DevicePointer,
+                                                        !refdescrC, csrValPtrC.DevicePointer, csrRowPtrC.DevicePointer, csrColIndPtrC.DevicePointer)
+
         
+                let csrValC = Array.init !nnzC (fun x -> 0.0)        
+                let csrColIndC = Array.init !nnzC (fun x -> 0)
 
-        let status2 = CudaSparseNativeMethods.cusparseDcsrgeam(!refcnt, matrixSize, matrixSize, alpha_dev.DevicePointer,
-                                                !refdescrA, nnzA, csrValPtrA.DevicePointer, csrRowPtrA.DevicePointer, csrColIndPtrA.DevicePointer,
-                                                beta_dev.DevicePointer, !refdescrB, nnzB, csrValPtrB.DevicePointer, csrRowPtrB.DevicePointer, csrColIndPtrB.DevicePointer,
-                                                !refdescrC, csrValPtrC.DevicePointer, csrRowPtrC.DevicePointer, csrColIndPtrC.DevicePointer)
+                csrValPtrC.CopyToHost(csrValC)
+                csrColIndPtrC.CopyToHost(csrColIndC)
 
-        
-        printfn "%i" !nnzC
-        let csrValC = Array.init !nnzC (fun x -> 0.0)        
-        let csrColIndC = Array.init !nnzC (fun x -> 0)
-
-        csrValPtrC.CopyToHost(csrValC)
-        csrRowPtrC.CopyToHost(csrRowC)
-        csrColIndPtrC.CopyToHost(csrColIndC)
-
-        let resultMatrix = new MySparseMatrix(matrixSize, !nnzC, csrValC, csrRowC, csrColIndC)
-        resultMatrix
+                let resultMatrix = new MySparseMatrix(matrixSize, !nnzC, csrValC, csrRowC, csrColIndC)
+                resultMatrix
         
     
 
@@ -376,111 +388,6 @@
                     matrix.Add(nonTerm, finalMatrix)
                     isChanged := true
 
-    (*let sparseCudaSquareMatrix_test =
-
-        let csrValA = Array.init 4 (fun x -> 0.0)
-        let csrRowA = Array.init 5 (fun x -> 0)
-        let csrColIndA = Array.init 4 (fun x -> 0)
-        let csrValB = Array.init 4 (fun x -> 0.0)
-        let csrRowB = Array.init 5 (fun x -> 0)
-        let csrColIndB = Array.init 4 (fun x -> 0)
-
-        csrValA.[0] <- 5.0
-        csrValA.[1] <- 8.0
-        csrValA.[2] <- 3.0
-        csrValA.[3] <- 6.0
-        csrValB.[0] <- 5.0
-        csrValB.[1] <- 8.0
-        csrValB.[2] <- 3.0
-        csrValB.[3] <- 6.0
-        csrRowA.[0] <- 0
-        csrRowA.[1] <- 0
-        csrRowA.[2] <- 2
-        csrRowA.[3] <- 3
-        csrRowA.[4] <- 4
-        csrRowB.[0] <- 0
-        csrRowB.[1] <- 0
-        csrRowB.[2] <- 2
-        csrRowB.[3] <- 3
-        csrRowB.[4] <- 4
-        csrColIndA.[0] <- 0
-        csrColIndA.[1] <- 1
-        csrColIndA.[2] <- 2
-        csrColIndA.[3] <- 1
-        csrColIndB.[0] <- 0
-        csrColIndB.[1] <- 1
-        csrColIndB.[2] <- 2
-        csrColIndB.[3] <- 1
-
-        let sparsecntx = new cusparseContext()
-        let mutable refcnt = ref sparsecntx
-        CudaSparseNativeMethods.cusparseCreate(refcnt) |> ignore
-
-        let transa = cusparseOperation.NonTranspose
-        let transb = cusparseOperation.NonTranspose
-        let descrA = new cusparseMatDescr()      
-        let descrB = new cusparseMatDescr()       
-        let descrC = new cusparseMatDescr()       
-        let refdescrA = ref descrA
-        CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrA) |> ignore
-        let refdescrB = ref descrB
-        CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrB) |> ignore
-        let refdescrC = ref descrC
-        CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrC) |> ignore
-
-        let mutable csrValPtrA : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(4))
-        csrValPtrA.CopyToDevice(csrValA)
-        let mutable csrRowPtrA : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(5))
-        csrRowPtrA.CopyToDevice(csrRowA)
-        let mutable csrColIndPtrA : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(4))
-        csrColIndPtrA.CopyToDevice(csrColIndA)
-        let mutable csrValPtrB : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(4))
-        csrValPtrB.CopyToDevice(csrValB)
-        let mutable csrRowPtrB : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(5))
-        csrRowPtrB.CopyToDevice(csrRowB)
-        let mutable csrColIndPtrB : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(4))
-        csrColIndPtrB.CopyToDevice(csrColIndB)
-        
-        let mutable csrRowPtrC : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(5))
-        let mutable nnzTotalDevHostPtr : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(1))
-
-        let nnzC = ref 0
-
-        let status1 = CudaSparseNativeMethods.cusparseXcsrgemmNnz(!refcnt, transa, transb, 4, 4, 4, !refdescrA, 4, csrRowPtrA.DevicePointer, csrColIndPtrA.DevicePointer,
-                                                     !refdescrB, 4, csrRowPtrB.DevicePointer, csrColIndPtrB.DevicePointer,
-                                                     !refdescrC, csrRowPtrC.DevicePointer, nnzTotalDevHostPtr.DevicePointer)
-
-        if nnzTotalDevHostPtr <> null then
-            nnzTotalDevHostPtr.CopyToHost(nnzC)
-        else
-            printfn "null nnzTotalDevHostPtr"
-
-        printfn "%i" !nnzC
-
-        let csrRowC = Array.init 5 (fun x -> 0)
-        csrRowPtrC.CopyToHost(csrRowC)
-
-        let mutable csrColIndPtrC : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(!nnzC))
-        let mutable csrValPtrC : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(!nnzC))
-        
-        let status2 = CudaSparseNativeMethods.cusparseDcsrgemm(!refcnt, transa, transb, 4, 4, 4, !refdescrA, 4, csrValPtrA.DevicePointer, csrRowPtrA.DevicePointer, csrColIndPtrA.DevicePointer,
-                                                    !refdescrB, 4, csrValPtrB.DevicePointer, csrRowPtrB.DevicePointer, csrColIndPtrB.DevicePointer,
-                                                    !refdescrC, csrValPtrC.DevicePointer, csrRowPtrC.DevicePointer, csrColIndPtrC.DevicePointer)
-
-        
-        printfn "%i" !nnzC
-        let csrValC = Array.init !nnzC (fun x -> 0.0)
-        
-        let csrColIndC = Array.init !nnzC (fun x -> 0)
-
-        csrValPtrC.CopyToHost(csrValC)
-        csrRowPtrC.CopyToHost(csrRowC)
-        csrColIndPtrC.CopyToHost(csrColIndC)
-
-        ()*)
-        
-
-    
 
     let recognizeGraph<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
                   (squareMatrix:ParsingMatrix<'MatrixType> -> RulesHolder -> bool ref -> int  -> unit)

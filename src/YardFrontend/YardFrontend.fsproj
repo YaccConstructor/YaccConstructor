@@ -48,6 +48,7 @@
     <Compile Include="Main.fs" />
     <Compile Include="YardFrontend.fs" />
     <None Include="paket.references" />
+    <None Include="gen.fsx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AST.Common\Common.AST.fsproj">

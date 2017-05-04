@@ -7,6 +7,7 @@ open Yard.Core.Checkers
 open Microsoft.FSharp.Text
 open System.IO
 open System.Reflection
+open Yard.Generators.Common
 open Yard.Generators.GLL
 open Yard.Generators.RNGLR
 open Yard.Generators.TreeDump

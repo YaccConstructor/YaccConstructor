@@ -80,6 +80,11 @@
       <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Generators.Common\Generators.Common.fsproj">
+      <Name>Generators.Common</Name>
+      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\GLLGenerator\GLLGenerator.fsproj">
       <Name>GLLGenerator</Name>
       <Project>{8756690f-8138-495a-a368-39afb9029823}</Project>

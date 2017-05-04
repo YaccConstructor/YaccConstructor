@@ -26,11 +26,6 @@ open YaccConstructor.Common
 open YaccConstructor.API
 open Argu
 
-
-
-
-
-
 let () =
     let feName = ref None
     let generatorName = ref None

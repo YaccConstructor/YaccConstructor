@@ -14,7 +14,6 @@
 
 namespace Yard.Frontends.YardFrontend
 
-
 open Yard.Core
 
 type YardFrontend() = 

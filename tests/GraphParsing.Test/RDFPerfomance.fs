@@ -21,7 +21,7 @@ let innerZeroFloat = 0.0
 let innerOneFloat = 1.0
 //let naiveSquareFunction = naiveSquareMatrix<ProbabilityMatrix.T, float> matrixSetValueProbability
 //                             <| toArrayProbability <| innerSumFloat <| innerMultFloat <| innerZeroFloat <| innerOneFloat
-//let cudaSquareFunction = cudaSquareMatrix<ProbabilityMatrix.T> <| matrixSetValueProbability <| toArrayProbability
+let cudaSquareFunction = cudaSquareMatrix<ProbabilityMatrix.T> <| matrixSetValueProbability <| toArrayProbability
 
 //Math.Net SparseMatrix<float> functions
 let createEmptyMatrixSparse size = SparseMatrix.Create(size, size, 0.0)
@@ -97,14 +97,14 @@ let processFile file grammarFile =
     let time2 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
     let countOfPairs2 = sparseAnalyzer root2.[0]
 
-    (*let start = System.DateTime.Now
+    let start = System.DateTime.Now
     let root3 =
         [for i in 0..cnt-1 ->
             let (parsingMatrix, _, _) = graphParse<ProbabilityMatrix.T, float>  g1  cudaSquareFunction  loadIL
                                           tokenizer createEmptyMatrixProbability matrixSetValueProbability innerOneFloat
             parsingMatrix]
     let time3 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
-    let countOfPairs3 = probabilityAnalyzer root3.[0]*)
+    let countOfPairs3 = probabilityAnalyzer root3.[0]
 
     let start = System.DateTime.Now
     let root4 =
@@ -115,12 +115,12 @@ let processFile file grammarFile =
     let time4 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
     let countOfPairs4 = mySparseAnalyzer root4.[0]
 
-    System.IO.Path.GetFileNameWithoutExtension file, triples1, (*time1, countOfPairs1,*) time2, countOfPairs2, (*time3, countOfPairs3,*) time4, countOfPairs4
+    System.IO.Path.GetFileNameWithoutExtension file, triples1, (*time1, countOfPairs1,*) time2, countOfPairs2, time3, countOfPairs3, time4, countOfPairs4
 
 let performTests () =
     let basePath = @"..\..\..\data\RDF"
     let files = System.IO.Directory.GetFiles basePath 
     files 
     |> Array.map (fun rdffile -> processFile rdffile "..\..\..\GraphParsing.Test\GPPerf1_cnf.yrd")
-    |> Array.sortBy (fun (_,_,x,_,_,_) -> x)
+    |> Array.sortBy (fun (_,_,x,_,_,_,_,_) -> x)
     |> Array.iter (printfn "%A")

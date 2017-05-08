@@ -234,14 +234,21 @@ let getGLLparserSource (fsa : FSA)
     let terminalNums = new HashSet<_>(stringToToken.Values)
     let stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int, int<positionInGrammar>>()
     for state, token, newState in stateTokenNewState do
-        stateAndTokenToNewState.Add((pack state token), newState)
+        let packed = pack state token
+        let cond, _ = stateAndTokenToNewState.TryGetValue(packed)
+        if cond then failwith "multiple transitions by one terminal"
+        stateAndTokenToNewState.Add(packed, newState)
 
     let intToString = new Dictionary<int, string>()
     
     for tokenNumber in stringToToken do
+        let cond, _ = intToString.TryGetValue(int tokenNumber.Value)
+        if cond then failwith "multiple terminal names for one int"
         intToString.Add(int tokenNumber.Value, tokenNumber.Key)
         
     for numberNonterm in sortedStateToNontermName do
+        let cond, _ = intToString.TryGetValue(int numberNonterm.Key)
+        if cond then failwith "multiple nonterminal names for one state"
         intToString.Add(int numberNonterm.Key, numberNonterm.Value)
 
     let rightSideToRule = 

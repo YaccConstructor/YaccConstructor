@@ -7,9 +7,15 @@ open Yard.Generators.GLL.AbstractParser
 open Microsoft.FSharp.Reflection
 open Yard.Generators.Common
 
+/// for resharper test runner 
+let needChangeDirectory = 
+    (@"C:\Users\Artem Gorokhov\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory())
+    || (@"C:\Users\artem\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory())
 
-let grammarFilesPath = @"./GLLParser.Simple.Tests/"
-
+let grammarFilesPath = 
+    if needChangeDirectory
+    then @"C:/Code/YaccConstructor/tests/GLLParser.Simple.Tests/"
+    else @"./GLLParser.Simple.Tests/"
 
 let getParserSource grammarFile =    
     generate grammarFile

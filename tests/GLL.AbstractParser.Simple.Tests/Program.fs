@@ -27,8 +27,10 @@ open YaccConstructor.API
 open System.Collections.Generic
 open System.Linq
 
+/// for resharper test runner
 let needChangeDirectory = 
-    @"C:\Users\Artem Gorokhov\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = Directory.GetCurrentDirectory()
+    (@"C:\Users\Artem Gorokhov\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = Directory.GetCurrentDirectory())
+    || (@"C:\Users\artem\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = Directory.GetCurrentDirectory())
 
 let outputDir = ""//@"../../../src/GLL.AbstractParser.SimpleTest/"
 
@@ -88,6 +90,11 @@ let test grammarFile inputFile nodesCount edgesCount termsCount ambiguityCount =
       
 [<TestFixture>]
 type ``GLL abstract parser tests``() =
+    [<Test>]  
+    member this._04_RightRecursionCheck () =
+        test "RightRecursionCheck.yrd" 
+             "RightRecursionCheck.txt"
+             15 16 4 1
     [<Test>]  
     member this._04_PackedNodesCheck () =
         test "PackedNodesCheck.yrd" 
@@ -262,7 +269,7 @@ type ``GLL abstract parser tests``() =
     member this._39_LongCycle () =
         test "LongCycle.yrd" 
              "LongCycle.txt"
-             6 6 1 1
+             8 8 1 1
 
     [<Test>]
     member this._41_Longest () =

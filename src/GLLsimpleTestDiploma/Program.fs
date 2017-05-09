@@ -27,8 +27,8 @@ let main argv =
 //    for num in [101..119] do
 //        let i = num
     for parser in [GLL.longK_noEBNF.parserSource; GLL.longK.parserSource] do
-        for num in [1..8] do
-            let i = num * 20
+        for num in [1..14] do
+            let i = num * 10
             GC.Collect()
             GC.WaitForPendingFinalizers()
             GC.Collect()

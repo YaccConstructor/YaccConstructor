@@ -331,6 +331,17 @@ type ``GLL abstract parser tests``() =
         test "SimpleBranch.yrd" 
              "SimpleBranch.txt"
              4 3 2 0
+//    following tests fail because input contain loops
+//    [<Test>]
+//    member this._51_Infinite () =
+//        test "Infinite.yrd" 
+//             "Infinite.txt"
+//             4 3 2 0
+//    [<Test>]
+//    member this._52_Infinite2 () =
+//        test "Infinite2.yrd" 
+//             "Infinite2.txt"
+//             4 3 2 0
 //        
 //[<EntryPoint>]
 //let f x =

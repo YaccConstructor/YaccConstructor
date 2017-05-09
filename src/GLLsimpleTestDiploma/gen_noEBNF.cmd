@@ -1,0 +1,1 @@
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i ".\grammar\longK.yrd" -g "GLLGenerator -pos int -token int -module GLL.longK_noEBNF  -o longK_noEBNF.yrd.fs " >> log.txt

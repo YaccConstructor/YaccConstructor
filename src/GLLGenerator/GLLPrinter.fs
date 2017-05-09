@@ -92,10 +92,29 @@ let getGLLparserSource (fsa : FSA)
         for i in stringToToken.Values do
             println "terminalNums.Add(%i<token>) |> ignore" i
 
-    let printStateAndTokenToNewState () =
-        println "let private stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int, int<positionInGrammar>>()"
-        for state, token, newState in stateTokenNewState do
-            println "stateAndTokenToNewState.Add(%i, %i<positionInGrammar>)" (pack state token) newState
+//    let printStateAndTokenToNewState () =
+//        println "let private stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int, int<positionInGrammar>>()"
+//        for state, token, newState in stateTokenNewState do
+//            println "stateAndTokenToNewState.Add(%i, %i<positionInGrammar>)" (pack state token) newState
+    let printStateAndTokenToNewState (stateAndTokenToNewState : Dictionary<int, int<positionInGrammar>[]>) () = 
+        println "let private stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int, int<positionInGrammar>[]>()" 
+        for pair in stateAndTokenToNewState do 
+            print "stateAndTokenToNewState.Add(%i, [|" pair.Key  
+            pair.Value 
+            |> Seq.iteri (fun i st -> 
+                if (i = 0 && pair.Value.Length > 1) 
+                then 
+                    print "%i<positionInGrammar>" st 
+                elif (i = 0) 
+                then 
+                    print "%i<positionInGrammar>|])" st 
+                elif (i < pair.Value.Length - 1) 
+                then 
+                    print "; %i<positionInGrammar>" st 
+                else 
+                    print "; %i<positionInGrammar>|])" st 
+                ) 
+            println "" 
 
     let printState (state:(int<positionInGrammar> * int<positionInGrammar>) []) isFirst isLast =
         let prefix = if isFirst then "  [|" else "    "
@@ -213,6 +232,22 @@ let getGLLparserSource (fsa : FSA)
         printer ()
         println ""
 
+    let terminalNums = new HashSet<_>(stringToToken.Values) 
+    let stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int, ResizeArray<int<positionInGrammar>>>() 
+    for state, token, newState in stateTokenNewState do 
+        let key = (pack state token) 
+        let cond, value = stateAndTokenToNewState.TryGetValue(key) 
+        if cond 
+        then 
+            value.Add(newState) 
+        else 
+            let x = new ResizeArray<_>() 
+            x.Add(newState) 
+            stateAndTokenToNewState.Add(key, x) 
+    let stateAndTokenToNewState1 = new System.Collections.Generic.Dictionary<int, int<positionInGrammar>[]>() 
+    for x in stateAndTokenToNewState do 
+        stateAndTokenToNewState1.Add(x.Key, x.Value |> Array.ofSeq)
+
     if generateToFile
     then
         printItem printHeaders
@@ -222,7 +257,7 @@ let getGLLparserSource (fsa : FSA)
         printItem (printIntToString sortedStateToNontermName)
         printItem (printAnyNonterm anyNonterm)
         printItem printTerminalNums
-        printItem printStateAndTokenToNewState
+        printItem (printStateAndTokenToNewState stateAndTokenToNewState1)
         printItem (printOutNonterms fsaStatesOutNonterms)
         printItem printStartState
         printItem printFinalStates
@@ -231,13 +266,13 @@ let getGLLparserSource (fsa : FSA)
         printItem printParser
     //printItem (printFun isAbstract)
 
-    let terminalNums = new HashSet<_>(stringToToken.Values)
-    let stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int, int<positionInGrammar>>()
-    for state, token, newState in stateTokenNewState do
-        let packed = pack state token
-        let cond, _ = stateAndTokenToNewState.TryGetValue(packed)
-        if cond then failwith "multiple transitions by one terminal"
-        stateAndTokenToNewState.Add(packed, newState)
+//    let terminalNums = new HashSet<_>(stringToToken.Values)
+//    let stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int, int<positionInGrammar>>()
+//    for state, token, newState in stateTokenNewState do
+//        let packed = pack state token
+//        let cond, _ = stateAndTokenToNewState.TryGetValue(packed)
+//        if cond then failwith "multiple transitions by one terminal"
+//        stateAndTokenToNewState.Add(packed, newState)
 
     let intToString = new Dictionary<int, string>()
     
@@ -268,7 +303,7 @@ let getGLLparserSource (fsa : FSA)
                                          , terminalNums
                                          , intToString
                                          , (int anyNonterm)* 1<positionInGrammar>
-                                         , stateAndTokenToNewState
+                                         , stateAndTokenToNewState1
                                          , stringToToken
                                          , multipleInEdges
                                          , rightSideToRule=rightSideToRule)

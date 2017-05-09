@@ -168,12 +168,14 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
         input.ForAllOutgoingEdges
             currentContext.PosInInput
             (fun nextToken nextPosInInput -> 
-                let isTransitionPossible, nextPosInGrammar = parser.StateAndTokenToNewState.TryGetValue (parser.GetTermsDictionaryKey currentContext.PosInGrammar (int nextToken))
+                let isTransitionPossible, positions = parser.StateAndTokenToNewState.TryGetValue (parser.GetTermsDictionaryKey currentContext.PosInGrammar (int nextToken))
                 if isTransitionPossible
-                then eatTerm currentContext nextToken nextPosInInput nextPosInGrammar
+                then 
+                    for nextPosInGrammar in positions do
+                        eatTerm currentContext nextToken nextPosInInput nextPosInGrammar
                    //pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex (currentContext.Length + 1us)
             )
-
+    printfn "SPPF nodes: %i" sppf.Nodes.Length
     gss, 
         if buildTree
         then 
@@ -187,6 +189,7 @@ let findVertices (gss:GSS) state : seq<GSSVertex> =
 
 let buildAst (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss, tree = parse parser input true
+    printfn "EdgeCount: %i\nVertCount: %i" gss.EdgeCount gss.VertexCount
     let tree = if tree.IsNone
                 then failwith "NotParsed"
                 else tree.Value

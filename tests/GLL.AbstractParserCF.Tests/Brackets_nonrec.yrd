@@ -1,0 +1,4 @@
+[<Start>]
+s : LBR a | A
+a : A RBR | A b
+b : B

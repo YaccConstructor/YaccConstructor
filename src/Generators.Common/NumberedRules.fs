@@ -52,6 +52,18 @@ type NumberedRules (ruleList : Rule.t<Source.t,Source.t> list, indexator : Index
             if not !res && Array.exists((=) errInd) right.[i] then
                 res := true
         !res
+
+    let ruleToString (rule : Rule.t<Source.t,Source.t>)=
+        let rec traverse = function
+            | PRef (nTerm,_) -> nTerm.text
+            | PToken token   -> token.text
+            | PLiteral lit   -> lit.text
+            | PSeq (s,_,_)   -> s |> List.map (fun x -> traverse x.rule) |> String.concat " "
+            | _ -> failwith "Unexpected construction in grammar"
+        traverse rule.body
+
+    let stringifiedRules = 
+        rules |> Array.mapi (fun i r -> ruleToString r, i) |> dict
         
     member this.rulesCount = rules.Length
     member this.startRule = start
@@ -65,3 +77,4 @@ type NumberedRules (ruleList : Rule.t<Source.t,Source.t> list, indexator : Index
     member this.symbol rule pos = right.[rule].[pos]
     member this.rulesWithLeftSide symbol = rulesWithLeft.[symbol]
     member this.errorRulesExists = errRulesExists
+    member this.rightSideToRule rightSide = stringifiedRules.[rightSide]

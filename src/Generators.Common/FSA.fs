@@ -16,7 +16,7 @@ type FSA(ruleList : Rule.t<Source.t,Source.t> list) =
         |> convertRulesToFSA  |> printDot @".\FSA1initialFSA.dot"
         |> removeEpsilonEdges //|> printDot @".\FSA2withoutEpsilon.dot"
         |> toDFA              //|> printDot @".\FSA3determ.dot"
-        |> minimizeFSA        |> printDot @"FSA4minimized.dot"
+        |> minimizeFSA        |> printDot @".\FSA4minimized.dot"
     //let firstSet = genFirstSet fsa
 
     member this.States = fsa.States
@@ -26,3 +26,4 @@ type FSA(ruleList : Rule.t<Source.t,Source.t> list) =
     //member this.FirstSet = firstSet
     member this.StateToNontermName = fsa.StateToNontermName
     member this.PrintDot filePrintPath = printDot filePrintPath fsa
+    member this.RuleList = ruleList

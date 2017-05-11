@@ -174,7 +174,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
                    //pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex (currentContext.Length + 1us)
             )
 
-    gss, 
+    gss, sppf,
         if buildTree
         then 
             Some <| new Tree<_>(sppf.GetRoots gss input.InitialPositions.[0], input.PositionToString)
@@ -186,14 +186,14 @@ let findVertices (gss:GSS) state : seq<GSSVertex> =
     |> Seq.filter (fun v -> v.Nonterm = state)
 
 let buildAst (parser : ParserSourceGLL) (input : IParserInput) = 
-    let gss, tree = parse parser input true
+    let _, _, tree = parse parser input true
     let tree = if tree.IsNone
                 then failwith "NotParsed"
                 else tree.Value
     tree
         
 let isParsed (parser : ParserSourceGLL) (input : LinearInput) = 
-    let gss, _ = parse parser input false
+    let gss, _, _ = parse parser input false
     findVertices gss parser.StartState
     |> Seq.exists (fun v -> v.P.SetP |> ResizeArray.exists (fun p -> int p.posInInput = input.Input.Length))
 
@@ -202,7 +202,7 @@ let getAllRangesForState gss state =
     |> Seq.collect (fun v -> v.U |> Seq.collect (fun kvp -> kvp.Value |> Seq.map (fun x -> v.PositionInInput, v.GetUncompressetPositions kvp.Key |> fst)))    
 
 let getAllRangesForStartState (parser : ParserSourceGLL) (input : IParserInput) = 
-    let gss, _ = parse parser input false
+    let gss, _, _ = parse parser input false
     getAllRangesForState gss parser.StartState
 
 let getAllRangesForStateWithLength gss state =
@@ -210,5 +210,5 @@ let getAllRangesForStateWithLength gss state =
     |> Seq.collect (fun v -> v.U |> Seq.collect (fun kvp -> kvp.Value |> Seq.map (fun x -> v.PositionInInput, v.GetUncompressetPositions kvp.Key |> fst, match x with Length x -> x | TreeNode _ -> failwith "Impossible!")))
 
 let getAllRangesForStartStateWithLength (parser : ParserSourceGLL) (input : IParserInput) = 
-    let gss, _ = parse parser input false
+    let gss, _, _ = parse parser input false
     getAllRangesForStateWithLength gss parser.StartState

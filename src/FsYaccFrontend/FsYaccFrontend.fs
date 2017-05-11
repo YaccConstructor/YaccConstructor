@@ -39,6 +39,8 @@ type FsYaccFrontend() =
             Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>
             |> List.ofArray
             |> List.map (fun unionCase -> unionCase.Name)
+        override this.ParseGrammarFromStr str = 
+            Main.ParseString str
     
 
 // For testing switch to Console App and then switch back to Class Library
@@ -52,7 +54,7 @@ module Run =
 
    
 //    let filename = @"..\..\..\AntlrToYard\Parser.fsy" 
-    let filename = @"..\..\..\..\Tests\FsYacc\5.fsy" 
+    let filename = @"..\..\..\..\tests\data\FsYacc\5.fsy" 
 //    let content = System.IO.File.ReadAllText(filename)
 //    Lexer.source := content
 //    let reader = new System.IO.StringReader(content)

@@ -110,7 +110,7 @@ Target "AssemblyInfo" (fun _ ->
 // src folder to support multiple project outputs
 Target "CopyBinaries" (fun _ ->
     !! "src/**/*.??proj"
-    |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) @@ "bin/Release", "bin" @@ (System.IO.Path.GetFileNameWithoutExtension f)))
+    |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) @@ "bin/Release", "Bin" @@ (System.IO.Path.GetFileNameWithoutExtension f)))
     |>  Seq.iter (fun (fromDir, toDir) -> CopyDir toDir fromDir (fun _ -> true))
 )
 
@@ -118,7 +118,7 @@ Target "CopyBinaries" (fun _ ->
 // Clean build results
 
 Target "Clean" (fun _ ->
-    CleanDirs ["bin"; "temp"]
+    CleanDirs ["Bin"; "temp"]
 )
 
 Target "CleanDocs" (fun _ ->
@@ -157,24 +157,41 @@ Target "Build:YardFrontend" (fun _ ->
 // Gen frontends, tests etc
 
 let runCmd cmdFile =
-    let retCode = Fake.ProcessHelper.Shell.Exec(System.IO.Path.GetFullPath(cmdFile), dir = System.IO.Path.GetDirectoryName cmdFile)
+#if MONO
+    let retCode = Fake.ProcessHelper.Shell.Exec("bash", args = System.IO.Path.GetFullPath(cmdFile), dir = System.IO.Path.GetDirectoryName (System.IO.Path.GetFullPath cmdFile))
+#else
+    let retCode = Fake.ProcessHelper.Shell.Exec(System.IO.Path.GetFullPath(cmdFile), dir = System.IO.Path.GetDirectoryName (System.IO.Path.GetFullPath cmdFile))
+#endif
     if retCode <> 0
     then failwithf "Execution of %A failed!" cmdFile
 
-Target "Gen:FsYaccFrontend" (fun _ -> runCmd @"src\FsYaccFrontend\gen.cmd")
+let runShell shellFile =
+#if MONO
+    runCmd (shellFile + ".sh")
+#else
+    runCmd (shellFile + ".cmd")
+#endif
 
-Target "Gen:YardFrontend" (fun _ -> runCmd @"src\YardFrontend\gen.cmd")
+Target "Gen:FsLex" (fun _ -> runShell <| "src" @@ "FsLex" @@ "gen")
+
+Target "Gen:FsYacc" (fun _ -> runShell <| "src" @@ "FsYacc" @@ "gen")
+
+Target "Gen:FsYaccFrontend" (fun _ -> runShell <| "src" @@ "FsYaccFrontend" @@ "gen")
+
+Target "Gen:YardFrontend" (fun _ -> runShell <| "src" @@ "YardFrontend" @@ "gen")
 
 Target "GenTests:RNGLR" (fun _ -> 
-                            runCmd @"tests\RNGLRAbstractParser.Tests\gen.cmd"
-                            runCmd @"tests\RNGLRAbstractParser.Tests\gen_lex.cmd"
-                            runCmd @"tests\RNGLRParser.Simple.Tests\gen.cmd"
+                            runShell <| "tests" @@ "RNGLRAbstractParser.Tests" @@ "gen"
+                            runShell <| "tests" @@ "RNGLRAbstractParser.Tests" @@ "gen_lex"
+                            runShell <| "tests" @@ "RNGLRParser.Simple.Tests" @@ "gen"
                         )
 
-Target "GenTests:GLL" (fun _ -> runCmd @"tests\GLL.AbstractParser.Simple.Tests\gen.cmd"
-                      )
+Target "GenTests:GLL" (fun _ ->
+                            runShell <| "tests" @@ "GLL.AbstractParser.Simple.Tests" @@ "gen"
+                            runShell <| "tests" @@ "GLLParser.Simple.Tests" @@ "genSimpleCalc"
+                        )
 
-Target "GenTests:RIGLR" (fun _ -> runCmd @"tests\RIGLRParser.SimpleTest\gen.cmd")
+Target "GenTests:RIGLR" (fun _ -> runShell <| "tests" @@ "RIGLRParser.SimpleTest" @@ "gen")
 
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner
@@ -189,7 +206,7 @@ Target "RunTests" (fun _ ->
             ShadowCopy = false
             DisposeRunners = true
             TimeOut = TimeSpan.FromMinutes 20.
-            WorkingDir = "tests/YardFrontend.Tests/bin/Release/"
+            WorkingDir = "tests/"
         })
 )
 
@@ -216,7 +233,7 @@ Target "SourceLink" (fun _ ->
 Target "NuGet" (fun _ ->
     Paket.Pack(fun p -> 
         { p with
-            OutputPath = "bin"
+            OutputPath = "Bin"
             Version = release.NugetVersion
             ReleaseNotes = toLines release.Notes})
 )
@@ -224,7 +241,7 @@ Target "NuGet" (fun _ ->
 Target "PublishNuget" (fun _ ->
     Paket.Push(fun p -> 
         { p with
-            WorkingDir = "bin" })
+            WorkingDir = "Bin" })
 )
 
 
@@ -323,7 +340,7 @@ let createIndexFsx lang =
     let content = """(*** hide ***)
 // This block of code is omitted in the generated HTML documentation. Use 
 // it to define helpers that you do not want to show in the documentation.
-#I "../../../bin"
+// "../../../bin"
 
 (**
 F# Project Scaffold ({0})
@@ -415,6 +432,8 @@ Target "All" DoNothing
 
 "Clean"
   ==> "AssemblyInfo"
+  ==> "Gen:FsLex"
+  ==> "Gen:FsYacc"
   ==> "Build:Core"
   ==> "Gen:FsYaccFrontend"
   ==> "Build:Minimal"

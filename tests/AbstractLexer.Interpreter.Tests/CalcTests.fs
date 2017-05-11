@@ -10,7 +10,7 @@ open YC.FST.AbstractLexing.Tests.CommonTestChecker
 open QuickGraph.FSA.GraphBasedFsa
 open System
 
-let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"
+let baseInputGraphsPath = "../../../tests/data/AbstractLexing/DOT"
 
 let transform x = (x, match x with |Smbl(y:char, _) when y <> (char 65535) -> Smbl(int y) |Smbl(y:char, _) when y = (char 65535) -> Smbl 65535 |_ -> Eps)
 let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
@@ -20,13 +20,13 @@ let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
 //        | (y, _) when y = char 65535 -> "eof"  
 //        | _ -> (fst x).ToString() + "_br: " + (snd x).back_ref.ToString() + "(" + (snd x).start_offset.ToString() + "," + (snd x).end_offset.ToString() + ")"
 
-let calcTokenizationTest file eCount vCount countEdgesArray =
+let calcTokenizationTest file eCount vCount countEdgesArray tagToNum =
     let graph = loadDotToQG (path baseInputGraphsPath file)
     let graphFsa = approximateQG(graph)
     //graphFsa.PrintToDOT("../../../FST/FST/FSA.Tests/DOTfsa/test12FSA.dot", printSmb)
     let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
     //graphFst.PrintToDOT("../../../FST/FST/FSA.Tests/DOTfsa/test12FST.dot", printSmb)
-    let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphFst    
+    let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphFst tagToNum   
     match res with
     | Success res ->
         //ToDot res @"../../../src/AbstractLexer.Interpreter.Tests/Tests/TestInterpretParserLexer.dot" (printBref printSmbString)

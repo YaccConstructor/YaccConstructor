@@ -11,7 +11,7 @@ open Yard.Generators.GLL.AbstractParserCF
 open Yard.Generators.GLL.ParserCommon
 open AbstractAnalysis.Common
 
-let grammarsDir = @"C:\Users\User\Projects\YaccConstructor\tests\GLL.AbstractParserCF.Tests\"
+let grammarsDir = @".\GLL.AbstractParserCF.Tests\" //@"C:\Users\User\Projects\YaccConstructor\tests\GLL.AbstractParserCF.Tests\"
 
 let getParserSource grammarFile =    
     generate (grammarsDir + grammarFile)
@@ -30,14 +30,14 @@ let testCFParser grammar1 grammar2 =
 type ``GLLAbstractCFParserTests`` () =
     
     // infinite loop (embedded recursion)
-    [<Test>]
-    member this.``Test_CF``() =        
-        let gss1, gss2, count = testCFParser "BracketsLeft.yrd" "BracketsRight.yrd"
-        gss1.ToDot (grammarsDir + "gss.dot")
-        gss2.ToDot (grammarsDir + "gss2.dot")
-        printfn "%i" count
-        Directory.GetCurrentDirectory() |> printfn "%s"        
-        Assert.IsTrue true
+//    [<Test>]
+//    member this.``Test_CF``() =        
+//        let gss1, gss2, count = testCFParser "BracketsLeft.yrd" "BracketsRight.yrd"
+//        gss1.ToDot (grammarsDir + "gss.dot")
+//        gss2.ToDot (grammarsDir + "gss2.dot")
+//        printfn "%i" count
+//        Directory.GetCurrentDirectory() |> printfn "%s"        
+//        Assert.IsTrue true
 
     [<Test>]
     member this.``Brackets``() =

@@ -69,6 +69,11 @@
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\CustomHashSet\CustomHashSet.csproj">
+      <Name>CustomHashSet</Name>
+      <Project>{6ed4ef0c-128e-4905-bb0a-85256167f9e8}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\GLLAbstractParser\GLLAbstractParser.fsproj">
       <Name>GLLAbstractParser</Name>
       <Project>{bd40477e-7ceb-4ff4-b53f-05316f3bb6d8}</Project>

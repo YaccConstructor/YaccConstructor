@@ -47,8 +47,6 @@ type NonTerminalNode =
 and TerminalNode =
     val Name : int<token>
     val Extension : int64<extension>
-    member this.getRightExtension = int <| ((int64 this.Extension) &&& 0xffffffffL)
-    member this.getLeftExtension = int <| ((int64 this.Extension) >>> 32)
     interface INode with
         member this.getExtension () = this.Extension
     new (name, extension) = {Name = name; Extension = extension}

@@ -203,5 +203,5 @@ type SPPF(lengthOfInput : int, startState : int<positionInGrammar>, finalStates 
                              | _ -> failwith "wrongType")
         |> Array.ofSeq
 
-let GetPathSet (sppf : SPPF) = 
-    sppf.GetTerminalNodes |> Seq.map (fun x -> x.Name, x.getLeftExtension, x.getRightExtension)
+let GetTerminals (sppf : SPPF) = 
+    sppf.GetTerminalNodes |> Seq.map (fun x -> x.Name, getLeftExtension x.Extension, getRightExtension x.Extension)

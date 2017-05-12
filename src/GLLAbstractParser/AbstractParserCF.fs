@@ -118,10 +118,12 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
         && (context.GssVertex2 :?> GSSVertexCF) = vertexRight
     
     let count = ref 0
+    let log = new System.IO.StreamWriter("log.txt")
 
     while setR.Count <> 0 do
+        incr count
         let currentContext = setR.Pop()
-        printfn "%s" <| currentContext.ToString()
+        //printfn "%s" <| currentContext.ToString()
 //        if isFinalContext currentContext
 //        then incr count            
         handleFinalStates Left currentContext
@@ -130,6 +132,14 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
         makeNontermTransitions Right currentContext
         makeTermTransitions currentContext
 
+        if !count % 1000 = 0
+        then 
+            log.WriteLine("{0}, {1}", !count, setR.Count)
+            if !count = 100000
+            then
+                log.Close()
+                setR.Clear()
+    
     gssLeft, gssRight, !count
 
 let findVertices (gss: GSS) state : seq<GSSVertex> =    

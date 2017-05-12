@@ -33,11 +33,6 @@ open Option
 open HighlightingPrinter
 open HighlightingConvertions
 
-
-
-do()
-
-
 type RNGLR() = 
     inherit Generator()
         override this.Name = "RNGLRGenerator"

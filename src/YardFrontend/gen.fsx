@@ -1,18 +1,18 @@
-﻿#r @"../../Bin/Release/v40/YC.RNGLR.dll"
-#r @"../../Bin/Release/v40/YC.Common.dll"
-#r @"../../Bin/Release/v40/YC.FsYaccFrontend.dll"
-#r @"../../Bin/Release/v40/YC.YaccConstructor.exe"
+﻿#I @"..\..\Bin\Release\v40"
+
+#r @"YC.RNGLR.dll"
+#r @"YC.Common.dll"
+#r @"YC.FsYaccFrontend.dll"
 
 open Yard.Generators.RNGLR
 open Yard.Frontends.FsYaccFrontend
-open YaccConstructor.API
 
-let gen = new RNGLR()
-let fe = new FsYaccFrontend()
-let filename = "Parser.fsy"
+module YardFrontend =
+    let gen = new RNGLR()
+    let fe = new FsYaccFrontend()
 
-let generate = 
-    generateToFile filename
-                   fe
-                   gen
-                   "Parser.fs"
+    let generate () =
+        let il = fe.ParseGrammar "Parser.fsy"
+        gen.Generate(il, true, "-o Parser.fs -module Yard.Frontends.YardFrontend.GrammarParser -pos Source.Position -token Source.t") |> ignore
+
+YardFrontend.generate()

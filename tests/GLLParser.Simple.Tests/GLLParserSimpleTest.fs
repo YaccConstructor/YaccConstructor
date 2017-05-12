@@ -18,18 +18,20 @@ open Yard.Generators.GLL.AbstractParser
 //    let tokens = LexCommon.tokens(path)
 //    astBuilder tokens
 
+/// for resharper test runner
 let needChangeDirectory = 
-    @"C:\Users\Artem Gorokhov\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory()
+    (@"C:\Users\Artem Gorokhov\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory())
+    || (@"C:\Users\artem\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory())
 
 let inputFilesPath = 
     if needChangeDirectory
     then @"C:/Code/YaccConstructor/tests/data/GLL/"
     else @"./data/GLL/"
+
 let grammarFilesPath = 
     if needChangeDirectory
     then @"C:/Code/YaccConstructor/tests/GLLParser.Simple.Tests/"
     else @"./GLLParser.Simple.Tests/"
-
 
 let getTokens path =
     System.IO.File.ReadAllText(inputFilesPath + path)
@@ -53,7 +55,8 @@ let getParserSource grammarFile =
     generate (grammarFilesPath + grammarFile)
              "YardFrontend" "GLLGenerator" 
              None
-             ["ExpandMeta"]
+             [ "ExpandMeta"]
+             //[ "ExpandEbnf"; "ExpandMeta"; "ExpandInnerAlt"; "AddDefaultAC"; "Linearize"]
              [] :?> ParserSourceGLL
 
 let runTest grammarFile inputFile =
@@ -79,6 +82,12 @@ let checkAst grammarFile inputFile nodesCount edgesCount termsCount ambiguityCou
 
 [<TestFixture>]
 type ``GLL parser tests with simple lexer`` () =
+
+//    [<Test>]
+//    member test.``Strange Error``() =
+//        //runTest "BadLeftRecursion.yrd" "BBB.txt"
+//        checkAst "code.yrd" "code.txt"
+//            19 24 3 1
 
     [<Test>]
     member test.``Bad left rec``() =
@@ -176,7 +185,7 @@ type ``GLL parser tests with simple lexer`` () =
     [<Test>]
     member test.``Long cycle``() =
         checkAst "LongCycle.yrd" "LongCycle.txt"
-             6 6 1 1
+             8 8 1 1
     [<Test>]
     member test.``Longest``() =
         checkAst "Longest.yrd" "Longest.txt"

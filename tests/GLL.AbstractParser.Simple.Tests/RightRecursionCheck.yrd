@@ -1,0 +1,4 @@
+[<Start>]
+s : protein
+protein : P similar protein | P
+similar : B A R

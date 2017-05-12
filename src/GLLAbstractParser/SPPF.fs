@@ -62,6 +62,9 @@ type SPPF(lengthOfInput : int, startState : int<positionInGrammar>, finalStates 
     member this.EpsilonNodes = epsilonNodes
     member this.PackedNodes = packedNodes
 
+    member this.GetTerminalNodes = 
+        this.Nodes |> Seq.filter (fun x -> x :? TerminalNode) |> Seq.cast<TerminalNode>
+
     member this.FindSppfNode (t : TypeOfNode) lExt rExt : int<nodeMeasure> =
         match t with 
         | Nonterm state ->
@@ -115,8 +118,6 @@ type SPPF(lengthOfInput : int, startState : int<positionInGrammar>, finalStates 
         let newNode = createNode()
 //        packedNodes.Add(key, newNode)
         newNode
-
-    
 
     member this.GetNodeT (symbol : int<token>) (pos : int<positionInInput>) (nextPos : int<positionInInput>) =
         let index = int pos + 1
@@ -201,3 +202,6 @@ type SPPF(lengthOfInput : int, startState : int<positionInGrammar>, finalStates 
                              | TreeNode n -> this.Nodes.Item (int n)
                              | _ -> failwith "wrongType")
         |> Array.ofSeq
+
+let GetTerminals (sppf : SPPF) = 
+    sppf.GetTerminalNodes |> Seq.map (fun x -> x.Name, getLeftExtension x.Extension, getRightExtension x.Extension)

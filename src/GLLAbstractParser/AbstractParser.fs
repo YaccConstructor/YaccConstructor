@@ -23,7 +23,10 @@ let unpackNode = function
     | _ -> failwith "Wrong type"
 
 let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) = 
-    let lengthOfInput = 100
+    let lengthOfInput = 
+        if (input :? LinearInput) then
+            (input :?> LinearInput).Input.Length
+        else 500
     let dummy = 
         if buildTree
         then TreeNode(-1<nodeMeasure>)

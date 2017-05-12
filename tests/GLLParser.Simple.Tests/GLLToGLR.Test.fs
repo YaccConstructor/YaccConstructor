@@ -6,6 +6,13 @@ open AbstractAnalysis.Common
 open Yard.Generators.GLL.AbstractParser
 open Microsoft.FSharp.Reflection
 open Yard.Generators.Common
+open Yard.Frontends.YardFrontend
+open Yard.Generators.GLL
+open Yard.Core
+open Yard.Core.Conversions.ExpandMeta
+open Yard.Core.Conversions.ExpandEbnfStrict
+open Yard.Core.Conversions.ExpandInnerAlt
+
 
 /// for resharper test runner 
 let needChangeDirectory = 
@@ -17,11 +24,15 @@ let grammarFilesPath =
     then @"C:/Code/YaccConstructor/tests/GLLParser.Simple.Tests/"
     else @"./GLLParser.Simple.Tests/"
 
-let getParserSource grammarFile =    
+let getParserSource grammarFile = 
+    let fe = new YardFrontend()
+    let gen = new GLL()
+    let conv = [|new ExpandMeta(), new ExpandEbnf(), new ExpandInnerAlt()|] |> Seq.cast<Conversion>
     generate grammarFile
-                "YardFrontend" "GLLGenerator" 
+                fe gen
                 None
-                ["ExpandMeta"; "ExpandEbnf"; "ExpandInnerAlt"] 
+                conv
+                [|""|]
                 [] :?> ParserSourceGLL
    
 let private tokenToString (token : 'a) =

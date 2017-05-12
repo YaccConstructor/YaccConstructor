@@ -14,7 +14,7 @@
 
 module YaccConstructor.Program
 
-open Mono.Addins
+
 open Yard.Core
 open Yard.Core.IL
 open Yard.Core.Helpers
@@ -25,12 +25,7 @@ open System.Reflection
 open YaccConstructor.Common
 open YaccConstructor.API
 open Argu
-
-
-
-[<assembly:AddinRoot ("YaccConstructor", "1.0")>]
-do()
-
+(*
 let () =
     let feName = ref None
     let generatorName = ref None
@@ -110,7 +105,7 @@ let () =
                            userDefs.Value
         with 
             | _ -> ()
-
+            *)
 //Tests. Please do not remove
 //YaccConstructor.exe -f AntlrFrontend -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/ANTLR/C.g
 //YaccConstructor.exe -g YardPrinter -i ../../../../Tests/Basic/test_include/test_include_main.yrd

@@ -17,7 +17,7 @@ module Yard.Core.Conversions.BuildAstSimple
 open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
-open Mono.Addins
+
 
 open System.Collections.Generic
 
@@ -94,11 +94,11 @@ let buildAstSimple (ruleList: Rule.t<Source.t, Source.t> list)  =
     ruleList |> List.map (fun rule -> {rule with body=(_buildAstSimple rule.name.text rule.body) } )
 
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
+
+
 do()
 
-[<Extension>]
+
 type BuildAstSimple() = 
     inherit Conversion()
         override this.Name = "BuildAstSimple"

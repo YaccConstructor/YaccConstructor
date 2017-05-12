@@ -19,7 +19,7 @@ open Yard.Core.IL
 open Namer
 open TransformAux
 open Yard.Core.IL.Production
-open Mono.Addins
+
 
 //let dummyPos s = new Source.t(s)
 
@@ -61,11 +61,11 @@ let private expandBrackets (ruleList: Rule.t<_, _> list) =
     List.rev !expanded
 
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
+
+
 do()
 
-[<Extension>]
+
 type ExpandBrackets() = 
     inherit Conversion()
         override this.Name = "ExpandBrackets"

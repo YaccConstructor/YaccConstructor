@@ -1,21 +1,7 @@
 ﻿module Addin
-open Mono.Addins
+
 open Yard.Core
-open Yard.Core.IL
-open Yard.Core.Helpers
-open Yard.Core.Checkers
-open Microsoft.FSharp.Text
-open System.IO
-open System.Reflection
-
-[<assembly:AddinRoot ("YaccConstructor", "1.0")>]
-
-AddinManager.Initialize()    
-//let x = AddinManager.Registry.RegistryPath
-//printfn "%A" x
-//System.IO.Directory.Delete(x, true)
-AddinManager.Registry.Update(null)
-
+(*
 let private createFrontendsInitialization() = 
     lazy( AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend> |> Seq.toArray )
 let private createConversionsInitialization() = 
@@ -50,4 +36,4 @@ let GetGenerators() = getX currentGenerators.Value
 let GetFrontendNames() = getX currentFrontendNames.Value
 let GetConversionNames() = getX currentConversionNames.Value
 let GetGeneratorNames() = getX currentGeneratorNames.Value
-
+*)

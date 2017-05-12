@@ -19,7 +19,7 @@ open Yard.Core.IL
 open TransformAux
 open Yard.Core.IL.Production
 open System.Collections.Generic
-open Mono.Addins
+
 
 let dummyPos s = new Source.t(s)
 
@@ -109,11 +109,11 @@ let private linearize (grammar: Grammar.t<_,_>) =
 
 
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
+
+
 do()
 
-[<Extension>]
+
 type Linearize() = 
     inherit Conversion()
         override this.Name = "Linearize"

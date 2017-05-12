@@ -17,7 +17,7 @@ module Yard.Core.Conversions.AddEOF
 open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
-open Mono.Addins
+
 
 open System.Collections.Generic
 
@@ -109,11 +109,11 @@ let addEOF (ruleList: Rule.t<Source.t, Source.t> list) =
             [rule]
     )  
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
+
+
 do()
 
-[<Extension>]
+
 type AddEOF() = 
     inherit Conversion()
         override this.Name = "AddEOF"

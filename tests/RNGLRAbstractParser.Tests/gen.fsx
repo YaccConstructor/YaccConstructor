@@ -1,3 +1,3 @@
 ﻿#I @"../../Bin/Release/v40"
 
-#r
+#r @"YC.Common.dll"

@@ -64,6 +64,7 @@
     <Compile Include="CfgBuildingTest.fs" />
     <Compile Include="CfgFunctionsTest.fs" />
     <None Include="app.config" />
+    <None Include="gen.fsx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\\AbstractLexer.Interpreter.Tests\AbstractLexer.Interpreter.Tests.fsproj">

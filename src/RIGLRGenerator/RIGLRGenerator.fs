@@ -13,11 +13,6 @@ open Constraints
 open Automata
 open PrintTable
 
-
-
-do()
-
-
 type RIGLR() = 
     inherit Generator()
         override this.Name = "RIGLRGenerator"

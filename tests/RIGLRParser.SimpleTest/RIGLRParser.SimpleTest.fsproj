@@ -62,6 +62,7 @@
     <Compile Include="LexCommon.fs" />
     <Compile Include="RIGLRParserSimpleTest.fs" />
     <None Include="paket.references" />
+    <None Include="gen.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

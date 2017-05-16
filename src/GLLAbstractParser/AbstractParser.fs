@@ -23,7 +23,6 @@ let unpackNode = function
     | _ -> failwith "Wrong type"
 
 let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) = 
-    let lengthOfInput = 100
     let dummy = 
         if buildTree
         then TreeNode(-1<nodeMeasure>)
@@ -31,7 +30,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
     let epsilon = -1<token>
 
     let gss = new GSS()
-    let sppf = new SPPF(lengthOfInput, parser.StartState, parser.FinalStates)
+    let sppf = new SPPF(parser.StartState, parser.FinalStates)
     
     let startContexts = 
         input.InitialPositions
@@ -199,7 +198,7 @@ let isParsed (parser : ParserSourceGLL) (input : LinearInput) =
 
 let getAllRangesForState gss state =
     findVertices gss state
-    |> Seq.collect (fun v -> v.U |> Seq.collect (fun kvp -> kvp.Value |> Seq.map (fun x -> v.PositionInInput, v.GetUncompressetPositions kvp.Key |> fst)))    
+    |> Seq.collect (fun v -> v.P.SetP |> Seq.map (fun poped -> v.PositionInInput, poped.posInInput))    
 
 let getAllRangesForStartState (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss, _, _ = parse parser input false
@@ -207,7 +206,7 @@ let getAllRangesForStartState (parser : ParserSourceGLL) (input : IParserInput) 
 
 let getAllRangesForStateWithLength gss state =
     findVertices gss state
-    |> Seq.collect (fun v -> v.U |> Seq.collect (fun kvp -> kvp.Value |> Seq.map (fun x -> v.PositionInInput, v.GetUncompressetPositions kvp.Key |> fst, match x with Length x -> x | TreeNode _ -> failwith "Impossible!")))
+    |> Seq.collect (fun v -> v.P.SetP |> Seq.map (fun poped -> v.PositionInInput, poped.posInInput, match poped.data with Length x -> x | TreeNode _ -> failwith "Impossible!"))
 
 let getAllRangesForStartStateWithLength (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss, _, _ = parse parser input false

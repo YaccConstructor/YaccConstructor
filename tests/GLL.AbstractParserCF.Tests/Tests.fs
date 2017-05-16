@@ -14,7 +14,7 @@ open Yard.Generators.GLL.AbstractParserCF
 open Yard.Generators.GLL.ParserCommon
 open AbstractAnalysis.Common
 
-let grammarsDir =  @"./GLL.AbstractParserCF.Tests/" //@"C:\Users\User\Projects\YaccConstructor\tests\GLL.AbstractParserCF.Tests\"
+let grammarsDir =  @"C:\Users\User\Projects\YaccConstructor\tests\GLL.AbstractParserCF.Tests\" //@"./GLL.AbstractParserCF.Tests/" 
 
 let getParserSource grammarFile =    
     generate (grammarsDir + grammarFile)
@@ -22,8 +22,6 @@ let getParserSource grammarFile =
              None
              ["ExpandMeta"]
              [] :?> ParserSourceGLL
-
-let parserSource16sMid = getParserSource "R16S_19_27.yrd"
 
 let convertNucleo n =
     let n = Char.ToUpper(n)
@@ -33,12 +31,13 @@ let convertNucleo n =
     then n
     else 'G'
 
-let tokenizeGenome (input: string) =
-    let mkTokenizer strToToken ch = (convertNucleo ch).ToString() |> strToToken
-    input.ToCharArray() |> Array.map (mkTokenizer parserSource16sMid.StringToToken)
-
-let find16sInLinearInput (input: array<int<token>>) = 
-    let linearInput = LinearInput([|for i in 0 .. input.Length - 1 -> i * 1<positionInInput>|], input)
+let find16sInLinearInput (input: string) = 
+    let parserSource16sMid = getParserSource "R16S_19_27.yrd"
+    let tokenizeGenome (input: string) =
+        let mkTokenizer strToToken ch = (convertNucleo ch).ToString() |> strToToken
+        input.ToCharArray() |> Array.map (mkTokenizer parserSource16sMid.StringToToken)
+    
+    let linearInput = LinearInput([|for i in 0 .. input.Length - 1 -> i * 1<positionInInput>|], tokenizeGenome input)
     getAllRangesForStartStateWithLength parserSource16sMid linearInput
 
 let toYardGr (path : string) (outPath : string) =    
@@ -76,7 +75,7 @@ type ``GLLAbstractCFParserTests`` () =
 
     [<Test>]
     member this.``Brackets``() =
-        let gss1, gss2, count = testCFParser "BracketsLeft.yrd" "Brackets_nonrec.yrd"
+        let gss1, gss2, count = testCFParser "BracketsLeft.yrd" "Brackets_nonrec.yrd" false
         let x = getAllCompleteRangesForState gss1 (0<positionInGrammar>) (1<positionInGrammar>)
         printfn ""
         x |> Seq.iter (fun (s, e) -> printf "(%i, %i); " s e)
@@ -84,7 +83,7 @@ type ``GLLAbstractCFParserTests`` () =
 
     [<Test>]
     member this.``Cycle_brackets``() =
-        let gss1, gss2, count = testCFParser "BracketsLeft.yrd" "Cycle_brackets.yrd"
+        let gss1, gss2, count = testCFParser "BracketsLeft.yrd" "Cycle_brackets.yrd" false
         let x = getAllCompleteRangesForState gss1 (0<positionInGrammar>) (1<positionInGrammar>)
         printfn ""
         x |> Seq.iter (fun (s, e) -> printf "(%i, %i); " s e)
@@ -92,7 +91,7 @@ type ``GLLAbstractCFParserTests`` () =
 
     [<Test>]
     member this.``Simple_substr``() =
-        let gss1, gss2, count = testCFParser "Simple_substr_t.yrd" "Simple_substr_d.yrd"
+        let gss1, gss2, count = testCFParser "Simple_substr_t.yrd" "Simple_substr_d.yrd" false
         let x = getAllCompleteRangesForState gss1 (0<positionInGrammar>) (1<positionInGrammar>)
         printfn ""
         x |> Seq.iter (fun (s, e) -> printf "(%i, %i); " s e)
@@ -108,8 +107,9 @@ type ``GLLAbstractCFParserTests`` () =
 //        let res = testData.[0].ToCharArray() |> Array.map convertNucleo
 //        out.Write (new string(res))
 //        out.Close()
-
-        let result = testData |> Array.map (find16sInLinearInput << tokenizeGenome)
+        
+        testData.[0] <- testData.[0].Substring(480, 600)
+        let result = testData |> Array.map find16sInLinearInput 
         result |> Array.iter (Seq.iter (fun (s, e, l) -> printf "(%i, %i, %i) " s e l))
 
         Assert.IsTrue true
@@ -117,8 +117,8 @@ type ``GLLAbstractCFParserTests`` () =
     [<Test>]
     member this.``Find_mid_in_compressed_16s``() =
         //toYardGr (grammarsDir + "output.txt") (grammarsDir + "compressed_16s.yrd")
-        let gss1, gss2, count = testCFParser "R16S_19_27.yrd" "compressed_16s.yrd"
-        let x = getAllCompleteRangesForState gss1 (524<positionInGrammar>) (830<positionInGrammar>)
-        printfn ""
+        let gss1, gss2, count = testCFParser "R16S_19_27.yrd" "16s_compressed_480_1080.yrd" true
+        let x = getAllRangesForState gss1 (524<positionInGrammar>) //(827<positionInGrammar>)
+        printfn "%i, %i, %i" count gss1.VertexCount gss2.VertexCount
         x |> Seq.iter (fun (s, e) -> printf "(%i, %i); " s e)
         Assert.IsFalse false

@@ -17,7 +17,7 @@ let inline toInputPos x = int x |> LanguagePrimitives.Int32WithMeasure<positionI
 let inline toGrammarPos x = int x |> LanguagePrimitives.Int32WithMeasure<positionInGrammar> 
 
 // now we have two CF grammars and two GSSs
-let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) = 
+let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) (parseSubstrings: bool) = 
     
     let gssLeft, gssRight = new GSS(), new GSS()
 
@@ -25,15 +25,29 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
     let inline getGrammarInfo selector = 
         match selector with | Left -> (leftGrammar, gssLeft) | Right -> (rightGrammar, gssRight)
     
-    let s1, s2 = leftGrammar.StartState, rightGrammar.StartState
-    let vertexLeft, vertexRight = 
-        new GSSVertexCF(s1, toInputPos s2, null), new GSSVertexCF(s2, toInputPos s1, null)
-    gssLeft.AddVertex vertexLeft |> ignore
-    gssRight.AddVertex vertexRight |> ignore
-    
-    let (startContext: ContextCF<GSSVertex>) = new ContextCF<_>(s1, s2, vertexLeft, vertexRight)
+    let createStartVertices leftPos rightPos =
+        let left = new GSSVertex(leftPos, (toInputPos rightPos))
+        let right = new GSSVertex(rightPos, (toInputPos leftPos))
+//        let left = new GSSVertexCF(leftPos, (toInputPos rightPos), null)
+//        let right = new GSSVertexCF(rightPos, (toInputPos leftPos), null)
+        gssLeft.AddVertex left |> ignore
+        gssRight.AddVertex right |> ignore
+        left, right
 
-    let setR = Stack<_>([startContext])
+
+    let (startContexts: ContextCF<GSSVertex> []) =
+        if parseSubstrings
+        then 
+            [|for i in rightGrammar.OutTerms.Length - 1 .. -1 .. 0 -> i * 1<positionInGrammar>|]
+            |> Array.map(fun pos -> 
+                             let leftVertex, rightVertex = createStartVertices leftGrammar.StartState pos
+                             new ContextCF<_>(leftGrammar.StartState, pos, leftVertex, rightVertex))
+        else
+            let s1, s2 = leftGrammar.StartState, rightGrammar.StartState
+            let leftVertex, rightVertex = createStartVertices s1 s2
+            [| new ContextCF<_>(s1, s2, leftVertex, rightVertex) |]
+
+    let setR = Stack<_>(startContexts)
     
     // with Empty data
     let pushContext posInGrammar1 posInGrammar2 gssVertex1 gssVertex2 =
@@ -55,9 +69,10 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
     let rec pop masterGrammar (curContext: ContextCF<_>) gssVertexMaster posInSlaveGrammar =
         let grammar, gss = getGrammarInfo masterGrammar              
         let _, gssVertexSlave = masterGrammar.neg |> curContext.GetInfo
+        let outEdges = gss.OutEdges gssVertexMaster |> Array.ofSeq 
         
-        let outEdges = gss.OutEdges gssVertexMaster |> Array.ofSeq        
-        gssVertexMaster.P.SetP.Add (new PoppedData(toInputPos posInSlaveGrammar, Empty))
+        if new PoppedData(toInputPos posInSlaveGrammar, Empty) |> gssVertexMaster.P.Add |> not then () else       
+//        gssVertexMaster.P.SetP.Add (new PoppedData(toInputPos posInSlaveGrammar, Empty))
         if outEdges <> null && outEdges.Length <> 0
         then  
             for e in outEdges do
@@ -71,7 +86,8 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
         let _, gssVertexMaster = masterGrammar |> curContext.GetInfo
         let posInSlaveGrammar, gssVertexSlave = masterGrammar.neg |> curContext.GetInfo      
         
-        let newVertex = new GSSVertexCF(nonterm, toInputPos posInSlaveGrammar, gssVertexSlave)
+//        let newVertex = new GSSVertexCF(nonterm, toInputPos posInSlaveGrammar, gssVertexSlave)
+        let newVertex = new GSSVertex(nonterm, toInputPos posInSlaveGrammar)
         let vertexExists, edgeExists, startV = gss.ContainsVertAndEdge(newVertex, gssVertexMaster, stateToContinue, Empty)        
 
         if vertexExists
@@ -111,14 +127,13 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
                                        |> Array.iter (fun (t2, s2) -> 
                                                           addContext Left s1 s2 currentContext.GssVertex1 currentContext.GssVertex2))
     
-    let isFinalContext (context: ContextCF<GSSVertex>) =
-        int context.PosInGrammar1 = 1 
-        && int context.PosInGrammar2 = 1
-        && (context.GssVertex1 :?> GSSVertexCF) = vertexLeft
-        && (context.GssVertex2 :?> GSSVertexCF) = vertexRight
+//    let isFinalContext (context: ContextCF<GSSVertex>) =
+//        int context.PosInGrammar1 = 1 
+//        && int context.PosInGrammar2 = 1
+//        && (context.GssVertex1 :?> GSSVertexCF) = vertexLeft
+//        && (context.GssVertex2 :?> GSSVertexCF) = vertexRight
     
     let count = ref 0
-    let log = new System.IO.StreamWriter("log.txt")
 
     while setR.Count <> 0 do
         incr count
@@ -132,13 +147,8 @@ let parse (leftGrammar : ParserSourceGLL) (rightGrammar : ParserSourceGLL) =
         makeNontermTransitions Right currentContext
         makeTermTransitions currentContext
 
-        if !count % 1000 = 0
-        then 
-            log.WriteLine("{0}, {1}", !count, setR.Count)
-            if !count = 100000
-            then
-                log.Close()
-                setR.Clear()
+        if !count = 1200000
+        then setR.Clear()
     
     gssLeft, gssRight, !count
 

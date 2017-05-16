@@ -23,10 +23,6 @@ let unpackNode = function
     | _ -> failwith "Wrong type"
 
 let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) = 
-    let lengthOfInput = 
-        if (input :? LinearInput) then
-            (input :?> LinearInput).Input.Length
-        else 500
     let dummy = 
         if buildTree
         then TreeNode(-1<nodeMeasure>)
@@ -34,7 +30,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
     let epsilon = -1<token>
 
     let gss = new GSS()
-    let sppf = new SPPF(lengthOfInput, parser.StartState, parser.FinalStates)
+    let sppf = new SPPF(parser.StartState, parser.FinalStates)
     
     let startContexts = 
         input.InitialPositions

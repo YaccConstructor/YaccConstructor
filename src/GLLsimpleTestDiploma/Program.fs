@@ -13,7 +13,7 @@ open Yard.Generators.GLL.AbstractParser
 open System
 
 let printRes what count n = 
-    System.IO.File.AppendAllText(sprintf "../../results/%s_noEbnf.txt" what, sprintf " (%i,%s)" n count)
+    System.IO.File.AppendAllText(sprintf "../../results/%s.txt" what, sprintf " (%i,%s)" n count)
 let test (parser : ParserSourceGLL) inputString = 
     let arr = inputString |> Array.map (fun (x : string) -> parser.StringToToken x)
     let input  = new LinearInput(arr)
@@ -27,15 +27,16 @@ let main argv =
 //    for num in [101..119] do
 //        let i = num
     for parser in [GLL.longK_noEBNF.parserSource; GLL.longK.parserSource] do
-        for num in [1..14] do
-            let i = num * 10
+        for num in [16..20] do
+            let i = num * 30
             GC.Collect()
             GC.WaitForPendingFinalizers()
             GC.Collect()
             let startTime = System.DateTime.Now
-            let tree, gssEdgesCount, gssNodesCount, sppfNodesCount, totalBytesOfMemoryUsed = 
+            let tree, gssEdgesCount, gssNodesCount, sppfNodesCount, totalBytesOfMemoryUsed, descr = 
                 test (parser) (genInput i)
             let duration = System.DateTime.Now - startTime
+            printRes "descr" (descr.ToString()) i
             printRes "GSSEdges" (gssEdgesCount.ToString()) i
             printRes "GSSNodes" (gssNodesCount.ToString()) i
             printRes "SPPF nodes" (sppfNodesCount.ToString()) i

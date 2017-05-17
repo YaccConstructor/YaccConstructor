@@ -38,7 +38,7 @@ type GSSVertex (nonterm: int<positionInGrammar>, posInInput: int<positionInInput
         y :? GSSVertex 
         && (let y = y :?> GSSVertex 
             this.Nonterm = y.Nonterm
-            && this.PositionInInput = y .PositionInInput)
+            && this.PositionInInput = y.PositionInInput)
 
     override this.GetHashCode() = hash (this.Nonterm, this.PositionInInput)
     
@@ -99,24 +99,24 @@ type GSS () =
     inherit AdjacencyGraph<GSSVertex, TaggedEdge<GSSVertex, GSSEdgeLbl>>(true)
     /// Checks for existing of edge in gss edges set. If not adds it to edges set.
     member this.ContainsVertAndEdge (startVertex:GSSVertex, endVertex:GSSVertex, stateToContinue : int<positionInGrammar>, data : ParseData) =
-        let mutable realStartVertex = if startVertex = endVertex then endVertex else startVertex
-        let vertexExists, outEdges = this.TryGetOutEdges startVertex
+        //let mutable realStartVertex = if startVertex = endVertex then endVertex else startVertex
+        let realStart = 
+            this.Vertices |> Seq.tryFind(fun x -> x.Nonterm = startVertex.Nonterm && x.PositionInInput = startVertex.PositionInInput)
+        let vertexExists = realStart.IsSome
         let edges =
             if vertexExists then
-                let edg = 
-                    outEdges
-                    |> Array.ofSeq
-                if edg.Length <> 0
-                then
-                    realStartVertex <- edg.[0].Source
-                edg
+                this.OutEdges (realStart.Value)
+                |> Array.ofSeq
                 |> Array.filter (fun e -> e.Target = endVertex && e.Tag.Data = data && e.Tag.StateToContinue = stateToContinue)                
             else [||]
         let edgeExists = edges.Length > 0
-        if not <| edgeExists
+        if not vertexExists
+        then
+            this.AddVerticesAndEdge(new QuickGraph.TaggedEdge<_,_>(startVertex, endVertex, new GSSEdgeLbl(stateToContinue, data))) |> ignore
+        elif not <| edgeExists
         then 
-            this.AddVerticesAndEdge(new QuickGraph.TaggedEdge<_,_>(realStartVertex, endVertex, new GSSEdgeLbl(stateToContinue, data))) |> ignore
-        vertexExists, edgeExists, realStartVertex
+            this.AddVerticesAndEdge(new QuickGraph.TaggedEdge<_,_>(realStart.Value, endVertex, new GSSEdgeLbl(stateToContinue, data))) |> ignore
+        vertexExists, edgeExists, realStart.Value
 
     member this.ToDot fileName =
         let getStrFromVertex (v: GSSVertex) = 

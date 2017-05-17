@@ -28,12 +28,11 @@ type PopSet () =
         else
             false
 
-type GSSVertex private (nonterm: int<positionInGrammar>, posInInput: int<positionInInput>) =
+
+type GSSVertex (nonterm: int<positionInGrammar>, posInInput: int<positionInInput>) =
     let setU = new System.Collections.Generic.Dictionary<int64<compressedPosInInputAndGrammar>,HashSet<ParseData>>()
     let setP = new PopSet() 
     
-    static let instanceHolder = new System.Collections.Generic.Dictionary<int,GSSVertex>()
-
     override this.Equals y =
         y :? GSSVertex 
         && (let y = y :?> GSSVertex 
@@ -41,17 +40,6 @@ type GSSVertex private (nonterm: int<positionInGrammar>, posInInput: int<positio
             && this.PositionInInput = y.PositionInInput)
 
     override this.GetHashCode() = hash (this.Nonterm, this.PositionInInput)
-
-    static member Get(nonterm: int<positionInGrammar>, posInInput: int<positionInInput>) = 
-        let hashed = hash(nonterm,posInInput)
-        let cond, value = instanceHolder.TryGetValue(hashed)
-        if cond
-        then
-            value
-        else 
-            let newInst = new GSSVertex(nonterm, posInInput)
-            instanceHolder.Add(hashed, newInst)
-            newInst
 
     member this.U = setU
     member this.P with get () = setP
@@ -76,6 +64,20 @@ type GSSVertex private (nonterm: int<positionInGrammar>, posInInput: int<positio
             false
     override this.ToString () = sprintf "Nonterm: %i, Index: %i" this.Nonterm this.PositionInInput
 
+type GSSVertexInstanceHolder() =
+    let instanceHolder = new System.Collections.Generic.Dictionary<int,GSSVertex>()
+
+    member this.Get(nonterm: int<positionInGrammar>, posInInput: int<positionInInput>) = 
+        let hashed = hash(nonterm,posInInput)
+        let cond, value = instanceHolder.TryGetValue(hashed)
+        if cond
+        then
+            value
+        else 
+            let newInst = new GSSVertex(nonterm, posInInput)
+            instanceHolder.Add(hashed, newInst)
+            newInst
+
 [<Struct>]
 type GSSEdgeLbl =
     val StateToContinue: int<positionInGrammar>
@@ -86,22 +88,20 @@ type GSS () =
     inherit AdjacencyGraph<GSSVertex, TaggedEdge<GSSVertex, GSSEdgeLbl>>(true)
     /// Checks for existing of edge in gss edges set. If not adds it to edges set.
     member this.ContainsVertexAndEdge (startVertex:GSSVertex, endVertex:GSSVertex, stateToContinue : int<positionInGrammar>, data : ParseData) =
-        let containsVertex, edges = this.TryGetOutEdges startVertex
+        let cond, edges = this.TryGetOutEdges startVertex
         let edges = 
-            if containsVertex
+            if cond
             then
                 edges
-                |> Array.ofSeq
-                |> Array.filter (fun e -> e.Target = endVertex && e.Tag.Data = data && e.Tag.StateToContinue = stateToContinue)                
-            else [||]
-        let edgeExists = edges.Length > 0
-        if not containsVertex
+                |> Seq.tryFind (fun e -> e.Target = endVertex && e.Tag.Data = data && e.Tag.StateToContinue = stateToContinue)               
+            else None
+        if not cond
         then
-            this.AddVerticesAndEdge(new QuickGraph.TaggedEdge<_,_>(startVertex, endVertex, new GSSEdgeLbl(stateToContinue, data))) |> ignore
-        elif not <| edgeExists
+            this.AddVertex(startVertex) |> ignore
+        if edges.IsNone
         then 
             this.AddEdge(new QuickGraph.TaggedEdge<_,_>(startVertex, endVertex, new GSSEdgeLbl(stateToContinue, data))) |> ignore
-        containsVertex, edgeExists
+        cond, edges.IsSome
 
     member this.ToDot fileName =
         let getStrFromVertex (v: GSSVertex) = 

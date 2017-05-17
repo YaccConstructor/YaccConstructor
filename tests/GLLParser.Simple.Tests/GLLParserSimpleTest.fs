@@ -43,6 +43,17 @@ let getLinearInput path (stringToToken : string -> int<token>) =
             getTokens path
             |> Array.map stringToToken
             )
+let getLinearInputWithAllStartingPos path (stringToToken : string -> int<token>) = 
+    let tokens = 
+        getTokens path
+            |> Array.map stringToToken
+    let startPoss = 
+        tokens
+        |> Array.mapi(fun i x -> i* 1<positionInInput>)
+    new LinearInput(startPoss,
+            getTokens path
+            |> Array.map stringToToken
+            )
 
 let isParsed parserSource input = 
     Yard.Generators.GLL.AbstractParser.isParsed parserSource input
@@ -79,6 +90,17 @@ let checkAst grammarFile inputFile nodesCount edgesCount termsCount ambiguityCou
     Assert.AreEqual(ambiguityCount, amb, sprintf "Ambiguities expected:%i, found:%i." ambiguityCount amb)
     Assert.Pass()
 
+let checkIntervals grammarFile inputFile (intervals : _[]) = 
+    let parser = getParserSource grammarFile
+    let input  = getLinearInputWithAllStartingPos inputFile parser.StringToToken
+    let ranges = getAllRangesForStartState parser input
+    printfn "%A" ranges
+    let result = 
+        ranges
+        |> Seq.fold(fun res x -> intervals |> Array.contains x && res) true
+    Assert.True(result)
+    Assert.Pass()
+
 
 [<TestFixture>]
 type ``GLL parser tests with simple lexer`` () =
@@ -88,6 +110,14 @@ type ``GLL parser tests with simple lexer`` () =
 //        //runTest "BadLeftRecursion.yrd" "BBB.txt"
 //        checkAst "code.yrd" "code.txt"
 //            19 24 3 1
+    [<Test>]
+    member test.``Brackets2``() =
+        //runTest "BadLeftRecursion.yrd" "BBB.txt"
+        checkIntervals "Brackets2.yrd" "Brackets2.txt"
+            [|(0<positionInInput>, 7<positionInInput>);
+              (1<positionInInput>, 6<positionInInput>);
+              (2<positionInInput>, 5<positionInInput>);
+              (3<positionInInput>, 4<positionInInput>);|]
 
     [<Test>]
     member test.``Bad left rec``() =

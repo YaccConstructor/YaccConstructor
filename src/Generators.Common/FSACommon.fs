@@ -196,6 +196,37 @@ let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
             x.UnionWith set
             x) (new HashSet<int<positionInGrammar>>())
 
+    //following is for factorization tests
+    let inGoingEdges = new Dictionary<int<positionInGrammar>,ResizeArray<_>>()
+    
+    for i in 0..states.Count-1 do
+        for symbol,nextState in states.[i] do
+            let contains, lst = inGoingEdges.TryGetValue(nextState)
+            if contains
+            then
+                lst.Add(i)
+            else
+                inGoingEdges.Add(nextState, new ResizeArray<_>([i]))
+    let nLastStates = new ResizeArray<_>()
+    lastStates
+    |> Seq.iter(fun x -> 
+        let contains, lst = inGoingEdges.TryGetValue(x)
+        if (contains && (lst.Count > 1))
+        then
+            for item in lst.ToArray().[1..] do
+                let newEdges = new ResizeArray<_>()
+                states.[item] <-
+                    states.[item]
+                    |> List.map(fun (symbol,next) ->
+                        if next = x
+                        then
+                            let nState = newState()
+                            nLastStates.Add(nState)
+                            symbol,nState
+                        else
+                            symbol,next)
+                            )
+    lastStates.UnionWith(nLastStates)
     {   States = 
             states
             |> Seq.map Array.ofList
@@ -247,9 +278,11 @@ let removeEpsilonEdges (fsa : InternalFSA) =
             |> Array.collect (fun (symbol, nextState) ->
                 match symbol with
                 | Epsilon() -> 
+                    // Add next state to start is current is start 
                     let isStartState, componentNum = startStatesToComponentNum.TryGetValue (currentState*1<positionInGrammar>)
-                    if isStartState && startStatesToComponentNum.ContainsKey nextState |> not then
+                    if isStartState && (startStatesToComponentNum.ContainsKey nextState |> not) then
                         startStatesToComponentNum.Add(nextState, componentNum)
+                    // Add current state to final if next is final
                     if finalStates.Contains nextState
                     then 
                         currentState*1<positionInGrammar> |> finalStates.Add |> ignore
@@ -579,6 +612,14 @@ let minimizeFSA fsa =
         FinalStates    = newFinalStates}
     //statesToReturn, nonterms.Count, newStateStringDict, (stateToNewState.[int startState]*1<positionInGrammar>), (stateToNewState.[int finalState]*1<positionInGrammar>)
 
+let leftFactorization fsa = 
+    
+    {fsa with
+        States = statesToReturn;
+        StateToNontermName = stateToNontermName;
+        StartState = stateToNewState.[int fsa.StartState]*1<positionInGrammar>;
+        StartStates    = newStartStates;
+        FinalStates    = newFinalStates}
 let genFirstSet fsa =
     let nontermToSet = new Dictionary<int<positionInGrammar>, int>()
 

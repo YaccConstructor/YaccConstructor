@@ -186,13 +186,12 @@ type ``GLL abstract parser tests``() =
              "StrangeBrackets.txt"
              13 13 4 1
 
-    //the tests below are not checked
     [<Test>]
     member this._25_UnambiguousBrackets_BiggerCircle () =
         test "StrangeBrackets.yrd" 
              "StrangeBrackets2.txt"
-             17 15 5 0
-
+             30 32 8 2
+    //the tests below are not checked
     [<Test>]
     member this._26_UnambiguousBrackets_Inf () =
         test "StrangeBrackets.yrd" 

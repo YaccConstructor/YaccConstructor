@@ -30,13 +30,14 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
     let epsilon = -1<token>
 
     let gss = new GSS()
+    let gssVertexInstanceHolder = new GSSVertexInstanceHolder()
     let sppf = new SPPF(parser.StartState, parser.FinalStates)
     
     let startContexts = 
         input.InitialPositions
-        |> Array.rev
+        //|> Array.rev
         |> Array.map(fun pos -> 
-            let vertex = new GSSVertex(parser.StartState, pos)
+            let vertex = gssVertexInstanceHolder.Get(parser.StartState, pos)
             gss.AddVertex vertex |> ignore
             new ContextFSA<_>(pos, parser.StartState, vertex, dummy))
 
@@ -77,8 +78,8 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
 
     ///Creates new descriptors.(Calls when found nonterninal in rule(on current input edge, or on some of next)))
     let create (curContext:ContextFSA<_>) stateToContinue nonterm =        
-        let newVertex = new GSSVertex(nonterm, curContext.PosInInput)
-        let vertexExists, edgeExists, startV = gss.ContainsVertAndEdge(newVertex, curContext.GssVertex, stateToContinue, curContext.Data)        
+        let startV = gssVertexInstanceHolder.Get(nonterm, curContext.PosInInput)
+        let vertexExists, edgeExists = gss.ContainsVertexAndEdge(startV, curContext.GssVertex, stateToContinue, curContext.Data)        
 
         if vertexExists
         then

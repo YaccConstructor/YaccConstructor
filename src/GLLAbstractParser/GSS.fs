@@ -47,11 +47,11 @@ type GSSVertex private (nonterm: int<positionInGrammar>, posInInput: int<positio
         let cond, value = instanceHolder.TryGetValue(hashed)
         if cond
         then
-            true, value
+            value
         else 
             let newInst = new GSSVertex(nonterm, posInInput)
             instanceHolder.Add(hashed, newInst)
-            false, newInst
+            newInst
 
     member this.U = setU
     member this.P with get () = setP
@@ -85,11 +85,15 @@ type GSSEdgeLbl =
 type GSS () =
     inherit AdjacencyGraph<GSSVertex, TaggedEdge<GSSVertex, GSSEdgeLbl>>(true)
     /// Checks for existing of edge in gss edges set. If not adds it to edges set.
-    member this.ContainsEdge (containsVertex:bool, startVertex:GSSVertex, endVertex:GSSVertex, stateToContinue : int<positionInGrammar>, data : ParseData) =
-        let edges =
-            this.OutEdges startVertex
-            |> Array.ofSeq
-            |> Array.filter (fun e -> e.Target = endVertex && e.Tag.Data = data && e.Tag.StateToContinue = stateToContinue)                
+    member this.ContainsVertexAndEdge (startVertex:GSSVertex, endVertex:GSSVertex, stateToContinue : int<positionInGrammar>, data : ParseData) =
+        let containsVertex, edges = this.TryGetOutEdges startVertex
+        let edges = 
+            if containsVertex
+            then
+                edges
+                |> Array.ofSeq
+                |> Array.filter (fun e -> e.Target = endVertex && e.Tag.Data = data && e.Tag.StateToContinue = stateToContinue)                
+            else [||]
         let edgeExists = edges.Length > 0
         if not containsVertex
         then
@@ -97,7 +101,7 @@ type GSS () =
         elif not <| edgeExists
         then 
             this.AddEdge(new QuickGraph.TaggedEdge<_,_>(startVertex, endVertex, new GSSEdgeLbl(stateToContinue, data))) |> ignore
-        edgeExists
+        containsVertex, edgeExists
 
     member this.ToDot fileName =
         let getStrFromVertex (v: GSSVertex) = 

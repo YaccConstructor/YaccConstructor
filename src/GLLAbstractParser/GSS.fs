@@ -33,13 +33,13 @@ type GSSVertex (nonterm: int<positionInGrammar>, posInInput: int<positionInInput
     let setU = new System.Collections.Generic.Dictionary<int64<compressedPosInInputAndGrammar>,HashSet<ParseData>>()
     let setP = new PopSet() 
     
-    override this.Equals y =
-        y :? GSSVertex 
-        && (let y = y :?> GSSVertex 
-            this.Nonterm = y.Nonterm
-            && this.PositionInInput = y.PositionInInput)
-
-    override this.GetHashCode() = hash (this.Nonterm, this.PositionInInput)
+//    override this.Equals y =
+//        y :? GSSVertex 
+//        && (let y = y :?> GSSVertex 
+//            this.Nonterm = y.Nonterm
+//            && this.PositionInInput = y.PositionInInput)
+//
+//    override this.GetHashCode() = hash (this.Nonterm, this.PositionInInput)
 
     member this.U = setU
     member this.P with get () = setP
@@ -65,17 +65,26 @@ type GSSVertex (nonterm: int<positionInGrammar>, posInInput: int<positionInInput
     override this.ToString () = sprintf "Nonterm: %i, Index: %i" this.Nonterm this.PositionInInput
 
 type GSSVertexInstanceHolder() =
-    let instanceHolder = new System.Collections.Generic.Dictionary<int,GSSVertex>()
+    let instanceHolder = new System.Collections.Generic.Dictionary<_,System.Collections.Generic.Dictionary<_,_>>()
 
-    member this.Get(nonterm: int<positionInGrammar>, posInInput: int<positionInInput>) = 
-        let hashed = hash(nonterm,posInInput)
-        let cond, value = instanceHolder.TryGetValue(hashed)
+    member this.Get(nonterm: int<positionInGrammar>, posInInput: int<positionInInput>) =
+        let cond, value = instanceHolder.TryGetValue(nonterm)
         if cond
         then
-            value
-        else 
+            let cond2, value2 = value.TryGetValue(posInInput)
+            if cond2
+            then
+                value2
+            else
+                let newInst = new GSSVertex(nonterm, posInInput)
+                value.Add(posInInput,newInst)
+                newInst
+        else
+            let dict = new System.Collections.Generic.Dictionary<_,_>()
             let newInst = new GSSVertex(nonterm, posInInput)
-            instanceHolder.Add(hashed, newInst)
+            dict.Add(posInInput, newInst)
+
+            instanceHolder.Add(nonterm, dict)
             newInst
 
 [<Struct>]

@@ -18,7 +18,12 @@ let test (parser : ParserSourceGLL) inputString =
     let arr = inputString |> Array.map (fun (x : string) -> parser.StringToToken x)
     let input  = new LinearInput(arr)
     buildAstTest parser input
-    //tree.AstToDot(parser.IntToString) (sprintf "res%i.dot" inputString.Length)
+   
+let cHash a b = 
+    let mutable h = 23
+    h <- h * 31 + a
+    h <- h * 31 + b
+    h
 
 let genInput length =
     [|for i in 1..length do yield "A"|]
@@ -27,7 +32,7 @@ let main argv =
 //    for num in [101..119] do
 //        let i = num
     for parser in [GLL.longK_noEBNF.parserSource; GLL.longK.parserSource] do
-        for num in [16..20] do
+        for num in [1..15] do
             let i = num * 30
             GC.Collect()
             GC.WaitForPendingFinalizers()
@@ -36,6 +41,7 @@ let main argv =
             let tree, gssEdgesCount, gssNodesCount, sppfNodesCount, totalBytesOfMemoryUsed, descr = 
                 test (parser) (genInput i)
             let duration = System.DateTime.Now - startTime
+            //tree.AstToDot(parser.IntToString) (sprintf "res%i.dot" i)
             printRes "descr" (descr.ToString()) i
             printRes "GSSEdges" (gssEdgesCount.ToString()) i
             printRes "GSSNodes" (gssNodesCount.ToString()) i

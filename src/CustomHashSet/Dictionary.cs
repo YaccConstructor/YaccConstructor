@@ -53,14 +53,14 @@ namespace System.Collections.Generic.Customized
     //[DebuggerTypeProxy(typeof(Mscorlib_DictionaryDebugView<,>))]
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
-    public class Dictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>, ISerializable, IDeserializationCallback
+    public class Dictionary<TValue> : IDictionary<long, TValue>, IDictionary, IReadOnlyDictionary<long, TValue>, ISerializable, IDeserializationCallback
     {
 
         private struct Entry
         {
-            public int hashCode;    // Lower 31 bits of hash code, -1 if unused
+            public long hashCode;    // Lower 31 bits of hash code, -1 if unused
             public int next;        // Index of next entry, -1 if last
-            public TKey key;           // Key of entry
+            public long key;           // Key of entry
             public TValue value;         // Value of entry
         }
 
@@ -70,7 +70,7 @@ namespace System.Collections.Generic.Customized
         private int version;
         private int freeList;
         private int freeCount;
-        private IEqualityComparer<TKey> comparer;
+        private IEqualityComparer<long> comparer;
         private KeyCollection keys;
         private ValueCollection values;
         private Object _syncRoot;
@@ -85,25 +85,25 @@ namespace System.Collections.Generic.Customized
 
         public Dictionary(int capacity) : this(capacity, null) { }
 
-        public Dictionary(IEqualityComparer<TKey> comparer) : this(0, comparer) { }
+        public Dictionary(IEqualityComparer<long> comparer) : this(0, comparer) { }
 
-        public Dictionary(int capacity, IEqualityComparer<TKey> comparer)
+        public Dictionary(int capacity, IEqualityComparer<long> comparer)
         {
             if (capacity < 0) ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.capacity);
             if (capacity > 0) Initialize(capacity);
-            this.comparer = comparer ?? EqualityComparer<TKey>.Default;
+            this.comparer = comparer ?? EqualityComparer<long>.Default;
 
 #if FEATURE_RANDOMIZED_STRING_HASHING
             if (HashHelpers.s_UseRandomizedStringHashing && comparer == EqualityComparer<string>.Default)
             {
-                this.comparer = (IEqualityComparer<TKey>) NonRandomizedStringEqualityComparer.Default;
+                this.comparer = (IEqualityComparer<long>) NonRandomizedStringEqualityComparer.Default;
             }
 #endif // FEATURE_RANDOMIZED_STRING_HASHING
         }
 
-        public Dictionary(IDictionary<TKey, TValue> dictionary) : this(dictionary, null) { }
+        public Dictionary(IDictionary<long, TValue> dictionary) : this(dictionary, null) { }
 
-        public Dictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer) :
+        public Dictionary(IDictionary<long, TValue> dictionary, IEqualityComparer<long> comparer) :
             this(dictionary != null ? dictionary.Count : 0, comparer)
         {
 
@@ -112,13 +112,13 @@ namespace System.Collections.Generic.Customized
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.dictionary);
             }
 
-            // It is likely that the passed-in dictionary is Dictionary<TKey,TValue>. When this is the case,
+            // It is likely that the passed-in dictionary is Dictionary<long,TValue>. When this is the case,
             // avoid the enumerator allocation and overhead by looping through the entries array directly.
-            // We only do this when dictionary is Dictionary<TKey,TValue> and not a subclass, to maintain
+            // We only do this when dictionary is Dictionary<long,TValue> and not a subclass, to maintain
             // back-compat with subclasses that may have overridden the enumerator behavior.
-            if (dictionary.GetType() == typeof(Dictionary<TKey, TValue>))
+            if (dictionary.GetType() == typeof(Dictionary<TValue>))
             {
-                Dictionary<TKey, TValue> d = (Dictionary<TKey, TValue>)dictionary;
+                Dictionary<TValue> d = (Dictionary<TValue>)dictionary;
                 int count = d.count;
                 Entry[] entries = d.entries;
                 for (int i = 0; i < count; i++)
@@ -131,25 +131,25 @@ namespace System.Collections.Generic.Customized
                 return;
             }
 
-            foreach (KeyValuePair<TKey, TValue> pair in dictionary)
+            foreach (KeyValuePair<long, TValue> pair in dictionary)
             {
                 Add(pair.Key, pair.Value);
             }
         }
 
-        public Dictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection) :
+        public Dictionary(IEnumerable<KeyValuePair<long, TValue>> collection) :
             this(collection, null)
         { }
 
-        public Dictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection, IEqualityComparer<TKey> comparer) :
-            this((collection as ICollection<KeyValuePair<TKey, TValue>>)?.Count ?? 0, comparer)
+        public Dictionary(IEnumerable<KeyValuePair<long, TValue>> collection, IEqualityComparer<long> comparer) :
+            this((collection as ICollection<KeyValuePair<long, TValue>>)?.Count ?? 0, comparer)
         {
             if (collection == null)
             {
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.collection);
             }
 
-            foreach (KeyValuePair<TKey, TValue> pair in collection)
+            foreach (KeyValuePair<long, TValue> pair in collection)
             {
                 Add(pair.Key, pair.Value);
             }
@@ -163,7 +163,7 @@ namespace System.Collections.Generic.Customized
             CustomizedHashHelpers.SerializationInfoTable.Add(this, info);
         }
 
-        public IEqualityComparer<TKey> Comparer
+        public IEqualityComparer<long> Comparer
         {
             get
             {
@@ -186,7 +186,7 @@ namespace System.Collections.Generic.Customized
             }
         }
 
-        ICollection<TKey> IDictionary<TKey, TValue>.Keys
+        ICollection<long> IDictionary<long, TValue>.Keys
         {
             get
             {
@@ -195,7 +195,7 @@ namespace System.Collections.Generic.Customized
             }
         }
 
-        IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys
+        IEnumerable<long> IReadOnlyDictionary<long, TValue>.Keys
         {
             get
             {
@@ -214,7 +214,7 @@ namespace System.Collections.Generic.Customized
             }
         }
 
-        ICollection<TValue> IDictionary<TKey, TValue>.Values
+        ICollection<TValue> IDictionary<long, TValue>.Values
         {
             get
             {
@@ -223,7 +223,7 @@ namespace System.Collections.Generic.Customized
             }
         }
 
-        IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values
+        IEnumerable<TValue> IReadOnlyDictionary<long, TValue>.Values
         {
             get
             {
@@ -232,7 +232,7 @@ namespace System.Collections.Generic.Customized
             }
         }
 
-        public TValue this[TKey key]
+        public TValue this[long key]
         {
             get
             {
@@ -247,17 +247,17 @@ namespace System.Collections.Generic.Customized
             }
         }
 
-        public void Add(TKey key, TValue value)
+        public void Add(long key, TValue value)
         {
             Insert(key, value, true);
         }
 
-        void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> keyValuePair)
+        void ICollection<KeyValuePair<long, TValue>>.Add(KeyValuePair<long, TValue> keyValuePair)
         {
             Add(keyValuePair.Key, keyValuePair.Value);
         }
 
-        bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> keyValuePair)
+        bool ICollection<KeyValuePair<long, TValue>>.Contains(KeyValuePair<long, TValue> keyValuePair)
         {
             int i = FindEntry(keyValuePair.Key);
             if (i >= 0 && EqualityComparer<TValue>.Default.Equals(entries[i].value, keyValuePair.Value))
@@ -267,7 +267,7 @@ namespace System.Collections.Generic.Customized
             return false;
         }
 
-        bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> keyValuePair)
+        bool ICollection<KeyValuePair<long, TValue>>.Remove(KeyValuePair<long, TValue> keyValuePair)
         {
             int i = FindEntry(keyValuePair.Key);
             if (i >= 0 && EqualityComparer<TValue>.Default.Equals(entries[i].value, keyValuePair.Value))
@@ -291,7 +291,7 @@ namespace System.Collections.Generic.Customized
             }
         }
 
-        public bool ContainsKey(TKey key)
+        public bool ContainsKey(long key)
         {
             return FindEntry(key) >= 0;
         }
@@ -315,7 +315,7 @@ namespace System.Collections.Generic.Customized
             return false;
         }
 
-        private void CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
+        private void CopyTo(KeyValuePair<long, TValue>[] array, int index)
         {
             if (array == null)
             {
@@ -338,7 +338,7 @@ namespace System.Collections.Generic.Customized
             {
                 if (entries[i].hashCode >= 0)
                 {
-                    array[index++] = new KeyValuePair<TKey, TValue>(entries[i].key, entries[i].value);
+                    array[index++] = new KeyValuePair<long, TValue>(entries[i].key, entries[i].value);
                 }
             }
         }
@@ -348,7 +348,7 @@ namespace System.Collections.Generic.Customized
             return new Enumerator(this, Enumerator.KeyValuePair);
         }
 
-        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
+        IEnumerator<KeyValuePair<long, TValue>> IEnumerable<KeyValuePair<long, TValue>>.GetEnumerator()
         {
             return new Enumerator(this, Enumerator.KeyValuePair);
         }
@@ -362,21 +362,21 @@ namespace System.Collections.Generic.Customized
             info.AddValue(VersionName, version);
 
 #if FEATURE_RANDOMIZED_STRING_HASHING
-            info.AddValue(ComparerName, HashHelpers.GetEqualityComparerForSerialization(comparer), typeof(IEqualityComparer<TKey>));
+            info.AddValue(ComparerName, HashHelpers.GetEqualityComparerForSerialization(comparer), typeof(IEqualityComparer<long>));
 #else
-            info.AddValue(ComparerName, comparer, typeof(IEqualityComparer<TKey>));
+            info.AddValue(ComparerName, comparer, typeof(IEqualityComparer<long>));
 #endif
 
             info.AddValue(HashSizeName, buckets == null ? 0 : buckets.Length); //This is the length of the bucket array.
             if (buckets != null)
             {
-                KeyValuePair<TKey, TValue>[] array = new KeyValuePair<TKey, TValue>[Count];
+                KeyValuePair<long, TValue>[] array = new KeyValuePair<long, TValue>[Count];
                 CopyTo(array, 0);
-                info.AddValue(KeyValuePairsName, array, typeof(KeyValuePair<TKey, TValue>[]));
+                info.AddValue(KeyValuePairsName, array, typeof(KeyValuePair<long, TValue>[]));
             }
         }
 
-        private int FindEntry(TKey key)
+        private int FindEntry(long key)
         {
             if (key == null)
             {
@@ -403,17 +403,10 @@ namespace System.Collections.Generic.Customized
             freeList = -1;
         }
 
-        private void Insert(TKey key, TValue value, bool add)
+        private void Insert(long key, TValue value, bool add)
         {
-
-            if (key == null)
-            {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.key);
-            }
-
             if (buckets == null) Initialize(0);
-            int hashCode = comparer.GetHashCode(key) & 0x7FFFFFFF;
-            int targetBucket = hashCode % buckets.Length;
+            long targetBucket = key % buckets.Length;
 
 #if FEATURE_RANDOMIZED_STRING_HASHING
             int collisionCount = 0;
@@ -421,7 +414,7 @@ namespace System.Collections.Generic.Customized
 
             for (int i = buckets[targetBucket]; i >= 0; i = entries[i].next)
             {
-                if (entries[i].hashCode == hashCode && comparer.Equals(entries[i].key, key))
+                if (entries[i].hashCode == key && comparer.Equals(entries[i].key, key))
                 {
                     if (add)
                     {
@@ -447,13 +440,13 @@ namespace System.Collections.Generic.Customized
                 if (count == entries.Length)
                 {
                     Resize();
-                    targetBucket = hashCode % buckets.Length;
+                    targetBucket = key % buckets.Length;
                 }
                 index = count;
                 count++;
             }
 
-            entries[index].hashCode = hashCode;
+            entries[index].hashCode = key;
             entries[index].next = buckets[targetBucket];
             entries[index].key = key;
             entries[index].value = value;
@@ -468,7 +461,7 @@ namespace System.Collections.Generic.Customized
 
             if (collisionCount > HashHelpers.HashCollisionThreshold && comparer == NonRandomizedStringEqualityComparer.Default) 
             {
-                comparer = (IEqualityComparer<TKey>) EqualityComparer<string>.Default;
+                comparer = (IEqualityComparer<long>) EqualityComparer<string>.Default;
                 Resize(entries.Length, true);
             }
 #endif
@@ -491,7 +484,7 @@ namespace System.Collections.Generic.Customized
 
             int realVersion = siInfo.GetInt32(VersionName);
             int hashsize = siInfo.GetInt32(HashSizeName);
-            comparer = (IEqualityComparer<TKey>)siInfo.GetValue(ComparerName, typeof(IEqualityComparer<TKey>));
+            comparer = (IEqualityComparer<long>)siInfo.GetValue(ComparerName, typeof(IEqualityComparer<long>));
 
             if (hashsize != 0)
             {
@@ -500,8 +493,8 @@ namespace System.Collections.Generic.Customized
                 entries = new Entry[hashsize];
                 freeList = -1;
 
-                KeyValuePair<TKey, TValue>[] array = (KeyValuePair<TKey, TValue>[])
-                    siInfo.GetValue(KeyValuePairsName, typeof(KeyValuePair<TKey, TValue>[]));
+                KeyValuePair<long, TValue>[] array = (KeyValuePair<long, TValue>[])
+                    siInfo.GetValue(KeyValuePairsName, typeof(KeyValuePair<long, TValue>[]));
 
                 if (array == null)
                 {
@@ -560,7 +553,7 @@ namespace System.Collections.Generic.Customized
             entries = newEntries;
         }
 
-        public bool Remove(TKey key)
+        public bool Remove(long key)
         {
             if (key == null)
             {
@@ -585,7 +578,7 @@ namespace System.Collections.Generic.Customized
                         }
                         entries[i].hashCode = -1;
                         entries[i].next = freeList;
-                        entries[i].key = default(TKey);
+                        entries[i].key = default(long);
                         entries[i].value = default(TValue);
                         freeList = i;
                         freeCount++;
@@ -597,7 +590,7 @@ namespace System.Collections.Generic.Customized
             return false;
         }
 
-        public bool TryGetValue(TKey key, out TValue value)
+        public bool TryGetValue(long key, out TValue value)
         {
             int i = FindEntry(key);
             if (i >= 0)
@@ -610,11 +603,11 @@ namespace System.Collections.Generic.Customized
         }
 
         // Method similar to TryGetValue that returns the value instead of putting it in an out param.
-        public TValue GetValueOrDefault(TKey key) => GetValueOrDefault(key, default(TValue));
+        public TValue GetValueOrDefault(long key) => GetValueOrDefault(key, default(TValue));
 
         // Method similar to TryGetValue that returns the value instead of putting it in an out param. If the entry
         // doesn't exist, returns the defaultValue instead.
-        public TValue GetValueOrDefault(TKey key, TValue defaultValue)
+        public TValue GetValueOrDefault(long key, TValue defaultValue)
         {
             int i = FindEntry(key);
             if (i >= 0)
@@ -624,12 +617,12 @@ namespace System.Collections.Generic.Customized
             return defaultValue;
         }
 
-        bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly
+        bool ICollection<KeyValuePair<long, TValue>>.IsReadOnly
         {
             get { return false; }
         }
 
-        void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
+        void ICollection<KeyValuePair<long, TValue>>.CopyTo(KeyValuePair<long, TValue>[] array, int index)
         {
             CopyTo(array, index);
         }
@@ -661,7 +654,7 @@ namespace System.Collections.Generic.Customized
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
             }
 
-            KeyValuePair<TKey, TValue>[] pairs = array as KeyValuePair<TKey, TValue>[];
+            KeyValuePair<long, TValue>[] pairs = array as KeyValuePair<long, TValue>[];
             if (pairs != null)
             {
                 CopyTo(pairs, index);
@@ -693,7 +686,7 @@ namespace System.Collections.Generic.Customized
                     {
                         if (entries[i].hashCode >= 0)
                         {
-                            objects[index++] = new KeyValuePair<TKey, TValue>(entries[i].key, entries[i].value);
+                            objects[index++] = new KeyValuePair<long, TValue>(entries[i].key, entries[i].value);
                         }
                     }
                 }
@@ -752,7 +745,7 @@ namespace System.Collections.Generic.Customized
             {
                 if (IsCompatibleKey(key))
                 {
-                    int i = FindEntry((TKey)key);
+                    int i = FindEntry((long)key);
                     if (i >= 0)
                     {
                         return entries[i].value;
@@ -770,7 +763,7 @@ namespace System.Collections.Generic.Customized
 
                 try
                 {
-                    TKey tempKey = (TKey)key;
+                    long tempKey = (long)key;
                     try
                     {
                         this[tempKey] = (TValue)value;
@@ -782,7 +775,7 @@ namespace System.Collections.Generic.Customized
                 }
                 catch (InvalidCastException)
                 {
-                    ThrowHelper.ThrowWrongKeyTypeArgumentException(key, typeof(TKey));
+                    ThrowHelper.ThrowWrongKeyTypeArgumentException(key, typeof(long));
                 }
             }
         }
@@ -793,7 +786,7 @@ namespace System.Collections.Generic.Customized
             {
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.key);
             }
-            return (key is TKey);
+            return (key is long);
         }
 
         void IDictionary.Add(object key, object value)
@@ -806,7 +799,7 @@ namespace System.Collections.Generic.Customized
 
             try
             {
-                TKey tempKey = (TKey)key;
+                long tempKey = (long)key;
 
                 try
                 {
@@ -819,7 +812,7 @@ namespace System.Collections.Generic.Customized
             }
             catch (InvalidCastException)
             {
-                ThrowHelper.ThrowWrongKeyTypeArgumentException(key, typeof(TKey));
+                ThrowHelper.ThrowWrongKeyTypeArgumentException(key, typeof(long));
             }
         }
 
@@ -827,7 +820,7 @@ namespace System.Collections.Generic.Customized
         {
             if (IsCompatibleKey(key))
             {
-                return ContainsKey((TKey)key);
+                return ContainsKey((long)key);
             }
 
             return false;
@@ -842,30 +835,30 @@ namespace System.Collections.Generic.Customized
         {
             if (IsCompatibleKey(key))
             {
-                Remove((TKey)key);
+                Remove((long)key);
             }
         }
 
         [Serializable]
-        public struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>,
+        public struct Enumerator : IEnumerator<KeyValuePair<long, TValue>>,
             IDictionaryEnumerator
         {
-            private Dictionary<TKey, TValue> dictionary;
+            private Dictionary<TValue> dictionary;
             private int version;
             private int index;
-            private KeyValuePair<TKey, TValue> current;
+            private KeyValuePair<long, TValue> current;
             private int getEnumeratorRetType;  // What should Enumerator.Current return?
 
             internal const int DictEntry = 1;
             internal const int KeyValuePair = 2;
 
-            internal Enumerator(Dictionary<TKey, TValue> dictionary, int getEnumeratorRetType)
+            internal Enumerator(Dictionary<TValue> dictionary, int getEnumeratorRetType)
             {
                 this.dictionary = dictionary;
                 version = dictionary.version;
                 index = 0;
                 this.getEnumeratorRetType = getEnumeratorRetType;
-                current = new KeyValuePair<TKey, TValue>();
+                current = new KeyValuePair<long, TValue>();
             }
 
             public bool MoveNext()
@@ -881,7 +874,7 @@ namespace System.Collections.Generic.Customized
                 {
                     if (dictionary.entries[index].hashCode >= 0)
                     {
-                        current = new KeyValuePair<TKey, TValue>(dictionary.entries[index].key, dictionary.entries[index].value);
+                        current = new KeyValuePair<long, TValue>(dictionary.entries[index].key, dictionary.entries[index].value);
                         index++;
                         return true;
                     }
@@ -889,11 +882,11 @@ namespace System.Collections.Generic.Customized
                 }
 
                 index = dictionary.count + 1;
-                current = new KeyValuePair<TKey, TValue>();
+                current = new KeyValuePair<long, TValue>();
                 return false;
             }
 
-            public KeyValuePair<TKey, TValue> Current
+            public KeyValuePair<long, TValue> Current
             {
                 get { return current; }
             }
@@ -916,7 +909,7 @@ namespace System.Collections.Generic.Customized
                         return new System.Collections.DictionaryEntry(current.Key, current.Value);
                     }
                     else {
-                        return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
+                        return new KeyValuePair<long, TValue>(current.Key, current.Value);
                     }
                 }
             }
@@ -929,7 +922,7 @@ namespace System.Collections.Generic.Customized
                 }
 
                 index = 0;
-                current = new KeyValuePair<TKey, TValue>();
+                current = new KeyValuePair<long, TValue>();
             }
 
             DictionaryEntry IDictionaryEnumerator.Entry
@@ -975,11 +968,11 @@ namespace System.Collections.Generic.Customized
         //[DebuggerTypeProxy(typeof(Mscorlib_DictionaryKeyCollectionDebugView<,>))]
         [DebuggerDisplay("Count = {Count}")]
         [Serializable]
-        public sealed class KeyCollection : ICollection<TKey>, ICollection, IReadOnlyCollection<TKey>
+        public sealed class KeyCollection : ICollection<long>, ICollection, IReadOnlyCollection<long>
         {
-            private Dictionary<TKey, TValue> dictionary;
+            private Dictionary<TValue> dictionary;
 
-            public KeyCollection(Dictionary<TKey, TValue> dictionary)
+            public KeyCollection(Dictionary<TValue> dictionary)
             {
                 if (dictionary == null)
                 {
@@ -993,7 +986,7 @@ namespace System.Collections.Generic.Customized
                 return new Enumerator(dictionary);
             }
 
-            public void CopyTo(TKey[] array, int index)
+            public void CopyTo(long[] array, int index)
             {
                 if (array == null)
                 {
@@ -1023,33 +1016,33 @@ namespace System.Collections.Generic.Customized
                 get { return dictionary.Count; }
             }
 
-            bool ICollection<TKey>.IsReadOnly
+            bool ICollection<long>.IsReadOnly
             {
                 get { return true; }
             }
 
-            void ICollection<TKey>.Add(TKey item)
+            void ICollection<long>.Add(long item)
             {
                 ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_KeyCollectionSet);
             }
 
-            void ICollection<TKey>.Clear()
+            void ICollection<long>.Clear()
             {
                 ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_KeyCollectionSet);
             }
 
-            bool ICollection<TKey>.Contains(TKey item)
+            bool ICollection<long>.Contains(long item)
             {
                 return dictionary.ContainsKey(item);
             }
 
-            bool ICollection<TKey>.Remove(TKey item)
+            bool ICollection<long>.Remove(long item)
             {
                 ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_KeyCollectionSet);
                 return false;
             }
 
-            IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator()
+            IEnumerator<long> IEnumerable<long>.GetEnumerator()
             {
                 return new Enumerator(dictionary);
             }
@@ -1086,7 +1079,7 @@ namespace System.Collections.Generic.Customized
                     ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
                 }
 
-                TKey[] keys = array as TKey[];
+                long[] keys = array as long[];
                 if (keys != null)
                 {
                     CopyTo(keys, index);
@@ -1125,19 +1118,19 @@ namespace System.Collections.Generic.Customized
             }
 
             [Serializable]
-            public struct Enumerator : IEnumerator<TKey>, System.Collections.IEnumerator
+            public struct Enumerator : IEnumerator<long>, System.Collections.IEnumerator
             {
-                private Dictionary<TKey, TValue> dictionary;
+                private Dictionary<TValue> dictionary;
                 private int index;
                 private int version;
-                private TKey currentKey;
+                private long currentKey;
 
-                internal Enumerator(Dictionary<TKey, TValue> dictionary)
+                internal Enumerator(Dictionary<TValue> dictionary)
                 {
                     this.dictionary = dictionary;
                     version = dictionary.version;
                     index = 0;
-                    currentKey = default(TKey);
+                    currentKey = default(long);
                 }
 
                 public void Dispose()
@@ -1163,11 +1156,11 @@ namespace System.Collections.Generic.Customized
                     }
 
                     index = dictionary.count + 1;
-                    currentKey = default(TKey);
+                    currentKey = default(long);
                     return false;
                 }
 
-                public TKey Current
+                public long Current
                 {
                     get
                     {
@@ -1196,7 +1189,7 @@ namespace System.Collections.Generic.Customized
                     }
 
                     index = 0;
-                    currentKey = default(TKey);
+                    currentKey = default(long);
                 }
             }
         }
@@ -1206,9 +1199,9 @@ namespace System.Collections.Generic.Customized
         [Serializable]
         public sealed class ValueCollection : ICollection<TValue>, ICollection, IReadOnlyCollection<TValue>
         {
-            private Dictionary<TKey, TValue> dictionary;
+            private Dictionary<TValue> dictionary;
 
-            public ValueCollection(Dictionary<TKey, TValue> dictionary)
+            public ValueCollection(Dictionary<TValue> dictionary)
             {
                 if (dictionary == null)
                 {
@@ -1354,12 +1347,12 @@ namespace System.Collections.Generic.Customized
             [Serializable]
             public struct Enumerator : IEnumerator<TValue>, System.Collections.IEnumerator
             {
-                private Dictionary<TKey, TValue> dictionary;
+                private Dictionary<TValue> dictionary;
                 private int index;
                 private int version;
                 private TValue currentValue;
 
-                internal Enumerator(Dictionary<TKey, TValue> dictionary)
+                internal Enumerator(Dictionary<TValue> dictionary)
                 {
                     this.dictionary = dictionary;
                     version = dictionary.version;

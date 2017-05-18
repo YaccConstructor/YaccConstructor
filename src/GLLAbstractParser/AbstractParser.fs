@@ -53,6 +53,8 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
         if not <| gssVertex.ContainsContext posInInput posInGrammar data
         then 
             incr descriptorsCounter
+//            if (posInInput = 33<positionInInput>) then
+//                System.IO.File.AppendAllText("descriptors.txt", sprintf "%i,%i,(%i,%i)\n" posInInput posInGrammar gssVertex.PositionInInput gssVertex.Nonterm)
             pushContext posInInput posInGrammar gssVertex data
     
     /// 

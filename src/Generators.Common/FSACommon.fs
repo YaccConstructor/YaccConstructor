@@ -612,14 +612,14 @@ let minimizeFSA fsa =
         FinalStates    = newFinalStates}
     //statesToReturn, nonterms.Count, newStateStringDict, (stateToNewState.[int startState]*1<positionInGrammar>), (stateToNewState.[int finalState]*1<positionInGrammar>)
 
-let leftFactorization fsa = 
-    
-    {fsa with
-        States = statesToReturn;
-        StateToNontermName = stateToNontermName;
-        StartState = stateToNewState.[int fsa.StartState]*1<positionInGrammar>;
-        StartStates    = newStartStates;
-        FinalStates    = newFinalStates}
+//let leftFactorization fsa = 
+//    
+//    {fsa with
+//        States = statesToReturn;
+//        StateToNontermName = stateToNontermName;
+//        StartState = stateToNewState.[int fsa.StartState]*1<positionInGrammar>;
+//        StartStates    = newStartStates;
+//        FinalStates    = newFinalStates}
 let genFirstSet fsa =
     let nontermToSet = new Dictionary<int<positionInGrammar>, int>()
 

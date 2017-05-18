@@ -137,7 +137,7 @@ module Production =
             |PMetaRef (name, args, metaArgs) ->
                 Source.toString name + metaArgsToString metaArgs + argsToString args
             |PLiteral src -> Source.toString src
-            |PRepet _ -> failwith "Repetition was not realized yet"
+            |PRepet (x, a, b) -> x.ToString() + sprintf "*[%s..%s]" (if a.IsSome then a.Value.ToString() else "") (if b.IsSome then b.Value.ToString() else "")
             |PPerm src ->
                 src
                 |> List.map (fun x -> x.ToString())

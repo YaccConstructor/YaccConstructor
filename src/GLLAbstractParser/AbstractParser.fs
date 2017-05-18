@@ -23,11 +23,6 @@ let unpackNode = function
     | _ -> failwith "Wrong type"
 
 let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) = 
-    let lengthOfInput = 
-        if (input :? LinearInput) then
-            let qwe = input :?> LinearInput
-            qwe.Input.Length
-        else 100
     let dummy = 
         if buildTree
         then TreeNode(-1<nodeMeasure>)
@@ -35,13 +30,14 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
     let epsilon = -1<token>
 
     let gss = new GSS()
-    let sppf = new SPPF(lengthOfInput, parser.StartState, parser.FinalStates)
+    let gssVertexInstanceHolder = new GSSVertexInstanceHolder()
+    let sppf = new SPPF(parser.StartState, parser.FinalStates)
     
     let startContexts = 
         input.InitialPositions
-        |> Array.rev
+        //|> Array.rev
         |> Array.map(fun pos -> 
-            let vertex = new GSSVertex(parser.StartState, pos)
+            let vertex = gssVertexInstanceHolder.Get(parser.StartState, pos)
             gss.AddVertex vertex |> ignore
             new ContextFSA<_>(pos, parser.StartState, vertex, dummy))
 
@@ -84,8 +80,8 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
 
     ///Creates new descriptors.(Calls when found nonterninal in rule(on current input edge, or on some of next)))
     let create (curContext:ContextFSA<_>) stateToContinue nonterm =        
-        let newVertex = new GSSVertex(nonterm, curContext.PosInInput)
-        let vertexExists, edgeExists, startV = gss.ContainsVertAndEdge(newVertex, curContext.GssVertex, stateToContinue, curContext.Data)        
+        let startV = gssVertexInstanceHolder.Get(nonterm, curContext.PosInInput)
+        let vertexExists, edgeExists = gss.ContainsVertexAndEdge(startV, curContext.GssVertex, stateToContinue, curContext.Data)        
 
         if vertexExists
         then
@@ -220,7 +216,7 @@ let isParsed (parser : ParserSourceGLL) (input : LinearInput) =
 
 let getAllRangesForState gss state =
     findVertices gss state
-    |> Seq.collect (fun v -> v.U |> Seq.collect (fun kvp -> kvp.Value |> Seq.map (fun x -> v.PositionInInput, v.GetUncompressetPositions kvp.Key |> fst)))    
+    |> Seq.collect (fun v -> v.P.SetP |> Seq.map (fun poped -> v.PositionInInput, poped.posInInput))    
 
 let getAllRangesForStartState (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss, _, _,_, _ = parse parser input false
@@ -228,7 +224,7 @@ let getAllRangesForStartState (parser : ParserSourceGLL) (input : IParserInput) 
 
 let getAllRangesForStateWithLength gss state =
     findVertices gss state
-    |> Seq.collect (fun v -> v.U |> Seq.collect (fun kvp -> kvp.Value |> Seq.map (fun x -> v.PositionInInput, v.GetUncompressetPositions kvp.Key |> fst, match x with Length x -> x | TreeNode _ -> failwith "Impossible!")))
+    |> Seq.collect (fun v -> v.P.SetP |> Seq.map (fun poped -> v.PositionInInput, poped.posInInput, match poped.data with Length x -> x | TreeNode _ -> failwith "Impossible!"))
 
 let getAllRangesForStartStateWithLength (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss, _, _,_, _ = parse parser input false

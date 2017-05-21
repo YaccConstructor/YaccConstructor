@@ -24,6 +24,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
     let terminalNodes = new Dictionary<int64<extension>, Dictionary<int<token>,int<nodeMeasure>>>()
     let epsilonNodes = new Dictionary<int, int<nodeMeasure>>()
     let nodes = new BlockResizeArray<INode>()
+
     member this.Nodes = nodes
     member this.TerminalNodes = terminalNodes
     member this.NonTerminalNodes = nonTerminalNodes
@@ -195,6 +196,30 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                              | TreeNode n -> this.Nodes.Item (int n)
                              | _ -> failwith "wrongType")
         |> Array.ofSeq
+
+    member this.Iterate (s : NonTerminalNode) = 
+        let queue = new Queue<INode>()
+        let mutable used = new Dictionary<INode, bool>()
+        for n in this.Nodes do
+            if (n.Equals(s)) then
+                used.Add(n, true)
+            else
+                used.Add(n, false)
+        
+        queue.Enqueue s
+        seq {
+            while (queue.Count <> 0) do
+                let h = queue.Dequeue()
+                match h with
+                | :? NonTerminalNode as n -> n.MapChildren (fun x -> if (not used.[x]) then
+                                                                         used.[x] <- true
+                                                                         queue.Enqueue(x)) |> ignore
+                | :? IntermidiateNode as i -> i.MapChildren (fun x -> if (not used.[x]) then
+                                                                         used.[x] <- true
+                                                                         queue.Enqueue(x)) |> ignore
+                | :? TerminalNode as t -> (t.Name, getLeftExtension t.Extension, getRightExtension t.Extension) |> ignore
+                | _ -> do()
+        }
 
 let GetTerminals (sppf : SPPF) = 
     sppf.GetTerminalNodes |> Seq.map (fun x -> x.Name, getLeftExtension x.Extension, getRightExtension x.Extension)

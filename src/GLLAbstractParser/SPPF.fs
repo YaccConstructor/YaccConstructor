@@ -197,7 +197,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                              | _ -> failwith "wrongType")
         |> Array.ofSeq
 
-    member this.Iterate (s : NonTerminalNode) = 
+    member this.IterateFromAnyNonTerm (s : NonTerminalNode) = 
         let queue = new Queue<INode>()
         let used = new Dictionary<INode, bool>()
         for n in this.Nodes do
@@ -213,20 +213,17 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 let h = queue.Dequeue()
                 match h with
                 | :? NonTerminalNode as n -> n.MapChildren (fun x -> if not used.[x] 
-                                                                     then
-                                                                         add x) |> ignore
+                                                                     then add x) |> ignore
                 | :? IntermidiateNode as i -> i.MapChildren (fun x -> if not used.[x] 
-                                                                      then
-                                                                         add x) |> ignore
+                                                                      then add x) |> ignore
                 | :? PackedNode as p -> if not used.[p.Left]
-                                        then
-                                            add p.Left |> ignore
+                                        then add p.Left |> ignore
                                         if not used.[p.Right]
-                                        then
-                                            add p.Right |> ignore
+                                        then add p.Right |> ignore
                 | :? TerminalNode as t -> t.Name, getLeftExtension t.Extension, getRightExtension t.Extension
-                | _ -> do()
+                | _ -> failwith "Strange type of node"
         }
+
 
 let GetTerminals (sppf : SPPF) = 
     sppf.GetTerminalNodes |> Seq.map (fun x -> x.Name, getLeftExtension x.Extension, getRightExtension x.Extension)

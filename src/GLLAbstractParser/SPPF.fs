@@ -203,18 +203,28 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         for n in this.Nodes do
             used.Add(n, n.Equals(s))
         
+        let add x = 
+            queue.Enqueue(x)
+            used.[x] <- true
+
         queue.Enqueue s
         seq {
             while queue.Count <> 0 do
                 let h = queue.Dequeue()
                 match h with
-                | :? NonTerminalNode as n -> n.MapChildren (fun x -> if not used.[x] then
-                                                                         used.[x] <- true
-                                                                         queue.Enqueue(x)) |> ignore
-                | :? IntermidiateNode as i -> i.MapChildren (fun x -> if not used.[x] then
-                                                                         used.[x] <- true
-                                                                         queue.Enqueue(x)) |> ignore
-                | :? TerminalNode as t -> (t.Name, getLeftExtension t.Extension, getRightExtension t.Extension) |> ignore
+                | :? NonTerminalNode as n -> n.MapChildren (fun x -> if not used.[x] 
+                                                                     then
+                                                                         add x) |> ignore
+                | :? IntermidiateNode as i -> i.MapChildren (fun x -> if not used.[x] 
+                                                                      then
+                                                                         add x) |> ignore
+                | :? PackedNode as p -> if not used.[p.Left]
+                                        then
+                                            add p.Left |> ignore
+                                        if not used.[p.Right]
+                                        then
+                                            add p.Right |> ignore
+                | :? TerminalNode as t -> t.Name, getLeftExtension t.Extension, getRightExtension t.Extension
                 | _ -> do()
         }
 

@@ -197,7 +197,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                              | _ -> failwith "wrongType")
         |> Array.ofSeq
 
-    member this.IterateFromAnyNonTerm (s : NonTerminalNode) = 
+    member this.Iterate (s : NonTerminalNode) = 
         let queue = new Queue<INode>()
         let used = new Dictionary<INode, bool>()
         for n in this.Nodes do
@@ -221,7 +221,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                                         if not used.[p.Right]
                                         then add p.Right |> ignore
                 | :? TerminalNode as t -> yield t.Name, getLeftExtension t.Extension, getRightExtension t.Extension
-                | _ -> failwith "Strange type of node"
+                | x -> failwithf "Strange type of node: %A" x
         }
 
 

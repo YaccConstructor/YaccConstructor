@@ -197,6 +197,12 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                              | _ -> failwith "wrongType")
         |> Array.ofSeq
 
+    member this.GetNonTermByName name = 
+        this.Nodes 
+        |> Seq.filter (fun x -> x :? NonTerminalNode) 
+        |> Seq.cast<NonTerminalNode> 
+        |> Seq.find (fun x -> x.Name.Equals name)
+
     member this.Iterate (s : NonTerminalNode) = 
         let queue = new Queue<INode>()
         let used = new Dictionary<INode, bool>()

@@ -220,7 +220,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                                         then add p.Left |> ignore
                                         if not used.[p.Right]
                                         then add p.Right |> ignore
-                | :? TerminalNode as t -> t.Name, getLeftExtension t.Extension, getRightExtension t.Extension
+                | :? TerminalNode as t -> yield t.Name, getLeftExtension t.Extension, getRightExtension t.Extension
                 | _ -> failwith "Strange type of node"
         }
 

@@ -125,10 +125,12 @@ type GraphLabelledVertex<'tagType when 'tagType : equality> (initialVertices : '
     let eBackMap = new ResizeArray<_>()
 
     let packPosition edge (position: Pos) = 
-        if position = Pos.Vertex then ((1 <<< 31) ||| edge) * 1<positionInInput>
+        if position = Pos.Vertex 
+        then ((1 <<< 31) ||| edge) * 1<positionInInput>
         else edge * 1<positionInInput>
     let isVertexOrEdge (position : int<positionInInput>) =
-        if int position < 0 then Pos.Vertex
+        if int position < 0 
+        then Pos.Vertex
         else Pos.Edge
     let getId (packedValue : int<positionInInput>) = int packedValue &&& 0x7FFFFFFF
 
@@ -160,7 +162,8 @@ type GraphLabelledVertex<'tagType when 'tagType : equality> (initialVertices : '
 
         [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
         member this.ForAllOutgoingEdges curPosInInput pFun =
-            if (isVertexOrEdge curPosInInput) = Pos.Edge then 
+            if (isVertexOrEdge curPosInInput) = Pos.Edge 
+            then 
                 let e = eBackMap.[getId curPosInInput]
                 pFun ((this.TagToToken e.Tag) * 1<token>) (packPosition (vMap.[e.Target]) Pos.Vertex)
             else 

@@ -112,3 +112,64 @@ type LinearIputWithErrors(input: int<token> array, errorTag) =
 
     member this.Input = input
 
+type Pos =
+    | Edge = 0
+    | Vertex = 1
+
+type GraphLabelledVertex<'tagType when 'tagType : equality> (initialVertices : 'tagType[], finalVertices : 'tagType[], tagToToken : 'tagType -> int) = 
+    inherit AdjacencyGraph<'tagType, TaggedEdge<'tagType, 'tagType>>()
+
+    let eMap = new System.Collections.Generic.Dictionary<_,_>()
+    let vMap = new System.Collections.Generic.Dictionary<_,_>()
+    let vBackMap = new ResizeArray<_>()
+    let eBackMap = new ResizeArray<_>()
+
+    let packPosition edge (position: Pos) = 
+        if position = Pos.Vertex 
+        then ((1 <<< 31) ||| edge) * 1<positionInInput>
+        else edge * 1<positionInInput>
+    let isVertexOrEdge (position : int<positionInInput>) =
+        if int position < 0 
+        then Pos.Vertex
+        else Pos.Edge
+    let getId (packedValue : int<positionInInput>) = int packedValue &&& 0x7FFFFFFF
+
+    member val InitStates = initialVertices 
+    member val FinalStates = finalVertices with get, set
+    member val TagToToken = tagToToken with get
+
+    member this.AddEdges (edges: TaggedEdge<'tagType, 'tagType>[]) = 
+        this.AddVerticesAndEdgeRange edges |> ignore
+        this.Vertices
+        |> Seq.iteri (fun i v ->
+            vMap.Add(v, i)
+            vBackMap.Add v
+        )
+        this.Edges
+        |> Seq.iteri (fun i e ->
+            eMap.Add(e, i) 
+            eBackMap.Add e
+        )
+
+    interface IParserInput with
+        member this.InitialPositions = 
+            Array.map(fun x -> 
+                match (vMap.TryGetValue x) with 
+                | (true, v) -> 
+                    packPosition v Pos.Vertex
+                | (false, v) -> failwithf "There is no vertex %A" x
+            ) this.InitStates
+
+        [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+        member this.ForAllOutgoingEdges curPosInInput pFun =
+            if (isVertexOrEdge curPosInInput) = Pos.Edge 
+            then 
+                let e = eBackMap.[getId curPosInInput]
+                pFun ((this.TagToToken e.Tag) * 1<token>) (packPosition (vMap.[e.Target]) Pos.Vertex)
+            else 
+                let outEdges =  vBackMap.[getId curPosInInput] |> this.OutEdges
+                outEdges |> Seq.iter
+                    (fun e -> pFun ((this.TagToToken vBackMap.[getId curPosInInput]) * 1<token>) (eMap.[e] * 1<positionInInput>))
+
+        member this.PositionToString (pos : int) =
+            sprintf "%i" pos

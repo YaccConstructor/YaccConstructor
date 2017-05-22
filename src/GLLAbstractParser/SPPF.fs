@@ -199,22 +199,19 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
 
     member this.Iterate (s : NonTerminalNode) = 
         let queue = new Queue<INode>()
-        let mutable used = new Dictionary<INode, bool>()
+        let used = new Dictionary<INode, bool>()
         for n in this.Nodes do
-            if (n.Equals(s)) then
-                used.Add(n, true)
-            else
-                used.Add(n, false)
+            used.Add(n, n.Equals(s))
         
         queue.Enqueue s
         seq {
-            while (queue.Count <> 0) do
+            while queue.Count <> 0 do
                 let h = queue.Dequeue()
                 match h with
-                | :? NonTerminalNode as n -> n.MapChildren (fun x -> if (not used.[x]) then
+                | :? NonTerminalNode as n -> n.MapChildren (fun x -> if not used.[x] then
                                                                          used.[x] <- true
                                                                          queue.Enqueue(x)) |> ignore
-                | :? IntermidiateNode as i -> i.MapChildren (fun x -> if (not used.[x]) then
+                | :? IntermidiateNode as i -> i.MapChildren (fun x -> if not used.[x] then
                                                                          used.[x] <- true
                                                                          queue.Enqueue(x)) |> ignore
                 | :? TerminalNode as t -> (t.Name, getLeftExtension t.Extension, getRightExtension t.Extension) |> ignore

@@ -53,6 +53,7 @@
     <Compile Include="FunsAndStructs.fs" />
     <Compile Include="ParserSource.fs" />
     <Content Include="paket.references" />
+    <Compile Include="OldParserSource.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

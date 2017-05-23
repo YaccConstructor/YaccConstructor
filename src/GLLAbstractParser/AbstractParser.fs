@@ -230,5 +230,5 @@ let getAllRangesForStateWithLength gss state =
 
 let getAllRangesForStartStateWithLength (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss, _, sppf, totalBytesOfMemoryUsed,  descr = parse parser input false
-    getAllRangesForStateWithLength gss parser.StartState
-    , gss.EdgeCount, gss.VertexCount, sppf.Nodes.Length, totalBytesOfMemoryUsed, descr
+    //getAllRangesForStateWithLength gss parser.StartState
+    gss.EdgeCount, gss.VertexCount, sppf.Nodes.Length, totalBytesOfMemoryUsed, descr

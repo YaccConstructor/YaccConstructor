@@ -21,7 +21,7 @@ module CommonFuns =
     let inline getPosition (packed : int64<gssVertex>) = int <| ((int64 packed) &&& 0xffffffffL)
     let inline getState (packed : int64<gssVertex>) = int <| ((int64 packed) >>> 32)
 
-    let inline packEdgePos edge position : int<positionInGrammar>  =
+    let inline packEdgePos edge position : int<positionInInput>  =
         if (edge < 65536) && (position < 65536) then LanguagePrimitives.Int32WithMeasure((int position <<< 16) ||| int edge)
         else failwith "Edge or position is greater then 65535!!"
     let inline getEdge (packedValue : int<positionInInput>)      = int (int packedValue &&& 0xffff)
@@ -35,7 +35,7 @@ module CommonFuns =
 [<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
 type Vertex =
     /// Position in input graph (Packed edge+position)
-    val Level            : int<positionInGrammar>
+    val Level            : int<positionInInput>
     /// Nonterminal
     val NontermLabel     : int<positionInGrammar>
     new (level, nonterm) = {Level = level; NontermLabel = nonterm}
@@ -51,15 +51,16 @@ type GSSVertexFSA =
 
 [<Struct>]
 type Context(*<'TokenType>*) =
-    val Index         : int
+    val Index         : int<positionInInput>
     val Label         : int<positionInGrammar>
     val Vertex        : Vertex
-    val Ast           : int<nodeMeasure>
-    val Probability   : float
-    val SLength       : int   
+    //val Ast           : int<nodeMeasure>
+    //val Probability   : float
+    val SLength       : uint16   
+    val Extension     : int64<extension>
     //val Path          : List<ParserEdge<'TokenType*ref<bool>>>
-    new (index, label, vertex, ast, prob, sLength) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Probability = prob; SLength = sLength} // Path = List.empty<ParserEdge<'TokenType*ref<bool>>>
-    new (index, label, vertex, ast) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Probability = 1.0; SLength = 1}
+    new (index, label, vertex, ext, sLength) = {Index = index; Label = label; Vertex = vertex; SLength = sLength; Extension = ext} // Path = List.empty<ParserEdge<'TokenType*ref<bool>>>
+    //new (index, label, vertex, ast) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Probability = 1.0; SLength = 1}
     //new (index, label, vertex, ast, path) = {Index = index; Label = label; Vertex = vertex; Ast = ast; Path = path}
 
 type ParseData = 
@@ -121,14 +122,14 @@ type ResultStruct =
     override this.ToString () = "Start:edge:" + (this.le.ToString()) + ";pos:" + (this.lpos.ToString()) + "--" +
                                 "Final:edge:" + (this.re.ToString()) + ";pos:" + (this.rpos.ToString())
 
-type CompressedArray<'t>(l : int[], f : _ -> 't, shift) =
+type CompressedArray<'t>(l : int[], f : _ -> 't) =
     let a = Array.init l.Length (fun i -> Array.init (l.[i]) f)
     member this.Item         
         with get (i:int<positionInInput>) = 
             let edg = (CommonFuns.getEdge i)
             let pos = (CommonFuns.getPosOnEdge i)
-            a.[edg].[shift + pos]
-        and set i v = a.[(CommonFuns.getEdge i)].[shift + (CommonFuns.getPosOnEdge i)] <- v
+            a.[edg].[pos]
+        and set i v = a.[(CommonFuns.getEdge i)].[(CommonFuns.getPosOnEdge i)] <- v
 
 
 type ParserStructures<'TokenType> (currentRule : int)=
@@ -214,12 +215,12 @@ type ParserStructures<'TokenType> (currentRule : int)=
             false
         //else true
 //CompressedArray<System.Collections.Generic.Dictionary<_, System.Collections.Generic.Dictionary<_, ResizeArray<_>>>>
-    let addContext (setU ) (inputVertex : int) (label : int<positionInGrammar>) vertex ast =
-        setR.Enqueue(new Context(inputVertex, label, vertex, ast(*, curR*)))
-        
-        if not <| containsContext setU inputVertex label vertex ast
-        then
-            setR.Enqueue(new Context(inputVertex, label, vertex, ast(*, dummy, currentPath*)))
+//    let addContext (setU ) (inputVertex : int<positionInInput>) (label : int<positionInGrammar>) vertex ast =
+//        setR.Enqueue(new Context(inputVertex, label, vertex, ast(*, curR*)))
+//        
+//        if not <| containsContext setU inputVertex label vertex ast
+//        then
+//            setR.Enqueue(new Context(inputVertex, label, vertex, ast(*, dummy, currentPath*)))
 
     let containsEdge (dict1 : Dictionary<_, Dictionary<_, ResizeArray<_>>>) ast (e : Vertex) =
         if dict1 <> Unchecked.defaultof<_>
@@ -282,7 +283,7 @@ type ParserStructures<'TokenType> (currentRule : int)=
     member this.DummyAST = dummyAST
     //member this.PushContext = pushContext
     member this.ContainsContext = containsContext
-    member this.AddContext = addContext
+    //member this.AddContext = addContext
     member this.ContainsEdge = containsEdge
     member this.GetTreeExtension = getTreeExtension
     member this.Dummy = dummy

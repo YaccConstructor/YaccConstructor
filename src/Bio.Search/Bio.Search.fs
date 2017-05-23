@@ -329,7 +329,7 @@ let printLongEdges path edges =
 
 let searchMain (config:Config) =     
     let assembliesOf16s = new ResizeArray<_>()
-    let sourceGraph, (graphs, edges), longEdges = loadInitialGraph config.InputGraphPath config.MiddleSearchConfig.HighLengthLimit config.MiddleSearchConfig.Tokenizer    
+    let sourceGraph, (graphs, edges), longEdges = loadInitialGraph config.InputGraphPath config.MiddleSearchConfig.HighLengthLimit GLL.Parse.test.tokenizer//config.MiddleSearchConfig.Tokenizer    
     config.OriginalEdges <- sourceGraph
     config.LongEdges <- longEdges
     let graphs =

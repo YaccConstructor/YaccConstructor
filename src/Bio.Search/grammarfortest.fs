@@ -4,6 +4,7 @@ open AbstractAnalysis.Common
 open Yard.Generators.OldGLL
 open Yard.Generators.Common.ASTGLL
 open Yard.Generators.OldGLL.ParserCommon
+
 type Token =
     | A of (unit)
     | C of (unit)
@@ -2181,11 +2182,30 @@ let numToString = function
     | _ -> ""
 
 let tokenToNumber = function
-    | A _ -> 2160
-    | C _ -> 2161
-    | G _ -> 2162
-    | RNGLR_EOF _ -> 2163
-    | U _ -> 2164
+    | A _ -> 2160<token>
+    | C _ -> 2161<token>
+    | G _ -> 2162<token>
+    | RNGLR_EOF _ -> 2163<token>
+    | U _ -> 2164<token>
+
+let charToInt c = 
+    match c with
+    | 'A' -> tokenToNumber (A ())
+    | 'C' -> tokenToNumber (C ())
+    | 'G' -> tokenToNumber (G ())
+    | 'U' | 'T'-> tokenToNumber (U ())
+    | _ -> failwith "unexpected token"
+
+let tokenizer = 
+    fun (ch:char) ->
+        let ch = 
+            let ch = System.Char.ToUpper(ch)
+            if ch = 'T'
+            then 'U'
+            elif Array.contains ch [|'A';'C';'G';'U';|]
+            then ch
+            else 'G'
+        charToInt ch
 
 let numIsTerminal = function
     | 2160 -> true

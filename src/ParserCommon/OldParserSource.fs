@@ -1,8 +1,9 @@
 ﻿namespace Yard.Generators.OldGLL.ParserCommon
 open System.Collections.Generic
+open AbstractAnalysis.Common
        
 type ParserSourceGLL<'TokenType> (//eof                  : 'TokenType
-                                  tokenToNumber      : 'TokenType -> int
+                                  tokenToNumber      : 'TokenType -> int<token>
                                //, genLiteral         : string -> int -> 'TokenType option
                                   ,numToString        : int -> string
 //                               , tokenData          : 'TokenType -> obj

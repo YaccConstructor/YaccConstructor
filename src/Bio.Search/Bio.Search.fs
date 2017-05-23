@@ -209,21 +209,25 @@ let searchInBioGraphs (searchCfg : SearchConfig) (config:Config) (graphs : EdgeC
                         try 
                             printfn "\nSearch in agent %A. Graph %A." name i
                             printfn "Vertices: %A Edges: %A" graph.VertexCount graph.EdgeCount
-                            let parseResult, edgeCount, vertexCount, sppfNodes, totalBytesOfMemoryUsed, descr = 
-                                getAllRangesForStartStateWithLength searchCfg.ParserSource graph
-                            
+                            let (*parseResult*) edgeCount, vertexCount, sppfNodes, totalBytesOfMemoryUsed, descr = 
+                                if (true)
+                                then
+                                    GLL.Parse.test.buildAbstract graph 2
+                                else
+                                    getAllRangesForStartStateWithLength searchCfg.ParserSource graph
+                                     
                             GSSedgeCount := !GSSedgeCount + (int64 edgeCount)
                             GSSnodeCount := !GSSnodeCount + (int64 vertexCount)
                             sppfNodeCount := !sppfNodeCount + (int64 sppfNodes)
                             MemoryUsed := !MemoryUsed + totalBytesOfMemoryUsed
                             descrCount := !descrCount + (int64 descr)
 
-                            let parseResult = parseResult |> Array.ofSeq                                   
-                            if parseResult.Length = 0 
-                            then failwith "Input parsing failed."
-                            else 
-                                printfn "SearchWithoutSPPF succeed. Count = %A" parseResult.Length
-                                postprocessor.Post(Data(graph, searchCfg, parseResult))
+//                            let parseResult = parseResult |> Array.ofSeq                                   
+//                            if parseResult.Length = 0 
+//                            then failwith "Input parsing failed."
+//                            else 
+//                                printfn "SearchWithoutSPPF succeed. Count = %A" parseResult.Length
+//                                postprocessor.Post(Data(graph, searchCfg, parseResult))
 
                         with e -> printfn "ERROR in bio graph parsing! %A" e.Message
                         return! loop n

@@ -25,12 +25,12 @@
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-i test.yrd -c ExpandEbnf -c ExpandMeta -c ExpandInnerAlt -c AddDefaultAC -c Linearize -g "GLLGenerator  -token unit -module GLL.Parse.test"</StartArguments>
+    <StartArguments>-i grammarfortest.yrd -g "GLLGeneratorOLD  -token unit -module GLL.Parse.test"</StartArguments>
     <StartWorkingDirectory>C:\Code\Yacc Constructor</StartWorkingDirectory>
     <StartAction>Project</StartAction>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <StartArguments>-i test.yrd -g "GLLGenerator -token unit -module GLL.H22_H23"</StartArguments>
+    <StartArguments>-i R16S_19_27.yrd -g "GLLGeneratorOLD -token unit -module GLL.R16S_19_27"</StartArguments>
     <RemoteDebugEnabled>false</RemoteDebugEnabled>
     <RemoteDebugMachine />
     <StartWorkingDirectory>C:\Code\Yacc Constructor</StartWorkingDirectory>
@@ -70,6 +70,11 @@
     <Content Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\OldGLLGenerator\OldGLLGenerator.fsproj">
+      <Name>OldGLLGenerator</Name>
+      <Project>{8ccd7e29-f670-40cd-87a5-0833754ec511}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\FsYacc\FsYacc.fsproj">
       <Name>FsYacc</Name>
       <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>

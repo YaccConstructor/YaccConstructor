@@ -17,10 +17,10 @@ open Option
 [<assembly:AddinDependency ("YaccConstructor", "1.0")>]
 do()
 [<Extension>]
-type GLL() = 
+type GLLOld() = 
     inherit Generator()
-        override this.Name = "GLLGenerator"
-        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; noBrackets; needAC; singleModule; (new Constraint("inline", (fun _ -> false), Conversions.ExpandInline.ReplaceInline()))|]
+        override this.Name = "GLLGeneratorOLD"
+        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; noBrackets; (*needAC;*) singleModule|]//; (new Constraint("inline", (fun _ -> false), Conversions.ExpandInline.ReplaceInline()))|]
         override this.Generate (definition, _,args) =
             
             let start = System.DateTime.Now
@@ -46,7 +46,7 @@ type GLL() =
             let mutable needTranslate = getBoolOption "translate" true
             let mutable light = getBoolOption "light" true
             let mutable printInfiniteEpsilonPath = getOption "infEpsPath" "" id
-            let mutable isAbstract = getBoolOption "abstract" false
+            let mutable isAbstract = getBoolOption "abstract" true
             let withoutTree = ref <| getBoolOption "withoutTree" true
             let mutable caseSensitive = getBoolOption "caseSensitive" false
             let mutable output =
@@ -142,9 +142,9 @@ type GLL() =
                             println "open AbstractAnalysis.Common"
                         else
                             println "open Yard.Generators.GLL.Parser"
-                    println "open Yard.Generators.GLL"
+                    println "open Yard.Generators.OldGLL"
                     println "open Yard.Generators.Common.ASTGLL"
-                    println "open Yard.Generators.GLL.ParserCommon"
+                    println "open Yard.Generators.OldGLL.ParserCommon"
 
                     match definition.head with
                     | None -> ()

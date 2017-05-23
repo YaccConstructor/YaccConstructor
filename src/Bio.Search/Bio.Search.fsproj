@@ -63,6 +63,7 @@
   </Target>
   -->
   <ItemGroup>
+    <Compile Include="grammarfortest.yrd.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="InfernalInteraction.fs" />
     <Compile Include="Bio.Search.fs" />

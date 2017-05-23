@@ -33,7 +33,7 @@ type ResultStruct =
     new (l,l1, r, r1, n, len) = {le = l; lpos = l1; re = r; rpos = r1; nterm = n; length = len}
 
 
-let buildAbstract<'TokenType> (parser : ParserSourceGLL<int>) (input : IParserInput) condNonTerm = 
+let buildAbstract<'token> (parser : ParserSourceGLL<'token>) (input : IParserInput) condNonTerm = 
     //let shift = input.Shift
 //    if input.EdgeCount = 0 then
 //      Error ("This grammar does not accept empty input.")     
@@ -48,9 +48,14 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<int>) (input : IParserIn
         for i in 0..input.EdgeCount - 1 do
             r.[input.Edges.[i].Start] <- i :: r.[input.Edges.[i].Start]
         r
-    let parser = parser
+    //let parser = parser
+    let edgeCount = ref 0
+    let vertexCount = ref 0
+    let sppfNodes = ref 0
+    let totalBytesOfMemoryUsed = ref 0
+    let descr = ref 0
+
     let reused = ref 0
-    let descriptorNumber = ref 0
     let slots = parser.Slots
     let condNonTermRules = Seq.toArray <| seq{for i in 0..parser.LeftSide.Length - 1 do if parser.LeftSide.[i] = condNonTerm then yield i}
     let setU = new CompressedArray<SysDict<int, SysDict<int64, _(*ResizeArray<int64<extension>>*)>>>(input.ChainLength, (fun _ -> null )) 
@@ -61,7 +66,6 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<int>) (input : IParserIn
     let currentLength = ref 0us
     let r = new System.Collections.Generic.HashSet<_>()
     let currentIndex = ref 0<positionInInput>
-    let currentrule = parser.StartRule
     let currentExtension = ref 0L<extension>
     let dummyGSSNode = new Vertex(!currentIndex, -1<positionInGrammar>)
     
@@ -130,7 +134,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<int>) (input : IParserIn
         if not <| containsContext inputVertex label vertex extension 
         then
             setR.Push(new Context(inputVertex, label, vertex, extension, len))
-            incr descriptorNumber
+            incr descr
         else
             incr reused
 
@@ -198,6 +202,7 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<int>) (input : IParserIn
                 d0.Add(label, d1)
                 false, Some d0
         if dict.IsSome then edges.[int nontermName].[beginLevel] <- dict.Value
+        if not cond then incr edgeCount
         cond
         
     let create (cE : int) (cP : int) (label : int<positionInGrammar>) (vertex : Vertex) curSymbol (len : uint16) =   
@@ -377,12 +382,9 @@ let buildAbstract<'TokenType> (parser : ParserSourceGLL<int>) (input : IParserIn
             while not !stop do
             if !condition then dispatcher() else processing()
     control()
-                 
-    match r.Count with
-        | 0 -> 
-            Error ("String was not parsed")
-        | _ -> 
-            //printfn "Reused descriptors %d" !reused
-            //printfn "All descriptors %d" !descriptorNumber
-            Success1 (Array.ofSeq r) 
+
+    let currentProcess = System.Diagnostics.Process.GetCurrentProcess()
+    let totalBytesOfMemoryUsed = currentProcess.WorkingSet64
+    (*Array.ofSeq r,*) 
+    !edgeCount, !vertexCount, !sppfNodes, totalBytesOfMemoryUsed, !descr
                                   

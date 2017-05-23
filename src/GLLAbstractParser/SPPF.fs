@@ -24,6 +24,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
     let terminalNodes = new Dictionary<int64<extension>, Dictionary<int<token>,int<nodeMeasure>>>()
     let epsilonNodes = new Dictionary<int, int<nodeMeasure>>()
     let nodes = new BlockResizeArray<INode>()
+
     member this.Nodes = nodes
     member this.TerminalNodes = terminalNodes
     member this.NonTerminalNodes = nonTerminalNodes
@@ -195,6 +196,40 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                              | TreeNode n -> this.Nodes.Item (int n)
                              | _ -> failwith "wrongType")
         |> Array.ofSeq
+
+    member this.GetNonTermByName name = 
+        this.Nodes 
+        |> Seq.filter (fun x -> x :? NonTerminalNode) 
+        |> Seq.cast<NonTerminalNode> 
+        |> Seq.find (fun x -> x.Name.Equals name)
+
+    member this.Iterate (s : NonTerminalNode) = 
+        let queue = new Queue<INode>()
+        let used = new Dictionary<INode, bool>()
+        for n in this.Nodes do
+            used.Add(n, n.Equals(s))
+        
+        let add x = 
+            queue.Enqueue(x)
+            used.[x] <- true
+
+        queue.Enqueue s
+        seq {
+            while queue.Count <> 0 do
+                let h = queue.Dequeue()
+                match h with
+                | :? NonTerminalNode as n -> n.MapChildren (fun x -> if not used.[x] 
+                                                                     then add x) |> ignore
+                | :? IntermidiateNode as i -> i.MapChildren (fun x -> if not used.[x] 
+                                                                      then add x) |> ignore
+                | :? PackedNode as p -> if not used.[p.Left]
+                                        then add p.Left |> ignore
+                                        if not used.[p.Right]
+                                        then add p.Right |> ignore
+                | :? TerminalNode as t -> yield t.Name, getLeftExtension t.Extension, getRightExtension t.Extension
+                | x -> failwithf "Strange type of node: %A" x
+        }
+
 
 let GetTerminals (sppf : SPPF) = 
     sppf.GetTerminalNodes |> Seq.map (fun x -> x.Name, getLeftExtension x.Extension, getRightExtension x.Extension)

@@ -32,7 +32,7 @@ let graphParsingPrint (matrix: ProbabilityMatrix.T) =
         printfn ""
     printfn ""
 
-//SparseMatrix<float> functions
+//Math.Net SparseMatrix<float> functions
 let createEmptyMatrixSparse size = SparseMatrix.Create(size, size, 0.0)
 let matrixSetValueSparse (matrix: SparseMatrix) (i: int) (j: int) (value: float) = matrix.At(i, j, value)
 let sparsePrint (matrix: SparseMatrix) =
@@ -41,6 +41,21 @@ let sparsePrint (matrix: SparseMatrix) =
             printf "%.1f  " <| matrix.At(i, j)
         printfn ""
     printfn ""
+
+//CuSparse MySparseMatrix<float> functions
+let createEmptyMatrixMySparse size = new MySparseMatrix(size, 0, Array.init 0 (fun x -> 0.0), Array.init 0 (fun x -> 0), Array.init 0 (fun x -> 0))
+let matrixSetValueMySparse (matrix: MySparseMatrix) (i: int) (j: int) (value: float) =
+    let csrVal = Array.init 1 (fun x -> 1.0)
+    let csrRow = Array.init (matrix.Size + 1) (fun x -> if x < i + 1 then 0 else 1)
+    let csrColInd = Array.init 1 (fun x -> j)
+    let oneCellMatrix = new MySparseMatrix(matrix.Size, 1, csrVal, csrRow, csrColInd)
+    let newMatrix = sparseCudaGeam matrix oneCellMatrix matrix.Size
+    matrix.Update(newMatrix.Nnz, newMatrix.CsrVal, newMatrix.CsrRow, newMatrix.CsrColInd)
+let MySparsePrint (matrix: MySparseMatrix) = 
+    printfn "CsrVal: %A" matrix.CsrVal
+    printfn "CsrColInd: %A" matrix.CsrColInd
+    printfn "CsrRow: %A" matrix.CsrRow
+   
 
 [<TestFixture>]
 type ``Graph parsing tests``() =  
@@ -210,6 +225,33 @@ type ``Graph parsing tests``() =
         printfn "CUDA Multiplacation count: %d" multCount
         graphParsingPrint parsingMatrix
 
+    member this._08_SimpleSparseCudaLoopTest () =
+        let graph = new AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>()
+        graph.AddVertex(0) |> ignore
+        graph.AddVertex(1) |> ignore
+        graph.AddVertex(2) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(0, 0, 1<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(0, 1, 2<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(1, 2, 2<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(2, 2, 5<AbstractAnalysis.Common.token>)) |> ignore
+        graph.AddEdge(new TaggedEdge<int, int<AbstractAnalysis.Common.token>>(2, 0, 4<AbstractAnalysis.Common.token>)) |> ignore
+        let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "GPPerf1_cnf.yrd")
+        let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+        let loadIL = fe.ParseGrammar grammarPath
+        let tokenizer str =
+            match str with
+            | "SCOR" -> 1<AbstractAnalysis.Common.token>
+            | "TR" -> 2<AbstractAnalysis.Common.token>
+            | "OTHER" -> 3<AbstractAnalysis.Common.token>
+            | "SCO" -> 4<AbstractAnalysis.Common.token>
+            | "T" -> 5<AbstractAnalysis.Common.token>
+            | _ -> -1<AbstractAnalysis.Common.token>
+
+        let (parsingMatrix, _, multCount) = graphParse<MySparseMatrix, float>  graph  sparseCudaSquareMatrix  loadIL 
+                                                        tokenizer createEmptyMatrixMySparse matrixSetValueMySparse innerOneFloat
+        printfn "Sparse GPU Multiplacation count: %d" multCount
+        MySparsePrint parsingMatrix
+
 [<EntryPoint>]
 let f x =
     System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
@@ -221,5 +263,6 @@ let f x =
 //    t._05_SimpleSparseLoopTest ()
 //    t._06_SimpleCudaRecognizerTest ()
 //    t._07_SimpleCudaLoopTest ()
-    YC.GraphParsing.Tests.RDFPerfomance.performTests ()
+    t._08_SimpleSparseCudaLoopTest ()
+//    YC.GraphParsing.Tests.RDFPerfomance.performTests ()
     0

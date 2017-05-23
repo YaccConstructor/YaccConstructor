@@ -16,7 +16,7 @@ module Yard.Core.Conversions.MergeAlter
 
 open Yard.Core
 open Yard.Core.IL
-open Mono.Addins
+
 
 open System.Collections.Generic
 
@@ -43,11 +43,11 @@ let mergeAlter (ruleList: Rule.t<Source.t, Source.t> list) =
             )
     
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
 
-[<Extension>]
+
+
+
+
 type MergeAlter() = 
     inherit Conversion()
         override this.Name = "MergeAlter"

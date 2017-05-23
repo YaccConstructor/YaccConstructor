@@ -29,14 +29,7 @@ open Conversions.TransformAux
 open NUnit.Framework
 open ConversionsTests
 open Yard.Core.Helpers
-open Mono.Addins
 
-[<SetUpFixture>]
-type SetUp()=
-    [<OneTimeSetUp>]
-    member this.SetUp () =
-        AddinManager.Initialize()
-        AddinManager.Registry.Update()
 
 [<TestFixture>]
 type ``Conversions expand metarules tests`` () =

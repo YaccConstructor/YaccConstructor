@@ -18,7 +18,6 @@ open System
 open System.IO
 open System.Text
 
-open Mono.Addins
 open Yard.Core
 open IL
 open Constraints
@@ -33,11 +32,6 @@ open Option
 open HighlightingPrinter
 open HighlightingConvertions
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
-
-[<Extension>]
 type RNGLR() = 
     inherit Generator()
         override this.Name = "RNGLRGenerator"

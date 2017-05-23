@@ -15,17 +15,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 namespace Yard.Generators.YardPrinter
 
 open Yard.Core
-open Mono.Addins
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
-
-[<Extension>]
 type YardPrinter() = 
     inherit Generator()
         override this.Name = "YardPrinter"

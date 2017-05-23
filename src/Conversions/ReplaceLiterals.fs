@@ -17,7 +17,7 @@ module Yard.Core.Conversions.ReplaceLiterals
 open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
-open Mono.Addins
+
 
 open System.Collections.Generic
 
@@ -110,11 +110,11 @@ let replaceLiterals (ruleList: Rule.t<Source.t, Source.t> list) token_format =
     ruleList |> List.map (fun rule -> {rule with body=replaceLiteralsInProduction rule.body replacedLiterals grammarTokens token_format} )  
 
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
 
-[<Extension>]
+
+
+
+
 type ReplaceLiterals() = 
     inherit Conversion()
         override this.Name = "ReplaceLiterals"

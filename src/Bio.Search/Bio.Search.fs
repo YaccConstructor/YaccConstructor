@@ -238,7 +238,7 @@ let searchInBioGraphs (searchCfg : SearchConfig) (config:Config) (graphs : EdgeC
             loop 0)
     
     let agents = Array.init config.AgentsCount (sprintf "searchAgent%A" >> agent)
-    let qToProcess = Queue<_>(graphs.[5..] |> Array.mapi (fun i x -> (i, x)))
+    let qToProcess = Queue<_>(graphs.[4..] |> Array.mapi (fun i x -> (i, x)))
     while qToProcess.Count > 0 do
         agents
         |> Array.iter (fun a ->

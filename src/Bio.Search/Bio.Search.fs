@@ -177,7 +177,24 @@ let parsingResultsProcessor (config:Config) (assembliesOf16s:ResizeArray<_>) =
                     ch.Reply()
             }
         loop 0)
+
+let GSSedgeCount = ref 0L
+let GSSnodeCount = ref 0L
+let sppfNodeCount = ref 0L
+let MemoryUsed = ref 0L
+let descrCount = ref 0L 
     
+let printRes what count = 
+    System.IO.File.AppendAllText(sprintf "./results.txt" , sprintf "%s : %s\n" what count)
+
+let printResults() =
+    printRes "descr" (descrCount.Value.ToString())
+    printRes "GSSEdges" (GSSedgeCount.Value.ToString())
+    printRes "GSSNodes" (GSSnodeCount.Value.ToString())
+    printRes "SPPF nodes" (sppfNodeCount.Value.ToString())
+    //printRes "time" (duration.Value.ToString()) i
+    printRes "memory" ((MemoryUsed.Value / (1024L * 1024L)).ToString())
+
 let searchInBioGraphs (searchCfg : SearchConfig) (config:Config) (graphs : EdgeCompressedGraphInput[]) assembliesOf16s =
     printfn "Total graph to porcess: %A" graphs.Length 
     let start = System.DateTime.Now
@@ -192,10 +209,16 @@ let searchInBioGraphs (searchCfg : SearchConfig) (config:Config) (graphs : EdgeC
                         try 
                             printfn "\nSearch in agent %A. Graph %A." name i
                             printfn "Vertices: %A Edges: %A" graph.VertexCount graph.EdgeCount
-                            let parseResult = 
+                            let parseResult, edgeCount, vertexCount, sppfNodes, totalBytesOfMemoryUsed, descr = 
                                 getAllRangesForStartStateWithLength searchCfg.ParserSource graph
-                                |> Array.ofSeq
-                                
+                            
+                            GSSedgeCount := !GSSedgeCount + (int64 edgeCount)
+                            GSSnodeCount := !GSSnodeCount + (int64 vertexCount)
+                            sppfNodeCount := !sppfNodeCount + (int64 sppfNodes)
+                            MemoryUsed := !MemoryUsed + totalBytesOfMemoryUsed
+                            descrCount := !descrCount + (int64 descr)
+
+                            let parseResult = parseResult |> Array.ofSeq                                   
                             if parseResult.Length = 0 
                             then failwith "Input parsing failed."
                             else 
@@ -211,7 +234,7 @@ let searchInBioGraphs (searchCfg : SearchConfig) (config:Config) (graphs : EdgeC
             loop 0)
     
     let agents = Array.init config.AgentsCount (sprintf "searchAgent%A" >> agent)
-    let qToProcess = Queue<_>(graphs |> Array.mapi (fun i x -> (i, x)))
+    let qToProcess = Queue<_>(graphs.[5..] |> Array.mapi (fun i x -> (i, x)))
     while qToProcess.Count > 0 do
         agents
         |> Array.iter (fun a ->
@@ -314,6 +337,8 @@ let searchMain (config:Config) =
 
     searchInBioGraphs config.MiddleSearchConfig config graphs assembliesOf16s 
     
+    printResults()
+
     config.Lap "Middles parsing"
 
     let globalResultCount = ref assembliesOf16s.Count

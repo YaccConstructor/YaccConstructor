@@ -148,7 +148,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit =
     let longEdges = ResizeArray<_>()
 
     let forFilter =
-        System.IO.File.ReadAllLines(@"C:\gsv\projects\YC\YaccConstructor\src\Bio.Search\data\a1")
+        System.IO.File.ReadAllLines(@"..\..\..\src\Bio.Search\data\a1")
         |> Seq.map (fun s -> s.Trim() |> int)
         |> Set.ofSeq
         |> Array.ofSeq

@@ -1,7 +1,7 @@
 ﻿module Yard.Generators.OldGLL.PrintTable
 
 open Yard.Generators.Common.FinalGrammar
-open Yard.Generators.GLL
+open Yard.Generators.OldGLL
 open System.Collections.Generic
 open Yard.Core.IL
 

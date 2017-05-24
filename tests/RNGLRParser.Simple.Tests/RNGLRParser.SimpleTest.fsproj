@@ -58,7 +58,6 @@
     <Compile Include="Order.yrd.fs" />
     <Compile Include="Resolvers.yrd.fs" />
     <Compile Include="SimpleRightNull.yrd.fs" />
-    <Compile Include="Omit.yrd.fs" />
     <Compile Include="Eps.yrd.fs" />
     <Compile Include="Eps2.yrd.fs" />
     <Compile Include="ListEps.yrd.fs" />

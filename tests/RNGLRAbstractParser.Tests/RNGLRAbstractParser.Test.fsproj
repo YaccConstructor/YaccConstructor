@@ -53,15 +53,11 @@
     <None Include="Lexer.fsl" />
     <Compile Include="AandB.yrd.fs" />
     <Compile Include="Brackets.yrd.fs" />
-    <Compile Include="Calc.yrd.fs" />
     <!--Compile Include="MsParser.fs" /-->
     <!--Compile Include="LexerHelper.fs" /-->
     <!--Compile Include="MsLexer.fs" /-->
     <Compile Include="CroppedBrackets.yrd.fs" />
-    <Compile Include="Eps.yrd.fs" />
     <Compile Include="EpsilonKiller.yrd.fs" />
-    <Compile Include="FirstEps.yrd.fs" />
-    <Compile Include="List.yrd.fs" />
     <!--Compile Include="calcDemo.yrd.fs" /-->
     <Compile Include="SimpleCalc.yrd.fs" />
     <Compile Include="simpleCalc_with_Nterms_2.yrd.fs" />
@@ -75,9 +71,7 @@
     <Compile Include="NotAmbigousSimpleCalcWith2Ops.yrd.fs" />
     <Compile Include="Stars.yrd.fs" />
     <!--Compile Include="Epsilons2.yrd.fs" /-->
-    <Compile Include="Stars2.yrd.fs" />
     <Compile Include="StrangeBrackets.yrd.fs" />
-    <Compile Include="ErrorSupport.yrd.fs" />
     <Compile Include="RNGLRAbstractParserTests.fs" />
     <None Include="paket.references" />
     <None Include="gen.fsx" />

@@ -11,7 +11,7 @@ module YardFrontend =
     let gen = new RNGLR()
     let fe = new FsYaccFrontend()
 
-    let generate () =
+    let generate() =
         let il = fe.ParseGrammar "Parser.fsy"
         gen.Generate(il, true, "-o Parser.fs -module Yard.Frontends.YardFrontend.GrammarParser -pos Source.Position -token Source.t") |> ignore
 

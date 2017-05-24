@@ -16,64 +16,60 @@ module RNGLRAbstractParserTests =
     let fe = new YardFrontend()
     let meta = new ExpandMeta()
     let ebnf = new ExpandEbnf()
-    let withConv = [|"Epsilon", "Longest", "InfEpsilon"|] |> Seq.cast<string>
-    let woTranslate = [|"Order", "Cond", "Attrs", "Calc", "Counter", "Cycle", "LongCycle"
-                        , "Resolvers", "LolCalc", "Omit"|] |> Seq.cast<string>
-    let withTranslate = [|"ComplexRightNull", "Expr", "First", "List", "SimpleRightNull"|] 
-                        |> Seq.cast<string>
+    let withConv = [|"Epsilon"; "Longest"; "InfEpsilon"|]
+    let woTranslate = [|"Order"; "Cond"; "Attrs"; "Calc"; "Counter"; "Cycle"; "LongCycle"
+                        ; "Resolvers"; "LolCalc"|]
+    let withTranslate = [|"ComplexRightNull"; "Expr"; "First"; "List"; "SimpleRightNull"|]
+                        
     
     let generate() = 
-        withConv
-        |> Seq.map (
-            fun x -> 
-                     let il = fe.ParseGrammar (x + ".yrd")
-                     {il with grammar = ebnf.ConvertGrammar(il.grammar)} |> ignore
-                     {il with grammar = meta.ConvertGrammar(il.grammar)} |> ignore
-                     gen.Generate(il, true, "-pos int -token int -module RNGLR.Parse" + x + " -o " + x 
-                         + ".yrd.fs") |> ignore
-            ) |> ignore
+        for x in withConv do
+            printf "GR: %s \n" x
+            let mutable il = fe.ParseGrammar (x + ".yrd")
+            il <- {il with grammar = ebnf.ConvertGrammar(il.grammar)}
+            il <- {il with grammar = meta.ConvertGrammar(il.grammar)}
+            gen.Generate(il, true, "-pos int -token int -module RNGLR.Parse" + x + " -o " + x 
+                + ".yrd.fs")
 
-        woTranslate
-        |> Seq.map (
-            fun x -> let il = fe.ParseGrammar (x + ".yrd")
-                     gen.Generate(il, true, "-pos int -token int -module RNGLR.Parse" + x + " -o " + x 
-                         + ".yrd.fs") |> ignore
-            ) |> ignore
+        for x in woTranslate do
+            printf "Gr: %s \n" x
+            let mutable il = fe.ParseGrammar (x + ".yrd")
+            gen.Generate(il, true, "-pos int -token int -module RNGLR.Parse" + x + " -o " + x 
+                + ".yrd.fs")
 
-        withTranslate
-        |> Seq.map (
-            fun x -> let il = fe.ParseGrammar (x + ".yrd")
-                     gen.Generate(il, true, "-pos int -token int -module RNGLR.Parse" + x + " -translate false -o " + x 
-                         + ".yrd.fs") |> ignore
-            ) |> ignore
+        for x in withTranslate do
+            printf "Gr: %s \n" x
+            let mutable il = fe.ParseGrammar (x + ".yrd")
+            gen.Generate(il, true, "-pos int -token int -module RNGLR.Parse" + x + " -translate false -o " + x 
+                + ".yrd.fs")
 
-        let eps = fe.ParseGrammar "Eps.yrd"
-        {eps with grammar = ebnf.ConvertGrammar(eps.grammar)} |> ignore
-        {eps with grammar = meta.ConvertGrammar(eps.grammar)} |> ignore
+        let mutable eps = fe.ParseGrammar "Eps.yrd"
+        eps <- {eps with grammar = ebnf.ConvertGrammar(eps.grammar)}
+        eps <- {eps with grammar = meta.ConvertGrammar(eps.grammar)}
         gen.Generate(eps, true, "-pos int -token int -module RNGLR.Eps -translate false -table LR -o Eps.yrd.fs")
         |> ignore
 
-        let eps2 = fe.ParseGrammar "Eps2.yrd"
-        {eps2 with grammar = ebnf.ConvertGrammar(eps2.grammar)} |> ignore
-        {eps2 with grammar = meta.ConvertGrammar(eps2.grammar)} |> ignore
+        let mutable eps2 = fe.ParseGrammar "Eps2.yrd"
+        eps2 <- {eps2 with grammar = ebnf.ConvertGrammar(eps2.grammar)}
+        eps2 <- {eps2 with grammar = meta.ConvertGrammar(eps2.grammar)}
         gen.Generate(eps2, true, "-pos int -token int -module RNGLR.Eps2 -translate false -table LR -o Eps2.yrd.fs")
         |> ignore
 
-        let listEps = fe.ParseGrammar "ListEps.yrd"
-        {listEps with grammar = ebnf.ConvertGrammar(listEps.grammar)} |> ignore
-        {listEps with grammar = meta.ConvertGrammar(listEps.grammar)} |> ignore
+        let mutable listEps = fe.ParseGrammar "ListEps.yrd"
+        listEps <- {listEps with grammar = ebnf.ConvertGrammar(listEps.grammar)}
+        listEps <- {listEps with grammar = meta.ConvertGrammar(listEps.grammar)}
         gen.Generate(listEps, true, "-pos int -token int -module RNGLR.ListEps -translate false -table LR -o ListEps.yrd.fs")
         |> ignore
 
-        let brackets = fe.ParseGrammar "Brackets.yrd"
-        {brackets with grammar = ebnf.ConvertGrammar(brackets.grammar)} |> ignore
-        {brackets with grammar = meta.ConvertGrammar(brackets.grammar)} |> ignore
+        let mutable brackets = fe.ParseGrammar "Brackets.yrd"
+        brackets <- {brackets with grammar = ebnf.ConvertGrammar(brackets.grammar)}
+        brackets <- {brackets with grammar = meta.ConvertGrammar(brackets.grammar)}
         gen.Generate(brackets, true, "-pos int -token int -module RNGLR.Brackets -translate false -table LR -o Brackets.yrd.fs")
         |> ignore
 
-        let _brackets = fe.ParseGrammar "_Brackets.yrd"
-        {_brackets with grammar = ebnf.ConvertGrammar(_brackets.grammar)} |> ignore
-        {_brackets with grammar = meta.ConvertGrammar(_brackets.grammar)} |> ignore
+        let mutable _brackets = fe.ParseGrammar "_Brackets.yrd"
+        _brackets <- {_brackets with grammar = ebnf.ConvertGrammar(_brackets.grammar)}
+        _brackets <- {_brackets with grammar = meta.ConvertGrammar(_brackets.grammar)}
         gen.Generate(_brackets, true, "-pos int -token int -module RNGLR._Brackets -translate false -table LR -o _Brackets.yrd.fs")
         |> ignore
 

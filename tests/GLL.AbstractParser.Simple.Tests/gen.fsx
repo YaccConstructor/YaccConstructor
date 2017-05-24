@@ -9,7 +9,7 @@ open Yard.Generators.GLL
 open Yard.Frontends.YardFrontend
 open Yard.Core.Conversions.ExpandMeta 
 
-module BioSearch =
+module GLLAbstractParserSimpleTests =
     let fe = new YardFrontend()
     let gen = new GLL()
     let meta = new ExpandMeta()
@@ -22,4 +22,4 @@ module BioSearch =
         gen.Generate(ilFirst, true, "-pos int -token int -module GLL.GPPerf1  -o GPPerf1.yrd.fs") |> ignore
         gen.Generate(ilSecond, true, "-pos int -token int -module GLL.GPPerf2  -o GPPerf2.yrd.fs")
 
-BioSearch.generate()
+GLLAbstractParserSimpleTests.generate()

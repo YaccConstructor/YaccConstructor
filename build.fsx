@@ -191,7 +191,7 @@ Target "GenTests:GLL" (fun _ ->
                             runShell <| "tests" @@ "GLLParser.Simple.Tests" @@ "genSimpleCalc"
                         )
 
-Target "GenTests:RIGLR" (fun _ -> runShell <| "tests" @@ "RIGLRParser.SimpleTest" @@ "gen")
+//Target "GenTests:RIGLR" (fun _ -> runShell <| "tests" @@ "RIGLRParser.SimpleTest" @@ "gen")
 
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner
@@ -441,7 +441,7 @@ Target "All" DoNothing
   ==> "Build:YardFrontend"
   ==> "GenTests:RNGLR"
   ==> "GenTests:GLL"
-  ==> "GenTests:RIGLR"
+  //==> "GenTests:RIGLR"
   ==> "Build:All"
   //==> "CopyBinaries"
   ==> "RunTests"

@@ -10,10 +10,10 @@ open Yard.Frontends.YardFrontend
 module GLLParserSimpleTests =
     let fe = new YardFrontend()
     let gen = new GLL()
-    let yards = [|"Epsilon", "Longest", "InfEpsilon", "Order", "Cond", "Attrs"
-                 , "Calc", "Counter", "Cycle", "LongCycle", "LolCalc", "Omit"
-                 , "ComplexRightNull", "Expr", "First", "List", "SimpleRightNull"
-                 |] |> Seq.ofArray |> Seq.cast<string>
+    let yards = [|"Epsilon"; "Longest"; "InfEpsilon"; "Order"; "Cond"; "Attrs"
+                 ; "Calc"; "Counter"; "Cycle"; "LongCycle"; "LolCalc"; "Omit"
+                 ; "ComplexRightNull"; "Expr"; "First"; "List"; "SimpleRightNull"
+                 |] |> Seq.ofArray
 
     let generate() = 
        yards 

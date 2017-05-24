@@ -10,17 +10,16 @@ open Yard.Frontends.YardFrontend
 module RNGLRAbstractParserTests =
     let gen = new RNGLR()
     let fe = new YardFrontend()
-    let strs = [|"AandB", "SimpleCalc", "Calc", "EpsilonKiller", "simpleCalc_with_Nterms", "simpleCalc_with_Nterms_2"
-                , "simpleCalc_with_Nterms_3", "simpleCalc_with_Nterms_4", "PrettySimpleCalc", "NotAmbigousSimpleCalc"
-                , "NotAmbigousSimpleCalcWith2Ops", "Stars", "Stars2", "Eps", "List", "FirstEps", "CroppedBrackets", "Brackets"
-                , "Brackets1", "StrangeBrackets", "ErrorSupport"|] |> Seq.ofArray |> Seq.cast<string>
+    let strs = [|"AandB"; "SimpleCalc"; "EpsilonKiller"; "simpleCalc_with_Nterms"; "simpleCalc_with_Nterms_2"
+                ; "simpleCalc_with_Nterms_3"; "simpleCalc_with_Nterms_4"; "PrettySimpleCalc"; "NotAmbigousSimpleCalc"
+                ; "NotAmbigousSimpleCalcWith2Ops"; "Stars"; "CroppedBrackets"; "Brackets"
+                ; "StrangeBrackets"|]
     
     let generate() = 
-        strs 
-        |> Seq.map (
-            fun x -> let il = fe.ParseGrammar (x + ".yrd")
-                     gen.Generate(il, true, "-pos int -token int -module RNGLR." + x + " -translate false -o " + x 
-                         + ".yrd.fs" + " -abstract true") |> ignore
-            ) |> ignore
+        for x in strs do
+            printf "Gr: %s \n"  x
+            let mutable il = fe.ParseGrammar (x + ".yrd")
+            gen.Generate(il, true, "-pos int -token int -module RNGLR." + x + " -translate false -o " + x 
+                         + ".yrd.fs" + " -abstract true")
 
 RNGLRAbstractParserTests.generate()

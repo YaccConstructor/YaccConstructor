@@ -2,14 +2,14 @@
 
 #r @"YC.RNGLR.dll"
 #r @"YC.Common.dll"
-#r @"YC.FsYaccFrontend.dll"
+#r @"YC.YardFrontend.dll"
 
 open Yard.Generators.RNGLR
-open Yard.Frontends.FsYaccFrontend
+open Yard.Frontends.YardFrontend
 
 module GLLParserSimpleTestsCalc =
     let gen = new RNGLR()
-    let fe = new FsYaccFrontend()
+    let fe = new YardFrontend()
 
     let generate () =
         let il = fe.ParseGrammar "SimpleCalcWithErrors.yrd"

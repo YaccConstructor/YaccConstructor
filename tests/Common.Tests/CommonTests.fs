@@ -22,7 +22,7 @@ open Yard.Core.Conversions.ExpandInline
 type ``Components loader tests`` () =
     [<Test>]
     member test.``All generators`` () =        
-        let generatorsManager = [|new GLL(), new RNGLR(), new TreeDump(), new YardPrinter(), new RIGLR()|] |> Seq.cast<Generator>
+        let generatorsManager = [|new GLL(), new RNGLR(), new TreeDump(), new YardPrinter(), new RIGLR()|] |> Seq.ofArray |> Seq.cast<Generator>
         let generatorNames = Seq.map (fun (elem: Generator) -> elem.Name) generatorsManager
         let allGenerators = 
             List.ofSeq generatorNames
@@ -39,7 +39,7 @@ type ``Components loader tests`` () =
 
     [<Test>]
     member test.``All frontends`` () =
-        let frontendsManager = [|new FsYaccFrontend(), new YardFrontend()|] |> Seq.cast<Frontend>
+        let frontendsManager = [|new FsYaccFrontend(), new YardFrontend()|] |> Seq.ofArray  |> Seq.cast<Frontend>
         let frontendNames = Seq.map (fun (elem: Frontend) -> elem.Name) frontendsManager 
         let allFrontends = 
             List.ofSeq frontendNames
@@ -60,7 +60,7 @@ type ``Components loader tests`` () =
                             new ToCNF.DeleteChainRule(), new ToCNF.DeleteEpsRule(), new ToCNF.SplitLongRule(), new ToCNF.RenameTerm(), new EliminateLeftRecursion.EliminateLeftRecursion(),
                             new ExpandTopLevelAlt.ExpandTopLevelAlt(), new ExpandBrackets.ExpandBrackets(), new ExpandEbnfStrict.ExpandEbnf(), new ExpandInnerAlt.ExpandInnerAlt(),
                             new ExpandMeta.ExpandMeta(), new LeaveLast.LeaveLast(), new MergeAlter.MergeAlter(), new RemoveAST.RemoveAC(), new ReplaceInline(), new ReplaceLiterals.ReplaceLiterals(),
-                            new Linearize.Linearize(), new ExpandRepet.ExpandExpand(), new ExpandConjunction.ExpandConjunction()|] |> Seq.cast<Conversion>
+                            new Linearize.Linearize(), new ExpandRepet.ExpandExpand(), new ExpandConjunction.ExpandConjunction()|] |> Seq.ofArray  |> Seq.cast<Conversion>
         let conversionNames = Seq.map (fun (elem : Conversion) -> elem.Name) conversionsManager
         let allConversions = 
             List.ofSeq conversionNames
@@ -78,7 +78,7 @@ type ``Components loader tests`` () =
     
     [<Test>]
     member test.``Get generators name`` () =
-        let generatorsManager = [|new RNGLR(), new TreeDump()|] |> Seq.cast<Generator>
+        let generatorsManager = [|new RNGLR(), new TreeDump()|] |> Seq.ofArray |> Seq.cast<Generator>
         let VerificatedGenerators  = ["RNGLRGenerator",true ; "TreeDump",true]
 
         let genfun (x,y)  = 

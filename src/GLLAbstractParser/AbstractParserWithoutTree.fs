@@ -52,7 +52,6 @@ let buildAbstract<'token> (parser : ParserSourceGLL<'token>) (input : IParserInp
     let edgeCount = ref 0
     let vertexCount = ref 0
     let sppfNodes = ref 0
-    let totalBytesOfMemoryUsed = ref 0
     let descr = ref 0
 
     let reused = ref 0
@@ -190,7 +189,8 @@ let buildAbstract<'token> (parser : ParserSourceGLL<'token>) (input : IParserInp
                     d1.Add(extension, d2)
                     outgoingEdges.Add(label, d1)
                     false, None
-            else 
+            else
+                incr vertexCount 
                 let d0 = new SysDict<_, SysDict<int64<extension>, SysDict<_, _>>>()
                 let d1 = new SysDict<int64<extension>, SysDict<_, _>>()
                 let d2 = new SysDict<_, _>()
@@ -381,10 +381,24 @@ let buildAbstract<'token> (parser : ParserSourceGLL<'token>) (input : IParserInp
     let control () =
             while not !stop do
             if !condition then dispatcher() else processing()
-    control()
-
+    let oldMode = System.Runtime.GCSettings.LatencyMode
     let currentProcess = System.Diagnostics.Process.GetCurrentProcess()
-    let totalBytesOfMemoryUsed = currentProcess.WorkingSet64
+    let totalBytesOfMemoryUsed = ref currentProcess.WorkingSet64
+    GC.Collect()
+    System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions()
+    try
+        System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
+        control()
+        // Generation 2 garbage collection is now
+        // deferred, except in extremely low-memory situations
+        
+        totalBytesOfMemoryUsed := currentProcess.WorkingSet64 - !totalBytesOfMemoryUsed
+        if !totalBytesOfMemoryUsed < (int64 0) then printfn "wtf memory less then 0"
+    finally
+        // ALWAYS set the latency mode back
+        System.Runtime.GCSettings.LatencyMode <- oldMode
+   
+    
     (*Array.ofSeq r,*) 
-    !edgeCount, !vertexCount, !sppfNodes, totalBytesOfMemoryUsed, !descr
+    !edgeCount, !vertexCount, !sppfNodes, !totalBytesOfMemoryUsed, !descr
                                   

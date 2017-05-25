@@ -139,47 +139,58 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
     let processed = ref 0
     let mlnCount = ref 0
     let startTime = ref System.DateTime.Now
+    let oldMode = System.Runtime.GCSettings.LatencyMode
+    let currentProcess = System.Diagnostics.Process.GetCurrentProcess()
+    GC.Collect()
+    let totalBytesOfMemoryUsed = ref currentProcess.WorkingSet64
+    System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions()
+    try
+        System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
+        while setR.Count <> 0 do
+            let currentContext = setR.Pop()
 
-    while setR.Count <> 0 do
-        let currentContext = setR.Pop()
-
-        incr processed
-        if !processed = 10000000
-        then
-            incr mlnCount            
-            printfn "%A mlns of D procesed. %A D/sec" (!mlnCount * 10) (!processed / int (System.DateTime.Now - !startTime).TotalMilliseconds * 1000)
-            processed := 0
-            startTime :=  System.DateTime.Now
-
-        let possibleNontermMovesInGrammar = parser.OutNonterms.[int currentContext.PosInGrammar]
-
-        /// Current state is final
-        if (currentContext.Data = dummy)&&(currentContext.PosInGrammar |> parser.FinalStates.Contains)
-        then 
-            if buildTree
+            incr processed
+            if !processed = 10000000
             then
-                let eps = sppf.GetNodeT epsilon currentContext.PosInInput currentContext.PosInInput
-                let _, nontermNode = sppf.GetNodes currentContext.PosInGrammar currentContext.GssVertex.Nonterm dummy eps
-                pop currentContext.PosInInput currentContext.GssVertex nontermNode
-            else
-                pop currentContext.PosInInput currentContext.GssVertex dummy
-        
-        /// Nonterminal transitions. Move pointer in grammar. Position in input is not changed.
-        for curNonterm, nextState in possibleNontermMovesInGrammar do            
-            create currentContext nextState curNonterm
+                incr mlnCount            
+                printfn "%A mlns of D procesed. %A D/sec" (!mlnCount * 10) (!processed / int (System.DateTime.Now - !startTime).TotalMilliseconds * 1000)
+                processed := 0
+                startTime :=  System.DateTime.Now
 
-        /// Terminal transitions.
-        input.ForAllOutgoingEdges
-            currentContext.PosInInput
-            (fun nextToken nextPosInInput -> 
-                let isTransitionPossible, positions = parser.StateAndTokenToNewState.TryGetValue (parser.GetTermsDictionaryKey currentContext.PosInGrammar (int nextToken))
-                if isTransitionPossible
-                then 
-                    for nextPosInGrammar in positions do
-                        eatTerm currentContext nextToken nextPosInInput nextPosInGrammar
-                    //eatTerm currentContext nextToken nextPosInInput (positions.[0])
-                   //pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex (currentContext.Length + 1us)
-            )
+            let possibleNontermMovesInGrammar = parser.OutNonterms.[int currentContext.PosInGrammar]
+
+            /// Current state is final
+            if (currentContext.Data = dummy)&&(currentContext.PosInGrammar |> parser.FinalStates.Contains)
+            then 
+                if buildTree
+                then
+                    let eps = sppf.GetNodeT epsilon currentContext.PosInInput currentContext.PosInInput
+                    let _, nontermNode = sppf.GetNodes currentContext.PosInGrammar currentContext.GssVertex.Nonterm dummy eps
+                    pop currentContext.PosInInput currentContext.GssVertex nontermNode
+                else
+                    pop currentContext.PosInInput currentContext.GssVertex dummy
+        
+            /// Nonterminal transitions. Move pointer in grammar. Position in input is not changed.
+            for curNonterm, nextState in possibleNontermMovesInGrammar do            
+                create currentContext nextState curNonterm
+
+            /// Terminal transitions.
+            input.ForAllOutgoingEdges
+                currentContext.PosInInput
+                (fun nextToken nextPosInInput -> 
+                    let isTransitionPossible, positions = parser.StateAndTokenToNewState.TryGetValue (parser.GetTermsDictionaryKey currentContext.PosInGrammar (int nextToken))
+                    if isTransitionPossible
+                    then 
+                        for nextPosInGrammar in positions do
+                            eatTerm currentContext nextToken nextPosInInput nextPosInGrammar
+                        //eatTerm currentContext nextToken nextPosInInput (positions.[0])
+                       //pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex (currentContext.Length + 1us)
+                )
+        totalBytesOfMemoryUsed := currentProcess.WorkingSet64 - !totalBytesOfMemoryUsed
+        if !totalBytesOfMemoryUsed < (int64 0) then printfn "wtf memory less then 0"
+    finally
+        // ALWAYS set the latency mode back
+        System.Runtime.GCSettings.LatencyMode <- oldMode
     //printfn "SPPF nodes: %i" sppf.Nodes.Length
     let currentProcess = System.Diagnostics.Process.GetCurrentProcess()
     let totalBytesOfMemoryUsed = currentProcess.WorkingSet64

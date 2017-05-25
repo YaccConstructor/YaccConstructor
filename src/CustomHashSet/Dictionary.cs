@@ -544,7 +544,7 @@ namespace System.Collections.Generic.Customized
             {
                 if (newEntries[i].hashCode >= 0)
                 {
-                    int bucket = newEntries[i].hashCode % newSize;
+                    var bucket = newEntries[i].hashCode % newSize;
                     newEntries[i].next = newBuckets[bucket];
                     newBuckets[bucket] = i;
                 }

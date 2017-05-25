@@ -2,6 +2,7 @@
 // See the 'F# Tutorial' project for more help.
 open NUnit.Framework
 open YC.Bio.RNA.SearchFSA
+open JetBrains.dotMemoryUnit
 
 [<TestFixture>]
 type ``Bio Test`` () =
@@ -14,7 +15,8 @@ type ``Bio Test`` () =
     [<Test>]
     member test.``Main``() =
         //runTest "BadLeftRecursion.yrd" "BBB.txt"
-        main [|"--input"; "../../../tests/data/bio/synth_for_semen/simplification"|]
+        let x = dotMemory.Check()
+        main [|"--input"; "../../../tests/data/bio/synth_for_semen/simplification"|] |> ignore
 
 [<EntryPoint>]
 let main argv = 

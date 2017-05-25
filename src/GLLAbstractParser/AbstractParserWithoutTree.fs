@@ -154,16 +154,16 @@ let buildAbstract<'token> (parser : ParserSourceGLL<'token>) (input : IParserInp
                     let c2, dictNontermKey = dictExtensionKey.TryGetValue extension
                     if c2
                     then
-                        let c3, ra = dictNontermKey.TryGetValue e.NontermLabel
+                        let c3, posLen = dictNontermKey.TryGetValue e.NontermLabel
                         if c3
                         then
                             let mutable contains = false
-                            for pair in ra do if (fst pair) = e.Level then contains <- true
+                            for pair in posLen do if (fst pair) = e.Level && (snd pair) = len then contains <- true
                             if contains then true, None
                             else
-                                let a = ref ra
-                                Array.Resize(a, ra.Length + 1)
-                                (!a).[ra.Length] <- (e.Level,len)
+                                let a = ref posLen
+                                Array.Resize(a, posLen.Length + 1)
+                                (!a).[posLen.Length] <- (e.Level,len)
                                 dictNontermKey.[e.NontermLabel] <- (!a)
                                 false, None
                         else

@@ -383,8 +383,8 @@ let buildAbstract<'token> (parser : ParserSourceGLL<'token>) (input : IParserInp
             if !condition then dispatcher() else processing()
     let oldMode = System.Runtime.GCSettings.LatencyMode
     let currentProcess = System.Diagnostics.Process.GetCurrentProcess()
-    let starting = dotMemory.Check()
-    let totalBytesOfMemoryUsed = ref (int64 0)
+//    let starting = dotMemory.Check()
+    let totalBytesOfMemoryUsed = ref (currentProcess.WorkingSet64)
     GC.Collect()
     
     System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions()
@@ -393,11 +393,11 @@ let buildAbstract<'token> (parser : ParserSourceGLL<'token>) (input : IParserInp
         control()
         // Generation 2 garbage collection is now
         // deferred, except in extremely low-memory situations
-        dotMemory.Check(fun memory ->
-          let newObjects = memory.GetDifference(starting).GetNewObjects()
-          totalBytesOfMemoryUsed := newObjects.SizeInBytes) |> ignore
-        //totalBytesOfMemoryUsed := currentProcess.WorkingSet64 - !totalBytesOfMemoryUsed
-        if !totalBytesOfMemoryUsed < (int64 0) then printfn "wtf memory less then 0"
+//        dotMemory.Check(fun memory ->
+//          let newObjects = memory.GetDifference(starting).GetNewObjects()
+//          totalBytesOfMemoryUsed := newObjects.SizeInBytes) |> ignore
+        totalBytesOfMemoryUsed := currentProcess.WorkingSet64 - !totalBytesOfMemoryUsed
+        if !totalBytesOfMemoryUsed <= (int64 0) then printfn "wtf memory less or eq 0"
     finally
         // ALWAYS set the latency mode back
         System.Runtime.GCSettings.LatencyMode <- oldMode

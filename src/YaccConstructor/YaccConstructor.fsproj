@@ -25,7 +25,7 @@
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-i grammarfortest.yrd -g "GLLGeneratorOLD  -token unit -module GLL.Parse.test"</StartArguments>
+    <StartArguments>-i longK.yrd -g "GLLGeneratorOLD  -token unit -module GLL.Parse.test"</StartArguments>
     <StartWorkingDirectory>C:\Code\Yacc Constructor</StartWorkingDirectory>
     <StartAction>Project</StartAction>
   </PropertyGroup>

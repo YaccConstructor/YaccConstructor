@@ -215,13 +215,13 @@ let searchInBioGraphs (searchCfg : SearchConfig) (config:Config) (graphs : EdgeC
                                     GLL.Parse.test.buildAbstract graph 2
                                 else
                                     getAllRangesForStartStateWithLength searchCfg.ParserSource graph
-                                     
+                            
                             GSSedgeCount := !GSSedgeCount + (int64 edgeCount)
                             GSSnodeCount := !GSSnodeCount + (int64 vertexCount)
                             sppfNodeCount := !sppfNodeCount + (int64 sppfNodes)
                             MemoryUsed := !MemoryUsed + totalBytesOfMemoryUsed
                             descrCount := !descrCount + (int64 descr)
-
+                            printfn "Mem: %i" !MemoryUsed
 //                            let parseResult = parseResult |> Array.ofSeq                                   
 //                            if parseResult.Length = 0 
 //                            then failwith "Input parsing failed."

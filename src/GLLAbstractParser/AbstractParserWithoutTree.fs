@@ -2,7 +2,7 @@
 
 open System 
 open Microsoft.FSharp.Collections
-
+open JetBrains.dotMemoryUnit
 open FSharpx.Collections.Experimental
 
 open Yard.Generators.GLL
@@ -383,16 +383,20 @@ let buildAbstract<'token> (parser : ParserSourceGLL<'token>) (input : IParserInp
             if !condition then dispatcher() else processing()
     let oldMode = System.Runtime.GCSettings.LatencyMode
     let currentProcess = System.Diagnostics.Process.GetCurrentProcess()
-    let totalBytesOfMemoryUsed = ref currentProcess.WorkingSet64
+    let starting = dotMemory.Check()
+    let totalBytesOfMemoryUsed = ref (int64 0)
     GC.Collect()
+    
     System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions()
     try
         System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
         control()
         // Generation 2 garbage collection is now
         // deferred, except in extremely low-memory situations
-        
-        totalBytesOfMemoryUsed := currentProcess.WorkingSet64 - !totalBytesOfMemoryUsed
+        dotMemory.Check(fun memory ->
+          let newObjects = memory.GetDifference(starting).GetNewObjects()
+          totalBytesOfMemoryUsed := newObjects.SizeInBytes) |> ignore
+        //totalBytesOfMemoryUsed := currentProcess.WorkingSet64 - !totalBytesOfMemoryUsed
         if !totalBytesOfMemoryUsed < (int64 0) then printfn "wtf memory less then 0"
     finally
         // ALWAYS set the latency mode back

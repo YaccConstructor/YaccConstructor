@@ -15,10 +15,14 @@ open System.Collections.Generic
 
 
 let (|Prefix|_|) (p:string) (s:string) =
-    if s.StartsWith(p) then Some() else None
+    if s.StartsWith(p) 
+    then Some() 
+    else None
 
 let (|Equals|_|) x y = 
-    if x = y then Some() else None
+    if x = y 
+    then Some() 
+    else None
 
 let getTokenFromTag tokenizer (tag:string) = 
     match tag with
@@ -47,7 +51,10 @@ let getEdgesVert file =
 let getEdges file = 
     let vMap = new System.Collections.Generic.Dictionary<_,_>()
     let mutable idV = -1
-    let getId v = if vMap.ContainsKey v then true, vMap.[v] else (idV <- idV + 2; vMap.Add(v, idV); false, idV)
+    let getId v = 
+        if vMap.ContainsKey v 
+        then true, vMap.[v] 
+        else (idV <- idV + 2; vMap.Add(v, idV); false, idV)
     let mutable count = 0
     let lines = File.ReadLines(file)
     [|

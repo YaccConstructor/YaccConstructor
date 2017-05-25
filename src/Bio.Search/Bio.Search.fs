@@ -215,7 +215,7 @@ let searchInBioGraphs (searchCfg : SearchConfig) (config:Config) (graphs : EdgeC
                                     GLL.Parse.test.buildAbstract graph 2
                                 else
                                     getAllRangesForStartStateWithLength searchCfg.ParserSource graph
-                                     
+                            printfn "EdgeCount: %i   desc: %i" edgeCount descr
                             GSSedgeCount := !GSSedgeCount + (int64 edgeCount)
                             GSSnodeCount := !GSSnodeCount + (int64 vertexCount)
                             sppfNodeCount := !sppfNodeCount + (int64 sppfNodes)
@@ -329,7 +329,7 @@ let printLongEdges path edges =
 
 let searchMain (config:Config) =     
     let assembliesOf16s = new ResizeArray<_>()
-    let sourceGraph, (graphs, edges), longEdges = loadInitialGraph config.InputGraphPath config.MiddleSearchConfig.HighLengthLimit GLL.Parse.test.tokenizer//config.MiddleSearchConfig.Tokenizer    
+    let sourceGraph, (graphs, edges), longEdges = loadInitialGraph config.InputGraphPath config.MiddleSearchConfig.HighLengthLimit GLL.Parse.test.tokenizer//*)config.MiddleSearchConfig.Tokenizer    
     config.OriginalEdges <- sourceGraph
     config.LongEdges <- longEdges
     let graphs =

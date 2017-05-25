@@ -96,7 +96,7 @@ type Config (argv) =
                                      [] :?> ParserSourceGLL
 
     let parserSourceHead = getParserSource "R16S_1_18.yrd"
-    let parserSourceMiddle = getParserSource "R16S_19_27.yrd"
+    let parserSourceMiddle = getParserSource "grammarfortest.yrd"//"R16S_19_27.yrd"
     let parserSourceTail = getParserSource "R16S_19_27.yrd"//"R16S_tails.yrd"
     
     let mkTokenizer strToToken =

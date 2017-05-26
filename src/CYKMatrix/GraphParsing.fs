@@ -135,6 +135,28 @@
                 then
                     isChanged := true
 
+    let sparseParallelSquareMatrix (matrix: ParsingMatrix<SparseMatrix>) (allRules: RulesHolder) isChanged matrixSize =
+        let nontermPairs = allRules.ComplexTails
+        let nontermPairs1,nontermPairs2 = nontermPairs.[0..nontermPairs.Length/2 - 1],nontermPairs.[nontermPairs.Length/2 .. nontermPairs.Length-1]        
+        let go nontermPairs =
+            for (nt1, nt2) in nontermPairs do
+                let matrix1 = matrix.[nt1]
+                let matrix2 = matrix.[nt2]
+                let resultMatrix = matrix1.Multiply(matrix2)          
+                for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
+                        let nonZ = matrix.[nonTerm].NonZerosCount
+                        lock matrix (fun () ->
+                        matrix.[nonTerm].PointwiseMaximum(resultMatrix, matrix.[nonTerm])
+                        )
+                        if (nonZ <> matrix.[nonTerm].NonZerosCount)
+                        then isChanged := true
+        let t1 = System.Threading.Thread (fun () -> go nontermPairs1)
+        let t2 = System.Threading.Thread (fun () -> go nontermPairs2)
+        t1.Start()
+        t2.Start()
+        t1.Join()
+        t2.Join()
+
     let worker = Worker.Default
 
     let cudaSquareMatrix<'MatrixType> matrixSetValue toArray (matrix: ParsingMatrix<'MatrixType>) (allRules: RulesHolder) isChanged matrixSize =
@@ -388,36 +410,71 @@
                     matrix.Add(nonTerm, finalMatrix)
                     isChanged := true
 
+        
 
-    let recognizeGraph<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
-                  (squareMatrix:ParsingMatrix<'MatrixType> -> RulesHolder -> bool ref -> int  -> unit)
+    type Message = bool
+
+    let recognizeGraphP<'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
                   (allRules: RulesHolder)
                   nonterminals
                   S 
                   createEmptyMatrix 
                   matrixSetValue 
                   (innerOne: 'InnerType) =
-        let parsingMatrix, vertexToInt = initParsingMatrix<'MatrixType, 'InnerType> graph allRules nonterminals createEmptyMatrix matrixSetValue innerOne
-//        printfn("Matrix initialized")
+        let parsingMatrix, vertexToInt = initParsingMatrix<SparseMatrix, 'InnerType> graph allRules nonterminals createEmptyMatrix matrixSetValue innerOne
         let matrixSize = graph.VertexCount
         let isChanged = ref true
         let mutable multCount = 0
 
+        let nontermPairs = allRules.ComplexTails
+        let nontermPairs1,nontermPairs2 = nontermPairs.[0..nontermPairs.Length/2 - 1],nontermPairs.[nontermPairs.Length/2 .. nontermPairs.Length-1]
+
+        let flg1 = ref false
+        let flg2 = ref false
+        let vl1 = ref false
+        let vl2 = ref false
+        
+        let mbp flg vl nontermPairs_mbp = new MailboxProcessor<Message>(fun inbox ->
+            let rec loop n =
+                async {                                  
+                        let! message = inbox.Receive();
+                        for (nt1, nt2) in nontermPairs_mbp do
+                            let matrix1 = parsingMatrix.[nt1]
+                            let matrix2 = parsingMatrix.[nt2]
+                            let resultMatrix = matrix1.Multiply(matrix2)          
+                            for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
+                                    let nonZ = parsingMatrix.[nonTerm].NonZerosCount
+                                    lock parsingMatrix (fun () ->
+                                    parsingMatrix.[nonTerm].PointwiseMaximum(resultMatrix, parsingMatrix.[nonTerm])
+                                    )
+                                    if (nonZ <> parsingMatrix.[nonTerm].NonZerosCount)
+                                    then vl := true
+                        flg:= true
+                        do! loop (n + 1)
+                }
+            loop (0))
+
+        let mbp1 = mbp flg1 vl1 nontermPairs1
+        mbp1.Start()
+        let mbp2 = mbp flg2 vl2 nontermPairs2
+        mbp2.Start()
+
         while !isChanged do
-//           printfn("Multiplication step started")
             isChanged := false
-            squareMatrix parsingMatrix allRules isChanged matrixSize
-            multCount <- multCount + 1
+            mbp1.Post(false)
+            mbp2.Post(false)
+            while not (!flg1 && !flg2) do ()
+            flg1 := false
+            flg2 := false
+            isChanged := !vl1 || !vl2
+            vl1 := false
+            vl2 := false
+            multCount <- multCount + 1            
 
-        (parsingMatrix.[S], vertexToInt, multCount)    
+        (parsingMatrix.[S], vertexToInt, multCount)
 
-    let graphParse<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
-                  squareMatrix
-                  (loadIL:t<Source.t, Source.t>)
-                  tokenToInt 
-                  createEmptyMatrix 
-                  matrixSetValue
-                  (innerOne: 'InnerType) =
+
+    let initRulesFromIL loadIL tokenToInt =
         let grammar = loadIL.grammar
         let mutable tokensCount = 0
         let S = ref (NonTerminal "")
@@ -483,6 +540,50 @@
             srl_result.Add(key, list)
         
         let rulesHolder = new RulesHolder(crl_result, srl_result, erl_result)
+
+        (rulesHolder, nonterminals, S)
+ 
+    let graphParseParallel<'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
+                  (loadIL:t<Source.t, Source.t>)
+                  tokenToInt 
+                  createEmptyMatrix 
+                  matrixSetValue
+                  (innerOne: 'InnerType) =
+
+        let (rulesHolder, nonterminals, S) = initRulesFromIL loadIL tokenToInt
+
+        recognizeGraphP<'InnerType> graph rulesHolder nonterminals !S  createEmptyMatrix matrixSetValue innerOne    
+
+
+    let recognizeGraph<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
+                  (squareMatrix:ParsingMatrix<'MatrixType> -> RulesHolder -> bool ref -> int  -> unit)
+                  (allRules: RulesHolder)
+                  nonterminals
+                  S 
+                  createEmptyMatrix 
+                  matrixSetValue 
+                  (innerOne: 'InnerType) =
+        let parsingMatrix, vertexToInt = initParsingMatrix<'MatrixType, 'InnerType> graph allRules nonterminals createEmptyMatrix matrixSetValue innerOne
+        let matrixSize = graph.VertexCount
+        let isChanged = ref true
+        let mutable multCount = 0
+
+        while !isChanged do
+            isChanged := false
+            squareMatrix parsingMatrix allRules isChanged matrixSize
+            multCount <- multCount + 1
+
+        (parsingMatrix.[S], vertexToInt, multCount)    
+
+    let graphParse<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
+                  squareMatrix
+                  (loadIL:t<Source.t, Source.t>)
+                  tokenToInt 
+                  createEmptyMatrix 
+                  matrixSetValue
+                  (innerOne: 'InnerType) =
+
+        let (rulesHolder, nonterminals, S) = initRulesFromIL loadIL tokenToInt
 
         recognizeGraph<'MatrixType, 'InnerType> graph squareMatrix rulesHolder nonterminals !S  createEmptyMatrix matrixSetValue innerOne
 

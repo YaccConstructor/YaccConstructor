@@ -263,6 +263,6 @@ let f x =
 //    t._05_SimpleSparseLoopTest ()
 //    t._06_SimpleCudaRecognizerTest ()
 //    t._07_SimpleCudaLoopTest ()
-    t._08_SimpleSparseCudaLoopTest ()
-//    YC.GraphParsing.Tests.RDFPerfomance.performTests ()
+//    t._08_SimpleSparseCudaLoopTest ()
+    YC.GraphParsing.Tests.RDFPerfomance.performTests ()
     0

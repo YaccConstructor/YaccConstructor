@@ -1,0 +1,17 @@
+[<Start>]
+a: s s
+a: s1 a1
+a1: a s2
+a: s3 a3 
+a3: a s4
+
+s: s1 s5
+s: s3 s6
+s: s1 s2
+s: s3 s4
+s5: s s2
+s6: s s4
+s1: SCOR
+s2: SCO
+s3: TR
+s4: T

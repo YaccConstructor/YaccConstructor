@@ -255,11 +255,6 @@ let rec eliminateLeftRecursion (ruleList: Rule list) =
 
 // requires RemoveMeta, RemoveEbnf, RemoveInnerAlt, RemoveBrackets
 
-
-
-do()
-
-
 type EliminateLeftRecursion() =
     inherit Conversion()
         override this.Name = "EliminateLeftRecursion"

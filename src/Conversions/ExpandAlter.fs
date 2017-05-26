@@ -28,12 +28,6 @@ let extractOneRule (rule:Rule.t<'a,'b>) =
     | a   -> [{rule with body = a}]
     expand rule.body
 
-
-
-
-do()
-
-
 type ExpandTopLevelAlt() = 
     inherit Conversion()
         override this.Name = "ExpandTopLevelAlt"

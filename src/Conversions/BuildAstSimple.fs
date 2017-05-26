@@ -93,12 +93,6 @@ let rec _buildAstSimple ruleName (production: t<Source.t, Source.t>) =
 let buildAstSimple (ruleList: Rule.t<Source.t, Source.t> list)  = 
     ruleList |> List.map (fun rule -> {rule with body=(_buildAstSimple rule.name.text rule.body) } )
 
-
-
-
-do()
-
-
 type BuildAstSimple() = 
     inherit Conversion()
         override this.Name = "BuildAstSimple"

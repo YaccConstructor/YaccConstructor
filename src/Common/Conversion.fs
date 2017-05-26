@@ -16,10 +16,6 @@ namespace Yard.Core
 
 open Yard.Core.IL
 
-
-do()
-
-
 [<AbstractClass>]
 type Conversion() = //as this =
     abstract Name : string

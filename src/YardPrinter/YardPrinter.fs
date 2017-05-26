@@ -20,12 +20,6 @@ namespace Yard.Generators.YardPrinter
 
 open Yard.Core
 
-
-
-
-do()
-
-
 type YardPrinter() = 
     inherit Generator()
         override this.Name = "YardPrinter"

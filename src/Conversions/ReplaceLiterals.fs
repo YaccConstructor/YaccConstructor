@@ -109,12 +109,6 @@ let replaceLiterals (ruleList: Rule.t<Source.t, Source.t> list) token_format =
     let replacedLiterals = new Dictionary<string, string>() // <literal text, token>
     ruleList |> List.map (fun rule -> {rule with body=replaceLiteralsInProduction rule.body replacedLiterals grammarTokens token_format} )  
 
-
-
-
-do()
-
-
 type ReplaceLiterals() = 
     inherit Conversion()
         override this.Name = "ReplaceLiterals"

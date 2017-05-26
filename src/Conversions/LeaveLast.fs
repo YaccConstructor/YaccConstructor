@@ -25,12 +25,6 @@ let leaveLast (ruleList: Rule.t<_,_> list) =
     List.rev ruleList |> List.filter (fun rule -> findedRules.Add rule.name)
     
 
-
-
-
-do()
-
-
 type LeaveLast() = 
     inherit Conversion()
         override this.Name = "LeaveLast"

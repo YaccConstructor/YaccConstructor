@@ -102,12 +102,6 @@ let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  =
                     |> ignore
                     !ruleRef)
 
-
-
-
-do()
-
-
 type AddDefaultAC() = 
     inherit Conversion()
         override this.Name = "AddDefaultAC"

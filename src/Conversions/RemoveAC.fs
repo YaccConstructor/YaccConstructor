@@ -37,12 +37,6 @@ let private removeAC (ruleList: Rule.t<Source.t, Source.t> list) =
 
     ruleList |> List.map (fun rule -> {rule with body=(inner rule.body) } )
 
-
-
-
-do()
-
-
 type RemoveAC() =
     inherit Conversion()
     override this.Name = "RemoveAC"

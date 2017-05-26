@@ -107,13 +107,6 @@ let private linearize (grammar: Grammar.t<_,_>) =
         )
     defaultModules newRules
 
-
-
-
-
-do()
-
-
 type Linearize() = 
     inherit Conversion()
         override this.Name = "Linearize"

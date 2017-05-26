@@ -41,12 +41,6 @@ let mergeAlter (ruleList: Rule.t<Source.t, Source.t> list) =
                     findedRules.Add rule.name.text |> ignore
                     Some <| buildAlt (ruleList |> List.filter (fun ruleInner -> rule.name = ruleInner.name))
             )
-    
-
-
-
-do()
-
 
 type MergeAlter() = 
     inherit Conversion()

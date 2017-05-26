@@ -20,12 +20,6 @@ namespace Yard.Generators.TreeDump
 
 open Yard.Core
 
-
-
-
-do()
-
-
 type TreeDump() = 
     inherit Generator()
         override this.Name = "TreeDump"

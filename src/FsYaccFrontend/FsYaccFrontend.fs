@@ -23,11 +23,6 @@ open Yard.Core
 /// Parser of FsYacc grammars. Usually it is files with .fsy extension.
 /// Also might work with OCamlYacc grammars(.mly) 
 
-
-
-do()
-
-
 type FsYaccFrontend() = 
     inherit Frontend()
         override this.Name = "FsYaccFrontend"

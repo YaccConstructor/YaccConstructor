@@ -109,11 +109,6 @@ let addEOF (ruleList: Rule.t<Source.t, Source.t> list) =
             [rule]
     )  
 
-
-
-do()
-
-
 type AddEOF() = 
     inherit Conversion()
         override this.Name = "AddEOF"

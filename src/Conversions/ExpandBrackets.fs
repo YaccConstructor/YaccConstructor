@@ -60,12 +60,6 @@ let private expandBrackets (ruleList: Rule.t<_, _> list) =
         ()
     List.rev !expanded
 
-
-
-
-do()
-
-
 type ExpandBrackets() = 
     inherit Conversion()
         override this.Name = "ExpandBrackets"

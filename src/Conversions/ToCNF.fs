@@ -241,11 +241,6 @@ let toCNF (ruleList: Rule.t<_, _> list) =
 
 //------------------------------------------------------------------------------------------------------------------------
 
-
-
-do()
-
-
 type SplitLongRule() = 
     inherit Conversion()
         override this.Name = "SplitLongRule"

@@ -69,13 +69,7 @@ let private replaceInline (rules : Rule.t<_,_> list) =
             if inlines.ContainsKey rule.name.text && not rule.isStart
             then None
             else Some <| {rule with body = modifyBody rule.body})
-
-
-
-
-do()
-
-            
+           
 type ReplaceInline() = 
     inherit Conversion()
         override this.Name = "ReplaceInline"

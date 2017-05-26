@@ -56,12 +56,6 @@ let private expandInnerAlts (ruleList: Rule.t<_,_> list) =
         ()
     List.rev !expanded
 
-
-
-
-do()
-
-
 type ExpandInnerAlt() = 
     inherit Conversion()
         override this.Name = "ExpandInnerAlt"

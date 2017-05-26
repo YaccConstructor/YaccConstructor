@@ -30,18 +30,27 @@ module RNGLRAbstractParserTests =
             il <- {il with grammar = meta.ConvertGrammar(il.grammar)}
             gen.Generate(il, true, "-pos int -token int -module RNGLR.Parse" + x + " -o " + x 
                 + ".yrd.fs")
+            |> ignore
 
         for x in woTranslate do
             printf "Gr: %s \n" x
             let mutable il = fe.ParseGrammar (x + ".yrd")
             gen.Generate(il, true, "-pos int -token int -module RNGLR.Parse" + x + " -o " + x 
                 + ".yrd.fs")
+            |> ignore
 
         for x in withTranslate do
             printf "Gr: %s \n" x
             let mutable il = fe.ParseGrammar (x + ".yrd")
             gen.Generate(il, true, "-pos int -token int -module RNGLR.Parse" + x + " -translate false -o " + x 
                 + ".yrd.fs")
+            |> ignore
+
+        let mutable omit = fe.ParseGrammar "Omit.yrd"
+        omit <- {omit with grammar = ebnf.ConvertGrammar(omit.grammar)}
+        omit <- {omit with grammar = meta.ConvertGrammar(omit.grammar)}
+        gen.Generate(omit, true, "-pos int -token int -module RNGLR.ParseOmit -o Omit.yrd.fs")
+        |> ignore
 
         let mutable eps = fe.ParseGrammar "Eps.yrd"
         eps <- {eps with grammar = ebnf.ConvertGrammar(eps.grammar)}

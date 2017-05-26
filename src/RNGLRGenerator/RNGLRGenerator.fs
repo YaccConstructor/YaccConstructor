@@ -17,10 +17,9 @@ namespace Yard.Generators.RNGLR
 open System
 open System.IO
 open System.Text
-
-
 open Yard.Core
-open IL
+open Yard.Core.IL
+open Yard.Core.Checkers
 open Constraints
 open Yard.Generators.Common
 open Yard.Generators.RNGLR
@@ -36,7 +35,7 @@ open HighlightingConvertions
 type RNGLR() = 
     inherit Generator()
         override this.Name = "RNGLRGenerator"
-        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; (*noLiterals;*) noInnerAlt; noBrackets; needAC; singleModule|]
+        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; (*noLiterals;*) noAlt; noBrackets; needAC; singleModule|]
         override this.Generate (definition, generateToFile, args) =
             let start = DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")

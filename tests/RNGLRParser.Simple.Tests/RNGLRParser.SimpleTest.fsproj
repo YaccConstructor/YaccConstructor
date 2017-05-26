@@ -58,6 +58,7 @@
     <Compile Include="Order.yrd.fs" />
     <Compile Include="Resolvers.yrd.fs" />
     <Compile Include="SimpleRightNull.yrd.fs" />
+    <Compile Include="Omit.yrd.fs" />
     <Compile Include="Eps.yrd.fs" />
     <Compile Include="Eps2.yrd.fs" />
     <Compile Include="ListEps.yrd.fs" />
@@ -79,6 +80,7 @@
     <None Include="LolCalc.yrd" />
     <None Include="Omit.yrd" />
     <None Include="paket.references" />
+    <None Include="gen.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=4.4.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

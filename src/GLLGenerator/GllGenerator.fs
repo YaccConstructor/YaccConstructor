@@ -1,7 +1,8 @@
 ﻿namespace Yard.Generators.GLL
 
 open Yard.Core
-open IL
+open Yard.Core.IL
+open Yard.Core.Checkers
 open Constraints
 open Yard.Generators.Common
 open InitialConvert

@@ -6,6 +6,8 @@ open System.Text
 
 
 open Yard.Core
+open Yard.Core.IL
+open Yard.Core.Checkers
 open Yard.Generators.Common
 open InitialConvert
 open Yard.Generators.Common.FinalGrammar

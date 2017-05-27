@@ -59,10 +59,8 @@
         -->
   <Import Project="..\..\.paket\paket.targets" />
   <ItemGroup>
-    <Compile Include="Addin.fs" />
     <Compile Include="Common.fs" />
     <Compile Include="API.fs" />
-    <Compile Include="YaccConstructor.fs" />
     <None Include="paket.references" />
     <None Include="YaccConstructor.addins">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

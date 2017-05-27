@@ -2,7 +2,6 @@
 
 open Argu
 
-
 type CLIArguments =
     | [<Unique; AltCommandLine("-f")>] Frontend of feName:string
     | [<AltCommandLine("-af")>] AvailableFrontends
@@ -26,6 +25,3 @@ with
             | DefConstant _ -> "User defined constants for YardFrontend lexer."
             | UndefConstant _ -> "Remove previously defined constants for YardFrontend lexer."
             | Input _ -> "Input grammar"
-    
-
-    

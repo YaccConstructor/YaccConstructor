@@ -1,1 +1,1 @@
-..\..\Bin\Release\v40\YC.YaccConstructor.exe -i test.yrd -g "GLLGenerator -token unit -module GLL.test -o test.fs -abstract false" >> generationLog.txt
+fsi gen.fsx >> generationLog.txt

@@ -8,6 +8,9 @@ open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.AbstractParser
 open System
 open System.Collections.Generic
+open Yard.Frontends.YardFrontend
+open Yard.Generators.GLL
+open Yard.Core.Conversions.ExpandMeta
 open Microsoft.FSharp.Collections
 
 let extendFileName origFile postfix = 
@@ -88,11 +91,15 @@ type Config (argv) =
         printfn "Step: %A. Duration: %A. Finished: %A" name (cur - last) cur
         timing.Add((name, cur - last, cur))
 
-    let getParserSource grammarFile =    
+    let getParserSource grammarFile = 
+        let fe = new YardFrontend()
+        let gen = new GLL()
+        let conv = seq{yield new ExpandMeta()}
         YaccConstructor.API.generate (System.IO.Path.Combine(grammarsDir, grammarFile))
-                                     "YardFrontend" "GLLGenerator" 
+                                     fe gen
                                      None
-                                     ["ExpandMeta"]
+                                     conv
+                                     [|""|]
                                      [] :?> ParserSourceGLL
 
     let parserSourceHead = getParserSource "R16S_1_18.yrd"

@@ -51,6 +51,7 @@
     <Compile Include="test.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
+    <None Include="gen.fsx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AST.Common\Common.AST.fsproj">

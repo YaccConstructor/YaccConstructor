@@ -17,10 +17,9 @@ namespace Yard.Generators.RNGLR
 open System
 open System.IO
 open System.Text
-
-open Mono.Addins
 open Yard.Core
-open IL
+open Yard.Core.IL
+open Yard.Core.Checkers
 open Constraints
 open Yard.Generators.Common
 open Yard.Generators.RNGLR
@@ -33,15 +32,10 @@ open Option
 open HighlightingPrinter
 open HighlightingConvertions
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
-
-[<Extension>]
 type RNGLR() = 
     inherit Generator()
         override this.Name = "RNGLRGenerator"
-        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; (*noLiterals;*) noInnerAlt; noBrackets; needAC; singleModule|]
+        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; (*noLiterals;*) noAlt; noBrackets; needAC; singleModule|]
         override this.Generate (definition, generateToFile, args) =
             let start = DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")

@@ -45,9 +45,6 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=4.4.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-    <Reference Include="Mono.Addins">
-      <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -77,6 +74,11 @@
     <ProjectReference Include="..\Conversions\Conversions.fsproj">
       <Name>Conversions</Name>
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\FsYaccFrontend\FsYaccFrontend.fsproj">
+      <Name>FsYaccFrontend</Name>
+      <Project>{17103a48-db90-4101-92ee-7b2719db2cf0}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\FsYacc\FsYacc.fsproj">

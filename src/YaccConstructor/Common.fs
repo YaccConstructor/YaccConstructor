@@ -1,7 +1,6 @@
 ﻿module YaccConstructor.Common
 
 open Argu
-open Mono.Addins
 
 type CLIArguments =
     | [<Unique; AltCommandLine("-f")>] Frontend of feName:string
@@ -26,6 +25,3 @@ with
             | DefConstant _ -> "User defined constants for YardFrontend lexer."
             | UndefConstant _ -> "Remove previously defined constants for YardFrontend lexer."
             | Input _ -> "Input grammar"
-    
-
-    

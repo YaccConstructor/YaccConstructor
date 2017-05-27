@@ -406,6 +406,7 @@ type ``RNGLR abstract parser tests`` () =
         
         test RNGLR.Stars.buildAstAbstract qGraph 15 14 0 6 1
 
+    
     [<Test>]
     member this._17_Stars2_Loop () =
         let qGraph = new SimpleInputGraph<_>(0, 1, RNGLR.Stars2.tokenToNumber)
@@ -437,7 +438,7 @@ type ``RNGLR abstract parser tests`` () =
             ] |> ignore
 
         test RNGLR.FirstEps.buildAstAbstract qGraph 14 13 2 2 0
-    
+
     [<Test>]
     member this._20_CroppedBrackets () =
         let qGraph = new SimpleInputGraph<_>(0, 2, RNGLR.CroppedBrackets.tokenToNumber)
@@ -646,8 +647,8 @@ type ``RNGLR abstract parser tests`` () =
         match RNGLR.ErrorSupport.buildAstAbstract qGraph with 
             | Success(_) -> Assert.Pass()
             | Error(_, _, _) -> Assert.Fail("Error skipping is not successful")
-  
 
+  
     [<Test>]
     member this._errorDispatchingBestTreeFindingGeneratesSameTokenOrderTest() =
         let tokens = [

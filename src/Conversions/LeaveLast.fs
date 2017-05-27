@@ -16,7 +16,7 @@ module Yard.Core.Conversions.LeaveLast
 
 open Yard.Core
 open Yard.Core.IL
-open Mono.Addins
+
 
 open System.Collections.Generic
 
@@ -25,12 +25,6 @@ let leaveLast (ruleList: Rule.t<_,_> list) =
     List.rev ruleList |> List.filter (fun rule -> findedRules.Add rule.name)
     
 
-
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
-
-[<Extension>]
 type LeaveLast() = 
     inherit Conversion()
         override this.Name = "LeaveLast"

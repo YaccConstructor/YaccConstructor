@@ -20,7 +20,7 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
 open System.Collections.Generic
 open Yard.Core.IL.Rule
-open Mono.Addins
+
 
 //--Разделение длинных правил на правила длины 2 и 1 ------------------------------------------------------------------------
 
@@ -241,35 +241,30 @@ let toCNF (ruleList: Rule.t<_, _> list) =
 
 //------------------------------------------------------------------------------------------------------------------------
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
-
-[<Extension>]
 type SplitLongRule() = 
     inherit Conversion()
         override this.Name = "SplitLongRule"
         override this.ConvertGrammar (ruleList,_) = mapGrammar splitLongRule ruleList
 
-[<Extension>]
+
 type DeleteEpsRule() = 
     inherit Conversion()
         override this.Name = "DeleteEpsRule"
         override this.ConvertGrammar (grammar,_) = mapGrammar deleteEpsRule grammar
 
-[<Extension>]
+
 type DeleteChainRule() = 
     inherit Conversion()
         override this.Name = "DeleteChainRule"
         override this.ConvertGrammar (grammar,_) = mapGrammar deleteChainRule grammar
 
-[<Extension>]
+
 type RenameTerm() = 
     inherit Conversion()
         override this.Name = "RenameTerm"
         override this.ConvertGrammar (grammar,_) = mapGrammar renameTerm grammar
 
-[<Extension>]
+
 type ToCNF() = 
     inherit Conversion()
         override this.Name = "ToCNF"

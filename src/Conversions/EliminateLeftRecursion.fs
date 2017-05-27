@@ -19,7 +19,7 @@ open Yard.Core.IL
 open Production
 open Yard.Core.Namer
 open TransformAux
-open Mono.Addins
+
 
 type Rule = Rule.t<Source.t,Source.t>
 type Production = Production.t<Source.t,Source.t>
@@ -255,11 +255,6 @@ let rec eliminateLeftRecursion (ruleList: Rule list) =
 
 // requires RemoveMeta, RemoveEbnf, RemoveInnerAlt, RemoveBrackets
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
-
-[<Extension>]
 type EliminateLeftRecursion() =
     inherit Conversion()
         override this.Name = "EliminateLeftRecursion"

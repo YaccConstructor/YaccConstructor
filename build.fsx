@@ -172,26 +172,36 @@ let runShell shellFile =
     runCmd (shellFile + ".cmd")
 #endif
 
+let runFSXScript fsxFile = 
+    printfn "dir: %s" (Directory.GetCurrentDirectory())
+    printfn "path: %s" (System.IO.Path.GetFullPath(fsxFile + ".fsx"))
+    let ret, out = Fake.FSIHelper.executeFSI (System.IO.Path.GetDirectoryName (System.IO.Path.GetFullPath(fsxFile + ".fsx"))) (System.IO.Path.GetFullPath(fsxFile + ".fsx")) Seq.empty
+    if not ret 
+    then printfn "ERROR: %A" out
+
 Target "Gen:FsLex" (fun _ -> runShell <| "src" @@ "FsLex" @@ "gen")
 
 Target "Gen:FsYacc" (fun _ -> runShell <| "src" @@ "FsYacc" @@ "gen")
 
 Target "Gen:FsYaccFrontend" (fun _ -> runShell <| "src" @@ "FsYaccFrontend" @@ "gen")
 
-Target "Gen:YardFrontend" (fun _ -> runShell <| "src" @@ "YardFrontend" @@ "gen")
+Target "Gen:YardFrontend" (fun _ -> runShell <| "src" @@ "YardFrontend" @@ "gen"
+                                    runFSXScript <| "src" @@ "YardFrontend" @@ "gen"
+                          )
 
 Target "GenTests:RNGLR" (fun _ -> 
                             runShell <| "tests" @@ "RNGLRAbstractParser.Tests" @@ "gen"
+                            runFSXScript <| "tests" @@ "RNGLRAbstractParser.Tests" @@ "gen"
                             runShell <| "tests" @@ "RNGLRAbstractParser.Tests" @@ "gen_lex"
-                            runShell <| "tests" @@ "RNGLRParser.Simple.Tests" @@ "gen"
+                            runFSXScript <| "tests" @@ "RNGLRParser.Simple.Tests" @@ "gen"
                         )
 
 Target "GenTests:GLL" (fun _ ->
-                            runShell <| "tests" @@ "GLL.AbstractParser.Simple.Tests" @@ "gen"
-                            runShell <| "tests" @@ "GLLParser.Simple.Tests" @@ "genSimpleCalc"
+                            runFSXScript <| "tests" @@ "GLL.AbstractParser.Simple.Tests" @@ "gen"
+                            runFSXScript <| "tests" @@ "GLLParser.Simple.Tests" @@ "genSimpleCalc"
                         )
 
-Target "GenTests:RIGLR" (fun _ -> runShell <| "tests" @@ "RIGLRParser.SimpleTest" @@ "gen")
+//Target "GenTests:RIGLR" (fun _ -> runShell <| "tests" @@ "RIGLRParser.SimpleTest" @@ "gen")
 
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner
@@ -441,7 +451,7 @@ Target "All" DoNothing
   ==> "Build:YardFrontend"
   ==> "GenTests:RNGLR"
   ==> "GenTests:GLL"
-  ==> "GenTests:RIGLR"
+  //==> "GenTests:RIGLR"
   ==> "Build:All"
   //==> "CopyBinaries"
   ==> "RunTests"

@@ -411,6 +411,26 @@
                     isChanged := true
 
         
+    
+    let nontermLockFreeSplit (allRules: RulesHolder) nonterminals (splitCount: int) =
+        let tailsByHead = new Dictionary<NonTerminal, ResizeArray<NonTerminal*NonTerminal>>()
+        for nontermPair in allRules.ComplexTails do
+            let heads = allRules.HeadsByComplexTail nontermPair
+            for (head, _) in heads do
+                if not <| tailsByHead.ContainsKey head
+                then
+                    tailsByHead.Add(head, new ResizeArray<NonTerminal * NonTerminal>())
+                tailsByHead.[head].Add(nontermPair)
+        let sortedPairs = tailsByHead |> Seq.sortByDescending (fun (KeyValue(k,v)) -> v.Count) |> Seq.map (fun (KeyValue(k,v)) -> (k,v)) |> List.ofSeq
+        let splitedNontermPairs = Array.init splitCount (fun _ -> new ResizeArray<NonTerminal*NonTerminal>())
+        let processedPairs = ref 0
+        let currentPart = ref 0
+        for (head, tails) in sortedPairs do
+            splitedNontermPairs.[!currentPart].AddRange(tails)
+            processedPairs := !processedPairs + tails.Count
+            if (!processedPairs >= (!currentPart + 1) * allRules.ComplexTails.Length / splitCount)
+            then currentPart := !currentPart + 1
+        splitedNontermPairs            
 
     type Message = bool
 
@@ -427,12 +447,21 @@
         let mutable multCount = 0
 
         let nontermPairs = allRules.ComplexTails
-        let nontermPairs1,nontermPairs2 = nontermPairs.[0..nontermPairs.Length/2 - 1],nontermPairs.[nontermPairs.Length/2 .. nontermPairs.Length-1]
+
+        let splitCount = 4
+
+        let splitedNontermPairs = nontermLockFreeSplit allRules nonterminals splitCount
+
+        let nontermPairs1,nontermPairs2,nontermPairs3,nontermPairs4 = splitedNontermPairs.[0], splitedNontermPairs.[1], splitedNontermPairs.[2], splitedNontermPairs.[3]
 
         let flg1 = ref false
         let flg2 = ref false
+        let flg3 = ref false
+        let flg4 = ref false
         let vl1 = ref false
         let vl2 = ref false
+        let vl3 = ref false
+        let vl4 = ref false
         
         let mbp flg vl nontermPairs_mbp = new MailboxProcessor<Message>(fun inbox ->
             let rec loop n =
@@ -444,9 +473,9 @@
                             let resultMatrix = matrix1.Multiply(matrix2)          
                             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
                                     let nonZ = parsingMatrix.[nonTerm].NonZerosCount
-                                    lock parsingMatrix (fun () ->
+                                    //lock parsingMatrix (fun () ->
                                     parsingMatrix.[nonTerm].PointwiseMaximum(resultMatrix, parsingMatrix.[nonTerm])
-                                    )
+                                    //)
                                     if (nonZ <> parsingMatrix.[nonTerm].NonZerosCount)
                                     then vl := true
                         flg:= true
@@ -458,17 +487,27 @@
         mbp1.Start()
         let mbp2 = mbp flg2 vl2 nontermPairs2
         mbp2.Start()
+        let mbp3 = mbp flg3 vl3 nontermPairs3
+        mbp3.Start()
+        let mbp4 = mbp flg4 vl4 nontermPairs4
+        mbp4.Start()
 
         while !isChanged do
             isChanged := false
             mbp1.Post(false)
             mbp2.Post(false)
-            while not (!flg1 && !flg2) do ()
+            mbp3.Post(false)
+            mbp4.Post(false)
+            while not (!flg1 && !flg2 && !flg3 && !flg4) do ()
             flg1 := false
             flg2 := false
-            isChanged := !vl1 || !vl2
+            flg3 := false
+            flg4 := false
+            isChanged := !vl1 || !vl2 || !vl3 || !vl4
             vl1 := false
             vl2 := false
+            vl3 := false
+            vl4 := false
             multCount <- multCount + 1            
 
         (parsingMatrix.[S], vertexToInt, multCount)

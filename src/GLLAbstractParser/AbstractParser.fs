@@ -192,6 +192,17 @@ let buildAst (parser : ParserSourceGLL) (input : IParserInput) =
                 else tree.Value
     tree
         
+let getAllSPPFRoots (parser : ParserSourceGLL) (input : IParserInput) = 
+    let gss, sppf, _ = parse parser input true
+    let forest = 
+        input.InitialPositions 
+        |> Array.choose (fun pos ->
+            let roots = sppf.GetRoots gss pos
+            if roots.Length <> 0 
+            then Some(new Tree<_>(roots, input.PositionToString))
+            else None) 
+    forest
+
 let isParsed (parser : ParserSourceGLL) (input : LinearInput) = 
     let gss, _, _ = parse parser input false
     findVertices gss parser.StartState

@@ -23,6 +23,9 @@ open Yard.Generators.GLL.AbstractParser
 open Yard.Generators.Common.ASTGLL
 open Yard.Generators.GLL.ParserCommon
 open YaccConstructor.API
+open Yard.Frontends.YardFrontend
+open Yard.Generators.GLL
+open Yard.Core.Conversions.ExpandMeta
 
 open System.Collections.Generic
 open System.Linq
@@ -66,11 +69,15 @@ let getInputGraph tokenizer inputFile =
     
     g 
 
-let getParserSource grammarFile =    
+let getParserSource grammarFile = 
+    let fe = new YardFrontend()
+    let gen = new GLL()
+    let conv = seq{yield new ExpandMeta()}
     generate (grammarsDir + grammarFile)
-             "YardFrontend" "GLLGenerator" 
+             fe gen 
              None
-             ["ExpandMeta"]
+             conv
+             [|""|]
              [] :?> ParserSourceGLL
 
 let test grammarFile inputFile nodesCount edgesCount termsCount ambiguityCount = 

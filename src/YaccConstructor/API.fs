@@ -1,6 +1,5 @@
 ﻿module YaccConstructor.API
 
-open Mono.Addins
 open Yard.Core
 open Yard.Core.IL
 open Yard.Core.Helpers
@@ -28,19 +27,6 @@ let log e m =
     failwith <| getLogMsg e m
 
 let eol = System.Environment.NewLine
-
-let getFrontend frontendName =
-    let fen = (Addin.GetFrontends())
-    let _raise () = InvalidFEName frontendName |> raise
-    if Array.exists (fun (elem : Frontend) -> elem.Name = frontendName) (Addin.GetFrontends())
-    then
-        try
-            match Array.tryFind (fun (elem : Frontend) -> elem.Name = frontendName) (Addin.GetFrontends()) with
-            | Some fe -> fe
-            | None -> failwith "Frontend is not found."
-        with
-        | _ -> _raise ()
-    else _raise ()
 
 let getIlTreeFromFile grammarFile (frontend : Frontend) userDefs = 
     try
@@ -88,27 +74,8 @@ let dealWithErrors ilTree =
         (fun (rule, got, expected) -> sprintf "%s(%d,%d): %d (expected %d)" rule.text rule.startPos.line rule.startPos.column got expected)
         eol
 
-let applyConversion (convNameWithParams : string) (ilTree : Definition.t<Source.t, Source.t>) = 
-    let parameters = convNameWithParams.Split(' ')
-    if parameters.Length = 0 then failwith "Missing Conversion name"
-    else
-        {
-            ilTree with grammar = match Seq.tryFind (fun (elem : Conversion) -> elem.Name = parameters.[0]) (Addin.GetConversions()) with 
-                                  | Some conv -> conv.ConvertGrammar (ilTree.grammar, parameters.[1..parameters.Length - 1])
-                                  | None -> failwith <| "Conversion not found: " + parameters.[0]
-        }
-
-let prepareGenerator generatorName =
-    let _raise () = InvalidGenName generatorName |> raise
-    if Array.exists (fun (elem : Generator) -> elem.Name = generatorName) (Addin.GetGenerators())
-    then              
-        try
-            match Array.tryFind (fun (elem : Generator) -> elem.Name = generatorName) (Addin.GetGenerators()) with
-            | Some gen -> gen
-            | None -> failwith "TreeDump is not found."
-        with
-        | _ -> _raise ()
-    else _raise ()
+let applyConversion (ilTree : Definition.t<Source.t, Source.t>) (conversion : Conversion) (parameters : string[]) = 
+        {ilTree with grammar = conversion.ConvertGrammar (ilTree.grammar, parameters.[0..parameters.Length - 1])}
 
 let checkIlTree ilTree (gen : Generator) =  
     if not (IsSingleStartRule !ilTree) then
@@ -138,7 +105,7 @@ let genToObj ((generator : Generator), genParams, ilTree) =
     with
         | e -> GenError e.Message |> raise
 
-let applyConversions (ilTree : Definition.t<Source.t, Source.t> ref) (frontend : Frontend) conversions =
+let applyConversions (ilTree : Definition.t<Source.t, Source.t> ref) (frontend : Frontend) conversions convParams =
     Namer.initNamer ilTree.Value.grammar
     dealWithErrors ilTree
     let lostSources = ref false
@@ -156,48 +123,44 @@ let applyConversions (ilTree : Definition.t<Source.t, Source.t> ref) (frontend :
     checkSources frontend.Name !ilTree
     // Apply Conversions
     for conv in conversions do
-        ilTree := applyConversion conv !ilTree
-        checkSources conv !ilTree
+        ilTree := applyConversion !ilTree conv convParams
+        checkSources conv.Name !ilTree
 
-let prepareGrammarFromString frontendName grammarStr = 
-    let frontend = getFrontend frontendName
+let prepareGrammarFromString frontend grammarStr = 
     let ilTree = getIlTreeFromStr grammarStr frontend
     (frontend, ilTree)
 
-let prepareGrammarFromFile frontendName grammarFile userDefs = 
-    let frontend = getFrontend frontendName
+let prepareGrammarFromFile frontend grammarFile userDefs = 
     let ilTree = getIlTreeFromFile grammarFile frontend userDefs
     (frontend, ilTree)
 
-let prepareResultForGeneration (frontend, ilTree) generatorName generatorParams conversions = 
-    applyConversions ilTree frontend conversions
-    let generator = prepareGenerator generatorName
+let prepareResultForGeneration (frontend, ilTree) generator generatorParams conversions convParams = 
+    applyConversions ilTree frontend conversions convParams
     checkIlTree ilTree generator
     (generator, generatorParams, ilTree)
 
 //should be simplified with pipeline
-let GenerateFromStrToFile grammarStr frontendName generatorName generatorParams conversions = 
-    let preparedTuple = prepareGrammarFromString frontendName grammarStr
-    let preparedResult = prepareResultForGeneration preparedTuple generatorName generatorParams conversions
+let GenerateFromStrToFile grammarStr frontend generator generatorParams conversions convParams = 
+    let preparedTuple = prepareGrammarFromString frontend grammarStr
+    let preparedResult = prepareResultForGeneration preparedTuple generator generatorParams conversions convParams
     genToFile preparedResult |> ignore
 
-let GenerateFromStrToObj grammarStr frontendName generatorName generatorParams conversions = 
-    let preparedTuple = prepareGrammarFromString frontendName grammarStr
-    let preparedResult = prepareResultForGeneration preparedTuple generatorName generatorParams conversions
+let GenerateFromStrToObj grammarStr frontend generator generatorParams conversions convParams = 
+    let preparedTuple = prepareGrammarFromString frontend grammarStr
+    let preparedResult = prepareResultForGeneration preparedTuple generator generatorParams conversions convParams
     genToObj preparedResult
 
-
-let gen grammarFile frontendName generatorName generatorParams conversions userDefs generateToFile = 
+let gen grammarFile frontend generator generatorParams conversions convParams userDefs generateToFile = 
     try
-        let preparedTuple = prepareGrammarFromFile frontendName grammarFile userDefs
-        let preparedResult = prepareResultForGeneration preparedTuple generatorName generatorParams conversions
+        let preparedTuple = prepareGrammarFromFile frontend grammarFile userDefs
+        let preparedResult = prepareResultForGeneration preparedTuple generator generatorParams conversions convParams
         if generateToFile then
             genToFile preparedResult
         else
             genToObj preparedResult
     with
-    | InvalidFEName frontendName as e  -> 
-        "Frontend with name " + frontendName + " is not available. Run \"Main.exe -af\" for get all available frontends.\n" 
+    | InvalidFEName frontend as e  -> 
+        "Frontend with name " + frontend + " is not available. Run \"Main.exe -af\" for get all available frontends.\n" 
         |> log e
     | InvalidGenName genName as e->
         "Generator with name " + genName + " is not available. Run \"Main.exe -ag\" for get all available generators.\n"
@@ -222,8 +185,8 @@ List of available frontends, generators and conversions can be obtained by -af -
     | x -> "Correct this or above construction. Pay attention to the punctuation.\n"
         |> log x
 
-let generateToFile grammarFile frontendName generatorName generatorParams conversions userDefs = 
-    gen grammarFile frontendName generatorName generatorParams conversions userDefs true |> ignore
+let generateToFile grammarFile frontend generator generatorParams conversions convParams userDefs = 
+    gen grammarFile frontend generator generatorParams conversions convParams userDefs true |> ignore
     
-let generate grammarFile frontendName generatorName generatorParams conversions userDefs = 
-    gen grammarFile frontendName generatorName generatorParams conversions userDefs false
+let generate grammarFile frontend generator generatorParams conversions convParams userDefs = 
+    gen grammarFile frontend generator generatorParams conversions convParams userDefs false

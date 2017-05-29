@@ -4,8 +4,10 @@ open System.Diagnostics
 open System.IO
 open System.Text
 
-open Mono.Addins
+
 open Yard.Core
+open Yard.Core.IL
+open Yard.Core.Checkers
 open Yard.Generators.Common
 open InitialConvert
 open Yard.Generators.Common.FinalGrammar
@@ -13,11 +15,6 @@ open Constraints
 open Automata
 open PrintTable
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
-
-[<Extension>]
 type RIGLR() = 
     inherit Generator()
         override this.Name = "RIGLRGenerator"

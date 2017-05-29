@@ -13,6 +13,9 @@ open YaccConstructor.API
 open Yard.Generators.GLL.ParserCommon
 open System.Collections.Generic
 open Yard.Generators.GLL.AbstractParser
+open Yard.Frontends.YardFrontend
+open Yard.Generators.GLL
+open Yard.Core.Conversions.ExpandMeta
 
 //let run path astBuilder =
 //    let tokens = LexCommon.tokens(path)
@@ -62,11 +65,15 @@ let shouldBeTrue res =
     Assert.AreEqual(res, true, "Not parsed")        
 
          
-let getParserSource grammarFile =    
+let getParserSource grammarFile = 
+    let fe = new YardFrontend()
+    let gen = new GLL()
+    let conv = seq{yield new ExpandMeta()}
     generate (grammarFilesPath + grammarFile)
-             "YardFrontend" "GLLGenerator" 
+             fe gen 
              None
-             [ "ExpandMeta"]
+             conv
+             [|""|]
              //[ "ExpandEbnf"; "ExpandMeta"; "ExpandInnerAlt"; "AddDefaultAC"; "Linearize"]
              [] :?> ParserSourceGLL
 

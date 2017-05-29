@@ -19,8 +19,6 @@ open Yard.Core.IL
 open Production
 open Yard.Core.Namer
 open TransformAux
-open Mono.Addins
-
 open System.Collections.Generic
 
 /// find metarule with given name in hash map of collected metarules
@@ -255,13 +253,7 @@ let private expandMetaRules grammar =
         )
     replaceMetasInGrammar grammar (metaRulesTbl grammar) refsTbl
 
-
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
-
-[<Extension>]
 type ExpandMeta() = 
     inherit Conversion()
         override this.Name = "ExpandMeta"
-        override this.ConvertGrammar (grammar,_) = expandMetaRules grammar
+        override this.ConvertGrammar (grammar, _) = expandMetaRules grammar

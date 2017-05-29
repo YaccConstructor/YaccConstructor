@@ -40,7 +40,6 @@ NUGET
       Microsoft.Bcl (>= 1.1.10)
       Microsoft.Bcl.Build (>= 1.0.14)
     Microsoft.Win32.Primitives (4.3) - framework: >= net463
-    Mono.Addins (1.3.2)
     NETStandard.Library (1.6.1) - framework: >= net463
       Microsoft.Win32.Primitives (>= 4.3) - framework: >= net46, >= netstandard13
       System.AppContext (>= 4.3) - framework: >= net46, >= netstandard13
@@ -173,5 +172,5 @@ NUGET
       FSharp.Core (4.0.0.1)
 GITHUB
   remote: fsharp/FAKE
-    modules/Octokit/Octokit.fsx (1ada6a9c84aada940bd7e6a7b63c0dc62e2fa56e)
+    modules/Octokit/Octokit.fsx (0723523ede994a213a5c9835144dfd2ad3a7fe01)
       Octokit (>= 0.20)

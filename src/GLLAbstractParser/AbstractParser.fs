@@ -195,14 +195,12 @@ let buildAst (parser : ParserSourceGLL) (input : IParserInput) =
 let getAllSPPFRoots (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss, sppf, _ = parse parser input true
     let forest = 
-        input.InitialPositions
-        |> Array.map (fun p -> 
-            let roots = sppf.GetRoots gss p
-            if roots.Length <> 0 then 
-                new Tree<_>(roots, input.PositionToString)
-            else null )
-        |> Seq.filter (fun x -> x <> null)
-        |> Seq.toArray
+        input.InitialPositions 
+        |> Array.choose (fun pos ->
+            let roots = sppf.GetRoots gss pos
+            if roots.Length <> 0 
+            then Some(new Tree<_>(roots, input.PositionToString))
+            else None) 
     forest
 
 let isParsed (parser : ParserSourceGLL) (input : LinearInput) = 

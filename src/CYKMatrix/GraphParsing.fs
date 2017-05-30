@@ -452,16 +452,8 @@
 
         let splitedNontermPairs = nontermLockFreeSplit allRules nonterminals splitCount
 
-        let nontermPairs1,nontermPairs2,nontermPairs3,nontermPairs4 = splitedNontermPairs.[0], splitedNontermPairs.[1], splitedNontermPairs.[2], splitedNontermPairs.[3]
-
-        let flg1 = ref false
-        let flg2 = ref false
-        let flg3 = ref false
-        let flg4 = ref false
-        let vl1 = ref false
-        let vl2 = ref false
-        let vl3 = ref false
-        let vl4 = ref false
+        let flags = Array.init splitCount (fun _ -> ref false)
+        let values = Array.init splitCount (fun _ -> ref false)
         
         let mbp flg vl nontermPairs_mbp = new MailboxProcessor<Message>(fun inbox ->
             let rec loop n =
@@ -482,32 +474,26 @@
                         do! loop (n + 1)
                 }
             loop (0))
+        
+        let mailBoxes = Array.init splitCount (fun i -> mbp flags.[i] values.[i] splitedNontermPairs.[i])
 
-        let mbp1 = mbp flg1 vl1 nontermPairs1
-        mbp1.Start()
-        let mbp2 = mbp flg2 vl2 nontermPairs2
-        mbp2.Start()
-        let mbp3 = mbp flg3 vl3 nontermPairs3
-        mbp3.Start()
-        let mbp4 = mbp flg4 vl4 nontermPairs4
-        mbp4.Start()
+        for i in 0..(mailBoxes.Length-1) do
+            mailBoxes.[i].Start()
 
         while !isChanged do
             isChanged := false
-            mbp1.Post(false)
-            mbp2.Post(false)
-            mbp3.Post(false)
-            mbp4.Post(false)
-            while not (!flg1 && !flg2 && !flg3 && !flg4) do ()
-            flg1 := false
-            flg2 := false
-            flg3 := false
-            flg4 := false
-            isChanged := !vl1 || !vl2 || !vl3 || !vl4
-            vl1 := false
-            vl2 := false
-            vl3 := false
-            vl4 := false
+            for i in 0..(mailBoxes.Length-1) do
+                mailBoxes.[i].Post(false)
+
+            while not <| Array.TrueForAll (flags, (fun fl -> !fl)) do ()
+
+            for i in 0..(flags.Length-1) do
+                flags.[i] := false
+
+            isChanged := Array.Exists (values, (fun vl -> !vl))
+
+            for i in 0..(values.Length-1) do
+                values.[i] := false
             multCount <- multCount + 1            
 
         (parsingMatrix.[S], vertexToInt, multCount)

@@ -77,7 +77,8 @@ let processFile file grammarFile =
                 with grammar = cnfConv.ConvertGrammar (loadIL.grammar, [||])
         }*)
 
-
+    
+    //DenseCPU --- naive realization
     (*let start = System.DateTime.Now
     let root1 =
         [for i in 0..cnt-1 ->
@@ -88,6 +89,7 @@ let processFile file grammarFile =
     let time1 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
     let countOfPairs1 = probabilityAnalyzer root1.[0]*)
 
+    //SparseCPU --- Math.Net Numerics
     let start = System.DateTime.Now
     let root2 =
         [for i in 0..cnt-1 ->
@@ -97,6 +99,7 @@ let processFile file grammarFile =
     let time2 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
     let countOfPairs2 = sparseAnalyzer root2.[0]
 
+    //DenseGPU --- Alea Cuda
     (*let start = System.DateTime.Now
     let root3 =
         [for i in 0..cnt-1 ->
@@ -106,6 +109,7 @@ let processFile file grammarFile =
     let time3 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
     let countOfPairs3 = probabilityAnalyzer root3.[0]*)
 
+    //SparseGPU --- managedCuda
     (*let start = System.DateTime.Now
     let root4 =
         [for i in 0..cnt-1 ->
@@ -115,6 +119,7 @@ let processFile file grammarFile =
     let time4 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
     let countOfPairs4 = mySparseAnalyzer root4.[0]*)
 
+    //SparseCPUParallel1 --- System.Threading (2 Threads)
     (*let start = System.DateTime.Now
     let root5 =
         [for i in 0..cnt-1 ->
@@ -124,6 +129,7 @@ let processFile file grammarFile =
     let time5 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
     let countOfPairs5 = sparseAnalyzer root5.[0]*)
     
+    //SparseCPUParallel2 --- MailBoxProcessors (any number of threads)
     let start = System.DateTime.Now
     let root6 =
         [for i in 0..cnt-1 ->

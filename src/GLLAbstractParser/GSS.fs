@@ -65,17 +65,17 @@ type GSSVertex (nonterm: int<positionInGrammar>, posInInput: int<positionInInput
     override this.ToString () = sprintf "Nonterm: %i, Index: %i" this.Nonterm this.PositionInInput
 
 type GSSVertexInstanceHolder() =
-    let instanceHolder = new System.Collections.Generic.Dictionary<int,GSSVertex>()
+    let instanceHolder = new System.Collections.Generic.Dictionary<_,_>()
 
     member this.Get(nonterm: int<positionInGrammar>, posInInput: int<positionInInput>) = 
-        let hashed = hash(nonterm,posInInput)
-        let cond, value = instanceHolder.TryGetValue(hashed)
+        let newInst = new GSSVertex(nonterm, posInInput) 
+        let packed = (int nonterm <<< 16) ||| int posInInput
+        let cond, value = instanceHolder.TryGetValue(newInst)
         if cond
         then
             value
-        else 
-            let newInst = new GSSVertex(nonterm, posInInput)
-            instanceHolder.Add(hashed, newInst)
+        else
+            instanceHolder.Add(newInst,newInst)
             newInst
 
 [<Struct>]

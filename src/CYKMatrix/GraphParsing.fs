@@ -441,10 +441,13 @@
                   createEmptyMatrix 
                   matrixSetValue 
                   (innerOne: 'InnerType) =
-        let parsingMatrix, vertexToInt = initParsingMatrix<SparseMatrix, 'InnerType> graph allRules nonterminals createEmptyMatrix matrixSetValue innerOne
+        let parsingMatrixInitial, vertexToInt = initParsingMatrix<SparseMatrix, 'InnerType> graph allRules nonterminals createEmptyMatrix matrixSetValue innerOne
         let matrixSize = graph.VertexCount
         let isChanged = ref true
         let mutable multCount = 0
+        let mutable parsingMatrixCurrent = parsingMatrixInitial
+        let mutable parsingMatrixNew, _ = initParsingMatrix<SparseMatrix, 'InnerType> graph allRules nonterminals createEmptyMatrix matrixSetValue innerOne
+        let mutable parsingMatrixFict = null
 
         let nontermPairs = allRules.ComplexTails
 
@@ -460,15 +463,15 @@
                 async {                                  
                         let! message = inbox.Receive();
                         for (nt1, nt2) in nontermPairs_mbp do
-                            let matrix1 = parsingMatrix.[nt1]
-                            let matrix2 = parsingMatrix.[nt2]
+                            let matrix1 = parsingMatrixCurrent.[nt1]
+                            let matrix2 = parsingMatrixCurrent.[nt2]
                             let resultMatrix = matrix1.Multiply(matrix2)          
                             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                                    let nonZ = parsingMatrix.[nonTerm].NonZerosCount
+                                    let nonZ = parsingMatrixCurrent.[nonTerm].NonZerosCount
                                     //lock parsingMatrix (fun () ->
-                                    parsingMatrix.[nonTerm].PointwiseMaximum(resultMatrix, parsingMatrix.[nonTerm])
+                                    parsingMatrixCurrent.[nonTerm].PointwiseMaximum(resultMatrix, parsingMatrixNew.[nonTerm])
                                     //)
-                                    if (nonZ <> parsingMatrix.[nonTerm].NonZerosCount)
+                                    if (nonZ <> parsingMatrixNew.[nonTerm].NonZerosCount)
                                     then vl := true
                         flg:= true
                         do! loop (n + 1)
@@ -494,9 +497,14 @@
 
             for i in 0..(values.Length-1) do
                 values.[i] := false
+
+            parsingMatrixFict <- parsingMatrixCurrent
+            parsingMatrixCurrent <- parsingMatrixNew
+            parsingMatrixNew <- parsingMatrixFict
+
             multCount <- multCount + 1            
 
-        (parsingMatrix.[S], vertexToInt, multCount)
+        (parsingMatrixNew.[S], vertexToInt, multCount)
 
 
     let initRulesFromIL loadIL tokenToInt =

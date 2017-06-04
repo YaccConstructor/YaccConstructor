@@ -441,13 +441,15 @@
                   createEmptyMatrix 
                   matrixSetValue 
                   (innerOne: 'InnerType) =
-        let parsingMatrixInitial, vertexToInt = initParsingMatrix<SparseMatrix, 'InnerType> graph allRules nonterminals createEmptyMatrix matrixSetValue innerOne
+        let parsingMatrixCurrent, vertexToInt = initParsingMatrix<SparseMatrix, 'InnerType> graph allRules nonterminals createEmptyMatrix matrixSetValue innerOne
         let matrixSize = graph.VertexCount
         let isChanged = ref true
         let mutable multCount = 0
-        let mutable parsingMatrixCurrent = parsingMatrixInitial
-        let mutable parsingMatrixNew, _ = initParsingMatrix<SparseMatrix, 'InnerType> graph allRules nonterminals createEmptyMatrix matrixSetValue innerOne
-        let mutable parsingMatrixFict = null
+        let parsingMatrixNew = new ParsingMatrix<SparseMatrix>()
+        for nont in parsingMatrixCurrent.Keys do
+            parsingMatrixNew.Add(nont, createEmptyMatrix(matrixSize))
+            parsingMatrixCurrent.[nont].CopyTo(parsingMatrixNew.[nont])
+
 
         let nontermPairs = allRules.ComplexTails
 
@@ -469,10 +471,11 @@
                             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
                                     let nonZ = parsingMatrixCurrent.[nonTerm].NonZerosCount
                                     //lock parsingMatrix (fun () ->
-                                    parsingMatrixCurrent.[nonTerm].PointwiseMaximum(resultMatrix, parsingMatrixNew.[nonTerm])
+                                    parsingMatrixNew.[nonTerm].PointwiseMaximum(resultMatrix, parsingMatrixNew.[nonTerm])
                                     //)
                                     if (nonZ <> parsingMatrixNew.[nonTerm].NonZerosCount)
-                                    then vl := true
+                                    then 
+                                        vl := true
                         flg:= true
                         do! loop (n + 1)
                 }
@@ -497,10 +500,9 @@
 
             for i in 0..(values.Length-1) do
                 values.[i] := false
-
-            parsingMatrixFict <- parsingMatrixCurrent
-            parsingMatrixCurrent <- parsingMatrixNew
-            parsingMatrixNew <- parsingMatrixFict
+            
+            for nont in parsingMatrixNew.Keys do
+                parsingMatrixNew.[nont].CopyTo(parsingMatrixCurrent.[nont])
 
             multCount <- multCount + 1            
 

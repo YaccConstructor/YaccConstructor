@@ -96,7 +96,7 @@
 
 
     type RulesHolder(complexRules: Dictionary<(NonTerminal * NonTerminal), (NonTerminal * Probability.T) list>,
-                     simpleRules: Dictionary<int<AbstractAnalysis.Common.token>, (NonTerminal * Probability.T) list>,
+                     simpleRules: Dictionary<int, (NonTerminal * Probability.T) list>,
                      epsilonRules: NonTerminal list)  =  
                                          
         member this.SimpleTails = simpleRules.Keys |> Array.ofSeq

@@ -37,7 +37,7 @@
             _CsrRow <- csrRow_upd
             _CsrColInd <- csrColInd_upd
 
-    let initParsingMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> (graph: AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
+    let initParsingMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
                   (allRules: RulesHolder)
                   nonterminals
                   createEmptyMatrix 
@@ -434,7 +434,7 @@
 
     type Message = bool
 
-    let recognizeGraphP<'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
+    let recognizeGraphP<'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
                   (allRules: RulesHolder)
                   nonterminals
                   S 
@@ -515,9 +515,9 @@
         let S = ref (NonTerminal "")
         let nonterminals = new ResizeArray<NonTerminal>()
         let crl = new Dictionary<NonTerminal * NonTerminal, ResizeArray<NonTerminal*Probability.T>>()
-        let srl = new Dictionary<int<AbstractAnalysis.Common.token>, ResizeArray<NonTerminal*Probability.T>>()
+        let srl = new Dictionary<int, ResizeArray<NonTerminal*Probability.T>>()
         let crl_result = new Dictionary<NonTerminal * NonTerminal, (NonTerminal * Probability.T) list>()
-        let srl_result = new Dictionary<int<AbstractAnalysis.Common.token>, (NonTerminal * Probability.T) list>()
+        let srl_result = new Dictionary<int, (NonTerminal * Probability.T) list>()
         let erl_result: NonTerminal list = []
 
         let probOne = Probability.create 1.0
@@ -578,7 +578,7 @@
 
         (rulesHolder, nonterminals, S)
  
-    let graphParseParallel<'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
+    let graphParseParallel<'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
                   (loadIL:t<Source.t, Source.t>)
                   tokenToInt 
                   createEmptyMatrix 
@@ -590,7 +590,7 @@
         recognizeGraphP<'InnerType> graph rulesHolder nonterminals !S  createEmptyMatrix matrixSetValue innerOne    
 
 
-    let recognizeGraph<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
+    let recognizeGraph<'MatrixType, 'InnerType when 'InnerType : comparison> graph
                   (squareMatrix:ParsingMatrix<'MatrixType> -> RulesHolder -> bool ref -> int  -> unit)
                   (allRules: RulesHolder)
                   nonterminals
@@ -598,7 +598,7 @@
                   createEmptyMatrix 
                   matrixSetValue 
                   (innerOne: 'InnerType) =
-        let parsingMatrix, vertexToInt = initParsingMatrix<'MatrixType, 'InnerType> graph allRules nonterminals createEmptyMatrix matrixSetValue innerOne
+        let parsingMatrix, vertexToInt = initParsingMatrix<'MatrixType, 'InnerType> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>) allRules nonterminals createEmptyMatrix matrixSetValue innerOne
         let matrixSize = graph.VertexCount
         let isChanged = ref true
         let mutable multCount = 0
@@ -610,7 +610,7 @@
 
         (parsingMatrix.[S], vertexToInt, multCount)    
 
-    let graphParse<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AdjacencyGraph<int, TaggedEdge<int, int<AbstractAnalysis.Common.token>>>)
+    let graphParse<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
                   squareMatrix
                   (loadIL:t<Source.t, Source.t>)
                   tokenToInt 

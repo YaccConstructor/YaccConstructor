@@ -17,7 +17,7 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Namer
-open Mono.Addins
+
 open TransformAux
 
 let rec extractOneRule (rule:Rule.t<_,_>) = 
@@ -33,7 +33,7 @@ let rec extractOneRule (rule:Rule.t<_,_>) =
     | a   -> a, []
     let body, rules = expandBody rule.args rule.body
     {rule with body=body}::rules
-[<Extension>]
+
 type ExpandConjunction() = 
     inherit Conversion()
         override this.Name = "ExpandConjunction"

@@ -42,12 +42,12 @@ let matrixSetValueMySparse (matrix: MySparseMatrix) (i: int) (j: int) (value: fl
 
 let tokenizer str =
     match str with
-    | "SCOR" -> 1<AbstractAnalysis.Common.token>
-    | "TR" -> 2<AbstractAnalysis.Common.token>
-    | "OTHER" -> 3<AbstractAnalysis.Common.token>
-    | "SCO" -> 4<AbstractAnalysis.Common.token>
-    | "T" -> 5<AbstractAnalysis.Common.token>
-    | _ -> -1<AbstractAnalysis.Common.token>
+    | "SCOR" -> 1
+    | "TR" -> 2
+    | "OTHER" -> 3
+    | "SCO" -> 4
+    | "T" -> 5
+    | _ -> -1
 
 let probabilityAnalyzer (matrix:Util.ProbabilityMatrix.T) =
     let mutable counter = 0
@@ -65,7 +65,7 @@ let mySparseAnalyzer (matrix:MySparseMatrix) = matrix.Nnz
 let processFile file grammarFile =
     let cnt = 1
     let g1, triples1 = 
-        getParseInputGraph tokenizer file (fun _ -> new AdjacencyGraph<_,_>())
+        getParseInputGraph tokenizer file
 
 //    printfn("Graph loaded")
     let fe = new Yard.Frontends.YardFrontend.YardFrontend()

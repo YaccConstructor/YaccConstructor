@@ -63,16 +63,37 @@
   </Target>
   -->
   <ItemGroup>
-    <Compile Include="io.fs" />
-    <Compile Include="structs.fs" />
+    <Compile Include="Configuration.fs" />
+    <Compile Include="InfernalInteraction.fs" />
     <Compile Include="Bio.Search.fs" />
     <None Include="paket.references" />
     <Content Include="App.config" />
+    <None Include="gen.fsx" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common (Core\Common)</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Conversions\Conversions.fsproj">
+      <Name>Conversions</Name>
+      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\GLLGenerator\GLLGenerator.fsproj">
+      <Name>GLLGenerator</Name>
+      <Project>{8756690f-8138-495a-a368-39afb9029823}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\YaccConstructor\YaccConstructor.fsproj">
       <Name>YaccConstructor</Name>
       <Project>{e9a0e63b-ead7-43de-8823-13faa6b2b972}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">
+      <Name>YardFrontend</Name>
+      <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="mscorlib" />
@@ -105,11 +126,6 @@
     <ProjectReference Include="..\GLLAbstractParser\GLLAbstractParser.fsproj">
       <Name>GLLAbstractParser</Name>
       <Project>{bd40477e-7ceb-4ff4-b53f-05316f3bb6d8}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\InfernalApi\InfernalApi.fsproj">
-      <Name>InfernalApi</Name>
-      <Project>{5c337db6-f5cc-4014-8bb7-3d66edf0eefc}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\ParserCommon\GLLParsers.Common.fsproj">

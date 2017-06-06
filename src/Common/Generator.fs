@@ -15,20 +15,12 @@
 namespace Yard.Core
 
 open Yard.Core.IL
-open Mono.Addins
 
-[<assembly:AddinRoot ("YaccConstructor", "1.0")>]
-do()
-
-[<TypeExtensionPoint>]
 [<AbstractClass>]
 type Generator() = //as this =
     abstract Name : string
-    
-
-    abstract Generate : Definition.t<Source.t,Source.t> * bool -> obj      
-    abstract Generate : Definition.t<Source.t,Source.t> * bool * string -> obj
-
+    abstract Generate : Definition.t<Source.t, Source.t> * bool -> obj      
+    abstract Generate : Definition.t<Source.t, Source.t> * bool * string -> obj
 //    abstract Generate : Definition.t<Source.t,Source.t> -> obj
 //    default this.Generate(grammar) = this.Generate(grammar,true)
 //    abstract Generate : Definition.t<Source.t,Source.t> * string -> obj  

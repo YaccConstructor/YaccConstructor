@@ -18,7 +18,7 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Core.IL.Production
-open Mono.Addins
+
 
 open System
 
@@ -28,12 +28,6 @@ let extractOneRule (rule:Rule.t<'a,'b>) =
     | a   -> [{rule with body = a}]
     expand rule.body
 
-
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
-
-[<Extension>]
 type ExpandTopLevelAlt() = 
     inherit Conversion()
         override this.Name = "ExpandTopLevelAlt"

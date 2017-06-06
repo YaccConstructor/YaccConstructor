@@ -1,0 +1,3 @@
+[<Start>]
+s: m | s1=s PLUS s2=s {s1 + " + " + s2}
+m: n=NUM TIMES e=m {n + " * " + e} | NUM

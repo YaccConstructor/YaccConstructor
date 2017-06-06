@@ -19,13 +19,7 @@
 namespace Yard.Generators.TreeDump
 
 open Yard.Core
-open Mono.Addins
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
-
-[<Extension>]
 type TreeDump() = 
     inherit Generator()
         override this.Name = "TreeDump"

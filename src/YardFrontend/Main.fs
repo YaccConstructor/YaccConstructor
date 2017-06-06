@@ -183,7 +183,7 @@ let posTo2D (source:string) pos =
         )
         (1,0)
 
-let ParseText (s:string) path =    
+let ParseText (s : string) path =    
     let userDefs = [||]
     GrammarParser.currentFilename := path
     Lexer.currentFile := path

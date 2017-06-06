@@ -43,7 +43,7 @@ type ``CNF tests`` () =
 
     [<Test>]
     member test.``Simple ToCNF mssql``() =
-        let msqlrootPath = @"../../../../src/YC.GrammarZOO/SQL/TSQL"
+        let msqlrootPath = @"../src/YC.GrammarZOO/SQL/TSQL"
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(msqlrootPath, "mssql.yrd"))
         Namer.initNamer loadIL.grammar
         let result = loadIL |> applyConversion expandTopLevelAlt |> 

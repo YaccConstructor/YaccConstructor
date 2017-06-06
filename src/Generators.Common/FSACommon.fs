@@ -473,19 +473,42 @@ let findEquivalenceClasses fsa =
 let minimizeFSA fsa =
     let classes = findEquivalenceClasses fsa
 
-    let sortClasses() =
-        let newClasses = new ResizeArray<_>()
-        let otherStatesClasses = new ResizeArray<_>()
-
-        let nonterms =
+    let nonterms =
             fsa.StartStates
             |> Array.fold (fun (x : HashSet<int<positionInGrammar>>) set ->
                 x.UnionWith set
                 x) (new HashSet<int<positionInGrammar>>())
 
+    let divideClassesWithMultipleNonterminals () = 
+        let newClasses = new ResizeArray<_>()
         for classNumber in 0..classes.Count-1 do
             if classes.[classNumber].Count <> 0 then
-                if classes.[classNumber].ToArray() |> Array.exists (fun x -> nonterms.Contains (x))
+                let currClass = classes.[classNumber].ToArray()
+                let nontermsInCurrentClass = 
+                    currClass
+                    |> Array.filter(fun x -> nonterms.Contains (x))
+                if nontermsInCurrentClass.Length > 1 then 
+                    nontermsInCurrentClass.[1..]
+                    |> Array.iter (fun x -> 
+                        newClasses.Add([|x|]))
+                    newClasses.Add(currClass
+                                   |> Array.filter(fun x -> 
+                                        not(x <> nontermsInCurrentClass.[0] && (nonterms.Contains(x)))))
+                else
+                    newClasses.Add(currClass)
+        newClasses
+    
+    let classes = divideClassesWithMultipleNonterminals()
+    
+
+    // move classes that contain nonterminals to beginning
+    let sortClasses() =
+        let newClasses = new ResizeArray<_>()
+        let otherStatesClasses = new ResizeArray<_>()
+
+        for classNumber in 0..classes.Count-1 do
+            if classes.[classNumber].Length <> 0 then
+                if classes.[classNumber] |> Array.exists (fun x -> nonterms.Contains (x))
                 then
                     newClasses.Add (classes.[classNumber])
                 else
@@ -528,7 +551,7 @@ let minimizeFSA fsa =
         if cond
         then
             stateToNontermName.Remove(newState*1<positionInGrammar>) |> ignore
-            stateToNontermName.Add(newState*1<positionInGrammar>, value + string)
+            stateToNontermName.Add(newState*1<positionInGrammar>, value + "|||" + string)
         else
             stateToNontermName.Add(newState*1<positionInGrammar>, string)
     

@@ -299,14 +299,14 @@ let printTables
         if errorRulesExists then
             printBrInd 0 "let createErrorToken (token: Token) = ERROR token"
         
-        printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists%s%s)"
+        printBrInd 0 "let parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists%s%s)"
             (if isAbstractParsingMode then ", tokenData = tokenData" else "")
             (if errorRulesExists then ", createErrorToken = createErrorToken" else "")
 
 
         if isAbstractParsingMode
         then
-            printBr "let buildAstAbstract : (ParserInputGraph<Token> -> Yard.Generators.ARNGLR.Parser.ParseResult<Token>) = "
+            printBr "let buildAstAbstract : (SimpleInputGraph<Token> -> Yard.Generators.ARNGLR.Parser.ParseResult<Token>) = "
             printBrInd 1 "buildAstAbstract<Token> parserSource"
             printBr ""
         else

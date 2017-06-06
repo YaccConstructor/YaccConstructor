@@ -1,8 +1,8 @@
 ﻿namespace Yard.Generators.GLL
 
-open Mono.Addins
 open Yard.Core
-open IL
+open Yard.Core.IL
+open Yard.Core.Checkers
 open Constraints
 open Yard.Generators.Common
 open InitialConvert
@@ -13,11 +13,6 @@ open Yard.Generators.Common.FSA.Common
 
 open System.Collections.Generic
 
-
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
-[<Extension>]
 type GLL() = 
     inherit Generator()
         override this.Name = "GLLGenerator"

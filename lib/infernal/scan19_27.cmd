@@ -1,1 +1,0 @@
-cmscan --anytrunc --noali --tblout log_19_27.txt archaea.cm "C:\YCInfernal\Bin\Release\v40\R16S_19_27_result.fa"

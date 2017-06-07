@@ -12,7 +12,7 @@ module YardFrontend =
     let fe = new FsYaccFrontend()
 
     let generate() =
-        let il = fe.ParseGrammar "Parser.fsy"
+        let il = fe.ParseGrammar "parser.fsy"
         gen.Generate(il, true, "-o Parser.fs -module Yard.Frontends.YardFrontend.GrammarParser -pos Source.Position -token Source.t") |> ignore
 
 YardFrontend.generate()

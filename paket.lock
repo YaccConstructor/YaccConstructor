@@ -10,7 +10,7 @@ NUGET
       FSharp.Core
       FSharpx.Collections.Experimental
     ExtCore (0.8.43)
-    FAKE (4.50)
+    FAKE (4.61.3)
     FsCheck (0.9.2) - framework: >= net40
     FSharp.Compiler.Service (2.0.0.6)
     FSharp.Core (4.0.0.1)
@@ -172,5 +172,5 @@ NUGET
       FSharp.Core (4.0.0.1)
 GITHUB
   remote: fsharp/FAKE
-    modules/Octokit/Octokit.fsx (0723523ede994a213a5c9835144dfd2ad3a7fe01)
+    modules/Octokit/Octokit.fsx (83c86c80b513f9fa97f7ebe325ce771ac97f4960)
       Octokit (>= 0.20)

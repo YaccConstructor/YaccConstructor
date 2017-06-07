@@ -192,7 +192,6 @@ Target "Gen:YardFrontend" (fun _ -> runShell <| "src" @@ "YardFrontend" @@ "gen"
 Target "GenTests:RNGLR" (fun _ -> 
                             runShell <| "tests" @@ "RNGLRAbstractParser.Tests" @@ "gen"
                             runFSXScript <| "tests" @@ "RNGLRAbstractParser.Tests" @@ "gen"
-                            runShell <| "tests" @@ "RNGLRAbstractParser.Tests" @@ "gen_lex"
                             runFSXScript <| "tests" @@ "RNGLRParser.Simple.Tests" @@ "gen"
                         )
 

@@ -9,7 +9,7 @@ open Yard.Generators
 open LexCommon
 open Microsoft.FSharp.Collections
 
-open YaccConstructor.API
+open YC.API
 open Yard.Generators.GLL.ParserCommon
 open System.Collections.Generic
 open Yard.Generators.GLL.AbstractParser

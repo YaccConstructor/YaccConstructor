@@ -22,7 +22,7 @@ open AbstractAnalysis.Common
 open Yard.Generators.GLL.AbstractParser
 open Yard.Generators.Common.ASTGLL
 open Yard.Generators.GLL.ParserCommon
-open YaccConstructor.API
+open YC.API
 open Yard.Frontends.YardFrontend
 open Yard.Generators.GLL
 open Yard.Core.Conversions.ExpandMeta

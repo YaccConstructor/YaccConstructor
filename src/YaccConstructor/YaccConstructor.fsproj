@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{e9a0e63b-ead7-43de-8823-13faa6b2b972}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>Main</RootNamespace>
     <AssemblyName>YC.YaccConstructor</AssemblyName>
     <Name>YaccConstructor</Name>

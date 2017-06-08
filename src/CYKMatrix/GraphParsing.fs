@@ -215,6 +215,53 @@
             for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
                 unionArrays matrix.[nonTerm] (toArray matrix.[nonTerm] false) resultArray
 
+    
+    let managedCudaSquareMatrix<'MatrixType> matrixSetValue toArray (matrix: ParsingMatrix<'MatrixType>) (allRules: RulesHolder) isChanged matrixSize =
+        
+        let unionArrays (matrix: 'MatrixType) (curArr: float []) (updArr: float []) =
+            for ind in 0..matrixSize*matrixSize - 1 do
+                if curArr.[ind] = 0.0 && updArr.[ind] > 0.0
+                then
+                    isChanged := true
+                    let i = ind / matrixSize
+                    let j = ind - i * matrixSize
+                    matrixSetValue matrix i j 1.0
+        
+        let multArrays (from1: float []) (from2: float []) =
+            let cublashandle = new CudaBlas.CudaBlasHandle()
+            let mutable refhandle = ref cublashandle
+            CudaBlas.CudaBlasNativeMethods.cublasCreate_v2(refhandle) |> ignore
+
+            let transa = CudaBlas.Operation.NonTranspose
+            let transb = CudaBlas.Operation.NonTranspose
+
+            let alpha_ref = ref 1.0
+            let beta_ref = ref 0.0
+
+            let mutable devicePtrA : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(matrixSize * matrixSize))
+            devicePtrA.CopyToDevice(from1)
+            let mutable devicePtrB : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(matrixSize * matrixSize))
+            devicePtrB.CopyToDevice(from2)
+            let mutable devicePtrC : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(matrixSize * matrixSize))
+        
+            CudaBlas.CudaBlasNativeMethods.cublasDgemm_v2(!refhandle, transa, transb, matrixSize, matrixSize, matrixSize,
+                                                                alpha_ref, devicePtrB.DevicePointer, matrixSize,
+                                                                devicePtrA.DevicePointer, matrixSize,
+                                                                beta_ref, devicePtrC.DevicePointer, matrixSize) |> ignore
+            
+            let resultArr = Array.init (matrixSize * matrixSize) (fun x -> 0.0)   
+            devicePtrC.CopyToHost(resultArr)
+            resultArr
+
+
+        let nontermPairs = allRules.ComplexTails
+        for (nt1, nt2) in nontermPairs do
+            let arr1 = toArray matrix.[nt1] false
+            let arr2 = toArray matrix.[nt2] false
+            let resultArray = multArrays arr1 arr2
+
+            for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
+                unionArrays matrix.[nonTerm] (toArray matrix.[nonTerm] false) resultArray
 
     let sparseCudaGemm (matrix1 : MySparseMatrix) (matrix2 : MySparseMatrix) matrixSize =
         let nnzA = matrix1.Nnz

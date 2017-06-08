@@ -1,9 +1,14 @@
 [<Start>]
-a: s s
+a: a s
 a: s1 a1
 a1: a s2
 a: s3 a3 
-a3: a s4
+a3: a s4
+
+a: s1 s5
+a: s3 s6
+a: s1 s2
+a: s3 s4
 
 s: s1 s5
 s: s3 s6

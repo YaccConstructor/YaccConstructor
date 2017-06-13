@@ -220,6 +220,10 @@ let getAllRangesForStateWithLength gss state =
     findVertices gss state
     |> Seq.collect (fun v -> v.P.SetP |> Seq.map (fun poped -> v.PositionInInput, poped.posInInput, match poped.data with Length x -> x | TreeNode _ -> failwith "Impossible!"))
 
+let getGSS (parser : ParserSourceGLL) (input : IParserInput) = 
+    let gss, _, _ = parse parser input false
+    gss
+
 let getAllRangesForStartStateWithLength (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss, _, _ = parse parser input false
     getAllRangesForStateWithLength gss parser.StartState

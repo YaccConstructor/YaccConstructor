@@ -177,7 +177,7 @@ let runFSXScript fsxFile =
     printfn "path: %s" (System.IO.Path.GetFullPath(fsxFile + ".fsx"))
     let ret, out = Fake.FSIHelper.executeFSI (System.IO.Path.GetDirectoryName (System.IO.Path.GetFullPath(fsxFile + ".fsx"))) (System.IO.Path.GetFullPath(fsxFile + ".fsx")) Seq.empty
     if not ret 
-    then printfn "ERROR: %A" out
+    then failwithf "ERROR: %A" out
 
 Target "Gen:FsLex" (fun _ -> runShell <| "src" @@ "FsLex" @@ "gen")
 

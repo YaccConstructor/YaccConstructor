@@ -60,21 +60,14 @@ let mySparseAnalyzer (matrix:MySparseMatrix) = matrix.Nnz
 let processFile file grammarFile =
     let cnt = 1
 
-    preprocBioData()
+    //preprocBioData()
 
     let g1, triples1 = 
         BioDataPerformance.getParseInputGraph file
 
-//    printfn("Graph loaded")
+    printfn("Graph loaded")
     let fe = new Yard.Frontends.YardFrontend.YardFrontend()
     let loadIL = fe.ParseGrammar grammarFile
-    (*let cnfConv = new Conversions.ToCNF.ToCNF()
-    let cnfIL = 
-        {
-            loadIL
-                with grammar = cnfConv.ConvertGrammar (loadIL.grammar, [||])
-        }*)
-
     
     //DenseCPU --- naive realization
     (*let start = System.DateTime.Now
@@ -88,14 +81,14 @@ let processFile file grammarFile =
     let countOfPairs1 = probabilityAnalyzer root1.[0]*)
 
     //SparseCPU --- Math.Net Numerics
-    let start = System.DateTime.Now
+    (*let start = System.DateTime.Now
     let root2 =
         [for i in 0..cnt-1 ->
             let (parsingMatrix, _, _) = graphParse<SparseMatrix, float> g1 sparseSquareMatrix2 loadIL
                                           tokenizer createEmptyMatrixSparse matrixSetValueSparse innerOneFloat
             parsingMatrix]
     let time2 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
-    let countOfPairs2 = sparseAnalyzer root2.[0]
+    let countOfPairs2 = sparseAnalyzer root2.[0]*)
 
     //DenseGPU --- Alea Cuda
     (*let start = System.DateTime.Now
@@ -108,14 +101,14 @@ let processFile file grammarFile =
     let countOfPairs3 = probabilityAnalyzer root3.[0]*)
 
     //SparseGPU --- managedCuda
-    (*let start = System.DateTime.Now
+    let start = System.DateTime.Now
     let root4 =
         [for i in 0..cnt-1 ->
             let (parsingMatrix, _, _) = graphParse<MySparseMatrix, float>  g1  sparseCudaSquareMatrix  loadIL
                                           tokenizer createEmptyMatrixMySparse matrixSetValueMySparse innerOneFloat
             parsingMatrix]
     let time4 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
-    let countOfPairs4 = mySparseAnalyzer root4.[0]*)
+    let countOfPairs4 = mySparseAnalyzer root4.[0]
 
     //SparseCPUParallel1 --- System.Threading (2 Threads)
     (*let start = System.DateTime.Now
@@ -128,19 +121,30 @@ let processFile file grammarFile =
     let countOfPairs5 = sparseAnalyzer root5.[0]*)
     
     //SparseCPUParallel2 --- MailBoxProcessors (any number of threads)
-    let start = System.DateTime.Now
+    (*let start = System.DateTime.Now
     let root6 =
         [for i in 0..cnt-1 ->
             let (parsingMatrix, _, _) = graphParseParallel<float> g1 loadIL
                                           tokenizer createEmptyMatrixSparse matrixSetValueSparse innerOneFloat
             parsingMatrix]
     let time6 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
-    let countOfPairs6 = sparseAnalyzer root6.[0]
+    let countOfPairs6 = sparseAnalyzer root6.[0]*)
 
-    System.IO.Path.GetFileNameWithoutExtension file, triples1, (*time1, countOfPairs1,*) time2, countOfPairs2, (*time3, countOfPairs3, time4, countOfPairs4, time5, countOfPairs5,*) time6, countOfPairs6
+    //DenseGPU2 --- managedCuda
+    (*let start = System.DateTime.Now
+    let root7 =
+        [for i in 0..cnt-1 ->
+            let (parsingMatrix, _, _) = graphParse<ProbabilityMatrix.T, float>  g1  managedCudaSquareFunction  loadIL
+                                          tokenizer createEmptyMatrixProbability matrixSetValueProbability innerOneFloat
+            parsingMatrix]
+    let time7 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
+    let countOfPairs7 = probabilityAnalyzer root7.[0]*)
+
+    System.IO.Path.GetFileNameWithoutExtension file, triples1, (*time1, countOfPairs1, time2, countOfPairs2, time3, countOfPairs3,*)
+                                                 time4, countOfPairs4(*, time5, countOfPairs5, time6, countOfPairs6, time7, countOfPairs7*)
 
 let performTests () =
     let allTriplesFile = @"..\..\..\data\BioData\result\allTriples.txt"
     let simpleInputFile = @"..\..\..\data\BioData\result\simpleInput.txt"    
-    processFile simpleInputFile "..\..\..\GraphParsing.Test\GPPerf_Bio.yrd" |> printfn "%A"
+    processFile allTriplesFile "..\..\..\GraphParsing.Test\GPPerf_Bio.yrd" |> printfn "%A"
 

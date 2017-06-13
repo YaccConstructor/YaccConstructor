@@ -91,8 +91,16 @@ let getParseInputGraph file =
      
     let graph = new SimpleInputGraph<_>(allVs, id)
     
-    edges
+    (*edges
     |> Array.collect (fun (f,l,t) -> [|new ParserEdge<_>(f, t, getTokenFromTag (fun x -> (int) GLL.BioCFG.stringToToken.[x]) l)|])
+    |> graph.AddVerticesAndEdgeRange
+    |> ignore*)
+
+    edges
+    |> Array.collect (fun (f,l,t) -> 
+        if getTokenFromTag (fun x -> (int) GLL.BioCFG.stringToToken.[x]) l <> (int) GLL.BioCFG.stringToToken.["OTHER"]
+        then [|new ParserEdge<_>(f, t, getTokenFromTag (fun x -> (int) GLL.BioCFG.stringToToken.[x]) l)|]
+        else [||])
     |> graph.AddVerticesAndEdgeRange
     |> ignore
 

@@ -11,6 +11,10 @@ open CYKMatrix
 open GraphParsing
 open MathNet.Numerics.LinearAlgebra.Double
 
+
+(*//Simple initializer
+simpleInitMatrix graph allRules nonterminals = initParsingMatrix<ProbabilityMatrix.T, float> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>) allRules nonterminals createEmptyMatrix matrixSetValue innerOne*)
+
 //ProbabilityMatrix<float> functions
 let createEmptyMatrixProbability = ProbabilityMatrix.empty
 let matrixSetValueProbability (matrix: ProbabilityMatrix.T) (i: int) (j: int) (value: float) = matrix.InnerValue.[i*matrix.Size + j] <- value

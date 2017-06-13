@@ -66,9 +66,10 @@
                     let row = vertexToInt.[edg.Source]
                     let col = vertexToInt.[edg.Target]
                     matrixSetValue parsingMatrix.[simpleNonterminal] row col innerOne
+            System.GC.Collect()
 
         parsingMatrix, vertexToInt
-
+    
     let naiveSquareMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> matrixSetValue toArray (innerSum: 'InnerType -> 'InnerType -> 'InnerType)
                 (innerMult: 'InnerType -> 'InnerType -> 'InnerType) (innerZero: 'InnerType) (innerOne: 'InnerType)
                 (matrix: ParsingMatrix<'MatrixType>) (allRules: RulesHolder) isChanged matrixSize =
@@ -105,6 +106,8 @@
 
     let sparseSquareMatrix (matrix: ParsingMatrix<SparseMatrix>) (allRules: RulesHolder) isChanged matrixSize =
         let unionArrays (matrix: SparseMatrix) (updMatrix: MathNet.Numerics.LinearAlgebra.Matrix<float>) =
+            //let d = matrix.Storage :?> MathNet.Numerics.LinearAlgebra.Storage.SparseCompressedRowMatrixStorage<_>
+            
             for i in 0..(matrixSize - 1) do
                 for j in 0..(matrixSize - 1) do
                     if matrix.At(i, j) = 0.0 && updMatrix.At(i, j) > 0.0
@@ -392,7 +395,7 @@
                 csrValPtrA.CopyToDevice(csrValA)
                 let mutable csrRowPtrA : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
                 csrRowPtrA.CopyToDevice(csrRowA)
-                let mutable csrColIndPtrA : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(nnzA))
+                let mutable csrColIndPtrA : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(nnzA))                
                 csrColIndPtrA.CopyToDevice(csrColIndA)
                 let mutable csrValPtrB : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(nnzB))
                 csrValPtrB.CopyToDevice(csrValB)
@@ -403,6 +406,7 @@
 
                 let mutable csrRowPtrC : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
                 let mutable nnzTotalDevHostPtr : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(1))
+                
 
                 let nnzC = ref 0
 
@@ -430,14 +434,23 @@
         
                 let csrValC = Array.init !nnzC (fun x -> 0.0)        
                 let csrColIndC = Array.init !nnzC (fun x -> 0)
-
+                
                 csrValPtrC.CopyToHost(csrValC)
                 csrColIndPtrC.CopyToHost(csrColIndC)
 
+                csrValPtrA.Dispose()
+                csrRowPtrA.Dispose()
+                csrColIndPtrA.Dispose()
+                csrValPtrB.Dispose()
+                csrRowPtrB.Dispose()
+                csrColIndPtrB.Dispose()
+                csrValPtrC.Dispose()
+                csrRowPtrC.Dispose()
+                csrColIndPtrC.Dispose()
+                nnzTotalDevHostPtr.Dispose()
+
                 let resultMatrix = new MySparseMatrix(matrixSize, !nnzC, csrValC, csrRowC, csrColIndC)
                 resultMatrix
-        
-    
 
     let sparseCudaSquareMatrix (matrix: ParsingMatrix<MySparseMatrix>) (allRules: RulesHolder) isChanged matrixSize =
         let nontermPairs = allRules.ComplexTails
@@ -638,6 +651,7 @@
 
 
     let recognizeGraph<'MatrixType, 'InnerType when 'InnerType : comparison> graph
+                  //(matrixInitializator:AbstractAnalysis.Common.SimpleInputGraph<int> -> RulesHolder -> seq<NonTerminal> -> (ParsingMatrix<'MatrixType> * Dicitionary<int,int>)
                   (squareMatrix:ParsingMatrix<'MatrixType> -> RulesHolder -> bool ref -> int  -> unit)
                   (allRules: RulesHolder)
                   nonterminals
@@ -646,6 +660,8 @@
                   matrixSetValue 
                   (innerOne: 'InnerType) =
         let parsingMatrix, vertexToInt = initParsingMatrix<'MatrixType, 'InnerType> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>) allRules nonterminals createEmptyMatrix matrixSetValue innerOne
+        //let parsingMatrix, vertexToInt = matrixInitializator graph allRules nonterminals
+        printfn "Matrix initialized"
         let matrixSize = graph.VertexCount
         let isChanged = ref true
         let mutable multCount = 0
@@ -653,6 +669,7 @@
         while !isChanged do
             isChanged := false
             squareMatrix parsingMatrix allRules isChanged matrixSize
+            printfn "Multiplication done"
             multCount <- multCount + 1
 
         (parsingMatrix.[S], vertexToInt, multCount)    

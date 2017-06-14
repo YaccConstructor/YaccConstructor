@@ -66,7 +66,7 @@
                     let row = vertexToInt.[edg.Source]
                     let col = vertexToInt.[edg.Target]
                     matrixSetValue parsingMatrix.[simpleNonterminal] row col innerOne
-            System.GC.Collect()
+            //System.GC.Collect()
 
         parsingMatrix, vertexToInt
     
@@ -105,9 +105,7 @@
                 unionArrays matrix.[nonTerm] (toArray matrix.[nonTerm] false) resultArray
 
     let sparseSquareMatrix (matrix: ParsingMatrix<SparseMatrix>) (allRules: RulesHolder) isChanged matrixSize =
-        let unionArrays (matrix: SparseMatrix) (updMatrix: MathNet.Numerics.LinearAlgebra.Matrix<float>) =
-            //let d = matrix.Storage :?> MathNet.Numerics.LinearAlgebra.Storage.SparseCompressedRowMatrixStorage<_>
-            
+        let unionArrays (matrix: SparseMatrix) (updMatrix: MathNet.Numerics.LinearAlgebra.Matrix<float>) =            
             for i in 0..(matrixSize - 1) do
                 for j in 0..(matrixSize - 1) do
                     if matrix.At(i, j) = 0.0 && updMatrix.At(i, j) > 0.0
@@ -325,7 +323,14 @@
             nnzTotalDevHostPtr.CopyToHost(nnzC)
 
             if (!nnzC = 0)
-            then
+            then               
+                csrValPtrA.Dispose()
+                csrRowPtrA.Dispose()
+                csrColIndPtrA.Dispose()
+                csrValPtrB.Dispose()
+                csrRowPtrB.Dispose()
+                csrColIndPtrB.Dispose()
+                nnzTotalDevHostPtr.Dispose()
                 let resultMatrix = new MySparseMatrix(matrixSize, 0, Array.init 0 (fun x -> 0.0), Array.init 0 (fun x -> 0), Array.init 0 (fun x -> 0))
                 resultMatrix
             else
@@ -347,9 +352,18 @@
                 csrValPtrC.CopyToHost(csrValC)
                 csrColIndPtrC.CopyToHost(csrColIndC)
 
+                csrValPtrA.Dispose()
+                csrRowPtrA.Dispose()
+                csrColIndPtrA.Dispose()
+                csrValPtrB.Dispose()
+                csrRowPtrB.Dispose()
+                csrColIndPtrB.Dispose()
+                csrValPtrC.Dispose()
+                csrRowPtrC.Dispose()
+                csrColIndPtrC.Dispose()
+                nnzTotalDevHostPtr.Dispose()
 
                 let resultMatrix = new MySparseMatrix(matrixSize, !nnzC, csrValC, csrRowC, csrColIndC)
-
                 resultMatrix
 
     let sparseCudaGeam (matrix1 : MySparseMatrix) (matrix2 : MySparseMatrix) matrixSize =
@@ -495,19 +509,17 @@
     type Message = bool
 
     let recognizeGraphP<'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
+                  (matrixInitializator:AbstractAnalysis.Common.SimpleInputGraph<int> -> RulesHolder -> seq<NonTerminal> -> (ParsingMatrix<SparseMatrix> * Dictionary<int,int>))
                   (allRules: RulesHolder)
                   nonterminals
-                  S 
-                  createEmptyMatrix 
-                  matrixSetValue 
-                  (innerOne: 'InnerType) =
-        let parsingMatrixCurrent, vertexToInt = initParsingMatrix<SparseMatrix, 'InnerType> graph allRules nonterminals createEmptyMatrix matrixSetValue innerOne
+                  S =
+        let parsingMatrixCurrent, vertexToInt = matrixInitializator graph allRules nonterminals
         let matrixSize = graph.VertexCount
         let isChanged = ref true
         let mutable multCount = 0
         let parsingMatrixNew = new ParsingMatrix<SparseMatrix>()
         for nont in parsingMatrixCurrent.Keys do
-            parsingMatrixNew.Add(nont, createEmptyMatrix(matrixSize))
+            parsingMatrixNew.Add(nont, new SparseMatrix(matrixSize))
             parsingMatrixCurrent.[nont].CopyTo(parsingMatrixNew.[nont])
 
 
@@ -639,28 +651,22 @@
         (rulesHolder, nonterminals, S)
  
     let graphParseParallel<'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
+                  (matrixInitializator:AbstractAnalysis.Common.SimpleInputGraph<int> -> RulesHolder -> seq<NonTerminal> -> (ParsingMatrix<SparseMatrix> * Dictionary<int,int>))
                   (loadIL:t<Source.t, Source.t>)
-                  tokenToInt 
-                  createEmptyMatrix 
-                  matrixSetValue
-                  (innerOne: 'InnerType) =
+                  tokenToInt =
 
         let (rulesHolder, nonterminals, S) = initRulesFromIL loadIL tokenToInt
 
-        recognizeGraphP<'InnerType> graph rulesHolder nonterminals !S  createEmptyMatrix matrixSetValue innerOne    
+        recognizeGraphP<'InnerType> graph matrixInitializator rulesHolder nonterminals !S
 
 
     let recognizeGraph<'MatrixType, 'InnerType when 'InnerType : comparison> graph
-                  //(matrixInitializator:AbstractAnalysis.Common.SimpleInputGraph<int> -> RulesHolder -> seq<NonTerminal> -> (ParsingMatrix<'MatrixType> * Dicitionary<int,int>)
+                  (matrixInitializator:AbstractAnalysis.Common.SimpleInputGraph<int> -> RulesHolder -> seq<NonTerminal> -> (ParsingMatrix<'MatrixType> * Dictionary<int,int>))
                   (squareMatrix:ParsingMatrix<'MatrixType> -> RulesHolder -> bool ref -> int  -> unit)
                   (allRules: RulesHolder)
                   nonterminals
-                  S 
-                  createEmptyMatrix 
-                  matrixSetValue 
-                  (innerOne: 'InnerType) =
-        let parsingMatrix, vertexToInt = initParsingMatrix<'MatrixType, 'InnerType> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>) allRules nonterminals createEmptyMatrix matrixSetValue innerOne
-        //let parsingMatrix, vertexToInt = matrixInitializator graph allRules nonterminals
+                  S =
+        let parsingMatrix, vertexToInt = matrixInitializator graph allRules nonterminals
         printfn "Matrix initialized"
         let matrixSize = graph.VertexCount
         let isChanged = ref true
@@ -675,14 +681,12 @@
         (parsingMatrix.[S], vertexToInt, multCount)    
 
     let graphParse<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
+                  (matrixInitializator:AbstractAnalysis.Common.SimpleInputGraph<int> -> RulesHolder -> seq<NonTerminal> -> (ParsingMatrix<'MatrixType> * Dictionary<int,int>))
                   squareMatrix
                   (loadIL:t<Source.t, Source.t>)
-                  tokenToInt 
-                  createEmptyMatrix 
-                  matrixSetValue
-                  (innerOne: 'InnerType) =
+                  tokenToInt =
 
         let (rulesHolder, nonterminals, S) = initRulesFromIL loadIL tokenToInt
 
-        recognizeGraph<'MatrixType, 'InnerType> graph squareMatrix rulesHolder nonterminals !S  createEmptyMatrix matrixSetValue innerOne
+        recognizeGraph<'MatrixType, 'InnerType> graph matrixInitializator squareMatrix rulesHolder nonterminals !S
 

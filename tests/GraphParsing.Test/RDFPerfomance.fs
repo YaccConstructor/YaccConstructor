@@ -12,9 +12,6 @@ open GraphParsing
 open MathNet.Numerics.LinearAlgebra.Double
 
 
-(*//Simple initializer
-simpleInitMatrix graph allRules nonterminals = initParsingMatrix<ProbabilityMatrix.T, float> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>) allRules nonterminals createEmptyMatrix matrixSetValue innerOne*)
-
 //ProbabilityMatrix<float> functions
 let createEmptyMatrixProbability = ProbabilityMatrix.empty
 let matrixSetValueProbability (matrix: ProbabilityMatrix.T) (i: int) (j: int) (value: float) = matrix.InnerValue.[i*matrix.Size + j] <- value
@@ -23,6 +20,8 @@ let innerSumFloat f1 f2 = f1 + f2
 let innerMultFloat f1 f2 = f1 * f2
 let innerZeroFloat = 0.0
 let innerOneFloat = 1.0
+let initMatrixProbability (graph:AbstractAnalysis.Common.SimpleInputGraph<int>) allRules nonterminals = 
+    initParsingMatrix<ProbabilityMatrix.T, float> graph allRules nonterminals createEmptyMatrixProbability matrixSetValueProbability innerOneFloat
 //let naiveSquareFunction = naiveSquareMatrix<ProbabilityMatrix.T, float> matrixSetValueProbability
 //                             <| toArrayProbability <| innerSumFloat <| innerMultFloat <| innerZeroFloat <| innerOneFloat
 //let cudaSquareFunction = cudaSquareMatrix<ProbabilityMatrix.T> <| matrixSetValueProbability <| toArrayProbability
@@ -32,6 +31,8 @@ let managedCudaSquareFunction = managedCudaSquareMatrix<ProbabilityMatrix.T> <| 
 //Math.Net SparseMatrix<float> functions
 let createEmptyMatrixSparse size = SparseMatrix.Create(size, size, 0.0)
 let matrixSetValueSparse (matrix: SparseMatrix) (i: int) (j: int) (value: float) = matrix.At(i, j, value)
+let initMatrixSparse (graph:AbstractAnalysis.Common.SimpleInputGraph<int>) allRules nonterminals = 
+    initParsingMatrix<SparseMatrix, float> graph allRules nonterminals createEmptyMatrixSparse matrixSetValueSparse innerOneFloat
 
 //CuSparse MySparseMatrix<float> functions
 let createEmptyMatrixMySparse size = new MySparseMatrix(size, 0, Array.init 0 (fun x -> 0.0), Array.init 0 (fun x -> 0), Array.init 0 (fun x -> 0))
@@ -39,12 +40,23 @@ let matrixSetValueMySparse (matrix: MySparseMatrix) (i: int) (j: int) (value: fl
     let csrVal = Array.init 1 (fun x -> 1.0)
     let csrRow = Array.init (matrix.Size + 1) (fun x -> if x < i + 1 then 0 else 1)
     let csrColInd = Array.init 1 (fun x -> j)
-
     let oneCellMatrix = new MySparseMatrix(matrix.Size, 1, csrVal, csrRow, csrColInd)
-
     let newMatrix = sparseCudaGeam matrix oneCellMatrix matrix.Size
-
     matrix.Update(newMatrix.Nnz, newMatrix.CsrVal, newMatrix.CsrRow, newMatrix.CsrColInd)
+let initMatrixMySparse (graph:AbstractAnalysis.Common.SimpleInputGraph<int>) allRules nonterminals =
+    let initMatrix, vertexToInt = initMatrixSparse graph allRules nonterminals
+    let mySparseDict = new ParsingMatrix<MySparseMatrix>()
+    for nonterm in initMatrix.Keys do
+        let matrix = initMatrix.[nonterm]    
+        let storage = matrix.Storage :?> MathNet.Numerics.LinearAlgebra.Storage.SparseCompressedRowMatrixStorage<_>
+        let csrVal = Array.copy storage.Values
+        let csrRow = Array.copy storage.RowPointers
+        let csrColInd = Array.copy storage.ColumnIndices
+        let newMatrix = new MySparseMatrix(matrix.RowCount, matrix.NonZerosCount, csrVal, csrRow, csrColInd)   
+        mySparseDict.Add(nonterm, newMatrix)
+
+    mySparseDict, vertexToInt
+
 
 let tokenizer str =
     match str with
@@ -76,20 +88,12 @@ let processFile file grammarFile =
 //    printfn("Graph loaded")
     let fe = new Yard.Frontends.YardFrontend.YardFrontend()
     let loadIL = fe.ParseGrammar grammarFile
-    (*let cnfConv = new Conversions.ToCNF.ToCNF()
-    let cnfIL = 
-        {
-            loadIL
-                with grammar = cnfConv.ConvertGrammar (loadIL.grammar, [||])
-        }*)
-
     
     //DenseCPU --- naive realization
     (*let start = System.DateTime.Now
     let root1 =
         [for i in 0..cnt-1 ->
-            let (parsingMatrix, _, _) = graphParse<ProbabilityMatrix.T, float> g1 naiveSquareFunction loadIL
-                                          tokenizer createEmptyMatrixProbability matrixSetValueProbability innerOneFloat
+            let (parsingMatrix, _, _) = graphParse<ProbabilityMatrix.T, float> g1 initMatrixProbability naiveSquareFunction loadIL tokenizer
             parsingMatrix]
     
     let time1 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
@@ -99,8 +103,7 @@ let processFile file grammarFile =
     let start = System.DateTime.Now
     let root2 =
         [for i in 0..cnt-1 ->
-            let (parsingMatrix, _, _) = graphParse<SparseMatrix, float> g1 sparseSquareMatrix2 loadIL
-                                          tokenizer createEmptyMatrixSparse matrixSetValueSparse innerOneFloat
+            let (parsingMatrix, _, _) = graphParse<SparseMatrix, float> g1 initMatrixSparse sparseSquareMatrix2 loadIL tokenizer
             parsingMatrix]
     let time2 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
     let countOfPairs2 = sparseAnalyzer root2.[0]
@@ -109,8 +112,7 @@ let processFile file grammarFile =
     (*let start = System.DateTime.Now
     let root3 =
         [for i in 0..cnt-1 ->
-            let (parsingMatrix, _, _) = graphParse<ProbabilityMatrix.T, float>  g1  cudaSquareFunction  loadIL
-                                          tokenizer createEmptyMatrixProbability matrixSetValueProbability innerOneFloat
+            let (parsingMatrix, _, _) = graphParse<ProbabilityMatrix.T, float> g1 initMatrixProbability cudaSquareFunction loadIL tokenizer
             parsingMatrix]
     let time3 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
     let countOfPairs3 = probabilityAnalyzer root3.[0]*)
@@ -119,8 +121,7 @@ let processFile file grammarFile =
     let start = System.DateTime.Now
     let root4 =
         [for i in 0..cnt-1 ->
-            let (parsingMatrix, _, _) = graphParse<MySparseMatrix, float>  g1  sparseCudaSquareMatrix  loadIL
-                                          tokenizer createEmptyMatrixMySparse matrixSetValueMySparse innerOneFloat
+            let (parsingMatrix, _, _) = graphParse<MySparseMatrix, float> g1 initMatrixMySparse sparseCudaSquareMatrix  loadIL tokenizer
             parsingMatrix]
     let time4 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
     let countOfPairs4 = mySparseAnalyzer root4.[0]
@@ -129,8 +130,7 @@ let processFile file grammarFile =
     (*let start = System.DateTime.Now
     let root5 =
         [for i in 0..cnt-1 ->
-            let (parsingMatrix, _, _) = graphParse<SparseMatrix, float> g1 sparseParallelSquareMatrix loadIL
-                                          tokenizer createEmptyMatrixSparse matrixSetValueSparse innerOneFloat
+            let (parsingMatrix, _, _) = graphParse<SparseMatrix, float> g1 initMatrixSparse sparseParallelSquareMatrix loadIL tokenizer
             parsingMatrix]
     let time5 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
     let countOfPairs5 = sparseAnalyzer root5.[0]*)
@@ -139,8 +139,7 @@ let processFile file grammarFile =
     (*let start = System.DateTime.Now
     let root6 =
         [for i in 0..cnt-1 ->
-            let (parsingMatrix, _, _) = graphParseParallel<float> g1 loadIL
-                                          tokenizer createEmptyMatrixSparse matrixSetValueSparse innerOneFloat
+            let (parsingMatrix, _, _) = graphParseParallel<float> g1 initMatrixSparse loadIL tokenizer
             parsingMatrix]
     let time6 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
     let countOfPairs6 = sparseAnalyzer root6.[0]*)
@@ -149,8 +148,7 @@ let processFile file grammarFile =
     let start = System.DateTime.Now
     let root7 =
         [for i in 0..cnt-1 ->
-            let (parsingMatrix, _, _) = graphParse<ProbabilityMatrix.T, float>  g1  managedCudaSquareFunction  loadIL
-                                          tokenizer createEmptyMatrixProbability matrixSetValueProbability innerOneFloat
+            let (parsingMatrix, _, _) = graphParse<ProbabilityMatrix.T, float> g1 initMatrixProbability managedCudaSquareFunction  loadIL tokenizer
             parsingMatrix]
     let time7 = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
     let countOfPairs7 = probabilityAnalyzer root7.[0]

@@ -21,9 +21,12 @@ let innerSumFloat f1 f2 = f1 + f2
 let innerMultFloat f1 f2 = f1 * f2
 let innerZeroFloat = 0.0
 let innerOneFloat = 1.0
+let initMatrixProbability (graph:AbstractAnalysis.Common.SimpleInputGraph<int>) allRules nonterminals = 
+    initParsingMatrix<ProbabilityMatrix.T, float> graph allRules nonterminals createEmptyMatrixProbability matrixSetValueProbability innerOneFloat
 let naiveSquareFunction = naiveSquareMatrix<ProbabilityMatrix.T, float> matrixSetValueProbability
                              <| toArrayProbability <| innerSumFloat <| innerMultFloat <| innerZeroFloat <| innerOneFloat
 let cudaSquareFunction = cudaSquareMatrix<ProbabilityMatrix.T> <| matrixSetValueProbability <| toArrayProbability
+
 let graphParsingPrint (matrix: ProbabilityMatrix.T) =
     let rowLength = matrix.Nrow
     let colLength = matrix.Ncol
@@ -37,6 +40,9 @@ let graphParsingPrint (matrix: ProbabilityMatrix.T) =
 //Math.Net SparseMatrix<float> functions
 let createEmptyMatrixSparse size = SparseMatrix.Create(size, size, 0.0)
 let matrixSetValueSparse (matrix: SparseMatrix) (i: int) (j: int) (value: float) = matrix.At(i, j, value)
+let initMatrixSparse (graph:AbstractAnalysis.Common.SimpleInputGraph<int>) allRules nonterminals = 
+    initParsingMatrix<SparseMatrix, float> graph allRules nonterminals createEmptyMatrixSparse matrixSetValueSparse innerOneFloat
+
 let sparsePrint (matrix: SparseMatrix) =
     for i in 0..(matrix.RowCount - 1) do
         for j in 0..(matrix.ColumnCount - 1) do
@@ -53,11 +59,24 @@ let matrixSetValueMySparse (matrix: MySparseMatrix) (i: int) (j: int) (value: fl
     let oneCellMatrix = new MySparseMatrix(matrix.Size, 1, csrVal, csrRow, csrColInd)
     let newMatrix = sparseCudaGeam matrix oneCellMatrix matrix.Size
     matrix.Update(newMatrix.Nnz, newMatrix.CsrVal, newMatrix.CsrRow, newMatrix.CsrColInd)
+let initMatrixMySparse (graph:AbstractAnalysis.Common.SimpleInputGraph<int>) allRules nonterminals =
+    let initMatrix, vertexToInt = initMatrixSparse graph allRules nonterminals
+    let mySparseDict = new ParsingMatrix<MySparseMatrix>()
+    for nonterm in initMatrix.Keys do
+        let matrix = initMatrix.[nonterm]    
+        let storage = matrix.Storage :?> MathNet.Numerics.LinearAlgebra.Storage.SparseCompressedRowMatrixStorage<_>
+        let csrVal = Array.copy storage.Values
+        let csrRow = Array.copy storage.RowPointers
+        let csrColInd = Array.copy storage.ColumnIndices
+        let newMatrix = new MySparseMatrix(matrix.RowCount, matrix.NonZerosCount, csrVal, csrRow, csrColInd)   
+        mySparseDict.Add(nonterm, newMatrix)
+
+    mySparseDict, vertexToInt
+
 let MySparsePrint (matrix: MySparseMatrix) = 
     printfn "CsrVal: %A" matrix.CsrVal
     printfn "CsrColInd: %A" matrix.CsrColInd
     printfn "CsrRow: %A" matrix.CsrRow
-   
 
 [<TestFixture>]
 type ``Graph parsing tests``() =  
@@ -85,8 +104,7 @@ type ``Graph parsing tests``() =
         let erl: NonTerminal list = []
         let rules = new RulesHolder(crl, srl, erl)
         let (recognizeMatrix, vertexToInt, multCount) =
-            GraphParsing.recognizeGraph<ProbabilityMatrix.T, float> <| graph <| naiveSquareFunction <| rules <| nonterminals <| S <| createEmptyMatrixProbability <| 
-                matrixSetValueProbability <| innerOneFloat
+            recognizeGraph<ProbabilityMatrix.T, float> graph initMatrixProbability naiveSquareFunction rules nonterminals S
         printfn "Naive Multiplacation count: %d" multCount
         graphParsingPrint recognizeMatrix
 
@@ -107,8 +125,7 @@ type ``Graph parsing tests``() =
                 | "A" -> 1
                 | _ -> -1
 
-        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> <| graph <| naiveSquareFunction <| loadIL
-                                          <| tokenizer <| createEmptyMatrixProbability <| matrixSetValueProbability <| innerOneFloat
+        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> graph initMatrixProbability naiveSquareFunction loadIL tokenizer
         printfn "Naive Multiplacation count: %d" multCount
         graphParsingPrint parsingMatrix
 
@@ -133,8 +150,7 @@ type ``Graph parsing tests``() =
                 | "A" -> 1
                 | _ -> -1
 
-        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> <| graph <| naiveSquareFunction <| loadIL
-                                          <| tokenizer <| createEmptyMatrixProbability <| matrixSetValueProbability <| innerOneFloat
+        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> graph initMatrixProbability naiveSquareFunction loadIL tokenizer
         printfn "Naive Multiplacation count: %d" multCount
         graphParsingPrint parsingMatrix
 
@@ -155,8 +171,7 @@ type ``Graph parsing tests``() =
                 | "A" -> 1
                 | _ -> -1
 
-        let (parsingMatrix, _, multCount) = graphParse<SparseMatrix, float> <| graph <| sparseSquareMatrix <| loadIL
-                                          <| tokenizer <| createEmptyMatrixSparse <| matrixSetValueSparse <| innerOneFloat
+        let (parsingMatrix, _, multCount) = graphParse<SparseMatrix, float> graph initMatrixSparse sparseSquareMatrix loadIL tokenizer
         printfn "Sparse Multiplacation count: %d" multCount
         sparsePrint parsingMatrix
 
@@ -181,8 +196,7 @@ type ``Graph parsing tests``() =
                 | "A" -> 1
                 | _ -> -1
 
-        let (parsingMatrix, _, multCount) = graphParse<SparseMatrix, float> <| graph <| sparseSquareMatrix <| loadIL
-                                          <| tokenizer <| createEmptyMatrixSparse <| matrixSetValueSparse <| innerOneFloat
+        let (parsingMatrix, _, multCount) = graphParse<SparseMatrix, float> graph initMatrixSparse sparseSquareMatrix loadIL tokenizer
         printfn "Sparse Multiplacation count: %d" multCount
         sparsePrint parsingMatrix
 
@@ -203,8 +217,7 @@ type ``Graph parsing tests``() =
                 | "A" -> 1
                 | _ -> -1
 
-        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> <| graph <| cudaSquareFunction <| loadIL
-                                          <| tokenizer <| createEmptyMatrixProbability <| matrixSetValueProbability <| innerOneFloat
+        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> graph initMatrixProbability cudaSquareFunction loadIL tokenizer
         printfn "CUDA Multiplacation count: %d" multCount
         graphParsingPrint parsingMatrix
 
@@ -229,8 +242,7 @@ type ``Graph parsing tests``() =
                 | "A" -> 1
                 | _ -> -1
 
-        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> <| graph <| cudaSquareFunction <| loadIL
-                                          <| tokenizer <| createEmptyMatrixProbability <| matrixSetValueProbability <| innerOneFloat
+        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> graph initMatrixProbability cudaSquareFunction loadIL tokenizer
         printfn "CUDA Multiplacation count: %d" multCount
         graphParsingPrint parsingMatrix
 
@@ -257,8 +269,7 @@ type ``Graph parsing tests``() =
             | "T" -> 5
             | _ -> -1
 
-        let (parsingMatrix, _, multCount) = graphParse<MySparseMatrix, float>  graph  sparseCudaSquareMatrix  loadIL 
-                                                        tokenizer createEmptyMatrixMySparse matrixSetValueMySparse innerOneFloat
+        let (parsingMatrix, _, multCount) = graphParse<MySparseMatrix, float> graph initMatrixMySparse sparseCudaSquareMatrix loadIL tokenizer
         printfn "Sparse GPU Multiplacation count: %d" multCount
         MySparsePrint parsingMatrix
 

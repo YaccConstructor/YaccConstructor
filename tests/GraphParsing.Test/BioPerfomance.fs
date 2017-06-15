@@ -9,6 +9,8 @@ open Util
 open QuickGraph
 open CYKMatrix
 open GraphParsing
+open MatrixKernels
+open MatrixRealizations
 open MathNet.Numerics.LinearAlgebra.Double
 open BioDataPreproc
 open BioDataPerformance
@@ -75,7 +77,7 @@ let mySparseAnalyzer (matrix:MySparseMatrix) = matrix.Nnz
 let processFile file grammarFile =
     let cnt = 1
 
-    //preprocBioData()
+//    preprocBioData()
 
     let g1, triples1 = 
         BioDataPerformance.getParseInputGraph file

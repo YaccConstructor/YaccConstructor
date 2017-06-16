@@ -14,82 +14,6 @@
     open Microsoft.FSharp.Core.Operators
     open MathNet.Numerics.LinearAlgebra.Double
 
-               
-
-    type Message = bool
-
-    let recognizeGraphP<'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
-                  (matrixInitializator:AbstractAnalysis.Common.SimpleInputGraph<int> -> RulesHolder -> seq<NonTerminal> -> (ParsingMatrix<SparseMatrix> * Dictionary<int,int>))
-                  (allRules: RulesHolder)
-                  nonterminals
-                  S =
-        let parsingMatrixCurrent, vertexToInt = matrixInitializator graph allRules nonterminals
-        let matrixSize = graph.VertexCount
-        let isChanged = ref true
-        let mutable multCount = 0
-        let parsingMatrixNew = new ParsingMatrix<SparseMatrix>()
-        for nont in parsingMatrixCurrent.Keys do
-            parsingMatrixNew.Add(nont, new SparseMatrix(matrixSize))
-            parsingMatrixCurrent.[nont].CopyTo(parsingMatrixNew.[nont])
-
-
-        let nontermPairs = allRules.ComplexTails
-
-        let splitCount = 4
-
-        let splitedNontermPairs = nontermLockFreeSplit allRules nonterminals splitCount
-
-        let flags = Array.init splitCount (fun _ -> ref false)
-        let values = Array.init splitCount (fun _ -> ref false)
-        
-        let mbp flg vl nontermPairs_mbp = new MailboxProcessor<Message>(fun inbox ->
-            let rec loop n =
-                async {                                  
-                        let! message = inbox.Receive();
-                        for (nt1, nt2) in nontermPairs_mbp do
-                            let matrix1 = parsingMatrixCurrent.[nt1]
-                            let matrix2 = parsingMatrixCurrent.[nt2]
-                            let resultMatrix = matrix1.Multiply(matrix2)          
-                            for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                                    let nonZ = parsingMatrixCurrent.[nonTerm].NonZerosCount
-                                    //lock parsingMatrix (fun () ->
-                                    parsingMatrixNew.[nonTerm].PointwiseMaximum(resultMatrix, parsingMatrixNew.[nonTerm])
-                                    //)
-                                    if (nonZ <> parsingMatrixNew.[nonTerm].NonZerosCount)
-                                    then 
-                                        vl := true
-                        flg:= true
-                        do! loop (n + 1)
-                }
-            loop (0))
-        
-        let mailBoxes = Array.init splitCount (fun i -> mbp flags.[i] values.[i] splitedNontermPairs.[i])
-
-        for i in 0..(mailBoxes.Length-1) do
-            mailBoxes.[i].Start()
-
-        while !isChanged do
-            isChanged := false
-            for i in 0..(mailBoxes.Length-1) do
-                mailBoxes.[i].Post(false)
-
-            while not <| Array.TrueForAll (flags, (fun fl -> !fl)) do ()
-
-            for i in 0..(flags.Length-1) do
-                flags.[i] := false
-
-            isChanged := Array.Exists (values, (fun vl -> !vl))
-
-            for i in 0..(values.Length-1) do
-                values.[i] := false
-            
-            for nont in parsingMatrixNew.Keys do
-                parsingMatrixNew.[nont].CopyTo(parsingMatrixCurrent.[nont])
-
-            multCount <- multCount + 1            
-
-        (parsingMatrixNew.[S], vertexToInt, multCount)
-
 
     let initRulesFromIL loadIL tokenToInt =
         let grammar = loadIL.grammar
@@ -159,44 +83,118 @@
         let rulesHolder = new RulesHolder(crl_result, srl_result, erl_result)
 
         (rulesHolder, nonterminals, S)
- 
-    let graphParseParallel<'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
-                  (matrixInitializator:AbstractAnalysis.Common.SimpleInputGraph<int> -> RulesHolder -> seq<NonTerminal> -> (ParsingMatrix<SparseMatrix> * Dictionary<int,int>))
-                  (loadIL:t<Source.t, Source.t>)
-                  tokenToInt =
 
-        let (rulesHolder, nonterminals, S) = initRulesFromIL loadIL tokenToInt
-
-        recognizeGraphP<'InnerType> graph matrixInitializator rulesHolder nonterminals !S
-
+    type Message = bool
 
     let recognizeGraph<'MatrixType, 'InnerType when 'InnerType : comparison> graph
-                  (matrixInitializator:AbstractAnalysis.Common.SimpleInputGraph<int> -> RulesHolder -> seq<NonTerminal> -> (ParsingMatrix<'MatrixType> * Dictionary<int,int>))
-                  (squareMatrix:ParsingMatrix<'MatrixType> -> RulesHolder -> bool ref -> int  -> unit)
-                  (allRules: RulesHolder)
-                  nonterminals
-                  S =
-        let parsingMatrix, vertexToInt = matrixInitializator graph allRules nonterminals
-        printfn "Matrix initialized"
-        let matrixSize = graph.VertexCount
-        let isChanged = ref true
-        let mutable multCount = 0
+                    (mHandler : IMatrixHandler<'MatrixType, 'InnerType>)
+                    (allRules: RulesHolder)
+                    nonterminals
+                    S 
+                    parallelProcesses =
+        if (parallelProcesses = 1)
+        then
+            let parsingMatrix, vertexToInt = mHandler.ParsingMatrixInitializator graph allRules nonterminals
+            printfn "Matrix initialized"
+            let matrixSize = graph.VertexCount
+            let isChanged = ref true
+            let mutable multCount = 0
 
-        while !isChanged do
-            isChanged := false
-            squareMatrix parsingMatrix allRules isChanged matrixSize
-            printfn "Multiplication done"
-            multCount <- multCount + 1
+            while !isChanged do
+                isChanged := false
+                for (nt1, nt2) in allRules.ComplexTails do
+                    let matrix1 = parsingMatrix.[nt1]
+                    let matrix2 = parsingMatrix.[nt2]
+                    let resultMatrix = mHandler.Multiply matrix1 matrix2          
+                    for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
+                        let nonZ = mHandler.getNonZerosCount parsingMatrix.[nonTerm]
+                        let updatedMatrix = mHandler.Add parsingMatrix.[nonTerm] resultMatrix
+                        parsingMatrix.Remove(nonTerm) |> ignore
+                        parsingMatrix.Add(nonTerm, updatedMatrix)
+                        if (nonZ <> mHandler.getNonZerosCount parsingMatrix.[nonTerm])
+                        then 
+                            isChanged := true
+                printfn "Iteration done"
+                multCount <- multCount + 1
 
-        (parsingMatrix.[S], vertexToInt, multCount)    
+            (parsingMatrix.[S], vertexToInt, multCount)
+        else
+            let parsingMatrixCurrent, vertexToInt = mHandler.ParsingMatrixInitializator graph allRules nonterminals
+            let matrixSize = graph.VertexCount
+            let isChanged = ref true
+            let mutable multCount = 0
+            let parsingMatrixNew = new ParsingMatrix<'MatrixType>()
+            let emptyMatrix = mHandler.createEmptyMatrix matrixSize
+            for nont in parsingMatrixCurrent.Keys do
+                parsingMatrixNew.Add(nont, mHandler.Add parsingMatrixCurrent.[nont] emptyMatrix)
+
+            let nontermPairs = allRules.ComplexTails
+
+            let splitedNontermPairs = nontermLockFreeSplit allRules nonterminals parallelProcesses
+
+            let flags = Array.init parallelProcesses (fun _ -> ref false)
+            let values = Array.init parallelProcesses (fun _ -> ref false)
+        
+            let mbp flg vl nontermPairs_mbp = new MailboxProcessor<Message>(fun inbox ->
+                let rec loop n =
+                    async {                                  
+                            let! message = inbox.Receive();
+                            for (nt1, nt2) in nontermPairs_mbp do
+                                let matrix1 = parsingMatrixCurrent.[nt1]
+                                let matrix2 = parsingMatrixCurrent.[nt2]
+                                let resultMatrix = mHandler.Multiply matrix1 matrix2          
+                                for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
+                                        let nonZ = mHandler.getNonZerosCount parsingMatrixCurrent.[nonTerm]
+                                        //lock parsingMatrix (fun () ->
+                                        let updatedMatrix = mHandler.Add parsingMatrixNew.[nonTerm] resultMatrix
+                                        parsingMatrixNew.Remove(nonTerm) |> ignore
+                                        parsingMatrixNew.Add(nonTerm, updatedMatrix)
+                                        //)
+                                        if (nonZ <> mHandler.getNonZerosCount parsingMatrixNew.[nonTerm])
+                                        then 
+                                            vl := true
+                            flg:= true
+                            do! loop (n + 1)
+                    }
+                loop (0))
+        
+            let mailBoxes = Array.init parallelProcesses (fun i -> mbp flags.[i] values.[i] splitedNontermPairs.[i])
+
+            for i in 0..(mailBoxes.Length-1) do
+                mailBoxes.[i].Start()
+
+            while !isChanged do
+                isChanged := false
+                for i in 0..(mailBoxes.Length-1) do
+                    mailBoxes.[i].Post(false)
+
+                while not <| Array.TrueForAll (flags, (fun fl -> !fl)) do ()
+
+                for i in 0..(flags.Length-1) do
+                    flags.[i] := false
+
+                isChanged := Array.Exists (values, (fun vl -> !vl))
+
+                for i in 0..(values.Length-1) do
+                    values.[i] := false
+            
+                for nont in parsingMatrixNew.Keys do
+                    let updatedMatrix = mHandler.Add parsingMatrixNew.[nont] emptyMatrix
+                    parsingMatrixCurrent.Remove(nont) |> ignore
+                    parsingMatrixCurrent.Add(nont, updatedMatrix)
+
+                multCount <- multCount + 1            
+
+            (parsingMatrixNew.[S], vertexToInt, multCount)
+            
+            
 
     let graphParse<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
-                  (matrixInitializator:AbstractAnalysis.Common.SimpleInputGraph<int> -> RulesHolder -> seq<NonTerminal> -> (ParsingMatrix<'MatrixType> * Dictionary<int,int>))
-                  squareMatrix
+                  mHandler
                   (loadIL:t<Source.t, Source.t>)
-                  tokenToInt =
+                  tokenToInt 
+                  parallelProcesses =
 
         let (rulesHolder, nonterminals, S) = initRulesFromIL loadIL tokenToInt
 
-        recognizeGraph<'MatrixType, 'InnerType> graph matrixInitializator squareMatrix rulesHolder nonterminals !S
-
+        recognizeGraph<'MatrixType, 'InnerType> graph mHandler rulesHolder nonterminals !S parallelProcesses

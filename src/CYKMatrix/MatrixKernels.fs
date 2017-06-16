@@ -21,6 +21,16 @@
 
     type ParsingMatrix<'MatrixType> = Dictionary<NonTerminal, 'MatrixType>
 
+    type IMatrixHandler<'MatrixType, 'InnerType when 'InnerType : comparison> =
+        abstract matrixSize : int
+        abstract createEmptyMatrix : int -> 'MatrixType
+        abstract ParsingMatrixInitializator : AbstractAnalysis.Common.SimpleInputGraph<int> -> RulesHolder -> ResizeArray<NonTerminal> -> (ParsingMatrix<'MatrixType> * Dictionary<int,int>)
+        abstract Multiply : 'MatrixType -> 'MatrixType -> 'MatrixType
+        abstract Add : 'MatrixType -> 'MatrixType -> 'MatrixType
+        abstract getNonZerosCount : 'MatrixType -> int
+         
+        
+
     type MySparseMatrix(size : int, nnz : int, csrVal : float[], csrRow : int[], csrColInd : int[]) =
         let mutable _Nnz = nnz
         let mutable _CsrVal = csrVal
@@ -70,199 +80,46 @@
 
         parsingMatrix, vertexToInt
     
-    let naiveSquareMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> matrixSetValue toArray (innerSum: 'InnerType -> 'InnerType -> 'InnerType)
-                (innerMult: 'InnerType -> 'InnerType -> 'InnerType) (innerZero: 'InnerType) (innerOne: 'InnerType)
-                (matrix: ParsingMatrix<'MatrixType>) (allRules: RulesHolder) isChanged matrixSize =
-        let unionArrays (matrix: 'MatrixType) (curArr: 'InnerType []) (updArr: 'InnerType []) =
-            for ind in 0..matrixSize*matrixSize - 1 do
-                if curArr.[ind] = innerZero && updArr.[ind] > innerZero
-                then
-                    isChanged := true
-                    let i = ind / matrixSize
-                    let j = ind - i * matrixSize
-                    matrixSetValue matrix i j innerOne
+    let aleaCudaMultArrays (from1: float []) (from2: float []) matrixSize (mult1:DeviceMemory<float>) (mult2:DeviceMemory<float>) (result:DeviceMemory<float>) =
+        let transa = cublasOperation_t.CUBLAS_OP_N
+        let transb = cublasOperation_t.CUBLAS_OP_N
 
-        let multArrays (from1: 'InnerType []) (from2: 'InnerType []) =        
-                let calculateCell x =
-                    let i = x / matrixSize
-                    let j = x - i * matrixSize 
-                    let skipRows = i * matrixSize
-                    let skipColumns = j * matrixSize                
-                    Array.fold2 (fun b v1 v2 -> innerSum b <| innerMult v1 v2)
-                                innerZero
-                                from1.[skipRows..skipRows + matrixSize - 1] 
-                                from2.[skipColumns..skipColumns + matrixSize - 1]
+        let dalpha = 1.
+        let dbeta = 0.
 
-                Array.init (matrixSize * matrixSize) (fun x -> calculateCell <| x)
+        mult1.Scatter(from1)
+        mult2.Scatter(from2)
 
-        let nontermPairs = allRules.ComplexTails
-        for (nt1, nt2) in nontermPairs do
-            let arr1 = toArray matrix.[nt1] false
-            let arr2 = toArray matrix.[nt2] true
-            let resultArray = multArrays arr1 arr2
+        CUBLAS.Default.Dgemm(transa, transb, matrixSize, matrixSize, matrixSize, 
+                                dalpha, mult2.Ptr, matrixSize, mult1.Ptr, matrixSize, 
+                                dbeta, result.Ptr, matrixSize) // mult1 and mult2 swaped because Dgemm expect column-major matrices
 
-            for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                unionArrays matrix.[nonTerm] (toArray matrix.[nonTerm] false) resultArray
-
-    let sparseSquareMatrix (matrix: ParsingMatrix<SparseMatrix>) (allRules: RulesHolder) isChanged matrixSize =
-        let unionArrays (matrix: SparseMatrix) (updMatrix: MathNet.Numerics.LinearAlgebra.Matrix<float>) =            
-            for i in 0..(matrixSize - 1) do
-                for j in 0..(matrixSize - 1) do
-                    if matrix.At(i, j) = 0.0 && updMatrix.At(i, j) > 0.0
-                    then
-                        isChanged := true
-                        matrix.At(i, j, 1.0)
-
-        let nontermPairs = allRules.ComplexTails
-        for (nt1, nt2) in nontermPairs do
-            let matrix1 = matrix.[nt1]
-            let matrix2 = matrix.[nt2]
-            let resultMatrix = matrix1.Multiply(matrix2)
-            
-            for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                unionArrays matrix.[nonTerm] resultMatrix
-
-    let sparseSquareMatrix2 (matrix: ParsingMatrix<SparseMatrix>) (allRules: RulesHolder) isChanged matrixSize =
-        let nontermPairs = allRules.ComplexTails
-        for (nt1, nt2) in nontermPairs do
-            let matrix1 = matrix.[nt1]
-            let matrix2 = matrix.[nt2]
-            let resultMatrix = matrix1.Multiply(matrix2)
-            
-            for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                let nonZ = matrix.[nonTerm].NonZerosCount
-                matrix.[nonTerm].PointwiseMaximum(resultMatrix, matrix.[nonTerm])
-                if (nonZ <> matrix.[nonTerm].NonZerosCount)
-                then
-                    isChanged := true
-
-    let sparseParallelSquareMatrix (matrix: ParsingMatrix<SparseMatrix>) (allRules: RulesHolder) isChanged matrixSize =
-        let nontermPairs = allRules.ComplexTails
-        let nontermPairs1,nontermPairs2 = nontermPairs.[0..nontermPairs.Length/2 - 1],nontermPairs.[nontermPairs.Length/2 .. nontermPairs.Length-1]        
-        let go nontermPairs =
-            for (nt1, nt2) in nontermPairs do
-                let matrix1 = matrix.[nt1]
-                let matrix2 = matrix.[nt2]
-                let resultMatrix = matrix1.Multiply(matrix2)          
-                for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                        let nonZ = matrix.[nonTerm].NonZerosCount
-                        lock matrix (fun () ->
-                        matrix.[nonTerm].PointwiseMaximum(resultMatrix, matrix.[nonTerm])
-                        )
-                        if (nonZ <> matrix.[nonTerm].NonZerosCount)
-                        then isChanged := true
-        let t1 = System.Threading.Thread (fun () -> go nontermPairs1)
-        let t2 = System.Threading.Thread (fun () -> go nontermPairs2)
-        t1.Start()
-        t2.Start()
-        t1.Join()
-        t2.Join()
-
-    let worker = Worker.Default
-
-    let cudaSquareMatrix<'MatrixType> matrixSetValue toArray (matrix: ParsingMatrix<'MatrixType>) (allRules: RulesHolder) isChanged matrixSize =
-        
-        let (mult1:DeviceMemory<float>) = worker.Malloc((int)(matrixSize * matrixSize)) //need to do malloc only once per graph parsing
-        let (mult2:DeviceMemory<float>) = worker.Malloc((int)(matrixSize * matrixSize))
-        let (result:DeviceMemory<float>) = worker.Malloc((int)(matrixSize * matrixSize))
-
-        let unionArrays (matrix: 'MatrixType) (curArr: float []) (updArr: float []) =
-            for ind in 0..matrixSize*matrixSize - 1 do
-                if curArr.[ind] = 0.0 && updArr.[ind] > 0.0
-                then
-                    isChanged := true
-                    let i = ind / matrixSize
-                    let j = ind - i * matrixSize
-                    matrixSetValue matrix i j 1.0
-
-        let multArrays (from1: float []) (from2: float []) =
-
-                let transa = cublasOperation_t.CUBLAS_OP_N
-                let transb = cublasOperation_t.CUBLAS_OP_N
-
-                let dalpha = 1.
-                let dbeta = 0.
-
-                let multiplicationResult =               
-                    
-                    mult1.Scatter(from1)
-                    mult2.Scatter(from2)
-
-                    CUBLAS.Default.Dgemm(transa, 
-                                            transb, 
-                                            matrixSize, 
-                                            matrixSize, 
-                                            matrixSize, 
-                                            dalpha,
-                                            mult2.Ptr, 
-                                            matrixSize, 
-                                            mult1.Ptr, 
-                                            matrixSize, 
-                                            dbeta, 
-                                            result.Ptr, 
-                                            matrixSize) // mult1 and mult2 swaped because Dgemm expect column-major matrices
-
-                    let resultArr = result.Gather()  
-                    resultArr
-
-                multiplicationResult
-
-        let nontermPairs = allRules.ComplexTails
-        for (nt1, nt2) in nontermPairs do
-            let arr1 = toArray matrix.[nt1] false
-            let arr2 = toArray matrix.[nt2] false
-            let resultArray = multArrays arr1 arr2
-
-            for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                unionArrays matrix.[nonTerm] (toArray matrix.[nonTerm] false) resultArray
+        let resultArr = result.Gather()  
+        resultArr
 
     
-    let managedCudaSquareMatrix<'MatrixType> matrixSetValue toArray (matrix: ParsingMatrix<'MatrixType>) (allRules: RulesHolder) isChanged matrixSize =
-        
-        let unionArrays (matrix: 'MatrixType) (curArr: float []) (updArr: float []) =
-            for ind in 0..matrixSize*matrixSize - 1 do
-                if curArr.[ind] = 0.0 && updArr.[ind] > 0.0
-                then
-                    isChanged := true
-                    let i = ind / matrixSize
-                    let j = ind - i * matrixSize
-                    matrixSetValue matrix i j 1.0
-        
-        let multArrays (from1: float []) (from2: float []) =
-            let cublashandle = new CudaBlas.CudaBlasHandle()
-            let mutable refhandle = ref cublashandle
-            CudaBlas.CudaBlasNativeMethods.cublasCreate_v2(refhandle) |> ignore
+    let managedCudaMultArrays (from1: float []) (from2: float []) (matrixSize:int) (mult1:CudaDeviceVariable<float>) (mult2:CudaDeviceVariable<float>) (result:CudaDeviceVariable<float>) =
+        let cublashandle = new CudaBlas.CudaBlasHandle()
+        let mutable refhandle = ref cublashandle
+        CudaBlas.CudaBlasNativeMethods.cublasCreate_v2(refhandle) |> ignore
 
-            let transa = CudaBlas.Operation.NonTranspose
-            let transb = CudaBlas.Operation.NonTranspose
+        let transa = CudaBlas.Operation.NonTranspose
+        let transb = CudaBlas.Operation.NonTranspose
 
-            let alpha_ref = ref 1.0
-            let beta_ref = ref 0.0
+        let alpha_ref = ref 1.0
+        let beta_ref = ref 0.0
 
-            let mutable devicePtrA : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(matrixSize * matrixSize))
-            devicePtrA.CopyToDevice(from1)
-            let mutable devicePtrB : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(matrixSize * matrixSize))
-            devicePtrB.CopyToDevice(from2)
-            let mutable devicePtrC : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(matrixSize * matrixSize))
+        mult1.CopyToDevice(from1)
+        mult2.CopyToDevice(from2)
         
-            CudaBlas.CudaBlasNativeMethods.cublasDgemm_v2(!refhandle, transa, transb, matrixSize, matrixSize, matrixSize,
-                                                                alpha_ref, devicePtrB.DevicePointer, matrixSize,
-                                                                devicePtrA.DevicePointer, matrixSize,
-                                                                beta_ref, devicePtrC.DevicePointer, matrixSize) |> ignore
+        CudaBlas.CudaBlasNativeMethods.cublasDgemm_v2(!refhandle, transa, transb, matrixSize, matrixSize, matrixSize,
+                                                            alpha_ref, mult2.DevicePointer, matrixSize,
+                                                            mult1.DevicePointer, matrixSize,
+                                                            beta_ref, result.DevicePointer, matrixSize) |> ignore
             
-            let resultArr = Array.init (matrixSize * matrixSize) (fun x -> 0.0)   
-            devicePtrC.CopyToHost(resultArr)
-            resultArr
-
-
-        let nontermPairs = allRules.ComplexTails
-        for (nt1, nt2) in nontermPairs do
-            let arr1 = toArray matrix.[nt1] false
-            let arr2 = toArray matrix.[nt2] false
-            let resultArray = multArrays arr1 arr2
-
-            for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                unionArrays matrix.[nonTerm] (toArray matrix.[nonTerm] false) resultArray
+        let resultArr = Array.init (matrixSize * matrixSize) (fun x -> 0.0)   
+        result.CopyToHost(resultArr)
+        resultArr
 
     let sparseCudaGemm (matrix1 : MySparseMatrix) (matrix2 : MySparseMatrix) matrixSize =
         let nnzA = matrix1.Nnz
@@ -464,27 +321,7 @@
                 nnzTotalDevHostPtr.Dispose()
 
                 let resultMatrix = new MySparseMatrix(matrixSize, !nnzC, csrValC, csrRowC, csrColIndC)
-                resultMatrix
-
-    let sparseCudaSquareMatrix (matrix: ParsingMatrix<MySparseMatrix>) (allRules: RulesHolder) isChanged matrixSize =
-        let nontermPairs = allRules.ComplexTails
-        for (nt1, nt2) in nontermPairs do
-            let matrix1 = matrix.[nt1]
-            let matrix2 = matrix.[nt2]
-
-            let resultMatrix = sparseCudaGemm matrix1 matrix2 matrixSize
-            
-            for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                let nnz = matrix.[nonTerm].Nnz
-
-                let finalMatrix = sparseCudaGeam matrix.[nonTerm] resultMatrix matrixSize
-                if (nnz <> finalMatrix.Nnz)
-                then
-                    matrix.Remove(nonTerm) |> ignore
-                    matrix.Add(nonTerm, finalMatrix)
-                    isChanged := true
-
-        
+                resultMatrix        
     
     let nontermLockFreeSplit (allRules: RulesHolder) nonterminals (splitCount: int) =
         let tailsByHead = new Dictionary<NonTerminal, ResizeArray<NonTerminal*NonTerminal>>()

@@ -1,0 +1,156 @@
+﻿module ProbabilityGraphParsingImpl
+    open MatrixKernels
+    open Util
+    open Alea.CUDA
+    open Alea.CUDA.CULib
+    open Alea.CUDA.Utilities
+    open ManagedCuda
+    open ManagedCuda.CudaSparse
+    open ManagedCuda.BasicTypes
+
+    let getSizeProbability (matrix:ProbabilityMatrix.T) = matrix.Size
+    let createEmptyMatrixProbability = ProbabilityMatrix.empty
+    let matrixSetValueProbability (matrix: ProbabilityMatrix.T) (i: int) (j: int) (value: float) = matrix.InnerValue.[i*matrix.Size + j] <- value
+    let toArrayProbability (matrix: ProbabilityMatrix.T) (isTranspose: bool) = matrix.GetSubArray id isTranspose matrix.WholeMatrix
+    let fromArrayProbability (arr: float[]) matrixSize =
+        let newMatrix = createEmptyMatrixProbability matrixSize
+        for ind in 0..matrixSize*matrixSize - 1 do
+            newMatrix.InnerValue.[ind] <- arr.[ind]
+        newMatrix
+
+    let innerSumFloat f1 f2 = f1 + f2
+    let innerMultFloat f1 f2 = f1 * f2
+    let innerZeroFloat = 0.0
+    let innerOneFloat = 1.0         
+
+    type ProbabilityNaiveHandler(_matrixSize:int) =       
+        member this.unionArrays (arr1: float[]) (arr2: float[]) =
+            let newArray = Array.init (_matrixSize*_matrixSize) (fun x -> innerZeroFloat)
+            for ind in 0.._matrixSize*_matrixSize - 1 do
+                if arr1.[ind] > innerZeroFloat || arr2.[ind] > innerZeroFloat
+                then
+                    newArray.[ind] <- innerOneFloat
+            newArray
+
+        member this.multArrays (arr1: float[]) (arr2: float[]) =      
+            let calculateCell x =
+                let i = x / _matrixSize
+                let j = x - i * _matrixSize 
+                let skipRows = i * _matrixSize
+                let skipColumns = j * _matrixSize                
+                Array.fold2 (fun b v1 v2 -> innerSumFloat b <| innerMultFloat v1 v2)
+                                            innerZeroFloat
+                                            arr1.[skipRows..skipRows + _matrixSize - 1] 
+                                            arr2.[skipColumns..skipColumns + _matrixSize - 1]
+
+            Array.init (_matrixSize * _matrixSize) (fun x -> calculateCell <| x)
+        interface IMatrixHandler<ProbabilityMatrix.T, float> with
+            member this.matrixSize = _matrixSize
+            member this.createEmptyMatrix size = createEmptyMatrixProbability size
+            member this.ParsingMatrixInitializator graph allRules nonterminals =
+                initParsingMatrix<ProbabilityMatrix.T, float> graph allRules nonterminals createEmptyMatrixProbability matrixSetValueProbability innerOneFloat
+
+            member this.Multiply (matrix1: ProbabilityMatrix.T) (matrix2: ProbabilityMatrix.T) =
+               let arr1 = toArrayProbability matrix1 false
+               let arr2 = toArrayProbability matrix2 true
+               let resultArray = this.multArrays arr1 arr2
+               fromArrayProbability resultArray _matrixSize
+ 
+            member this.Add matrix1 matrix2 =
+               let arr1 = toArrayProbability matrix1 false
+               let arr2 = toArrayProbability matrix2 false
+               let resultArray = this.unionArrays arr1 arr2
+               fromArrayProbability resultArray _matrixSize
+
+            member this.getNonZerosCount (matrix:ProbabilityMatrix.T) =
+                let nnz = ref 0
+                for ind in 0..matrix.Size*matrix.Size - 1 do
+                    if matrix.InnerValue.[ind] > innerZeroFloat
+                    then        
+                        nnz := !nnz + 1
+                !nnz
+
+
+    type ProbabilityAleaCudaHandler(_matrixSize:int) =
+        member this.worker = Worker.Default
+        member this.mult1 = this.worker.Malloc((int)(_matrixSize * _matrixSize))
+        member this.mult2 = this.worker.Malloc((int)(_matrixSize * _matrixSize))
+        member this.result = this.worker.Malloc((int)(_matrixSize * _matrixSize))
+               
+        member this.unionArrays (arr1: float[]) (arr2: float[]) =
+            let newArray = Array.init (_matrixSize*_matrixSize) (fun x -> innerZeroFloat)
+            for ind in 0.._matrixSize*_matrixSize - 1 do
+                if arr1.[ind] > innerZeroFloat || arr2.[ind] > innerZeroFloat
+                then
+                    newArray.[ind] <- innerOneFloat
+            newArray
+
+        member this.multArrays (from1: float[]) (from2: float[]) =      
+            aleaCudaMultArrays from1 from2 _matrixSize this.mult1 this.mult2 this.result
+
+        interface IMatrixHandler<ProbabilityMatrix.T, float> with
+            member this.matrixSize = _matrixSize
+            member this.createEmptyMatrix size = createEmptyMatrixProbability size
+            member this.ParsingMatrixInitializator graph allRules nonterminals =
+                initParsingMatrix<ProbabilityMatrix.T, float> graph allRules nonterminals createEmptyMatrixProbability matrixSetValueProbability innerOneFloat
+
+            member this.Multiply (matrix1: ProbabilityMatrix.T) (matrix2: ProbabilityMatrix.T) =
+               let arr1 = toArrayProbability matrix1 false
+               let arr2 = toArrayProbability matrix2 true
+               let resultArray = this.multArrays arr1 arr2
+               fromArrayProbability resultArray _matrixSize
+ 
+            member this.Add matrix1 matrix2 =
+               let arr1 = toArrayProbability matrix1 false
+               let arr2 = toArrayProbability matrix2 false
+               let resultArray = this.unionArrays arr1 arr2
+               fromArrayProbability resultArray _matrixSize
+
+            member this.getNonZerosCount (matrix:ProbabilityMatrix.T) =
+                let nnz = ref 0
+                for ind in 0..matrix.Size*matrix.Size - 1 do
+                    if matrix.InnerValue.[ind] > innerZeroFloat
+                    then        
+                        nnz := !nnz + 1
+                !nnz
+
+    type ProbabilityManagedCudaHandler(_matrixSize:int) =
+        member this.mult1 = new CudaDeviceVariable<float>(new SizeT(_matrixSize * _matrixSize))
+        member this.mult2 = new CudaDeviceVariable<float>(new SizeT(_matrixSize * _matrixSize))
+        member this.result = new CudaDeviceVariable<float>(new SizeT(_matrixSize * _matrixSize))
+        member this.unionArrays (arr1: float[]) (arr2: float[]) =
+            let newArray = Array.init (_matrixSize*_matrixSize) (fun x -> innerZeroFloat)
+            for ind in 0.._matrixSize*_matrixSize - 1 do
+                if arr1.[ind] > innerZeroFloat || arr2.[ind] > innerZeroFloat
+                then
+                    newArray.[ind] <- innerOneFloat
+            newArray
+
+        member this.multArrays (from1: float[]) (from2: float[]) =      
+            managedCudaMultArrays from1 from2 _matrixSize this.mult1 this.mult2 this.result
+
+        interface IMatrixHandler<ProbabilityMatrix.T, float> with
+            member this.matrixSize = _matrixSize
+            member this.createEmptyMatrix size = createEmptyMatrixProbability size
+            member this.ParsingMatrixInitializator graph allRules nonterminals =
+                initParsingMatrix<ProbabilityMatrix.T, float> graph allRules nonterminals createEmptyMatrixProbability matrixSetValueProbability innerOneFloat
+
+            member this.Multiply (matrix1: ProbabilityMatrix.T) (matrix2: ProbabilityMatrix.T) =
+               let arr1 = toArrayProbability matrix1 false
+               let arr2 = toArrayProbability matrix2 true
+               let resultArray = this.multArrays arr1 arr2
+               fromArrayProbability resultArray _matrixSize
+ 
+            member this.Add matrix1 matrix2 =
+               let arr1 = toArrayProbability matrix1 false
+               let arr2 = toArrayProbability matrix2 false
+               let resultArray = this.unionArrays arr1 arr2
+               fromArrayProbability resultArray _matrixSize
+
+            member this.getNonZerosCount (matrix:ProbabilityMatrix.T) =
+                let nnz = ref 0
+                for ind in 0..matrix.Size*matrix.Size - 1 do
+                    if matrix.InnerValue.[ind] > innerZeroFloat
+                    then        
+                        nnz := !nnz + 1
+                !nnz

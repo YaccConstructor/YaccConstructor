@@ -48,7 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="RealizationTests.fs" />
+    <Compile Include="ImplementationTests.fs" />
     <Compile Include="RDFPerfomance.fs" />
     <Compile Include="BioPerfomance.fs" />
     <Compile Include="Program.fs" />

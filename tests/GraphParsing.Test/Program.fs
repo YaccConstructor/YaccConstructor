@@ -9,8 +9,10 @@ open Util
 open System.Collections.Generic
 open GraphParsing
 open MatrixKernels
-open MatrixRealizations
-open RealizationTests
+open ProbabilityGraphParsingImpl
+open SparseGraphParsingImpl
+open MySparseGraphParsingImpl
+open ImplementationTests
 open MathNet.Numerics.LinearAlgebra.Double
 open AbstractAnalysis.Common
 
@@ -28,7 +30,7 @@ type ``Graph parsing tests``() =
         let A = NonTerminal "A"
         let B = NonTerminal "B"
         let S = NonTerminal "S"
-        let nonterminals = [| A; B; S |]
+        let nonterminals = new ResizeArray<NonTerminal>([| A; B; S |])
         let rawHeadsToProbs = List.map (fun (nt, prob) -> nt, Probability.create prob)
         let crl = new Dictionary<NonTerminal * NonTerminal, (NonTerminal * Probability.T) list>()
         [ (A, B), [ S, 1.0 ]
@@ -42,9 +44,9 @@ type ``Graph parsing tests``() =
         let erl: NonTerminal list = []
         let rules = new RulesHolder(crl, srl, erl)
         let (recognizeMatrix, vertexToInt, multCount) =
-            recognizeGraph<ProbabilityMatrix.T, float> graph initMatrixProbability naiveSquareFunction rules nonterminals S
+            recognizeGraph<ProbabilityMatrix.T, float> graph (new ProbabilityNaiveHandler(graph.VertexCount)) rules nonterminals S 1
         printfn "Naive Multiplacation count: %d" multCount
-        graphParsingPrint recognizeMatrix
+        probabilityMatrixPrint recognizeMatrix
 
     member this._02_SimpleNaiveRecognizerTest2 () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
@@ -63,9 +65,9 @@ type ``Graph parsing tests``() =
                 | "A" -> 1
                 | _ -> -1
 
-        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> graph initMatrixProbability naiveSquareFunction loadIL tokenizer
+        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityNaiveHandler(graph.VertexCount)) loadIL tokenizer 1
         printfn "Naive Multiplacation count: %d" multCount
-        graphParsingPrint parsingMatrix
+        probabilityMatrixPrint parsingMatrix
 
     member this._03_SimpleNaiveLoopTest () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
@@ -88,9 +90,9 @@ type ``Graph parsing tests``() =
                 | "A" -> 1
                 | _ -> -1
 
-        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> graph initMatrixProbability naiveSquareFunction loadIL tokenizer
+        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityNaiveHandler(graph.VertexCount)) loadIL tokenizer 1
         printfn "Naive Multiplacation count: %d" multCount
-        graphParsingPrint parsingMatrix
+        probabilityMatrixPrint parsingMatrix
 
     member this._04_SimpleSparseRecognizerTest () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
@@ -109,9 +111,9 @@ type ``Graph parsing tests``() =
                 | "A" -> 1
                 | _ -> -1
 
-        let (parsingMatrix, _, multCount) = graphParse<SparseMatrix, float> graph initMatrixSparse sparseSquareMatrix loadIL tokenizer
+        let (parsingMatrix, _, multCount) = graphParse<SparseMatrix, float> graph (new SparseHandler(graph.VertexCount)) loadIL tokenizer 1
         printfn "Sparse Multiplacation count: %d" multCount
-        sparsePrint parsingMatrix
+        sparseMatrixPrint parsingMatrix
 
     member this._05_SimpleSparseLoopTest () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
@@ -134,9 +136,9 @@ type ``Graph parsing tests``() =
                 | "A" -> 1
                 | _ -> -1
 
-        let (parsingMatrix, _, multCount) = graphParse<SparseMatrix, float> graph initMatrixSparse sparseSquareMatrix loadIL tokenizer
+        let (parsingMatrix, _, multCount) = graphParse<SparseMatrix, float> graph (new SparseHandler(graph.VertexCount)) loadIL tokenizer 1
         printfn "Sparse Multiplacation count: %d" multCount
-        sparsePrint parsingMatrix
+        sparseMatrixPrint parsingMatrix
 
     member this._06_SimpleCudaRecognizerTest () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
@@ -155,9 +157,9 @@ type ``Graph parsing tests``() =
                 | "A" -> 1
                 | _ -> -1
 
-        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> graph initMatrixProbability cudaSquareFunction loadIL tokenizer
-        printfn "CUDA Multiplacation count: %d" multCount
-        graphParsingPrint parsingMatrix
+        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityAleaCudaHandler(graph.VertexCount)) loadIL tokenizer 1
+        printfn "Alea CUDA Multiplacation count: %d" multCount
+        probabilityMatrixPrint parsingMatrix
 
     member this._07_SimpleCudaLoopTest () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
@@ -180,9 +182,9 @@ type ``Graph parsing tests``() =
                 | "A" -> 1
                 | _ -> -1
 
-        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> graph initMatrixProbability cudaSquareFunction loadIL tokenizer
-        printfn "CUDA Multiplacation count: %d" multCount
-        graphParsingPrint parsingMatrix
+        let (parsingMatrix, _, multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityAleaCudaHandler(graph.VertexCount)) loadIL tokenizer 1
+        printfn "Alea CUDA Multiplacation count: %d" multCount
+        probabilityMatrixPrint parsingMatrix
 
     member this._08_SimpleSparseCudaLoopTest () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
@@ -207,22 +209,22 @@ type ``Graph parsing tests``() =
             | "T" -> 5
             | _ -> -1
 
-        let (parsingMatrix, _, multCount) = graphParse<MySparseMatrix, float> graph initMatrixMySparse sparseCudaSquareMatrix loadIL tokenizer
-        printfn "Sparse GPU Multiplacation count: %d" multCount
+        let (parsingMatrix, _, multCount) = graphParse<MySparseMatrix, float> graph (new MySparseHandler(graph.VertexCount)) loadIL tokenizer 1
+        printfn "MySparse GPU Multiplacation count: %d" multCount
         MySparsePrint parsingMatrix
 
 [<EntryPoint>]
 let f x =
     System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
     let t = new ``Graph parsing tests``()
-//    t._01_SimpleNaiveRecognizerTest ()
-//    t._02_SimpleNaiveRecognizerTest2 ()
-//    t._03_SimpleNaiveLoopTest ()
-//    t._04_SimpleSparseRecognizerTest ()
-//    t._05_SimpleSparseLoopTest ()
-//    t._06_SimpleCudaRecognizerTest ()
-//    t._07_SimpleCudaLoopTest ()
-//    t._08_SimpleSparseCudaLoopTest ()
+    t._01_SimpleNaiveRecognizerTest ()
+    t._02_SimpleNaiveRecognizerTest2 ()
+    t._03_SimpleNaiveLoopTest ()
+    t._04_SimpleSparseRecognizerTest ()
+    t._05_SimpleSparseLoopTest ()
+    t._06_SimpleCudaRecognizerTest ()
+    t._07_SimpleCudaLoopTest ()
+    t._08_SimpleSparseCudaLoopTest ()
     YC.GraphParsing.Tests.RDFPerfomance.performTests ()
 //    YC.GraphParsing.Tests.BioPerfomance.performTests ()
     0

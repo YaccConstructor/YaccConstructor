@@ -117,7 +117,7 @@
                 //printfn "Iteration done"
                 multCount <- multCount + 1
 
-            (parsingMatrix.[S], vertexToInt, multCount)
+            (parsingMatrix, S, vertexToInt, multCount)
         else
             let parsingMatrixCurrent, vertexToInt = mHandler.ParsingMatrixInitializator graph allRules nonterminals
             let matrixSize = graph.VertexCount
@@ -185,7 +185,7 @@
 
                 multCount <- multCount + 1            
 
-            (parsingMatrixNew.[S], vertexToInt, multCount)
+            (parsingMatrixNew, S, vertexToInt, multCount)
             
             
 

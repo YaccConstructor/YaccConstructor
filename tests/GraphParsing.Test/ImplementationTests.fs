@@ -8,14 +8,16 @@
     open Util
 
     let graphParsingTest<'MatrixType, 'InnerType when 'InnerType : comparison> cnt graph mHandler loadIL tokenizer parallelProcesses resultAnalyzer =
+        let S = ref (NonTerminal "")
         let start = System.DateTime.Now
         let root =
             [for i in 0..cnt-1 ->
-                let (parsingMatrix, _, _) = graphParse<'MatrixType, 'InnerType> graph mHandler loadIL tokenizer parallelProcesses
+                let (parsingMatrix, StartNonTerm, _, _) = graphParse<'MatrixType, 'InnerType> graph mHandler loadIL tokenizer parallelProcesses
+                S := StartNonTerm
                 parsingMatrix]
     
         let time = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
-        let countOfPairs = resultAnalyzer root.[0]
+        let countOfPairs = resultAnalyzer root.[0] !S
         root, time, countOfPairs
 
 //ProbabilityMatrix.T
@@ -30,11 +32,12 @@
             printfn ""
         printfn ""
 
-    let probabilityAnalyzer (matrix:Util.ProbabilityMatrix.T) =
+    let probabilityAnalyzer (parsingMatrix:ParsingMatrix<Util.ProbabilityMatrix.T>) (S:NonTerminal) =
+        let startMatrix = parsingMatrix.[S]
         let mutable counter = 0
-        let dataSize = matrix.Size * matrix.Size
+        let dataSize = startMatrix.Size * startMatrix.Size
         for ind in 0..dataSize - 1 do
-            if matrix.InnerValue.[ind] > 0.0
+            if startMatrix.InnerValue.[ind] > 0.0
             then
                 counter <- counter + 1
         counter
@@ -60,7 +63,7 @@
             printfn ""
         printfn ""
 
-    let sparseAnalyzer (matrix:SparseMatrix) = matrix.NonZerosCount
+    let sparseAnalyzer (parsingMatrix:ParsingMatrix<SparseMatrix>) (S:NonTerminal) = parsingMatrix.[S].NonZerosCount
 
     //SparseCPU --- Math.Net Numerics
     let testSparseCPU cnt graph loadIL tokenizer =
@@ -77,7 +80,7 @@
         printfn "CsrColInd: %A" matrix.CsrColInd
         printfn "CsrRow: %A" matrix.CsrRow
 
-    let mySparseAnalyzer (matrix:MySparseMatrix) = matrix.Nnz
+    let mySparseAnalyzer (parsingMatrix:ParsingMatrix<MySparseMatrix>) (S:NonTerminal) = parsingMatrix.[S].Nnz
 
     //SparseGPU --- managedCuda
     let testSparseGPU cnt graph loadIL tokenizer =

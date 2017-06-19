@@ -14,7 +14,7 @@ open Yard.Generators.GLL.AbstractParserCF
 open Yard.Generators.GLL.ParserCommon
 open AbstractAnalysis.Common
 
-let grammarsDir =  @"C:\Users\User\Projects\YaccConstructor\tests\GLL.AbstractParserCF.Tests\" //@"./GLL.AbstractParserCF.Tests/" 
+let grammarsDir =  @"./GLL.AbstractParserCF.Tests/" 
 
 let getParserSource grammarFile =    
     generate (grammarsDir + grammarFile)

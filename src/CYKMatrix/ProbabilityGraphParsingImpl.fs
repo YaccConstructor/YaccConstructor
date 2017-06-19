@@ -96,7 +96,7 @@
 
             member this.Multiply (matrix1: ProbabilityMatrix.T) (matrix2: ProbabilityMatrix.T) =
                let arr1 = toArrayProbability matrix1 false
-               let arr2 = toArrayProbability matrix2 true
+               let arr2 = toArrayProbability matrix2 false
                let resultArray = this.multArrays arr1 arr2
                fromArrayProbability resultArray _matrixSize
  
@@ -137,7 +137,7 @@
 
             member this.Multiply (matrix1: ProbabilityMatrix.T) (matrix2: ProbabilityMatrix.T) =
                let arr1 = toArrayProbability matrix1 false
-               let arr2 = toArrayProbability matrix2 true
+               let arr2 = toArrayProbability matrix2 false
                let resultArray = this.multArrays arr1 arr2
                fromArrayProbability resultArray _matrixSize
  

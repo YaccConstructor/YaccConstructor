@@ -115,9 +115,12 @@
                 !nnz
 
     type ProbabilityManagedCudaHandler(_matrixSize:int) =
-        member this.mult1 = new CudaDeviceVariable<float>(new SizeT(_matrixSize * _matrixSize))
-        member this.mult2 = new CudaDeviceVariable<float>(new SizeT(_matrixSize * _matrixSize))
-        member this.result = new CudaDeviceVariable<float>(new SizeT(_matrixSize * _matrixSize))
+        let mutable cublashandle = new CudaBlas.CudaBlasHandle()
+        let refhandle = ref cublashandle
+        let initStatus = CudaBlas.CudaBlasNativeMethods.cublasCreate_v2(refhandle)
+        let mult1 = new CudaDeviceVariable<float>(new SizeT(_matrixSize * _matrixSize))
+        let mult2 = new CudaDeviceVariable<float>(new SizeT(_matrixSize * _matrixSize))
+        let result = new CudaDeviceVariable<float>(new SizeT(_matrixSize * _matrixSize))
         member this.unionArrays (arr1: float[]) (arr2: float[]) =
             let newArray = Array.init (_matrixSize*_matrixSize) (fun x -> innerZeroFloat)
             for ind in 0.._matrixSize*_matrixSize - 1 do
@@ -127,7 +130,7 @@
             newArray
 
         member this.multArrays (from1: float[]) (from2: float[]) =      
-            managedCudaMultArrays from1 from2 _matrixSize this.mult1 this.mult2 this.result
+            managedCudaMultArrays from1 from2 _matrixSize refhandle mult1 mult2 result
 
         interface IMatrixHandler<ProbabilityMatrix.T, float> with
             member this.matrixSize = _matrixSize

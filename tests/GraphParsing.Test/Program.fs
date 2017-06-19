@@ -217,14 +217,14 @@ type ``Graph parsing tests``() =
 let f x =
     System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
     let t = new ``Graph parsing tests``()
-    t._01_SimpleNaiveRecognizerTest ()
-    t._02_SimpleNaiveRecognizerTest2 ()
-    t._03_SimpleNaiveLoopTest ()
-    t._04_SimpleSparseRecognizerTest ()
-    t._05_SimpleSparseLoopTest ()
-    t._06_SimpleCudaRecognizerTest ()
-    t._07_SimpleCudaLoopTest ()
-    t._08_SimpleSparseCudaLoopTest ()
+//    t._01_SimpleNaiveRecognizerTest ()
+//    t._02_SimpleNaiveRecognizerTest2 ()
+//    t._03_SimpleNaiveLoopTest ()
+//    t._04_SimpleSparseRecognizerTest ()
+//    t._05_SimpleSparseLoopTest ()
+//    t._06_SimpleCudaRecognizerTest ()
+//    t._07_SimpleCudaLoopTest ()
+//    t._08_SimpleSparseCudaLoopTest ()
     YC.GraphParsing.Tests.RDFPerfomance.performTests ()
 //    YC.GraphParsing.Tests.BioPerfomance.performTests ()
     0

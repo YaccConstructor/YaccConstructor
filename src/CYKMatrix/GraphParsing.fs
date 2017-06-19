@@ -95,7 +95,7 @@
         if (parallelProcesses = 1)
         then
             let parsingMatrix, vertexToInt = mHandler.ParsingMatrixInitializator graph allRules nonterminals
-            printfn "Matrix initialized"
+            //printfn "Matrix initialized"
             let matrixSize = graph.VertexCount
             let isChanged = ref true
             let mutable multCount = 0
@@ -114,7 +114,7 @@
                         if (nonZ <> mHandler.getNonZerosCount parsingMatrix.[nonTerm])
                         then 
                             isChanged := true
-                printfn "Iteration done"
+                //printfn "Iteration done"
                 multCount <- multCount + 1
 
             (parsingMatrix.[S], vertexToInt, multCount)

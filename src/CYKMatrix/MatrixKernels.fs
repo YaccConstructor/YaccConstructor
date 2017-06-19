@@ -98,10 +98,7 @@
         resultArr
 
     
-    let managedCudaMultArrays (from1: float []) (from2: float []) (matrixSize:int) (mult1:CudaDeviceVariable<float>) (mult2:CudaDeviceVariable<float>) (result:CudaDeviceVariable<float>) =
-        let cublashandle = new CudaBlas.CudaBlasHandle()
-        let mutable refhandle = ref cublashandle
-        CudaBlas.CudaBlasNativeMethods.cublasCreate_v2(refhandle) |> ignore
+    let managedCudaMultArrays (from1: float []) (from2: float []) (matrixSize:int) (refhandle:CudaBlas.CudaBlasHandle ref)(mult1:CudaDeviceVariable<float>) (mult2:CudaDeviceVariable<float>) (result:CudaDeviceVariable<float>) =
 
         let transa = CudaBlas.Operation.NonTranspose
         let transb = CudaBlas.Operation.NonTranspose

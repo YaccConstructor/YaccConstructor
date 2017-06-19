@@ -72,10 +72,10 @@
 
 
     type ProbabilityAleaCudaHandler(_matrixSize:int) =
-        member this.worker = Worker.Default
-        member this.mult1 = this.worker.Malloc((int)(_matrixSize * _matrixSize))
-        member this.mult2 = this.worker.Malloc((int)(_matrixSize * _matrixSize))
-        member this.result = this.worker.Malloc((int)(_matrixSize * _matrixSize))
+        let worker = Worker.Default
+        let mult1 = worker.Malloc((int)(_matrixSize * _matrixSize))
+        let mult2 = worker.Malloc((int)(_matrixSize * _matrixSize))
+        let result = worker.Malloc((int)(_matrixSize * _matrixSize))
                
         member this.unionArrays (arr1: float[]) (arr2: float[]) =
             let newArray = Array.init (_matrixSize*_matrixSize) (fun x -> innerZeroFloat)
@@ -86,7 +86,7 @@
             newArray
 
         member this.multArrays (from1: float[]) (from2: float[]) =      
-            aleaCudaMultArrays from1 from2 _matrixSize this.mult1 this.mult2 this.result
+            aleaCudaMultArrays from1 from2 _matrixSize mult1 mult2 result
 
         interface IMatrixHandler<ProbabilityMatrix.T, float> with
             member this.matrixSize = _matrixSize

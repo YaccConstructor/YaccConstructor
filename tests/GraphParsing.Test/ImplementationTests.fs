@@ -43,16 +43,16 @@
         counter
 
     //DenseCPU --- naive realization
-    let testDenseCPU cnt graph loadIL tokenizer =
-        graphParsingTest<ProbabilityMatrix.T, float> cnt graph (new ProbabilityNaiveHandler(graph.VertexCount)) loadIL tokenizer 1 probabilityAnalyzer 
+    let testDenseCPU cnt graph loadIL tokenizer numberOfThreads =
+        graphParsingTest<ProbabilityMatrix.T, float> cnt graph (new ProbabilityNaiveHandler(graph.VertexCount)) loadIL tokenizer numberOfThreads probabilityAnalyzer 
 
     //DenseGPU1 --- managedCuda
-    let testDenseGPU1 cnt graph loadIL tokenizer =
-        graphParsingTest<ProbabilityMatrix.T, float> cnt graph (new ProbabilityManagedCudaHandler(graph.VertexCount)) loadIL tokenizer 1 probabilityAnalyzer 
+    let testDenseGPU1 cnt graph loadIL tokenizer numberOfThreads =
+        graphParsingTest<ProbabilityMatrix.T, float> cnt graph (new ProbabilityManagedCudaHandler(graph.VertexCount)) loadIL tokenizer numberOfThreads probabilityAnalyzer 
 
     //DenseGPU2 --- Alea Cuda
-    let testDenseGPU2 cnt graph loadIL tokenizer =
-        graphParsingTest<ProbabilityMatrix.T, float> cnt graph (new ProbabilityAleaCudaHandler(graph.VertexCount)) loadIL tokenizer 1 probabilityAnalyzer 
+    let testDenseGPU2 cnt graph loadIL tokenizer numberOfThreads =
+        graphParsingTest<ProbabilityMatrix.T, float> cnt graph (new ProbabilityAleaCudaHandler(graph.VertexCount)) loadIL tokenizer numberOfThreads probabilityAnalyzer 
 
 //SparseMatrix (MathNet Numerics)
 
@@ -66,11 +66,7 @@
     let sparseAnalyzer (parsingMatrix:ParsingMatrix<SparseMatrix>) (S:NonTerminal) = parsingMatrix.[S].NonZerosCount
 
     //SparseCPU --- Math.Net Numerics
-    let testSparseCPU cnt graph loadIL tokenizer =
-        graphParsingTest<SparseMatrix, float> cnt graph (new SparseHandler(graph.VertexCount)) loadIL tokenizer 1 sparseAnalyzer
-
-    //SparseCPUParallel --- MailBoxProcessors (any number of threads)
-    let testSparseCPUParallel cnt graph loadIL tokenizer numberOfThreads =
+    let testSparseCPU cnt graph loadIL tokenizer numberOfThreads =
         graphParsingTest<SparseMatrix, float> cnt graph (new SparseHandler(graph.VertexCount)) loadIL tokenizer numberOfThreads sparseAnalyzer
 
 //MySparseMatrix
@@ -83,5 +79,5 @@
     let mySparseAnalyzer (parsingMatrix:ParsingMatrix<MySparseMatrix>) (S:NonTerminal) = parsingMatrix.[S].Nnz
 
     //SparseGPU --- managedCuda
-    let testSparseGPU cnt graph loadIL tokenizer =
-        graphParsingTest<MySparseMatrix, float> cnt graph (new MySparseHandler(graph.VertexCount)) loadIL tokenizer 1 mySparseAnalyzer
+    let testSparseGPU cnt graph loadIL tokenizer numberOfThreads =
+        graphParsingTest<MySparseMatrix, float> cnt graph (new MySparseHandler(graph.VertexCount)) loadIL tokenizer numberOfThreads mySparseAnalyzer

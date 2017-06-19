@@ -320,7 +320,7 @@
                 let resultMatrix = new MySparseMatrix(matrixSize, !nnzC, csrValC, csrRowC, csrColIndC)
                 resultMatrix        
     
-    let nontermLockFreeSplit (allRules: RulesHolder) nonterminals (splitCount: int) =
+    let nontermLockFreeSplit (allRules: RulesHolder) nonterminals (splitCount: int) =        
         let tailsByHead = new Dictionary<NonTerminal, ResizeArray<NonTerminal*NonTerminal>>()
         for nontermPair in allRules.ComplexTails do
             let heads = allRules.HeadsByComplexTail nontermPair
@@ -331,11 +331,25 @@
                 tailsByHead.[head].Add(nontermPair)
         let sortedPairs = tailsByHead |> Seq.sortByDescending (fun (KeyValue(k,v)) -> v.Count) |> Seq.map (fun (KeyValue(k,v)) -> (k,v)) |> List.ofSeq
         let splitedNontermPairs = Array.init splitCount (fun _ -> new ResizeArray<NonTerminal*NonTerminal>())
-        let processedPairs = ref 0
+        let processedPairs = new ResizeArray<NonTerminal*NonTerminal>()
+        let processedHeads = new ResizeArray<NonTerminal>()
         let currentPart = ref 0
-        for (head, tails) in sortedPairs do
-            splitedNontermPairs.[!currentPart].AddRange(tails)
-            processedPairs := !processedPairs + tails.Count
-            if (!processedPairs >= (!currentPart + 1) * allRules.ComplexTails.Length / splitCount)
+
+        let rec addPairsForNonterm currentPart head =
+            if not <| processedHeads.Contains head
+            then
+                processedHeads.Add(head)
+                let tails = List.filter (fun (nont,tail) -> nont = head) sortedPairs |> List.head |> (fun (_, tail) -> tail)
+                let newTails = Seq.filter (fun x -> not <| processedPairs.Contains x) tails |> List.ofSeq
+                splitedNontermPairs.[!currentPart].AddRange(newTails)
+                processedPairs.AddRange(newTails)
+                for newTail in newTails do
+                    let newHeads = allRules.HeadsByComplexTail newTail |> List.filter (fun (h,_) -> not <| processedHeads.Contains h)
+                    for (newHead,_) in newHeads do
+                        addPairsForNonterm currentPart newHead
+
+        for (head,tails) in sortedPairs do
+            addPairsForNonterm currentPart head
+            if (processedPairs.Count >= (!currentPart + 1) * allRules.ComplexTails.Length / splitCount)
             then currentPart := !currentPart + 1
         splitedNontermPairs

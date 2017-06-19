@@ -45,7 +45,9 @@ type ``Graph parsing tests``() =
         let rules = new RulesHolder(crl, srl, erl)
         let (recognizeMatrix, _, vertexToInt, multCount) =
             recognizeGraph<ProbabilityMatrix.T, float> graph (new ProbabilityNaiveHandler(graph.VertexCount)) rules nonterminals S 1
-        printfn "Naive Multiplacation count: %d" multCount
+        assert (probabilityAnalyzer recognizeMatrix S = 2)
+        assert (recognizeMatrix.[S].InnerValue.[1] > 0.0 && recognizeMatrix.[S].InnerValue.[2] > 0.0)
+        printfn "Naive DenseCPU Multiplacation count: %d" multCount
         probabilityMatrixPrint recognizeMatrix.[S]
 
     member this._02_SimpleNaiveRecognizerTest2 () =
@@ -66,7 +68,9 @@ type ``Graph parsing tests``() =
                 | _ -> -1
 
         let (parsingMatrix,S,_,multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityNaiveHandler(graph.VertexCount)) loadIL tokenizer 1
-        printfn "Naive Multiplacation count: %d" multCount
+        assert (probabilityAnalyzer parsingMatrix S = 3)
+        assert (parsingMatrix.[S].InnerValue.[0] > 0.0 && parsingMatrix.[S].InnerValue.[4] > 0.0 && parsingMatrix.[S].InnerValue.[8] > 0.0)
+        printfn "Naive DenseCPU Multiplacation count: %d" multCount
         probabilityMatrixPrint parsingMatrix.[S]
 
     member this._03_SimpleNaiveLoopTest () =
@@ -91,7 +95,10 @@ type ``Graph parsing tests``() =
                 | _ -> -1
 
         let (parsingMatrix,S,_,multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityNaiveHandler(graph.VertexCount)) loadIL tokenizer 1
-        printfn "Naive Multiplacation count: %d" multCount
+        assert (probabilityAnalyzer parsingMatrix S = 8)
+        assert (parsingMatrix.[S].InnerValue.[0] > 0.0 && parsingMatrix.[S].InnerValue.[1] > 0.0 && parsingMatrix.[S].InnerValue.[0] > 0.0 && parsingMatrix.[S].InnerValue.[3] > 0.0
+                && parsingMatrix.[S].InnerValue.[6] > 0.0 && parsingMatrix.[S].InnerValue.[7] > 0.0 && parsingMatrix.[S].InnerValue.[11] > 0.0 && parsingMatrix.[S].InnerValue.[14] > 0.0)
+        printfn "Naive DenseCPU Multiplacation count: %d" multCount
         probabilityMatrixPrint parsingMatrix.[S]
 
     member this._04_SimpleSparseRecognizerTest () =
@@ -112,7 +119,9 @@ type ``Graph parsing tests``() =
                 | _ -> -1
 
         let (parsingMatrix,S,_,multCount) = graphParse<SparseMatrix, float> graph (new SparseHandler(graph.VertexCount)) loadIL tokenizer 1
-        printfn "Sparse Multiplacation count: %d" multCount
+        assert (sparseAnalyzer parsingMatrix S = 3)
+        assert (parsingMatrix.[S].At(0,0) > 0.0 && parsingMatrix.[S].At(1,1) > 0.0 && parsingMatrix.[S].At(1,1) > 0.0)
+        printfn "SparseCPU Multiplacation count: %d" multCount
         sparseMatrixPrint parsingMatrix.[S]
 
     member this._05_SimpleSparseLoopTest () =
@@ -137,7 +146,10 @@ type ``Graph parsing tests``() =
                 | _ -> -1
 
         let (parsingMatrix,S,_,multCount) = graphParse<SparseMatrix, float> graph (new SparseHandler(graph.VertexCount)) loadIL tokenizer 1
-        printfn "Sparse Multiplacation count: %d" multCount
+        assert (sparseAnalyzer parsingMatrix S = 8)
+        assert (parsingMatrix.[S].At(0,0) > 0.0 && parsingMatrix.[S].At(0,1) > 0.0 && parsingMatrix.[S].At(0,2) > 0.0 && parsingMatrix.[S].At(0,3)> 0.0
+                && parsingMatrix.[S].At(1,2) > 0.0 && parsingMatrix.[S].At(1,3) > 0.0 && parsingMatrix.[S].At(2,3) > 0.0 && parsingMatrix.[S].At(3,2) > 0.0)
+        printfn "SparseCPU Multiplacation count: %d" multCount
         sparseMatrixPrint parsingMatrix.[S]
 
     member this._06_SimpleCudaRecognizerTest () =
@@ -158,7 +170,9 @@ type ``Graph parsing tests``() =
                 | _ -> -1
 
         let (parsingMatrix,S,_,multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityAleaCudaHandler(graph.VertexCount)) loadIL tokenizer 1
-        printfn "Alea CUDA Multiplacation count: %d" multCount
+        assert (probabilityAnalyzer parsingMatrix S = 3)
+        assert (parsingMatrix.[S].InnerValue.[0] > 0.0 && parsingMatrix.[S].InnerValue.[4] > 0.0 && parsingMatrix.[S].InnerValue.[8] > 0.0)
+        printfn "Alea CUDA, DenseGPU Multiplacation count: %d" multCount
         probabilityMatrixPrint parsingMatrix.[S]
 
     member this._07_SimpleCudaLoopTest () =
@@ -183,7 +197,10 @@ type ``Graph parsing tests``() =
                 | _ -> -1
 
         let (parsingMatrix,S,_,multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityAleaCudaHandler(graph.VertexCount)) loadIL tokenizer 1
-        printfn "Alea CUDA Multiplacation count: %d" multCount
+        assert (probabilityAnalyzer parsingMatrix S = 8)
+        assert (parsingMatrix.[S].InnerValue.[0] > 0.0 && parsingMatrix.[S].InnerValue.[1] > 0.0 && parsingMatrix.[S].InnerValue.[0] > 0.0 && parsingMatrix.[S].InnerValue.[3] > 0.0
+                && parsingMatrix.[S].InnerValue.[6] > 0.0 && parsingMatrix.[S].InnerValue.[7] > 0.0 && parsingMatrix.[S].InnerValue.[11] > 0.0 && parsingMatrix.[S].InnerValue.[14] > 0.0)
+        printfn "Alea CUDA, DenseGPU Multiplacation count: %d" multCount
         probabilityMatrixPrint parsingMatrix.[S]
 
     member this._08_SimpleSparseCudaLoopTest () =
@@ -210,7 +227,10 @@ type ``Graph parsing tests``() =
             | _ -> -1
 
         let (parsingMatrix,S,_,multCount) = graphParse<MySparseMatrix, float> graph (new MySparseHandler(graph.VertexCount)) loadIL tokenizer 1
-        printfn "MySparse GPU Multiplacation count: %d" multCount
+        assert (mySparseAnalyzer parsingMatrix S = 3)
+        assert (parsingMatrix.[S].CsrRow.[1] = 2 && parsingMatrix.[S].CsrRow.[2] = 3)
+        assert (parsingMatrix.[S].CsrColInd.[0] = 0 && parsingMatrix.[S].CsrColInd.[1] = 2 && parsingMatrix.[S].CsrColInd.[2] = 2)
+        printfn "ManagedCuda, SparseGPU Multiplacation count: %d" multCount
         MySparsePrint parsingMatrix.[S]
 
 [<EntryPoint>]
@@ -225,6 +245,6 @@ let f x =
 //    t._06_SimpleCudaRecognizerTest ()
 //    t._07_SimpleCudaLoopTest ()
 //    t._08_SimpleSparseCudaLoopTest ()
-    YC.GraphParsing.Tests.RDFPerfomance.performTests ()
+//    YC.GraphParsing.Tests.RDFPerfomance.performTests ()
 //    YC.GraphParsing.Tests.BioPerfomance.performTests ()
     0

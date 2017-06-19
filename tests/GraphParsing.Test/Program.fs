@@ -15,8 +15,47 @@ open MySparseGraphParsingImpl
 open ImplementationTests
 open MathNet.Numerics.LinearAlgebra.Double
 open AbstractAnalysis.Common
+open YC.GLL.Abstarct.Tests.RDFPerformance
 
 let graphParsingTestPath = "..\..\..\GraphParsing.Test"
+let baseRDFPath = @"..\..\..\data\RDF"
+let RDFfiles = System.IO.Directory.GetFiles baseRDFPath
+let GPPerf1File = "..\..\..\GraphParsing.Test\GPPerf1_cnf.yrd"
+let GPPerf2File = "..\..\..\GraphParsing.Test\GPPerf2_cnf.yrd"
+
+let testFileRDF test file grammarFile = 
+    let cnt = 1
+    let graph, triples = getParseInputGraph RDFtokenizer file
+    let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+    let loadIL = fe.ParseGrammar grammarFile
+    test cnt graph loadIL RDFtokenizer 1
+    
+let checkResultsRDF parsingResults =
+    for (file, (_,_,countOfPairs)) in parsingResults do
+            match file with 
+            | "skos" ->
+                assert(countOfPairs = 810)
+            | "generations" ->
+                assert(countOfPairs = 2164)
+            | "travel" -> 
+                assert(countOfPairs = 2499)
+            | "univ-bench" -> 
+                assert(countOfPairs = 2540)
+            | "atom-primitive" -> 
+                assert(countOfPairs = 15454)
+            | "biomedical-measure-primitive" -> 
+                assert(countOfPairs = 15156)
+            | "foaf" -> 
+                assert(countOfPairs = 4118)
+            | "people-pets" -> 
+                assert(countOfPairs = 9472)
+            | "funding" -> 
+                assert(countOfPairs = 17634)
+            | "wine" -> 
+                assert(countOfPairs = 66572)
+            | "pizza" -> 
+                assert(countOfPairs = 56195)   
+            | _ -> ignore()
 
 [<TestFixture>]
 type ``Graph parsing tests``() =  
@@ -233,6 +272,48 @@ type ``Graph parsing tests``() =
         printfn "ManagedCuda, SparseGPU Multiplacation count: %d" multCount
         MySparsePrint parsingMatrix.[S]
 
+    member this._RDF_GPPerf1_DenseCPU () =
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testDenseCPU rdffile GPPerf2File)))
+        checkResultsRDF parsingResults
+
+    member this._RDF_GPPerf1_SparseCPU () =
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testSparseCPU rdffile GPPerf2File)))
+        checkResultsRDF parsingResults
+
+    member this._RDF_GPPerf1_DenseGPU1 () =
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testDenseGPU1 rdffile GPPerf2File)))
+        checkResultsRDF parsingResults
+
+    member this._RDF_GPPerf1_DenseGPU2 () =
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testDenseGPU2 rdffile GPPerf2File)))
+        checkResultsRDF parsingResults
+
+    member this._RDF_GPPerf1_SparseGPU () =
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testSparseGPU rdffile GPPerf2File)))
+        checkResultsRDF parsingResults
+
+    member this._RDF_GPPerf2_DenseCPU () =
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testDenseCPU rdffile GPPerf2File)))
+        checkResultsRDF parsingResults
+
+    member this._RDF_GPPerf2_SparseCPU () =
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testSparseCPU rdffile GPPerf2File)))
+        checkResultsRDF parsingResults
+
+    member this._RDF_GPPerf2_DenseGPU1 () =
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testDenseGPU1 rdffile GPPerf2File)))
+        checkResultsRDF parsingResults
+
+    member this._RDF_GPPerf2_DenseGPU2 () =
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testDenseGPU2 rdffile GPPerf2File)))
+        checkResultsRDF parsingResults
+
+    member this._RDF_GPPerf2_SparseGPU () =
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testSparseGPU rdffile GPPerf2File)))
+        checkResultsRDF parsingResults
+            
+
+
 [<EntryPoint>]
 let f x =
     System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
@@ -245,6 +326,16 @@ let f x =
 //    t._06_SimpleCudaRecognizerTest ()
 //    t._07_SimpleCudaLoopTest ()
 //    t._08_SimpleSparseCudaLoopTest ()
+//    t._RDF_GPPerf1_DenseCPU ()
+//    t._RDF_GPPerf1_SparseCPU ()
+//    t._RDF_GPPerf1_DenseGPU1 ()
+//    t._RDF_GPPerf1_DenseGPU2 ()
+//    t._RDF_GPPerf1_SparseGPU ()
+//    t._RDF_GPPerf2_DenseCPU ()
+//    t._RDF_GPPerf2_SparseCPU ()
+//    t._RDF_GPPerf2_DenseGPU1 ()
+//    t._RDF_GPPerf2_DenseGPU2 ()
+//    t._RDF_GPPerf2_SparseGPU ()
 //    YC.GraphParsing.Tests.RDFPerfomance.performTests ()
 //    YC.GraphParsing.Tests.BioPerfomance.performTests ()
     0

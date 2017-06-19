@@ -89,17 +89,32 @@ type GSSVertexCF (nonterm: int<positionInGrammar>, posInInput: int<positionInInp
             vertexStr
 
 type GSSVertexInstanceHolder() =
-    let instanceHolder = new System.Collections.Generic.Dictionary<int,GSSVertex>()
+    let instanceHolder = new System.Collections.Generic.Dictionary<_,_>()
 
-    member this.Get(nonterm: int<positionInGrammar>, posInInput: int<positionInInput>) = 
-        let hashed = hash(nonterm,posInInput)
-        let cond, value = instanceHolder.TryGetValue(hashed)
+    member this.Get(nonterm: int<positionInGrammar>, posInInput: int<positionInInput>) =
+        let newInst = new GSSVertex(nonterm, posInInput) 
+        let packed = (int nonterm <<< 16) ||| int posInInput
+        let cond, value = instanceHolder.TryGetValue(packed)
+        if cond
+        then
+            value
+        else
+            instanceHolder.Add(packed,newInst)
+            newInst
+
+type GSSVertexCFInstanceHolder() =
+    let instanceHolder = new System.Collections.Generic.Dictionary<_,_>()
+
+    member this.Get(nonterm: int<positionInGrammar>, posInInput: int<positionInInput>, vertex: GSSVertex) = 
+        let newInst = new GSSVertexCF(nonterm, posInInput, vertex) 
+//        let hashed = hash(nonterm,posInInput,vertex)
+        let cond, value = instanceHolder.TryGetValue(newInst)
         if cond
         then
             value
         else 
-            let newInst = new GSSVertex(nonterm, posInInput)
-            instanceHolder.Add(hashed, newInst)
+            let newInst = new GSSVertexCF(nonterm, posInInput, vertex)
+            instanceHolder.Add(newInst, newInst)
             newInst
 
 [<Struct>]

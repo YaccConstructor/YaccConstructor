@@ -1,5 +1,6 @@
 source https://nuget.org/api/v2
 
+nuget Alea.CUDA
 nuget Argu
 nuget Alea.CUDA.Fody 2.2.0.3307 framework: >= net45
 nuget Alea.CUDA.Unbound 2.2.0.3307 framework: >= net45

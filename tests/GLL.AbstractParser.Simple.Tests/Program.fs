@@ -86,7 +86,7 @@ let test grammarFile inputFile nodesCount edgesCount termsCount ambiguityCount =
     let input  = getInputGraph parser.StringToToken inputFile
     let tree = buildAst parser input
     //printfn "%A" tree
-    tree.AstToDot parser.IntToString (grammarsDir + inputFile + ".dot")
+    //tree.AstToDot parser.IntToString (grammarsDir + inputFile + ".dot")
     let n, e, t, amb = tree.CountCounters
     //printfn "%d %d %d %d" n e t amb
     Assert.AreEqual(nodesCount, n, sprintf "Nodes expected:%i, found:%i." nodesCount n)

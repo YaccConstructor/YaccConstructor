@@ -1,6 +1,6 @@
 ﻿module GLLToGLR
 open NUnit.Framework
-open YaccConstructor.API
+open YC.API
 open Yard.Generators.GLL.ParserCommon
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.AbstractParser

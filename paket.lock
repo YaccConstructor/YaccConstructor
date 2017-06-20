@@ -30,7 +30,7 @@ NUGET
       FSharp.Core
       FSharpx.Collections.Experimental
     ExtCore (0.8.43)
-    FAKE (4.50)
+    FAKE (4.61.3)
     Fody (1.29.4)
     FsCheck (0.9.2) - restriction: >= net40
     FSharp.Compiler.Service (2.0.0.6)

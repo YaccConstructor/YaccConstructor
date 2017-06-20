@@ -13,10 +13,10 @@ open Yard.Generators.Common
 type FSA(ruleList : Rule.t<Source.t,Source.t> list) =
     let fsa =
         ruleList
-        |> convertRulesToFSA  |> printDot @".\FSA1initialFSA.dot"
+        |> convertRulesToFSA  //|> printDot @".\FSA1initialFSA.dot"
         |> removeEpsilonEdges //|> printDot @".\FSA2withoutEpsilon.dot"
         |> toDFA              //|> printDot @".\FSA3determ.dot"
-        |> minimizeFSA        |> printDot @".\FSA4minimized.dot"
+        |> minimizeFSA        //|> printDot @".\FSA4minimized.dot"
     //let firstSet = genFirstSet fsa
 
     member this.States = fsa.States

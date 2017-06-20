@@ -469,6 +469,7 @@ let findEquivalenceClasses fsa =
                     queue.Enqueue(j,c)
 
     classesP
+    |> ResizeArray.map(fun x -> Array.ofSeq x)
 
 let minimizeFSA fsa =
     let classes = findEquivalenceClasses fsa
@@ -482,8 +483,8 @@ let minimizeFSA fsa =
     let divideClassesWithMultipleNonterminals () = 
         let newClasses = new ResizeArray<_>()
         for classNumber in 0..classes.Count-1 do
-            if classes.[classNumber].Count <> 0 then
-                let currClass = classes.[classNumber].ToArray()
+            if classes.[classNumber].Length <> 0 then
+                let currClass = classes.[classNumber]
                 let nontermsInCurrentClass = 
                     currClass
                     |> Array.filter(fun x -> nonterms.Contains (x))

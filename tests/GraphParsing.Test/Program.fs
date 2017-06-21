@@ -20,8 +20,8 @@ open YC.GLL.Abstarct.Tests.RDFPerformance
 let graphParsingTestPath = "..\..\..\GraphParsing.Test"
 let baseRDFPath = @"..\..\..\data\RDF"
 let RDFfiles = System.IO.Directory.GetFiles baseRDFPath
-let GPPerf1File = "..\..\..\GraphParsing.Test\GPPerf1_cnf.yrd"
-let GPPerf2File = "..\..\..\GraphParsing.Test\GPPerf2_cnf.yrd"
+let [<Literal>] RDF_GPPERF1_GRAMMAR_FILE = "..\..\..\GraphParsing.Test\GPPerf1_cnf.yrd"
+let [<Literal>] RDF_GPPERF2_GRAMMAR_FILE = "..\..\..\GraphParsing.Test\GPPerf2_cnf.yrd"
 
 let testFileRDF test file grammarFile = 
     let cnt = 1
@@ -29,36 +29,74 @@ let testFileRDF test file grammarFile =
     let fe = new Yard.Frontends.YardFrontend.YardFrontend()
     let loadIL = fe.ParseGrammar grammarFile
     test cnt graph loadIL RDFtokenizer 1
-    
-let checkResultsRDF parsingResults =
-    for (file, (_,_,countOfPairs)) in parsingResults do
-            match file with 
-            | "skos" ->
-                assert(countOfPairs = 810)
-            | "generations" ->
-                assert(countOfPairs = 2164)
-            | "travel" -> 
-                assert(countOfPairs = 2499)
-            | "univ-bench" -> 
-                assert(countOfPairs = 2540)
-            | "atom-primitive" -> 
-                assert(countOfPairs = 15454)
-            | "biomedical-measure-primitive" -> 
-                assert(countOfPairs = 15156)
-            | "foaf" -> 
-                assert(countOfPairs = 4118)
-            | "people-pets" -> 
-                assert(countOfPairs = 9472)
-            | "funding" -> 
-                assert(countOfPairs = 17634)
-            | "wine" -> 
-                assert(countOfPairs = 66572)
-            | "pizza" -> 
-                assert(countOfPairs = 56195)   
-            | _ -> ignore()
+
+let RDFGPPerf1Checker graphFile parsingResults =
+    let (_,_,countOfPairs) = parsingResults
+    match  System.IO.Path.GetFileNameWithoutExtension graphFile with 
+    | "skos" ->
+        assert(countOfPairs = 810)
+    | "generations" ->
+        assert(countOfPairs = 2164)
+    | "travel" -> 
+        assert(countOfPairs = 2499)
+    | "univ-bench" -> 
+        assert(countOfPairs = 2540)
+    | "atom-primitive" -> 
+        assert(countOfPairs = 15454)
+    | "biomedical-measure-primitive" -> 
+        assert(countOfPairs = 15156)
+    | "foaf" -> 
+        assert(countOfPairs = 4118)
+    | "people-pets" -> 
+        assert(countOfPairs = 9472)
+    | "funding" -> 
+        assert(countOfPairs = 17634)
+    | "wine" -> 
+        assert(countOfPairs = 66572)
+    | "pizza" -> 
+        assert(countOfPairs = 56195)   
+    | _ -> ignore()
+
+let RDFGPPerf2Checker graphFile parsingResults =
+    let (_,_,countOfPairs) = parsingResults
+    match  System.IO.Path.GetFileNameWithoutExtension graphFile with 
+    | "skos" ->
+        assert(countOfPairs = 1)
+    | "generations" ->
+        assert(countOfPairs = 0)
+    | "travel" -> 
+        assert(countOfPairs = 63)
+    | "univ-bench" -> 
+        assert(countOfPairs = 81)
+    | "atom-primitive" -> 
+        assert(countOfPairs = 122)
+    | "biomedical-measure-primitive" -> 
+        assert(countOfPairs = 2871)
+    | "foaf" -> 
+        assert(countOfPairs = 10)
+    | "people-pets" -> 
+        assert(countOfPairs = 37)
+    | "funding" -> 
+        assert(countOfPairs = 1158)
+    | "wine" -> 
+        assert(countOfPairs = 133)
+    | "pizza" -> 
+        assert(countOfPairs = 1262)   
+    | _ -> ignore()
+
+let RDFChecker parsingResults =
+    for (graphFile, grammarFile, results) in parsingResults do
+        match grammarFile with 
+        | RDF_GPPERF1_GRAMMAR_FILE ->
+            RDFGPPerf1Checker graphFile results
+        | RDF_GPPERF2_GRAMMAR_FILE ->
+            RDFGPPerf2Checker graphFile results
+        | _ -> ignore()
+
 
 [<TestFixture>]
-type ``Graph parsing tests``() =  
+type ``Graph parsing tests``() = 
+    [<Test>] 
     member this._01_SimpleNaiveRecognizerTest () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
         graph.AddVertex(0) |> ignore
@@ -89,6 +127,7 @@ type ``Graph parsing tests``() =
         printfn "Naive DenseCPU Multiplacation count: %d" multCount
         probabilityMatrixPrint recognizeMatrix.[S]
 
+    [<Test>]
     member this._02_SimpleNaiveRecognizerTest2 () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
         graph.AddVertex(0) |> ignore
@@ -112,6 +151,7 @@ type ``Graph parsing tests``() =
         printfn "Naive DenseCPU Multiplacation count: %d" multCount
         probabilityMatrixPrint parsingMatrix.[S]
 
+    [<Test>]
     member this._03_SimpleNaiveLoopTest () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
         graph.AddVertex(0) |> ignore
@@ -140,6 +180,7 @@ type ``Graph parsing tests``() =
         printfn "Naive DenseCPU Multiplacation count: %d" multCount
         probabilityMatrixPrint parsingMatrix.[S]
 
+    [<Test>]
     member this._04_SimpleSparseRecognizerTest () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
         graph.AddVertex(0) |> ignore
@@ -163,6 +204,7 @@ type ``Graph parsing tests``() =
         printfn "SparseCPU Multiplacation count: %d" multCount
         sparseMatrixPrint parsingMatrix.[S]
 
+    [<Test>]
     member this._05_SimpleSparseLoopTest () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
         graph.AddVertex(0) |> ignore
@@ -191,6 +233,7 @@ type ``Graph parsing tests``() =
         printfn "SparseCPU Multiplacation count: %d" multCount
         sparseMatrixPrint parsingMatrix.[S]
 
+    [<Test>]
     member this._06_SimpleCudaRecognizerTest () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
         graph.AddVertex(0) |> ignore
@@ -214,6 +257,7 @@ type ``Graph parsing tests``() =
         printfn "Alea CUDA, DenseGPU Multiplacation count: %d" multCount
         probabilityMatrixPrint parsingMatrix.[S]
 
+    [<Test>]
     member this._07_SimpleCudaLoopTest () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
         graph.AddVertex(0) |> ignore
@@ -242,6 +286,7 @@ type ``Graph parsing tests``() =
         printfn "Alea CUDA, DenseGPU Multiplacation count: %d" multCount
         probabilityMatrixPrint parsingMatrix.[S]
 
+    [<Test>]
     member this._08_SimpleSparseCudaLoopTest () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
         graph.AddVertex(0) |> ignore
@@ -272,46 +317,56 @@ type ``Graph parsing tests``() =
         printfn "ManagedCuda, SparseGPU Multiplacation count: %d" multCount
         MySparsePrint parsingMatrix.[S]
 
+    [<Test>]
     member this._RDF_GPPerf1_DenseCPU () =
-        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testDenseCPU rdffile GPPerf2File)))
-        checkResultsRDF parsingResults
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF1_GRAMMAR_FILE, (testFileRDF testDenseCPU rdffile RDF_GPPERF1_GRAMMAR_FILE)))
+        RDFChecker parsingResults
 
+    [<Test>]
     member this._RDF_GPPerf1_SparseCPU () =
-        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testSparseCPU rdffile GPPerf2File)))
-        checkResultsRDF parsingResults
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF1_GRAMMAR_FILE, (testFileRDF testSparseCPU rdffile RDF_GPPERF1_GRAMMAR_FILE)))
+        RDFChecker parsingResults
 
+    [<Test>]
     member this._RDF_GPPerf1_DenseGPU1 () =
-        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testDenseGPU1 rdffile GPPerf2File)))
-        checkResultsRDF parsingResults
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF1_GRAMMAR_FILE, (testFileRDF testDenseGPU1 rdffile RDF_GPPERF1_GRAMMAR_FILE)))
+        RDFChecker parsingResults
 
+    [<Test>]
     member this._RDF_GPPerf1_DenseGPU2 () =
-        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testDenseGPU2 rdffile GPPerf2File)))
-        checkResultsRDF parsingResults
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF1_GRAMMAR_FILE, (testFileRDF testDenseGPU2 rdffile RDF_GPPERF1_GRAMMAR_FILE)))
+        RDFChecker parsingResults
 
+    [<Test>]
     member this._RDF_GPPerf1_SparseGPU () =
-        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testSparseGPU rdffile GPPerf2File)))
-        checkResultsRDF parsingResults
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF1_GRAMMAR_FILE, (testFileRDF testSparseGPU rdffile RDF_GPPERF1_GRAMMAR_FILE)))
+        RDFChecker parsingResults
 
+    [<Test>]
     member this._RDF_GPPerf2_DenseCPU () =
-        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testDenseCPU rdffile GPPerf2File)))
-        checkResultsRDF parsingResults
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF2_GRAMMAR_FILE, (testFileRDF testDenseCPU rdffile RDF_GPPERF2_GRAMMAR_FILE)))
+        RDFChecker parsingResults
 
+    [<Test>]
     member this._RDF_GPPerf2_SparseCPU () =
-        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testSparseCPU rdffile GPPerf2File)))
-        checkResultsRDF parsingResults
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF2_GRAMMAR_FILE, (testFileRDF testSparseCPU rdffile RDF_GPPERF2_GRAMMAR_FILE)))
+        RDFChecker parsingResults
 
+    [<Test>]
     member this._RDF_GPPerf2_DenseGPU1 () =
-        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testDenseGPU1 rdffile GPPerf2File)))
-        checkResultsRDF parsingResults
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF2_GRAMMAR_FILE, (testFileRDF testDenseGPU1 rdffile RDF_GPPERF2_GRAMMAR_FILE)))
+        RDFChecker parsingResults
 
+    [<Test>]
     member this._RDF_GPPerf2_DenseGPU2 () =
-        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testDenseGPU2 rdffile GPPerf2File)))
-        checkResultsRDF parsingResults
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF2_GRAMMAR_FILE, (testFileRDF testDenseGPU2 rdffile RDF_GPPERF2_GRAMMAR_FILE)))
+        RDFChecker parsingResults
 
+    [<Test>]
     member this._RDF_GPPerf2_SparseGPU () =
-        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, (testFileRDF testSparseGPU rdffile GPPerf2File)))
-        checkResultsRDF parsingResults
-            
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF2_GRAMMAR_FILE, (testFileRDF testSparseGPU rdffile RDF_GPPERF2_GRAMMAR_FILE)))
+        RDFChecker parsingResults
+
 
 
 [<EntryPoint>]

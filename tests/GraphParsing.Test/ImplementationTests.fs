@@ -18,7 +18,7 @@
     
         let time = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
         let countOfPairs = resultAnalyzer root.[0] !S
-        root, time, countOfPairs
+        root.[0], time, countOfPairs
 
 //ProbabilityMatrix.T
 

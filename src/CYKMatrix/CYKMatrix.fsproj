@@ -87,7 +87,6 @@
     <Compile Include="CYKMatrixBFS.fs" />
     <Compile Include="CYKMatrix.fs" />
     <Compile Include="MatrixKernels.fs" />
-    <Compile Include="InnerTypeImpl.fs" />
     <Compile Include="ProbabilityGraphParsingImpl.fs" />
     <Compile Include="SparseGraphParsingImpl.fs" />
     <Compile Include="MySparseGraphParsingImpl.fs" />

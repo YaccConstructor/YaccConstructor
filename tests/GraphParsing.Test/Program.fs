@@ -17,11 +17,11 @@ open MathNet.Numerics.LinearAlgebra.Double
 open AbstractAnalysis.Common
 open YC.GLL.Abstarct.Tests.RDFPerformance
 
-let graphParsingTestPath = "..\..\..\GraphParsing.Test"
-let baseRDFPath = @"..\..\..\data\RDF"
+let graphParsingTestPath = ".\GraphParsing.Test"
+let baseRDFPath = @".\data\RDF"
 let RDFfiles = System.IO.Directory.GetFiles baseRDFPath
-let [<Literal>] RDF_GPPERF1_GRAMMAR_FILE = "..\..\..\GraphParsing.Test\GPPerf1_cnf.yrd"
-let [<Literal>] RDF_GPPERF2_GRAMMAR_FILE = "..\..\..\GraphParsing.Test\GPPerf2_cnf.yrd"
+let [<Literal>] RDF_GPPERF1_GRAMMAR_FILE = ".\GraphParsing.Test\GPPerf1_cnf.yrd"
+let [<Literal>] RDF_GPPERF2_GRAMMAR_FILE = ".\GraphParsing.Test\GPPerf2_cnf.yrd"
 
 let testFileRDF test file grammarFile = 
     let cnt = 1
@@ -233,7 +233,7 @@ type ``Graph parsing tests``() =
         printfn "SparseCPU Multiplacation count: %d" multCount
         sparseMatrixPrint parsingMatrix.[S]
 
-    [<Test>]
+    [<Ignore("GPU tests are ignored on the build server")>] 
     member this._06_SimpleCudaRecognizerTest () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
         graph.AddVertex(0) |> ignore
@@ -257,7 +257,7 @@ type ``Graph parsing tests``() =
         printfn "Alea CUDA, DenseGPU Multiplacation count: %d" multCount
         probabilityMatrixPrint parsingMatrix.[S]
 
-    [<Test>]
+    [<Ignore("GPU tests are ignored on the build server")>]  
     member this._07_SimpleCudaLoopTest () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
         graph.AddVertex(0) |> ignore
@@ -286,7 +286,7 @@ type ``Graph parsing tests``() =
         printfn "Alea CUDA, DenseGPU Multiplacation count: %d" multCount
         probabilityMatrixPrint parsingMatrix.[S]
 
-    [<Test>]
+    [<Ignore("GPU tests are ignored on the build server")>] 
     member this._08_SimpleSparseCudaLoopTest () =
         let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
         graph.AddVertex(0) |> ignore
@@ -317,7 +317,6 @@ type ``Graph parsing tests``() =
         printfn "ManagedCuda, SparseGPU Multiplacation count: %d" multCount
         MySparsePrint parsingMatrix.[S]
 
-    [<Test>]
     member this._RDF_GPPerf1_DenseCPU () =
         let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF1_GRAMMAR_FILE, (testFileRDF testDenseCPU rdffile RDF_GPPERF1_GRAMMAR_FILE)))
         RDFChecker parsingResults
@@ -326,23 +325,22 @@ type ``Graph parsing tests``() =
     member this._RDF_GPPerf1_SparseCPU () =
         let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF1_GRAMMAR_FILE, (testFileRDF testSparseCPU rdffile RDF_GPPERF1_GRAMMAR_FILE)))
         RDFChecker parsingResults
-
-    [<Test>]
+    
+    [<Ignore("GPU tests are ignored on the build server")>]   
     member this._RDF_GPPerf1_DenseGPU1 () =
         let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF1_GRAMMAR_FILE, (testFileRDF testDenseGPU1 rdffile RDF_GPPERF1_GRAMMAR_FILE)))
         RDFChecker parsingResults
-
-    [<Test>]
+    
+    [<Ignore("GPU tests are ignored on the build server")>] 
     member this._RDF_GPPerf1_DenseGPU2 () =
         let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF1_GRAMMAR_FILE, (testFileRDF testDenseGPU2 rdffile RDF_GPPERF1_GRAMMAR_FILE)))
         RDFChecker parsingResults
-
-    [<Test>]
+    
+    [<Ignore("GPU tests are ignored on the build server")>]  
     member this._RDF_GPPerf1_SparseGPU () =
         let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF1_GRAMMAR_FILE, (testFileRDF testSparseGPU rdffile RDF_GPPERF1_GRAMMAR_FILE)))
         RDFChecker parsingResults
 
-    [<Test>]
     member this._RDF_GPPerf2_DenseCPU () =
         let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF2_GRAMMAR_FILE, (testFileRDF testDenseCPU rdffile RDF_GPPERF2_GRAMMAR_FILE)))
         RDFChecker parsingResults
@@ -351,18 +349,18 @@ type ``Graph parsing tests``() =
     member this._RDF_GPPerf2_SparseCPU () =
         let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF2_GRAMMAR_FILE, (testFileRDF testSparseCPU rdffile RDF_GPPERF2_GRAMMAR_FILE)))
         RDFChecker parsingResults
-
-    [<Test>]
+    
+    [<Ignore("GPU tests are ignored on the build server")>]  
     member this._RDF_GPPerf2_DenseGPU1 () =
         let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF2_GRAMMAR_FILE, (testFileRDF testDenseGPU1 rdffile RDF_GPPERF2_GRAMMAR_FILE)))
         RDFChecker parsingResults
 
-    [<Test>]
+    [<Ignore("GPU tests are ignored on the build server")>]  
     member this._RDF_GPPerf2_DenseGPU2 () =
         let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF2_GRAMMAR_FILE, (testFileRDF testDenseGPU2 rdffile RDF_GPPERF2_GRAMMAR_FILE)))
         RDFChecker parsingResults
 
-    [<Test>]
+    [<Ignore("GPU tests are ignored on the build server")>]  
     member this._RDF_GPPerf2_SparseGPU () =
         let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF2_GRAMMAR_FILE, (testFileRDF testSparseGPU rdffile RDF_GPPERF2_GRAMMAR_FILE)))
         RDFChecker parsingResults

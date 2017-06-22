@@ -21,14 +21,6 @@
 
     type ParsingMatrix<'MatrixType> = Dictionary<NonTerminal, 'MatrixType>
 
-    type IInnerTypeHandler<'InnerType when 'InnerType : comparison> =
-        abstract innerZero : 'InnerType
-        abstract innerOne : 'InnerType
-        abstract innerSum : 'InnerType -> 'InnerType -> 'InnerType
-        abstract innerMult : 'InnerType -> 'InnerType -> 'InnerType
-
-
-    //type IMatrixHandler<'MatrixType, 'InnerType, 'InnerTypeHandler when 'InnerTypeHandler :> IInnerTypeHandler<'InnerType> and 'InnerType : comparison> = 
     type IMatrixHandler<'MatrixType, 'InnerType when 'InnerType : comparison> =
         abstract matrixSize : int
         abstract createEmptyMatrix : int -> 'MatrixType

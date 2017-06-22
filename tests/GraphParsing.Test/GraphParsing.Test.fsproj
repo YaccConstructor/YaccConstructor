@@ -8,7 +8,7 @@
     <ProjectGuid>dd1e36ef-ab54-42e0-b8ef-ae98adfdf6ac</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>GraphParsing.Test</RootNamespace>
-    <AssemblyName>GraphParsing.Test</AssemblyName>
+    <AssemblyName>GraphParsing.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>

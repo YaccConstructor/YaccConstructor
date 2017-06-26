@@ -137,7 +137,7 @@
         
             let mbp flg vl nontermPairs_mbp = new MailboxProcessor<Message>(fun inbox ->
                 let rec loop n =
-                    async {                                  
+                    async {
                             let! message = inbox.Receive();
                             for (nt1, nt2) in nontermPairs_mbp do
                                 let matrix1 = parsingMatrixCurrent.[nt1]
@@ -145,14 +145,11 @@
                                 let resultMatrix = mHandler.Multiply matrix1 matrix2          
                                 for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
                                         let nonZ = mHandler.getNonZerosCount parsingMatrixCurrent.[nonTerm]
-                                        //lock parsingMatrix (fun () ->
                                         let updatedMatrix = mHandler.Add parsingMatrixNew.[nonTerm] resultMatrix
                                         parsingMatrixNew.Remove(nonTerm) |> ignore
                                         parsingMatrixNew.Add(nonTerm, updatedMatrix)
-                                        //)
                                         if (nonZ <> mHandler.getNonZerosCount parsingMatrixNew.[nonTerm])
-                                        then 
-                                            vl := true
+                                        then vl := true
                             flg:= true
                             do! loop (n + 1)
                     }

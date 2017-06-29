@@ -86,7 +86,7 @@ let test grammarFile inputFile nodesCount edgesCount termsCount ambiguityCount =
     let input  = getInputGraph parser.StringToToken inputFile
     let tree = buildAst parser input
     //printfn "%A" tree
-    tree.AstToDot parser.IntToString (grammarsDir + inputFile + ".dot")
+    //tree.AstToDot parser.IntToString (grammarsDir + inputFile + ".dot")
     let n, e, t, amb = tree.CountCounters
     //printfn "%d %d %d %d" n e t amb
     Assert.AreEqual(nodesCount, n, sprintf "Nodes expected:%i, found:%i." nodesCount n)
@@ -349,29 +349,27 @@ type ``GLL abstract parser tests``() =
 //             "Infinite2.txt"
 //             4 3 2 0
 //        
-//[<EntryPoint>]
-//let f x =
-//    System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
-//    let t = new ``GLL abstract parser tests``()   
-//
-////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\1.1.ttl"
-////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
-////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\pizza.owl"
-////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf" 
-////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\people_pets.rdf"
-////        ] do
-////
-////            let f = 
-////                YC.GLL.Abstarct.Tests.RDFPerformance.loadFromFile p
-////                 
-////            printfn "triples in %A: %A" (System.IO.Path.GetFileName p) f.Triples.Count
-//    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf"
-//    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
-//    YC.GLL.Abstarct.Tests.RDFPerformance.performTests()
-//    0
-//
-//
-//               t.PerformanceTestLinearBadLeftRec()
-//               t.PerformanceTestLinearUnambBraces()
-//               t.PerformanceTestLinearAmbBraces()
+[<EntryPoint>]
+let f x =
+    System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
+    let t = new ``GLL abstract parser tests``()   
 
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\1.1.ttl"
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\pizza.owl"
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf" 
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\people_pets.rdf"
+//        ] do
+//
+//            let f = 
+//                YC.GLL.Abstarct.Tests.RDFPerformance.loadFromFile p
+//                 
+//            printfn "triples in %A: %A" (System.IO.Path.GetFileName p) f.Triples.Count
+    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf"
+    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
+    let basePath = if x.Length = 1 then x.[0] else @"..\..\..\data\RDF"
+    YC.GLL.Abstarct.Tests.RDFPerformance.performTests basePath
+    0
+
+
+               

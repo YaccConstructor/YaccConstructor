@@ -516,6 +516,6 @@ let buildAST (parser : ParserSourceGLL) (input : seq<int>) =
         | None -> FSAParseResult.Error ("String was not parsed")
         | Some node -> 
             let r1 = new Tree<_> (node)
-            r1.AstToDot parser.IntToString "ASTforAutomaton.dot"
+            //r1.AstToDot parser.IntToString "ASTforAutomaton.dot"
             FSAParseResult.Success (r1)
             

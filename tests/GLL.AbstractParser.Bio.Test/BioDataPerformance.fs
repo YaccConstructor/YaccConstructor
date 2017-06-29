@@ -89,10 +89,18 @@ let getParseInputGraph file =
 
     let allVs = edges |> Array.collect (fun (f,l,t) -> [|f * 1<positionInInput>; t * 1<positionInInput>|]) |> Set.ofArray |> Array.ofSeq
      
-    let graph = new SimpleInputGraph<_>(allVs, getTokenFromTag (fun x -> (int) GLL.BioCFG.stringToToken.[x]))
+    let graph = new SimpleInputGraph<_>(allVs, id)
     
+    (*edges
+    |> Array.collect (fun (f,l,t) -> [|new ParserEdge<_>(f, t, getTokenFromTag (fun x -> (int) GLL.BioCFG.stringToToken.[x]) l)|])
+    |> graph.AddVerticesAndEdgeRange
+    |> ignore*)
+
     edges
-    |> Array.collect (fun (f,l,t) -> [|new ParserEdge<_>(f, t, l)|])
+    |> Array.collect (fun (f,l,t) -> 
+        if getTokenFromTag (fun x -> (int) GLL.BioCFG.stringToToken.[x]) l <> (int) GLL.BioCFG.stringToToken.["OTHER"]
+        then [|new ParserEdge<_>(f, t, getTokenFromTag (fun x -> (int) GLL.BioCFG.stringToToken.[x]) l)|]
+        else [||])
     |> graph.AddVerticesAndEdgeRange
     |> ignore
 
@@ -100,10 +108,12 @@ let getParseInputGraph file =
 
 let getParseInputGraphVert file =
     let edges = getEdgesVert file
-    let graph = new GraphLabelledVertex<string>([|"Gene_348"|], [||], getTokenFromTag (fun x -> (int) GLL.BioCFG.stringToToken.[x]))
+    let graph = new GraphLabelledVertex<int>([|getTokenFromTag (fun x -> (int) GLL.BioCFG.stringToToken.[x]) "Gene_348"|], [||], id)
 
     edges 
-    |> Array.collect (fun (f,l,t) -> [|new TaggedEdge<_,_>(f, t, l)|])
+    |> Array.collect (fun (f,l,t) -> [|new TaggedEdge<_,_>(getTokenFromTag (fun x -> (int) GLL.BioCFG.stringToToken.[x]) f,
+                                                             getTokenFromTag (fun x -> (int) GLL.BioCFG.stringToToken.[x]) t,
+                                                             getTokenFromTag (fun x -> (int) GLL.BioCFG.stringToToken.[x]) l)|])
     |> graph.AddEdges
     |> ignore
 
@@ -111,7 +121,7 @@ let getParseInputGraphVert file =
         
 let processFile file =
     let g1, edges = 
-        getParseInputGraphVert file 
+        getParseInputGraph file 
 
     let start = System.DateTime.Now
     printfn "%A" edges

@@ -1,0 +1,83 @@
+digraph G {
+node [shape = circle]
+0[label="s", style=filled, fillcolor=green]
+0 -> 7 [label="gene",color=green]; 
+
+1[label="v", style=filled, fillcolor=yellow]
+1 -> 8 [label="protein",color=green]; 
+
+1 -> 8 [label="gene",color=green]; 
+
+1 -> 8 [label="go",color=green]; 
+
+2[label="similar", style=filled, fillcolor=yellow]
+2 -> 10 [label="CODESFOR"]; 
+
+2 -> 12 [label="BELONGS"]; 
+
+2 -> 9 [label="INTERACTS"]; 
+
+3[label="protein", style=filled, fillcolor=yellow]
+3 -> 15 [label="protein",color=green]; 
+
+3 -> 14 [label="PROTEIN"]; 
+
+4[label="gene", style=filled, fillcolor=yellow]
+4 -> 18 [label="gene",color=green]; 
+
+4 -> 17 [label="GENE"]; 
+
+5[label="go", style=filled, fillcolor=yellow]
+5 -> 21 [label="go",color=green]; 
+
+5 -> 20 [label="GO"]; 
+
+6[label="other", style=filled, fillcolor=yellow]
+6 -> 23 [label="OTHER"]; 
+
+6 -> 23 [label="FAM_OR_DOM"]; 
+
+6 -> 23 [label="HAS_FAM_OR_DOM"]; 
+
+6 -> 23 [label="REFERS"]; 
+
+6 -> 23 [label="PHENOTYPE"]; 
+
+7[label="", shape = doublecircle, style=filled, fillcolor=red]
+8[label="", shape = doublecircle, style=filled, fillcolor=red]
+9[label="", shape = doublecircle, style=filled, fillcolor=red]
+10[label=""]
+10 -> 11 [label="v",color=green]; 
+
+11[label=""]
+11 -> 9 [label="RCODESFOR"]; 
+
+12[label=""]
+12 -> 13 [label="v",color=green]; 
+
+13[label=""]
+13 -> 9 [label="RBELONGS"]; 
+
+14[label="", shape = doublecircle, style=filled, fillcolor=red]
+15[label=""]
+15 -> 16 [label="similar",color=green]; 
+
+16[label=""]
+16 -> 14 [label="PROTEIN"]; 
+
+17[label="", shape = doublecircle, style=filled, fillcolor=red]
+18[label=""]
+18 -> 19 [label="similar",color=green]; 
+
+19[label=""]
+19 -> 17 [label="GENE"]; 
+
+20[label="", shape = doublecircle, style=filled, fillcolor=red]
+21[label=""]
+21 -> 22 [label="similar",color=green]; 
+
+22[label=""]
+22 -> 20 [label="GO"]; 
+
+23[label="", shape = doublecircle, style=filled, fillcolor=red]
+}

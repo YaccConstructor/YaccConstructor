@@ -175,74 +175,116 @@ type NodeAncestor =
 let isDummy (n:INode) = match n with :? TerminalNode as t -> t.Extension = packExtension -1 -1 | _ -> false
 
 type TreeNode = 
-    | SPPFNonterminal of TreeNode list
-    | SPPFTerminal of int<token>
+    | SPPFNonterminal of TreeNode[] * string
+    | SPPFTerminal of string * int * int
 
 [<Struct>]
 type Info =
-    val StemCount : int
     val LastStem : int
-    val Lengths : int[]
+    val Lengths : ResizeArray<int>
     val Tree : TreeNode[]
-    new (stemCount, lastStem, lengths, tree) = {StemCount = stemCount; Lengths = lengths; LastStem = lastStem; Tree = tree}
+    new (lastStem, lengths, tree) = {Lengths = lengths; LastStem = lastStem; Tree = tree}
 
+let dummyNonterm = -3
+let dictionary = new Dictionary<_,_>()
+let rec getBestTree (intToString : Dictionary<int,string>) (currentNonterm : int) (node : INode) : Info =
+    let contains, value = dictionary.TryGetValue(node)
+    if contains then value else
+    let newInfo = new Info() |> ref
+    match node with
+    | :? NonTerminalNode as n -> 
+        let children = 
+            if n.Others <> null
+            then
+                n.Others |> Array.ofSeq
+            else
+                [||]
+        let children = Array.append children [|n.First|] 
+        let isStem = (intToString.[int n.Name]).Contains("toCount")
+        let currentNonterm = if isStem then int n.Name else dummyNonterm
+        let subtreeToChoose, info =
+            children
+            |> Array.map(fun x -> x, getBestTree intToString currentNonterm x)
+            |> Array.maxBy(fun (_,x) -> if x.Lengths.Count > 0 then x.Lengths |> Seq.averageBy(fun x -> float x ) else 0.0)
+        n.Others <- null
+        n.First <- subtreeToChoose
 
-//let getBestTree (intToString : (int -> string)) : INode -> Info = function
-//    | :? NonTerminalNode as n -> 
-//        let lst = 
-//            if n.Others <> null
-//            then
-//                n.Others |> Array.ofSeq
-//            else
-//                [||]
-//        let lst = Array.append lst [|n.First|] 
-//        let subtreeToChoose, info =
-//            lst
-//            |> Array.map(fun x -> x, getBestTree x)
-//            |> Array.maxBy(fun (_,x) -> x)
-//        n.Others <- null
-//        n.First <- subtreeToChoose
-//        if (intToString n.Name).Contains("stem")
-//        then
-//            if info.LastStem = n.Name
-//            then
-//                info.Lengths
-//        
-//    | :? PackedNode as p ->
-//        let left = getBestTree p.Left
-//        let right = getBestTree p.Right
-//        new Info(left.StemCount + right.StemCount, 0, Array.append left.Lenghts right.Lenghts, Array.append left.Tree right.Tree)
-//    | :? IntermidiateNode as i ->
-//        let lst = 
-//            if i.Others <> null
-//            then
-//                i.Others |> Array.ofSeq
-//            else
-//                [||]
-//        let lst = Array.append lst [|i.First|] 
-//        let info =
-//            lst
-//            |> Array.map(fun x -> getBestTree x)
-//            |> Array.maxBy(fun x -> x.Lengths |> Array.average)
-//        info
-//    | :? TerminalNode as t ->
-//        new Info(0,0,[||],[Term(t.Name)])
-//    | :? EpsilonNode as e ->
-//        new Info(0,0,[||],[Term(-1<token>)])
-//    | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
+        let st, stack = 
+            if isStem
+            then
+                let stack = new ResizeArray<_>(info.Lengths)
+                if info.LastStem = int n.Name
+                then
+                    stack.[stack.Count - 1] <- stack.[stack.Count - 1] + 1
+                else
+                    stack.Add(1)
+                int n.Name,stack
+            else
+                dummyNonterm, info.Lengths
+            
+        newInfo := new Info(st, stack, [|SPPFNonterminal(info.Tree, intToString.[int n.Name])|])
+        
+    | :? PackedNode as p ->
+        let left = getBestTree intToString currentNonterm p.Left
+        let right = getBestTree intToString currentNonterm p.Right
+        let stack = new ResizeArray<_>()
+        
+        if currentNonterm = right.LastStem
+        then
+            for i in right.Lengths do stack.Add(i)
+            for i in left.Lengths do stack.Add(i)
+        else
+            for i in left.Lengths do stack.Add(i)
+            for i in right.Lengths do stack.Add(i)
 
+        newInfo :=
+            new Info ((if currentNonterm = right.LastStem then right.LastStem
+                       elif currentNonterm = left.LastStem then left.LastStem
+                       else dummyNonterm),
+                      stack,
+                      Array.append left.Tree right.Tree)
+    | :? IntermidiateNode as i ->
+        let children = 
+            if i.Others <> null
+            then
+                i.Others |> Array.ofSeq
+            else
+                [||]
+        let children = Array.append children [|i.First|] 
+        let info =
+            children
+            |> Array.map(fun x -> getBestTree intToString currentNonterm x)
+            |> Array.maxBy(fun x -> if x.Lengths.Count > 0 then x.Lengths |> Seq.averageBy(fun x -> float x ) else 0.0)
+        newInfo := info
+    | :? TerminalNode as t ->
+        if int t.Name <> -1
+        then
+            newInfo := new Info(0,new ResizeArray<_>(),[|SPPFTerminal(intToString.[int t.Name], getLeftExtension t.Extension, getRightExtension t.Extension)|])
+        else
+            newInfo := new Info(0,new ResizeArray<_>(),[||])
+    | :? EpsilonNode as e ->
+        newInfo := new Info(0,new ResizeArray<_>(),[|SPPFTerminal("eps", -1, -1)|])
+    | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
+    
+    dictionary.Add(node, !newInfo)
+    !newInfo
+    
 [<AllowNullLiteral>]
-type Tree<'TokenType> (roots : INode[], unpackPos) =
+type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
     member this.MinimizeBinarized() =
         ()
-//    member this.GetBestTree() = 
-//        let result = Term(-1<token>) |> ref
-//        let func () =
-//            result := (getBestTree unpackPos roots.[0]).Tree.[0]
-//        let stackSize : int = 2000000000 
-//        let thread = new System.Threading.Thread(func, stackSize)
-//        thread.Start()
-//        thread.Join()
+    member this.GetBestTree() = 
+        let result = SPPFTerminal("dummy", -1,-1) |> ref
+        let func () =
+            try
+                result := (getBestTree indToString dummyNonterm roots.[0]).Tree.[0]
+            with
+            | e -> printfn "%A" e
+        let stackSize : int = 2000000000 
+        let thread = new System.Threading.Thread(func, stackSize)
+        thread.Start()
+        thread.Join()
+        !result
 
     member this.AstToDot (indToString : Dictionary<int,_>) (path : string) =
         use out = new System.IO.StreamWriter (path : string)
@@ -312,7 +354,7 @@ type Tree<'TokenType> (roots : INode[], unpackPos) =
                         nodeQueue.Enqueue(new NumNode<INode>(!num, a.First))
                     if isAmbiguous
                     then
-                        printfn "* %i" (a.Others.Count+1)
+                        //printfn "* %i" (a.Others.Count+1)
                         differentTreesCount := !differentTreesCount * (a.Others.Count+1)
                         for n in a.Others do
                             nodeQueue.Enqueue(new NumNode<INode>(!num, n))
@@ -361,7 +403,7 @@ type Tree<'TokenType> (roots : INode[], unpackPos) =
                 | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
         out.WriteLine("}")
         out.Close()
-        printfn "Different trees count: %i" !differentTreesCount
+        //printfn "Different trees count: %i" !differentTreesCount
 
     (*member this.ReduceTree (tokenToNumber : 'TokenType -> int) (indToString : int -> string) : ReducedTree =
         let rec cleanTree (st : INode)  =             

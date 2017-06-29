@@ -177,7 +177,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
     gss, sppf,
         if buildTree
         then 
-            Some <| new Tree<_>(sppf.GetRoots gss input.InitialPositions.[0], input.PositionToString)
+            Some <| new Tree<_>(sppf.GetRoots gss input.InitialPositions.[0], input.PositionToString, parser.IntToString)
         else
             None
        
@@ -199,7 +199,7 @@ let getAllSPPFRoots (parser : ParserSourceGLL) (input : IParserInput) =
         |> Array.choose (fun pos ->
             let roots = sppf.GetRoots gss pos
             if roots.Length <> 0 
-            then Some(new Tree<_>(roots, input.PositionToString))
+            then Some(new Tree<_>(roots, input.PositionToString, parser.IntToString))
             else None) 
     forest
 

@@ -59,8 +59,8 @@ and EpsilonNode =
 
 and PackedNode = 
     val State : int<positionInGrammar>
-    val Left : INode
-    val Right : INode
+    val mutable Left : INode
+    val mutable Right : INode
     interface INode with
         member this.getExtension () = this.Right.getExtension ()
     new (state, left, right) = {State = state; Left = left; Right = right}
@@ -165,12 +165,90 @@ type TranslateArguments<'Token, 'Position, 'Result> = {
     withErrors : bool
 }
 
+[<Struct>]
+type NodeAncestor =
+    val IsLeft : bool
+    val Ancestor : PackedNode
+    val Node : INode
+    new (node, ancestor, isLeft) = {Ancestor = ancestor; Node = node; IsLeft = isLeft}
+
+let isDummy (n:INode) = match n with :? TerminalNode as t -> t.Extension = packExtension -1 -1 | _ -> false
+
+type TreeNode = 
+    | Nonterm of TreeNode list
+    | Term of int<token>
+
+[<Struct>]
+type Info =
+    val StemCount : int
+    val LastStem : int
+    val Lengths : int[]
+    val Tree : TreeNode[]
+    new (stemCount, lastStem, lengths, tree) = {StemCount = stemCount; Lengths = lengths; LastStem = lastStem; Tree = tree}
+
+
+let getBestTree (intToString : (int -> string)) : INode -> Info = function
+    | :? NonTerminalNode as n -> 
+        let lst = 
+            if n.Others <> null
+            then
+                n.Others |> Array.ofSeq
+            else
+                [||]
+        let lst = Array.append lst [|n.First|] 
+        let subtreeToChoose, info =
+            lst
+            |> Array.map(fun x -> x, getBestTree x)
+            |> Array.maxBy(fun (_,x) -> x)
+        n.Others <- null
+        n.First <- subtreeToChoose
+        if (intToString n.Name).Contains("stem")
+        then
+            if info.LastStem = n.Name
+            then
+                info.Lengths
+        
+    | :? PackedNode as p ->
+        let left = getBestTree p.Left
+        let right = getBestTree p.Right
+        new Info(left.StemCount + right.StemCount, 0, Array.append left.Lenghts right.Lenghts, Array.append left.Tree right.Tree)
+    | :? IntermidiateNode as i ->
+        let lst = 
+            if i.Others <> null
+            then
+                i.Others |> Array.ofSeq
+            else
+                [||]
+        let lst = Array.append lst [|i.First|] 
+        let info =
+            lst
+            |> Array.map(fun x -> getBestTree x)
+            |> Array.maxBy(fun x -> x.Lengths |> Array.average)
+        info
+    | :? TerminalNode as t ->
+        new Info(0,0,[||],[Term(t.Name)])
+    | :? EpsilonNode as e ->
+        new Info(0,0,[||],[Term(-1<token>)])
+    | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
+
 [<AllowNullLiteral>]
 type Tree<'TokenType> (roots : INode[], unpackPos) =
+    member this.MinimizeBinarized() =
+        ()
+    member this.GetBestTree() = 
+        let result = Term(-1<token>) |> ref
+        let func () =
+            result := (getBestTree unpackPos roots.[0]).Tree.[0]
+        let stackSize : int = 2000000000 
+        let thread = new System.Threading.Thread(func, stackSize)
+        thread.Start()
+        thread.Join()
+
     member this.AstToDot (indToString : Dictionary<int,_>) (path : string) =
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
 
+        let differentTreesCount = ref 1
         let createNode isRoot num isAmbiguous nodeType (str : string) =
             let label =
                 let cur = str.Replace("\n", "\\n").Replace ("\r", "")
@@ -232,8 +310,10 @@ type Tree<'TokenType> (roots : INode[], unpackPos) =
                     if a.First <> Unchecked.defaultof<_>
                     then
                         nodeQueue.Enqueue(new NumNode<INode>(!num, a.First))
-                    if a.Others <> null
+                    if isAmbiguous
                     then
+                        printfn "* %i" (a.Others.Count+1)
+                        differentTreesCount := !differentTreesCount * (a.Others.Count+1)
                         for n in a.Others do
                             nodeQueue.Enqueue(new NumNode<INode>(!num, n))
                 | :? PackedNode as p ->
@@ -251,6 +331,8 @@ type Tree<'TokenType> (roots : INode[], unpackPos) =
                         nodeQueue.Enqueue(new NumNode<INode>(!num, i.First))
                     if i.Others <> null
                     then
+                        printfn "* %i" (i.Others.Count+1)
+                        differentTreesCount := !differentTreesCount * (i.Others.Count+1)
                         for nodes in i.Others do
                             nodeQueue.Enqueue(new NumNode<INode>(!num, nodes))
                 | :? TerminalNode as t ->
@@ -279,6 +361,7 @@ type Tree<'TokenType> (roots : INode[], unpackPos) =
                 | x -> failwithf "Unexpected node type in ASTGLL: %s" <| x.GetType().ToString()
         out.WriteLine("}")
         out.Close()
+        printfn "Different trees count: %i" !differentTreesCount
 
     (*member this.ReduceTree (tokenToNumber : 'TokenType -> int) (indToString : int -> string) : ReducedTree =
         let rec cleanTree (st : INode)  =             

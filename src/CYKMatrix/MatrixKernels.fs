@@ -45,6 +45,11 @@
             _CsrVal <- csrVal_upd
             _CsrRow <- csrRow_upd
             _CsrColInd <- csrColInd_upd
+        member this.GetItem (i, j) =
+            let nzInd =  
+                [_CsrRow.[i] .. _CsrRow.[i + 1] - 1]
+                |> List.tryFind (fun k -> _CsrColInd.[k] = j)
+            in if nzInd.IsSome then _CsrVal.[nzInd.Value] else 0.0
 
     let initParsingMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
                   (allRules: RulesHolder)

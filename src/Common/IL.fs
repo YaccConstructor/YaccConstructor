@@ -26,6 +26,7 @@ module Source =
             {absoluteOffset = fslexPos.AbsoluteOffset; line = fslexPos.Line; column = fslexPos.Column}
     /// Type of elementary part of source grammar
     [<Struct>]
+    [<StructuralEquality; StructuralComparison>]
     type t =
         val text : string
         val startPos : Position
@@ -43,6 +44,7 @@ module Source =
         new (text) =
             t (text, new Position(), new Position(), "")
         override this.ToString() = this.text
+        //override this.GetHashCode t = hash this.text 
     // TODO: make something with toString overriding of Source.t   
     let toString (x : t) = x.text
   
@@ -53,6 +55,7 @@ module Production =
         label: string;
         weight: float option
     }
+    [<StructuralEquality; StructuralComparison>]
     type elem<'patt,'expr> = {
         /// Don't include rule into AST
         omit:bool;
@@ -155,6 +158,7 @@ module Rule =
     /// <para>Rule have the following format: </para>
     /// <para>  [+]name&lt;&lt; metaArgs &gt;&gt;[args] : body; </para>
     /// </summary>
+    [<StructuralEquality; StructuralComparison>]
     type t<'patt,'expr> = {
         /// Rule name. Used to start from this or to be referenced to from other rules.
         name    : Source.t

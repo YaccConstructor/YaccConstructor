@@ -77,7 +77,7 @@ let drawPositiveExamples fastaFile =
     for (id, gen) in data do
         drawPicture (buildInputGraph gen) (path + id + ".bmp")
 
-let drawNegativeExamples length fastaFiles =
+let drawNegativeExamples minLength maxLength fastaFiles =
     let remove16s (genome: string) toRemove =
         if Array.isEmpty toRemove
         then genome
@@ -90,6 +90,7 @@ let drawNegativeExamples length fastaFiles =
             builder.Append(genome.[!cur ..]).ToString()
 
     let path = "../../negative/"
+    let random = System.Random()
     Directory.CreateDirectory(path) |> ignore
     for f in fastaFiles do
         let data = (getData f).[0]
@@ -99,7 +100,8 @@ let drawNegativeExamples length fastaFiles =
             metaParts.[3].Split()
             |> Array.map (fun s -> let p = s.Split(':') in (int p.[0], int p.[1]))
         let filteredGen = remove16s (snd data) intervals16s
-        for i in 0 .. 100 .. filteredGen.Length - length - 1 do
+        for i in 0 .. 300 .. filteredGen.Length - maxLength - 1 do
+            let length = random.Next(minLength, maxLength)
             let name = sprintf "%s_%i_%i.bmp" id i length
             drawPicture (buildInputGraph filteredGen.[i .. i + length - 2]) (path + name)
 
@@ -108,5 +110,5 @@ let main argv =
     let genomeFiles = 
         Directory.GetFiles("../../../data/bio/complete_genome/", "*.txt", SearchOption.AllDirectories)
     drawPositiveExamples "../../SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta"
-    drawNegativeExamples 1500 genomeFiles
+    drawNegativeExamples 1300 1700 genomeFiles
     0

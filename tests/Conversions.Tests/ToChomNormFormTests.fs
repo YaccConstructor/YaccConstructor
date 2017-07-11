@@ -20,12 +20,17 @@ let applyConversion (conversion:Conversion) loadIL =
     }
 
 //let loadIL = fe.ParseGrammar (path "C:/YaccConstructor/tests/data/Conversions/ToCNF/grammar.yrd") 
-let loadIL = fe.ParseGrammar (path "C:/YaccConstructor/tests/data/Conversions/ToCNF/gr1.yrd") 
+(*let loadIL = fe.ParseGrammar (path "C:/YaccConstructor/tests/data/Conversions/ToCNF/gr1.yrd") 
 Namer.initNamer loadIL.grammar
-let result = loadIL |> applyConversion conversionChomNormForm
+let result = loadIL |> applyConversion conversionChomNormForm*)
+let loadIL = fe.ParseGrammar (path "C:/YaccConstructor/tests/GraphParsing.Test/GPPerf2_cnf.yrd")
+Namer.initNamer loadIL.grammar
+let result = loadIL |> applyConversion expandTopLevelAlt |> 
+                    applyConversion expandEbnf |> applyConversion expandMeta |> applyConversion conversionChomNormForm
+
 let rules = result.grammar.[0].rules
-for i in 0..rules.Length - 1 do
-    printfn "%A" (rules.[i].name.text + ": " + rules.[i].body.ToString())
+//for i in 0..rules.Length - 1 do
+ //   printfn "%A" (rules.[i].name.text + ": " + rules.[i].body.ToString())
 //printfn "%A" result 
 System.Console.ReadKey() |> ignore
 

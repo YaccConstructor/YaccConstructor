@@ -80,6 +80,7 @@ let conversionEps = new Conversions.ToCNF.DeleteEpsRule()
 let conversionChain = new Conversions.ToCNF.DeleteChainRule()
 let conversionRenamer = new Conversions.ToCNF.RenameTerm()
 let conversionCNF = new Conversions.ToCNF.ToCNF()
+let conversionChomNormForm = new Conversions.ToChomNormForm.ToChomNormForm()
 
 let applyConversion (conversion:Conversion) loadIL = 
     {

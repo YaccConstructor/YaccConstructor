@@ -19,6 +19,7 @@ open MathNet.Numerics.LinearAlgebra.Double
 open MatrixKernels
 open GraphParsing
 open MySparseGraphParsingImpl
+open SparseGraphParsingImpl
 
 let grammar = @"../../../../src/YC.GrammarZOO/Bio/tests/bio_brackets.yrd"
 let yardFE = new Yard.Frontends.YardFrontend.YardFrontend()

@@ -8,23 +8,23 @@ open System.Collections.Generic
 open Yard.Core.IL.Rule
 open Microsoft.FSharp.Collections
 
-type NonTermComparer<'t1, 't2 when 't1:equality and 't2:equality> () =
-    interface IEqualityComparer<Production.elem<'t1, 't2>> with
+type NonTermComparer<'t1,'t2 when 't1:equality and 't2:equality>() =
+    interface IEqualityComparer<Production.elem<'t1,'t2>> with
         member this.Equals(x, y) = match x.rule, y.rule with PRef (x, _), PRef (y, _) -> x.text = y.text | _ -> false
         member this.GetHashCode x = match x.rule with PRef (x, _) -> hash x.text | _ -> hash x
 
-type PairComparer<'t1, 't2 when 't1:equality and 't2:equality> () =
-    interface IEqualityComparer<Production.elem<'t1, 't2> * Production.elem<'t1, 't2>> with
+type PairComparer<'t1,'t2 when 't1:equality and 't2:equality>() =
+    interface IEqualityComparer<Production.elem<'t1,'t2> * Production.elem<'t1,'t2>> with
         member this.Equals((x1, x2), (y1, y2)) = match (x1.rule,x2.rule), (y1.rule,y2.rule) with (PRef (x1, _), PRef (x2, _)), (PRef (y1, _), PRef (y2, _)) -> x1.text = y1.text && x2.text = y2.text | _ -> false
         member this.GetHashCode x = match (fst x).rule, (snd x).rule with PRef (x1, _), PRef(x2, _) -> hash (x1.text + x2.text) | _ -> hash (fst x) + hash (snd x)
 
-type RuleComparer<'t1, 't2 when 't1:equality and 't2:equality> () =
-    interface IEqualityComparer<Rule.t<'t1, 't2>> with
+type RuleComparer<'t1,'t2 when 't1:equality and 't2:equality>() =
+    interface IEqualityComparer<Rule.t<'t1,'t2>> with
         member this.Equals(x, y) = (x.name.ToString() + x.body.ToString() = y.name.ToString() + y.body.ToString())
         member this.GetHashCode x = hash (x.name.ToString() + x.body.ToString())
 
-let deleteLongRules (rules: Rule.t<_, _> list) =
-    let newRules = HashSet<_>(new RuleComparer<_, _>())
+let deleteLongRules (rules: Rule.t<_,_> list) =
+    let newRules = HashSet<_>(new RuleComparer<_,_>())
     for rule in rules do
         let elements = match rule.body with PSeq(e, a, l) -> e 
         if elements.Length < 3 
@@ -37,8 +37,8 @@ let deleteLongRules (rules: Rule.t<_, _> list) =
             newRules.Add(TransformAux.createRule newNames.[elements.Length - 3] rule.args (PSeq([elements.[elements.Length - 2]; elements.[elements.Length - 1]], None, None)) false rule.metaArgs) |> ignore
     newRules |> Seq.toList
 
-let collectEpsNonterms (rules: Rule.t<_, _> list) = 
-    let epsNonterms = HashSet<_>(new NonTermComparer<_, _>())
+let collectEpsNonterms (rules: Rule.t<_,_> list) = 
+    let epsNonterms = HashSet<_>(new NonTermComparer<_,_>())
     for rule in rules do
         let elements = match rule.body with PSeq(e, a, l) -> e
         if elements.IsEmpty 
@@ -69,18 +69,19 @@ let deleteEpsilonRules (rules: Rule.t<_, _> list) =
                 then newRules.Add(TransformAux.createRule rule.name rule.args (PSeq([elements.[1]], None, None)) rule.isStart rule.metaArgs) |> ignore
                 if (List.contains (elements.[1].rule.ToString()) epsNonterms) 
                 then newRules.Add(TransformAux.createRule rule.name rule.args (PSeq([elements.[0]], None, None)) rule.isStart rule.metaArgs) |> ignore
-   (* let start = (List.find (fun x -> x.name.text = "s") rules).name
-    if List.contains start.text epsNonterms
-    then        
-        let newStart = Namer.newSource(start)
-        newRules.Add(TransformAux.createRule newStart [] (PSeq([TransformAux.createDefaultElem(PRef(start, None))], None, None)) true []) |> ignore
-        newRules.Add(TransformAux.createRule start [] (PSeq([], None, None)) false []) |> ignore*)
+//если выводима пустая строка
+//    let start = (List.find (fun x -> x.name.text = "s") rules).name
+//    if List.contains start.text epsNonterms
+//    then        
+//        let newStart = Namer.newSource(start)
+//        newRules.Add(TransformAux.createRule newStart [] (PSeq([TransformAux.createDefaultElem(PRef(start, None))], None, None)) true []) |> ignore
+//        newRules.Add(TransformAux.createRule start [] (PSeq([], None, None)) false []) |> ignore
     newRules.RemoveWhere(fun x -> (match x.body with PSeq(e, a, l) -> e).IsEmpty) |> ignore
     newRules |> Seq.toList
 
-let findPairs (nonterms: HashSet<_ * _>) (rules: HashSet<_>) = 
-    let pairs = HashSet<_>(nonterms, new PairComparer<_, _>())
-    let queue = new Queue<_ * _>(nonterms)
+let findPairs (nonterms: HashSet<_*_>) (rules: HashSet<_>) = 
+    let pairs = HashSet<_>(nonterms, new PairComparer<_,_>())
+    let queue = new Queue<_*_>(nonterms)
     while queue.Count > 0 do
         let q = queue.Dequeue()
         for rule in rules do
@@ -91,10 +92,10 @@ let findPairs (nonterms: HashSet<_ * _>) (rules: HashSet<_>) =
                     queue.Enqueue((fst q, el))
     pairs 
 
-let deleteUnitRules (rules: Rule.t<_, _> list) = 
+let deleteUnitRules (rules: Rule.t<_,_> list) = 
     let newRules = HashSet<_>(rules, new RuleComparer<_, _>())
     let unitRules = HashSet<_>(new RuleComparer<_, _>())
-    let nonterms = HashSet<_ * _>(new PairComparer<_, _>())
+    let nonterms = HashSet<_*_>(new PairComparer<_,_>())
     for rule in rules do
         nonterms.Add(TransformAux.createDefaultElem(PRef(rule.name, None)), TransformAux.createDefaultElem(PRef(rule.name, None))) |> ignore
         let elements = match rule.body with PSeq(e, a, l) -> e
@@ -114,8 +115,8 @@ let deleteUnitRules (rules: Rule.t<_, _> list) =
     newRules.RemoveWhere(fun x -> (match x.body with PSeq(e, a, l) -> e).Length = 1 && (match (match x.body with PSeq(e, a, l) -> e).[0].rule with PRef(t, _)  -> true | _ -> false)) |> ignore
     newRules |> Seq.toList 
 
-let deleteNonGenerating (rules: Rule.t<_, _> list) = 
-    let newRules = HashSet<_>(rules, new RuleComparer<_, _>())
+let deleteNonGenerating (rules: Rule.t<_,_> list) = 
+    let newRules = HashSet<_>(rules, new RuleComparer<_,_>())
     let generating = HashSet<string>()
     for rule in rules do
         let elements = match rule.body with PSeq(e, a, l) -> e |> List.map (fun x -> match x.rule with | PToken t -> true | _ -> false )
@@ -134,8 +135,8 @@ let deleteNonGenerating (rules: Rule.t<_, _> list) =
                                 List.contains false elements) |> ignore
     newRules |> Seq.toList
 
-let deleteUnreachable (rules: Rule.t<_, _> list) = 
-    let newRules = HashSet<_>(rules, new RuleComparer<_, _>())
+let deleteUnreachable (rules: Rule.t<_,_> list) = 
+    let newRules = HashSet<_>(rules, new RuleComparer<_,_>())
     let start = (List.find (fun x -> x.isStart) rules).name.text
     let reachable = HashSet<string>([start])
     let mutable flag = true
@@ -163,13 +164,13 @@ let tryFindRule (term: Source.t) rule (rules: HashSet<_>) =
     else Namer.newSource(rule.name)
 
        
-let deleteFewTermRules  (rules: Rule.t<_, _> list) = 
-    let newRules = HashSet<_>(rules, new RuleComparer<_, _>())
+let deleteFewTermRules  (rules: Rule.t<_,_> list) = 
+    let newRules = HashSet<_>(rules, new RuleComparer<_,_>())
     for rule in rules do
         let elements = match rule.body with PSeq(e, a, l) -> e
         if elements.Length = 2 
         then
-            if (match elements.[0].rule with | PToken t -> true | _ -> false) && (match elements.[1].rule with | PToken t -> true | _ -> false) 
+            if (match elements.[0].rule with | PToken t -> true | _ -> false) && (match elements.[1].rule with | PToken t -> true | _ -> false)
             then
                 let n1, n2 = tryFindRule (match elements.[0].rule with | PToken t -> t) rule newRules,  tryFindRule (match elements.[1].rule with | PToken t -> t) rule newRules
                 let a1, a2 = TransformAux.createDefaultElem(PRef(n1, None)), TransformAux.createDefaultElem(PRef(n2, None))
@@ -177,14 +178,14 @@ let deleteFewTermRules  (rules: Rule.t<_, _> list) =
                 newRules.Add(TransformAux.createRule n1 rule.args (PSeq([elements.[0]], None, None)) false rule.metaArgs) |> ignore
                 newRules.Add(TransformAux.createRule n2 rule.args (PSeq([elements.[1]], None, None)) false rule.metaArgs) |> ignore
                 newRules.Remove(rule) |> ignore
-            else if (match elements.[0].rule with | PToken t -> true | _ -> false) && not (match elements.[1].rule with | PToken t -> true | _ -> false) 
+            elif (match elements.[0].rule with | PToken t -> true | _ -> false) && not (match elements.[1].rule with | PToken t -> true | _ -> false) 
             then
                 let n1 =  tryFindRule (match elements.[0].rule with | PToken t -> t) rule newRules
                 let a1 = TransformAux.createDefaultElem(PRef(n1, None))
                 newRules.Add(TransformAux.createRule rule.name rule.args (PSeq([a1; elements.[1]], None, None)) rule.isStart rule.metaArgs) |> ignore
                 newRules.Add(TransformAux.createRule n1 rule.args (PSeq([elements.[0]], None, None)) false rule.metaArgs) |> ignore
                 newRules.Remove(rule)|> ignore
-            else if elements.Length = 2 && not (match elements.[0].rule with | PToken t -> true | _ -> false) &&  (match elements.[1].rule with | PToken t -> true | _ -> false) 
+            elif elements.Length = 2 && not (match elements.[0].rule with | PToken t -> true | _ -> false) &&  (match elements.[1].rule with | PToken t -> true | _ -> false) 
             then
                 let n1 =  tryFindRule (match elements.[1].rule with | PToken t -> t) rule newRules
                 let a1 = TransformAux.createDefaultElem(PRef(n1, None))
@@ -193,7 +194,7 @@ let deleteFewTermRules  (rules: Rule.t<_, _> list) =
                 newRules.Remove(rule) |> ignore
     newRules |> Seq.toList
 
-let toChomNormForm (rules: Rule.t<_, _> list) = 
+let toChomNormForm (rules: Rule.t<_,_> list) = 
     rules
     |> deleteLongRules
     |> deleteEpsilonRules

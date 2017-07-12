@@ -10,29 +10,101 @@ open NUnit.Framework
 open ConversionsTests
 open Yard.Core.Helpers
 
-let basePath = System.IO.Path.Combine(conversionTestPath, "ToChomNormForm")
-let path f = System.IO.Path.Combine(basePath, f)
+[<TestFixture>]
+type ``CNF tests`` () =
+    let basePath = System.IO.Path.Combine(conversionTestPath, "ToChomNormForm")
+    let path f = System.IO.Path.Combine(basePath, f)
       
-let applyConversion (conversion:Conversion) loadIL = 
-    {
-        loadIL
-            with grammar = conversion.ConvertGrammar (loadIL.grammar, [||])                               
-    }
+    let applyConversion (conversion:Conversion) loadIL = 
+        {
+            loadIL
+                with grammar = conversion.ConvertGrammar (loadIL.grammar, [||])                               
+        }
 
-//let loadIL = fe.ParseGrammar (path "C:/YaccConstructor/tests/data/Conversions/ToCNF/grammar.yrd") 
-(*let loadIL = fe.ParseGrammar (path "C:/YaccConstructor/tests/data/Conversions/ToCNF/gr1.yrd") 
-Namer.initNamer loadIL.grammar
-let result = loadIL |> applyConversion conversionChomNormForm*)
-let loadIL = fe.ParseGrammar (path "C:/YaccConstructor/tests/GraphParsing.Test/GPPerf2_cnf.yrd")
-Namer.initNamer loadIL.grammar
-let result = loadIL |> applyConversion expandTopLevelAlt |> 
-                    applyConversion expandEbnf |> applyConversion expandMeta |> applyConversion conversionChomNormForm
+    [<Test>]
+    member test.``ToChomNormForm1`` () =
+            let rules = 
+                (verySimpleRules "yard_s_2"
+                    [{dummyRule with rule = PRef (Source.t "yard_s_2_4", None)}
+                     {dummyRule with rule = PRef (Source.t "x", None)}]) 
+               @(verySimpleNotStartRules "yard_s_1"
+                    [{dummyRule with rule = PRef (Source.t "x", None)}
+                     {dummyRule with rule = PRef (Source.t "yard_s_2", None)}]) 
+               @(verySimpleNotStartRules "x"
+                    [{dummyRule with rule = PRef (Source.t "yard_s_3", None)}
+                     {dummyRule with rule = PRef (Source.t "y", None)}])
+               @(verySimpleNotStartRules "x"
+                    [{dummyRule with rule = PRef (Source.t "yard_s_2_4", None)}
+                     {dummyRule with rule = PRef (Source.t "y", None)}])
+               @(verySimpleNotStartRules "yard_s_1"
+                    [{dummyRule with rule = PRef (Source.t "yard_s_2_4", None)}
+                     {dummyRule with rule = PRef (Source.t "x", None)}])
+               @(verySimpleNotStartRules "y"
+                    [{dummyRule with rule = PToken (Source.t "CC")}])
+               @(verySimpleNotStartRules "yard_s_2"
+                    [{dummyRule with rule = PToken (Source.t "B")}])
+               @(verySimpleNotStartRules "x"
+                    [{dummyRule with rule = PToken (Source.t "A")}])
+               @(verySimpleNotStartRules "x"
+                    [{dummyRule with rule = PToken (Source.t "B")}])
+               @(verySimpleNotStartRules "y"
+                    [{dummyRule with rule = PRef (Source.t "yard_s_3", None)}
+                     {dummyRule with rule = PRef (Source.t "y", None)}])
+               @(verySimpleNotStartRules "yard_s_1"
+                    [{dummyRule with rule = PToken (Source.t "B")}])
+               @(verySimpleNotStartRules "y"
+                    [{dummyRule with rule = PRef (Source.t "yard_s_2_4", None)}
+                     {dummyRule with rule = PRef (Source.t "y", None)}])
+               @(verySimpleNotStartRules "y"
+                    [{dummyRule with rule = PToken (Source.t "A")}])
+               @(verySimpleNotStartRules "y"
+                    [{dummyRule with rule = PToken (Source.t "B")}])
+               @(verySimpleNotStartRules "s"
+                    [{dummyRule with rule = PRef (Source.t "yard_s_3", None)}
+                     {dummyRule with rule = PRef (Source.t "yard_s_1", None)}])
+               @(verySimpleNotStartRules "yard_s_3"
+                    [{dummyRule with rule = PToken (Source.t "A")}])
+               @(verySimpleNotStartRules "yard_s_2_4"
+                    [{dummyRule with rule = PToken (Source.t "B")}])
+            runTest (path "C:/YaccConstructor/tests/data/Conversions/ToCNF/grammar.yrd") conversionChomNormForm rules
 
-let rules = result.grammar.[0].rules
-//for i in 0..rules.Length - 1 do
- //   printfn "%A" (rules.[i].name.text + ": " + rules.[i].body.ToString())
-//printfn "%A" result 
-System.Console.ReadKey() |> ignore
+    [<Test>]
+    member test.``ToChomNormForm2`` () =
+            let rules = 
+                (verySimpleRules "s"
+                    [{dummyRule with rule = PRef (Source.t "yard_s_4", None)}
+                     {dummyRule with rule = PRef (Source.t "b", None)}]) 
+               @(verySimpleNotStartRules "a"
+                    [{dummyRule with rule = PRef (Source.t "yard_s_4", None)}
+                     {dummyRule with rule = PRef (Source.t "s", None)}]) 
+               @(verySimpleNotStartRules "a"
+                    [{dummyRule with rule = PToken (Source.t "A")}])
+               @(verySimpleNotStartRules "a"
+                    [{dummyRule with rule = PRef (Source.t "yard_s_3", None)}
+                     {dummyRule with rule = PRef (Source.t "yard_a_1", None)}])
+               @(verySimpleNotStartRules "b"
+                    [{dummyRule with rule = PRef (Source.t "yard_s_3", None)}
+                     {dummyRule with rule = PRef (Source.t "s", None)}])
+               @(verySimpleNotStartRules "yard_a_1"
+                    [{dummyRule with rule = PRef (Source.t "a", None)}
+                     {dummyRule with rule = PRef (Source.t "a", None)}])
+               @(verySimpleNotStartRules "b"
+                    [{dummyRule with rule = PToken (Source.t "B")}])
+               @(verySimpleNotStartRules "b"
+                    [{dummyRule with rule = PRef (Source.t "yard_s_4", None)}
+                     {dummyRule with rule = PRef (Source.t "yard_b_2", None)}])
+               @(verySimpleNotStartRules "yard_b_2"
+                    [{dummyRule with rule = PRef (Source.t "b", None)}
+                     {dummyRule with rule = PRef (Source.t "b", None)}])
+               @(verySimpleRules "s"
+                    [{dummyRule with rule = PRef (Source.t "yard_s_3", None)}
+                     {dummyRule with rule = PRef (Source.t "a", None)}])
+               @(verySimpleNotStartRules "yard_s_3"
+                    [{dummyRule with rule = PToken (Source.t "B")}])
+               @(verySimpleNotStartRules "yard_s_4"
+                    [{dummyRule with rule = PToken (Source.t "A")}])
+            runTest (path "C:/YaccConstructor/tests/data/Conversions/ToCNF/grammar.yrd") conversionChomNormForm rules
+
 
 
 

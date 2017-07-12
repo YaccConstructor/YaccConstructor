@@ -82,7 +82,7 @@ let deleteEpsilonRules (rules: Rule.t<_, _> list) =
 //        let newStart = Namer.newSource(start)
 //        newRules.Add(TransformAux.createRule newStart [] (PSeq([TransformAux.createDefaultElem(PRef(start, None))], None, None)) true []) |> ignore
 //        newRules.Add(TransformAux.createRule start [] (PSeq([], None, None)) false []) |> ignore
-    newRules.RemoveWhere(fun x -> (match x.body with PSeq(e, a, l) -> e).IsEmpty) |> ignore
+    newRules.RemoveWhere(fun x -> (getElements x).IsEmpty) |> ignore
     newRules |> Seq.toList
 
 let findPairs (nonterms: HashSet<_*_>) (rules: HashSet<_>) = 
@@ -118,7 +118,7 @@ let deleteUnitRules (rules: Rule.t<_,_> list) =
             let newRule = TransformAux.createRule name rule.args rule.body startFlag rule.metaArgs 
             if not (unitRules.Contains(rule)) && (snd pair).rule.ToString() = rule.name.ToString()
             then newRules.Add(newRule) |> ignore
-    newRules.RemoveWhere(fun x -> (match x.body with PSeq(e, a, l) -> e).Length = 1 && (match (match x.body with PSeq(e, a, l) -> e).[0].rule with PRef(t, _)  -> true | _ -> false)) |> ignore
+    newRules.RemoveWhere(fun x -> (getElements x).Length = 1 && (match (getElements x).[0].rule with PRef(t, _)  -> true | _ -> false)) |> ignore
     newRules |> Seq.toList 
 
 let deleteNonGenerating (rules: Rule.t<_,_> list) = 
@@ -162,9 +162,9 @@ let deleteUselessRules (rules: Rule.t<_, _> list) =
     deleteUnreachable (deleteNonGenerating rules)
  
 let tryFindRule (term: Source.t) rule (rules: HashSet<_>) = 
-    let a = Seq.filter (fun x -> List.length (match x.body with PSeq(e, a, l) -> e) = 1
-                                && match (match x.body with PSeq(e, a, l) -> e).[0].rule with PToken t -> true | _ -> false 
-                                && (match (match x.body with PSeq(e, a, l) -> e).[0].rule with PToken t -> t).text = term.text 
+    let a = Seq.filter (fun x -> List.length (getElements x) = 1
+                                && match (getElements x).[0].rule with PToken t -> true | _ -> false 
+                                && (match (getElements x).[0].rule with PToken t -> t).text = term.text 
                                 && Seq.filter (fun y -> y.name.text = x.name.text) rules |> Seq.length = 1) rules
     if not (Seq.isEmpty a) then (Seq.head a).name
     else Namer.newSource(rule.name)

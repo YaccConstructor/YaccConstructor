@@ -66,7 +66,7 @@ type ``CNF tests`` () =
                     [{dummyRule with rule = PToken (Source.t "A")}])
                @(verySimpleNotStartRules "yard_s_2_4"
                     [{dummyRule with rule = PToken (Source.t "B")}])
-            runTest (path "C:/YaccConstructor/tests/data/Conversions/ToCNF/grammar.yrd") conversionChomNormForm rules
+            runTest (path "grammar.yrd") conversionChomNormForm rules
 
     [<Test>]
     member test.``ToChomNormForm2`` () =
@@ -103,7 +103,7 @@ type ``CNF tests`` () =
                     [{dummyRule with rule = PToken (Source.t "B")}])
                @(verySimpleNotStartRules "yard_s_4"
                     [{dummyRule with rule = PToken (Source.t "A")}])
-            runTest (path "C:/YaccConstructor/tests/data/Conversions/ToCNF/grammar.yrd") conversionChomNormForm rules
+            runTest (path "grammar2.yrd") conversionChomNormForm rules
 
 
 

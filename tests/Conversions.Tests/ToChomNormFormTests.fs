@@ -71,7 +71,7 @@ type ``CNF tests`` () =
     [<Test>]
     member test.``ToChomNormForm2`` () =
             let rules = 
-                (verySimpleRules "s"
+                (verySimpleNotStartRules "s"
                     [{dummyRule with rule = PRef (Source.t "yard_s_4", None)}
                      {dummyRule with rule = PRef (Source.t "b", None)}]) 
                @(verySimpleNotStartRules "a"

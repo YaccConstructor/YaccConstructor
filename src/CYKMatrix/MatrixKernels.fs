@@ -50,6 +50,7 @@
                 [_CsrRow.[i] .. _CsrRow.[i + 1] - 1]
                 |> List.tryFind (fun k -> _CsrColInd.[k] = j)
             in if nzInd.IsSome then _CsrVal.[nzInd.Value] else 0.0
+        member this.ToArray() = Array2D.init size size (fun i j -> this.GetItem(i, j))
 
     let initParsingMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
                   (allRules: RulesHolder)

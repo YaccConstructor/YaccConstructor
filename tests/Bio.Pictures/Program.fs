@@ -9,6 +9,12 @@ open YC.API
 open Yard.Frontends.YardFrontend
 open Yard.Core.Conversions.ExpandMeta
 open AbstractAnalysis.Common
+open Yard.Core.Conversions
+open Yard.Core.IL.Definition
+open Yard.Core
+open Yard.Generators.YardPrinter
+
+open MathNet.Numerics.LinearAlgebra.Double
 
 open MatrixKernels
 open GraphParsing
@@ -51,23 +57,35 @@ let buildInputGraph (input: string) =
     graph.AddVerticesAndEdgeRange edges |> ignore
     graph
 
-let drawPicture (inputGraph: SimpleInputGraph<_>) output = 
-    let dim = inputGraph.VertexCount
-    
-    let handler = new MySparseHandler(dim)
-    let parsingMatrix, startN, _, _ = 
-        graphParse<MySparseMatrix, float> inputGraph handler IL tokenizer 1
-    
-    let startMatrix = parsingMatrix.[startN]
+let parse<'MatrixType> handler input =
+    graphParse<'MatrixType, float> input handler IL tokenizer 1
+let parseCPU (graph: SimpleInputGraph<_>) = 
+    parse<SparseMatrix> (new SparseHandler(graph.VertexCount)) graph
+let parseGPU (graph: SimpleInputGraph<_>) =
+    parse<MySparseMatrix> (new MySparseHandler(graph.VertexCount)) graph
+
+let getPictureSource isGpu (graph: SimpleInputGraph<_>) =
+    let dim = graph.VertexCount
+    if isGpu 
+    // because Sparse and MySparse have different parent classes
+    then 
+        let parsingMatrix, startN, _, _ = parseGPU graph
+        parsingMatrix.[startN].ToArray()     
+    else
+        let parsingMatrix, startN, _, _ = parseCPU graph
+        parsingMatrix.[startN].ToArray()
+
+let drawPicture (matrix: float[,]) output = 
+    let dim = Array2D.length1 matrix
+
     let bmp = new Bitmap(dim, dim)
     for i in 0 .. dim - 1 do
         for j in 0 .. dim - 1 do
-                if startMatrix.GetItem(i, j) <> 0.0 
-                then bmp.SetPixel (i, j, Color.Black) 
-//                else bmp.SetPixel (i, j, Color.White) 
+                if matrix.[i, j] <> 0.0
+                then bmp.SetPixel (i, j, Color.Black)
     bmp.Save(output)
 
-let drawPositiveExamples fastaFile =
+let drawPositiveExamples isGpu fastaFile =
     let data = 
         getData fastaFile 
         |> Array.filter (fun (meta, _) -> meta.Contains("Bacteria;"))
@@ -75,9 +93,10 @@ let drawPositiveExamples fastaFile =
     let path = "../../positive/"
     Directory.CreateDirectory(path) |> ignore
     for (id, gen) in data do
-        drawPicture (buildInputGraph gen) (path + id + ".bmp")
+        let matrix = getPictureSource isGpu (buildInputGraph gen)
+        drawPicture matrix (path + id + ".bmp")
 
-let drawNegativeExamples minLength maxLength fastaFiles =
+let drawNegativeExamples isGpu minLength maxLength fastaFiles =
     let remove16s (genome: string) toRemove =
         if Array.isEmpty toRemove
         then genome
@@ -100,15 +119,16 @@ let drawNegativeExamples minLength maxLength fastaFiles =
             metaParts.[3].Split()
             |> Array.map (fun s -> let p = s.Split(':') in (int p.[0], int p.[1]))
         let filteredGen = remove16s (snd data) intervals16s
-        for i in 0 .. 300 .. filteredGen.Length - maxLength - 1 do
+        for i in 0 .. 100 .. filteredGen.Length - maxLength - 1 do
             let length = random.Next(minLength, maxLength)
             let name = sprintf "%s_%i_%i.bmp" id i length
-            drawPicture (buildInputGraph filteredGen.[i .. i + length - 2]) (path + name)
+            let matrix = getPictureSource isGpu (buildInputGraph filteredGen.[i .. i + length - 2])
+            drawPicture matrix (path + name)
 
 [<EntryPoint>]
 let main argv = 
     let genomeFiles = 
         Directory.GetFiles("../../../data/bio/complete_genome/", "*.txt", SearchOption.AllDirectories)
-    drawPositiveExamples "../../SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta"
-    drawNegativeExamples 1300 1700 genomeFiles
+    drawPositiveExamples false "../../SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta"
+    drawNegativeExamples false 500 700 genomeFiles
     0

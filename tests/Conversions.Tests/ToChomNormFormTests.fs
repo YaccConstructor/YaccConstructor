@@ -24,7 +24,7 @@ type ``CNF tests`` () =
     [<Test>]
     member test.``ToChomNormForm1`` () =
             let rules = 
-                (verySimpleRules "yard_s_2"
+                (verySimpleNotStartRules "yard_s_2"
                     [{dummyRule with rule = PRef (Source.t "yard_s_2_4", None)}
                      {dummyRule with rule = PRef (Source.t "x", None)}]) 
                @(verySimpleNotStartRules "yard_s_1"
@@ -59,7 +59,7 @@ type ``CNF tests`` () =
                     [{dummyRule with rule = PToken (Source.t "A")}])
                @(verySimpleNotStartRules "y"
                     [{dummyRule with rule = PToken (Source.t "B")}])
-               @(verySimpleNotStartRules "s"
+               @(verySimpleRules "s"
                     [{dummyRule with rule = PRef (Source.t "yard_s_3", None)}
                      {dummyRule with rule = PRef (Source.t "yard_s_1", None)}])
                @(verySimpleNotStartRules "yard_s_3"

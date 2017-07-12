@@ -23,10 +23,16 @@ type RuleComparer<'t1,'t2 when 't1:equality and 't2:equality>() =
         member this.Equals(x, y) = (x.name.ToString() + x.body.ToString() = y.name.ToString() + y.body.ToString())
         member this.GetHashCode x = hash (x.name.ToString() + x.body.ToString())
 
+let getElements rule = 
+    match rule.body with 
+    | PSeq(e, a, l) -> e 
+    | PRef(t, a) -> [TransformAux.createDefaultElem(PRef(t, a))]
+    | PToken t -> [TransformAux.createDefaultElem(PToken t)]
+
 let deleteLongRules (rules: Rule.t<_,_> list) =
     let newRules = HashSet<_>(new RuleComparer<_,_>())
     for rule in rules do
-        let elements = match rule.body with PSeq(e, a, l) -> e 
+        let elements = getElements rule
         if elements.Length < 3 
         then newRules.Add(rule) |> ignore
         else 
@@ -40,14 +46,14 @@ let deleteLongRules (rules: Rule.t<_,_> list) =
 let collectEpsNonterms (rules: Rule.t<_,_> list) = 
     let epsNonterms = HashSet<_>(new NonTermComparer<_,_>())
     for rule in rules do
-        let elements = match rule.body with PSeq(e, a, l) -> e
+        let elements = getElements rule
         if elements.IsEmpty 
         then epsNonterms.Add(TransformAux.createDefaultElem(PRef(rule.name, None))) |> ignore   
     let mutable flag = true
     while flag do
         let mutable k = epsNonterms.Count
         for rule in rules do
-            let elements = match rule.body with PSeq(e, a, l) -> e |> List.map (fun x -> epsNonterms.Contains(x))
+            let elements = getElements rule |> List.map (fun x -> epsNonterms.Contains(x))
             if not (elements.IsEmpty) && not (List.contains false elements)
             then epsNonterms.Add(TransformAux.createDefaultElem(PRef(rule.name, None))) |> ignore
         if epsNonterms.Count = k then flag <- false
@@ -57,7 +63,7 @@ let deleteEpsilonRules (rules: Rule.t<_, _> list) =
     let epsNonterms = collectEpsNonterms rules |> List.map (fun x -> x.rule.ToString())
     let newRules = HashSet<_>(rules, new RuleComparer<_, _>())  
     for rule in rules do
-        let elements = match rule.body with PSeq(e, a, l) -> e
+        let elements = getElements rule
         if elements.Length = 2 
         then
             if (List.contains (elements.[0].rule.ToString()) epsNonterms) && (List.contains (elements.[1].rule.ToString()) epsNonterms) 
@@ -85,7 +91,7 @@ let findPairs (nonterms: HashSet<_*_>) (rules: HashSet<_>) =
     while queue.Count > 0 do
         let q = queue.Dequeue()
         for rule in rules do
-            let elements = match rule.body with PSeq(e, a, l) -> e
+            let elements = getElements rule
             let el = TransformAux.createDefaultElem(PRef(match elements.[0].rule with PRef(t, _) -> t, None))    
             if (snd q).rule.ToString() = rule.name.ToString() then 
                 if pairs.Add((fst q, el)) then
@@ -98,7 +104,7 @@ let deleteUnitRules (rules: Rule.t<_,_> list) =
     let nonterms = HashSet<_*_>(new PairComparer<_,_>())
     for rule in rules do
         nonterms.Add(TransformAux.createDefaultElem(PRef(rule.name, None)), TransformAux.createDefaultElem(PRef(rule.name, None))) |> ignore
-        let elements = match rule.body with PSeq(e, a, l) -> e
+        let elements = getElements rule
         if elements.Length = 1 && match elements.[0].rule with PRef(t, _) -> true | _ -> false
         then 
             nonterms.Add(elements.[0], elements.[0]) |> ignore
@@ -106,7 +112,7 @@ let deleteUnitRules (rules: Rule.t<_,_> list) =
     let pairs = findPairs nonterms unitRules   
     for pair in pairs do
         for rule in rules do
-            let elements = match rule.body with PSeq(e, a, l) -> e
+            let elements = getElements rule
             let name = match (fst pair).rule with PRef(t, _) -> t 
             let startFlag = not (Seq.isEmpty (Seq.where (fun x -> x.name = name && x.isStart) newRules))
             let newRule = TransformAux.createRule name rule.args rule.body startFlag rule.metaArgs 
@@ -119,19 +125,19 @@ let deleteNonGenerating (rules: Rule.t<_,_> list) =
     let newRules = HashSet<_>(rules, new RuleComparer<_,_>())
     let generating = HashSet<string>()
     for rule in rules do
-        let elements = match rule.body with PSeq(e, a, l) -> e |> List.map (fun x -> match x.rule with | PToken t -> true | _ -> false )
+        let elements = getElements rule |> List.map (fun x -> match x.rule with | PToken t -> true | _ -> false )
         if not (List.contains false elements)
         then generating.Add(rule.name.ToString()) |> ignore
     let mutable flag = true
     while flag do
         let mutable k = generating.Count
         for rule in rules do
-            let elements = match rule.body with PSeq(e, a, l) -> e |> List.filter(fun x -> match x.rule with | PToken t -> false | _ -> true) |> List.map (fun x -> generating.Contains(x.rule.ToString()))
+            let elements = getElements rule |> List.filter(fun x -> match x.rule with | PToken t -> false | _ -> true) |> List.map (fun x -> generating.Contains(x.rule.ToString()))
             if not (List.contains false elements) && not (List.isEmpty elements)
             then generating.Add(rule.name.ToString()) |> ignore
         if generating.Count = k then flag <- false
     newRules.RemoveWhere(fun r -> 
-                                let elements = match r.body with PSeq(e, a, l) -> e |> List.map (fun x -> match x.rule with | PToken t -> true | _ -> false || generating.Contains(x.rule.ToString()))
+                                let elements = getElements r |> List.map (fun x -> match x.rule with | PToken t -> true | _ -> false || generating.Contains(x.rule.ToString()))
                                 List.contains false elements) |> ignore
     newRules |> Seq.toList
 
@@ -143,7 +149,7 @@ let deleteUnreachable (rules: Rule.t<_,_> list) =
     while flag do
         let mutable k = reachable.Count
         for rule in rules do
-            let elements = match rule.body with PSeq(e, a, l) -> e  |> List.filter (fun x -> match x.rule with | PToken t -> false | _ -> true) |> List.map (fun x -> (x.rule.ToString()))
+            let elements = getElements rule  |> List.filter (fun x -> match x.rule with | PToken t -> false | _ -> true) |> List.map (fun x -> (x.rule.ToString()))
             if reachable.Contains(rule.name.ToString()) && 
                 ((elements.Length = 1 && reachable.Add(elements.[0])) 
                     || (elements.Length = 2 && reachable.Add(elements.[0]) && reachable.Add(elements.[1]))
@@ -167,7 +173,7 @@ let tryFindRule (term: Source.t) rule (rules: HashSet<_>) =
 let deleteFewTermRules  (rules: Rule.t<_,_> list) = 
     let newRules = HashSet<_>(rules, new RuleComparer<_,_>())
     for rule in rules do
-        let elements = match rule.body with PSeq(e, a, l) -> e
+        let elements = getElements rule
         if elements.Length = 2 
         then
             if (match elements.[0].rule with | PToken t -> true | _ -> false) && (match elements.[1].rule with | PToken t -> true | _ -> false)

@@ -12,7 +12,7 @@ open Yard.Core.Helpers
 
 [<TestFixture>]
 type ``CNF tests`` () =
-    let basePath = System.IO.Path.Combine(conversionTestPath, "ToChomNormForm")
+    let basePath = System.IO.Path.Combine(conversionTestPath, "ToCNF")
     let path f = System.IO.Path.Combine(basePath, f)
       
     let applyConversion (conversion:Conversion) loadIL = 

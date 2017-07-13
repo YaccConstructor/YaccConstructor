@@ -1,4 +1,4 @@
-﻿#I @"..\..\Bin\Release\v40"
+﻿#I @"../../Bin/Release/v40"
 
 #r @"YC.RNGLR.dll"
 #r @"YC.Common.dll"

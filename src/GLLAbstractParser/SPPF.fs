@@ -197,7 +197,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                              | _ -> failwith "wrongType")
         |> Seq.sortByDescending(fun x -> getRightExtension(x.getExtension()) )
         |> Array.ofSeq
-        |> (fun x -> [|x.[0]|])
+        //|> (fun x -> [|x.[0]|])
 
     member this.GetNonTermByName name = 
         this.Nodes 

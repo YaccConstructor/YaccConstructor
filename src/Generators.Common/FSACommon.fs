@@ -499,7 +499,7 @@ let minimizeFSA fsa =
                     newClasses.Add(currClass)
         newClasses
     
-    //let classes = divideClassesWithMultipleNonterminals()
+    let classes = divideClassesWithMultipleNonterminals()
     
 
     // move classes that contain nonterminals to beginning

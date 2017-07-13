@@ -27,7 +27,7 @@ let grammarFilesPath =
 let getParserSource grammarFile = 
     let fe = new YardFrontend()
     let gen = new GLL()
-    let conv = [|new ExpandMeta(), new ExpandEbnf(), new ExpandInnerAlt()|] |> Seq.cast<Conversion>
+    let conv = [| new ExpandMeta() :> Conversion; new ExpandEbnf() :> Conversion; new ExpandInnerAlt() :> Conversion|]
     generate grammarFile
                 fe gen
                 None

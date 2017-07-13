@@ -20,7 +20,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         | _ -> failwith "Wrong type"
 
     let nonTerminalNodes = new Dictionary<int64<extension>, Dictionary<int<positionInGrammar>,int<nodeMeasure>>>()
-    let intermidiateNodes = new Dictionary<int64<extension>, Dictionary<int<positionInGrammar>, int<nodeMeasure>>>()
+    let intermidiateNodes = new Dictionary<int64<extension>, Dictionary<int<positionInGrammar> * int<positionInGrammar>, int<nodeMeasure>>>()
     let terminalNodes = new Dictionary<int64<extension>, Dictionary<int<token>,int<nodeMeasure>>>()
     let epsilonNodes = new Dictionary<int, int<nodeMeasure>>()
     let nodes = new BlockResizeArray<INode>()
@@ -59,26 +59,26 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                     num
                 else
                     n1
-        | Intermed state -> 
+        | Intermed (state, nonterm) -> 
             let hash = packExtension lExt rExt
             let contains, n = this.IntermidiateNodes.TryGetValue hash
             if not contains
             then
                 let dict1 = new Dictionary<_,_>()
-                let newNode = new IntermidiateNode(state, (packExtension lExt rExt))
+                let newNode = new IntermidiateNode(state, nonterm, (packExtension lExt rExt))
                 this.Nodes.Add(newNode)
                 let num = (this.Nodes.Length - 1)*1<nodeMeasure>
-                dict1.Add(state, num)
+                dict1.Add((state,nonterm), num)
                 this.IntermidiateNodes.Add(hash, dict1)
                 num  
             else
-                let cont, n1 = n.TryGetValue state
+                let cont, n1 = n.TryGetValue((state, nonterm))
                 if not cont
                 then
-                    let newNode = new IntermidiateNode(state, (packExtension lExt rExt))
+                    let newNode = new IntermidiateNode(state, nonterm, (packExtension lExt rExt))
                     this.Nodes.Add(newNode)
                     let num = (this.Nodes.Length - 1)*1<nodeMeasure>
-                    n.Add(state, num)
+                    n.Add((state, nonterm), num)
                     num  
                 else
                     n1
@@ -182,7 +182,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
             then
                 dataCurrentR
             else
-                this.GetNodeP posInGrammar (Intermed posInGrammar) currentN currentR
+                this.GetNodeP posInGrammar (Intermed (posInGrammar, stateOfCurrentNonterm)) currentN currentR
         otherNode, nontermNode
 
     member this.GetRoots (gss : GSS) startPosition = 

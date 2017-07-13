@@ -127,7 +127,7 @@ let processFile file =
     printfn "%A" edges
     let root1 =
         Yard.Generators.GLL.AbstractParser.getAllSPPFRoots GLL.BioCFG.parserSource g1
-    root1.[0].AstToDot GLL.BioCFG.intToString "resultV.dot"
+    root1.[0].AstToDot "resultV.dot"
 //    let root1 =
 //        Yard.Generators.GLL.AbstractParser.getAllRangesForStartState GLL.GPPerf1.parserSource g1
 //        |> Seq.length

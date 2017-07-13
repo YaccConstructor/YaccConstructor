@@ -67,6 +67,7 @@ and PackedNode =
 
 and IntermidiateNode = 
     val State     : int<positionInGrammar>
+    val Nonterm   : int<positionInGrammar>
     val Extension : int64<extension>
     val mutable First     : PackedNode
     val mutable Others    : ResizeArray<PackedNode>
@@ -92,7 +93,7 @@ and IntermidiateNode =
                     for child in this.Others do
                         yield func child
         }
-    new (state, extension) = {State = state; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
+    new (state, nonterm, extension) = {Nonterm = nonterm; State = state; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
     
 
 type private DotNodeType = Packed | NonTerminal | Intermidiate | Terminal | Epsilon
@@ -175,7 +176,7 @@ type NodeAncestor =
 let isDummy (n:INode) = match n with :? TerminalNode as t -> t.Extension = packExtension -1 -1 | _ -> false
 
 type TreeNode = 
-    | SPPFNonterminal of TreeNode[] * string
+    | SPPFNonterminal of TreeNode[] * string * NonTerminalNode
     | SPPFTerminal of string * int * int
 
 [<Struct>]
@@ -193,6 +194,9 @@ let rec getBestTree (intToString : Dictionary<int,string>) (currentNonterm : int
     let newInfo = new Info() |> ref
     match node with
     | :? NonTerminalNode as n -> 
+        if int n.Name = 6 && n.Extension = 481036337303L<extension>
+        then
+            printfn "name is 6"
         let children = 
             if n.Others <> null
             then
@@ -222,7 +226,7 @@ let rec getBestTree (intToString : Dictionary<int,string>) (currentNonterm : int
             else
                 dummyNonterm, info.Lengths
             
-        newInfo := new Info(st, stack, [|SPPFNonterminal(info.Tree, intToString.[int n.Name])|])
+        newInfo := new Info(st, stack, [|SPPFNonterminal(info.Tree, intToString.[int n.Name], n)|])
         
     | :? PackedNode as p ->
         let left = getBestTree intToString currentNonterm p.Left
@@ -251,10 +255,12 @@ let rec getBestTree (intToString : Dictionary<int,string>) (currentNonterm : int
             else
                 [||]
         let children = Array.append children [|i.First|] 
-        let info =
+        let subtreeToChoose, info =
             children
-            |> Array.map(fun x -> getBestTree intToString currentNonterm x)
-            |> Array.maxBy(fun x -> if x.Lengths.Count > 0 then x.Lengths |> Seq.averageBy(fun x -> float x ) else 0.0)
+            |> Array.map(fun x -> x, getBestTree intToString currentNonterm x)
+            |> Array.maxBy(fun (_,x) -> if x.Lengths.Count > 0 then x.Lengths |> Seq.averageBy(fun x -> float x ) else 0.0)
+        i.Others <- null
+        i.First <- subtreeToChoose
         newInfo := info
     | :? TerminalNode as t ->
         if int t.Name <> -1
@@ -286,7 +292,7 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
         thread.Join()
         !result
 
-    member this.AstToDot (indToString : Dictionary<int,_>) (path : string) =
+    member this.AstToDot (*(indToString : Dictionary<int,_>)*) (path : string) =
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
 

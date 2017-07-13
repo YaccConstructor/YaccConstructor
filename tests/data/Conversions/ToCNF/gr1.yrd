@@ -1,0 +1,9 @@
+﻿[<Start>]
+s: B a
+s: A b
+a: A
+a: A s
+a: B a a
+b: B
+b: B s
+b: A b b

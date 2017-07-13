@@ -59,6 +59,7 @@
     <Compile Include="ToCNFTests.fs" />
     <Compile Include="ExpandRepeatTests.fs" />
     <None Include="paket.references" />
+    <Compile Include="ToChomNormFormTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

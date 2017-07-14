@@ -22,8 +22,19 @@ open MySparseGraphParsingImpl
 open SparseGraphParsingImpl
 
 let grammar = @"../../../../src/YC.GrammarZOO/Bio/tests/bio_brackets.yrd"
+let (conversions: Conversion list) =
+    [new ExpandEbnfStrict.ExpandEbnf(); new ExpandRepet.ExpandExpand(); 
+     new ExpandMeta.ExpandMeta(); new ExpandInnerAlt.ExpandInnerAlt();
+     new ExpandTopLevelAlt.ExpandTopLevelAlt(); new ToChomNormForm.ToChomNormForm()]
 let yardFE = new Yard.Frontends.YardFrontend.YardFrontend()
 let IL = yardFE.ParseGrammar grammar
+let finalIL = 
+    let converted = 
+        conversions |> List.fold (fun il conv -> conv.ConvertGrammar il) IL.grammar
+    in {IL.Definition.info = {fileName = ""}; head = None; foot = None; grammar = converted; options = Map.empty; tokens = Map.empty}
+let printer = new YardPrinter()
+let yrd = printer.Generate(finalIL, false)
+printfn "%A" (yrd.ToString())
 
 let tokenizer x =
     match x with

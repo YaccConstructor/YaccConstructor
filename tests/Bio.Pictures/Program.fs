@@ -31,10 +31,10 @@ let IL = yardFE.ParseGrammar grammar
 let finalIL = 
     let converted = 
         conversions |> List.fold (fun il conv -> conv.ConvertGrammar il) IL.grammar
-    in {IL.Definition.info = {fileName = ""}; head = None; foot = None; grammar = converted; options = Map.empty; tokens = Map.empty}
-let printer = new YardPrinter()
-let yrd = printer.Generate(finalIL, false)
-printfn "%A" (yrd.ToString())
+    in {IL.Definition.info = {fileName = ""}; head = None; foot = None; grammar = converted; 
+        options = Map.empty; tokens = Map.empty}
+
+printfn "rules: %A" finalIL.grammar.[0].rules.Length
 
 let tokenizer x =
     match x with
@@ -70,7 +70,7 @@ let buildInputGraph (input: string) =
     graph
 
 let parse<'MatrixType> handler input =
-    graphParse<'MatrixType, float> input handler IL tokenizer 1
+    graphParse<'MatrixType, float> input handler finalIL tokenizer 1
 let parseCPU (graph: SimpleInputGraph<_>) = 
     parse<SparseMatrix> (new SparseHandler(graph.VertexCount)) graph
 let parseGPU (graph: SimpleInputGraph<_>) =
@@ -142,5 +142,5 @@ let main argv =
     let genomeFiles = 
         Directory.GetFiles("../../../data/bio/complete_genome/", "*.txt", SearchOption.AllDirectories)
     drawPositiveExamples false "../../SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta"
-    drawNegativeExamples false 500 700 genomeFiles
+    drawNegativeExamples true 1300 1700 genomeFiles
     0

@@ -9,6 +9,7 @@ open AbstractAnalysis.Common
 open Yard.Core.Conversions
 open Yard.Core.IL.Definition
 open Yard.Core
+open Yard.Generators.YardPrinter
 
 open MathNet.Numerics.LinearAlgebra.Double
 
@@ -55,6 +56,10 @@ type BioParser(grammar) =
         graphParse<'MatrixType, float> (buildInputGraph input) handler finalIL tokenizer 1
     
     member val StartNonTerm = startN with get
+
+    member this.PrintGrammarCNF() =
+        let printer = new YardPrinter()
+        printer.Generate(finalIL, false).ToString()
 
     member this.Parse isGpu (input: string) =
         if isGpu

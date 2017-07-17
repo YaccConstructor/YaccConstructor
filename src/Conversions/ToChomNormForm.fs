@@ -109,15 +109,18 @@ let deleteUnitRules (rules: Rule.t<_,_> list) =
         then 
             nonterms.Add(elements.[0], elements.[0]) |> ignore
             unitRules.Add(rule) |> ignore
-    let pairs = findPairs nonterms unitRules   
+    let pairs = findPairs nonterms unitRules
+    
     for pair in pairs do
+        let name = match (fst pair).rule with PRef(t, _) -> t 
         for rule in rules do
-            let elements = getElements rule
-            let name = match (fst pair).rule with PRef(t, _) -> t 
-            let startFlag = not (Seq.isEmpty (Seq.where (fun x -> x.name = name && x.isStart) newRules))
-            let newRule = TransformAux.createRule name rule.args rule.body startFlag rule.metaArgs 
-            if not (unitRules.Contains(rule)) && (snd pair).rule.ToString() = rule.name.ToString()
-            then newRules.Add(newRule) |> ignore
+            if name.text = rule.name.text && not (unitRules.Contains(rule))
+            then
+                let elements = getElements rule
+                let startFlag = newRules |> Seq.exists (fun x -> x.name = name && x.isStart)
+                let newRule = TransformAux.createRule name rule.args rule.body startFlag rule.metaArgs 
+                newRules.Add(newRule) |> ignore
+
     newRules.RemoveWhere(fun x -> (getElements x).Length = 1 && (match (getElements x).[0].rule with PRef(t, _)  -> true | _ -> false)) |> ignore
     newRules |> Seq.toList 
 

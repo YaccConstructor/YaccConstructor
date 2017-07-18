@@ -114,7 +114,7 @@ let deleteUnitRules (rules: Rule.t<_,_> list) =
     for pair in pairs do
         let name = match (fst pair).rule with PRef(t, _) -> t 
         for rule in rules do
-            if name.text = rule.name.text && not (unitRules.Contains(rule))
+            if (snd pair).rule.ToString() = rule.name.text && not (unitRules.Contains(rule))
             then
                 let elements = getElements rule
                 let startFlag = newRules |> Seq.exists (fun x -> x.name = name && x.isStart)

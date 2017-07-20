@@ -15,6 +15,79 @@
     open MathNet.Numerics.LinearAlgebra.Double
 
 
+    
+    (*let initRulesFromIL loadIL tokenToInt =
+        let grammar = loadIL.grammar
+        let mutable tokensCount = 0
+        let S = ref (NonTerminal "")
+        let nonterminals = new ResizeArray<NonTerminal>()
+        let complexConjRules = new ResizeArray<(NonTerminal * Probability.T) * (NonTerminal * NonTerminal * bool) []>()
+        let simpleConjRules = new ResizeArray<(NonTerminal * Probability.T) * int>()
+        let epsilonConjRules: NonTerminal list = []
+        let probOne = Probability.create 1.0
+
+        for module' in grammar do
+            for r in module'.rules do
+                let nonterm = NonTerminal <| Source.toString r.name
+                if not <| nonterminals.Contains nonterm
+                then
+                    nonterminals.Add nonterm
+                    if r.isStart
+                    then
+                        S := nonterm
+
+                match r.body with
+                | PSeq([elem],_,_) ->
+                    match elem.rule with
+                    | PToken src ->
+                        let token = Source.toString src
+                        let intToken = tokenToInt token
+                        if not <| srl.ContainsKey intToken
+                        then
+                            srl.Add(intToken, new ResizeArray<NonTerminal*Probability.T>())
+                        if not <| srl.[intToken].Contains (nonterm, probOne)
+                        then
+                            srl.[intToken].Add (nonterm, probOne)
+                    | _ ->
+                        failwith "Given grammar is not in normal form."
+                        
+                | PSeq([e1; e2],_,_) ->
+                    match e1.rule, e2.rule with 
+                    | PRef (name1, _), PRef (name2, _) ->
+                        let nonterm1 = NonTerminal <| Source.toString name1
+                        if not <| nonterminals.Contains nonterm1
+                        then
+                            nonterminals.Add nonterm1
+                        let nonterm2 = NonTerminal <| Source.toString name2
+                        if not <| nonterminals.Contains nonterm2
+                        then
+                            nonterminals.Add nonterm2
+                        if not <| crl.ContainsKey (nonterm1, nonterm2)
+                        then
+                            crl.Add((nonterm1, nonterm2), new ResizeArray<NonTerminal*Probability.T>())
+                        if not <| crl.[(nonterm1, nonterm2)].Contains (nonterm, probOne)
+                        then
+                            crl.[(nonterm1, nonterm2)].Add (nonterm, probOne)                     
+                    | _ -> failwith "Given grammar is not in normal form."
+                | PConj([e1; e2],_,_) ->
+                    
+                    parseConjucts e1 e2 
+                    
+                               
+                | _ -> failwith "Given grammar is not in normal form."
+
+        for key in crl.Keys do
+            let list = Seq.toList crl.[key]
+            crl_result.Add(key, list)
+        for key in srl.Keys do
+            let list = Seq.toList srl.[key]
+            srl_result.Add(key, list)
+        
+        let rulesHolder = new RulesHolder(crl_result, srl_result, erl_result)
+
+        (rulesHolder, nonterminals, S)*)
+    
+    
     let initRulesFromIL loadIL tokenToInt =
         let grammar = loadIL.grammar
         let mutable tokensCount = 0

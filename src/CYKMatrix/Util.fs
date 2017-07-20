@@ -113,6 +113,16 @@
             then complexRules.[c]
             else []
 
+    type BooleanRulesHolder(complexRules: ((NonTerminal * Probability.T) * (NonTerminal * NonTerminal * bool) []) [],
+                            simpleRules: ((NonTerminal * Probability.T) * int) [],
+                            epsilonRules: NonTerminal [],
+                            allConjucts: (NonTerminal * NonTerminal) [])  =  
+                                         
+        member this.SimpleRules = simpleRules
+        member this.ComplexRules = complexRules
+        member this.EpsilonRules = epsilonRules
+        member this.AllConjucts = allConjucts
+
     module Cell =
         type T(i, j) =
             member this.Row = i

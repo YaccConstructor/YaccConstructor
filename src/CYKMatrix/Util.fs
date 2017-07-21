@@ -115,13 +115,21 @@
 
     type BooleanRulesHolder(complexRules: ((NonTerminal * Probability.T) * (NonTerminal * NonTerminal * bool) []) [],
                             simpleRules: ((NonTerminal * Probability.T) * int) [],
-                            epsilonRules: NonTerminal [],
-                            allConjucts: (NonTerminal * NonTerminal) [])  =  
+                            epsilonRules: NonTerminal []) =  
                                          
         member this.SimpleRules = simpleRules
         member this.ComplexRules = complexRules
         member this.EpsilonRules = epsilonRules
-        member this.AllConjucts = allConjucts
+
+        member this.AllConjuncts = Array.collect (fun ((_,_),conjs) -> conjs) this.ComplexRules |> Array.map (fun (n1,n2,_) -> (n1,n2))
+                                |> Seq.distinct |> Array.ofSeq
+
+        member this.AllTokens = Array.map (fun ((_,_),t) -> t) this.SimpleRules |> Seq.distinct |> Array.ofSeq
+
+        member this.IsSimpleTail token = this.AllTokens |> Array.contains token
+        
+        member this.HeadsBySimpleTail token =
+            Array.filter (fun ((_,_),t) -> t = token) this.SimpleRules |> Array.map (fun ((nont,prob),_) -> (nont,prob)) |> Seq.distinct |> Array.ofSeq
 
     module Cell =
         type T(i, j) =

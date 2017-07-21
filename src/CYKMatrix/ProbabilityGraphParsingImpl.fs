@@ -32,6 +32,14 @@
                     newArray.[ind] <- innerOneFloat
             newArray
 
+        member this.intersectArrays (arr1: float[]) (arr2: float[]) =
+            let newArray = Array.init (_matrixSize*_matrixSize) (fun x -> innerZeroFloat)
+            for ind in 0.._matrixSize*_matrixSize - 1 do
+                if arr1.[ind] > innerZeroFloat && arr2.[ind] > innerZeroFloat
+                then
+                    newArray.[ind] <- innerOneFloat
+            newArray
+
         member this.multArrays (arr1: float[]) (arr2: float[]) =      
             let calculateCell x =
                 let i = x / _matrixSize
@@ -62,6 +70,12 @@
                let resultArray = this.unionArrays arr1 arr2
                fromArrayProbability resultArray _matrixSize
 
+            member this.Conj matrix1 matrix2 =
+               let arr1 = toArrayProbability matrix1 false
+               let arr2 = toArrayProbability matrix2 false
+               let resultArray = this.intersectArrays arr1 arr2
+               fromArrayProbability resultArray _matrixSize
+
             member this.getNonZerosCount (matrix:ProbabilityMatrix.T) =
                 let nnz = ref 0
                 for ind in 0..matrix.Size*matrix.Size - 1 do
@@ -81,6 +95,14 @@
             let newArray = Array.init (_matrixSize*_matrixSize) (fun x -> innerZeroFloat)
             for ind in 0.._matrixSize*_matrixSize - 1 do
                 if arr1.[ind] > innerZeroFloat || arr2.[ind] > innerZeroFloat
+                then
+                    newArray.[ind] <- innerOneFloat
+            newArray
+
+        member this.intersectArrays (arr1: float[]) (arr2: float[]) =
+            let newArray = Array.init (_matrixSize*_matrixSize) (fun x -> innerZeroFloat)
+            for ind in 0.._matrixSize*_matrixSize - 1 do
+                if arr1.[ind] > innerZeroFloat && arr2.[ind] > innerZeroFloat
                 then
                     newArray.[ind] <- innerOneFloat
             newArray
@@ -106,6 +128,12 @@
                let resultArray = this.unionArrays arr1 arr2
                fromArrayProbability resultArray _matrixSize
 
+            member this.Conj matrix1 matrix2 =
+               let arr1 = toArrayProbability matrix1 false
+               let arr2 = toArrayProbability matrix2 false
+               let resultArray = this.intersectArrays arr1 arr2
+               fromArrayProbability resultArray _matrixSize
+
             member this.getNonZerosCount (matrix:ProbabilityMatrix.T) =
                 let nnz = ref 0
                 for ind in 0..matrix.Size*matrix.Size - 1 do
@@ -129,6 +157,14 @@
                     newArray.[ind] <- innerOneFloat
             newArray
 
+        member this.intersectArrays (arr1: float[]) (arr2: float[]) =
+            let newArray = Array.init (_matrixSize*_matrixSize) (fun x -> innerZeroFloat)
+            for ind in 0.._matrixSize*_matrixSize - 1 do
+                if arr1.[ind] > innerZeroFloat && arr2.[ind] > innerZeroFloat
+                then
+                    newArray.[ind] <- innerOneFloat
+            newArray
+
         member this.multArrays (from1: float[]) (from2: float[]) =      
             managedCudaMultArrays from1 from2 _matrixSize refhandle mult1 mult2 result
 
@@ -148,6 +184,12 @@
                let arr1 = toArrayProbability matrix1 false
                let arr2 = toArrayProbability matrix2 false
                let resultArray = this.unionArrays arr1 arr2
+               fromArrayProbability resultArray _matrixSize
+
+            member this.Conj matrix1 matrix2 =
+               let arr1 = toArrayProbability matrix1 false
+               let arr2 = toArrayProbability matrix2 false
+               let resultArray = this.intersectArrays arr1 arr2
                fromArrayProbability resultArray _matrixSize
 
             member this.getNonZerosCount (matrix:ProbabilityMatrix.T) =

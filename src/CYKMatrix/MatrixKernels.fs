@@ -24,9 +24,10 @@
     type IMatrixHandler<'MatrixType, 'InnerType when 'InnerType : comparison> =
         abstract matrixSize : int
         abstract createEmptyMatrix : int -> 'MatrixType
-        abstract ParsingMatrixInitializator : AbstractAnalysis.Common.SimpleInputGraph<int> -> RulesHolder -> ResizeArray<NonTerminal> -> (ParsingMatrix<'MatrixType> * Dictionary<int,int>)
+        abstract ParsingMatrixInitializator : AbstractAnalysis.Common.SimpleInputGraph<int> -> BooleanRulesHolder -> ResizeArray<NonTerminal> -> (ParsingMatrix<'MatrixType> * Dictionary<int,int>)
         abstract Multiply : 'MatrixType -> 'MatrixType -> 'MatrixType
         abstract Add : 'MatrixType -> 'MatrixType -> 'MatrixType
+        abstract Conj : 'MatrixType -> 'MatrixType -> 'MatrixType
         abstract getNonZerosCount : 'MatrixType -> int
          
 
@@ -47,7 +48,7 @@
             _CsrColInd <- csrColInd_upd
 
     let initParsingMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
-                  (allRules: RulesHolder)
+                  (allRules: BooleanRulesHolder)
                   nonterminals
                   createEmptyMatrix 
                   (matrixSetValue : 'MatrixType -> int -> int -> 'InnerType -> unit) 
@@ -319,9 +320,9 @@
                 let resultMatrix = new MySparseMatrix(matrixSize, !nnzC, csrValC, csrRowC, csrColIndC)
                 resultMatrix        
     
-    let nontermLockFreeSplit (allRules: RulesHolder) nonterminals (splitCount: int) =        
+(*    let nontermLockFreeSplit (allRules: BooleanRulesHolder) nonterminals (splitCount: int) =        
         let tailsByHead = new Dictionary<NonTerminal, ResizeArray<NonTerminal*NonTerminal>>()
-        for nontermPair in allRules.ComplexTails do
+        for nontermPair in allRules.AllConjuncts do
             let heads = allRules.HeadsByComplexTail nontermPair
             for (head, _) in heads do
                 if not <| tailsByHead.ContainsKey head
@@ -351,4 +352,4 @@
             addPairsForNonterm currentPart head
             if (processedPairs.Count >= (!currentPart + 1) * allRules.ComplexTails.Length / splitCount)
             then currentPart := !currentPart + 1
-        splitedNontermPairs
+        splitedNontermPairs*)

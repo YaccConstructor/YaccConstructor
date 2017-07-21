@@ -108,18 +108,10 @@ type ``Graph parsing tests``() =
         let B = NonTerminal "B"
         let S = NonTerminal "S"
         let nonterminals = new ResizeArray<NonTerminal>([| A; B; S |])
-        let rawHeadsToProbs = List.map (fun (nt, prob) -> nt, Probability.create prob)
-        let crl = new Dictionary<NonTerminal * NonTerminal, (NonTerminal * Probability.T) list>()
-        [ (A, B), [ S, 1.0 ]
-          (A, A), [ B, 1.0 ] ]
-        |> List.map (fun (nts, heads) -> nts, rawHeadsToProbs heads)
-        |> Seq.iter crl.Add
-        let srl = new Dictionary< int, (NonTerminal * Probability.T) list>()
-        [ 2, [ A, 1.0 ] ]
-        |> List.map (fun (c, heads) -> c, rawHeadsToProbs heads)
-        |> Seq.iter srl.Add
-        let erl: NonTerminal list = []
-        let rules = new RulesHolder(crl, srl, erl)
+        let crl = [| (S, Probability.create 1.0),[|(A, B, true)|];(B, Probability.create 1.0),[|(A, A, true)|]|]
+        let srl = [| (A, Probability.create 1.0), 2 |]
+        let erl: NonTerminal [] = [||]
+        let rules = new BooleanRulesHolder(crl, srl, erl)
         let (recognizeMatrix, _, vertexToInt, multCount) =
             recognizeGraph<ProbabilityMatrix.T, float> graph (new ProbabilityNaiveHandler(graph.VertexCount)) rules nonterminals S 1
         assert (probabilityAnalyzer recognizeMatrix S = 2)

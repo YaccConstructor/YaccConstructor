@@ -1,0 +1,15 @@
+[<Start>]
+s: a b & c d
+a: a a
+a: A
+b: B
+b: b3 b1
+b1: b b2
+b2: C
+b3: B
+c: c c
+c: C
+d: d3 d1
+d1: d d2
+d2: B
+d3: A

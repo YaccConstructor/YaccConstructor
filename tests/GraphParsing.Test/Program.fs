@@ -22,6 +22,8 @@ let baseRDFPath = @".\data\RDF"
 let RDFfiles = System.IO.Directory.GetFiles baseRDFPath
 let [<Literal>] RDF_GPPERF1_GRAMMAR_FILE = ".\GraphParsing.Test\GPPerf1_cnf.yrd"
 let [<Literal>] RDF_GPPERF2_GRAMMAR_FILE = ".\GraphParsing.Test\GPPerf2_cnf.yrd"
+let [<Literal>] CONJ_RDF_GPPERF1_GRAMMAR_FILE = ".\GraphParsing.Test\GPPerf1_conj_cnf.yrd"
+let [<Literal>] CONJ_RDF_GPPERF2_GRAMMAR_FILE = ".\GraphParsing.Test\GPPerf2_conj_cnf.yrd"
 
 let testFileRDF test file grammarFile = 
     let cnt = 1
@@ -87,9 +89,11 @@ let RDFGPPerf2Checker graphFile parsingResults =
 let RDFChecker parsingResults =
     for (graphFile, grammarFile, results) in parsingResults do
         match grammarFile with 
-        | RDF_GPPERF1_GRAMMAR_FILE ->
+        | RDF_GPPERF1_GRAMMAR_FILE
+        | CONJ_RDF_GPPERF1_GRAMMAR_FILE ->
             RDFGPPerf1Checker graphFile results
-        | RDF_GPPERF2_GRAMMAR_FILE ->
+        | RDF_GPPERF2_GRAMMAR_FILE
+        | CONJ_RDF_GPPERF2_GRAMMAR_FILE ->
             RDFGPPerf2Checker graphFile results
         | _ -> ignore()
 
@@ -356,6 +360,16 @@ type ``Graph parsing tests``() =
     member this._RDF_GPPerf2_SparseGPU () =
         let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF2_GRAMMAR_FILE, (testFileRDF testSparseGPU rdffile RDF_GPPERF2_GRAMMAR_FILE)))
         RDFChecker parsingResults
+    
+    [<Test>]
+    member this._Conj_RDF_GPPerf1_SparseCPU () =
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, CONJ_RDF_GPPERF1_GRAMMAR_FILE, (testFileRDF testSparseCPU rdffile CONJ_RDF_GPPERF1_GRAMMAR_FILE)))
+        RDFChecker parsingResults
+
+    [<Test>]
+    member this._Conj_RDF_GPPerf2_SparseCPU () =
+        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, CONJ_RDF_GPPERF2_GRAMMAR_FILE, (testFileRDF testSparseCPU rdffile CONJ_RDF_GPPERF2_GRAMMAR_FILE)))
+        RDFChecker parsingResults
 
 
 
@@ -381,6 +395,8 @@ let f x =
 //    t._RDF_GPPerf2_DenseGPU1 ()
 //    t._RDF_GPPerf2_DenseGPU2 ()
 //    t._RDF_GPPerf2_SparseGPU ()
+//    t._Conj_RDF_GPPerf1_SparseCPU ()
+//    t._Conj_RDF_GPPerf2_SparseCPU ()
 //    YC.GraphParsing.Tests.RDFPerfomance.performTests ()
 //    YC.GraphParsing.Tests.BioPerfomance.performTests ()
     0

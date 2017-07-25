@@ -76,7 +76,7 @@ let deleteEpsilonRules (rules: Rule.t<_, _> list) epsNonterms =
                 if (List.contains (elements.[1].rule.ToString()) epsNonterms) 
                 then newRules.Add(TransformAux.createRule rule.name rule.args (PSeq([elements.[0]], None, None)) rule.isStart rule.metaArgs) |> ignore
 //если выводима пустая строка
-//    let start = (List.find (fun x -> x.name.text = "s") rules).name
+//    let start = (List.find (fun x -> x.isStart = true) rules).name
 //    if List.contains start.text epsNonterms
 //    then        
 //        let newStart = Namer.newSource(start)

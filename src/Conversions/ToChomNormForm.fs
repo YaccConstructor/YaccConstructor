@@ -59,8 +59,8 @@ let collectEpsNonterms (rules: Rule.t<_,_> list) =
         if epsNonterms.Count = k then flag <- false
     epsNonterms |> Seq.toList
 
-let deleteEpsilonRules (rules: Rule.t<_, _> list) = 
-    let epsNonterms = collectEpsNonterms rules |> List.map (fun x -> x.rule.ToString())
+let deleteEpsilonRules (rules: Rule.t<_, _> list) epsNonterms = 
+    let epsNonterms = epsNonterms |> List.map (fun x -> x.rule.ToString())
     let newRules = HashSet<_>(rules, new RuleComparer<_, _>())  
     for rule in rules do
         let elements = getElements rule
@@ -98,8 +98,7 @@ let findPairs (nonterms: HashSet<_*_>) (rules: HashSet<_>) =
                     queue.Enqueue((fst q, el))
     pairs 
 
-let deleteUnitRules (rules: Rule.t<_,_> list) = 
-    let newRules = HashSet<_>(rules, new RuleComparer<_, _>())
+let collectNontermsAndUnitRules (rules: Rule.t<_,_> list) = 
     let unitRules = HashSet<_>(new RuleComparer<_, _>())
     let nonterms = HashSet<_*_>(new PairComparer<_,_>())
     for rule in rules do
@@ -109,6 +108,11 @@ let deleteUnitRules (rules: Rule.t<_,_> list) =
         then 
             nonterms.Add(elements.[0], elements.[0]) |> ignore
             unitRules.Add(rule) |> ignore
+    nonterms, unitRules
+
+let deleteUnitRules (rules: Rule.t<_,_> list) = 
+    let newRules = HashSet<_>(rules, new RuleComparer<_, _>())
+    let nonterms, unitRules = collectNontermsAndUnitRules rules
     let pairs = findPairs nonterms unitRules   
     for pair in pairs do
         for rule in rules do
@@ -162,15 +166,17 @@ let deleteUselessRules (rules: Rule.t<_, _> list) =
     deleteUnreachable (deleteNonGenerating rules)
  
 let tryFindRule (term: Source.t) rule (rules: HashSet<_>) = 
+    let b = Seq.filter (fun x -> match x.body with PConj(a,b) -> false |_ -> true) rules
     let a = Seq.filter (fun x -> List.length (getElements x) = 1
                                 && match (getElements x).[0].rule with PToken t -> true | _ -> false 
                                 && (match (getElements x).[0].rule with PToken t -> t).text = term.text 
-                                && Seq.filter (fun y -> y.name.text = x.name.text) rules |> Seq.length = 1) rules
+                                && Seq.filter (fun y -> y.name.text = x.name.text) rules |> Seq.length = 1) b
     if not (Seq.isEmpty a) then (Seq.head a).name
     else Namer.newSource(rule.name)
 
        
-let deleteFewTermRules  (rules: Rule.t<_,_> list) = 
+let deleteFewTermRules  (rules: Rule.t<_,_> list) (allRules: HashSet<_>)  = 
+    let flag = if rules.Length = allRules.Count then true else false
     let newRules = HashSet<_>(rules, new RuleComparer<_,_>())
     for rule in rules do
         let elements = getElements rule
@@ -178,7 +184,7 @@ let deleteFewTermRules  (rules: Rule.t<_,_> list) =
         then
             if (match elements.[0].rule with | PToken t -> true | _ -> false) && (match elements.[1].rule with | PToken t -> true | _ -> false)
             then
-                let n1, n2 = tryFindRule (match elements.[0].rule with | PToken t -> t) rule newRules,  tryFindRule (match elements.[1].rule with | PToken t -> t) rule newRules
+                let n1, n2 = tryFindRule (match elements.[0].rule with | PToken t -> t) rule allRules,  tryFindRule (match elements.[1].rule with | PToken t -> t) rule allRules
                 let a1, a2 = TransformAux.createDefaultElem(PRef(n1, None)), TransformAux.createDefaultElem(PRef(n2, None))
                 newRules.Add(TransformAux.createRule rule.name rule.args (PSeq([a1; a2], None, None)) rule.isStart rule.metaArgs) |> ignore
                 newRules.Add(TransformAux.createRule n1 rule.args (PSeq([elements.[0]], None, None)) false rule.metaArgs) |> ignore
@@ -186,36 +192,32 @@ let deleteFewTermRules  (rules: Rule.t<_,_> list) =
                 newRules.Remove(rule) |> ignore
             elif (match elements.[0].rule with | PToken t -> true | _ -> false) && not (match elements.[1].rule with | PToken t -> true | _ -> false) 
             then
-                let n1 =  tryFindRule (match elements.[0].rule with | PToken t -> t) rule newRules
+                let n1 =  tryFindRule (match elements.[0].rule with | PToken t -> t) rule allRules
                 let a1 = TransformAux.createDefaultElem(PRef(n1, None))
                 newRules.Add(TransformAux.createRule rule.name rule.args (PSeq([a1; elements.[1]], None, None)) rule.isStart rule.metaArgs) |> ignore
                 newRules.Add(TransformAux.createRule n1 rule.args (PSeq([elements.[0]], None, None)) false rule.metaArgs) |> ignore
                 newRules.Remove(rule)|> ignore
             elif elements.Length = 2 && not (match elements.[0].rule with | PToken t -> true | _ -> false) &&  (match elements.[1].rule with | PToken t -> true | _ -> false) 
             then
-                let n1 =  tryFindRule (match elements.[1].rule with | PToken t -> t) rule newRules
+                let n1 =  tryFindRule (match elements.[1].rule with | PToken t -> t) rule allRules
                 let a1 = TransformAux.createDefaultElem(PRef(n1, None))
                 newRules.Add(TransformAux.createRule rule.name rule.args (PSeq([elements.[0]; a1], None, None)) rule.isStart rule.metaArgs) |> ignore
                 newRules.Add(TransformAux.createRule n1 rule.args (PSeq([elements.[1]], None, None)) false rule.metaArgs) |> ignore
                 newRules.Remove(rule) |> ignore
+            if flag then
+                allRules.Clear()
+                allRules.UnionWith(newRules)
+            
     newRules |> Seq.toList
 
 let toChomNormForm (rules: Rule.t<_,_> list) = 
-    rules
-    |> deleteLongRules
-    |> deleteEpsilonRules
-    |> deleteUnitRules
-    |> deleteUselessRules
-    |> deleteFewTermRules
+     let rules =
+        deleteEpsilonRules  (deleteLongRules rules) (collectEpsNonterms (deleteLongRules rules))
+        |> deleteUnitRules
+        |> deleteUselessRules
+     deleteFewTermRules rules (HashSet<_>(rules, new RuleComparer<_,_>()))
     
 type ToChomNormForm() = 
     inherit Conversion()
         override this.Name = "ToChomNormForm"
         override this.ConvertGrammar (grammar, _) = mapGrammar toChomNormForm grammar
-
-
-
-                
-        
-    
-

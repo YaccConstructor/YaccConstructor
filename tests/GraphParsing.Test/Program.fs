@@ -335,10 +335,40 @@ type ``Graph parsing tests``() =
                 | _ -> -1
 
         let (parsingMatrix,S,_,multCount) = graphParse<SparseMatrix, float> graph (new SparseHandler(graph.VertexCount)) loadIL tokenizer 1
-        (*assert (sparseAnalyzer parsingMatrix S = 8)
-        assert (parsingMatrix.[S].At(0,0) > 0.0 && parsingMatrix.[S].At(0,1) > 0.0 && parsingMatrix.[S].At(0,2) > 0.0 && parsingMatrix.[S].At(0,3)> 0.0
-                && parsingMatrix.[S].At(1,2) > 0.0 && parsingMatrix.[S].At(1,3) > 0.0 && parsingMatrix.[S].At(2,3) > 0.0 && parsingMatrix.[S].At(3,2) > 0.0)
-        printfn "SparseCPU Multiplacation count: %d" multCount*)
+        assert (sparseAnalyzer parsingMatrix S = 1)
+        assert (parsingMatrix.[S].At(0,3) > 0.0)
+        printfn "SparseCPU Multiplacation count: %d" multCount
+        sparseMatrixPrint parsingMatrix.[S]
+
+    [<Test>]
+    member this._10_Conj_abc_SimpleLoop () =
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        graph.AddVertex(0) |> ignore
+        graph.AddVertex(1) |> ignore
+        graph.AddVertex(2) |> ignore
+        graph.AddVertex(3) |> ignore
+        graph.AddVertex(4) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 0, 1)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 1)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 2, 2)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 3, 2)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 4, 3)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(3, 3, 3)) |> ignore
+
+        let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "Conj_abc_cnf.yrd")
+        let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+        let loadIL = fe.ParseGrammar grammarPath
+        let tokenizer str =
+            match str with
+                | "A" -> 1
+                | "B" -> 2
+                | "C" -> 3
+                | _ -> -1
+
+        let (parsingMatrix,S,_,multCount) = graphParse<SparseMatrix, float> graph (new SparseHandler(graph.VertexCount)) loadIL tokenizer 1
+        assert (sparseAnalyzer parsingMatrix S = 2)
+        assert (parsingMatrix.[S].At(0,3) > 0.0 && parsingMatrix.[S].At(0,4) > 0.0)
+        printfn "SparseCPU Multiplacation count: %d" multCount
         sparseMatrixPrint parsingMatrix.[S]
 
     member this._RDF_GPPerf1_DenseCPU () =
@@ -413,7 +443,8 @@ let f x =
 //    t._06_SimpleCudaRecognizerTest ()
 //    t._07_SimpleCudaLoopTest ()
 //    t._08_SimpleSparseCudaLoopTest ()
-    t._09_Conj_abc_DirectedChain ()
+//    t._09_Conj_abc_DirectedChain ()
+//    t._10_Conj_abc_SimpleLoop ()
 //    t._RDF_GPPerf1_DenseCPU ()
 //    t._RDF_GPPerf1_SparseCPU ()
 //    t._RDF_GPPerf1_DenseGPU1 ()

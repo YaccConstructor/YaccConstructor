@@ -1,15 +1,16 @@
 [<Start>]
-s: a b & c d
+s: a b & d c
 a: a a
 a: A
-b: B
-b: b3 b1
-b1: b b2
+b: b1 b2
+b1: B
 b2: C
-b3: B
+b: b1 b3
+b3: b b2
 c: c c
 c: C
-d: d3 d1
-d1: d d2
+d: d1 d2
+d1: A
 d2: B
-d3: A
+d: d1 d3
+d3: d d2

@@ -56,6 +56,8 @@
     <Compile Include="ToCNF.fs" />
     <None Include="paket.references" />
     <Compile Include="ToChomNormForm.fs" />
+    <Compile Include="ToBinNormForm.fs" />
+    <Compile Include="CNFandBNF.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FsYacc\FsYacc.fsproj">

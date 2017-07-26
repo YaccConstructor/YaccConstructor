@@ -76,6 +76,8 @@ module Production =
         |PAlt     of (t<'patt,'expr>) * (t<'patt,'expr>)
         /// Conjunction (e1 & e2)
         |PConj    of (t<'patt,'expr>) * (t<'patt,'expr>)
+        /// Negation
+        |PNeg of (t<'patt,'expr>)
         /// Sequence * attribute. (Attribute is always applied to sequence) 
         |PSeq     of (elem<'patt,'expr>) list * 'expr option * DLabel option
         /// Token itself. Final element of parsing.
@@ -116,6 +118,7 @@ module Production =
             match this with
             |PAlt (x, y) -> x.ToString() + " | " + y.ToString()
             |PConj (x, y) -> x.ToString() + " & " + y.ToString()
+            |PNeg x -> "!" + x.ToString()
             |PSeq (ruleSeq, attrs, l) ->
                 let strAttrs =
                     match attrs with

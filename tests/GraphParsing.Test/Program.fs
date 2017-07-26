@@ -371,6 +371,35 @@ type ``Graph parsing tests``() =
         printfn "SparseCPU Multiplacation count: %d" multCount
         sparseMatrixPrint parsingMatrix.[S]
 
+    [<Test>]
+    member this._11_Conj_SimpleAprox () =
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        graph.AddVertex(0) |> ignore
+        graph.AddVertex(1) |> ignore
+        graph.AddVertex(2) |> ignore
+        graph.AddVertex(3) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 1)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 3, 2)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 2, 3)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 3, 4)) |> ignore
+
+        let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "Conj_simple_aprox.yrd")
+        let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+        let loadIL = fe.ParseGrammar grammarPath
+        let tokenizer str =
+            match str with
+                | "A" -> 1
+                | "B" -> 2
+                | "C" -> 3
+                | "D" -> 4
+                | _ -> -1
+
+        let (parsingMatrix,S,_,multCount) = graphParse<SparseMatrix, float> graph (new SparseHandler(graph.VertexCount)) loadIL tokenizer 1
+        assert (sparseAnalyzer parsingMatrix S = 1)
+        assert (parsingMatrix.[S].At(0,3) > 0.0)
+        printfn "SparseCPU Multiplacation count: %d" multCount
+        sparseMatrixPrint parsingMatrix.[S]
+
     member this._RDF_GPPerf1_DenseCPU () =
         let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF1_GRAMMAR_FILE, (testFileRDF testDenseCPU rdffile RDF_GPPERF1_GRAMMAR_FILE)))
         RDFChecker parsingResults
@@ -445,6 +474,7 @@ let f x =
 //    t._08_SimpleSparseCudaLoopTest ()
 //    t._09_Conj_abc_DirectedChain ()
 //    t._10_Conj_abc_SimpleLoop ()
+//    t._11_Conj_SimpleAprox ()
 //    t._RDF_GPPerf1_DenseCPU ()
 //    t._RDF_GPPerf1_SparseCPU ()
 //    t._RDF_GPPerf1_DenseGPU1 ()

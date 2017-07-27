@@ -400,6 +400,60 @@ type ``Graph parsing tests``() =
         printfn "SparseCPU Multiplacation count: %d" multCount
         sparseMatrixPrint parsingMatrix.[S]
 
+    [<Test>]
+    member this._12_APSP_SimpleNaiveRecognizerTest () =
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        graph.AddVertex(0) |> ignore
+        graph.AddVertex(1) |> ignore
+        graph.AddVertex(2) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 1)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 2, 1)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 0, 1)) |> ignore
+
+        let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "SimpleGrammar_cnf.yrd")
+        let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+        let loadIL = fe.ParseGrammar grammarPath
+        let tokenizer str =
+            match str with
+                | "A" -> 1
+                | _ -> -1
+
+        let (parsingMatrix,S,_,multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityMinPlusHandler(graph.VertexCount)) loadIL tokenizer 1
+        assert (probabilityAnalyzer parsingMatrix S = 3)
+        assert (parsingMatrix.[S].InnerValue.[0] = 3.0 && parsingMatrix.[S].InnerValue.[4] = 3.0 && parsingMatrix.[S].InnerValue.[8] = 3.0)
+        printfn "Naive APSP Multiplacation count: %d" multCount
+        probabilityMatrixPrint parsingMatrix.[S]
+
+    [<Test>]
+    member this._13_APSP_SimpleLoopTest () =
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        graph.AddVertex(0) |> ignore
+        graph.AddVertex(1) |> ignore
+        graph.AddVertex(2) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 0, 1)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 2)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 2, 2)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 2, 5)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 0, 4)) |> ignore
+
+        let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "GPPerf1_cnf.yrd")
+        let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+        let loadIL = fe.ParseGrammar grammarPath
+        let tokenizer str =
+            match str with
+            | "SCOR" -> 1
+            | "TR" -> 2
+            | "OTHER" -> 3
+            | "SCO" -> 4
+            | "T" -> 5
+            | _ -> -1
+
+        let (parsingMatrix,S,_,multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityMinPlusHandler(graph.VertexCount)) loadIL tokenizer 1
+        assert (probabilityAnalyzer parsingMatrix S = 3)
+        assert (parsingMatrix.[S].InnerValue.[0] = 6.0 && parsingMatrix.[S].InnerValue.[2] = 4.0 && parsingMatrix.[S].InnerValue.[5] = 2.0)
+        printfn "Naive APSP Multiplacation count: %d" multCount
+        probabilityMatrixPrint parsingMatrix.[S]
+
     member this._RDF_GPPerf1_DenseCPU () =
         let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF1_GRAMMAR_FILE, (testFileRDF testDenseCPU rdffile RDF_GPPERF1_GRAMMAR_FILE)))
         RDFChecker parsingResults
@@ -475,6 +529,8 @@ let f x =
 //    t._09_Conj_abc_DirectedChain ()
 //    t._10_Conj_abc_SimpleLoop ()
 //    t._11_Conj_SimpleAprox ()
+//    t._12_APSP_SimpleNaiveRecognizerTest ()
+//    t._13_APSP_SimpleLoopTest ()
 //    t._RDF_GPPerf1_DenseCPU ()
 //    t._RDF_GPPerf1_SparseCPU ()
 //    t._RDF_GPPerf1_DenseGPU1 ()

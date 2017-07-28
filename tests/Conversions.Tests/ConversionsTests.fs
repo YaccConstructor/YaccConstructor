@@ -80,11 +80,9 @@ let conversionEps = new Conversions.ToCNF.DeleteEpsRule()
 let conversionChain = new Conversions.ToCNF.DeleteChainRule()
 let conversionRenamer = new Conversions.ToCNF.RenameTerm()
 //let conversionCNF = new Conversions.ToCNF.ToCNF()
-let conversionChomNormForm = new Conversions.ToChomNormForm.ToChomNormForm()
-let conversionBinNormForm = new Conversions.ToBinNormForm.ToBinNormForm()
 let conversionCNF = new Conversions.CNFandBNF.CNF()
 let conversionBNFconj = new Conversions.CNFandBNF.BNFconj()
-let conversionBNFbool = new Conversions.CNFandBNF.BNFconj()
+let conversionBNFbool = new Conversions.CNFandBNF.BNFbool()
 
 
 let applyConversion (conversion:Conversion) loadIL = 
@@ -105,6 +103,12 @@ let runTest inputFile conversion expectedResult =
     result |> treeDump.Generate |> string |> printfn "%s"
 #endif
     Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
+
+let runTest2 inputFile conversion expectedResult =
+    let loadIL = fe.ParseGrammar inputFile
+    Namer.initNamer loadIL.grammar
+    let result = loadIL |> applyConversion conversion
+    Assert.IsTrue((expectedResult = (result.ToString())))
 
 [<TestFixture>]
 type ``Conversions tests`` () =

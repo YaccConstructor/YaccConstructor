@@ -55,8 +55,6 @@
     <Compile Include="ExpandRepet.fs" />
     <Compile Include="ToCNF.fs" />
     <None Include="paket.references" />
-    <Compile Include="ToChomNormForm.fs" />
-    <Compile Include="ToBinNormForm.fs" />
     <Compile Include="CNFandBNF.fs" />
   </ItemGroup>
   <ItemGroup>

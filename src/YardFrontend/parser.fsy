@@ -311,6 +311,7 @@ int_opt :
     | NUMBER {(Yard.Core.IL.Source.toString $1) |> int |> Some}
 
 prim: prim STAR            {PMany $1}
+    | NEG prim             {PNeg $2}
     | STARTREPEAT prim ENDREPEAT {PMany $2} 
     | NUMBER STAR prim           {PRepet ($3, (Some 0), (Yard.Core.IL.Source.toString $1) |> int |> Some)}
     | prim STAR SQR_LBR int_opt DOUBLEDOT int_opt SQR_RBR {PRepet ($1,$4,$6)}

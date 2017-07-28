@@ -48,6 +48,7 @@ let private replaceInline (rules : Rule.t<_,_> list) =
             PSeq(newElems, ac, l)
         | PAlt (l,r) -> PAlt(modifyBody l, modifyBody r)
         | PConj (l,r) -> PConj(modifyBody l, modifyBody r)
+        | PNeg x -> PNeg(modifyBody x)
         | PRef (name,_) as prev ->
             if inlines.ContainsKey name.text then modifyBody inlines.[name.text]
             else prev

@@ -30,9 +30,12 @@ let mutable startIsEps = false
 let rec getElements body pos neg flag = 
     match body with 
     | PSeq(e, a, l) -> 
-                    if flag 
-                    then pos @ [e], neg
-                    else pos, neg @ [e]
+                    if e.Length > 0 && (match e.[0].rule with PNeg t -> true | _ -> false) 
+                    then getElements (match e.[0].rule with PNeg t -> t) pos neg false
+                    else
+                        if flag 
+                        then pos @ [e], neg
+                        else pos, neg @ [e]
                     
     | PRef(t, a) -> 
                     if flag 
@@ -79,15 +82,17 @@ let rec getCombinations conjs =
 let collectEpsNonterms (rules: Rule.t<_,_> list) = 
     let epsNonterms = HashSet<_>(new NonTermComparer<_,_>())
     for rule in rules do
-        let elements = (fst (getElements rule.body [] [] true)).[0]
-        if elements.IsEmpty 
+        let elementsPos = fst (getElements rule.body [] [] true)
+        let elementsNeg = snd (getElements rule.body [] [] true)
+        if List.contains [] elementsPos && elementsNeg.IsEmpty
         then epsNonterms.Add(createDefaultElem(PRef(rule.name, None))) |> ignore   
     let mutable flag = true
     while flag do
         let mutable k = epsNonterms.Count
         for rule in rules do
-            let elements = (fst (getElements rule.body [] [] true)).[0] |> List.map (fun x -> epsNonterms.Contains(x))
-            if not (elements.IsEmpty) && not (List.contains false elements)
+            let elementsPos = fst (getElements rule.body [] [] true) |> List.filter (fun x -> List.forall (fun y -> epsNonterms.Contains(y)) x)
+            let elementsNeg = snd (getElements rule.body [] [] true) |> List.filter (fun x -> List.forall (fun y -> epsNonterms.Contains(y)) x)
+            if not (elementsPos.IsEmpty) && elementsNeg.IsEmpty
             then epsNonterms.Add(createDefaultElem(PRef(rule.name, None))) |> ignore
         if epsNonterms.Count = k then flag <- false
     epsNonterms |> Seq.toList
@@ -112,11 +117,7 @@ let getConjs rule epsNonterms =
     conjs |> Seq.toList
 
 let deleteEpsilonRules (rules: Rule.t<_,_> list) =
-    let splitRules = HashSet<_>() 
-    for rule in rules do 
-        for el in fst (getElements rule.body [] [] true) do
-            splitRules.Add(createRule rule.name rule.args (PSeq(el, None, None)) rule.isStart rule.metaArgs) |> ignore
-    let epsNonterms = collectEpsNonterms (Seq.toList splitRules)
+    let epsNonterms = collectEpsNonterms rules
     let newRules = HashSet<_>(rules, new RuleComparer<_, _>()) 
     for rule in rules do
         let conjs = ResizeArray<t<_,_> list>()
@@ -305,9 +306,26 @@ let filterAndStuff (rules: Rule.t<_,_> list) =
     let newRules = HashSet<_>(rules, new RuleComparer<_,_>())
     for rule in rules do
         let elements = getElements rule.body [] [] true
-        for el in fst elements @ snd elements do 
-            if (fst elements).Length + (snd elements).Length > 2 && el.Length = 1 && match el.[0].rule with PToken t -> true | _ -> false 
+        for el in fst elements do 
+            if (fst elements).Length > 1 && el.Length = 1 && match el.[0].rule with PToken t -> true | _ -> false 
             then newRules.Remove(rule) |> ignore
+            if (fst elements).Length = 1 && (snd elements).Length > 1 && el.Length = 1 && match el.[0].rule with PToken t -> true | _ -> false 
+            then 
+                newRules.Remove(rule) |> ignore
+                newRules.Add(createRule rule.name rule.args (PSeq([el.[0]], None, None)) rule.isStart rule.metaArgs) |> ignore
+        for el in snd elements  do 
+            if (fst elements).Length > 0 && el.Length = 1 && match el.[0].rule with PToken t -> true | _ -> false 
+            then 
+                newRules.Remove(rule) |> ignore
+                let b1 = (fst elements) |> List.map (fun x -> createRule rule.name rule.args (PSeq(x, None, None)) rule.isStart rule.metaArgs)  
+                let b2 = (snd elements) |> List.filter (fun x -> not (x = el)) |> List.map (fun x -> createRule rule.name rule.args (PNeg(PSeq(x, None, None))) rule.isStart rule.metaArgs)
+                if b2.Length = 1 && b1.Length = 1 && (match b1.[0].body with PSeq(e ,a, l) -> true | _ -> false) && (match (match b1.[0].body with PSeq(e,a,l) -> e).[0].rule with PToken t -> true | _ -> false) && ((match b1.[0].body with PSeq(e,a,l) -> e).Length = 1)
+                then newRules.Add(b1.[0]) |> ignore
+                else newRules.Add(createRule rule.name rule.args (createConj (b1 @ b2)) rule.isStart rule.metaArgs) |> ignore
+            if (fst elements).Length = 0 && (snd elements).Length > 2 && el.Length = 1 && match el.[0].rule with PToken t -> true | _ -> false 
+            then 
+                newRules.Remove(rule) |> ignore
+                newRules.Add(createRule rule.name rule.args el.[0].rule rule.isStart rule.metaArgs) |> ignore
         if not (Seq.isEmpty (Seq.filter (fun x -> 
                                   let el1, el2 = fst (getElements x.body [] [] true), snd(getElements x.body [] [] true) 
                                   if not (x = rule)
@@ -344,7 +362,6 @@ let toCNFandBNF (rules: Rule.t<_,_> list) conversionType =
     | "CNF" -> rules |> deleteLongRules |> deleteEpsilonRules |> deleteUnitRules |> deleteUselessRules |> deleteFewTermRules |> filterAndStuff |> cutNonEps
     | "BNFconj" -> rules |> deleteLongRules |> deleteEpsilonRules |> deleteUnitRules |> deleteFewTermRules |> filterAndStuff |> cutNonEps 
     | "BNFbool" -> rules |> deleteLongRules |> deleteEpsilonRules |> deleteUnitRules |> deleteFewTermRules |> filterAndStuff
-   // | _ -> failwith "unsupported conversion type"
     
 type CNF() = 
     inherit Conversion()

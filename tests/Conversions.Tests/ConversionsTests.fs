@@ -102,13 +102,15 @@ let runTest inputFile conversion expectedResult =
     printfn "%s" "************************"
     result |> treeDump.Generate |> string |> printfn "%s"
 #endif
+    printfn "!!! %A" (ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
     Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
 
 let runTest2 inputFile conversion expectedResult =
     let loadIL = fe.ParseGrammar inputFile
     Namer.initNamer loadIL.grammar
     let result = loadIL |> applyConversion conversion
-    Assert.IsTrue((expectedResult = (result.ToString())))
+    let r = sprintf "%A" result.grammar.[0].rules
+    Assert.IsTrue((expectedResult = r))
 
 [<TestFixture>]
 type ``Conversions tests`` () =

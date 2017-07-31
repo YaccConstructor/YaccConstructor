@@ -107,10 +107,10 @@ type ``CNF tests`` () =
             
     [<Test>]
     member test.``ToBNFconj`` () =
-            let rules = System.IO.File.ReadAllText(path "grammar3_res.txt")
+            let rules = System.IO.File.ReadAllText(path "grammar3_res.txt").Replace("\r", "")
             runTest2 (path "grammar3.yrd") conversionBNFconj rules 
 
     [<Test>]
     member test.``ToBNFbool`` () =
-            let rules = System.IO.File.ReadAllText(path "grammar4_res.txt")
+            let rules = System.IO.File.ReadAllText(path "grammar4_res.txt").Replace("\r", "")
             runTest2 (path "grammar4.yrd") conversionBNFconj rules 

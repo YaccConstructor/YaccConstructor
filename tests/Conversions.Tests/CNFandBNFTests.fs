@@ -11,7 +11,7 @@ open ConversionsTests
 open Yard.Core.Helpers
 
 [<TestFixture>]
-type ``CNF tests`` () =
+type ``CNFandBNF tests`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "ToCNF")
     let path f = System.IO.Path.Combine(basePath, f)
       

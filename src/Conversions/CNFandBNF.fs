@@ -90,9 +90,9 @@ let collectEpsNonterms (rules: Rule.t<_,_> list) =
     while flag do
         let mutable k = epsNonterms.Count
         for rule in rules do
-            let elementsPos = fst (getElements rule.body [] [] true) |> List.filter (fun x -> List.forall (fun y -> epsNonterms.Contains(y)) x)
-            let elementsNeg = snd (getElements rule.body [] [] true) |> List.filter (fun x -> List.forall (fun y -> epsNonterms.Contains(y)) x)
-            if not (elementsPos.IsEmpty) && elementsNeg.IsEmpty
+            let checkPos = fst (getElements rule.body [] [] true) |> List.forall (fun x -> List.forall (fun y -> epsNonterms.Contains(y)) x)
+            let checkNeg = snd (getElements rule.body [] [] true) |> List.forall (fun x -> List.exists (fun y -> not (epsNonterms.Contains(y))) x)
+            if checkPos && checkNeg
             then epsNonterms.Add(createDefaultElem(PRef(rule.name, None))) |> ignore
         if epsNonterms.Count = k then flag <- false
     epsNonterms |> Seq.toList
@@ -180,24 +180,16 @@ let deleteUnitRules (rules: Rule.t<_,_> list) =
                                                                   |> List.map (fun x -> createRule rule.name rule.args (PNeg(PSeq(x, None, None))) rule.isStart rule.metaArgs)
                                                        createRule rule.name rule.args (createConj (pos @ neg |> List.toSeq)) rule.isStart rule.metaArgs |> filter))
                     else
-                        newRules.UnionWith(rulesToAdd 
-                                           |> Seq.collect 
-                                              (fun x -> 
-                                                       let pos = fst elements |> List.map (fun x -> createRule rule.name rule.args (PSeq(x, None, None)) rule.isStart rule.metaArgs)
-                                                       let neg = List.except([c]) (snd elements) |> List.map (fun x -> createRule rule.name rule.args (PNeg(PSeq(x, None, None))) rule.isStart rule.metaArgs)
-                                                       let altsWithNegList = 
-                                                           if List.isEmpty (fst (getElements x.body [] [] true) |> List.filter (fun x -> not (List.isEmpty x)) |> List.map (fun x -> createRule rule.name rule.args (PNeg(PSeq(x, None, None))) rule.isStart rule.metaArgs))
-                                                           then [createRule rule.name rule.args (createConj (pos @ neg |> List.toSeq)) rule.isStart rule.metaArgs]                                                                          
-                                                           else
-                                                               (fst (getElements x.body [] [] true) |> List.filter (fun x -> not (List.isEmpty x)) |> List.map (fun x -> createRule rule.name rule.args (PNeg(PSeq(x, None, None))) rule.isStart rule.metaArgs))
-                                                                |> List.map (fun x -> createRule rule.name rule.args (PConj(x.body, createConj (pos @ neg |> List.toSeq))) rule.isStart rule.metaArgs)
-                                                       let altsList = 
-                                                           if List.isEmpty (snd (getElements x.body [] [] true) |> List.filter(fun x -> not (List.isEmpty x)) |> List.map (fun x -> createRule rule.name rule.args (PSeq(x, None, None)) rule.isStart rule.metaArgs))
-                                                           then altsWithNegList                                                                         
-                                                           else
-                                                               (snd (getElements x.body [] [] true) |> List.filter (fun x -> not (List.isEmpty x)) |> List.map (fun x -> createRule rule.name rule.args (PSeq(x, None, None)) rule.isStart rule.metaArgs))
-                                                                |> List.map (fun x -> createRule rule.name rule.args (PConj(x.body, createConj altsWithNegList)) rule.isStart rule.metaArgs)                                                     
-                                                       altsList |> Seq.map filter))                 
+                        let conjs = ResizeArray<t<_,_> list>()
+                        let pos = fst elements |> List.map (fun x -> createRule rule.name rule.args (PSeq(x, None, None)) rule.isStart rule.metaArgs)
+                        let neg = List.except([c]) (snd elements) |> List.map (fun x -> createRule rule.name rule.args (PNeg(PSeq(x, None, None))) rule.isStart rule.metaArgs)                                                       
+                        for r in rulesToAdd do
+                            let pos2 = snd (getElements r.body [] [] true) |> List.filter (fun x -> not (x = [])) |> List.map (fun x -> createRule r.name r.args (PSeq(x, None, None)) r.isStart r.metaArgs)
+                            let neg2 = fst (getElements r.body [] [] true) |> List.map (fun x -> createRule r.name r.args (PNeg(PSeq(x, None, None))) r.isStart r.metaArgs)
+                            conjs.Add(pos2 @ neg2) |> ignore
+                        let combinations = getCombinations (conjs |> Seq.toList) 
+                        for i in 0..combinations.Length - 1 do
+                            newRules.Add(filter (createRule rule.name rule.args (createConj (combinations.[i] @ pos @ neg)) rule.isStart rule.metaArgs)) |> ignore                      
                 newRules.Remove(rule) |> ignore
         oldRules.Clear()
         oldRules.UnionWith(newRules)
@@ -304,6 +296,7 @@ let deleteFewTermRules  (rules: Rule.t<_,_> list) =
 
 let filterAndStuff (rules: Rule.t<_,_> list) = 
     let newRules = HashSet<_>(rules, new RuleComparer<_,_>())
+    let toAdd = HashSet<_>(new RuleComparer<_,_>())
     for rule in rules do
         let elements = getElements rule.body [] [] true
         for el in fst elements do 
@@ -323,9 +316,7 @@ let filterAndStuff (rules: Rule.t<_,_> list) =
                 then newRules.Add(b1.[0]) |> ignore
                 else newRules.Add(createRule rule.name rule.args (createConj (b1 @ b2)) rule.isStart rule.metaArgs) |> ignore
             if (fst elements).Length = 0 && (snd elements).Length > 2 && el.Length = 1 && match el.[0].rule with PToken t -> true | _ -> false 
-            then 
-                newRules.Remove(rule) |> ignore
-                newRules.Add(createRule rule.name rule.args el.[0].rule rule.isStart rule.metaArgs) |> ignore
+            then toAdd.Add(rule) |> ignore
         if not (Seq.isEmpty (Seq.filter (fun x -> 
                                   let el1, el2 = fst (getElements x.body [] [] true), snd(getElements x.body [] [] true) 
                                   if not (x = rule)
@@ -335,6 +326,9 @@ let filterAndStuff (rules: Rule.t<_,_> list) =
                                   then true
                                   else false) newRules)) 
         then newRules.Remove(rule) |> ignore 
+  //  for rule in toAdd do
+    //    let nt = snd(getElements rule.body [] [] true) 
+      //  let c = (fst (collectNontermsAndUnitRules (newRules |> Seq.toList))) |> Seq.filter (fun x -> )
     if startIsEps then 
         let start = (Seq.find (fun x -> x.isStart = true) newRules).name
         newRules.Add(createRule start [] (PSeq([], None, None)) true [] ) |> ignore

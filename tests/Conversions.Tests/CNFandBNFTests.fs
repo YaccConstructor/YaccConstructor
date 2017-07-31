@@ -74,7 +74,7 @@ type ``CNF tests`` () =
                (verySimpleRules "s"
                     [{dummyRule with rule = PRef (Source.t "yard_s_3", None)}
                      {dummyRule with rule = PRef (Source.t "a", None)}]) 
-               @(verySimpleNotStartRules "s"
+               @(verySimpleRules "s"
                     [{dummyRule with rule = PRef (Source.t "yard_s_4", None)}
                      {dummyRule with rule = PRef (Source.t "b", None)}]) 
                @(verySimpleNotStartRules "a"

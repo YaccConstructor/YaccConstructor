@@ -357,79 +357,32 @@
                     isPublic = false;
                     isInline = false;
                     metaArgs = [];};
- {name = s;
+ {name = yard_a_3;
   args = [];
-  body =
-   PConj
-     (PSeq ([{omit = false;
-              rule = PRef (a,null);
-              binding = null;
-              checker = null;}; {omit = false;
-                                 rule = PRef (b,null);
-                                 binding = null;
-                                 checker = null;}],null,null),
-      PNeg (PSeq ([],null,null)));
-  isStart = true;
+  body = PSeq ([{omit = false;
+                 rule = PToken A;
+                 binding = null;
+                 checker = null;}],null,null);
+  isStart = false;
   isPublic = false;
   isInline = false;
-  metaArgs = [];};
- {name = s;
-  args = [];
-  body =
-   PConj
-     (PSeq ([{omit = false;
-              rule = PRef (yard_b_5,null);
-              binding = null;
-              checker = null;}; {omit = false;
-                                 rule = PRef (yard_b_1,null);
-                                 binding = null;
-                                 checker = null;}],null,null),
-      PNeg (PSeq ([],null,null)));
-  isStart = true;
-  isPublic = false;
-  isInline = false;
-  metaArgs = [];};
- {name = s;
-  args = [];
-  body =
-   PConj
-     (PSeq ([{omit = false;
-              rule = PRef (yard_a_3,null);
-              binding = null;
-              checker = null;}; {omit = false;
-                                 rule = PRef (a,null);
-                                 binding = null;
-                                 checker = null;}],null,null),
-      PNeg (PSeq ([],null,null)));
-  isStart = true;
-  isPublic = false;
-  isInline = false;
-  metaArgs = [];}; {name = yard_a_3;
+  metaArgs = [];}; {name = yard_b_1_4;
                     args = [];
                     body = PSeq ([{omit = false;
-                                   rule = PToken A;
+                                   rule = PToken C;
                                    binding = null;
                                    checker = null;}],null,null);
                     isStart = false;
                     isPublic = false;
                     isInline = false;
                     metaArgs = [];};
- {name = yard_b_1_4;
+ {name = yard_b_5;
   args = [];
   body = PSeq ([{omit = false;
-                 rule = PToken C;
+                 rule = PToken B;
                  binding = null;
                  checker = null;}],null,null);
   isStart = false;
   isPublic = false;
   isInline = false;
-  metaArgs = [];}; {name = yard_b_5;
-                    args = [];
-                    body = PSeq ([{omit = false;
-                                   rule = PToken B;
-                                   binding = null;
-                                   checker = null;}],null,null);
-                    isStart = false;
-                    isPublic = false;
-                    isInline = false;
-                    metaArgs = [];}]
+  metaArgs = [];}]

@@ -27,11 +27,24 @@ let getEdges (g:Graph) =
 let loadFromFile (file:string) =
     let g = new Graph()
     if (System.IO.Path.GetExtension file).ToLower() = "ttl"
-    then        
-        let ttlparser = new TurtleParser()
-        ttlparser.Load(g, file)
+    then
+        try
+            let ttlparser = new TurtleParser()
+            ttlparser.Load(g, file)
+        with
+            | _ -> 
+                let _ = System.Diagnostics.Process.Start("cat \"" + file + "\" | head -n 10")
+                let _ = System.Diagnostics.Process.Start("md5sum \"" + file + "\"")
+                printfn "%s" file
     else
-        FileLoader.Load(g, file)       
+        try
+            FileLoader.Load(g, file) 
+        with
+            | _ -> 
+                let _ = System.Diagnostics.Process.Start("cat \"" + file + "\" | head -n 10")
+                let _ = System.Diagnostics.Process.Start("md5sum \"" + file + "\"")
+                printfn "%s" file
+     
     g
 
 let getParseInputGraph tokenizer file =    

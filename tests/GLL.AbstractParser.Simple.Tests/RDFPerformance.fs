@@ -33,16 +33,14 @@ let loadFromFile (file:string) =
             ttlparser.Load(g, file)
         with
             | _ -> 
-                let _ = System.Diagnostics.Process.Start("cat \"" + file + "\" | head -n 10")
-                let _ = System.Diagnostics.Process.Start("md5sum \"" + file + "\"")
+                let _ = System.Diagnostics.Process.Start("head", " -n 10 \"" + file + "\"")            
                 printfn "%s" file
     else
         try
             FileLoader.Load(g, file) 
         with
             | _ -> 
-                let _ = System.Diagnostics.Process.Start("cat \"" + file + "\" | head -n 10")
-                let _ = System.Diagnostics.Process.Start("md5sum \"" + file + "\"")
+                let _ = System.Diagnostics.Process.Start("head", " -n 10 \"" + file + "\"")
                 printfn "%s" file
      
     g

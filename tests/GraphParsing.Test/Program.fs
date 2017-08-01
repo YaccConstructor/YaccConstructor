@@ -17,13 +17,13 @@ open MathNet.Numerics.LinearAlgebra.Double
 open AbstractAnalysis.Common
 open YC.GLL.Abstarct.Tests.RDFPerformance
 
-let graphParsingTestPath = ".\GraphParsing.Test"
-let baseRDFPath = @".\data\RDF"
+let graphParsingTestPath = @"./GraphParsing.Test"
+let baseRDFPath = @"./data/RDF"
 let RDFfiles = System.IO.Directory.GetFiles baseRDFPath
-let [<Literal>] RDF_GPPERF1_GRAMMAR_FILE = ".\GraphParsing.Test\GPPerf1_cnf.yrd"
-let [<Literal>] RDF_GPPERF2_GRAMMAR_FILE = ".\GraphParsing.Test\GPPerf2_cnf.yrd"
-let [<Literal>] CONJ_RDF_GPPERF1_GRAMMAR_FILE = ".\GraphParsing.Test\GPPerf1_conj_cnf.yrd"
-let [<Literal>] CONJ_RDF_GPPERF2_GRAMMAR_FILE = ".\GraphParsing.Test\GPPerf2_conj_cnf.yrd"
+let [<Literal>] RDF_GPPERF1_GRAMMAR_FILE = @"./GraphParsing.Test/GPPerf1_cnf.yrd"
+let [<Literal>] RDF_GPPERF2_GRAMMAR_FILE = @"./GraphParsing.Test/GPPerf2_cnf.yrd"
+let [<Literal>] CONJ_RDF_GPPERF1_GRAMMAR_FILE = @"./GraphParsing.Test/GPPerf1_conj_cnf.yrd"
+let [<Literal>] CONJ_RDF_GPPERF2_GRAMMAR_FILE = @"./GraphParsing.Test/GPPerf2_conj_cnf.yrd"
 
 let testFileRDF test file grammarFile = 
     let cnt = 1

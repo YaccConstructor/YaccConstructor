@@ -205,7 +205,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         |> Seq.cast<NonTerminalNode> 
         |> Seq.find (fun x -> x.Name.Equals name)
 
-    member this.Iterate (s : NonTerminalNode) = 
+    member this.Iterate (s : INode) = 
         let queue = new Queue<INode>()
         let used = new Dictionary<INode, bool>()
         for n in this.Nodes do
@@ -220,19 +220,11 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
             while queue.Count <> 0 do
                 let h = queue.Dequeue()
                 match h with
-                | :? NonTerminalNode as nt -> if nt.Others <> null
-                                              then nt.Others.ForEach(fun x -> if not used.[x]
-                                                                              then add x)
-                                              elif not used.[nt.First]
-                                              then add nt.First
-                | :? IntermidiateNode as interm -> if interm.Others <> null
-                                                   then interm.Others.ForEach(fun x -> if not used.[x]
-                                                                                       then add x)
-                                                   elif not used.[interm.First]
-                                                   then add interm.First
-                | :? PackedNode as packed-> if packed.Left <> null && not used.[packed.Left]
+                | :? NonTerminalNode as nt -> nt.MapChildren(fun x -> add x)
+                | :? IntermidiateNode as interm -> interm.MapChildren(fun x -> add x)
+                | :? PackedNode as packed-> if packed.Left <> null
                                             then add packed.Left
-                                            if packed.Right <> null && not used.[packed.Right]
+                                            if packed.Right <> null
                                             then add packed.Right
                 | :? TerminalNode as term -> yield term.Name, getLeftExtension term.Extension, getRightExtension term.Extension
                 | x -> failwithf "Strange type of node: %A" x

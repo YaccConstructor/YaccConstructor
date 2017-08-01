@@ -70,10 +70,9 @@ let getInputGraph tokenizer inputFile =
     
     g 
 
-let getParserSource grammarFile = 
+let getParserSource grammarFile conv = 
     let fe = new YardFrontend()
     let gen = new GLL()
-    let conv = seq{yield new ExpandMeta()}
     generate (grammarsDir + grammarFile)
              fe gen 
              None
@@ -83,7 +82,8 @@ let getParserSource grammarFile =
 
 let test grammarFile inputFile nodesCount edgesCount termsCount ambiguityCount = 
     //printfn "%A" needChangeDirectory
-    let parser = getParserSource grammarFile
+    let conv = seq{yield new ExpandMeta()}
+    let parser = getParserSource grammarFile conv
     let input  = getInputGraph parser.StringToToken inputFile
     let tree = buildAst parser input
     //printfn "%A" tree
@@ -106,11 +106,10 @@ let initGraph (graph : IVertexAndEdgeListGraph<_, _>) (edgeTagToString : _ -> st
         simpleGraph
 
 let sppfTest grammarFile inputGraph = 
-    let ps = getParserSource grammarFile
+    let ps = getParserSource grammarFile Seq.empty
     let preparedGraph = initGraph inputGraph id ps
     let _, sppf, _ = parse ps preparedGraph true
-    let nt = sppf.Nodes.Find(fun x -> x :? NonTerminalNode) :?> NonTerminalNode
-    let pathset = sppf.Iterate nt
+    let pathset = sppf.Iterate sppf.Nodes.[0]
     for n in pathset do
         printf "%A" n
     Assert.Pass()
@@ -124,16 +123,16 @@ type ``GLL abstract parser tests``() =
         vertices.Add(1)
         vertices.Add(2)
         let edges = new ResizeArray<ParserEdge<string>>()
-        edges.Add(new ParserEdge<string>(0, 1, "LBR"))
-        edges.Add(new ParserEdge<string>(1, 0, "LBR"))
-        edges.Add(new ParserEdge<string>(1, 2, "RBR"))
-        edges.Add(new ParserEdge<string>(2, 1, "RBR"))
+        edges.Add(new ParserEdge<string>(0, 1, "A"))
+        edges.Add(new ParserEdge<string>(1, 0, "A"))
+        edges.Add(new ParserEdge<string>(1, 2, "B"))
+        edges.Add(new ParserEdge<string>(2, 1, "B"))
         let graph = new QuickGraph.AdjacencyGraph<int, ParserEdge<string>>()
         for v in vertices do
             graph.AddVertex v |> ignore
         for e in edges do
             graph.AddEdge e |> ignore
-        sppfTest "Brackets.yrd"
+        sppfTest "MyBrackets.yrd" graph
         
 
     [<Test>]  

@@ -223,19 +223,17 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 | :? NonTerminalNode as nt -> if nt.Others <> null
                                               then nt.Others.ForEach(fun x -> if not used.[x]
                                                                               then add x)
-                                              else if not used.[nt.First]
-                                                   then add nt.First
+                                              elif not used.[nt.First]
+                                              then add nt.First
                 | :? IntermidiateNode as interm -> if interm.Others <> null
                                                    then interm.Others.ForEach(fun x -> if not used.[x]
                                                                                        then add x)
-                                                   else if not used.[interm.First]
-                                                        then add interm.First
-                | :? PackedNode as packed-> if packed.Left <> null
-                                            then if not used.[packed.Left]
-                                                 then add packed.Left
-                                            if packed.Right <> null
-                                            then if not used.[packed.Right]
-                                                 then add packed.Right
+                                                   elif not used.[interm.First]
+                                                   then add interm.First
+                | :? PackedNode as packed-> if packed.Left <> null && not used.[packed.Left]
+                                            then add packed.Left
+                                            if packed.Right <> null && not used.[packed.Right]
+                                            then add packed.Right
                 | :? TerminalNode as term -> yield term.Name, getLeftExtension term.Extension, getRightExtension term.Extension
                 | x -> failwithf "Strange type of node: %A" x
         }

@@ -21,6 +21,7 @@ open NUnit.Framework
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.AbstractParser
 open Yard.Generators.Common.ASTGLL
+open Yard.Generators.Common.ASTGLLFSA
 open Yard.Generators.GLL.ParserCommon
 open YC.API
 open Yard.Frontends.YardFrontend
@@ -94,9 +95,47 @@ let test grammarFile inputFile nodesCount edgesCount termsCount ambiguityCount =
     Assert.AreEqual(termsCount, t, sprintf "Terms expected:%i, found:%i." termsCount t) 
     Assert.AreEqual(ambiguityCount, amb, sprintf "Ambiguities expected:%i, found:%i." ambiguityCount amb)
     Assert.Pass()
-      
+
+let initGraph (graph : IVertexAndEdgeListGraph<_, _>) (edgeTagToString : _ -> string) (parserSource : ParserSourceGLL) = 
+        let edgeTagToInt x = edgeTagToString x |> parserSource.StringToToken |> int
+        let simpleGraph = new SimpleInputGraph<_>(graph.VertexCount, edgeTagToInt)
+        for v in graph.Vertices do
+            simpleGraph.AddVertex v |> ignore
+        for e in graph.Edges do
+            simpleGraph.AddEdge e |> ignore
+        simpleGraph
+
+let sppfTest grammarFile inputGraph = 
+    let ps = getParserSource grammarFile
+    let preparedGraph = initGraph inputGraph id ps
+    let _, sppf, _ = parse ps preparedGraph true
+    let nt = sppf.Nodes.Find(fun x -> x :? NonTerminalNode) :?> NonTerminalNode
+    let pathset = sppf.Iterate nt
+    for n in pathset do
+        printf "%A" n
+    Assert.Pass()
+
 [<TestFixture>]
 type ``GLL abstract parser tests``() =
+    [<Test>]
+    member this._01_SimpleSPPFTest() = 
+        let vertices = new ResizeArray<int>()
+        vertices.Add(0)
+        vertices.Add(1)
+        vertices.Add(2)
+        let edges = new ResizeArray<ParserEdge<string>>()
+        edges.Add(new ParserEdge<string>(0, 1, "LBR"))
+        edges.Add(new ParserEdge<string>(1, 0, "LBR"))
+        edges.Add(new ParserEdge<string>(1, 2, "RBR"))
+        edges.Add(new ParserEdge<string>(2, 1, "RBR"))
+        let graph = new QuickGraph.AdjacencyGraph<int, ParserEdge<string>>()
+        for v in vertices do
+            graph.AddVertex v |> ignore
+        for e in edges do
+            graph.AddEdge e |> ignore
+        sppfTest "Brackets.yrd"
+        
+
     [<Test>]  
     member this._04_RightRecursionCheck () =
         test "RightRecursionCheck.yrd" 

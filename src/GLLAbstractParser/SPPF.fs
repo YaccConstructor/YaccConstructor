@@ -209,7 +209,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         let queue = new Queue<INode>()
         let used = new Dictionary<INode, bool>()
         for n in this.Nodes do
-            used.Add(n, n.Equals(s))
+            used.Add(n, false)
         
         let add x = 
             queue.Enqueue(x)
@@ -217,16 +217,20 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
 
         queue.Enqueue s
         seq {
-            while queue.Count <> 0 do
+            while queue.Count > 0 do
                 let h = queue.Dequeue()
                 match h with
-                | :? NonTerminalNode as nt -> nt.MapChildren(fun x -> add x)
-                | :? IntermidiateNode as interm -> interm.MapChildren(fun x -> add x)
-                | :? PackedNode as packed-> if packed.Left <> null
-                                            then add packed.Left
-                                            if packed.Right <> null
-                                            then add packed.Right
-                | :? TerminalNode as term -> yield term.Name, getLeftExtension term.Extension, getRightExtension term.Extension
+                | :? NonTerminalNode as nt -> queue.Enqueue(nt.First)
+                                              if nt.Others <> null
+                                              then nt.Others.ForEach(fun x -> queue.Enqueue(x))
+                | :? IntermidiateNode as interm -> queue.Enqueue(interm.First)
+                                                   if interm.Others <> null
+                                                   then interm.Others.ForEach(fun x -> queue.Enqueue(x))
+                | :? PackedNode as packed-> add packed.Left
+                                            add packed.Right
+                | :? TerminalNode as term -> if term.Name <> -1<token>
+                                             then yield term.Name, getLeftExtension term.Extension, getRightExtension term.Extension
+                | :? EpsilonNode as eps -> ignore
                 | x -> failwithf "Strange type of node: %A" x
         }
 

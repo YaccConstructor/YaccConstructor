@@ -28,21 +28,10 @@ let loadFromFile (file:string) =
     let g = new Graph()
     if (System.IO.Path.GetExtension file).ToLower() = "ttl"
     then
-        try
-            let ttlparser = new TurtleParser()
-            ttlparser.Load(g, file)
-        with
-            | _ -> 
-                let _ = System.Diagnostics.Process.Start("head", " -n 10 \"" + file + "\"")            
-                printfn "%s" file
+        let ttlparser = new TurtleParser()
+        ttlparser.Load(g, file)
     else
-        try
-            FileLoader.Load(g, file) 
-        with
-            | _ -> 
-                let _ = System.Diagnostics.Process.Start("head", " -n 10 \"" + file + "\"")
-                printfn "%s" file
-     
+        FileLoader.Load(g, file)      
     g
 
 let getParseInputGraph tokenizer file =    

@@ -1,4 +1,4 @@
 ﻿[<Start>]
-e: s;
-s: {None};
-s: STRING;
+e: s
+s: {None}
+s: ST

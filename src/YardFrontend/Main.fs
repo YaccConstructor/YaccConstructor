@@ -69,7 +69,8 @@ let private tokenFun f = function
     | TOKENS_BLOCK st
     | LITERAL st
     | OPTIONS_START st 
-    | DOUBLEDOT st ->
+    | DOUBLEDOT st
+    | NEG st ->
         f st
     //| OPTION_BLOCK _ -> failwith "Unexpected OPTION_BLOCK"
 

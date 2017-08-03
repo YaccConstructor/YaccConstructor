@@ -64,6 +64,7 @@ type ``CNF tests`` () =
                     [{dummyRule with rule = PRef (Source.t "yard_e_1", None)}
                      {dummyRule with rule = PRef (Source.t "e", None)}])
             runTest (path "longrule_0.yrd") conversionLongRules rules
+            //runTest (path "longrule_0.yrd") conversionChomNormForm rules
 
     [<Test>]
     member test.``Delete Eps rule test 1`` () =

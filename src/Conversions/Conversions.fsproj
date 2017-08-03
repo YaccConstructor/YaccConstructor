@@ -55,7 +55,7 @@
     <Compile Include="ExpandRepet.fs" />
     <Compile Include="ToCNF.fs" />
     <None Include="paket.references" />
-    <Compile Include="ToChomNormForm.fs" />
+    <Compile Include="CNFandBNF.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FsYacc\FsYacc.fsproj">

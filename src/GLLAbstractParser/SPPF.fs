@@ -205,15 +205,22 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         |> Seq.cast<NonTerminalNode> 
         |> Seq.find (fun x -> x.Name.Equals name)
 
-    member this.Iterate (s : INode) = 
+    member this.Iterate (s : INode) (ps : ParserSourceGLL)= 
         let queue = new Queue<INode>()
-        let used = new Dictionary<INode, bool>()
+        let dang = new HashSet<PackedNode>()
+        let checkForStub (x : INode) = 
+            match x with
+            | :? TerminalNode as term -> if (term.Name.Equals -1<token>)
+                                         then true
+                                         else false
+            | :? EpsilonNode as eps -> true
+            | _ -> false
+
         for n in this.Nodes do
-            used.Add(n, false)
-        
-        let add x = 
-            queue.Enqueue(x)
-            used.[x] <- true
+            match n with
+            | :? PackedNode as packed -> if checkForStub packed.Left || checkForStub packed.Right
+                                         then dang.Add packed |> ignore
+            | _ -> ignore |> ignore  //something strange
 
         queue.Enqueue s
         seq {
@@ -226,12 +233,12 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 | :? IntermidiateNode as interm -> queue.Enqueue(interm.First)
                                                    if interm.Others <> null
                                                    then interm.Others.ForEach(fun x -> queue.Enqueue(x))
-                | :? PackedNode as packed-> add packed.Left
-                                            add packed.Right
-                | :? TerminalNode as term -> if term.Name <> -1<token>
-                                             then yield term.Name, getLeftExtension term.Extension, getRightExtension term.Extension
+                | :? PackedNode as packed-> if not (dang.Contains packed)
+                                            then queue.Enqueue packed.Left
+                                                 queue.Enqueue packed.Right
+                | :? TerminalNode as term -> yield (ps.IntToString.Item (term.Name |> int)), getLeftExtension term.Extension, getRightExtension term.Extension
                 | :? EpsilonNode as eps -> ignore
-                | x -> failwithf "Strange type of node: %A" x
+                | x -> failwithf "Strange type of node: %A" x.GetType
         }
 
 

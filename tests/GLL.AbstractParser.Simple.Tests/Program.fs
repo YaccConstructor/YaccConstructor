@@ -109,10 +109,8 @@ let sppfTest grammarFile inputGraph =
     let ps = getParserSource grammarFile Seq.empty
     let preparedGraph = initGraph inputGraph id ps
     let _, sppf, _ = parse ps preparedGraph true
-    let pathset = sppf.Iterate sppf.Nodes.[21]
-    let list = new List<int<token> * int * int>()
-    for n in pathset do
-        printf "%A" n
+    let pathset = sppf.Iterate sppf.Nodes.[21] ps
+    Assert.AreEqual(100, Seq.take 100 pathset |> Seq.length)
 
 [<TestFixture>]
 type ``GLL abstract parser tests``() =

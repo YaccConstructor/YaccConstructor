@@ -210,17 +210,15 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         let dang = new HashSet<PackedNode>()
         let checkForStub (x : INode) = 
             match x with
-            | :? TerminalNode as term -> if (term.Name.Equals -1<token>)
-                                         then true
-                                         else false
-            | :? EpsilonNode as eps -> true
+            | :? TerminalNode as term -> term.Name.Equals -1<token>
+            | :? EpsilonNode -> true
             | _ -> false
 
         for n in this.Nodes do
             match n with
             | :? PackedNode as packed -> if checkForStub packed.Left || checkForStub packed.Right
                                          then dang.Add packed |> ignore
-            | _ -> ignore |> ignore  //something strange
+            | _ -> ()
 
         queue.Enqueue s
         seq {
@@ -236,7 +234,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 | :? PackedNode as packed-> if not (dang.Contains packed)
                                             then queue.Enqueue packed.Left
                                                  queue.Enqueue packed.Right
-                | :? TerminalNode as term -> yield (ps.IntToString.Item (term.Name |> int)), getLeftExtension term.Extension, getRightExtension term.Extension
+                | :? TerminalNode as term -> yield (ps.IntToString.Item (int term.Name)), getLeftExtension term.Extension, getRightExtension term.Extension
                 | :? EpsilonNode as eps -> ignore
                 | x -> failwithf "Strange type of node: %A" x.GetType
         }

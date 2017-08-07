@@ -1,5 +1,6 @@
 [<Start>]
 s : a b c
-a -> A+
-b -> {None}+
-c -> C+
+a : A+
+e : {None}
+b : e+
+c : C+

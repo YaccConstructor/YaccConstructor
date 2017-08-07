@@ -109,7 +109,10 @@ let sppfTest grammarFile inputGraph =
     let ps = getParserSource grammarFile Seq.empty
     let preparedGraph = initGraph inputGraph id ps
     let _, sppf, _ = parse ps preparedGraph true
-    let pathset = sppf.Iterate sppf.Nodes.[21] ps
+    let pathset = sppf.Iterate sppf.Nodes.[10] ps
+    let list = new List<string * int * int>()
+    for n in pathset do
+        list.Add n
     Assert.AreEqual(100, Seq.take 100 pathset |> Seq.length)
 
 [<TestFixture>]
@@ -132,6 +135,22 @@ type ``GLL abstract parser tests``() =
             graph.AddEdge e |> ignore
         sppfTest "MyBrackets.yrd" graph
         
+
+    [<Test>]
+    member this._02_SimpleEpsCycleSPPFTest() =
+        let vertices = [|0; 1; 2; 3; 4; 5|]
+        let edges = new ResizeArray<ParserEdge<string>>()
+        edges.Add(new ParserEdge<string>(0, 1, "A"))
+        edges.Add(new ParserEdge<string>(1, 2, "A"))
+        edges.Add(new ParserEdge<string>(2, 3, "A"))
+        edges.Add(new ParserEdge<string>(3, 4, "C"))
+        edges.Add(new ParserEdge<string>(4, 5, "C"))
+        let graph = new QuickGraph.AdjacencyGraph<int, ParserEdge<string>>()
+        for v in vertices do
+            graph.AddVertex v |> ignore
+        for e in edges do
+            graph.AddEdge e |> ignore
+        sppfTest "EpsCycle.yrd" graph
 
     [<Test>]  
     member this._04_RightRecursionCheck () =

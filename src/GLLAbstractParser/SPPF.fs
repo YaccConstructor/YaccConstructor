@@ -200,7 +200,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         //|> (fun x -> [|x.[0]|])
 
     member this.GetNonTermByName name (ps : ParserSourceGLL) = 
-        let token = ps.ReverseIntToString.Item name
+        let token = ps.NameToId.Item name
         this.Nodes 
         |> Seq.filter (fun x -> x :? NonTerminalNode) 
         |> Seq.cast<NonTerminalNode> 

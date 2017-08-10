@@ -124,10 +124,7 @@ type ``GLL abstract parser tests``() =
         edges.Add(new ParserEdge<string>(1, 2, "B"))
         edges.Add(new ParserEdge<string>(2, 1, "B"))
         let graph = new QuickGraph.AdjacencyGraph<int, ParserEdge<string>>()
-        for v in vertices do
-            graph.AddVertex v |> ignore
-        for e in edges do
-            graph.AddEdge e |> ignore
+        graph.AddVerticesAndEdgeRange edges |> ignore
         sppfTest "MyBrackets.yrd" graph "s" 100
         
 
@@ -141,10 +138,7 @@ type ``GLL abstract parser tests``() =
         edges.Add(new ParserEdge<string>(3, 4, "C"))
         edges.Add(new ParserEdge<string>(4, 5, "C"))
         let graph = new QuickGraph.AdjacencyGraph<int, ParserEdge<string>>()
-        for v in vertices do
-            graph.AddVertex v |> ignore
-        for e in edges do
-            graph.AddEdge e |> ignore
+        graph.AddVerticesAndEdgeRange edges |> ignore
         sppfTest "EpsCycle.yrd" graph "a" 5
 
     [<Test>]  

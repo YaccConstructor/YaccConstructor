@@ -43,5 +43,5 @@ type ParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<positi
     member this.MultipleInEdges         = multipleInEdges
     member this.RightSideToRule         = rightSideToRule.Value
 
-    member this.ReverseIntToString = 
+    member this.NameToId = 
         rev (this.IntToString |> Seq.map (|KeyValue|)|> Map.ofSeq)

@@ -1,5 +1,5 @@
 [<Start>]
-s : a b c
+s : a b c  
 a : A+
 e : {None}
 b : e+

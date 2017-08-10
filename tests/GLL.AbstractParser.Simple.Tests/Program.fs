@@ -82,7 +82,7 @@ let getParserSource grammarFile conv =
 
 let test grammarFile inputFile nodesCount edgesCount termsCount ambiguityCount = 
     //printfn "%A" needChangeDirectory
-    let conv = seq{yield new ExpandMeta()}
+    let conv = [new ExpandMeta()]
     let parser = getParserSource grammarFile conv
     let input  = getInputGraph parser.StringToToken inputFile
     let tree = buildAst parser input
@@ -99,10 +99,7 @@ let test grammarFile inputFile nodesCount edgesCount termsCount ambiguityCount =
 let initGraph (graph : IVertexAndEdgeListGraph<_, _>) (edgeTagToString : _ -> string) (parserSource : ParserSourceGLL) = 
         let edgeTagToInt x = edgeTagToString x |> parserSource.StringToToken |> int
         let simpleGraph = new SimpleInputGraph<_>(graph.VertexCount, edgeTagToInt)
-        for v in graph.Vertices do
-            simpleGraph.AddVertex v |> ignore
-        for e in graph.Edges do
-            simpleGraph.AddEdge e |> ignore
+        simpleGraph.AddVerticesAndEdgeRange(graph.Edges) |> ignore
         simpleGraph
 
 let sppfTest grammarFile inputGraph nonTermName maxLength = 

@@ -200,9 +200,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         //|> (fun x -> [|x.[0]|])
 
     member this.GetNonTermByName name (ps : ParserSourceGLL) = 
-        let rev (map : Map<int, string>) = 
-            Map.fold(fun (m : Map<string, int>) k v -> m.Add(v, k)) Map.empty map
-        let token = (rev (ps.IntToString |> Seq.map (|KeyValue|)|> Map.ofSeq)).Item name
+        let token = ps.ReverseIntToString.Item name
         this.Nodes 
         |> Seq.filter (fun x -> x :? NonTerminalNode) 
         |> Seq.cast<NonTerminalNode> 
@@ -211,19 +209,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
     member this.Iterate (s : seq<NonTerminalNode>) (ps : ParserSourceGLL) maxLength = 
         let queue = new Queue<INode>()
         let length = ref 0
-        (*let dang = new HashSet<PackedNode>()
-        let checkForStub (x : INode) = 
-            match x with
-            | :? TerminalNode as term -> term.Name.Equals -1<token>
-            | :? EpsilonNode -> true
-            | _ -> false
-
-        for n in this.Nodes do
-            match n with
-            | :? PackedNode as packed -> if checkForStub packed.Left || checkForStub packed.Right
-                                         then dang.Add packed |> ignore
-            | _ -> ()*)
-
+       
         Seq.iter (fun x -> queue.Enqueue x) s
         seq {
             while queue.Count > 0 && length.Value < maxLength do

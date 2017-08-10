@@ -111,9 +111,6 @@ let sppfTest grammarFile inputGraph nonTermName maxLength =
     let _, sppf, _ = parse ps preparedGraph true
     let nt = sppf.GetNonTermByName nonTermName ps
     let pathset = sppf.Iterate nt ps maxLength
-    let list = new List<string * int * int>()
-    for n in pathset do
-        list.Add n
     Assert.AreEqual(maxLength, Seq.length pathset)
 
 [<TestFixture>]
@@ -151,7 +148,7 @@ type ``GLL abstract parser tests``() =
             graph.AddVertex v |> ignore
         for e in edges do
             graph.AddEdge e |> ignore
-        sppfTest "EpsCycle.yrd" graph "a" 10
+        sppfTest "EpsCycle.yrd" graph "a" 5
 
     [<Test>]  
     member this._04_RightRecursionCheck () =

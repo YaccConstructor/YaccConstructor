@@ -79,8 +79,11 @@ let conversionLongRules = new Conversions.ToCNF.SplitLongRule()
 let conversionEps = new Conversions.ToCNF.DeleteEpsRule()
 let conversionChain = new Conversions.ToCNF.DeleteChainRule()
 let conversionRenamer = new Conversions.ToCNF.RenameTerm()
-let conversionCNF = new Conversions.ToCNF.ToCNF()
-let conversionChomNormForm = new Conversions.ToChomNormForm.ToChomNormForm()
+//let conversionCNF = new Conversions.ToCNF.ToCNF()
+let conversionCNF = new Conversions.CNFandBNF.CNF()
+let conversionBNFconj = new Conversions.CNFandBNF.BNFconj()
+let conversionBNFbool = new Conversions.CNFandBNF.BNFbool()
+
 
 let applyConversion (conversion:Conversion) loadIL = 
     {
@@ -99,7 +102,15 @@ let runTest inputFile conversion expectedResult =
     printfn "%s" "************************"
     result |> treeDump.Generate |> string |> printfn "%s"
 #endif
+    printfn "!!! %A" (ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
     Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
+
+let runTest2 inputFile conversion expectedResult =
+    let loadIL = fe.ParseGrammar inputFile
+    Namer.initNamer loadIL.grammar
+    let result = loadIL |> applyConversion conversion
+    let r = sprintf "%A" result.grammar.[0].rules
+    Assert.IsTrue((expectedResult = r))
 
 [<TestFixture>]
 type ``Conversions tests`` () =

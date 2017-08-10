@@ -42,9 +42,9 @@ let processFile file grammarFile =
                                                  time4, countOfPairs4,*) time5, countOfPairs5(*, time6, countOfPairs6*)
 
 let performTests () =
-    let basePath = @"..\..\..\data\RDF"
+    let basePath = @"../../../data/RDF"
     let files = System.IO.Directory.GetFiles basePath 
     files 
-    |> Array.map (fun rdffile -> processFile rdffile "..\..\..\GraphParsing.Test\GPPerf1_cnf.yrd")
+    |> Array.map (fun rdffile -> processFile rdffile @"../../../GraphParsing.Test/GPPerf1_cnf.yrd")
     |> Array.sortBy (fun (_,_,x,_(*,_,_,_,_,_,_,_,_*)) -> x)
     |> Array.iter (printfn "%A")

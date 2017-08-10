@@ -92,6 +92,7 @@ let initNamer (grammar : Grammar.t<_,_>) =
         | PConj (l,r) ->
             walk l
             walk r
+        | PNeg x -> walk x
         | PMany x | PSome x | POpt x | PRepet (x,_,_) -> walk x
         | PSeq (elems, ac, lbl) ->
             elems |> List.iter (fun e ->

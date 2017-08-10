@@ -27,11 +27,11 @@ let getEdges (g:Graph) =
 let loadFromFile (file:string) =
     let g = new Graph()
     if (System.IO.Path.GetExtension file).ToLower() = "ttl"
-    then        
+    then
         let ttlparser = new TurtleParser()
         ttlparser.Load(g, file)
     else
-        FileLoader.Load(g, file)       
+        FileLoader.Load(g, file)      
     g
 
 let getParseInputGraph tokenizer file =    

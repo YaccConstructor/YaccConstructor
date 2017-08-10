@@ -199,15 +199,19 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         |> Array.ofSeq
         //|> (fun x -> [|x.[0]|])
 
-    member this.GetNonTermByName name = 
+    member this.GetNonTermByName name (ps : ParserSourceGLL) = 
+        let rev (map : Map<int, string>) = 
+            Map.fold(fun (m : Map<string, int>) k v -> m.Add(v, k)) Map.empty map
+        let token = (rev (ps.IntToString |> Seq.map (|KeyValue|)|> Map.ofSeq)).Item name
         this.Nodes 
         |> Seq.filter (fun x -> x :? NonTerminalNode) 
         |> Seq.cast<NonTerminalNode> 
-        |> Seq.find (fun x -> x.Name.Equals name)
+        |> Seq.filter (fun x -> x.Name.Equals token)
 
-    member this.Iterate (s : INode) (ps : ParserSourceGLL)= 
+    member this.Iterate (s : seq<NonTerminalNode>) (ps : ParserSourceGLL) maxLength = 
         let queue = new Queue<INode>()
-        let dang = new HashSet<PackedNode>()
+        let length = ref 0
+        (*let dang = new HashSet<PackedNode>()
         let checkForStub (x : INode) = 
             match x with
             | :? TerminalNode as term -> term.Name.Equals -1<token>
@@ -218,11 +222,11 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
             match n with
             | :? PackedNode as packed -> if checkForStub packed.Left || checkForStub packed.Right
                                          then dang.Add packed |> ignore
-            | _ -> ()
+            | _ -> ()*)
 
-        queue.Enqueue s
+        Seq.iter (fun x -> queue.Enqueue x) s
         seq {
-            while queue.Count > 0 do
+            while queue.Count > 0 && length.Value < maxLength do
                 let h = queue.Dequeue()
                 match h with
                 | :? NonTerminalNode as nt -> queue.Enqueue(nt.First)
@@ -231,11 +235,12 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 | :? IntermidiateNode as interm -> queue.Enqueue(interm.First)
                                                    if interm.Others <> null
                                                    then interm.Others.ForEach(fun x -> queue.Enqueue(x))
-                | :? PackedNode as packed-> if not (dang.Contains packed)
-                                            then queue.Enqueue packed.Left
-                                                 queue.Enqueue packed.Right
-                | :? TerminalNode as term -> yield (ps.IntToString.Item (int term.Name)), getLeftExtension term.Extension, getRightExtension term.Extension
-                | :? EpsilonNode as eps -> ignore
+                | :? PackedNode as packed-> queue.Enqueue packed.Left
+                                            queue.Enqueue packed.Right
+                | :? TerminalNode as term -> if term.Name <> -1<token>
+                                             then incr length
+                                                  yield (ps.IntToString.Item (int term.Name)), getLeftExtension term.Extension, getRightExtension term.Extension
+                | :? EpsilonNode as eps -> ()
                 | x -> failwithf "Strange type of node: %A" x.GetType
         }
 

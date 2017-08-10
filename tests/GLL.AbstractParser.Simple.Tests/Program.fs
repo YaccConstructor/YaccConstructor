@@ -105,15 +105,16 @@ let initGraph (graph : IVertexAndEdgeListGraph<_, _>) (edgeTagToString : _ -> st
             simpleGraph.AddEdge e |> ignore
         simpleGraph
 
-let sppfTest grammarFile inputGraph = 
+let sppfTest grammarFile inputGraph nonTermName maxLength = 
     let ps = getParserSource grammarFile Seq.empty
     let preparedGraph = initGraph inputGraph id ps
     let _, sppf, _ = parse ps preparedGraph true
-    let pathset = sppf.Iterate sppf.Nodes.[10] ps
+    let nt = sppf.GetNonTermByName nonTermName ps
+    let pathset = sppf.Iterate nt ps maxLength
     let list = new List<string * int * int>()
     for n in pathset do
         list.Add n
-    Assert.AreEqual(100, Seq.take 100 pathset |> Seq.length)
+    Assert.AreEqual(maxLength, Seq.length pathset)
 
 [<TestFixture>]
 type ``GLL abstract parser tests``() =
@@ -133,7 +134,7 @@ type ``GLL abstract parser tests``() =
             graph.AddVertex v |> ignore
         for e in edges do
             graph.AddEdge e |> ignore
-        sppfTest "MyBrackets.yrd" graph
+        sppfTest "MyBrackets.yrd" graph "s" 100
         
 
     [<Test>]
@@ -150,7 +151,7 @@ type ``GLL abstract parser tests``() =
             graph.AddVertex v |> ignore
         for e in edges do
             graph.AddEdge e |> ignore
-        sppfTest "EpsCycle.yrd" graph
+        sppfTest "EpsCycle.yrd" graph "a" 10
 
     [<Test>]  
     member this._04_RightRecursionCheck () =

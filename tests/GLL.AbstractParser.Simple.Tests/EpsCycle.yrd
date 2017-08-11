@@ -1,0 +1,6 @@
+[<Start>]
+s : a b c  
+a : A+
+e : {None}
+b : e+
+c : C+

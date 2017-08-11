@@ -69,7 +69,8 @@ let private tokenFun f = function
     | TOKENS_BLOCK st
     | LITERAL st
     | OPTIONS_START st 
-    | DOUBLEDOT st ->
+    | DOUBLEDOT st
+    | NEG st ->
         f st
     //| OPTION_BLOCK _ -> failwith "Unexpected OPTION_BLOCK"
 
@@ -183,7 +184,7 @@ let posTo2D (source:string) pos =
         )
         (1,0)
 
-let ParseText (s:string) path =    
+let ParseText (s : string) path =    
     let userDefs = [||]
     GrammarParser.currentFilename := path
     Lexer.currentFile := path

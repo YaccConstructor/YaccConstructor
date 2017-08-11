@@ -1,0 +1,27 @@
+[<Start>]
+s: s s1
+
+s: GENE
+s1: similar s2
+s2: GENE
+similar: s3 s4
+s4: protein s5
+s4: s s5
+s4: go s5
+s3: CODESFOR
+s5: RCODESFOR
+similar: s6 s7
+s6: BELONGS
+s7: protein s8
+s7: s s8
+s7: go s8
+s8: RBELONGS
+similar: INTERACTS
+protein: protein s9
+s9: similar s10
+s10: PROTEIN
+protein: PROTEIN
+go: go s11
+s11: similar s12
+s12: GO
+go: GO

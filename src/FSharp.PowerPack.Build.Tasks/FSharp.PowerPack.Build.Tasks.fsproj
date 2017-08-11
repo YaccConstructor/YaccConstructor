@@ -65,4 +65,5 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
+  <Import Project="..\..\.paket\paket.targets" />
 </Project>

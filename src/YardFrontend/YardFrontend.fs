@@ -14,14 +14,9 @@
 
 namespace Yard.Frontends.YardFrontend
 
-open Mono.Addins
+
 open Yard.Core
 
-[<assembly:Addin>]
-[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
-do()
-
-[<Extension>]
 type YardFrontend() = 
     inherit Frontend()
         override this.Name = "YardFrontend"
@@ -35,3 +30,7 @@ type YardFrontend() =
         override this.ProductionTypes =
             List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
             |> List.map (fun unionCase -> unionCase.Name)
+        override this.ParseGrammarFromStr str =
+            let inliner = new Conversions.ExpandInline.ReplaceInline()
+            let g = Main.ParseText str "Grammar from string"
+            { g with grammar = inliner.ConvertGrammar g.grammar}

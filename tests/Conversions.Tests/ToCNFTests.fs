@@ -31,7 +31,6 @@ open ConversionsTests
 open Yard.Core.Helpers
 
 [<TestFixture>]
-[<Ignore("Temporarily disabled for branches merge")>]
 type ``CNF tests`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "ToCNF")
     let path f = System.IO.Path.Combine(basePath, f)
@@ -44,7 +43,7 @@ type ``CNF tests`` () =
 
     [<Test>]
     member test.``Simple ToCNF mssql``() =
-        let msqlrootPath = @"../../../../src/YC.GrammarZOO/SQL/TSQL"
+        let msqlrootPath = @"../src/YC.GrammarZOO/SQL/TSQL"
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(msqlrootPath, "mssql.yrd"))
         Namer.initNamer loadIL.grammar
         let result = loadIL |> applyConversion expandTopLevelAlt |> 
@@ -65,6 +64,7 @@ type ``CNF tests`` () =
                     [{dummyRule with rule = PRef (Source.t "yard_e_1", None)}
                      {dummyRule with rule = PRef (Source.t "e", None)}])
             runTest (path "longrule_0.yrd") conversionLongRules rules
+            //runTest (path "longrule_0.yrd") conversionChomNormForm rules
 
     [<Test>]
     member test.``Delete Eps rule test 1`` () =

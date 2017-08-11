@@ -29,17 +29,8 @@ open Conversions.TransformAux
 open NUnit.Framework
 open ConversionsTests
 open Yard.Core.Helpers
-open Mono.Addins
-
-[<SetUpFixture>]
-type SetUp()=
-    [<OneTimeSetUp>]
-    member this.SetUp () =
-        AddinManager.Initialize()
-        AddinManager.Registry.Update()
 
 [<TestFixture>]
-[<Ignore("Temporarily disabled for branches merge")>]
 type ``Conversions expand metarules tests`` () =
     
     let basePath = System.IO.Path.Combine(conversionTestPath, "Meta")

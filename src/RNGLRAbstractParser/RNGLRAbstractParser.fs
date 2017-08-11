@@ -20,7 +20,7 @@ open AbstractAnalysis.Common
 
 type Parser<'token>() =
 
-    let parse buildAst (inGraph:ParserInputGraph<'token>) : Yard.Generators.ARNGLR.Parser.ParseResult<'token> =
+    let parse buildAst (inGraph:SimpleInputGraph<'token>) : Yard.Generators.ARNGLR.Parser.ParseResult<'token> =
         buildAst inGraph
     
     member this.Parse = parse

@@ -128,7 +128,7 @@ and [<AllowNullLiteral>]
     new (head, tail) = new Path(head, tail, if tail = null then 1 else tail.Length + 1)
     new (edge) = new Path (edge, null, 1)
 
-let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : ParserInputGraph<'TokenType>) =
+let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : SimpleInputGraph<'TokenType>) =
     if parserSource.ErrorRulesExists then
         let edges = tokens.Edges |> Seq.map(fun edge -> (edge.Source, edge.Target, edge.Tag)) |> Seq.toList 
         for tokenEdge in edges do
@@ -454,7 +454,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             | Some res -> 
                 try 
                     let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString, isErrorToken = isErrorToken)
-                    tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../data/AbstractRNGLR/DOT/sppf.dot"
+                    tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "./data/AbstractRNGLR/DOT/sppf.dot"
 //
 //                    let gssInitVertices = 
 //                    innerGraph.Edges |> Seq.filter (fun e -> List.exists (fun f -> f = e.Target) finalVList) |> Seq.collect (fun e -> e.Source.processedGssVertices)
@@ -563,7 +563,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 //    val pos : int    
 //    new (_prod, _remainLength, _path, _nonTerm, _pos) = {prod = _prod; remainLength = _remainLength; path = _path; nonTerm = _nonTerm; pos = _pos}
 //    
-//let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : ParserInputGraph<'TokenType>) =    
+//let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : SimpleInputGraph<'TokenType>) =    
 //    
 //    let incomingEdges = new Dictionary<_,_>()
 //    tokens.Vertices |> Seq.iter(fun v -> incomingEdges.Add(v,0))

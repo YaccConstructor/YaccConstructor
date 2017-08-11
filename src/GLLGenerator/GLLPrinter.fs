@@ -5,6 +5,8 @@ open Yard.Generators.Common.FSA
 open Yard.Generators.Common.FSA.Common
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
+open Yard.Generators.Common.InitialConvert
+open Yard.Generators.Common
 
 let getGLLparserSource (fsa : FSA)
              (outFileName : string)
@@ -139,13 +141,25 @@ let getGLLparserSource (fsa : FSA)
     let printNontermCount () =
         println "let private nontermCount = %i" fsa.NontermCount
     
+    let printMultipleInEdges (multipleInEdges : bool []) () =
+        println "let private multipleInEdges = "
+        print "    [|"
+        multipleInEdges
+        |> Array.iteri (fun i st -> 
+            if st then print "true"
+            else print "false"
+            if i <> multipleInEdges.Length - 1
+            then print "; ")
+        println "|]"
+     
+
     let printParser () =
-        println "let parserSource = new ParserSourceGLL (outNonterms, startState, finalStates, nontermCount, terminalNums, intToString, anyNonterm, stateAndTokenToNewState,stringToToken)"
+        println "let parserSource = new ParserSourceGLL (outNonterms, startState, finalStates, nontermCount, terminalNums, intToString, anyNonterm, stateAndTokenToNewState,stringToToken, multipleInEdges)"
 
     let printFun isAbstract () =
         if isAbstract
         then
-            println "let buildAbstract : (AbstractAnalysis.Common.BioParserInputGraph -> ParserCommon.ParseResult<_>) ="
+            println "let buildAbstract : (AbstractAnalysis.Common.BioSimpleInputGraph -> ParserCommon.ParseResult<_>) ="
             println "    Yard.Generators.GLL.AbstractParserWithoutTree.buildAbstract parserSource"
         else
             println "let buildAST (input : seq<int>) ="
@@ -181,6 +195,19 @@ let getGLLparserSource (fsa : FSA)
             match x with
             | Some i -> i.Key
             | _ -> -1<positionInGrammar>)
+
+    let multipleInEdges = 
+        let inEdgesCount = Array.zeroCreate fsa.States.Length
+
+        fsa.States
+        |> Array.iter (fun edges -> 
+            edges
+            |> Array.iter (fun (_,nextState) -> 
+                inEdgesCount.[int nextState] <- inEdgesCount.[int nextState] + 1))
+
+        inEdgesCount
+        |> Array.map (fun x -> x > 1)
+
     
     let printItem printer = 
         printer ()
@@ -200,22 +227,40 @@ let getGLLparserSource (fsa : FSA)
         printItem printStartState
         printItem printFinalStates
         printItem printNontermCount
+        printItem (printMultipleInEdges multipleInEdges)
         printItem printParser
     //printItem (printFun isAbstract)
 
     let terminalNums = new HashSet<_>(stringToToken.Values)
     let stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int, int<positionInGrammar>>()
     for state, token, newState in stateTokenNewState do
-        stateAndTokenToNewState.Add((pack state token), newState)
+        let packed = pack state token
+        let cond, _ = stateAndTokenToNewState.TryGetValue(packed)
+        if cond then failwith "multiple transitions by one terminal"
+        stateAndTokenToNewState.Add(packed, newState)
 
     let intToString = new Dictionary<int, string>()
     
     for tokenNumber in stringToToken do
+        let cond, _ = intToString.TryGetValue(int tokenNumber.Value)
+        if cond then failwith "multiple terminal names for one int"
         intToString.Add(int tokenNumber.Value, tokenNumber.Key)
         
     for numberNonterm in sortedStateToNontermName do
+        let cond, _ = intToString.TryGetValue(int numberNonterm.Key)
+        if cond then failwith "multiple nonterminal names for one state"
         intToString.Add(int numberNonterm.Key, numberNonterm.Value)
 
+    let rightSideToRule = 
+        try
+            let newRuleList = fsa.RuleList |> convertRules
+            let indexator = new Indexator(newRuleList, true)
+            let numberredRules = new NumberedRules(newRuleList, indexator, true)
+            numberredRules.rightSideToRule
+        with
+            | ex ->
+                printfn "It would not be possible to use translation because not having some necessary conversions in grammar"
+                fun _ -> failwith "Bad grammar"
     let parserSource = new ParserSourceGLL(fsaStatesOutNonterms
                                          , fsa.StartState
                                          , fsa.FinalStates
@@ -224,7 +269,9 @@ let getGLLparserSource (fsa : FSA)
                                          , intToString
                                          , (int anyNonterm)* 1<positionInGrammar>
                                          , stateAndTokenToNewState
-                                         , stringToToken)
+                                         , stringToToken
+                                         , multipleInEdges
+                                         , rightSideToRule=rightSideToRule)
 
 
     res, parserSource

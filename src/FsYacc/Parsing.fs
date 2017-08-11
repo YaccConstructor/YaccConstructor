@@ -2,12 +2,13 @@
 
 #if INTERNALIZED_POWER_PACK
 
-namespace  Internal.Utilities.Text.Parsing
+namespace Internal.Utilities.Text.Parsing
 open Internal.Utilities
 open Internal.Utilities.Text.Lexing
 
 #else
 namespace Microsoft.FSharp.Text.Parsing
+open Microsoft.FSharp
 open Microsoft.FSharp.Text.Lexing
 #endif
 

@@ -14,10 +14,10 @@ open System
 let transform x = (x, match x with |Smbl(y:char, _) when y <> (char 65535) -> Smbl(int y) |Smbl(y:char, _) when y = (char 65535) -> Smbl 65535 |_ -> Eps)
 let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
      
-let TokenizationTest graph eCount vCount  =
+let TokenizationTest graph eCount vCount tagToToken =
     let graphFsa = approximateQG(graph)
     let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
-    let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphFst       
+    let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphFst tagToToken
     match res with
     | Success res -> 
                 //ToDot res @"../../../src/AbstractLexer.Interpreter.Tests/Tests/TestInterpretParser.dot" (printBref printSmbString)

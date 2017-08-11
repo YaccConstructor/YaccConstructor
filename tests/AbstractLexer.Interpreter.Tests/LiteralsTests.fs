@@ -10,22 +10,21 @@ open YC.FST.AbstractLexing.Tests.CommonTestChecker
 open QuickGraph.FSA.GraphBasedFsa
 open System
 
-let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"
+let baseInputGraphsPath = "../../../tests/data/AbstractLexing/DOT"
 
 let transform x = (x, match x with |Smbl(y:char, _) when y <> (char 65535) -> Smbl(int y) |Smbl(y:char, _) when y = (char 65535) -> Smbl 65535 |_ -> Eps)
 let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
   
-let literalsTokenizationTest file eCount vCount pathPrint =
+let literalsTokenizationTest file eCount vCount pathPrint tagToToken =
     let graph = loadDotToQG (path baseInputGraphsPath file)
     let graphFsa = approximateQG(graph)
     let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
-    let res = YC.FST.AbstractLexing.LiteralsLexer.tokenize eof graphFst
+    let res = YC.FST.AbstractLexing.LiteralsLexer.tokenize eof graphFst tagToToken
     match res with
     | Success res -> checkGraph res eCount vCount  
     | Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" file e)
 
 [<TestFixture>]
-[<Ignore("Temporarily disabled for branches merge")>]
 type ``Lexer Literals Fst Tests`` () =   
     [<Test>]  
     member this.``Literals. Simple.`` () =

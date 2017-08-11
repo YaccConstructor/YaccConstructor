@@ -108,7 +108,7 @@ type ParseResult<'a> =
 
 type TypeOfNode = 
     | Nonterm of int<positionInGrammar>
-    | Intermed of int<positionInGrammar>
+    | Intermed of int<positionInGrammar> * int<positionInGrammar>
 
 [<Struct>]
 type ResultStruct =

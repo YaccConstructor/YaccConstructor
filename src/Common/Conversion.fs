@@ -15,12 +15,7 @@
 namespace Yard.Core
 
 open Yard.Core.IL
-open Mono.Addins
 
-[<assembly:AddinRoot ("YaccConstructor", "1.0")>]
-do()
-
-[<TypeExtensionPoint>]
 [<AbstractClass>]
 type Conversion() = //as this =
     abstract Name : string

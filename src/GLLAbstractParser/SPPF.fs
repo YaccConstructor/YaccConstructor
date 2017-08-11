@@ -9,35 +9,9 @@ open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
 open Yard.Generators.Common.ASTGLLFSA
-//open YC.GLL.GSS
+open YC.GLL.GSS
 
-type SPPF(lengthOfInput : int, finalStates : HashSet<int<positionInGrammar>>) =
-    let hashIntermed x y z =
-        x
-        * (lengthOfInput + 1) 
-        * (lengthOfInput + 1)
-        + y
-        * (lengthOfInput + 1)
-        + z
-
-    let hashNonterm x y z = (x
-                                 * (lengthOfInput + 1)
-                                 * (lengthOfInput + 1)
-                                 + y
-                                 * (lengthOfInput + 1)
-                                 + z)
-                                 * -1
-
-    let getKeyForPackedNode x y z w =
-        x
-        * (lengthOfInput + 1)
-        * (lengthOfInput + 1)
-        * (lengthOfInput + 1)
-        + y
-        * (lengthOfInput + 1)
-        * (lengthOfInput + 1)
-        + z * (lengthOfInput + 1)
-        + w
+type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positionInGrammar>>) =
     let dummyNode = -1<nodeMeasure>
     let dummyAST = new TerminalNode(-1<token>, packExtension -1 -1)
     let epsilon = -1<token>
@@ -45,37 +19,69 @@ type SPPF(lengthOfInput : int, finalStates : HashSet<int<positionInGrammar>>) =
         | TreeNode x -> x
         | _ -> failwith "Wrong type"
 
-    let nonTerminalNodes = new Dictionary<int, int<nodeMeasure>>()
-    let packedNodes = new Dictionary<int, int<nodeMeasure>>()
-    let intermidiateNodes = new Dictionary<int, int<nodeMeasure>>()
-    let terminalNodes = new BlockResizeArray<int<nodeMeasure>>()
-    let epsilonNodes = new BlockResizeArray<int<nodeMeasure>>()
-    member this.Nodes = new BlockResizeArray<INode>()
+    let nonTerminalNodes = new Dictionary<int64<extension>, Dictionary<int<positionInGrammar>,int<nodeMeasure>>>()
+    let intermidiateNodes = new Dictionary<int64<extension>, Dictionary<int<positionInGrammar> * int<positionInGrammar>, int<nodeMeasure>>>()
+    let terminalNodes = new Dictionary<int64<extension>, Dictionary<int<token>,int<nodeMeasure>>>()
+    let epsilonNodes = new Dictionary<int, int<nodeMeasure>>()
+    let nodes = new BlockResizeArray<INode>()
+
+    member this.Nodes = nodes
+    member this.TerminalNodes = terminalNodes
+    member this.NonTerminalNodes = nonTerminalNodes
+    member this.IntermidiateNodes = intermidiateNodes
+    member this.EpsilonNodes = epsilonNodes
+
+    member this.GetTerminalNodes = 
+        this.Nodes |> Seq.filter (fun x -> x :? TerminalNode) |> Seq.cast<TerminalNode>
 
     member this.FindSppfNode (t : TypeOfNode) lExt rExt : int<nodeMeasure> =
         match t with 
         | Nonterm state ->
-            let key = hashNonterm lExt rExt (int state)
-            let contains, n = nonTerminalNodes.TryGetValue key
+            let hash = packExtension lExt rExt 
+            let contains, n = this.NonTerminalNodes.TryGetValue hash
             if not contains
             then
-                let newNode = new NonTerminalNode(state, (packExtension lExt rExt))
+                let dict1 = new Dictionary<_,_>()
+                let newNode = new NonTerminalNode(state, (packExtension lExt rExt)) 
+                let num = this.Nodes.Length *1<nodeMeasure>
+                dict1.Add(state,num)
                 this.Nodes.Add(newNode)
-                let num = (this.Nodes.Length - 1)*1<nodeMeasure>
-                nonTerminalNodes.Add(key, num)
+                this.NonTerminalNodes.Add(hash, dict1)
                 num
-            else n
-        | Intermed state -> 
-            let key = hashIntermed lExt rExt (int state)
-            let contains, n = intermidiateNodes.TryGetValue key
+            else
+                let cont, n1 = n.TryGetValue state
+                if not cont
+                then
+                    let newNode = new NonTerminalNode(state, (packExtension lExt rExt)) 
+                    let num = this.Nodes.Length *1<nodeMeasure>
+                    this.Nodes.Add(newNode)
+                    n.Add(state, num)
+                    num
+                else
+                    n1
+        | Intermed (state, nonterm) -> 
+            let hash = packExtension lExt rExt
+            let contains, n = this.IntermidiateNodes.TryGetValue hash
             if not contains
             then
-                let newNode = new IntermidiateNode(state, (packExtension lExt rExt))
+                let dict1 = new Dictionary<_,_>()
+                let newNode = new IntermidiateNode(state, nonterm, (packExtension lExt rExt))
                 this.Nodes.Add(newNode)
                 let num = (this.Nodes.Length - 1)*1<nodeMeasure>
-                intermidiateNodes.Add(key, num)
+                dict1.Add((state,nonterm), num)
+                this.IntermidiateNodes.Add(hash, dict1)
                 num  
-            else n
+            else
+                let cont, n1 = n.TryGetValue((state, nonterm))
+                if not cont
+                then
+                    let newNode = new IntermidiateNode(state, nonterm, (packExtension lExt rExt))
+                    this.Nodes.Add(newNode)
+                    let num = (this.Nodes.Length - 1)*1<nodeMeasure>
+                    n.Add((state, nonterm), num)
+                    num  
+                else
+                    n1
 
     member this.FindSppfPackedNode parent (state : int<positionInGrammar>) leftExtension rightExtension (left : INode) (right : INode) =
         let createNode () =
@@ -92,33 +98,47 @@ type SPPF(lengthOfInput : int, finalStates : HashSet<int<positionInGrammar>>) =
                 i.AddChild newNode
             | _ -> failwith "adjf;sawf"
             num
+        
         let newNode = createNode()
-        newNode 
-    
+        newNode
 
-    member this.GetNodeT (symbol : int<token>) (pos : int<positionInInput>) =
-        let index = int pos
+    member this.GetNodeT (symbol : int<token>) (pos : int<positionInInput>) (nextPos : int<positionInInput>) =
+        let index = int pos + 1
         if symbol = epsilon
         then
-            if epsilonNodes.Item index <> Unchecked.defaultof<int<nodeMeasure>>
+            let contains, v = this.EpsilonNodes.TryGetValue index
+            if not contains
             then
-                TreeNode(epsilonNodes.Item index)
-            else
-                let t = new EpsilonNode(packExtension index index)
+                let t = new EpsilonNode(packExtension pos pos)
+                let res = this.Nodes.Length *1<nodeMeasure>
                 this.Nodes.Add t
-                let res = this.Nodes.Length - 1
-                epsilonNodes.[index] <- ((this.Nodes.Length - 1)*1<nodeMeasure>)
-                TreeNode(res * 1<nodeMeasure>)
+                this.EpsilonNodes.Add(index, res)
+                TreeNode(res)
+            else
+                TreeNode(v)
         else
-            if terminalNodes.Item index <> Unchecked.defaultof<int<nodeMeasure>>
+            let hash = packExtension index (int nextPos + 1)
+            let contains, v = this.TerminalNodes.TryGetValue hash
+            if not contains
             then
-                TreeNode(terminalNodes.Item index)
-            else
-                let t = new TerminalNode(symbol, packExtension index (index + 1))
+                let dict1 = new Dictionary<_,_>()
+                let t = new TerminalNode(symbol, packExtension pos nextPos)
+                let res = this.Nodes.Length *1<nodeMeasure>
+                dict1.Add(symbol, res)
                 this.Nodes.Add t
-                let res = this.Nodes.Length - 1
-                terminalNodes.[index] <- ((this.Nodes.Length - 1)*1<nodeMeasure>)
-                TreeNode(res * 1<nodeMeasure>)
+                this.TerminalNodes.Add(hash, dict1)
+                TreeNode(res)
+            else
+                let cont, v1 = v.TryGetValue symbol
+                if not cont
+                then
+                    let t = new TerminalNode(symbol, packExtension pos nextPos)
+                    let res = this.Nodes.Length *1<nodeMeasure>
+                    this.Nodes.Add t
+                    v.Add(symbol, res)
+                    TreeNode(res)
+                else
+                    TreeNode(v1)
     
     member this.GetNodeP (state : int<positionInGrammar>) (t : TypeOfNode) currentN currentR = 
         let currR = this.Nodes.Item (int currentR)
@@ -129,7 +149,7 @@ type SPPF(lengthOfInput : int, finalStates : HashSet<int<positionInGrammar>>) =
         then
             let currL = this.Nodes.Item (int currentN)
             let extL = currL.getExtension ()
-            let lExtL, _ = getLeftExtension extL, getRightExtension extL
+            let lExtL = getLeftExtension extL//, getRightExtension extL
             let y = this.FindSppfNode t lExtL rExtR
             let extra = this.FindSppfPackedNode y state extL extR currL currR
             if extra = -1<nodeMeasure> then failwith "boom"
@@ -140,18 +160,18 @@ type SPPF(lengthOfInput : int, finalStates : HashSet<int<positionInGrammar>>) =
             if extra = -1<nodeMeasure> then failwith "boom"
             TreeNode(y)
 
-    member this.GetNodes state nontermState (dataCurrentN : ParseData) (dataCurrentR : ParseData) = 
+    member this.GetNodes posInGrammar stateOfCurrentNonterm (dataCurrentN : ParseData) (dataCurrentR : ParseData) = 
         let currentN = unpackNode dataCurrentN
         let currentR = unpackNode dataCurrentR
 
-        let x = 
-            if state |> finalStates.Contains
+        let nontermNode = 
+            if posInGrammar |> finalStates.Contains
             then
-                this.GetNodeP state (Nonterm nontermState) currentN currentR
+                this.GetNodeP posInGrammar (Nonterm stateOfCurrentNonterm) currentN currentR
             else
                 TreeNode(dummyNode)
 
-        let y =
+        let otherNode =
             let isCurrentRNontermAndItsExtentsEqual = 
                 match this.Nodes.Item (int currentR) with
                 | :? NonTerminalNode as n ->
@@ -162,5 +182,54 @@ type SPPF(lengthOfInput : int, finalStates : HashSet<int<positionInGrammar>>) =
             then
                 dataCurrentR
             else
-                this.GetNodeP state (Intermed state) currentN currentR
-        y, x
+                this.GetNodeP posInGrammar (Intermed (posInGrammar, stateOfCurrentNonterm)) currentN currentR
+        otherNode, nontermNode
+
+    member this.GetRoots (gss : GSS) startPosition = 
+        let gssRoot = 
+            gss.Vertices
+            |> Seq.filter (fun vert -> vert.Nonterm = startState && vert.PositionInInput = startPosition)
+            |> (fun x -> (Array.ofSeq x).[0])
+        
+        gssRoot.P.SetP
+        |> Seq.map (fun x -> match x.data with
+                             | TreeNode n -> this.Nodes.Item (int n)
+                             | _ -> failwith "wrongType")
+        |> Seq.sortByDescending(fun x -> getRightExtension(x.getExtension()) )
+        |> Array.ofSeq
+        //|> (fun x -> [|x.[0]|])
+
+    member this.GetNonTermByName name (ps : ParserSourceGLL) = 
+        let token = ps.NameToId.Item name
+        this.Nodes 
+        |> Seq.filter (fun x -> x :? NonTerminalNode) 
+        |> Seq.cast<NonTerminalNode> 
+        |> Seq.filter (fun x -> x.Name.Equals token)
+
+    member this.Iterate (s : seq<NonTerminalNode>) (ps : ParserSourceGLL) maxLength = 
+        let queue = new Queue<INode>()
+        let length = ref 0
+       
+        Seq.iter (fun x -> queue.Enqueue x) s
+        seq {
+            while queue.Count > 0 && length.Value < maxLength do
+                let h = queue.Dequeue()
+                match h with
+                | :? NonTerminalNode as nt -> queue.Enqueue(nt.First)
+                                              if nt.Others <> null
+                                              then nt.Others.ForEach(fun x -> queue.Enqueue(x))
+                | :? IntermidiateNode as interm -> queue.Enqueue(interm.First)
+                                                   if interm.Others <> null
+                                                   then interm.Others.ForEach(fun x -> queue.Enqueue(x))
+                | :? PackedNode as packed-> queue.Enqueue packed.Left
+                                            queue.Enqueue packed.Right
+                | :? TerminalNode as term -> if term.Name <> -1<token>
+                                             then incr length
+                                                  yield (ps.IntToString.Item (int term.Name)), getLeftExtension term.Extension, getRightExtension term.Extension
+                | :? EpsilonNode as eps -> ()
+                | x -> failwithf "Strange type of node: %A" x.GetType
+        }
+
+
+let GetTerminals (sppf : SPPF) = 
+    sppf.GetTerminalNodes |> Seq.map (fun x -> x.Name, getLeftExtension x.Extension, getRightExtension x.Extension)

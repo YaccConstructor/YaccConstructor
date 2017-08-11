@@ -26,26 +26,32 @@ open Yard.Core.IL.Definition
 open Yard.Core.Helpers
 open Conversions.TransformAux
 open NUnit.Framework
-open Mono.Addins
+open Yard.Core.Conversions
+open Yard.Frontends.YardFrontend
+open Yard.Frontends.FsYaccFrontend
+open Yard.Generators.GLL
+open Yard.Generators.RNGLR
+open Yard.Generators.TreeDump
+open Yard.Generators.YardPrinter
+open Yard.Generators.RIGLRGenerator
 
 let dummyPos s = new Source.t(s)
 let dummyToken s = PToken <| new Source.t(s)
 
 exception FEError of string
 
-[<assembly:AddinRoot ("YaccConstructor", "1.0")>]
-do()
+let ConversionsManager = [|new AddDefaultAC.AddDefaultAC(), new AddEOF.AddEOF(), new BuildAST.BuildAST(), new BuildAstSimple.BuildAstSimple(), new ToCNF.ToCNF(),
+                            new ToCNF.DeleteChainRule(), new ToCNF.DeleteEpsRule(), new ToCNF.SplitLongRule(), new ToCNF.RenameTerm(), new EliminateLeftRecursion.EliminateLeftRecursion(),
+                            new ExpandTopLevelAlt.ExpandTopLevelAlt(), new ExpandBrackets.ExpandBrackets(), new ExpandEbnfStrict.ExpandEbnf(), new ExpandInnerAlt.ExpandInnerAlt(),
+                            new ExpandMeta.ExpandMeta(), new LeaveLast.LeaveLast(), new MergeAlter.MergeAlter(), new RemoveAST.RemoveAC(), new ExpandInline.ReplaceInline()
+                            , new ReplaceLiterals.ReplaceLiterals(), new Linearize.Linearize(), new ExpandRepet.ExpandExpand(), new ExpandConjunction.ExpandConjunction()|] 
+                            |> Seq.ofArray |> Seq.cast<Conversion>
 
-[<OneTimeSetUp>]
-let f () = 
-    AddinManager.Initialize()    
-    AddinManager.Registry.Update(null)
+let FrontendsManager = [|new FsYaccFrontend(), new YardFrontend()|] |> Seq.ofArray |> Seq.cast<Frontend>
 
-let ConversionsManager = AddinManager.GetExtensionObjects (typeof<Conversion>) |> Seq.cast<Conversion>
-let FrontendsManager = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
+let conversionTestPath = @"./data/Conversions/"
+let GeneratorsManager = [|new GLL(), new RNGLR(), new TreeDump(), new YardPrinter(), new RIGLR()|] |> Seq.ofArray |> Seq.cast<Generator>
 
-let conversionTestPath = @"../../../data/Conversions/"
-let GeneratorsManager = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator>
 
 let getFrontend name =       
     match Seq.tryFind (fun (elem : Frontend) -> elem.Name = name) FrontendsManager with
@@ -73,7 +79,11 @@ let conversionLongRules = new Conversions.ToCNF.SplitLongRule()
 let conversionEps = new Conversions.ToCNF.DeleteEpsRule()
 let conversionChain = new Conversions.ToCNF.DeleteChainRule()
 let conversionRenamer = new Conversions.ToCNF.RenameTerm()
-let conversionCNF = new Conversions.ToCNF.ToCNF()
+//let conversionCNF = new Conversions.ToCNF.ToCNF()
+let conversionCNF = new Conversions.CNFandBNF.CNF()
+let conversionBNFconj = new Conversions.CNFandBNF.BNFconj()
+let conversionBNFbool = new Conversions.CNFandBNF.BNFbool()
+
 
 let applyConversion (conversion:Conversion) loadIL = 
     {
@@ -81,7 +91,7 @@ let applyConversion (conversion:Conversion) loadIL =
             with grammar = conversion.ConvertGrammar (loadIL.grammar, [||])                               
     }
 
-let fe = getFrontend("YardFrontend")
+let fe = new YardFrontend()
 let runTest inputFile conversion expectedResult =
     let loadIL = fe.ParseGrammar inputFile
     Namer.initNamer loadIL.grammar
@@ -92,24 +102,27 @@ let runTest inputFile conversion expectedResult =
     printfn "%s" "************************"
     result |> treeDump.Generate |> string |> printfn "%s"
 #endif
+    printfn "!!! %A" (ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
     Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
 
+let runTest2 inputFile conversion expectedResult =
+    let loadIL = fe.ParseGrammar inputFile
+    Namer.initNamer loadIL.grammar
+    let result = loadIL |> applyConversion conversion
+    let r = sprintf "%A" result.grammar.[0].rules
+    Assert.IsTrue((expectedResult = r))
+
 [<TestFixture>]
-[<Ignore("Temporarily disabled for branches merge")>]
 type ``Conversions tests`` () =
     
     [<Test>]
     member test.``ExpandBrackets. Sequence as sequence element test.``()=
-        AddinManager.Initialize()
         //let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager() 
-        let FrontendsManager = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
-        let frontend =
-            match Seq.tryFind (fun (elem : Frontend) -> elem.Name = "YardFrontend") FrontendsManager with
-               | Some fron -> fron
-               | None -> failwith "YardFrontend is not found."         
+        let frontend = new YardFrontend()
         let ilTree = 
             System.IO.Path.Combine(conversionTestPath,"expandbrackets_1.yrd")
             |> frontend.ParseGrammar
+
         Namer.initNamer ilTree.grammar
         let ilTreeConverted = 
             ilTree 
@@ -133,10 +146,7 @@ type ``Conversions tests`` () =
                 )
             
 #if DEBUG
-        let generator = 
-           match Seq.tryFind (fun (elem : Generator) -> elem.Name = "TreeDump") GeneratorsManager with
-           | Some gen -> gen    
-           | None -> failwith "TreeDump is not found."
+        let generator = new TreeDump()
         printfn "%A\n" (generator.Generate(ilTreeConverted,true))
 #endif
 
@@ -145,7 +155,6 @@ type ``Conversions tests`` () =
         Assert.True(hasNotInnerSeq)
    
 [<TestFixture>]
-[<Ignore("Temporarily disabled for branches merge")>]
 type ``Expand top level alters`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "ExpandTopLevelAlters")
     let path f = System.IO.Path.Combine(basePath, f)

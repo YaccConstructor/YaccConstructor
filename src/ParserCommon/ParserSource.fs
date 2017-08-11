@@ -12,11 +12,13 @@ type ParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<positi
                      , anyNonterm         : int<positionInGrammar>
                      , stateAndTokenToNewState : Dictionary<int, int<positionInGrammar>>
                      , stringToToken      : Dictionary<string,int<token>>
+                     , multipleInEdges    : bool []
+                     , ?rightSideToRule   : string -> int
                      ) =
 
     let getTermsDictionaryKey (state: int<positionInGrammar>) token = 
         int( (int state <<< 16) ||| (token - outNonterms.Length) )
-
+    
     let strToToken str = 
         let isExist, value = stringToToken.TryGetValue(str)
         if isExist
@@ -24,6 +26,9 @@ type ParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<positi
             value
         else
             failwith "Such string is not in a grammar alphabet."
+
+    let rev (map : Map<int, string>) = 
+            Map.fold(fun (m : Map<string, int>) k v -> m.Add(v, k)) Map.empty map
 
     member this.OutNonterms             = outNonterms
     member this.FinalStates             = finalStates
@@ -35,3 +40,8 @@ type ParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<positi
     member this.AnyNonterm              = anyNonterm
     member this.StateAndTokenToNewState = stateAndTokenToNewState
     member this.StringToToken           = strToToken
+    member this.MultipleInEdges         = multipleInEdges
+    member this.RightSideToRule         = rightSideToRule.Value
+
+    member this.NameToId = 
+        rev (this.IntToString |> Seq.map (|KeyValue|)|> Map.ofSeq)

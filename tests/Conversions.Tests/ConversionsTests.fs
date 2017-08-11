@@ -110,7 +110,7 @@ let runTest2 inputFile conversion expectedResult =
     Namer.initNamer loadIL.grammar
     let result = loadIL |> applyConversion conversion
     let r = sprintf "%A" result.grammar.[0].rules
-    Assert.IsTrue((expectedResult = r))
+    Assert.AreEqual(expectedResult, r)
 
 [<TestFixture>]
 type ``Conversions tests`` () =

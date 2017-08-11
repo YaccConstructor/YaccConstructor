@@ -1,3 +1,6 @@
+### 0.2.0.0-alpha2
+* Huge amount of technical changes.
+
 ### 0.2.0.0-alpha1
 * GLL reworked!!!
 

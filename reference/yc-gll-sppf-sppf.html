@@ -51,11 +51,11 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '314', 314)" onmouseover="showTip(event, '314', 314)">
-            new(lengthOfInput, finalStates)
+          <code onmouseout="hideTip(event, '387', 387)" onmouseover="showTip(event, '387', 387)">
+            new(startState, finalStates)
           </code>
-          <div class="tip" id="314">
-            <strong>Signature:</strong> (lengthOfInput:int * finalStates:HashSet&lt;int&lt;MeasureProduct&lt;positionInGrammar,MeasureOne&gt;&gt;&gt;) -&gt; SPPF<br />
+          <div class="tip" id="387">
+            <strong>Signature:</strong> (startState:int&lt;MeasureProduct&lt;positionInGrammar,MeasureOne&gt;&gt; * finalStates:HashSet&lt;int&lt;MeasureProduct&lt;positionInGrammar,MeasureOne&gt;&gt;&gt;) -&gt; SPPF<br />
                       </div>
         </td>
         <td class="xmldoc">
@@ -78,15 +78,34 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '315', 315)" onmouseover="showTip(event, '315', 315)">
+          <code onmouseout="hideTip(event, '388', 388)" onmouseover="showTip(event, '388', 388)">
+            EpsilonNodes
+          </code>
+          <div class="tip" id="388">
+            <strong>Signature:</strong> Dictionary&lt;int,int&lt;MeasureProduct&lt;nodeMeasure,MeasureOne&gt;&gt;&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L32-32" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_EpsilonNodes</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '389', 389)" onmouseover="showTip(event, '389', 389)">
             FindSppfNode(t lExt rExt)
           </code>
-          <div class="tip" id="315">
+          <div class="tip" id="389">
             <strong>Signature:</strong> t:TypeOfNode -&gt; lExt:int -&gt; rExt:int -&gt; int&lt;MeasureProduct&lt;nodeMeasure,MeasureOne&gt;&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L55-55" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L37-37" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -96,15 +115,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '316', 316)" onmouseover="showTip(event, '316', 316)">
+          <code onmouseout="hideTip(event, '390', 390)" onmouseover="showTip(event, '390', 390)">
             FindSppfPackedNode(...)
           </code>
-          <div class="tip" id="316">
-            <strong>Signature:</strong> parent:int&lt;MeasureProduct&lt;nodeMeasure,MeasureOne&gt;&gt; -&gt; state:int&lt;MeasureProduct&lt;positionInGrammar,MeasureOne&gt;&gt; -&gt; leftExtension:&#39;?9030 -&gt; rightExtension:&#39;?9031 -&gt; left:INode -&gt; right:INode -&gt; int&lt;MeasureProduct&lt;nodeMeasure,MeasureOne&gt;&gt;<br />
-                          <strong>Type parameters:</strong> '?9030, '?9031          </div>
+          <div class="tip" id="390">
+            <strong>Signature:</strong> parent:int&lt;MeasureProduct&lt;nodeMeasure,MeasureOne&gt;&gt; -&gt; state:int&lt;MeasureProduct&lt;positionInGrammar,MeasureOne&gt;&gt; -&gt; leftExtension:&#39;?9302 -&gt; rightExtension:&#39;?9303 -&gt; left:INode -&gt; right:INode -&gt; int&lt;MeasureProduct&lt;nodeMeasure,MeasureOne&gt;&gt;<br />
+                          <strong>Type parameters:</strong> '?9302, '?9303          </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L80-80" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L86-86" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -114,29 +133,11 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '317', 317)" onmouseover="showTip(event, '317', 317)">
+          <code onmouseout="hideTip(event, '391', 391)" onmouseover="showTip(event, '391', 391)">
             GetNodeP(state t currentN currentR)
           </code>
-          <div class="tip" id="317">
+          <div class="tip" id="391">
             <strong>Signature:</strong> state:int&lt;MeasureProduct&lt;positionInGrammar,MeasureOne&gt;&gt; -&gt; t:TypeOfNode -&gt; currentN:int&lt;MeasureProduct&lt;nodeMeasure,MeasureOne&gt;&gt; -&gt; currentR:int&lt;MeasureProduct&lt;nodeMeasure,MeasureOne&gt;&gt; -&gt; ParseData<br />
-                      </div>
-        </td>
-        <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L123-123" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '318', 318)" onmouseover="showTip(event, '318', 318)">
-            GetNodes(...)
-          </code>
-          <div class="tip" id="318">
-            <strong>Signature:</strong> state:int&lt;MeasureProduct&lt;positionInGrammar,MeasureOne&gt;&gt; -&gt; nontermState:int&lt;MeasureProduct&lt;positionInGrammar,MeasureOne&gt;&gt; -&gt; dataCurrentN:ParseData -&gt; dataCurrentR:ParseData -&gt; ParseData * ParseData<br />
                       </div>
         </td>
         <td class="xmldoc">
@@ -150,15 +151,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '319', 319)" onmouseover="showTip(event, '319', 319)">
-            GetNodeT(symbol pos)
+          <code onmouseout="hideTip(event, '392', 392)" onmouseover="showTip(event, '392', 392)">
+            GetNodes(...)
           </code>
-          <div class="tip" id="319">
-            <strong>Signature:</strong> symbol:int&lt;MeasureProduct&lt;token,MeasureOne&gt;&gt; -&gt; pos:int&lt;MeasureProduct&lt;positionInInput,MeasureOne&gt;&gt; -&gt; ParseData<br />
+          <div class="tip" id="392">
+            <strong>Signature:</strong> posInGrammar:int&lt;MeasureProduct&lt;positionInGrammar,MeasureOne&gt;&gt; -&gt; stateOfCurrentNonterm:int&lt;MeasureProduct&lt;positionInGrammar,MeasureOne&gt;&gt; -&gt; dataCurrentN:ParseData -&gt; dataCurrentR:ParseData -&gt; ParseData * ParseData<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L99-99" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L163-163" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -168,20 +169,168 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '320', 320)" onmouseover="showTip(event, '320', 320)">
+          <code onmouseout="hideTip(event, '393', 393)" onmouseover="showTip(event, '393', 393)">
+            GetNodeT(symbol pos nextPos)
+          </code>
+          <div class="tip" id="393">
+            <strong>Signature:</strong> symbol:int&lt;MeasureProduct&lt;token,MeasureOne&gt;&gt; -&gt; pos:int&lt;MeasureProduct&lt;positionInInput,MeasureOne&gt;&gt; -&gt; nextPos:int&lt;MeasureProduct&lt;positionInInput,MeasureOne&gt;&gt; -&gt; ParseData<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L105-105" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '394', 394)" onmouseover="showTip(event, '394', 394)">
+            GetNonTermByName(name ps)
+          </code>
+          <div class="tip" id="394">
+            <strong>Signature:</strong> name:string -&gt; ps:ParserSourceGLL -&gt; seq&lt;NonTerminalNode&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L202-202" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '395', 395)" onmouseover="showTip(event, '395', 395)">
+            GetRoots(gss startPosition)
+          </code>
+          <div class="tip" id="395">
+            <strong>Signature:</strong> gss:GSS -&gt; startPosition:int&lt;MeasureProduct&lt;positionInInput,MeasureOne&gt;&gt; -&gt; INode []<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L188-188" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '396', 396)" onmouseover="showTip(event, '396', 396)">
+            GetTerminalNodes
+          </code>
+          <div class="tip" id="396">
+            <strong>Signature:</strong> seq&lt;TerminalNode&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L34-34" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_GetTerminalNodes</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '397', 397)" onmouseover="showTip(event, '397', 397)">
+            IntermidiateNodes
+          </code>
+          <div class="tip" id="397">
+            <strong>Signature:</strong> Dictionary&lt;int64&lt;MeasureProduct&lt;extension,MeasureOne&gt;&gt;,Dictionary&lt;(int&lt;MeasureProduct&lt;positionInGrammar,MeasureOne&gt;&gt; * int&lt;MeasureProduct&lt;positionInGrammar,MeasureOne&gt;&gt;),int&lt;MeasureProduct&lt;nodeMeasure,MeasureOne&gt;&gt;&gt;&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L31-31" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_IntermidiateNodes</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '398', 398)" onmouseover="showTip(event, '398', 398)">
+            Iterate(s ps maxLength)
+          </code>
+          <div class="tip" id="398">
+            <strong>Signature:</strong> s:seq&lt;NonTerminalNode&gt; -&gt; ps:ParserSourceGLL -&gt; maxLength:int -&gt; seq&lt;string * int * int&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L209-209" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '399', 399)" onmouseover="showTip(event, '399', 399)">
             Nodes
           </code>
-          <div class="tip" id="320">
+          <div class="tip" id="399">
             <strong>Signature:</strong> BlockResizeArray&lt;INode&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L53-53" class="github-link">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L28-28" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           
               <p>CompiledName: <code>get_Nodes</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '400', 400)" onmouseover="showTip(event, '400', 400)">
+            NonTerminalNodes
+          </code>
+          <div class="tip" id="400">
+            <strong>Signature:</strong> Dictionary&lt;int64&lt;MeasureProduct&lt;extension,MeasureOne&gt;&gt;,Dictionary&lt;int&lt;MeasureProduct&lt;positionInGrammar,MeasureOne&gt;&gt;,int&lt;MeasureProduct&lt;nodeMeasure,MeasureOne&gt;&gt;&gt;&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L30-30" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_NonTerminalNodes</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '401', 401)" onmouseover="showTip(event, '401', 401)">
+            TerminalNodes
+          </code>
+          <div class="tip" id="401">
+            <strong>Signature:</strong> Dictionary&lt;int64&lt;MeasureProduct&lt;extension,MeasureOne&gt;&gt;,Dictionary&lt;int&lt;MeasureProduct&lt;token,MeasureOne&gt;&gt;,int&lt;MeasureProduct&lt;nodeMeasure,MeasureOne&gt;&gt;&gt;&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/YaccConstructor/YaccConstructor/tree/master/src/GLLAbstractParser/SPPF.fs#L29-29" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_TerminalNodes</code></p>
         </td>
       </tr>
     </tbody>

@@ -206,7 +206,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         |> Seq.cast<NonTerminalNode> 
         |> Seq.filter (fun x -> x.Name.Equals token)
 
-    member this.Iterate (s : seq<NonTerminalNode>) (ps : ParserSourceGLL) ?maxLength = 
+    member this.Iterate (s : seq<NonTerminalNode>) (ps : ParserSourceGLL) maxLength = 
         let queue = new Queue<INode>()
         let length = ref 0
         let unwrapped = match maxLength with

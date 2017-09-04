@@ -107,7 +107,7 @@ let sppfTest grammarFile inputGraph nonTermName maxLength =
     let preparedGraph = initGraph inputGraph id ps
     let _, sppf, _ = parse ps preparedGraph true
     let nt = sppf.GetNonTermByName nonTermName ps
-    let pathset = sppf.Iterate nt ps (Some maxLength)
+    let pathset = sppf.Iterate(nt, ps, maxLength)
     Assert.AreEqual(maxLength, Seq.length pathset)
 
 [<TestFixture>]

@@ -206,15 +206,15 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         |> Seq.cast<NonTerminalNode> 
         |> Seq.filter (fun x -> x.Name.Equals token)
 
-    member this.Iterate (s : seq<NonTerminalNode>) (ps : ParserSourceGLL) maxLength = 
+    member this.Iterate (s : seq<NonTerminalNode>, ps : ParserSourceGLL, ?maxLength) = 
         let queue = new Queue<INode>()
         let length = ref 0
         let unwrapped = match maxLength with
                         | Some x -> x
                         | None -> -1
-        Seq.iter (fun x -> queue.Enqueue x) s
+        Seq.iter queue.Enqueue s
         seq {
-            while queue.Count > 0 && (unwrapped = -1 || length.Value < unwrapped) do
+            while queue.Count > 0 && (unwrapped = -1 || !length < unwrapped) do
                 let h = queue.Dequeue()
                 match h with
                 | :? NonTerminalNode as nt -> queue.Enqueue(nt.First)

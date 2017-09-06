@@ -206,25 +206,37 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         |> Seq.cast<NonTerminalNode> 
         |> Seq.filter (fun x -> x.Name.Equals token)
 
-    member this.Iterate (s : seq<NonTerminalNode>, ps : ParserSourceGLL, ?maxLength) = 
+    member this.Iterate (s : seq<NonTerminalNode>, ps : ParserSourceGLL, ?maxLength : int, ?searchShortest : bool) = 
         let queue = new Queue<INode>()
+        let used = Seq.empty
         let length = ref 0
         let unwrapped = match maxLength with
                         | Some x -> x
                         | None -> -1
+
+        let shrts = match searchShortest with
+                                      | Some x -> x
+                                      | None -> false
+
         Seq.iter queue.Enqueue s
         seq {
             while queue.Count > 0 && (unwrapped = -1 || !length < unwrapped) do
                 let h = queue.Dequeue()
                 match h with
-                | :? NonTerminalNode as nt -> queue.Enqueue(nt.First)
-                                              if nt.Others <> null
-                                              then nt.Others.ForEach(fun x -> queue.Enqueue(x))
-                | :? IntermidiateNode as interm -> queue.Enqueue(interm.First)
-                                                   if interm.Others <> null
-                                                   then interm.Others.ForEach(fun x -> queue.Enqueue(x))
-                | :? PackedNode as packed-> queue.Enqueue packed.Left
-                                            queue.Enqueue packed.Right
+                | :? NonTerminalNode as nt -> if !shrts && !Seq.exist nt used
+                                              then Seq.append used nt
+                                                   queue.Enqueue(nt.First)
+                                                   if nt.Others <> null
+                                                   then nt.Others.ForEach(fun x -> queue.Enqueue(x))
+                | :? IntermidiateNode as interm -> if !shrts && !Seq.exist interm used
+                                                   then queue.Enqueue(interm.First)
+                                                        Seq.append used interm
+                                                        if interm.Others <> null
+                                                        then interm.Others.ForEach(fun x -> queue.Enqueue(x))
+                | :? PackedNode as packed-> if !shrts && !Seq.exist packed used
+                                            then Seq.append used packed
+                                                 queue.Enqueue packed.Left
+                                                 queue.Enqueue packed.Right
                 | :? TerminalNode as term -> if term.Name <> -1<token>
                                              then incr length
                                                   yield (ps.IntToString.Item (int term.Name)), getLeftExtension term.Extension, getRightExtension term.Extension

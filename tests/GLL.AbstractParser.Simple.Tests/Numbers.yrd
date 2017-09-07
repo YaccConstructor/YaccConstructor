@@ -1,2 +1,2 @@
 [<Start>]
-s: NUM| s '+' s
+s: N | s '+' s

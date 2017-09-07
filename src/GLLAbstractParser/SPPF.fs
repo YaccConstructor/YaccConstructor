@@ -208,33 +208,33 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
 
     member this.Iterate (s : seq<NonTerminalNode>, ps : ParserSourceGLL, ?maxLength : int, ?searchShortest : bool) = 
         let queue = new Queue<INode>()
-        let used = Seq.empty
+        let used = new ResizeArray<INode>()
         let length = ref 0
         let unwrapped = match maxLength with
                         | Some x -> x
                         | None -> -1
 
         let shrts = match searchShortest with
-                                      | Some x -> x
-                                      | None -> false
+                    | Some x -> x
+                    | None -> false
 
         Seq.iter queue.Enqueue s
         seq {
             while queue.Count > 0 && (unwrapped = -1 || !length < unwrapped) do
                 let h = queue.Dequeue()
                 match h with
-                | :? NonTerminalNode as nt -> if !shrts && !Seq.exist nt used
-                                              then Seq.append used nt
+                | :? NonTerminalNode as nt -> if not (used.Contains nt)
+                                              then if shrts then used.Add nt
                                                    queue.Enqueue(nt.First)
                                                    if nt.Others <> null
                                                    then nt.Others.ForEach(fun x -> queue.Enqueue(x))
-                | :? IntermidiateNode as interm -> if !shrts && !Seq.exist interm used
-                                                   then queue.Enqueue(interm.First)
-                                                        Seq.append used interm
+                | :? IntermidiateNode as interm -> if not (used.Contains interm)
+                                                   then if shrts then used.Add interm
+                                                        queue.Enqueue(interm.First)
                                                         if interm.Others <> null
                                                         then interm.Others.ForEach(fun x -> queue.Enqueue(x))
-                | :? PackedNode as packed-> if !shrts && !Seq.exist packed used
-                                            then Seq.append used packed
+                | :? PackedNode as packed-> if not (used.Contains packed)
+                                            then if shrts then used.Add packed
                                                  queue.Enqueue packed.Left
                                                  queue.Enqueue packed.Right
                 | :? TerminalNode as term -> if term.Name <> -1<token>

@@ -102,22 +102,20 @@ let initGraph (graph : IVertexAndEdgeListGraph<_, _>) (edgeTagToString : _ -> st
         simpleGraph.AddVerticesAndEdgeRange(graph.Edges) |> ignore
         simpleGraph
 
-let sppfTest grammarFile inputGraph nonTermName maxLength = 
+let sppfTest grammarFile inputGraph nonTermName maxLength isShortest = 
     let ps = getParserSource grammarFile Seq.empty
     let preparedGraph = initGraph inputGraph id ps
     let _, sppf, _ = parse ps preparedGraph true
     let nt = sppf.GetNonTermByName nonTermName ps
-    let pathset = sppf.Iterate(nt, ps, maxLength)
+    let pathset = sppf.Iterate(nt, ps, maxLength, isShortest)
+    for x in pathset do
+        printfn "%s" (x.ToString())
     Assert.AreEqual(maxLength, Seq.length pathset)
 
 [<TestFixture>]
 type ``GLL abstract parser tests``() =
     [<Test>]
     member this._01_SimpleSPPFTest() = 
-        let vertices = new ResizeArray<int>()
-        vertices.Add(0)
-        vertices.Add(1)
-        vertices.Add(2)
         let edges = new ResizeArray<ParserEdge<string>>()
         edges.Add(new ParserEdge<string>(0, 1, "A"))
         edges.Add(new ParserEdge<string>(1, 0, "A"))
@@ -125,12 +123,11 @@ type ``GLL abstract parser tests``() =
         edges.Add(new ParserEdge<string>(2, 1, "B"))
         let graph = new QuickGraph.AdjacencyGraph<int, ParserEdge<string>>()
         graph.AddVerticesAndEdgeRange edges |> ignore
-        sppfTest "MyBrackets.yrd" graph "s" 100
+        sppfTest "MyBrackets.yrd" graph "s" 100 false
         
 
     [<Test>]
     member this._02_SimpleEpsCycleSPPFTest() =
-        let vertices = [|0; 1; 2; 3; 4; 5|]
         let edges = new ResizeArray<ParserEdge<string>>()
         edges.Add(new ParserEdge<string>(0, 1, "A"))
         edges.Add(new ParserEdge<string>(1, 2, "A"))
@@ -139,7 +136,27 @@ type ``GLL abstract parser tests``() =
         edges.Add(new ParserEdge<string>(4, 5, "C"))
         let graph = new QuickGraph.AdjacencyGraph<int, ParserEdge<string>>()
         graph.AddVerticesAndEdgeRange edges |> ignore
-        sppfTest "EpsCycle.yrd" graph "a" 5
+        sppfTest "EpsCycle.yrd" graph "a" 5 false
+
+    [<Test>]
+    member this._03_SimpleNumbersSPPFTest() =
+        let edges = new ResizeArray<ParserEdge<string>>()
+        edges.Add(new ParserEdge<string>(0, 1, "N"))
+        edges.Add(new ParserEdge<string>(1, 2, "+"))
+        edges.Add(new ParserEdge<string>(2, 3, "N"))
+        edges.Add(new ParserEdge<string>(3, 4, "+"))
+        edges.Add(new ParserEdge<string>(4, 5, "N"))
+        edges.Add(new ParserEdge<string>(5, 6, "+"))
+        edges.Add(new ParserEdge<string>(6, 7, "N"))
+        edges.Add(new ParserEdge<string>(7, 8, "+"))
+        edges.Add(new ParserEdge<string>(8, 9, "N"))
+        edges.Add(new ParserEdge<string>(2, 10, "N"))
+        edges.Add(new ParserEdge<string>(10, 11, "+"))
+        edges.Add(new ParserEdge<string>(11, 7, "N"))
+        edges.Add(new ParserEdge<string>(2, 7, "N"))
+        let graph = new QuickGraph.AdjacencyGraph<int, ParserEdge<string>>()
+        graph.AddVerticesAndEdgeRange edges |> ignore
+        sppfTest "Numbers.yrd" graph "s" 21 true
 
     [<Test>]  
     member this._04_RightRecursionCheck () =

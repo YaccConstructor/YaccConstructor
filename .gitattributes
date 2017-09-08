@@ -9,11 +9,6 @@
 homologene.data.txt filter=lfs diff=lfs merge=lfs -text
 interpro.xml filter=lfs diff=lfs merge=lfs -text
 *.keg filter=lfs diff=lfs merge=lfs -text
-6239.protein.links.v10.txt filter=lfs diff=lfs merge=lfs -text
-7227.protein.links.v10.txt filter=lfs diff=lfs merge=lfs -text
-9606.protein.links.v10.txt filter=lfs diff=lfs merge=lfs -text
-10116.protein.links.v10.txt filter=lfs diff=lfs merge=lfs -text
-10090.protein.links.v10.txt filter=lfs diff=lfs merge=lfs -text
 geneToPath.txt filter=lfs diff=lfs merge=lfs -text
 UniprotToEntrezGene.txt filter=lfs diff=lfs merge=lfs -text
 UniprotToGO.txt filter=lfs diff=lfs merge=lfs -text

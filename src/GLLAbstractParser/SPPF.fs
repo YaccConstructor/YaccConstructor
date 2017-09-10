@@ -206,6 +206,64 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         |> Seq.cast<NonTerminalNode> 
         |> Seq.filter (fun x -> x.Name.Equals token)
 
+    member this.FindAllSubtrees (s : seq<NonTerminalNode>) (ps : ParserSourceGLL) = 
+        let queue = new Queue<INode>()
+        let used = new ResizeArray<INode>()
+        let subtrees = new Dictionary<INode, ResizeArray<string * int * int>>()
+        let ancestors = new Dictionary<INode, INode>()
+        Seq.iter queue.Enqueue s
+        while queue.Count > 0 do 
+            let h = queue.Dequeue()
+            match h with
+            | :? NonTerminalNode as nt -> if not (used.Contains(nt))
+                                            then used.Add(nt)
+                                                 queue.Enqueue(nt.First)
+                                                 if not (ancestors.ContainsKey(nt.First))
+                                                 then ancestors.Add(nt.First, nt.First)
+                                                 subtrees.Add(nt.First, new ResizeArray<string * int * int>())
+                                                 if nt.Others <> null
+                                                 then nt.Others.ForEach(fun x -> queue.Enqueue(x)
+                                                                                 if not (ancestors.ContainsKey(x))
+                                                                                 then ancestors.Add(x, x)
+                                                                                 if not (subtrees.ContainsKey(x))
+                                                                                 then subtrees.Add(x, new ResizeArray<string * int * int>())
+                                                                                )
+                                                 
+
+            | :? IntermidiateNode as interm -> if not (used.Contains(interm))
+                                                then used.Add(interm)
+                                                     let ancestor = ancestors.Item(interm)
+                                                     queue.Enqueue(interm.First)
+                                                     if not (ancestors.ContainsKey(interm.First))
+                                                     then ancestors.Add(interm.First, ancestor)
+                                                     if interm.Others <> null
+                                                     then interm.Others.ForEach(fun x -> queue.Enqueue(x)
+                                                                                         if not (ancestors.ContainsKey(x))
+                                                                                         then ancestors.Add(x, ancestor)
+                                                                                    )
+
+            | :? PackedNode as packed -> if not (used.Contains(packed))
+                                            then used.Add(packed)
+                                                 let ancestor = ancestors.Item(packed)
+                                                 queue.Enqueue(packed.Left)
+                                                 queue.Enqueue(packed.Right)
+                                                 if not (ancestors.ContainsKey(packed.Left))
+                                                 then ancestors.Add(packed.Left, ancestor)
+                                                 if not (ancestors.ContainsKey(packed.Right))
+                                                 then ancestors.Add(packed.Right, ancestor)
+                                                 
+            | :? TerminalNode as term -> if term.Name <> -1<token>
+                                            then used.Add(term)
+                                                 let ancestor = ancestors.Item(term)
+                                                 let newArray = subtrees.Item(ancestor)
+                                                 newArray.Add((ps.IntToString.Item (int term.Name)), getLeftExtension term.Extension, getRightExtension term.Extension)
+                                                 if subtrees.ContainsKey ancestor && subtrees.Remove(ancestor)
+                                                 then subtrees.Add(ancestor, newArray)
+
+            | :? EpsilonNode -> ()
+            | x -> failwithf "Strange type of node: %A" x.GetType
+        subtrees
+
     member this.Iterate (s : seq<NonTerminalNode>, ps : ParserSourceGLL, ?maxLength : int, ?searchShortest : bool) = 
         let queue = new Queue<INode>()
         let used = new ResizeArray<INode>()
@@ -219,6 +277,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                     | None -> false
 
         Seq.iter queue.Enqueue s
+       
         seq {
             while queue.Count > 0 && (unwrapped = -1 || !length < unwrapped) do
                 let h = queue.Dequeue()
@@ -240,7 +299,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 | :? TerminalNode as term -> if term.Name <> -1<token>
                                              then incr length
                                                   yield (ps.IntToString.Item (int term.Name)), getLeftExtension term.Extension, getRightExtension term.Extension
-                | :? EpsilonNode as eps -> ()
+                | :? EpsilonNode -> ()
                 | x -> failwithf "Strange type of node: %A" x.GetType
         }
 

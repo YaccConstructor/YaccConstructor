@@ -130,7 +130,8 @@ and  main = parse
      | '-'  {MINUS <| lex2source lexbuf}
      | ':'  {COLON <| lex2source lexbuf}
      | ';'  {SEMICOLON <| lex2source lexbuf}
-     | ','  {COMMA <| lex2source lexbuf}     
+     | ','  {COMMA <| lex2source lexbuf}
+     | "||" {SHUFFLE <| lex2source lexbuf} 
      | '|'  {BAR <| lex2source lexbuf}
      | '='  {EQUAL <| lex2source lexbuf}     
      | '*'  {STAR <| lex2source lexbuf}

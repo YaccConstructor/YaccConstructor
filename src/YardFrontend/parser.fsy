@@ -107,6 +107,7 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
 %token INCLUDE
 %token SET
 %token AND
+%token SHUFFLE
 %token <IL.Source.t> EOF
 %token <IL.Source.t> STRING LIDENT UIDENT
 %token <IL.Source.t> PREDICATE ACTION
@@ -237,7 +238,7 @@ rule_delim: COLON {$1} | EQUAL {$1}
 
 inline_opt: INLINE { true } | {false}
 
-rule: start_rule_sign_opt access_modifier_opt inline_opt LIDENT formal_meta_param_opt param_list rule_delim alts
+rule: start_rule_sign_opt access_modifier_opt inline_opt LIDENT formal_meta_param_opt param_list rule_delim shuffles
             { 
                 {
                     Rule.isStart = $1
@@ -264,6 +265,12 @@ formal_meta_list: LIDENT { [$1] } | LIDENT formal_meta_list   { $1::$2 }
 param_opt : { None } | PARAM   { Some $1 }
 
 param_list : { [] } | PARAM param_list { $1::$2 }
+
+shuffles: alts                       { $1 }
+        | alts shuffle_alts_nlist { PShuf ($1,$2) }
+
+shuffle_alts_nlist : SHUFFLE alts shuffle_alts_nlist { PShuf ($2,$3) }  
+                   | SHUFFLE alts                    { $2 }
 
 alts: conjunction                       { $1 }
     | conjunction bar_conjunction_nlist { PAlt ($1,$2) }
@@ -317,8 +324,8 @@ prim: prim STAR            {PMany $1}
     | prim STAR SQR_LBR int_opt DOUBLEDOT int_opt SQR_RBR {PRepet ($1,$4,$6)}
     | prim PLUS            {PSome $1}
     | prim QUESTION        {POpt $1}
-    | SQR_LBR alts SQR_RBR {POpt $2}
-    | LPAREN alts RPAREN   {$2}
+    | SQR_LBR shuffles SQR_RBR {POpt $2}
+    | LPAREN shuffles RPAREN   {$2}
     | call                 {$1}
     | lbl_seq              {$1}
     | LITERAL              {PLiteral $1}

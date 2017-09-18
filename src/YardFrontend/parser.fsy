@@ -267,9 +267,9 @@ param_opt : { None } | PARAM   { Some $1 }
 param_list : { [] } | PARAM param_list { $1::$2 }
 
 shuffles: alts                       { $1 }
-        | alts shuffle_alts_nlist { PShuf ($1,$2) }
+        | alts shuffle_alts_nlist { PShuff ($1,$2) }
 
-shuffle_alts_nlist : SHUFFLE alts shuffle_alts_nlist { PShuf ($2,$3) }  
+shuffle_alts_nlist : SHUFFLE alts shuffle_alts_nlist { PShuff ($2,$3) }  
                    | SHUFFLE alts                    { $2 }
 
 alts: conjunction                       { $1 }

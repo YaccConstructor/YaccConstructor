@@ -63,6 +63,7 @@
     <Compile Include="GPPerf1.yrd.fs" />
     <Compile Include="GPPerf2.yrd.fs" />
     <Compile Include="RDFPerformance.fs" />
+    <Compile Include="GraphLabelledVertexTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

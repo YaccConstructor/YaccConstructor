@@ -105,13 +105,6 @@ let runTest inputFile conversion expectedResult =
     printfn "!!! %A" (ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
     Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
 
-let runTest2 inputFile conversion expectedResult =
-    let loadIL = fe.ParseGrammar inputFile
-    Namer.initNamer loadIL.grammar
-    let result = loadIL |> applyConversion conversion
-    let r = sprintf "%A" result.grammar.[0].rules
-    Assert.AreEqual(expectedResult, r)
-
 [<TestFixture>]
 type ``Conversions tests`` () =
     

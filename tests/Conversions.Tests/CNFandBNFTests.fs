@@ -22,7 +22,7 @@ type ``CNFandBNF tests`` () =
         }
 
     [<Test>]
-    member test.``ToCNF`` () =
+    member test.``To CNF test`` () =
             let rules = 
                 (verySimpleRules "yard_s_2"
                     [{dummyRule with rule = PRef (Source.t "yard_s_2_4", None)}
@@ -55,6 +55,8 @@ type ``CNFandBNF tests`` () =
                   @(verySimpleNotStartRules "y"
                      [{dummyRule with rule = PRef (Source.t "yard_s_2_4", None)}
                       {dummyRule with rule = PRef (Source.t "y", None)}])
+                  @(verySimpleNotStartRules "y"
+                     [{dummyRule with rule = PToken (Source.t "A")}])
                   @(verySimpleNotStartRules "y"
                      [{dummyRule with rule = PToken (Source.t "B")}])
                   @(verySimpleRules "s"

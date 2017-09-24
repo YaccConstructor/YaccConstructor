@@ -24,20 +24,23 @@ type ``CNFandBNF tests`` () =
     [<Test>]
     member test.``To CNF test`` () =
             let rules = 
-                (verySimpleRules "yard_s_2"
-                    [{dummyRule with rule = PRef (Source.t "yard_s_2_4", None)}
-                     {dummyRule with rule = PRef (Source.t "x", None)}])
-                @(verySimpleNotStartRules "yard_s_1"
+                (verySimpleNotStartRules "yard_s_1"
                     [{dummyRule with rule = PRef (Source.t "x", None)}
                      {dummyRule with rule = PRef (Source.t "yard_s_2", None)}]) 
+                @(verySimpleNotStartRules "yard_s_2"
+                    [{dummyRule with rule = PRef (Source.t "yard_s_2_3", None)}
+                     {dummyRule with rule = PRef (Source.t "x", None)}])
+                  @(verySimpleRules "s"
+                     [{dummyRule with rule = PRef (Source.t "yard_s_4", None)}
+                      {dummyRule with rule = PRef (Source.t "yard_s_1", None)}])
                 @(verySimpleNotStartRules "x"
-                    [{dummyRule with rule = PRef (Source.t "yard_s3", None)}
+                    [{dummyRule with rule = PRef (Source.t "yard_s_4", None)}
                      {dummyRule with rule = PRef (Source.t "y", None)}])   
                 @(verySimpleNotStartRules "x"
-                    [{dummyRule with rule = PRef (Source.t "yard_s_2_4", None)}
+                    [{dummyRule with rule = PRef (Source.t "yard_s_2_3", None)}
                      {dummyRule with rule = PRef (Source.t "y", None)}])      
                 @(verySimpleNotStartRules "yard_s_1"
-                    [{dummyRule with rule = PRef (Source.t "yard_s_2_4", None)}
+                    [{dummyRule with rule = PRef (Source.t "yard_s_2_3", None)}
                      {dummyRule with rule = PRef (Source.t "x", None)}]) 
                  @(verySimpleNotStartRules "y"
                      [{dummyRule with rule = PToken (Source.t "CC")}]) 
@@ -48,22 +51,19 @@ type ``CNFandBNF tests`` () =
                   @(verySimpleNotStartRules "x"
                      [{dummyRule with rule = PToken (Source.t "B")}]) 
                   @(verySimpleNotStartRules "y"
-                     [{dummyRule with rule = PRef (Source.t "yard_s_3", None)}
+                     [{dummyRule with rule = PRef (Source.t "yard_s_4", None)}
                       {dummyRule with rule = PRef (Source.t "y", None)}]) 
-                  @(verySimpleNotStartRules "yard_s_1"
-                     [{dummyRule with rule = PToken (Source.t "B")}])
                   @(verySimpleNotStartRules "y"
-                     [{dummyRule with rule = PRef (Source.t "yard_s_2_4", None)}
+                     [{dummyRule with rule = PRef (Source.t "yard_s_2_3", None)}
                       {dummyRule with rule = PRef (Source.t "y", None)}])
                   @(verySimpleNotStartRules "y"
                      [{dummyRule with rule = PToken (Source.t "A")}])
                   @(verySimpleNotStartRules "y"
                      [{dummyRule with rule = PToken (Source.t "B")}])
-                  @(verySimpleRules "s"
-                     [{dummyRule with rule = PRef (Source.t "yard_s_3", None)}
-                      {dummyRule with rule = PRef (Source.t "yard_s_1", None)}])
-                  @(verySimpleNotStartRules "yard_s_3"
-                     [{dummyRule with rule = PToken (Source.t "A")}])
-                  @(verySimpleNotStartRules "yard_s_2_4"
+                  @(verySimpleNotStartRules "yard_s_1"
                      [{dummyRule with rule = PToken (Source.t "B")}])
+                  @(verySimpleNotStartRules "yard_s_2_3"
+                     [{dummyRule with rule = PToken (Source.t "B")}])
+                  @(verySimpleNotStartRules "yard_s_4"
+                     [{dummyRule with rule = PToken (Source.t "A")}])
             runTest (path "grammar1.yrd") conversionCNF rules 

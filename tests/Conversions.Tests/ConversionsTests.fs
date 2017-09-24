@@ -40,8 +40,7 @@ let dummyToken s = PToken <| new Source.t(s)
 
 exception FEError of string
 
-let ConversionsManager = [|new AddDefaultAC.AddDefaultAC(), new AddEOF.AddEOF(), new BuildAST.BuildAST(), new BuildAstSimple.BuildAstSimple(), new ToCNF.ToCNF(),
-                            new ToCNF.DeleteChainRule(), new ToCNF.DeleteEpsRule(), new ToCNF.SplitLongRule(), new ToCNF.RenameTerm(), new EliminateLeftRecursion.EliminateLeftRecursion(),
+let ConversionsManager = [|new AddDefaultAC.AddDefaultAC(), new AddEOF.AddEOF(), new BuildAST.BuildAST(), new BuildAstSimple.BuildAstSimple(), new CNFandBNF.CNF(), new CNFandBNF.BNFconj(), new CNFandBNF.BNFbool(), new EliminateLeftRecursion.EliminateLeftRecursion(),
                             new ExpandTopLevelAlt.ExpandTopLevelAlt(), new ExpandBrackets.ExpandBrackets(), new ExpandEbnfStrict.ExpandEbnf(), new ExpandInnerAlt.ExpandInnerAlt(),
                             new ExpandMeta.ExpandMeta(), new LeaveLast.LeaveLast(), new MergeAlter.MergeAlter(), new RemoveAST.RemoveAC(), new ExpandInline.ReplaceInline()
                             , new ReplaceLiterals.ReplaceLiterals(), new Linearize.Linearize(), new ExpandRepet.ExpandExpand(), new ExpandConjunction.ExpandConjunction()|] 
@@ -75,11 +74,6 @@ let expandRepeat = new Conversions.ExpandRepet.ExpandExpand()
 let expandTopLevelAlt = new Conversions.ExpandTopLevelAlt.ExpandTopLevelAlt()
 let expandSubSeq = new Conversions.ExpandBrackets.ExpandBrackets()
 let eliminateLeftRecursion = new Conversions.EliminateLeftRecursion.EliminateLeftRecursion()
-let conversionLongRules = new Conversions.ToCNF.SplitLongRule()
-let conversionEps = new Conversions.ToCNF.DeleteEpsRule()
-let conversionChain = new Conversions.ToCNF.DeleteChainRule()
-let conversionRenamer = new Conversions.ToCNF.RenameTerm()
-//let conversionCNF = new Conversions.ToCNF.ToCNF()
 let conversionCNF = new Conversions.CNFandBNF.CNF()
 let conversionBNFconj = new Conversions.CNFandBNF.BNFconj()
 let conversionBNFbool = new Conversions.CNFandBNF.BNFbool()

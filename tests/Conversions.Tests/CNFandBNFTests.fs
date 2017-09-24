@@ -10,6 +10,7 @@ open NUnit.Framework
 open ConversionsTests
 open Yard.Core.Helpers
 
+
 [<TestFixture>]
 type ``CNFandBNF tests`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "ToCNF")
@@ -67,3 +68,358 @@ type ``CNFandBNF tests`` () =
                   @(verySimpleNotStartRules "yard_s_4"
                      [{dummyRule with rule = PToken (Source.t "A")}])
             runTest (path "grammar1.yrd") conversionCNF rules 
+
+    [<Test>]
+    member test.``To BNFconj test`` () =
+            let rules: Rule.t<_,_> list = 
+                [{name = Source.t "s";
+                  args = [];
+                  body =
+                   PConj
+                     (PSeq ([{omit = false;
+                              rule = PRef (Source.t "a",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef (Source.t "b",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None),
+                      PSeq ([{omit = false;
+                              rule = PRef (Source.t "d",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef (Source.t "c",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None));
+                  isStart = true;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];};
+                 {name = Source.t "a";
+                  args = [];
+                  body = PSeq ([{omit = false;
+                                 rule = PRef (Source.t "yard_a_3",None);
+                                 binding = None;
+                                 checker = None;}; {omit = false;
+                                                    rule = PRef (Source.t "a",None);
+                                                    binding = None;
+                                                    checker = None;}],None,None);
+                  isStart = false;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];};
+                 {name =  Source.t "yard_b_1";
+                  args = [];
+                  body = PSeq ([{omit = false;
+                                 rule = PRef (Source.t "b",None);
+                                 binding = None;
+                                 checker = None;}; {omit = false;
+                                                    rule = PRef (Source.t "yard_b_1_4",None);
+                                                    binding = None;
+                                                    checker = None;}],None,None);
+                  isStart = false;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];};
+                 {name = Source.t "b";
+                  args = [];
+                  body = PSeq ([{omit = false;
+                                 rule = PRef (Source.t "yard_b_5",None);
+                                 binding = None;
+                                 checker = None;}; {omit = false;
+                                                    rule = PRef (Source.t "yard_b_1",None);
+                                                    binding = None;
+                                                    checker = None;}],None,None);
+                  isStart = false;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];};
+                 {name = Source.t "c";
+                  args = [];
+                  body = PSeq ([{omit = false;
+                                 rule = PRef (Source.t "yard_b_1_4",None);
+                                 binding = None;
+                                 checker = None;}; {omit = false;
+                                                    rule = PRef (Source.t "c",None);
+                                                    binding = None;
+                                                    checker = None;}],None,None);
+                  isStart = false;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];};
+                 {name = Source.t "yard_d_2";
+                  args = [];
+                  body = PSeq ([{omit = false;
+                                 rule = PRef (Source.t "d",None);
+                                 binding = None;
+                                 checker = None;}; {omit = false;
+                                                    rule = PRef (Source.t "yard_b_5",None);
+                                                    binding = None;
+                                                    checker = None;}],None,None);
+                  isStart = false;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];};
+                 {name = Source.t "d";
+                  args = [];
+                  body = PSeq ([{omit = false;
+                                 rule = PRef (Source.t "yard_a_3",None);
+                                 binding = None;
+                                 checker = None;}; {omit = false;
+                                                    rule = PRef (Source.t "yard_d_2",None);
+                                                    binding = None;
+                                                    checker = None;}],None,None);
+                  isStart = false;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];};
+                 {name = Source.t "s";
+                  args = [];
+                  body =
+                   PConj
+                     (PSeq ([{omit = false;
+                              rule = PRef (Source.t "d",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef (Source.t "c",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None),
+                      PSeq ([{omit = false;
+                              rule = PRef (Source.t "yard_a_3",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef (Source.t "a",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None));
+                  isStart = true;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];};
+                 {name = Source.t "s";
+                  args = [];
+                  body =
+                   PConj
+                     (PSeq ([{omit = false;
+                              rule = PRef (Source.t "a",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef (Source.t "b",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None),
+                      PSeq ([{omit = false;
+                              rule = PRef (Source.t "yard_a_3",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef (Source.t "yard_d_2",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None));
+                  isStart = true;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];};
+                 {name = Source.t "s";
+                  args = [];
+                  body =
+                   PConj
+                     (PSeq ([{omit = false;
+                              rule = PRef (Source.t "a",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef (Source.t "b",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None),
+                      PSeq ([{omit = false;
+                              rule = PRef (Source.t "yard_b_1_4",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef (Source.t "c",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None));
+                  isStart = true;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];};
+                 {name = Source.t "s";
+                  args = [];
+                  body =
+                   PConj
+                     (PSeq ([{omit = false;
+                              rule = PRef (Source.t "yard_b_5",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef (Source.t "yard_b_1",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None),
+                      PSeq ([{omit = false;
+                              rule = PRef (Source.t "yard_a_3",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef (Source.t "yard_d_2",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None));
+                  isStart = true;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];}; {name = Source.t "a";
+                                    args = [];
+                                    body = PSeq ([{omit = false;
+                                                   rule = PToken (Source.t "A");
+                                                   binding = None;
+                                                   checker = None;}],None,None);
+                                    isStart = false;
+                                    isPublic = false;
+                                    isInline = false;
+                                    metaArgs = [];};
+                 {name = Source.t "yard_b_1";
+                  args = [];
+                  body = PSeq ([{omit = false;
+                                 rule = PToken (Source.t "C");
+                                 binding = None;
+                                 checker = None;}],None,None);
+                  isStart = false;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];}; {name = Source.t "c";
+                                    args = [];
+                                    body = PSeq ([{omit = false;
+                                                   rule = PToken (Source.t "C");
+                                                   binding = None;
+                                                   checker = None;}],None,None);
+                                    isStart = false;
+                                    isPublic = false;
+                                    isInline = false;
+                                    metaArgs = [];};
+                 {name = Source.t "yard_d_2";
+                  args = [];
+                  body = PSeq ([{omit = false;
+                                 rule = PToken (Source.t "B");
+                                 binding = None;
+                                 checker = None;}],None,None);
+                  isStart = false;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];};
+                 {name = Source.t "s";
+                  args = [];
+                  body =
+                   PConj
+                     (PSeq ([{omit = false;
+                              rule = PRef (Source.t "d",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef (Source.t "c",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None),
+                      PSeq ([{omit = false;
+                              rule = PRef (Source.t "yard_b_5",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef ( Source.t "yard_b_1",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None));
+                  isStart = true;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];};
+                 {name =Source.t "s";
+                  args = [];
+                  body =
+                   PConj
+                     (PSeq ([{omit = false;
+                              rule = PRef (Source.t "yard_a_3",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef (Source.t "yard_d_2",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None),
+                      PSeq ([{omit = false;
+                              rule = PRef (Source.t "yard_a_3",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef (Source.t "a",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None));
+                  isStart = true;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];};
+                 {name = Source.t "s";
+                  args = [];
+                  body =
+                   PConj
+                     (PSeq ([{omit = false;
+                              rule = PRef (Source.t "yard_b_1_4",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef (Source.t "c",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None),
+                      PSeq ([{omit = false;
+                              rule = PRef (Source.t "yard_b_5",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef (Source.t "yard_b_1",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None));
+                  isStart = true;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];};
+                 {name = Source.t "s";
+                  args = [];
+                  body =
+                   PConj
+                     (PSeq ([{omit = false;
+                              rule = PRef (Source.t "yard_b_1_4",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef (Source.t "c",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None),
+                      PSeq ([{omit = false;
+                              rule = PRef (Source.t "yard_a_3",None);
+                              binding = None;
+                              checker = None;}; {omit = false;
+                                                 rule = PRef (Source.t "a",None);
+                                                 binding = None;
+                                                 checker = None;}],None,None));
+                  isStart = true;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];}; {name = Source.t "s";
+                                    args = [];
+                                    body = PSeq ([],None,None);
+                                    isStart = true;
+                                    isPublic = false;
+                                    isInline = false;
+                                    metaArgs = [];};
+                 {name = Source.t "yard_a_3";
+                  args = [];
+                  body = PSeq ([{omit = false;
+                                 rule = PToken (Source.t "A");
+                                 binding = None;
+                                 checker = None;}],None,None);
+                  isStart = false;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];}; {name = Source.t "yard_b_1_4";
+                                    args = [];
+                                    body = PSeq ([{omit = false;
+                                                   rule = PToken (Source.t "C");
+                                                   binding = None;
+                                                   checker = None;}],None,None);
+                                    isStart = false;
+                                    isPublic = false;
+                                    isInline = false;
+                                    metaArgs = [];};
+                 {name = Source.t "yard_b_5";
+                  args = [];
+                  body = PSeq ([{omit = false;
+                                 rule = PToken (Source.t "B");
+                                 binding = None;
+                                 checker = None;}],None,None);
+                  isStart = false;
+                  isPublic = false;
+                  isInline = false;
+                  metaArgs = [];}]
+
+            runTest (path "grammar3.yrd") conversionBNFconj rules    

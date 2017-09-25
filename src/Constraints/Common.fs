@@ -27,7 +27,8 @@ let existsSubProd pred =
         if pred node then true
         else
             match node with
-            | PAlt (l, r) -> exists l || exists r
+            | PAlt (l, r)
+            | PShuff (l, r)
             | PConj (l, r) -> exists l || exists r
             | PSeq (elems,_,_) ->
                 elems |> List.exists (fun e -> exists e.rule)

@@ -86,6 +86,9 @@ let initNamer (grammar : Grammar.t<_,_>) =
             metas |> List.iter walk
         | PToken n -> addSrc n
         | PLiteral n -> addSrc n
+        | PShuff (l,r) ->
+            walk l
+            walk r
         | PAlt (l,r) ->
             walk l
             walk r

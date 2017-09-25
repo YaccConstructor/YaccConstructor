@@ -25,6 +25,7 @@ open Yard.Core.Conversions.ExpandMeta
 let needChangeDirectory = 
     (@"C:\Users\Artem Gorokhov\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory())
     || (@"C:\Users\artem\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory())
+    || (@"C:\Users\Artem Gorokov\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory())
 
 let inputFilesPath = 
     if needChangeDirectory
@@ -247,3 +248,18 @@ type ``GLL parser tests with simple lexer`` () =
     member test.``Pretty simple calc seq input``() =
         checkAst "PrettySimpleCalc.yrd" "PrettyCalc1.txt"
             15 14 3 0
+    [<Test>]
+    member test.``Shuffle simple``() =
+        checkAst "ShuffleSimple.yrd" "ShuffleSimple.txt"
+            15 14 3 0
+
+    [<Test>]
+    member test.``Shuffle Equivalent Traces``() =
+        checkAst "ShuffleEqTraces.yrd" "ShuffleEqTraces.txt"
+            15 14 3 0
+
+    [<Test>]
+    member test.``16s``() =
+        checkAst "R16S_1_18.yrd" "R16S_1_18.txt"
+            15 14 3 0
+            

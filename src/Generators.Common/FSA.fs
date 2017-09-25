@@ -38,7 +38,6 @@ type FSA(ruleList : Rule.t<Source.t,Source.t> list) =
                         //System.IO.File.AppendAllLines(@".\time.txt", [sprintf "Minimization time: %A" (System.DateTime.Now - !time)])
                         time := System.DateTime.Now
                         x)
-    //let firstSet = genFirstSet fsa
 
     member this.States = fsa.States
     member this.StartState = fsa.StartState
@@ -47,4 +46,6 @@ type FSA(ruleList : Rule.t<Source.t,Source.t> list) =
     //member this.FirstSet = firstSet
     member this.StateToNontermName = fsa.StateToNontermName
     member this.PrintDot filePrintPath = printDot filePrintPath fsa
+    member this.ShuffleTransitions = fsa.ShuffleTransitions
+    member this.ShuffleFinalStates = fsa.ShuffleFinalStates
     member this.RuleList = ruleList

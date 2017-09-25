@@ -74,6 +74,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
             |> fun elems -> PSeq(elems , ac, l)
         | PAlt(left, right) -> PAlt(replaceEbnf left attrs metaArgs, replaceEbnf right attrs metaArgs)
         | PConj(left, right) -> PConj(replaceEbnf left attrs metaArgs, replaceEbnf right attrs metaArgs)
+        | PShuff(left, right) -> PShuff(replaceEbnf left attrs metaArgs, replaceEbnf right attrs metaArgs)
         | PSome p ->
             let generatedName = genSomeName()
             let expandedBody = replaceEbnf p attrs metaArgs

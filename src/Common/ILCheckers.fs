@@ -42,8 +42,9 @@ let GetIncorrectMetaArgsCount (def:Yard.Core.IL.Definition.t<_,_>) =
         let rec checkBody acc = function
             | PRef (name,_) -> check acc name 0
             | PMetaRef (name, _, metas) -> check acc name metas.Length
-            | PAlt (x, y) -> checkBody acc x |> fun acc' -> checkBody acc' y
-            | PConj (x, y) -> checkBody acc x |> fun acc' -> checkBody acc' y
+            | PAlt (x, y)
+            | PConj (x, y)
+            | PShuff (x, y) -> checkBody acc x |> fun acc' -> checkBody acc' y
             | PSeq (list,_,_) -> list |> List.fold (fun acc elem -> checkBody acc elem.rule) acc
             | PSome x
             | PMany x
@@ -175,9 +176,8 @@ let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Grammar.Module<
         | PMany expr
         | PSome expr
         | POpt  expr -> getUndeclaredRulesCurried expr
-        | PAlt (lExpr,rExpr) -> 
-            getUndeclaredRulesCurried lExpr
-            getUndeclaredRulesCurried rExpr
+        | PShuff (lExpr,rExpr)
+        | PAlt (lExpr,rExpr)
         | PConj (lExpr,rExpr) -> 
             getUndeclaredRulesCurried lExpr
             getUndeclaredRulesCurried rExpr
@@ -229,9 +229,8 @@ let reachableRulesInfo_of_grammar (grammar: Grammar.t<_,_>) =
         | PMany expr
         | PSome expr
         | POpt expr -> getReachableRulesCurried expr
-        | PAlt (lExpr,rExpr) -> 
-            getReachableRulesCurried lExpr
-            getReachableRulesCurried rExpr
+        | PAlt (lExpr,rExpr)
+        | PShuff (lExpr,rExpr)
         | PConj (lExpr,rExpr) -> 
             getReachableRulesCurried lExpr
             getReachableRulesCurried rExpr
@@ -283,7 +282,8 @@ let sourcesWithoutFileNames (def:Yard.Core.IL.Definition.t<Source.t,Source.t>) =
         | PMetaRef (name,args,metas) -> collectName name @ collectOpt args @ List.collect processBody metas
         | PSeq (s,ac,lab) -> collectOpt ac @ (s |> List.collect (fun e -> processBody e.rule))
         | PToken tok | PLiteral tok -> collectName tok
-        | PAlt (l,r) -> processBody l @ processBody r
+        | PAlt (l,r)
+        | PShuff (l,r)
         | PConj (l,r) -> processBody l @ processBody r
         | PMany e | PSome e | POpt e -> processBody e
         | PPerm p -> List.collect processBody p

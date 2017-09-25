@@ -66,25 +66,85 @@ type ParseData =
     | TreeNode of int<nodeMeasure>
     | Length of uint16
 
+type DescriptorTreeNode<'GSSVertex> (dad : DescriptorTreeNode<'GSSVertex> option, posInGr : int<positionInGrammar>, gss : 'GSSVertex) = 
+    //let children : TreeNode option [] option ref = ref None
+    let childrenCount = ref 0
+
+    member this.HasBrothers level =
+        if dad.Value.ChildrenCount > 1
+        then
+            true
+        elif level > 1
+            then
+                level-1 |> dad.Value.HasBrothers
+            else
+                false
+    
+    /// Can be called only by child
+    member this.ChildrenCount = !childrenCount
+
+    member this.CloneData () = 
+        new DescriptorTreeNode<'GSSVertex>(dad, posInGr, gss)
+
+    member this.BecomeFather () = 
+        dad.Value.CloneData()
+
+    member this.AddChildren count = 
+        childrenCount := count
+
+    member this.DeleteChild () = 
+        decr childrenCount
+
+    member this.GSSNode = gss
+    member this.PositionInGrammar = posInGr
+
 [<Struct>]
 [<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
 type ContextFSA<'GSSVertex> =
     /// Position in input graph (packed edge+position).
     val PosInInput         : int<positionInInput>
+    val DescriptorVertices : DescriptorTreeNode<'GSSVertex> []
     /// Current state of FSA.
-    val PosInGrammar         : int<positionInGrammar>
+    //val PosInGrammar         : int<positionInGrammar>
     /// Current GSS node.
-    val GssVertex        : 'GSSVertex
+    //val GssVertex        : 'GSSVertex
     /// 4 values packed in one int64: leftEdge, leftPos, rightEdge, rightPos.
     //val LeftPos       : int<leftPosition>
     /// Length of current result
     val Data        : ParseData
-    new (index, state, vertex, data) = {PosInInput = index; PosInGrammar = state; GssVertex = vertex; Data = data}
+    //new (index, state, vertex, data) = {PosInInput = index; PosInGrammar = state; GssVertex = vertex; Data = data}
+    new (index, state, vertex, data) =
+        {PosInInput = index;
+         DescriptorVertices = [|new DescriptorTreeNode<'GSSVertex>(None, state, vertex)|];
+         Data = data}
+    new (index, list, data) = {PosInInput = index; DescriptorVertices = list; Data = data}
     override this.ToString () = "Edge:" + (CommonFuns.getEdge(this.PosInInput).ToString()) +
                                 "; PosOnEdge:" + (CommonFuns.getPosOnEdge(this.PosInInput).ToString()) +
-                                "; State:" + (this.PosInGrammar.ToString()) +
-                                //"; LeftPos:" + (this.LeftPos.ToString()) +
+                                "; State:" + (this.DescriptorVertices.ToString()) +
+                                // "; State:" + (this.PosInGrammar.ToString()) +
+                                // "; LeftPos:" + (this.LeftPos.ToString()) +
                                 "; Len:" + (this.Data.ToString())
+
+//[<Struct>]
+//[<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
+//type ContextFSA<'GSSVertex> =
+//    /// Position in input graph (packed edge+position).
+//    val PosInInput         : int<positionInInput>
+//    /// Current state of FSA.
+//    val PosInGrammarAndGssVertex : (int<positionInGrammar> * 'GSSVertex) []
+//    /// Current GSS node.
+//    //val GssVertex        : 'GSSVertex
+//    /// 4 values packed in one int64: leftEdge, leftPos, rightEdge, rightPos.
+//    //val LeftPos       : int<leftPosition>
+//    /// Length of current result
+//    val Data        : ParseData
+//    //new (index, state, vertex, data) = {PosInInput = index; PosInGrammar = state; GssVertex = vertex; Data = data}
+//    new (index, state, vertex, data) = {PosInInput = index; PosInGrammarAndGssVertex = [|state,vertex|]; Data = data}
+//    override this.ToString () = "Edge:" + (CommonFuns.getEdge(this.PosInInput).ToString()) +
+//                                "; PosOnEdge:" + (CommonFuns.getPosOnEdge(this.PosInInput).ToString()) +
+//                                "; State:" + (this.PosInGrammarAndGssVertex.ToString()) +
+//                                //"; LeftPos:" + (this.LeftPos.ToString()) +
+//                                "; Len:" + (this.Data.ToString())
 
 [<Struct>]
 [<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]

@@ -23,10 +23,10 @@ type InternalFSA = {
     StateToNontermName : Dictionary<int<positionInGrammar>,string>
     StartState         : int<positionInGrammar>
     StartStates        : HashSet<int<positionInGrammar>> []
-    //FirstStates        : int<positionInGrammar> list list
     LastStates         : HashSet<int<positionInGrammar>>
     FinalStates        : HashSet<int<positionInGrammar>>
-    //Dictionary<int<positionInGrammar>, int>
+    ShuffleFinalStates : Dictionary<int<positionInGrammar>, int>
+    ShuffleTransitions : Dictionary<int<positionInGrammar>, ResizeArray<int<positionInGrammar>>>
 }
 
 let stateToString (nontermStringDict : Dictionary<int<positionInGrammar>, string>) state =
@@ -46,7 +46,8 @@ let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
     let stateToNontermName = new Dictionary<int<positionInGrammar>, string>()
     let dummyState = -1<positionInGrammar>
     let startComponent = ref -1
-
+    let shuffleFinalStates = new Dictionary<int<positionInGrammar>, int>()
+    let shuffleTransitions = new Dictionary<int<positionInGrammar>, ResizeArray<int<positionInGrammar>>>()
     let newEpsilonEdge (firstState : int<positionInGrammar>) (finalState : int<positionInGrammar>) = 
         () |> Epsilon |> alphabet.Add |> ignore    
         states.Item (int firstState) <- states.Item (int firstState) @ [Epsilon(), finalState]
@@ -144,7 +145,42 @@ let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
                 productionToStates !lastState (Some final) expr
 
         match prod with
-        |PAlt (left, right) ->
+        | PShuff (left, right) -> 
+            let isRightShuffle = //we need to now it due to eliminate redundant nodes
+                match right with
+                | PShuff _ -> true
+                | _ -> false
+            
+            let leftStart = newState()
+            let rightStart = if isRightShuffle then firstState else newState()
+            
+            let cond, list = shuffleTransitions.TryGetValue(firstState)
+            if cond
+            then
+                list.Add leftStart
+                if not isRightShuffle then list.Add rightStart
+            else
+                shuffleTransitions.Add(firstState, new ResizeArray<_>(if isRightShuffle then [leftStart] else [leftStart; rightStart]))
+
+            let finalState =
+                if finalState.IsNone
+                then
+                    newState() |> Some
+                else
+                    finalState
+            
+            if not isRightShuffle
+            then
+                let cond, counter = shuffleFinalStates.TryGetValue(finalState.Value)
+                if cond
+                then
+                    shuffleFinalStates.[finalState.Value] <- counter + 1
+                else
+                    shuffleFinalStates.Add(finalState.Value, 1)
+
+            productionToStates leftStart finalState left |> ignore
+            productionToStates rightStart finalState right
+        | PAlt (left, right) ->
             let finalState =
                 if finalState.IsNone
                 then
@@ -161,6 +197,7 @@ let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
                     let newstate = productionToStates first None hd.rule
                     seqToStates newstate final tl
                 | [] -> newEdge false first final None
+            
             seqToStates firstState finalState s
         | PToken s | PLiteral s -> newEdge true firstState finalState (Some s)
         | PRef (rule,_) -> newEdge false firstState finalState (Some rule)
@@ -179,7 +216,7 @@ let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
         |> List.mapi (fun i rule ->
             match sourse_tToSymbol false rule.name with
             | Nonterm x ->
-                let fnlState = productionToStates x (Some(newState())) rule.body
+                let fnlState = productionToStates x (newState() |> Some) rule.body
                 if rule.isStart
                 then 
                     startComponent := i
@@ -206,14 +243,17 @@ let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
         StartStates    = startStates;
         //FirstStates    = firstStates;
         FinalStates    = lastStates;
-        LastStates     = new HashSet<_>(lastStates)}
+        LastStates     = new HashSet<_>(lastStates)
+        ShuffleFinalStates = shuffleFinalStates
+        ShuffleTransitions = shuffleTransitions
+        }
 
-/// Removes epsilon edges from FA using epsilon closure.
+/// Removes epsilon edges from FA. Epsilon closure.
 let removeEpsilonEdges (fsa : InternalFSA) = 
-    let epsilonClosure = Array.init (fsa.States.Length) (fun i -> new HashSet<_>())
+    let EpsilonReachableStates = Array.init (fsa.States.Length) (fun i -> new HashSet<_>())
 
-    let rec getEpsilonClosure state =
-        let currentSet = epsilonClosure.[int state]
+    let rec getEpsilonReachableStates state =
+        let currentSet = EpsilonReachableStates.[int state]
         if currentSet.Count = 0
         then
             currentSet.Add(state) |> ignore
@@ -222,7 +262,7 @@ let removeEpsilonEdges (fsa : InternalFSA) =
                 match symbol with
                 |Epsilon() -> 
                     nextState
-                    |> getEpsilonClosure
+                    |> getEpsilonReachableStates
                     |> currentSet.UnionWith
                 | _ -> ())
             currentSet
@@ -256,7 +296,7 @@ let removeEpsilonEdges (fsa : InternalFSA) =
                     [||]
                 | _ ->
                     nextState
-                    |> getEpsilonClosure
+                    |> getEpsilonReachableStates
                     |> Seq.map (fun stateToAdd ->
                         symbol, stateToAdd)
                     |> Array.ofSeq)
@@ -286,6 +326,7 @@ let removeEpsilonEdges (fsa : InternalFSA) =
 
 /// Converts NFA without epsilon edges to DFA
 let toDFA fsa = 
+    /// sets of states tha reachable by same symbol
     let getOutSets (set: HashSet<int<positionInGrammar>>) =
         let newSets = new Dictionary<_,HashSet<_>>()
         for state in set do
@@ -305,10 +346,15 @@ let toDFA fsa =
     let queue = new Queue<_>()
     let statesEliminationSet = new ResizeArray<HashSet<int<positionInGrammar>>>()
 
-    startStates
+    fsa.ShuffleTransitions.Values
+    |> Array.ofSeq
+    |> Array.collect Array.ofSeq
+    |> Array.map (fun x -> new HashSet<_>([x]))
+    |> (fun x -> Array.append startStates x)
     |> Array.iteri (fun i s ->
         queue.Enqueue s
-        new HashSet<_>([statesEliminationSet.Count * 1<positionInGrammar>]) |> newStartStates.Add |> ignore
+        if i < startStates.Length then
+            new HashSet<_>([statesEliminationSet.Count * 1<positionInGrammar>]) |> newStartStates.Add |> ignore
         if i = int fsa.StartState
         then
             newStartState := statesEliminationSet.Count * 1<positionInGrammar>
@@ -341,6 +387,7 @@ let toDFA fsa =
         
     let newFinalStates = new HashSet<_>()
     let newLastStates = new HashSet<_>()
+    let newShuffleFinalStates = new Dictionary<_,_>()
     let finalStates = fsa.FinalStates
     let lastStates = fsa.LastStates
     let stateToNewState = Array.create (fsa.States.Length) 0<positionInGrammar>
@@ -355,6 +402,12 @@ let toDFA fsa =
             if lastStates.Contains st
             then 
                 stateNum*1<positionInGrammar> |> newLastStates.Add |> ignore
+            
+            let cond, value = fsa.ShuffleFinalStates.TryGetValue st
+            if cond
+            then
+                newShuffleFinalStates.Add(stateNum*1<positionInGrammar>, value)
+
             stateToNewState.[int st] <- stateNum*1<positionInGrammar>)
             
     let newStates = 
@@ -386,6 +439,13 @@ let toDFA fsa =
             | _ -> symbol)
         |> set
 
+    let newShuffleTransitions = new Dictionary<_,_>()
+        
+    for kvp in fsa.ShuffleTransitions do
+        let st,set = kvp.Key, kvp.Value
+        newShuffleTransitions.Add(stateToNewState.[int st],
+            set |> ResizeArray.map (fun x -> stateToNewState.[int x])|> ResizeArray.distinct)        
+
     {fsa with 
         States = newStates;
         Alphabet = newAlphabet;
@@ -393,7 +453,9 @@ let toDFA fsa =
         StartState = !newStartState;
         StartStates = Array.ofSeq newStartStates;
         LastStates = newLastStates;
-        FinalStates = newFinalStates}
+        FinalStates = newFinalStates;
+        ShuffleFinalStates = newShuffleFinalStates;
+        ShuffleTransitions = newShuffleTransitions}
 
 /// Returns sets of equivalent states
 /// http://goo.gl/z9uJP0
@@ -475,10 +537,10 @@ let minimizeFSA fsa =
     let classes = findEquivalenceClasses fsa
 
     let nonterms =
-            fsa.StartStates
-            |> Array.fold (fun (x : HashSet<int<positionInGrammar>>) set ->
-                x.UnionWith set
-                x) (new HashSet<int<positionInGrammar>>())
+        fsa.StartStates
+        |> Array.fold (fun (x : HashSet<int<positionInGrammar>>) set ->
+            x.UnionWith set
+            x) (new HashSet<int<positionInGrammar>>())
 
     let divideClassesWithMultipleNonterminals () = 
         let newClasses = new ResizeArray<_>()
@@ -500,7 +562,6 @@ let minimizeFSA fsa =
         newClasses
     
     let classes = divideClassesWithMultipleNonterminals()
-    
 
     // move classes that contain nonterminals to beginning
     let sortClasses() =
@@ -570,12 +631,27 @@ let minimizeFSA fsa =
     for state in fsa.FinalStates do
         stateToNewState.[int state]*1<positionInGrammar> |> newFinalStates.Add |> ignore
 
+    let newShuffleFinalStates = new Dictionary<_,_>()
+        
+    for kvp in fsa.ShuffleFinalStates do
+        let state, counter = kvp.Key, kvp.Value
+        newShuffleFinalStates.Add(stateToNewState.[int state]*1<positionInGrammar>, counter)
+
+    let newShuffleTransitions = new Dictionary<_,_>()
+        
+    for kvp in fsa.ShuffleTransitions do
+        let st,set = kvp.Key, kvp.Value
+        newShuffleTransitions.Add(stateToNewState.[int st]*1<positionInGrammar>,
+            set |> ResizeArray.map (fun x -> stateToNewState.[int x]*1<positionInGrammar>))      
+
     {fsa with
         States = statesToReturn;
         StateToNontermName = stateToNontermName;
         StartState = stateToNewState.[int fsa.StartState]*1<positionInGrammar>;
         StartStates    = newStartStates;
-        FinalStates    = newFinalStates}
+        FinalStates    = newFinalStates;
+        ShuffleFinalStates = newShuffleFinalStates;
+        ShuffleTransitions = newShuffleTransitions}
     //statesToReturn, nonterms.Count, newStateStringDict, (stateToNewState.[int startState]*1<positionInGrammar>), (stateToNewState.[int finalState]*1<positionInGrammar>)
 
 let genFirstSet fsa =
@@ -704,6 +780,12 @@ let printDot filePrintPath fsa =
         strs.Add hd
         strs.AddRange tl
         )
+    
+    for kvp in fsa.ShuffleTransitions do
+        let state, set = kvp.Key, kvp.Value
+
+        for destination in set do
+            strs.Add(sprintf "%i -> %i [label=\"\",color=orange]; \n" state destination)
 
     strs.Add "}"
     System.IO.File.WriteAllLines(filePrintPath, strs)

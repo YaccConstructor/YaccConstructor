@@ -120,6 +120,7 @@ module Production =
             match this with
             |PAlt (x, y) -> x.ToString() + " | " + y.ToString()
             |PConj (x, y) -> x.ToString() + " & " + y.ToString()
+            |PShuff (x, y) -> x.ToString() + " || " + y.ToString()
             |PNeg x -> "!" + x.ToString()
             |PSeq (ruleSeq, attrs, l) ->
                 let strAttrs =

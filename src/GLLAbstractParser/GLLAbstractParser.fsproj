@@ -31,6 +31,7 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
+    <Compile Include="JustTree.fs" />
     <Compile Include="GSS.fs" />
     <Compile Include="SPPF.fs" />
     <Compile Include="AbstractParser.fs" />

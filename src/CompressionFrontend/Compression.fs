@@ -55,9 +55,8 @@ let compress (text: string) (separator: char) : Definition.t<Source.t, Source.t>
             then
                 //reuse the rule
                 substitute newD rule
-                if rule.lst.First.Value.isNonTerminal() && rule.lst.First.Value.Rule.count = 1
-                then
-                    expand rule
+                if rule.lst.First.Value.isNonTerminal() && rule.lst.First.Value.Rule.count = 1 
+                then expand rule
             else
                 //create new rule
                 let r = new Rule(numRules)
@@ -65,61 +64,42 @@ let compress (text: string) (separator: char) : Definition.t<Source.t, Source.t>
                 Rules.Add(r.number, r)
                 r.lst.AddLast(newD.Value) |> ignore
                 r.lst.AddLast(newD.Next.Value) |> ignore
-                if r.lst.First.Value.isNonTerminal()
-                then
-                    r.lst.First.Value.Rule.IncCount()
-                if r.lst.Last.Value.isNonTerminal()
-                then
-                    r.lst.Last.Value.Rule.IncCount()
+                if r.lst.First.Value.isNonTerminal() then r.lst.First.Value.Rule.IncCount()
+                if r.lst.Last.Value.isNonTerminal() then r.lst.Last.Value.Rule.IncCount()
 
                 substitute found r
                 substitute newD r
             
                 if r.lst.First.Value.isNonTerminal() && r.lst.First.Value.Rule.count = 1
-                then
-                    expand r
+                then expand r
       
         //check if there is another such digram
         if s = null || s.Next = null || s.Value.Value = special || s.Next.Value.Value = special
-        then
-            false
+        then false
         else
             let rec nextSym (f: LinkedListNode<Symbol>) i = 
                 if f.Value = s.Value && f.Next.Value = s.Next.Value && not(f = s || f.Next = s)
                 then
                     matchDigrams s f (Rules.Item(i))
                     true
-                elif f.Next <> null && f.Next.Next <> null
-                then
-                    nextSym f.Next i
-                else
-                    false
+                elif f.Next <> null && f.Next.Next <> null then nextSym f.Next i
+                else false
             let rec nextRule i =
                 if Rules.ContainsKey(i) && nextSym (Rules.Item(i)).lst.First i
-                then
-                    true
-                elif i < numRules
-                then
-                    nextRule (i + 1)
-                else
-                    false
+                then true
+                elif i < numRules then nextRule (i + 1)
+                else false
             nextRule 0
                         
     and substitute (s : LinkedListNode<Symbol>) (r : Rule) =
         r.IncCount()
-        if s.Value.isNonTerminal()
-        then
-            s.Value.Rule.DecCount()
-        if s.Next.Value.isNonTerminal()
-        then
-            s.Next.Value.Rule.DecCount()
+        if s.Value.isNonTerminal() then s.Value.Rule.DecCount()
+        if s.Next.Value.isNonTerminal() then s.Next.Value.Rule.DecCount()
         s.List.AddAfter(s.Next, NonTerminal(numTerminals + r.number, r)) |> ignore
         let prevNode = s.Previous
         s.List.Remove(s.Next)
         s.List.Remove(s)
-        if prevNode <> null && not(check prevNode)
-        then
-            check prevNode.Next |> ignore
+        if prevNode <> null && not(check prevNode) then check prevNode.Next |> ignore
 
 
     for i in text do
@@ -140,8 +120,7 @@ let compress (text: string) (separator: char) : Definition.t<Source.t, Source.t>
                     r.lst.AddLast(s) |> ignore
                 tmp.Clear()
                 newFirst.lst.AddLast(NonTerminal(r.number, r)) |> ignore
-        else
-            tmp.AddLast(sym) |> ignore
+        else tmp.AddLast(sym) |> ignore
     if tmp.Count > 0
     then
         let r = new Rule(numRules)
@@ -164,20 +143,16 @@ let compress (text: string) (separator: char) : Definition.t<Source.t, Source.t>
                         then
                             let x = p.First.Value
                             if x.isNonTerminal() 
-                            then 
-                                PRef(Source.t ("sq_" + (x.Value).ToString()), None)
-                            else 
-                                PToken(Source.t ((char(x.Value)).ToString()))
+                            then PRef(Source.t ("sq_" + (x.Value).ToString()), None)
+                            else PToken(Source.t ((char(x.Value)).ToString()))
                         else
                             PSeq([for x in p ->
                                     {omit = false; 
                                     binding = None; 
                                     checker = None;
                                     rule = (if x.isNonTerminal() 
-                                            then 
-                                                PRef(Source.t ("sq_" + (x.Value).ToString()), None)
-                                            else 
-                                                PToken(Source.t ((char(x.Value)).ToString())))
+                                            then PRef(Source.t ("sq_" + (x.Value).ToString()), None)
+                                            else PToken(Source.t ((char(x.Value)).ToString())))
                                     }],
                                 None, None)
 

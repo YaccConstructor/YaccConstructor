@@ -9,6 +9,8 @@ type CompressionFrontend() =
         override this.ParseGrammar t = 
             match t with
             | (:? System.String as s) -> compress s '&'
+            | (:?((string * char)) as t) -> compress (fst t) (snd t)
+            | (:? (string list) as lst) -> compressList lst
             | _ -> IL.Definition.empty
         override this.ProductionTypes =
             Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>

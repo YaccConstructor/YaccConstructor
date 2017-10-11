@@ -10,12 +10,15 @@ type Rule =
     val number : int
     val mutable count : int
     val lst: LinkedList<Symbol>
-    new (number) = { number = number; count = 0; lst = LinkedList<Symbol>() }
+    val mutable index : int
+    new (number) = {number = number; count = 0; lst = LinkedList<Symbol>(); index = -1}
     member x.IncCount() =
         x.count <- x.count + 1
     member x.DecCount() =
         x.count <- x.count - 1
-
+    member x.putInd(n) = 
+        x.index <- n
+    
 and Symbol = Terminal of int | NonTerminal of int * Rule with
     member x.isNonTerminal() = 
         match x with
@@ -40,17 +43,27 @@ let compress (text: string) (separator: char) : Definition.t<Source.t, Source.t>
     numRules <- numRules + 1
     Rules.Add(firstRule.number, firstRule)
     
-    let rec check (s: LinkedListNode<Symbol>) =
-    
-        let matchDigrams (newD: LinkedListNode<Symbol>) (found: LinkedListNode<Symbol>) (rule: Rule) =
-            let expand (r: Rule) =
-                let underused = r.lst.First.Value.Rule
-                r.lst.RemoveFirst()
-                while underused.lst.First <> null do
-                    r.lst.AddFirst(underused.lst.Last.Value) |> ignore
-                    underused.lst.RemoveLast()
-                Rules.Remove(underused.number) |> ignore
+    let rec handle (stack : Stack<LinkedListNode<Symbol>>) = 
         
+        let substitute (s : LinkedListNode<Symbol>) (r : Rule) =
+            r.IncCount()
+            if s.Value.isNonTerminal() then s.Value.Rule.DecCount()
+            if s.Next.Value.isNonTerminal() then s.Next.Value.Rule.DecCount()
+            s.List.AddAfter(s.Next, NonTerminal(numTerminals + r.number, r)) |> ignore
+            stack.Push(s.Next.Next)
+            stack.Push(s.Previous)
+            s.List.Remove(s.Next)
+            s.List.Remove(s)
+            
+        let expand (r: Rule) =
+            let underused = r.lst.First.Value.Rule
+            r.lst.RemoveFirst()
+            while underused.lst.First <> null do
+                r.lst.AddFirst(underused.lst.Last.Value) |> ignore
+                underused.lst.RemoveLast()
+            Rules.Remove(underused.number) |> ignore
+
+        let matchDigrams (newD: LinkedListNode<Symbol>) (found: LinkedListNode<Symbol>) (rule: Rule) =
             if rule.lst.Count = 2
             then
                 //reuse the rule
@@ -72,41 +85,41 @@ let compress (text: string) (separator: char) : Definition.t<Source.t, Source.t>
             
                 if r.lst.First.Value.isNonTerminal() && r.lst.First.Value.Rule.count = 1
                 then expand r
-      
-        //check if there is another such digram
-        if s = null || s.Next = null || s.Value.Value = special || s.Next.Value.Value = special
-        then false
-        else
-            let rec nextSym (f: LinkedListNode<Symbol>) i = 
-                if f.Value = s.Value && f.Next.Value = s.Next.Value && not(f = s || f.Next = s)
-                then
-                    matchDigrams s f (Rules.Item(i))
-                    true
-                elif f.Next <> null && f.Next.Next <> null then nextSym f.Next i
-                else false
-            let rec nextRule i =
-                if Rules.ContainsKey(i) && nextSym (Rules.Item(i)).lst.First i
-                then true
-                elif i < numRules then nextRule (i + 1)
-                else false
-            nextRule 0
-                        
-    and substitute (s : LinkedListNode<Symbol>) (r : Rule) =
-        r.IncCount()
-        if s.Value.isNonTerminal() then s.Value.Rule.DecCount()
-        if s.Next.Value.isNonTerminal() then s.Next.Value.Rule.DecCount()
-        s.List.AddAfter(s.Next, NonTerminal(numTerminals + r.number, r)) |> ignore
-        let prevNode = s.Previous
-        s.List.Remove(s.Next)
-        s.List.Remove(s)
-        if prevNode <> null && not(check prevNode) then check prevNode.Next |> ignore
+        
+        let s = stack.Pop()
+        let rec compareDigrams (f: LinkedListNode<Symbol>) =
+            if f.Value = s.Value && f.Next.Value = s.Next.Value && not(f = s || f.Next = s)
+                then f
+                elif f.Next <> null && f.Next.Next <> null then compareDigrams f.Next
+                else null
+        let rec searchInRule i =
+            let compareResult = (if Rules.ContainsKey(i) then compareDigrams (Rules.Item(i).lst.First) else null)
+            if compareResult <> null
+                then (compareResult, i)
+                elif i < numRules then searchInRule (i + 1)
+                else (null, i)
+        
+        if not (s = null || s.Next = null || s.Value.Value = special || s.Next.Value.Value = special)
+        then
+            let (d, r) = searchInRule 0
+            if d <> null then matchDigrams s d (Rules.Item(r))
 
+        if stack.Count > 0 then handle stack
 
     for i in text do
         int i |> Terminal |> firstRule.lst.AddLast |> ignore
-        firstRule.lst.Last.Previous |> check |> ignore
-    
-    //separate firstRule by special
+        let stc = new Stack<LinkedListNode<Symbol>>()
+        stc.Push(firstRule.lst.Last.Previous) 
+        stc|> handle
+    //for rules names
+    let mutable INDEX  = 1
+    let Index (x: Rule) = 
+        if x.index = -1
+        then
+            x.putInd(INDEX)
+            INDEX <- INDEX + 1
+        (x.index).ToString()
+    //separate firstRule by special for making alternatives
     let tmp = LinkedList<Symbol>()
     let newFirst = new Rule(0)
     for sym in Rules.Item(0).lst do
@@ -128,9 +141,10 @@ let compress (text: string) (separator: char) : Definition.t<Source.t, Source.t>
         for s in tmp do
             r.lst.AddLast(s) |> ignore
         tmp.Clear()
-        newFirst.lst.AddLast(NonTerminal(r.number, r)) |> ignore
+        newFirst.lst.AddLast(NonTerminal(numTerminals + r.number, r)) |> ignore
     Rules.Remove(0) |> ignore
     if newFirst.lst.Count > 0 then Rules.Add(newFirst.number, newFirst)
+    //to IL format
     let g : Grammar.t<Source.t, Source.t>= 
         [{openings = []; 
         allPublic = false; 
@@ -138,45 +152,42 @@ let compress (text: string) (separator: char) : Definition.t<Source.t, Source.t>
         rules = 
             //modules
             [for i in Rules.Keys ->
-                let addRule (p: LinkedList<Symbol>) = 
-                        if p.Count = 1
-                        then
-                            let x = p.First.Value
+                let makeRule (p: LinkedList<Symbol>) = 
+                        let oneElem (x: Symbol) = 
                             if x.isNonTerminal() 
-                            then PRef(Source.t ("sq_" + (x.Value).ToString()), None)
+                            then PRef(Source.t ("sq_" + Index x.Rule), None)
                             else PToken(Source.t ((char(x.Value)).ToString()))
+                        if p.Count = 1 then oneElem p.First.Value
                         else
                             PSeq([for x in p ->
                                     {omit = false; 
                                     binding = None; 
                                     checker = None;
-                                    rule = (if x.isNonTerminal() 
-                                            then PRef(Source.t ("sq_" + (x.Value).ToString()), None)
-                                            else PToken(Source.t ((char(x.Value)).ToString())))
+                                    rule = oneElem x
                                     }],
                                 None, None)
 
                 if i = 0
                 then
-                    let rec alt (x : LinkedListNode<Symbol>) =
+                    let rec makeAlt (x : LinkedListNode<Symbol>) =
                         match x.Next with
-                        |null -> addRule x.Value.Rule.lst
-                        |y -> PAlt(addRule x.Value.Rule.lst, alt y)
+                        |null -> makeRule x.Value.Rule.lst
+                        |y -> PAlt(makeRule x.Value.Rule.lst, makeAlt y)
                     {name = Source.t "sq_0";
                     args = [];
                     isStart = true;
                     isInline = false;
                     metaArgs = [];
                     isPublic = false;
-                    body = alt (Rules.Item(i).lst.First)}
+                    body = makeAlt (Rules.Item(i).lst.First)}
                 else
-                    {name = Source.t ("sq_" + i.ToString()); 
+                    {name = Source.t ("sq_" + Index (Rules.Item(i))); 
                     args = []; 
                     isStart = false; 
                     isInline = false; 
                     metaArgs = []; 
                     isPublic = false; 
-                    body = addRule (Rules.Item(i).lst)}
+                    body = makeRule (Rules.Item(i).lst)}
         ]}]
     {info = {fileName = ""}; head = None; foot = None; grammar = g; options = Map.empty; tokens = Map.empty} 
 

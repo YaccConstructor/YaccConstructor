@@ -199,6 +199,8 @@ Target "GenTests:GLL" (fun _ ->
                             runFSXScript <| "tests" @@ "GLL.AbstractParser.Simple.Tests" @@ "gen"
                             runFSXScript <| "tests" @@ "GLLParser.Simple.Tests" @@ "genSimpleCalc"
                             runFSXScript <| "tests" @@ "GLL.AbstractParser.Bio.Test" @@ "gen"
+                            runFSXScript <| "tests" @@ "GLL.AbstractParser.TSQL" @@
+                            "gen"
                         )
 
 //Target "GenTests:RIGLR" (fun _ -> runShell <| "tests" @@ "RIGLRParser.SimpleTest" @@ "gen")

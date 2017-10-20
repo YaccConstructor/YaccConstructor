@@ -48,7 +48,6 @@
     <None Include="App.config" />
     <None Include="paket.references" />
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="BioCFG.yrd.fs" />
     <Compile Include="BioDataPreproc.fs" />
     <Compile Include="BioDataPerformance.fs" />
     <Compile Include="Program.fs" />
@@ -64,14 +63,34 @@
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\Common\Common.fsproj">
+      <Name>Common (Core\Common)</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\GLLAbstractParser\GLLAbstractParser.fsproj">
       <Name>GLLAbstractParser</Name>
       <Project>{bd40477e-7ceb-4ff4-b53f-05316f3bb6d8}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\GLLGenerator\GLLGenerator.fsproj">
+      <Name>GLLGenerator</Name>
+      <Project>{8756690f-8138-495a-a368-39afb9029823}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\ParserCommon\GLLParsers.Common.fsproj">
       <Name>GLLParsers.Common</Name>
       <Project>{f2e8eda4-c13f-4f8d-b858-d5ef4fb8a06d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\YaccConstructor\YaccConstructor.fsproj">
+      <Name>YaccConstructor</Name>
+      <Project>{e9a0e63b-ead7-43de-8823-13faa6b2b972}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\YardFrontend\YardFrontend.fsproj">
+      <Name>YardFrontend</Name>
+      <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

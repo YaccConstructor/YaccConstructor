@@ -31,8 +31,6 @@ let writeTriplesFromHomologene file (sw:StreamWriter) =
         then 
             sw.WriteLine(gene + "\t" + "is_homologous_to" + "\t" + homoloGeneGroup)
             sw.WriteLine(homoloGeneGroup + "\t" + "-is_homologous_to" + "\t" + gene)
-        
-//    printfn "Homologene processed"
     
 let writeTriplesFromKegg mapFile keggFile (sw:StreamWriter) =
 //    let keggLines = File.ReadLines(keggFile)
@@ -51,7 +49,6 @@ let writeTriplesFromKegg mapFile keggFile (sw:StreamWriter) =
         then 
             sw.WriteLine(gene + "\t" + "belongs_to" + "\t" + pathw)
             sw.WriteLine(pathw + "\t" + "-belongs_to" + "\t" + gene)
-//    printfn "KEGG processed"
 
 let writeTriplesFromSTRING mapFile stringFiles (sw:StreamWriter) =
     let mapLines = File.ReadLines(mapFile)
@@ -73,7 +70,6 @@ let writeTriplesFromSTRING mapFile stringFiles (sw:StreamWriter) =
                     sw.WriteLine("Protein_" + p1 + "\t" + "interacts_with" + "\t" + "Protein_" + p2)
                     sw.WriteLine("Protein_" + p2 + "\t" + "interacts_with" + "\t" + "Protein_" + p1)
                 | _ -> ()
-//    printfn "STRING processed"
 
 let writeTriplesFromInterpro mapFile (file:string) (sw:StreamWriter) =
 //    let settings = new System.Xml.XmlReaderSettings()
@@ -106,8 +102,6 @@ let writeTriplesFromInterpro mapFile (file:string) (sw:StreamWriter) =
                 let InterProId = "FamilyOrDomain_" + arrayInterPro.[i]
                 sw.WriteLine(protein + "\t" + "has" + "\t" + InterProId)
                 sw.WriteLine(InterProId + "\t" + "-has" + "\t" + protein)
-
-//    printfn "Interpro processed"
 
 let writeTriplesFromEntrezGene mapFile files (sw:StreamWriter) numberOfGenes =
 //    for f in files do
@@ -161,8 +155,6 @@ let writeTriplesFromEntrezGene mapFile files (sw:StreamWriter) numberOfGenes =
             sw.WriteLine(protein + "\t" + "-codes_for" + "\t" + gene)
             sw.WriteLine(gene + "\t" + "codes_for" + "\t" + protein)
 
-//    printfn "EntrezGene processed"
-
 let writeTriplesFromGO mapFile file (sw:StreamWriter) =
 //    let g = loadFromFile file
 
@@ -187,8 +179,6 @@ let writeTriplesFromGO mapFile file (sw:StreamWriter) =
                 let go = "GO_" + g.Substring(g.IndexOf(':') + 1)
                 sw.WriteLine(protein + "\t" + "has" + "\t" + go)
                 sw.WriteLine(go + "\t" + "-has" + "\t" + protein)
-
-//    printfn "GO processed"
 
 let writeAllTriples basePath (sw:StreamWriter) numberOfGenes =
 

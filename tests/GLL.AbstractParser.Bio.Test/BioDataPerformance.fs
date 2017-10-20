@@ -17,7 +17,7 @@ open YC.GLL.SPPF
 open System.IO
 open System.Collections.Generic
 
-let private PrepareGrammarFromFile grammarFile = 
+let PrepareGrammarFromFile grammarFile = 
         let fe = new YardFrontend()
         let gen = new GLL()
         generate grammarFile fe gen None Seq.empty [||] [] :?> ParserSourceGLL
@@ -60,13 +60,13 @@ let PrintToDot (graph: AdjacencyGraph<_,ParserEdge<_>>) name (tagToString: _ -> 
     out.WriteLine("}")
     out.Close() 
 
-let private fst (f, _, _) = f
+let fst (f, _, _) = f
 
-let private snd (_, s, _) = s
+let snd (_, s, _) = s
 
-let private trd (_, _, t) = t
+let trd (_, _, t) = t
 
-let private SPPFToSubgraph (sppf : SPPF) (ps : ParserSourceGLL) =
+let SPPFToSubgraph (sppf : SPPF) (ps : ParserSourceGLL) =
     let tagToLabel x = ps.IntToString.Item (x |> int)
     let edges = GetTerminals sppf |> Seq.map(fun x -> new ParserEdge<_>(snd x, trd x, (fst x |> tagToLabel)))
     let subgraph = new AdjacencyGraph<int, ParserEdge<_>>()

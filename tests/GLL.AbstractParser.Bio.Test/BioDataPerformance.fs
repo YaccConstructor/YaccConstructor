@@ -150,21 +150,16 @@ let getEdges file =
     |] |> Array.concat
 
 
-let getParseInputGraph file (ps : ParserSourceGLL) =
-    
+let getParseInputGraph file =
     let edges = getEdges file
-
     let allVs = edges |> Array.collect (fun (f,l,t) -> [|f * 1<positionInInput>; t * 1<positionInInput>|]) |> Set.ofArray |> Array.ofSeq
-    let allGenes = edges |> Array.choose (fun (f,l,t) -> 
-        if getTokenFromTag id l = "GENE"
-        then Some(f * 1<positionInInput>)
-        else None)
-    let genes = allGenes |> Set.ofArray |> Array.ofSeq 
-    let edgeTagToInt x = getTokenFromTag (fun t -> t |> ps.StringToToken |> int) x
-    let graph = new SimpleInputGraph<_>(allGenes, edgeTagToInt)
-    
+    let graph = new SimpleInputGraph<_>(allVs, id)
+
     edges
-    |> Array.collect (fun (f,l,t) -> [|new ParserEdge<_>(f, t, l)|])
+    |> Array.collect (fun (f,l,t) -> 
+        if getTokenFromTag (fun x -> (int) GLL.BioCFG.stringToToken.[x]) l <> (int) GLL.BioCFG.stringToToken.["OTHER"]
+        then [|new ParserEdge<_>(f, t, getTokenFromTag (fun x -> (int) GLL.BioCFG.stringToToken.[x]) l)|]
+        else [||])
     |> graph.AddVerticesAndEdgeRange
     |> ignore
 

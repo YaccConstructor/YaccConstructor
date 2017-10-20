@@ -48,6 +48,7 @@
     <None Include="App.config" />
     <None Include="paket.references" />
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="BioCFG.yrd.fs" />
     <Compile Include="BioDataPreproc.fs" />
     <Compile Include="BioDataPerformance.fs" />
     <Compile Include="Program.fs" />

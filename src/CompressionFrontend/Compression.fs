@@ -38,36 +38,46 @@ let compress (text: string) (separator: char) : Definition.t<Source.t, Source.t>
     let special = int separator
     let numTerminals = 100000
     let mutable numRules = 0
+    let Digrams = new Dictionary<(Symbol * Symbol), (LinkedListNode<Symbol> * int)>()
     let Rules = new Dictionary<int, Rule>()
     let firstRule = new Rule(numRules)
     numRules <- numRules + 1
     Rules.Add(firstRule.number, firstRule)
     
-    let rec handle (stack : Stack<LinkedListNode<Symbol>>) = 
+    let expand (r: Rule) =
+        let underused = r.lst.First.Value.Rule
+        Digrams.Remove(r.lst.First.Value, r.lst.First.Next.Value) |> ignore
+        r.lst.RemoveFirst()
+        while underused.lst.First <> null do
+            r.lst.AddFirst(underused.lst.Last.Value) |> ignore
+            underused.lst.RemoveLast()
+            //replacing digrams to another rule
+            Digrams.Remove(r.lst.First.Value, r.lst.First.Next.Value) |> ignore
+            Digrams.Add((r.lst.First.Value, r.lst.First.Next.Value), (r.lst.First, r.number))
+        Rules.Remove(underused.number) |> ignore
+
+    let rec handle (stack: Stack<LinkedListNode<Symbol> * int>) = 
         
-        let substitute (s : LinkedListNode<Symbol>) (r : Rule) =
+        let substitute (n: int) (s: LinkedListNode<Symbol>) (r: Rule) =
             r.IncCount()
+            //remove old digrams
+            if s.Previous <> null then Digrams.Remove(s.Previous.Value, s.Value) |> ignore
+            if s.Next.Next <> null then Digrams.Remove(s.Next.Value, s.Next.Next.Value) |> ignore
+            
             if s.Value.isNonTerminal() then s.Value.Rule.DecCount()
             if s.Next.Value.isNonTerminal() then s.Next.Value.Rule.DecCount()
             s.List.AddAfter(s.Next, NonTerminal(numTerminals + r.number, r)) |> ignore
-            stack.Push(s.Next.Next)
-            stack.Push(s.Previous)
+            
+            stack.Push(s.Next.Next, n)
+            stack.Push(s.Previous, n)
             s.List.Remove(s.Next)
             s.List.Remove(s)
             
-        let expand (r: Rule) =
-            let underused = r.lst.First.Value.Rule
-            r.lst.RemoveFirst()
-            while underused.lst.First <> null do
-                r.lst.AddFirst(underused.lst.Last.Value) |> ignore
-                underused.lst.RemoveLast()
-            Rules.Remove(underused.number) |> ignore
-
-        let matchDigrams (newD: LinkedListNode<Symbol>) (found: LinkedListNode<Symbol>) (rule: Rule) =
+        let matchDigrams (newD: LinkedListNode<Symbol>) (n: int) (found: LinkedListNode<Symbol>) (rule: Rule) =
             if rule.lst.Count = 2
             then
                 //reuse the rule
-                substitute newD rule
+                substitute n newD rule
                 if rule.lst.First.Value.isNonTerminal() && rule.lst.First.Value.Rule.count = 1 
                 then expand rule
             else
@@ -77,39 +87,36 @@ let compress (text: string) (separator: char) : Definition.t<Source.t, Source.t>
                 Rules.Add(r.number, r)
                 r.lst.AddLast(newD.Value) |> ignore
                 r.lst.AddLast(newD.Next.Value) |> ignore
+                Digrams.Remove(newD.Value,newD.Next.Value) |> ignore
+                Digrams.Add((newD.Value,newD.Next.Value), (r.lst.First, r.number))
                 if r.lst.First.Value.isNonTerminal() then r.lst.First.Value.Rule.IncCount()
                 if r.lst.Last.Value.isNonTerminal() then r.lst.Last.Value.Rule.IncCount()
 
-                substitute found r
-                substitute newD r
+                substitute (rule.number) found r
+                substitute n newD r
             
                 if r.lst.First.Value.isNonTerminal() && r.lst.First.Value.Rule.count = 1
                 then expand r
         
-        let s = stack.Pop()
-        let rec compareDigrams (f: LinkedListNode<Symbol>) =
-            if f.Value = s.Value && f.Next.Value = s.Next.Value && not(f = s || f.Next = s)
-                then f
-                elif f.Next <> null && f.Next.Next <> null then compareDigrams f.Next
-                else null
-        let rec searchInRule i =
-            let compareResult = (if Rules.ContainsKey(i) then compareDigrams (Rules.Item(i).lst.First) else null)
-            if compareResult <> null
-                then (compareResult, i)
-                elif i < numRules then searchInRule (i + 1)
-                else (null, i)
-        
+        let s = fst (stack.Peek())
+        let n = snd (stack.Pop())
+
         if not (s = null || s.Next = null || s.Value.Value = special || s.Next.Value.Value = special)
         then
-            let (d, r) = searchInRule 0
-            if d <> null then matchDigrams s d (Rules.Item(r))
+            if Digrams.ContainsKey(s.Value, s.Next.Value)
+                then
+                    let node = Digrams.Item(s.Value, s.Next.Value)
+                    if fst node <> s && fst node <> s.Next && s <> (fst node).Next
+                    then matchDigrams s n (fst node) (Rules.Item(snd node))
+                else
+                    Digrams.Add((s.Value, s.Next.Value), (s, n))
 
         if stack.Count > 0 then handle stack
 
     for i in text do
         int i |> Terminal |> firstRule.lst.AddLast |> ignore
-        let stc = new Stack<LinkedListNode<Symbol>>()
-        stc.Push(firstRule.lst.Last.Previous) 
+        let stc = new Stack<LinkedListNode<Symbol> * int>()
+        stc.Push(firstRule.lst.Last.Previous, 0) 
         stc|> handle
     //for rules names
     let mutable INDEX  = 1

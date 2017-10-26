@@ -61,10 +61,10 @@ let rec addAcToProduction neededRules ruleBody =
     //| PMetaRef(_,_,_) -> failwith "ERROR: PMetaRef unexpected in AddDefaultAC"
     | x -> failwithf "ERROR: %A unexpected in AddDefaultAC" x
 
-let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  = 
+let addDefaultAC (ruleList: Rule<Source.t, Source.t> list)  = 
     let updatedRules = new HashSet<string>()
     let rulesQueueBfs = new System.Collections.Generic.Queue<string>()
-    let rulesMap = new Dictionary<string, Rule.t<Source.t, Source.t>>()
+    let rulesMap = new Dictionary<string, Rule<Source.t, Source.t>>()
     for rule in ruleList do
             rulesMap.Add(rule.name.text, rule) 
             //if rule._public then (rulesQueueBfs.Enqueue(rule.name) |> ignore)
@@ -74,8 +74,8 @@ let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  =
         if not <| updatedRules.Contains bfsFor then    
             //printfn "u: %s" bfsFor
             updatedRules.Add bfsFor |> ignore        
-            let emptyRule = {Rule.t.name = new Source.t(""); Rule.t.args = []; Rule.t.body = PSeq([], None, None)
-                            ;Rule.t.isPublic = false; Rule.t.isInline = false; Rule.t.metaArgs = []; Rule.isStart = false
+            let emptyRule = {Rule.name = new Source.t(""); Rule.args = []; Rule.body = PSeq([], None, None)
+                            ;Rule.isPublic = false; Rule.isInline = false; Rule.metaArgs = []; Rule.isStart = false
                             }
             let ruleFor = ref emptyRule
             if rulesMap.TryGetValue(bfsFor, ruleFor) then

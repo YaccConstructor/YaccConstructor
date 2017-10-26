@@ -97,7 +97,7 @@ let replaceLiteralsInProduction production (replacedLiterals:Dictionary<_,_>) (g
         | x -> x
     _replaceLiterals production
 
-let replaceLiterals (ruleList: Rule.t<Source.t, Source.t> list) token_format = 
+let replaceLiterals (ruleList: Rule<Source.t, Source.t> list) token_format = 
     
     let grammarTokens = new HashSet<_>()
     eachProduction

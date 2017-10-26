@@ -5,7 +5,6 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open System.Collections.Generic
-open Yard.Core.IL.Rule
 open Microsoft.FSharp.Collections
 open TransformAux
 
@@ -26,7 +25,7 @@ type PairComparer<'t1,'t2 when 't1:equality and 't2:equality>() =
         member this.GetHashCode x = match (fst x).rule, (snd x).rule with PRef (x1, _), PRef(x2, _) -> hash (x1.text + x2.text) | _ -> hash (fst x) + hash (snd x)
 
 type RuleComparer<'t1,'t2 when 't1:equality and 't2:equality>() =
-    interface IEqualityComparer<Rule.t<'t1,'t2>> with
+    interface IEqualityComparer<Rule<'t1,'t2>> with
         member this.Equals(x, y) = (x.name.ToString() + x.body.ToString() = y.name.ToString() + y.body.ToString())
         member this.GetHashCode x = hash (x.name.ToString() + x.body.ToString())
 
@@ -59,7 +58,7 @@ let rec createConj rules =
     | 1 -> (Seq.item(0) rules).body
     | _ -> PConj((Seq.item(0) rules).body, createConj (Seq.except [(Seq.item(0) rules)] rules))
 
-let deleteLongRules (rules: Rule.t<_,_> list) =
+let deleteLongRules (rules: Rule<_,_> list) =
     startIsEps <- false
     let newRules = HashSet<_>(new RuleComparer<_,_>())
     for rule in rules do
@@ -86,7 +85,7 @@ let rec getCombinations conjs =
     | h::t -> List.fold (fun cacc celem -> (List.fold (fun acc elem -> (elem::celem)::acc) [] h) @ cacc) [] (getCombinations t)
     | _ -> []
 
-let collectEpsNonterms (rules: Rule.t<_,_> list) = 
+let collectEpsNonterms (rules: Rule<_,_> list) = 
     let epsNonterms = HashSet<_>(new NonTermComparer<_,_>())
     for rule in rules do
         let elementsPos = fst (getElements rule.body [] [] true)
@@ -123,11 +122,11 @@ let getConjs rule epsNonterms =
     conjs.RemoveWhere(fun x -> ((fst (getElements x.body [] [] true)).[0]).IsEmpty) |> ignore
     conjs |> Seq.toList
 
-let deleteEpsilonRules (rules: Rule.t<_,_> list) =
+let deleteEpsilonRules (rules: Rule<_,_> list) =
     let epsNonterms = collectEpsNonterms rules
     let newRules = HashSet<_>(rules, new RuleComparer<_, _>()) 
     for rule in rules do
-        let conjs = ResizeArray<t<_,_> list>()
+        let conjs = ResizeArray<Rule<_,_> list>()
         let elements = getElements rule.body [] [] true
         for el in fst elements @ snd elements do
             let c = getConjs (createRule rule.name rule.args (PSeq(el, None, None)) rule.isStart rule.metaArgs) epsNonterms |> Seq.toList   
@@ -146,7 +145,7 @@ let deleteEpsilonRules (rules: Rule.t<_,_> list) =
                                 else createRule x.name x.args (PConj(x.body, PNeg(PSeq([], None, None)))) x.isStart x.metaArgs ) 
              |> Seq.toList
 
-let collectNontermsAndUnitRules (rules: Rule.t<_,_> list) = 
+let collectNontermsAndUnitRules (rules: Rule<_,_> list) = 
     let unitRules = HashSet<_>(new RuleComparer<_, _>())
     let nonterms = HashSet<_>(new NonTermComparer<_,_>())
     for rule in rules do
@@ -168,9 +167,9 @@ let filter rule =
     then createRule rule.name rule.args (createConj el1) rule.isStart rule.metaArgs
     else createRule rule.name rule.args (createConj (el1 @ el2)) rule.isStart rule.metaArgs
 
-let deleteUnitRules (rules: Rule.t<_,_> list) =
-    let newRules = HashSet<_>(rules, new RuleComparer<_, _>())
-    let oldRules = HashSet<_>(rules, new RuleComparer<_, _>())
+let deleteUnitRules (rules: Rule<_,_> list) =
+    let newRules = HashSet<_>(rules, new RuleComparer<_,_>())
+    let oldRules = HashSet<_>(rules, new RuleComparer<_,_>())
     let nonTerms, unitRules = collectNontermsAndUnitRules rules
     let mutable flag = true
     while flag do
@@ -180,7 +179,7 @@ let deleteUnitRules (rules: Rule.t<_,_> list) =
                 let unitConjs = List.filter (fun x -> List.length x = 1 && Seq.contains ((x.[0]).rule.ToString()) nonTerms) (fst elements)
                 let unitConjsNeg = List.filter (fun x -> List.length x = 1 && Seq.contains ((x.[0]).rule.ToString()) nonTerms) (snd elements)
                 for c in unitConjs @ unitConjsNeg do 
-                    let rulesToAdd = Seq.filter (fun x -> x.name.text = c.[0].rule.ToString()) oldRules              
+                    let rulesToAdd = oldRules |> Seq.filter (fun x -> x.name.text = c.[0].rule.ToString())               
                     if List.contains c unitConjs then 
                         newRules.UnionWith(rulesToAdd 
                                            |> Seq.map 
@@ -191,7 +190,7 @@ let deleteUnitRules (rules: Rule.t<_,_> list) =
                                                                   |> List.map (fun x -> createRule rule.name rule.args (PNeg(PSeq(x, None, None))) rule.isStart rule.metaArgs)
                                                        createRule rule.name rule.args (createConj (pos @ neg |> List.toSeq)) rule.isStart rule.metaArgs |> filter))
                     else
-                        let conjs = ResizeArray<t<_,_> list>()
+                        let conjs = ResizeArray<Rule<_,_> list>()
                         let pos = fst elements |> List.map (fun x -> createRule rule.name rule.args (PSeq(x, None, None)) rule.isStart rule.metaArgs)
                         let neg = List.except([c]) (snd elements) |> List.map (fun x -> createRule rule.name rule.args (PNeg(PSeq(x, None, None))) rule.isStart rule.metaArgs)                                                       
                         for r in rulesToAdd do
@@ -209,7 +208,7 @@ let deleteUnitRules (rules: Rule.t<_,_> list) =
         if unitRules.Count = 0 then flag <- false   
     newRules |> Seq.toList
 
-let deleteNonGenerating (rules: Rule.t<_,_> list) = 
+let deleteNonGenerating (rules: Rule<_,_> list) = 
     let newRules = HashSet<_>(rules, new RuleComparer<_,_>())
     let generating = HashSet<string>()
     for rule in rules do
@@ -229,7 +228,7 @@ let deleteNonGenerating (rules: Rule.t<_,_> list) =
                                 List.contains false elements) |> ignore
     newRules |> Seq.toList
 
-let deleteUnreachable (rules: Rule.t<_,_> list) = 
+let deleteUnreachable (rules: Rule<_,_> list) = 
     let newRules = HashSet<_>(rules, new RuleComparer<_,_>())
     let start = (List.find (fun x -> x.isStart) rules).name.text
     let reachable = HashSet<string>([start])
@@ -246,16 +245,17 @@ let deleteUnreachable (rules: Rule.t<_,_> list) =
     newRules.RemoveWhere(fun r -> not (reachable.Contains(r.name.ToString()))) |> ignore
     newRules |> Seq.toList
         
-let deleteUselessRules (rules: Rule.t<_, _> list) = 
+let deleteUselessRules (rules: Rule<_,_> list) = 
     deleteUnreachable (deleteNonGenerating rules)
 
-let tryFindRule (term: Source.t) rule (rules: HashSet<_>) = 
+let tryFindRule (term: Source.t) (rule:Rule<_,_>) (rules: HashSet<_>) = 
     let b = Seq.filter (fun x -> match x.body with PConj(a,b) -> false |_ -> true) rules
     let a = Seq.filter (fun x -> List.length ((fst (getElements x.body [] [] true)).[0]) = 1
                                  && match ((fst (getElements x.body [] [] true)).[0]).[0].rule with PToken t -> true | _ -> false
                                  && (match ((fst (getElements x.body [] [] true)).[0]).[0].rule with PToken t -> t).text = term.text 
-                                 && Seq.filter (fun y -> y.name.text = x.name.text) rules |> Seq.length = 1) b
-    if not (Seq.isEmpty a) then (Seq.head a).name
+                                 && rules |> Seq.filter (fun y -> y.name.text = x.name.text)  |> Seq.length = 1) b
+    if not (Seq.isEmpty a) 
+    then (Seq.head a).name
     else Namer.newSource(rule.name)
        
 let cutRule rule (rules: HashSet<_>)  = 
@@ -288,7 +288,7 @@ let cutRule rule (rules: HashSet<_>)  =
             newRules.Remove(rule) |> ignore
     newRules |> Seq.toList 
 
-let deleteFewTermRules  (rules: Rule.t<_,_> list) = 
+let deleteFewTermRules  (rules: Rule<_,_> list) = 
     let newRules = HashSet<_>(rules, new RuleComparer<_,_>())
     for rule in rules do
         let elements = getElements rule.body [] [] true
@@ -298,14 +298,15 @@ let deleteFewTermRules  (rules: Rule.t<_,_> list) =
             then
                 let res = cutRule (createRule rule.name rule.args (PSeq(el, None, None)) rule.isStart rule.metaArgs) newRules         
                 newRules.UnionWith(List.filter (fun x -> not (x.name.text = rule.name.text)) res)
-                if List.contains el (fst elements) then conjRule.Add(List.find (fun x -> x.name.text = rule.name.text) res)
-                else conjRule.Add(createRule rule.name rule.args (PNeg (List.find (fun x -> x.name.text = rule.name.text) res).body) rule.isStart rule.metaArgs)
+                if List.contains el (fst elements) 
+                then conjRule.Add(res |> List.find (fun x -> x.name.text = rule.name.text))
+                else conjRule.Add(createRule rule.name rule.args (PNeg (res |> List.find (fun x -> x.name.text = rule.name.text) ).body) rule.isStart rule.metaArgs)
             else conjRule.Add(createRule rule.name rule.args (PNeg(PSeq([], None, None))) rule.isStart rule.metaArgs)
         newRules.Remove(rule) |> ignore
         newRules.Add(createRule rule.name rule.args (createConj conjRule) rule.isStart rule.metaArgs) |> ignore
     newRules |> Seq.toList |> List.map filter
 
-let filterAndStuff (rules: Rule.t<_,_> list) = 
+let filterAndStuff (rules: Rule<_,_> list) = 
     let newRules = HashSet<_>(rules, new RuleComparer<_,_>()) 
     let toAdd1 = HashSet<_>(new RuleComparer<_,_>())
     let toAdd2 = HashSet<_>(new RuleComparer<_,_>())
@@ -375,7 +376,7 @@ let filterAndStuff (rules: Rule.t<_,_> list) =
         newRules.Add(createRule start [] (PSeq([], None, None)) true [] ) |> ignore
     newRules |> Seq.toList |> List.map filter
 
-let cutNonEps (rules: Rule.t<_,_> list) = 
+let cutNonEps (rules: Rule<_,_> list) = 
     rules 
     |> List.map 
        (fun x ->
@@ -392,7 +393,7 @@ let cutNonEps (rules: Rule.t<_,_> list) =
                     createRule x.name x.args (createConj newBody) x.isStart x.metaArgs
                 else x)  
 
-let toCNFandBNF (rules: Rule.t<_,_> list) conversionType =
+let toCNFandBNF (rules: Rule<_,_> list) conversionType =
     match conversionType with
     | "CNF" -> rules |> deleteLongRules |> deleteEpsilonRules |> deleteUnitRules |> deleteUselessRules |> deleteFewTermRules |> filterAndStuff |> cutNonEps
     | "BNFconj" -> rules |> deleteLongRules |> deleteEpsilonRules |> deleteUnitRules |> deleteFewTermRules |> filterAndStuff |> cutNonEps 

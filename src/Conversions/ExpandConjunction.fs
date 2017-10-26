@@ -20,7 +20,7 @@ open Namer
 
 open TransformAux
 
-let rec extractOneRule (rule:Rule.t<_,_>) = 
+let rec extractOneRule (rule:Rule<_,_>) = 
     //let name = ref None
     let rec expandBody attrs = function
     | PAlt (a,b)  -> let leftBody, leftRules = expandBody attrs a

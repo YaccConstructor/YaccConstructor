@@ -67,7 +67,7 @@ let addEOFToProduction = function
                 ,None, None
            ) |> PSeq
 
-let addEOF (ruleList: Rule.t<Source.t, Source.t> list) = 
+let addEOF (ruleList: Rule<Source.t, Source.t> list) = 
     let startRules = new HashSet<string>()
     ruleList |> List.iter
         (fun rule -> if rule.isStart then startRules.Add rule.name.text |>ignore )

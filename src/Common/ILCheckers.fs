@@ -35,7 +35,8 @@ let GetIncorrectMetaArgsCount (def:Yard.Core.IL.Definition<_,_>) =
         let map = rules.[module']
         let check acc (name : Source.t) cnt =
             let expected = 
-                if not <| map.ContainsKey name.text then 0
+                if not <| map.ContainsKey name.text 
+                then 0
                 else (snd map.[name.text]).metaArgs.Length
             if cnt = expected then acc
             else (name, cnt, expected)::acc
@@ -118,7 +119,7 @@ let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Module<Source.t
     let declaredExportRules =
         module'.openings
         |> List.map (fun op ->
-            let rules : Rule.t<_,_> list =
+            let rules : Rule<_,_> list =
                 if publicRules.ContainsKey op.text then publicRules.[op.text]
                 else
                     eprintf "Undeclared module %s (%s:%d) " op.text op.file op.startPos.line
@@ -212,7 +213,7 @@ let reachableRulesInfo_of_grammar (grammar: Grammar<_,_>) =
     let rulesMap = getRulesMap grammar
     let reachedRules = new HashSet<_>()
     
-    let getAdditionRules (rule : Rule.t<Source.t,Source.t>) =
+    let getAdditionRules (rule : Rule<Source.t,Source.t>) =
         rule.metaArgs |> List.map (fun i -> i.text)
         |> fun x -> new HashSet<_>(x)
 

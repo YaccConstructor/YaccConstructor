@@ -90,7 +90,7 @@ let rec _buildAstSimple ruleName (production: t<Source.t, Source.t>) =
     | PConj(left, right) -> PConj(_buildAstSimple ruleName left, _buildAstSimple ruleName right)
     | x -> _buildAstSimple ruleName (seqify x)
 
-let buildAstSimple (ruleList: Rule.t<Source.t, Source.t> list)  = 
+let buildAstSimple (ruleList: Rule<Source.t, Source.t> list)  = 
     ruleList |> List.map (fun rule -> {rule with body=(_buildAstSimple rule.name.text rule.body) } )
 
 type BuildAstSimple() = 

@@ -20,7 +20,7 @@ open Yard.Core.IL.Production
 open System.Collections.Generic
 
 
-let private replaceInline (rules : Rule.t<_,_> list) =
+let private replaceInline (rules : Rule<_,_> list) =
     let closure (inlines : (string * t<_,_>) list) = 
         let inlinesDict = inlines |> dict
         let getName = function

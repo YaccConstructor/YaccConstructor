@@ -21,7 +21,7 @@ open Yard.Core.Namer
 open TransformAux
 
 
-type Rule = Rule.t<Source.t,Source.t>
+type Rule = Rule<Source.t,Source.t>
 type Production = Production.t<Source.t,Source.t>
 
 let noReduceError = sprintf "Cannot eliminate left recursion. Nonterminal %s does not reduce."

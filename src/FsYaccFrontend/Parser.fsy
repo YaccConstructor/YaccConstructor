@@ -62,7 +62,7 @@ yard_item_2 : IDENT {let s=$1 in
 
 rule : IDENT COLON yard_option_11 alternative yard_list_12 {
             let name=$1 in let alt=$4 in let opt_alts=$5 in
-                { new Rule.t<Source.t, Source.t> 
+                { new Rule<Source.t, Source.t> 
                      with name= name
                      and args=[] 
                      and body=if opt_alts=[] then alt

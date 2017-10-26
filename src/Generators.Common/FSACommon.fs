@@ -39,7 +39,7 @@ let symbolToString nontermStringDict s =
         | Nonterm nonterm -> stateToString nontermStringDict nonterm
         | Epsilon() -> "Epsilon"
 
-let convertRulesToFSA (ruleList : Rule.t<Source.t,Source.t> list) =
+let convertRulesToFSA (ruleList : Rule<Source.t,Source.t> list) =
     let states = new ResizeArray<(EdgeSymbol * int<positionInGrammar>) list>()
     let alphabet = new HashSet<EdgeSymbol>()
     let nonterms = new Dictionary<string, int<positionInGrammar>>()

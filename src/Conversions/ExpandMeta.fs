@@ -22,7 +22,7 @@ open TransformAux
 open System.Collections.Generic
 
 /// find metarule with given name in hash map of collected metarules
-let findMetaRule (tbl : IDictionary<string,Dictionary<string,string * Rule.t<Source.t,Source.t>>>) module' metaName =
+let findMetaRule (tbl : IDictionary<string,Dictionary<string,string * Rule<Source.t,Source.t>>>) module' metaName =
     try tbl.[module'].[metaName] with
     | :?System.Collections.Generic.KeyNotFoundException ->
         failwith <| sprintf "unable to find metarule %s in module %s" metaName module'
@@ -136,7 +136,7 @@ let expandRule =
         //let newGlobalAttrs = getRuleBindings metaRule globalAttrs
                 
         let metaExp = expandBody (replaceMetasInBody newFormalToAct metaRule.body) declModule metaRules expanded newRes
-        let newRule = {Rule.defaultRule newRuleName (fst metaExp) with args = formalArgs}
+        let newRule = {defaultRule newRuleName (fst metaExp) with args = formalArgs}
         (substitution, newRule::snd metaExp)
 
     /// <summary>

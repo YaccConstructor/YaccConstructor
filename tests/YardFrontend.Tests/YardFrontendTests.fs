@@ -396,7 +396,7 @@ type ``YardFrontend options tests`` () =
 type ``YardFrontend Complete tests`` () =    
     [<Test>]
     member test.``L_attr test`` () =
-        let rules : Rule.t<_,_> list = 
+        let rules : Rule<_,_> list = 
             [{ 
                 name = dummyPos"s"
                 args = []
@@ -467,7 +467,7 @@ type ``Yardfrontend label tests`` () =
 
     [<Test>]
     member test.``weight test correct input`` () =
-        let rules: Rule.t<_,_> list  =
+        let rules: Rule<_,_> list  =
           [{name = dummyPos"s";
             args = [];
             body = PSeq ([{omit = false;

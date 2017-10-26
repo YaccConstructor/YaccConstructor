@@ -4,7 +4,6 @@ open System.Collections.Generic
 open Yard.Generators.Common.FinalGrammar
 open QuickGraph
 open Yard.Core.IL
-open Yard.Core.IL.Rule
 
 type ContextLabel = L | R | B
 

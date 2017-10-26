@@ -44,7 +44,7 @@ let getPosFromSource printPositions fullPath dummyPos (src : Source.t) =
 
 let defaultSource output = new Source.t("", new Source.Position(0,-1,0), new Source.Position(), output)
 
-let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list)
+let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule<Source.t,Source.t> list)
         positionType fullPath output dummyPos caseSensitive isAbstractParsingMode isHighlightingMode printPositions =
     let tab = 4
 
@@ -226,7 +226,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 |> aboveListL)
             |> (fun x -> (wordL "(" @@-- x) @@ wordL ")")
         | x -> failwithf "unexpected construction: %A" x
-    let getRuleLayout (rule : Rule.t<Source.t,Source.t>) nonTermName =
+    let getRuleLayout (rule : Rule<Source.t,Source.t>) nonTermName =
         if positionType = "" then
             failwith "RNGLR: Unspecified position type"
         wordL (sprintf "fun (%s : array<_>) (parserRange : (%s * %s)) -> " childrenName positionType positionType)
@@ -266,7 +266,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             [for i = 0 to args.Length - 1 do
                 yield "'_rnglr_type_" + indexator.indexToNonTerm i ]
             |> List.reduce (fun l r -> l + " * " + r)
-        let errorRule : Rule.t<_,_> = 
+        let errorRule : Rule<_,_> = 
             {
                 name    = new Source.t("error")
                 args    = []

@@ -104,7 +104,7 @@ let rec _buildAST ruleName (production: t<Source.t, Source.t>) =
         PConj(_buildAST (sprintf "%s_Conj%dL" ruleName 1) left,_buildAST (sprintf "%s_Conj%dR" ruleName 1) right)
     | x -> seqify x |> _buildAST ruleName
 
-let buildAST (ruleList: Rule.t<Source.t, Source.t> list) tokenType =
+let buildAST (ruleList: Rule<Source.t, Source.t> list) tokenType =
     if System.String.IsNullOrEmpty tokenType then
         leafConstr := (sprintf "Leaf(\"%s\", %s)")
         isTyped := true

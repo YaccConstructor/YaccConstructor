@@ -12,8 +12,8 @@ open System
 
 let dummyPos s = new Source.t(s)
 
-let private expandRepet (ruleList: Rule.t<_,_> list) = 
-    let toExpand = new System.Collections.Generic.Queue<Rule.t<_,_>>(List.toArray ruleList)
+let private expandRepet (ruleList: Rule<_,_> list) = 
+    let toExpand = new System.Collections.Generic.Queue<Rule<_,_>>(List.toArray ruleList)
 
     let rec bodyRule acc b rule =
         if (acc > b) || (acc < 1) then failwith "Incorrect parameters of range for Repeat!"

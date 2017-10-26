@@ -46,9 +46,9 @@ let private getNodeSemantic parent children =
     printer.PrintBrInd 0 "addSemantic parent children"
     printer.ToString()
 
-let private changeRule (oldRule : Rule.t<_,_>) (elemList : elem<Source.t, Source.t> list) (bindings : Source.t list) = 
+let private changeRule (oldRule : Rule<_,_>) (elemList : elem<Source.t, Source.t> list) (bindings : Source.t list) = 
     let actionCode = getNodeSemantic oldRule.name.text bindings
-    let newRule : Rule.t<Source.t, Source.t> = 
+    let newRule : Rule<Source.t, Source.t> = 
         {
             name = oldRule.name
             args = []
@@ -88,7 +88,7 @@ let private literalToName rules lit =
     |> indexator.getLiteralName
 
 let createHighlightingRule name newElem actionCode =
-    let newRule : Rule.t<Source.t, Source.t> =
+    let newRule : Rule<Source.t, Source.t> =
         {
             name = new Source.t(sprintf "highlight_%s" name)
             args = []
@@ -170,7 +170,7 @@ let highlightingConvertions (def : Definition<Source.t, Source.t>) =
         | _ -> failwith "Error in highlighting convertions"
         !result
 
-    let processRule (oldRule : Rule.t<Source.t, Source.t>) = 
+    let processRule (oldRule : Rule<Source.t, Source.t>) = 
         let count = ref 0
         match oldRule.body with 
         | t.PSeq(elemList, _, _) -> 

@@ -19,7 +19,6 @@ open Yard.Core.IL
 open Production
 open Namer
 open TransformAux
-open Yard.Core.IL.Rule
 
 
 //let dummyPos s = new Source.t(s)
@@ -42,7 +41,7 @@ let genOptName () =
 
 let default_elem = {omit=false; rule=PRef(new Source.t "dummy", None); binding=None; checker=None}
 
-let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) = 
+let convertToBnf (rule:(Rule<Source.t,Source.t>)) = 
     let factList list = list |> List.map fst
     let formList list = list |> List.map snd
     let reduceMeta = function 

@@ -36,7 +36,7 @@ let defaultModules rules : Module<_,_> list =
 
 let defaultDefinition rules = {emptyGrammarDefinition with grammar = defaultModules rules}
 
-let simpleRules nonTerm body : Rule.t<_,_> list =
+let simpleRules nonTerm body : Rule<_,_> list =
     [{
         name = Source.t nonTerm
         args = []
@@ -47,7 +47,7 @@ let simpleRules nonTerm body : Rule.t<_,_> list =
         metaArgs = []
     }]
 
-let metaRules nonTerm body args : Rule.t<_,_> list = 
+let metaRules nonTerm body args : Rule<_,_> list = 
     [{
         name = Source.t nonTerm
         args = []
@@ -58,13 +58,13 @@ let metaRules nonTerm body args : Rule.t<_,_> list =
         metaArgs = args
     }]
 
-let simpleNotStartRules nonTerm body : Rule.t<_,_> list =
+let simpleNotStartRules nonTerm body : Rule<_,_> list =
     metaRules nonTerm body []
 
-let verySimpleRules nonTerm seq : Rule.t<_,_> list =
+let verySimpleRules nonTerm seq : Rule<_,_> list =
     simpleRules nonTerm <| PSeq(seq, None, None)
 
-let verySimpleNotStartRules nonTerm seq : Rule.t<_,_> list =
+let verySimpleNotStartRules nonTerm seq : Rule<_,_> list =
     simpleNotStartRules nonTerm <| PSeq(seq, None, None)
 
 let inline mapModule mapF (m : Module<_,_>) =
@@ -109,7 +109,7 @@ let getRulesMap (grammar : Grammar<_,_>) =
     |> dict
 
 /// if rule has metaArgs then it is a metarule
-let isMetaRule (r:Rule.t<Source.t,Source.t>) = r.metaArgs <> []
+let isMetaRule (r:Rule<Source.t,Source.t>) = r.metaArgs <> []
 
 /// hash table for metarules. 
 /// Map: using_module -> (rule_name -> (decl_module, rule_decl));
@@ -118,7 +118,7 @@ let metaRulesTbl grammar =
     let publicRules = new Dictionary<_,_>(getPublicRules grammar)
     /// Only public meta-rules present here
     let publicMeta =
-        let map = new Dictionary<string,Rule.t<Source.t, Source.t> list>()
+        let map = new Dictionary<string, Rule<Source.t, Source.t> list>()
         publicRules |> Seq.iter (fun item ->
             map.[item.Key] <- List.filter isMetaRule item.Value
         )

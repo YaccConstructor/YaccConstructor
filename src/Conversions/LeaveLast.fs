@@ -20,7 +20,7 @@ open Yard.Core.IL
 
 open System.Collections.Generic
 
-let leaveLast (ruleList: Rule.t<_,_> list) = 
+let leaveLast (ruleList: Rule<_,_> list) = 
     let findedRules = new HashSet<_>()
     List.rev ruleList |> List.filter (fun rule -> findedRules.Add rule.name)
     

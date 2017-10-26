@@ -155,38 +155,37 @@ module Production =
             |POpt x -> "(" + x.ToString() + ")?"
 
 
-module Rule = 
-    /// <summary>
-    /// <para>t&lt;'patt,'expr&gt; - Type of rule. </para>
-    /// <para>  'patt - type of attributes (arguments). </para>
-    /// <para>  'expr - type of expressions in action code. </para>
-    /// <para>Rule have the following format: </para>
-    /// <para>  [+]name&lt;&lt; metaArgs &gt;&gt;[args] : body; </para>
-    /// </summary>
-    [<StructuralEquality; StructuralComparison>]
-    type t<'patt,'expr> = {
-        /// Rule name. Used to start from this or to be referenced to from other rules.
-        name    : Source.t
-        /// Heritable arguments of rule
-        args    : 'patt list
-        /// Rule body (production).
-        body    : (Production.t<'patt,'expr>)
-        /// Is this rule a start non-terminal (in this case '[<Start>]' is used before rule)
-        isStart : bool
-        /// Can this rule be seen from another module.
-        /// It's true if ('public' is used before rule) or (module is marked as AllPublic and rule isn't marked as private)
-        isPublic : bool
-        isInline : bool
-        /// List of meta-arguments - names of rules, parametrizing this rule.
-        metaArgs: 'patt list
-    }
+/// <summary>
+/// <para>t&lt;'patt,'expr&gt; - Type of rule. </para>
+/// <para>  'patt - type of attributes (arguments). </para>
+/// <para>  'expr - type of expressions in action code. </para>
+/// <para>Rule have the following format: </para>
+/// <para>  [+]name&lt;&lt; metaArgs &gt;&gt;[args] : body; </para>
+/// </summary>
+[<StructuralEquality; StructuralComparison>]
+type Rule<'patt,'expr> = {
+    /// Rule name. Used to start from this or to be referenced to from other rules.
+    name    : Source.t
+    /// Heritable arguments of rule
+    args    : 'patt list
+    /// Rule body (production).
+    body    : (Production.t<'patt,'expr>)
+    /// Is this rule a start non-terminal (in this case '[<Start>]' is used before rule)
+    isStart : bool
+    /// Can this rule be seen from another module.
+    /// It's true if ('public' is used before rule) or (module is marked as AllPublic and rule isn't marked as private)
+    isPublic : bool
+    isInline : bool
+    /// List of meta-arguments - names of rules, parametrizing this rule.
+    metaArgs: 'patt list
+}
 
-    let defaultRule name body =
-        {name = name; body = body; args = []; isStart = false; isPublic = false; isInline = false; metaArgs = []}
+let defaultRule name body =
+    {name = name; body = body; args = []; isStart = false; isPublic = false; isInline = false; metaArgs = []}
 
 /// Module is a list of rules
 type Module<'patt,'expr> = {
-    rules : Rule.t<'patt,'expr> list
+    rules : Rule<'patt,'expr> list
     openings : Source.t list
     name : Source.t option
     /// Are all rules public (can be seen form another module), except explicitly marked as private.

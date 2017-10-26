@@ -183,7 +183,7 @@ let printProduction =
         | _ -> Seq.singleton <| Str "ERROR"
     printProduction
 
-let printRule isPublicModule (rule : Rule.t<Source.t, Source.t>) =
+let printRule isPublicModule (rule : Rule<Source.t, Source.t>) =
     let printArgs args =
         args
         |> List.map (fun src -> "<<" + Source.toString src + ">>")

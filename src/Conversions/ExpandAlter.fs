@@ -17,12 +17,11 @@ module Yard.Core.Conversions.ExpandTopLevelAlt
 open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
-open Yard.Core.IL.Production
 
 
 open System
 
-let extractOneRule (rule:Rule.t<'a,'b>) = 
+let extractOneRule (rule:Rule<'a,'b>) = 
     let rec expand = function
     | PAlt (a,b) -> expand a @ expand b
     | a   -> [{rule with body = a}]

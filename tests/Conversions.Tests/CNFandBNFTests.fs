@@ -23,7 +23,7 @@ type ``CNFandBNF tests`` () =
 
     [<Test>]
     member test.``To CNF test`` () =
-            let rules: Rule.t<_,_> list = 
+            let rules: Rule<_,_> list = 
                 [{name = Source.t "yard_s_1";
                   args = [];
                   body = PSeq ([{omit = false;
@@ -218,7 +218,7 @@ type ``CNFandBNF tests`` () =
 
     [<Test>]
     member test.``To BNFconj test`` () =
-            let rules: Rule.t<_,_> list = 
+            let rules: Rule<_,_> list = 
                 [{name = Source.t "s";
                   args = [];
                   body =
@@ -573,7 +573,7 @@ type ``CNFandBNF tests`` () =
 
     [<Test>]
     member test.``To BNFbool test`` () =
-            let rules: Rule.t<_,_> list = 
+            let rules: Rule<_,_> list = 
                 [{name = Source.t "s";
                   args = [];
                   body =

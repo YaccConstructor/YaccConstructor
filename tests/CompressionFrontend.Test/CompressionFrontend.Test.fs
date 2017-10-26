@@ -18,7 +18,7 @@ let ``When empty string expect empty grammar``() =
 
 [<Test>]
 let ``When only special symbols expect empty grammar``() = 
-    let x : Rule.t<Source.t, Source.t> list = []
+    let x : Rule<Source.t, Source.t> list = []
     Assert.AreEqual(x, tester.ParseGrammar("$$$$$", '$').grammar.Head.rules)
 
 [<Test>]

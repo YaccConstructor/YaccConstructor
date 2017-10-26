@@ -47,7 +47,7 @@
   </tr>
   <tr>
     <td>Parsing algorithm</td>
-    <td>RNGLR</td> 
+    <td>RNGLR, GLL</td> 
     <td>LL(*)</td>
     <td>LALR(1)</td>
     <td>LALR(1), LR(1), IELR(1), GLR</td>
@@ -272,28 +272,28 @@ expressions[declarations]:
 <h3>Conditional generation</h3>
 <pre>
 exec_literal:
-<h1><a name="if-ms" class="anchor" href="#if-ms">if ms</a></h1>
-<p>("EXEC" | "EXECUTE")</p>
-<h1><a name="elif-pl" class="anchor" href="#elif-pl">elif pl</a></h1>
-<p>"EXECUTE" "IMMEDIATE"</p>
-<h1><a name="endif" class="anchor" href="#endif">endif</a></h1>
-<p>LBRACE LITERAL RBRACE
+&num;if ms
+("EXEC" | "EXECUTE")
+&num;elif pl
+"EXECUTE" "IMMEDIATE"
+&num;endif
+LBRACE LITERAL RBRACE
 ;
 </pre>
 Means, that if you run generator with key -D "ms" then you get parser for grammar
 <pre>
-exec<em>literal:
+exec_literal:
 ("EXEC" | "EXECUTE")
 LBRACE LITERAL RBRACE
 ;
 </pre>
 Else, if you run generator with key -D "pl" then you get parser for grammar
 <pre>
-exec</em>literal:
+exec_literal:
 "EXECUTE" "IMMEDIATE"
 LBRACE LITERAL RBRACE
 ;
-</pre></p>
+</pre>
 <p><h3>Labels</h3>
 <pre>
 s: x (@l1(y z)| @l2(a b)) g;

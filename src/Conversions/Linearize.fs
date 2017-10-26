@@ -23,7 +23,7 @@ open System.Collections.Generic
 
 let dummyPos s = new Source.t(s)
 
-let private linearize (grammar: Grammar.t<_,_>) = 
+let private linearize (grammar: Grammar<_,_>) = 
     let rename =
         let decls = new Dictionary<_,_>()
         grammar |> List.iter (fun m ->

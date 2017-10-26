@@ -184,20 +184,19 @@ module Rule =
     let defaultRule name body =
         {name = name; body = body; args = []; isStart = false; isPublic = false; isInline = false; metaArgs = []}
 
-module Grammar =  
-    type Module<'patt,'expr> = {
-        /// Module is a list of rules
-        rules : Rule.t<'patt,'expr> list
-        openings : Source.t list
-        name : Source.t option
-        /// Are all rules public (can be seen form another module), except explicitly marked as private.
-        /// Otherwise rule must be directly marked as public to be seen.
-        allPublic : bool
-    }
-    /// Grammar is a list of modules
-    type t<'patt,'expr> = Module<'patt,'expr> list
+/// Module is a list of rules
+type Module<'patt,'expr> = {
+    rules : Rule.t<'patt,'expr> list
+    openings : Source.t list
+    name : Source.t option
+    /// Are all rules public (can be seen form another module), except explicitly marked as private.
+    /// Otherwise rule must be directly marked as public to be seen.
+    allPublic : bool
+}
 
-//module Definition =     
+/// Grammar is a list of modules
+type Grammar<'patt,'expr> = Module<'patt,'expr> list
+
 type DefinitionInfo = { fileName: string }
 type Definition<'patt,'expr when 'patt : comparison and 'expr : comparison>  = { 
     /// Contains information (e.g. origin) about this grammar description
@@ -205,7 +204,7 @@ type Definition<'patt,'expr when 'patt : comparison and 'expr : comparison>  = {
     /// Text before a grammar description ( e.g. some open-s), what will be simply copied
     head    :'expr option;
     /// Grammar description itself
-    grammar : Grammar.t<'patt,'expr>;
+    grammar : Grammar<'patt,'expr>;
     /// Text after a grammar description, what will be simply copied
     foot    :'expr option;
     options : Map<string, string>

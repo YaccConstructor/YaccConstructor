@@ -21,7 +21,6 @@ open Microsoft.FSharp.Text
 open Yard.Core.IL
 open Yard.Core
 open Yard.Core.IL.Production
-open Yard.Core.IL.Grammar
 open System.Text.RegularExpressions
  
 type Range = struct

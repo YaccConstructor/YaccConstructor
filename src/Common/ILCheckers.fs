@@ -81,7 +81,7 @@ let IsChomskyNormalForm (def:Yard.Core.IL.Definition<_,_>) =
             )
         )
 
-let private getAllModuleNames (grammar : Grammar.t<_,_>) =
+let private getAllModuleNames (grammar : Grammar<_,_>) =
     grammar
     |> List.map (fun m -> getModuleName m)
     |> List.sort
@@ -111,7 +111,7 @@ let GetInvalidOpenings (def : Yard.Core.IL.Definition<Source.t, Source.t>) =
             | _ -> Some (m, invalidOpenings)
         )
 
-let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Grammar.Module<Source.t, Source.t>) = 
+let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Module<Source.t, Source.t>) = 
     let declaredInnerRules =
         module'.rules |> List.map (fun r -> r.name.text)
     let declaredRules = new HashSet<_>(declaredInnerRules)
@@ -208,7 +208,7 @@ let GetUndeclaredNonterminalsList (def : Yard.Core.IL.Definition<Source.t, Sourc
     |> (fun (x,y,z) -> filterEmpty x, filterEmpty y, filterEmpty z)
 
 // returns a list of rule's names which are reachead from start rule in the grammar
-let reachableRulesInfo_of_grammar (grammar: Grammar.t<_,_>) =
+let reachableRulesInfo_of_grammar (grammar: Grammar<_,_>) =
     let rulesMap = getRulesMap grammar
     let reachedRules = new HashSet<_>()
     

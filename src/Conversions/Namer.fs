@@ -59,7 +59,7 @@ end
 
 let usedNames = new HashSet<_>()
 
-let initNamer (grammar : Grammar.t<_,_>) =
+let initNamer (grammar : Grammar<_,_>) =
     curNum := 0
     usedNames.Clear()
     let add s = usedNames.Add s |> ignore

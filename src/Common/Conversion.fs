@@ -19,6 +19,6 @@ open Yard.Core.IL
 [<AbstractClass>]
 type Conversion() = //as this =
     abstract Name : string
-    abstract ConvertGrammar : Grammar.t<Source.t, Source.t> * string[] -> Grammar.t<Source.t, Source.t>
-    abstract ConvertGrammar : Grammar.t<Source.t, Source.t>          -> Grammar.t<Source.t, Source.t>
+    abstract ConvertGrammar : Grammar<Source.t, Source.t> * string[] -> Grammar<Source.t, Source.t>
+    abstract ConvertGrammar : Grammar<Source.t, Source.t>            -> Grammar<Source.t, Source.t>
     default this.ConvertGrammar grammar = this.ConvertGrammar (grammar,[||]) 

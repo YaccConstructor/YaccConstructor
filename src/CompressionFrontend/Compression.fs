@@ -152,7 +152,7 @@ let compress (text: string) (separator: char) : Definition<Source.t, Source.t> =
     Rules.Remove(0) |> ignore
     if newFirst.lst.Count > 0 then Rules.Add(newFirst.number, newFirst)
     //to IL format
-    let g : Grammar.t<Source.t, Source.t>= 
+    let g : Grammar<Source.t, Source.t>= 
         [{openings = []; 
         allPublic = false; 
         name = None; 

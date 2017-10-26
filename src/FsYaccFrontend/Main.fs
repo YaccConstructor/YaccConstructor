@@ -27,7 +27,7 @@ open Microsoft.FSharp.Text.Lexing
 open Microsoft.FSharp.Core
 open System.Text.RegularExpressions
 
-let addStarts starts (grammar: Grammar.t<Source.t, Source.t>) = 
+let addStarts starts (grammar: Grammar<Source.t, Source.t>) = 
     grammar |> List.map (fun m ->
         {m with rules = m.rules |> List.map (fun rule ->
             if List.exists (fun (x : Source.t) -> x.text = rule.name.text) starts
@@ -55,7 +55,7 @@ let rec _addBindings = function
     | PMany(x) -> PMany(_addBindings x)
     | x -> x
 
-let addBindings (grammar: Grammar.t<Source.t, Source.t>) = 
+let addBindings (grammar: Grammar<Source.t, Source.t>) = 
     grammar |> mapGrammar (List.map (fun rule -> { rule with body=_addBindings rule.body } ))
 
 let LexBufferFromFile fileName = 
@@ -76,7 +76,7 @@ let LexBufferFromString grammarStr =
 
 let Parse lexbuf ilInfo = 
     try 
-        let (res : System.Tuple<Source.t option, Source.t list, Source.t list, Grammar.t<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
+        let (res : System.Tuple<Source.t option, Source.t list, Source.t list, Grammar<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
         let defHead = res.Item1
         { emptyGrammarDefinition
             with info = {fileName = ilInfo}

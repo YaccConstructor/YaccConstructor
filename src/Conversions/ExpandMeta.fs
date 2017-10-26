@@ -238,7 +238,7 @@ let private expandMetaRules grammar =
     /// hash table for references to expanded metarules
     let refsTbl = new Dictionary<_, Production.t<_,_> >(200)
     /// Replace existing meta-rules. Suppose that all high-level meta-rules are in metaRulesTbl
-    let rec replaceMetasInGrammar (grammar : Grammar.t<_,_>) metaRulesTbl refsTbl = 
+    let rec replaceMetasInGrammar (grammar : Grammar<_,_>) metaRulesTbl refsTbl = 
         grammar
         |> List.map (fun m ->
             m.rules

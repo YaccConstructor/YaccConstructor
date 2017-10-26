@@ -18,7 +18,7 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Core.Helpers
 
-let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Grammar.t<Source.t, Source.t>) =
+let GrammarEqualsWithoutLineNumbers (g1:Grammar<Source.t,Source.t>) (g2:Grammar<Source.t, Source.t>) =
     let srcEquals (a:Source.t) (b:Source.t) =
         if (a.text = b.text) then true
         else printfn "bad %A %A" a b; false
@@ -65,7 +65,7 @@ let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
         | _ -> false
 
     List.forall2
-        (fun (m1 : Grammar.Module<_,_>) (m2 : Grammar.Module<_,_>) ->
+        (fun (m1 : Module<_,_>) (m2 : Module<_,_>) ->
             getModuleName m1 = getModuleName m2
             && m1.allPublic = m2.allPublic
             && List.forall2 srcEquals m1.openings m2.openings

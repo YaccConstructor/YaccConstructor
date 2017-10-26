@@ -17,7 +17,7 @@ module Yard.Core.ConstraintsImpl.SingleModule
 open Yard.Core
 open Yard.Core.IL
 
-let private checker (grammar : Grammar.t<_,_>) =
+let private checker (grammar : Grammar<_,_>) =
     grammar.Length = 1
     
 let singleModule = new Constraint("SingleModule", checker, Conversions.Linearize.Linearize())

@@ -17,7 +17,6 @@ module Yard.Core.Helpers
 
 open System.Collections.Generic
 open Yard.Core.IL
-open Grammar
 open Production
 
 let errorToken = "error"
@@ -27,7 +26,7 @@ let getModuleName (m : Module<_,_>) =
     | Some n -> n.text
     | None -> ""
 
-let defaultModules rules : Grammar.Module<_,_> list =
+let defaultModules rules : Module<_,_> list =
     [{
         rules = rules
         openings = []
@@ -68,7 +67,7 @@ let verySimpleRules nonTerm seq : Rule.t<_,_> list =
 let verySimpleNotStartRules nonTerm seq : Rule.t<_,_> list =
     simpleNotStartRules nonTerm <| PSeq(seq, None, None)
 
-let inline mapModule mapF (m : Grammar.Module<_,_>) =
+let inline mapModule mapF (m : Module<_,_>) =
     {m with rules = mapF m.rules}
 
 let inline mapGrammar mapF grammar =
@@ -76,7 +75,7 @@ let inline mapGrammar mapF grammar =
     |> List.map (mapModule mapF)
 
 /// Map: module -> (list of public rules, declared in it)
-let getPublicRules (grammar : Grammar.t<_,_>) =
+let getPublicRules (grammar : Grammar<_,_>) =
     grammar
     |> List.map (fun module' ->
             let publics = module'.rules |> List.filter (fun r -> r.isPublic)
@@ -85,7 +84,7 @@ let getPublicRules (grammar : Grammar.t<_,_>) =
     |> dict
 
 /// For each module creates map: rule -> (module, in which the rule is declared)
-let getRulesMap (grammar : Grammar.t<_,_>) =
+let getRulesMap (grammar : Grammar<_,_>) =
     let publicRules = getPublicRules grammar
     grammar
     |> List.map (fun module' ->

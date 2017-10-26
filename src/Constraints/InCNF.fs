@@ -19,7 +19,7 @@ open IL
 open Production
 open Yard.Core.ConstraintsImpl.Common
 
-let private checker (grammar : Grammar.t<_,_>) =
+let private checker (grammar : Grammar<_,_>) =
     if grammar.Length > 1 then false
     else
         let notStart = 

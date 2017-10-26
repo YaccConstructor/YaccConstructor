@@ -30,6 +30,7 @@ let private tokenFun f = function
     | ACTION st
     | BAR st
     | AND st
+    | SHUFFLE st
     | COLON st
     | COMMA st
     | GREAT st

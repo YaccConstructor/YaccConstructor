@@ -72,6 +72,8 @@ module Production =
     /// <para>  'expr - type of expressions in action code. </para>
     /// </summary>
     and t<'patt,'expr> = 
+        /// Shuffle (e1 || e2)
+        |PShuff     of (t<'patt,'expr>) * (t<'patt,'expr>)
         /// Alternative (e1 | e2)
         |PAlt     of (t<'patt,'expr>) * (t<'patt,'expr>)
         /// Conjunction (e1 & e2)

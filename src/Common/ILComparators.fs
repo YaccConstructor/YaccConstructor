@@ -58,6 +58,7 @@ let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
         | PMany t1, PMany t2 -> ilTreeEqualsWithoutLineNumbers t1 t2
         | PSome t1, PSome t2 -> ilTreeEqualsWithoutLineNumbers t1 t2
         | POpt t1, POpt t2 -> ilTreeEqualsWithoutLineNumbers t1 t2
+        | PNeg elem1, PNeg elem2 -> ilTreeEqualsWithoutLineNumbers elem1 elem2
         | PMetaRef(r1, arg1, marg1), PMetaRef(r2, arg2, marg2) -> 
             srcEquals r1 r2 && srcOptEquals arg1 arg2 && 
                 List.length marg1 = List.length marg2 && List.forall2 ilTreeEqualsWithoutLineNumbers marg1 marg2

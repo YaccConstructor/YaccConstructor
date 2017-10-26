@@ -20,7 +20,7 @@ YARD is powerful translation specification language. It allows you to use EBNF, 
   </tr>
   <tr>
     <td>Parsing algorithm</td>
-    <td>RNGLR</td> 
+    <td>RNGLR, GLL</td> 
     <td>LL(*)</td>
     <td>LALR(1)</td>
     <td>LALR(1), LR(1), IELR(1), GLR</td>
@@ -270,11 +270,11 @@ expressions[declarations]:
 <h3>Conditional generation</h3>
 <pre>
 exec_literal:
-#if ms
+&num;if ms
 ("EXEC" | "EXECUTE")
-#elif pl
+&num;elif pl
 "EXECUTE" "IMMEDIATE"
-#endif
+&num;endif
 LBRACE LITERAL RBRACE
 ;
 </pre>

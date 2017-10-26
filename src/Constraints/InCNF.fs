@@ -37,4 +37,4 @@ let private checker (grammar : Grammar.t<_,_>) =
             | _ -> true
         ) grammar |> not
     
-let inCNF = new Constraint("InCNF", checker, Conversions.ToCNF.ToCNF())
+let inCNF = new Constraint("InCNF", checker, Conversions.CNFandBNF.CNF())

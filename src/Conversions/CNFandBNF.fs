@@ -60,6 +60,7 @@ let rec createConj rules =
     | _ -> PConj((Seq.item(0) rules).body, createConj (Seq.except [(Seq.item(0) rules)] rules))
 
 let deleteLongRules (rules: Rule.t<_,_> list) =
+    startIsEps <- false
     let newRules = HashSet<_>(new RuleComparer<_,_>())
     for rule in rules do
         let elements = getElements rule.body [] [] true

@@ -21,7 +21,6 @@ open Yard.Generators.Common
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 open Yard.Core.IL
-open Yard.Core.IL.Production
 open YC.PrettyPrinter.Pretty
 open YC.PrettyPrinter.StructuredFormat
 open Yard.Generators.Common.Epsilon
@@ -172,7 +171,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule<Source.t,Source.
                 childrenName !num (indexator.getLiteralName i) name
             |> wordL
         | PSeq (s, ac, _) ->
-            let getVarName innerNum (e : elem<_,_>) =
+            let getVarName innerNum (e : ProductionElem<_,_>) =
                 match e.binding with
                 | None ->
                     incr innerNum

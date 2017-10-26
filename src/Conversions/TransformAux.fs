@@ -15,7 +15,6 @@
 module Yard.Core.Conversions.TransformAux
 
 open Yard.Core.IL
-open Production
 open Yard.Core.Namer
 
 let getText = Source.toString

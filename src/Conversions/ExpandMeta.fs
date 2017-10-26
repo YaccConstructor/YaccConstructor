@@ -16,7 +16,6 @@ module Yard.Core.Conversions.ExpandMeta
 
 open Yard.Core
 open Yard.Core.IL
-open Production
 open Yard.Core.Namer
 open TransformAux
 open System.Collections.Generic
@@ -51,7 +50,7 @@ let getKey module' key =
                 | None -> ""
                 | Some x -> "{" + (x : Source.t).text + "}"
 
-            let elemToString (x : elem<Source.t, Source.t>) =
+            let elemToString (x : ProductionElem<Source.t, Source.t>) =
                 let check =
                     match x.checker with
                     | None -> ""
@@ -96,7 +95,7 @@ let getKey module' key =
 /// </summary>
 let expandRule =
     /// Replace formal parameter with its actual value or (if it is not to be replaced) 
-    let tryReplaceActual (formalToAct : (string * Production.t<_,_>) list) formal prev = 
+    let tryReplaceActual (formalToAct : (string * Production<_,_>) list) formal prev = 
         match List.tryFind (fun x -> fst x = formal) formalToAct with
         | None -> prev
         | Some res -> snd res
@@ -148,7 +147,7 @@ let expandRule =
     /// <para> resRuleList: Rule.t list - currently generated rules </para>
     /// <para> returns (new body, generated rules + old rules) </para>
     /// </summary>
-    and expandBody body (module' : string) metaRules (expanded : Dictionary<_, Production.t<_,_>>) resRuleList =
+    and expandBody body (module' : string) metaRules (expanded : Dictionary<_, Production<_,_>>) resRuleList =
         //printfn "b: %A" body
         /// Returns key for table of expanded rules.
         /// It's better to use hash.
@@ -236,7 +235,7 @@ let expandRule =
  *)
 let private expandMetaRules grammar =
     /// hash table for references to expanded metarules
-    let refsTbl = new Dictionary<_, Production.t<_,_> >(200)
+    let refsTbl = new Dictionary<_, Production<_,_> >(200)
     /// Replace existing meta-rules. Suppose that all high-level meta-rules are in metaRulesTbl
     let rec replaceMetasInGrammar (grammar : Grammar<_,_>) metaRulesTbl refsTbl = 
         grammar

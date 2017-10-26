@@ -21,7 +21,6 @@ open Yard.Frontends.FsYaccFrontend.Lexer
 open Yard.Frontends.FsYaccFrontend.Parser
 open Yard.Core.IL
 open Yard.Core
-open Yard.Core.IL.Production
 
 open Microsoft.FSharp.Text.Lexing
 open Microsoft.FSharp.Core

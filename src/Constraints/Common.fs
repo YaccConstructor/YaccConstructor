@@ -15,7 +15,6 @@
 module Yard.Core.ConstraintsImpl.Common
 
 open Yard.Core.IL
-open Production
 
 let existsRules pred (grammar : Grammar<_,_>) =
     grammar |> List.exists (fun m ->

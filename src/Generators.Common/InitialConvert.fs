@@ -17,7 +17,6 @@
 module Yard.Generators.Common.InitialConvert
 
 open Yard.Core.IL
-open Yard.Core.IL.Production
 open System.Collections.Generic
 open Yard.Core.Conversions.TransformAux
 

@@ -16,7 +16,6 @@ module Yard.Core.ConstraintsImpl.InCNF
 
 open Yard.Core
 open IL
-open Production
 open Yard.Core.ConstraintsImpl.Common
 
 let private checker (grammar : Grammar<_,_>) =

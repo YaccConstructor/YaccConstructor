@@ -17,7 +17,6 @@ module Yard.Core.Helpers
 
 open System.Collections.Generic
 open Yard.Core.IL
-open Production
 
 let errorToken = "error"
 

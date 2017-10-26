@@ -14,7 +14,6 @@
 
 namespace Yard.Generators.Common
 
-open Yard.Core.IL.Production
 open Yard.Core.IL
 
 type NumberedRules (ruleList : Rule<Source.t,Source.t> list, indexator : Indexator, caseSensitive) =

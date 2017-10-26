@@ -16,8 +16,6 @@ module Yard.Core.Conversions.ExpandTopLevelAlt
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
-
 
 open System
 

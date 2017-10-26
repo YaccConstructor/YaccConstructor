@@ -17,7 +17,6 @@ module Yard.Core.Conversions.Linearize
 open Yard.Core
 open Yard.Core.IL
 open TransformAux
-open Yard.Core.IL.Production
 open System.Collections.Generic
 
 

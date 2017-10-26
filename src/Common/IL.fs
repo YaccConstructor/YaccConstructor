@@ -48,111 +48,110 @@ module Source =
     // TODO: make something with toString overriding of Source.t   
     let toString (x : t) = x.text
   
-module Production = 
-    //let num = ref 0
-    type IRuleType = interface end
-    type DLabel = {
-        label: string;
-        weight: float option
-    }
-    [<StructuralEquality; StructuralComparison>]
-    type elem<'patt,'expr> = {
-        /// Don't include rule into AST
-        omit:bool;
-        /// Production rule itself.
-        rule:(t<'patt,'expr>);
-        /// Binding :) like f:F or f:=F.... Seal 
-        binding:'patt option;
-        /// Almost resolver (condition in production).
-        checker:'expr option
-    }
-    /// <summary>
-    /// <para>t&lt;'patt,'expr&gt; - Type of production node in derivation tree. </para>
-    /// <para>  'patt - type of l-attributes. </para>
-    /// <para>  'expr - type of expressions in action code. </para>
-    /// </summary>
-    and t<'patt,'expr> = 
-        /// Shuffle (e1 || e2)
-        |PShuff     of (t<'patt,'expr>) * (t<'patt,'expr>)
-        /// Alternative (e1 | e2)
-        |PAlt     of (t<'patt,'expr>) * (t<'patt,'expr>)
-        /// Conjunction (e1 & e2)
-        |PConj    of (t<'patt,'expr>) * (t<'patt,'expr>)
-        /// Negation
-        |PNeg of (t<'patt,'expr>)
-        /// Sequence * attribute. (Attribute is always applied to sequence) 
-        |PSeq     of (elem<'patt,'expr>) list * 'expr option * DLabel option
-        /// Token itself. Final element of parsing.
-        |PToken   of Source.t 
-        /// Reference to other rule inside production. With an optional args list.
-        |PRef     of Source.t * 'expr option
-        /// expr*
-        |PMany    of (t<'patt,'expr>)
-        /// Reference to metarule inside production (mr<<x>> in rule "a: mr<<x>> y z")
-        |PMetaRef of Source.t * 'expr option * t<'patt,'expr> list
-        /// Literal. We can use constants ("if" and "then" in ' .."if" expr "then" expr...')
-        |PLiteral of Source.t 
-        /// Extended regexp repetition, "man egrep" for details
-        |PRepet   of (t<'patt,'expr>) * int option * int option
-        /// Permutation (A || B || C)
-        |PPerm    of (t<'patt,'expr>) list
-        // The following are obsolete and reduction to PRepet should be discussed.
-        /// expr+
-        |PSome    of (t<'patt,'expr>)
-        /// expr?
-        |POpt     of (t<'patt,'expr>)
+type DLabel = {
+    label: string;
+    weight: float option
+}
 
-        with
-        override this.ToString() =
+[<StructuralEquality; StructuralComparison>]
+type ProductionElem<'patt,'expr> = {
+    /// Don't include rule into AST
+    omit:bool;
+    /// Production rule itself.
+    rule:(Production<'patt,'expr>);
+    /// Binding :) like f:F or f:=F.... Seal 
+    binding:'patt option;
+    /// Almost resolver (condition in production).
+    checker:'expr option
+}
+
+/// <summary>
+/// <para>t&lt;'patt,'expr&gt; - Type of production node in derivation tree. </para>
+/// <para>  'patt - type of l-attributes. </para>
+/// <para>  'expr - type of expressions in action code. </para>
+/// </summary>
+and Production<'patt,'expr> = 
+    /// Shuffle (e1 || e2)
+    |PShuff     of (Production<'patt,'expr>) * (Production<'patt,'expr>)
+    /// Alternative (e1 | e2)
+    |PAlt     of (Production<'patt,'expr>) * (Production<'patt,'expr>)
+    /// Conjunction (e1 & e2)
+    |PConj    of (Production<'patt,'expr>) * (Production<'patt,'expr>)
+    /// Negation
+    |PNeg of (Production<'patt,'expr>)
+    /// Sequence * attribute. (Attribute is always applied to sequence) 
+    |PSeq     of (ProductionElem<'patt,'expr>) list * 'expr option * DLabel option
+    /// Token itself. Final element of parsing.
+    |PToken   of Source.t 
+    /// Reference to other rule inside production. With an optional args list.
+    |PRef     of Source.t * 'expr option
+    /// expr*
+    |PMany    of (Production<'patt,'expr>)
+    /// Reference to metarule inside production (mr<<x>> in rule "a: mr<<x>> y z")
+    |PMetaRef of Source.t * 'expr option * Production<'patt,'expr> list
+    /// Literal. We can use constants ("if" and "then" in ' .."if" expr "then" expr...')
+    |PLiteral of Source.t 
+    /// Extended regexp repetition, "man egrep" for details
+    |PRepet   of (Production<'patt,'expr>) * int option * int option
+    /// Permutation (A || B || C)
+    |PPerm    of (Production<'patt,'expr>) list
+    // The following are obsolete and reduction to PRepet should be discussed.
+    /// expr+
+    |PSome    of (Production<'patt,'expr>)
+    /// expr?
+    |POpt     of (Production<'patt,'expr>)
+
+    with
+    override this.ToString() =
 //            incr num
 //            printfn "%d %A" !num this
-            let argsToString = function
+        let argsToString = function
+            | None -> ""
+            | Some x -> "[" + x.ToString() + "]"
+                    
+        let metaArgsToString metaArgs =
+            if ((metaArgs : 'a list).IsEmpty) then ""
+            else "<<" + (metaArgs
+                            |> List.map (fun x -> x.ToString())
+                            |> String.concat " ")
+                    + ">>"
+                    
+        match this with
+        |PAlt (x, y) -> x.ToString() + " | " + y.ToString()
+        |PConj (x, y) -> x.ToString() + " & " + y.ToString()
+        |PNeg x -> "!" + x.ToString()
+        |PSeq (ruleSeq, attrs, l) ->
+            let strAttrs =
+                match attrs with
                 | None -> ""
-                | Some x -> "[" + x.ToString() + "]"
-                    
-            let metaArgsToString metaArgs =
-                if ((metaArgs : 'a list).IsEmpty) then ""
-                else "<<" + (metaArgs
-                             |> List.map (fun x -> x.ToString())
-                             |> String.concat " ")
-                        + ">>"
-                    
-            match this with
-            |PAlt (x, y) -> x.ToString() + " | " + y.ToString()
-            |PConj (x, y) -> x.ToString() + " & " + y.ToString()
-            |PNeg x -> "!" + x.ToString()
-            |PSeq (ruleSeq, attrs, l) ->
-                let strAttrs =
-                    match attrs with
+                | Some x -> "{" + x.ToString() + "}"
+            let elemToString (x:ProductionElem<_,_>) =
+                let check =
+                    match x.checker with
                     | None -> ""
-                    | Some x -> "{" + x.ToString() + "}"
-                let elemToString (x:elem<_,_>) =
-                    let check =
-                        match x.checker with
-                        | None -> ""
-                        | Some c -> "=>{" + c.ToString() + "}=>"
-                    let omit = if (x.omit) then "-" else ""
-                    let bind =
-                        match x.binding with
-                        | None -> ""
-                        | Some var -> var.ToString() + "="
-                    check + omit + bind + x.rule.ToString()
-                "<" + String.concat " " (List.map (fun x -> (*printfn "%A" x;*) "(" + (elemToString x) + ")") ruleSeq) + ">" + strAttrs
-            |PToken src -> Source.toString src
-            |PRef (name, args) ->
-                Source.toString name + argsToString args
-            |PMany x -> "(" + x.ToString() + ")*"
-            |PMetaRef (name, args, metaArgs) ->
-                Source.toString name + metaArgsToString metaArgs + argsToString args
-            |PLiteral src -> Source.toString src
-            |PRepet _ -> failwith "Repetition was not realized yet"
-            |PPerm src ->
-                src
-                |> List.map (fun x -> x.ToString())
-                |> String.concat " "
-                |> fun res -> "[|" + res + "|]"
-            |PSome x -> "(" + x.ToString() + ")+"
-            |POpt x -> "(" + x.ToString() + ")?"
+                    | Some c -> "=>{" + c.ToString() + "}=>"
+                let omit = if (x.omit) then "-" else ""
+                let bind =
+                    match x.binding with
+                    | None -> ""
+                    | Some var -> var.ToString() + "="
+                check + omit + bind + x.rule.ToString()
+            "<" + String.concat " " (List.map (fun x -> (*printfn "%A" x;*) "(" + (elemToString x) + ")") ruleSeq) + ">" + strAttrs
+        |PToken src -> Source.toString src
+        |PRef (name, args) ->
+            Source.toString name + argsToString args
+        |PMany x -> "(" + x.ToString() + ")*"
+        |PMetaRef (name, args, metaArgs) ->
+            Source.toString name + metaArgsToString metaArgs + argsToString args
+        |PLiteral src -> Source.toString src
+        |PRepet _ -> failwith "Repetition was not realized yet"
+        |PPerm src ->
+            src
+            |> List.map (fun x -> x.ToString())
+            |> String.concat " "
+            |> fun res -> "[|" + res + "|]"
+        |PSome x -> "(" + x.ToString() + ")+"
+        |POpt x -> "(" + x.ToString() + ")?"
 
 
 /// <summary>
@@ -169,7 +168,7 @@ type Rule<'patt,'expr> = {
     /// Heritable arguments of rule
     args    : 'patt list
     /// Rule body (production).
-    body    : (Production.t<'patt,'expr>)
+    body    : (Production<'patt,'expr>)
     /// Is this rule a start non-terminal (in this case '[<Start>]' is used before rule)
     isStart : bool
     /// Can this rule be seen from another module.

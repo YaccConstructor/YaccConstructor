@@ -16,8 +16,6 @@ module Yard.Core.Conversions.BuildAST
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
-
 
 open System.Collections.Generic
 
@@ -42,7 +40,7 @@ let leafConstr = ref (fun token binding -> sprintf "Leaf(\"%s\")" token)
 
 let seqify = function
     | PSeq(x, y,l) -> PSeq(x, y,l)
-    | production -> PSeq([{new elem<Source.t, Source.t> with omit=false and rule=production and binding=None and checker=None}], None,None)
+    | production -> PSeq([{new ProductionElem<Source.t, Source.t> with omit=false and rule=production and binding=None and checker=None}], None,None)
 
 let printSeqProduction binding = function
     | POpt x -> sprintf "(match %s with None -> Node(\"opt\", []) | Some(ast) -> ast)" binding 
@@ -51,8 +49,8 @@ let printSeqProduction binding = function
     | PMany p -> sprintf "Node(\"many\", %s)" binding    
     | _ -> binding
 
-let rec _buildAST ruleName (production: t<Source.t, Source.t>) = 
-    let isRef (elem:Production.elem<Source.t, Source.t>) = match elem.rule with PRef(_,_) -> true | _ -> false
+let rec _buildAST ruleName (production: Production<Source.t, Source.t>) = 
+    let isRef (elem:ProductionElem<Source.t, Source.t>) = match elem.rule with PRef(_,_) -> true | _ -> false
     let isTopLevelAlt elem = 
         match elem.rule with
         | PAlt _ -> true

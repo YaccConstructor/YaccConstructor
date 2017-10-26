@@ -16,13 +16,12 @@ module Yard.Core.Conversions.EliminateLeftRecursion
 
 open Yard.Core
 open Yard.Core.IL
-open Production
 open Yard.Core.Namer
 open TransformAux
 
 
 type Rule = Rule<Source.t,Source.t>
-type Production = Production.t<Source.t,Source.t>
+type Production = Production<Source.t,Source.t>
 
 let noReduceError = sprintf "Cannot eliminate left recursion. Nonterminal %s does not reduce."
 let trivialReduceError x = sprintf "Cannot eliminate left recursion. There is derivation %s -*> %s." x x

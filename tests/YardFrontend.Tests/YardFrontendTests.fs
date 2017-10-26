@@ -24,7 +24,6 @@ open Yard.Frontends.YardFrontend
 open Yard.Frontends.YardFrontend.GrammarParser
 open System.Collections.Generic
 open Yard.Core.IL
-open Yard.Core.IL.Production
 open Yard.Core.Helpers
 open NUnit.Framework
 

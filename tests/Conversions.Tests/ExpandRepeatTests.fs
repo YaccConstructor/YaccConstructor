@@ -2,7 +2,6 @@
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
 open Conversions.TransformAux
 open NUnit.Framework
 open ConversionsTests

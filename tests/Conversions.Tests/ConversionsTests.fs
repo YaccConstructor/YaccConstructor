@@ -21,7 +21,6 @@ module ConversionsTests
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
 open Yard.Core.Helpers
 open Conversions.TransformAux
 open NUnit.Framework
@@ -63,7 +62,7 @@ let getBE name =
 
 let treeDump = new Yard.Generators.TreeDump.TreeDump ()
 
-let dummyRule : elem<Source.t,Source.t> = {omit=false; binding=None; checker=None; rule=PToken (Source.t "DUMMY")}
+let dummyRule : ProductionElem<Source.t,Source.t> = {omit=false; binding=None; checker=None; rule=PToken (Source.t "DUMMY")}
 
 let expandBrackets = new Conversions.ExpandBrackets.ExpandBrackets()
 let expandMeta = new Conversions.ExpandMeta.ExpandMeta()

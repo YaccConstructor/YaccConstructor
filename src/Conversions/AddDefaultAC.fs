@@ -17,7 +17,6 @@ module Yard.Core.Conversions.AddDefaultAC
 open Yard.Core
 open Namer
 open Yard.Core.IL
-open Yard.Core.IL.Production
 open System.Collections.Generic
 open Yard.Core.Conversions.TransformAux
 

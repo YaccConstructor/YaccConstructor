@@ -16,11 +16,10 @@ module Yard.Core.Conversions.RemoveAST
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
 
 
 let private removeAC (ruleList: Rule<Source.t, Source.t> list) =
-    let rec inner (production: t<Source.t, Source.t>) =
+    let rec inner production =
         match production with
         | PSeq (x,ac,l) -> PSeq(x |> List.map (fun b -> {b with rule = b.rule |> inner}),None,l)
         | PAlt (l,r) -> PAlt (inner l, inner r)

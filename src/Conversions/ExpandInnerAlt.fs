@@ -17,8 +17,6 @@ module Yard.Core.Conversions.ExpandInnerAlt
 open Yard.Core
 open Yard.Core.IL
 open TransformAux
-open Yard.Core.IL.Production
-
 
 let dummyPos s = new Source.t(s)
 

@@ -16,8 +16,6 @@ module Yard.Core.Conversions.ReplaceLiterals
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
-
 
 open System.Collections.Generic
 

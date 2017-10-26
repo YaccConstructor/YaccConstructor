@@ -3,7 +3,6 @@
 open System
 
 open Yard.Core.IL
-open Yard.Core.IL.Production
 open Yard.Generators.Common
 
 open HighlightingPrinter
@@ -46,7 +45,7 @@ let private getNodeSemantic parent children =
     printer.PrintBrInd 0 "addSemantic parent children"
     printer.ToString()
 
-let private changeRule (oldRule : Rule<_,_>) (elemList : elem<Source.t, Source.t> list) (bindings : Source.t list) = 
+let private changeRule (oldRule : Rule<_,_>) (elemList : ProductionElem<Source.t, Source.t> list) (bindings : Source.t list) = 
     let actionCode = getNodeSemantic oldRule.name.text bindings
     let newRule : Rule<Source.t, Source.t> = 
         {
@@ -72,7 +71,7 @@ let private createNewBinding (numOpt : int ref option) =
     newBinding
 
 let private getNewElem newBinding refRule = 
-    let newElem : elem<Source.t, Source.t> = 
+    let newElem : ProductionElem<Source.t, Source.t> = 
         {
             binding = newBinding
             checker = None
@@ -103,7 +102,7 @@ let createHighlightingRule name newElem actionCode =
 let getRulesForTerminal terminals = 
     let processTerminal terminal = 
         let actionCode = new Source.t(getLeafSemanticForTerminal terminal)
-        let newElem = getNewElem None <| t.PToken (new Source.t(terminal))
+        let newElem = getNewElem None <| PToken (new Source.t(terminal))
         createHighlightingRule terminal newElem actionCode
 
     terminals
@@ -114,7 +113,7 @@ let getRulesForLiterals literals =
     let processLiteral literal =
         let litName, litText = literal
         let actionCode = new Source.t (getLeafSemanticForLiteral litName litText)
-        let newElem =  getNewElem None <| t.PLiteral(new Source.t(litName))
+        let newElem =  getNewElem None <| PLiteral(new Source.t(litName))
 
         createHighlightingRule litName newElem actionCode
 
@@ -128,15 +127,15 @@ let highlightingConvertions (def : Definition<Source.t, Source.t>) =
     let terminals = ref []
     let literals = ref []
 
-    let rec processElem (oldElem : elem<Source.t, Source.t>) count = 
+    let rec processElem (oldElem : ProductionElem<Source.t, Source.t>) count = 
         let result = ref []
         let newElem = ref oldElem
 
         let inline createHighlightRefRule text = 
-            t.PRef(new Source.t(sprintf "highlight_%s" text), None)
+            PRef(new Source.t(sprintf "highlight_%s" text), None)
         
         match oldElem.rule with
-        | t.PSeq (metaList,_,_) -> 
+        | PSeq (metaList,_,_) -> 
             metaList
             |> List.iter
                 (
@@ -145,12 +144,12 @@ let highlightingConvertions (def : Definition<Source.t, Source.t>) =
                         result := !result @ someElemList
                 )
 
-        | t.PRef (name, _) as oldElemRule -> 
+        | PRef (name, _) as oldElemRule -> 
             let newBinding = createNewBinding <| Some count
-            newElem := getNewElem <| newBinding <| t.PRef (name, None)
+            newElem := getNewElem <| newBinding <| PRef (name, None)
             result := !result @ [!newElem]
 
-        | t.PToken tok -> 
+        | PToken tok -> 
             if List.forall ((<>) tok.text) !terminals
             then terminals := tok.text :: !terminals
             
@@ -158,7 +157,7 @@ let highlightingConvertions (def : Definition<Source.t, Source.t>) =
             newElem := getNewElem newBinding <| createHighlightRefRule tok.text
             result := !result @ [!newElem]
         
-        | t.PLiteral lit -> 
+        | PLiteral lit -> 
             let litName = literalToName' lit.text
             if List.forall (fun symbol -> fst symbol <> litName) !literals
             then literals := (litName, lit.text) :: !literals
@@ -173,7 +172,7 @@ let highlightingConvertions (def : Definition<Source.t, Source.t>) =
     let processRule (oldRule : Rule<Source.t, Source.t>) = 
         let count = ref 0
         match oldRule.body with 
-        | t.PSeq(elemList, _, _) -> 
+        | PSeq(elemList, _, _) -> 
             let newElemList = ref []
             let bindingsList = ref []
             elemList
@@ -183,7 +182,7 @@ let highlightingConvertions (def : Definition<Source.t, Source.t>) =
             |> List.iter (fun newElem -> bindingsList := newElem.binding.Value :: !bindingsList)
 
             changeRule <| oldRule <| !newElemList <| List.rev !bindingsList
-        | t.PRef _ -> oldRule
+        | PRef _ -> oldRule
         | _ -> failwith "Error in highlighting convertions"
 
     let addHighlightRules() = 

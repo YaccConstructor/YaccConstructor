@@ -4,7 +4,6 @@ open System.Collections.Generic
 open Microsoft.FSharp.Collections
 
 open Yard.Core.IL
-open Yard.Core.IL.Production
 open Yard.Generators.Common.Epsilon
 open Yard.Generators.Common.SymbolSets
 open Yard.Generators.Common

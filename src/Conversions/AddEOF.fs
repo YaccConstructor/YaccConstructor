@@ -16,7 +16,6 @@ module Yard.Core.Conversions.AddEOF
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
 
 
 open System.Collections.Generic

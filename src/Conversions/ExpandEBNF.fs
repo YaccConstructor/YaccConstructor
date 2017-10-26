@@ -16,7 +16,6 @@ module Yard.Core.Conversions.ExpandEbnfStrict
 
 open Yard.Core
 open Yard.Core.IL
-open Production
 open Namer
 open TransformAux
 

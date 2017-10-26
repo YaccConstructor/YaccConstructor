@@ -15,7 +15,6 @@ module Yard.Core.Conversions.ExpandConjunction
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
 open Namer
 
 open TransformAux

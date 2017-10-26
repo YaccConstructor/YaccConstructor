@@ -15,7 +15,6 @@
 namespace Yard.Generators.Common
 
 open Yard.Core.IL
-open Yard.Core.IL.Production
 
 type Indexator (ruleList : Rule<Source.t,Source.t> list, caseSensitive) =
     let unique s = s |> Set.ofSeq |> Array.ofSeq

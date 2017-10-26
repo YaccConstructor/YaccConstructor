@@ -4,7 +4,6 @@ open System.Collections.Generic
 open System.IO
 open System.Collections
 open Yard.Core.IL
-open Production
 
 type Rule =
     val number : int

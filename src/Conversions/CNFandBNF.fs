@@ -3,24 +3,23 @@
 open System.IO
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 open TransformAux
 
 
 type NonTermComparer<'t1,'t2 when 't1:equality and 't2:equality>() =
-    interface IEqualityComparer<Production.elem<'t1,'t2>> with
+    interface IEqualityComparer<ProductionElem<'t1,'t2>> with
         member this.Equals(x, y) = match x.rule, y.rule with PRef (x, _), PRef (y, _) -> x.text = y.text | _ -> false
         member this.GetHashCode x = match x.rule with PRef (x, _) -> hash x.text | _ -> hash x
 
 type TermComparer<'t1,'t2 when 't1:equality and 't2:equality>() =
-    interface IEqualityComparer<Production.elem<'t1,'t2>> with
+    interface IEqualityComparer<ProductionElem<'t1,'t2>> with
         member this.Equals(x, y) = match x.rule, y.rule with PToken x, PToken y -> x.text = y.text | _ -> false
         member this.GetHashCode x = match x.rule with PToken x -> hash x.text | _ -> hash x
 
 type PairComparer<'t1,'t2 when 't1:equality and 't2:equality>() =
-    interface IEqualityComparer<Production.elem<'t1,'t2> * Production.elem<'t1,'t2>> with
+    interface IEqualityComparer<ProductionElem<'t1,'t2> * ProductionElem<'t1,'t2>> with
         member this.Equals((x1, x2), (y1, y2)) = match (x1.rule,x2.rule), (y1.rule,y2.rule) with (PRef (x1, _), PRef (x2, _)), (PRef (y1, _), PRef (y2, _)) -> x1.text = y1.text && x2.text = y2.text | _ -> false
         member this.GetHashCode x = match (fst x).rule, (snd x).rule with PRef (x1, _), PRef(x2, _) -> hash (x1.text + x2.text) | _ -> hash (fst x) + hash (snd x)
 

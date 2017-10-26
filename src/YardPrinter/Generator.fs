@@ -19,7 +19,6 @@ module Yard.Generators.YardPrinter.Generator
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
 
 let endl = System.Environment.NewLine
 let printSourceOpt = function None -> "" | Some (arg : Source.t) -> endl + "{" + arg.text + "}" + endl + endl
@@ -100,7 +99,7 @@ let printProduction =
         |> printSeqBrackets "<" ">"
 
     // wasAlt is used for dealing with one set of alternatives (if it's true, we are inside the set).
-    and printProduction wasAlt (production:Production.t<Source.t,Source.t>)  = 
+    and printProduction wasAlt (production:Production<Source.t,Source.t>)  = 
         let rec priority = function 
             | PAlt _ -> 1
             | PSeq ([elem],None,_) -> 
@@ -121,7 +120,7 @@ let printProduction =
         let printArg = function
             | Some attr  -> "<<" + Source.toString attr + ">>"
             | None -> ""
-        let printElem (elem:elem<Source.t,Source.t>) = 
+        let printElem (elem:ProductionElem<Source.t,Source.t>) = 
             let binding = function
                 | Some x when String.forall (fun x -> System.Char.IsLetterOrDigit x || x = '_')  (Source.toString x) -> Source.toString x + " ="
                 | Some x  -> "{" + Source.toString x + "} ="

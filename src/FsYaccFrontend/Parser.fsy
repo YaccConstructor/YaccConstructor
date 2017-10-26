@@ -17,7 +17,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 open Yard.Core.IL
-open Yard.Core.IL.Production
  
 %}
 %token EOF
@@ -44,7 +43,7 @@ alternative : yard_list_13 ACTION_CODE {
     let ac=$2 in
     lst
     |> List.map (fun prod ->
-            {new Production.elem<Source.t, Source.t>
+            {new ProductionElem<Source.t, Source.t>
                 with omit=false
                 and rule=prod
                 and binding=None

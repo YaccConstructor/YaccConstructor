@@ -16,8 +16,6 @@ module Yard.Core.Conversions.BuildAstSimple
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
-
 
 open System.Collections.Generic
 
@@ -30,7 +28,7 @@ type AST<'token> =
 let leafConstr = sprintf "Leaf(\"%s\", %s)"
 let seqify = function
     | PSeq(x, y, l) -> PSeq(x, y, l)
-    | production -> PSeq([{new elem<Source.t, Source.t> with omit=false and rule=production and binding=None and checker=None}], None, None)
+    | production -> PSeq([{new ProductionElem<Source.t, Source.t> with omit=false and rule=production and binding=None and checker=None}], None, None)
 
 let printSeqProduction binding = function
     | POpt(x) -> sprintf "(match %s with None -> [] | Some(ast) -> ast)" binding 
@@ -40,7 +38,7 @@ let printSeqProduction binding = function
     | _ -> binding
 
 /// ruleName is empty when production is inner and action code returns list of nodes
-let rec _buildAstSimple ruleName (production: t<Source.t, Source.t>) = 
+let rec _buildAstSimple ruleName (production: Production<Source.t, Source.t>) = 
     match production with
     | PSeq(elements, _, l) -> 
         //if elements.Length = 1 && (match elements.Head.rule with PRef(("empty",_),_) -> true | _ -> false) then

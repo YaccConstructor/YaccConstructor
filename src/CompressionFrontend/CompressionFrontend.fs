@@ -13,7 +13,7 @@ type CompressionFrontend() =
             | (:? (string list) as lst) -> compressList lst
             | _ -> IL.emptyGrammarDefinition
         override this.ProductionTypes =
-            Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>
+            Reflection.FSharpType.GetUnionCases typeof<IL.Production<string,string>>
             |> List.ofArray
             |> List.map (fun unionCase -> unionCase.Name)
         override this.ParseGrammarFromStr str = 

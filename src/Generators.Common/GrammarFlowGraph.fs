@@ -3,7 +3,6 @@
 open System.Collections.Generic
 
 open Yard.Core.IL
-open Yard.Core.IL.Production
 open QuickGraph
 
 type GFGEdgeTag<'token> =

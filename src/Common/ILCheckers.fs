@@ -14,7 +14,6 @@
 
 module Yard.Core.Checkers
 
-open Yard.Core.IL.Production
 open Yard.Core.IL
 open System.Collections.Generic
 open System.Linq

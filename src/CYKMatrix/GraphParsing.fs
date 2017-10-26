@@ -6,7 +6,6 @@
     open System.Collections.Generic
     open Yard.Core
     open Yard.Core.IL
-    open Yard.Core.IL.Production
     open Yard.Core.Helpers
     open Conversions.TransformAux
     open QuickGraph

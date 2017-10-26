@@ -2,9 +2,6 @@
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
-open Yard.Core.IL.Production
-
 open Yard.Core.Namer
 open TransformAux
 

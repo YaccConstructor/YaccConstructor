@@ -15,7 +15,6 @@
 module Yard.Core.Namer
 
 open IL
-open Production
 open System.Collections.Generic
 
 (** prefix for all items created by Yard *)
@@ -130,7 +129,7 @@ let newName (n : string) =
 
 let newSource (old : Source.t) = new Source.t(newName old.text, old)
 
-let genNewSourceWithRange (name : string) (body : t<_,_>) =
+let genNewSourceWithRange (name : string) (body : Production<_,_>) =
     let rec getBegin = function
         | PSeq (s, ac,l) ->
             match s with

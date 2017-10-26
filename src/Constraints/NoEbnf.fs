@@ -15,7 +15,7 @@
 module Yard.Core.ConstraintsImpl.NoEbnf
 
 open Yard.Core
-open IL.Production
+open Yard.Core.IL
 open Yard.Core.ConstraintsImpl.Common
 
 let private isEbnf = function

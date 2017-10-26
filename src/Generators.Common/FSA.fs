@@ -9,7 +9,7 @@ open Yard.Generators.Common.Epsilon
 open Yard.Generators.Common.SymbolSets
 open Yard.Generators.Common
 
-type FSA(ruleList : Rule<Source.t,Source.t> list) =
+type FSA(ruleList : Rule<Source,Source> list) =
     let time = ref System.DateTime.Now
     let fsa =
         ruleList

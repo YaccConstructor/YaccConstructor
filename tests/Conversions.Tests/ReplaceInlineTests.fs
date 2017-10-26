@@ -41,11 +41,11 @@ type ``Inline tests`` () =
         let result = {loadIL with grammar = conversion.ConvertGrammar loadIL.grammar}
         let rules = 
             (verySimpleRules "s"
-                [{dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}])
+                [{dummyRule with rule = PRef (Source("yard_exp_brackets_1"),None)}])
             @
             (verySimpleNotStartRules "yard_exp_brackets_1"
-                [{dummyRule with rule = PRef (Source.t("x"),None)}
-                ;{dummyRule with rule = PRef (Source.t("y"),None)}
+                [{dummyRule with rule = PRef (Source("x"),None)}
+                ;{dummyRule with rule = PRef (Source("y"),None)}
                 ]
             )
         let expected = defaultDefinition rules

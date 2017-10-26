@@ -31,7 +31,7 @@ module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
 
 let basePath subdir = System.IO.Path.Combine("./data/YardFrontend/", subdir)
 
-let dummyPos s = new Source.t(s)
+let dummyPos s = new Source(s)
 
 let equalTokens x y =
     let getCtor arg = fst <| Microsoft.FSharp.Reflection.FSharpValue.GetUnionFields(arg, typeof<Token>)
@@ -62,7 +62,7 @@ let lexerTest str lexemsListCorrect =
         with _ -> false
     Assert.IsTrue (areEqual lexemsListCorrect lexemsList)
 
-let preprocessorTest path (expectedIL : Definition<Source.t,Source.t>) =
+let preprocessorTest path (expectedIL : Definition<Source,Source>) =
     let currentIL = {Main.ParseFile path with info = {fileName =""}}
 
     //printfn "ilDef = %A" currentIL
@@ -70,7 +70,7 @@ let preprocessorTest path (expectedIL : Definition<Source.t,Source.t>) =
 
     Assert.IsTrue(Yard.Core.ILComparators.GrammarEqualsWithoutLineNumbers expectedIL.grammar currentIL.grammar)
 
-let parserTest str (ilDefCorrect: Definition<Source.t,Source.t>) =
+let parserTest str (ilDefCorrect: Definition<Source,Source>) =
     let ilDef = { Main.ParseText str "" with info = {fileName =""}}
 
     //printfn "ilDef = %A" ilDef
@@ -95,7 +95,7 @@ let optionsTest path optionsCorrect =
         |> Assert.IsTrue
     optionsAreEq currentOptions optionsCorrect
         
-let getSource name b e = new Source.t (name, new Source.Position(b, 0, b), new Source.Position(e, 0, e), "")
+let getSource name b e = new Source (name, new SourcePosition(b, 0, b), new SourcePosition(e, 0, e), "")
 
 [<TestFixture>]
 type ``YardFrontend lexer tests`` () = 

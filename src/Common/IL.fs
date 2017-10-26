@@ -14,39 +14,40 @@
 
 
 module Yard.Core.IL
-module Source = 
-    open Microsoft.FSharp.Text
-    [<Struct>]
-    type Position =
-        val absoluteOffset : int
-        val line : int
-        val column : int
-        new (absoluteOffset, line, column) = {absoluteOffset = absoluteOffset; line = line; column = column}
-        new (fslexPos : Lexing.Position) =
-            {absoluteOffset = fslexPos.AbsoluteOffset; line = fslexPos.Line; column = fslexPos.Column}
-    /// Type of elementary part of source grammar
-    [<Struct>]
-    [<StructuralEquality; StructuralComparison>]
-    type t =
-        val text : string
-        val startPos : Position
-        val endPos : Position
-        val file : string
 
-        new (text, startPos, endPos, file) =
-            {text = text; startPos = startPos; endPos = endPos; file = file}
-        new (text, origin : t) =
-            {text = text; startPos = origin.startPos; endPos = origin.endPos; file = origin.file}
-        new (text, startPos : Lexing.Position, endPos : Lexing.Position) =
-            t (text, new Position(startPos), new Position(endPos), startPos.FileName)
-        new (text, lexbuf : Lexing.LexBuffer<_>) =
-            t (text, lexbuf.StartPos, lexbuf.EndPos)
-        new (text) =
-            t (text, new Position(), new Position(), "")
-        override this.ToString() = this.text
-        //override this.GetHashCode t = hash this.text 
-    // TODO: make something with toString overriding of Source.t   
-    let toString (x : t) = x.text
+open Microsoft.FSharp.Text
+
+[<Struct>]
+type SourcePosition =
+    val absoluteOffset : int
+    val line : int
+    val column : int
+    new (absoluteOffset, line, column) = {absoluteOffset = absoluteOffset; line = line; column = column}
+    new (fslexPos : Lexing.Position) =
+        {absoluteOffset = fslexPos.AbsoluteOffset; line = fslexPos.Line; column = fslexPos.Column}
+/// Type of elementary part of source grammar
+[<Struct>]
+[<StructuralEquality; StructuralComparison>]
+type Source =
+    val text : string
+    val startPos : SourcePosition
+    val endPos : SourcePosition
+    val file : string
+
+    new (text, startPos, endPos, file) =
+        {text = text; startPos = startPos; endPos = endPos; file = file}
+    new (text, origin : Source) =
+        {text = text; startPos = origin.startPos; endPos = origin.endPos; file = origin.file}
+    new (text, startPos : Lexing.Position, endPos : Lexing.Position) =
+        Source (text, new SourcePosition(startPos), new SourcePosition(endPos), startPos.FileName)
+    new (text, lexbuf : Lexing.LexBuffer<_>) =
+        Source (text, lexbuf.StartPos, lexbuf.EndPos)
+    new (text) =
+        Source (text, new SourcePosition(), new SourcePosition(), "")
+    override this.ToString() = this.text
+    //override this.GetHashCode t = hash this.text 
+// TODO: make something with toString overriding of Source   
+let sourceToString (x : Source) = x.text
   
 type DLabel = {
     label: string;
@@ -82,15 +83,15 @@ and Production<'patt,'expr> =
     /// Sequence * attribute. (Attribute is always applied to sequence) 
     |PSeq     of (ProductionElem<'patt,'expr>) list * 'expr option * DLabel option
     /// Token itself. Final element of parsing.
-    |PToken   of Source.t 
+    |PToken   of Source 
     /// Reference to other rule inside production. With an optional args list.
-    |PRef     of Source.t * 'expr option
+    |PRef     of Source * 'expr option
     /// expr*
     |PMany    of (Production<'patt,'expr>)
     /// Reference to metarule inside production (mr<<x>> in rule "a: mr<<x>> y z")
-    |PMetaRef of Source.t * 'expr option * Production<'patt,'expr> list
+    |PMetaRef of Source * 'expr option * Production<'patt,'expr> list
     /// Literal. We can use constants ("if" and "then" in ' .."if" expr "then" expr...')
-    |PLiteral of Source.t 
+    |PLiteral of Source 
     /// Extended regexp repetition, "man egrep" for details
     |PRepet   of (Production<'patt,'expr>) * int option * int option
     /// Permutation (A || B || C)
@@ -137,13 +138,13 @@ and Production<'patt,'expr> =
                     | Some var -> var.ToString() + "="
                 check + omit + bind + x.rule.ToString()
             "<" + String.concat " " (List.map (fun x -> (*printfn "%A" x;*) "(" + (elemToString x) + ")") ruleSeq) + ">" + strAttrs
-        |PToken src -> Source.toString src
+        |PToken src -> sourceToString src
         |PRef (name, args) ->
-            Source.toString name + argsToString args
+            sourceToString name + argsToString args
         |PMany x -> "(" + x.ToString() + ")*"
         |PMetaRef (name, args, metaArgs) ->
-            Source.toString name + metaArgsToString metaArgs + argsToString args
-        |PLiteral src -> Source.toString src
+            sourceToString name + metaArgsToString metaArgs + argsToString args
+        |PLiteral src -> sourceToString src
         |PRepet _ -> failwith "Repetition was not realized yet"
         |PPerm src ->
             src
@@ -164,7 +165,7 @@ and Production<'patt,'expr> =
 [<StructuralEquality; StructuralComparison>]
 type Rule<'patt,'expr> = {
     /// Rule name. Used to start from this or to be referenced to from other rules.
-    name    : Source.t
+    name    : Source
     /// Heritable arguments of rule
     args    : 'patt list
     /// Rule body (production).
@@ -185,8 +186,8 @@ let defaultRule name body =
 /// Module is a list of rules
 type Module<'patt,'expr> = {
     rules : Rule<'patt,'expr> list
-    openings : Source.t list
-    name : Source.t option
+    openings : Source list
+    name : Source option
     /// Are all rules public (can be seen form another module), except explicitly marked as private.
     /// Otherwise rule must be directly marked as public to be seen.
     allPublic : bool

@@ -37,7 +37,7 @@ let defaultDefinition rules = {emptyGrammarDefinition with grammar = defaultModu
 
 let simpleRules nonTerm body : Rule<_,_> list =
     [{
-        name = Source.t nonTerm
+        name = Source nonTerm
         args = []
         body = body
         isStart = true
@@ -48,7 +48,7 @@ let simpleRules nonTerm body : Rule<_,_> list =
 
 let metaRules nonTerm body args : Rule<_,_> list = 
     [{
-        name = Source.t nonTerm
+        name = Source nonTerm
         args = []
         body = body
         isStart = false
@@ -108,7 +108,7 @@ let getRulesMap (grammar : Grammar<_,_>) =
     |> dict
 
 /// if rule has metaArgs then it is a metarule
-let isMetaRule (r:Rule<Source.t,Source.t>) = r.metaArgs <> []
+let isMetaRule (r:Rule<Source,Source>) = r.metaArgs <> []
 
 /// hash table for metarules. 
 /// Map: using_module -> (rule_name -> (decl_module, rule_decl));
@@ -117,7 +117,7 @@ let metaRulesTbl grammar =
     let publicRules = new Dictionary<_,_>(getPublicRules grammar)
     /// Only public meta-rules present here
     let publicMeta =
-        let map = new Dictionary<string, Rule<Source.t, Source.t> list>()
+        let map = new Dictionary<string, Rule<Source, Source> list>()
         publicRules |> Seq.iter (fun item ->
             map.[item.Key] <- List.filter isMetaRule item.Value
         )

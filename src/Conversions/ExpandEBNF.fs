@@ -20,7 +20,7 @@ open Namer
 open TransformAux
 
 
-//let dummyPos s = new Source.t(s)
+//let dummyPos s = new Source(s)
 
 //let s2source = TransformAux.createSource
 let generatedSomesCount = ref 0
@@ -38,9 +38,9 @@ let genOptName () =
     generatedOptsCount := !generatedOptsCount + 1
     sprintf "yard_opt_%d" !generatedOptsCount
 
-let default_elem = {omit=false; rule=PRef(new Source.t "dummy", None); binding=None; checker=None}
+let default_elem = {omit=false; rule=PRef(new Source "dummy", None); binding=None; checker=None}
 
-let convertToBnf (rule:(Rule<Source.t,Source.t>)) = 
+let convertToBnf (rule:(Rule<Source,Source>)) = 
     let factList list = list |> List.map fst
     let formList list = list |> List.map snd
     let reduceMeta = function 

@@ -82,7 +82,7 @@ let replaceLiteralsInProduction production (replacedLiterals:Dictionary<_,_>) (g
         | PLiteral src -> 
             let str = src.text
             if replacedLiterals.ContainsKey str
-            then PToken <| new Source.t(replacedLiterals.[str], src)
+            then PToken <| new Source(replacedLiterals.[str], src)
             else
                 let token = ref(tokenName str token_format)
                 while grammarTokens.Contains !token do
@@ -91,11 +91,11 @@ let replaceLiteralsInProduction production (replacedLiterals:Dictionary<_,_>) (g
                         !token !token str
                     token := "YARD_" + !token
                 replacedLiterals.Add(str, !token) 
-                PToken <| new Source.t(!token, src) 
+                PToken <| new Source(!token, src) 
         | x -> x
     _replaceLiterals production
 
-let replaceLiterals (ruleList: Rule<Source.t, Source.t> list) token_format = 
+let replaceLiterals (ruleList: Rule<Source, Source> list) token_format = 
     
     let grammarTokens = new HashSet<_>()
     eachProduction

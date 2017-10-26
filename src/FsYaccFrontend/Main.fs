@@ -26,24 +26,24 @@ open Microsoft.FSharp.Text.Lexing
 open Microsoft.FSharp.Core
 open System.Text.RegularExpressions
 
-let addStarts starts (grammar: Grammar<Source.t, Source.t>) = 
+let addStarts starts (grammar: Grammar<Source, Source>) = 
     grammar |> List.map (fun m ->
         {m with rules = m.rules |> List.map (fun rule ->
-            if List.exists (fun (x : Source.t) -> x.text = rule.name.text) starts
+            if List.exists (fun (x : Source) -> x.text = rule.name.text) starts
             then { rule with isStart=true }
             else rule
         )}
     )
 
 let rec _addBindings = function
-    | PSeq(elements, Some (ac : Source.t), l) -> 
+    | PSeq(elements, Some (ac : Source), l) -> 
         (elements |> List.mapi (fun i elem -> 
             if Regex.Match(ac.text, sprintf "\\$%d([^\\d]|$)" (i+1)).Success then 
-                { elem with rule=(_addBindings elem.rule) ; binding=Some <| new Source.t(sprintf "_S%d" (i+1), ac) } 
+                { elem with rule=(_addBindings elem.rule) ; binding=Some <| new Source(sprintf "_S%d" (i+1), ac) } 
             else 
                 { elem with rule=_addBindings elem.rule} 
             )
-         , Some <| new Source.t(Regex.Replace(ac.text, "\\$(\\d+)", "_S$1"), ac)
+         , Some <| new Source(Regex.Replace(ac.text, "\\$(\\d+)", "_S$1"), ac)
          , l
         ) |> PSeq
     | PSeq(elements, None, l) -> PSeq(List.map (fun elem -> { elem with rule=_addBindings elem.rule} ) elements, None, l)
@@ -54,7 +54,7 @@ let rec _addBindings = function
     | PMany(x) -> PMany(_addBindings x)
     | x -> x
 
-let addBindings (grammar: Grammar<Source.t, Source.t>) = 
+let addBindings (grammar: Grammar<Source, Source>) = 
     grammar |> mapGrammar (List.map (fun rule -> { rule with body=_addBindings rule.body } ))
 
 let LexBufferFromFile fileName = 
@@ -75,7 +75,7 @@ let LexBufferFromString grammarStr =
 
 let Parse lexbuf ilInfo = 
     try 
-        let (res : System.Tuple<Source.t option, Source.t list, Source.t list, Grammar<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
+        let (res : System.Tuple<Source option, Source list, Source list, Grammar<Source, Source>>) = Parser.s Lexer.token lexbuf
         let defHead = res.Item1
         { emptyGrammarDefinition
             with info = {fileName = ilInfo}

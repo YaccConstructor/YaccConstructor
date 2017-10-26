@@ -7,8 +7,8 @@ open Yard.Frontends.CompressionFrontend.Compression
 
 let tester = CompressionFrontend()
 
-let mTok x = PToken(Source.t x)
-let mRef x = PRef(Source.t ("sq_" + x.ToString()), None)
+let mTok x = PToken(Source x)
+let mRef x = PRef(Source ("sq_" + x.ToString()), None)
 let mSeq x = PSeq([for e in x -> {omit = false; rule = e; binding= None; checker = None}], None, None)
 
 [<Test>]
@@ -17,7 +17,7 @@ let ``When empty string expect empty grammar``() =
 
 [<Test>]
 let ``When only special symbols expect empty grammar``() = 
-    let x : Rule<Source.t, Source.t> list = []
+    let x : Rule<Source, Source> list = []
     Assert.AreEqual(x, tester.ParseGrammar("$$$$$", '$').grammar.Head.rules)
 
 [<Test>]

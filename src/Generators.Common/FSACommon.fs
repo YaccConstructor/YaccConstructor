@@ -38,7 +38,7 @@ let symbolToString nontermStringDict s =
         | Nonterm nonterm -> stateToString nontermStringDict nonterm
         | Epsilon() -> "Epsilon"
 
-let convertRulesToFSA (ruleList : Rule<Source.t,Source.t> list) =
+let convertRulesToFSA (ruleList : Rule<Source,Source> list) =
     let states = new ResizeArray<(EdgeSymbol * int<positionInGrammar>) list>()
     let alphabet = new HashSet<EdgeSymbol>()
     let nonterms = new Dictionary<string, int<positionInGrammar>>()
@@ -54,7 +54,7 @@ let convertRulesToFSA (ruleList : Rule<Source.t,Source.t> list) =
         states.Add []
         (states.Count-1) * 1<positionInGrammar>
 
-    let sourse_tToSymbol isTerm (token : Source.t) =
+    let sourse_tToSymbol isTerm (token : Source) =
         if isTerm
         then
             Term token.text |> alphabet.Add |> ignore
@@ -71,7 +71,7 @@ let convertRulesToFSA (ruleList : Rule<Source.t,Source.t> list) =
                 stateToNontermName.Add (state,token.text)
                 Nonterm state
 
-    let newEdge isTerm firstState (finalState : int<positionInGrammar> option) (s : Source.t option) =
+    let newEdge isTerm firstState (finalState : int<positionInGrammar> option) (s : Source option) =
         let symbol =
             if s.IsNone
             then

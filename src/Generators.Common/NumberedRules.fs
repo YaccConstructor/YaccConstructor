@@ -16,7 +16,7 @@ namespace Yard.Generators.Common
 
 open Yard.Core.IL
 
-type NumberedRules (ruleList : Rule<Source.t,Source.t> list, indexator : Indexator, caseSensitive) =
+type NumberedRules (ruleList : Rule<Source,Source> list, indexator : Indexator, caseSensitive) =
     let transformLiteral = Indexator.transformLiteral caseSensitive
     let rules = ruleList |> Array.ofList
     let start =
@@ -52,7 +52,7 @@ type NumberedRules (ruleList : Rule<Source.t,Source.t> list, indexator : Indexat
                 res := true
         !res
 
-    let ruleToString (rule : Rule<Source.t,Source.t>)=
+    let ruleToString (rule : Rule<Source,Source>)=
         let rec traverse = function
             | PRef (nTerm,_) -> nTerm.text
             | PToken token   -> token.text

@@ -32,7 +32,7 @@ let GetIncorrectMetaArgsCount (def:Yard.Core.IL.Definition<_,_>) =
     let rules = metaRulesTbl def.grammar
     let checkBody module' =
         let map = rules.[module']
-        let check acc (name : Source.t) cnt =
+        let check acc (name : Source) cnt =
             let expected = 
                 if not <| map.ContainsKey name.text 
                 then 0
@@ -86,7 +86,7 @@ let private getAllModuleNames (grammar : Grammar<_,_>) =
     |> List.map (fun m -> getModuleName m)
     |> List.sort
 
-let GetCoincideModuleNames (def : Yard.Core.IL.Definition<Source.t, Source.t>) =
+let GetCoincideModuleNames (def : Yard.Core.IL.Definition<Source, Source>) =
     getAllModuleNames def.grammar
     |> (function
         | [] -> []
@@ -96,7 +96,7 @@ let GetCoincideModuleNames (def : Yard.Core.IL.Definition<Source.t, Source.t>) =
                        |> snd
        )
 
-let GetInvalidOpenings (def : Yard.Core.IL.Definition<Source.t, Source.t>) =
+let GetInvalidOpenings (def : Yard.Core.IL.Definition<Source, Source>) =
     let existsModule searched =
         def.grammar
         |> List.exists (fun m -> getModuleName m = searched)
@@ -111,7 +111,7 @@ let GetInvalidOpenings (def : Yard.Core.IL.Definition<Source.t, Source.t>) =
             | _ -> Some (m, invalidOpenings)
         )
 
-let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Module<Source.t, Source.t>) = 
+let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Module<Source, Source>) = 
     let declaredInnerRules =
         module'.rules |> List.map (fun r -> r.name.text)
     let declaredRules = new HashSet<_>(declaredInnerRules)
@@ -156,7 +156,7 @@ let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Module<Source.t
         repeated |> List.ofSeq |> List.map (fun r -> r, List.ofSeq ruleToModule.[r])
 
     let undeclaredRules = new HashSet<_>()
-    let addUndeclaredRule (name : Source.t) additionRules = 
+    let addUndeclaredRule (name : Source) additionRules = 
         if not (declaredRules.Contains name.text
                 || Seq.exists ((=) name.text) additionRules) && name.text <> errorToken
         then
@@ -193,7 +193,7 @@ let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Module<Source.t
 
     repeatedInnerRules, repeatedExportRules, List.ofSeq undeclaredRules
 
-let GetUndeclaredNonterminalsList (def : Yard.Core.IL.Definition<Source.t, Source.t>) =
+let GetUndeclaredNonterminalsList (def : Yard.Core.IL.Definition<Source, Source>) =
     let grammar = def.grammar
     let publicRules = getPublicRules grammar
     let filterEmpty (x : ('a * 'b list)  list) =
@@ -212,7 +212,7 @@ let reachableRulesInfo_of_grammar (grammar: Grammar<_,_>) =
     let rulesMap = getRulesMap grammar
     let reachedRules = new HashSet<_>()
     
-    let getAdditionRules (rule : Rule<Source.t,Source.t>) =
+    let getAdditionRules (rule : Rule<Source,Source>) =
         rule.metaArgs |> List.map (fun i -> i.text)
         |> fun x -> new HashSet<_>(x)
 
@@ -271,10 +271,10 @@ let IsUnusedRulesExists(def:Yard.Core.IL.Definition<_,_>) =
   )
 
 /// Usage example: check after conversion, that we didn't lose any binding to source (e.g. position)
-let sourcesWithoutFileNames (def:Yard.Core.IL.Definition<Source.t,Source.t>) =
-    let inline check (src : Source.t) = src.file = ""
-    let collectName (src : Source.t) = if check src then [src] else []
-    let collectOpt (src : Source.t option) =
+let sourcesWithoutFileNames (def:Yard.Core.IL.Definition<Source,Source>) =
+    let inline check (src : Source) = src.file = ""
+    let collectName (src : Source) = if check src then [src] else []
+    let collectOpt (src : Source option) =
         match src with
         | Some src when check src -> [src]
         | _ -> []

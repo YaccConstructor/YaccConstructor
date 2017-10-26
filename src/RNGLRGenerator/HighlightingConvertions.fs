@@ -45,13 +45,13 @@ let private getNodeSemantic parent children =
     printer.PrintBrInd 0 "addSemantic parent children"
     printer.ToString()
 
-let private changeRule (oldRule : Rule<_,_>) (elemList : ProductionElem<Source.t, Source.t> list) (bindings : Source.t list) = 
+let private changeRule (oldRule : Rule<_,_>) (elemList : ProductionElem<Source, Source> list) (bindings : Source list) = 
     let actionCode = getNodeSemantic oldRule.name.text bindings
-    let newRule : Rule<Source.t, Source.t> = 
+    let newRule : Rule<Source, Source> = 
         {
             name = oldRule.name
             args = []
-            body = PSeq(elemList, Some <| new Source.t(actionCode), None)
+            body = PSeq(elemList, Some <| new Source(actionCode), None)
             isStart = oldRule.isStart
             isPublic = oldRule.isPublic
             isInline = oldRule.isInline
@@ -66,12 +66,12 @@ let private createNewBinding (numOpt : int ref option) =
             (
                 fun num -> 
                     incr num
-                    new Source.t (sprintf "h%d" num.Value)
+                    new Source (sprintf "h%d" num.Value)
             )
     newBinding
 
 let private getNewElem newBinding refRule = 
-    let newElem : ProductionElem<Source.t, Source.t> = 
+    let newElem : ProductionElem<Source, Source> = 
         {
             binding = newBinding
             checker = None
@@ -87,9 +87,9 @@ let private literalToName rules lit =
     |> indexator.getLiteralName
 
 let createHighlightingRule name newElem actionCode =
-    let newRule : Rule<Source.t, Source.t> =
+    let newRule : Rule<Source, Source> =
         {
-            name = new Source.t(sprintf "highlight_%s" name)
+            name = new Source(sprintf "highlight_%s" name)
             args = []
             body = PSeq([newElem], Some <| actionCode, None)
             isStart = false
@@ -101,8 +101,8 @@ let createHighlightingRule name newElem actionCode =
 
 let getRulesForTerminal terminals = 
     let processTerminal terminal = 
-        let actionCode = new Source.t(getLeafSemanticForTerminal terminal)
-        let newElem = getNewElem None <| PToken (new Source.t(terminal))
+        let actionCode = new Source(getLeafSemanticForTerminal terminal)
+        let newElem = getNewElem None <| PToken (new Source(terminal))
         createHighlightingRule terminal newElem actionCode
 
     terminals
@@ -112,27 +112,27 @@ let getRulesForLiterals literals =
     
     let processLiteral literal =
         let litName, litText = literal
-        let actionCode = new Source.t (getLeafSemanticForLiteral litName litText)
-        let newElem =  getNewElem None <| PLiteral(new Source.t(litName))
+        let actionCode = new Source (getLeafSemanticForLiteral litName litText)
+        let newElem =  getNewElem None <| PLiteral(new Source(litName))
 
         createHighlightingRule litName newElem actionCode
 
     literals
     |> List.map processLiteral
 
-let highlightingConvertions (def : Definition<Source.t, Source.t>) = 
+let highlightingConvertions (def : Definition<Source, Source>) = 
     let rules = def.grammar.Head.rules
     let literalToName' = literalToName rules
 
     let terminals = ref []
     let literals = ref []
 
-    let rec processElem (oldElem : ProductionElem<Source.t, Source.t>) count = 
+    let rec processElem (oldElem : ProductionElem<Source, Source>) count = 
         let result = ref []
         let newElem = ref oldElem
 
         let inline createHighlightRefRule text = 
-            PRef(new Source.t(sprintf "highlight_%s" text), None)
+            PRef(new Source(sprintf "highlight_%s" text), None)
         
         match oldElem.rule with
         | PSeq (metaList,_,_) -> 
@@ -169,7 +169,7 @@ let highlightingConvertions (def : Definition<Source.t, Source.t>) =
         | _ -> failwith "Error in highlighting convertions"
         !result
 
-    let processRule (oldRule : Rule<Source.t, Source.t>) = 
+    let processRule (oldRule : Rule<Source, Source>) = 
         let count = ref 0
         match oldRule.body with 
         | PSeq(elemList, _, _) -> 

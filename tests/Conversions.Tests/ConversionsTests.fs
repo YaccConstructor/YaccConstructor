@@ -33,8 +33,8 @@ open Yard.Generators.TreeDump
 open Yard.Generators.YardPrinter
 open Yard.Generators.RIGLRGenerator
 
-let dummyPos s = new Source.t(s)
-let dummyToken s = PToken <| new Source.t(s)
+let dummyPos s = new Source(s)
+let dummyToken s = PToken <| new Source(s)
 
 exception FEError of string
 
@@ -62,7 +62,7 @@ let getBE name =
 
 let treeDump = new Yard.Generators.TreeDump.TreeDump ()
 
-let dummyRule : ProductionElem<Source.t,Source.t> = {omit=false; binding=None; checker=None; rule=PToken (Source.t "DUMMY")}
+let dummyRule : ProductionElem<Source,Source> = {omit=false; binding=None; checker=None; rule=PToken (Source "DUMMY")}
 
 let expandBrackets = new Conversions.ExpandBrackets.ExpandBrackets()
 let expandMeta = new Conversions.ExpandMeta.ExpandMeta()
@@ -147,35 +147,35 @@ type ``Expand top level alters`` () =
     [<Test>]
     member test.``No alter`` () =     
         (verySimpleRules "s"
-            [{dummyRule with rule = PRef (Source.t "d", None)}]
+            [{dummyRule with rule = PRef (Source "d", None)}]
         ) @ (
             verySimpleNotStartRules "d"
-                [{dummyRule with rule = PToken (Source.t "NUM")}]
+                [{dummyRule with rule = PToken (Source "NUM")}]
         )
         |> runTest (path "noAlters.yrd") expandTopLevelAlt        
 
     [<Test>]
     member test.``One alter`` () =
         (verySimpleRules "s"
-            [{dummyRule with rule = PRef (Source.t "c", None)}]
+            [{dummyRule with rule = PRef (Source "c", None)}]
         ) @ (
             verySimpleRules "s"
-                [{dummyRule with rule = PRef (Source.t "d", None)}]
+                [{dummyRule with rule = PRef (Source "d", None)}]
         )
         |> runTest (path "oneAlter.yrd") expandTopLevelAlt        
 
     [<Test>]
     member test.``Multi alters`` () =        
         (verySimpleRules "s"
-            [{dummyRule with rule = PRef (Source.t "x", None)}]
+            [{dummyRule with rule = PRef (Source "x", None)}]
         ) @ (
             verySimpleRules "s"
-                [{dummyRule with rule = PRef (Source.t "y", None)}]
+                [{dummyRule with rule = PRef (Source "y", None)}]
         ) @ (
             verySimpleRules "s"
-                [{dummyRule with rule = PRef (Source.t "z", None)}]
+                [{dummyRule with rule = PRef (Source "z", None)}]
         ) @ (
             verySimpleRules "s"
-                [{dummyRule with rule = PRef (Source.t "m", None)}]
+                [{dummyRule with rule = PRef (Source "m", None)}]
         )
         |> runTest (path "multiAlters.yrd") expandTopLevelAlt 

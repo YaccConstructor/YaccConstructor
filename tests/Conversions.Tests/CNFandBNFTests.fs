@@ -23,189 +23,189 @@ type ``CNFandBNF tests`` () =
     [<Test>]
     member test.``To CNF test`` () =
             let rules: Rule<_,_> list = 
-                [{name = Source.t "yard_s_1";
+                [{name = Source "yard_s_1";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PRef (Source.t  "x",None);
+                                 rule = PRef (Source  "x",None);
                                  binding = None;
                                  checker = None;}; {omit = false;
-                                                    rule = PRef (Source.t  "yard_s_2",None);
+                                                    rule = PRef (Source  "yard_s_2",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t  "yard_s_2";
+                 {name = Source  "yard_s_2";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PRef (Source.t  "yard_s_2_3",None);
+                                 rule = PRef (Source  "yard_s_2_3",None);
                                  binding = None;
                                  checker = None;}; {omit = false;
-                                                    rule = PRef (Source.t "x",None);
+                                                    rule = PRef (Source "x",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "s";
+                 {name = Source "s";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PRef (Source.t  "yard_s_4",None);
+                                 rule = PRef (Source  "yard_s_4",None);
                                  binding = None;
                                  checker = None;}; {omit = false;
-                                                    rule = PRef (Source.t  "yard_s_1",None);
+                                                    rule = PRef (Source  "yard_s_1",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
                   isStart = true;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "x";
+                 {name = Source "x";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PRef (Source.t  "yard_s_4",None);
+                                 rule = PRef (Source  "yard_s_4",None);
                                  binding = None;
                                  checker = None;}; {omit = false;
-                                                    rule = PRef (Source.t  "y",None);
+                                                    rule = PRef (Source  "y",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "x";
+                 {name = Source "x";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PRef (Source.t  "yard_s_2_3",None);
+                                 rule = PRef (Source  "yard_s_2_3",None);
                                  binding = None;
                                  checker = None;}; {omit = false;
-                                                    rule = PRef (Source.t "y",None);
+                                                    rule = PRef (Source "y",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t  "yard_s_1";
+                 {name = Source  "yard_s_1";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PRef (Source.t  "yard_s_2_3",None);
+                                 rule = PRef (Source  "yard_s_2_3",None);
                                  binding = None;
                                  checker = None;}; {omit = false;
-                                                    rule = PRef (Source.t  "x",None);
+                                                    rule = PRef (Source  "x",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
-                  metaArgs = [];}; {name = Source.t  "y";
+                  metaArgs = [];}; {name = Source  "y";
                                     args = [];
                                     body = PSeq ([{omit = false;
-                                                   rule = PToken( Source.t "CC");
+                                                   rule = PToken( Source "CC");
                                                    binding = None;
                                                    checker = None;}],None,None);
                                     isStart = false;
                                     isPublic = false;
                                     isInline = false;
                                     metaArgs = [];};
-                 {name = Source.t  "yard_s_2";
+                 {name = Source  "yard_s_2";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PToken (Source.t "B");
+                                 rule = PToken (Source "B");
                                  binding = None;
                                  checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
-                  metaArgs = [];}; {name = Source.t "x";
+                  metaArgs = [];}; {name = Source "x";
                                     args = [];
                                     body = PSeq ([{omit = false;
-                                                   rule = PToken(Source.t "A");
+                                                   rule = PToken(Source "A");
                                                    binding = None;
                                                    checker = None;}],None,None);
                                     isStart = false;
                                     isPublic = false;
                                     isInline = false;
                                     metaArgs = [];};
-                 {name = Source.t "x";
+                 {name = Source "x";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PToken (Source.t "B");
+                                 rule = PToken (Source "B");
                                  binding = None;
                                  checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "y";
+                 {name = Source "y";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PRef (Source.t "yard_s_4",None);
+                                 rule = PRef (Source "yard_s_4",None);
                                  binding = None;
                                  checker = None;}; {omit = false;
-                                                    rule = PRef (Source.t "y",None);
+                                                    rule = PRef (Source "y",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "y";
+                 {name = Source "y";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PRef (Source.t "yard_s_2_3",None);
+                                 rule = PRef (Source "yard_s_2_3",None);
                                  binding = None;
                                  checker = None;}; {omit = false;
-                                                    rule = PRef (Source.t "y",None);
+                                                    rule = PRef (Source "y",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
-                  metaArgs = [];}; {name = Source.t "y";
+                  metaArgs = [];}; {name = Source "y";
                                     args = [];
                                     body = PSeq ([{omit = false;
-                                                   rule = PToken(Source.t "A");
+                                                   rule = PToken(Source "A");
                                                    binding = None;
                                                    checker = None;}],None,None);
                                     isStart = false;
                                     isPublic = false;
                                     isInline = false;
                                     metaArgs = [];};
-                 {name = Source.t "y";
+                 {name = Source "y";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PToken (Source.t "B");
+                                 rule = PToken (Source "B");
                                  binding = None;
                                  checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
-                  metaArgs = [];}; {name = Source.t "yard_s_1";
+                  metaArgs = [];}; {name = Source "yard_s_1";
                                     args = [];
                                     body = PSeq ([{omit = false;
-                                                   rule = PToken (Source.t "B");
+                                                   rule = PToken (Source "B");
                                                    binding = None;
                                                    checker = None;}],None,None);
                                     isStart = false;
                                     isPublic = false;
                                     isInline = false;
                                     metaArgs = [];};
-                 {name = Source.t "yard_s_2_3";
+                 {name = Source "yard_s_2_3";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PToken (Source.t "B");
+                                 rule = PToken (Source "B");
                                  binding = None;
                                  checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
-                  metaArgs = [];}; {name = Source.t "yard_s_4";
+                  metaArgs = [];}; {name = Source "yard_s_4";
                                     args = [];
                                     body = PSeq ([{omit = false;
-                                                   rule = PToken (Source.t "A");
+                                                   rule = PToken (Source "A");
                                                    binding = None;
                                                    checker = None;}],None,None);
                                     isStart = false;
@@ -218,349 +218,349 @@ type ``CNFandBNF tests`` () =
     [<Test>]
     member test.``To BNFconj test`` () =
             let rules: Rule<_,_> list = 
-                [{name = Source.t "s";
+                [{name = Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "a",None);
+                              rule = PRef (Source "a",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "b",None);
+                                                 rule = PRef (Source "b",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PSeq ([{omit = false;
-                              rule = PRef (Source.t "d",None);
+                              rule = PRef (Source "d",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "c",None);
+                                                 rule = PRef (Source "c",None);
                                                  binding = None;
                                                  checker = None;}],None,None));
                   isStart = true;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "a";
+                 {name = Source "a";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PRef (Source.t "yard_a_3",None);
+                                 rule = PRef (Source "yard_a_3",None);
                                  binding = None;
                                  checker = None;}; {omit = false;
-                                                    rule = PRef (Source.t "a",None);
+                                                    rule = PRef (Source "a",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name =  Source.t "yard_b_1";
+                 {name =  Source "yard_b_1";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PRef (Source.t "b",None);
+                                 rule = PRef (Source "b",None);
                                  binding = None;
                                  checker = None;}; {omit = false;
-                                                    rule = PRef (Source.t "yard_b_1_4",None);
+                                                    rule = PRef (Source "yard_b_1_4",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "b";
+                 {name = Source "b";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PRef (Source.t "yard_b_5",None);
+                                 rule = PRef (Source "yard_b_5",None);
                                  binding = None;
                                  checker = None;}; {omit = false;
-                                                    rule = PRef (Source.t "yard_b_1",None);
+                                                    rule = PRef (Source "yard_b_1",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "c";
+                 {name = Source "c";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PRef (Source.t "yard_b_1_4",None);
+                                 rule = PRef (Source "yard_b_1_4",None);
                                  binding = None;
                                  checker = None;}; {omit = false;
-                                                    rule = PRef (Source.t "c",None);
+                                                    rule = PRef (Source "c",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "yard_d_2";
+                 {name = Source "yard_d_2";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PRef (Source.t "d",None);
+                                 rule = PRef (Source "d",None);
                                  binding = None;
                                  checker = None;}; {omit = false;
-                                                    rule = PRef (Source.t "yard_b_5",None);
+                                                    rule = PRef (Source "yard_b_5",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "d";
+                 {name = Source "d";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PRef (Source.t "yard_a_3",None);
+                                 rule = PRef (Source "yard_a_3",None);
                                  binding = None;
                                  checker = None;}; {omit = false;
-                                                    rule = PRef (Source.t "yard_d_2",None);
+                                                    rule = PRef (Source "yard_d_2",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "s";
+                 {name = Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "d",None);
+                              rule = PRef (Source "d",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "c",None);
+                                                 rule = PRef (Source "c",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_a_3",None);
+                              rule = PRef (Source "yard_a_3",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "a",None);
+                                                 rule = PRef (Source "a",None);
                                                  binding = None;
                                                  checker = None;}],None,None));
                   isStart = true;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "s";
+                 {name = Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "a",None);
+                              rule = PRef (Source "a",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "b",None);
+                                                 rule = PRef (Source "b",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_a_3",None);
+                              rule = PRef (Source "yard_a_3",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "yard_d_2",None);
+                                                 rule = PRef (Source "yard_d_2",None);
                                                  binding = None;
                                                  checker = None;}],None,None));
                   isStart = true;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "s";
+                 {name = Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "a",None);
+                              rule = PRef (Source "a",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "b",None);
+                                                 rule = PRef (Source "b",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_b_1_4",None);
+                              rule = PRef (Source "yard_b_1_4",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "c",None);
+                                                 rule = PRef (Source "c",None);
                                                  binding = None;
                                                  checker = None;}],None,None));
                   isStart = true;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "s";
+                 {name = Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_b_5",None);
+                              rule = PRef (Source "yard_b_5",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "yard_b_1",None);
+                                                 rule = PRef (Source "yard_b_1",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_a_3",None);
+                              rule = PRef (Source "yard_a_3",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "yard_d_2",None);
+                                                 rule = PRef (Source "yard_d_2",None);
                                                  binding = None;
                                                  checker = None;}],None,None));
                   isStart = true;
                   isPublic = false;
                   isInline = false;
-                  metaArgs = [];}; {name = Source.t "a";
+                  metaArgs = [];}; {name = Source "a";
                                     args = [];
                                     body = PSeq ([{omit = false;
-                                                   rule = PToken (Source.t "A");
+                                                   rule = PToken (Source "A");
                                                    binding = None;
                                                    checker = None;}],None,None);
                                     isStart = false;
                                     isPublic = false;
                                     isInline = false;
                                     metaArgs = [];};
-                 {name = Source.t "yard_b_1";
+                 {name = Source "yard_b_1";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PToken (Source.t "C");
+                                 rule = PToken (Source "C");
                                  binding = None;
                                  checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
-                  metaArgs = [];}; {name = Source.t "c";
+                  metaArgs = [];}; {name = Source "c";
                                     args = [];
                                     body = PSeq ([{omit = false;
-                                                   rule = PToken (Source.t "C");
+                                                   rule = PToken (Source "C");
                                                    binding = None;
                                                    checker = None;}],None,None);
                                     isStart = false;
                                     isPublic = false;
                                     isInline = false;
                                     metaArgs = [];};
-                 {name = Source.t "yard_d_2";
+                 {name = Source "yard_d_2";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PToken (Source.t "B");
+                                 rule = PToken (Source "B");
                                  binding = None;
                                  checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "s";
+                 {name = Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "d",None);
+                              rule = PRef (Source "d",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "c",None);
+                                                 rule = PRef (Source "c",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_b_5",None);
+                              rule = PRef (Source "yard_b_5",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef ( Source.t "yard_b_1",None);
+                                                 rule = PRef ( Source "yard_b_1",None);
                                                  binding = None;
                                                  checker = None;}],None,None));
                   isStart = true;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name =Source.t "s";
+                 {name =Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_a_3",None);
+                              rule = PRef (Source "yard_a_3",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "yard_d_2",None);
+                                                 rule = PRef (Source "yard_d_2",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_a_3",None);
+                              rule = PRef (Source "yard_a_3",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "a",None);
+                                                 rule = PRef (Source "a",None);
                                                  binding = None;
                                                  checker = None;}],None,None));
                   isStart = true;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "s";
+                 {name = Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_b_1_4",None);
+                              rule = PRef (Source "yard_b_1_4",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "c",None);
+                                                 rule = PRef (Source "c",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_b_5",None);
+                              rule = PRef (Source "yard_b_5",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "yard_b_1",None);
+                                                 rule = PRef (Source "yard_b_1",None);
                                                  binding = None;
                                                  checker = None;}],None,None));
                   isStart = true;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "s";
+                 {name = Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_b_1_4",None);
+                              rule = PRef (Source "yard_b_1_4",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "c",None);
+                                                 rule = PRef (Source "c",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_a_3",None);
+                              rule = PRef (Source "yard_a_3",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "a",None);
+                                                 rule = PRef (Source "a",None);
                                                  binding = None;
                                                  checker = None;}],None,None));
                   isStart = true;
                   isPublic = false;
                   isInline = false;
-                  metaArgs = [];}; {name = Source.t "s";
+                  metaArgs = [];}; {name = Source "s";
                                     args = [];
                                     body = PSeq ([],None,None);
                                     isStart = true;
                                     isPublic = false;
                                     isInline = false;
                                     metaArgs = [];};
-                 {name = Source.t "yard_a_3";
+                 {name = Source "yard_a_3";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PToken (Source.t "A");
+                                 rule = PToken (Source "A");
                                  binding = None;
                                  checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
-                  metaArgs = [];}; {name = Source.t "yard_b_1_4";
+                  metaArgs = [];}; {name = Source "yard_b_1_4";
                                     args = [];
                                     body = PSeq ([{omit = false;
-                                                   rule = PToken (Source.t "C");
+                                                   rule = PToken (Source "C");
                                                    binding = None;
                                                    checker = None;}],None,None);
                                     isStart = false;
                                     isPublic = false;
                                     isInline = false;
                                     metaArgs = [];};
-                 {name = Source.t "yard_b_5";
+                 {name = Source "yard_b_5";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PToken (Source.t "B");
+                                 rule = PToken (Source "B");
                                  binding = None;
                                  checker = None;}],None,None);
                   isStart = false;
@@ -573,23 +573,23 @@ type ``CNFandBNF tests`` () =
     [<Test>]
     member test.``To BNFbool test`` () =
             let rules: Rule<_,_> list = 
-                [{name = Source.t "s";
+                [{name = Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "a",None);
+                              rule = PRef (Source "a",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "b",None);
+                                                 rule = PRef (Source "b",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PConj
                         (PNeg (PSeq ([{omit = false;
-                                       rule = PRef (Source.t "d",None);
+                                       rule = PRef (Source "d",None);
                                        binding = None;
                                        checker = None;}; {omit = false;
-                                                          rule = PRef (Source.t "c",None);
+                                                          rule = PRef (Source "c",None);
                                                           binding = None;
                                                           checker = None;}],None,None)),
                          PNeg (PSeq ([],None,None))));
@@ -597,15 +597,15 @@ type ``CNFandBNF tests`` () =
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "a";
+                 {name = Source "a";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_a_3",None);
+                              rule = PRef (Source "yard_a_3",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "a",None);
+                                                 rule = PRef (Source "a",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PNeg (PSeq ([],None,None)));
@@ -613,15 +613,15 @@ type ``CNFandBNF tests`` () =
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "yard_b_1";
+                 {name = Source "yard_b_1";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "b",None);
+                              rule = PRef (Source "b",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "yard_b_1_4",None);
+                                                 rule = PRef (Source "yard_b_1_4",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PNeg (PSeq ([],None,None)));
@@ -629,15 +629,15 @@ type ``CNFandBNF tests`` () =
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "b";
+                 {name = Source "b";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_b_5",None);
+                              rule = PRef (Source "yard_b_5",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "yard_b_1",None);
+                                                 rule = PRef (Source "yard_b_1",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PNeg (PSeq ([],None,None)));
@@ -645,15 +645,15 @@ type ``CNFandBNF tests`` () =
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "c";
+                 {name = Source "c";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_b_1_4",None);
+                              rule = PRef (Source "yard_b_1_4",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "c",None);
+                                                 rule = PRef (Source "c",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PNeg (PSeq ([],None,None)));
@@ -661,15 +661,15 @@ type ``CNFandBNF tests`` () =
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "yard_d_2";
+                 {name = Source "yard_d_2";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "d",None);
+                              rule = PRef (Source "d",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "yard_b_5",None);
+                                                 rule = PRef (Source "yard_b_5",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PNeg (PSeq ([],None,None)));
@@ -677,15 +677,15 @@ type ``CNFandBNF tests`` () =
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "d";
+                 {name = Source "d";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_a_3",None);
+                              rule = PRef (Source "yard_a_3",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "yard_d_2",None);
+                                                 rule = PRef (Source "yard_d_2",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PNeg (PSeq ([],None,None)));
@@ -693,23 +693,23 @@ type ``CNFandBNF tests`` () =
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "s";
+                 {name = Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_a_3",None);
+                              rule = PRef (Source "yard_a_3",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "a",None);
+                                                 rule = PRef (Source "a",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PConj
                         (PNeg (PSeq ([{omit = false;
-                                       rule = PRef (Source.t "d",None);
+                                       rule = PRef (Source "d",None);
                                        binding = None;
                                        checker = None;}; {omit = false;
-                                                          rule = PRef (Source.t "c",None);
+                                                          rule = PRef (Source "c",None);
                                                           binding = None;
                                                           checker = None;}],None,None)),
                          PNeg (PSeq ([],None,None))));
@@ -717,23 +717,23 @@ type ``CNFandBNF tests`` () =
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "s";
+                 {name = Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_a_3",None);
+                              rule = PRef (Source "yard_a_3",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "a",None);
+                                                 rule = PRef (Source "a",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PConj
                         (PNeg (PSeq ([{omit = false;
-                                       rule = PRef (Source.t "yard_a_3",None);
+                                       rule = PRef (Source "yard_a_3",None);
                                        binding = None;
                                        checker = None;}; {omit = false;
-                                                          rule = PRef (Source.t "yard_d_2",None);
+                                                          rule = PRef (Source "yard_d_2",None);
                                                           binding = None;
                                                           checker = None;}],None,None)),
                          PNeg (PSeq ([],None,None))));
@@ -741,23 +741,23 @@ type ``CNFandBNF tests`` () =
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "s";
+                 {name = Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_b_5",None);
+                              rule = PRef (Source "yard_b_5",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "yard_b_1",None);
+                                                 rule = PRef (Source "yard_b_1",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PConj
                         (PNeg (PSeq ([{omit = false;
-                                       rule = PRef (Source.t "yard_b_1_4",None);
+                                       rule = PRef (Source "yard_b_1_4",None);
                                        binding = None;
                                        checker = None;}; {omit = false;
-                                                          rule = PRef (Source.t "c",None);
+                                                          rule = PRef (Source "c",None);
                                                           binding = None;
                                                           checker = None;}],None,None)),
                          PNeg (PSeq ([],None,None))));
@@ -765,23 +765,23 @@ type ``CNFandBNF tests`` () =
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "s";
+                 {name = Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "a",None);
+                              rule = PRef (Source "a",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "b",None);
+                                                 rule = PRef (Source "b",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PConj
                         (PNeg (PSeq ([{omit = false;
-                                       rule = PRef (Source.t "yard_a_3",None);
+                                       rule = PRef (Source "yard_a_3",None);
                                        binding = None;
                                        checker = None;}; {omit = false;
-                                                          rule = PRef (Source.t "yard_d_2",None);
+                                                          rule = PRef (Source "yard_d_2",None);
                                                           binding = None;
                                                           checker = None;}],None,None)),
                          PNeg (PSeq ([],None,None))));
@@ -789,23 +789,23 @@ type ``CNFandBNF tests`` () =
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "s";
+                 {name = Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_a_3",None);
+                              rule = PRef (Source "yard_a_3",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "a",None);
+                                                 rule = PRef (Source "a",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PConj
                         (PNeg (PSeq ([{omit = false;
-                                       rule = PRef (Source.t "yard_b_1_4",None);
+                                       rule = PRef (Source "yard_b_1_4",None);
                                        binding = None;
                                        checker = None;}; {omit = false;
-                                                          rule = PRef (Source.t "c",None);
+                                                          rule = PRef (Source "c",None);
                                                           binding = None;
                                                           checker = None;}],None,None)),
                          PNeg (PSeq ([],None,None))));
@@ -813,23 +813,23 @@ type ``CNFandBNF tests`` () =
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "s";
+                 {name = Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "a",None);
+                              rule = PRef (Source "a",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "b",None);
+                                                 rule = PRef (Source "b",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PConj
                         (PNeg (PSeq ([{omit = false;
-                                       rule = PRef (Source.t "yard_b_1_4",None);
+                                       rule = PRef (Source "yard_b_1_4",None);
                                        binding = None;
                                        checker = None;}; {omit = false;
-                                                          rule = PRef (Source.t "c",None);
+                                                          rule = PRef (Source "c",None);
                                                           binding = None;
                                                           checker = None;}],None,None)),
                          PNeg (PSeq ([],None,None))));
@@ -837,124 +837,124 @@ type ``CNFandBNF tests`` () =
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "s";
+                 {name = Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_b_5",None);
+                              rule = PRef (Source "yard_b_5",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "yard_b_1",None);
+                                                 rule = PRef (Source "yard_b_1",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PConj
                         (PNeg (PSeq ([{omit = false;
-                                       rule = PRef (Source.t "yard_a_3",None);
+                                       rule = PRef (Source "yard_a_3",None);
                                        binding = None;
                                        checker = None;}; {omit = false;
-                                                          rule = PRef (Source.t "yard_d_2",None);
+                                                          rule = PRef (Source "yard_d_2",None);
                                                           binding = None;
                                                           checker = None;}],None,None)),
                          PNeg (PSeq ([],None,None))));
                   isStart = true;
                   isPublic = false;
                   isInline = false;
-                  metaArgs = [];}; {name = Source.t "a";
+                  metaArgs = [];}; {name = Source "a";
                                     args = [];
                                     body = PSeq ([{omit = false;
-                                                   rule = PToken (Source.t "A");
+                                                   rule = PToken (Source "A");
                                                    binding = None;
                                                    checker = None;}],None,None);
                                     isStart = false;
                                     isPublic = false;
                                     isInline = false;
                                     metaArgs = [];};
-                 {name = Source.t "yard_b_1";
+                 {name = Source "yard_b_1";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PToken (Source.t "C");
+                                 rule = PToken (Source "C");
                                  binding = None;
                                  checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
-                  metaArgs = [];}; {name = Source.t "c";
+                  metaArgs = [];}; {name = Source "c";
                                     args = [];
                                     body = PSeq ([{omit = false;
-                                                   rule = PToken (Source.t "C");
+                                                   rule = PToken (Source "C");
                                                    binding = None;
                                                    checker = None;}],None,None);
                                     isStart = false;
                                     isPublic = false;
                                     isInline = false;
                                     metaArgs = [];};
-                 {name = Source.t "yard_d_2";
+                 {name = Source "yard_d_2";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PToken (Source.t "B");
+                                 rule = PToken (Source "B");
                                  binding = None;
                                  checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
                   metaArgs = [];};
-                 {name = Source.t "s";
+                 {name = Source "s";
                   args = [];
                   body =
                    PConj
                      (PSeq ([{omit = false;
-                              rule = PRef (Source.t "yard_b_5",None);
+                              rule = PRef (Source "yard_b_5",None);
                               binding = None;
                               checker = None;}; {omit = false;
-                                                 rule = PRef (Source.t "yard_b_1",None);
+                                                 rule = PRef (Source "yard_b_1",None);
                                                  binding = None;
                                                  checker = None;}],None,None),
                       PConj
                         (PNeg (PSeq ([{omit = false;
-                                       rule = PRef (Source.t "d",None);
+                                       rule = PRef (Source "d",None);
                                        binding = None;
                                        checker = None;}; {omit = false;
-                                                          rule = PRef (Source.t "c",None);
+                                                          rule = PRef (Source "c",None);
                                                           binding = None;
                                                           checker = None;}],None,None)),
                          PNeg (PSeq ([],None,None))));
                   isStart = true;
                   isPublic = false;
                   isInline = false;
-                  metaArgs = [];}; {name = Source.t "s";
+                  metaArgs = [];}; {name = Source "s";
                                     args = [];
                                     body = PSeq ([{omit = false;
-                                                   rule = PToken (Source.t "A");
+                                                   rule = PToken (Source "A");
                                                    binding = None;
                                                    checker = None;}],None,None);
                                     isStart = true;
                                     isPublic = false;
                                     isInline = false;
                                     metaArgs = [];};
-                 {name = Source.t "yard_a_3";
+                 {name = Source "yard_a_3";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PToken (Source.t "A");
+                                 rule = PToken (Source "A");
                                  binding = None;
                                  checker = None;}],None,None);
                   isStart = false;
                   isPublic = false;
                   isInline = false;
-                  metaArgs = [];}; {name = Source.t "yard_b_1_4";
+                  metaArgs = [];}; {name = Source "yard_b_1_4";
                                     args = [];
                                     body = PSeq ([{omit = false;
-                                                   rule = PToken (Source.t "C");
+                                                   rule = PToken (Source "C");
                                                    binding = None;
                                                    checker = None;}],None,None);
                                     isStart = false;
                                     isPublic = false;
                                     isInline = false;
                                     metaArgs = [];};
-                 {name = Source.t "yard_b_5";
+                 {name = Source "yard_b_5";
                   args = [];
                   body = PSeq ([{omit = false;
-                                 rule = PToken (Source.t "B");
+                                 rule = PToken (Source "B");
                                  binding = None;
                                  checker = None;}],None,None);
                   isStart = false;

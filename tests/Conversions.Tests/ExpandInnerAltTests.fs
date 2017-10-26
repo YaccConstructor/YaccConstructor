@@ -35,62 +35,62 @@ type ``Expand inner alts tests`` () =
     [<Test>]                                                                                            
     member test.``Alt in seq 1`` () =
         (verySimpleRules "s"
-                [{dummyRule with rule = PRef (Source.t("x"),None)}
-                 {dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}]
+                [{dummyRule with rule = PRef (Source("x"),None)}
+                 {dummyRule with rule = PRef (Source("yard_exp_brackets_1"),None)}]
         ) @ (
               simpleNotStartRules "yard_exp_brackets_1"
               <| PAlt
-                   (PSeq ([{dummyRule with rule = PRef (Source.t("y"),None)}],None,None),
-                    PSeq ([{dummyRule with rule = PRef (Source.t("z"),None)}],None,None))
+                   (PSeq ([{dummyRule with rule = PRef (Source("y"),None)}],None,None),
+                    PSeq ([{dummyRule with rule = PRef (Source("z"),None)}],None,None))
         )
         |> runTest (path "altInSeq1.yrd") expandInnerAlt          
 
     [<Test>]
     member test.``Alt in seq 2`` () =
         (verySimpleRules "s"
-            [{dummyRule with rule = PRef (Source.t "x",None)}
-            ;{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1", None)}
-            ;{dummyRule with rule = PRef (Source.t "m", None)}]
+            [{dummyRule with rule = PRef (Source "x",None)}
+            ;{dummyRule with rule = PRef (Source "yard_exp_brackets_1", None)}
+            ;{dummyRule with rule = PRef (Source "m", None)}]
         ) @ (
              simpleNotStartRules "yard_exp_brackets_1"
              <| PAlt
-                 (PSeq ([{dummyRule with rule = PRef (Source.t "y", None)}],None,None),
-                  PSeq ([{dummyRule with rule = PRef (Source.t "z", None)}],None,None))
+                 (PSeq ([{dummyRule with rule = PRef (Source "y", None)}],None,None),
+                  PSeq ([{dummyRule with rule = PRef (Source "z", None)}],None,None))
         )
         |> runTest (path "altInSeq2.yrd") expandInnerAlt
 
     [<Test>]
     member test.``Alts in seq`` () =                
         (verySimpleRules "s"
-            [{dummyRule with rule = PRef (Source.t "x", None)}
-            ;{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1", None)}
-            ;{dummyRule with rule = PRef (Source.t "yard_exp_brackets_2", None)}]
+            [{dummyRule with rule = PRef (Source "x", None)}
+            ;{dummyRule with rule = PRef (Source "yard_exp_brackets_1", None)}
+            ;{dummyRule with rule = PRef (Source "yard_exp_brackets_2", None)}]
         ) @ (
             simpleNotStartRules "yard_exp_brackets_1"
             <| PAlt
-               (PSeq ([{dummyRule with rule = PRef (Source.t "y", None)}],None,None),
-                PSeq ([{dummyRule with rule = PRef (Source.t "z", None)}],None,None))
+               (PSeq ([{dummyRule with rule = PRef (Source "y", None)}],None,None),
+                PSeq ([{dummyRule with rule = PRef (Source "z", None)}],None,None))
         ) @ (
             simpleNotStartRules "yard_exp_brackets_2"
             <| PAlt
-                (PSeq ([{dummyRule with rule = PRef (Source.t "m", None)}],None,None),
-                 PSeq ([{dummyRule with rule = PRef (Source.t "n", None)}],None,None))
+                (PSeq ([{dummyRule with rule = PRef (Source "m", None)}],None,None),
+                 PSeq ([{dummyRule with rule = PRef (Source "n", None)}],None,None))
         )
         |> runTest (path "altsInSeq.yrd") expandInnerAlt
 
     [<Test>]
     member test.``Nested alts`` () =
         (verySimpleRules "s"
-            [{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1", None)}]
+            [{dummyRule with rule = PRef (Source "yard_exp_brackets_1", None)}]
         ) @ (
             simpleNotStartRules "yard_exp_brackets_1"
             <| PAlt
-                (PSeq ([{dummyRule with rule = PRef (Source.t "y", None)}],None,None),
-                 PSeq ([{dummyRule with rule = PRef (Source.t "yard_exp_brackets_2", None)}],None,None))
+                (PSeq ([{dummyRule with rule = PRef (Source "y", None)}],None,None),
+                 PSeq ([{dummyRule with rule = PRef (Source "yard_exp_brackets_2", None)}],None,None))
             ) @ (
             simpleNotStartRules "yard_exp_brackets_2"
             <| PAlt
-                (PSeq ([{dummyRule with rule = PRef (Source.t "m", None)}],None,None),
-                 PSeq ([{dummyRule with rule = PRef (Source.t "n",None)}],None,None))
+                (PSeq ([{dummyRule with rule = PRef (Source "m", None)}],None,None),
+                 PSeq ([{dummyRule with rule = PRef (Source "n",None)}],None,None))
         )
         |> runTest (path "nestedAlts.yrd") expandInnerAlt

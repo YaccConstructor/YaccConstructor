@@ -41,8 +41,8 @@ type ProductionGraph(grammar: FinalGrammar) as this =
                      (new TaggedEdge<int, ContextLabel> (nonTerm, item.Key, item.Value)) |> ignore
     
     new () =
-        let rule = {name = new Source.t(""); 
-                    body = Production.PToken(new Source.t("")); 
+        let rule = {name = new Source(""); 
+                    body = Production.PToken(new Source("")); 
                     args = []; 
                     isStart = true; 
                     isPublic = false; 

@@ -197,7 +197,7 @@ type RNGLR() =
                         
                     match definition.head with
                     | None -> ()
-                    | Some (s : Source.t) ->
+                    | Some (s : Source) ->
                         println "%s" <| getPosFromSource printPos fullPath dummyPos s
                         println "%s" <| s.text + getPosFromSource printPos fullPath dummyPos (defaultSource output)
 
@@ -224,7 +224,7 @@ type RNGLR() =
             let res = 
                 match definition.foot with
                 | None -> res
-                | Some (s : Source.t) ->
+                | Some (s : Source) ->
                     res + (getPosFromSource printPos fullPath dummyPos s + "\n"
                                 + s.text + getPosFromSource printPos fullPath dummyPos (defaultSource output) + "\n")
             let res =

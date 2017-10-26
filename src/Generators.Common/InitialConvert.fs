@@ -33,7 +33,7 @@ let convertRules (ruleList : Rule<_,_> list) =
                     let startRule : Rule<_,_> =
                         {
                             isStart = true
-                            name = new Source.t("yard_start_rule", rule.name)
+                            name = new Source("yard_start_rule", rule.name)
                             args = rule.args
                             metaArgs = []
                             isPublic=false
@@ -68,7 +68,7 @@ let convertRules (ruleList : Rule<_,_> list) =
         let rec reachable =
             function
             | PToken _ | PLiteral _ -> true
-            | PRef (n, _) -> getCount <| Source.toString n > 0
+            | PRef (n, _) -> getCount <| sourceToString n > 0
             | PSeq (s,_,_) -> s |> List.forall (fun elem -> reachable elem.rule)
             | PAlt (x,y) -> reachable x && reachable y
             | x -> failwithf "Unexpected construction %A" x

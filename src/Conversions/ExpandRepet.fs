@@ -7,7 +7,7 @@ open TransformAux
 
 open System
 
-let dummyPos s = new Source.t(s)
+let dummyPos s = new Source(s)
 
 let private expandRepet (ruleList: Rule<_,_> list) = 
     let toExpand = new System.Collections.Generic.Queue<Rule<_,_>>(List.toArray ruleList)

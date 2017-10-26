@@ -17,7 +17,7 @@ module Yard.Core.Conversions.TransformAux
 open Yard.Core.IL
 open Yard.Core.Namer
 
-let getText = Source.toString
+let getText = sourceToString
 let rec getTextIL = function
     //| PRef(s,None) -> getText s
     | PRef(s,_) -> getText s
@@ -48,11 +48,11 @@ let createRule name args body _public mArgs =
 let createSimpleRule name args body =
     createRule name args body false []
 
-/// Replace first (name) field in Source.t with new source 
-let getNewSource (old : Source.t) n =
-    new Source.t(n, old.startPos, old.endPos, old.file)
+/// Replace first (name) field in Source with new source 
+let getNewSource (old : Source) n =
+    new Source(n, old.startPos, old.endPos, old.file)
 
-//let createSource n = new Source.t(n)
+//let createSource n = new Source(n)
 
 //let createRef ruleName _params = PRef (createSource ruleName, _params)
 

@@ -24,13 +24,13 @@ open Yard.Core.IL
 %token TOKEN_KW
 %token ASSOC_KW
 %token START_KW
-%token <Source.t> TYPE
+%token <Source> TYPE
 %token TYPE_KW
 %token BAR
 %token COLON
-%token <Source.t> IDENT
-%token <Source.t> ACTION_CODE
-%token <Source.t> HEAD
+%token <Source> IDENT
+%token <Source> ACTION_CODE
+%token <Source> HEAD
 
 %start s
 
@@ -43,7 +43,7 @@ alternative : yard_list_13 ACTION_CODE {
     let ac=$2 in
     lst
     |> List.map (fun prod ->
-            {new ProductionElem<Source.t, Source.t>
+            {new ProductionElem<Source, Source>
                 with omit=false
                 and rule=prod
                 and binding=None
@@ -61,7 +61,7 @@ yard_item_2 : IDENT {let s=$1 in
 
 rule : IDENT COLON yard_option_11 alternative yard_list_12 {
             let name=$1 in let alt=$4 in let opt_alts=$5 in
-                { new Rule<Source.t, Source.t> 
+                { new Rule<Source, Source> 
                      with name= name
                      and args=[] 
                      and body=if opt_alts=[] then alt

@@ -20,8 +20,8 @@ open Yard.Core.IL
 
 open System.Collections.Generic
 
-let mergeAlter (ruleList: Rule<Source.t, Source.t> list) = 
-    let buildAlt (ruleList:Rule<Source.t, Source.t> list) = 
+let mergeAlter (ruleList: Rule<Source, Source> list) = 
+    let buildAlt (ruleList:Rule<Source, Source> list) = 
         //TODO add check that all merged rules contains same attributes and metaattributes
         let rec buildProduction productionList =
             match productionList with

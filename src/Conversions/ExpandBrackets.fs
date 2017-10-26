@@ -19,7 +19,7 @@ open Yard.Core.IL
 open Namer
 open TransformAux
 
-//let dummyPos s = new Source.t(s)
+//let dummyPos s = new Source(s)
 
 let private newName () = Namer.newName Namer.Names.brackets
     

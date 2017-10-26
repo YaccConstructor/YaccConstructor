@@ -247,7 +247,7 @@ let deleteUnreachable (rules: Rule<_,_> list) =
 let deleteUselessRules (rules: Rule<_,_> list) = 
     deleteUnreachable (deleteNonGenerating rules)
 
-let tryFindRule (term: Source.t) (rule:Rule<_,_>) (rules: HashSet<_>) = 
+let tryFindRule (term: Source) (rule:Rule<_,_>) (rules: HashSet<_>) = 
     let b = Seq.filter (fun x -> match x.body with PConj(a,b) -> false |_ -> true) rules
     let a = Seq.filter (fun x -> List.length ((fst (getElements x.body [] [] true)).[0]) = 1
                                  && match ((fst (getElements x.body [] [] true)).[0]).[0].rule with PToken t -> true | _ -> false

@@ -18,7 +18,7 @@ open Yard.Core
 open Yard.Core.IL
 open TransformAux
 
-let dummyPos s = new Source.t(s)
+let dummyPos s = new Source(s)
 
 let private expandInnerAlts (ruleList: Rule<_,_> list) = 
     let toExpand = new System.Collections.Generic.Queue<Rule<_,_>>(List.toArray ruleList)

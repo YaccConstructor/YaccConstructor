@@ -32,7 +32,7 @@ and Symbol = Terminal of int | NonTerminal of int * Rule with
         | Terminal _ -> failwith "that was a Terminal"
         | NonTerminal (_, r) -> r
 
-let compress (text: string) (separator: char) : Definition<Source.t, Source.t> =
+let compress (text: string) (separator: char) : Definition<Source, Source> =
 
     let special = int separator
     let numTerminals = 100000
@@ -151,7 +151,7 @@ let compress (text: string) (separator: char) : Definition<Source.t, Source.t> =
     Rules.Remove(0) |> ignore
     if newFirst.lst.Count > 0 then Rules.Add(newFirst.number, newFirst)
     //to IL format
-    let g : Grammar<Source.t, Source.t>= 
+    let g : Grammar<Source, Source>= 
         [{openings = []; 
         allPublic = false; 
         name = None; 
@@ -161,8 +161,8 @@ let compress (text: string) (separator: char) : Definition<Source.t, Source.t> =
                 let makeRule (p: LinkedList<Symbol>) = 
                         let oneElem (x: Symbol) = 
                             if x.isNonTerminal() 
-                            then PRef(Source.t ("sq_" + Index x.Rule), None)
-                            else PToken(Source.t ((char(x.Value)).ToString()))
+                            then PRef(Source ("sq_" + Index x.Rule), None)
+                            else PToken(Source ((char(x.Value)).ToString()))
                         if p.Count = 1 then oneElem p.First.Value
                         else
                             PSeq([for x in p ->
@@ -179,7 +179,7 @@ let compress (text: string) (separator: char) : Definition<Source.t, Source.t> =
                         match x.Next with
                         |null -> makeRule x.Value.Rule.lst
                         |y -> PAlt(makeRule x.Value.Rule.lst, makeAlt y)
-                    {name = Source.t "sq_0";
+                    {name = Source "sq_0";
                     args = [];
                     isStart = true;
                     isInline = false;
@@ -187,7 +187,7 @@ let compress (text: string) (separator: char) : Definition<Source.t, Source.t> =
                     isPublic = false;
                     body = makeAlt (Rules.Item(i).lst.First)}
                 else
-                    {name = Source.t ("sq_" + Index (Rules.Item(i))); 
+                    {name = Source ("sq_" + Index (Rules.Item(i))); 
                     args = []; 
                     isStart = false; 
                     isInline = false; 

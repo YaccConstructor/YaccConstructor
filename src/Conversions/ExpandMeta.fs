@@ -21,7 +21,7 @@ open TransformAux
 open System.Collections.Generic
 
 /// find metarule with given name in hash map of collected metarules
-let findMetaRule (tbl : IDictionary<string,Dictionary<string,string * Rule<Source.t,Source.t>>>) module' metaName =
+let findMetaRule (tbl : IDictionary<string,Dictionary<string,string * Rule<Source,Source>>>) module' metaName =
     try tbl.[module'].[metaName] with
     | :?System.Collections.Generic.KeyNotFoundException ->
         failwith <| sprintf "unable to find metarule %s in module %s" metaName module'
@@ -48,9 +48,9 @@ let getKey module' key =
             let strAttrs =
                 match attrs with
                 | None -> ""
-                | Some x -> "{" + (x : Source.t).text + "}"
+                | Some x -> "{" + (x : Source).text + "}"
 
-            let elemToString (x : ProductionElem<Source.t, Source.t>) =
+            let elemToString (x : ProductionElem<Source, Source>) =
                 let check =
                     match x.checker with
                     | None -> ""
@@ -88,7 +88,7 @@ let getKey module' key =
 /// <para> Replace rule with new one, replacing references to metarules, </para>
 /// <para> and generate new rules for every such reference </para>
 /// <para> body: t - production which can contain metareferences </para>
-/// <para> metaRules: TO_DO Dictionary&lt;string,Rule.t&lt;Source.t,Source.t&gt;&gt; - table, which contains expanding metareferences rules </para>
+/// <para> metaRules: TO_DO Dictionary&lt;string,Rule.t&lt;Source,Source&gt;&gt; - table, which contains expanding metareferences rules </para>
 /// <para> expanded: Dictionary&lt;string,Production.t&gt; - map of metareference with actual params to generated rule name </para>
 /// <para> res: Rule.t list - currently generated rules </para>
 /// <para> returns (new body, generated rules + old rules) </para>
@@ -103,7 +103,7 @@ let expandRule =
     /// Applies function to the first element of result
     let applyToRes f (a,b) = (f a, b)
 
-    let rec expandMetaRef (name : Source.t) attrs metaArgs key module' metaRules expanded resRuleList =
+    let rec expandMetaRef (name : Source) attrs metaArgs key module' metaRules expanded resRuleList =
         let (newMetaArgs, newRes) =
             metaArgs
             |> List.fold (fun (accMeta, accRes) body ->
@@ -114,9 +114,9 @@ let expandRule =
             |> applyToRes List.rev
         // TODO catch exception
         let declModule, metaRule = findMetaRule metaRules module' name.text
-        let newRuleName = new Source.t(newName ("rule_" + name.text), metaRule.name)
+        let newRuleName = new Source(newName ("rule_" + name.text), metaRule.name)
         let formalArgs = metaRule.args
-        let substitution = PRef(new Source.t(newRuleName.text, name), attrs)
+        let substitution = PRef(new Source(newRuleName.text, name), attrs)
         let newKey = getKey module' <| PMetaRef(name, attrs, newMetaArgs)
         if not <| expanded.ContainsKey key then
             expanded.Add(key, substitution)
@@ -126,9 +126,9 @@ let expandRule =
             let expected = metaRule.metaArgs.Length
             let actual = newMetaArgs.Length
             if expected = actual then
-                List.zip (metaRule.metaArgs |> List.map Source.toString) newMetaArgs
+                List.zip (metaRule.metaArgs |> List.map sourceToString) newMetaArgs
             else 
-                let pos (p:Source.Position) = string p.line + ":"  + string p.column
+                let pos (p:SourcePosition) = string p.line + ":"  + string p.column
                 failwithf "%s - %s. Incorrect number of args. Metarule \"%s\" expected %i parameter(s) but get %i." 
                     (pos name.startPos) (pos name.endPos) metaRule.name.text expected actual
         // TODO There can be a bug
@@ -142,7 +142,7 @@ let expandRule =
     /// <para> Replace rule body, expanding references to metarules, </para>
     /// <para> and generate new rules for every such reference </para>
     /// <para> body: t - production which can contain metareferences </para>
-    /// <para> metaRules: TO_DO Dictionary&lt;string,Rule.t&lt;Source.t,Source.t&gt;&gt; - table, which contains expanding metareferences rules </para>
+    /// <para> metaRules: TO_DO Dictionary&lt;string,Rule.t&lt;Source,Source&gt;&gt; - table, which contains expanding metareferences rules </para>
     /// <para> expanded: Dictionary&lt;string,Production.t&gt; - map of metareference with actual params to generated rule name </para>
     /// <para> resRuleList: Rule.t list - currently generated rules </para>
     /// <para> returns (new body, generated rules + old rules) </para>
@@ -207,13 +207,13 @@ let expandRule =
         | PLiteral _ as literal -> literal
         | PToken _ as token -> token
         | PRef(name, attrs) as prev ->
-            prev |> tryReplaceActual formalToAct (Source.toString name)
+            prev |> tryReplaceActual formalToAct (sourceToString name)
         | PSeq (ruleList, actionCode, l) ->
             PSeq (ruleList |> List.map (fun x ->  {x with rule = replace x.rule})
                     , actionCode, l)
         | PMetaRef (name, attrs, metaArgs) -> 
             if metaArgs.IsEmpty then
-                PRef(name, attrs) |> tryReplaceActual formalToAct (Source.toString name)
+                PRef(name, attrs) |> tryReplaceActual formalToAct (sourceToString name)
             else PMetaRef(name, attrs, List.map replace metaArgs)
         | PPerm _ -> failwith "Unrealised meta-expanding of permutation"
         | PRepet (body,x,y) -> //failwith "Unrealised meta-expanding of repetition"

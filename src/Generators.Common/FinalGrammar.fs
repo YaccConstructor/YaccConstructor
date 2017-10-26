@@ -19,7 +19,7 @@ open Yard.Generators.Common.Epsilon
 open Yard.Generators.Common.SymbolSets
 open Yard.Generators.Common
 
-type FinalGrammar (ruleList : Rule<Source.t,Source.t> list, caseSensitive) =
+type FinalGrammar (ruleList : Rule<Source,Source> list, caseSensitive) =
     let _indexator = new Indexator(ruleList, caseSensitive)
     let _probability = 
         let getProb body = 

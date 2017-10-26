@@ -40,7 +40,7 @@ let leafConstr = ref (fun token binding -> sprintf "Leaf(\"%s\")" token)
 
 let seqify = function
     | PSeq(x, y,l) -> PSeq(x, y,l)
-    | production -> PSeq([{new ProductionElem<Source.t, Source.t> with omit=false and rule=production and binding=None and checker=None}], None,None)
+    | production -> PSeq([{new ProductionElem<Source, Source> with omit=false and rule=production and binding=None and checker=None}], None,None)
 
 let printSeqProduction binding = function
     | POpt x -> sprintf "(match %s with None -> Node(\"opt\", []) | Some(ast) -> ast)" binding 
@@ -49,8 +49,8 @@ let printSeqProduction binding = function
     | PMany p -> sprintf "Node(\"many\", %s)" binding    
     | _ -> binding
 
-let rec _buildAST ruleName (production: Production<Source.t, Source.t>) = 
-    let isRef (elem:ProductionElem<Source.t, Source.t>) = match elem.rule with PRef(_,_) -> true | _ -> false
+let rec _buildAST ruleName (production: Production<Source, Source>) = 
+    let isRef (elem:ProductionElem<Source, Source>) = match elem.rule with PRef(_,_) -> true | _ -> false
     let isTopLevelAlt elem = 
         match elem.rule with
         | PAlt _ -> true
@@ -67,21 +67,21 @@ let rec _buildAST ruleName (production: Production<Source.t, Source.t>) =
                 //Don't add bindings to omit or tokens or literals
                 //TODO add omit check
                         match elem.rule with
-                        | PToken _ | PLiteral _ -> { elem with binding=if !isTyped then Some(new Source.t(sprintf "S%d" (i+1))) else None }
-                        | PRef _ ->  { elem with binding=Some(new Source.t(sprintf "S%d" (i+1))) }
-                        | PAlt(left,right) -> { elem with binding=Some(new Source.t(sprintf "S%d" (i+1)));
+                        | PToken _ | PLiteral _ -> { elem with binding=if !isTyped then Some(new Source(sprintf "S%d" (i+1))) else None }
+                        | PRef _ ->  { elem with binding=Some(new Source(sprintf "S%d" (i+1))) }
+                        | PAlt(left,right) -> { elem with binding=Some(new Source(sprintf "S%d" (i+1)));
                                                           rule=PAlt(_buildAST (sprintf "%s_Alt%dL" ruleName (i+1)) left,
                                                                     _buildAST (sprintf "%s_Alt%dR" ruleName (i+1)) right) }
-                        | PConj(left,right) -> { elem with binding=Some(new Source.t(sprintf "S%d" (i+1)));
+                        | PConj(left,right) -> { elem with binding=Some(new Source(sprintf "S%d" (i+1)));
                                                           rule=PConj(_buildAST (sprintf "%s_Conj%dL" ruleName (i+1)) left,
                                                                     _buildAST (sprintf "%s_Conj%dR" ruleName (i+1)) right) }
-                        | PMany p -> { elem with binding=Some(new Source.t(sprintf "S%d" (i+1)));
+                        | PMany p -> { elem with binding=Some(new Source(sprintf "S%d" (i+1)));
                                                  rule=PMany(_buildAST (sprintf "%s_Many%d" ruleName (i+1)) p) }
-                        | PSome p -> { elem with binding=Some(new Source.t(sprintf "S%d" (i+1)));
+                        | PSome p -> { elem with binding=Some(new Source(sprintf "S%d" (i+1)));
                                                  rule=PSome(_buildAST (sprintf "%s_Some%d" ruleName (i+1)) p) }
-                        | POpt p  -> { elem with binding=Some(new Source.t(sprintf "S%d" (i+1)));
+                        | POpt p  -> { elem with binding=Some(new Source(sprintf "S%d" (i+1)));
                                                  rule=POpt (_buildAST (sprintf "%s_Opt%d"  ruleName (i+1)) p) }
-                        | x -> { elem with binding=Some(new Source.t(sprintf "S%d" (i+1)));
+                        | x -> { elem with binding=Some(new Source(sprintf "S%d" (i+1)));
                                            rule=_buildAST (sprintf "%s_INNER%d" ruleName (i+1)) elem.rule }
                     )
                 ,
@@ -94,7 +94,7 @@ let rec _buildAST ruleName (production: Production<Source.t, Source.t>) =
                             else Some(printSeqProduction (sprintf "S%d" (i+1)) elem.rule))
                     |> String.concat "; "
                     |> sprintf "Node(\"%s\", [%s])" ruleName
-                    |> (fun x -> Some <| new Source.t(x))
+                    |> (fun x -> Some <| new Source(x))
                 ,l)
     | PAlt(left,right) -> 
         PAlt(_buildAST (sprintf "%s_Alt%dL" ruleName 1) left,_buildAST (sprintf "%s_Alt%dR" ruleName 1) right)
@@ -102,7 +102,7 @@ let rec _buildAST ruleName (production: Production<Source.t, Source.t>) =
         PConj(_buildAST (sprintf "%s_Conj%dL" ruleName 1) left,_buildAST (sprintf "%s_Conj%dR" ruleName 1) right)
     | x -> seqify x |> _buildAST ruleName
 
-let buildAST (ruleList: Rule<Source.t, Source.t> list) tokenType =
+let buildAST (ruleList: Rule<Source, Source> list) tokenType =
     if System.String.IsNullOrEmpty tokenType then
         leafConstr := (sprintf "Leaf(\"%s\", %s)")
         isTyped := true

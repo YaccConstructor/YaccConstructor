@@ -1,3 +1,6 @@
+### 0.2.0.0
+* Small fixes.
+
 ### 0.2.0.0-alpha2
 * Huge amount of technical changes.
 

@@ -121,7 +121,7 @@ let getRulesForLiterals literals =
     literals
     |> List.map processLiteral
 
-let highlightingConvertions (def : Definition.t<Source.t, Source.t>) = 
+let highlightingConvertions (def : Definition<Source.t, Source.t>) = 
     let rules = def.grammar.Head.rules
     let literalToName' = literalToName rules
 

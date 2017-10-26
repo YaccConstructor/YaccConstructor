@@ -25,7 +25,6 @@ open Yard.Frontends.YardFrontend.GrammarParser
 open System.Collections.Generic
 open Yard.Core.IL
 open Yard.Core.IL.Production
-open Yard.Core.IL.Definition
 open Yard.Core.Helpers
 open NUnit.Framework
 
@@ -64,7 +63,7 @@ let lexerTest str lexemsListCorrect =
         with _ -> false
     Assert.IsTrue (areEqual lexemsListCorrect lexemsList)
 
-let preprocessorTest path (expectedIL : t<Source.t,Source.t>) =
+let preprocessorTest path (expectedIL : Definition<Source.t,Source.t>) =
     let currentIL = {Main.ParseFile path with info = {fileName =""}}
 
     //printfn "ilDef = %A" currentIL
@@ -72,7 +71,7 @@ let preprocessorTest path (expectedIL : t<Source.t,Source.t>) =
 
     Assert.IsTrue(Yard.Core.ILComparators.GrammarEqualsWithoutLineNumbers expectedIL.grammar currentIL.grammar)
 
-let parserTest str (ilDefCorrect: t<Source.t,Source.t>) =
+let parserTest str (ilDefCorrect: Definition<Source.t,Source.t>) =
     let ilDef = { Main.ParseText str "" with info = {fileName =""}}
 
     //printfn "ilDef = %A" ilDef
@@ -440,9 +439,9 @@ type ``YardFrontend Complete tests`` () =
                 LIDENT (getSource "n" 84 85); EQUAL(getSource ":" 2 9); UIDENT (getSource "NUMBER" 86 92);
                 ACTION (getSource "(value n |> int) + i" 94 114); SEMICOLON (getSource ":" 2 9); EOF(getSource ":" 2 9)]
 
-            {empty with head = Some <| getSource "  let value x = (x:>Lexeme<string>).value  " 3 46
-                        grammar = defaultModules rules
-            }
+            {emptyGrammarDefinition with head = Some <| getSource "  let value x = (x:>Lexeme<string>).value  " 3 46
+                                         grammar = defaultModules rules
+            } 
         
 [<TestFixture>]
 type ``Yardfrontend label tests`` () =

@@ -2,7 +2,6 @@
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Definition
 open NUnit.Framework
 open ConversionsTests
 open Yard.Core.Helpers

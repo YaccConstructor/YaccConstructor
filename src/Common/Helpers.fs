@@ -19,8 +19,6 @@ open System.Collections.Generic
 open Yard.Core.IL
 open Grammar
 open Production
-open Definition
-
 
 let errorToken = "error"
 
@@ -37,7 +35,7 @@ let defaultModules rules : Grammar.Module<_,_> list =
         allPublic = false
     }]
 
-let defaultDefinition rules = {empty with grammar = defaultModules rules}
+let defaultDefinition rules = {emptyGrammarDefinition with grammar = defaultModules rules}
 
 let simpleRules nonTerm body : Rule.t<_,_> list =
     [{

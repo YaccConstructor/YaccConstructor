@@ -19,6 +19,6 @@ open Yard.Core.IL
 [<AbstractClass>]
 type Frontend() = //as this =
     abstract Name : string
-    abstract ParseGrammar : obj -> Definition.t<Source.t, Source.t>
-    abstract ParseGrammarFromStr : string -> Definition.t<Source.t, Source.t>
+    abstract ParseGrammar : obj -> Definition<Source.t, Source.t>
+    abstract ParseGrammarFromStr : string -> Definition<Source.t, Source.t>
     abstract ProductionTypes : string list

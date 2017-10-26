@@ -20,7 +20,7 @@ open System.Collections.Generic
 open System.Linq
 open Yard.Core.Helpers
 
-let private startRulesCount (def:Yard.Core.IL.Definition.t<_,_>) =
+let private startRulesCount (def:Yard.Core.IL.Definition<_,_>) =
     def.grammar |> List.sumBy (fun module' -> module'.rules.Count (fun r -> r.isStart))
 
 let IsStartRuleExists def =
@@ -29,7 +29,7 @@ let IsStartRuleExists def =
 let IsSingleStartRule def =
     startRulesCount def = 1
 
-let GetIncorrectMetaArgsCount (def:Yard.Core.IL.Definition.t<_,_>) =
+let GetIncorrectMetaArgsCount (def:Yard.Core.IL.Definition<_,_>) =
     let rules = metaRulesTbl def.grammar
     let checkBody module' =
         let map = rules.[module']
@@ -67,7 +67,7 @@ let GetIncorrectMetaArgsCount (def:Yard.Core.IL.Definition.t<_,_>) =
         | list -> (module', List.rev list)::badModules
     ) []
 
-let IsChomskyNormalForm (def:Yard.Core.IL.Definition.t<_,_>) =
+let IsChomskyNormalForm (def:Yard.Core.IL.Definition<_,_>) =
     def.grammar
     |> List.forall (fun module' ->
         module'.rules
@@ -86,7 +86,7 @@ let private getAllModuleNames (grammar : Grammar.t<_,_>) =
     |> List.map (fun m -> getModuleName m)
     |> List.sort
 
-let GetCoincideModuleNames (def : Yard.Core.IL.Definition.t<Source.t, Source.t>) =
+let GetCoincideModuleNames (def : Yard.Core.IL.Definition<Source.t, Source.t>) =
     getAllModuleNames def.grammar
     |> (function
         | [] -> []
@@ -96,7 +96,7 @@ let GetCoincideModuleNames (def : Yard.Core.IL.Definition.t<Source.t, Source.t>)
                        |> snd
        )
 
-let GetInvalidOpenings (def : Yard.Core.IL.Definition.t<Source.t, Source.t>) =
+let GetInvalidOpenings (def : Yard.Core.IL.Definition<Source.t, Source.t>) =
     let existsModule searched =
         def.grammar
         |> List.exists (fun m -> getModuleName m = searched)
@@ -193,7 +193,7 @@ let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Grammar.Module<
 
     repeatedInnerRules, repeatedExportRules, List.ofSeq undeclaredRules
 
-let GetUndeclaredNonterminalsList (def : Yard.Core.IL.Definition.t<Source.t, Source.t>) =
+let GetUndeclaredNonterminalsList (def : Yard.Core.IL.Definition<Source.t, Source.t>) =
     let grammar = def.grammar
     let publicRules = getPublicRules grammar
     let filterEmpty (x : ('a * 'b list)  list) =
@@ -261,17 +261,17 @@ let reachableRulesInfo_of_grammar (grammar: Grammar.t<_,_>) =
     getReachableRules startModule (getAdditionRules startRule) startRule.body
     reachedRules
 
-let reachableRulesInfo (def: Definition.t<_,_>) =
+let reachableRulesInfo (def: Definition<_,_>) =
   reachableRulesInfo_of_grammar def.grammar
 
-let IsUnusedRulesExists(def:Yard.Core.IL.Definition.t<_,_>) =
+let IsUnusedRulesExists(def:Yard.Core.IL.Definition<_,_>) =
   let reachedRules = reachableRulesInfo def
   def.grammar |> List.exists (fun m ->
         m.rules |> List.exists (fun r -> let v = (getModuleName m, r.name.text) in not <| reachedRules.Contains v)
   )
 
 /// Usage example: check after conversion, that we didn't lose any binding to source (e.g. position)
-let sourcesWithoutFileNames (def:Yard.Core.IL.Definition.t<Source.t,Source.t>) =
+let sourcesWithoutFileNames (def:Yard.Core.IL.Definition<Source.t,Source.t>) =
     let inline check (src : Source.t) = src.file = ""
     let collectName (src : Source.t) = if check src then [src] else []
     let collectOpt (src : Source.t option) =

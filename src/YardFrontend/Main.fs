@@ -164,7 +164,7 @@ let private parse buf userDefs =
             }
         ast.ChooseLongestMatch()
         try
-            (GrammarParser.translate args ast dict : Definition.t<Source.t, Source.t> list).Head
+            (GrammarParser.translate args ast dict : Definition<Source.t, Source.t> list).Head
         with
         | ParseError (src, msg) ->
             failwithf "Parse error on position %s:%s. %s: %s" src.file

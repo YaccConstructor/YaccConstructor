@@ -29,7 +29,7 @@ type FsYaccFrontend() =
         override this.ParseGrammar t = 
             match t with
             | (:? System.String as s) -> Main.ParseFile s
-            | _ -> IL.Definition.empty
+            | _ -> IL.emptyGrammarDefinition
         override this.ProductionTypes =
             Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>
             |> List.ofArray

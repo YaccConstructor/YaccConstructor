@@ -89,7 +89,7 @@ let convertRules (ruleList : Rule.t<_,_> list) =
         inner ruleList
     ruleList |> addStartRule |> splitAlters |> filterNonReachable
 
-let initialConvert (def : Definition.t<_,_>) =
+let initialConvert (def : Definition<_,_>) =
     if def.grammar.Length > 1 then
         failwith "More than one module. Use 'Linearize' conversion"
     let rules = def.grammar.Head.rules |> convertRules

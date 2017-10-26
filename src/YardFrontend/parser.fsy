@@ -22,7 +22,6 @@ open Yard.Core.IL
 open Yard.Core
 open Yard.Core.IL.Production
 open Yard.Core.IL.Grammar
-open Yard.Core.IL.Definition
 open System.Text.RegularExpressions
  
 type Range = struct
@@ -70,7 +69,7 @@ let errorexception msg parserRange = raise <| ParseError ( new Source.t("", fst 
 let createSeqElem bnd omitted r check =
     { binding = bnd; omit = omitted; rule = r; checker = check }
 
-let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
+let parseRules (filename:string) : Definition<Source.t, Source.t> =
     let oldFileName = !currentFilename
     currentFilename := filename
     let ext = filename.Substring(filename.LastIndexOf(".") + 1)    

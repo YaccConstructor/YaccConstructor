@@ -33,7 +33,7 @@ and Symbol = Terminal of int | NonTerminal of int * Rule with
         | Terminal _ -> failwith "that was a Terminal"
         | NonTerminal (_, r) -> r
 
-let compress (text: string) (separator: char) : Definition.t<Source.t, Source.t> =
+let compress (text: string) (separator: char) : Definition<Source.t, Source.t> =
 
     let special = int separator
     let numTerminals = 100000

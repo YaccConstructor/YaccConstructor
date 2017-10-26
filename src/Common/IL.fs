@@ -197,21 +197,21 @@ module Grammar =
     /// Grammar is a list of modules
     type t<'patt,'expr> = Module<'patt,'expr> list
 
-module Definition =     
-    type info = { fileName: string }
-    type t<'patt,'expr when 'patt : comparison and 'expr : comparison>  = { 
-     /// Contains information (e.g. origin) about this grammar description
-     info    : info;
-     /// Text before a grammar description ( e.g. some open-s), what will be simply copied
-     head    :'expr option;
-     /// Grammar description itself
-     grammar : Grammar.t<'patt,'expr>;
-     /// Text after a grammar description, what will be simply copied
-     foot    :'expr option;
-     options : Map<string, string>
-     ///
-     tokens : Map<string, string option>
-    }    
+//module Definition =     
+type DefinitionInfo = { fileName: string }
+type Definition<'patt,'expr when 'patt : comparison and 'expr : comparison>  = { 
+    /// Contains information (e.g. origin) about this grammar description
+    info    : DefinitionInfo;
+    /// Text before a grammar description ( e.g. some open-s), what will be simply copied
+    head    :'expr option;
+    /// Grammar description itself
+    grammar : Grammar.t<'patt,'expr>;
+    /// Text after a grammar description, what will be simply copied
+    foot    :'expr option;
+    options : Map<string, string>
+    ///
+    tokens : Map<string, string option>
+}    
     
-    /// Empty grammar
-    let empty = { info = {fileName = ""}; head = None; foot = None; grammar = []; options = Map.empty; tokens = Map.empty}
+/// Empty grammar
+let emptyGrammarDefinition = { info = {fileName = ""}; head = None; foot = None; grammar = []; options = Map.empty; tokens = Map.empty}

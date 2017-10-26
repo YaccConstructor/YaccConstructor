@@ -16,7 +16,6 @@ module Yard.Core.ILComparators
 
 open Yard.Core.IL
 open Yard.Core.IL.Production
-open Yard.Core.IL.Definition
 open Yard.Core.Helpers
 
 let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Grammar.t<Source.t, Source.t>) =

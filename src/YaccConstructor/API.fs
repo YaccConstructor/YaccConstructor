@@ -74,7 +74,7 @@ let dealWithErrors ilTree =
         (fun (rule, got, expected) -> sprintf "%s(%d,%d): %d (expected %d)" rule.text rule.startPos.line rule.startPos.column got expected)
         eol
 
-let applyConversion (ilTree : Definition.t<Source.t, Source.t>) (conversion : Conversion) (parameters : string[]) = 
+let applyConversion (ilTree : Definition<Source.t, Source.t>) (conversion : Conversion) (parameters : string[]) = 
         {ilTree with grammar = conversion.ConvertGrammar (ilTree.grammar, parameters.[0..parameters.Length - 1])}
 
 let checkIlTree ilTree (gen : Generator) =  
@@ -105,7 +105,7 @@ let genToObj ((generator : Generator), genParams, ilTree) =
     with
         | e -> GenError e.Message |> raise
 
-let applyConversions (ilTree : Definition.t<Source.t, Source.t> ref) (frontend : Frontend) conversions convParams =
+let applyConversions (ilTree : Definition<Source.t, Source.t> ref) (frontend : Frontend) conversions convParams =
     Namer.initNamer ilTree.Value.grammar
     dealWithErrors ilTree
     let lostSources = ref false

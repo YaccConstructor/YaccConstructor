@@ -7,7 +7,6 @@
     open Yard.Core
     open Yard.Core.IL
     open Yard.Core.IL.Production
-    open Yard.Core.IL.Definition
     open Yard.Core.Helpers
     open Conversions.TransformAux
     open QuickGraph
@@ -229,7 +228,7 @@
 
     let graphParse<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
                   mHandler
-                  (loadIL:t<Source.t, Source.t>)
+                  (loadIL:Definition<Source.t, Source.t>)
                   tokenToInt 
                   parallelProcesses =
 

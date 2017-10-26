@@ -203,7 +203,7 @@ let printRule isPublicModule (rule : Rule.t<Source.t, Source.t>) =
                    )
         }
 
-let generate (input_grammar: Definition.t<Source.t,Source.t>) =
+let generate (input_grammar: Definition<Source.t,Source.t>) =
     let print : seq<_> -> _ = printTextBox 4 80 
     let tab = "    "
     let tokens =

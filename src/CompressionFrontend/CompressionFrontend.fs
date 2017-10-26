@@ -11,7 +11,7 @@ type CompressionFrontend() =
             | (:? System.String as s) -> compress s '&'
             | (:?((string * char)) as t) -> compress (fst t) (snd t)
             | (:? (string list) as lst) -> compressList lst
-            | _ -> IL.Definition.empty
+            | _ -> IL.emptyGrammarDefinition
         override this.ProductionTypes =
             Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>
             |> List.ofArray

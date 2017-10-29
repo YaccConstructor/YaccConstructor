@@ -4,7 +4,7 @@ open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
 open AbstractAnalysis.Common
 open Microsoft.FSharp.Reflection
-
+        
 
 [<AllowNullLiteral>]
 type INode = 
@@ -18,6 +18,7 @@ type NonTerminalNode =
     val Name      : int<positionInGrammar>
     val mutable First     : PackedNode 
     val mutable Others    : ResizeArray<PackedNode> 
+    
     member this.AddChild (child : PackedNode) : unit = 
         if this.First <> Unchecked.defaultof<_>
         then 
@@ -40,10 +41,54 @@ type NonTerminalNode =
                         yield func child
         }
 
+    member this.Clone = 
+        let newNt = new NBNonTerminalNode(this.Name, this.Extension)
+        let newP = new NBPackedNode(this.First.State)
+    (*member this.CloneToNotBin = 
+        let notBin = new NotBinNonTerminalNode(this.Name, this.Extension)
+        match this.First.Left with
+        | :? IntermidiateNode as interm -> let nonBinPacked = new NotBinarizedPackedNode(this.First.State, this.First.Right.getExtension)
+                                           nonBinPacked.AddChild interm.First
+                                           if interm.Others <> null 
+                                           then interm.Others.ForEach(fun x -> nonBinPacked.AddChild x)
+                                           notBin.First <- nonBinPacked
+        notBin.Others <- this.Others
+        notBin*)
     interface INode with
         member this.getExtension () = this.Extension
     new (name, extension) = {Name = name; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
     
+and NBNonTerminalNode =
+    val Extension : int64<extension>
+    val Name      : int<positionInGrammar>
+    val mutable First     : NBPackedNode 
+    val mutable Others    : ResizeArray<NBPackedNode> 
+    member this.AddChild (child : NBPackedNode) : unit = 
+        if this.First <> Unchecked.defaultof<_>
+        then 
+            if this.Others <> Unchecked.defaultof<_>
+            then
+                this.Others.Add child
+            else
+                this.Others <- new ResizeArray<NBPackedNode>()
+                this.Others.Add child
+        else this.First <- child
+
+    member this.MapChildren func =
+        seq {
+            if this.First <> Unchecked.defaultof<_>
+            then
+                yield func this.First
+                if this.Others <> Unchecked.defaultof<_>
+                then
+                    for child in this.Others do
+                        yield func child
+        }
+
+    interface INode with
+        member this.getExtension () = this.Extension
+    new (name, extension) = {Name = name; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
+
 and TerminalNode =
     val Name : int<token>
     val Extension : int64<extension>
@@ -61,6 +106,12 @@ and PackedNode =
     val State : int<positionInGrammar>
     val mutable Left : INode
     val mutable Right : INode
+    member this.Clone = 
+        let newP = new NBPackedNode(this.State)
+        newP.AddChild this.Left
+        newP.AddChild this.Right
+        newP
+
     interface INode with
         member this.getExtension () = this.Right.getExtension ()
     new (state, left, right) = {State = state; Left = left; Right = right}
@@ -95,6 +146,19 @@ and IntermidiateNode =
         }
     new (state, nonterm, extension) = {Nonterm = nonterm; State = state; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
     
+and NBPackedNode = 
+    val State : int<positionInGrammar>
+    val mutable Nodes    : ResizeArray<INode>
+    interface INode with
+        member this.getExtension () = (this.Nodes.Item 0).getExtension()
+    member this.AddChild (child : INode) : unit = 
+        if this.Nodes <> Unchecked.defaultof<_>
+            then
+                this.Nodes.Add child
+            else
+                this.Nodes <- new ResizeArray<INode>()
+                this.Nodes.Add child
+    new (state) = {State = state; Nodes = Unchecked.defaultof<_>}
 
 type private DotNodeType = Packed | NonTerminal | Intermidiate | Terminal | Epsilon
 
@@ -805,3 +869,4 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
 type FSAParseResult<'a> =
     | Success of Tree<'a>
     | Error of string
+ 

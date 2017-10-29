@@ -1,0 +1,12 @@
+[<Start>]
+s : gene
+
+v : protein | gene | GO | PATHWAY | FAMDOM | HOMOLOGENE
+
+similar : CODESFOR v RCODESFOR | BELONGS v RBELONGS | HAS v RHAS | HOMOLOGTO v RHOMOLOGTO
+
+ps : (PROTEIN similar) *[1..2]
+protein : ps PROTEIN | PROTEIN
+
+gs : (GENE similar) *[1..2]
+gene : gs GENE | GENE

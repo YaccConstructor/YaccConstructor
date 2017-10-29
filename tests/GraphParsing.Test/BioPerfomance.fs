@@ -21,7 +21,7 @@ let processFile file grammarFile =
     let cnt = 1
 
     let graph, triples = 
-        BioDataPerformance.getParseInputGraph file
+        BioDataPerformance.getIntGraph file
 
     printfn("Graph loaded")
     let fe = new Yard.Frontends.YardFrontend.YardFrontend()

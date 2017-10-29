@@ -26,6 +26,60 @@ let getGLLparserSource (fsa : FSA)
         if (int state < 65536) && (int token - fsa.States.Length < 65536)
         then int( (int state <<< 16) ||| (int token - fsa.States.Length) )
         else failwith "State or token is greater then 65535!!"
+      
+    // Some tokens may have names like "=" or "(" which will lead to
+    // incorectness of generated type Token.
+    let getTokenName (token : string) = 
+        let replacementDict =
+            [
+                '.', "dot"
+                ',', "comma"
+                ':', "semi"
+                ';', "colon"
+                '+', "plus"
+                '-', "minus"
+                '*', "star"
+                '<', "less"
+                '>', "more"
+                '=', "equal"
+                '/', "slash"
+                '&', "and"
+                '|', "or"
+                '?', "question"
+                '$', "dollar"
+                '[', "left_square_bracket"
+                ']', "right_square_bracket"
+                '(', "left_bracket"
+                ')', "right_bracket"
+                '!', "not"
+                '~', "tilda"
+                '#', "sharp"
+                '%', "percent"
+                '^', "hat"
+                '{', "left_figure_bracket"
+                '}', "right_figure_bracket"
+                '\\', "reverse_slash"
+                '`', "reverse_quate"
+                ''', "quate"
+                '?', "number"
+            ]
+            |> dict
+        token
+        |> Seq.mapi  
+            (fun i ch ->
+                let exist,v = replacementDict.TryGetValue(ch)
+                if exist
+                then
+                    if i = 0 
+                    then v + "_"
+                    elif i = token.Length - 1
+                    then "_" + v
+                    else "_" + v + "_"
+                else string ch
+            )
+        |> String.concat ""
+        |> (fun str ->
+            str.ToUpper())
 
     let println (x : 'a) =
         Printf.kprintf (fun s -> res.Append(s).Append "\n" |> ignore) x
@@ -57,11 +111,20 @@ let getGLLparserSource (fsa : FSA)
                     match defaultType with
                     | Some t -> t
                     | None -> failwithf "Type of token %s in not defined" str
-            println "    | %s%s" str
+            println "    | %s%s" 
+            <| getTokenName str
             <|  match type' with
                 | None -> ""
                 | Some s -> " of (" + s + ")"
     
+    let printTokenToNumber() =
+        println "let tokenToNumber = function"
+        for tokenNumber in stringToToken do
+            println "   | %s _ -> %i<token>" 
+            <| getTokenName tokenNumber.Key
+            <| tokenNumber.Value
+
+
     let printStringToToken () = 
         println "let stringToToken = new System.Collections.Generic.Dictionary<_,_>()"
         for tokenNumber in stringToToken do
@@ -218,7 +281,7 @@ let getGLLparserSource (fsa : FSA)
         printItem printHeaders
         printItem printToken
         printItem printStringToToken
-//        printItem printTokenToNumber
+        printItem printTokenToNumber
         printItem (printIntToString sortedStateToNontermName)
         printItem (printAnyNonterm anyNonterm)
         printItem printTerminalNums
@@ -259,7 +322,7 @@ let getGLLparserSource (fsa : FSA)
             numberredRules.rightSideToRule
         with
             | ex ->
-                printfn "It would not be possible to use translation because not having some necessary conversions in grammar"
+                printfn "It would not be possible to use translation because not having some necessary conversions in grammar \n inner exception: %A" ex.Message 
                 fun _ -> failwith "Bad grammar"
     let parserSource = new ParserSourceGLL(fsaStatesOutNonterms
                                          , fsa.StartState

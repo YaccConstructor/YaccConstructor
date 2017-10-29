@@ -210,7 +210,7 @@ let getParseInputGraphVert file (ps : ParserSourceGLL) =
 let processFile inputFile grammarFile =
     let ps = PrepareGrammarFromFile grammarFile
     let g1, edges = 
-        getParseInputGraph inputFile ps
+        getParseInputGraphVert inputFile ps
     printfn "\nNumber of edges: %i" edges
 
     let start = System.DateTime.Now

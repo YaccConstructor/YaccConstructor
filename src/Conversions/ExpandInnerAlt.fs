@@ -29,9 +29,7 @@ let private expandInnerAlts (ruleList: Rule<_,_> list) =
             | PSeq(elements, actionCode, l) -> 
                 elements |> List.fold (fun (res, attrs) elem ->
                     match elem.rule with 
-                    | PSeq(subelements, None, l) when subelements.Length = 1 -> 
-                        { elem with rule = (List.head subelements).rule }
-                    | PSeq(subelements, subActionCode, l) when subelements.Length > 1 || subActionCode <> None ->
+                    | PSeq(subelements, subActionCode, l) ->
                         let newName = Namer.newName Namer.Names.brackets
                         toExpand.Enqueue({name = dummyPos newName; args=attrs; body=elem.rule;
                                             isStart=false; isPublic=false; isInline = false; metaArgs=[]})

@@ -16,6 +16,7 @@ nuget MathNet.Numerics.FSharp
 nuget FSharp.Formatting
 
 nuget FSharpx.Text.StructuredFormat
+nuget NUnit
 nuget NUnit.Runners
 nuget FSharpx.Core
 nuget Virtuosity.Fody

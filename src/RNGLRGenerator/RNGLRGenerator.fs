@@ -246,4 +246,4 @@ type RNGLR() =
             eprintfn "Generation time: %A" <| DateTime.Now - start
             //(new YardPrinter()).Generate newDefinition
             box ()
-        override this.Generate(definition, gtf )= this.Generate (definition, gtf, "")
+        override this.Generate(definition, gtf)= this.Generate (definition, gtf, "")

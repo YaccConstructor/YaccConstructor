@@ -7,9 +7,6 @@ open System.Collections.Generic
 
 let mutable basePath = @"..\..\..\data\RDF"
 
-[<PreTest>]
-do basePath <- @"./data/RDF"
-
 [<TestFixture>]
 type ``Tests for bottom-Up parser based on automata intersection``() =
 
@@ -105,6 +102,10 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
             !i
         printfn "%A" startNonTermCount
         Assert.AreEqual(expectedResult, startNonTermCount)
+
+    [<OneTimeSetUp>]
+    member this.Init () =
+        basePath <- @"./data/RDF"
 
     [<Test>]
     member this._01_BracketsLinear() = 

@@ -9,22 +9,22 @@ type Grammar =
     val startFinal: ResizeArray<int*HashSet<int>*HashSet<int>>
     new (grm, strtFnl) = {grammar = grm; startFinal = strtFnl}
 
-let closure (atm:Matrix<_>) =
-    let zeros =  Matrix.foldSkipZeros (fun i j -> i + 1) 0 atm |> ref
+let closure (atm:Single.SparseMatrix) =
+    let mutable zeros = atm.NonZerosCount
     let mutable res = atm
     let _go = ref true
     while !_go do
-        res <- res.Add (res.Multiply res)
-        let newZeros = Matrix.foldSkipZeros (fun i j -> i + 1) 0 res
-        _go := not (!zeros = newZeros )
-        zeros := newZeros
+        res <- (res.Add (res.Multiply res) :?> Single.SparseMatrix)
+        let newZeros = res.NonZerosCount
+        _go := not (zeros = newZeros )
+        zeros <- newZeros
     res
 
 let main (input:HashSet<int> [,]) (grammar:Grammar) =
     let inputSize = Array2D.length1 input
     let grammarSize = Array2D.length1 grammar.grammar    
     let mutable intersectionResult = 
-        SparseMatrix.create (inputSize * grammarSize) (inputSize * grammarSize) 0.0
+        Single.SparseMatrix.Create((inputSize * grammarSize), (inputSize * grammarSize), 0.0f)
     let stateRemap =
         let m = new ResizeArray<_>()
         for i in 0 .. inputSize-1 do
@@ -47,7 +47,7 @@ let main (input:HashSet<int> [,]) (grammar:Grammar) =
             let _endInput,_endGrammar = stateRemap.[j]
             if input.[_startInput, _endInput].Overlaps grammar.grammar.[_startGrammar, _endGrammar]
                || (_startInput = _endInput && _startGrammar = _endGrammar)
-            then intersectionResult.[i,j] <- 1.0
+            then intersectionResult.[i,j] <- 1.0f
             )
         let cls = closure intersectionResult
         cls

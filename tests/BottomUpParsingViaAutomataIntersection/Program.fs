@@ -41,7 +41,7 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
         g.[5,3].Add 1 |> ignore
         g.[4,3].Add 1 |> ignore
         let states = [|(6, new HashSet<_>([0]), new HashSet<_>([3]))|]
-        new Grammar (g, new ResizeArray<_>(states))
+        new Grammar (g, states)
 
     // s -> b SCO | SCO
     // b -> SCOR b SCO | SCOR SCO
@@ -61,7 +61,7 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
                 (6, new HashSet<_>([0]), new HashSet<_>([2]))
                 (7, new HashSet<_>([3]), new HashSet<_>([6]))
             |]
-        new Grammar (g, new ResizeArray<_>(states))
+        new Grammar (g, states)
     
     // S -> a S b | eps
     // 1 a
@@ -73,7 +73,7 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
         g.[1,2].Add 3 |> ignore
         g.[2,3].Add 2 |> ignore
         let states = [|(3, new HashSet<_>([0]), new HashSet<_>([0;3]))|]
-        new Grammar (g, new ResizeArray<_>(states))
+        new Grammar (g, states)
 
     // E -> E (+|*E) | n
     // 1 +
@@ -88,7 +88,7 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
         g.[2,3].Add 3 |> ignore
         g.[0,3].Add 4 |> ignore
         let states = [|(3, new HashSet<_>([0]), new HashSet<_>([3]))|]
-        new Grammar (g, new ResizeArray<_>(states))    
+        new Grammar (g, states)    
 
     let testRDF file query expectedResult = 
         let input = getRDFInput file
@@ -243,5 +243,5 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
 let f x =
     let t = new ``Tests for bottom-Up parser based on automata intersection``()
     t._19_RDF_univ_bench_q1 ()
-    t._14_RDF_people_pets_q2 ()
+    t._07_RDF_wine_q2 ()
     0 

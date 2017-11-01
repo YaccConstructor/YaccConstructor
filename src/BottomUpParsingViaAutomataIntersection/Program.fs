@@ -2,11 +2,12 @@
 
 open MathNet.Numerics.LinearAlgebra
 open System.Collections.Generic
+open System.Threading.Tasks
 
 [<Struct>]
 type Grammar =
     val grammar:HashSet<int> [,]
-    val startFinal: ResizeArray<int*HashSet<int>*HashSet<int>>
+    val startFinal: array<int*HashSet<int>*HashSet<int>>
     new (grm, strtFnl) = {grammar = grm; startFinal = strtFnl}
 
 let closure (atm:Single.SparseMatrix) =
@@ -54,7 +55,7 @@ let main (input:HashSet<int> [,]) (grammar:Grammar) =
         |> Matrix.iteriSkipZeros (fun i j n ->
             let _startInput,_startGrammar = stateRemap.[i] 
             let _endInput,_endGrammar = stateRemap.[j]
-            let startFinal = grammar.startFinal |> Seq.tryFind (fun (_,s,_) -> s.Contains _startGrammar)
+            let startFinal = grammar.startFinal |> Array.tryFind (fun (_,s,_) -> s.Contains _startGrammar)
             match startFinal with
             | Some (n,s,f) when f.Contains _endGrammar -> input.[_startInput,_endInput].Add n |> ignore
             | _ -> ()

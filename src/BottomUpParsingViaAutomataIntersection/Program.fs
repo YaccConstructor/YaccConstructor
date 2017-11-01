@@ -55,7 +55,6 @@ let main (input:HashSet<int> [,]) (grammar:Grammar) =
             let _startInput,_startGrammar = stateRemap.[i] 
             let _endInput,_endGrammar = stateRemap.[j]
             let startFinal = grammar.startFinal |> Seq.tryFind (fun (_,s,_) -> s.Contains _startGrammar)
-            //printfn "%A %A %A" _startGrammar _endGrammar startFinal
             match startFinal with
             | Some (n,s,f) when f.Contains _endGrammar -> input.[_startInput,_endInput].Add n |> ignore
             | _ -> ()

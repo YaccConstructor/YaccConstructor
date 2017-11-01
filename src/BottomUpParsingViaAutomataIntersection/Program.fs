@@ -23,8 +23,7 @@ let closure (atm:Single.SparseMatrix) =
 let main (input:HashSet<int> [,]) (grammar:Grammar) =
     let inputSize = Array2D.length1 input
     let grammarSize = Array2D.length1 grammar.grammar    
-    let mutable intersectionResult = 
-        Single.SparseMatrix.Create((inputSize * grammarSize), (inputSize * grammarSize), 0.0f)
+    let mutable intersectionResult = Single.SparseMatrix.Create((inputSize * grammarSize), (inputSize * grammarSize), 0.0f)
     let stateRemap,backStateRemap =
         let m = new Dictionary<_,_>()
         let n = new ResizeArray<_>()
@@ -36,12 +35,6 @@ let main (input:HashSet<int> [,]) (grammar:Grammar) =
                 incr k
         n,m
 
-    let getEdgesCount a = 
-        let mutable i = 0
-        Array2D.iter (fun (t:HashSet<_>) -> i <- i + t.Count) a
-        i
-
-    let mutable inputEdges = getEdgesCount input
     let mutable _go = true
 
     while _go do
@@ -56,17 +49,15 @@ let main (input:HashSet<int> [,]) (grammar:Grammar) =
                             then intersectionResult.[backStateRemap.[(_startInput,_startGrammar)] ,backStateRemap.[(_endInput,_endGrammar)]] <- 1.0f
 
         let cls = closure intersectionResult
+        _go <- false
         cls
         |> Matrix.iteriSkipZeros (fun i j n ->
             let _startInput,_startGrammar = stateRemap.[i] 
             let _endInput,_endGrammar = stateRemap.[j]
             let startFinal = grammar.startFinal |> Array.tryFind (fun (_,s,_) -> s.Contains _startGrammar)
             match startFinal with
-            | Some (n,s,f) when f.Contains _endGrammar -> input.[_startInput,_endInput].Add n |> ignore
+            | Some (n,s,f) when f.Contains _endGrammar -> _go <- input.[_startInput,_endInput].Add n || _go
             | _ -> ()
             )
-        let newEdgesCount = getEdgesCount input
-        _go <- not (newEdgesCount = inputEdges)
-        inputEdges <- newEdgesCount
 
     input

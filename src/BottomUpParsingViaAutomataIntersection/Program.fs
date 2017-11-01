@@ -2,7 +2,6 @@
 
 open MathNet.Numerics.LinearAlgebra
 open System.Collections.Generic
-open System.Threading.Tasks
 
 [<Struct>]
 type Grammar =
@@ -26,12 +25,16 @@ let main (input:HashSet<int> [,]) (grammar:Grammar) =
     let grammarSize = Array2D.length1 grammar.grammar    
     let mutable intersectionResult = 
         Single.SparseMatrix.Create((inputSize * grammarSize), (inputSize * grammarSize), 0.0f)
-    let stateRemap =
-        let m = new ResizeArray<_>()
+    let stateRemap,backStateRemap =
+        let m = new Dictionary<_,_>()
+        let n = new ResizeArray<_>()
+        let k = ref 0
         for i in 0 .. inputSize-1 do
             for j in 0 .. grammarSize-1 do
-                m.Add((i,j))
-        m
+                m.Add((i,j),!k)
+                n.Add((i,j))
+                incr k
+        n,m
 
     let getEdgesCount a = 
         let mutable i = 0
@@ -42,14 +45,16 @@ let main (input:HashSet<int> [,]) (grammar:Grammar) =
     let mutable _go = true
 
     while _go do
-        intersectionResult 
-        |> Matrix.iteri (fun i j n -> 
-            let _startInput,_startGrammar = stateRemap.[i] 
-            let _endInput,_endGrammar = stateRemap.[j]
-            if input.[_startInput, _endInput].Overlaps grammar.grammar.[_startGrammar, _endGrammar]
-               || (_startInput = _endInput && _startGrammar = _endGrammar)
-            then intersectionResult.[i,j] <- 1.0f
-            )
+        for _startInput in 0..inputSize-1 do
+            for _endInput in 0..inputSize-1 do
+                if input.[_startInput, _endInput].Count <> 0 || _startInput = _endInput
+                then 
+                    for _startGrammar in 0..grammarSize-1 do
+                        for _endGrammar in 0..grammarSize-1 do
+                            if input.[_startInput, _endInput].Overlaps grammar.grammar.[_startGrammar, _endGrammar]
+                               || (_startInput = _endInput && _startGrammar = _endGrammar)
+                            then intersectionResult.[backStateRemap.[(_startInput,_startGrammar)] ,backStateRemap.[(_endInput,_endGrammar)]] <- 1.0f
+
         let cls = closure intersectionResult
         cls
         |> Matrix.iteriSkipZeros (fun i j n ->

@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0AEA0EC0-6341-4813-BA39-948D8D8691A6}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>GrammarCombinator</RootNamespace>
+    <AssemblyName>GrammarCombinator</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
+    <Name>GrammarCombinator</Name>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <Tailcalls>false</Tailcalls>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <OtherFlags>--warnon:1182</OtherFlags>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <OtherFlags>--warnon:1182</OtherFlags>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FSharp.Quotations.Evaluator, Version=1.0.7.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\FSharp.Quotations.Evaluator.1.0.7\lib\net40\FSharp.Quotations.Evaluator.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharpx.Collections.Experimental, Version=1.15.2.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\FSharpx.Collections.Experimental\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
+    </Reference>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="FSharp.Core">
+      <HintPath>..\..\packages\FSharp.Core.4.1.17\lib\net45\FSharp.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple">
+      <HintPath>..\..\packages\System.ValueTuple.4.3.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.QuickGraph, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="SimpleILWrapper.fs" />
+    <Compile Include="Combinators.fs" />
+    <Compile Include="FeatureExamples.fs" />
+    <Content Include="packages.config" />
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
+      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
+      <Name>AbstractAnalysis.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
+      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
+      <Name>Common.AST</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FsYacc\FsYacc.fsproj">
+      <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>
+      <Name>FsYacc</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GLLAbstractParser\GLLAbstractParser.fsproj">
+      <Project>{bd40477e-7ceb-4ff4-b53f-05316f3bb6d8}</Project>
+      <Name>GLLAbstractParser</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GLLGenerator\GLLGenerator.fsproj">
+      <Project>{8756690f-8138-495a-a368-39afb9029823}</Project>
+      <Name>GLLGenerator</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ParserCommon\GLLParsers.Common.fsproj">
+      <Project>{f2e8eda4-c13f-4f8d-b858-d5ef4fb8a06d}</Project>
+      <Name>GLLParsers.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '11.0'">
+      <PropertyGroup Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')">
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets')">
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
+</Project>

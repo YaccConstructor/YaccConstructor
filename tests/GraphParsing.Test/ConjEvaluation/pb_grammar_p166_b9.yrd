@@ -1,0 +1,707 @@
+s: sp & sb
+sp: sp sp
+sp: any_b sp
+sp: sp any_b
+sp: OP0 sp CP0
+sp: OP0 CP0
+sp: OP1 sp CP1
+sp: OP1 CP1
+sp: OP2 sp CP2
+sp: OP2 CP2
+sp: OP3 sp CP3
+sp: OP3 CP3
+sp: OP4 sp CP4
+sp: OP4 CP4
+sp: OP5 sp CP5
+sp: OP5 CP5
+sp: OP6 sp CP6
+sp: OP6 CP6
+sp: OP7 sp CP7
+sp: OP7 CP7
+sp: OP8 sp CP8
+sp: OP8 CP8
+sp: OP9 sp CP9
+sp: OP9 CP9
+sp: OP10 sp CP10
+sp: OP10 CP10
+sp: OP11 sp CP11
+sp: OP11 CP11
+sp: OP12 sp CP12
+sp: OP12 CP12
+sp: OP13 sp CP13
+sp: OP13 CP13
+sp: OP14 sp CP14
+sp: OP14 CP14
+sp: OP15 sp CP15
+sp: OP15 CP15
+sp: OP16 sp CP16
+sp: OP16 CP16
+sp: OP17 sp CP17
+sp: OP17 CP17
+sp: OP18 sp CP18
+sp: OP18 CP18
+sp: OP19 sp CP19
+sp: OP19 CP19
+sp: OP20 sp CP20
+sp: OP20 CP20
+sp: OP21 sp CP21
+sp: OP21 CP21
+sp: OP22 sp CP22
+sp: OP22 CP22
+sp: OP23 sp CP23
+sp: OP23 CP23
+sp: OP24 sp CP24
+sp: OP24 CP24
+sp: OP25 sp CP25
+sp: OP25 CP25
+sp: OP26 sp CP26
+sp: OP26 CP26
+sp: OP27 sp CP27
+sp: OP27 CP27
+sp: OP28 sp CP28
+sp: OP28 CP28
+sp: OP29 sp CP29
+sp: OP29 CP29
+sp: OP30 sp CP30
+sp: OP30 CP30
+sp: OP31 sp CP31
+sp: OP31 CP31
+sp: OP32 sp CP32
+sp: OP32 CP32
+sp: OP33 sp CP33
+sp: OP33 CP33
+sp: OP34 sp CP34
+sp: OP34 CP34
+sp: OP35 sp CP35
+sp: OP35 CP35
+sp: OP36 sp CP36
+sp: OP36 CP36
+sp: OP37 sp CP37
+sp: OP37 CP37
+sp: OP38 sp CP38
+sp: OP38 CP38
+sp: OP39 sp CP39
+sp: OP39 CP39
+sp: OP40 sp CP40
+sp: OP40 CP40
+sp: OP41 sp CP41
+sp: OP41 CP41
+sp: OP42 sp CP42
+sp: OP42 CP42
+sp: OP43 sp CP43
+sp: OP43 CP43
+sp: OP44 sp CP44
+sp: OP44 CP44
+sp: OP45 sp CP45
+sp: OP45 CP45
+sp: OP46 sp CP46
+sp: OP46 CP46
+sp: OP47 sp CP47
+sp: OP47 CP47
+sp: OP48 sp CP48
+sp: OP48 CP48
+sp: OP49 sp CP49
+sp: OP49 CP49
+sp: OP50 sp CP50
+sp: OP50 CP50
+sp: OP51 sp CP51
+sp: OP51 CP51
+sp: OP52 sp CP52
+sp: OP52 CP52
+sp: OP53 sp CP53
+sp: OP53 CP53
+sp: OP54 sp CP54
+sp: OP54 CP54
+sp: OP55 sp CP55
+sp: OP55 CP55
+sp: OP56 sp CP56
+sp: OP56 CP56
+sp: OP57 sp CP57
+sp: OP57 CP57
+sp: OP58 sp CP58
+sp: OP58 CP58
+sp: OP59 sp CP59
+sp: OP59 CP59
+sp: OP60 sp CP60
+sp: OP60 CP60
+sp: OP61 sp CP61
+sp: OP61 CP61
+sp: OP62 sp CP62
+sp: OP62 CP62
+sp: OP63 sp CP63
+sp: OP63 CP63
+sp: OP64 sp CP64
+sp: OP64 CP64
+sp: OP65 sp CP65
+sp: OP65 CP65
+sp: OP66 sp CP66
+sp: OP66 CP66
+sp: OP67 sp CP67
+sp: OP67 CP67
+sp: OP68 sp CP68
+sp: OP68 CP68
+sp: OP69 sp CP69
+sp: OP69 CP69
+sp: OP70 sp CP70
+sp: OP70 CP70
+sp: OP71 sp CP71
+sp: OP71 CP71
+sp: OP72 sp CP72
+sp: OP72 CP72
+sp: OP73 sp CP73
+sp: OP73 CP73
+sp: OP74 sp CP74
+sp: OP74 CP74
+sp: OP75 sp CP75
+sp: OP75 CP75
+sp: OP76 sp CP76
+sp: OP76 CP76
+sp: OP77 sp CP77
+sp: OP77 CP77
+sp: OP78 sp CP78
+sp: OP78 CP78
+sp: OP79 sp CP79
+sp: OP79 CP79
+sp: OP80 sp CP80
+sp: OP80 CP80
+sp: OP81 sp CP81
+sp: OP81 CP81
+sp: OP82 sp CP82
+sp: OP82 CP82
+sp: OP83 sp CP83
+sp: OP83 CP83
+sp: OP84 sp CP84
+sp: OP84 CP84
+sp: OP85 sp CP85
+sp: OP85 CP85
+sp: OP86 sp CP86
+sp: OP86 CP86
+sp: OP87 sp CP87
+sp: OP87 CP87
+sp: OP88 sp CP88
+sp: OP88 CP88
+sp: OP89 sp CP89
+sp: OP89 CP89
+sp: OP90 sp CP90
+sp: OP90 CP90
+sp: OP91 sp CP91
+sp: OP91 CP91
+sp: OP92 sp CP92
+sp: OP92 CP92
+sp: OP93 sp CP93
+sp: OP93 CP93
+sp: OP94 sp CP94
+sp: OP94 CP94
+sp: OP95 sp CP95
+sp: OP95 CP95
+sp: OP96 sp CP96
+sp: OP96 CP96
+sp: OP97 sp CP97
+sp: OP97 CP97
+sp: OP98 sp CP98
+sp: OP98 CP98
+sp: OP99 sp CP99
+sp: OP99 CP99
+sp: OP100 sp CP100
+sp: OP100 CP100
+sp: OP101 sp CP101
+sp: OP101 CP101
+sp: OP102 sp CP102
+sp: OP102 CP102
+sp: OP103 sp CP103
+sp: OP103 CP103
+sp: OP104 sp CP104
+sp: OP104 CP104
+sp: OP105 sp CP105
+sp: OP105 CP105
+sp: OP106 sp CP106
+sp: OP106 CP106
+sp: OP107 sp CP107
+sp: OP107 CP107
+sp: OP108 sp CP108
+sp: OP108 CP108
+sp: OP109 sp CP109
+sp: OP109 CP109
+sp: OP110 sp CP110
+sp: OP110 CP110
+sp: OP111 sp CP111
+sp: OP111 CP111
+sp: OP112 sp CP112
+sp: OP112 CP112
+sp: OP113 sp CP113
+sp: OP113 CP113
+sp: OP114 sp CP114
+sp: OP114 CP114
+sp: OP115 sp CP115
+sp: OP115 CP115
+sp: OP116 sp CP116
+sp: OP116 CP116
+sp: OP117 sp CP117
+sp: OP117 CP117
+sp: OP118 sp CP118
+sp: OP118 CP118
+sp: OP119 sp CP119
+sp: OP119 CP119
+sp: OP120 sp CP120
+sp: OP120 CP120
+sp: OP121 sp CP121
+sp: OP121 CP121
+sp: OP122 sp CP122
+sp: OP122 CP122
+sp: OP123 sp CP123
+sp: OP123 CP123
+sp: OP124 sp CP124
+sp: OP124 CP124
+sp: OP125 sp CP125
+sp: OP125 CP125
+sp: OP126 sp CP126
+sp: OP126 CP126
+sp: OP127 sp CP127
+sp: OP127 CP127
+sp: OP128 sp CP128
+sp: OP128 CP128
+sp: OP129 sp CP129
+sp: OP129 CP129
+sp: OP130 sp CP130
+sp: OP130 CP130
+sp: OP131 sp CP131
+sp: OP131 CP131
+sp: OP132 sp CP132
+sp: OP132 CP132
+sp: OP133 sp CP133
+sp: OP133 CP133
+sp: OP134 sp CP134
+sp: OP134 CP134
+sp: OP135 sp CP135
+sp: OP135 CP135
+sp: OP136 sp CP136
+sp: OP136 CP136
+sp: OP137 sp CP137
+sp: OP137 CP137
+sp: OP138 sp CP138
+sp: OP138 CP138
+sp: OP139 sp CP139
+sp: OP139 CP139
+sp: OP140 sp CP140
+sp: OP140 CP140
+sp: OP141 sp CP141
+sp: OP141 CP141
+sp: OP142 sp CP142
+sp: OP142 CP142
+sp: OP143 sp CP143
+sp: OP143 CP143
+sp: OP144 sp CP144
+sp: OP144 CP144
+sp: OP145 sp CP145
+sp: OP145 CP145
+sp: OP146 sp CP146
+sp: OP146 CP146
+sp: OP147 sp CP147
+sp: OP147 CP147
+sp: OP148 sp CP148
+sp: OP148 CP148
+sp: OP149 sp CP149
+sp: OP149 CP149
+sp: OP150 sp CP150
+sp: OP150 CP150
+sp: OP151 sp CP151
+sp: OP151 CP151
+sp: OP152 sp CP152
+sp: OP152 CP152
+sp: OP153 sp CP153
+sp: OP153 CP153
+sp: OP154 sp CP154
+sp: OP154 CP154
+sp: OP155 sp CP155
+sp: OP155 CP155
+sp: OP156 sp CP156
+sp: OP156 CP156
+sp: OP157 sp CP157
+sp: OP157 CP157
+sp: OP158 sp CP158
+sp: OP158 CP158
+sp: OP159 sp CP159
+sp: OP159 CP159
+sp: OP160 sp CP160
+sp: OP160 CP160
+sp: OP161 sp CP161
+sp: OP161 CP161
+sp: OP162 sp CP162
+sp: OP162 CP162
+sp: OP163 sp CP163
+sp: OP163 CP163
+sp: OP164 sp CP164
+sp: OP164 CP164
+sp: OP165 sp CP165
+sp: OP165 CP165
+sb: sb sb
+sb: any_p sb
+sb: sb any_p
+sb: OB0 sb CB0
+sb: OB0 CB0
+sb: OB1 sb CB1
+sb: OB1 CB1
+sb: OB2 sb CB2
+sb: OB2 CB2
+sb: OB3 sb CB3
+sb: OB3 CB3
+sb: OB4 sb CB4
+sb: OB4 CB4
+sb: OB5 sb CB5
+sb: OB5 CB5
+sb: OB6 sb CB6
+sb: OB6 CB6
+sb: OB7 sb CB7
+sb: OB7 CB7
+sb: OB8 sb CB8
+sb: OB8 CB8
+any_p: OP0
+any_p: CP0
+any_p: OP1
+any_p: CP1
+any_p: OP2
+any_p: CP2
+any_p: OP3
+any_p: CP3
+any_p: OP4
+any_p: CP4
+any_p: OP5
+any_p: CP5
+any_p: OP6
+any_p: CP6
+any_p: OP7
+any_p: CP7
+any_p: OP8
+any_p: CP8
+any_p: OP9
+any_p: CP9
+any_p: OP10
+any_p: CP10
+any_p: OP11
+any_p: CP11
+any_p: OP12
+any_p: CP12
+any_p: OP13
+any_p: CP13
+any_p: OP14
+any_p: CP14
+any_p: OP15
+any_p: CP15
+any_p: OP16
+any_p: CP16
+any_p: OP17
+any_p: CP17
+any_p: OP18
+any_p: CP18
+any_p: OP19
+any_p: CP19
+any_p: OP20
+any_p: CP20
+any_p: OP21
+any_p: CP21
+any_p: OP22
+any_p: CP22
+any_p: OP23
+any_p: CP23
+any_p: OP24
+any_p: CP24
+any_p: OP25
+any_p: CP25
+any_p: OP26
+any_p: CP26
+any_p: OP27
+any_p: CP27
+any_p: OP28
+any_p: CP28
+any_p: OP29
+any_p: CP29
+any_p: OP30
+any_p: CP30
+any_p: OP31
+any_p: CP31
+any_p: OP32
+any_p: CP32
+any_p: OP33
+any_p: CP33
+any_p: OP34
+any_p: CP34
+any_p: OP35
+any_p: CP35
+any_p: OP36
+any_p: CP36
+any_p: OP37
+any_p: CP37
+any_p: OP38
+any_p: CP38
+any_p: OP39
+any_p: CP39
+any_p: OP40
+any_p: CP40
+any_p: OP41
+any_p: CP41
+any_p: OP42
+any_p: CP42
+any_p: OP43
+any_p: CP43
+any_p: OP44
+any_p: CP44
+any_p: OP45
+any_p: CP45
+any_p: OP46
+any_p: CP46
+any_p: OP47
+any_p: CP47
+any_p: OP48
+any_p: CP48
+any_p: OP49
+any_p: CP49
+any_p: OP50
+any_p: CP50
+any_p: OP51
+any_p: CP51
+any_p: OP52
+any_p: CP52
+any_p: OP53
+any_p: CP53
+any_p: OP54
+any_p: CP54
+any_p: OP55
+any_p: CP55
+any_p: OP56
+any_p: CP56
+any_p: OP57
+any_p: CP57
+any_p: OP58
+any_p: CP58
+any_p: OP59
+any_p: CP59
+any_p: OP60
+any_p: CP60
+any_p: OP61
+any_p: CP61
+any_p: OP62
+any_p: CP62
+any_p: OP63
+any_p: CP63
+any_p: OP64
+any_p: CP64
+any_p: OP65
+any_p: CP65
+any_p: OP66
+any_p: CP66
+any_p: OP67
+any_p: CP67
+any_p: OP68
+any_p: CP68
+any_p: OP69
+any_p: CP69
+any_p: OP70
+any_p: CP70
+any_p: OP71
+any_p: CP71
+any_p: OP72
+any_p: CP72
+any_p: OP73
+any_p: CP73
+any_p: OP74
+any_p: CP74
+any_p: OP75
+any_p: CP75
+any_p: OP76
+any_p: CP76
+any_p: OP77
+any_p: CP77
+any_p: OP78
+any_p: CP78
+any_p: OP79
+any_p: CP79
+any_p: OP80
+any_p: CP80
+any_p: OP81
+any_p: CP81
+any_p: OP82
+any_p: CP82
+any_p: OP83
+any_p: CP83
+any_p: OP84
+any_p: CP84
+any_p: OP85
+any_p: CP85
+any_p: OP86
+any_p: CP86
+any_p: OP87
+any_p: CP87
+any_p: OP88
+any_p: CP88
+any_p: OP89
+any_p: CP89
+any_p: OP90
+any_p: CP90
+any_p: OP91
+any_p: CP91
+any_p: OP92
+any_p: CP92
+any_p: OP93
+any_p: CP93
+any_p: OP94
+any_p: CP94
+any_p: OP95
+any_p: CP95
+any_p: OP96
+any_p: CP96
+any_p: OP97
+any_p: CP97
+any_p: OP98
+any_p: CP98
+any_p: OP99
+any_p: CP99
+any_p: OP100
+any_p: CP100
+any_p: OP101
+any_p: CP101
+any_p: OP102
+any_p: CP102
+any_p: OP103
+any_p: CP103
+any_p: OP104
+any_p: CP104
+any_p: OP105
+any_p: CP105
+any_p: OP106
+any_p: CP106
+any_p: OP107
+any_p: CP107
+any_p: OP108
+any_p: CP108
+any_p: OP109
+any_p: CP109
+any_p: OP110
+any_p: CP110
+any_p: OP111
+any_p: CP111
+any_p: OP112
+any_p: CP112
+any_p: OP113
+any_p: CP113
+any_p: OP114
+any_p: CP114
+any_p: OP115
+any_p: CP115
+any_p: OP116
+any_p: CP116
+any_p: OP117
+any_p: CP117
+any_p: OP118
+any_p: CP118
+any_p: OP119
+any_p: CP119
+any_p: OP120
+any_p: CP120
+any_p: OP121
+any_p: CP121
+any_p: OP122
+any_p: CP122
+any_p: OP123
+any_p: CP123
+any_p: OP124
+any_p: CP124
+any_p: OP125
+any_p: CP125
+any_p: OP126
+any_p: CP126
+any_p: OP127
+any_p: CP127
+any_p: OP128
+any_p: CP128
+any_p: OP129
+any_p: CP129
+any_p: OP130
+any_p: CP130
+any_p: OP131
+any_p: CP131
+any_p: OP132
+any_p: CP132
+any_p: OP133
+any_p: CP133
+any_p: OP134
+any_p: CP134
+any_p: OP135
+any_p: CP135
+any_p: OP136
+any_p: CP136
+any_p: OP137
+any_p: CP137
+any_p: OP138
+any_p: CP138
+any_p: OP139
+any_p: CP139
+any_p: OP140
+any_p: CP140
+any_p: OP141
+any_p: CP141
+any_p: OP142
+any_p: CP142
+any_p: OP143
+any_p: CP143
+any_p: OP144
+any_p: CP144
+any_p: OP145
+any_p: CP145
+any_p: OP146
+any_p: CP146
+any_p: OP147
+any_p: CP147
+any_p: OP148
+any_p: CP148
+any_p: OP149
+any_p: CP149
+any_p: OP150
+any_p: CP150
+any_p: OP151
+any_p: CP151
+any_p: OP152
+any_p: CP152
+any_p: OP153
+any_p: CP153
+any_p: OP154
+any_p: CP154
+any_p: OP155
+any_p: CP155
+any_p: OP156
+any_p: CP156
+any_p: OP157
+any_p: CP157
+any_p: OP158
+any_p: CP158
+any_p: OP159
+any_p: CP159
+any_p: OP160
+any_p: CP160
+any_p: OP161
+any_p: CP161
+any_p: OP162
+any_p: CP162
+any_p: OP163
+any_p: CP163
+any_p: OP164
+any_p: CP164
+any_p: OP165
+any_p: CP165
+any_b: OB0
+any_b: CB0
+any_b: OB1
+any_b: CB1
+any_b: OB2
+any_b: CB2
+any_b: OB3
+any_b: CB3
+any_b: OB4
+any_b: CB4
+any_b: OB5
+any_b: CB5
+any_b: OB6
+any_b: CB6
+any_b: OB7
+any_b: CB7
+any_b: OB8
+any_b: CB8

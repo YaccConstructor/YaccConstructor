@@ -121,6 +121,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BottomUpParsingViaAutomataI
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BottomUpParsingViaAutomataIntersection", "src\BottomUpParsingViaAutomataIntersection\BottomUpParsingViaAutomataIntersection.fsproj", "{0697FBAE-293B-4109-A890-2B9F1EBBD12E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrammarCombinator", "src\GrammarCombinator\GrammarCombinator.fsproj", "{0AEA0EC0-6341-4813-BA39-948D8D8691A6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -623,6 +625,18 @@ Global
 		{0697FBAE-293B-4109-A890-2B9F1EBBD12E}.Release20|Any CPU.Build.0 = Release|Any CPU
 		{0697FBAE-293B-4109-A890-2B9F1EBBD12E}.Release20|x86.ActiveCfg = Release|Any CPU
 		{0697FBAE-293B-4109-A890-2B9F1EBBD12E}.Release20|x86.Build.0 = Release|Any CPU
+		{0AEA0EC0-6341-4813-BA39-948D8D8691A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AEA0EC0-6341-4813-BA39-948D8D8691A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AEA0EC0-6341-4813-BA39-948D8D8691A6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0AEA0EC0-6341-4813-BA39-948D8D8691A6}.Debug|x86.Build.0 = Debug|Any CPU
+		{0AEA0EC0-6341-4813-BA39-948D8D8691A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AEA0EC0-6341-4813-BA39-948D8D8691A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AEA0EC0-6341-4813-BA39-948D8D8691A6}.Release|x86.ActiveCfg = Release|Any CPU
+		{0AEA0EC0-6341-4813-BA39-948D8D8691A6}.Release|x86.Build.0 = Release|Any CPU
+		{0AEA0EC0-6341-4813-BA39-948D8D8691A6}.Release20|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AEA0EC0-6341-4813-BA39-948D8D8691A6}.Release20|Any CPU.Build.0 = Debug|Any CPU
+		{0AEA0EC0-6341-4813-BA39-948D8D8691A6}.Release20|x86.ActiveCfg = Debug|Any CPU
+		{0AEA0EC0-6341-4813-BA39-948D8D8691A6}.Release20|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

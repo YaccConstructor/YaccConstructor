@@ -17,9 +17,15 @@ module internal IL =
 
     let inline pref n = Production.PRef(Source n, None)
 
-    let conc a b =
-        Production.PSeq([{omit=false; rule=a; binding=None; checker=None};
-                         {omit=false; rule=b; binding=None; checker=None}], None, None)
+    let conc x y =
+        let prodElem a = {omit=false; rule=a; binding=None; checker=None}
+        let xys =
+            match x, y with
+            | PSeq(xs, _, _), PSeq(ys, _, _) -> xs @ ys
+            | PSeq(xs, _, _), _ -> List.append xs [prodElem y]
+            | _, PSeq(ys, _, _) -> prodElem x :: ys
+            | _ -> [prodElem x; prodElem y]
+        PSeq(xys, None, None)
 
     let rule (name: string) (p: Production) (isStart: bool) : Rule =
         {defaultRule (Source name) p with isStart = isStart; isPublic = true}

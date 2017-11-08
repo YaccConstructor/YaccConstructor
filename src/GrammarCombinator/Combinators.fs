@@ -12,25 +12,16 @@ module Combinators =
         with
         member this.Name = match this with Product(Some name, _, _, _) -> name
 
-    let private applyBinop op a b =
-        let used = set[]
-        let recs = []
-        let updateRefUsedAndRecs (a: Product) used recs =
-            match a with
-            | Product(Some n, p, used', recs') ->
-                Wrapper.IL.pref n, Set.union used <| extendRules n p used', recs @ recs'
-            | Product(None, p, used', recs') -> p, Set.union used used', recs @ recs'
-        let a', used, recs = updateRefUsedAndRecs a used recs
-        let b', used, recs = updateRefUsedAndRecs b used recs
-        let p = op a' b'
-        Product(None, p, used, recs)
+    let internal refProduct = function
+        | Product(Some n, p, used, recs) -> Wrapper.IL.pref n, extendRules n p used, recs
+        | Product(None, p, used, recs) -> p, used, recs
 
-    let private applyUnaryop op a =
-        let a, used, recs =
-            match a with
-            | Product(Some n, p, used', recs') -> Wrapper.IL.pref n, extendRules n p used', recs'
-            | Product(None, p, used', recs') -> p, used', recs'
-        Product(None, op a, used, recs)
+    let private applyBinop op a b =
+        let a, used, recs = refProduct a
+        let b, used', recs' = refProduct b
+        Product(None, op a b, Set.union used used', recs @ recs')
+
+    let private applyUnaryop op = refProduct >> (fun (p, used, recs) -> Product(None, op p, used, recs))
 
     type Product with
         static member (+) (a: Product, b: Product) = applyBinop Wrapper.IL.conc a b
@@ -54,11 +45,7 @@ module internal Core =
 
 
     // --------------------------------------------- AT EVALUATE ---------------------------------------------
-    let assignProd n = function
-        | Product(None, p, used, recs) ->
-            Product(Some n, p, used, recs)
-        | Product(Some other, p, used, recs) ->
-            Product(Some n, Wrapper.IL.pref other, extendRules other p used, recs)
+    let private assignProd n = refProduct >> (fun (p, used, recs) -> Product(Some n, p, used, recs))
 
 
     // --------------------------------------------- BEFORE EVALUATE ---------------------------------------------
@@ -103,7 +90,7 @@ module internal Core =
                     match el with
                     | Product(Some name, prod, rules', recs) ->
                         let used = Set.add name used
-                        let rules = Set.add <| Wrapper.IL.rule name prod false <| Set.union rules rules'
+                        let rules = extendRules name prod <| Set.union rules rules'
                         let queue' =
                             List.map ((|>)()) recs
                             |> List.filter (fun x -> not <| Set.contains x.Name used)

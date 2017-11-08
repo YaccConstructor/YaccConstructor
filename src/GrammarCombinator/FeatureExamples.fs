@@ -12,13 +12,12 @@ module TestSuite =
     open Yard.Generators.GLL
     open AbstractAnalysis.Common
 
-    let psgll (def: GrammarDefinition) : ParserCommon.ParserSourceGLL =
+    let private psgll (def: GrammarDefinition) : ParserCommon.ParserSourceGLL =
         let gll = new GLL() in
         gll.Generate(def, false) :?> ParserCommon.ParserSourceGLL
 
-    let ast (str: string) (pgll: ParserCommon.ParserSourceGLL) =
-        let input = Array.map (fun c -> pgll.StringToToken <| c.ToString()) <| str.ToCharArray()
-        AbstractParser.buildAst pgll <| new LinearInput(input)
+    let private ast (strs: array<string>) (pgll: ParserCommon.ParserSourceGLL) =
+        AbstractParser.buildAst pgll <| new LinearInput(Array.map pgll.StringToToken strs)
 
     let genTree input filename =
         GrammarGenerator.generate "unique" // TODO: unique

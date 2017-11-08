@@ -10,10 +10,15 @@ open GraphParsing
 open MatrixKernels
 open MathNet.Numerics.LinearAlgebra.Double
 open ImplementationTests
+open Yard.Core
+open Yard.Core.Conversions
+open Yard.Core.Conversions.CNFandBNF
+open Yard.Core.IL
+open Yard.Core.Helpers
 
 let PBtokenizer (str:string) =
     let bracketKind = str.Substring(0, 2).ToUpper()
-    let bracketIndex = str.Substring(4) |> int
+    let bracketIndex = str.Substring(2) |> int
     match str with
     | "OP" -> 2*bracketIndex + 1
     | "CP" -> -2*bracketIndex - 1
@@ -49,7 +54,7 @@ let getTriplesFromFile file =
                     | "CB" -> maxBracket <- max maxBracket bracketIndex
                     | _ -> ignore()
                 
-                triples.Add(f,l,t)
+                triples.Add(f,bracketKind + l.Substring(4),t)
     triples, maxParenthesis, maxBracket
 
 let getInputGraph file =
@@ -70,23 +75,34 @@ let getInputGraph file =
     
     g, triples.Count, pMax, bMax
 
+let conversionBNFconj = new Conversions.CNFandBNF.BNFconj()
+
+let applyConversion (conversion:Conversion) loadIL = 
+    {
+        loadIL
+            with grammar = conversion.ConvertGrammar (loadIL.grammar, [||])                               
+    }
+
 let processFile file grammarFile =
     let cnt = 1
     let graph, triples, pMax, bMax = 
         getInputGraph file
 
     //printfn("Graph loaded")
+
     let fe = new Yard.Frontends.YardFrontend.YardFrontend()
     let pStr = "_p" + (pMax + 1 |> string)
     let bStr = "_b" + (bMax + 1 |> string)
     let loadIL = fe.ParseGrammar (grammarFile + pStr + bStr + ".yrd")
+    Namer.initNamer loadIL.grammar
+    let resultIL = loadIL |> applyConversion conversionBNFconj
 
-    //let root1, time1, countOfPairs1 = testDenseCPU cnt graph loadIL PBtokenizer 1
-    //let root2, time2, countOfPairs2 = testSparseCPU cnt graph loadIL PBtokenizer 1
-    //let root3, time3, countOfPairs3 = testDenseGPU1 cnt graph loadIL PBtokenizer 1
-    //let root4, time4, countOfPairs4 = testDenseGPU2 cnt graph loadIL PBtokenizer 1
-    let root5, time5, countOfPairs5 = testSparseGPU cnt graph loadIL PBtokenizer 1
-    //let root6, time6, countOfPairs6 = testSparseCPU cnt graph loadIL PBtokenizer 2
+    //let root1, time1, countOfPairs1 = testDenseCPU cnt graph resultIL PBtokenizer 1
+    //let root2, time2, countOfPairs2 = testSparseCPU cnt graph resultIL PBtokenizer 1
+    //let root3, time3, countOfPairs3 = testDenseGPU1 cnt graph resultIL PBtokenizer 1
+    //let root4, time4, countOfPairs4 = testDenseGPU2 cnt graph resultIL PBtokenizer 1
+    let root5, time5, countOfPairs5 = testSparseGPU cnt graph resultIL PBtokenizer 1
+    //let root6, time6, countOfPairs6 = testSparseCPU cnt graph resultIL PBtokenizer 2
 
     System.IO.Path.GetFileNameWithoutExtension file, triples, (*time1, countOfPairs1, time2, countOfPairs2, time3, countOfPairs3,
                                                  time4, countOfPairs4,*) time5, countOfPairs5(*, time6, countOfPairs6*)

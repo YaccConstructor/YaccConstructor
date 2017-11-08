@@ -13,7 +13,8 @@ def grammars_gen(p_count, b_count):
     for i in range(b_count):
         ob.append('OB' + str(i))
         cb.append('CB' + str(i))
-
+	
+    f.write('[<Start>]\n')
     f.write('s: sp & sb\n')
 
     f.write('sp: sp sp\n')

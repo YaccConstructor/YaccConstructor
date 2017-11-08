@@ -1,3 +1,4 @@
+[<Start>]
 s: sp & sb
 sp: sp sp
 sp: any_b sp

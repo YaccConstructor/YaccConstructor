@@ -49,36 +49,34 @@ module internal Core =
 
 
     // --------------------------------------------- BEFORE EVALUATE ---------------------------------------------
-    let rec fixTree : Expr -> Expr =
-        let mkRuleWithName (name: Var) (prodExpr: Expr) =
-            let assignRule prod =
-                <@@ assignProd %%(Expr.Value name.Name) %%(fixTree prod) @@>
-            match name.Type with
-            | t when t = typeof<unit -> Product> ->
-                match prodExpr with Lambda(u, prodExpr) -> Expr.Lambda(u, assignRule prodExpr)
-            | t when t = typeof<Product> ->
-                assignRule prodExpr
-            | _ -> fixTree prodExpr
+    let rec private fixExpression =
+        let rec mkRuleWithName (name: Var) = function
+            | Lambda(u, prodExpr) -> Expr.Lambda(u, mkRuleWithName name prodExpr)
+            | prodExpr when prodExpr.Type = typeof<Product> ->
+                <@@ assignProd %%(Expr.Value name.Name) %%(fixExpression prodExpr) @@>
+            | prodExpr -> fixExpression prodExpr // TODO: match inner grammars
         function
         | Let(name, prodExpr, body) ->
             let letExpr = mkRuleWithName name prodExpr
-            Expr.Let(name, letExpr, fixTree body)
+            Expr.Let(name, letExpr, fixExpression body)
         | LetRecursive(dfs, body) ->
             let bindings = List.map (fun (n, p) -> n, mkRuleWithName n p) dfs
-            Expr.LetRecursive(bindings, fixTree body)
+            Expr.LetRecursive(bindings, fixExpression body)
         | Application(op, args) as app ->
             Expr.Application(
                 if op.Type = typeof<unit -> Product>
-                then <@@ fun (_: unit) -> Product(None, Wrapper.IL.pref <| op.ToString(), set[], [%%op]) @@>
-                else fixTree op
-                , fixTree args)
+                then <@@ fun (_: unit) -> Product(None, Wrapper.IL.pref (op.ToString()), set[], [%%op]) @@>
+                else fixExpression op
+                , fixExpression args)
         | PropertyGet(None, info, args) ->
-            Expr.PropertyGet(info, List.map fixTree args)
+            Expr.PropertyGet(info, List.map fixExpression args)
         | Call(None, op, args) ->
-            Expr.Call(op, List.map fixTree args)
+            Expr.Call(op, List.map fixExpression args)
         | IfThenElse(p, t1, t2) ->
-            Expr.IfThenElse(fixTree p, fixTree t1, fixTree t2)
+            Expr.IfThenElse(fixExpression p, fixExpression t1, fixExpression t2)
         | t -> t // TODO: all Expressions
+
+    let fixTree (expr: Expr<Product>) : Expr = fixExpression expr.Raw
 
 
     // --------------------------------------------- POSTPROCESSING ---------------------------------------------
@@ -114,7 +112,7 @@ module GrammarGenerator =
     open Combinators
     open Core
 
-    let generate (name: string) : Expr -> GrammarDefinition =
+    let generate (name: string) : Expr<Product> -> GrammarDefinition =
         fixTree
         >> QuotationEvaluator.EvaluateUntyped
         >> (fun x -> x :?> Product)

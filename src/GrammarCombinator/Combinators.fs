@@ -2,35 +2,19 @@ namespace GrammarCombinator
 open GrammarCombinator.Wrapper.Shortcuts
 
 module Combinators =
-    let internal extendRules n p = Set.add <| Wrapper.IL.rule n p false
+    type Product = Product of option<string * int> // optional name and unique id
+                              * Production<unit -> Product>
+    with override this.ToString() =
+            match this with
+            | Product(None, p) -> sprintf "Product(None, %O)" p
+            | Product(Some(s, n), p) -> sprintf "Product(%O$%O, %O)" s n p
 
-    type Product =
-        | Product of option<string> // optional name (name -> prod)
-                     * Production
-                     * Set<Rule>    // referenced simple rules
-                     * list<unit -> Product> // recursive rules. if `p` is in the list, we want it's set of rules too
-        with
-        member this.Name = match this with Product(Some name, _, _, _) -> name
+    let inline internal pref n = Production.PRef(Source "", Some n)
+    let internal getProd = function Product(_, p) -> p
+    let private mkProd = untuple Product None
 
-    let private applyBinop op a b =
-        let used = set[]
-        let recs = []
-        let updateRefUsedAndRecs (a: Product) used recs =
-            match a with
-            | Product(Some n, p, used', recs') ->
-                Wrapper.IL.pref n, Set.union used <| extendRules n p used', recs @ recs'
-            | Product(None, p, used', recs') -> p, Set.union used used', recs @ recs'
-        let a', used, recs = updateRefUsedAndRecs a used recs
-        let b', used, recs = updateRefUsedAndRecs b used recs
-        let p = op a' b'
-        Product(None, p, used, recs)
-
-    let private applyUnaryop op a =
-        let a, used, recs =
-            match a with
-            | Product(Some n, p, used', recs') -> Wrapper.IL.pref n, extendRules n p used', recs'
-            | Product(None, p, used', recs') -> p, used', recs'
-        Product(None, op a, used, recs)
+    let private applyBinop op a b = mkProd <| op (getProd a) (getProd b)
+    let private applyUnaryop op = getProd >> op >> mkProd
 
     type Product with
         static member (+) (a: Product, b: Product) = applyBinop Wrapper.IL.conc a b
@@ -42,23 +26,26 @@ module Combinators =
     let (!+) = applyUnaryop Production.PSome
     let (!~) = applyUnaryop Production.PNeg
 
-    let inline private anonProd p = Product(None, p, set[], [])
-    let tok =  Source >> Production.PToken >> anonProd
-    let Eps = anonProd <| Production.PSeq([], None, None)
+    let tok = Source >> Production.PToken >> mkProd
+    let Eps = mkProd <| Production.PSeq([], None, None)
 
 module internal Core =
     open Combinators
+    open Yard.Core.IL
 
     open Microsoft.FSharp.Quotations
     open Microsoft.FSharp.Quotations.Patterns
 
 
     // --------------------------------------------- AT EVALUATE ---------------------------------------------
-    let assignProd n = function
-        | Product(None, p, used, recs) ->
-            Product(Some n, p, used, recs)
-        | Product(Some other, p, used, recs) ->
-            Product(Some n, Wrapper.IL.pref other, extendRules other p used, recs)
+    let private getUniqueID =
+        let uniqueID = ref 0
+        fun (_: unit) ->
+            let last = !uniqueID
+            uniqueID := !uniqueID + 1
+            last
+
+    let inline private assignProd uname p = Product(Some uname, getProd p)
 
 
     // --------------------------------------------- BEFORE EVALUATE ---------------------------------------------
@@ -66,7 +53,8 @@ module internal Core =
         let rec mkRuleWithName (name: Var) = function
             | Lambda(u, prodExpr) -> Expr.Lambda(u, mkRuleWithName name prodExpr)
             | prodExpr when prodExpr.Type = typeof<Product> ->
-                <@@ assignProd %%(Expr.Value name.Name) %%(fixExpression prodExpr) @@>
+                let uname = name.Name, getUniqueID()
+                <@@ assignProd %%(Expr.Value uname) %%(fixExpression prodExpr) @@>
             | prodExpr -> fixExpression prodExpr // TODO: match inner grammars
         function
         | Let(name, prodExpr, body) ->
@@ -78,7 +66,7 @@ module internal Core =
         | Application(op, args) as app ->
             Expr.Application(
                 if op.Type = typeof<unit -> Product>
-                then <@@ fun (_: unit) -> Product(None, Wrapper.IL.pref (op.ToString()), set[], [%%op]) @@>
+                then <@@ fun (_: unit) -> Product(None, pref %%op) @@>
                 else fixExpression op
                 , fixExpression args)
         | PropertyGet(None, info, args) ->
@@ -101,7 +89,7 @@ module internal Core =
                     match el with
                     | Product(Some name, prod, rules', recs) ->
                         let used = Set.add name used
-                        let rules = Set.add <| Wrapper.IL.rule name prod false <| Set.union rules rules'
+                        let rules = extendRules name prod <| Set.union rules rules'
                         let queue' =
                             List.map ((|>)()) recs
                             |> List.filter (fun x -> not <| Set.contains x.Name used)

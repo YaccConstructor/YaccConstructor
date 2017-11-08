@@ -3,7 +3,7 @@ namespace GrammarCombinator.Wrapper
 module internal Shortcuts =
     open Yard.Core.IL
 
-    type Production = Production<Source, Source>
+    type Production<'a> = Production<Source, 'a>
     type Rule = Rule<Source, Source>
     type Grammar = Grammar<Source, Source>
     type GrammarDefinition = Definition<Source, Source>
@@ -15,7 +15,6 @@ module internal IL =
     open Yard.Core.IL
     open Shortcuts
 
-    let inline pref n = Production.PRef(Source n, None)
 
     let conc x y =
         let prodElem a = {omit=false; rule=a; binding=None; checker=None}
@@ -27,7 +26,7 @@ module internal IL =
             | _ -> [prodElem x; prodElem y]
         PSeq(xys, None, None)
 
-    let rule (name: string) (p: Production) (isStart: bool) : Rule =
+    let rule (name: string) (p: Production<Source>) (isStart: bool) : Rule =
         {defaultRule (Source name) p with isStart = isStart; isPublic = true}
 
     let grammar (rules: list<Rule>) : Grammar =

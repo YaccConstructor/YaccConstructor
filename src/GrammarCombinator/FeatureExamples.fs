@@ -35,11 +35,11 @@ let PairRec() =
 let QuotationPrimitive() =
     let list itm sep =
         <@
-            let lst = Eps <|> %itm + !* (%sep + %itm)
-            lst
+            let lst() = Eps <|> %itm + !* (%sep + %itm)
+            lst()
         @>
     let commas = list <@ tok "a" @> <@ tok "," @>
-    commas
+    list commas <@ tok ";" @>
 
 let ScopeTest() =
     <@

@@ -9,15 +9,23 @@ module internal Shortcuts =
     type GrammarDefinition = Definition<Source, Source>
     let Source x = new Source(x)
     let fail() = failwith "Internal Fail"
+    let __unreachable__() = failwith "Unreachable branch hit"
     let untuple f a b = f(a, b)
+
+    let rec mapFoldk f a xs k =
+        match xs with
+        | [] -> k ([], a)
+        | x::xs' ->
+            f a x (fun (x', a') ->
+                mapFoldk f a' xs' (fun (ys, b) -> k (x' :: ys, b)))
 
 module internal IL =
     open Yard.Core.IL
     open Shortcuts
 
+    let prodElem a = {omit=false; rule=a; binding=None; checker=None}
 
     let conc x y =
-        let prodElem a = {omit=false; rule=a; binding=None; checker=None}
         let xys =
             match x, y with
             | PSeq(xs, _, _), PSeq(ys, _, _) -> xs @ ys

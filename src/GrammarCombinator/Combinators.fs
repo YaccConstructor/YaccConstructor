@@ -82,28 +82,58 @@ module internal Core =
 
     // --------------------------------------------- POSTPROCESSING ---------------------------------------------
     let productToGrammar start : Product -> GrammarDefinition =
+        let inline mkName name uid = name + "$" + uid.ToString()
+        let inline mkPRef name uid = PRef(Source <| mkName name uid, None)
+
         let collectRules : Product -> list<Rule> =
-            let rec collectRulesBFS used rules = function
-                | [] -> rules
-                | el::queue ->
-                    match el with
-                    | Product(Some name, prod, rules', recs) ->
-                        let used = Set.add name used
-                        let rules = extendRules name prod <| Set.union rules rules'
-                        let queue' =
-                            List.map ((|>)()) recs
-                            |> List.filter (fun x -> not <| Set.contains x.Name used)
-                        collectRulesBFS used rules <| queue' @ queue
+            let rec collectRulesk product used k =
+                let getBinOp = function
+                    | PShuff _ -> PShuff
+                    | PAlt _ -> PAlt
+                    | PConj _ -> PConj
+                let getUnaryOp = function
+                    | PNeg _ -> PNeg
+                    | PMany _ -> PMany
+                    | PSome _ -> PSome
+                    | POpt _ -> POpt
+                match product with
+                | PShuff(l, r)
+                | PAlt(l, r)
+                | PConj(l, r) ->
+                    collectRulesk l used (fun (l, used, rules) ->
+                    collectRulesk r used (fun (r, used, rules') ->
+                    k <| (getBinOp product (l, r), used, rules @ rules')))
+                | PSeq(ps, _, _) ->
+                    mapFoldk
+                        (fun (used, rules) pelem k ->
+                            collectRulesk pelem.rule used (fun (r, used, rules') -> k(r, (used, rules @ rules'))))
+                        (used, []) ps
+                        (fun (rs, (used, rules)) ->
+                            k (PSeq(List.map Wrapper.IL.prodElem rs, None, None), used, rules))
+                | PToken s -> k (PToken s, used, [])
+                | PRef(_, Some callback) ->
+                    match callback() with
+                    | Product(Some(name, uid), _) when Set.contains uid used ->
+                        k (mkPRef name uid, used, [])
+                    | Product(Some(name, uid), prod) ->
+                        collectRulesk prod (Set.add uid used) (fun (prod, used, rules) ->
+                        k (mkPRef name uid, used, Wrapper.IL.rule (mkName name uid) prod false :: rules))
+                    | _ -> __unreachable__()
+                | PNeg p
+                | PMany p
+                | PSome p
+                | POpt p ->
+                    collectRulesk p used (fun (x, used, rules) ->
+                    k <| (getUnaryOp product x, used, rules))
+                | _ -> fail()
 
-            let collectRulesFromProd = function
-                | Product(Some name, prod, rules, recs) -> // guaranteed to be the only one case
-                    List.map ((|>)()) recs
-                    |> collectRulesBFS Set.empty Set.empty
-                    |> Set.union rules
-                    |> Set.add (Wrapper.IL.rule name prod true)
-                    |> List.ofSeq
+            let collectRulesFromProduct = function
+                | Product(Some(name, uid), prod) ->
+                    collectRulesk prod Set.empty (fun (prod, _, rules) ->
+                    Wrapper.IL.rule (mkName name uid) prod true :: rules)
+                | _ -> __unreachable__()
 
-            assignProd start >> collectRulesFromProd
+            assignProd(start, getUniqueID()) >> collectRulesFromProduct
 
         collectRules >> Wrapper.IL.grammar >> Wrapper.IL.definition
 

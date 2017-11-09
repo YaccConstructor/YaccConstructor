@@ -65,6 +65,17 @@ type ProductionElem<'patt,'expr> = {
     /// Almost resolver (condition in production).
     checker:'expr option
 }
+with override x.ToString() =
+        let check =
+            match x.checker with
+            | None -> ""
+            | Some c -> sprintf "=>{%O}=>" c
+        let omit = if x.omit then "-" else ""
+        let bind =
+            match x.binding with
+            | None -> ""
+            | Some var -> var.ToString() + "="
+        check + omit + bind + x.rule.ToString()
 
 /// <summary>
 /// <para>t&lt;'patt,'expr&gt; - Type of production node in derivation tree. </para>
@@ -126,18 +137,7 @@ and Production<'patt,'expr> =
                 match attrs with
                 | None -> ""
                 | Some x -> "{" + x.ToString() + "}"
-            let elemToString (x:ProductionElem<_,_>) =
-                let check =
-                    match x.checker with
-                    | None -> ""
-                    | Some c -> "=>{" + c.ToString() + "}=>"
-                let omit = if (x.omit) then "-" else ""
-                let bind =
-                    match x.binding with
-                    | None -> ""
-                    | Some var -> var.ToString() + "="
-                check + omit + bind + x.rule.ToString()
-            "<" + String.concat " " (List.map (fun x -> (*printfn "%A" x;*) "(" + (elemToString x) + ")") ruleSeq) + ">" + strAttrs
+            "<" + String.concat " " (List.map (sprintf "(%O)") ruleSeq) + ">" + strAttrs
         |PToken src -> sourceToString src
         |PRef (name, args) ->
             sourceToString name + argsToString args

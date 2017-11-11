@@ -11,6 +11,10 @@ open Yard.Generators.GLL.ParserCommon.CommonFuns
 open Yard.Generators.Common.ASTGLLFSA
 open YC.GLL.GSS
 
+type SimpleSyntaxTree() = 
+    let nodes = new BlockResizeArray<INode>()
+    member this.Nodes = nodes
+
 type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positionInGrammar>>) =
     let dummyNode = -1<nodeMeasure>
     let dummyAST = new TerminalNode(-1<token>, packExtension -1 -1)
@@ -24,7 +28,9 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
     let terminalNodes = new Dictionary<int64<extension>, Dictionary<int<token>,int<nodeMeasure>>>()
     let epsilonNodes = new Dictionary<int, int<nodeMeasure>>()
     let nodes = new BlockResizeArray<INode>()
+    let nodesNB = new BlockResizeArray<INode>()
 
+    member this.NodesNB = nodesNB
     member this.Nodes = nodes
     member this.TerminalNodes = terminalNodes
     member this.NonTerminalNodes = nonTerminalNodes
@@ -199,37 +205,147 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         |> Array.ofSeq
         //|> (fun x -> [|x.[0]|])
 
+    member this.StartNTs = 
+        this.Nodes |> Seq.filter (fun x -> x :? NonTerminalNode)
+                   |> Seq.cast<NonTerminalNode>
+                   |> Seq.filter (fun x -> x.Name.Equals startState)
+
+    member this.GetCFRelationsByNTName name (ps : ParserSourceGLL) = 
+        let mutable token = -1
+        if (ps.NameToId.ContainsKey name)
+        then token <- (ps.NameToId.Item name)
+        else failwith "no such non terminal"
+        this.Nodes
+        |> Seq.filter (fun x -> x :? NonTerminalNode)
+        |> Seq.cast<NonTerminalNode>
+        |> Seq.filter (fun x -> x.Name.Equals token)
+        |> Seq.map (fun x -> (ps.IntToString.Item (x.Name |> int), getLeftExtension x.Extension, getRightExtension x.Extension))
+
     member this.GetNonTermByName name (ps : ParserSourceGLL) = 
         let token = ps.NameToId.Item name
         this.Nodes 
         |> Seq.filter (fun x -> x :? NonTerminalNode) 
         |> Seq.cast<NonTerminalNode> 
         |> Seq.filter (fun x -> x.Name.Equals token)
+        
+    member this.ClearSPPF = 
+        let ancestors = new Dictionary<INode, INode>()
+        let findAncestors = 
+            for n in this.Nodes do
+                match n with
+                | :? IntermidiateNode as i -> ancestors.Add(i.First, i)
+                                              if (i.Others <> null)
+                                              then i.Others.ForEach(fun x -> ancestors.Add(x, i))
+                | :? NonTerminalNode as nt -> ancestors.Add(nt.First, nt)
+                                              if (nt.Others <> null)
+                                              then nt.Others.ForEach(fun x -> ancestors.Add(x, nt))
+                | :? PackedNode as p -> ancestors.Add(p.Left, p)
+                                        ancestors.Add(p.Right, p)
+                | _ -> ()
 
-    member this.Iterate (s : seq<NonTerminalNode>) (ps : ParserSourceGLL) maxLength = 
+        let stack = new Stack<INode>()
+        let used = new ResizeArray<INode>()
+        let rel = new Dictionary<INode, INode>()
+        let mutable childs = new ResizeArray<INode>()
+        let mutable isStarted = new Dictionary<INode, ResizeArray<INode>>()
+        Seq.iter stack.Push this.StartNTs
+        while stack.Count <> 0 do
+            let head = stack.Pop()
+            match head with
+            | :? NonTerminalNode as nt -> if not (used.Contains nt)
+                                          then used.Add nt
+                                               if (nt.Others <> null)
+                                               then nt.Others.ForEach(fun x -> stack.Push(x))
+                                               stack.Push nt.First
+                                               let newNt = new NBNonTerminalNode(nt.Name, nt.Extension)
+                                               nodesNB.Add newNt
+                                               rel.Add(nt, newNt)
+                                               if (ancestors.ContainsKey nt)
+                                               then let parentP = ancestors.Item nt
+                                                    let mutable chlds = new ResizeArray<INode>()
+                                                    if (isStarted.ContainsKey parentP)
+                                                    then chlds <- isStarted.Item parentP
+                                                         chlds.Add newNt
+                                                    else chlds.Add newNt
+                                                    isStarted.Add(parentP, chlds)
+            | :? PackedNode as p -> if not (used.Contains p)
+                                    then used.Add p
+                                         let newP = new NBPackedNode(p.State)
+                                         nodesNB.Add newP
+                                         rel.Add(p, newP)
+                                         let ancestor = ancestors.Item p
+                                         let related = rel.Item ancestor
+                                         let h = nodesNB.Find(fun x -> x.Equals(related)) :?> NBNonTerminalNode
+                                         h.AddChild newP
+            | :? IntermidiateNode as i -> if not (used.Contains i)
+                                          then used.Add i
+                                               if (i.Others <> null)
+                                               then i.Others.ForEach(fun x -> stack.Push(x))
+                                               stack.Push i.First
+            | :? TerminalNode as t -> ()
+            | _ -> ()                              
+                                                                            
+
+    member this.Iterate (s : seq<NonTerminalNode>, ps : ParserSourceGLL, ?maxLength : int, ?searchShortest : bool) = 
         let queue = new Queue<INode>()
+        let used = new ResizeArray<INode>()
         let length = ref 0
+        let alternatives = new Dictionary<PackedNode, IEnumerable<INode>>()
+        let unwrapped = match maxLength with
+                        | Some x -> x
+                        | None -> -1
+
+        let shrts = match searchShortest with
+                    | Some x -> x
+                    | None -> false
+
+        Seq.iter queue.Enqueue s
        
-        Seq.iter (fun x -> queue.Enqueue x) s
         seq {
-            while queue.Count > 0 && length.Value < maxLength do
+            while queue.Count > 0 && (unwrapped = -1 || !length < unwrapped) do
                 let h = queue.Dequeue()
                 match h with
-                | :? NonTerminalNode as nt -> queue.Enqueue(nt.First)
-                                              if nt.Others <> null
-                                              then nt.Others.ForEach(fun x -> queue.Enqueue(x))
-                | :? IntermidiateNode as interm -> queue.Enqueue(interm.First)
-                                                   if interm.Others <> null
-                                                   then interm.Others.ForEach(fun x -> queue.Enqueue(x))
-                | :? PackedNode as packed-> queue.Enqueue packed.Left
-                                            queue.Enqueue packed.Right
+                | :? NonTerminalNode as nt -> if not (used.Contains nt)
+                                              then if shrts 
+                                                   then used.Add nt
+                                                   queue.Enqueue(nt.First)
+                                                   if nt.Others <> null
+                                                   then nt.Others.ForEach(fun x -> queue.Enqueue(x))
+
+                | :? IntermidiateNode as interm -> if not (used.Contains interm)
+                                                   then if shrts 
+                                                        then used.Add interm
+                                                        queue.Enqueue(interm.First)
+                                                        if interm.Others <> null
+                                                        then interm.Others.ForEach(fun x -> queue.Enqueue(x))
+
+                | :? PackedNode as packed-> if not (used.Contains packed)
+                                            then if shrts 
+                                                 then used.Add packed
+                                                 queue.Enqueue packed.Left
+                                                 queue.Enqueue packed.Right
+
                 | :? TerminalNode as term -> if term.Name <> -1<token>
                                              then incr length
                                                   yield (ps.IntToString.Item (int term.Name)), getLeftExtension term.Extension, getRightExtension term.Extension
-                | :? EpsilonNode as eps -> ()
+                | :? EpsilonNode -> ()
                 | x -> failwithf "Strange type of node: %A" x.GetType
         }
 
 
 let GetTerminals (sppf : SPPF) = 
     sppf.GetTerminalNodes |> Seq.map (fun x -> x.Name, getLeftExtension x.Extension, getRightExtension x.Extension)
+
+(*let processPacked (packed: PackedNode) = 
+    let nonBinPacked = new NotBinarizedPackedNode(packed.State, packed.Right.getExtension)
+    let matchX (x : INode) = 
+        match x with
+        | :? IntermidiateNode as interm -> matchX interm.First
+                                           if interm.Others <> null 
+                                           then interm.Others.ForEach(fun x -> nonBinPacked.AddChild x)
+        | :? NonTerminalNode as nt -> nonBinPacked.AddChild nt
+        | :? TerminalNode as term -> nonBinPacked.AddChild term
+
+    matchX packed.Left
+    matchX packed.Right
+    nonBinPacked*)

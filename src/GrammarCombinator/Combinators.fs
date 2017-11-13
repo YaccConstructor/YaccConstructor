@@ -73,13 +73,44 @@ module internal Core =
                 then <@@ fun (_: unit) -> Product(None, pref %%op) @@>
                 else fixExpression op
                 , fixExpression args)
-        | PropertyGet(None, info, args) ->
-            Expr.PropertyGet(info, List.map fixExpression args)
-        | Call(None, op, args) ->
-            Expr.Call(op, List.map fixExpression args)
-        | IfThenElse(p, t1, t2) ->
-            Expr.IfThenElse(fixExpression p, fixExpression t1, fixExpression t2)
-        | t -> t // TODO: all Expressions
+        | IfThenElse(p, t1, t2) -> Expr.IfThenElse(fixExpression p, fixExpression t1, fixExpression t2)
+        | NewObject(cinfo, exprs) -> Expr.NewObject(cinfo, List.map fixExpression exprs)
+        | AddressOf expr -> Expr.AddressOf <| fixExpression expr
+        | QuoteRaw expr -> Expr.QuoteRaw <| fixExpression expr
+        | AddressSet(left, right) -> Expr.AddressSet(fixExpression left, fixExpression right)
+        | Sequential(left, right) -> Expr.Sequential(fixExpression left, fixExpression right)
+        | TryFinally(tryblock, finalblock) -> Expr.TryFinally(fixExpression tryblock, fixExpression finalblock)
+        | WhileLoop(cond, body) -> Expr.WhileLoop(fixExpression cond, fixExpression body)
+        | Coerce(expr, tp) -> Expr.Coerce(fixExpression expr, tp)
+        | TypeTest(expr, tp) -> Expr.TypeTest(fixExpression expr, tp)
+        | UnionCaseTest(expr, uinfo) -> Expr.UnionCaseTest(fixExpression expr, uinfo)
+        | TryWith(body, filterVar, filterBody, catchVar, catchBody) ->
+            Expr.TryWith(fixExpression body, filterVar, fixExpression filterBody, catchVar, fixExpression catchBody)
+        | TupleGet(expr, ind) -> Expr.TupleGet(fixExpression expr, ind)
+        | NewTuple exprs -> Expr.NewTuple <| List.map fixExpression exprs
+        | NewArray(tp, exprs) -> Expr.NewArray(tp, List.map fixExpression exprs)
+        | NewRecord(tp, exprs) -> Expr.NewRecord(tp, List.map fixExpression exprs)
+        | NewDelegate(tp, vrs, expr) -> Expr.NewDelegate(tp, vrs, fixExpression expr)
+        | NewUnionCase(uinfo, exprs) -> Expr.NewUnionCase(uinfo, List.map fixExpression exprs)
+        | DefaultValue _ as dv -> dv
+        | Var _ as vr -> vr
+        | Value _ as vl -> vl
+        | Lambda(vr, expr) -> Expr.Lambda(vr, fixExpression expr)
+        | VarSet(vr, expr) -> Expr.VarSet(vr, fixExpression expr)
+        | ForIntegerRangeLoop(loopVariable, start, endExpr, body) ->
+            Expr.ForIntegerRangeLoop(loopVariable, fixExpression start, fixExpression endExpr, fixExpression body)
+        | Call(None, op, args) -> Expr.Call(op, List.map fixExpression args)
+        | Call(Some expr, op, args) -> Expr.Call(fixExpression expr, op, List.map fixExpression args)
+        | FieldGet(None, _) as fg -> fg
+        | FieldGet(Some expr, finfo) -> Expr.FieldGet(fixExpression expr, finfo)
+        | FieldSet(None, finfo, expr) -> Expr.FieldSet(finfo, fixExpression expr)
+        | FieldSet(Some fld, finfo, expr) -> Expr.FieldSet(fixExpression fld, finfo, fixExpression expr)
+        | PropertyGet(None, pinfo, args) -> Expr.PropertyGet(pinfo, List.map fixExpression args)
+        | PropertyGet(Some expr, pinfo, exprs) -> Expr.PropertyGet(fixExpression expr, pinfo, List.map fixExpression exprs)
+        | PropertySet(None, pinfo, exprs, expr) -> Expr.PropertySet(pinfo, fixExpression expr, List.map fixExpression exprs)
+        | PropertySet(Some prop, pinfo, exprs, expr) ->
+            Expr.PropertySet(fixExpression prop, pinfo, fixExpression expr, List.map fixExpression exprs)
+        | t -> failwithf "Internal error. Please report this object to developer team: %O" t
 
     let fixTree (expr: Expr<Product>) : Expr = fixExpression expr.Raw
 

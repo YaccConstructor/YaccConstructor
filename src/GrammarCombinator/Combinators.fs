@@ -122,22 +122,14 @@ module internal Core =
 
         let collectRules : Product -> list<Rule> =
             let rec collectRulesk product used k =
-                let getBinOp = function
-                    | PShuff _ -> PShuff
-                    | PAlt _ -> PAlt
-                    | PConj _ -> PConj
-                let getUnaryOp = function
-                    | PNeg _ -> PNeg
-                    | PMany _ -> PMany
-                    | PSome _ -> PSome
-                    | POpt _ -> POpt
                 match product with
-                | PShuff(l, r)
-                | PAlt(l, r)
-                | PConj(l, r) ->
+                | Wrapper.IL.BinaryIL(binOp, l, r) ->
                     collectRulesk l used (fun (l, used, rules) ->
                     collectRulesk r used (fun (r, used, rules') ->
-                    k <| (getBinOp product (l, r), used, rules @ rules')))
+                    k <| (binOp l r, used, rules @ rules')))
+                | Wrapper.IL.UnaryIL(unOp, p) ->
+                    collectRulesk p used (fun (x, used, rules) ->
+                    k <| (unOp x, used, rules))
                 | PSeq(ps, _, _) ->
                     mapFoldk
                         (fun (used, rules) pelem k ->
@@ -154,12 +146,6 @@ module internal Core =
                         collectRulesk prod (Set.add uid used) (fun (prod, used, rules) ->
                         k (mkPRef name uid, used, Wrapper.IL.rule (mkName name uid) prod false :: rules))
                     | _ -> __unreachable__()
-                | PNeg p
-                | PMany p
-                | PSome p
-                | POpt p ->
-                    collectRulesk p used (fun (x, used, rules) ->
-                    k <| (getUnaryOp product x, used, rules))
                 | _ -> fail()
 
             let collectRulesFromProduct = function

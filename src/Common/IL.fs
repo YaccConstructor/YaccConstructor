@@ -145,7 +145,10 @@ and Production<'patt,'expr> =
         |PMetaRef (name, args, metaArgs) ->
             sourceToString name + metaArgsToString metaArgs + argsToString args
         |PLiteral src -> sourceToString src
-        |PRepet _ -> failwith "Repetition was not realized yet"
+        |PRepet(p, None, None) -> PMany(p).ToString()
+        |PRepet(p, None, Some n) -> sprintf "(%O){0..%O}" p n
+        |PRepet(p, Some m, None) -> sprintf "(%O){%O..inf}" p m
+        |PRepet(p, Some m, Some n) -> sprintf "(%O){%O..%O}" p m n
         |PPerm src ->
             src
             |> List.map (fun x -> x.ToString())

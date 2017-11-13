@@ -13,14 +13,12 @@ module Combinators =
     let internal getProd = function Product(_, p) -> p
     let private mkProd = untuple Product None
 
-    type Product with
-        static member (%) (p, (m, n)) = Production.PRepet(getProd p, Some m, Some n)
-        static member (%) (p, (m)) = Production.PRepet(getProd p, Some m, None)
-
     let private applyBinop op a b = mkProd <| op (getProd a) (getProd b)
     let private applyUnaryop op = getProd >> op >> mkProd
 
     type Product with
+        static member (%) (p, (m, n)) = Production.PRepet(getProd p, Some m, Some n)
+        static member (%) (p, (m)) = Production.PRepet(getProd p, Some m, None)
         static member (+) (a: Product, b: Product) = applyBinop Wrapper.IL.conc a b
 
     let (<|>) = applyBinop <| untuple Production.PAlt
@@ -42,14 +40,14 @@ module internal Core =
 
 
     // --------------------------------------------- AT EVALUATE ---------------------------------------------
-    let private getUniqueID =
-        let uniqueID = ref 0
-        fun (_: unit) ->
-            let last = !uniqueID
-            uniqueID := !uniqueID + 1
-            last
-
-    let inline private assignProd uname p = Product(Some uname, getProd p)
+    let private assignProd name p =
+        let getUniqueID =
+            let uniqueID = ref 0
+            fun (_: unit) ->
+                let last = !uniqueID
+                uniqueID := !uniqueID + 1
+                last
+        Product(Some(name, getUniqueID()), getProd p)
 
 
     // --------------------------------------------- BEFORE EVALUATE ---------------------------------------------
@@ -57,8 +55,8 @@ module internal Core =
         let rec mkRuleWithName (name: Var) = function
             | Lambda(u, prodExpr) -> Expr.Lambda(u, mkRuleWithName name prodExpr)
             | prodExpr when prodExpr.Type = typeof<Product> ->
-                let uname = name.Name, getUniqueID()
-                <@@ assignProd %%(Expr.Value uname) %%(fixExpression prodExpr) @@>
+                let assigner = assignProd name.Name
+                <@@ assigner %%(fixExpression prodExpr) @@>
             | prodExpr -> fixExpression prodExpr // TODO: match inner grammars
         function
         | Let(name, prodExpr, body) ->
@@ -154,7 +152,7 @@ module internal Core =
                     Wrapper.IL.rule (mkName name uid) prod true :: rules)
                 | _ -> __unreachable__()
 
-            assignProd(start, getUniqueID()) >> collectRulesFromProduct
+            assignProd start >> collectRulesFromProduct
 
         collectRules >> Wrapper.IL.grammar >> Wrapper.IL.definition
 

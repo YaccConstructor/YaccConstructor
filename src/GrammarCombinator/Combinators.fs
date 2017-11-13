@@ -13,6 +13,10 @@ module Combinators =
     let internal getProd = function Product(_, p) -> p
     let private mkProd = untuple Product None
 
+    type Product with
+        static member (%) (p, (m, n)) = Production.PRepet(getProd p, Some m, Some n)
+        static member (%) (p, (m)) = Production.PRepet(getProd p, Some m, None)
+
     let private applyBinop op a b = mkProd <| op (getProd a) (getProd b)
     let private applyUnaryop op = getProd >> op >> mkProd
 

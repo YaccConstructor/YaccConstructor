@@ -74,7 +74,6 @@ module internal Core =
         | IfThenElse(p, t1, t2) -> Expr.IfThenElse(fixExpression p, fixExpression t1, fixExpression t2)
         | NewObject(cinfo, exprs) -> Expr.NewObject(cinfo, List.map fixExpression exprs)
         | AddressOf expr -> Expr.AddressOf <| fixExpression expr
-        | QuoteRaw expr -> Expr.QuoteRaw <| fixExpression expr
         | AddressSet(left, right) -> Expr.AddressSet(fixExpression left, fixExpression right)
         | Sequential(left, right) -> Expr.Sequential(fixExpression left, fixExpression right)
         | TryFinally(tryblock, finalblock) -> Expr.TryFinally(fixExpression tryblock, fixExpression finalblock)
@@ -108,6 +107,7 @@ module internal Core =
         | PropertySet(None, pinfo, exprs, expr) -> Expr.PropertySet(pinfo, fixExpression expr, List.map fixExpression exprs)
         | PropertySet(Some prop, pinfo, exprs, expr) ->
             Expr.PropertySet(fixExpression prop, pinfo, fixExpression expr, List.map fixExpression exprs)
+        | Quote _ as expr -> failwithf "Cannot use Quotations inside Quotations! %O" expr
         | t -> failwithf "Internal error. Please report this object to developer team: %O" t
 
     let fixTree (expr: Expr<Product>) : Expr = fixExpression expr.Raw

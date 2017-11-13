@@ -12,7 +12,7 @@ module TestSuite =
     open Yard.Generators.GLL
     open AbstractAnalysis.Common
 
-    let private psgll (def: GrammarDefinition) : ParserCommon.ParserSourceGLL =
+    let private psgll def : ParserCommon.ParserSourceGLL =
         let gll = new GLL() in
         gll.Generate(def, false) :?> ParserCommon.ParserSourceGLL
 

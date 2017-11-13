@@ -116,7 +116,7 @@ module internal Core =
 
 
     // --------------------------------------------- POSTPROCESSING ---------------------------------------------
-    let productToGrammar start : Product -> GrammarDefinition =
+    let productToGrammar start =
         let inline mkName name uid = name + "$" + uid.ToString()
         let inline mkPRef name uid = PRef(Source <| mkName name uid, None)
 
@@ -164,7 +164,7 @@ module GrammarGenerator =
     open Combinators
     open Core
 
-    let generate (name: string) : Expr<Product> -> GrammarDefinition =
+    let generate (name: string) =
         fixTree
         >> QuotationEvaluator.EvaluateUntyped
         >> (fun x -> x :?> Product)

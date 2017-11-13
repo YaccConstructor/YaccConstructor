@@ -6,7 +6,6 @@ module internal Shortcuts =
     type Production<'a> = Production<Source, 'a>
     type Rule = Rule<Source, Source>
     type Grammar = Grammar<Source, Source>
-    type GrammarDefinition = Definition<Source, Source>
     let Source x = new Source(x)
     let fail() = failwith "Internal Fail"
     let __unreachable__() = failwith "Unreachable branch hit"
@@ -64,4 +63,4 @@ module internal IL =
     let grammar (rules: list<Rule>) : Grammar =
         List.map (fun r -> {r with allPublic = true}) (Yard.Core.Helpers.defaultModules rules)
 
-    let definition (g: Grammar) : GrammarDefinition = {emptyGrammarDefinition with grammar = g}
+    let definition (g: Grammar) : Definition<Source, Source> = {emptyGrammarDefinition with grammar = g}

@@ -49,8 +49,9 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="ImplementationTests.fs" />
-    <Compile Include="RDFPerfomance.fs" />
-    <Compile Include="BioPerfomance.fs" />
+    <Compile Include="RDFPerformance.fs" />
+    <Compile Include="BioPerformance.fs" />
+    <Compile Include="AliasAndTaintPerformance.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="paket.references" />

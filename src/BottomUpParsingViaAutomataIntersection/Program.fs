@@ -10,13 +10,16 @@ type Grammar =
     val startFinal: array<int*HashSet<int>*HashSet<int>>
     new (grm, strtFnl) = {grammar = grm; startFinal = strtFnl}
 
-let closure (atm:Double.SparseMatrix) (gpuSparseMatrix:MySparseMatrix) =    
-    printfn "closure start"
+let closure (toUpdate:ResizeArray<_*_*_>) (atm:Double.SparseMatrix) (gpuSparseMatrix:MySparseMatrix) (gpuSparseMatrix1:MySparseMatrix) =    
+    //printfn "closure start"
+    let upCsr = Storage.SparseCompressedRowMatrixStorage.OfIndexedEnumerable(atm.RowCount,atm.RowCount,toUpdate) 
     let csr = (atm.Storage :?> Storage.SparseCompressedRowMatrixStorage<_>)    
     //let gpuSparseMatrix = new MySparseMatrix(atm.RowCount, atm.NonZerosCount, csr.Values, csr.RowPointers, csr.ColumnIndices)
-    gpuSparseMatrix.Update (atm.NonZerosCount, csr.Values, csr.RowPointers, csr.ColumnIndices)
+    //let gpuSparseMatrix1 = new MySparseMatrix(atm.RowCount, toUpdate.Count, upCsr.Values, upCsr.RowPointers, upCsr.ColumnIndices)
+    gpuSparseMatrix1.Update (toUpdate.Count, upCsr.Values, upCsr.RowPointers, upCsr.ColumnIndices)
+    //gpuSparseMatrix.Update (atm.NonZerosCount, csr.Values, csr.RowPointers, csr.ColumnIndices)
     let mutable zeros = atm.NonZerosCount
-    let mutable res = gpuSparseMatrix 
+    let mutable res = sparseCudaGeam gpuSparseMatrix gpuSparseMatrix1 atm.RowCount
     let _go = ref true
     while !_go do
         res <- sparseCudaGeam res (sparseCudaGemm res res atm.RowCount) atm.RowCount
@@ -27,7 +30,7 @@ let closure (atm:Double.SparseMatrix) (gpuSparseMatrix:MySparseMatrix) =
     csr.ColumnIndices <- res.CsrColInd
     res.CsrRow.CopyTo(csr.RowPointers,0)  //csr.col  <- res.CsrRow
     csr.Values <- res.CsrVal
-    printfn "closure end"
+    //printfn "closure end"
     atm
 //    printfn "closure start"
 //    let mutable zeros = atm.NonZerosCount
@@ -44,10 +47,11 @@ let closure (atm:Double.SparseMatrix) (gpuSparseMatrix:MySparseMatrix) =
 let main (input:HashSet<int> [,]) (grammar:Grammar) =
     let inputSize = Array2D.length1 input
     let grammarSize = Array2D.length1 grammar.grammar    
-    let xxx = Double.SparseMatrix.Create((inputSize * grammarSize), (inputSize * grammarSize), 0.0)
+    //let xxx = Double.SparseMatrix.Create((inputSize * grammarSize), (inputSize * grammarSize), 0.0)
     let mutable intersectionResult = Double.SparseMatrix.Create((inputSize * grammarSize), (inputSize * grammarSize), 0.0)
     let csr = (intersectionResult.Storage :?> Storage.SparseCompressedRowMatrixStorage<_>)    
     let gpuSparseMatrix = new MySparseMatrix(intersectionResult.RowCount, intersectionResult.NonZerosCount, csr.Values, csr.RowPointers, csr.ColumnIndices)
+    let gpuSparseMatrix1 = new MySparseMatrix(intersectionResult.RowCount, intersectionResult.NonZerosCount, csr.Values, csr.RowPointers, csr.ColumnIndices)
     let stateRemap,backStateRemap =
         let m = new Dictionary<_,_>()
         let n = new ResizeArray<_>()
@@ -61,26 +65,26 @@ let main (input:HashSet<int> [,]) (grammar:Grammar) =
 
     let mutable _go = true
 
+    let toUpdate = new ResizeArray<_>()
+
     while _go do
-        printfn "s1"
-        let toUpdate = new ResizeArray<_>()
+        //printfn "s1"
         //let toUpdate = new System.Collections.Concurrent.ConcurrentBag<_>()
         //System.Threading.Tasks.Parallel.For(0,inputSize,fun _startInput ->
-        input
-        |> Array2D.iteri (fun _startInput _endInput e -> 
-        //for _startInput in 0..inputSize-1 do
-            //for _endInput in 0..inputSize-1 do
-                if e.Count <> 0 || _startInput = _endInput
+        //input
+        //|> Array2D.iteri (fun _startInput _endInput e -> 
+        for _startInput in 0..inputSize-1 do
+            for _endInput in 0..inputSize-1 do
+                if input.[_startInput,_endInput].Count <> 0 || _startInput = _endInput
                 then 
                     for _startGrammar in 0..grammarSize-1 do
                         for _endGrammar in 0..grammarSize-1 do
-                            if intersectionResult.[backStateRemap.[(_startInput,_startGrammar)] ,backStateRemap.[(_endInput,_endGrammar)]] <> 1.0
-                                && ((_startInput = _endInput && _startGrammar = _endGrammar)
-                               || e.Overlaps grammar.grammar.[_startGrammar, _endGrammar])
+                            if ((_startInput = _endInput && _startGrammar = _endGrammar)
+                               || input.[_startInput,_endInput].Overlaps grammar.grammar.[_startGrammar, _endGrammar])
                             then 
                                  //intersectionResult.[backStateRemap.[(_startInput,_startGrammar)] ,backStateRemap.[(_endInput,_endGrammar)]] <- 1.0
-                                 toUpdate.Add(backStateRemap.[(_startInput,_startGrammar)] ,backStateRemap.[(_endInput,_endGrammar)])
-                                 )
+                                 toUpdate.Add(backStateRemap.[(_startInput,_startGrammar)], backStateRemap.[(_endInput,_endGrammar)], 1.0)
+            
 //        for _startInput in 0..inputSize-1 do
 //            for _endInput in 0..inputSize-1 do
 //                if input.[_startInput, _endInput].Count <> 0 || _startInput = _endInput
@@ -93,14 +97,15 @@ let main (input:HashSet<int> [,]) (grammar:Grammar) =
 //                                 intersectionResult.[backStateRemap.[(_startInput,_startGrammar)] ,backStateRemap.[(_endInput,_endGrammar)]] <- 1.0
                                  //toUpdate.Add(backStateRemap.[(_startInput,_startGrammar)] ,backStateRemap.[(_endInput,_endGrammar)])
         //) |> ignore
-        printfn "f1"        
-        xxx.Clear()
-        printfn "SSS = %A" toUpdate.Count
-        for (i,j) in toUpdate do intersectionResult.[i,j] <- 1.0
+        //printfn "f1"        
+        //xxx.Clear()
+        //printfn "SSS = %A" toUpdate.Count
+        //for (i,j) in toUpdate do intersectionResult.[i,j] <- 1.0
         //intersectionResult <- intersectionResult.PointwiseAbsoluteMaximum xxx :?>_
-        printfn "f11"
-        let cls = closure intersectionResult gpuSparseMatrix
-        printfn "s2"
+        //printfn "f11"
+        let cls = closure toUpdate intersectionResult gpuSparseMatrix gpuSparseMatrix1
+        toUpdate.Clear()
+       // printfn "s2"
         _go <- false
         cls
         |> Matrix.iteriSkipZeros (fun i j n ->
@@ -111,7 +116,7 @@ let main (input:HashSet<int> [,]) (grammar:Grammar) =
             | Some (n,s,f) when f.Contains _endGrammar -> _go <- input.[_startInput,_endInput].Add n || _go
             | _ -> ()
             )
-        printfn "f2"
+        //printfn "f2"
 
     input
 

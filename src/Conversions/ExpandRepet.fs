@@ -59,7 +59,9 @@ let private expandRepet (ruleList: Rule<_,_> list) =
         | PToken _ | PLiteral _  | PRef _  as x -> x
         | PPerm _ -> failwith "Unsupported rule in Repetion!"        
         | PMetaRef (src, args, metas) as x ->                         
-            PMetaRef (src, args, metas |> List.map (fun prod -> expandBody attrs prod))                   
+            PMetaRef (src, args, metas |> List.map (fun prod -> expandBody attrs prod))     
+        | PShuff _ -> failwith "Unsupported"
+        | PNeg _ -> failwith "Unsupported"              
                                      
     let expanded = ref []
     while toExpand.Count > 0 do 

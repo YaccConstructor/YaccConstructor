@@ -33,6 +33,8 @@ let private removeAC (ruleList: Rule<Source, Source> list) =
         | PPerm _
         | PMetaRef _ as p -> p
         | POpt p -> inner p |> POpt
+        | PShuff _ -> failwith "Unsupported"
+        | PNeg _ -> failwith "Unsupported"
 
     ruleList |> List.map (fun rule -> {rule with body=(inner rule.body) } )
 

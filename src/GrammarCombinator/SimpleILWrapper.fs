@@ -38,6 +38,7 @@ module internal IL =
             | PShuff _ -> PShuff
             | PAlt _ -> PAlt
             | PConj _ -> PConj
+            | _ -> failwith "unsupported"
         match prod with
         | PShuff(l, r)
         | PAlt(l, r)
@@ -50,6 +51,7 @@ module internal IL =
             | PMany _ -> PMany
             | PSome _ -> PSome
             | POpt _ -> POpt
+            | _ -> failwith "unsupported"
         match prod with
             | PNeg p
             | PMany p

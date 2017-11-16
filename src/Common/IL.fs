@@ -156,6 +156,7 @@ and Production<'patt,'expr> =
             |> fun res -> "[|" + res + "|]"
         |PSome x -> "(" + x.ToString() + ")+"
         |POpt x -> "(" + x.ToString() + ")?"
+        |PShuff (a, b) -> a.ToString() + "||" + b.ToString()
 
 
 /// <summary>

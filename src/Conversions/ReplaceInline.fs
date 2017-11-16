@@ -61,6 +61,7 @@ let private replaceInline (rules : Rule<_,_> list) =
         | PLiteral _ 
         | PPerm _ 
         | PToken _ as x -> x
+        | PShuff _ -> failwith "Unsupported"
         //| x -> x
         
     rules

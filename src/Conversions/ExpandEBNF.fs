@@ -153,10 +153,12 @@ let convertToBnf (rule:(Rule<Source,Source>)) =
                  metaArgs = metaArgs
                 }) :: !addedBnfRules
             newRule
-         | PMetaRef (src, args, metas) as x ->
+        | PMetaRef (src, args, metas) as x ->
             metas |> List.map (fun prod -> replaceEbnf prod attrs metaArgs)
             |> fun m -> PMetaRef (src, args, m)
-         | PLiteral _ | PPerm _ | PRef _ | PRepet _ | PToken _ as x -> x
+        | PLiteral _ | PPerm _ | PRef _ | PRepet _ | PToken _ as x -> x
+        | PShuff _ -> failwith "Unsupported"
+        | PNeg _ -> failwith "Unsupported"
         //| x -> x
     {rule with body=replaceEbnf rule.body (List.zip rule.args rule.args) rule.metaArgs}::(List.rev !addedBnfRules)
 

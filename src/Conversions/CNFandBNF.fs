@@ -34,7 +34,7 @@ let rec getElements body pos neg flag =
     match body with 
     | PSeq(e, a, l) -> 
                     if e.Length > 0 && (match e.[0].rule with PNeg t -> true | _ -> false) 
-                    then getElements (match e.[0].rule with PNeg t -> t) pos neg false
+                    then getElements (match e.[0].rule with PNeg t -> t | _ -> failwith "unsupported") pos neg false
                     else
                         if flag 
                         then pos @ [e], neg
@@ -50,6 +50,7 @@ let rec getElements body pos neg flag =
                     else pos, neg @ [[createDefaultElem(PToken t)]]
     | PConj(a, b) -> fst (getElements a pos neg flag) @ fst (getElements b pos neg flag), snd (getElements a pos neg flag) @ snd (getElements b pos neg flag) 
     | PNeg t -> getElements t pos neg false
+    | _ -> failwith "unsupported"
      
 let rec createConj rules = 
     match Seq.length rules with
@@ -139,7 +140,9 @@ let deleteEpsilonRules (rules: Rule<_,_> list) =
     if List.contains (createDefaultElem (PRef(start,None))) epsNonterms
     then startIsEps <- true
     newRules |> Seq.map (fun x -> 
-                                if (match x.body with PSeq(e ,a, l) -> true | _ -> false) && (match (match x.body with PSeq(e,a,l) -> e).[0].rule with PToken t -> true | _ -> false) && ((match x.body with PSeq(e,a,l) -> e).Length = 1)
+                                if (match x.body with PSeq(e ,a, l) -> true | _ -> false)
+                                   && (match (match x.body with PSeq(e,a,l) -> e | _ -> failwith "unsupported").[0].rule with PToken t -> true | _ -> false)
+                                   && ((match x.body with PSeq(e,a,l) -> e | _ -> failwith "unsupported").Length = 1)
                                 then x
                                 else createRule x.name x.args (PConj(x.body, PNeg(PSeq([], None, None)))) x.isStart x.metaArgs ) 
              |> Seq.toList
@@ -160,9 +163,15 @@ let collectNontermsAndUnitRules (rules: Rule<_,_> list) =
 let filter rule = 
     let el1 = fst (getElements rule.body [] [] true) |> List.toSeq |> Seq.toList |> List.map (fun x -> createRule rule.name rule.args (PSeq(x, None, None)) rule.isStart rule.metaArgs) 
     let el2 = (snd (getElements rule.body [] [] true) |> List.filter(fun x -> not (x = []))) @ [[]] |> List.toSeq |> Seq.toList |> List.map (fun x -> createRule rule.name rule.args (PNeg(PSeq(x, None, None))) rule.isStart rule.metaArgs)
-    if el1.Length = 1 && (match el1.[0].body with PSeq(e ,a, l) -> true | _ -> false) && ((match el1.[0].body with PSeq(e,a,l) -> e) = []) && el2.Length = 1
+    if el1.Length = 1
+       && (match el1.[0].body with PSeq(e ,a, l) -> true | _ -> false)
+       && ((match el1.[0].body with PSeq(e,a,l) -> e | _ -> failwith "unsupported") = [])
+       && el2.Length = 1
     then createRule rule.name rule.args (PSeq([], None, None)) rule.isStart rule.metaArgs
-    elif el1.Length = 1 && (match el1.[0].body with PSeq(e ,a, l) -> true | _ -> false) && (match (match el1.[0].body with PSeq(e,a,l) -> e).[0].rule with PToken t -> true | _ -> false) && el2.Length = 1
+    elif el1.Length = 1
+         && (match el1.[0].body with PSeq(e ,a, l) -> true | _ -> false)
+         && (match (match el1.[0].body with PSeq(e,a,l) -> e).[0].rule with PToken t -> true | _ -> false)
+         && el2.Length = 1
     then createRule rule.name rule.args (createConj el1) rule.isStart rule.metaArgs
     else createRule rule.name rule.args (createConj (el1 @ el2)) rule.isStart rule.metaArgs
 
@@ -251,7 +260,7 @@ let tryFindRule (term: Source) (rule:Rule<_,_>) (rules: HashSet<_>) =
     let b = Seq.filter (fun x -> match x.body with PConj(a,b) -> false |_ -> true) rules
     let a = Seq.filter (fun x -> List.length ((fst (getElements x.body [] [] true)).[0]) = 1
                                  && match ((fst (getElements x.body [] [] true)).[0]).[0].rule with PToken t -> true | _ -> false
-                                 && (match ((fst (getElements x.body [] [] true)).[0]).[0].rule with PToken t -> t).text = term.text 
+                                 && (match ((fst (getElements x.body [] [] true)).[0]).[0].rule with PToken t -> t | _ -> failwith "unsupported").text = term.text 
                                  && rules |> Seq.filter (fun y -> y.name.text = x.name.text)  |> Seq.length = 1) b
     if not (Seq.isEmpty a) 
     then (Seq.head a).name
@@ -265,7 +274,8 @@ let cutRule rule (rules: HashSet<_>)  =
     then
         if (match elements.[0].rule with | PToken t -> true | _ -> false) && (match elements.[1].rule with | PToken t -> true | _ -> false)
         then
-            let n1, n2 = tryFindRule (match elements.[0].rule with | PToken t -> t) rule rules,  tryFindRule (match elements.[1].rule with | PToken t -> t) rule rules
+            let n1 = tryFindRule (match elements.[0].rule with | PToken t -> t | _ -> failwith "unsupported") rule rules
+            let n2 = tryFindRule (match elements.[1].rule with | PToken t -> t | _ -> failwith "unsupported") rule rules
             let a1, a2 = createDefaultElem(PRef(n1, None)), createDefaultElem(PRef(n2, None))
             newRules.Add(createRule rule.name rule.args (PSeq([a1; a2], None, None)) rule.isStart rule.metaArgs) |> ignore
             newRules.Add(createRule n1 rule.args (PSeq([elements.[0]], None, None)) false rule.metaArgs) |> ignore
@@ -273,14 +283,14 @@ let cutRule rule (rules: HashSet<_>)  =
             newRules.Remove(rule) |> ignore
         elif (match elements.[0].rule with | PToken t -> true | _ -> false) && not (match elements.[1].rule with | PToken t -> true | _ -> false) 
         then
-            let n1 =  tryFindRule (match elements.[0].rule with | PToken t -> t) rule rules
+            let n1 = tryFindRule (match elements.[0].rule with | PToken t -> t | _ -> failwith "unsupported") rule rules
             let a1 = createDefaultElem(PRef(n1, None))
             newRules.Add(createRule rule.name rule.args (PSeq([a1; elements.[1]], None, None)) rule.isStart rule.metaArgs) |> ignore
             newRules.Add(createRule n1 rule.args (PSeq([elements.[0]], None, None)) false rule.metaArgs) |> ignore
             newRules.Remove(rule)|> ignore
         elif elements.Length = 2 && not (match elements.[0].rule with | PToken t -> true | _ -> false) &&  (match elements.[1].rule with | PToken t -> true | _ -> false) 
         then
-            let n1 =  tryFindRule (match elements.[1].rule with | PToken t -> t) rule rules
+            let n1 =  tryFindRule (match elements.[1].rule with | PToken t -> t | _ -> failwith "unsupported") rule rules
             let a1 = TransformAux.createDefaultElem(PRef(n1, None))
             newRules.Add(createRule rule.name rule.args (PSeq([elements.[0]; a1], None, None)) rule.isStart rule.metaArgs) |> ignore
             newRules.Add(createRule n1 rule.args (PSeq([elements.[1]], None, None)) false rule.metaArgs) |> ignore
@@ -328,7 +338,11 @@ let filterAndStuff (rules: Rule<_,_> list) =
                 newRules.Remove(rule) |> ignore
                 let b1 = (fst elements) |> List.map (fun x -> createRule rule.name rule.args (PSeq(x, None, None)) rule.isStart rule.metaArgs)  
                 let b2 = (snd elements) |> List.filter (fun x ->  not (x = []) && match x.[0].rule with PToken t -> false | _ -> true) |> List.map (fun x -> createRule rule.name rule.args (PNeg(PSeq(x, None, None))) rule.isStart rule.metaArgs)
-                if b2.Length = 1 && b1.Length = 1 && (match b1.[0].body with PSeq(e ,a, l) -> true | _ -> false) && (match (match b1.[0].body with PSeq(e,a,l) -> e).[0].rule with PToken t -> true | _ -> false) && ((match b1.[0].body with PSeq(e,a,l) -> e).Length = 1)
+                if b2.Length = 1
+                   && b1.Length = 1
+                   && (match b1.[0].body with PSeq(e ,a, l) -> true | _ -> false)
+                   && (match (match b1.[0].body with PSeq(e,a,l) -> e | _ -> failwith "unsupported").[0].rule with PToken t -> true | _ -> false)
+                   && ((match b1.[0].body with PSeq(e,a,l) -> e | _ -> failwith "unsupported").Length = 1)
                 then newRules.Add(b1.[0]) |> ignore
                 else newRules.Add(createRule rule.name rule.args (createConj (b1 @ b2)) rule.isStart rule.metaArgs) |> ignore
             if (fst elements).Length = 0 && (snd elements).Length > 1 && negTerm.IsSome
@@ -397,6 +411,7 @@ let toCNFandBNF (rules: Rule<_,_> list) conversionType =
     | "CNF" -> rules |> deleteLongRules |> deleteEpsilonRules |> deleteUnitRules |> deleteUselessRules |> deleteFewTermRules |> filterAndStuff |> cutNonEps
     | "BNFconj" -> rules |> deleteLongRules |> deleteEpsilonRules |> deleteUnitRules |> deleteFewTermRules |> filterAndStuff |> cutNonEps 
     | "BNFbool" -> rules |> deleteLongRules |> deleteEpsilonRules |> deleteUnitRules |> deleteFewTermRules |> filterAndStuff
+    | _ -> failwith "Usupporded conversion type"
     
 type CNF() = 
     inherit Conversion()

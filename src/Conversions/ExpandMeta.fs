@@ -82,6 +82,8 @@ let getKey module' key =
             |> List.map getProdKey
             |> String.concat ";"
             |> fun res -> "[|" + res + "|]"
+        | PShuff _ -> failwith "Unsupported"
+        | PNeg _ -> failwith "Unsupported"
     module' + ":" + getProdKey key
 
 /// <summary>
@@ -188,6 +190,8 @@ let expandRule =
                 | PRepet (body,x,y) -> //failwith "Unrealised meta-expanding of repetition"
                                        let a, b = simpleExpand body
                                        applyToRes PRepet <| ((a, x, y),b)
+                | PShuff _ -> failwith "Unsupported"
+                | PNeg _ -> failwith "Unsupported"
             if not <| expanded.ContainsKey key then
                 expanded.Add(key, newRule)
 //            printfn "%A\n: \t%A\n\n:\t%A\n=========================\n" body rule resRuleList
@@ -218,6 +222,8 @@ let expandRule =
         | PPerm _ -> failwith "Unrealised meta-expanding of permutation"
         | PRepet (body,x,y) -> //failwith "Unrealised meta-expanding of repetition"
                                PRepet  <| (replace body, x, y)
+        | PShuff _ -> failwith "Unsupported"
+        | PNeg _ -> failwith "Unsupported"
 
     fun body (module' : string) metaRules expanded ->
         expandBody body module' metaRules expanded []

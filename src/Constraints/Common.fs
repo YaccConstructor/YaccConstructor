@@ -35,6 +35,8 @@ let existsSubProd pred =
                 metas |> List.exists exists
             | PPerm elems -> elems |> List.exists exists
             | PLiteral _ | PToken _ | PRef _ -> false
+            | PShuff _ -> failwith "Unsupported"
+            | PNeg _ -> failwith "Unsupported"
     exists
 
 let existsProd pred =

@@ -54,10 +54,11 @@ type ``Components loader tests`` () =
 
     [<Test>]
     member test.``All conversions`` () =
-        let conversionsManager = [|new AddDefaultAC.AddDefaultAC(), new AddEOF.AddEOF(), new BuildAST.BuildAST(), new BuildAstSimple.BuildAstSimple(), new CNFandBNF.CNF(), new CNFandBNF.BNFconj(), new CNFandBNF.BNFbool(), new EliminateLeftRecursion.EliminateLeftRecursion(),
-                            new ExpandTopLevelAlt.ExpandTopLevelAlt(), new ExpandBrackets.ExpandBrackets(), new ExpandEbnfStrict.ExpandEbnf(), new ExpandInnerAlt.ExpandInnerAlt(),
-                            new ExpandMeta.ExpandMeta(), new LeaveLast.LeaveLast(), new MergeAlter.MergeAlter(), new RemoveAST.RemoveAC(), new ReplaceInline(), new ReplaceLiterals.ReplaceLiterals(),
-                            new Linearize.Linearize(), new ExpandRepet.ExpandExpand(), new ExpandConjunction.ExpandConjunction()|] |> Seq.ofArray  |> Seq.cast<Conversion>
+        let conversionsManager = 
+            [|new AddDefaultAC.AddDefaultAC(), new AddEOF.AddEOF(), new BuildAST.BuildAST(), new BuildAstSimple.BuildAstSimple(), new CNFandBNF.CNF(), new CNFandBNF.BNFconj(), new CNFandBNF.BNFbool(), new EliminateLeftRecursion.EliminateLeftRecursion(),
+              new ExpandTopLevelAlt.ExpandTopLevelAlt(), new ExpandBrackets.ExpandBrackets(), new ExpandEbnfStrict.ExpandEbnf(), new ExpandInnerAlt.ExpandInnerAlt(),
+              new ExpandMeta.ExpandMeta(), new LeaveLast.LeaveLast(), new MergeAlter.MergeAlter(), new RemoveAST.RemoveAC(), new ReplaceInline(), new ReplaceLiterals.ReplaceLiterals(),
+              new Linearize.Linearize(), new ExpandRepet.ExpandExpand(), new ExpandConjunction.ExpandConjunction()|] |> Seq.ofArray  |> Seq.cast<Conversion>
         let conversionNames = Seq.map (fun (elem : Conversion) -> elem.Name) conversionsManager
         let allConversions = 
             List.ofSeq conversionNames

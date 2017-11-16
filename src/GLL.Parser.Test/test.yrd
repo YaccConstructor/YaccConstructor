@@ -1,3 +1,0 @@
-[<Start>]
-start : aNonterm aNonterm | aNonterm A
-aNonterm : start aNonterm | A aNonterm | A

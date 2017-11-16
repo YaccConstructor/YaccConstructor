@@ -61,6 +61,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="SimpleILWrapper.fs" />
     <Compile Include="Combinators.fs" />
+    <Compile Include="Examples\Bio16s.fs" />
     <Compile Include="FeatureExamples.fs" />
     <Content Include="packages.config" />
     <None Include="App.config" />

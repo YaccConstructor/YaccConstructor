@@ -97,7 +97,7 @@ def grammars_gen(p_count, b_count):
                 f.write('q1-#: '+any_q[qind]+'-'+ob[i]+' q1ob'+str(i)+'-'+any_z[zind]+'\n')
 
 
-    #todo zo_i zo_i to zo_i zo_j ?
+    #todo rewrite to conjuncts l-term Any & Any r-term
 
 
 

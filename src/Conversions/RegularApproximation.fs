@@ -3,6 +3,7 @@ module Yard.Core.Conversions.RegularApproximation
 open QuickGraph
 open Yard.Core
 open Yard.Core.IL
+open TransformAux
 
 let private grammarToGraph (grammar : Grammar<_,_>) =
 
@@ -14,3 +15,56 @@ let private grammarToGraph (grammar : Grammar<_,_>) =
 
 let inline private getStronglyConnectedComps graph =
     QuickGraph.Algorithms.ConnectedComponents.StronglyConnectedComponentsAlgorithm(graph).Graphs
+
+let private approximate (grammar : Grammar<_,_>) =
+    let newNonTerm (nonTerm : Source) = new Source(nonTerm.text + "'")
+    let PhaseOne =
+        let newNonTerms = List.map (fun (rule : Rule<_,_>) -> newNonTerm rule.name) grammar.Head.rules
+        let epsilon = PSeq(List.empty, None, None)
+        List.map (fun head -> defaultRule head epsilon) newNonTerms
+
+    let PhaseTwo =
+        let stronglyConnectedVertexLst =
+            grammar
+            |> grammarToGraph
+            |> getStronglyConnectedComps
+            |> List.ofSeq
+            |> List.map (fun stronglyConnectedComponent -> List.ofSeq stronglyConnectedComponent.Vertices)
+
+        let handleOneComponent vertexes =
+            let wrapSeq head (lst : ProductionElem<_,_> list) =
+                let head', stock, lst =
+                    List.fold (fun (head, stock, rules) elem ->
+                        match elem.rule with
+                        | PRef(nonTerm, _) when List.contains nonTerm vertexes ->
+                            newNonTerm nonTerm, List.empty, List.Cons (defaultRule head <| PSeq(List.append stock [elem], None, None), rules)
+                        | PToken _
+                        | PRef _ -> head, List.append stock [elem], rules
+                        | _ -> failwith "wrong grammar!")
+                        (head, List.empty, List.empty) lst
+                let stock = PSeq(List.append stock [createDefaultElem <| PRef(newNonTerm head, None)], None, None)
+                List.Cons(defaultRule head' stock, lst)
+
+            let transformOneRule rule =
+                match rule.body with
+                | PToken _
+                | PRef _ -> wrapSeq rule.name [createDefaultElem rule.body]
+                | PSeq(elemList, _, _) -> wrapSeq rule.name elemList
+                | _ -> failwith "wrong grammar!"
+
+            let handleOneVertex vertex =
+                grammar.Head.rules
+                |> List.filter (fun rule -> rule.name = vertex)
+                |> List.collect transformOneRule
+
+            List.collect handleOneVertex vertexes
+
+        List.collect handleOneComponent stronglyConnectedVertexLst
+
+    defaultModules(List.append PhaseOne PhaseTwo)
+
+// ATTENTION! It is believed that there is ONLY ONE MODULE in the grammar, NO CONJUNCTION, NO EBNF, NO METARULES.
+type RegularApproximation() =
+    inherit Conversion()
+        override this.Name = "RegularApproximation"
+        override this.ConvertGrammar (grammar, _) = approximate grammar

@@ -52,6 +52,7 @@
     <Compile Include="RemoveAC.fs" />
     <Compile Include="ReplaceInline.fs" />
     <Compile Include="Linearize.fs" />
+    <Compile Include="RegularApproximation.fs" />
     <Compile Include="ExpandRepet.fs" />
     <Compile Include="ToCNF.fs" />
     <None Include="paket.references" />
@@ -72,6 +73,9 @@
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <Reference Include="YC.QuickGraph, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\QuickGraph\bin\QuickGraph\YC.QuickGraph.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
              Other similar extension points exist, see Microsoft.Common.targets.

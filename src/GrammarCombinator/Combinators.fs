@@ -17,8 +17,8 @@ module Combinators =
     let private applyUnaryop op = getProd >> op >> mkProd
 
     type Product with
-        static member (%) (p, (m, n)) = Production.PRepet(getProd p, Some m, Some n)
-        static member (%) (p, (m)) = Production.PRepet(getProd p, Some m, None)
+        static member (%) (p, (m, n)) = mkProd <| Production.PRepet(getProd p, Some m, Some n)
+        static member (%) (p, (m)) = mkProd <| Production.PRepet(getProd p, Some m, None)
         static member (+) (a: Product, b: Product) = applyBinop Wrapper.IL.conc a b
 
     let (<|>) = applyBinop <| untuple Production.PAlt
@@ -40,14 +40,16 @@ module internal Core =
 
 
     // --------------------------------------------- AT EVALUATE ---------------------------------------------
-    let private assignProd name p =
-        let getUniqueID =
-            let uniqueID = ref 0
-            fun (_: unit) ->
-                let last = !uniqueID
-                uniqueID := !uniqueID + 1
-                last
-        Product(Some(name, getUniqueID()), getProd p)
+    let private getUniqueID =
+        let uniqueID = ref 0
+        fun (_: unit) ->
+            let last = !uniqueID
+            uniqueID := !uniqueID + 1
+            last
+
+    let private assignProd name =
+        let uid = getUniqueID()
+        fun p -> Product(Some(name, uid), getProd p)
 
 
     // --------------------------------------------- BEFORE EVALUATE ---------------------------------------------
@@ -144,6 +146,9 @@ module internal Core =
                         collectRulesk prod (Set.add uid used) (fun (prod, used, rules) ->
                         k (mkPRef name uid, used, Wrapper.IL.rule (mkName name uid) prod false :: rules))
                     | _ -> __unreachable__()
+                | PRepet(prod, l, r) ->
+                    collectRulesk prod used (fun (prod, used, rules) ->
+                    k <| (PRepet(prod, l, r), used, rules))
                 | _ -> fail()
 
             let collectRulesFromProduct = function

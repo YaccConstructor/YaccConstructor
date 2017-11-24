@@ -33,7 +33,7 @@ let currentFile = ref ""
 
 let make_lexeme n1 n2 =
     source.Value.Substring(offset n1, offset n2 - offset n1)
-    |> fun s -> new Source.t(s, new Source.Position(n1), new Source.Position(n2), !currentFile)
+    |> fun s -> new Source(s, new SourcePosition(n1), new SourcePosition(n2), !currentFile)
 
 let nextline (lexbuf:Lexing.LexBuffer<_>) = lexbuf.EndPos <- lexbuf.EndPos.NextLine
 }

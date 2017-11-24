@@ -14,13 +14,12 @@
 
 module Yard.Core.Checkers
 
-open Yard.Core.IL.Production
 open Yard.Core.IL
 open System.Collections.Generic
 open System.Linq
 open Yard.Core.Helpers
 
-let private startRulesCount (def:Yard.Core.IL.Definition.t<_,_>) =
+let private startRulesCount (def:Yard.Core.IL.Definition<_,_>) =
     def.grammar |> List.sumBy (fun module' -> module'.rules.Count (fun r -> r.isStart))
 
 let IsStartRuleExists def =
@@ -29,13 +28,14 @@ let IsStartRuleExists def =
 let IsSingleStartRule def =
     startRulesCount def = 1
 
-let GetIncorrectMetaArgsCount (def:Yard.Core.IL.Definition.t<_,_>) =
+let GetIncorrectMetaArgsCount (def:Yard.Core.IL.Definition<_,_>) =
     let rules = metaRulesTbl def.grammar
     let checkBody module' =
         let map = rules.[module']
-        let check acc (name : Source.t) cnt =
+        let check acc (name : Source) cnt =
             let expected = 
-                if not <| map.ContainsKey name.text then 0
+                if not <| map.ContainsKey name.text 
+                then 0
                 else (snd map.[name.text]).metaArgs.Length
             if cnt = expected then acc
             else (name, cnt, expected)::acc
@@ -54,6 +54,8 @@ let GetIncorrectMetaArgsCount (def:Yard.Core.IL.Definition.t<_,_>) =
             | PToken _
                 -> acc
             | PPerm list -> list |> List.fold (fun acc elem -> checkBody acc elem) acc
+            | PShuff _ -> failwith "Unsupported"
+            | PNeg _ -> failwith "Unsupported"
         checkBody
 
     def.grammar
@@ -67,7 +69,7 @@ let GetIncorrectMetaArgsCount (def:Yard.Core.IL.Definition.t<_,_>) =
         | list -> (module', List.rev list)::badModules
     ) []
 
-let IsChomskyNormalForm (def:Yard.Core.IL.Definition.t<_,_>) =
+let IsChomskyNormalForm (def:Yard.Core.IL.Definition<_,_>) =
     def.grammar
     |> List.forall (fun module' ->
         module'.rules
@@ -81,12 +83,12 @@ let IsChomskyNormalForm (def:Yard.Core.IL.Definition.t<_,_>) =
             )
         )
 
-let private getAllModuleNames (grammar : Grammar.t<_,_>) =
+let private getAllModuleNames (grammar : Grammar<_,_>) =
     grammar
     |> List.map (fun m -> getModuleName m)
     |> List.sort
 
-let GetCoincideModuleNames (def : Yard.Core.IL.Definition.t<Source.t, Source.t>) =
+let GetCoincideModuleNames (def : Yard.Core.IL.Definition<Source, Source>) =
     getAllModuleNames def.grammar
     |> (function
         | [] -> []
@@ -96,7 +98,7 @@ let GetCoincideModuleNames (def : Yard.Core.IL.Definition.t<Source.t, Source.t>)
                        |> snd
        )
 
-let GetInvalidOpenings (def : Yard.Core.IL.Definition.t<Source.t, Source.t>) =
+let GetInvalidOpenings (def : Yard.Core.IL.Definition<Source, Source>) =
     let existsModule searched =
         def.grammar
         |> List.exists (fun m -> getModuleName m = searched)
@@ -111,14 +113,14 @@ let GetInvalidOpenings (def : Yard.Core.IL.Definition.t<Source.t, Source.t>) =
             | _ -> Some (m, invalidOpenings)
         )
 
-let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Grammar.Module<Source.t, Source.t>) = 
+let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Module<Source, Source>) = 
     let declaredInnerRules =
         module'.rules |> List.map (fun r -> r.name.text)
     let declaredRules = new HashSet<_>(declaredInnerRules)
     let declaredExportRules =
         module'.openings
         |> List.map (fun op ->
-            let rules : Rule.t<_,_> list =
+            let rules : Rule<_,_> list =
                 if publicRules.ContainsKey op.text then publicRules.[op.text]
                 else
                     eprintf "Undeclared module %s (%s:%d) " op.text op.file op.startPos.line
@@ -156,7 +158,7 @@ let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Grammar.Module<
         repeated |> List.ofSeq |> List.map (fun r -> r, List.ofSeq ruleToModule.[r])
 
     let undeclaredRules = new HashSet<_>()
-    let addUndeclaredRule (name : Source.t) additionRules = 
+    let addUndeclaredRule (name : Source) additionRules = 
         if not (declaredRules.Contains name.text
                 || Seq.exists ((=) name.text) additionRules) && name.text <> errorToken
         then
@@ -183,6 +185,8 @@ let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Grammar.Module<
             getUndeclaredRulesCurried rExpr
         | PLiteral _ 
         | PToken _  -> ()
+        | PShuff _ -> failwith "Unsupported"
+        | PNeg _ -> failwith "Unsupported"
 
     module'.rules
     |> List.iter
@@ -193,7 +197,7 @@ let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Grammar.Module<
 
     repeatedInnerRules, repeatedExportRules, List.ofSeq undeclaredRules
 
-let GetUndeclaredNonterminalsList (def : Yard.Core.IL.Definition.t<Source.t, Source.t>) =
+let GetUndeclaredNonterminalsList (def : Yard.Core.IL.Definition<Source, Source>) =
     let grammar = def.grammar
     let publicRules = getPublicRules grammar
     let filterEmpty (x : ('a * 'b list)  list) =
@@ -208,11 +212,11 @@ let GetUndeclaredNonterminalsList (def : Yard.Core.IL.Definition.t<Source.t, Sou
     |> (fun (x,y,z) -> filterEmpty x, filterEmpty y, filterEmpty z)
 
 // returns a list of rule's names which are reachead from start rule in the grammar
-let reachableRulesInfo_of_grammar (grammar: Grammar.t<_,_>) =
+let reachableRulesInfo_of_grammar (grammar: Grammar<_,_>) =
     let rulesMap = getRulesMap grammar
     let reachedRules = new HashSet<_>()
     
-    let getAdditionRules (rule : Rule.t<Source.t,Source.t>) =
+    let getAdditionRules (rule : Rule<Source,Source>) =
         rule.metaArgs |> List.map (fun i -> i.text)
         |> fun x -> new HashSet<_>(x)
 
@@ -237,6 +241,8 @@ let reachableRulesInfo_of_grammar (grammar: Grammar.t<_,_>) =
             getReachableRulesCurried rExpr
         | PLiteral _ 
         | PToken _  -> ()
+        | PShuff _ -> failwith "Unsupported"
+        | PNeg _ -> failwith "Unsupported"
 
     and addReachedRule (module' : string) (name : string) (additionRules : HashSet<_>) : unit =  
         let key = module', name
@@ -261,20 +267,20 @@ let reachableRulesInfo_of_grammar (grammar: Grammar.t<_,_>) =
     getReachableRules startModule (getAdditionRules startRule) startRule.body
     reachedRules
 
-let reachableRulesInfo (def: Definition.t<_,_>) =
+let reachableRulesInfo (def: Definition<_,_>) =
   reachableRulesInfo_of_grammar def.grammar
 
-let IsUnusedRulesExists(def:Yard.Core.IL.Definition.t<_,_>) =
+let IsUnusedRulesExists(def:Yard.Core.IL.Definition<_,_>) =
   let reachedRules = reachableRulesInfo def
   def.grammar |> List.exists (fun m ->
         m.rules |> List.exists (fun r -> let v = (getModuleName m, r.name.text) in not <| reachedRules.Contains v)
   )
 
 /// Usage example: check after conversion, that we didn't lose any binding to source (e.g. position)
-let sourcesWithoutFileNames (def:Yard.Core.IL.Definition.t<Source.t,Source.t>) =
-    let inline check (src : Source.t) = src.file = ""
-    let collectName (src : Source.t) = if check src then [src] else []
-    let collectOpt (src : Source.t option) =
+let sourcesWithoutFileNames (def:Yard.Core.IL.Definition<Source,Source>) =
+    let inline check (src : Source) = src.file = ""
+    let collectName (src : Source) = if check src then [src] else []
+    let collectOpt (src : Source option) =
         match src with
         | Some src when check src -> [src]
         | _ -> []
@@ -288,6 +294,8 @@ let sourcesWithoutFileNames (def:Yard.Core.IL.Definition.t<Source.t,Source.t>) =
         | PMany e | PSome e | POpt e -> processBody e
         | PPerm p -> List.collect processBody p
         | PRepet (p,_,_) -> processBody p
+        | PShuff _ -> failwith "Unsupported"
+        | PNeg _ -> failwith "Unsupported"
         
 
     def.grammar |> List.collect (fun m ->

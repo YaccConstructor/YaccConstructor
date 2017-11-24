@@ -2,18 +2,15 @@
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
-open Yard.Core.IL.Production
-
 open Yard.Core.Namer
 open TransformAux
 
 open System
 
-let dummyPos s = new Source.t(s)
+let dummyPos s = new Source(s)
 
-let private expandRepet (ruleList: Rule.t<_,_> list) = 
-    let toExpand = new System.Collections.Generic.Queue<Rule.t<_,_>>(List.toArray ruleList)
+let private expandRepet (ruleList: Rule<_,_> list) = 
+    let toExpand = new System.Collections.Generic.Queue<Rule<_,_>>(List.toArray ruleList)
 
     let rec bodyRule acc b rule =
         if (acc > b) || (acc < 1) then failwith "Incorrect parameters of range for Repeat!"
@@ -62,7 +59,9 @@ let private expandRepet (ruleList: Rule.t<_,_> list) =
         | PToken _ | PLiteral _  | PRef _  as x -> x
         | PPerm _ -> failwith "Unsupported rule in Repetion!"        
         | PMetaRef (src, args, metas) as x ->                         
-            PMetaRef (src, args, metas |> List.map (fun prod -> expandBody attrs prod))                   
+            PMetaRef (src, args, metas |> List.map (fun prod -> expandBody attrs prod))     
+        | PShuff _ -> failwith "Unsupported"
+        | PNeg _ -> failwith "Unsupported"              
                                      
     let expanded = ref []
     while toExpand.Count > 0 do 

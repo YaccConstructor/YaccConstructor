@@ -16,16 +16,15 @@ module Yard.Core.ConstraintsImpl.InCNF
 
 open Yard.Core
 open IL
-open Production
 open Yard.Core.ConstraintsImpl.Common
 
-let private checker (grammar : Grammar.t<_,_>) =
+let private checker (grammar : Grammar<_,_>) =
     if grammar.Length > 1 then false
     else
         let notStart = 
             match grammar.Head.rules |> List.tryPick (fun r -> if r.isStart then Some r.name.text else None) with
             | None -> fun _ -> true
-            | Some start -> fun (x : Source.t) -> x.text <> start
+            | Some start -> fun (x : Source) -> x.text <> start
         existsRules (fun r ->
             match r.body with
             | PSeq (elems, _, _) ->
@@ -37,4 +36,4 @@ let private checker (grammar : Grammar.t<_,_>) =
             | _ -> true
         ) grammar |> not
     
-let inCNF = new Constraint("InCNF", checker, Conversions.ToCNF.ToCNF())
+let inCNF = new Constraint("InCNF", checker, Conversions.CNFandBNF.CNF())

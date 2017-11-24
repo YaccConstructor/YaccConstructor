@@ -6,8 +6,6 @@
     open System.Collections.Generic
     open Yard.Core
     open Yard.Core.IL
-    open Yard.Core.IL.Production
-    open Yard.Core.IL.Definition
     open Yard.Core.Helpers
     open Conversions.TransformAux
     open QuickGraph
@@ -30,33 +28,29 @@
             | PSeq([n1; n2],_,_), PSeq([n3; n4],_,_) ->
                 match n1.rule, n2.rule, n3.rule, n4.rule with 
                 | PRef (name1, _), PRef (name2, _), PRef (name3, _), PRef (name4, _) ->
-                    let nonterm1 = NonTerminal <| Source.toString name1
+                    let nonterm1 = NonTerminal <| sourceToString name1
                     if not <| nonterminals.Contains nonterm1
-                    then
-                        nonterminals.Add nonterm1
-                    let nonterm2 = NonTerminal <| Source.toString name2
+                    then nonterminals.Add nonterm1
+                    let nonterm2 = NonTerminal <| sourceToString name2
                     if not <| nonterminals.Contains nonterm2
-                    then
-                        nonterminals.Add nonterm2
-                    let nonterm3 = NonTerminal <| Source.toString name3
+                    then nonterminals.Add nonterm2
+                    let nonterm3 = NonTerminal <| sourceToString name3
                     if not <| nonterminals.Contains nonterm3
-                    then
-                        nonterminals.Add nonterm3
-                    let nonterm4 = NonTerminal <| Source.toString name4
+                    then nonterminals.Add nonterm3
+                    let nonterm4 = NonTerminal <| sourceToString name4
                     if not <| nonterminals.Contains nonterm4
-                    then
-                        nonterminals.Add nonterm4
+                    then nonterminals.Add nonterm4
                     conjunctsArr.AddRange([|(nonterm1,nonterm2,true);(nonterm3,nonterm4,true)|])
                 | _ -> failwith "Given grammar is not in conjunctive normal form."
 
             | PSeq([n1; n2],_,_), PConj(conj1, conj2) ->
                 match n1.rule, n2.rule with 
                 | PRef (name1, _), PRef (name2, _) ->
-                    let nonterm1 = NonTerminal <| Source.toString name1
+                    let nonterm1 = NonTerminal <| sourceToString name1
                     if not <| nonterminals.Contains nonterm1
                     then
                         nonterminals.Add nonterm1
-                    let nonterm2 = NonTerminal <| Source.toString name2
+                    let nonterm2 = NonTerminal <| sourceToString name2
                     if not <| nonterminals.Contains nonterm2
                     then
                         nonterminals.Add nonterm2
@@ -69,7 +63,7 @@
 
         for module' in grammar do
             for r in module'.rules do
-                let nonterm = NonTerminal <| Source.toString r.name
+                let nonterm = NonTerminal <| sourceToString r.name
                 if not <| nonterminals.Contains nonterm
                 then
                     nonterminals.Add nonterm
@@ -81,7 +75,7 @@
                 | PSeq([elem],_,_) ->
                     match elem.rule with
                     | PToken src ->
-                        let token = Source.toString src
+                        let token = sourceToString src
                         let intToken = tokenToInt token
                         simpleConjRules.Add((nonterm, probOne), intToken)
                     | _ ->
@@ -90,11 +84,11 @@
                 | PSeq([e1; e2],_,_) ->
                     match e1.rule, e2.rule with 
                     | PRef (name1, _), PRef (name2, _) ->
-                        let nonterm1 = NonTerminal <| Source.toString name1
+                        let nonterm1 = NonTerminal <| sourceToString name1
                         if not <| nonterminals.Contains nonterm1
                         then
                             nonterminals.Add nonterm1
-                        let nonterm2 = NonTerminal <| Source.toString name2
+                        let nonterm2 = NonTerminal <| sourceToString name2
                         if not <| nonterminals.Contains nonterm2
                         then
                             nonterminals.Add nonterm2
@@ -229,7 +223,7 @@
 
     let graphParse<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
                   mHandler
-                  (loadIL:t<Source.t, Source.t>)
+                  (loadIL:Definition<Source, Source>)
                   tokenToInt 
                   parallelProcesses =
 

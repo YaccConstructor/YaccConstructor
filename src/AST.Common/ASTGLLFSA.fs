@@ -122,6 +122,7 @@ let gllNodeToGlr (node: INode) rightToRule intToString termToIndex =
                  match child with
                  | :? TerminalNode as term -> intToString <| int term.Name
                  | :? NonTerminalNode as nonTerm -> intToString <| int nonTerm.Name
+                 | _ -> failwith "unsupported type of node"
             let childrenString = children |> Seq.map childToString |> String.concat " "
             if Seq.isEmpty children
             then
@@ -719,6 +720,8 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
                 handleNode packed.Left + handleNode packed.Right
             | :? IntermidiateNode as inter ->
                 inter.MapChildren handleNode |> Seq.sum
+            | _ -> failwith "unsupported node type"
+
         roots |> Array.map handleNode |> ignore
 
     member this.StringRepr intToString = 
@@ -754,7 +757,8 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
                          inter.MapChildren(fun packed -> handleNode packed <| idents + 1) |> String.concat ""
                     sprintf "IN:\n%s"
                             <| childrenStringified
-                        |> idented idents                 
+                        |> idented idents   
+                | _ -> failwith "unsupported node type"              
         roots
             |> Array.mapi (fun i r -> sprintf "R(%i):\n%s" i <| handleNode r 1)
             |> String.concat ""

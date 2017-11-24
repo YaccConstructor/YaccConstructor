@@ -18,15 +18,13 @@ open Yard.Core
 open Yard.Core.IL
 open Namer
 open TransformAux
-open Yard.Core.IL.Production
 
-
-//let dummyPos s = new Source.t(s)
+//let dummyPos s = new Source(s)
 
 let private newName () = Namer.newName Namer.Names.brackets
     
-let private expandBrackets (ruleList: Rule.t<_, _> list) = 
-    let toExpand = new System.Collections.Generic.Queue<Rule.t<_, _>>(List.toArray ruleList)
+let private expandBrackets (ruleList: Rule<_, _> list) = 
+    let toExpand = new System.Collections.Generic.Queue<Rule<_, _>>(List.toArray ruleList)
     let expanded = ref []
     while toExpand.Count > 0 do
         let toExpandRule = toExpand.Dequeue()

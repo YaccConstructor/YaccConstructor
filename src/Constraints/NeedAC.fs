@@ -16,7 +16,6 @@ module Yard.Core.ConstraintsImpl.NeedAC
 
 open Yard.Core
 open IL
-open Production
 open Yard.Core.ConstraintsImpl.Common
 
 let private checker =

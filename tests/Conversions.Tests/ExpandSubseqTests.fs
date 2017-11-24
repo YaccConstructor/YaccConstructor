@@ -22,8 +22,6 @@ module ExpandSubseqTests
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
-open Yard.Core.IL.Definition
 open Yard.Core.Helpers
 open Conversions.TransformAux
 open NUnit.Framework
@@ -39,42 +37,42 @@ type ``Expand subseq tests`` () =
     [<Test>]
     member test.``Subseq 1`` () =
         (verySimpleRules "s"
-            [{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1",None)}]
+            [{dummyRule with rule = PRef (Source "yard_exp_brackets_1",None)}]
         ) @ (
             verySimpleNotStartRules "yard_exp_brackets_1"
-                [{dummyRule with rule = PRef (Source.t("x"),None)}
-                ;{dummyRule with rule = PRef (Source.t("y"),None)}]
+                [{dummyRule with rule = PRef (Source("x"),None)}
+                ;{dummyRule with rule = PRef (Source("y"),None)}]
         )
         |> runTest (path "subseq1.yrd") expandSubSeq
 
     [<Test>]
     member test.``Subseq 2`` () =
         (verySimpleRules "s"
-            [{dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}
-            ;{dummyRule with rule = PRef (Source.t("yard_exp_brackets_2"),None)}]
+            [{dummyRule with rule = PRef (Source("yard_exp_brackets_1"),None)}
+            ;{dummyRule with rule = PRef (Source("yard_exp_brackets_2"),None)}]
         ) @ (
             verySimpleNotStartRules "yard_exp_brackets_1"
-                [{dummyRule with rule = PRef (Source.t("x"),None)}
-                ;{dummyRule with rule = PRef (Source.t("y"),None)}]
+                [{dummyRule with rule = PRef (Source("x"),None)}
+                ;{dummyRule with rule = PRef (Source("y"),None)}]
         ) @ (
             verySimpleNotStartRules "yard_exp_brackets_2"
-                [{dummyRule with rule = PRef (Source.t("n"),None)}
-                ;{dummyRule with rule = PRef (Source.t("m"),None)}]
+                [{dummyRule with rule = PRef (Source("n"),None)}
+                ;{dummyRule with rule = PRef (Source("m"),None)}]
         )
         |> runTest (path "subseq2.yrd") expandSubSeq
     
     [<Test>]
     member test.``Inner subseq`` () =
         (verySimpleRules "s"
-            [{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1",None)}]
+            [{dummyRule with rule = PRef (Source "yard_exp_brackets_1",None)}]
         ) @ (
             verySimpleNotStartRules "yard_exp_brackets_1"
-                [{dummyRule with rule = PRef (Source.t "x", None)}
-                ;{dummyRule with rule = PRef (Source.t "yard_exp_brackets_2", None)}
-                ;{dummyRule with rule = PRef (Source.t "y", None)}]
+                [{dummyRule with rule = PRef (Source "x", None)}
+                ;{dummyRule with rule = PRef (Source "yard_exp_brackets_2", None)}
+                ;{dummyRule with rule = PRef (Source "y", None)}]
         ) @ (
             verySimpleNotStartRules "yard_exp_brackets_2"
-                [{dummyRule with rule = PRef (Source.t "n", None)}
-                ;{dummyRule with rule = PRef (Source.t "m", None)}]
+                [{dummyRule with rule = PRef (Source "n", None)}
+                ;{dummyRule with rule = PRef (Source "m", None)}]
         )
         |> runTest (path "innerSubseq.yrd") expandSubSeq

@@ -5,12 +5,11 @@ open System.Collections.Generic
 open Yard.Generators.Common.FSA.Common
 
 open Yard.Core.IL
-open Yard.Core.IL.Production
 open Yard.Generators.Common.Epsilon
 open Yard.Generators.Common.SymbolSets
 open Yard.Generators.Common
 
-type FSA(ruleList : Rule.t<Source.t,Source.t> list) =
+type FSA(ruleList : Rule<Source,Source> list) =
     let time = ref System.DateTime.Now
     let fsa =
         ruleList
@@ -38,13 +37,12 @@ type FSA(ruleList : Rule.t<Source.t,Source.t> list) =
                         //System.IO.File.AppendAllLines(@".\time.txt", [sprintf "Minimization time: %A" (System.DateTime.Now - !time)])
                         time := System.DateTime.Now
                         x)
-    //let firstSet = genFirstSet fsa
 
     member this.States = fsa.States
-    member this.StartState = fsa.StartState
+    //after convertion to dfa each startstates HashSet contains only one state
+    member this.StartState = fsa.StartStates.[fsa.StartComponentNumber] |> Seq.find (fun x -> true)
     member this.FinalStates = fsa.FinalStates
     member this.NontermCount = fsa.StartStates.Length
-    //member this.FirstSet = firstSet
     member this.StateToNontermName = fsa.StateToNontermName
     member this.PrintDot filePrintPath = printDot filePrintPath fsa
     member this.RuleList = ruleList

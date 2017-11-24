@@ -17,10 +17,6 @@ module Yard.Core.Helpers
 
 open System.Collections.Generic
 open Yard.Core.IL
-open Grammar
-open Production
-open Definition
-
 
 let errorToken = "error"
 
@@ -29,7 +25,7 @@ let getModuleName (m : Module<_,_>) =
     | Some n -> n.text
     | None -> ""
 
-let defaultModules rules : Grammar.Module<_,_> list =
+let defaultModules rules : Module<_,_> list =
     [{
         rules = rules
         openings = []
@@ -37,11 +33,11 @@ let defaultModules rules : Grammar.Module<_,_> list =
         allPublic = false
     }]
 
-let defaultDefinition rules = {empty with grammar = defaultModules rules}
+let defaultDefinition rules = {emptyGrammarDefinition with grammar = defaultModules rules}
 
-let simpleRules nonTerm body : Rule.t<_,_> list =
+let simpleRules nonTerm body : Rule<_,_> list =
     [{
-        name = Source.t nonTerm
+        name = Source nonTerm
         args = []
         body = body
         isStart = true
@@ -50,9 +46,9 @@ let simpleRules nonTerm body : Rule.t<_,_> list =
         metaArgs = []
     }]
 
-let metaRules nonTerm body args : Rule.t<_,_> list =
+let metaRules nonTerm body args : Rule<_,_> list =
     [{
-        name = Source.t nonTerm
+        name = Source nonTerm
         args = []
         body = body
         isStart = false
@@ -61,16 +57,16 @@ let metaRules nonTerm body args : Rule.t<_,_> list =
         metaArgs = args
     }]
 
-let simpleNotStartRules nonTerm body : Rule.t<_,_> list =
+let simpleNotStartRules nonTerm body : Rule<_,_> list =
     metaRules nonTerm body []
 
-let verySimpleRules nonTerm seq : Rule.t<_,_> list =
+let verySimpleRules nonTerm seq : Rule<_,_> list =
     simpleRules nonTerm <| PSeq(seq, None, None)
 
-let verySimpleNotStartRules nonTerm seq : Rule.t<_,_> list =
+let verySimpleNotStartRules nonTerm seq : Rule<_,_> list =
     simpleNotStartRules nonTerm <| PSeq(seq, None, None)
 
-let inline mapModule mapF (m : Grammar.Module<_,_>) =
+let inline mapModule mapF (m : Module<_,_>) =
     {m with rules = mapF m.rules}
 
 let inline mapGrammar mapF grammar =
@@ -78,7 +74,7 @@ let inline mapGrammar mapF grammar =
     |> List.map (mapModule mapF)
 
 /// Map: module -> (list of public rules, declared in it)
-let getPublicRules (grammar : Grammar.t<_,_>) =
+let getPublicRules (grammar : Grammar<_,_>) =
     grammar
     |> List.map (fun module' ->
             let publics = module'.rules |> List.filter (fun r -> r.isPublic)
@@ -86,26 +82,27 @@ let getPublicRules (grammar : Grammar.t<_,_>) =
         )
     |> dict
 
-let rec getAllNonTermOfProd (prod : Production.t<_,_>) =
+let rec getAllNonTermOfProd (prod : Production<_,_>) =
     let inline getNonTermOfLst prodList = List.collect getAllNonTermOfProd prodList
 
     match prod with
-    |PAlt(prod1, prod2)
-    |PConj(prod1, prod2) -> List.append (getAllNonTermOfProd prod1) (getAllNonTermOfProd prod2)
-    |PNeg prod -> getAllNonTermOfProd prod
-    |PSeq(prodList, _, _) -> getNonTermOfLst << List.map (fun elem -> elem.rule) <| prodList
-    |PToken(_) -> []
-    |PRef(nonTerm, _) -> List.singleton nonTerm
-    |PMany prod -> getAllNonTermOfProd prod
-    |PMetaRef(ref, _, prodList) -> ref :: getNonTermOfLst prodList
-    |PLiteral lit -> List.empty
-    |PRepet(prod, _, _) -> getAllNonTermOfProd prod
-    |PPerm prodList -> getNonTermOfLst prodList
-    |PSome prod -> getAllNonTermOfProd prod
-    |POpt prod -> getAllNonTermOfProd prod
+    | PAlt(prod1, prod2)
+    | PShuff(prod1, prod2)
+    | PConj(prod1, prod2) -> List.append (getAllNonTermOfProd prod1) (getAllNonTermOfProd prod2)
+    | PNeg prod -> getAllNonTermOfProd prod
+    | PSeq(prodList, _, _) -> getNonTermOfLst << List.map (fun elem -> elem.rule) <| prodList
+    | PToken(_) -> []
+    | PRef(nonTerm, _) -> List.singleton nonTerm
+    | PMany prod -> getAllNonTermOfProd prod
+    | PMetaRef(ref, _, prodList) -> ref :: getNonTermOfLst prodList
+    | PLiteral lit -> List.empty
+    | PRepet(prod, _, _) -> getAllNonTermOfProd prod
+    | PPerm prodList -> getNonTermOfLst prodList
+    | PSome prod -> getAllNonTermOfProd prod
+    | POpt prod -> getAllNonTermOfProd prod
 
 /// For each module creates map: rule -> (module, in which the rule is declared)
-let getRulesMap (grammar : Grammar.t<_,_>) =
+let getRulesMap (grammar : Grammar<_,_>) =
     let publicRules = getPublicRules grammar
     grammar
     |> List.map (fun module' ->
@@ -130,7 +127,7 @@ let getRulesMap (grammar : Grammar.t<_,_>) =
     |> dict
 
 /// if rule has metaArgs then it is a metarule
-let isMetaRule (r:Rule.t<Source.t,Source.t>) = r.metaArgs <> []
+let isMetaRule (r:Rule<Source,Source>) = r.metaArgs <> []
 
 /// hash table for metarules.
 /// Map: using_module -> (rule_name -> (decl_module, rule_decl));
@@ -139,7 +136,7 @@ let metaRulesTbl grammar =
     let publicRules = new Dictionary<_,_>(getPublicRules grammar)
     /// Only public meta-rules present here
     let publicMeta =
-        let map = new Dictionary<string,Rule.t<Source.t, Source.t> list>()
+        let map = new Dictionary<string, Rule<Source, Source> list>()
         publicRules |> Seq.iter (fun item ->
             map.[item.Key] <- List.filter isMetaRule item.Value
         )

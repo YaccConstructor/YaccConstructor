@@ -28,7 +28,7 @@ type YardFrontend() =
                 { g with grammar = inliner.ConvertGrammar g.grammar }
             | _ -> failwithf "File name expected as argumnet for YardFrontend.ParseGrammar, but got: %A" t
         override this.ProductionTypes =
-            List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
+            List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production<string,string>>)
             |> List.map (fun unionCase -> unionCase.Name)
         override this.ParseGrammarFromStr str =
             let inliner = new Conversions.ExpandInline.ReplaceInline()

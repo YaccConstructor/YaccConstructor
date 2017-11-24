@@ -19,10 +19,9 @@ module Yard.Generators.YardPrinter.Generator
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
 
 let endl = System.Environment.NewLine
-let printSourceOpt = function None -> "" | Some (arg : Source.t) -> endl + "{" + arg.text + "}" + endl + endl
+let printSourceOpt = function None -> "" | Some (arg : Source) -> endl + "{" + arg.text + "}" + endl + endl
 
 type TextBox =
 | Tabbed of seq<TextBox> 
@@ -100,7 +99,7 @@ let printProduction =
         |> printSeqBrackets "<" ">"
 
     // wasAlt is used for dealing with one set of alternatives (if it's true, we are inside the set).
-    and printProduction wasAlt (production:Production.t<Source.t,Source.t>)  = 
+    and printProduction wasAlt (production:Production<Source,Source>)  = 
         let rec priority = function 
             | PAlt _ -> 1
             | PSeq ([elem],None,_) -> 
@@ -116,15 +115,15 @@ let printProduction =
             if cond then seq { yield Str "("; yield! s; yield Str ")"}
             else s
         let printAttr = function
-            | Some attr -> "{" + Source.toString attr + "}"
+            | Some attr -> "{" + sourceToString attr + "}"
             | None -> ""
         let printArg = function
-            | Some attr  -> "<<" + Source.toString attr + ">>"
+            | Some attr  -> "<<" + sourceToString attr + ">>"
             | None -> ""
-        let printElem (elem:elem<Source.t,Source.t>) = 
+        let printElem (elem:ProductionElem<Source,Source>) = 
             let binding = function
-                | Some x when String.forall (fun x -> System.Char.IsLetterOrDigit x || x = '_')  (Source.toString x) -> Source.toString x + " ="
-                | Some x  -> "{" + Source.toString x + "} ="
+                | Some x when String.forall (fun x -> System.Char.IsLetterOrDigit x || x = '_')  (sourceToString x) -> sourceToString x + " ="
+                | Some x  -> "{" + sourceToString x + "} ="
                 | None -> ""
             let omit = if elem.omit then "-" else ""
             let needBrackets =  let prio = priority elem.rule in if elem.binding.IsSome then prio < 50 else prio <= 1
@@ -159,18 +158,18 @@ let printProduction =
                  yield Str <| printAttr attr_option
                 }
         // Token
-        | PToken source -> Seq.singleton <| Str (Source.toString source)
+        | PToken source -> Seq.singleton <| Str (sourceToString source)
         // Vanilla rule reference with an optional args list.
-        | PRef(source, attr_option) -> Seq.singleton <| Str (Source.toString source + printArg attr_option)
+        | PRef(source, attr_option) -> Seq.singleton <| Str (sourceToString source + printArg attr_option)
         // expr*
         | PMany many -> printEbnf "*" many
         // Metarule reference like in "a: mr<x> y z"
         | PMetaRef(rule_name, opt_arg, metaArgs) ->
-            Source.toString rule_name + printMetaArgs metaArgs + printArg opt_arg
+            sourceToString rule_name + printMetaArgs metaArgs + printArg opt_arg
             |> Str |> Seq.singleton
         // Literal. Often one wants to write explicitly, e.g.: .."if" expr "then" expr...
         | PLiteral source ->
-            Source.toString source
+            sourceToString source
             |> fun s -> Str ("'" + s + "'") 
             |> Seq.singleton
     //        |PRepet   of (t<'patt,'expr>) * int option * int option  //extended regexp repetition, "man egrep" for details
@@ -183,10 +182,10 @@ let printProduction =
         | _ -> Seq.singleton <| Str "ERROR"
     printProduction
 
-let printRule isPublicModule (rule : Rule.t<Source.t, Source.t>) =
+let printRule isPublicModule (rule : Rule<Source, Source>) =
     let printArgs args =
         args
-        |> List.map (fun src -> "<<" + Source.toString src + ">>")
+        |> List.map (fun src -> "<<" + sourceToString src + ">>")
         |> String.concat ""
     let startSign = if rule.isStart then "[<Start>]" + endl else ""
     let accessModifier =
@@ -194,7 +193,7 @@ let printRule isPublicModule (rule : Rule.t<Source.t, Source.t>) =
         elif rule.isPublic then "public "
         else "private "
     seq {yield Line(seq{yield Str(startSign + accessModifier + rule.name.text
-                                    + (rule.metaArgs |> List.map Source.toString |> printSeqBrackets "<" ">")
+                                    + (rule.metaArgs |> List.map sourceToString |> printSeqBrackets "<" ">")
                                     + (printArgs rule.args) + ":");
                         yield Str " ";
                         yield! printProduction false rule.body;
@@ -203,7 +202,7 @@ let printRule isPublicModule (rule : Rule.t<Source.t, Source.t>) =
                    )
         }
 
-let generate (input_grammar: Definition.t<Source.t,Source.t>) =
+let generate (input_grammar: Definition<Source,Source>) =
     let print : seq<_> -> _ = printTextBox 4 80 
     let tab = "    "
     let tokens =

@@ -16,13 +16,12 @@ module Yard.Core.Conversions.AddEOF
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
 
 
 open System.Collections.Generic
 
-let dummyPos s = new Source.t(s)
-let dummyToken s = PToken <| new Source.t(s)
+let dummyPos s = new Source(s)
+let dummyToken s = PToken <| new Source(s)
 
 let lastName = ref ""
 let createName() =
@@ -67,7 +66,7 @@ let addEOFToProduction = function
                 ,None, None
            ) |> PSeq
 
-let addEOF (ruleList: Rule.t<Source.t, Source.t> list) = 
+let addEOF (ruleList: Rule<Source, Source> list) = 
     let startRules = new HashSet<string>()
     ruleList |> List.iter
         (fun rule -> if rule.isStart then startRules.Add rule.name.text |>ignore )

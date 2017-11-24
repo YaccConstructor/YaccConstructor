@@ -16,12 +16,11 @@ module Yard.Core.Conversions.ExpandInline
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
 open System.Collections.Generic
 
 
-let private replaceInline (rules : Rule.t<_,_> list) =
-    let closure (inlines : (string * t<_,_>) list) = 
+let private replaceInline (rules : Rule<_,_> list) =
+    let closure (inlines : (string * Production<_,_>) list) = 
         let inlinesDict = inlines |> dict
         let getName = function
             | PRef(n,_) | PToken n | PLiteral n -> n.text
@@ -62,6 +61,7 @@ let private replaceInline (rules : Rule.t<_,_> list) =
         | PLiteral _ 
         | PPerm _ 
         | PToken _ as x -> x
+        | PShuff _ -> failwith "Unsupported"
         //| x -> x
         
     rules

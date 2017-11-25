@@ -26,7 +26,7 @@ let private approximate (grammar : Grammar<_,_>) =
     let PhaseTwo =
         let handleOneComponent vertexes =
             let wrapSeq head elemList =
-                let head', stock, lst =
+                let newHead, stock, lst =
                     List.fold (fun (head, stock, rules) elem ->
                         match elem.rule with
                         | PRef(nonTerm, _) when List.contains nonTerm vertexes ->
@@ -35,15 +35,18 @@ let private approximate (grammar : Grammar<_,_>) =
                         | PRef _ -> head, List.append stock [elem], rules
                         | _ -> failwith "wrong grammar!")
                         (head, List.empty, List.empty) elemList
-                let stock = PSeq(List.append stock [createDefaultElem <| PRef(newNonTerm head, None)], None, None)
-                List.Cons(defaultRule head' stock, lst)
+                let head' = PRef(newNonTerm head, None)
+                let stock = if stock.IsEmpty then head' else PSeq(List.append stock [createDefaultElem <| head'], None, None)
+                List.Cons(defaultRule newHead stock, lst)
 
             let transformOneRule rule =
-                match rule.body with
-                | PToken _
-                | PRef _ -> wrapSeq rule.name [createDefaultElem rule.body]
-                | PSeq(elemList, _, _) -> wrapSeq rule.name elemList
-                | _ -> failwith "wrong grammar!"
+                let x :: xs =
+                    match rule.body with
+                    | PToken _
+                    | PRef _ -> wrapSeq rule.name [createDefaultElem rule.body]
+                    | PSeq(elemList, _, _) -> wrapSeq rule.name elemList
+                    | _ -> failwith "wrong grammar!"
+                {x with isStart = rule.isStart} :: xs
 
             let handleOneVertex vertex =
                 grammar.Head.rules

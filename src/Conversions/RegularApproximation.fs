@@ -17,19 +17,19 @@ let inline private getStronglyConnectedComps graph =
     QuickGraph.Algorithms.ConnectedComponents.StronglyConnectedComponentsAlgorithm(graph).Graphs
 
 let private approximate (grammar : Grammar<_,_>) =
+    let epsilon = PSeq(List.empty, None, None)
     let newNonTerm (nonTerm : Source) = new Source(nonTerm.text + "'")
-    let PhaseOne =
-        let newNonTerms = List.map (fun (rule : Rule<_,_>) -> newNonTerm rule.name) grammar.Head.rules
-        let epsilon = PSeq(List.empty, None, None)
-        List.map (fun head -> defaultRule head epsilon) newNonTerms
+    let handleSets sets =
+        let handleOneSet nonterminals =
+            let epsilonRules =
+                let newNonTerms = List.map newNonTerm nonterminals
+                List.map (fun head -> defaultRule head epsilon) newNonTerms
 
-    let PhaseTwo =
-        let handleOneComponent vertexes =
             let wrapSeq head elemList =
                 let newHead, stock, lst =
                     List.fold (fun (head, stock, rules) elem ->
                         match elem.rule with
-                        | PRef(nonTerm, _) when List.contains nonTerm vertexes ->
+                        | PRef(nonTerm, _) when List.contains nonTerm nonterminals ->
                             newNonTerm nonTerm, List.empty, List.Cons (defaultRule head <| PSeq(List.append stock [elem], None, None), rules)
                         | PToken _
                         | PRef _ -> head, List.append stock [elem], rules
@@ -49,21 +49,24 @@ let private approximate (grammar : Grammar<_,_>) =
                     | _ -> failwith "wrong grammar!"
                 { x with isStart = isStart } :: xs
 
-            let handleOneVertex vertex =
+            let handleOneNonterm nonterminal =
                 grammar.Head.rules
-                |> List.filter (fun rule -> rule.name = vertex)
+                |> List.filter (fun rule -> rule.name = nonterminal)
                 |> List.collect (fun rule -> transformOneRule rule.isStart rule.name rule.body)
 
-            List.collect handleOneVertex vertexes
+            List.append epsilonRules <| List.collect handleOneNonterm nonterminals
 
-        grammar
-        |> grammarToGraph
-        |> getStronglyConnectedComps
-        |> List.ofSeq
-        |> List.map (fun stronglyConnectedComponent -> List.ofSeq stronglyConnectedComponent.Vertices)
-        |> List.collect handleOneComponent
+        let allRecNonterms = List.concat sets
+        let unchangedRules = List.filter (fun (rule : Rule<_,_>) -> not <| List.contains rule.name allRecNonterms) <| grammar.Head.rules
+        List.append unchangedRules <| List.collect handleOneSet sets
 
-    defaultModules(List.append PhaseOne PhaseTwo)
+    grammar
+    |> grammarToGraph
+    |> getStronglyConnectedComps
+    |> List.ofSeq
+    |> List.map (fun stronglyConnectedComponent -> List.ofSeq stronglyConnectedComponent.Vertices)
+    |> handleSets
+    |> defaultModules
 
 // ATTENTION! It is believed that there is ONLY ONE MODULE in the grammar, NO CONJUNCTION, NO EBNF, NO METARULES.
 type RegularApproximation() =

@@ -39,19 +39,20 @@ let private approximate (grammar : Grammar<_,_>) =
                 let stock = if stock.IsEmpty then head' else PSeq(List.append stock [createDefaultElem <| head'], None, None)
                 List.Cons(defaultRule newHead stock, lst)
 
-            let transformOneRule rule =
+            let rec transformOneRule isStart head prod =
                 let x :: xs =
-                    match rule.body with
+                    match prod with
                     | PToken _
-                    | PRef _ -> wrapSeq rule.name [createDefaultElem rule.body]
-                    | PSeq(elemList, _, _) -> wrapSeq rule.name elemList
+                    | PRef _ as prod -> wrapSeq head [createDefaultElem prod]
+                    | PSeq(elemList, _, _) -> wrapSeq head elemList
+                    | PAlt(prod1, prod2) -> List.append (transformOneRule isStart head prod1) (transformOneRule isStart head prod2)
                     | _ -> failwith "wrong grammar!"
-                {x with isStart = rule.isStart} :: xs
+                { x with isStart = isStart } :: xs
 
             let handleOneVertex vertex =
                 grammar.Head.rules
                 |> List.filter (fun rule -> rule.name = vertex)
-                |> List.collect transformOneRule
+                |> List.collect (fun rule -> transformOneRule rule.isStart rule.name rule.body)
 
             List.collect handleOneVertex vertexes
 

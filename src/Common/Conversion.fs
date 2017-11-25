@@ -21,4 +21,4 @@ type Conversion() = //as this =
     abstract Name : string
     abstract ConvertGrammar : Grammar<Source, Source> * string[] -> Grammar<Source, Source>
     abstract ConvertGrammar : Grammar<Source, Source>            -> Grammar<Source, Source>
-    default this.ConvertGrammar grammar = this.ConvertGrammar (grammar,[||]) 
+    default this.ConvertGrammar grammar = this.ConvertGrammar (grammar,[||])

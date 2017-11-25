@@ -24,15 +24,8 @@ let private approximate (grammar : Grammar<_,_>) =
         List.map (fun head -> defaultRule head epsilon) newNonTerms
 
     let PhaseTwo =
-        let stronglyConnectedVertexLst =
-            grammar
-            |> grammarToGraph
-            |> getStronglyConnectedComps
-            |> List.ofSeq
-            |> List.map (fun stronglyConnectedComponent -> List.ofSeq stronglyConnectedComponent.Vertices)
-
         let handleOneComponent vertexes =
-            let wrapSeq head (lst : ProductionElem<_,_> list) =
+            let wrapSeq head elemList =
                 let head', stock, lst =
                     List.fold (fun (head, stock, rules) elem ->
                         match elem.rule with
@@ -41,7 +34,7 @@ let private approximate (grammar : Grammar<_,_>) =
                         | PToken _
                         | PRef _ -> head, List.append stock [elem], rules
                         | _ -> failwith "wrong grammar!")
-                        (head, List.empty, List.empty) lst
+                        (head, List.empty, List.empty) elemList
                 let stock = PSeq(List.append stock [createDefaultElem <| PRef(newNonTerm head, None)], None, None)
                 List.Cons(defaultRule head' stock, lst)
 
@@ -59,7 +52,12 @@ let private approximate (grammar : Grammar<_,_>) =
 
             List.collect handleOneVertex vertexes
 
-        List.collect handleOneComponent stronglyConnectedVertexLst
+        grammar
+        |> grammarToGraph
+        |> getStronglyConnectedComps
+        |> List.ofSeq
+        |> List.map (fun stronglyConnectedComponent -> List.ofSeq stronglyConnectedComponent.Vertices)
+        |> List.collect handleOneComponent
 
     defaultModules(List.append PhaseOne PhaseTwo)
 

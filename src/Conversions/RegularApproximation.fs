@@ -20,7 +20,7 @@ let private approximate (grammar : Grammar<_,_>) =
     let epsilon = PSeq(List.empty, None, None)
     let newNonTerm (nonTerm : Source) = new Source(nonTerm.text + "'")
     let handleSets sets =
-        let handleOneSet nonterminals =
+        let handleOneSet changed unchanged nonterminals =
             let epsilonRules =
                 let newNonTerms = List.map newNonTerm nonterminals
                 List.map (fun head -> defaultRule head epsilon) newNonTerms
@@ -49,16 +49,18 @@ let private approximate (grammar : Grammar<_,_>) =
                     | _ -> failwith "wrong grammar!"
                 { x with isStart = isStart } :: xs
 
-            let handleOneNonterm nonterminal =
-                grammar.Head.rules
-                |> List.filter (fun rule -> rule.name = nonterminal)
-                |> List.collect (fun rule -> transformOneRule rule.isStart rule.name rule.body)
+            let handleRulesOfNonterm = List.collect (fun rule -> transformOneRule rule.isStart rule.name rule.body)
 
-            List.append epsilonRules <| List.collect handleOneNonterm nonterminals
+            let changed, unchanged =
+                List.fold (fun (changedRules, unchangedRules) nonterm ->
+                        let needToChange, unchanchedRules = List.partition (fun (rule : Rule<_,_>) -> rule.name = nonterm) unchangedRules
+                        List.append changedRules <| handleRulesOfNonterm needToChange, unchanchedRules)
+                    (changed, unchanged)
+                    nonterminals
+            List.append epsilonRules changed, unchanged
 
-        let allRecNonterms = List.concat sets
-        let unchangedRules = List.filter (fun (rule : Rule<_,_>) -> not <| List.contains rule.name allRecNonterms) <| grammar.Head.rules
-        List.append unchangedRules <| List.collect handleOneSet sets
+        let changed, unchanged = List.fold (fun (changedRules, unchangedRules) -> handleOneSet changedRules unchangedRules) (List.empty, grammar.Head.rules) sets
+        List.append changed unchanged
 
     grammar
     |> grammarToGraph

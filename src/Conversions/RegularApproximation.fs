@@ -4,17 +4,23 @@ open QuickGraph
 open Yard.Core
 open Yard.Core.IL
 open TransformAux
+open QuickGraph.Algorithms
 
 let private grammarToGraph (grammar : Grammar<_,_>) =
 
     let handleOneRule (rule : Rule<_,_>) =
-        List.map (fun nonTerm -> SEdge<Source>(rule.name, nonTerm)) <| getAllNonTermOfProd rule.body
+        List.map (fun (nonTerm : Source) -> SEdge<Source>(rule.name, nonTerm)) <| getAllNonTermOfProd rule.body
 
     let edges = List.collect handleOneRule grammar.Head.rules
     edges.ToAdjacencyGraph<Source, SEdge<Source>>()
 
-let inline private getStronglyConnectedComps graph =
-    QuickGraph.Algorithms.ConnectedComponents.StronglyConnectedComponentsAlgorithm(graph).Graphs
+let private getStronglyConnectedComps (graph : AdjacencyGraph<Source, SEdge<Source>>) =
+    let a = ConnectedComponents.StronglyConnectedComponentsAlgorithm<Source, SEdge<Source>>(graph)
+    do a.Compute()
+    a.Components
+    |> Seq.toList
+    |> List.groupBy (fun (elem : System.Collections.Generic.KeyValuePair<Source, int>) -> elem.Value)
+    |> List.map (fun (_, list) -> List.map (fun (elem : System.Collections.Generic.KeyValuePair<Source, int>) -> elem.Key) list)
 
 let private approximate (grammar : Grammar<_,_>) =
     let epsilon = PSeq(List.empty, None, None)
@@ -52,7 +58,7 @@ let private approximate (grammar : Grammar<_,_>) =
             let handleRulesOfNonterm = List.collect (fun rule -> transformOneRule rule.isStart rule.name rule.body)
 
             let changed, unchanged =
-                List.fold (fun (changedRules, unchangedRules) nonterm ->
+                List.fold (fun (changedRules, unchangedRules) (nonterm : Source)->
                         let needToChange, unchanchedRules = List.partition (fun (rule : Rule<_,_>) -> rule.name = nonterm) unchangedRules
                         List.append changedRules <| handleRulesOfNonterm needToChange, unchanchedRules)
                     (changed, unchanged)
@@ -65,8 +71,6 @@ let private approximate (grammar : Grammar<_,_>) =
     grammar
     |> grammarToGraph
     |> getStronglyConnectedComps
-    |> List.ofSeq
-    |> List.map (fun stronglyConnectedComponent -> List.ofSeq stronglyConnectedComponent.Vertices)
     |> handleSets
     |> defaultModules
 

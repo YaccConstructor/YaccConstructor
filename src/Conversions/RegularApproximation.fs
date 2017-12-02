@@ -9,22 +9,22 @@ open QuickGraph.Algorithms
 let private grammarToGraph (grammar : Grammar<_,_>) =
 
     let handleOneRule (rule : Rule<_,_>) =
-        List.map (fun (nonTerm : Source) -> SEdge<Source>(rule.name, nonTerm)) <| getAllNonTermOfProd rule.body
+        List.map (fun (nonTerm : Source) -> SEdge<string>(rule.name.text, nonTerm.text)) <| getAllNonTermOfProd rule.body
 
     let edges = List.collect handleOneRule grammar.Head.rules
-    edges.ToAdjacencyGraph<Source, SEdge<Source>>()
+    edges.ToAdjacencyGraph<string, SEdge<string>>()
 
-let private getStronglyConnectedComps (graph : AdjacencyGraph<Source, SEdge<Source>>) =
-    let a = ConnectedComponents.StronglyConnectedComponentsAlgorithm<Source, SEdge<Source>>(graph)
+let private getStronglyConnectedComps graph =
+    let a = ConnectedComponents.StronglyConnectedComponentsAlgorithm<string, SEdge<string>>(graph)
     do a.Compute()
     a.Components
     |> Seq.toList
-    |> List.groupBy (fun (elem : System.Collections.Generic.KeyValuePair<Source, int>) -> elem.Value)
-    |> List.map (fun (_, list) -> List.map (fun (elem : System.Collections.Generic.KeyValuePair<Source, int>) -> elem.Key) list)
+    |> List.groupBy (fun elem  -> elem.Value)
+    |> List.map (snd >> List.map (fun elem -> elem.Key))
 
 let private approximate (grammar : Grammar<_,_>) =
     let epsilon = PSeq(List.empty, None, None)
-    let newNonTerm (nonTerm : Source) = new Source(nonTerm.text + "'")
+    let inline newNonTerm nonTerm = new Source(nonTerm + "'")
     let handleSets sets =
         let handleOneSet changed unchanged nonterminals =
             let epsilonRules =
@@ -35,13 +35,13 @@ let private approximate (grammar : Grammar<_,_>) =
                 let newHead, stock, lst =
                     List.fold (fun (head, stock, rules) elem ->
                         match elem.rule with
-                        | PRef(nonTerm, _) when List.contains nonTerm nonterminals ->
-                            newNonTerm nonTerm, List.empty, List.Cons (defaultRule head <| PSeq(List.append stock [elem], None, None), rules)
+                        | PRef(nonTerm, _) when List.contains nonTerm.text nonterminals ->
+                            newNonTerm nonTerm.text, List.empty, List.Cons (defaultRule head <| PSeq(List.append stock [elem], None, None), rules)
                         | PToken _
                         | PRef _ -> head, List.append stock [elem], rules
                         | _ -> failwith "wrong grammar!")
                         (head, List.empty, List.empty) elemList
-                let head' = PRef(newNonTerm head, None)
+                let head' = PRef(newNonTerm head.text, None)
                 let stock = if stock.IsEmpty then head' else PSeq(List.append stock [createDefaultElem <| head'], None, None)
                 List.Cons(defaultRule newHead stock, lst)
 
@@ -58,15 +58,14 @@ let private approximate (grammar : Grammar<_,_>) =
             let handleRulesOfNonterm = List.collect (fun rule -> transformOneRule rule.isStart rule.name rule.body)
 
             let changed, unchanged =
-                List.fold (fun (changedRules, unchangedRules) (nonterm : Source)->
-                        let needToChange, unchanchedRules = List.partition (fun (rule : Rule<_,_>) -> rule.name = nonterm) unchangedRules
+                List.fold (fun (changedRules, unchangedRules) nonterm ->
+                        let needToChange, unchanchedRules = List.partition (fun (rule : Rule<_,_>) -> rule.name.text = nonterm) unchangedRules
                         List.append changedRules <| handleRulesOfNonterm needToChange, unchanchedRules)
                     (changed, unchanged)
                     nonterminals
             List.append epsilonRules changed, unchanged
 
-        let changed, unchanged = List.fold (fun (changedRules, unchangedRules) -> handleOneSet changedRules unchangedRules) (List.empty, grammar.Head.rules) sets
-        List.append changed unchanged
+        List.append <|| List.fold (fun (changedRules, unchangedRules) -> handleOneSet changedRules unchangedRules) (List.empty, grammar.Head.rules) sets
 
     grammar
     |> grammarToGraph

@@ -38,19 +38,13 @@ let dummyToken s = PToken <| new Source(s)
 
 exception FEError of string
 
-let ConversionsManager = [|new AddDefaultAC.AddDefaultAC(), new AddEOF.AddEOF(), new BuildAST.BuildAST(), new BuildAstSimple.BuildAstSimple(), new CNFandBNF.CNF(), new CNFandBNF.BNFconj(), new CNFandBNF.BNFbool(), new EliminateLeftRecursion.EliminateLeftRecursion(),
-                            new ExpandTopLevelAlt.ExpandTopLevelAlt(), new ExpandBrackets.ExpandBrackets(), new ExpandEbnfStrict.ExpandEbnf(), new ExpandInnerAlt.ExpandInnerAlt(),
-                            new ExpandMeta.ExpandMeta(), new LeaveLast.LeaveLast(), new MergeAlter.MergeAlter(), new RemoveAST.RemoveAC(), new ExpandInline.ReplaceInline()
-                            , new ReplaceLiterals.ReplaceLiterals(), new Linearize.Linearize(), new ExpandRepet.ExpandExpand(), new ExpandConjunction.ExpandConjunction()|] 
-                            |> Seq.ofArray |> Seq.cast<Conversion>
-
 let FrontendsManager = [|new FsYaccFrontend(), new YardFrontend()|] |> Seq.ofArray |> Seq.cast<Frontend>
 
 let conversionTestPath = @"./data/Conversions/"
 let GeneratorsManager = [|new GLL(), new RNGLR(), new TreeDump(), new YardPrinter(), new RIGLR()|] |> Seq.ofArray |> Seq.cast<Generator>
 
 
-let getFrontend name =       
+let getFrontend name =
     match Seq.tryFind (fun (elem : Frontend) -> elem.Name = name) FrontendsManager with
     | Some fe -> fe
     | None -> failwith (name + " is not found.")
@@ -75,12 +69,13 @@ let eliminateLeftRecursion = new Conversions.EliminateLeftRecursion.EliminateLef
 let conversionCNF = new Conversions.CNFandBNF.CNF()
 let conversionBNFconj = new Conversions.CNFandBNF.BNFconj()
 let conversionBNFbool = new Conversions.CNFandBNF.BNFbool()
+let regularApproximarion = new RegularApproximation.RegularApproximation()
 
 
-let applyConversion (conversion:Conversion) loadIL = 
+let applyConversion (conversion:Conversion) loadIL =
     {
         loadIL
-            with grammar = conversion.ConvertGrammar (loadIL.grammar, [||])                               
+            with grammar = conversion.ConvertGrammar (loadIL.grammar, [||])
     }
 
 let fe = new YardFrontend()
@@ -89,7 +84,7 @@ let runTest inputFile conversion expectedResult =
     Namer.initNamer loadIL.grammar
     let result = loadIL |> applyConversion conversion
     let expected = defaultDefinition expectedResult
-#if DEBUG    
+#if DEBUG
     expected |> treeDump.Generate |> string |> printfn "%s"
     printfn "%s" "************************"
     result |> treeDump.Generate |> string |> printfn "%s"
@@ -99,23 +94,23 @@ let runTest inputFile conversion expectedResult =
 
 [<TestFixture>]
 type ``Conversions tests`` () =
-    
+
     [<Test>]
     member test.``ExpandBrackets. Sequence as sequence element test.``()=
-        //let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager() 
+        //let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
         let frontend = new YardFrontend()
-        let ilTree = 
+        let ilTree =
             System.IO.Path.Combine(conversionTestPath,"expandbrackets_1.yrd")
             |> frontend.ParseGrammar
 
         Namer.initNamer ilTree.grammar
-        let ilTreeConverted = 
-            ilTree 
+        let ilTreeConverted =
+            ilTree
             |> applyConversion expandMeta
             |> applyConversion expandEbnf
             |> applyConversion expandInnerAlt
             |> applyConversion expandBrackets
-        let hasNotInnerSeq = 
+        let hasNotInnerSeq =
             ilTreeConverted.grammar
             |> List.forall (fun m ->
                 m.rules |> List.forall
@@ -129,7 +124,7 @@ type ``Conversions tests`` () =
                         eachProd rule.body
                     )
                 )
-            
+
 #if DEBUG
         let generator = new TreeDump()
         printfn "%A\n" (generator.Generate(ilTreeConverted,true))
@@ -138,21 +133,21 @@ type ``Conversions tests`` () =
         //treeDump.Generate expected |> string |> printfn "%s"
         //treeDump.Generate ilTreeConverted |> string |> printfn "%s"
         Assert.True(hasNotInnerSeq)
-   
+
 [<TestFixture>]
 type ``Expand top level alters`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "ExpandTopLevelAlters")
     let path f = System.IO.Path.Combine(basePath, f)
 
     [<Test>]
-    member test.``No alter`` () =     
+    member test.``No alter`` () =
         (verySimpleRules "s"
             [{dummyRule with rule = PRef (Source "d", None)}]
         ) @ (
             verySimpleNotStartRules "d"
                 [{dummyRule with rule = PToken (Source "NUM")}]
         )
-        |> runTest (path "noAlters.yrd") expandTopLevelAlt        
+        |> runTest (path "noAlters.yrd") expandTopLevelAlt
 
     [<Test>]
     member test.``One alter`` () =
@@ -162,10 +157,10 @@ type ``Expand top level alters`` () =
             verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source "d", None)}]
         )
-        |> runTest (path "oneAlter.yrd") expandTopLevelAlt        
+        |> runTest (path "oneAlter.yrd") expandTopLevelAlt
 
     [<Test>]
-    member test.``Multi alters`` () =        
+    member test.``Multi alters`` () =
         (verySimpleRules "s"
             [{dummyRule with rule = PRef (Source "x", None)}]
         ) @ (
@@ -178,4 +173,4 @@ type ``Expand top level alters`` () =
             verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source "m", None)}]
         )
-        |> runTest (path "multiAlters.yrd") expandTopLevelAlt 
+        |> runTest (path "multiAlters.yrd") expandTopLevelAlt

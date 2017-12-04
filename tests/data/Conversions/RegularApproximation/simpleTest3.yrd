@@ -1,0 +1,4 @@
+[<Start>]
+e: e PLUS t | t
+t: t MUL f | f
+f: L e R | A

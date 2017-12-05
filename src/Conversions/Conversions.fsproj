@@ -62,7 +62,7 @@
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="YC.QuickGraph, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\QuickGraph\bin\QuickGraph\YC.QuickGraph.dll</HintPath>
+      <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.dll</HintPath>
     </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

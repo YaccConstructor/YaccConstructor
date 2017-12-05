@@ -5,6 +5,7 @@ open Yard.Core
 open Yard.Core.IL
 open TransformAux
 open QuickGraph.Algorithms
+open Namer
 
 let private grammarToGraph (grammar : Grammar<_,_>) =
 
@@ -24,8 +25,11 @@ let private getStronglyConnectedComps graph =
 
 let private approximate (grammar : Grammar<_,_>) =
     let handleSets sets =
+        do initNamer grammar
+        let allNonTerms = List.concat sets
+        let newNonTerms = Map.ofSeq <| List.map (fun nonTerm -> nonTerm, newName nonTerm) allNonTerms
         let handleOneSet changed unchanged nonterminals =
-            let inline newNonTerm nonTerm = new Source(nonTerm + "'")
+            let inline newNonTerm nonTerm = new Source(newNonTerms.[nonTerm])
             let epsilonRules =
                 let newNonTerms = List.map newNonTerm nonterminals
                 let epsilon = PSeq(List.empty, None, None)

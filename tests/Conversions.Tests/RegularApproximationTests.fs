@@ -14,105 +14,105 @@ type ``Regular approximation tests`` () =
 
     [<Test>]
     member test.``Simple approximation 1`` () =
-        (simpleNotStartRules "s'"
+        (simpleNotStartRules "yard_s_1"
                 <| PSeq ([],None,None))
         @
-        (simpleNotStartRules "a'"
+        (simpleNotStartRules "yard_a_2"
                 <| PSeq ([],None,None))
         @
-        (simpleNotStartRules "b'"
+        (simpleNotStartRules "yard_b_3"
                 <| PSeq ([],None,None))
         @
         (simpleRules "s"
                 <| PRef (Source("a"),None))
         @
-        (simpleNotStartRules "a'"
-                <| PSeq ([{dummyRule with rule = PToken <| Source("X")}; {dummyRule with rule = PRef (Source("s'"),None)}],None,None))
+        (simpleNotStartRules "yard_a_2"
+                <| PSeq ([{dummyRule with rule = PToken <| Source("X")}; {dummyRule with rule = PRef (Source("yard_s_1"),None)}],None,None))
         @
         (simpleNotStartRules "a"
                 <| PRef (Source("b"),None))
         @
-        (simpleNotStartRules "b'"
-                <| PRef (Source("a'"),None))
+        (simpleNotStartRules "yard_b_3"
+                <| PRef (Source("yard_a_2"),None))
         @
         (simpleNotStartRules "a"
-                <| PRef (Source("a'"),None))
+                <| PRef (Source("yard_a_2"),None))
         @
         (simpleNotStartRules "b"
                 <| PRef (Source("a"),None))
         @
-        (simpleNotStartRules "a'"
+        (simpleNotStartRules "yard_a_2"
                 <| PRef (Source("s"),None))
         @
-        (simpleNotStartRules "s'"
-                <| PSeq ([{dummyRule with rule = PToken <| Source("Y")}; {dummyRule with rule = PRef (Source("b'"),None)}],None,None))
+        (simpleNotStartRules "yard_s_1"
+                <| PSeq ([{dummyRule with rule = PToken <| Source("Y")}; {dummyRule with rule = PRef (Source("yard_b_3"),None)}],None,None))
         @
         (simpleNotStartRules "b"
-                <| PSeq ([{dummyRule with rule = PToken <| Source("Z")}; {dummyRule with rule = PRef (Source("b'"),None)}],None,None))
+                <| PSeq ([{dummyRule with rule = PToken <| Source("Z")}; {dummyRule with rule = PRef (Source("yard_b_3"),None)}],None,None))
         |> runTest (path "simpleTest1.yrd") regularApproximarion
 
     [<Test>]
     member test.``Simple approximation 2`` () =
-        (simpleNotStartRules "s'"
+        (simpleNotStartRules "yard_s_1"
                 <| PSeq ([],None,None))
         @
         (simpleRules "s"
                 <| PSeq ([{dummyRule with rule = PToken <| Source("A")}; {dummyRule with rule = PRef (Source("s"),None)}],None,None))
         @
-        (simpleNotStartRules "s'"
-                <| PSeq ([{dummyRule with rule = PToken <| Source("A")}; {dummyRule with rule = PRef (Source("s'"),None)}],None,None))
+        (simpleNotStartRules "yard_s_1"
+                <| PSeq ([{dummyRule with rule = PToken <| Source("A")}; {dummyRule with rule = PRef (Source("yard_s_1"),None)}],None,None))
         @
         (simpleRules "s"
-                <| PRef (Source("s'"),None))
+                <| PRef (Source("yard_s_1"),None))
         |> runTest (path "simpleTest2.yrd") regularApproximarion
 
     [<Test>]
     member test.``Simple approximation 3`` () =
-        (simpleNotStartRules "e'"
+        (simpleNotStartRules "yard_e_1"
                 <| PSeq ([],None,None))
         @
-        (simpleNotStartRules "t'"
+        (simpleNotStartRules "yard_t_2"
                 <| PSeq ([],None,None))
         @
-        (simpleNotStartRules "f'"
+        (simpleNotStartRules "yard_f_3"
                 <| PSeq ([],None,None))
         @
         (simpleRules "e"
                 <| PRef (Source("e"),None))
         @
-        (simpleNotStartRules "e'"
+        (simpleNotStartRules "yard_e_1"
                 <| PSeq ([{dummyRule with rule = PToken <| Source("PLUS")}; {dummyRule with rule = PRef (Source("t"),None)}],None,None))
         @
-        (simpleNotStartRules "t'"
-                <| PRef (Source("e'"),None))
+        (simpleNotStartRules "yard_t_2"
+                <| PRef (Source("yard_e_1"),None))
         @
         (simpleRules "e"
                 <| PRef (Source("t"),None))
         @
-        (simpleNotStartRules "t'"
-                <| PRef (Source("e'"),None))
+        (simpleNotStartRules "yard_t_2"
+                <| PRef (Source("yard_e_1"),None))
         @
         (simpleNotStartRules "t"
                 <| PRef (Source("t"),None))
         @
-        (simpleNotStartRules "t'"
+        (simpleNotStartRules "yard_t_2"
                 <| PSeq ([{dummyRule with rule = PToken <| Source("MUL")}; {dummyRule with rule = PRef (Source("f"),None)}],None,None))
         @
-        (simpleNotStartRules "f'"
-                <| PRef (Source("t'"),None))
+        (simpleNotStartRules "yard_f_3"
+                <| PRef (Source("yard_t_2"),None))
         @
         (simpleNotStartRules "t"
                 <| PRef (Source("f"),None))
         @
-        (simpleNotStartRules "f'"
-                <| PRef (Source("t'"),None))
+        (simpleNotStartRules "yard_f_3"
+                <| PRef (Source("yard_t_2"),None))
         @
         (simpleNotStartRules "f"
                 <| PSeq ([{dummyRule with rule = PToken <| Source("L")}; {dummyRule with rule = PRef (Source("e"),None)}],None,None))
         @
-        (simpleNotStartRules "e'"
-                <| PSeq ([{dummyRule with rule = PToken <| Source("R")}; {dummyRule with rule = PRef (Source("f'"),None)}],None,None))
+        (simpleNotStartRules "yard_e_1"
+                <| PSeq ([{dummyRule with rule = PToken <| Source("R")}; {dummyRule with rule = PRef (Source("yard_f_3"),None)}],None,None))
         @
         (simpleNotStartRules "f"
-                <| PSeq ([{dummyRule with rule = PToken <| Source("A")}; {dummyRule with rule = PRef (Source("f'"),None)}],None,None))
+                <| PSeq ([{dummyRule with rule = PToken <| Source("A")}; {dummyRule with rule = PRef (Source("yard_f_3"),None)}],None,None))
         |> runTest (path "simpleTest3.yrd") regularApproximarion

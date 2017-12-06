@@ -50,6 +50,7 @@
     <Compile Include="ExpandMetaTests.fs" />
     <Compile Include="ExpandInnerAltTests.fs" />
     <Compile Include="ExpandSubseqTests.fs" />
+    <Compile Include="RegularApproximationTests.fs" />
     <Compile Include="ReplaceInlineTests.fs" />
     <Compile Include="EliminateLeftRecursionTests.fs" />
     <Compile Include="ExpandRepeatTests.fs" />
@@ -124,6 +125,9 @@
       <Project>{3148144c-1649-440e-a9b4-1d5c41677262}</Project>
       <Private>True</Private>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App.config" />
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.

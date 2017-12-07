@@ -18,7 +18,7 @@ type GLL() =
         override this.Name = "GLLGenerator"
         override this.Constraints = [|noMeta; singleModule|]
         override this.Generate (definition, generateToFile, args) =
-            let start = System.DateTime.Now
+            let start = System.DateTime.UtcNow
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
             let pairs = Array.zeroCreate <| args.Length / 2
             for i = 0 to pairs.Length - 1 do
@@ -79,7 +79,7 @@ type GLL() =
                 out.WriteLine (generatedCode.ToString().Replace("\r\n", "\n").Replace("\n", "\r\n"))
                 out.Flush()
                 out.Close()
-            eprintfn "Generation time: %A" <| System.DateTime.Now - start
+            eprintfn "Generation time: %A" <| System.DateTime.UtcNow - start
             
             box parserSource
         override this.Generate(definition, generateTofile) = this.Generate (definition, generateTofile, "")

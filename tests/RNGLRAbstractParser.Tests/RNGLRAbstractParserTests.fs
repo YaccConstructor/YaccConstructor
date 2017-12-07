@@ -57,22 +57,22 @@ let test buildAstAbstract qGraph nodesCount edgesCount epsilonsCount termsCount 
 let perfTest parse inputLength graph =    
     for x in 0..inputLength do
         let qGraph = graph x
-        let start = System.DateTime.Now
+        let start = System.DateTime.UtcNow
         for y in 0..9 do
             match parse qGraph with
             | Success _ -> ()
             | Error (i, t, msg) -> failwithf "Performance test failed wit message:%A" msg
 
-        let time = (System.DateTime.Now - start).TotalMilliseconds / 10.0
+        let time = (System.DateTime.UtcNow - start).TotalMilliseconds / 10.0
         System.GC.Collect()
         printfn "%0i : %A" x time
 
 let perfTest2 parse graph =    
     for i = 10 to 200 do
         let g = graph (1 + i) 2 
-        let start = System.DateTime.Now
+        let start = System.DateTime.UtcNow
         let r = parse g
-        let finish = System.DateTime.Now - start
+        let finish = System.DateTime.UtcNow - start
         printfn "%i  : %A" (i+1) finish.TotalSeconds
         System.GC.Collect()
         match r with

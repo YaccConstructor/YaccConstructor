@@ -212,11 +212,11 @@ let processFile inputFile grammarFile =
     let g1, edges = 
         getParseInputGraphVert inputFile ps
     printfn "\nNumber of edges: %i" edges
-
-    let start = System.DateTime.Now
-    let _,sppf,_ = parse ps g1 true
-    let subgraph = SPPFToSubgraph sppf ps
-    let time1 = (System.DateTime.Now - start).TotalMilliseconds
+    let parser = new Parser(ps)
+    let start = System.DateTime.UtcNow
+    parser.Parse g1 true
+    let subgraph = SPPFToSubgraph parser.SPPF ps
+    let time1 = (System.DateTime.UtcNow - start).TotalMilliseconds
 
 //    PrintToDotVert g1 "inputGraph.dot" id
     let subgraphVert = SubgraphToGraphVert subgraph g1 

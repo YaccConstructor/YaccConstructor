@@ -58,9 +58,6 @@ let getLinearInputWithAllStartingPos path (stringToToken : string -> int<token>)
             |> Array.map stringToToken
             )
 
-let isParsed parserSource input = 
-    Yard.Generators.GLL.AbstractParser.isParsed parserSource input
-
 let shouldBeTrue res = 
     Assert.AreEqual(res, true, "Not parsed")        
 
@@ -78,15 +75,17 @@ let getParserSource grammarFile =
              [] :?> ParserSourceGLL
 
 let runTest grammarFile inputFile =
-    let parser = getParserSource grammarFile
-    let input  = getLinearInput inputFile parser.StringToToken
-    let res = isParsed parser input
+    let parserSource = getParserSource grammarFile
+    let parser = new Parser(parserSource)
+    let input  = getLinearInput inputFile parserSource.StringToToken
+    let res = parser.IsParsed input
     shouldBeTrue res
 
 let checkAst grammarFile inputFile nodesCount edgesCount termsCount ambiguityCount = 
-    let parser = getParserSource grammarFile
-    let input  = getLinearInput inputFile parser.StringToToken
-    let tree = buildAst parser input
+    let parserSource = getParserSource grammarFile
+    let parser = new Parser(parserSource)
+    let input  = getLinearInput inputFile parserSource.StringToToken
+    let tree = parser.BuildAst input
     printfn "%A" tree
     tree.AstToDot (grammarFilesPath + inputFile + ".dot")
     let n, e, t, amb = tree.CountCounters
@@ -98,9 +97,10 @@ let checkAst grammarFile inputFile nodesCount edgesCount termsCount ambiguityCou
     Assert.Pass()
 
 let checkIntervals grammarFile inputFile (intervals : _[]) = 
-    let parser = getParserSource grammarFile
-    let input  = getLinearInputWithAllStartingPos inputFile parser.StringToToken
-    let ranges = getAllRangesForStartState parser input
+    let parserSource = getParserSource grammarFile
+    let parser = new Parser(parserSource)
+    let input  = getLinearInputWithAllStartingPos inputFile parserSource.StringToToken
+    let ranges = parser.GetAllRangesForStartState input
     printfn "%A" ranges
     let result = 
         ranges

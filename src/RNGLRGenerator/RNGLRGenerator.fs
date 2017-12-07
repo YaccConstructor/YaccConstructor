@@ -37,7 +37,7 @@ type RNGLR() =
         override this.Name = "RNGLRGenerator"
         override this.Constraints = [|noEbnf; noMeta; noInnerAlt; (*noLiterals;*) noAlt; noBrackets; needAC; singleModule|]
         override this.Generate (definition, generateToFile, args) =
-            let start = DateTime.Now
+            let start = DateTime.UtcNow
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
             let pairs = Array.zeroCreate <| args.Length / 2
             for i = 0 to pairs.Length-1 do
@@ -243,7 +243,7 @@ type RNGLR() =
                 | Scala -> res + "\n}"
             out.WriteLine res
             out.Close()
-            eprintfn "Generation time: %A" <| DateTime.Now - start
+            eprintfn "Generation time: %A" <| DateTime.UtcNow - start
             //(new YardPrinter()).Generate newDefinition
             box ()
         override this.Generate(definition, gtf)= this.Generate (definition, gtf, "")

@@ -117,4 +117,15 @@ type GSS () =
             
         System.IO.File.WriteAllText(fileName, str)
 
+    member this.GetAllDescriptors() = 
+        this.Vertices
+        |> Seq.collect(fun vertex -> 
+            vertex.U
+            |> Seq.collect(fun x -> 
+                let compressed = int64 x.Key
+                let posInInput = CommonFuns.getLeft compressed
+                let posInGrammar = CommonFuns.getRight compressed
+                x.Value
+                |> Seq.map(fun data -> new ContextFSA<_>(posInInput * 1<positionInInput>, posInGrammar * 1<positionInGrammar>, vertex, data))))
+
 

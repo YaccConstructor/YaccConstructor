@@ -17,7 +17,8 @@ module TestSuite =
         gll.Generate(def, false) :?> ParserCommon.ParserSourceGLL
 
     let private ast (strs: array<string>) (pgll: ParserCommon.ParserSourceGLL) =
-        AbstractParser.buildAst pgll <| new LinearInput(Array.map pgll.StringToToken strs)
+        let parser = new Yard.Generators.GLL.AbstractParser.Parser(pgll)
+        parser.BuildAst <| new LinearInput(Array.map pgll.StringToToken strs)
 
     let genTree input filename =
         GrammarGenerator.generate "unique" // TODO: unique

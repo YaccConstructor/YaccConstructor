@@ -83,9 +83,10 @@ let getParserSource grammarFile conv =
 let test grammarFile inputFile nodesCount edgesCount termsCount ambiguityCount = 
     //printfn "%A" needChangeDirectory
     let conv = [new ExpandMeta()]
-    let parser = getParserSource grammarFile conv
-    let input  = getInputGraph parser.StringToToken inputFile
-    let tree = buildAst parser input
+    let parserSource = getParserSource grammarFile conv
+    let parser = new Parser(parserSource)
+    let input  = getInputGraph parserSource.StringToToken inputFile
+    let tree = parser.BuildAst input
     //printfn "%A" tree
     //tree.AstToDot parser.IntToString (grammarsDir + inputFile + ".dot")
     let n, e, t, amb = tree.CountCounters
@@ -104,10 +105,11 @@ let initGraph (graph : IVertexAndEdgeListGraph<_, _>) (edgeTagToString : _ -> st
 
 let sppfTest grammarFile inputGraph nonTermName maxLength = 
     let ps = getParserSource grammarFile Seq.empty
+    let parser = new Parser(ps)
     let preparedGraph = initGraph inputGraph id ps
-    let _, sppf, _ = parse ps preparedGraph true
-    let nt = sppf.GetNonTermByName nonTermName ps
-    let pathset = sppf.Iterate nt ps maxLength
+    parser.Parse preparedGraph true
+    let nt = parser.SPPF.GetNonTermByName nonTermName ps
+    let pathset = parser.SPPF.Iterate nt ps maxLength
     Assert.AreEqual(maxLength, Seq.length pathset)
 
 [<TestFixture>]

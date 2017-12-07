@@ -2,6 +2,7 @@
 
 open QuickGraph
 open System.Runtime.CompilerServices
+open System.Collections.Generic
 
 [<Measure>] type token
 
@@ -152,6 +153,93 @@ type GraphLabelledVertex<'tagType when 'tagType : equality> (initialVertices : '
                 let v = vBackMap.[((int)curPosInInput - 1) / 2]
                 this.OutEdges v |> Seq.iter
                     (fun e -> pFun ((this.TagToToken e.Tag) * 1<token>) (vMap.[e.Target] * 2<positionInInput>))
+
+        member this.PositionToString (pos : int) =
+            sprintf "%i" pos
+
+type ShuffleInputGraph<'tag>(tagToToken : 'tag -> int<token>) = 
+    let lastVertex = ref 0
+    //input to graph of all posible traces
+    let edges = new List<int * int * 'tag>()
+//        input
+//        |> Array.mapi (fun i x -> i, i+1, x )
+//    let edges =
+//        edges
+//        |> Array.collect (fun (_, i, x) -> [| for k in 1..i -> k, i, x |])
+//        |> Array.append edges
+
+    let initialVertices = new List<int>()
+
+    let finalVertices = new List<int>()
+
+    let outEdges = new Dictionary<int,List<'tag*int>>()
+
+    let addToOutEdges source target tag =
+        let cond,lst = outEdges.TryGetValue(source)
+        if cond
+        then 
+            lst.Add((tag,target))
+        else
+            let newList = new List<_>()
+            newList.Add((tag,target))
+            outEdges.Add(source,newList)
+
+    let addToken token = 
+        incr lastVertex
+        let n = !lastVertex
+        initialVertices.Add(n)
+        finalVertices.Add(n)
+        for i in 0..n-1 do
+            edges.Add(i, n, token)
+            addToOutEdges i n token
+
+    member val InitStates = initialVertices with get
+    member val FinalStates = finalVertices with get
+    member val TagToToken = tagToToken with get
+    member val OutEdges = outEdges with get
+    member this.AddTokens(input : 'tag []) = 
+        for token in input do
+            addToken token
+    (*
+    member this.PrintToDot name (tagToString: 'tag -> string) (*(tokenToString : 'token -> string) (numToToken : int -> 'token)*) = 
+        use out = new System.IO.StreamWriter (name : string)
+        out.WriteLine("digraph AST {")
+        out.WriteLine "rankdir=LR"
+        for i=0 to this.VertexCount-1 do
+            out.Write (i.ToString() + "; ")
+        out.WriteLine()
+        for i in this.Vertices do
+            let edges = this.OutEdges i
+            for e in edges do
+                let tokenName = e.Tag |> tagToString 
+                out.WriteLine (e.Source.ToString() + " -> " + e.Target.ToString() + "[label=\"" + tokenName + "\"]")
+        out.WriteLine("}")
+        out.Close()      
+    
+    new (initial : int, final : int, tagToToken : 'tag -> int) = 
+        SimpleInputGraph<_>([|initial|], [|final|], tagToToken)
+
+    new (n : int, tagToToken : 'tag -> int) =
+        let allVertices = [|for i in 0 .. n - 1 -> i|]
+        SimpleInputGraph<_>(allVertices, allVertices, tagToToken)
+
+    new (initial : int<positionInInput>[], tagToToken : 'tag -> int) = 
+        let casted = Array.map(fun x -> int x) initial
+        SimpleInputGraph<_>(casted, casted, tagToToken)
+    *)
+    interface IParserInput with
+        member this.InitialPositions = 
+            Array.map(fun x -> x * 1<positionInInput>) (this.InitStates.ToArray())
+
+        [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+        member this.ForAllOutgoingEdges curPosInInput pFun =
+            let inputOutEdges = this.OutEdges.[int curPosInInput]
+            inputOutEdges |> Seq.iter
+                (fun (tag, target) ->
+                    // proceed only if terminal is in grammar alphabet
+                    let tok = this.TagToToken tag
+                    if tok = -2<token> then () else
+                    pFun tok (target * 1<positionInInput>))
 
         member this.PositionToString (pos : int) =
             sprintf "%i" pos

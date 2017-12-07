@@ -55,18 +55,19 @@ let getInput tokens stringToGLLToken withErrors =
 
 
 let testConversion grmmarFile tokens expected (createErrorToken: _ option) rules translate withErrors =
-    let parser = getParserSource <| grammarFilesPath + grmmarFile
-    let input = getInput tokens parser.StringToToken withErrors
-    let tree = buildAst parser input
+    let parserSourse = getParserSource <| grammarFilesPath + grmmarFile
+    let parser = new Parser(parserSourse)
+    let input = getInput tokens parserSourse.StringToToken withErrors
+    let tree = parser.BuildAst input
     if withErrors
-    then tree.ChooseSingleAst <| (=)(parser.StringToToken "ERROR")
+    then tree.ChooseSingleAst <| (=)(parserSourse.StringToToken "ERROR")
 
     let transArguments : ASTGLLFSA.TranslateArguments<_,_,_> = {
         tokenToRange = fun _ -> 0, 0
         zeroPosition = 0
         createErrorToken = createErrorToken
-        intToString = fun i -> parser.IntToString.[i]
-        rightToRule = parser.RightSideToRule
+        intToString = fun i -> parserSourse.IntToString.[i]
+        rightToRule = parserSourse.RightSideToRule
         rules = rules
         translate = translate
         withErrors = withErrors

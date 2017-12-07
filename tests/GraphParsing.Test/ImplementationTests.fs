@@ -9,14 +9,14 @@
 
     let graphParsingTest<'MatrixType, 'InnerType when 'InnerType : comparison> cnt graph mHandler loadIL tokenizer parallelProcesses resultAnalyzer =
         let S = ref (NonTerminal "")
-        let start = System.DateTime.Now
+        let start = System.DateTime.UtcNow
         let root =
             [for i in 0..cnt-1 ->
                 let (parsingMatrix, StartNonTerm, _, _) = graphParse<'MatrixType, 'InnerType> graph mHandler loadIL tokenizer parallelProcesses
                 S := StartNonTerm
                 parsingMatrix]
     
-        let time = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
+        let time = (System.DateTime.UtcNow - start).TotalMilliseconds / (float cnt)
         let countOfPairs = resultAnalyzer root.[0] !S
         root.[0], time, countOfPairs
 

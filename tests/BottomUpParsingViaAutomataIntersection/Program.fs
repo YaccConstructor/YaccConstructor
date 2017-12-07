@@ -92,9 +92,9 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
 
     let testRDF file query expectedResult = 
         let input = getRDFInput file
-        let s = System.DateTime.Now
+        let s = System.DateTime.UtcNow
         let output = main input query
-        (System.DateTime.Now - s).TotalMilliseconds
+        (System.DateTime.UtcNow - s).TotalMilliseconds
         |> printfn "flie: %A time = %A" file
         let startNonTermCount = 
             let i = ref 0

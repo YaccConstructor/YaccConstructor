@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{370FB9E2-14CC-44C0-8160-6A6066F12B26}"
 	ProjectSection(SolutionItems) = preProject
@@ -122,6 +122,8 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BottomUpParsingViaAutomataIntersection", "src\BottomUpParsingViaAutomataIntersection\BottomUpParsingViaAutomataIntersection.fsproj", "{0697FBAE-293B-4109-A890-2B9F1EBBD12E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrammarCombinator", "src\GrammarCombinator\GrammarCombinator.fsproj", "{0AEA0EC0-6341-4813-BA39-948D8D8691A6}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLL.Shuffle.Test", "tests\GLL.Shuffle.Test\GLL.Shuffle.Test.fsproj", "{B719FC30-CDD7-42F0-ACAD-BF98E3C29DF1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -637,6 +639,18 @@ Global
 		{0AEA0EC0-6341-4813-BA39-948D8D8691A6}.Release20|Any CPU.Build.0 = Debug|Any CPU
 		{0AEA0EC0-6341-4813-BA39-948D8D8691A6}.Release20|x86.ActiveCfg = Debug|Any CPU
 		{0AEA0EC0-6341-4813-BA39-948D8D8691A6}.Release20|x86.Build.0 = Debug|Any CPU
+		{B719FC30-CDD7-42F0-ACAD-BF98E3C29DF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B719FC30-CDD7-42F0-ACAD-BF98E3C29DF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B719FC30-CDD7-42F0-ACAD-BF98E3C29DF1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B719FC30-CDD7-42F0-ACAD-BF98E3C29DF1}.Debug|x86.Build.0 = Debug|Any CPU
+		{B719FC30-CDD7-42F0-ACAD-BF98E3C29DF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B719FC30-CDD7-42F0-ACAD-BF98E3C29DF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B719FC30-CDD7-42F0-ACAD-BF98E3C29DF1}.Release|x86.ActiveCfg = Release|Any CPU
+		{B719FC30-CDD7-42F0-ACAD-BF98E3C29DF1}.Release|x86.Build.0 = Release|Any CPU
+		{B719FC30-CDD7-42F0-ACAD-BF98E3C29DF1}.Release20|Any CPU.ActiveCfg = Release|Any CPU
+		{B719FC30-CDD7-42F0-ACAD-BF98E3C29DF1}.Release20|Any CPU.Build.0 = Release|Any CPU
+		{B719FC30-CDD7-42F0-ACAD-BF98E3C29DF1}.Release20|x86.ActiveCfg = Release|Any CPU
+		{B719FC30-CDD7-42F0-ACAD-BF98E3C29DF1}.Release20|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -689,5 +703,6 @@ Global
 		{639C1CAD-86BD-4320-A653-A94148B662E4} = {63AAA0A2-AA38-4AE9-A890-56453B4A3B2B}
 		{2F085E7A-AACA-4ACE-8506-336809B98249} = {F4364CD0-7F94-42C7-BEF5-FAF324B75469}
 		{0697FBAE-293B-4109-A890-2B9F1EBBD12E} = {639C1CAD-86BD-4320-A653-A94148B662E4}
+		{B719FC30-CDD7-42F0-ACAD-BF98E3C29DF1} = {29F087C7-44E6-45B9-9CE2-D84F619D7B0C}
 	EndGlobalSection
 EndGlobal

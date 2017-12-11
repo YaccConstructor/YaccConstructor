@@ -257,3 +257,17 @@ type Parser(parser : ParserSourceGLL) =
     member this.GetAllRangesForStartStateWithLength (input : IParserInput) = 
         this.Parse input false
         this.GetAllRangesForStateWithLength gss parser.StartState
+
+    member this.GetPrefixTrees(input : IParserInput) = 
+        let roots = 
+            this.Parse input true
+            input.InitialPositions 
+                |> Array.choose (fun pos ->
+                    let roots = sppf.GetRoots gss pos
+                    if roots.Length <> 0 
+                    then Some(roots)
+                    else None)
+        roots
+        |> Array.collect id
+        |> Array.map(fun x -> GetPrefixTree(x))
+

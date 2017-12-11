@@ -3,6 +3,7 @@
 open System.Collections.Generic
 open FSharpx.Collections.Experimental
 
+open QuickGraph
 open Yard.Generators.GLL
 open Yard.Generators.Common.DataStructures
 open AbstractAnalysis.Common
@@ -233,3 +234,49 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
 
 let GetTerminals (sppf : SPPF) = 
     sppf.GetTerminalNodes |> Seq.map (fun x -> x.Name, getLeftExtension x.Extension, getRightExtension x.Extension)
+
+//let getNewNode() = 
+//    let edge = new TaggedEdge<int,int>()
+//    let vert = new QuickGraph.TaggedEdge<_,_>(startVertex, endVertex, new GSSEdgeLbl(stateToContinue, data))
+
+let GetPrefixTree(root) = 
+        let currentNode = ref -1
+
+        let getNode() =
+            incr currentNode
+            !currentNode 
+            
+        let rec buildTree (beginning : int) (destination : int) : INode -> TaggedEdge<_,_> [] = function
+            | :? TerminalNode as n ->
+                [| new TaggedEdge<_,_>(beginning, destination,n.Name) |]
+                    
+            | :? IntermidiateNode as n ->
+                let length = 
+                    if n.Others <> null
+                    then
+                        n.Others.Count + 1
+                    else 1
+                let allChildren = Array.init length (fun x -> if x > 0 then n.Others.[x-1] else n.First)
+                allChildren
+                |> Array.collect (fun x -> buildTree beginning destination x)
+
+            | :? PackedNode as n ->
+                let node = getNode()
+                Array.append (buildTree beginning node n.Left) (buildTree node destination n.Right)
+
+            | :? NonTerminalNode as n ->
+                let length = 
+                    if n.Others <> null
+                    then
+                        n.Others.Count + 1
+                    else 1
+                let allChildren = Array.init length (fun x -> if x > 0 then n.Others.[x-1] else n.First)
+                allChildren
+                |> Array.collect (fun x -> buildTree beginning destination x)
+            | _ -> failwith "unexpected type of node"
+        
+        let beginning = getNode()
+        let edges = buildTree beginning (getNode()) root
+        let graph = new AdjacencyGraph<_,_>()
+        graph.AddEdgeRange edges |> ignore
+        beginning, graph

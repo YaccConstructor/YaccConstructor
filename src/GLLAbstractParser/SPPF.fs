@@ -239,16 +239,30 @@ let GetTerminals (sppf : SPPF) =
 //    let edge = new TaggedEdge<int,int>()
 //    let vert = new QuickGraph.TaggedEdge<_,_>(startVertex, endVertex, new GSSEdgeLbl(stateToContinue, data))
 
-let GetPrefixTree(root) = 
-        let currentNode = ref -1
-
-        let getNode() =
+type NodeGenerator() =
+    let currentNode = ref -1
+    member this.getNode() =
             incr currentNode
             !currentNode 
-            
+
+let GetPrefixTreeEdges root beginning (nodeGenerator : NodeGenerator) (intToString : Dictionary<_,_>) =
+        let vertToMerge = new Dictionary<_,_>()
+
         let rec buildTree (beginning : int) (destination : int) : INode -> TaggedEdge<_,_> [] = function
             | :? TerminalNode as n ->
-                [| new TaggedEdge<_,_>(beginning, destination,n.Name) |]
+                
+                if n.Name = -1<token> && n.Extension = packExtension -1 -1
+                then
+                    let cond, value = vertToMerge.TryGetValue beginning
+                    if cond
+                    then
+                        vertToMerge.Remove(beginning) |> ignore
+                        vertToMerge.Add(destination, value)
+                    else
+                        vertToMerge.Add(destination, beginning)
+                    [||]
+                else
+                [| new TaggedEdge<_,_>(beginning, destination, (n.Extension |> int64 |> CommonFuns.getRight)-1 ) |]
                     
             | :? IntermidiateNode as n ->
                 let length = 
@@ -261,7 +275,7 @@ let GetPrefixTree(root) =
                 |> Array.collect (fun x -> buildTree beginning destination x)
 
             | :? PackedNode as n ->
-                let node = getNode()
+                let node = nodeGenerator.getNode()
                 Array.append (buildTree beginning node n.Left) (buildTree node destination n.Right)
 
             | :? NonTerminalNode as n ->
@@ -275,8 +289,90 @@ let GetPrefixTree(root) =
                 |> Array.collect (fun x -> buildTree beginning destination x)
             | _ -> failwith "unexpected type of node"
         
-        let beginning = getNode()
-        let edges = buildTree beginning (getNode()) root
-        let graph = new AdjacencyGraph<_,_>()
-        graph.AddEdgeRange edges |> ignore
-        beginning, graph
+        let edges = buildTree beginning (nodeGenerator.getNode()) root
+
+        edges
+        |> Array.map(fun x ->
+            let target =
+                let cond, value = vertToMerge.TryGetValue(x.Target)
+                if cond
+                then
+                    value
+                else
+                    x.Target
+            let source = 
+                let cond, value = vertToMerge.TryGetValue(x.Source)
+                if cond
+                then
+                    value
+                else
+                    x.Source
+            new TaggedEdge<_,_>(source, target, x.Tag)
+            )
+        
+
+
+type BandBNode = {
+    Parent           : BandBNode option
+    Index            : int
+    PositionsInTrees : int [] []
+}
+
+let mergeSPPFS inputLength (prefixTreesAndBeginnings : (int * AdjacencyGraph<int,TaggedEdge<int,int>>) []) = 
+    printfn "%A" prefixTreesAndBeginnings
+    let front = new Stack<BandBNode>()
+    let edges = new ResizeArray<_>()
+
+    let currentNode = ref -1
+    let getNode() = 
+        incr currentNode
+        !currentNode
+
+    //let prefixTrees = prefixTreesAndBeginnings |> Array.map(fun (_,tree) -> tree)
+    front.Push({Parent = None; Index = 0; PositionsInTrees = prefixTreesAndBeginnings |> Array.map(fun (beginning,_) -> [|beginning|])})
+
+    let counter = ref 0
+    let old = ref 0
+    let found = ref 0
+    while front.Count <> 0 do
+        incr counter
+        if !counter - 1000 = !old
+        then
+            printfn "Processed %A" !counter
+            old := !counter
+        let banbbNode = front.Pop()
+
+        //if banbbNode.Index = inputLength then () else            
+        banbbNode.PositionsInTrees
+        |> Array.iteri (fun treeNumber possInTree -> 
+            if treeNumber = 1
+            then
+                printfn "Poss:%A" possInTree
+            let newPoss = 
+                possInTree
+                |> Array.collect (fun node ->
+                    let _,tree = prefixTreesAndBeginnings.[treeNumber]
+                    tree.OutEdges node
+                    |> Seq.filter (fun x -> x.Tag = banbbNode.Index)
+                    |> Array.ofSeq
+                    )
+            if newPoss.Length = 0 then () else
+            if banbbNode.Index + 1 = inputLength
+            then 
+                incr found
+                printfn "Found: %i" !found
+            else
+                let newPoss = 
+                    Array.init 
+                        banbbNode.PositionsInTrees.Length
+                        (fun j ->
+                            if j = treeNumber
+                            then
+                                newPoss
+                                |> Array.map(fun x -> x.Target)
+                            else
+                                banbbNode.PositionsInTrees.[j])
+                front.Push({Parent = Some banbbNode; Index = banbbNode.Index+1; PositionsInTrees = newPoss})
+            )
+    printfn "Total processed: %i" !counter
+    ()

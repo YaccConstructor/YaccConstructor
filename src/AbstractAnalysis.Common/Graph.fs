@@ -168,31 +168,50 @@ type ShuffleInputGraph<'tag>(tagToToken : 'tag -> int<token>) =
 //        |> Array.collect (fun (_, i, x) -> [| for k in 1..i -> k, i, x |])
 //        |> Array.append edges
 
-    let initialVertices = new List<int>()
+    let initialVertices = new List<int>([0])
 
     let finalVertices = new List<int>()
 
     let outEdges = new Dictionary<int,List<'tag*int>>()
 
+    let _ =
+        outEdges.Add(0,new List<_>())
+
     let addToOutEdges source target tag =
-        let cond,lst = outEdges.TryGetValue(source)
-        if cond
-        then 
-            lst.Add((tag,target))
-        else
-            let newList = new List<_>()
-            newList.Add((tag,target))
-            outEdges.Add(source,newList)
+        let lst = outEdges.[source]
+        lst.Add((tag,target))
+//        let cond,lst = outEdges.TryGetValue(source)
+//        if cond
+//        then 
+//            lst.Add((tag,target))
+//        else
+//            let newList = new List<_>()
+//            newList.Add((tag,target))
+//            outEdges.Add(source,newList)
 
     let addToken token = 
         incr lastVertex
         let n = !lastVertex
         initialVertices.Add(n)
         finalVertices.Add(n)
+        outEdges.Add(n,new List<_>())
         for i in 0..n-1 do
             edges.Add(i, n, token)
             addToOutEdges i n token
+    
+    member this.GetTokens() = 
+        edges
+        |> Seq.filter(fun (from, dest, value) -> from+1 = dest)
+        |> Seq.map(fun (_, _, value) -> value)
 
+    member this.GetEdges() = 
+        outEdges
+        |> Seq.collect(fun kvp -> 
+            kvp.Value
+            |> Seq.map(fun (tag, dest) -> 
+                kvp.Key, dest,tag))
+        |> Array.ofSeq
+         
     member val InitStates = initialVertices with get
     member val FinalStates = finalVertices with get
     member val TagToToken = tagToToken with get
@@ -233,7 +252,8 @@ type ShuffleInputGraph<'tag>(tagToToken : 'tag -> int<token>) =
 
         [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
         member this.ForAllOutgoingEdges curPosInInput pFun =
-            let inputOutEdges = this.OutEdges.[int curPosInInput]
+            let cond,inputOutEdges = this.OutEdges.TryGetValue(int curPosInInput)
+            if not cond then failwithf "No out edges for input position %i" curPosInInput
             inputOutEdges |> Seq.iter
                 (fun (tag, target) ->
                     // proceed only if terminal is in grammar alphabet

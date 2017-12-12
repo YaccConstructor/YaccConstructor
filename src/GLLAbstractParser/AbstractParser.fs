@@ -12,6 +12,7 @@ open Yard.Generators.GLL.ParserCommon.CommonFuns
 open Yard.Generators.Common.ASTGLLFSA
 open YC.GLL.GSS
 open YC.GLL.SPPF
+open QuickGraph
 
 let summLengths (len1 : ParseData) (len2 : ParseData) = 
     match len1, len2 with 
@@ -258,16 +259,30 @@ type Parser(parser : ParserSourceGLL) =
         this.Parse input false
         this.GetAllRangesForStateWithLength gss parser.StartState
 
-    member this.GetPrefixTrees(input : IParserInput) = 
+    member this.GetPrefixTree(input : IParserInput) = 
+        this.Parse input true
+        
         let roots = 
-            this.Parse input true
             input.InitialPositions 
-                |> Array.choose (fun pos ->
-                    let roots = sppf.GetRoots gss pos
-                    if roots.Length <> 0 
-                    then Some(roots)
-                    else None)
-        roots
-        |> Array.collect id
-        |> Array.map(fun x -> GetPrefixTree(x))
+            |> Array.choose (fun pos ->
+                let roots = sppf.GetRoots gss pos
+                if roots.Length <> 0 
+                then Some(roots)
+                else None)
+        let nodeGenerator = new NodeGenerator()
+        let beginning = nodeGenerator.getNode()
+        let edges = 
+            roots
+            |> Array.collect id
+            |> Array.collect(fun x ->
+                GetPrefixTreeEdges x beginning nodeGenerator parser.IntToString
+                )
 
+        
+
+        if edges.Length <> 0 then
+            let graph = new AdjacencyGraph<_,_>()
+            graph.AddVerticesAndEdgeRange edges |> ignore
+            Some (beginning, graph)
+        else
+            None

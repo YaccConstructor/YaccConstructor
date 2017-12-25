@@ -73,13 +73,13 @@ type ProductionElem<'patt,'expr> = {
 /// </summary>
 and Production<'patt,'expr> = 
     /// Shuffle (e1 || e2)
-    |PShuff     of (Production<'patt,'expr>) * (Production<'patt,'expr>)
+    |PShuff   of (Production<'patt,'expr>) * (Production<'patt,'expr>)
     /// Alternative (e1 | e2)
     |PAlt     of (Production<'patt,'expr>) * (Production<'patt,'expr>)
     /// Conjunction (e1 & e2)
     |PConj    of (Production<'patt,'expr>) * (Production<'patt,'expr>)
     /// Negation
-    |PNeg of (Production<'patt,'expr>)
+    |PNeg     of (Production<'patt,'expr>)
     /// Sequence * attribute. (Attribute is always applied to sequence) 
     |PSeq     of (ProductionElem<'patt,'expr>) list * 'expr option * DLabel option
     /// Token itself. Final element of parsing.

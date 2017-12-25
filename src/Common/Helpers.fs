@@ -20,7 +20,7 @@ open Yard.Core.IL
 
 let errorToken = "error"
 
-let getModuleName (m : Module<_,_>) = 
+let getModuleName (m : Module<_,_>) =
     match m.name with
     | Some n -> n.text
     | None -> ""
@@ -46,7 +46,7 @@ let simpleRules nonTerm body : Rule<_,_> list =
         metaArgs = []
     }]
 
-let metaRules nonTerm body args : Rule<_,_> list = 
+let metaRules nonTerm body args : Rule<_,_> list =
     [{
         name = Source nonTerm
         args = []
@@ -82,6 +82,25 @@ let getPublicRules (grammar : Grammar<_,_>) =
         )
     |> dict
 
+let rec getAllNonTermOfProd (prod : Production<_,_>) =
+    let inline getNonTermOfLst prodList = List.collect getAllNonTermOfProd prodList
+
+    match prod with
+    | PAlt(prod1, prod2)
+    | PShuff(prod1, prod2)
+    | PConj(prod1, prod2) -> List.append (getAllNonTermOfProd prod1) (getAllNonTermOfProd prod2)
+    | PNeg prod -> getAllNonTermOfProd prod
+    | PSeq(prodList, _, _) -> getNonTermOfLst << List.map (fun elem -> elem.rule) <| prodList
+    | PToken(_) -> []
+    | PRef(nonTerm, _) -> List.singleton nonTerm
+    | PMany prod -> getAllNonTermOfProd prod
+    | PMetaRef(ref, _, prodList) -> ref :: getNonTermOfLst prodList
+    | PLiteral lit -> List.empty
+    | PRepet(prod, _, _) -> getAllNonTermOfProd prod
+    | PPerm prodList -> getNonTermOfLst prodList
+    | PSome prod -> getAllNonTermOfProd prod
+    | POpt prod -> getAllNonTermOfProd prod
+
 /// For each module creates map: rule -> (module, in which the rule is declared)
 let getRulesMap (grammar : Grammar<_,_>) =
     let publicRules = getPublicRules grammar
@@ -90,17 +109,17 @@ let getRulesMap (grammar : Grammar<_,_>) =
         let rMap = new System.Collections.Generic.Dictionary<_,_>()
         module'.openings
         |> List.iter (fun op ->
-            try 
+            try
                 publicRules.[op.text] |> List.iter (fun r ->
-                    try 
+                    try
                         rMap.[r.name.text] <- op.text
                     with
                     | e -> printfn "Get rules error: rule name: %A;" r.name.text
 
                         )
             with
-            | e -> printfn "Get rules error: open: %A;" op.text  
-            
+            | e -> printfn "Get rules error: open: %A;" op.text
+
         )
         module'.rules |> List.iter (fun r -> rMap.[r.name.text] <- getModuleName module')
         getModuleName module', rMap
@@ -110,7 +129,7 @@ let getRulesMap (grammar : Grammar<_,_>) =
 /// if rule has metaArgs then it is a metarule
 let isMetaRule (r:Rule<Source,Source>) = r.metaArgs <> []
 
-/// hash table for metarules. 
+/// hash table for metarules.
 /// Map: using_module -> (rule_name -> (decl_module, rule_decl));
 let metaRulesTbl grammar =
     let rulesMap = getRulesMap grammar

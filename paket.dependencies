@@ -8,6 +8,7 @@ nuget Brahma.FSharp
 nuget dotNetRDF
 nuget ExtCore 0.8.43
 nuget FsCheck 0.9.2.0 framework: >= net40
+nuget Fsharp.Compiler.Tools
 nuget FSharp.Core
 nuget ManagedCuda-75-x64
 nuget MathNet.Numerics.FSharp

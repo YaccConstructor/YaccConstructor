@@ -37,13 +37,12 @@ type FSA(ruleList : Rule<Source,Source> list) =
                         //System.IO.File.AppendAllLines(@".\time.txt", [sprintf "Minimization time: %A" (System.DateTime.Now - !time)])
                         time := System.DateTime.Now
                         x)
-    //let firstSet = genFirstSet fsa
 
     member this.States = fsa.States
-    member this.StartState = fsa.StartState
+    //after convertion to dfa each startstates HashSet contains only one state
+    member this.StartState = fsa.StartStates.[fsa.StartComponentNumber] |> Seq.find (fun x -> true)
     member this.FinalStates = fsa.FinalStates
     member this.NontermCount = fsa.StartStates.Length
-    //member this.FirstSet = firstSet
     member this.StateToNontermName = fsa.StateToNontermName
     member this.LastStates = fsa.LastStates
     member this.StartStates = fsa.StartStates

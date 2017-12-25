@@ -19,27 +19,27 @@ open Yard.Core.Conversions.ExpandInline
 [<TestFixture>]
 type ``Components loader tests`` () =
     [<Test>]
-    member test.``All generators`` () =        
+    member test.``All generators`` () =
         let generatorsManager = [|new GLL(), new RNGLR(), new TreeDump(), new YardPrinter(), new RIGLR()|] |> Seq.ofArray |> Seq.cast<Generator>
         let generatorNames = Seq.map (fun (elem: Generator) -> elem.Name) generatorsManager
-        let allGenerators = 
+        let allGenerators =
             List.ofSeq generatorNames
             |> List.sort
-        let expetedResult = 
+        let expetedResult =
             ["GLLGenerator"; "RNGLRGenerator"; "TreeDump"; "YardPrinter";"RIGLRGenerator"]
             |> List.sort
         Seq.iter (printfn "%A;") allGenerators
         printfn "**********************"
-        Seq.iter (printfn "%A;") expetedResult        
+        Seq.iter (printfn "%A;") expetedResult
         Assert.AreEqual(expetedResult |> List.sort, allGenerators |> List.sort)
-    
+
 
 
     [<Test>]
     member test.``All frontends`` () =
         let frontendsManager = [|new FsYaccFrontend(), new YardFrontend()|] |> Seq.ofArray  |> Seq.cast<Frontend>
-        let frontendNames = Seq.map (fun (elem: Frontend) -> elem.Name) frontendsManager 
-        let allFrontends = 
+        let frontendNames = Seq.map (fun (elem: Frontend) -> elem.Name) frontendsManager
+        let allFrontends =
             List.ofSeq frontendNames
             |> List.sort
         let expetedResult =
@@ -47,47 +47,49 @@ type ``Components loader tests`` () =
             |> List.sort
         Seq.iter (printfn "%A;") allFrontends
         printfn "**********************"
-        Seq.iter (printfn "%A;") expetedResult        
+        Seq.iter (printfn "%A;") expetedResult
         Assert.AreEqual(expetedResult, allFrontends)
 
-        
+
 
     [<Test>]
     member test.``All conversions`` () =
-        let conversionsManager = [|new AddDefaultAC.AddDefaultAC(), new AddEOF.AddEOF(), new BuildAST.BuildAST(), new BuildAstSimple.BuildAstSimple(), new CNFandBNF.CNF(), new CNFandBNF.BNFconj(), new CNFandBNF.BNFbool(), new EliminateLeftRecursion.EliminateLeftRecursion(),
-                            new ExpandTopLevelAlt.ExpandTopLevelAlt(), new ExpandBrackets.ExpandBrackets(), new ExpandEbnfStrict.ExpandEbnf(), new ExpandInnerAlt.ExpandInnerAlt(),
-                            new ExpandMeta.ExpandMeta(), new LeaveLast.LeaveLast(), new MergeAlter.MergeAlter(), new RemoveAST.RemoveAC(), new ReplaceInline(), new ReplaceLiterals.ReplaceLiterals(),
-                            new Linearize.Linearize(), new ExpandRepet.ExpandExpand(), new ExpandConjunction.ExpandConjunction()|] |> Seq.ofArray  |> Seq.cast<Conversion>
+        let conversionsManager = [| new AddDefaultAC.AddDefaultAC(), new AddEOF.AddEOF(), new BuildAST.BuildAST(), new BuildAstSimple.BuildAstSimple(), new CNFandBNF.CNF(),
+                                    new CNFandBNF.BNFconj(), new CNFandBNF.BNFbool(), new EliminateLeftRecursion.EliminateLeftRecursion(), new RegularApproximation.RegularApproximation(),
+                                    new ExpandTopLevelAlt.ExpandTopLevelAlt(), new ExpandBrackets.ExpandBrackets(), new ExpandEbnfStrict.ExpandEbnf(), new ExpandInnerAlt.ExpandInnerAlt(),
+                                    new ExpandMeta.ExpandMeta(), new LeaveLast.LeaveLast(), new MergeAlter.MergeAlter(), new RemoveAST.RemoveAC(), new ExpandInline.ReplaceInline(),
+                                    new ReplaceLiterals.ReplaceLiterals(), new Linearize.Linearize(), new ExpandRepet.ExpandExpand(), new ExpandConjunction.ExpandConjunction()|]
+                                    |> Seq.ofArray |> Seq.cast<Conversion>
         let conversionNames = Seq.map (fun (elem : Conversion) -> elem.Name) conversionsManager
-        let allConversions = 
+        let allConversions =
             List.ofSeq conversionNames
             |> List.sort
         let expetedResult =
-             ["AddDefaultAC"; "AddEOF"; "BuildAST"; "BuildAstSimple"; "ToCNF"; "DeleteChainRule"; "DeleteEpsRule"; "SplitLongRule"; "RenameTerm"; "EliminateLeftRecursion";
-             "ExpandTopLevelAlt"; "ExpandBrackets"; "ExpandEbnf"; "ExpandInnerAlt"; "ExpandMeta"; "LeaveLast"; "MergeAlter";
-             "RemoveAC"; "ReplaceInline"; "ReplaceLiterals"; "Linearize"; "ExpandRepeat"; "ExpandConjunction"]
-            |> List.sort
+             ["AddDefaultAC"; "AddEOF"; "BuildAST"; "BuildAstSimple"; "ToCNF"; "DeleteChainRule"; "DeleteEpsRule"; "SplitLongRule"; "RenameTerm";
+              "RegularApproximation"; "EliminateLeftRecursion"; "ExpandTopLevelAlt"; "ExpandBrackets"; "ExpandEbnf"; "ExpandInnerAlt"; "ExpandMeta";
+              "LeaveLast"; "MergeAlter"; "RemoveAC"; "ReplaceInline"; "ReplaceLiterals"; "Linearize"; "ExpandRepeat"; "ExpandConjunction"]
+             |> List.sort
         Seq.iter (printfn "%A;") allConversions
         printfn "**********************"
-        Seq.iter (printfn "%A;") expetedResult        
+        Seq.iter (printfn "%A;") expetedResult
         Assert.AreEqual(expetedResult |> List.sort, allConversions |> List.sort)
 
-    
+
     [<Test>]
     member test.``Get generators name`` () =
         let generatorsManager = [|new RNGLR(), new TreeDump()|] |> Seq.ofArray |> Seq.cast<Generator>
         let VerificatedGenerators  = ["RNGLRGenerator",true ; "TreeDump",true]
 
-        let genfun (x,y)  = 
+        let genfun (x,y)  =
             match (Seq.tryFind (fun (elem : Generator) -> elem.Name = x) generatorsManager) with
                 | Some _ -> true
                 | None   -> false
-        
+
         let allGettingGenerators = List.map genfun VerificatedGenerators
 
         List.iter (fun vg ->  (vg |> snd |> printfn "%A : "); (vg |> fst |> printfn "%A;"))  VerificatedGenerators
         printfn "**********************"
-        List.iter (printfn "%A;") allGettingGenerators 
+        List.iter (printfn "%A;") allGettingGenerators
         Assert.AreEqual(VerificatedGenerators |> List.map (fun vg ->   vg |> snd),allGettingGenerators)
 
 [<TestFixture>]
@@ -155,7 +157,7 @@ type ``Checker test`` () =
         let expetedResult = []
         Seq.iter (printfn "%s;") result
         printfn "**********************"
-        Seq.iter (printfn "%s;") expetedResult  
+        Seq.iter (printfn "%s;") expetedResult
         Assert.AreEqual(result,expetedResult)
 
     [<Test>]
@@ -167,7 +169,7 @@ type ``Checker test`` () =
         Seq.iter (printf "%s; ") result
         printfn ""
         printfn "**********************"
-        Seq.iter (printf "%s; ") expetedResult 
+        Seq.iter (printf "%s; ") expetedResult
         Assert.AreEqual(result, expetedResult)
 
     [<Test>]
@@ -178,7 +180,7 @@ type ``Checker test`` () =
         let expetedResult = []
         Seq.iter (printfn "%A;") result
         printfn "**********************"
-        Seq.iter (printfn "%A;") expetedResult  
+        Seq.iter (printfn "%A;") expetedResult
         Assert.AreEqual(result,expetedResult)
 
     [<Test>]
@@ -189,7 +191,7 @@ type ``Checker test`` () =
         let expetedResult = List.sort ["b"]
         Seq.iter (printfn "%A;") result
         printfn "**********************"
-        Seq.iter (printfn "%A;") expetedResult 
+        Seq.iter (printfn "%A;") expetedResult
         Assert.AreEqual(result,expetedResult)
 
     [<Test>]

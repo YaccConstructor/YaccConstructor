@@ -100,6 +100,7 @@ let initNamer (grammar : Grammar<_,_>) =
                 walk e.rule
             )
         | PPerm elems -> elems |> List.iter walk
+        | PShuff _ -> failwith "Unsupported"
 
     grammar |> List.iter (fun mod' ->
         add <| getModuleName mod'
@@ -149,6 +150,8 @@ let genNewSourceWithRange (name : string) (body : Production<_,_>) =
         | PMetaRef (n,_,_) -> n
         | PRepet (b,_,_) -> getBegin b
         | PPerm _  as x -> failwithf "Unrealized construction: %A" x
+        | PShuff _ -> failwith "Unsupported"
+        | PNeg _ -> failwith "Unsupported"
     let oldSource = getBegin body
     new Source(name, oldSource)
 

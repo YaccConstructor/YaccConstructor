@@ -25,7 +25,8 @@ type ParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<positi
         then
             value
         else
-            failwith "Such string is not in a grammar alphabet."
+            //failwith "Such string is not in a grammar alphabet."
+            -2<token>
 
     let rev (map : Map<int, string>) = 
             Map.fold(fun (m : Map<string, int>) k v -> m.Add(v, k)) Map.empty map

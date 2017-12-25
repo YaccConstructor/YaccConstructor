@@ -1,1 +1,0 @@
-fsi gen.fsx >> generationLog.txt

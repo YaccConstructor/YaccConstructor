@@ -54,6 +54,8 @@ let GetIncorrectMetaArgsCount (def:Yard.Core.IL.Definition<_,_>) =
             | PToken _
                 -> acc
             | PPerm list -> list |> List.fold (fun acc elem -> checkBody acc elem) acc
+            | PShuff _ -> failwith "Unsupported"
+            | PNeg _ -> failwith "Unsupported"
         checkBody
 
     def.grammar
@@ -183,6 +185,8 @@ let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Module<Source, 
             getUndeclaredRulesCurried rExpr
         | PLiteral _ 
         | PToken _  -> ()
+        | PShuff _ -> failwith "Unsupported"
+        | PNeg _ -> failwith "Unsupported"
 
     module'.rules
     |> List.iter
@@ -237,6 +241,8 @@ let reachableRulesInfo_of_grammar (grammar: Grammar<_,_>) =
             getReachableRulesCurried rExpr
         | PLiteral _ 
         | PToken _  -> ()
+        | PShuff _ -> failwith "Unsupported"
+        | PNeg _ -> failwith "Unsupported"
 
     and addReachedRule (module' : string) (name : string) (additionRules : HashSet<_>) : unit =  
         let key = module', name
@@ -288,6 +294,8 @@ let sourcesWithoutFileNames (def:Yard.Core.IL.Definition<Source,Source>) =
         | PMany e | PSome e | POpt e -> processBody e
         | PPerm p -> List.collect processBody p
         | PRepet (p,_,_) -> processBody p
+        | PShuff _ -> failwith "Unsupported"
+        | PNeg _ -> failwith "Unsupported"
         
 
     def.grammar |> List.collect (fun m ->

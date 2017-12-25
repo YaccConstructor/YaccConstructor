@@ -75,12 +75,12 @@ let LexBufferFromString grammarStr =
 
 let Parse lexbuf ilInfo = 
     try 
-        let (res : System.Tuple<Source option, Source list, Source list, Grammar<Source, Source>>) = Parser.s Lexer.token lexbuf
-        let defHead = res.Item1
+        let (res : Source option * Source list * Source list * Grammar<Source, Source>) = Parser.s Lexer.token lexbuf
+        let defHead, _, it3, it4 = res
         { emptyGrammarDefinition
             with info = {fileName = ilInfo}
                  head = defHead
-                 grammar = addBindings <| addStarts res.Item3 res.Item4
+                 grammar = addBindings <| addStarts it3 it4
             }
     with e -> // when e.Message="parse error" -> 
         fprintfn stderr "%A" e

@@ -3,8 +3,8 @@
 open System.IO
 open QuickGraph
 open NUnit.Framework
-open YC.GraphParsing.Tests.RDFPerfomance
-open YC.GraphParsing.Tests.BioPerfomance
+open YC.GraphParsing.Tests.RDFPerformance
+open YC.GraphParsing.Tests.BioPerformance
 open Util
 open System.Collections.Generic
 open GraphParsing
@@ -543,6 +543,7 @@ let f x =
 //    t._RDF_GPPerf2_SparseGPU ()
 //    t._Conj_RDF_GPPerf1_SparseCPU ()
 //    t._Conj_RDF_GPPerf2_SparseCPU ()
-//    YC.GraphParsing.Tests.RDFPerfomance.performTests ()
-//    YC.GraphParsing.Tests.BioPerfomance.performTests ()
+//    YC.GraphParsing.Tests.RDFPerformance.performTests ()
+//    YC.GraphParsing.Tests.BioPerformance.performTests ()
+//    YC.GraphParsing.Tests.AliasAndTaintPerformance.performTests ()
     0

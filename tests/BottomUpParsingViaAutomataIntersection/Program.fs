@@ -19,6 +19,14 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
         | "OTHER" -> 5
         | x -> failwithf "Unexpected edge label: %A" x
 
+    let rdfToDot () =
+        let files = System.IO.Directory.GetFiles(basePath,"*")
+        for file in files do 
+            let parserInputGraph,_ = YC.GLL.Abstarct.Tests.RDFPerformance.getParseInputGraph rdfTokenizer file
+            parserInputGraph.PrintToDot (System.IO.Path.GetFileNameWithoutExtension file + ".dot") string
+        0
+        
+
     let getRDFInput file = 
         
         let path file = System.IO.Path.Combine(basePath, file)
@@ -102,6 +110,37 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
             !i
         printfn "%A" startNonTermCount
         Assert.AreEqual(expectedResult, startNonTermCount)
+
+    member this.RdftoDot() = //rdfToDot()
+        let getParserSource = 
+            let grm = @"C:\gsv\projects\YC\YaccConstructor\1.yrd"
+            let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+            let gen = new Yard.Generators.GLL.GLL()
+            YC.API.generate (grm)
+                     fe gen 
+                     None
+                     Seq.empty
+                     [|""|]
+                     [] :?> Yard.Generators.GLL.ParserCommon.ParserSourceGLL
+
+        let gll = new Yard.Generators.GLL.GLL()
+        let input = new AbstractAnalysis.Common.SimpleInputGraph<_>([|0|],[|0|],id)
+        let batch i j =
+            [
+                new AbstractAnalysis.Common.ParserEdge<_>(i, j, int <| getParserSource.StringToToken "A")
+                new AbstractAnalysis.Common.ParserEdge<_>(i, j, int <| getParserSource.StringToToken "B")
+                new AbstractAnalysis.Common.ParserEdge<_>(i, j, int <| getParserSource.StringToToken "C")
+                new AbstractAnalysis.Common.ParserEdge<_>(i, j, int <| getParserSource.StringToToken "D")
+                ]
+        input.AddVerticesAndEdgeRange(batch 0 0)
+        //input.AddVerticesAndEdgeRange(batch 1 2)
+        //input.AddVerticesAndEdgeRange(batch 2 3)
+        //input.AddVerticesAndEdgeRange(batch 3 4)
+        //input.AddVerticesAndEdgeRange(batch 4 5)
+        //input.AddVerticesAndEdgeRange(batch 5 6)
+        let ast = Yard.Generators.GLL.AbstractParser.buildAst getParserSource input
+        ast.AstToDot "outSigmaStar.dot"
+
 
     [<OneTimeSetUp>]
     member this.Init () =
@@ -242,6 +281,8 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
 [<EntryPoint>]
 let f x =
     let t = new ``Tests for bottom-Up parser based on automata intersection``()
-    t._19_RDF_univ_bench_q1 ()
-    t._07_RDF_wine_q2 ()
+    //t._07_RDF_wine_q2 ()
+    //for i in 0 .. 5 do
+    //    t._05_RDF_wine_q1 ()
+    t.RdftoDot ()
     0 

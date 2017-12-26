@@ -7,6 +7,7 @@ open System.Collections.Generic
 
 let mutable basePath = @"..\..\..\data\RDF"
 
+[<Ignore("Not finished")>]
 [<TestFixture>]
 type ``Tests for bottom-Up parser based on automata intersection``() =
 

@@ -17,6 +17,7 @@ open MathNet.Numerics.LinearAlgebra.Double
 open AbstractAnalysis.Common
 open YC.GLL.Abstarct.Tests.RDFPerformance
 
+// paste in all these paths ../../../ instead of ./ if local build
 let graphParsingTestPath = @"./GraphParsing.Test"
 let baseRDFPath = @"./data/RDF"
 let RDFfiles = System.IO.Directory.GetFiles baseRDFPath
@@ -454,6 +455,35 @@ type ``Graph parsing tests``() =
         printfn "Naive APSP Multiplacation count: %d" multCount
         probabilityMatrixPrint parsingMatrix.[S]
 
+    [<Test>]
+    member this._14_PaperExampleTest () =
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        graph.AddVertex(0) |> ignore
+        graph.AddVertex(1) |> ignore
+        graph.AddVertex(2) |> ignore
+        graph.AddVertex(3) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 1)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 2, 1)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 0, 1)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 3, 2)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(3, 0, 2)) |> ignore
+
+        let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "PaperExampleGrammar_cnf.yrd")
+        let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+        let loadIL = fe.ParseGrammar grammarPath
+        let tokenizer str =
+            match str with
+                | "A" -> 1
+                | "B" -> 2
+                | _ -> -1
+
+        let (parsingMatrix,S,_,multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityNaiveHandler(graph.VertexCount)) loadIL tokenizer 1
+        assert (probabilityAnalyzer parsingMatrix S = 6)
+        assert (parsingMatrix.[S].InnerValue.[0] > 0.0 && parsingMatrix.[S].InnerValue.[3] > 0.0 && parsingMatrix.[S].InnerValue.[4] > 0.0
+                && parsingMatrix.[S].InnerValue.[7] > 0.0 && parsingMatrix.[S].InnerValue.[8] > 0.0 && parsingMatrix.[S].InnerValue.[11] > 0.0)
+        printfn "Naive DenseCPU Multiplacation count: %d" multCount
+        probabilityMatrixPrint parsingMatrix.[S]
+
     member this._RDF_GPPerf1_DenseCPU () =
         let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, RDF_GPPERF1_GRAMMAR_FILE, (testFileRDF testDenseCPU rdffile RDF_GPPERF1_GRAMMAR_FILE)))
         RDFChecker parsingResults
@@ -531,6 +561,7 @@ let f x =
 //    t._11_Conj_SimpleAprox ()
 //    t._12_APSP_SimpleNaiveRecognizerTest ()
 //    t._13_APSP_SimpleLoopTest ()
+//    t._14_PaperExampleTest ()
 //    t._RDF_GPPerf1_DenseCPU ()
 //    t._RDF_GPPerf1_SparseCPU ()
 //    t._RDF_GPPerf1_DenseGPU1 ()

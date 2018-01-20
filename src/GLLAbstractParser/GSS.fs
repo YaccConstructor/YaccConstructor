@@ -68,8 +68,7 @@ type GSSVertexInstanceHolder() =
     let instanceHolder = new System.Collections.Generic.Dictionary<_,_>()
 
     member this.Get(nonterm: int<positionInGrammar>, posInInput: int<positionInInput>) = 
-        let newInst = new GSSVertex(nonterm, posInInput) 
-        let packed = (int nonterm <<< 16) ||| int posInInput
+        let newInst = new GSSVertex(nonterm, posInInput)
         let cond, value = instanceHolder.TryGetValue(newInst)
         if cond
         then

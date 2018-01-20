@@ -67,6 +67,7 @@ and PackedNode =
 
 and IntermidiateNode = 
     val State     : int<positionInGrammar>
+    // We need nonterm to avoid ambiguity
     val Nonterm   : int<positionInGrammar>
     val Extension : int64<extension>
     val mutable First     : PackedNode
@@ -94,7 +95,15 @@ and IntermidiateNode =
                         yield func child
         }
     new (state, nonterm, extension) = {Nonterm = nonterm; State = state; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
-    
+
+and PartialNonTerminalNode =
+    val Beginning : int<positionInInput>
+    val Name      : int<positionInGrammar>
+    val Children  : HashSet<int<nodeMeasure>>
+
+    interface INode with
+        member this.getExtension () = LanguagePrimitives.Int64WithMeasure (int64 this.Beginning <<< 32)
+    new (name, beginning) = {Name = name; Beginning = beginning; Children = new HashSet<_>()}
 
 type private DotNodeType = Packed | NonTerminal | Intermidiate | Terminal | Epsilon
 

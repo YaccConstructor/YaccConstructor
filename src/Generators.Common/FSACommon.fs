@@ -395,7 +395,6 @@ let toDFA fsa =
         LastStates = newLastStates;
         FinalStates = newFinalStates}
 
-/// Returns sets of equivalent states
 /// http://goo.gl/z9uJP0
 let findEquivalenceClasses fsa =  
     let inv = Array.init (fsa.States.Length) (fun i -> new Dictionary<_,ResizeArray<_>>())

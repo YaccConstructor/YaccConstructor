@@ -12,6 +12,12 @@ open Yard.Generators.GLL.ParserCommon.CommonFuns
 open Yard.Generators.Common.ASTGLLFSA
 open YC.GLL.GSS
 
+type NodeGenerator() =
+    let currentNode = ref -1
+    member this.getNode() =
+            incr currentNode
+            !currentNode       
+
 type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positionInGrammar>>) =
     let dummyNode = -1<nodeMeasure>
     let dummyAST = new TerminalNode(-1<token>, packExtension -1 -1)
@@ -25,17 +31,21 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
     let terminalNodes = new Dictionary<int64<extension>, Dictionary<int<token>,int<nodeMeasure>>>()
     let epsilonNodes = new Dictionary<int, int<nodeMeasure>>()
     let nodes = new BlockResizeArray<INode>()
+    let mostRootedNodes = new HashSet<int<nodeMeasure>>()
+    let partialNonterminalNodes = new Dictionary<int64,int<nodeMeasure>>()
 
     member this.Nodes = nodes
     member this.TerminalNodes = terminalNodes
     member this.NonTerminalNodes = nonTerminalNodes
     member this.IntermidiateNodes = intermidiateNodes
     member this.EpsilonNodes = epsilonNodes
+    member this.MostRootedNodes = mostRootedNodes
+    member this.PartialNonterminalNodes = partialNonterminalNodes
 
-    member this.GetTerminalNodes = 
+    member this.GetTerminalNodes() = 
         this.Nodes |> Seq.filter (fun x -> x :? TerminalNode) |> Seq.cast<TerminalNode>
 
-    member this.FindSppfNode (t : TypeOfNode) lExt rExt : int<nodeMeasure> =
+    member this.FindOrCreateIntermedOrNontermNode (t : TypeOfNode) lExt rExt : int<nodeMeasure> =
         match t with 
         | Nonterm state ->
             let hash = packExtension lExt rExt 
@@ -84,14 +94,19 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 else
                     n1
 
-    member this.FindSppfPackedNode parent (state : int<positionInGrammar>) leftExtension rightExtension (left : INode) (right : INode) =
+    member this.CreateAndAddPackedNodeToNontermOrIntermedNode parent (state : int<positionInGrammar>) leftExtension rightExtension (leftChild : INode) (rightChild : INode) (leftChildIndex : int<nodeMeasure>) (rightChildIndex : int<nodeMeasure>) =
         let createNode () =
-            let newNode = new PackedNode(state, left, right)
+            let newNode = new PackedNode(state, leftChild, rightChild)
             this.Nodes.Add(newNode)
             let num = (this.Nodes.Length - 1 )*1<nodeMeasure>
             ///
             if parent = dummyNode then failwith "try to get dummyNode from sppfNodes"
             ///
+
+            if mostRootedNodes.Remove leftChildIndex || mostRootedNodes.Remove rightChildIndex
+            then
+                mostRootedNodes.Add parent |> ignore
+
             match (this.Nodes.Item (int parent)) with
             | :? NonTerminalNode as n ->
                 n.AddChild newNode
@@ -103,20 +118,21 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         let newNode = createNode()
         newNode
 
-    member this.GetNodeT (symbol : int<token>) (pos : int<positionInInput>) (nextPos : int<positionInInput>) =
+    /// Creates new or returns existing terminal node
+    member this.FindOrCreateTerminalNode (symbol : int<token>) (pos : int<positionInInput>) (nextPos : int<positionInInput>) =
         let index = int pos + 1
+        let result = ref 0<nodeMeasure>
         if symbol = epsilon
         then
             let contains, v = this.EpsilonNodes.TryGetValue index
             if not contains
             then
                 let t = new EpsilonNode(packExtension pos pos)
-                let res = this.Nodes.Length *1<nodeMeasure>
+                result := this.Nodes.Length *1<nodeMeasure>
                 this.Nodes.Add t
-                this.EpsilonNodes.Add(index, res)
-                TreeNode(res)
+                this.EpsilonNodes.Add(index, !result)
             else
-                TreeNode(v)
+                result := v
         else
             let hash = packExtension index (int nextPos + 1)
             let contains, v = this.TerminalNodes.TryGetValue hash
@@ -124,67 +140,108 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
             then
                 let dict1 = new Dictionary<_,_>()
                 let t = new TerminalNode(symbol, packExtension pos nextPos)
-                let res = this.Nodes.Length *1<nodeMeasure>
-                dict1.Add(symbol, res)
+                result := this.Nodes.Length *1<nodeMeasure>
+                dict1.Add(symbol, !result)
                 this.Nodes.Add t
                 this.TerminalNodes.Add(hash, dict1)
-                TreeNode(res)
             else
                 let cont, v1 = v.TryGetValue symbol
                 if not cont
                 then
                     let t = new TerminalNode(symbol, packExtension pos nextPos)
-                    let res = this.Nodes.Length *1<nodeMeasure>
+                    result := this.Nodes.Length *1<nodeMeasure>
                     this.Nodes.Add t
-                    v.Add(symbol, res)
-                    TreeNode(res)
+                    v.Add(symbol, !result)
                 else
-                    TreeNode(v1)
+                    result := v1
+
+        mostRootedNodes.Add !result |> ignore
+        TreeNode(!result)
     
-    member this.GetNodeP (state : int<positionInGrammar>) (t : TypeOfNode) currentN currentR = 
-        let currR = this.Nodes.Item (int currentR)
-        let extR = currR.getExtension ()
-        let lExtR, rExtR = getLeftExtension extR, getRightExtension extR
+    member this.GetParentNode (state : int<positionInGrammar>) (t : TypeOfNode) currentLeft currentRight = 
+        let currRight = this.Nodes.Item (int currentRight)
+        let extRight = currRight.getExtension ()
+        let leftExtOfRight, rightExtOfRight = getLeftExtension extRight, getRightExtension extRight
          
-        if currentN <> dummyNode
+        if currentLeft <> dummyNode
         then
-            let currL = this.Nodes.Item (int currentN)
-            let extL = currL.getExtension ()
-            let lExtL = getLeftExtension extL//, getRightExtension extL
-            let y = this.FindSppfNode t lExtL rExtR
-            let extra = this.FindSppfPackedNode y state extL extR currL currR
+            let currLeft = this.Nodes.Item (int currentLeft)
+            let extLeft = currLeft.getExtension ()
+            let leftExtOfLeft = getLeftExtension extLeft
+            let y = this.FindOrCreateIntermedOrNontermNode t leftExtOfLeft rightExtOfRight
+            let extra = this.CreateAndAddPackedNodeToNontermOrIntermedNode y state extLeft extRight currLeft currRight currentLeft currentRight
             if extra = -1<nodeMeasure> then failwith "boom"
             TreeNode(y)
         else
-            let y = this.FindSppfNode t lExtR rExtR
-            let extra = this.FindSppfPackedNode y state extR extR dummyAST currR
+            let y = this.FindOrCreateIntermedOrNontermNode t leftExtOfRight rightExtOfRight
+            let extra = this.CreateAndAddPackedNodeToNontermOrIntermedNode y state extRight extRight dummyAST currRight dummyNode currentRight
             if extra = -1<nodeMeasure> then failwith "boom"
             TreeNode(y)
 
-    member this.GetNodes posInGrammar stateOfCurrentNonterm (dataCurrentN : ParseData) (dataCurrentR : ParseData) = 
-        let currentN = unpackNode dataCurrentN
-        let currentR = unpackNode dataCurrentR
+    member this.GetNodes posInGrammar stateOfCurrentNonterm (dataCurrentLeft : ParseData) (dataCurrentRight : ParseData) = 
+        let currentLeft = unpackNode dataCurrentLeft
+        let currentRight = unpackNode dataCurrentRight
 
         let nontermNode = 
             if posInGrammar |> finalStates.Contains
             then
-                this.GetNodeP posInGrammar (Nonterm stateOfCurrentNonterm) currentN currentR
+                this.GetParentNode posInGrammar (Nonterm stateOfCurrentNonterm) currentLeft currentRight
             else
                 TreeNode(dummyNode)
 
         let otherNode =
             let isCurrentRNontermAndItsExtentsEqual = 
-                match this.Nodes.Item (int currentR) with
+                match this.Nodes.Item (int currentRight) with
                 | :? NonTerminalNode as n ->
                     getRightExtension n.Extension = getLeftExtension n.Extension
                 | _ -> false
 
-            if (currentN = dummyNode)&&(not isCurrentRNontermAndItsExtentsEqual)
+            if (currentLeft = dummyNode)&&(not isCurrentRNontermAndItsExtentsEqual)
             then
-                dataCurrentR
+                dataCurrentRight
             else
-                this.GetNodeP posInGrammar (Intermed (posInGrammar, stateOfCurrentNonterm)) currentN currentR
+                this.GetParentNode posInGrammar (Intermed (posInGrammar, stateOfCurrentNonterm)) currentLeft currentRight
         otherNode, nontermNode
+    
+    member this.GetNode posInGrammar stateOfCurrentNonterm (dataCurrentLeft : ParseData) (dataCurrentRight : ParseData) = 
+        let currentLeft = unpackNode dataCurrentLeft
+        let currentRight = unpackNode dataCurrentRight
+
+        let isCurrentRNontermAndItsExtentsEqual = 
+            match this.Nodes.Item (int currentRight) with
+            | :? NonTerminalNode as n ->
+                getRightExtension n.Extension = getLeftExtension n.Extension
+            | _ -> false
+
+        if (currentLeft = dummyNode)&&(not isCurrentRNontermAndItsExtentsEqual)
+        then
+            dataCurrentRight
+        else
+            this.GetParentNode posInGrammar (Intermed (posInGrammar, stateOfCurrentNonterm)) currentLeft currentRight
+
+
+    member this.FindOrCreatePartialNonterminal (nonterm : int<positionInGrammar>) (beginning: int<positionInInput> ): int<nodeMeasure> =
+        let hash = pack nonterm beginning 
+        let contains, n = this.PartialNonterminalNodes.TryGetValue hash
+        if not contains
+        then
+            let newNode = new PartialNonTerminalNode(nonterm, beginning) 
+            let num = this.Nodes.Length *1<nodeMeasure>
+            this.Nodes.Add(newNode)
+            this.PartialNonterminalNodes.Add(hash, num)
+            num
+        else
+            n
+
+    member this.RemovePartioalNonterminalChild (gssVert : GSSVertex) data = 
+        let node = unpackNode data
+        let nonterm = this.Nodes.Item (this.FindOrCreatePartialNonterminal gssVert.Nonterm gssVert.PositionInInput |> int)
+        (nonterm :?> PartialNonTerminalNode).Children.Remove node |> ignore
+
+    member this.AddChildToPartialNonterm (gssVert : GSSVertex) data = 
+        let node = unpackNode data
+        let nonterm = this.Nodes.Item (this.FindOrCreatePartialNonterminal gssVert.Nonterm gssVert.PositionInInput |> int)
+        (nonterm :?> PartialNonTerminalNode).Children.Add node |> ignore
 
     member this.GetRoots (gss : GSS) startPosition = 
         let gssRoot = 
@@ -231,26 +288,16 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 | x -> failwithf "Strange type of node: %A" x.GetType
         }
 
-
-let GetTerminals (sppf : SPPF) = 
-    sppf.GetTerminalNodes |> Seq.map (fun x -> x.Name, getLeftExtension x.Extension, getRightExtension x.Extension)
-
-//let getNewNode() = 
-//    let edge = new TaggedEdge<int,int>()
-//    let vert = new QuickGraph.TaggedEdge<_,_>(startVertex, endVertex, new GSSEdgeLbl(stateToContinue, data))
-
-type NodeGenerator() =
-    let currentNode = ref -1
-    member this.getNode() =
-            incr currentNode
-            !currentNode 
-
-let GetPrefixTreeEdges root beginning (nodeGenerator : NodeGenerator) (intToString : Dictionary<_,_>) =
+    member this.GetPrefixTreeEdges (root : int<nodeMeasure>) beginning (nodeGenerator : NodeGenerator) (intToString : Dictionary<_,_>) =
         let vertToMerge = new Dictionary<_,_>()
+        //let nodeToEdges = new Dictionary<INode,TaggedEdge<_,_>[]>()
+        let node = this.Nodes.[int root]
 
-        let rec buildTree (beginning : int) (destination : int) : INode -> TaggedEdge<_,_> [] = function
+        let rec buildTree (beginning : int) (destination : int) (node: INode) : TaggedEdge<_,_> [] =
+            //if nodeToEdges.ContainsKey(node) then nodeToEdges.[node] else
+            //let node = this.Nodes.[int root]
+            match node with
             | :? TerminalNode as n ->
-                
                 if n.Name = -1<token> && n.Extension = packExtension -1 -1
                 then
                     let cond, value = vertToMerge.TryGetValue beginning
@@ -289,7 +336,7 @@ let GetPrefixTreeEdges root beginning (nodeGenerator : NodeGenerator) (intToStri
                 |> Array.collect (fun x -> buildTree beginning destination x)
             | _ -> failwith "unexpected type of node"
         
-        let edges = buildTree beginning (nodeGenerator.getNode()) root
+        let edges = buildTree beginning (nodeGenerator.getNode()) node
 
         edges
         |> Array.map(fun x ->
@@ -309,7 +356,16 @@ let GetPrefixTreeEdges root beginning (nodeGenerator : NodeGenerator) (intToStri
                     x.Source
             new TaggedEdge<_,_>(source, target, x.Tag)
             )
-        
+
+
+let GetTerminals (sppf : SPPF) = 
+    sppf.GetTerminalNodes() |> Seq.map (fun x -> x.Name, getLeftExtension x.Extension, getRightExtension x.Extension)
+
+//let getNewNode() = 
+//    let edge = new TaggedEdge<int,int>()
+//    let vert = new QuickGraph.TaggedEdge<_,_>(startVertex, endVertex, new GSSEdgeLbl(stateToContinue, data))
+
+  
 
 
 type BandBNode = {
@@ -319,7 +375,10 @@ type BandBNode = {
 }
 
 let mergeSPPFS inputLength (prefixTreesAndBeginnings : (int * AdjacencyGraph<int,TaggedEdge<int,int>>) []) = 
-    printfn "%A" prefixTreesAndBeginnings
+    printfn "Number of trees %A" prefixTreesAndBeginnings.Length
+    prefixTreesAndBeginnings
+    |> Array.iteri ( fun i (_,x) -> 
+        printfn "Number of vertices if tree %i %i" i (Array.ofSeq x.Vertices).Length)
     let front = new Stack<BandBNode>()
     let edges = new ResizeArray<_>()
 
@@ -332,14 +391,16 @@ let mergeSPPFS inputLength (prefixTreesAndBeginnings : (int * AdjacencyGraph<int
     front.Push({Parent = None; Index = 0; PositionsInTrees = prefixTreesAndBeginnings |> Array.map(fun (beginning,_) -> [|beginning|])})
 
     let counter = ref 0
+    let border = ref 1000
     let old = ref 0
     let found = ref 0
-    while front.Count <> 0 do
+    while (front.Count <> 0) || !found < 1 do
         incr counter
-        if !counter - 1000 = !old
+        if !counter - !border = !old
         then
-            printfn "Processed %A" !counter
+            //printfn "Processed %A" !counter
             old := !counter
+            border := !border * 2
         let banbbNode = front.Pop()
 
         //if banbbNode.Index = inputLength then () else            
@@ -347,7 +408,8 @@ let mergeSPPFS inputLength (prefixTreesAndBeginnings : (int * AdjacencyGraph<int
         |> Array.iteri (fun treeNumber possInTree -> 
             if treeNumber = 1
             then
-                printfn "Poss:%A" possInTree
+                //printfn "Poss:%A" possInTree
+                ()
             let newPoss = 
                 possInTree
                 |> Array.collect (fun node ->
@@ -360,7 +422,7 @@ let mergeSPPFS inputLength (prefixTreesAndBeginnings : (int * AdjacencyGraph<int
             if banbbNode.Index + 1 = inputLength
             then 
                 incr found
-                printfn "Found: %i" !found
+                //printfn "Found: %i" !found
             else
                 let newPoss = 
                     Array.init 

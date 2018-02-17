@@ -137,7 +137,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
     let startTime = ref System.DateTime.Now
 
     while setR.Count <> 0 do
-        let currentContext = setR.Pop()
+        let currentContext = setR.Pop()        
 
         incr processed
         if !processed = 10000000

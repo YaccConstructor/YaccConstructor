@@ -393,27 +393,28 @@ type ``GLL abstract parser tests``() =
 //             "Infinite2.txt"
 //             4 3 2 0
 //        
-//[<EntryPoint>]
-//let f x =
-//    System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
-//    let t = new ``GLL abstract parser tests``()   
+[<EntryPoint>]
+let f x =
+    System.Runtime.GCSettings.LatencyMode <- System.Runtime.GCLatencyMode.LowLatency
+    let t = new ``GLL abstract parser tests``()   
+
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\1.1.ttl"
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\pizza.owl"
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf" 
+//         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\people_pets.rdf"
+//        ] do
 //
-////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\1.1.ttl"
-////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
-////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\pizza.owl"
-////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf" 
-////         @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\people_pets.rdf"
-////        ] do
-////
-////            let f = 
-////                YC.GLL.Abstarct.Tests.RDFPerformance.loadFromFile p
-////                 
-////            printfn "triples in %A: %A" (System.IO.Path.GetFileName p) f.Triples.Count
-//    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf"
-//    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
-//    let basePath = if x.Length = 1 then x.[0] else @"..\..\..\data\RDF"
-//    YC.GLL.Abstarct.Tests.RDFPerformance.performTests basePath
-//    0
+//            let f = 
+//                YC.GLL.Abstarct.Tests.RDFPerformance.loadFromFile p
+//                 
+//            printfn "triples in %A: %A" (System.IO.Path.GetFileName p) f.Triples.Count
+    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf"
+    //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
+    //let basePath = if x.Length = 1 then x.[0] else @"..\..\..\data\RDF"
+    //YC.GLL.Abstarct.Tests.RDFPerformance.performTests basePath
+    YC.GLL.Abstarct.Tests.RDFPerformance.doSmth()
+    0
 
 
                

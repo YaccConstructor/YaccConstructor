@@ -283,7 +283,7 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
 let f x =
     let t = new ``Tests for bottom-Up parser based on automata intersection``()
     //t._07_RDF_wine_q2 ()
-    //for i in 0 .. 5 do
-    //    t._05_RDF_wine_q1 ()
-    t.RdftoDot ()
+    for i in 0 .. 5 do
+        t._05_RDF_wine_q1 ()
+    //t.RdftoDot ()
     0 

@@ -9,6 +9,10 @@ open Yard.Generators.GLL.AbstractParser
 open Yard.Generators.Common.ASTGLL
 open Yard.Generators.GLL.ParserCommon
 
+open Yard.Generators.GLL
+open Yard.Frontends.YardFrontend
+open Yard.Core.Conversions.ExpandMeta
+
 let getEdges (g:Graph) =
     let vMap = new System.Collections.Generic.Dictionary<_,_>()
     let mutable id = -1
@@ -100,3 +104,33 @@ let performTests basePath =
     |> Array.map processFile
     |> Array.sortBy (fun (_,_,x,_,_,_) -> x)
     |> Array.iter (fun x -> (sprintf "%A" x).Trim [|'('; ')'|] |> printfn "%s")
+
+
+let doSmth () =
+    let fe = new YardFrontend()
+    let gen = new GLL()
+    let meta = new ExpandMeta()
+    let conv = seq{yield new ExpandMeta()}
+
+    let parser = YC.API.generate (@"E:\bio_brackets.yrd")
+                        fe gen
+                        None
+                        conv
+                        [|""|]
+                        [] :?> ParserSourceGLL
+    let tokenizer ch =
+        string (if ch = 'T' then 'U' else ch)  |> parser.StringToToken
+        
+    let data =
+        System.IO.File.ReadLines(@"E:\complete_genome\ATCC_35405.txt")
+        |> Seq.concat
+        |> Seq.map tokenizer
+        |> Seq.take 10000
+        |> Seq.toArray
+
+    let input = LinearInput([|0<positionInInput>|],data)
+    let start = System.DateTime.Now
+    let res = Yard.Generators.GLL.AbstractParser.getGSS parser input
+
+    printfn "Full time = %A" (System.DateTime.Now-start)
+

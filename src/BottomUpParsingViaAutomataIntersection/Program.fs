@@ -47,11 +47,17 @@ let main (input:HashSet<int> [,]) (grammar:Grammar) =
         
     let mutable _go = true
 
-    let toUpdate = new ResizeArray<_>()
-
+    //let toUpdate = new ResizeArray<_>()    
+    let idxs = [|0..((inputSize-1) )|]
     while _go do
-        for _startInput in 0..inputSize-1 do
+        printfn "_____"
+        let toUpdate = new System.Collections.Concurrent.ConcurrentBag<_>()
+        //for _startInput in 0..inputSize-1 do
+        idxs
+        |> Array.Parallel.iter (fun _startInput ->
             for _endInput in 0..inputSize-1 do
+                //let _startInput = poss / (inputSize-1)
+                //let _endInput = poss % (inputSize-1)
                 if input.[_startInput,_endInput].Count <> 0 || _startInput = _endInput
                 then 
                     for _startGrammar in 0..grammarSize-1 do
@@ -60,11 +66,12 @@ let main (input:HashSet<int> [,]) (grammar:Grammar) =
                                || input.[_startInput,_endInput].Overlaps grammar.grammar.[_startGrammar, _endGrammar])
                             then 
                                  toUpdate.Add(backStateRemap.[(_startInput,_startGrammar)], backStateRemap.[(_endInput,_endGrammar)], 1.0)
+                )
 
         let upCsr = Storage.SparseCompressedRowMatrixStorage.OfIndexedEnumerable(intersectionResult.RowCount,intersectionResult.RowCount,toUpdate) 
         gpuSparseMatrix1.Update (toUpdate.Count, upCsr.Values, upCsr.RowPointers, upCsr.ColumnIndices)    
         closure ()
-        toUpdate.Clear()
+        //toUpdate.Clear()
         _go <- false
         intersectionResult
         |> Matrix.iteriSkipZeros (fun i j n ->

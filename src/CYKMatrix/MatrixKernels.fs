@@ -46,11 +46,23 @@
             _CsrRow <- csrRow_upd
             _CsrColInd <- csrColInd_upd
         member this.GetItem (i, j) =
-            let nzInd =  
-                [_CsrRow.[i] .. _CsrRow.[i + 1] - 1]
-                |> List.tryFind (fun k -> _CsrColInd.[k] = j)
-            in if nzInd.IsSome then _CsrVal.[nzInd.Value] else 0.0
+            if _Nnz = 0 || _CsrRow.Length <= i
+            then 0.0
+            else
+                let nzInd =  
+                    [_CsrRow.[i] .. _CsrRow.[i + 1] - 1]
+                    |> List.tryFind (fun k -> _CsrColInd.[k] = j)
 
+                in if nzInd.IsSome then _CsrVal.[nzInd.Value] else 0.0
+        member this.ToArray() = 
+            let result = Array2D.zeroCreate size size
+            if _Nnz <> 0
+            then
+                for i in 0 .. size - 1 do
+                    for j in _CsrRow.[i] .. _CsrRow.[i + 1] - 1 do
+                        result.[i, _CsrColInd.[j]] <- _CsrVal.[j]
+            result 
+    
     let initParsingMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
                   (allRules: RulesHolder)
                   nonterminals

@@ -29,15 +29,12 @@
         let probOne = Probability.create 1.0
 
         for module' in grammar do
+            S := module'.rules |> Seq.find (fun r -> r.isStart) |> fun r -> r.name.text |> NonTerminal
             for r in module'.rules do
                 let nonterm = NonTerminal <| Source.toString r.name
                 if not <| nonterminals.Contains nonterm
-                then
-                    nonterminals.Add nonterm
-                    if r.isStart
-                    then
-                        S := nonterm
-
+                then nonterminals.Add nonterm
+                    
                 match r.body with
                 | PSeq([elem],_,_) ->
                     match elem.rule with

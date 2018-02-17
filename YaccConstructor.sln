@@ -89,6 +89,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RNGLR", "RNGLR", "{6B21A38A-2723-4FDA-909A-E413E9261CEB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontends", "Frontends", "{9DC60E5B-8DA8-4241-B8EF-17A12E176AB6}"
+	ProjectSection(SolutionItems) = preProject
+		tests\Conversions.Tests\ToChomNormFormTests.fs = tests\Conversions.Tests\ToChomNormFormTests.fs
+	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLL.AbstractParser.SimpleTest", "tests\GLL.AbstractParser.Simple.Tests\GLL.AbstractParser.SimpleTest.fsproj", "{61A3B851-03A0-4A87-B786-D21DFE03B9DD}"
 EndProject
@@ -107,6 +110,9 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Bio.Pictures", "tests\Bio.Pictures\Bio.Pictures.fsproj", "{931330AA-4003-43A5-B4DB-173ED8CE1B5E}"
 EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x86 = Debug|x86

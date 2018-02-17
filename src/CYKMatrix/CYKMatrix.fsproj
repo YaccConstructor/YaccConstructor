@@ -90,6 +90,7 @@
     <Compile Include="ProbabilityGraphParsingImpl.fs" />
     <Compile Include="SparseGraphParsingImpl.fs" />
     <Compile Include="MySparseGraphParsingImpl.fs" />
+    <Compile Include="DenseBitMatrix.fs" />
     <Compile Include="GraphParsing.fs" />
     <Compile Include="Main.fs" />
     <None Include="FodyWeavers.xml" />

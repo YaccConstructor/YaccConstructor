@@ -19,7 +19,7 @@ open MySparseGraphParsingImpl
 open SparseGraphParsingImpl
 
 type ParsingResult = 
-    | CPU of Dictionary<Util.NonTerminal, SparseMatrix> 
+    | CPU of Dictionary<Util.NonTerminal, SparseMatrix> //System.Collections.BitArray> 
     | GPU of Dictionary<Util.NonTerminal, MySparseMatrix>
 
 type BioParser(grammar) =
@@ -53,7 +53,7 @@ type BioParser(grammar) =
         graph
     
     member private this.parse<'MatrixType> handler input =
-        graphParse<'MatrixType, float> (buildInputGraph input) handler finalIL tokenizer 1
+        graphParse<'MatrixType, _> (buildInputGraph input) handler finalIL tokenizer 1
     
     member val StartNonTerm = startN with get
 
@@ -66,8 +66,10 @@ type BioParser(grammar) =
         then
             let dict, _, _, _ = 
                 this.parse<MySparseMatrix> (new MySparseHandler(input.Length + 1)) input
+                //this.parse<System.Collections.BitArray> (new DenseBitMatrix.DenseBitHandler(input.Length + 1)) input
             in GPU dict
         else 
             let dict, _, _, _ = 
                 this.parse<SparseMatrix> (new SparseHandler(input.Length + 1)) input
+                //this.parse<System.Collections.BitArray> (new DenseBitMatrix.DenseBitHandler(input.Length + 1)) input
             in CPU dict 

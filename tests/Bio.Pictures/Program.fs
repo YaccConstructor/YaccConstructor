@@ -42,7 +42,7 @@ let formatOutCSVString meta arr flg =
         |> String.concat ","
         |> fun x -> x + "\n"
 
-let negativeToUintArray isGpu minLength maxLength fastaFiles =
+let negativeToUintArray isGpu minLength maxLength fastaFiles outFilePath =
     let path = "../../negative/"
     let random = System.Random()
     let cnt = ref 0//18211
@@ -52,7 +52,7 @@ let negativeToUintArray isGpu minLength maxLength fastaFiles =
         incr cntF
         let id, gen, intervals16s = getCompleteGenomeData f
         let filteredGen = removeIntervals gen intervals16s
-        for i in 0 .. 100 .. filteredGen.Length - maxLength - 1 do
+        for i in 0 .. 50 .. filteredGen.Length - maxLength - 1 do
             //if !cnt < 2611 
             //then ()
             //else
@@ -63,7 +63,7 @@ let negativeToUintArray isGpu minLength maxLength fastaFiles =
             let parsed = parser.Parse isGpu str            
             let picture = toIntArray length "s0" parsed
             formatOutCSVString name picture "\"n\""
-            |> fun x -> System.IO.File.AppendAllText("out_512_n.csv",x)
+            |> fun x -> System.IO.File.AppendAllText(outFilePath, x)
             printfn "processing time = %A" (System.DateTime.Now - start)
             printfn "file %A gene %A" !cntF !cnt             
             incr cnt
@@ -90,7 +90,7 @@ let drawPositiveExamples isGpu (legend:(string*Color) list) fastaFile sortNum =
     let data = getDataFrom16sBase fastaFile sortNum
    // let path = "../../positive/"
    // Directory.CreateDirectory("../../positive2/") |> ignore
-    for i in 0..10 do 
+    for i in 0..50 do 
         let (id, gen) = data.[i]       
         let path = "../../positive/" + ([for i in 1..sortNum - 1 -> id.Split().[i]] |> String.concat("/")) + "/" 
         Directory.CreateDirectory(path) |> ignore
@@ -118,6 +118,8 @@ let drawNegativeExamples isGpu minLength maxLength legend fastaFiles =
 
 [<EntryPoint>]
 let main argv = 
+    let inputPath = argv.[0]
+    let outFilePath = argv.[1]
     let loadIL = fe.ParseGrammar(grammar) 
     let rules = loadIL.grammar.[0].rules
     let nonterms = HashSet<string>() 
@@ -146,11 +148,12 @@ let main argv =
                                                     |_ -> (nonterms.[i],Color.Black)
                                                     ]
     let genomeFiles = 
-        Directory.GetFiles("C:/Users/User/Desktop/folder/YaccConstructor/tests/data/bio/complete_genome/", "*.txt", SearchOption.AllDirectories)
+    //"C:/Users/User/Desktop/folder/YaccConstructor/tests/data/bio/complete_genome/"
+        Directory.GetFiles(inputPath, "*.txt", SearchOption.AllDirectories)
  //   let legend = [(parser.StartNonTerm, Color.Black)]
     //drawNegativeExamples true 560 560 legend genomeFiles
     //for i in 0..legend.Length-1 do
-    //drawPositiveExamples true legend  "C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
+    //rawPositiveExamples true legend  "C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
     //positiveToUIntArray true "C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
-    negativeToUintArray true 512 512 genomeFiles
+    negativeToUintArray true 512 512 genomeFiles outFilePath
     0

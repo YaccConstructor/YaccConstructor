@@ -14,7 +14,7 @@ let toIntArray dim ntermName (nonTermLayers: ParsingResult) =
     let bArray = new System.Collections.BitArray(dim * dim / 2,false)
     for i in 0 .. dim - 1 do
         for j in i .. dim-1 do
-            if matrix.[i, j] <> 0.0
+            if matrix.[i, j] <> 0.0 
             then bArray.[i*(i+1)/2 + (dim - 1 - j)] <- true
     let fInfo = typeof<System.Collections.BitArray>.GetField("m_array", System.Reflection.BindingFlags.NonPublic ||| System.Reflection.BindingFlags.Instance)
     fInfo.GetValue(bArray) :?> int[] 

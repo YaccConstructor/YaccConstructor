@@ -25,13 +25,6 @@ let rec getCombinations nonterms =
     | h::t -> List.fold (fun cacc celem -> (List.fold (fun acc elem -> (elem::celem)::acc) [] h) @ cacc) [] (getCombinations t)
     | _ -> []
 
-let grammar = 
-    //"C:/Users/User/Desktop/folder/cnf_head.txt"
-    @"C:\Users\User\Desktop\folder\YaccConstructor\src\YC.GrammarZOO\Bio\tests\bio_brackets.yrd"
-
-let parser = new BioParser(grammar)
-
-let fe = new YardFrontend()
 
 let formatOutCSVString meta arr flg =
         [
@@ -42,7 +35,7 @@ let formatOutCSVString meta arr flg =
         |> String.concat ","
         |> fun x -> x + "\n"
 
-let negativeToUintArray isGpu minLength maxLength fastaFiles outFilePath =
+let negativeToUintArray isGpu minLength maxLength fastaFiles outFilePath (parser:BioParser) =    
     let path = "../../negative/"
     let random = System.Random()
     let cnt = ref 0//18211
@@ -69,24 +62,26 @@ let negativeToUintArray isGpu minLength maxLength fastaFiles outFilePath =
             incr cnt
 
 
-let positiveToUIntArray isGpu fastaFile sortNum =
+let positiveToUIntArray isGpu fastaFile sortNum outFilePath (parser:BioParser)=
+    let fe = new YardFrontend()
     let data = getDataFrom16sBase fastaFile sortNum
     
-
     data
     |> fun x -> 
         printfn "L=%A" x.Length
         x
     |> Array.iteri (fun i (id,gen) ->
         printfn "gene %A" i
-        let path = "../../positive/" + ([for i in 1..sortNum - 1 -> id.Split().[i]] |> String.concat("/")) + "/" 
-        Directory.CreateDirectory(path) |> ignore
-        if gen.Length >= 1000 then 
-            let picture = toIntArray 1000 "s0" (parser.Parse isGpu (gen.Substring(0,1000)))  
-            formatOutCSVString (path + id.Split().[0]) picture "\"p\""
-            |> fun x -> System.IO.File.AppendAllText("out.csv",x)
+        //let path = "../../positive/" + ([for i in 1..sortNum - 1 -> id.Split().[i]] |> String.concat("/")) + "/" 
+        //Directory.CreateDirectory(path) |> ignore
+        //if gen.Length >= 1000 then 
+        for i in 0 .. 20 .. gen.Length - 512 - 1 do
+            let picture = toIntArray 512 "s0" (parser.Parse isGpu (gen.Substring(i,512)))  
+            formatOutCSVString (id.Split().[0] + "_" + (string i)) picture "\"p\""
+            |> fun x -> System.IO.File.AppendAllText(outFilePath, x)
             )
-let drawPositiveExamples isGpu (legend:(string*Color) list) fastaFile sortNum =
+
+let drawPositiveExamples isGpu (legend:(string*Color) list) fastaFile sortNum (parser:BioParser)=
     let data = getDataFrom16sBase fastaFile sortNum
    // let path = "../../positive/"
    // Directory.CreateDirectory("../../positive2/") |> ignore
@@ -103,7 +98,7 @@ let drawPositiveExamples isGpu (legend:(string*Color) list) fastaFile sortNum =
 //            picture.Draw(legend, path)
 
 
-let drawNegativeExamples isGpu minLength maxLength legend fastaFiles =
+let drawNegativeExamples isGpu minLength maxLength legend fastaFiles (parser:BioParser) =
     let path = "../../negative/"
     let random = System.Random()
     Directory.CreateDirectory(path) |> ignore
@@ -120,8 +115,11 @@ let drawNegativeExamples isGpu minLength maxLength legend fastaFiles =
 let main argv = 
     let inputPath = argv.[0]
     let outFilePath = argv.[1]
+    let grammar = argv.[2]
+    let fe = new YardFrontend()
     let loadIL = fe.ParseGrammar(grammar) 
     let rules = loadIL.grammar.[0].rules
+    let parser = new BioParser(grammar)
     let nonterms = HashSet<string>() 
     for rule in rules do
 
@@ -147,13 +145,13 @@ let main argv =
                                                     |"h6" -> (nonterms.[i],Color.Brown)
                                                     |_ -> (nonterms.[i],Color.Black)
                                                     ]
-    let genomeFiles = 
+    //let genomeFiles = 
     //"C:/Users/User/Desktop/folder/YaccConstructor/tests/data/bio/complete_genome/"
-        Directory.GetFiles(inputPath, "*.txt", SearchOption.AllDirectories)
+        //Directory.GetFiles(inputPath, "*.txt", SearchOption.AllDirectories)
  //   let legend = [(parser.StartNonTerm, Color.Black)]
     //drawNegativeExamples true 560 560 legend genomeFiles
     //for i in 0..legend.Length-1 do
     //rawPositiveExamples true legend  "C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
-    //positiveToUIntArray true "C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
-    negativeToUintArray true 512 512 genomeFiles outFilePath
+    positiveToUIntArray true inputPath 2 outFilePath parser
+    //negativeToUintArray true 512 512 genomeFiles outFilePath
     0

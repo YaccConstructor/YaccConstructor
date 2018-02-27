@@ -26,7 +26,6 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
             let parserInputGraph,_ = YC.GLL.Abstarct.Tests.RDFPerformance.getParseInputGraph rdfTokenizer file
             parserInputGraph.PrintToDot (System.IO.Path.GetFileNameWithoutExtension file + ".dot") string
         0
-        
 
     let getRDFInput file = 
         
@@ -36,6 +35,113 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
         parserInputGraph.Edges
         |> Seq.iter (fun e -> input.[e.Source,e.Target].Add e.Tag |> ignore)
         input
+
+
+    let getRNAinput file =
+        let input = Array2D.init 512 512 (fun i j -> new HashSet<_>())
+        (System.IO.File.ReadAllText file).Substring(330,511).ToLower()
+        |> Seq.map (fun ch -> match ch with 'a' -> 1 | 'u' -> 2 | 'c' -> 3 | 'g' -> 4 | x -> failwithf "Strange input %A" x)
+        |> Seq.iteri (fun i k -> input.[i, i + 1].Add k |> ignore)
+        input
+
+    // s0 = 5
+    // st1 = 6
+    // st2 = 7
+    // stem = 8
+    // any_0_7 = 9
+    let grammar_16s =
+        let g = Array2D.init 31 31 (fun i j -> new HashSet<_>())
+        //any_0_7
+        g.[0,1].Add 1 |> ignore
+        g.[0,1].Add 2 |> ignore
+        g.[0,1].Add 3 |> ignore
+        g.[0,1].Add 4 |> ignore
+
+        g.[1,2].Add 1 |> ignore
+        g.[1,2].Add 2 |> ignore
+        g.[1,2].Add 3 |> ignore
+        g.[1,2].Add 4 |> ignore
+
+        g.[2,3].Add 1 |> ignore
+        g.[2,3].Add 2 |> ignore
+        g.[2,3].Add 3 |> ignore
+        g.[2,3].Add 4 |> ignore
+
+        g.[3,4].Add 1 |> ignore
+        g.[3,4].Add 2 |> ignore
+        g.[3,4].Add 3 |> ignore
+        g.[3,4].Add 4 |> ignore
+
+        g.[4,5].Add 1 |> ignore
+        g.[4,5].Add 2 |> ignore
+        g.[4,5].Add 3 |> ignore
+        g.[4,5].Add 4 |> ignore
+
+        g.[5,6].Add 1 |> ignore
+        g.[5,6].Add 2 |> ignore
+        g.[5,6].Add 3 |> ignore
+        g.[5,6].Add 4 |> ignore
+
+        g.[6,7].Add 1 |> ignore
+        g.[6,7].Add 2 |> ignore
+        g.[6,7].Add 3 |> ignore
+        g.[6,7].Add 4 |> ignore
+
+        // s0
+        g.[28,29].Add 9 |> ignore
+        g.[29,30].Add 8 |> ignore
+        //g.[30,31].Add 5 |> ignore
+
+        //stems
+        g.[8,9].Add 1 |> ignore
+        g.[8,10].Add 2 |> ignore
+        g.[8,11].Add 3 |> ignore
+        g.[8,12].Add 4 |> ignore
+        
+        g.[9,13].Add 6 |> ignore
+        g.[9,14].Add 8 |> ignore
+        g.[9,15].Add 5 |> ignore
+
+        g.[10,16].Add 6 |> ignore
+        g.[10,17].Add 8 |> ignore
+        g.[10,18].Add 5 |> ignore
+
+        g.[11,19].Add 6 |> ignore
+        g.[11,20].Add 8 |> ignore
+        g.[11,21].Add 5 |> ignore
+
+        g.[12,22].Add 6 |> ignore
+        g.[12,23].Add 8 |> ignore
+        g.[12,24].Add 5 |> ignore
+
+
+        g.[13,25].Add 2 |> ignore
+        g.[16,25].Add 1 |> ignore
+        g.[19,25].Add 4 |> ignore
+        g.[22,25].Add 3 |> ignore
+
+        g.[15,26].Add 2 |> ignore
+        g.[18,26].Add 1 |> ignore
+        g.[21,26].Add 4 |> ignore
+        g.[24,26].Add 3 |> ignore
+
+        g.[14,27].Add 2 |> ignore
+        g.[17,27].Add 1 |> ignore
+        g.[20,27].Add 4 |> ignore
+        g.[23,27].Add 3 |> ignore
+
+        g.[8,27].Add 7 |> ignore
+                
+        let states = 
+            [|
+                (9, new HashSet<_>([0]), new HashSet<_>([0;1;2;3;4;5;6;7]))                
+                (5, new HashSet<_>([28]), new HashSet<_>([29;30]))
+                (6, new HashSet<_>([8]), new HashSet<_>([25]))
+                (7, new HashSet<_>([8]), new HashSet<_>([26]))
+                (8, new HashSet<_>([8]), new HashSet<_>([27]))
+            |]
+        new Grammar (g, states)
+
 
     // s -> SCOR SCO | TR T | SCOR s SCO | TR s T 
     // 6 s
@@ -99,6 +205,29 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
         let states = [|(3, new HashSet<_>([0]), new HashSet<_>([3]))|]
         new Grammar (g, states)    
 
+    let testRNA () =
+        let input = getRNAinput @"C:\gsv\projects\YC\YaccConstructor\testRNA1"
+        let s = System.DateTime.Now
+        let res = main input grammar_16s
+        (System.DateTime.Now - s).TotalMilliseconds
+        |> printfn "flie: %A time = %A" "111"
+        let startNonTermCount = 
+            let i = ref 0
+            res |> Array2D.iteri (fun j k s -> 
+                                     if s.Contains 5 
+                                     then 
+                                           incr i
+                                //           printfn "%A,%A" j k 
+                                )
+            !i
+        printfn "%A" startNonTermCount
+//        for i in 0 .. 511 do
+//            printfn ""
+//            for j in 0 .. 511 do
+//             if res.[i,j].Contains 5 
+//             then printf "1;"
+//             else printf "0;"
+
     let testRDF file query expectedResult = 
         let input = getRDFInput file
         let s = System.DateTime.Now
@@ -146,6 +275,10 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
     [<OneTimeSetUp>]
     member this.Init () =
         basePath <- @"./data/RDF"
+
+    [<Test>]
+    member this._00_RNA() = 
+        testRNA()
 
     [<Test>]
     member this._01_BracketsLinear() = 
@@ -282,8 +415,9 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
 [<EntryPoint>]
 let f x =
     let t = new ``Tests for bottom-Up parser based on automata intersection``()
+    t._00_RNA()
     //t._07_RDF_wine_q2 ()
     for i in 0 .. 5 do
-        t._05_RDF_wine_q1 ()
+        t._00_RNA()
     //t.RdftoDot ()
     0 

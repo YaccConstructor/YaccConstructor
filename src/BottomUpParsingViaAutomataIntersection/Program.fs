@@ -77,10 +77,12 @@ let main (input:HashSet<int> [,]) (grammar:Grammar) =
         |> Matrix.iteriSkipZeros (fun i j n ->
             let _startInput,_startGrammar = stateRemap.[i] 
             let _endInput,_endGrammar = stateRemap.[j]
-            let startFinal = grammar.startFinal |> Array.tryFind (fun (_,s,_) -> s.Contains _startGrammar)
-            match startFinal with
-            | Some (n,s,f) when f.Contains _endGrammar -> _go <- input.[_startInput,_endInput].Add n || _go
-            | _ -> ()
+            let startFinal = grammar.startFinal |> Array.filter (fun (_,s,_) -> s.Contains _startGrammar)
+            startFinal 
+            |> Array.iter (fun (n,s,f) -> if f.Contains _endGrammar then _go <- input.[_startInput,_endInput].Add n || _go)
+            //match startFinal with
+            //| Some (n,s,f) when f.Contains _endGrammar -> _go <- input.[_startInput,_endInput].Add n || _go
+            //| _ -> ()
             )
 
     input

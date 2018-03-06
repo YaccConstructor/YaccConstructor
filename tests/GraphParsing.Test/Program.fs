@@ -5,6 +5,7 @@ open QuickGraph
 open NUnit.Framework
 open YC.GraphParsing.Tests.RDFPerformance
 open YC.GraphParsing.Tests.BioPerformance
+open YC.GraphParsing.Tests.SimpleConjPerformance
 open Util
 open System.Collections.Generic
 open GraphParsing
@@ -577,4 +578,5 @@ let f x =
 //    YC.GraphParsing.Tests.RDFPerformance.performTests ()
 //    YC.GraphParsing.Tests.BioPerformance.performTests ()
 //    YC.GraphParsing.Tests.AliasAndTaintPerformance.performTests ()
+//    YC.GraphParsing.Tests.SimpleConjPerformance.performTests ()
     0

@@ -50,6 +50,7 @@
     <Compile Include="RDFPerformance.fs" />
     <Compile Include="BioPerformance.fs" />
     <Compile Include="AliasAndTaintPerformance.fs" />
+    <Compile Include="SimpleConjPerformance.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="paket.references" />

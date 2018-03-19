@@ -94,23 +94,24 @@ let performTests () =
     |> Array.sortBy (fun (x,_,_) -> x)
     |> Array.iter (printfn "%A")
     *)
-    (*
-    for density in [0.005(*; 0.01; 0.05; 0.1*)] do
+    
+    for density in [0.1; 0.25; 0.75; 1.0; 2.0; 10.0] do
+        let x = int(System.Math.Round((float(2) * density)))
+        let round (x:float) = int <| System.Math.Round x
+        printfn "DensityTest: %f" density
+        [|10; 10; 10; 100; 200; 400; 600; 800; 1000|] 
+        |> Array.map (fun n -> densityTest n (round (density * float (n))) @"../../../GraphParsing.Test/Conj_abc_cnf.yrd")
+        |> Array.sortBy (fun (x,_,_,_) -> x)
+        |> Array.iter (printfn "%A")
+    
+    (*for density in [0.005(*; 0.01; 0.05; 0.1*)] do
         let x = int(System.Math.Round((float(2) * density)))
         let round (x:float) = int <| System.Math.Round x
         printfn "DensityTest: %f" density
         [|10; 10; 10; 100; 200; 400; 600(*; 800; 1000*)|] 
-        |> Array.map (fun n -> densityTest n (round (density * float (3*n*(n-1)))) @"../../../GraphParsing.Test/Conj_abc_cnf.yrd")
+        |> Array.map (fun n -> densityBNFTest n (round (density * float (n))) @"../../../GraphParsing.Test/Conj_wcw.yrd")
         |> Array.sortBy (fun (x,_,_,_) -> x)
         |> Array.iter (printfn "%A")
     *)
-    for density in [0.005(*; 0.01; 0.05; 0.1*)] do
-        let x = int(System.Math.Round((float(2) * density)))
-        let round (x:float) = int <| System.Math.Round x
-        printfn "DensityTest: %f" density
-        [|10; 10; 10; 100; 200; 400; 600(*; 800; 1000*)|] 
-        |> Array.map (fun n -> densityBNFTest n (round (density * float (3*n*(n-1)))) @"../../../GraphParsing.Test/Conj_wcw.yrd")
-        |> Array.sortBy (fun (x,_,_,_) -> x)
-        |> Array.iter (printfn "%A")
 
     

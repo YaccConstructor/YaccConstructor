@@ -62,6 +62,15 @@ let applyConversion (conversion:Conversion) (loadIL:IL.Definition<IL.Source, IL.
             loadIL
                 with grammar = conversion.ConvertGrammar (loadIL.grammar, [||])                               
         }
+ 
+
+let expandBrackets = new Conversions.ExpandBrackets.ExpandBrackets()
+let expandMeta = new Conversions.ExpandMeta.ExpandMeta()
+let expandEbnf = new Conversions.ExpandEbnfStrict.ExpandEbnf()
+let expandInnerAlt = new Conversions.ExpandInnerAlt.ExpandInnerAlt()
+let expandRepeat = new Conversions.ExpandRepet.ExpandExpand()
+let expandTopLevelAlt = new Conversions.ExpandTopLevelAlt.ExpandTopLevelAlt()
+let conversionBNFconj = new Conversions.CNFandBNF.BNFconj()
 
 let densityBNFTest (verticesCount:int) (edgesCount:int) grammarFile =
     let cnt = 1
@@ -78,19 +87,23 @@ let densityBNFTest (verticesCount:int) (edgesCount:int) grammarFile =
     //printfn("Graph loaded")
     let fe = new Yard.Frontends.YardFrontend.YardFrontend()
     let loadIL = fe.ParseGrammar grammarFile
-    
-    let conversionBNFconj = new Conversions.CNFandBNF.BNFconj()
 
-    let cnfIL = applyConversion conversionBNFconj loadIL
+    let result = loadIL |> applyConversion expandEbnf        
+                        |> applyConversion expandMeta        
+                        |> applyConversion expandRepeat
+                        |> applyConversion expandInnerAlt        
+                        |> applyConversion expandBrackets
+                        |> applyConversion expandTopLevelAlt
+                        |> applyConversion conversionBNFconj
 
-    let root, time, countOfPairs = testSparseCPU cnt graph cnfIL SimpleTokenizer 1
+    let root, time, countOfPairs = testSparseCPU cnt graph result SimpleTokenizer 1
 
     verticesCount, edgesCount, time, countOfPairs
 
 let performTests () =
     (*printfn "DenseTest:"
     [|10; 10; 10; 100; 200; 400; 600; 800; 1000|] 
-    |> Array.map (fun n -> denseTest n @"../../../GraphParsing.Test/Conj_abc_cnf.yrd")
+    |> Array.map (fun n -> denseTest n @"../../../GraphParsing.Test/Conj_abc_bnf.yrd")
     |> Array.sortBy (fun (x,_,_) -> x)
     |> Array.iter (printfn "%A")
     *)
@@ -100,7 +113,7 @@ let performTests () =
         let round (x:float) = int <| System.Math.Round x
         printfn "DensityTest: %f" density
         [|10; 10; 10; 100; 200; 400; 600; 800; 1000|] 
-        |> Array.map (fun n -> densityTest n (round (density * float (n))) @"../../../GraphParsing.Test/Conj_abc_cnf.yrd")
+        |> Array.map (fun n -> densityTest n (round (density * float (n))) @"../../../GraphParsing.Test/Conj_abc_bnf.yrd")
         |> Array.sortBy (fun (x,_,_,_) -> x)
         |> Array.iter (printfn "%A")
     

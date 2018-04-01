@@ -18,7 +18,8 @@ type FormulaNode =
                                           else br x)
                 |> (fun x -> 
                         let s = new System.Text.StringBuilder()
-                        for it in x do s.Append( it) |> ignore
+                        for it in x do 
+                            if (it <> symb + "()") then s.Append( it) |> ignore
                         s.ToString())
             else
                 br arr.[0]

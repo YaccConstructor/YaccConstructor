@@ -261,7 +261,7 @@ type Parser(parser : ParserSourceGLL) =
 
     member this.GetPrefixTree(inputToNum : Dictionary<_,_>) = 
         this.InputUpdated()
-        printfn "Building prefix tree..."
+        //printfn "Building prefix tree..."
         (*
         let roots = 
             input.InitialPositions 

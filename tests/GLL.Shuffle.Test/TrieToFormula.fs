@@ -35,37 +35,40 @@ type FormulaNode =
 
         
 
-let trieToFormula (trie : AdjacencyGraph<int,TaggedEdge<int,int>>) (beginning : int) (lengthOfInput : int ) (literal : string)=
-    let vars = Array.init lengthOfInput (fun i -> literal + i.ToString())
+let trieToFormula (trie : AdjacencyGraph<int,TaggedEdge<int,int>>) (beginning : int) (input : string[] ) (trieNumber : int)=
+    let vars = 
+        input
+        |> Array.map(fun s -> s + "_" + trieNumber.ToString())
 
-    let getUnusedVarsConj (setOfVars : int Set) : FormulaNode =
-        let n = setOfVars.Count
+    //let getUnusedVarsConj (setOfVars : int Set) : FormulaNode =
+    //    let n = setOfVars.Count
 
-        if n > 1
-        then
-            setOfVars
-            |> Seq.map( fun x -> vars.[x] |> VAR |> NOT)
-            |> Array.ofSeq
-            |> AND
+    //    if n > 1
+    //    then
+    //        setOfVars
+    //        |> Seq.map( fun x -> vars.[x] |> VAR |> NOT)
+    //        |> Array.ofSeq
+    //        |> AND
             
-        elif n = 1
-        then
-            VAR(vars.[setOfVars |> Array.ofSeq |> (fun x -> x.[0])])
-        else
-            NONE
+    //    elif n = 1
+    //    then
+    //        VAR(vars.[setOfVars |> Array.ofSeq |> (fun x -> x.[0])])
+    //    else
+    //        NONE
 
-    let rec processsVert (v : int) (setOfVars : int Set): FormulaNode = 
+    let rec processsVert (v : int) : FormulaNode = 
         let outEdges = trie.OutEdges(v) |> Array.ofSeq
         if outEdges.Length > 1
         then
-            let node = Array.init outEdges.Length (fun i -> [| vars.[outEdges.[i].Tag] |> VAR; processsVert outEdges.[i].Target (setOfVars.Remove(outEdges.[i].Tag)) |] |> AND) |> OR
+            let node = Array.init outEdges.Length (fun i -> [| vars.[outEdges.[i].Tag] |> VAR; processsVert outEdges.[i].Target |] |> AND) |> OR
             node
         elif outEdges.Length = 1
         then
-            [| vars.[outEdges.[0].Tag] |> VAR; processsVert outEdges.[0].Target (setOfVars.Remove(outEdges.[0].Tag)) |] |> AND
+            [| vars.[outEdges.[0].Tag] |> VAR; processsVert outEdges.[0].Target |] |> AND
         else
-            getUnusedVarsConj setOfVars   
+        //    getUnusedVarsConj setOfVars   
+            NONE
             
-    let formula = processsVert beginning (new Set<int>(Array.init lengthOfInput id))
+    let formula = processsVert beginning
 
-    formula
+    formula, vars

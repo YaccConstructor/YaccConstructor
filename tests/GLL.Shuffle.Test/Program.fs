@@ -259,6 +259,56 @@ let getParserSource grammarFile conv =
 //        ()
 
 
+let testBaseLineDomainGrammars () =     
+    let parserSources : ParserSourceGLL [] = 
+        let conv = [new ExpandMeta()]
+        [|for fileNumber in 1..98 -> getParserSource (sprintf "../../grammarsNew/BaselineDomain-%i.yrd" fileNumber ) conv |]
+    
+    let input = [| "A75"; "A14"; "A99"; "A68"; "A14"; "A65" ;"A64" ; "A66" ; "A7" ; "A74"; "A89"; "A56"; "A37"; "A43"; "A78"; "A88"; "A58"; "A33" |]
+    let inputToNum = new Dictionary<_,_>()
+    input |> Array.iteri(fun i x -> inputToNum.Add(x, i))
+
+    let shuffledInput = 
+        [| for ps in parserSources ->
+            let shuffleInput = new ShuffleInputGraph<string>(ps.StringToToken)
+            shuffleInput.AddTokens(input)
+            shuffleInput |]
+
+    let tries = 
+        parserSources
+        |> Array.mapi (fun i ps ->
+            let parser = new Parser(parserSources.[i])
+            parser.Parse shuffledInput.[i] true
+            parser.GetPrefixTree(inputToNum), i
+            )
+    
+    let usedVars = new List<_>()
+
+    let sppfFormulas = 
+        tries
+        |> Array.filter (fun (x,i) -> x.IsSome)
+        |> Array.map (fun (x,i) -> 
+            let beg,trie = x.Value
+            let formula, vars = trieToFormula trie beg input i
+            usedVars.Add(vars)
+            formula)
+
+    printfn "Number of tries: %i" sppfFormulas.Length
+
+    let genXors (vars : List<string[]>) =
+        vars
+        |> Seq.map(fun x -> String.Join(" ", x))
+        |> (fun x -> String.Join("\n", x))
+    
+    let finalFormula =        
+        //Array.append sppfFormulas xors
+        sppfFormulas
+        |> AND
+
+    System.IO.File.WriteAllText("myFormula.txt", finalFormula.ToString())
+    System.IO.File.WriteAllText("myFormulaXORS.txt", genXors usedVars)
+
+(*
 let testSingleLetterGrammar () = 
     let input = [|1..100|]|> Array.map (fun i -> sprintf "A%i" i)
 
@@ -310,9 +360,10 @@ let testSingleLetterGrammar () =
 
     System.IO.File.WriteAllText("myFormula.txt", finalFormula.ToString())
     System.IO.File.WriteAllText("myFormulaXORS.txt", genXors vars)
-
+*)
 
 [<EntryPoint>]
 let main argv = 
-    testSingleLetterGrammar()
+    //testSingleLetterGrammar()
+    testBaseLineDomainGrammars()
     0

@@ -208,9 +208,10 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         gssRoots
         |> Seq.collect (fun x -> 
             x.P.SetP
-            |> Seq.map (fun x -> match x.data with
-                             | TreeNode n -> this.Nodes.Item (int n)
-                             | _ -> failwith "wrongType"))
+            |> Seq.map (fun x -> 
+                match x.data with
+                | TreeNode n -> this.Nodes.Item (int n)
+                | _ -> failwith "wrongType"))
         |> Seq.sortByDescending(fun x -> getRightExtension(x.getExtension()))
         |> Array.ofSeq
 
@@ -259,7 +260,7 @@ type NodeGenerator() =
             incr currentNode
             !currentNode 
 
-let GetPrefixTreeEdges root beginning (nodeGenerator : NodeGenerator) (intToString : Dictionary<_,_>) =
+let GetPrefixTreeEdges root beginning (nodeGenerator : NodeGenerator) (intToString : Dictionary<int,string>) (stringToNum : Dictionary<string,int>)=
         let vertToMerge = new Dictionary<_,_>()
 
         let rec buildTree (beginning : int) (destination : int) : INode -> TaggedEdge<_,_> [] = function
@@ -276,7 +277,7 @@ let GetPrefixTreeEdges root beginning (nodeGenerator : NodeGenerator) (intToStri
                         vertToMerge.Add(destination, beginning)
                     [||]
                 else
-                [| new TaggedEdge<_,_>(beginning, destination, (n.Extension |> int64 |> CommonFuns.getRight)-1 ) |]
+                [| new TaggedEdge<_,_>(beginning, destination, stringToNum.[intToString.[int n.Name]]) |]
                     
             | :? IntermidiateNode as n ->
                 let length = 

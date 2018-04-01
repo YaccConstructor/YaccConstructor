@@ -259,7 +259,7 @@ type Parser(parser : ParserSourceGLL) =
         this.Parse input false
         this.GetAllRangesForStateWithLength gss parser.StartState
 
-    member this.GetPrefixTree() = 
+    member this.GetPrefixTree(inputToNum : Dictionary<_,_>) = 
         this.InputUpdated()
         printfn "Building prefix tree..."
         (*
@@ -287,7 +287,7 @@ type Parser(parser : ParserSourceGLL) =
         let edges = 
             allNodes
             |> Array.collect(fun x ->
-                GetPrefixTreeEdges x beginning nodeGenerator parser.IntToString
+                GetPrefixTreeEdges x beginning nodeGenerator parser.IntToString inputToNum
                 )
         
         if edges.Length = 0 then None else

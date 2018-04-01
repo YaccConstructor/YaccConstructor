@@ -200,6 +200,20 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         |> Array.ofSeq
         //|> (fun x -> [|x.[0]|])
 
+    member this.GetAllRoots (gss : GSS) = 
+        let gssRoots = 
+            gss.Vertices
+            |> Seq.filter (fun vert -> vert.Nonterm = startState)
+        
+        gssRoots
+        |> Seq.collect (fun x -> 
+            x.P.SetP
+            |> Seq.map (fun x -> match x.data with
+                             | TreeNode n -> this.Nodes.Item (int n)
+                             | _ -> failwith "wrongType"))
+        |> Seq.sortByDescending(fun x -> getRightExtension(x.getExtension()))
+        |> Array.ofSeq
+
     member this.GetNonTermByName name (ps : ParserSourceGLL) = 
         let token = ps.NameToId.Item name
         this.Nodes 

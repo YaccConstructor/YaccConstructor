@@ -259,9 +259,10 @@ type Parser(parser : ParserSourceGLL) =
         this.Parse input false
         this.GetAllRangesForStateWithLength gss parser.StartState
 
-    member this.GetPrefixTree(input : IParserInput) = 
-        this.Parse input true
-        
+    member this.GetPrefixTree() = 
+        this.InputUpdated()
+        printfn "Building prefix tree..."
+        (*
         let roots = 
             input.InitialPositions 
             |> Array.choose (fun pos ->
@@ -269,20 +270,92 @@ type Parser(parser : ParserSourceGLL) =
                 if roots.Length <> 0 
                 then Some(roots)
                 else None)
+                *)
+        let allNodes = Array.ofSeq (sppf.GetAllRoots gss)
+
+        if allNodes.Length = 0 then None else
         let nodeGenerator = new NodeGenerator()
         let beginning = nodeGenerator.getNode()
+        (*
         let edges = 
             roots
             |> Array.collect id
             |> Array.collect(fun x ->
                 GetPrefixTreeEdges x beginning nodeGenerator parser.IntToString
                 )
+        *)
+        let edges = 
+            allNodes
+            |> Array.collect(fun x ->
+                GetPrefixTreeEdges x beginning nodeGenerator parser.IntToString
+                )
+        
+        if edges.Length = 0 then None else
+        let graph = new AdjacencyGraph<_,_>()
+        graph.AddVerticesAndEdgeRange edges |> ignore
+
+        let toDFA beginning (graph : AdjacencyGraph<_,TaggedEdge<int,_>> )= 
+            let getOutSets (set: HashSet<int>) =
+                let newSets = new Dictionary<_,HashSet<_>>()
+                for state in set do
+                    for edge in graph.OutEdges(state) do
+                        let symbol,nextState = edge.Tag, edge.Target
+                        let cond, value = newSets.TryGetValue symbol
+                        if cond
+                        then
+                            value.Add nextState |> ignore
+                        else
+                            newSets.Add(symbol, new HashSet<_>([nextState]))
+                newSets 
+    
+            let newStates = new ResizeArray<_>()
+            let newStartStates = new ResizeArray<HashSet<_>>()
+            let newStartComponentNumber = ref -1
+            let queue = new Queue<HashSet<int>>()
+            let statesEliminationSet = new ResizeArray<HashSet<int>>()
+
+            new HashSet<_>([beginning]) |> queue.Enqueue 
+            /// here it is. each component has only one startState
+            new HashSet<_>([statesEliminationSet.Count * 1<positionInGrammar>]) |> newStartStates.Add |> ignore
+            new HashSet<_>([beginning]) |> statesEliminationSet.Add 
+
+            while queue.Count <> 0 do
+                let setToProcess = queue.Dequeue()
+                let newSets = getOutSets setToProcess
+                let newEdges = new ResizeArray<int*int>()
+                newStates.Add newEdges
+
+                for keyValue in newSets do
+                    let symbol = keyValue.Key
+                    let states = keyValue.Value
+                    let stateExists = ref false
+
+                    statesEliminationSet
+                    |> ResizeArray.iteri (fun stateNum set ->
+                        if states.SetEquals(set)
+                        then
+                            stateExists := true
+                            newEdges.Add(symbol, stateNum))
+
+                    if !stateExists |> not
+                    then
+                        statesEliminationSet.Add(states)
+                        newEdges.Add(symbol, statesEliminationSet.Count - 1)
+                        queue.Enqueue(states)
+            
+            newStates
+            |> Seq.indexed
+            |> Seq.collect(fun (i, edges) ->
+                edges
+                |> Seq.map(fun (symbol, state) -> new TaggedEdge<_,_>(i, state, symbol))
+                )
+            |> Seq.toArray
 
         
+        //let edges = removeDuplicates edges
+        let edges = toDFA beginning graph
 
-        if edges.Length <> 0 then
-            let graph = new AdjacencyGraph<_,_>()
-            graph.AddVerticesAndEdgeRange edges |> ignore
-            Some (beginning, graph)
-        else
-            None
+        let graph = new AdjacencyGraph<_,_>()
+        graph.AddVerticesAndEdgeRange edges |> ignore
+
+        Some(beginning, graph)

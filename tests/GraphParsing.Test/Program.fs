@@ -5,6 +5,7 @@ open QuickGraph
 open NUnit.Framework
 open YC.GraphParsing.Tests.RDFPerformance
 open YC.GraphParsing.Tests.BioPerformance
+open YC.GraphParsing.Tests.SimpleConjPerformance
 open Util
 open System.Collections.Generic
 open GraphParsing
@@ -325,7 +326,7 @@ type ``Graph parsing tests``() =
         graph.AddEdge(new ParserEdge<_>(1, 2, 2)) |> ignore
         graph.AddEdge(new ParserEdge<_>(2, 3, 3)) |> ignore
 
-        let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "Conj_abc_cnf.yrd")
+        let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "Conj_abc_bnf.yrd")
         let fe = new Yard.Frontends.YardFrontend.YardFrontend()
         let loadIL = fe.ParseGrammar grammarPath
         let tokenizer str =
@@ -356,7 +357,7 @@ type ``Graph parsing tests``() =
         graph.AddEdge(new ParserEdge<_>(2, 4, 3)) |> ignore
         graph.AddEdge(new ParserEdge<_>(3, 3, 3)) |> ignore
 
-        let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "Conj_abc_cnf.yrd")
+        let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "Conj_abc_bnf.yrd")
         let fe = new Yard.Frontends.YardFrontend.YardFrontend()
         let loadIL = fe.ParseGrammar grammarPath
         let tokenizer str =
@@ -577,4 +578,5 @@ let f x =
 //    YC.GraphParsing.Tests.RDFPerformance.performTests ()
 //    YC.GraphParsing.Tests.BioPerformance.performTests ()
 //    YC.GraphParsing.Tests.AliasAndTaintPerformance.performTests ()
+//    YC.GraphParsing.Tests.SimpleConjPerformance.performTests ()
     0

@@ -54,7 +54,7 @@ let negativeToUintArray isGpu minLength maxLength fastaFiles outFilePath (parser
             let str = filteredGen.[i .. i + length - 2]
             let start = System.DateTime.Now
             let parsed = parser.Parse isGpu str            
-            let picture = toIntArray length "s0" parsed
+            let picture = toIntArray length "s1" parsed
             formatOutCSVString name picture "\"n\""
             |> fun x -> System.IO.File.AppendAllText(outFilePath, x)
             printfn "processing time = %A" (System.DateTime.Now - start)
@@ -76,7 +76,7 @@ let positiveToUIntArray isGpu fastaFile sortNum outFilePath (parser:BioParser)=
         //Directory.CreateDirectory(path) |> ignore
         //if gen.Length >= 1000 then 
         for i in 0 .. 20 .. gen.Length - 512 - 1 do
-            let picture = toIntArray 512 "s0" (parser.Parse isGpu (gen.Substring(i,512)))  
+            let picture = toIntArray 512 "s1" (parser.Parse isGpu (gen.Substring(i,512)))  
             formatOutCSVString (id.Split().[0] + "_" + (string i)) picture "\"p\""
             |> fun x -> System.IO.File.AppendAllText(outFilePath, x)
             )

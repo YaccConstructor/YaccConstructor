@@ -372,28 +372,33 @@ let testGraphParsing () =
     let parserSources : ParserSourceGLL [] = 
         let conv = [new ExpandMeta()]
         [|getParserSource "../../S.yrd"conv;
-          getParserSource "../../D.yrd"conv;
+          //getParserSource "../../D.yrd"conv;
           getParserSource "../../K.yrd"conv;
           getParserSource "../../M.yrd"conv|]
     let timeInit = System.DateTime.UtcNow;
 
+    let n = 10
+
     let inputEdges = 
-        Array.init 50 id
+        [|for k in 1..n-1 -> k|]
         |> Array.collect(fun i ->
-            Array.init 50 (fun j -> [|new ParserEdge<string>(i, j, "eps"); new ParserEdge<string>(i, j, "M"); new ParserEdge<string>(i, j, "K"); new ParserEdge<string>(i, j, "S")|])
+            [|for k in i+1..i+1 -> k|]
+            |> Array.map (fun j -> [|new ParserEdge<string>(i, j, "M"); new ParserEdge<string>(i, j, "K"); new ParserEdge<string>(i, j, "S")|])
             |> Array.collect id)
-        |> (fun x -> Array.append x ([|new ParserEdge<string>(0, 1, "S"); new ParserEdge<string>(0, 1, "eps"); new ParserEdge<string>(0, 1, "M"); new ParserEdge<string>(0, 1, "K"); new ParserEdge<string>(50, 51, "D")|]))
+        |> (fun x -> Array.append x ([|new ParserEdge<string>(0, 1, "S"); new ParserEdge<string>(0, 1, "M"); new ParserEdge<string>(0, 1, "K"); new ParserEdge<string>(n, n+1, "D")|]))
     
+
     let inputEpsEdges = 
-        Array.init 50 id
+        [|for k in 1..n-1 -> k|]
         |> Array.collect(fun i ->
-            Array.init 50 (fun j -> new ParserEdge<string>(i, j, "eps")))
-        |> (fun x -> Array.append x ([|new ParserEdge<string>(0, 1, "eps")|]))
+            [|for k in i+1..i+1 -> k|]
+            |> Array.map (fun j -> new ParserEdge<string>(i, j, "eps")))
+        |> (fun x -> Array.append x ([|new ParserEdge<string>(0, 1, "eps"); new ParserEdge<string>(n, n+1, "eps")|]))
 
     let tokenToInt = (fun x -> match x with |"M"-> 0 |"K"-> 1 |"D"-> 2 |"S"-> 3 |"eps"-> -1)
     let intToString = (fun x -> match x with |0<token> -> "M" |1<token> -> "K" |2<token> -> "D"| 3<token> ->"S" | -1<token> -> "eps")
     
-    let shuffledInput = new SimpleInputGraph<string>([|0|], [|51|], tokenToInt)
+    let shuffledInput = new SimpleInputGraph<string>([|0|], [|n+1|], tokenToInt)
     shuffledInput.AddVerticesAndEdgeRange(inputEdges) |> ignore
 
     let inputGraphformula = 
@@ -401,6 +406,8 @@ let testGraphParsing () =
 
     shuffledInput.AddEdgeRange(inputEpsEdges) |> ignore
 
+    shuffledInput.PrintToDot "qw.dot" id
+    printfn "Parsing"
     let sppfsFormula = 
         parserSources
         |> Array.mapi (fun i ps ->
@@ -409,14 +416,14 @@ let testGraphParsing () =
             sppfRootsToFormula roots intToString i
             )
         |> (fun x -> AND(x))
-    
+    printfn "Formula finishing"
     let edgesMappingFormula = 
         let len = parserSources.Length
         edgesMapping inputEdges len
 
     let finalFormula =        
         [|inputGraphformula; sppfsFormula; edgesMappingFormula|] |> AND |> reduceFormula
-    
+    printfn "Solving"
     Z3logic.solveFormula finalFormula
 
     printfn "Time: %A" (System.DateTime.UtcNow - timeInit)

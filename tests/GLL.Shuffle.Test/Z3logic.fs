@@ -45,7 +45,7 @@ let simpleTest () =
 
 let MkXor (ctx : Context) (exprs : BoolExpr [])  = 
     let r = ref (ctx.MkXor(exprs.[0], exprs.[1]))
-    for i in 2..exprs.Length do
+    for i in 2..exprs.Length-1 do
         r := ctx.MkXor(!r, exprs.[i])
     !r
 

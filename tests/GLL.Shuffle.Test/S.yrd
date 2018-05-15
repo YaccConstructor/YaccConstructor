@@ -1,2 +1,2 @@
 [<Start>]
-s : ss | S
+s : s S | S

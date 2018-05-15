@@ -194,7 +194,7 @@ type Parser(parser : ParserSourceGLL) =
             input.Value.Value.ForAllOutgoingEdges
                 currentDescr.PosInInput
                 (fun nextToken nextPosInInput -> 
-                    if nextToken = -1<token> then pushContext nextPosInInput currentDescr.PosInGrammar currentDescr.GssVertex currentDescr.Data else
+                    if nextToken = -1<token> then addContext nextPosInInput currentDescr.PosInGrammar currentDescr.GssVertex currentDescr.Data else
                     let isTransitionPossible, nextPosInGrammar = parser.StateAndTokenToNewState.TryGetValue (parser.GetTermsDictionaryKey currentDescr.PosInGrammar (int nextToken))
                     if isTransitionPossible
                     then eatTerm currentDescr nextToken nextPosInInput nextPosInGrammar

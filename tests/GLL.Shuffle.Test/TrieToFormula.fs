@@ -36,14 +36,13 @@ type FormulaNode =
         | EQ(x,y) -> x.ToString() + "==" + y.ToString()
         | VAR(x) -> x
         | NONE -> ""
-
-
- let rec reduceFormula = function 
+        
+let rec reduceFormula = function 
     | OR(l) ->
         let r = 
             l
             |> Array.map reduceFormula
-            |> Array.filter(fun x -> x = NONE)
+            |> Array.filter(fun x -> x <> NONE)
         if (r.Length <> 0)
         then OR(r)
         else NONE
@@ -51,7 +50,7 @@ type FormulaNode =
         let r = 
             l
             |> Array.map reduceFormula
-            |> Array.filter(fun x -> x = NONE)
+            |> Array.filter(fun x -> x <> NONE)
         if (r.Length <> 0)
         then AND(r)
         else NONE
@@ -59,10 +58,12 @@ type FormulaNode =
         let r = 
             l
             |> Array.map reduceFormula
-            |> Array.filter(fun x -> x = NONE)
-        if (r.Length <> 0)
-        then XOR(r)
-        else NONE
+            |> Array.filter(fun x -> x <> NONE)
+        if (r.Length = 0)
+        then NONE
+        elif (r.Length = 1)
+        then r.[0]
+        else XOR(r)
     | NOT(l) ->
         let r = reduceFormula l
         if (r <> NONE)
@@ -76,31 +77,13 @@ type FormulaNode =
         else EQ(lRes,rRes)
     | VAR(s) ->
         VAR(s)
-    | NONE -> NONE
-    
-
-        
+    | NONE -> 
+        NONE
 
 let trieToFormula (trie : AdjacencyGraph<int,TaggedEdge<int,int>>) (beginning : int) (input : string[] ) (trieNumber : int)=
     let vars = 
         input
         |> Array.mapi(fun i s -> s + "_i" + (i.ToString()) +  "_" + trieNumber.ToString())
-
-    //let getUnusedVarsConj (setOfVars : int Set) : FormulaNode =
-    //    let n = setOfVars.Count
-
-    //    if n > 1
-    //    then
-    //        setOfVars
-    //        |> Seq.map( fun x -> vars.[x] |> VAR |> NOT)
-    //        |> Array.ofSeq
-    //        |> AND
-            
-    //    elif n = 1
-    //    then
-    //        VAR(vars.[setOfVars |> Array.ofSeq |> (fun x -> x.[0])])
-    //    else
-    //        NONE
 
     let rec processsVert (v : int) : FormulaNode = 
         let outEdges = trie.OutEdges(v) |> Array.ofSeq
@@ -120,44 +103,41 @@ let trieToFormula (trie : AdjacencyGraph<int,TaggedEdge<int,int>>) (beginning : 
     formula, vars
 
 
-
-
-
 let sppfRootsToFormula (roots : INode[]) (intToString : int<token> -> string) (i : int) = // (beginning : int) (input : string[] ) (trieNumber : int)=
     let rec nodeProc : INode -> FormulaNode = function
-    | :? TerminalNode as n ->      
-        if n.Name = -1<token>
-        then
-            NONE
-        else
-            let posl = getLeftExtension n.Extension
-            let posr = getRightExtension n.Extension
-            FormulaNode.VAR(posl.ToString() + intToString n.Name + posr.ToString() + "_" + i.ToString())          
-    | :? IntermidiateNode as n ->
-        let first = nodeProc n.First
-        if (n.Others <> null)
-        then
-            let others = 
-                n.Others
-                |> Seq.map (fun x -> nodeProc x)
-                |> Array.ofSeq
-            OR(Array.append others [|first|])
-        else
-            first
-    | :? PackedNode as n ->
-        AND([|nodeProc n.Left; nodeProc n.Right|])
-    | :? NonTerminalNode as n ->
-        let first = nodeProc n.First
-        if (n.Others <> null)
-        then
-            let others = 
-                n.Others
-                |> Seq.map (fun x -> nodeProc x)
-                |> Array.ofSeq
-            OR(Array.append others [|first|])
-        else
-            first
-    | _ -> failwith "unexpected type of node"
+        | :? TerminalNode as n ->      
+            if n.Name = -1<token>
+            then
+                NONE
+            else
+                let posl = getLeftExtension n.Extension
+                let posr = getRightExtension n.Extension
+                FormulaNode.VAR(posl.ToString() + intToString n.Name + posr.ToString() + "_" + i.ToString())          
+        | :? IntermidiateNode as n ->
+            let first = nodeProc n.First
+            if (n.Others <> null)
+            then
+                let others = 
+                    n.Others
+                    |> Seq.map (fun x -> nodeProc x)
+                    |> Array.ofSeq
+                OR(Array.append others [|first|])
+            else
+                first
+        | :? PackedNode as n ->
+            AND([|nodeProc n.Left; nodeProc n.Right|])
+        | :? NonTerminalNode as n ->
+            let first = nodeProc n.First
+            if (n.Others <> null)
+            then
+                let others = 
+                    n.Others
+                    |> Seq.map (fun x -> nodeProc x)
+                    |> Array.ofSeq
+                OR(Array.append others [|first|])
+            else
+                first
+        | _ -> failwith "unexpected type of node"
 
     let formula = 
         roots
@@ -167,21 +147,44 @@ let sppfRootsToFormula (roots : INode[]) (intToString : int<token> -> string) (i
     formula
 
 let inputGraphToFormula (graph : SimpleInputGraph<string>) = 
-    graph.Vertices
-    |> Seq.map(fun vert ->
-        let outEdgesVars = 
-            graph.OutEdges(vert)
-            |> Seq.map(fun x -> VAR(x.Source.ToString() + x.Tag + x.Target.ToString()))
+    let inOutEdgesCondition = 
+        graph.Vertices
+        |> Seq.filter(fun x -> (Seq.contains x graph.InitStates || Seq.contains x graph.FinalStates) |> not)
+        |> Seq.map(fun vert ->
+            let outEdgesVars = 
+                graph.OutEdges(vert)
+                |> Seq.map(fun x -> VAR(x.Source.ToString() + x.Tag + x.Target.ToString()))
+                |> Array.ofSeq
+            let inEdgesVars = 
+                graph.Edges
+                |> Seq.filter(fun x -> x.Target = vert)
+                |> Seq.map(fun x -> VAR(x.Source.ToString() + x.Tag + x.Target.ToString())) 
+                |> Array.ofSeq
+
+            EQ(XOR(outEdgesVars), XOR(inEdgesVars)))
+        |> Array.ofSeq
+        |> (fun x -> AND(x))
+    
+    let initCond = 
+        graph.InitStates
+        |> Array.ofSeq
+        |> Array.collect(fun vert -> 
+            graph.Edges
+            |> Seq.filter(fun x -> x.Source = vert)
+            |> Seq.map(fun x -> VAR(x.Source.ToString() + x.Tag + x.Target.ToString())) 
             |> Array.ofSeq
-        let inEdgesVars = 
+            )
+    let finalCond = 
+        graph.FinalStates
+        |> Array.ofSeq
+        |> Array.collect(fun vert -> 
             graph.Edges
             |> Seq.filter(fun x -> x.Target = vert)
             |> Seq.map(fun x -> VAR(x.Source.ToString() + x.Tag + x.Target.ToString())) 
             |> Array.ofSeq
+            )
 
-        EQ(XOR(outEdgesVars), XOR(inEdgesVars)))
-    |> Array.ofSeq
-    |> (fun x -> AND(x))
+    [|inOutEdgesCondition; XOR(initCond) ; XOR(finalCond)|] |>  AND
 
 let edgesMapping (edges : ParserEdge<string>[]) (count : int) =
     edges

@@ -383,47 +383,46 @@ let testGraphParsing () =
             Array.init 50 (fun j -> [|new ParserEdge<string>(i, j, "eps"); new ParserEdge<string>(i, j, "M"); new ParserEdge<string>(i, j, "K"); new ParserEdge<string>(i, j, "S")|])
             |> Array.collect id)
         |> (fun x -> Array.append x ([|new ParserEdge<string>(0, 1, "S"); new ParserEdge<string>(0, 1, "eps"); new ParserEdge<string>(0, 1, "M"); new ParserEdge<string>(0, 1, "K"); new ParserEdge<string>(50, 51, "D")|]))
-    let shuffledInput = new SimpleInputGraph<string>([|0|], [|51|], (fun x -> match x with |"M"-> 1 |""-> 1 |""-> 1 |"M"-> 1 |))
     
-    let tries = 
+    let inputEpsEdges = 
+        Array.init 50 id
+        |> Array.collect(fun i ->
+            Array.init 50 (fun j -> new ParserEdge<string>(i, j, "eps")))
+        |> (fun x -> Array.append x ([|new ParserEdge<string>(0, 1, "eps")|]))
+
+    let tokenToInt = (fun x -> match x with |"M"-> 0 |"K"-> 1 |"D"-> 2 |"S"-> 3 |"eps"-> -1)
+    let intToString = (fun x -> match x with |0<token> -> "M" |1<token> -> "K" |2<token> -> "D"| 3<token> ->"S" | -1<token> -> "eps")
+    
+    let shuffledInput = new SimpleInputGraph<string>([|0|], [|51|], tokenToInt)
+    shuffledInput.AddVerticesAndEdgeRange(inputEdges) |> ignore
+
+    let inputGraphformula = 
+        inputGraphToFormula shuffledInput
+
+    shuffledInput.AddEdgeRange(inputEpsEdges) |> ignore
+
+    let sppfsFormula = 
         parserSources
         |> Array.mapi (fun i ps ->
             let parser = new Parser(ps)
-            parser.Parse shuffledInput.[i] true
-            parser.GetPrefixTree(), i
+            let roots = parser.GetRoots shuffledInput
+            sppfRootsToFormula roots intToString i
             )
+        |> (fun x -> AND(x))
     
-    let usedVars = new List<_>()
+    let edgesMappingFormula = 
+        let len = parserSources.Length
+        edgesMapping inputEdges len
 
-    let sppfFormulas = 
-        tries
-        |> Array.filter (fun (x,i) -> x.IsSome)
-        |> Array.map (fun (x,i) -> 
-            let beg,trie = x.Value
-            let formula, vars = trieToFormula trie beg input i
-            usedVars.Add(vars)
-            formula)
-
-    //printfn "Number of tries: %i" sppfFormulas.Length
-
-    let xors = Array.init input.Length (fun x -> new List<_>())
-
-    let genXors (vars : List<string[]>) =
-        for v in vars do
-            v
-            |> Seq.iteri(fun i x -> xors.[i].Add(x))//String.Join(" ", x))
-        
-        xors
-        |> Array.map(fun x -> String.Join(" ", x))
-        |> (fun x -> String.Join("\n", x))
-    
     let finalFormula =        
-        //Array.append sppfFormulas xors
-        sppfFormulas
-        |> AND
+        [|inputGraphformula; sppfsFormula; edgesMappingFormula|] |> AND |> reduceFormula
+    
+    Z3logic.solveFormula finalFormula
+
     printfn "Time: %A" (System.DateTime.UtcNow - timeInit)
-    System.IO.File.WriteAllText("myFormula.txt", finalFormula.ToString())
-    System.IO.File.WriteAllText("myFormulaXORS.txt", genXors usedVars)
+    
+
+
 
 (*
 let testSingleLetterGrammar () = 
@@ -488,5 +487,6 @@ let main argv =
 
     //testSimpleProgram()
 
-    Z3logic.simpleTest()
+    //Z3logic.simpleTest()
+    testGraphParsing()
     0

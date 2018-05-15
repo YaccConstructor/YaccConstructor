@@ -259,6 +259,10 @@ type Parser(parser : ParserSourceGLL) =
     member this.GetAllRangesForStartStateWithLength (input : IParserInput) = 
         this.Parse input false
         this.GetAllRangesForStateWithLength gss parser.StartState
+    
+    member this.GetRoots (input : IParserInput) = 
+        this.Parse input true
+        Array.ofSeq (sppf.GetAllRoots gss)
 
     member this.GetPrefixTree() = 
         this.InputUpdated()

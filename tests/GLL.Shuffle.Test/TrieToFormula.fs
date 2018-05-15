@@ -39,7 +39,7 @@ type FormulaNode =
 let trieToFormula (trie : AdjacencyGraph<int,TaggedEdge<int,int>>) (beginning : int) (input : string[] ) (trieNumber : int)=
     let vars = 
         input
-        |> Array.map(fun s -> s + "_" + trieNumber.ToString())
+        |> Array.mapi(fun i s -> s + "_i" + (i.ToString()) +  "_" + trieNumber.ToString())
 
     //let getUnusedVarsConj (setOfVars : int Set) : FormulaNode =
     //    let n = setOfVars.Count

@@ -40,6 +40,9 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Z3">
+      <HintPath>..\..\packages\z3x64win\lib\Microsoft.Z3.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -48,6 +51,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="TrieToFormula.fs" />
+    <Compile Include="Z3logic.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
   </ItemGroup>

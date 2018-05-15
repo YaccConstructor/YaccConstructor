@@ -31,5 +31,6 @@ nuget NLog.Config 2.0.1.2 framework: >= net40
 nuget Nuget.CommandLine
 nuget FAKE
 nuget SourceLink.Fake
+nuget z3x64win
 
 github fsharp/FAKE modules/Octokit/Octokit.fsx

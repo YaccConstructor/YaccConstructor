@@ -658,7 +658,8 @@ NUGET
       FSharp.Core
     YC.Utils.SourceText (0.3.0.1)
       FSharp.Core (4.0.0.1)
+    z3x64win (4.5.0.1)
 GITHUB
   remote: fsharp/FAKE
-    modules/Octokit/Octokit.fsx (0341a2e614eb2a7f34607cec914eb0ed83ce9add)
+    modules/Octokit/Octokit.fsx (30dce890c6baafdda7125d21072ee1ba0d52515a)
       Octokit (>= 0.20)

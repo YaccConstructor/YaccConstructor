@@ -194,6 +194,7 @@ type Parser(parser : ParserSourceGLL) =
             input.Value.Value.ForAllOutgoingEdges
                 currentDescr.PosInInput
                 (fun nextToken nextPosInInput -> 
+                    if nextToken = -1<token> then pushContext nextPosInInput currentDescr.PosInGrammar currentDescr.GssVertex currentDescr.Data else
                     let isTransitionPossible, nextPosInGrammar = parser.StateAndTokenToNewState.TryGetValue (parser.GetTermsDictionaryKey currentDescr.PosInGrammar (int nextToken))
                     if isTransitionPossible
                     then eatTerm currentDescr nextToken nextPosInInput nextPosInGrammar
@@ -259,7 +260,7 @@ type Parser(parser : ParserSourceGLL) =
         this.Parse input false
         this.GetAllRangesForStateWithLength gss parser.StartState
 
-    member this.GetPrefixTree(inputToNum : Dictionary<_,_>) = 
+    member this.GetPrefixTree() = 
         this.InputUpdated()
         //printfn "Building prefix tree..."
         (*
@@ -287,7 +288,7 @@ type Parser(parser : ParserSourceGLL) =
         let edges = 
             allNodes
             |> Array.collect(fun x ->
-                GetPrefixTreeEdges x beginning nodeGenerator parser.IntToString inputToNum
+                GetPrefixTreeEdges x beginning nodeGenerator parser.IntToString
                 )
         
         if edges.Length = 0 then None else

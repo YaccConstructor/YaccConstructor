@@ -260,7 +260,7 @@ type NodeGenerator() =
             incr currentNode
             !currentNode 
 
-let GetPrefixTreeEdges root beginning (nodeGenerator : NodeGenerator) (intToString : Dictionary<int,string>) (stringToNum : Dictionary<string,int>)=
+let GetPrefixTreeEdges root beginning (nodeGenerator : NodeGenerator) (intToString : Dictionary<int,string>) = //(stringToNum : Dictionary<string,int>)=
         let vertToMerge = new Dictionary<_,_>()
 
         let rec buildTree (beginning : int) (destination : int) : INode -> TaggedEdge<_,_> [] = function
@@ -277,7 +277,7 @@ let GetPrefixTreeEdges root beginning (nodeGenerator : NodeGenerator) (intToStri
                         vertToMerge.Add(destination, beginning)
                     [||]
                 else
-                [| new TaggedEdge<_,_>(beginning, destination, stringToNum.[intToString.[int n.Name]]) |]
+                [| new TaggedEdge<_,_>(beginning, destination, -1 + CommonFuns.getRight(int64 n.Extension))|]
                     
             | :? IntermidiateNode as n ->
                 let length = 

@@ -257,17 +257,15 @@ let getParserSource grammarFile conv =
 //        times.Add(l, (System.DateTime.UtcNow - startTime).TotalMilliseconds)
 //        System.IO.File.AppendText(sprintf "Length %i. Time: %A" l times.[times.Count-1]) |> ignore
 //        ()
-
-
-let testBaseLineDomainGrammars () =     
+let testSimpleProgram () =     
     let parserSources : ParserSourceGLL [] = 
         let conv = [new ExpandMeta()]
-        [|for fileNumber in 1..98 -> getParserSource (sprintf "../../grammarsNew/BaselineDomain-%i.yrd" fileNumber ) conv |]
+        [|for fileNumber in 0..1 -> getParserSource "../../gammarFromPda.yrd" conv |]
     //A25 A29 A83 A65 A64 A66 A75 A14 A99
     //let input = [| "A75"; "A14"; "A99"; "A68"; "A14"; "A65" ;"A64" ; "A66" ; "A7" |]//; "A74"; "A89"; "A56"; "A37"; "A43"; "A78"; "A88"; "A58"; "A33" |]
-    let input = [| "A25"; "A29"; "A83"; "A65"; "A64"; "A66"; "A75"; "A14"; "A99" |]
-    let inputToNum = new Dictionary<_,_>()
-    input |> Array.iteri(fun i x -> inputToNum.Add(x, i))
+    let input = [| "If0"; "If0"; "App"; "App"; "If1"; "If1"; "Err"; "Err"|]
+    //let inputToNum = new Dictionary<_,_>()
+    //input |> Array.iteri(fun i x -> inputToNum.Add(x, i))
     let timeInit = System.DateTime.UtcNow;
     let shuffledInput = 
         [| for ps in parserSources ->
@@ -280,7 +278,119 @@ let testBaseLineDomainGrammars () =
         |> Array.mapi (fun i ps ->
             let parser = new Parser(parserSources.[i])
             parser.Parse shuffledInput.[i] true
-            parser.GetPrefixTree(inputToNum), i
+            parser.GetPrefixTree(), i
+            )
+    
+    let usedVars = new List<_>()
+
+    let sppfFormulas = 
+        tries
+        |> Array.filter (fun (x,i) -> x.IsSome)
+        |> Array.map (fun (x,i) -> 
+            let beg,trie = x.Value
+            let formula, vars = trieToFormula trie beg input i
+            usedVars.Add(vars)
+            formula)
+
+    //printfn "Number of tries: %i" sppfFormulas.Length
+
+    let xors = Array.init input.Length (fun x -> new List<_>())
+
+    let genXors (vars : List<string[]>) =
+        for v in vars do
+            v
+            |> Seq.iteri(fun i x -> xors.[i].Add(x))//String.Join(" ", x))
+        
+        xors
+        |> Array.map(fun x -> String.Join(" ", x))
+        |> (fun x -> String.Join("\n", x))
+    
+    let finalFormula =        
+        //Array.append sppfFormulas xors
+        sppfFormulas
+        |> AND
+    printfn "Time: %A" (System.DateTime.UtcNow - timeInit)
+    System.IO.File.WriteAllText("myFormula.txt", finalFormula.ToString())
+    System.IO.File.WriteAllText("myFormulaXORS.txt", genXors usedVars)
+
+
+let testBaseLineDomainGrammars () =     
+    let parserSources : ParserSourceGLL [] = 
+        let conv = [new ExpandMeta()]
+        [|for fileNumber in 1..98 -> getParserSource (sprintf "../../grammarsNew/BaselineDomain-%i.yrd" fileNumber ) conv |]
+    //A25 A29 A83 A65 A64 A66 A75 A14 A99
+    //let input = [| "A75"; "A14"; "A99"; "A68"; "A14"; "A65" ;"A64" ; "A66" ; "A7" |]//; "A74"; "A89"; "A56"; "A37"; "A43"; "A78"; "A88"; "A58"; "A33" |]
+    let input = [| "A25"; "A29"; "A83"; "A65"; "A64"; "A66"; "A75"; "A14"; "A99" |]
+    let timeInit = System.DateTime.UtcNow;
+    let shuffledInput = 
+        [| for ps in parserSources ->
+            let shuffleInput = new ShuffleInputGraph<string>(ps.StringToToken)
+            shuffleInput.AddTokens(input)
+            shuffleInput |]
+
+    let tries = 
+        parserSources
+        |> Array.mapi (fun i ps ->
+            let parser = new Parser(parserSources.[i])
+            parser.Parse shuffledInput.[i] true
+            parser.GetPrefixTree(), i
+            )
+    
+    let usedVars = new List<_>()
+
+    let sppfFormulas = 
+        tries
+        |> Array.filter (fun (x,i) -> x.IsSome)
+        |> Array.map (fun (x,i) -> 
+            let beg,trie = x.Value
+            let formula, vars = trieToFormula trie beg input i
+            usedVars.Add(vars)
+            formula)
+
+    //printfn "Number of tries: %i" sppfFormulas.Length
+
+    let xors = Array.init input.Length (fun x -> new List<_>())
+
+    let genXors (vars : List<string[]>) =
+        for v in vars do
+            v
+            |> Seq.iteri(fun i x -> xors.[i].Add(x))//String.Join(" ", x))
+        
+        xors
+        |> Array.map(fun x -> String.Join(" ", x))
+        |> (fun x -> String.Join("\n", x))
+    
+    let finalFormula =        
+        //Array.append sppfFormulas xors
+        sppfFormulas
+        |> AND
+    printfn "Time: %A" (System.DateTime.UtcNow - timeInit)
+    System.IO.File.WriteAllText("myFormula.txt", finalFormula.ToString())
+    System.IO.File.WriteAllText("myFormulaXORS.txt", genXors usedVars)
+
+let testGraphParsing () =     
+    let parserSources : ParserSourceGLL [] = 
+        let conv = [new ExpandMeta()]
+        [|getParserSource "../../S.yrd"conv;
+          getParserSource "../../D.yrd"conv;
+          getParserSource "../../K.yrd"conv;
+          getParserSource "../../M.yrd"conv|]
+    let timeInit = System.DateTime.UtcNow;
+
+    let inputEdges = 
+        Array.init 50 id
+        |> Array.collect(fun i ->
+            Array.init 50 (fun j -> [|new ParserEdge<string>(i, j, "eps"); new ParserEdge<string>(i, j, "M"); new ParserEdge<string>(i, j, "K"); new ParserEdge<string>(i, j, "S")|])
+            |> Array.collect id)
+        |> (fun x -> Array.append x ([|new ParserEdge<string>(0, 1, "S"); new ParserEdge<string>(0, 1, "eps"); new ParserEdge<string>(0, 1, "M"); new ParserEdge<string>(0, 1, "K"); new ParserEdge<string>(50, 51, "D")|]))
+    let shuffledInput = new SimpleInputGraph<string>([|0|], [|51|], (fun x -> match x with |"M"-> 1 |""-> 1 |""-> 1 |"M"-> 1 |))
+    
+    let tries = 
+        parserSources
+        |> Array.mapi (fun i ps ->
+            let parser = new Parser(ps)
+            parser.Parse shuffledInput.[i] true
+            parser.GetPrefixTree(), i
             )
     
     let usedVars = new List<_>()
@@ -369,8 +479,14 @@ let testSingleLetterGrammar () =
     System.IO.File.WriteAllText("myFormulaXORS.txt", genXors vars)
 *)
 
+
+
 [<EntryPoint>]
 let main argv = 
     //testSingleLetterGrammar()
-    testBaseLineDomainGrammars()
+    //testBaseLineDomainGrammars()
+
+    //testSimpleProgram()
+
+    Z3logic.simpleTest()
     0

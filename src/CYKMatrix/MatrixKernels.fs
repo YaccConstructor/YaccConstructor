@@ -57,7 +57,8 @@
         do 
             (
                 nonterminals 
-                |> Seq.map (fun x -> x, createEmptyMatrix (graph.VertexCount))
+                |> Seq.map (fun x -> x, createEmptyMatrix (graph.VertexCount)) //1xsize
+                //|> Seq.map (fun x -> x, createEmptyMatrix (8*graph.VertexCount)) //8xsize
             )
             |> Seq.iter parsingMatrix.Add
 
@@ -73,7 +74,16 @@
                 for (simpleNonterminal, _) in simpleNonterminals do
                     let row = vertexToInt.[edg.Source]
                     let col = vertexToInt.[edg.Target]
-                    matrixSetValue parsingMatrix.[simpleNonterminal] row col innerOne
+                    matrixSetValue parsingMatrix.[simpleNonterminal] row col innerOne //1xsize
+                    //8xsize
+                    (*matrixSetValue parsingMatrix.[simpleNonterminal] row col innerOne
+                    matrixSetValue parsingMatrix.[simpleNonterminal] (graph.VertexCount + row) (graph.VertexCount + col) innerOne
+                    matrixSetValue parsingMatrix.[simpleNonterminal] (2*graph.VertexCount + row) (2*graph.VertexCount + col) innerOne
+                    matrixSetValue parsingMatrix.[simpleNonterminal] (3*graph.VertexCount + row) (3*graph.VertexCount + col) innerOne
+                    matrixSetValue parsingMatrix.[simpleNonterminal] (4*graph.VertexCount + row) (4*graph.VertexCount + col) innerOne
+                    matrixSetValue parsingMatrix.[simpleNonterminal] (5*graph.VertexCount + row) (5*graph.VertexCount + col) innerOne
+                    matrixSetValue parsingMatrix.[simpleNonterminal] (6*graph.VertexCount + row) (6*graph.VertexCount + col) innerOne
+                    matrixSetValue parsingMatrix.[simpleNonterminal] (7*graph.VertexCount + row) (7*graph.VertexCount + col) innerOne*)
             //System.GC.Collect()
 
         parsingMatrix, vertexToInt

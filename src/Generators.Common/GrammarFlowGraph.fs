@@ -3,7 +3,6 @@
 open System.Collections.Generic
 
 open Yard.Core.IL
-open Yard.Core.IL.Production
 open QuickGraph
 
 type GFGEdgeTag<'token> =
@@ -23,7 +22,7 @@ type GFGEdgeTag<'token> =
 type GFGEdge<'token>(s, e, t)=
     inherit TaggedEdge<int, GFGEdgeTag<'token>>(s, e, t)
 
-type GrammarFlowGraph<'token> (ruleList : Rule.t<Source.t,Source.t> list, mapToToken, EOF) as this =   // temporary solution
+type GrammarFlowGraph<'token> (ruleList : Rule<Source,Source> list, mapToToken, EOF) as this =   // temporary solution
     inherit AdjacencyGraph<int, GFGEdge<'token>>()
 
     let nonTermToStates = new Dictionary<string, int * int>()  // nonTerm -> start/end nodes
@@ -41,7 +40,7 @@ type GrammarFlowGraph<'token> (ruleList : Rule.t<Source.t,Source.t> list, mapToT
     let addEdge source target tag = 
         this.AddEdge (new GFGEdge<_>(source, target, tag)) |> ignore
 
-    let newEdges isTerm source (target : int option) (s: Source.t) =
+    let newEdges isTerm source (target : int option) (s: Source) =
         let final = ref dummyState
         if target.IsNone then final := newState() else final := target.Value
         if isTerm

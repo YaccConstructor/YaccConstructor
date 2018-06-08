@@ -34,7 +34,7 @@ start: START_KW name=IDENT+ { name };
 typedef: TYPE_KW TYPE IDENT+ ;
 
 rule: name=IDENT COLON BAR? alt=alternative opt_alts=(BAR alt=alternative {alt})* 
-    { { new Rule.t<Source.t, Source.t> with 
+    { { new Rule.t<Source, Source> with 
             name=name 
             and args=[] 
             and body=if opt_alts=[] then alt else PAlt(alt, List.reduce (fun acc prod -> PAlt(acc, prod)) opt_alts)
@@ -50,10 +50,10 @@ alternative:
   ac=ACTION_CODE
   {
     PSeq(lst |> List.map (fun prod ->
-			{new Production.elem<Source.t, Source.t>
+			{new Production.elem<Source, Source>
 				with omit=false
 				and rule=prod
 				and binding=None
 				and checker=None})
-		 , Some <| new Source.t(ac,new Source.Position(), new Source.Position(), "")) }
+		 , Some <| new Source(ac,new SourcePosition(), new SourcePosition(), "")) }
 	;

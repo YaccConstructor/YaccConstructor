@@ -30,6 +30,7 @@ let private tokenFun f = function
     | ACTION st
     | BAR st
     | AND st
+    | SHUFFLE st
     | COLON st
     | COMMA st
     | GREAT st
@@ -69,7 +70,8 @@ let private tokenFun f = function
     | TOKENS_BLOCK st
     | LITERAL st
     | OPTIONS_START st 
-    | DOUBLEDOT st ->
+    | DOUBLEDOT st
+    | NEG st ->
         f st
     //| OPTION_BLOCK _ -> failwith "Unexpected OPTION_BLOCK"
 
@@ -146,7 +148,7 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
     filtered
 
 let private parse buf userDefs =
-    let rangeToString (b : Source.Position, e : Source.Position) =
+    let rangeToString (b : SourcePosition, e : SourcePosition) =
         sprintf "((%d,%d)-(%d,%d))" b.line b.column e.line e.column
     //let tokens = List.ofSeq (filterByDefs buf userDefs)
    // tokens |> Seq.iter (fun t -> printfn "%A: %A" t (rangeToString <| tokenToRange t))
@@ -156,13 +158,13 @@ let private parse buf userDefs =
         |> ResizeArray.iter (fun (x,y) -> fprintfn stderr "Ambiguity: %s %A" (rangeToString x) y)
         let args = {
                 tokenToRange = tokenToRange
-                zeroPosition = new Source.Position()
+                zeroPosition = new SourcePosition()
                 clearAST = false
                 filterEpsilons = true
             }
         ast.ChooseLongestMatch()
         try
-            (GrammarParser.translate args ast dict : Definition.t<Source.t, Source.t> list).Head
+            (GrammarParser.translate args ast dict : Definition<Source, Source> list).Head
         with
         | ParseError (src, msg) ->
             failwithf "Parse error on position %s:%s. %s: %s" src.file

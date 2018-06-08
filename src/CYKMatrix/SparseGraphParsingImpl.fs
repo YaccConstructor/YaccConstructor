@@ -20,4 +20,5 @@
                 initParsingMatrix<SparseMatrix, float> graph allRules nonterminals createEmptyMatrixSparse matrixSetValueSparse innerOneFloat
             member this.Multiply (matrix1: SparseMatrix) (matrix2: SparseMatrix) = (matrix1.Multiply(matrix2) :?> SparseMatrix)
             member this.Add matrix1 matrix2 = (matrix1.PointwiseMaximum(matrix2) :?> SparseMatrix)
+            member this.Conj matrix1 matrix2 = (matrix1.PointwiseMinimum(matrix2) :?> SparseMatrix)
             member this.getNonZerosCount (matrix:SparseMatrix) = matrix.NonZerosCount

@@ -95,7 +95,7 @@ let _lexeme lexbuf (n : Position) (n' : Position) =
   currentFileContent.Value.Substring(n.AbsoluteOffset, len)
 
 let from_lexbuf (lexbuf:Lexing.LexBuffer<_>) lStart lEnd =
-    new Source.t(_lexeme lexbuf lStart lEnd, new Source.Position(lStart), new Source.Position(lEnd), !currentFile)
+    new Source(_lexeme lexbuf lStart lEnd, new SourcePosition(lStart), new SourcePosition(lEnd), !currentFile)
 let lex2source (lexbuf:Lexing.LexBuffer<_>)= from_lexbuf lexbuf lexbuf.StartPos lexbuf.EndPos
 let newline (lexbuf:Lexing.LexBuffer<_>) = lexbuf.EndPos <- lexbuf.EndPos.NextLine
 
@@ -130,7 +130,8 @@ and  main = parse
      | '-'  {MINUS <| lex2source lexbuf}
      | ':'  {COLON <| lex2source lexbuf}
      | ';'  {SEMICOLON <| lex2source lexbuf}
-     | ','  {COMMA <| lex2source lexbuf}     
+     | ','  {COMMA <| lex2source lexbuf}
+     | "||" {SHUFFLE <| lex2source lexbuf} 
      | '|'  {BAR <| lex2source lexbuf}
      | '='  {EQUAL <| lex2source lexbuf}     
      | '*'  {STAR <| lex2source lexbuf}
@@ -206,6 +207,7 @@ and  main = parse
     | "(" {LPAREN <| lex2source lexbuf}
     | ")" {RPAREN <| lex2source lexbuf}
     | "&" {AND <| lex2source lexbuf}
+	| "!" {NEG <| lex2source lexbuf}
     | _
        { raise(Lexical_error
                 ("illegal character " + (*String.escaped*)LexBuffer<_>.LexemeString(lexbuf),
@@ -338,6 +340,5 @@ and comment = parse
   | '\n' { newline lexbuf; comment lexbuf }
   | _
     { comment lexbuf }
-
 {
 }

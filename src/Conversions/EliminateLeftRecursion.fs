@@ -16,13 +16,12 @@ module Yard.Core.Conversions.EliminateLeftRecursion
 
 open Yard.Core
 open Yard.Core.IL
-open Production
 open Yard.Core.Namer
 open TransformAux
 
 
-type Rule = Rule.t<Source.t,Source.t>
-type Production = Production.t<Source.t,Source.t>
+type Rule = Rule<Source,Source>
+type Production = Production<Source,Source>
 
 let noReduceError = sprintf "Cannot eliminate left recursion. Nonterminal %s does not reduce."
 let trivialReduceError x = sprintf "Cannot eliminate left recursion. There is derivation %s -*> %s." x x
@@ -132,7 +131,7 @@ let removeImmediateRecursion (rule:Rule) =
                                 checker = None }//
             let newAc = ac |> Option.map (fun ac ->
                 let newText = wrapActionCode restPrefix restSuffix ac.text
-                Source.t(newText, ac))
+                Source(newText, ac))
             PSeq (List.append items [newLastItem], newAc, dlabel)
         | _ -> failwith "Unexpected production, expected PSeq")
     let newNonTermProductions = recProductions |> List.map (function
@@ -149,13 +148,13 @@ let removeImmediateRecursion (rule:Rule) =
                 | _ -> defaultArgName
             let newAc = ac |> Option.map (fun ac ->
                  let newText = wrapActionCode (recPrefix recCallBinding) recSuffix ac.text
-                 Source.t(newText, ac))
+                 Source(newText, ac))
             PSeq (List.append items [newLastItem], newAc, dlabel)//
         | _ -> failwith "Unexpected production, expected PSeq")
     let newNonTermProductions =
-        PSeq ([], Some <| Source.t(emptyListAc), None)::newNonTermProductions
+        PSeq ([], Some <| Source(emptyListAc), None)::newNonTermProductions
     [{ rule with body = createAlt changedRestProductions };
-     { name = Source.t(newNonTermName)
+     { name = Source(newNonTermName)
        body = createAlt newNonTermProductions
        isStart = false
        isPublic = false
@@ -196,7 +195,7 @@ let inlineRule indexToRule targetProductions sourceRuleIndex =
                                 | { binding = Some b } -> b.text
                                 | _ -> defaultArgName
                             let text = wrapActionCode (letTemplate firstItemBinding) targetAC.text sourceAC.text
-                            Some <| Source.t(text,sourceAC)
+                            Some <| Source(text,sourceAC)
                         | (Some _ as x), None
                         | None, (Some _ as x) -> x
                         | None, None -> None

@@ -224,6 +224,7 @@ type RCA(grammar: FinalGrammar) as this =
                 | Smbl(Sh x) -> shift.Add (x, edge.Target)
                 | Smbl(Ri i) -> reduce.Add (i, edge.Target)
                 | Smbl(Push s) -> push.Add (s, edge.Target)
+                | _ -> failwith "unsupported tag type"
             shift.Sort()            
             table.[state] <- [| Seq.toArray(reduce); Seq.toArray(push); Seq.toArray(shift) |]
         table

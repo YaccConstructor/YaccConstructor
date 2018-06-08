@@ -120,7 +120,8 @@
         then*)
         let parsingMatrix, vertexToInt = mHandler.ParsingMatrixInitializator graph allRules nonterminals
         //printfn "Matrix initialized"
-        let matrixSize = graph.VertexCount
+        let matrixSize = graph.VertexCount //1xsize
+        //let matrixSize = 8*graph.VertexCount //8xsize
         let isChanged = ref true
         let mutable multCount = 0
 
@@ -238,6 +239,7 @@
         let sparseHandler = (new MySparseHandler(graph.VertexCount)) :> IMatrixHandler<MySparseMatrix, float>
         let parsingMatrix, vertexToInt = sparseHandler.ParsingMatrixInitializator graph allRules nonterminals
         //printfn "Matrix initialized"
-        let resultMatrix, multCount = cusparseTransitiveClosure parsingMatrix allRules nonterminals graph.VertexCount
+        let resultMatrix, multCount = cusparseTransitiveClosure parsingMatrix allRules nonterminals graph.VertexCount //1xsize
+        //let resultMatrix, multCount = cusparseTransitiveClosure parsingMatrix allRules nonterminals (8*graph.VertexCount) //8xsize
         (resultMatrix, !S, vertexToInt, multCount)
 

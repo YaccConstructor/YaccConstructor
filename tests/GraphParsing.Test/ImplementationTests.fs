@@ -80,7 +80,11 @@
 
     //SparseGPU --- managedCuda
     let testSparseGPU cnt graph loadIL tokenizer numberOfThreads =
+        //1xsize
         graphParsingTest<MySparseMatrix, float> cnt graph (new MySparseHandler(graph.VertexCount)) loadIL tokenizer numberOfThreads mySparseAnalyzer
+        //8xsize
+        //graphParsingTest<MySparseMatrix, float> cnt graph (new MySparseHandler(8*graph.VertexCount)) loadIL tokenizer numberOfThreads mySparseAnalyzer
+      
 
     //FastSparseGPU --- managedCuda, minimum data transitions
     let testFastSparseGPU cnt graph loadIL tokenizer =

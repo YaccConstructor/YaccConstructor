@@ -53,7 +53,7 @@ let negativeToUintArray isGpu minLength maxLength fastaFiles outFilePath =
         let id, gen, intervals16s = getCompleteGenomeData f
         let filteredGen = removeIntervals gen intervals16s
         for i in 0 .. 50 .. filteredGen.Length - maxLength - 1 do
-            //if !cnt < 2611 
+            //if !cnt < 59000 
             //then ()
             //else
             let length = random.Next(minLength, maxLength)
@@ -61,7 +61,7 @@ let negativeToUintArray isGpu minLength maxLength fastaFiles outFilePath =
             let str = filteredGen.[i .. i + length - 2]
             let start = System.DateTime.Now
             let parsed = parser.Parse isGpu str            
-            let picture = toIntArray length "s0" parsed
+            let picture = toIntArray length "s1" parsed
             formatOutCSVString name picture "\"n\""
             |> fun x -> System.IO.File.AppendAllText(outFilePath, x)
             printfn "processing time = %A" (System.DateTime.Now - start)
@@ -71,7 +71,6 @@ let negativeToUintArray isGpu minLength maxLength fastaFiles outFilePath =
 
 let positiveToUIntArray isGpu fastaFile sortNum =
     let data = getDataFrom16sBase fastaFile sortNum
-    
 
     data
     |> fun x -> 
@@ -81,10 +80,10 @@ let positiveToUIntArray isGpu fastaFile sortNum =
         printfn "gene %A" i
         let path = "../../positive/" + ([for i in 1..sortNum - 1 -> id.Split().[i]] |> String.concat("/")) + "/" 
         Directory.CreateDirectory(path) |> ignore
-        if gen.Length >= 1000 then 
-            let picture = toIntArray 1000 "s0" (parser.Parse isGpu (gen.Substring(0,1000)))  
+        if gen.Length >= 512 then 
+            let picture = toIntArray 512 "s1" (parser.Parse isGpu (gen.Substring(0,512)))  
             formatOutCSVString (path + id.Split().[0]) picture "\"p\""
-            |> fun x -> System.IO.File.AppendAllText("out.csv",x)
+            |> fun x -> System.IO.File.AppendAllText("outGreenGenes.csv",x)
             )
 let drawPositiveExamples isGpu (legend:(string*Color) list) fastaFile sortNum =
     let data = getDataFrom16sBase fastaFile sortNum
@@ -154,6 +153,6 @@ let main argv =
     //drawNegativeExamples true 560 560 legend genomeFiles
     //for i in 0..legend.Length-1 do
     //rawPositiveExamples true legend  "C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
-    //positiveToUIntArray true "C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
-    negativeToUintArray true 512 512 genomeFiles outFilePath
+    positiveToUIntArray true "C:/Users/User/Desktop/folder/GG/gg_16s_format.fasta" 2//"C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
+   // negativeToUintArray true 512 512 genomeFiles outFilePath
     0

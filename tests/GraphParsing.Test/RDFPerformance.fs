@@ -36,15 +36,15 @@ let processFile file grammarFile =
     //let root3, time3, countOfPairs3 = testDenseGPU1 cnt graph loadIL RDFtokenizer 1
     //let root4, time4, countOfPairs4 = testDenseGPU2 cnt graph loadIL RDFtokenizer 1
     let root5, time5, countOfPairs5 = testSparseGPU cnt graph loadIL RDFtokenizer 1
-    //let root6, time6, countOfPairs6 = testSparseCPU cnt graph loadIL RDFtokenizer 2
+    let root6, time6, countOfPairs6 = testFastSparseGPU cnt graph loadIL RDFtokenizer
 
     System.IO.Path.GetFileNameWithoutExtension file, triples, (*time1, countOfPairs1, time2, countOfPairs2, time3, countOfPairs3,
-                                                 time4, countOfPairs4,*) time5, countOfPairs5(*, time6, countOfPairs6*)
+                                                 time4, countOfPairs4,*) time5, countOfPairs5, time6, countOfPairs6
 
 let performTests () =
     let basePath = @"../../../data/RDF"
     let files = System.IO.Directory.GetFiles basePath 
     files 
     |> Array.map (fun rdffile -> processFile rdffile @"../../../GraphParsing.Test/GPPerf1_cnf.yrd")
-    |> Array.sortBy (fun (_,_,x,_(*,_,_,_,_,_,_,_,_*)) -> x)
+    |> Array.sortBy (fun (_,_,x,_,_,_(*,_,_,_,_,_,_*)) -> x)
     |> Array.iter (printfn "%A")

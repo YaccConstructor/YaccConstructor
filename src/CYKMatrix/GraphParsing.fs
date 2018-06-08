@@ -11,6 +11,7 @@
     open QuickGraph
     open Microsoft.FSharp.Core.Operators
     open MathNet.Numerics.LinearAlgebra.Double
+    open MySparseGraphParsingImpl
 
 
     let initRulesFromIL loadIL tokenToInt =
@@ -230,3 +231,16 @@
         let (rulesHolder, nonterminals, S) = initRulesFromIL loadIL tokenToInt
 
         recognizeGraph<'MatrixType, 'InnerType> graph mHandler rulesHolder nonterminals !S parallelProcesses
+
+    
+    let graphParseGPU (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
+                  (loadIL:Definition<Source, Source>)
+                  tokenToInt =
+
+        let (allRules, nonterminals, S) = initRulesFromIL loadIL tokenToInt
+        let sparseHandler = (new MySparseHandler(graph.VertexCount)) :> IMatrixHandler<MySparseMatrix, float>
+        let parsingMatrix, vertexToInt = sparseHandler.ParsingMatrixInitializator graph allRules nonterminals
+        //printfn "Matrix initialized"
+        let resultMatrix, multCount = cusparseTransitiveClosure parsingMatrix allRules nonterminals graph.VertexCount
+        (resultMatrix, !S, vertexToInt, multCount)
+

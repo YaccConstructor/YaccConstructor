@@ -81,3 +81,17 @@
     //SparseGPU --- managedCuda
     let testSparseGPU cnt graph loadIL tokenizer numberOfThreads =
         graphParsingTest<MySparseMatrix, float> cnt graph (new MySparseHandler(graph.VertexCount)) loadIL tokenizer numberOfThreads mySparseAnalyzer
+
+    //FastSparseGPU --- managedCuda, minimum data transitions
+    let testFastSparseGPU cnt graph loadIL tokenizer =
+        let S = ref (NonTerminal "")
+        let start = System.DateTime.Now
+        let root =
+            [for i in 0..cnt-1 ->
+                let (parsingMatrix, StartNonTerm, _, _) = graphParseGPU graph loadIL tokenizer
+                S := StartNonTerm
+                parsingMatrix]
+    
+        let time = (System.DateTime.Now - start).TotalMilliseconds / (float cnt)
+        let countOfPairs = mySparseAnalyzer root.[0] !S
+        root.[0], time, countOfPairs

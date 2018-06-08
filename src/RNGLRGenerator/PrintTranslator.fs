@@ -21,13 +21,12 @@ open Yard.Generators.Common
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 open Yard.Core.IL
-open Yard.Core.IL.Production
 open YC.PrettyPrinter.Pretty
 open YC.PrettyPrinter.StructuredFormat
 open Yard.Generators.Common.Epsilon
 open HighlightingPrinter
 
-let getPosFromSource printPositions fullPath dummyPos (src : Source.t) =
+let getPosFromSource printPositions fullPath dummyPos (src : Source) =
     let file =
         if fullPath then src.file
         else
@@ -42,9 +41,9 @@ let getPosFromSource printPositions fullPath dummyPos (src : Source.t) =
       else sprintf "\n# %d \"%s\"" src.startPos.line file
     else "\n"
 
-let defaultSource output = new Source.t("", new Source.Position(0,-1,0), new Source.Position(), output)
+let defaultSource output = new Source("", new SourcePosition(0,-1,0), new SourcePosition(), output)
 
-let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list)
+let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule<Source,Source> list)
         positionType fullPath output dummyPos caseSensitive isAbstractParsingMode isHighlightingMode printPositions =
     let tab = 4
 
@@ -65,21 +64,21 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     let printArgsDeclare args= 
         args
-        |> List.map (fun arg -> sprintf "fun %s ->" (Source.toString arg))
+        |> List.map (fun arg -> sprintf "fun %s ->" (sourceToString arg))
         |> String.concat " "
         |> fun s -> s.Trim()
         |> wordL
 
     let printArgsCallList args other = 
         args
-        |> List.map Source.toString
+        |> List.map sourceToString
         |> String.concat " "
         |> (fun x -> other + " " + x)
 
     let printArgsCallOpt args =
         match args with
         | None -> ""
-        | Some str -> Source.toString str
+        | Some str -> sourceToString str
 
     // Declare non-term arrays
     let count = Array.zeroCreate indexator.nonTermCount
@@ -151,7 +150,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
     let rec getProductionLayout num = function
         | PRef (name, args) ->
             incr num
-            let name = Source.toString name
+            let name = sourceToString name
             let value = 
                 if name <> "error" || isHighlightingMode
                 then sprintf "((unbox %s.[%d]) : '_rnglr_type_%s) " childrenName !num name
@@ -160,24 +159,24 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             |> wordL
         | PToken name -> 
             incr num
-            let name = Source.toString name
+            let name = sourceToString name
             sprintf "(match ((unbox %s.[%d]) : Token) with %s _rnglr_val -> [_rnglr_val] | a -> failwithf \"%s expected, but %%A found\" a )"
                 childrenName !num name name
             |> wordL
         | PLiteral name -> 
             incr num
-            let name = Source.toString name
+            let name = sourceToString name
             let i = Indexator.transformLiteral caseSensitive name |> indexator.literalToIndex
             sprintf "(match ((unbox %s.[%d]) : Token) with L_%s _rnglr_val -> [_rnglr_val] | a -> failwithf \"%s expected, but %%A found\" a )"
                 childrenName !num (indexator.getLiteralName i) name
             |> wordL
         | PSeq (s, ac, _) ->
-            let getVarName innerNum (e : elem<_,_>) =
+            let getVarName innerNum (e : ProductionElem<_,_>) =
                 match e.binding with
                 | None ->
                     incr innerNum
                     sprintf "_rnglr_var_%d" <| !innerNum
-                | Some b -> Source.toString b
+                | Some b -> sourceToString b
                 
             let actionCodeLayout =
                 match ac with
@@ -192,7 +191,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                     |> (fun s -> "(" + s + ")")
                     |> wordL
                 | Some ac ->
-                    let strings = (Source.toString ac).Replace("\r\n", "\n").Split([|'\n'|])
+                    let strings = (sourceToString ac).Replace("\r\n", "\n").Split([|'\n'|])
                     strings.[0] <- String.replicate ac.startPos.column " " + strings.[0]
                     strings
                     |> List.ofArray
@@ -226,7 +225,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 |> aboveListL)
             |> (fun x -> (wordL "(" @@-- x) @@ wordL ")")
         | x -> failwithf "unexpected construction: %A" x
-    let getRuleLayout (rule : Rule.t<Source.t,Source.t>) nonTermName =
+    let getRuleLayout (rule : Rule<Source,Source>) nonTermName =
         if positionType = "" then
             failwith "RNGLR: Unspecified position type"
         wordL (sprintf "fun (%s : array<_>) (parserRange : (%s * %s)) -> " childrenName positionType positionType)
@@ -266,11 +265,11 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             [for i = 0 to args.Length - 1 do
                 yield "'_rnglr_type_" + indexator.indexToNonTerm i ]
             |> List.reduce (fun l r -> l + " * " + r)
-        let errorRule : Rule.t<_,_> = 
+        let errorRule : Rule<_,_> = 
             {
-                name    = new Source.t("error")
+                name    = new Source("error")
                 args    = []
-                body    = PSeq([], Some <| new Source.t("parserRange"), None)
+                body    = PSeq([], Some <| new Source("parserRange"), None)
                 isStart = false
                 isPublic = false
                 isInline = false

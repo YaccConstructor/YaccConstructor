@@ -6,13 +6,12 @@
     open System.Collections.Generic
     open Yard.Core
     open Yard.Core.IL
-    open Yard.Core.IL.Production
-    open Yard.Core.IL.Definition
     open Yard.Core.Helpers
     open Conversions.TransformAux
     open QuickGraph
     open Microsoft.FSharp.Core.Operators
     open MathNet.Numerics.LinearAlgebra.Double
+    open MySparseGraphParsingImpl
 
 
     let initRulesFromIL loadIL tokenToInt =
@@ -20,18 +19,53 @@
         let mutable tokensCount = 0
         let S = ref (NonTerminal "")
         let nonterminals = new ResizeArray<NonTerminal>()
-        let crl = new Dictionary<NonTerminal * NonTerminal, ResizeArray<NonTerminal*Probability.T>>()
-        let srl = new Dictionary<int, ResizeArray<NonTerminal*Probability.T>>()
-        let crl_result = new Dictionary<NonTerminal * NonTerminal, (NonTerminal * Probability.T) list>()
-        let srl_result = new Dictionary<int, (NonTerminal * Probability.T) list>()
-        let erl_result: NonTerminal list = []
-
+        let complexConjRules = new ResizeArray<(NonTerminal * Probability.T) * (NonTerminal * NonTerminal * bool) []>()
+        let simpleConjRules = new ResizeArray<(NonTerminal * Probability.T) * int>()
+        let epsilonConjRules: NonTerminal [] = [||]
         let probOne = Probability.create 1.0
+        
+        let rec parseConjuncts e1 e2 (conjunctsArr:ResizeArray<NonTerminal * NonTerminal * bool>) =
+            match e1, e2 with
+            | PSeq([n1; n2],_,_), PSeq([n3; n4],_,_) ->
+                match n1.rule, n2.rule, n3.rule, n4.rule with 
+                | PRef (name1, _), PRef (name2, _), PRef (name3, _), PRef (name4, _) ->
+                    let nonterm1 = NonTerminal <| sourceToString name1
+                    if not <| nonterminals.Contains nonterm1
+                    then nonterminals.Add nonterm1
+                    let nonterm2 = NonTerminal <| sourceToString name2
+                    if not <| nonterminals.Contains nonterm2
+                    then nonterminals.Add nonterm2
+                    let nonterm3 = NonTerminal <| sourceToString name3
+                    if not <| nonterminals.Contains nonterm3
+                    then nonterminals.Add nonterm3
+                    let nonterm4 = NonTerminal <| sourceToString name4
+                    if not <| nonterminals.Contains nonterm4
+                    then nonterminals.Add nonterm4
+                    conjunctsArr.AddRange([|(nonterm1,nonterm2,true);(nonterm3,nonterm4,true)|])
+                | _ -> failwith "Given grammar is not in conjunctive normal form."
+
+            | PSeq([n1; n2],_,_), PConj(conj1, conj2) ->
+                match n1.rule, n2.rule with 
+                | PRef (name1, _), PRef (name2, _) ->
+                    let nonterm1 = NonTerminal <| sourceToString name1
+                    if not <| nonterminals.Contains nonterm1
+                    then
+                        nonterminals.Add nonterm1
+                    let nonterm2 = NonTerminal <| sourceToString name2
+                    if not <| nonterminals.Contains nonterm2
+                    then
+                        nonterminals.Add nonterm2
+                    conjunctsArr.Add((nonterm1,nonterm2,true))
+                    parseConjuncts conj1 conj2 conjunctsArr
+                | _ -> failwith "Given grammar is not in conjunctive normal form."
+
+            | _ -> failwith "Given grammar is not in conjunctive normal form."
+
 
         for module' in grammar do
             S := module'.rules |> Seq.find (fun r -> r.isStart) |> fun r -> r.name.text |> NonTerminal
             for r in module'.rules do
-                let nonterm = NonTerminal <| Source.toString r.name
+                let nonterm = NonTerminal <| sourceToString r.name
                 if not <| nonterminals.Contains nonterm
                 then nonterminals.Add nonterm
                     
@@ -39,83 +73,87 @@
                 | PSeq([elem],_,_) ->
                     match elem.rule with
                     | PToken src ->
-                        let token = Source.toString src
+                        let token = sourceToString src
                         let intToken = tokenToInt token
-                        if not <| srl.ContainsKey intToken
-                        then
-                            srl.Add(intToken, new ResizeArray<NonTerminal*Probability.T>())
-                        if not <| srl.[intToken].Contains (nonterm, probOne)
-                        then
-                            srl.[intToken].Add (nonterm, probOne)
+                        simpleConjRules.Add((nonterm, probOne), intToken)
                     | _ ->
-                        failwith "Given grammar is not in normal form."
+                        failwith "Given grammar is not in conjunctive normal form."
                         
                 | PSeq([e1; e2],_,_) ->
                     match e1.rule, e2.rule with 
                     | PRef (name1, _), PRef (name2, _) ->
-                        let nonterm1 = NonTerminal <| Source.toString name1
+                        let nonterm1 = NonTerminal <| sourceToString name1
                         if not <| nonterminals.Contains nonterm1
                         then
                             nonterminals.Add nonterm1
-                        let nonterm2 = NonTerminal <| Source.toString name2
+                        let nonterm2 = NonTerminal <| sourceToString name2
                         if not <| nonterminals.Contains nonterm2
                         then
                             nonterminals.Add nonterm2
-                        if not <| crl.ContainsKey (nonterm1, nonterm2)
-                        then
-                            crl.Add((nonterm1, nonterm2), new ResizeArray<NonTerminal*Probability.T>())
-                        if not <| crl.[(nonterm1, nonterm2)].Contains (nonterm, probOne)
-                        then
-                            crl.[(nonterm1, nonterm2)].Add (nonterm, probOne)                     
-                    | _ -> failwith "Given grammar is not in normal form."               
-                | _ -> failwith "Given grammar is not in normal form."
+                        complexConjRules.Add((nonterm, probOne),[|(nonterm1, nonterm2, true)|])
+                    | _ -> failwith "Given grammar is not in conjunctive normal form."
 
-        for key in crl.Keys do
-            let list = Seq.toList crl.[key]
-            crl_result.Add(key, list)
-        for key in srl.Keys do
-            let list = Seq.toList srl.[key]
-            srl_result.Add(key, list)
-        
-        let rulesHolder = new RulesHolder(crl_result, srl_result, erl_result)
+                | PConj(e1, e2) ->
+                    let newConjArr = new ResizeArray<NonTerminal * NonTerminal * bool>()
+                    parseConjuncts e1 e2 newConjArr
+                    complexConjRules.Add((nonterm, probOne), newConjArr.ToArray())
 
-        (rulesHolder, nonterminals, S)
+                | _ -> failwith "Given grammar is not in conjunctive normal form."
+
+        let boolRulesHolder = new BooleanRulesHolder(complexConjRules.ToArray(), simpleConjRules.ToArray(), epsilonConjRules)
+
+        (boolRulesHolder, nonterminals, S)
 
     type Message = bool
 
     let recognizeGraph<'MatrixType, 'InnerType when 'InnerType : comparison> graph
                     (mHandler : IMatrixHandler<'MatrixType, 'InnerType>)
-                    (allRules: RulesHolder)
+                    (allRules: BooleanRulesHolder)
                     nonterminals
                     S 
                     parallelProcesses =
-        if (parallelProcesses = 1)
-        then
-            let parsingMatrix, vertexToInt = mHandler.ParsingMatrixInitializator graph allRules nonterminals
-            //printfn "Matrix initialized"
-            let matrixSize = graph.VertexCount
-            let isChanged = ref true
-            let mutable multCount = 0
 
-            while !isChanged do
-                isChanged := false
-                for (nt1, nt2) in allRules.ComplexTails do
-                    let matrix1 = parsingMatrix.[nt1]
-                    let matrix2 = parsingMatrix.[nt2]
-                    let resultMatrix = mHandler.Multiply matrix1 matrix2          
-                    for (nonTerm, _) in allRules.HeadsByComplexTail (nt1, nt2) do
-                        let nonZ = mHandler.getNonZerosCount parsingMatrix.[nonTerm]
-                        let updatedMatrix = mHandler.Add parsingMatrix.[nonTerm] resultMatrix
-                        parsingMatrix.Remove(nonTerm) |> ignore
-                        parsingMatrix.Add(nonTerm, updatedMatrix)
-                        if (nonZ <> mHandler.getNonZerosCount parsingMatrix.[nonTerm])
-                        then 
-                            isChanged := true
-                //printfn "Iteration done"
-                multCount <- multCount + 1
+        let conjMatrices = new Dictionary<NonTerminal*NonTerminal, 'MatrixType>()
+        let allConjuncts = allRules.AllConjuncts
 
-            (parsingMatrix, S, vertexToInt, multCount)
-        else
+        (*if (parallelProcesses = 1)
+        then*)
+        let parsingMatrix, vertexToInt = mHandler.ParsingMatrixInitializator graph allRules nonterminals
+        //printfn "Matrix initialized"
+        let matrixSize = graph.VertexCount
+        let isChanged = ref true
+        let mutable multCount = 0
+
+        while !isChanged do
+            isChanged := false
+            for (nt1, nt2) in allConjuncts do
+                let matrix1 = parsingMatrix.[nt1]
+                let matrix2 = parsingMatrix.[nt2]
+                let resultMatrix = mHandler.Multiply matrix1 matrix2
+                conjMatrices.Remove(nt1, nt2) |> ignore
+                conjMatrices.Add((nt1, nt2), resultMatrix)
+            for (nonTerm,_), conjuncts in allRules.ComplexRules do
+                let nonZ = mHandler.getNonZerosCount parsingMatrix.[nonTerm]
+                let resultMatrices = conjuncts |> Array.map (fun (n1,n2,_) -> conjMatrices.[n1,n2])
+                if resultMatrices.Length = 1
+                then
+                    let resultConjMatrix = resultMatrices.[0]
+                    let updatedMatrix = mHandler.Add parsingMatrix.[nonTerm] resultConjMatrix
+                    parsingMatrix.Remove(nonTerm) |> ignore
+                    parsingMatrix.Add(nonTerm, updatedMatrix)
+                else
+                    let resultConjMatrix = resultMatrices |> Array.fold (fun acc elem -> mHandler.Conj acc elem) resultMatrices.[0]
+                    let updatedMatrix = mHandler.Add parsingMatrix.[nonTerm] resultConjMatrix
+                    parsingMatrix.Remove(nonTerm) |> ignore
+                    parsingMatrix.Add(nonTerm, updatedMatrix)
+                if (nonZ <> mHandler.getNonZerosCount parsingMatrix.[nonTerm])
+                then 
+                    isChanged := true
+            //printfn "Iteration done"
+            multCount <- multCount + 1
+
+        (parsingMatrix, S, vertexToInt, multCount)
+        (*else
             let parsingMatrixCurrent, vertexToInt = mHandler.ParsingMatrixInitializator graph allRules nonterminals
             let matrixSize = graph.VertexCount
             let isChanged = ref true
@@ -124,8 +162,6 @@
             let emptyMatrix = mHandler.createEmptyMatrix matrixSize
             for nont in parsingMatrixCurrent.Keys do
                 parsingMatrixNew.Add(nont, mHandler.Add parsingMatrixCurrent.[nont] emptyMatrix)
-
-            let nontermPairs = allRules.ComplexTails
 
             let splitedNontermPairs = nontermLockFreeSplit allRules nonterminals parallelProcesses
 
@@ -179,16 +215,29 @@
 
                 multCount <- multCount + 1            
 
-            (parsingMatrixNew, S, vertexToInt, multCount)
+            (parsingMatrixNew, S, vertexToInt, multCount)*)
             
             
 
     let graphParse<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
                   mHandler
-                  (loadIL:t<Source.t, Source.t>)
+                  (loadIL:Definition<Source, Source>)
                   tokenToInt 
                   parallelProcesses =
 
         let (rulesHolder, nonterminals, S) = initRulesFromIL loadIL tokenToInt
 
         recognizeGraph<'MatrixType, 'InnerType> graph mHandler rulesHolder nonterminals !S parallelProcesses
+
+    
+    let graphParseGPU (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
+                  (loadIL:Definition<Source, Source>)
+                  tokenToInt =
+
+        let (allRules, nonterminals, S) = initRulesFromIL loadIL tokenToInt
+        let sparseHandler = (new MySparseHandler(graph.VertexCount)) :> IMatrixHandler<MySparseMatrix, float>
+        let parsingMatrix, vertexToInt = sparseHandler.ParsingMatrixInitializator graph allRules nonterminals
+        //printfn "Matrix initialized"
+        let resultMatrix, multCount = cusparseTransitiveClosure parsingMatrix allRules nonterminals graph.VertexCount
+        (resultMatrix, !S, vertexToInt, multCount)
+

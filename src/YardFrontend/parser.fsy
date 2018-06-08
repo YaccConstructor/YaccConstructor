@@ -20,9 +20,6 @@
 open Microsoft.FSharp.Text
 open Yard.Core.IL
 open Yard.Core
-open Yard.Core.IL.Production
-open Yard.Core.IL.Grammar
-open Yard.Core.IL.Definition
 open System.Text.RegularExpressions
  
 type Range = struct
@@ -32,7 +29,7 @@ type Range = struct
     new (start,end_) = {Start = start; End = end_}
 end
 
-exception ParseError of Source.t * string
+exception ParseError of Source * string
 let parseFile = ref Unchecked.defaultof<_>
 let currentFilename = ref ""
 let allPublic = ref false
@@ -45,7 +42,7 @@ let trd_ (_,_,x) = x
 let joinMaps (p:Map<'a,'b>) (q:Map<'a,'b>) = 
     Map(Seq.concat [ (Map.toSeq p) ; (Map.toSeq q) ])
 
-let mkLbl (lbl:Option<Source.t>) (w:Option<Source.t>) = 
+let mkLbl (lbl:Option<Source>) (w:Option<Source>) = 
     let lblName = 
         match lbl with
         | Some s -> s.text
@@ -66,11 +63,11 @@ let makeNewSeq seq lbl =
      | PSeq(els,ac,_) -> PSeq (els,ac,lbl)
      | x -> x
 
-let errorexception msg parserRange = raise <| ParseError ( new Source.t("", fst parserRange, snd parserRange, !currentFilename), msg ) 
+let errorexception msg parserRange = raise <| ParseError ( new Source("", fst parserRange, snd parserRange, !currentFilename), msg ) 
 let createSeqElem bnd omitted r check =
     { binding = bnd; omit = omitted; rule = r; checker = check }
 
-let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
+let parseRules (filename:string) : Definition<Source, Source> =
     let oldFileName = !currentFilename
     currentFilename := filename
     let ext = filename.Substring(filename.LastIndexOf(".") + 1)    
@@ -107,15 +104,16 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
 %token INCLUDE
 %token SET
 %token AND
-%token <IL.Source.t> EOF
-%token <IL.Source.t> STRING LIDENT UIDENT
-%token <IL.Source.t> PREDICATE ACTION
-%token <IL.Source.t> PATTERN PARAM
+%token SHUFFLE
+%token <IL.Source> EOF
+%token <IL.Source> STRING LIDENT UIDENT
+%token <IL.Source> PREDICATE ACTION
+%token <IL.Source> PATTERN PARAM
 %token <string> SHARPLINE
-%token <IL.Source.t> DLABEL
+%token <IL.Source> DLABEL
 
 %start file
-%type <IL.Definition.t<IL.Source.t, IL.Source.t>> file
+%type <IL.Definition.t<IL.Source, IL.Source>> file
 
 %%
 
@@ -155,7 +153,7 @@ tokens_block : TOKENS_BLOCK
     |> Array.map (fun s -> s.Trim())
     |> Array.filter ((<>) "")
     |> Array.map (fun s ->
-        let genError msg = raise <| ParseError (new Source.t(s, fst parserRange, snd parserRange, !currentFilename),
+        let genError msg = raise <| ParseError (new Source(s, fst parserRange, snd parserRange, !currentFilename),
                                                 "Error in tokens block: " + msg)
         if Regex.IsMatch(s, @"^(_|[A-Z][A-Za-z0-9_]*)$") then s, None
         else
@@ -184,7 +182,7 @@ option_block: OPTIONS_START opts BLOCK_END      { Map.ofList $2 : Map<_,_> }
 
 opts: option opts { $1::$2 } | { [] }
 
-option : option_l_value EQUAL option_value  { ($1 : Source.t).text, ($3 : Source.t).text }
+option : option_l_value EQUAL option_value  { ($1 : Source).text, ($3 : Source).text }
        | option_l_value option_value        { errorexception " Incorrect construction! '=' expected. " parserRange }
 
 option_value: ident { $1 } | STRING { $1 } | kw { $1 }
@@ -237,7 +235,7 @@ rule_delim: COLON {$1} | EQUAL {$1}
 
 inline_opt: INLINE { true } | {false}
 
-rule: start_rule_sign_opt access_modifier_opt inline_opt LIDENT formal_meta_param_opt param_list rule_delim alts
+rule: start_rule_sign_opt access_modifier_opt inline_opt LIDENT formal_meta_param_opt param_list rule_delim shuffles
             { 
                 {
                     Rule.isStart = $1
@@ -264,6 +262,12 @@ formal_meta_list: LIDENT { [$1] } | LIDENT formal_meta_list   { $1::$2 }
 param_opt : { None } | PARAM   { Some $1 }
 
 param_list : { [] } | PARAM param_list { $1::$2 }
+
+shuffles: alts                       { $1 }
+        | alts shuffle_alts_nlist { PShuff ($1,$2) }
+
+shuffle_alts_nlist : SHUFFLE alts shuffle_alts_nlist { PShuff ($2,$3) }  
+                   | SHUFFLE alts                    { $2 }
 
 alts: conjunction                       { $1 }
     | conjunction bar_conjunction_nlist { PAlt ($1,$2) }
@@ -308,16 +312,17 @@ patt: LIDENT {$1} | ACTION {$1}
 
 int_opt : 
     {None}
-    | NUMBER {(Yard.Core.IL.Source.toString $1) |> int |> Some}
+    | NUMBER {(Yard.Core.IL.sourceToString $1) |> int |> Some}
 
 prim: prim STAR            {PMany $1}
+    | NEG prim             {PNeg $2}
     | STARTREPEAT prim ENDREPEAT {PMany $2} 
-    | NUMBER STAR prim           {PRepet ($3, (Some 0), (Yard.Core.IL.Source.toString $1) |> int |> Some)}
+    | NUMBER STAR prim           {PRepet ($3, (Some 0), (Yard.Core.IL.sourceToString $1) |> int |> Some)}
     | prim STAR SQR_LBR int_opt DOUBLEDOT int_opt SQR_RBR {PRepet ($1,$4,$6)}
     | prim PLUS            {PSome $1}
     | prim QUESTION        {POpt $1}
-    | SQR_LBR alts SQR_RBR {POpt $2}
-    | LPAREN alts RPAREN   {$2}
+    | SQR_LBR shuffles SQR_RBR {POpt $2}
+    | LPAREN shuffles RPAREN   {$2}
     | call                 {$1}
     | lbl_seq              {$1}
     | LITERAL              {PLiteral $1}

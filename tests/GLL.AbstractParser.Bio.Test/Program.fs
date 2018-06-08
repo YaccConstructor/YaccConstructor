@@ -2,6 +2,6 @@
 
 [<EntryPoint>]
 let main argv = 
-//    BioDataPreproc.preprocBioData()
+    BioDataPreproc.preprocBioData()
     BioDataPerformance.performTests()
     0

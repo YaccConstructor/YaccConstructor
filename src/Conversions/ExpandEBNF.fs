@@ -16,13 +16,11 @@ module Yard.Core.Conversions.ExpandEbnfStrict
 
 open Yard.Core
 open Yard.Core.IL
-open Production
 open Namer
 open TransformAux
-open Yard.Core.IL.Rule
 
 
-//let dummyPos s = new Source.t(s)
+//let dummyPos s = new Source(s)
 
 //let s2source = TransformAux.createSource
 let generatedSomesCount = ref 0
@@ -40,9 +38,9 @@ let genOptName () =
     generatedOptsCount := !generatedOptsCount + 1
     sprintf "yard_opt_%d" !generatedOptsCount
 
-let default_elem = {omit=false; rule=PRef(new Source.t "dummy", None); binding=None; checker=None}
+let default_elem = {omit=false; rule=PRef(new Source "dummy", None); binding=None; checker=None}
 
-let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) = 
+let convertToBnf (rule:(Rule<Source,Source>)) = 
     let factList list = list |> List.map fst
     let formList list = list |> List.map snd
     let reduceMeta = function 
@@ -155,10 +153,12 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                  metaArgs = metaArgs
                 }) :: !addedBnfRules
             newRule
-         | PMetaRef (src, args, metas) as x ->
+        | PMetaRef (src, args, metas) as x ->
             metas |> List.map (fun prod -> replaceEbnf prod attrs metaArgs)
             |> fun m -> PMetaRef (src, args, m)
-         | PLiteral _ | PPerm _ | PRef _ | PRepet _ | PToken _ as x -> x
+        | PLiteral _ | PPerm _ | PRef _ | PRepet _ | PToken _ as x -> x
+        | PShuff _ -> failwith "Unsupported"
+        | PNeg _ -> failwith "Unsupported"
         //| x -> x
     {rule with body=replaceEbnf rule.body (List.zip rule.args rule.args) rule.metaArgs}::(List.rev !addedBnfRules)
 

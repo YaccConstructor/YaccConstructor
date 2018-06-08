@@ -21,8 +21,6 @@ module ConversionsTests
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.IL.Production
-open Yard.Core.IL.Definition
 open Yard.Core.Helpers
 open Conversions.TransformAux
 open NUnit.Framework
@@ -35,17 +33,10 @@ open Yard.Generators.TreeDump
 open Yard.Generators.YardPrinter
 open Yard.Generators.RIGLRGenerator
 
-let dummyPos s = new Source.t(s)
-let dummyToken s = PToken <| new Source.t(s)
+let dummyPos s = new Source(s)
+let dummyToken s = PToken <| new Source(s)
 
 exception FEError of string
-
-let ConversionsManager = [|new AddDefaultAC.AddDefaultAC(), new AddEOF.AddEOF(), new BuildAST.BuildAST(), new BuildAstSimple.BuildAstSimple(), new ToCNF.ToCNF(),
-                            new ToCNF.DeleteChainRule(), new ToCNF.DeleteEpsRule(), new ToCNF.SplitLongRule(), new ToCNF.RenameTerm(), new EliminateLeftRecursion.EliminateLeftRecursion(),
-                            new ExpandTopLevelAlt.ExpandTopLevelAlt(), new ExpandBrackets.ExpandBrackets(), new ExpandEbnfStrict.ExpandEbnf(), new ExpandInnerAlt.ExpandInnerAlt(),
-                            new ExpandMeta.ExpandMeta(), new LeaveLast.LeaveLast(), new MergeAlter.MergeAlter(), new RemoveAST.RemoveAC(), new ExpandInline.ReplaceInline()
-                            , new ReplaceLiterals.ReplaceLiterals(), new Linearize.Linearize(), new ExpandRepet.ExpandExpand(), new ExpandConjunction.ExpandConjunction()|] 
-                            |> Seq.ofArray |> Seq.cast<Conversion>
 
 let FrontendsManager = [|new FsYaccFrontend(), new YardFrontend()|] |> Seq.ofArray |> Seq.cast<Frontend>
 
@@ -53,7 +44,7 @@ let conversionTestPath = @"./data/Conversions/"
 let GeneratorsManager = [|new GLL(), new RNGLR(), new TreeDump(), new YardPrinter(), new RIGLR()|] |> Seq.ofArray |> Seq.cast<Generator>
 
 
-let getFrontend name =       
+let getFrontend name =
     match Seq.tryFind (fun (elem : Frontend) -> elem.Name = name) FrontendsManager with
     | Some fe -> fe
     | None -> failwith (name + " is not found.")
@@ -65,7 +56,7 @@ let getBE name =
 
 let treeDump = new Yard.Generators.TreeDump.TreeDump ()
 
-let dummyRule : elem<Source.t,Source.t> = {omit=false; binding=None; checker=None; rule=PToken (Source.t "DUMMY")}
+let dummyRule : ProductionElem<Source,Source> = {omit=false; binding=None; checker=None; rule=PToken (Source "DUMMY")}
 
 let expandBrackets = new Conversions.ExpandBrackets.ExpandBrackets()
 let expandMeta = new Conversions.ExpandMeta.ExpandMeta()
@@ -75,17 +66,16 @@ let expandRepeat = new Conversions.ExpandRepet.ExpandExpand()
 let expandTopLevelAlt = new Conversions.ExpandTopLevelAlt.ExpandTopLevelAlt()
 let expandSubSeq = new Conversions.ExpandBrackets.ExpandBrackets()
 let eliminateLeftRecursion = new Conversions.EliminateLeftRecursion.EliminateLeftRecursion()
-let conversionLongRules = new Conversions.ToCNF.SplitLongRule()
-let conversionEps = new Conversions.ToCNF.DeleteEpsRule()
-let conversionChain = new Conversions.ToCNF.DeleteChainRule()
-let conversionRenamer = new Conversions.ToCNF.RenameTerm()
-let conversionCNF = new Conversions.ToCNF.ToCNF()
-let conversionChomNormForm = new Conversions.ToChomNormForm.ToChomNormForm()
+let conversionCNF = new Conversions.CNFandBNF.CNF()
+let conversionBNFconj = new Conversions.CNFandBNF.BNFconj()
+let conversionBNFbool = new Conversions.CNFandBNF.BNFbool()
+let regularApproximarion = new RegularApproximation.RegularApproximation()
 
-let applyConversion (conversion:Conversion) loadIL = 
+
+let applyConversion (conversion:Conversion) loadIL =
     {
         loadIL
-            with grammar = conversion.ConvertGrammar (loadIL.grammar, [||])                               
+            with grammar = conversion.ConvertGrammar (loadIL.grammar, [||])
     }
 
 let fe = new YardFrontend()
@@ -94,32 +84,33 @@ let runTest inputFile conversion expectedResult =
     Namer.initNamer loadIL.grammar
     let result = loadIL |> applyConversion conversion
     let expected = defaultDefinition expectedResult
-#if DEBUG    
+#if DEBUG
     expected |> treeDump.Generate |> string |> printfn "%s"
     printfn "%s" "************************"
     result |> treeDump.Generate |> string |> printfn "%s"
 #endif
+    printfn "!!! %A" (ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
     Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
 
 [<TestFixture>]
 type ``Conversions tests`` () =
-    
+
     [<Test>]
     member test.``ExpandBrackets. Sequence as sequence element test.``()=
-        //let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager() 
+        //let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
         let frontend = new YardFrontend()
-        let ilTree = 
+        let ilTree =
             System.IO.Path.Combine(conversionTestPath,"expandbrackets_1.yrd")
             |> frontend.ParseGrammar
 
         Namer.initNamer ilTree.grammar
-        let ilTreeConverted = 
-            ilTree 
+        let ilTreeConverted =
+            ilTree
             |> applyConversion expandMeta
             |> applyConversion expandEbnf
             |> applyConversion expandInnerAlt
             |> applyConversion expandBrackets
-        let hasNotInnerSeq = 
+        let hasNotInnerSeq =
             ilTreeConverted.grammar
             |> List.forall (fun m ->
                 m.rules |> List.forall
@@ -133,7 +124,7 @@ type ``Conversions tests`` () =
                         eachProd rule.body
                     )
                 )
-            
+
 #if DEBUG
         let generator = new TreeDump()
         printfn "%A\n" (generator.Generate(ilTreeConverted,true))
@@ -142,44 +133,44 @@ type ``Conversions tests`` () =
         //treeDump.Generate expected |> string |> printfn "%s"
         //treeDump.Generate ilTreeConverted |> string |> printfn "%s"
         Assert.True(hasNotInnerSeq)
-   
+
 [<TestFixture>]
 type ``Expand top level alters`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "ExpandTopLevelAlters")
     let path f = System.IO.Path.Combine(basePath, f)
 
     [<Test>]
-    member test.``No alter`` () =     
+    member test.``No alter`` () =
         (verySimpleRules "s"
-            [{dummyRule with rule = PRef (Source.t "d", None)}]
+            [{dummyRule with rule = PRef (Source "d", None)}]
         ) @ (
             verySimpleNotStartRules "d"
-                [{dummyRule with rule = PToken (Source.t "NUM")}]
+                [{dummyRule with rule = PToken (Source "NUM")}]
         )
-        |> runTest (path "noAlters.yrd") expandTopLevelAlt        
+        |> runTest (path "noAlters.yrd") expandTopLevelAlt
 
     [<Test>]
     member test.``One alter`` () =
         (verySimpleRules "s"
-            [{dummyRule with rule = PRef (Source.t "c", None)}]
+            [{dummyRule with rule = PRef (Source "c", None)}]
         ) @ (
             verySimpleRules "s"
-                [{dummyRule with rule = PRef (Source.t "d", None)}]
+                [{dummyRule with rule = PRef (Source "d", None)}]
         )
-        |> runTest (path "oneAlter.yrd") expandTopLevelAlt        
+        |> runTest (path "oneAlter.yrd") expandTopLevelAlt
 
     [<Test>]
-    member test.``Multi alters`` () =        
+    member test.``Multi alters`` () =
         (verySimpleRules "s"
-            [{dummyRule with rule = PRef (Source.t "x", None)}]
+            [{dummyRule with rule = PRef (Source "x", None)}]
         ) @ (
             verySimpleRules "s"
-                [{dummyRule with rule = PRef (Source.t "y", None)}]
+                [{dummyRule with rule = PRef (Source "y", None)}]
         ) @ (
             verySimpleRules "s"
-                [{dummyRule with rule = PRef (Source.t "z", None)}]
+                [{dummyRule with rule = PRef (Source "z", None)}]
         ) @ (
             verySimpleRules "s"
-                [{dummyRule with rule = PRef (Source.t "m", None)}]
+                [{dummyRule with rule = PRef (Source "m", None)}]
         )
-        |> runTest (path "multiAlters.yrd") expandTopLevelAlt 
+        |> runTest (path "multiAlters.yrd") expandTopLevelAlt

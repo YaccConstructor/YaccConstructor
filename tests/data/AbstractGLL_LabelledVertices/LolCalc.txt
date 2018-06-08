@@ -1,0 +1,5 @@
+A_1 MUL B_1
+B_1 ADD A_2
+A_2 MUL B_2
+B_2 ADD B_3
+B_3 MUL A_3

@@ -19,10 +19,10 @@ open Yard.Core.IL
 [<AbstractClass>]
 type Generator() = //as this =
     abstract Name : string
-    abstract Generate : Definition.t<Source.t, Source.t> * bool -> obj      
-    abstract Generate : Definition.t<Source.t, Source.t> * bool * string -> obj
-//    abstract Generate : Definition.t<Source.t,Source.t> -> obj
+    abstract Generate : Definition<Source, Source> * bool -> obj      
+    abstract Generate : Definition<Source, Source> * bool * string -> obj
+//    abstract Generate : Definition.t<Source,Source> -> obj
 //    default this.Generate(grammar) = this.Generate(grammar,true)
-//    abstract Generate : Definition.t<Source.t,Source.t> * string -> obj  
+//    abstract Generate : Definition.t<Source,Source> * string -> obj  
 //    default this.Generate(grammar, str) = this.Generate(grammar,true, str)
     abstract Constraints : Constraint []

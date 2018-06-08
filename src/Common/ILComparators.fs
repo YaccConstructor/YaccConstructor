@@ -15,12 +15,10 @@
 module Yard.Core.ILComparators
 
 open Yard.Core.IL
-open Yard.Core.IL.Production
-open Yard.Core.IL.Definition
 open Yard.Core.Helpers
 
-let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Grammar.t<Source.t, Source.t>) =
-    let srcEquals (a:Source.t) (b:Source.t) =
+let GrammarEqualsWithoutLineNumbers (g1:Grammar<_,_>) (g2:Grammar<_,_>) =
+    let srcEquals (a:Source) (b:Source) =
         if (a.text = b.text) then true
         else printfn "bad %A %A" a b; false
 
@@ -58,6 +56,7 @@ let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
         | PMany t1, PMany t2 -> ilTreeEqualsWithoutLineNumbers t1 t2
         | PSome t1, PSome t2 -> ilTreeEqualsWithoutLineNumbers t1 t2
         | POpt t1, POpt t2 -> ilTreeEqualsWithoutLineNumbers t1 t2
+        | PNeg elem1, PNeg elem2 -> ilTreeEqualsWithoutLineNumbers elem1 elem2
         | PMetaRef(r1, arg1, marg1), PMetaRef(r2, arg2, marg2) -> 
             srcEquals r1 r2 && srcOptEquals arg1 arg2 && 
                 List.length marg1 = List.length marg2 && List.forall2 ilTreeEqualsWithoutLineNumbers marg1 marg2
@@ -65,12 +64,12 @@ let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
         | _ -> false
 
     List.forall2
-        (fun (m1 : Grammar.Module<_,_>) (m2 : Grammar.Module<_,_>) ->
+        (fun (m1 : Module<_,_>) (m2 : Module<_,_>) ->
             getModuleName m1 = getModuleName m2
             && m1.allPublic = m2.allPublic
             && List.forall2 srcEquals m1.openings m2.openings
             && List.forall2
-                (fun (rule1:Rule.t<Source.t, Source.t>) (rule2:Rule.t<Source.t, Source.t>) ->
+                (fun (rule1:Rule<_,_>) (rule2:Rule<_,_>) ->
                     rule1.isStart = rule2.isStart &&
                     rule1.isPublic = rule2.isPublic &&
                     argsAreEqual rule1.args rule2.args &&

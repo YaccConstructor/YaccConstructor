@@ -17,13 +17,12 @@ module Yard.Core.Conversions.Linearize
 open Yard.Core
 open Yard.Core.IL
 open TransformAux
-open Yard.Core.IL.Production
 open System.Collections.Generic
 
 
-let dummyPos s = new Source.t(s)
+let dummyPos s = new Source(s)
 
-let private linearize (grammar: Grammar.t<_,_>) = 
+let private linearize (grammar: Grammar<_,_>) = 
     let rename =
         let decls = new Dictionary<_,_>()
         grammar |> List.iter (fun m ->
@@ -62,13 +61,13 @@ let private linearize (grammar: Grammar.t<_,_>) =
             |> dict
         
         let rulesMap = getRulesMap grammar
-        fun module' metaArgs (name : Source.t) ->
-            if List.exists (fun (arg : Source.t) -> arg.text = name.text) metaArgs then name
+        fun module' metaArgs (name : Source) ->
+            if List.exists (fun (arg : Source) -> arg.text = name.text) metaArgs then name
             elif name.text = errorToken then name
             else
                 try
                     let ruleModule = rulesMap.[module'].[name.text]
-                    new Source.t (namesDict.[ruleModule].[name.text], name)
+                    new Source (namesDict.[ruleModule].[name.text], name)
                 with
                 | :? KeyNotFoundException ->
                     if not <| rulesMap.ContainsKey module' then

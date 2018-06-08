@@ -45,6 +45,7 @@ type RIGLR() =
                 match opt with
                 | "-module" -> moduleName <- value
                 | "-token" -> tokenType <- mapFromType value
+                | _ -> failwith "unsupported option"
 
             let mutable newDefinition = initialConvert definition
             let grammar = new FinalGrammar(newDefinition.grammar.[0].rules, true)                        

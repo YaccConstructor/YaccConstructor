@@ -15,7 +15,7 @@
 module Yard.Core.ConstraintsImpl.NoLiterals
 
 open Yard.Core
-open IL.Production
+open IL
 open Yard.Core.ConstraintsImpl.Common
 
 let private isLiteral = function

@@ -2,13 +2,13 @@
 module Yard.Frontends.FsYaccFrontend.Parser
 open Yard.Core
 type token = 
-  | HEAD of (Source.t)
-  | ACTION_CODE of (Source.t)
-  | IDENT of (Source.t)
+  | HEAD of (Source)
+  | ACTION_CODE of (Source)
+  | IDENT of (Source)
   | COLON
   | BAR
   | TYPE_KW
-  | TYPE of (Source.t)
+  | TYPE of (Source)
   | START_KW
   | ASSOC_KW
   | TOKEN_KW

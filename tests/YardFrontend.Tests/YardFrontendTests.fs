@@ -24,8 +24,6 @@ open Yard.Frontends.YardFrontend
 open Yard.Frontends.YardFrontend.GrammarParser
 open System.Collections.Generic
 open Yard.Core.IL
-open Yard.Core.IL.Production
-open Yard.Core.IL.Definition
 open Yard.Core.Helpers
 open NUnit.Framework
 
@@ -33,7 +31,7 @@ module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
 
 let basePath subdir = System.IO.Path.Combine("./data/YardFrontend/", subdir)
 
-let dummyPos s = new Source.t(s)
+let dummyPos s = new Source(s)
 
 let equalTokens x y =
     let getCtor arg = fst <| Microsoft.FSharp.Reflection.FSharpValue.GetUnionFields(arg, typeof<Token>)
@@ -64,7 +62,7 @@ let lexerTest str lexemsListCorrect =
         with _ -> false
     Assert.IsTrue (areEqual lexemsListCorrect lexemsList)
 
-let preprocessorTest path (expectedIL : t<Source.t,Source.t>) =
+let preprocessorTest path (expectedIL : Definition<Source,Source>) =
     let currentIL = {Main.ParseFile path with info = {fileName =""}}
 
     //printfn "ilDef = %A" currentIL
@@ -72,7 +70,7 @@ let preprocessorTest path (expectedIL : t<Source.t,Source.t>) =
 
     Assert.IsTrue(Yard.Core.ILComparators.GrammarEqualsWithoutLineNumbers expectedIL.grammar currentIL.grammar)
 
-let parserTest str (ilDefCorrect: t<Source.t,Source.t>) =
+let parserTest str (ilDefCorrect: Definition<Source,Source>) =
     let ilDef = { Main.ParseText str "" with info = {fileName =""}}
 
     //printfn "ilDef = %A" ilDef
@@ -97,7 +95,7 @@ let optionsTest path optionsCorrect =
         |> Assert.IsTrue
     optionsAreEq currentOptions optionsCorrect
         
-let getSource name b e = new Source.t (name, new Source.Position(b, 0, b), new Source.Position(e, 0, e), "")
+let getSource name b e = new Source (name, new SourcePosition(b, 0, b), new SourcePosition(e, 0, e), "")
 
 [<TestFixture>]
 type ``YardFrontend lexer tests`` () = 
@@ -397,7 +395,7 @@ type ``YardFrontend options tests`` () =
 type ``YardFrontend Complete tests`` () =    
     [<Test>]
     member test.``L_attr test`` () =
-        let rules : Rule.t<_,_> list = 
+        let rules : Rule<_,_> list = 
             [{ 
                 name = dummyPos"s"
                 args = []
@@ -440,9 +438,9 @@ type ``YardFrontend Complete tests`` () =
                 LIDENT (getSource "n" 84 85); EQUAL(getSource ":" 2 9); UIDENT (getSource "NUMBER" 86 92);
                 ACTION (getSource "(value n |> int) + i" 94 114); SEMICOLON (getSource ":" 2 9); EOF(getSource ":" 2 9)]
 
-            {empty with head = Some <| getSource "  let value x = (x:>Lexeme<string>).value  " 3 46
-                        grammar = defaultModules rules
-            }
+            {emptyGrammarDefinition with head = Some <| getSource "  let value x = (x:>Lexeme<string>).value  " 3 46
+                                         grammar = defaultModules rules
+            } 
         
 [<TestFixture>]
 type ``Yardfrontend label tests`` () =
@@ -468,7 +466,7 @@ type ``Yardfrontend label tests`` () =
 
     [<Test>]
     member test.``weight test correct input`` () =
-        let rules: Rule.t<_,_> list  =
+        let rules: Rule<_,_> list  =
           [{name = dummyPos"s";
             args = [];
             body = PSeq ([{omit = false;

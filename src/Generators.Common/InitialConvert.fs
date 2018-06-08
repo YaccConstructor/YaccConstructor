@@ -17,12 +17,11 @@
 module Yard.Generators.Common.InitialConvert
 
 open Yard.Core.IL
-open Yard.Core.IL.Production
 open System.Collections.Generic
 open Yard.Core.Conversions.TransformAux
 
-let convertRules (ruleList : Rule.t<_,_> list) =
-    let addStartRule (ruleList : Rule.t<_,_> list) =
+let convertRules (ruleList : Rule<_,_> list) =
+    let addStartRule (ruleList : Rule<_,_> list) =
         let wasStart = ref false
         ruleList
         |> List.fold
@@ -31,10 +30,10 @@ let convertRules (ruleList : Rule.t<_,_> list) =
                 else
                     if !wasStart then failwith "More than one start rule"
                     wasStart := true
-                    let startRule : Rule.t<_,_> =
+                    let startRule : Rule<_,_> =
                         {
                             isStart = true
-                            name = new Source.t("yard_start_rule", rule.name)
+                            name = new Source("yard_start_rule", rule.name)
                             args = rule.args
                             metaArgs = []
                             isPublic=false
@@ -48,7 +47,7 @@ let convertRules (ruleList : Rule.t<_,_> list) =
                      x)
 
     let splitAlters ruleList =
-        let rec splitRule (curRule : Rule.t<_,_>) res = function
+        let rec splitRule (curRule : Rule<_,_>) res = function
             | PAlt (l, r) ->
                 let rightRes = splitRule curRule res r
                 splitRule curRule rightRes l
@@ -63,17 +62,17 @@ let convertRules (ruleList : Rule.t<_,_> list) =
             else count.[str]
         ruleList
         |> List.iter
-            (fun (rule : Rule.t<_,_>) ->
+            (fun (rule : Rule<_,_>) ->
                 let str = rule.name.text
                 count.[str] <- getCount str + 1)
         let rec reachable =
             function
             | PToken _ | PLiteral _ -> true
-            | PRef (n, _) -> getCount <| Source.toString n > 0
+            | PRef (n, _) -> getCount <| sourceToString n > 0
             | PSeq (s,_,_) -> s |> List.forall (fun elem -> reachable elem.rule)
             | PAlt (x,y) -> reachable x && reachable y
             | x -> failwithf "Unexpected construction %A" x
-        let rec inner (ruleList : Rule.t<_,_> list) =
+        let rec inner (ruleList : Rule<_,_> list) =
             let iter = ref false
             let res = 
                 ruleList
@@ -89,7 +88,7 @@ let convertRules (ruleList : Rule.t<_,_> list) =
         inner ruleList
     ruleList |> addStartRule |> splitAlters |> filterNonReachable
 
-let initialConvert (def : Definition.t<_,_>) =
+let initialConvert (def : Definition<_,_>) =
     if def.grammar.Length > 1 then
         failwith "More than one module. Use 'Linearize' conversion"
     let rules = def.grammar.Head.rules |> convertRules

@@ -15,9 +15,8 @@
 module Yard.Core.ConstraintsImpl.Common
 
 open Yard.Core.IL
-open Production
 
-let existsRules pred (grammar : Grammar.t<_,_>) =
+let existsRules pred (grammar : Grammar<_,_>) =
     grammar |> List.exists (fun m ->
         m.rules |> List.exists pred
     )
@@ -36,6 +35,8 @@ let existsSubProd pred =
                 metas |> List.exists exists
             | PPerm elems -> elems |> List.exists exists
             | PLiteral _ | PToken _ | PRef _ -> false
+            | PShuff _ -> failwith "Unsupported"
+            | PNeg _ -> failwith "Unsupported"
     exists
 
 let existsProd pred =

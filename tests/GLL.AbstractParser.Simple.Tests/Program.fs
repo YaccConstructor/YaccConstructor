@@ -21,6 +21,7 @@ open NUnit.Framework
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.AbstractParser
 open Yard.Generators.Common.ASTGLL
+open Yard.Generators.Common.ASTGLLFSA
 open Yard.Generators.GLL.ParserCommon
 open YC.API
 open Yard.Frontends.YardFrontend
@@ -69,10 +70,9 @@ let getInputGraph tokenizer inputFile =
     
     g 
 
-let getParserSource grammarFile = 
+let getParserSource grammarFile conv = 
     let fe = new YardFrontend()
     let gen = new GLL()
-    let conv = seq{yield new ExpandMeta()}
     generate (grammarsDir + grammarFile)
              fe gen 
              None
@@ -82,7 +82,8 @@ let getParserSource grammarFile =
 
 let test grammarFile inputFile nodesCount edgesCount termsCount ambiguityCount = 
     //printfn "%A" needChangeDirectory
-    let parser = getParserSource grammarFile
+    let conv = [new ExpandMeta()]
+    let parser = getParserSource grammarFile conv
     let input  = getInputGraph parser.StringToToken inputFile
     let tree = buildAst parser input
     //printfn "%A" tree
@@ -94,9 +95,52 @@ let test grammarFile inputFile nodesCount edgesCount termsCount ambiguityCount =
     Assert.AreEqual(termsCount, t, sprintf "Terms expected:%i, found:%i." termsCount t) 
     Assert.AreEqual(ambiguityCount, amb, sprintf "Ambiguities expected:%i, found:%i." ambiguityCount amb)
     Assert.Pass()
-      
+
+let initGraph (graph : IVertexAndEdgeListGraph<_, _>) (edgeTagToString : _ -> string) (parserSource : ParserSourceGLL) = 
+        let edgeTagToInt x = edgeTagToString x |> parserSource.StringToToken |> int
+        let simpleGraph = new SimpleInputGraph<_>(graph.VertexCount, edgeTagToInt)
+        simpleGraph.AddVerticesAndEdgeRange(graph.Edges) |> ignore
+        simpleGraph
+
+let sppfTest grammarFile inputGraph nonTermName maxLength = 
+    let ps = getParserSource grammarFile Seq.empty
+    let preparedGraph = initGraph inputGraph id ps
+    let _, sppf, _ = parse ps preparedGraph true
+    let nt = sppf.GetNonTermByName nonTermName ps
+    let pathset = sppf.Iterate nt ps maxLength
+    Assert.AreEqual(maxLength, Seq.length pathset)
+
 [<TestFixture>]
 type ``GLL abstract parser tests``() =
+    [<Test>]
+    member this._01_SimpleSPPFTest() = 
+        let vertices = new ResizeArray<int>()
+        vertices.Add(0)
+        vertices.Add(1)
+        vertices.Add(2)
+        let edges = new ResizeArray<ParserEdge<string>>()
+        edges.Add(new ParserEdge<string>(0, 1, "A"))
+        edges.Add(new ParserEdge<string>(1, 0, "A"))
+        edges.Add(new ParserEdge<string>(1, 2, "B"))
+        edges.Add(new ParserEdge<string>(2, 1, "B"))
+        let graph = new QuickGraph.AdjacencyGraph<int, ParserEdge<string>>()
+        graph.AddVerticesAndEdgeRange edges |> ignore
+        sppfTest "MyBrackets.yrd" graph "s" 100
+        
+
+    [<Test>]
+    member this._02_SimpleEpsCycleSPPFTest() =
+        let vertices = [|0; 1; 2; 3; 4; 5|]
+        let edges = new ResizeArray<ParserEdge<string>>()
+        edges.Add(new ParserEdge<string>(0, 1, "A"))
+        edges.Add(new ParserEdge<string>(1, 2, "A"))
+        edges.Add(new ParserEdge<string>(2, 3, "A"))
+        edges.Add(new ParserEdge<string>(3, 4, "C"))
+        edges.Add(new ParserEdge<string>(4, 5, "C"))
+        let graph = new QuickGraph.AdjacencyGraph<int, ParserEdge<string>>()
+        graph.AddVerticesAndEdgeRange edges |> ignore
+        sppfTest "EpsCycle.yrd" graph "a" 5
+
     [<Test>]  
     member this._04_RightRecursionCheck () =
         test "RightRecursionCheck.yrd" 
@@ -367,8 +411,9 @@ let f x =
 //            printfn "triples in %A: %A" (System.IO.Path.GetFileName p) f.Triples.Count
     //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\foaf.rdf"
     //YC.GLL.Abstarct.Tests.RDFPerformance.parse @"C:\gsv\projects\YC\YaccConstructor\tests\data\RDF\wine.rdf"
-    let basePath = if x.Length = 1 then x.[0] else @"..\..\..\data\RDF"
-    YC.GLL.Abstarct.Tests.RDFPerformance.performTests basePath
+    //let basePath = if x.Length = 1 then x.[0] else @"..\..\..\data\RDF"
+    //YC.GLL.Abstarct.Tests.RDFPerformance.performTests basePath
+    YC.GLL.Abstarct.Tests.RDFPerformance.doSmth()
     0
 
 

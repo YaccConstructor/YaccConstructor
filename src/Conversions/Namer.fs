@@ -15,7 +15,6 @@
 module Yard.Core.Namer
 
 open IL
-open Production
 open System.Collections.Generic
 
 (** prefix for all items created by Yard *)
@@ -24,7 +23,7 @@ let private withPrefix s = "yard_" + s
 (** global variable for number of current generated rule *)
 let private curNum = ref 0
 
-//let private genYardName n (b, e, f) = new Source.t(sprintf "%s_%d" (withPrefix n) !curNum, b, e, f)
+//let private genYardName n (b, e, f) = new Source(sprintf "%s_%d" (withPrefix n) !curNum, b, e, f)
 
 module Names =
  begin
@@ -59,13 +58,13 @@ end
 
 let usedNames = new HashSet<_>()
 
-let initNamer (grammar : Grammar.t<_,_>) =
+let initNamer (grammar : Grammar<_,_>) =
     curNum := 0
     usedNames.Clear()
     let add s = usedNames.Add s |> ignore
-    let addSrc (s : Source.t) = usedNames.Add s.text |> ignore
+    let addSrc (s : Source) = usedNames.Add s.text |> ignore
     let acceptable c = System.Char.IsLetterOrDigit c || c = '_'
-    let addAC (s : Source.t) =
+    let addAC (s : Source) =
         let len = ref 0
         s.text |> String.iteri (fun i c ->
             if acceptable c
@@ -92,6 +91,7 @@ let initNamer (grammar : Grammar.t<_,_>) =
         | PConj (l,r) ->
             walk l
             walk r
+        | PNeg x -> walk x
         | PMany x | PSome x | POpt x | PRepet (x,_,_) -> walk x
         | PSeq (elems, ac, lbl) ->
             elems |> List.iter (fun e ->
@@ -100,6 +100,7 @@ let initNamer (grammar : Grammar.t<_,_>) =
                 walk e.rule
             )
         | PPerm elems -> elems |> List.iter walk
+        | PShuff _ -> failwith "Unsupported"
 
     grammar |> List.iter (fun mod' ->
         add <| getModuleName mod'
@@ -127,16 +128,16 @@ let newName (n : string) =
     usedNames.Add !res |> ignore
     !res
 
-let newSource (old : Source.t) = new Source.t(newName old.text, old)
+let newSource (old : Source) = new Source(newName old.text, old)
 
-let genNewSourceWithRange (name : string) (body : t<_,_>) =
+let genNewSourceWithRange (name : string) (body : Production<_,_>) =
     let rec getBegin = function
         | PSeq (s, ac,l) ->
             match s with
             | h::_ -> getBegin h.rule
             | _ ->
                 match ac with
-                | Some (ac : Source.t) -> ac
+                | Some (ac : Source) -> ac
                 | None -> failwith "Empty sequence without action code"
         | PRef (n,_) -> n
         | PAlt (l, r) -> getBegin l
@@ -149,8 +150,10 @@ let genNewSourceWithRange (name : string) (body : t<_,_>) =
         | PMetaRef (n,_,_) -> n
         | PRepet (b,_,_) -> getBegin b
         | PPerm _  as x -> failwithf "Unrealized construction: %A" x
+        | PShuff _ -> failwith "Unsupported"
+        | PNeg _ -> failwith "Unsupported"
     let oldSource = getBegin body
-    new Source.t(name, oldSource)
+    new Source(name, oldSource)
 
 (** returns true if given name is metarule name for EBNF *)
 let isEBNFmeta name = 

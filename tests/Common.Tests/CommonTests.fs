@@ -10,7 +10,7 @@ open Yard.Generators.GLL
 open Yard.Generators.RNGLR
 open Yard.Generators.TreeDump
 open Yard.Generators.YardPrinter
-open Yard.Generators.RIGLRGenerator
+//open Yard.Generators.RIGLRGenerator
 open Yard.Frontends.FsYaccFrontend
 open Yard.Frontends.YardFrontend
 open Yard.Core.Conversions
@@ -20,7 +20,7 @@ open Yard.Core.Conversions.ExpandInline
 type ``Components loader tests`` () =
     [<Test>]
     member test.``All generators`` () =
-        let generatorsManager = [|new GLL(), new RNGLR(), new TreeDump(), new YardPrinter(), new RIGLR()|] |> Seq.ofArray |> Seq.cast<Generator>
+        let generatorsManager = [|new GLL(), new RNGLR(), new TreeDump(), new YardPrinter()(*, new RIGLR()*)|] |> Seq.ofArray |> Seq.cast<Generator>
         let generatorNames = Seq.map (fun (elem: Generator) -> elem.Name) generatorsManager
         let allGenerators =
             List.ofSeq generatorNames

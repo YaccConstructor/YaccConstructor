@@ -26,11 +26,13 @@ s: C s RT s | G s0 RL s | ba s | ba | eps
 *)
 let loadGrammar grammarFile = 
     let data = System.IO.File.ReadAllLines grammarFile
-    let getLocks = int <| data.[0].Trim()
+    let getLocks = int <| data.[0].Trim()    
     let calls = int <| data.[1].Trim()
+    let asserts = int <| data.[2].Trim()
+    let assertsGrm = [|0 .. asserts - 1|] |> Array.map (fun i -> "A" + string i) |> String.concat " | "
     let mutable grm = 
-        "ba: A \n"
-      + "ca: A \n"
+        "ba: " +  assertsGrm + " \n"
+      + "ca: " +  assertsGrm + " \n"
       + "[<Start>]\n"
       + "s: {} | ba s | ba \n"
     let genBrs tmplt count =

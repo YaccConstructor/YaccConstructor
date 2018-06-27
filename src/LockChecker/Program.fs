@@ -25,7 +25,7 @@ s0: C s0 RT s0 | G s0 RL s0 | ca s0 | ca | eps
 s1: C s1 RT s1 | G s0 RL s1 | eps
 
 [<Start>]
-s: s1 ba | ba s1 | ba s | s ba| s1 s | s s1 | ba | C s RT s1 | C s1 RT s | C s RT s 
+s: ba s | s ba| s1 s | s s1 | ba | C s RT s1 | C s1 RT s | C s RT s 
 *)
 let loadGrammar grammarFile = 
     let data = System.IO.File.ReadAllLines grammarFile
@@ -37,7 +37,7 @@ let loadGrammar grammarFile =
         "ba: " +  assertsGrm + " \n"
       + "ca: " +  assertsGrm + " \n"
       + "[<Start>]\n"
-      + "s: s1 ba | ba s1 | ba s | s ba | s s1 | s1 s | ba \n"
+      + "s: ba s | s ba | s s1 | s1 s | ba \n"
     let genBrs tmplt count =
         [|0..count - 1|] 
         |> Array.map (fun i -> sprintf tmplt i i)

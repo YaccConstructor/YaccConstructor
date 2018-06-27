@@ -58,7 +58,7 @@ let loadGrammar grammarFile =
     
     grm + "    |" + sCalls1 + "\n    |" + sCalls2 + "\n    |" + sCalls3 + "\n" + s0Head + "    |" + s0Calls + "\n    |" + s0Locks + "\n"
     + s1Head + "    |" + s1Calls +  "    |" + s1Locks + "\n"
-
+(*
 let singlePathForRoot (root: INode) (intToString : Dictionary<_,_>) : seq<string> =
     let results = new Dictionary<INode, _>() 
     let rec getPath : INode -> seq<string> = function
@@ -94,12 +94,93 @@ let singlePathForRoot (root: INode) (intToString : Dictionary<_,_>) : seq<string
         | _ -> failwith "Unexpected node type. rly?"
 
     getPath root
+*)
+let allPathsForRoot (root: INode) (intToString : Dictionary<_,_>) : List<List<string>> =
+    let results = new Dictionary<INode, _>() 
+    let rec getPaths : INode -> List<List<string>> = function
+        | :? IntermidiateNode as i -> 
+            let isGot,value = results.TryGetValue i
+            if isGot
+            then
+                if (value = null)
+                then
+                    new List<_>()
+                else
+                    value
+            else
+                results.Add(i, null)
+                let f = getPaths i.First
+                results.Remove(i) |> ignore
+                results.Add(i, f)
+                if (i.Others <> null)
+                then
+                    for o in i.Others do
+                        f.AddRange (getPaths o)
+                
+                f
+        | :? TerminalNode as t ->
+            let res = new List<List<_>>()
+            if t.Name <> -1<token> 
+            then
+                let l = new List<_>()
+                l.Add(sprintf "%s %i %i"
+                         intToString.[int t.Name]
+                         (getLeftExtension t.Extension)
+                         (getRightExtension t.Extension)
+                        )
+                res.Add(l)
+            res
+        | :? PackedNode as p ->
+            let rightPaths = getPaths p.Right
+            let leftPaths = getPaths p.Left
+            let result = new List<List<_>>()
+            if (rightPaths.Count > 0)
+            then
+                if (leftPaths.Count > 0)
+                then
+                    for rp in rightPaths do
+                        for lp in leftPaths do
+                            let l = new List<_>()
+                            l.AddRange lp
+                            l.AddRange rp
+                            result.Add(l)
+                    result
+                else
+                    rightPaths
+            else
+                leftPaths
+        | :? NonTerminalNode as n ->
+            let isGot,value = results.TryGetValue n
+            if isGot
+            then 
+                if (value = null)
+                then
+                    new List<_>()
+                else
+                    value
+            else
+                results.Add(n, null)
+                let f = getPaths n.First
+                if (n.Others <> null)
+                then
+                    for o in n.Others do
+                        f.AddRange (getPaths o)
+                results.Remove(n) |> ignore
+                results.Add(n, f)
+                f
+            
+        | :? EpsilonNode as eps ->
+            new List<List<_>>()
+        | _ -> failwith "Unexpected node type. rly?"
+
+    getPaths root
 
 [<EntryPoint>]
 let main argv =
     //let graph = ".\\..\\..\\graph"
     //let grammarFile = ".\\..\\..\\grammar"
     let graph = argv.[0]
+    /// LOCKS, CALLS, ASSERTS
     let grammarFile = argv.[1]
     
     let grammar = loadGrammar grammarFile    
@@ -116,13 +197,21 @@ let main argv =
 
     let inputGraph = loadGraph graph tokenizer
 
-    let treesForEachInitialInputPosition = getAllSPPFRootsAsINodes parserSource inputGraph
+    let roots = getAllSPPFRootsAsINodes parserSource inputGraph
 
-    let result = 
-        singlePathForRoot treesForEachInitialInputPosition.[0] parserSource.IntToString
-        |> Array.ofSeq
+    //let tree = new Tree<_>(roots, graph.PositionToString, parser.IntToString)
+
+    if roots.Length < 1
+    then 
+        printfn "doesn't parsed"
+    else
+        let result = 
+            roots
+            |> Array.collect(fun root -> (allPathsForRoot root parserSource.IntToString).ToArray())
+            |> Array.map(fun x -> System.String.Join("; ", x))
+            |> Array.distinct
     
-    let outputFile = argv.[2]
-    System.IO.File.WriteAllLines(outputFile, result)    
+        let outputFile = argv.[2]
+        System.IO.File.WriteAllLines(outputFile, result)    
     
     0 // return an integer exit code

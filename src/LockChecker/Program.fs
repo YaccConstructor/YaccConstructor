@@ -15,7 +15,34 @@ let loadGraph graphFile tokenizer =
     graph.AddVerticesAndEdgeRange edges |> ignore
     graph
 
-let loadGrammar grammarFile = ""
+(*
+ba: ASSERT
+ca: ASSERT
+
+s0: C s0 RT s0 | G s0 RL s0 | ca s0 | ca | eps
+
+[<Start>]
+s: C s RT s | G s0 RL s | ba s | ba | eps
+*)
+let loadGrammar grammarFile = 
+    let data = System.IO.File.ReadAllLines grammarFile
+    let getLocks = int <| data.[0].Trim()
+    let calls = int <| data.[1].Trim()
+    let mutable grm = 
+        "ba: A \n"
+      + "ca: A \n"
+      + "[<Start>]\n"
+      + "s: {} | ba s | ba \n"
+    let genBrs tmplt count =
+        [|0..count - 1|] 
+        |> Array.map (fun i -> sprintf tmplt i i)
+        |> String.concat "\n    |" 
+    let sCalls = genBrs " C%i s RT%i s" calls
+    let sLocks = genBrs " G%i s0 RL%i s" getLocks
+    let s0Calls = genBrs " C%i s0 RT%i s0" calls
+    let s0Locks = genBrs " G%i s0 RL%i s0" getLocks
+    let s0Head = "\ns0: {} | ca s0 | ca \n"
+    grm + "    |" + sCalls + "\n    |" + sLocks + "\n" + s0Head + "    |" + s0Calls + "\n    |" + s0Locks + "\n"
 
 [<EntryPoint>]
 let main argv =

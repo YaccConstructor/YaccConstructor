@@ -59,7 +59,7 @@ let loadGrammar grammarFile =
     grm + "    |" + sCalls1 + "\n    |" + sCalls2 + "\n    |" + sCalls3 + "\n" + s0Head + "    |" + s0Calls + "\n    |" + s0Locks + "\n"
     + s1Head + "    |" + s1Calls +  "    |" + s1Locks + "\n"
 
-let singlePathToBadAssertForRoot (root: INode) (badAssertInt : int) (intToString : Dictionary<_,_>) : seq<string> =
+let singlePathForRoot (root: INode) (intToString : Dictionary<_,_>) : seq<string> =
     let results = new Dictionary<INode, _>() 
     let rec getPath : INode -> seq<string> = function
         | :? IntermidiateNode as i ->
@@ -74,7 +74,7 @@ let singlePathToBadAssertForRoot (root: INode) (badAssertInt : int) (intToString
             let res = new List<_>()
             if t.Name <> -1<token> 
             then 
-                seq{yield intToString.[int t.Name]}
+                seq{yield (sprintf "%s %i %i" intToString.[int t.Name] (getLeftExtension t.Extension) (getRightExtension t.Extension))}
             else
                 Seq.empty
         | :? PackedNode as p ->
@@ -88,11 +88,7 @@ let singlePathToBadAssertForRoot (root: INode) (badAssertInt : int) (intToString
                 Seq.empty
             else
                 results.Add(n, null)
-                if (int n.Name = badAssertInt)
-                then
-                    seq{yield intToString.[int n.Name]}
-                else
-                    getPath n.First
+                getPath n.First
         | :? EpsilonNode as eps ->
             Seq.empty
         | _ -> failwith "Unexpected node type. rly?"
@@ -108,7 +104,7 @@ let main argv =
     
     let grammar = loadGrammar grammarFile    
     
-    System.IO.File.WriteAllText("resultGrammar.yrd", grammar)
+    //System.IO.File.WriteAllText("resultGrammar.yrd", grammar)
 
     let parserSource =
         let fe = new YardFrontend()
@@ -121,15 +117,9 @@ let main argv =
     let inputGraph = loadGraph graph tokenizer
 
     let treesForEachInitialInputPosition = getAllSPPFRootsAsINodes parserSource inputGraph
-    let badAssertInt = 
-        let k = ref 0
-        for kvp in parserSource.IntToString do
-            if kvp.Value = "ba"
-            then k := kvp.Key
-        !k
 
     let result = 
-        singlePathToBadAssertForRoot treesForEachInitialInputPosition.[0] badAssertInt parserSource.IntToString
+        singlePathForRoot treesForEachInitialInputPosition.[0] parserSource.IntToString
         |> Array.ofSeq
     
     let outputFile = argv.[2]

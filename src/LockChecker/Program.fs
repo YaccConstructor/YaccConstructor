@@ -6,6 +6,7 @@ open Yard.Frontends.YardFrontend
 open YC.API
 open AbstractParser
 open System.Collections.Generic
+open Microsoft.FSharp.Collections
 
 let loadGraph graphFile tokenizer =
     let data = System.IO.File.ReadAllLines(graphFile)
@@ -68,41 +69,92 @@ let loadGrammar grammarFile =
     + alts [|s1Head; s1Calls; s1Locks|] 
     + "\n"
 
-let singlePathForRoot (root: INode) (intToString : Dictionary<_,_>) : seq<string> =
+//let singlePathForRoot (root: INode) (intToString : Dictionary<_,_>) : seq<string> =
+//    let results = new Dictionary<INode, _>() 
+//    let rec getPath : INode -> seq<string> = function
+//        | :? IntermidiateNode as i ->
+//            let isGot,value = results.TryGetValue i
+//            if isGot
+//            then 
+//                Seq.empty
+//            else
+//                results.Add(i, null)
+//                getPath i.First
+//        | :? TerminalNode as t ->
+//            let res = new List<_>()
+//            if t.Name <> -1<token> 
+//            then 
+//                seq{yield (sprintf "%s %i %i" intToString.[int t.Name] (getLeftExtension t.Extension) (getRightExtension t.Extension))}
+//            else
+//                Seq.empty
+//        | :? PackedNode as p ->
+//            let rightPath = getPath p.Right
+//            let leftPath = getPath p.Left
+//            Seq.append leftPath rightPath
+//        | :? NonTerminalNode as n ->
+//            let isGot,value = results.TryGetValue n
+//            if isGot
+//            then 
+//                Seq.empty
+//            else
+//                results.Add(n, null)
+//                getPath n.First
+//        | :? EpsilonNode as eps ->
+//            Seq.empty
+//        | _ -> failwith "Unexpected node type. rly?"
+//
+//    getPath root
+
+
+let allPathForRoot (root: INode) (intToString : Dictionary<_,_>) =
     let results = new Dictionary<INode, _>() 
-    let rec getPath : INode -> seq<string> = function
+    let rec getPath : INode -> HashSet<_>  = function
         | :? IntermidiateNode as i ->
             let isGot,value = results.TryGetValue i
             if isGot
-            then 
-                Seq.empty
+            then new HashSet<_>()
             else
                 results.Add(i, null)
-                getPath i.First
-        | :? TerminalNode as t ->
-            let res = new List<_>()
-            if t.Name <> -1<token> 
-            then 
-                seq{yield (sprintf "%s %i %i" intToString.[int t.Name] (getLeftExtension t.Extension) (getRightExtension t.Extension))}
-            else
-                Seq.empty
-        | :? PackedNode as p ->
-            let rightPath = getPath p.Right
-            let leftPath = getPath p.Left
-            Seq.append leftPath rightPath
+                let first = getPath i.First 
+                
+                let res = new HashSet<_>(first)
+                if i.Others <> null 
+                then  i.Others |> ResizeArray.map getPath  |> ResizeArray.iter (fun elt -> res.UnionWith elt)
+                res
+       
         | :? NonTerminalNode as n ->
             let isGot,value = results.TryGetValue n
             if isGot
-            then 
-                Seq.empty
+            then new HashSet<_>()
             else
                 results.Add(n, null)
-                getPath n.First
-        | :? EpsilonNode as eps ->
-            Seq.empty
+                let first = getPath n.First 
+                //let others = n.Others |> Seq.map getPath
+                let res = new HashSet<_>(first)
+                if n.Others <> null 
+                then  n.Others |> ResizeArray.map getPath  |> ResizeArray.iter (fun elt -> res.UnionWith elt)
+                res
+       
+        | :? PackedNode as p ->
+            let rightPath = getPath p.Right
+            let leftPath = getPath p.Left
+            if leftPath.Count = 0
+            then rightPath
+            elif rightPath.Count = 0 
+            then leftPath
+            else new HashSet<_>([|for l in leftPath do yield! [|for r in rightPath -> l + " " + r|]|])
+        
+        | :? TerminalNode as t ->
+            if t.Name <> -1<token> 
+            then new HashSet<_> ([|intToString.[int t.Name]|])
+            else new HashSet<_>()
+
+        | :? EpsilonNode as eps -> new HashSet<_>()
+
         | _ -> failwith "Unexpected node type. rly?"
 
     getPath root
+
 
 [<EntryPoint>]
 let main argv =
@@ -127,8 +179,12 @@ let main argv =
     let treesForEachInitialInputPosition = getAllSPPFRootsAsINodes parserSource inputGraph
 
     let result = 
-        singlePathForRoot treesForEachInitialInputPosition.[0] parserSource.IntToString
-        |> Array.ofSeq
+        let res = new HashSet<_>()
+        treesForEachInitialInputPosition
+        |> Array.map (fun x -> allPathForRoot x parserSource.IntToString)
+        |> Array.iter (fun s -> res.UnionWith s)
+        res
+
     
     let outputFile = argv.[2]
     System.IO.File.WriteAllLines(outputFile, result)    

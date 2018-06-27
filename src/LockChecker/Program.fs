@@ -27,37 +27,47 @@ s1: C s1 RT s1 | G s0 RL s1 | eps
 [<Start>]
 s: ba s | s ba| s1 s | s s1 | ba | C s RT s1 | C s1 RT s | C s RT s 
 *)
+
 let loadGrammar grammarFile = 
     let data = System.IO.File.ReadAllLines grammarFile
     let getLocks = int <| data.[0].Trim()    
     let calls = int <| data.[1].Trim()
     let asserts = int <| data.[2].Trim()
     let assertsGrm = [|0 .. asserts - 1|] |> Array.map (fun i -> "A" + string i) |> String.concat " | "
-    let mutable grm = 
-        "ba: " +  assertsGrm + " \n"
-      + "ca: " +  assertsGrm + " \n"
-      + "[<Start>]\n"
-      + "s: ba s | s ba | s s1 | s1 s | ba \n"
+    let mutable grmHead = 
+        "ba: " + assertsGrm + " \n"
+      + "ca: " + assertsGrm + " \n"
+      
     let genBrs tmplt count =
         [|0..count - 1|] 
         |> Array.map (fun i -> sprintf tmplt i i)
         |> String.concat "\n    |" 
 
-    let s1Head = "\ns1: {} \n"
+    let s1Head  = "\ns1: {} \n"
     let s1Calls = genBrs " C%i s1 RT%i s1" calls
     let s1Locks = genBrs " G%i s0 RL%i s1" getLocks
     
-
+    let sHead = 
+        "[<Start>]\n"
+      + "s: ba s | s ba | s s1 | s1 s | ba \n"
     let sCalls1 = genBrs " C%i s RT%i s1" calls
     let sCalls2 = genBrs " C%i s1 RT%i s" calls
     let sCalls3 = genBrs " C%i s RT%i s" calls
     
+    let s0Head  = "\ns0: {} | ca s0 | ca \n"
     let s0Calls = genBrs " C%i s0 RT%i s0" calls
     let s0Locks = genBrs " G%i s0 RL%i s0" getLocks
-    let s0Head = "\ns0: {} | ca s0 | ca \n"
     
-    grm + "    |" + sCalls1 + "\n    |" + sCalls2 + "\n    |" + sCalls3 + "\n" + s0Head + "    |" + s0Calls + "\n    |" + s0Locks + "\n"
-    + s1Head + "    |" + s1Calls +  "    |" + s1Locks + "\n"
+    let alts a = a |> String.concat  "\n    |"
+    
+    grmHead
+    + alts [|sHead; sCalls1; sCalls2; sCalls3|]
+    + "\n" 
+    + alts [|s0Head; s0Calls; s0Locks|]
+    + "\n"
+    + alts [|s1Head; s1Calls; s1Locks|] 
+    + "\n"
+
 (*
 let singlePathForRoot (root: INode) (intToString : Dictionary<_,_>) : seq<string> =
     let results = new Dictionary<INode, _>() 
@@ -192,8 +202,7 @@ let main argv =
         let gen = new GLL()
         GenerateFromStrToObj grammar fe gen None Seq.empty [||] :?> ParserSourceGLL
     
-    let tokenizer str =
-        str |> parserSource.StringToToken |> int
+    let tokenizer str = str |> parserSource.StringToToken |> int
 
     let inputGraph = loadGraph graph tokenizer
 

@@ -34,15 +34,15 @@ let loadGrammar grammarFile =
     let asserts = int <| data.[2].Trim()
     let assertsGrm = [|0 .. asserts - 1|] |> Array.map (fun i -> "A" + string i) |> String.concat " | "
     let mutable grmHead = 
-        "ba: " +  assertsGrm + " \n"
-      + "ca: " +  assertsGrm + " \n"
+        "ba: " + assertsGrm + " \n"
+      + "ca: " + assertsGrm + " \n"
       
     let genBrs tmplt count =
         [|0..count - 1|] 
         |> Array.map (fun i -> sprintf tmplt i i)
         |> String.concat "\n    |" 
 
-    let s1Head = "\ns1: {} \n"
+    let s1Head  = "\ns1: {} \n"
     let s1Calls = genBrs " C%i s1 RT%i s1" calls
     let s1Locks = genBrs " G%i s0 RL%i s1" getLocks
     
@@ -53,9 +53,10 @@ let loadGrammar grammarFile =
     let sCalls2 = genBrs " C%i s1 RT%i s" calls
     let sCalls3 = genBrs " C%i s RT%i s" calls
     
+    let s0Head  = "\ns0: {} | ca s0 | ca \n"
     let s0Calls = genBrs " C%i s0 RT%i s0" calls
     let s0Locks = genBrs " G%i s0 RL%i s0" getLocks
-    let s0Head = "\ns0: {} | ca s0 | ca \n"
+    
     let alts a = a |> String.concat  "\n    |"
     
     grmHead

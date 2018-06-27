@@ -203,6 +203,17 @@ let getAllSPPFRoots (parser : ParserSourceGLL) (input : IParserInput) =
             else None) 
     forest
 
+let getAllSPPFRootsAsINodes (parser : ParserSourceGLL) (input : IParserInput) = 
+    let gss, sppf, _ = parse parser input true
+    let roots = 
+        input.InitialPositions 
+        |> Array.collect (fun pos ->
+            let roots = sppf.GetRoots gss pos
+            if roots.Length <> 0 
+            then roots
+            else [||]) 
+    roots
+
 let isParsed (parser : ParserSourceGLL) (input : LinearInput) = 
     let gss, _, _ = parse parser input false
     findVertices gss parser.StartState

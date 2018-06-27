@@ -26,6 +26,7 @@ s1: C s1 RT s1 | G s0 RL s1 | eps
 [<Start>]
 s: ba s | s ba| s1 s | s s1 | ba | C s RT s1 | C s1 RT s | C s RT s 
 *)
+
 let loadGrammar grammarFile = 
     let data = System.IO.File.ReadAllLines grammarFile
     let getLocks = int <| data.[0].Trim()    
@@ -77,8 +78,7 @@ let main argv =
         let gen = new GLL()
         GenerateFromStrToObj grammar fe gen None Seq.empty [||] :?> ParserSourceGLL
     
-    let tokenizer str =
-        str |> parserSource.StringToToken |> int
+    let tokenizer str = str |> parserSource.StringToToken |> int
 
     let inputGraph = loadGraph grpahFile tokenizer
 

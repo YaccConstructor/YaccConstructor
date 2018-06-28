@@ -32,7 +32,7 @@ let printAllPaths parserSource inputGraph outputFile =
 
         let filteredRes = croppedRes |> Seq.filter (fun x -> not <| x.Contains "RT")
 
-        System.IO.File.WriteAllLines(outputFile, filteredRes)
+        System.IO.File.WriteAllLines(outputFile, croppedRes)
 
 let printAllBadAsserts parserSource inputGraph outputFile = 
     let roots = getAllSPPFRootsAsINodes parserSource inputGraph
@@ -60,7 +60,8 @@ let main argv =
 
     printGraph inputGraph "inputGraph.dot"
     let outputFile = argv.[1]
-
+    let start = System.DateTime.Now
     printAllPaths parserSource inputGraph outputFile
     //printAllBadAsserts parserSource inputGraph outputFile
+    printfn "Processing time: %A" (System.DateTime.Now - start)
     0 // return an integer exit code

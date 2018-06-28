@@ -26,6 +26,7 @@
     <DocumentationFile>bin\Debug\LockChecker.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <StartArguments>"..\..\graph6" "..\..\grammar6" "..\..\out6"</StartArguments>
+    <StartAction>Project</StartAction>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>

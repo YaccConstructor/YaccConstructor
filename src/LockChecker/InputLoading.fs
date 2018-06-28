@@ -83,12 +83,13 @@ let parseGraphFile graphFile =
 
 let loadInput graphFile =
     let grammar, edges, startVerts = parseGraphFile graphFile
-
+    let time = System.DateTime.UtcNow
     let parserSource =
         let fe = new YardFrontend()
         let gen = new GLL()
         GenerateFromStrToObj grammar fe gen None Seq.empty [||] :?> ParserSourceGLL
     
+    printfn "ParserSource time is %A" (System.DateTime.UtcNow - time)
     let tokenizer str = str |> parserSource.StringToToken |> int
 
     let inputGraph = new SimpleInputGraph<_>(startVerts, [||], tokenizer)

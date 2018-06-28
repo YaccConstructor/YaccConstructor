@@ -58,8 +58,12 @@ let genGrammar calls locks asserts =
 
 let parseGraphFile graphFile = 
     let data = System.IO.File.ReadAllLines graphFile
+    
+    let data = if data.[data.Length-1].Length < 1 then data.[..data.Length-2] else data
+    
     let infoLine = data.[data.Length-2]
     let startVLine = data.[data.Length-1] 
+    
     let edgesLines = data.[..data.Length-3]
 
     let info = infoLine.Split ' '

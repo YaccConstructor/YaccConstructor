@@ -109,69 +109,35 @@ let loadGrammar grammarFile =
 let allPathForRoot (root: INode) (intToString : Dictionary<_,_>) =
     let results = new Dictionary<INode, _>() 
     let rec getPath (node : INode) : HashSet<_> =
-//        let processNode (n:INode) = 
-//            let isGot,value = results.TryGetValue n
-//            let name = string .Extension + "_" + string i.Nonterm
-//            let res = 
-//                if isGot
-//                then new HashSet<_>([|name|])
-//                else
-//                    results.Add(i, null)
-//                    let first = getPath i.First 
-//                
-//                    let res = new HashSet<_>(first)
-//                    if i.Others <> null 
-//                    then  i.Others |> ResizeArray.map getPath  |> ResizeArray.iter (fun elt -> res.UnionWith elt)
-//                    res
-//            let withPH, complete = 
-//                Array.ofSeq res
-//                |> Array.partition (fun a -> a.Contains name)
-//            res.Clear()
-//            res.UnionWith complete
-//            for c in complete do for s in withPH do res.Add(s.Replace(name, c)) |> ignore
-//            res
- 
         match node with
-        | :? IntermidiateNode as i ->
-            let isGot,value = results.TryGetValue i
-            let name = string i.Extension + "_" + string i.Nonterm
+        | :? IntermidiateNode | :? NonTerminalNode ->
+            let isGot,value = results.TryGetValue node
+            let name = 
+                match node with 
+                | :? IntermidiateNode as i -> string i.Extension + "_" + string i.Nonterm
+                | :? NonTerminalNode as n -> string n.Extension + "_" + string n.Name
+
             if isGot
             then if value = null then new HashSet<_>([|name|]) else value
             else
-                results.Add(i, null)
-                let first = getPath i.First 
+                results.Add(node, null)
+                let first, others = 
+                    match node with 
+                    | :? IntermidiateNode as i -> i.First, i.Others
+                    | :? NonTerminalNode as n -> n.First, n.Others
+
+                let first = getPath first
                 
                 let res = new HashSet<_>(first)
-                if i.Others <> null 
-                then  i.Others |> ResizeArray.map getPath  |> ResizeArray.iter (fun elt -> res.UnionWith elt)
+                if others <> null 
+                then others |> ResizeArray.map getPath  |> ResizeArray.iter (fun elt -> res.UnionWith elt)
                 let withPH, complete = 
                     Array.ofSeq res
                     |> Array.partition (fun a -> a.Contains name)
                 res.Clear()
                 res.UnionWith complete
                 for c in complete do for s in withPH do res.Add(s.Replace(name, c)) |> ignore
-                results.[i] <- res
-                res
-
-       
-        | :? NonTerminalNode as n ->
-            let isGot,value = results.TryGetValue n
-            let name = string n.Extension + "_" + string n.Name
-            if isGot
-            then if value = null then new HashSet<_>([|name|]) else value
-            else
-                results.Add(n, null)
-                let first = getPath n.First                
-                let res = new HashSet<_>(first)
-                if n.Others <> null 
-                then  n.Others |> ResizeArray.map getPath  |> ResizeArray.iter (fun elt -> res.UnionWith elt)
-                let withPH, complete = 
-                    Array.ofSeq res
-                    |> Array.partition (fun a -> a.Contains name)
-                res.Clear()
-                res.UnionWith complete
-                for c in complete do for s in withPH do res.Add(s.Replace(name, c)) |> ignore
-                results.[n] <- res
+                results.[node] <- res
                 res
        
         | :? PackedNode as p ->
@@ -224,7 +190,6 @@ let main argv =
         |> Array.iter (fun s -> res.UnionWith s)
         res
 
-    
     let outputFile = argv.[2]
     System.IO.File.WriteAllLines(outputFile, result)    
     

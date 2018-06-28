@@ -69,43 +69,6 @@ let loadGrammar grammarFile =
     + alts [|s1Head; s1Calls; s1Locks|] 
     + "\n"
 
-//let singlePathForRoot (root: INode) (intToString : Dictionary<_,_>) : seq<string> =
-//    let results = new Dictionary<INode, _>() 
-//    let rec getPath : INode -> seq<string> = function
-//        | :? IntermidiateNode as i ->
-//            let isGot,value = results.TryGetValue i
-//            if isGot
-//            then 
-//                Seq.empty
-//            else
-//                results.Add(i, null)
-//                getPath i.First
-//        | :? TerminalNode as t ->
-//            let res = new List<_>()
-//            if t.Name <> -1<token> 
-//            then 
-//                seq{yield (sprintf "%s %i %i" intToString.[int t.Name] (getLeftExtension t.Extension) (getRightExtension t.Extension))}
-//            else
-//                Seq.empty
-//        | :? PackedNode as p ->
-//            let rightPath = getPath p.Right
-//            let leftPath = getPath p.Left
-//            Seq.append leftPath rightPath
-//        | :? NonTerminalNode as n ->
-//            let isGot,value = results.TryGetValue n
-//            if isGot
-//            then 
-//                Seq.empty
-//            else
-//                results.Add(n, null)
-//                getPath n.First
-//        | :? EpsilonNode as eps ->
-//            Seq.empty
-//        | _ -> failwith "Unexpected node type. rly?"
-//
-//    getPath root
-
-
 let allPathForRoot (root: INode) (intToString : Dictionary<_,_>) =
     let results = new Dictionary<INode, _>() 
     let rec getPath (node : INode) : HashSet<_> =
@@ -130,7 +93,7 @@ let allPathForRoot (root: INode) (intToString : Dictionary<_,_>) =
                 
                 let res = new HashSet<_>(first)
                 if others <> null 
-                then others |> ResizeArray.map getPath  |> ResizeArray.iter (fun elt -> res.UnionWith elt)
+                then others |> ResizeArray.iter (fun elt -> res.UnionWith (getPath elt))
                 let withPH, complete = 
                     Array.ofSeq res
                     |> Array.partition (fun a -> a.Contains name)
@@ -159,7 +122,6 @@ let allPathForRoot (root: INode) (intToString : Dictionary<_,_>) =
         | _ -> failwith "Unexpected node type. rly?"
 
     getPath root
-
 
 [<EntryPoint>]
 let main argv =

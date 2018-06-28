@@ -154,6 +154,12 @@ let main argv =
         res
 
     let outputFile = argv.[2]
-    System.IO.File.WriteAllLines(outputFile, result)    
+    let croppedRes = 
+        result 
+        |> Seq.map (fun s -> 
+            let p = s.LastIndexOf 'A'
+            let p2 = s.IndexOf(' ', p)
+            s.Substring(0,p2).Trim())
+    System.IO.File.WriteAllLines(outputFile, croppedRes)    
     
     0 // return an integer exit code

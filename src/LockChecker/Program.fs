@@ -75,12 +75,13 @@ let allPathForRoot (root: INode) (intToString : Dictionary<_,_>) =
         match node with
         | :? IntermidiateNode | :? NonTerminalNode ->
             let isGot,value = results.TryGetValue node
-            let name = 
+            let name, strName = 
                 match node with 
-                | :? IntermidiateNode as i -> string i.Extension + "_" + string i.Nonterm
-                | :? NonTerminalNode as n -> string n.Extension + "_" + string n.Name
-
-            if isGot
+                | :? IntermidiateNode as i -> string i.Extension + "_" + string i.Nonterm, intToString.[int i.Nonterm]
+                | :? NonTerminalNode as n -> string n.Extension + "_" + string n.Name,  intToString.[int n.Name]
+            if strName = "s1" || strName = "s0"
+            then new HashSet<_>()
+            elif isGot
             then if value = null then new HashSet<_>([|name|]) else value
             else
                 results.Add(node, null)

@@ -89,7 +89,10 @@ let printAllPaths parserSource inputGraph outputFile =
                 let p = s.LastIndexOf 'A'
                 let p2 = s.IndexOf(' ', p)
                 s.Substring(0,p2).Trim())
-        System.IO.File.WriteAllLines(outputFile, croppedRes)
+
+        let filteredRes = croppedRes |> Seq.filter (fun x -> not <| x.Contains "RT")
+
+        System.IO.File.WriteAllLines(outputFile, filteredRes)
 
 let printAllBadAsserts parserSource inputGraph outputFile = 
     let roots = getAllSPPFRootsAsINodes parserSource inputGraph

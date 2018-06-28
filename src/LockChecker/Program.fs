@@ -77,10 +77,11 @@ let printAllPaths parserSource inputGraph outputFile =
         printfn "doesn't parsed"
     else
         let result = 
+            let res = new HashSet<_>()
             roots
-            |> Seq.collect(fun root -> (allPathsForRoot root parserSource.IntToString))
-            //|> Array.map(fun x -> System.String.Join("; ", x))
-            //|> Array.distinct
+            |> Array.map (fun x -> allPathsForRoot x parserSource.IntToString)
+            |> Array.iter (fun s -> res.UnionWith s)
+            res
 
         let croppedRes = 
             result 
@@ -89,7 +90,6 @@ let printAllPaths parserSource inputGraph outputFile =
                 let p2 = s.IndexOf(' ', p)
                 s.Substring(0,p2).Trim())
         System.IO.File.WriteAllLines(outputFile, croppedRes)
-        //System.IO.File.WriteAllLines(outputFile, result)  
 
 let printAllBadAsserts parserSource inputGraph outputFile = 
     let roots = getAllSPPFRootsAsINodes parserSource inputGraph
@@ -110,15 +110,11 @@ let printGraph (graph : SimpleInputGraph<_>) (file : string) =
 
 [<EntryPoint>]
 let main argv =
-    //let graph = ".\\..\\..\\graph"
-    //let grammarFile = ".\\..\\..\\grammar"
     let graph = argv.[0]
     /// LOCKS, CALLS, ASSERTS
     let grammarFile = argv.[1]
     
     let grammar = loadGrammar grammarFile    
-    
-    //System.IO.File.WriteAllText("resultGrammar.yrd", grammar)
 
     let parserSource =
         let fe = new YardFrontend()

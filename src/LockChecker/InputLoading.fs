@@ -17,7 +17,7 @@ s0: C s0 RT s0 | G s0 RL s0 | ca s0 | ca | eps
 s1: C s1 RT s1 | G s0 RL s1 | eps
 
 [<Start>]
-s: ba s | s ba| s1 s | s s1 | ba | C s RT s1 | C s1 RT s | C s RT s 
+s: ba s | s ba| s1 s | s s1 | ba | C s RT s1 | C s RT s 
 *)
 
 let genGrammar calls locks asserts = 
@@ -39,7 +39,7 @@ let genGrammar calls locks asserts =
         "[<Start>]\n"
       + "s: ba s | s ba | s s1 | s1 s | ba \n"
     let sCalls1 = genBrs " C%i s RT%i s1" calls
-    let sCalls2 = genBrs " C%i s1 RT%i s" calls
+    //let sCalls2 = genBrs " C%i s1 RT%i s" calls
     let sCalls3 = genBrs " C%i s RT%i s" calls
     
     let s0Head  = "\ns0: {} | ca s0 | ca \n"
@@ -49,7 +49,7 @@ let genGrammar calls locks asserts =
     let alts a = a |> String.concat  "\n    |"
     
     grmHead
-    + alts [|sHead; sCalls1; sCalls2; sCalls3|]
+    + alts [|sHead; sCalls1;(* sCalls2;*) sCalls3|]
     + "\n" 
     + alts [|s0Head; s0Calls; s0Locks|]
     + "\n"

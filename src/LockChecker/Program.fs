@@ -6,6 +6,7 @@ open Yard.Frontends.YardFrontend
 open YC.API
 open AbstractParser
 open System.Collections.Generic
+open ResultProcessing
 
 let loadGraph graphFile tokenizer =
     let data = System.IO.File.ReadAllLines(graphFile)
@@ -67,123 +68,37 @@ let loadGrammar grammarFile =
     + "\n"
     + alts [|s1Head; s1Calls; s1Locks|] 
     + "\n"
-
 (*
-let singlePathForRoot (root: INode) (intToString : Dictionary<_,_>) : seq<string> =
-    let results = new Dictionary<INode, _>() 
-    let rec getPath : INode -> seq<string> = function
-        | :? IntermidiateNode as i ->
-            let isGot,value = results.TryGetValue i
-            if isGot
-            then 
-                Seq.empty
-            else
-                results.Add(i, null)
-                getPath i.First
-        | :? TerminalNode as t ->
-            let res = new List<_>()
-            if t.Name <> -1<token> 
-            then 
-                seq{yield (sprintf "%s %i %i" intToString.[int t.Name] (getLeftExtension t.Extension) (getRightExtension t.Extension))}
-            else
-                Seq.empty
-        | :? PackedNode as p ->
-            let rightPath = getPath p.Right
-            let leftPath = getPath p.Left
-            Seq.append leftPath rightPath
-        | :? NonTerminalNode as n ->
-            let isGot,value = results.TryGetValue n
-            if isGot
-            then 
-                Seq.empty
-            else
-                results.Add(n, null)
-                getPath n.First
-        | :? EpsilonNode as eps ->
-            Seq.empty
-        | _ -> failwith "Unexpected node type. rly?"
+let printAllPaths parserSource inputGraph outputFile = 
+    let roots = getAllSPPFRootsAsINodes parserSource inputGraph
+    if roots.Length < 1
+    then 
+        printfn "doesn't parsed"
+    else
+        let result = 
+            roots
+            |> Array.collect(fun root -> (allPathsForRoot root parserSource.IntToString).ToArray())
+            |> Array.map(fun x -> System.String.Join("; ", x))
+            |> Array.distinct
 
-    getPath root
+        System.IO.File.WriteAllLines(outputFile, result)  
 *)
-let allPathsForRoot (root: INode) (intToString : Dictionary<_,_>) : List<List<string>> =
-    let results = new Dictionary<INode, _>() 
-    let rec getPaths : INode -> List<List<string>> = function
-        | :? IntermidiateNode as i -> 
-            let isGot,value = results.TryGetValue i
-            if isGot
-            then
-                if (value = null)
-                then
-                    new List<_>()
-                else
-                    value
-            else
-                results.Add(i, null)
-                let f = getPaths i.First
-                results.Remove(i) |> ignore
-                results.Add(i, f)
-                if (i.Others <> null)
-                then
-                    for o in i.Others do
-                        f.AddRange (getPaths o)
-                
-                f
-        | :? TerminalNode as t ->
-            let res = new List<List<_>>()
-            if t.Name <> -1<token> 
-            then
-                let l = new List<_>()
-                l.Add(sprintf "%s %i %i"
-                         intToString.[int t.Name]
-                         (getLeftExtension t.Extension)
-                         (getRightExtension t.Extension)
-                        )
-                res.Add(l)
-            res
-        | :? PackedNode as p ->
-            let rightPaths = getPaths p.Right
-            let leftPaths = getPaths p.Left
-            let result = new List<List<_>>()
-            if (rightPaths.Count > 0)
-            then
-                if (leftPaths.Count > 0)
-                then
-                    for rp in rightPaths do
-                        for lp in leftPaths do
-                            let l = new List<_>()
-                            l.AddRange lp
-                            l.AddRange rp
-                            result.Add(l)
-                    result
-                else
-                    rightPaths
-            else
-                leftPaths
-        | :? NonTerminalNode as n ->
-            let isGot,value = results.TryGetValue n
-            if isGot
-            then 
-                if (value = null)
-                then
-                    new List<_>()
-                else
-                    value
-            else
-                results.Add(n, null)
-                let f = getPaths n.First
-                if (n.Others <> null)
-                then
-                    for o in n.Others do
-                        f.AddRange (getPaths o)
-                results.Remove(n) |> ignore
-                results.Add(n, f)
-                f
-            
-        | :? EpsilonNode as eps ->
-            new List<List<_>>()
-        | _ -> failwith "Unexpected node type. rly?"
+let printAllBadAsserts parserSource inputGraph outputFile = 
+    let roots = getAllSPPFRootsAsINodes parserSource inputGraph
+    if roots.Length < 1
+    then 
+        printfn "doesn't parsed"
+    else
+        let result = 
+            roots
+            |> Array.collect(fun root -> getBadAsserts root parserSource.IntToString)
+            |> Array.map(fun x -> System.String.Join("; ", x))
+            |> Array.distinct
 
-    getPaths root
+        System.IO.File.WriteAllLines(outputFile, result)
+
+let printGraph (graph : SimpleInputGraph<_>) (file : string) = 
+    graph.PrintToDot file id
 
 [<EntryPoint>]
 let main argv =
@@ -206,21 +121,9 @@ let main argv =
 
     let inputGraph = loadGraph graph tokenizer
 
-    let roots = getAllSPPFRootsAsINodes parserSource inputGraph
+    printGraph inputGraph "inputGraph.dot"
 
-    //let tree = new Tree<_>(roots, graph.PositionToString, parser.IntToString)
-
-    if roots.Length < 1
-    then 
-        printfn "doesn't parsed"
-    else
-        let result = 
-            roots
-            |> Array.collect(fun root -> (allPathsForRoot root parserSource.IntToString).ToArray())
-            |> Array.map(fun x -> System.String.Join("; ", x))
-            |> Array.distinct
-    
-        let outputFile = argv.[2]
-        System.IO.File.WriteAllLines(outputFile, result)    
-    
+    let outputFile = argv.[2]
+    //printAllPaths parserSource inputGraph outputFile
+    printAllBadAsserts parserSource inputGraph outputFile
     0 // return an integer exit code

@@ -6,6 +6,7 @@ open Yard.Frontends.YardFrontend
 open YC.API
 open AbstractParser
 open System.Collections.Generic
+
 open ResultProcessing
 
 let loadGraph graphFile tokenizer =
@@ -68,7 +69,7 @@ let loadGrammar grammarFile =
     + "\n"
     + alts [|s1Head; s1Calls; s1Locks|] 
     + "\n"
-(*
+
 let printAllPaths parserSource inputGraph outputFile = 
     let roots = getAllSPPFRootsAsINodes parserSource inputGraph
     if roots.Length < 1
@@ -77,12 +78,19 @@ let printAllPaths parserSource inputGraph outputFile =
     else
         let result = 
             roots
-            |> Array.collect(fun root -> (allPathsForRoot root parserSource.IntToString).ToArray())
-            |> Array.map(fun x -> System.String.Join("; ", x))
-            |> Array.distinct
+            |> Seq.collect(fun root -> (allPathsForRoot root parserSource.IntToString))
+            //|> Array.map(fun x -> System.String.Join("; ", x))
+            //|> Array.distinct
 
-        System.IO.File.WriteAllLines(outputFile, result)  
-*)
+        let croppedRes = 
+            result 
+            |> Seq.map (fun s -> 
+                let p = s.LastIndexOf 'A'
+                let p2 = s.IndexOf(' ', p)
+                s.Substring(0,p2).Trim())
+        System.IO.File.WriteAllLines(outputFile, croppedRes)
+        //System.IO.File.WriteAllLines(outputFile, result)  
+
 let printAllBadAsserts parserSource inputGraph outputFile = 
     let roots = getAllSPPFRootsAsINodes parserSource inputGraph
     if roots.Length < 1
@@ -122,8 +130,8 @@ let main argv =
     let inputGraph = loadGraph graph tokenizer
 
     printGraph inputGraph "inputGraph.dot"
-
     let outputFile = argv.[2]
-    //printAllPaths parserSource inputGraph outputFile
-    printAllBadAsserts parserSource inputGraph outputFile
+
+    printAllPaths parserSource inputGraph outputFile
+    //printAllBadAsserts parserSource inputGraph outputFile
     0 // return an integer exit code

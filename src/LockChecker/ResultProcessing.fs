@@ -7,6 +7,7 @@ open Yard.Frontends.YardFrontend
 open YC.API
 open AbstractParser
 open System.Collections.Generic
+//open Microsoft.FSharp.Collections
 
 let singlePathForRoot (root: INode) (intToString : Dictionary<_,_>) : seq<string> =
     let results = new Dictionary<INode, _>() 
@@ -20,7 +21,7 @@ let singlePathForRoot (root: INode) (intToString : Dictionary<_,_>) : seq<string
                 results.Add(i, null)
                 getPath i.First
         | :? TerminalNode as t ->
-            let res = new List<_>()
+            let res = new List<string>()
             if t.Name <> -1<token> 
             then 
                 seq{yield (sprintf "%s %i %i" intToString.[int t.Name] (getLeftExtension t.Extension) (getRightExtension t.Extension))}
@@ -43,94 +44,62 @@ let singlePathForRoot (root: INode) (intToString : Dictionary<_,_>) : seq<string
         | _ -> failwith "Unexpected node type. rly?"
 
     getPath root
-(*
-let allPathsForRoot (root: INode) (intToString : Dictionary<_,_>) : List<List<string>> =
-    let results = new Dictionary<INode, List<_>>() 
-    let rec getPaths : INode -> List<List<string>> * bool = function
-        | :? IntermidiateNode as i -> 
-            let isGot,value = results.TryGetValue i
-            if isGot
-            then
-                value, true
+
+let allPathsForRoot (root: INode) (intToString : Dictionary<_,_>) =
+    let results = new Dictionary<INode, _>() 
+    let rec getPath (node : INode) : HashSet<_> =
+        match node with
+        | :? IntermidiateNode | :? NonTerminalNode ->
+            let isGot,value = results.TryGetValue node
+            let name, strName = 
+                match node with 
+                | :? IntermidiateNode as i -> string i.Extension + "_" + string i.Nonterm, intToString.[int i.Nonterm]
+                | :? NonTerminalNode as n -> string n.Extension + "_" + string n.Name,  intToString.[int n.Name]
+            if strName = "s1" || strName = "s0"
+            then new HashSet<_>()
+            elif isGot
+            then if value = null then new HashSet<_>([|name|]) else value
             else
-                let withHole = new List<_>()
-                let withoutHole = new List<_>()
-                results.Add(i, withoutHole)
-                let f, isHoled = getPaths i.First
-                if isHoled
-                then
-                    withHole.AddRange f
-                else
-                    withoutHole.AddRange f
-                if (i.Others <> null)
-                then
-                    for o in i.Others do
-                        let oth, isHoled = getPaths o
-                        if isHoled
-                        then
-                            withHole.AddRange oth
-                        else
-                            withoutHole.AddRange oth
+                results.Add(node, null)
+                let first, others = 
+                    match node with 
+                    | :? IntermidiateNode as i -> i.First, i.Others
+                    | :? NonTerminalNode as n -> n.First, n.Others
+
+                let first = getPath first
                 
-                
-                f
-        | :? TerminalNode as t ->
-            let res = new List<List<_>>()
-            if t.Name <> -1<token> 
-            then
-                let l = new List<_>()
-                l.Add(sprintf "%s %i %i"
-                         intToString.[int t.Name]
-                         (getLeftExtension t.Extension)
-                         (getRightExtension t.Extension)
-                        )
-                res.Add(l)
-            res, false
+                let res = new HashSet<_>(first)
+                if others <> null 
+                then others |> Microsoft.FSharp.Collections.ResizeArray.iter (fun elt -> res.UnionWith (getPath elt))
+                let withPH, complete = 
+                    Array.ofSeq res
+                    |> Array.partition (fun a -> a.Contains name)
+                res.Clear()
+                res.UnionWith complete
+                for c in complete do for s in withPH do res.Add(s.Replace(name, c)) |> ignore
+                results.[node] <- res
+                res
+       
         | :? PackedNode as p ->
-            let rightPaths, rightIsHoled = getPaths p.Right
-            let leftPaths, leftIsHoled = getPaths p.Left
-            let result = new List<List<_>>()
-            if (rightPaths.Count > 0)
-            then
-                if (leftPaths.Count > 0)
-                then
-                    for rp in rightPaths do
-                        for lp in leftPaths do
-                            let l = new List<_>()
-                            l.AddRange lp
-                            l.AddRange rp
-                            result.Add(l)
-                    result
-                else
-                    rightPaths
-            else
-                leftPaths
-        | :? NonTerminalNode as n ->
-            let isGot,value = results.TryGetValue n
-            if isGot
-            then 
-                if (value = null)
-                then
-                    new List<_>()
-                else
-                    value
-            else
-                results.Add(n, null)
-                let f = getPaths n.First
-                if (n.Others <> null)
-                then
-                    for o in n.Others do
-                        f.AddRange (getPaths o)
-                results.Remove(n) |> ignore
-                results.Add(n, f)
-                f
-            
-        | :? EpsilonNode as eps ->
-            new List<List<_>>()
+            let rightPath = getPath p.Right
+            let leftPath = getPath p.Left
+            if leftPath.Count = 0
+            then rightPath
+            elif rightPath.Count = 0 
+            then leftPath
+            else new HashSet<_>([|for l in leftPath do yield! [|for r in rightPath -> l + " " + r|]|])
+        
+        | :? TerminalNode as t ->
+            if t.Name <> -1<token> 
+            then new HashSet<_> ([|intToString.[int t.Name]|])
+            else new HashSet<_>()
+
+        | :? EpsilonNode as eps -> new HashSet<_>()
+
         | _ -> failwith "Unexpected node type. rly?"
 
-    getPaths root
-*)
+    getPath root
+
 let getBadAsserts (root : INode) (intToString : Dictionary<_,string>) : string[] = 
     let results = new HashSet<string>()
     let isVisided = new HashSet<INode>()

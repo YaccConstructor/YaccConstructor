@@ -49,6 +49,9 @@ type Source =
 // TODO: make something with toString overriding of Source
 let sourceToString (x : Source) = x.text
 
+let namedSource text =
+    Source text
+
 type DLabel = {
     label: string;
     weight: float option
@@ -158,7 +161,11 @@ and Production<'patt,'expr> =
         |POpt x -> "(" + x.ToString() + ")?"
         |PShuff (a, b) -> a.ToString() + "||" + b.ToString()
 
+let defaultProductionElem prod = 
+    {omit = false; rule = prod; binding = None; checker = None }
 
+let defaultPSeq (prod : Production<_,_> list) = 
+    PSeq(prod |> List.map (fun x -> defaultProductionElem x), None, None)
 /// <summary>
 /// <para>t&lt;'patt,'expr&gt; - Type of rule. </para>
 /// <para>  'patt - type of attributes (arguments). </para>
@@ -175,7 +182,7 @@ type Rule<'patt,'expr> = {
     /// Rule body (production).
     body    : (Production<'patt,'expr>)
     /// Is this rule a start non-terminal (in this case '[<Start>]' is used before rule)
-    isStart : bool
+    mutable isStart : bool
     /// Can this rule be seen from another module.
     /// It's true if ('public' is used before rule) or (module is marked as AllPublic and rule isn't marked as private)
     isPublic : bool

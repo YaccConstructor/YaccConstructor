@@ -15,8 +15,18 @@ open System.Collections.Generic
 
 type GLL() = 
     inherit Generator()
+        member this.GenerateByRules (*rules*) calls locks asserts =
+            let start = System.DateTime.Now
+            let fsa = new FSA((*rules,*) calls, locks, asserts)
+                        
+            let generatedCode, parserSource = getGLLparserSource fsa "" (*new Map<_,_>("",Some "")*) "" false false
+            
+            eprintfn "Generation time: %A" <| System.DateTime.Now - start
+            parserSource
+            
         override this.Name = "GLLGenerator"
         override this.Constraints = [|noMeta; singleModule|]
+        
         override this.Generate (definition, generateToFile, args) =
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
@@ -68,9 +78,9 @@ type GLL() =
                 //| "-withoutTree" -> withoutTree := getBoolValue "withoutTree" value
                 | value -> failwithf "Unexpected %s option" value
                  
-            let fsa = new FSA(definition.grammar.[0].rules)
+            let fsa = new FSA((*definition.grammar.[0].rules,*) 1, 2, 3)
             
-            let generatedCode, parserSource = getGLLparserSource fsa outFileName tokenType moduleName light generateToFile//isAbstract
+            let generatedCode, parserSource = getGLLparserSource fsa outFileName (*tokenType*) moduleName light generateToFile//isAbstract
             
             if generateToFile
             then

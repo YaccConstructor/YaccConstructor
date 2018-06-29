@@ -22,7 +22,7 @@ let printAllPaths parserSource inputGraph outputFile =
             |> Array.map (fun x -> allPathsForRoot x parserSource.IntToString)
             |> Array.iter (fun s -> res.UnionWith s)
             res
-
+        (*
         let croppedRes = 
             result 
             |> Seq.map (fun s -> 
@@ -31,8 +31,8 @@ let printAllPaths parserSource inputGraph outputFile =
                 s.Substring(0,p2).Trim())
 
         let filteredRes = croppedRes |> Seq.filter (fun x -> not <| x.Contains "RT")
-
-        System.IO.File.WriteAllLines(outputFile, croppedRes)
+        *)
+        System.IO.File.WriteAllLines(outputFile, result)//croppedRes)
 
 let printAllBadAsserts parserSource inputGraph outputFile = 
     let roots = getAllSPPFRootsAsINodes parserSource inputGraph

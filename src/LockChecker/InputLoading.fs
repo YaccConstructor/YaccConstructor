@@ -6,7 +6,11 @@ open AbstractAnalysis.Common
 open Yard.Frontends.YardFrontend
 open YC.API
 open AbstractParser
+open System
 open System.Collections.Generic
+open Yard.Core
+open Yard.Core.IL
+//open Yard.Generators.Common.FSA.Common
 
 (*
 ba: ASSERT
@@ -55,7 +59,95 @@ let genGrammar calls locks asserts =
     + "\n"
     + alts [|s1Head; s1Calls; s1Locks|] 
     + "\n"
-
+(*
+let genRules calls locks asserts =
+    let getAltFromArray (alts : Production<_,_> []) = 
+        let st = alts.[0]
+        alts.[1..]
+        |> Array.fold (fun a t -> PAlt(t,a)) st
+    (*  
+    let assertsRule name = 
+        let tokens = 
+            [|0 .. asserts - 1|]
+            |> Array.map (fun i -> defaultPSeq [PToken (namedSource ("A" + i.ToString())) ] )
+            
+        let body = getAltFromArray tokens
+            
+        let name = namedSource name
+        defaultRule name body
+    
+    let ba = assertsRule "ba"
+    let ca = assertsRule "ca"
+    *)
+    (*
+    let getArrayOfAlternativeFours token1 ref1 token2 ref2 count = 
+        [|0..count - 1|] 
+        |> Array.map (fun i -> 
+            let c = token1 + i.ToString() |> namedSource |> PToken
+            let ret = token2 + i.ToString() |> namedSource |> PToken
+            [c; PRef(namedSource ref1, None); ret; PRef(namedSource ref2, None)]
+            |> defaultPSeq
+            )
+    
+    // "\ns1: {} \n"
+    // " C%i s1 RT%i s1" calls
+    // genBrs " G%i s0 RL%i s1" locks
+    let s1Rule = 
+        let alts1 = getArrayOfAlternativeFours "C" "s1" "RT" "s1" calls            
+        let alts2 = getArrayOfAlternativeFours "G" "s0" "RL" "s1" locks        
+        let body = Array.concat [alts1; alts2; [|defaultPSeq []|] ] |> getAltFromArray
+        let name = namedSource "s1"
+        let r = defaultRule name body
+        r
+    *)
+    // "[<Start>]\n"
+    // "s: ba s | s ba | s s1 | s1 s | ba \n"
+    // " C%i s RT%i s1" calls
+    // " C%i s RT%i s" calls
+    (*
+    let sRule =         
+        let baAlts = 
+            [|defaultPSeq [PRef("ba" |> namedSource, None); PRef("s" |> namedSource, None)];
+             defaultPSeq [PRef("s" |> namedSource, None); PRef("ba" |> namedSource, None)];
+             defaultPSeq [PRef("s" |> namedSource, None); PRef("s1" |> namedSource, None)];
+             defaultPSeq [PRef("s1" |> namedSource, None); PRef("s" |> namedSource, None)];
+             defaultPSeq [PRef("ba" |> namedSource, None)]|]
+        
+        let alts1 = getArrayOfAlternativeFours "C" "s" "RT" "s1" calls            
+        let alts2 = getArrayOfAlternativeFours "C" "s" "RT" "s" calls
+        
+        let body = Array.concat [alts1; alts2; baAlts ] |> getAltFromArray
+        let name = namedSource "s"
+        let r = defaultRule name body
+        r.isStart <- true 
+        r
+      *)  
+    // "\ns0: {} | ca s0 | ca \n"
+    // " C%i s0 RT%i s0" calls
+    // " G%i s0 RL%i s0" locks
+    (*
+    let s0Rule =         
+        let caAlts = 
+            [|defaultPSeq [PRef("ca" |> namedSource, None); PRef("s0" |> namedSource, None)];
+             defaultPSeq [];
+             defaultPSeq [PRef("ca" |> namedSource, None)]|]
+        
+        let alts1 = getArrayOfAlternativeFours "C" "s0" "RT" "s0" calls            
+        let alts2 = getArrayOfAlternativeFours "G" "s0" "RL" "s0" locks
+        
+        let body = Array.concat [alts1; alts2; caAlts ] |> getAltFromArray
+        let name = namedSource "s0"
+        let r = defaultRule name body
+        r
+    *)
+    
+    let name = namedSource "s0"
+    let body = name |> PToken
+    let q = defaultRule name body
+    
+    [q(*ba; ca; s1Rule; sRule; s0Rule*)]
+    
+*)
 let parseGraphFile graphFile = 
     let data = System.IO.File.ReadAllLines graphFile
     
@@ -71,23 +163,26 @@ let parseGraphFile graphFile =
     let calls = int <| info.[1].Trim()
     let locks = int <| info.[2].Trim()    
     let asserts = int <| info.[3].Trim()
-
-    let grammar = genGrammar calls locks asserts
-
-    let startVerts = startVLine.Split ' ' |> Array.map int
+    let startVertsLines = startVLine.Split([|' '|],StringSplitOptions.RemoveEmptyEntries)
+    let startVerts = startVertsLines |> Array.map int
     let edges = 
         edgesLines |> Array.map (fun s -> s.Split ' ' |> fun a -> new ParserEdge<_>(int a.[0], int a.[2], a.[1]))
     
-    grammar, edges, startVerts
+    edges, calls, locks, asserts, startVerts
 
 
 let loadInput graphFile =
-    let grammar, edges, startVerts = parseGraphFile graphFile
+    let edges, calls, locks, asserts, startVerts = parseGraphFile graphFile
+    //let grammar = genGrammar calls locks asserts
+    let time = System.DateTime.UtcNow
+    //let rules = genRules calls locks asserts
+    printfn "Rules Generation time is %A" (System.DateTime.UtcNow - time)
     let time = System.DateTime.UtcNow
     let parserSource =
         let fe = new YardFrontend()
         let gen = new GLL()
-        GenerateFromStrToObj grammar fe gen None Seq.empty [||] :?> ParserSourceGLL
+        gen.GenerateByRules (*rules*) calls locks asserts
+        //GenerateFromStrToObj grammar fe gen None Seq.empty [||] :?> ParserSourceGLL
     
     printfn "ParserSource time is %A" (System.DateTime.UtcNow - time)
     let tokenizer str = str |> parserSource.StringToToken |> int

@@ -186,8 +186,16 @@ let loadInput graphFile =
     
     printfn "ParserSource time is %A" (System.DateTime.UtcNow - time)
     let tokenizer str = str |> parserSource.StringToToken |> int
+    
+    let r = new HashSet<_>()
+    let ev = edges |> Array.iter (fun e ->
+        r.Add e.Source |> ignore
+        r.Add e.Target |> ignore)
 
-    let inputGraph = new SimpleInputGraph<_>(startVerts, [||], tokenizer)
+    printfn "Start: %A" startVerts.Length
+    let inputGraph = new SimpleInputGraph<_>(startVerts |> Array.filter (fun x -> r.Contains x), [||], tokenizer)
+    
+    //let inputGraph = new SimpleInputGraph<_>(startVerts, [||], tokenizer)
     inputGraph.AddVerticesAndEdgeRange edges |> ignore
 
     parserSource, inputGraph

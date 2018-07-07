@@ -12,7 +12,7 @@
     open Microsoft.FSharp.Core.Operators
     open MathNet.Numerics.LinearAlgebra.Double
     open MySparseGraphParsingImpl
-
+    open AbstractAnalysis.Common
 
     let initRulesFromIL loadIL tokenToInt =
         let grammar = loadIL.grammar
@@ -20,7 +20,7 @@
         let S = ref (NonTerminal "")
         let nonterminals = new ResizeArray<NonTerminal>()
         let complexConjRules = new ResizeArray<(NonTerminal * Probability.T) * (NonTerminal * NonTerminal * bool) []>()
-        let simpleConjRules = new ResizeArray<(NonTerminal * Probability.T) * int>()
+        let simpleConjRules = new ResizeArray<(NonTerminal * Probability.T) * int<token>>()
         let epsilonConjRules: NonTerminal [] = [||]
         let probOne = Probability.create 1.0
         
@@ -109,7 +109,7 @@
 
     type Message = bool
 
-    let recognizeGraph<'MatrixType, 'InnerType when 'InnerType : comparison> graph
+    let recognizeGraph<'MatrixType, 'InnerType when 'InnerType : comparison> (graph : SimpleInputGraph<int<token>>)
                     (mHandler : IMatrixHandler<'MatrixType, 'InnerType>)
                     (allRules: BooleanRulesHolder)
                     nonterminals
@@ -223,7 +223,7 @@
             
             
 
-    let graphParse<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
+    let graphParse<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:SimpleInputGraph<int<token>>)
                   mHandler
                   (loadIL:Definition<Source, Source>)
                   tokenToInt 
@@ -234,7 +234,7 @@
         recognizeGraph<'MatrixType, 'InnerType> graph mHandler rulesHolder nonterminals !S parallelProcesses
 
     
-    let graphParseGPU (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
+    let graphParseGPU (graph:AbstractAnalysis.Common.SimpleInputGraph<int<token>>)
                   (loadIL:Definition<Source, Source>)
                   tokenToInt =
 

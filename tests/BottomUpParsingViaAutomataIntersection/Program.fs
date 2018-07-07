@@ -3,7 +3,7 @@
 open NUnit.Framework
 open YC.Parsers.BottomUp
 open System.Collections.Generic
-
+open AbstractAnalysis.Common
 
 let mutable basePath = @"..\..\..\data\RDF"
 
@@ -13,11 +13,11 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
 
     let rdfTokenizer str =
         match str with
-        | "T"     -> 1
-        | "TR"    -> 2
-        | "SCO"   -> 3
-        | "SCOR"  -> 4
-        | "OTHER" -> 5
+        | "T"     -> 1<token>
+        | "TR"    -> 2<token>
+        | "SCO"   -> 3<token>
+        | "SCOR"  -> 4<token>
+        | "OTHER" -> 5<token>
         | x -> failwithf "Unexpected edge label: %A" x
 
     let rdfToDot () =
@@ -29,12 +29,11 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
         
 
     let getRDFInput file = 
-        
         let path file = System.IO.Path.Combine(basePath, file)
         let parserInputGraph,triples = YC.GLL.Abstarct.Tests.RDFPerformance.getParseInputGraph rdfTokenizer (path file)
         let input = Array2D.init parserInputGraph.EdgeCount parserInputGraph.EdgeCount (fun i j -> new HashSet<_>())
         parserInputGraph.Edges
-        |> Seq.iter (fun e -> input.[e.Source,e.Target].Add e.Tag |> ignore)
+        |> Seq.iter (fun e -> input.[e.Source,e.Target].Add (int e.Tag) |> ignore)
         input
 
     // s -> SCOR SCO | TR T | SCOR s SCO | TR s T 

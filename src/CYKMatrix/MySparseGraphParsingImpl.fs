@@ -1,7 +1,8 @@
 ﻿module MySparseGraphParsingImpl
     open MatrixKernels
     open SparseGraphParsingImpl
-
+    open AbstractAnalysis.Common
+    
     let innerZeroFloat = 0.0
     let innerOneFloat = 1.0   
 
@@ -14,7 +15,7 @@
         let newMatrix = sparseCudaGeam matrix oneCellMatrix matrix.Size
         matrix.Update(newMatrix.Nnz, newMatrix.CsrVal, newMatrix.CsrRow, newMatrix.CsrColInd)
 
-    let initMatrixMySparse (graph:AbstractAnalysis.Common.SimpleInputGraph<int>) allRules nonterminals =
+    let initMatrixMySparse (graph:AbstractAnalysis.Common.SimpleInputGraph<int<token>>) allRules nonterminals =
         let initMatrix, vertexToInt = initMatrixSparse graph allRules nonterminals
         let mySparseDict = new ParsingMatrix<MySparseMatrix>()
         for nonterm in initMatrix.Keys do

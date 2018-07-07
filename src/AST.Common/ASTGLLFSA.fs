@@ -102,9 +102,14 @@ type private DotNodeType = Packed | NonTerminal | Intermidiate | Terminal | Epsi
 //    Term of string * TerminalNode
 //    | NonTerm of string * NonTerminalNode * list<ReducedTree>
 
-let inline packExtension left right : int64<extension> =  LanguagePrimitives.Int64WithMeasure ((int64 left <<< 32) ||| int64 right)
-let inline getRightExtension (long : int64<extension>) = int <| ((int64 long) &&& 0xffffffffL)
-let inline getLeftExtension (long : int64<extension>)  = int <| ((int64 long) >>> 32)
+let inline packExtension left right : int64<extension> =
+    LanguagePrimitives.Int64WithMeasure ((int64 left <<< 32) ||| int64 right)
+    
+let inline getRightExtension (long : int64<extension>) : int<positionInInput> =
+     (int64 long) &&& 0xffffffffL |> int |> LanguagePrimitives.Int32WithMeasure
+     
+let inline getLeftExtension (long : int64<extension>) : int<positionInInput> =
+    (int64 long) >>> 32 |> int |> LanguagePrimitives.Int32WithMeasure
 
 let inline getRule packedValue = int packedValue >>> 16
 let inline getPosition (packedValue : int) = int (packedValue &&& 0xffff)
@@ -218,7 +223,7 @@ let rec getBestTree (intToString : Dictionary<int,string>) (currentNonterm : int
             if isStem
             then
                 let stack = new ResizeArray<_>(info.Lengths)
-                if info.LastStem = int n.Name
+                if int info.LastStem = int n.Name
                 then
                     stack.[stack.Count - 1] <- stack.[stack.Count - 1] + 1
                 else
@@ -266,7 +271,7 @@ let rec getBestTree (intToString : Dictionary<int,string>) (currentNonterm : int
     | :? TerminalNode as t ->
         if int t.Name <> -1
         then
-            newInfo := new Info(0,new ResizeArray<_>(),[|SPPFTerminal(intToString.[int t.Name], getLeftExtension t.Extension, getRightExtension t.Extension)|])
+            newInfo := new Info(0,new ResizeArray<_>(),[|SPPFTerminal(intToString.[int t.Name], getLeftExtension t.Extension |> int, getRightExtension t.Extension |> int)|])
         else
             newInfo := new Info(0,new ResizeArray<_>(),[||])
     | :? EpsilonNode as e ->
@@ -774,7 +779,7 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
             match FSharpValue.GetUnionFields(token, typeof<'a>) with
                 | case, _ -> case.Name.ToUpper()
         let termToIndex (term : TerminalNode) =
-            let tokenIndex = (term.Extension |> getRightExtension) - 1
+            let tokenIndex = (term.Extension |> getRightExtension |> int) - 1
             if arguments.withErrors
             then
                 if arguments.intToString <| int term.Name <> "ERROR" then 2 * tokenIndex else 2 * tokenIndex + 1

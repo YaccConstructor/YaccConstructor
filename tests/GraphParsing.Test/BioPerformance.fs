@@ -15,7 +15,7 @@ open MathNet.Numerics.LinearAlgebra.Double
 open BioDataPreproc
 open BioDataPerformance
 
-let BioTokenizer = (fun x -> (int) GLL.BioCFG.stringToToken.[x])
+let BioTokenizer = (fun x -> GLL.BioCFG.stringToToken.[x])
 
 let processFile file grammarFile =
     let cnt = 1

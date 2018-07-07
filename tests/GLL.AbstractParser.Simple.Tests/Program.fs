@@ -62,7 +62,7 @@ let getInputGraph tokenizer inputFile =
     let edg (f : int) (t : string) (l : int) = 
         new ParserEdge<_>(f, l, tokenizer (t.ToUpper()) |> int) 
       
-    let g = new SimpleInputGraph<_>([|0<positionInInput>|], id)
+    let g = new SimpleInputGraph<_>([|0<positionInInput>|], (fun x -> x* 1<token>))
     
     [|for (first,last,tag) in edges -> edg first tag last |]
     |> g.AddVerticesAndEdgeRange
@@ -97,7 +97,7 @@ let test grammarFile inputFile nodesCount edgesCount termsCount ambiguityCount =
     Assert.Pass()
 
 let initGraph (graph : IVertexAndEdgeListGraph<_, _>) (edgeTagToString : _ -> string) (parserSource : ParserSourceGLL) = 
-        let edgeTagToInt x = edgeTagToString x |> parserSource.StringToToken |> int
+        let edgeTagToInt x = edgeTagToString x |> parserSource.StringToToken
         let simpleGraph = new SimpleInputGraph<_>(graph.VertexCount, edgeTagToInt)
         simpleGraph.AddVerticesAndEdgeRange(graph.Edges) |> ignore
         simpleGraph

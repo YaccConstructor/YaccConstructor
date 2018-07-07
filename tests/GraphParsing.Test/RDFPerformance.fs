@@ -5,6 +5,7 @@ open VDS.RDF.Parsing
 open YC.GLL.Abstarct.Tests.RDFPerformance
 open Yard.Core
 open Util
+open AbstractAnalysis.Common
 
 open QuickGraph
 open CYKMatrix
@@ -15,12 +16,12 @@ open ImplementationTests
 
 let RDFtokenizer str =
     match str with
-    | "SCOR" -> 1
-    | "TR" -> 2
-    | "OTHER" -> 3
-    | "SCO" -> 4
-    | "T" -> 5
-    | _ -> -1
+    | "SCOR" -> 1<token>
+    | "TR" -> 2<token>
+    | "OTHER" -> 3<token>
+    | "SCO" -> 4<token>
+    | "T" -> 5<token>
+    | _ -> -1<token>
 
 let processFile file grammarFile =
     let cnt = 1

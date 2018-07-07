@@ -104,18 +104,18 @@ let RDFChecker parsingResults =
 type ``Graph parsing tests``() = 
     [<Test>] 
     member this._01_SimpleNaiveRecognizerTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
+        let graph = new SimpleInputGraph<int<token>>([||], id)
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 1, 2)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(1, 0, 2)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 2<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 0, 2<token>)) |> ignore
 
         let A = NonTerminal "A"
         let B = NonTerminal "B"
         let S = NonTerminal "S"
         let nonterminals = new ResizeArray<NonTerminal>([| A; B; S |])
         let crl = [| (S, Probability.create 1.0),[|(A, B, true)|];(B, Probability.create 1.0),[|(A, A, true)|]|]
-        let srl = [| (A, Probability.create 1.0), 2 |]
+        let srl = [| (A, Probability.create 1.0), 2<token> |]
         let erl: NonTerminal [] = [||]
         let rules = new BooleanRulesHolder(crl, srl, erl)
         let (recognizeMatrix, _, vertexToInt, multCount) =
@@ -127,21 +127,21 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._02_SimpleNaiveRecognizerTest2 () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int<token>>([||], id)
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 1, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(1, 2, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(2, 0, 1)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 2, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 0, 1<token>)) |> ignore
 
         let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "SimpleGrammar_cnf.yrd")
         let fe = new Yard.Frontends.YardFrontend.YardFrontend()
         let loadIL = fe.ParseGrammar grammarPath
         let tokenizer str =
             match str with
-                | "A" -> 1
-                | _ -> -1
+                | "A" -> 1<token>
+                | _ -> -1<token>
 
         let (parsingMatrix,S,_,multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityNaiveHandler(graph.VertexCount)) loadIL tokenizer 1
         assert (probabilityAnalyzer parsingMatrix S = 3)
@@ -151,25 +151,25 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._03_SimpleNaiveLoopTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<_>([||], id)
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
         graph.AddVertex(3) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 0, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 1, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(1, 2, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(1, 3, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(2, 3, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(3, 2, 1)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 0, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 2, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 3, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 3, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(3, 2, 1<token>)) |> ignore
 
         let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "SimpleGrammar_cnf.yrd")
         let fe = new Yard.Frontends.YardFrontend.YardFrontend()
         let loadIL = fe.ParseGrammar grammarPath
         let tokenizer str =
             match str with
-                | "A" -> 1
-                | _ -> -1
+                | "A" -> 1<token>
+                | _ -> -1<token>
 
         let (parsingMatrix,S,_,multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityNaiveHandler(graph.VertexCount)) loadIL tokenizer 1
         assert (probabilityAnalyzer parsingMatrix S = 8)
@@ -180,21 +180,21 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._04_SimpleSparseRecognizerTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
+        let graph = new SimpleInputGraph<int<token>>([||], id)
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 1, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(1, 2, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(2, 0, 1)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 2, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 0, 1<token>)) |> ignore
 
         let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "SimpleGrammar_cnf.yrd")
         let fe = new Yard.Frontends.YardFrontend.YardFrontend()
         let loadIL = fe.ParseGrammar grammarPath
         let tokenizer str =
             match str with
-                | "A" -> 1
-                | _ -> -1
+                | "A" -> 1<token>
+                | _ -> -1<token>
 
         let (parsingMatrix,S,_,multCount) = graphParse<SparseMatrix, float> graph (new SparseHandler(graph.VertexCount)) loadIL tokenizer 1
         assert (sparseAnalyzer parsingMatrix S = 3)
@@ -204,25 +204,25 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._05_SimpleSparseLoopTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
+        let graph = new SimpleInputGraph<int<token>>([||], id)
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
         graph.AddVertex(3) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 0, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 1, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(1, 2, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(1, 3, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(2, 3, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(3, 2, 1)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 0, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 2, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 3, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 3, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(3, 2, 1<token>)) |> ignore
 
         let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "SimpleGrammar_cnf.yrd")
         let fe = new Yard.Frontends.YardFrontend.YardFrontend()
         let loadIL = fe.ParseGrammar grammarPath
         let tokenizer str =
             match str with
-                | "A" -> 1
-                | _ -> -1
+                | "A" -> 1<token>
+                | _ -> -1<token>
 
         let (parsingMatrix,S,_,multCount) = graphParse<SparseMatrix, float> graph (new SparseHandler(graph.VertexCount)) loadIL tokenizer 1
         assert (sparseAnalyzer parsingMatrix S = 8)
@@ -233,21 +233,21 @@ type ``Graph parsing tests``() =
 
     [<Ignore("GPU tests are ignored on the build server")>] 
     member this._06_SimpleCudaRecognizerTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
+        let graph = new SimpleInputGraph<int<token>>([||], id)
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 1, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(1, 2, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(2, 0, 1)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 2, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 0, 1<token>)) |> ignore
 
         let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "SimpleGrammar_cnf.yrd")
         let fe = new Yard.Frontends.YardFrontend.YardFrontend()
         let loadIL = fe.ParseGrammar grammarPath
         let tokenizer str =
             match str with
-                | "A" -> 1
-                | _ -> -1
+                | "A" -> 1<token>
+                | _ -> -1<token>
 
         let (parsingMatrix,S,_,multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityAleaCudaHandler(graph.VertexCount)) loadIL tokenizer 1
         assert (probabilityAnalyzer parsingMatrix S = 3)
@@ -257,25 +257,25 @@ type ``Graph parsing tests``() =
 
     [<Ignore("GPU tests are ignored on the build server")>]  
     member this._07_SimpleCudaLoopTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
+        let graph = new SimpleInputGraph<int<token>>([||], id)
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
         graph.AddVertex(3) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 0, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 1, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(1, 2, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(1, 3, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(2, 3, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(3, 2, 1)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 0, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 2, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 3, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 3, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(3, 2, 1<token>)) |> ignore
 
         let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "SimpleGrammar_cnf.yrd")
         let fe = new Yard.Frontends.YardFrontend.YardFrontend()
         let loadIL = fe.ParseGrammar grammarPath
         let tokenizer str =
             match str with
-                | "A" -> 1
-                | _ -> -1
+                | "A" -> 1<token>
+                | _ -> -1<token>
 
         let (parsingMatrix,S,_,multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityAleaCudaHandler(graph.VertexCount)) loadIL tokenizer 1
         assert (probabilityAnalyzer parsingMatrix S = 8)
@@ -286,27 +286,27 @@ type ``Graph parsing tests``() =
 
     [<Ignore("GPU tests are ignored on the build server")>] 
     member this._08_SimpleSparseCudaLoopTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
+        let graph = new SimpleInputGraph<int<token>>([||], id)
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 0, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 1, 2)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(1, 2, 2)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(2, 2, 5)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(2, 0, 4)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 0, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 2<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 2, 2<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 2, 5<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 0, 4<token>)) |> ignore
 
         let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "GPPerf1_cnf.yrd")
         let fe = new Yard.Frontends.YardFrontend.YardFrontend()
         let loadIL = fe.ParseGrammar grammarPath
         let tokenizer str =
             match str with
-            | "SCOR" -> 1
-            | "TR" -> 2
-            | "OTHER" -> 3
-            | "SCO" -> 4
-            | "T" -> 5
-            | _ -> -1
+            | "SCOR" -> 1<token>
+            | "TR" -> 2<token>
+            | "OTHER" -> 3<token>
+            | "SCO" -> 4<token>
+            | "T" -> 5<token>
+            | _ -> -1<token>
 
         let (parsingMatrix,S,_,multCount) = graphParse<MySparseMatrix, float> graph (new MySparseHandler(graph.VertexCount)) loadIL tokenizer 1
         assert (mySparseAnalyzer parsingMatrix S = 3)
@@ -317,24 +317,24 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._09_Conj_abc_DirectedChain () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
+        let graph = new SimpleInputGraph<int<token>>([||], id)
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
         graph.AddVertex(3) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 1, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(1, 2, 2)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(2, 3, 3)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 2, 2<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 3, 3<token>)) |> ignore
 
         let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "Conj_abc_bnf.yrd")
         let fe = new Yard.Frontends.YardFrontend.YardFrontend()
         let loadIL = fe.ParseGrammar grammarPath
         let tokenizer str =
             match str with
-                | "A" -> 1
-                | "B" -> 2
-                | "C" -> 3
-                | _ -> -1
+                | "A" -> 1<token>
+                | "B" -> 2<token>
+                | "C" -> 3<token>
+                | _ -> -1<token>
 
         let (parsingMatrix,S,_,multCount) = graphParse<SparseMatrix, float> graph (new SparseHandler(graph.VertexCount)) loadIL tokenizer 1
         assert (sparseAnalyzer parsingMatrix S = 1)
@@ -344,28 +344,28 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._10_Conj_abc_SimpleLoop () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
+        let graph = new SimpleInputGraph<int<token>>([||], id)
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
         graph.AddVertex(3) |> ignore
         graph.AddVertex(4) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 0, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 1, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(1, 2, 2)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(2, 3, 2)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(2, 4, 3)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(3, 3, 3)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 0, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 2, 2<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 3, 2<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 4, 3<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(3, 3, 3<token>)) |> ignore
 
         let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "Conj_abc_bnf.yrd")
         let fe = new Yard.Frontends.YardFrontend.YardFrontend()
         let loadIL = fe.ParseGrammar grammarPath
         let tokenizer str =
             match str with
-                | "A" -> 1
-                | "B" -> 2
-                | "C" -> 3
-                | _ -> -1
+                | "A" -> 1<token>
+                | "B" -> 2<token>
+                | "C" -> 3<token>
+                | _ -> -1<token>
 
         let (parsingMatrix,S,_,multCount) = graphParse<SparseMatrix, float> graph (new SparseHandler(graph.VertexCount)) loadIL tokenizer 1
         assert (sparseAnalyzer parsingMatrix S = 2)
@@ -375,26 +375,26 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._11_Conj_SimpleAprox () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
+        let graph = new SimpleInputGraph<int<token>>([||], id)
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
         graph.AddVertex(3) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 1, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(1, 3, 2)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 2, 3)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(2, 3, 4)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 3, 2<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 2, 3<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 3, 4<token>)) |> ignore
 
         let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "Conj_simple_aprox.yrd")
         let fe = new Yard.Frontends.YardFrontend.YardFrontend()
         let loadIL = fe.ParseGrammar grammarPath
         let tokenizer str =
             match str with
-                | "A" -> 1
-                | "B" -> 2
-                | "C" -> 3
-                | "D" -> 4
-                | _ -> -1
+                | "A" -> 1<token>
+                | "B" -> 2<token>
+                | "C" -> 3<token>
+                | "D" -> 4<token>
+                | _ -> -1<token>
 
         let (parsingMatrix,S,_,multCount) = graphParse<SparseMatrix, float> graph (new SparseHandler(graph.VertexCount)) loadIL tokenizer 1
         assert (sparseAnalyzer parsingMatrix S = 1)
@@ -404,21 +404,21 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._12_APSP_SimpleNaiveRecognizerTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
+        let graph = new SimpleInputGraph<int<token>>([||], id)
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 1, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(1, 2, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(2, 0, 1)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 2, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 0, 1<token>)) |> ignore
 
         let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "SimpleGrammar_cnf.yrd")
         let fe = new Yard.Frontends.YardFrontend.YardFrontend()
         let loadIL = fe.ParseGrammar grammarPath
         let tokenizer str =
             match str with
-                | "A" -> 1
-                | _ -> -1
+                | "A" -> 1<token>
+                | _ -> -1<token>
 
         let (parsingMatrix,S,_,multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityMinPlusHandler(graph.VertexCount)) loadIL tokenizer 1
         assert (probabilityAnalyzer parsingMatrix S = 3)
@@ -428,27 +428,27 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._13_APSP_SimpleLoopTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
+        let graph = new SimpleInputGraph<int<token>>([||], id)
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 0, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 1, 2)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(1, 2, 2)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(2, 2, 5)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(2, 0, 4)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 0, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 2<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 2, 2<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 2, 5<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 0, 4<token>)) |> ignore
 
         let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "GPPerf1_cnf.yrd")
         let fe = new Yard.Frontends.YardFrontend.YardFrontend()
         let loadIL = fe.ParseGrammar grammarPath
         let tokenizer str =
             match str with
-            | "SCOR" -> 1
-            | "TR" -> 2
-            | "OTHER" -> 3
-            | "SCO" -> 4
-            | "T" -> 5
-            | _ -> -1
+            | "SCOR" -> 1<token>
+            | "TR" -> 2<token>
+            | "OTHER" -> 3<token>
+            | "SCO" -> 4<token>
+            | "T" -> 5<token>
+            | _ -> -1<token>
 
         let (parsingMatrix,S,_,multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityMinPlusHandler(graph.VertexCount)) loadIL tokenizer 1
         assert (probabilityAnalyzer parsingMatrix S = 3)
@@ -458,25 +458,25 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._14_PaperExampleTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
+        let graph = new SimpleInputGraph<int<token>>([||], id)
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
         graph.AddVertex(3) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 1, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(1, 2, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(2, 0, 1)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(0, 3, 2)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(3, 0, 2)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 1, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(1, 2, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(2, 0, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, 3, 2<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(3, 0, 2<token>)) |> ignore
 
         let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "PaperExampleGrammar_cnf.yrd")
         let fe = new Yard.Frontends.YardFrontend.YardFrontend()
         let loadIL = fe.ParseGrammar grammarPath
         let tokenizer str =
             match str with
-                | "A" -> 1
-                | "B" -> 2
-                | _ -> -1
+                | "A" -> 1<token>
+                | "B" -> 2<token>
+                | _ -> -1<token>
 
         let (parsingMatrix,S,_,multCount) = graphParse<ProbabilityMatrix.T, float> graph (new ProbabilityNaiveHandler(graph.VertexCount)) loadIL tokenizer 1
         assert (probabilityAnalyzer parsingMatrix S = 6)

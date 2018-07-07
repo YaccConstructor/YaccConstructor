@@ -2,6 +2,7 @@
 
 open System.Collections.Generic
 open FSharpx.Collections.Experimental
+open Microsoft.FSharp.Collections
 
 open Yard.Generators.GLL
 open Yard.Generators.Common.DataStructures
@@ -198,6 +199,30 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         |> Seq.sortByDescending(fun x -> getRightExtension(x.getExtension()) )
         |> Array.ofSeq
         //|> (fun x -> [|x.[0]|])
+    
+    member this.GetRootsForStartAndFinal (gss : GSS) (startPositions :_ []) (finalPositions :_ []) = 
+        let startPoss = new HashSet<int<positionInInput>>(startPositions)
+        let finalPoss = new HashSet<int<positionInInput>>(finalPositions)
+        let gssRoots = 
+            gss.Vertices
+            |> Seq.filter (fun vert -> vert.Nonterm = startState && startPoss.Contains(vert.PositionInInput) )
+            |> Array.ofSeq
+        
+        gssRoots
+        |> Array.collect (fun x ->
+            x.P.SetP
+            |> ResizeArray.toArray
+            |> Array.choose (fun x -> 
+                match x.data with
+                | TreeNode n -> 
+                    let node = this.Nodes.Item (int n)
+                    if (finalPoss.Contains(node.getExtension() |> getRightExtension))
+                    then
+                        Some(node)
+                    else
+                        None
+                | _ -> failwith "wrongType")
+            )
 
     member this.GetNonTermByName name (ps : ParserSourceGLL) = 
         let token = ps.NameToId.Item name

@@ -26,7 +26,6 @@ let PBtokenizer (str:string) =
     | "CB" -> -2*bracketIndex
     | _ -> 0
 
-
 let getTriplesFromFile file =
     let triples = new ResizeArray<int*string*int>()  
     let mutable maxParenthesis = 0
@@ -66,7 +65,7 @@ let getInputGraph file =
 
     let allVs = triples.ToArray() |> Array.collect (fun (f,l,t) -> [|f * 1<positionInInput>; t * 1<positionInInput>|]) |> Set.ofArray |> Array.ofSeq
 
-    let g = new SimpleInputGraph<_>(allVs, id)
+    let g = new SimpleInputGraph<int>(allVs, (fun x -> x * 1<token>))
     
     [|for (f,l,t) in triples -> edg f t l |]
     |> Array.concat

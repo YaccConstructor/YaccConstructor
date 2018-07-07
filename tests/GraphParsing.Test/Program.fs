@@ -104,7 +104,7 @@ let RDFChecker parsingResults =
 type ``Graph parsing tests``() = 
     [<Test>] 
     member this._01_SimpleNaiveRecognizerTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddEdge(new ParserEdge<_>(0, 1, 2)) |> ignore
@@ -127,7 +127,7 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._02_SimpleNaiveRecognizerTest2 () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
@@ -151,7 +151,7 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._03_SimpleNaiveLoopTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
@@ -180,7 +180,7 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._04_SimpleSparseRecognizerTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
@@ -204,7 +204,7 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._05_SimpleSparseLoopTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
@@ -233,7 +233,7 @@ type ``Graph parsing tests``() =
 
     [<Ignore("GPU tests are ignored on the build server")>] 
     member this._06_SimpleCudaRecognizerTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
@@ -257,7 +257,7 @@ type ``Graph parsing tests``() =
 
     [<Ignore("GPU tests are ignored on the build server")>]  
     member this._07_SimpleCudaLoopTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
@@ -286,7 +286,7 @@ type ``Graph parsing tests``() =
 
     [<Ignore("GPU tests are ignored on the build server")>] 
     member this._08_SimpleSparseCudaLoopTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
@@ -317,7 +317,7 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._09_Conj_abc_DirectedChain () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
@@ -344,7 +344,7 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._10_Conj_abc_SimpleLoop () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
@@ -375,7 +375,7 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._11_Conj_SimpleAprox () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
@@ -404,7 +404,7 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._12_APSP_SimpleNaiveRecognizerTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
@@ -428,7 +428,7 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._13_APSP_SimpleLoopTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore
@@ -458,7 +458,7 @@ type ``Graph parsing tests``() =
 
     [<Test>]
     member this._14_PaperExampleTest () =
-        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], id)
+        let graph = new AbstractAnalysis.Common.SimpleInputGraph<int>([||], (fun x -> x * 1<token>))
         graph.AddVertex(0) |> ignore
         graph.AddVertex(1) |> ignore
         graph.AddVertex(2) |> ignore

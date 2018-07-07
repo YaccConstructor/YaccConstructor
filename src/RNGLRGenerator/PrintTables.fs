@@ -224,9 +224,9 @@ let printTables
 
         printBrInd 0 "let tokenToNumber = function"
         for i = indexator.termsStart to indexator.termsEnd do
-            printBrInd 1 "| %s _ -> %d" (indexator.indexToTerm i) i
+            printBrInd 1 "| %s _ -> %d<token>" (indexator.indexToTerm i) i
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| L_%s _ -> %d" (indexator.getLiteralName i) i
+            printBrInd 1 "| L_%s _ -> %d<token>" (indexator.getLiteralName i) i
         printBr ""
 
         printBrInd 0 "let isLiteral = function"
@@ -285,7 +285,7 @@ let printTables
         printBrInd 0 "for i = 0 to %d do" statesLim
         printBrInd 2 "accStates.[i] <- List.exists ((=) i) small_acc"
 
-        printBrInd 0 "let eofIndex = %d" grammar.indexator.eofIndex
+        printBrInd 0 "let eofIndex = %d<token>" grammar.indexator.eofIndex
 
         let mutable errorIndex = -1      
         for i = indexator.termsStart to indexator.termsEnd do
@@ -293,7 +293,7 @@ let printTables
                 errorIndex <- i
         let errorRulesExists = errorIndex <> -1  
                 
-        printBrInd 0 "let errorIndex = %d" errorIndex
+        printBrInd 0 "let errorIndex = %d<token>" errorIndex
         printBrInd 0 "let errorRulesExists = %b" errorRulesExists
 
         if errorRulesExists then

@@ -19,7 +19,7 @@ open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
 open Yard.Generators.Common.AstNode
 open FSharpx.Collections.Experimental
-
+open AbstractAnalysis.Common
 
 type TS<'Token> =
     | Tok of 'Token
@@ -915,7 +915,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>
         
             forestTree
 
-    member this.AstToDot (indToString : int -> string) tokenToNumber tokenData (leftSide : array<int>) (path : string)=
+    member this.AstToDot (indToString : int -> string) (tokenToNumber : _ -> int<token>) tokenData (leftSide : array<int>) (path : string)=
         let next =
             let cur = ref order.Length
             fun () ->
@@ -957,7 +957,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>
             res
         let createTerm t =
             let res = next()
-            let textualTerm = sprintf "t %s: %s" (indToString (tokenToNumber tokens.[t]))(match tokenData with | None -> "" | Some f -> f tokens.[t] |> string)
+            let textualTerm = sprintf "t %s: %s" (indToString (tokenToNumber tokens.[t] |> int))(match tokenData with | None -> "" | Some f -> f tokens.[t] |> string)
             createNode res false AstNodeType textualTerm
             res
         if not isEpsilonTree then

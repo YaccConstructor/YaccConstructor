@@ -33,7 +33,7 @@ type IParserInput =
 type ParserEdge<'tag>(s, e, t)=
     inherit TaggedEdge<int, 'tag>(s, e, t)
     
-type SimpleInputGraph<'tag>(initialVertices : int[], finalVertices : int[], tagToToken : 'tag -> int) = 
+type SimpleInputGraph<'tag>(initialVertices : int[], finalVertices : int[], tagToToken : 'tag -> int<token>) = 
     inherit AdjacencyGraph<int, ParserEdge<'tag>>()
 
     member val InitStates = initialVertices 
@@ -55,14 +55,14 @@ type SimpleInputGraph<'tag>(initialVertices : int[], finalVertices : int[], tagT
         out.WriteLine("}")
         out.Close()      
 
-    new (initial : int, final : int, tagToToken : 'tag -> int) = 
+    new (initial : int, final : int, tagToToken : 'tag -> int<token>) = 
         SimpleInputGraph<_>([|initial|], [|final|], tagToToken)
 
-    new (n : int, tagToToken : 'tag -> int) =
+    new (n : int, tagToToken : 'tag -> int<token>) =
         let allVertices = [|for i in 0 .. n - 1 -> i|]
         SimpleInputGraph<_>(allVertices, allVertices, tagToToken)
 
-    new (initial : int<positionInInput>[], tagToToken : 'tag -> int) = 
+    new (initial : int<positionInInput>[], tagToToken : 'tag -> int<token>) = 
         let casted = Array.map(fun x -> int x) initial
         SimpleInputGraph<_>(casted, casted, tagToToken)
  
@@ -74,7 +74,7 @@ type SimpleInputGraph<'tag>(initialVertices : int[], finalVertices : int[], tagT
         member this.ForAllOutgoingEdges curPosInInput pFun =
             let outEdges = int curPosInInput |> this.OutEdges
             outEdges |> Seq.iter
-                (fun e -> pFun ((this.TagToToken e.Tag) * 1<token>) (e.Target * 1<positionInInput>))
+                (fun e -> pFun (this.TagToToken e.Tag) (e.Target * 1<positionInInput>))
 
         member this.PositionToString (pos : int) =
             sprintf "%i" pos

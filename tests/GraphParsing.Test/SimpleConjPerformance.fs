@@ -21,7 +21,7 @@ let SimpleTokenizer str =
 
 let denseTest (verticesCount:int) grammarFile =
     let cnt = 1
-    let graph = new SimpleInputGraph<int>(verticesCount, id)
+    let graph = new SimpleInputGraph<int>(verticesCount, (fun x -> x * 1<token>))
     for v1 in [0 .. verticesCount - 1] do
         for v2 in [0 .. verticesCount - 1] do
             if v1 <> v2 then 
@@ -39,7 +39,7 @@ let denseTest (verticesCount:int) grammarFile =
 
 let densityTest (verticesCount:int) (edgesCount:int) grammarFile =
     let cnt = 1
-    let graph = new SimpleInputGraph<int>(verticesCount, id)
+    let graph = new SimpleInputGraph<int>(verticesCount, (fun x -> x * 1<token>))
 
     let rnd = System.Random()
 
@@ -74,7 +74,7 @@ let conversionBNFconj = new Conversions.CNFandBNF.BNFconj()
 
 let densityBNFTest (verticesCount:int) (edgesCount:int) grammarFile =
     let cnt = 1
-    let graph = new SimpleInputGraph<int>(verticesCount, id)
+    let graph = new SimpleInputGraph<int>(verticesCount, (fun x -> x * 1<token>))
 
     let rnd = System.Random()
 

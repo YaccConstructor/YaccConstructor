@@ -31,7 +31,7 @@ type SNN(grammar, width) =
 
      let gll = new Yard.Generators.GLL.GLL()
      let input = new AbstractAnalysis.Common.SimpleInputGraph<_>([|0|],[|0|],id)
-     let batch i j = [for t in getParserSource.TerminalNums -> new AbstractAnalysis.Common.ParserEdge<_>(i, j, int t)]
+     let batch i j = [for t in getParserSource.TerminalNums -> new AbstractAnalysis.Common.ParserEdge<_>(i, j, t)]
      //for i in 0 .. width do input.AddVerticesAndEdgeRange(batch i (i+1)) |> ignore
      input.AddVerticesAndEdgeRange(batch 0 0) |> ignore
      

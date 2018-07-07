@@ -13,7 +13,7 @@
 //   limitations under the License.
 
 namespace Yard.Generators.RNGLR
-
+open AbstractAnalysis.Common
 type ParserSource<'TokenType> (gotos : int[][]
                                , reduces : (int * int)[][][]
                                , zeroReduces : int[][][]
@@ -22,11 +22,11 @@ type ParserSource<'TokenType> (gotos : int[][]
                                , rulesStart : int[]
                                , leftSide : int[]
                                , startRule : int
-                               , eofIndex : int
-                               , tokenToNumber : 'TokenType -> int
+                               , eofIndex : int<token>
+                               , tokenToNumber : 'TokenType -> int<token>
                                , acceptEmptyInput : bool
                                , numToString : int -> string
-                               , errorIndex : int
+                               , errorIndex : int<token>
                                , errorRulesExists : bool
                                , ?tokenData: 'TokenType -> obj
                                , ?createErrorToken: 'TokenType -> 'TokenType) =

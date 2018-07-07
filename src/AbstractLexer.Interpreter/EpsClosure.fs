@@ -73,7 +73,7 @@ let newDfaNodeId, reset =
     fun () -> let res = !i in incr i; res
     , fun () -> i := 0
    
-let NfaToDfa (inGraph: SimpleInputGraph<_>) tagToToken = 
+let NfaToDfa (inGraph: SimpleInputGraph<_>) (tagToToken : _ -> int<token>)= 
     reset ()
     let numNfaNodes = inGraph.VertexCount
     let rec EClosure1 (acc:NfaNodeIdSetBuilder) n = 

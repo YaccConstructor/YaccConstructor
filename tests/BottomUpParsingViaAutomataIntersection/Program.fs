@@ -128,12 +128,12 @@ type ``Tests for bottom-Up parser based on automata intersection``() =
         let input = new AbstractAnalysis.Common.SimpleInputGraph<_>([|0|],[|0|],id)
         let batch i j =
             [
-                new AbstractAnalysis.Common.ParserEdge<_>(i, j, int <| getParserSource.StringToToken "A")
-                new AbstractAnalysis.Common.ParserEdge<_>(i, j, int <| getParserSource.StringToToken "B")
-                new AbstractAnalysis.Common.ParserEdge<_>(i, j, int <| getParserSource.StringToToken "C")
-                new AbstractAnalysis.Common.ParserEdge<_>(i, j, int <| getParserSource.StringToToken "D")
+                new AbstractAnalysis.Common.ParserEdge<_>(i, j, getParserSource.StringToToken "A")
+                new AbstractAnalysis.Common.ParserEdge<_>(i, j, getParserSource.StringToToken "B")
+                new AbstractAnalysis.Common.ParserEdge<_>(i, j, getParserSource.StringToToken "C")
+                new AbstractAnalysis.Common.ParserEdge<_>(i, j, getParserSource.StringToToken "D")
                 ]
-        input.AddVerticesAndEdgeRange(batch 0 0)
+        input.AddVerticesAndEdgeRange(batch 0 0) |> ignore
         //input.AddVerticesAndEdgeRange(batch 1 2)
         //input.AddVerticesAndEdgeRange(batch 2 3)
         //input.AddVerticesAndEdgeRange(batch 3 4)

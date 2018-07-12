@@ -10,6 +10,8 @@ open System.Collections.Generic
 open ResultProcessing
 open InputLoading
 
+open Yard.Generators.Common.AutomataCombinators
+
 let printAllPaths parserSource inputGraph outputFile = 
     let roots = getAllSPPFRootsAsINodes parserSource inputGraph
     if roots.Length < 1
@@ -51,9 +53,33 @@ let printAllBadAsserts parserSource inputGraph outputFile =
 let printGraph (graph : SimpleInputGraph<_>) (file : string) = 
     graph.PrintToDot file id
 
+(*
+ba: ASSERT
+ca: ASSERT
+
+s0: C s0 RT s0 | G s0 RL s0 | ca s0 | ca | eps
+
+s1: C s1 RT s1 | G s0 RL s1 | eps
+
+[<Start>]
+s: ba s | s ba| s1 s | s s1 | ba | C s RT s1 | C s RT s 
+*)
+
 [<EntryPoint>]
 let main argv =
-    let graphFile = argv.[0]
+    let factory = new AutomataFactory()
+    let (~%), (~&), eps, (=>), (!=>), (<~>), (<|>) = factory.Combinators
+
+    let s0 = "s0" => ((%"C0" <~> &"s0" <~> %"RT0" <~> &"s0") <|> (%"G0" <~> &"s0" <~> %"RL0" <~> &"s0"))
+    let s = "s" !=> &"s0"
+
+    let automata = factory.Produce()
+    automata.PrintDot "automata.dot" 
+
+    //let gll = new GLL()
+    //gll.GenerateFromFSA automata true "gll.fs" |> ignore
+
+    (*let graphFile = argv.[0]
     /// CALLS, LOCKS, ASSERTS
     
     let parserSource, inputGraph = loadInput graphFile   
@@ -64,4 +90,5 @@ let main argv =
     printAllPaths parserSource inputGraph outputFile
     //printAllBadAsserts parserSource inputGraph outputFile
     printfn "Processing time: %A" (System.DateTime.Now - start)
+    *)
     0 // return an integer exit code

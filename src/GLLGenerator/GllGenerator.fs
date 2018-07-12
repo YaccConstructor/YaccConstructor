@@ -17,6 +17,24 @@ type GLL() =
     inherit Generator()
         override this.Name = "GLLGenerator"
         override this.Constraints = [|noMeta; singleModule|]
+
+        member this.GenerateFromFSA fsa generateToFile outFileName =
+            let start = System.DateTime.Now
+
+            let generatedCode, parserSource = 
+                getGLLparserSource fsa outFileName (new Map<_, _>(["", Some ""])) "" false generateToFile//isAbstract
+            
+            if generateToFile
+            then
+                use out = new System.IO.StreamWriter (outFileName)
+                // TODO: write foot of definition
+                out.WriteLine (generatedCode.ToString().Replace("\r\n", "\n").Replace("\n", "\r\n"))
+                out.Flush()
+                out.Close()
+            eprintfn "Generation time: %A" <| System.DateTime.Now - start
+            
+            box parserSource
+
         override this.Generate (definition, generateToFile, args) =
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")

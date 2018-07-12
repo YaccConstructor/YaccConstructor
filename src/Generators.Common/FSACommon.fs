@@ -23,7 +23,7 @@ type InternalFSA = {
     StartComponentNumber         : int
     StartStates        : HashSet<int<positionInGrammar>> []
     //FirstStates        : int<positionInGrammar> list list
-    LastStates         : HashSet<int<positionInGrammar>>
+    //LastStates         : HashSet<int<positionInGrammar>>
     FinalStates        : HashSet<int<positionInGrammar>>
     //Dictionary<int<positionInGrammar>, int>
 }
@@ -205,7 +205,8 @@ let convertRulesToFSA (ruleList : Rule<Source,Source> list) =
         StartStates    = startStates;
         //FirstStates    = firstStates;
         FinalStates    = lastStates;
-        LastStates     = new HashSet<_>(lastStates)}
+        //LastStates     = new HashSet<_>(lastStates)}
+        }
 
 /// Removes epsilon edges from FA using epsilon closure.
 let removeEpsilonEdges (fsa : InternalFSA) = 
@@ -237,7 +238,7 @@ let removeEpsilonEdges (fsa : InternalFSA) =
             startStatesToComponentNum.Add(st, componentNum))
     
     let finalStates = fsa.FinalStates
-    let lastStates  = fsa.LastStates
+    //let lastStates  = fsa.LastStates
 
     let newStates = 
         fsa.States
@@ -261,7 +262,7 @@ let removeEpsilonEdges (fsa : InternalFSA) =
                     |> Array.ofSeq)
             |> (fun x ->
                 if Array.isEmpty x
-                then (currentState*1<positionInGrammar>) |> lastStates.Add |> ignore
+                then (currentState*1<positionInGrammar>) |> ignore //lastStates.Add |> ignore
                 x)
                 )
     
@@ -281,7 +282,8 @@ let removeEpsilonEdges (fsa : InternalFSA) =
         StartStates    = startStates;
         //FirstStates    = firstStates;
         FinalStates    = finalStates;
-        LastStates     = lastStates}
+        //LastStates     = lastStates
+        }
 
 /// Converts NFA without epsilon edges to DFA
 let toDFA fsa = 
@@ -342,7 +344,7 @@ let toDFA fsa =
     let newFinalStates = new HashSet<_>()
     let newLastStates = new HashSet<_>()
     let finalStates = fsa.FinalStates
-    let lastStates = fsa.LastStates
+    //let lastStates = fsa.LastStates
     let stateToNewState = Array.create (fsa.States.Length) 0<positionInGrammar>
 
     statesEliminationSet
@@ -352,10 +354,13 @@ let toDFA fsa =
             then 
                 stateNum*1<positionInGrammar> |> newFinalStates.Add |> ignore
 
+            (*
             if lastStates.Contains st
             then 
                 stateNum*1<positionInGrammar> |> newLastStates.Add |> ignore
-            stateToNewState.[int st] <- stateNum*1<positionInGrammar>)
+            stateToNewState.[int st] <- stateNum*1<positionInGrammar>
+            *)
+            )
             
     let newStates = 
         newStates
@@ -392,7 +397,7 @@ let toDFA fsa =
         StateToNontermName = stateToNontermName;
         StartComponentNumber = !newStartComponentNumber;
         StartStates = Array.ofSeq newStartStates;
-        LastStates = newLastStates;
+        //LastStates = newLastStates;
         FinalStates = newFinalStates}
 
 /// Returns sets of equivalent states

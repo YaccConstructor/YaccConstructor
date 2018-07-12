@@ -64,9 +64,19 @@
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\AutomataCombinators\AutomataCombinators.fsproj">
+      <Name>AutomataCombinators</Name>
+      <Project>{575e24b3-564e-4290-86c9-d8d8103db12c}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common (Core\Common)</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Generators.Common\Generators.Common.fsproj">
+      <Name>Generators.Common</Name>
+      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\GLLAbstractParser\GLLAbstractParser.fsproj">

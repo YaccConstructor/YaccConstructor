@@ -251,7 +251,7 @@ let getGLLparserSource (fsa : FSA)
         if cond then failwith "multiple nonterminal names for one state"
         intToString.Add(int numberNonterm.Key, numberNonterm.Value)
 
-    let rightSideToRule = 
+    (*let rightSideToRule = 
         try
             let newRuleList = fsa.RuleList |> convertRules
             let indexator = new Indexator(newRuleList, true)
@@ -260,7 +260,7 @@ let getGLLparserSource (fsa : FSA)
         with
             | ex ->
                 printfn "It would not be possible to use translation because not having some necessary conversions in grammar"
-                fun _ -> failwith "Bad grammar"
+                fun _ -> failwith "Bad grammar"*)
     let parserSource = new ParserSourceGLL(fsaStatesOutNonterms
                                          , fsa.StartState
                                          , fsa.FinalStates
@@ -270,8 +270,8 @@ let getGLLparserSource (fsa : FSA)
                                          , (int anyNonterm)* 1<positionInGrammar>
                                          , stateAndTokenToNewState
                                          , stringToToken
-                                         , multipleInEdges
-                                         , rightSideToRule=rightSideToRule)
+                                         , multipleInEdges)
+                                         //, rightSideToRule=rightSideToRule)
 
 
     res, parserSource

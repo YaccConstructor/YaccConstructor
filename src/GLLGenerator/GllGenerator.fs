@@ -11,13 +11,86 @@ open Yard.Generators.GLL
 open Printer
 open Yard.Generators.Common.FSA.Common
 
+open AbstractAnalysis.Common
 open System.Collections.Generic
+open FSharp.PowerPack
 
 type GLL() = 
     inherit Generator()
         member this.GenerateByRules (*rules*) calls locks asserts =
             let start = System.DateTime.Now
             let fsa = new FSA((*rules,*) calls, locks, asserts)
+            let dfaToFsLexNfa (dfa: FSA) = 
+                let nfa = new FsLex.AST.NfaNodeMap()
+                let count = dfa.States.Length
+                
+                let counter = ref 0u
+                let symbols = Dictionary<EdgeSymbol, uint32>()
+                let getOrCreate symbol = 
+                    if (symbols.ContainsKey symbol) then
+                        symbols.Item symbol
+                    else 
+                        let id = !counter
+                        symbols.Add(symbol, id)
+                        counter := !counter + 1u
+                        id
+                
+                [|0..count - 1|] |> Array.iter (fun i -> 
+                    let node: FsLex.AST.NfaNode = 
+                        {Id = i; 
+                         Name = ""; 
+                         Transitions = new Dictionary<_, _>(); 
+                         Accepted = if (dfa.FinalStates.Contains (i * 1<positionInGrammar>)) then [i, 0] else []} 
+                    nfa.GetMap.Add(i, node))
+                    
+                Array.iteri (fun i -> 
+                    Array.iter (fun (symbol, trans) -> 
+                        (nfa.GetMap.Item i).Transitions.Add(getOrCreate symbol, [nfa.Item (int trans)])))
+                    dfa.States
+                
+                nfa, symbols
+                
+            let fsLexNfa, symbols = dfaToFsLexNfa fsa 
+            
+            printfn "fslex nfa to dfa start"
+            let fsLexStart = System.DateTime.Now
+            FsLex.AST.NfaToDfa fsLexNfa (fsLexNfa.GetMap.Item 0)
+            FsLex.AST.NfaToDfa fsLexNfa (fsLexNfa.GetMap.Item 1)
+            FsLex.AST.NfaToDfa fsLexNfa (fsLexNfa.GetMap.Item 3)
+            FsLex.AST.NfaToDfa fsLexNfa (fsLexNfa.GetMap.Item 4)
+            let fsLexDfa = FsLex.AST.NfaToDfa fsLexNfa (fsLexNfa.GetMap.Item 2)
+            printfn "fslex nfa to dfa %A" (System.DateTime.Now - fsLexStart)
+            
+            printfn "yc nfa to dfa start"
+            let ycStart = System.DateTime.Now
+            let ycDfa = toDFA fsa.InternalFSA
+            printfn "yc nfa to dfa %A" (System.DateTime.Now - ycStart)
+            
+            let symbols' = new Dictionary<uint32, EdgeSymbol>()
+            symbols.Keys |> Seq.iter (fun k -> symbols'.Add(symbols.Item k, k))
+            
+            let states = 
+                (snd fsLexDfa) |> List.collect (fun n -> 
+                    n.Transitions |> List.map (fun (symbol, dir) -> 
+                        (n.Id, (symbols'.Item symbol).ToString(), dir.Id)))
+                        
+            let printDotFromTransitions filePrintPath transitions = 
+                let strs = new ResizeArray<_>(["digraph G {\nnode [shape = circle]"])
+                
+                transitions
+                |> List.groupBy(fun (from, tag, target) -> from)
+                |> List.iter(fun (x,_) -> sprintf "%i[label=\"%i\", style=filled]" x x |> strs.Add)
+                
+                transitions
+                |> List.iter (fun (from, tag, target) ->
+                    sprintf "%i -> %i [label=\"%s\"]; \n" from target tag |> strs.Add
+                    )
+                strs.Add "}"
+                System.IO.File.WriteAllLines(filePrintPath, strs)
+            
+            printDotFromTransitions "test.dot" states
+             
+            //let final = (snd fsLexDfa) |> List.filter (fun n -> not n.Accepted.IsEmpty)
                         
             let generatedCode, parserSource = getGLLparserSource fsa "" (*new Map<_,_>("",Some "")*) "" false false
             
@@ -79,6 +152,7 @@ type GLL() =
                 | value -> failwithf "Unexpected %s option" value
                  
             let fsa = new FSA((*definition.grammar.[0].rules,*) 1, 2, 3)
+            
             
             let generatedCode, parserSource = getGLLparserSource fsa outFileName (*tokenType*) moduleName light generateToFile//isAbstract
             

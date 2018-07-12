@@ -9,6 +9,7 @@ open Yard.Core.IL
 open Yard.Generators.Common.Epsilon
 open Yard.Generators.Common.SymbolSets
 open Yard.Generators.Common
+
 (*
 type FSA(ruleList : Rule<Source,Source> list) =
     let time = ref System.DateTime.Now
@@ -127,7 +128,7 @@ type FSA( calls : int, locks : int, asserts : int) =
                 let numbStr = (i - currVertexNum - 1).ToString()
                 states.[2].Add(Term("C" + numbStr), i * 1<positionInGrammar>)
                 states.[i].Add(Nonterm(sState), (i + calls) * 1<positionInGrammar>)
-                states.[i].Add(Nonterm(s1State), (i + calls) * 1<positionInGrammar>)
+                //states.[i].Add(Nonterm(s1State), (i + calls) * 1<positionInGrammar>)
                 states.[i + calls].Add(Term("RT" + numbStr), 8<positionInGrammar>)
             
             //s0 edges calls
@@ -206,6 +207,8 @@ type FSA( calls : int, locks : int, asserts : int) =
     let x = 
         ()
         //printDot "ruchnoiFSA.dot" fsa
+        
+    member this.InternalFSA = fsa
 
     member this.States = fsa.States
     //after convertion to dfa each startstates HashSet contains only one state

@@ -50,6 +50,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="InputLoading.fs" />
     <Compile Include="ResultProcessing.fs" />
+    <Compile Include="FsLexGenerator.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
   </ItemGroup>

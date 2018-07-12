@@ -42,6 +42,10 @@
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\FsLex\FsLex.fsproj">
+      <Project>{117fe82b-461d-4ab6-ada6-e6d0782d5f83}</Project>
+      <Name>FsLex</Name>
+    </ProjectReference>
     <ProjectReference Include="..\FsYacc\FsYacc.fsproj">
       <Name>FsYacc</Name>
       <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>

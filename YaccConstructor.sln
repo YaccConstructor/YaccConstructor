@@ -105,6 +105,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLL.AbstractParser.Bio.Test
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LockChecker", "src\LockChecker\LockChecker.fsproj", "{33A2AB9A-4E67-447D-9831-3A781301C927}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsLex", "src\FsLex\FsLex.fsproj", "{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -535,6 +537,18 @@ Global
 		{33A2AB9A-4E67-447D-9831-3A781301C927}.Release20|Any CPU.Build.0 = Release|Any CPU
 		{33A2AB9A-4E67-447D-9831-3A781301C927}.Release20|x86.ActiveCfg = Release|Any CPU
 		{33A2AB9A-4E67-447D-9831-3A781301C927}.Release20|x86.Build.0 = Release|Any CPU
+		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Debug|x86.Build.0 = Debug|Any CPU
+		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Release|x86.ActiveCfg = Release|Any CPU
+		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Release|x86.Build.0 = Release|Any CPU
+		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Release20|Any CPU.ActiveCfg = Debug|Any CPU
+		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Release20|Any CPU.Build.0 = Debug|Any CPU
+		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Release20|x86.ActiveCfg = Debug|Any CPU
+		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Release20|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

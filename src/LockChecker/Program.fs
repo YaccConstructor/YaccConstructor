@@ -10,6 +10,8 @@ open System.Collections.Generic
 open ResultProcessing
 open InputLoading
 
+open FsLexGenerator
+
 let printAllPaths parserSource inputGraph outputFile = 
     let roots = getAllSPPFRootsAsINodes parserSource inputGraph
     if roots.Length < 1
@@ -53,6 +55,9 @@ let printGraph (graph : SimpleInputGraph<_>) (file : string) =
 
 [<EntryPoint>]
 let main argv =
+    let gen = new GLL()
+    gen.GenerateByRules (*rules*)  5000 1000 50 
+    (*
     let graphFile = argv.[0]
     /// CALLS, LOCKS, ASSERTS
     
@@ -64,4 +69,5 @@ let main argv =
     printAllPaths parserSource inputGraph outputFile
     //printAllBadAsserts parserSource inputGraph outputFile
     printfn "Processing time: %A" (System.DateTime.Now - start)
+    *)
     0 // return an integer exit code

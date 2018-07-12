@@ -16,6 +16,12 @@ type EdgeSymbol =
     | Term of string
     | Nonterm of int<positionInGrammar>
     | Epsilon of unit
+    with 
+    override this.ToString() =
+        match this with 
+        | Term (s) -> s
+        | Nonterm (i) -> sprintf "%i" i
+        | Epsilon (e) -> "eps"
 
 type InternalFSA = {
     States             : (EdgeSymbol * int<positionInGrammar>) [] []

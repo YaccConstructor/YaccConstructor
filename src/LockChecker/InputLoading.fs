@@ -63,7 +63,29 @@ let genParser calls locks asserts =
     let factory = new AutomataFactory()
     let (~%), (~&), eps, (=>), (!=>), (<~>), (<|>) = factory.Combinators
 
-    let s = "s" !=> ((%"a" <~> &"s") <|> %"b")
+    let asserts() = ([|0..asserts - 1|] 
+        |> Array.map (fun i -> %(sprintf "A%i" i)) 
+        |> (fun a -> Array.fold (<|>) a.[0] a.[1..]))
+    
+    let brackets count left body right = ([|0..count - 1|]
+        |> Array.map (fun i -> (%(sprintf left i) <~> &body <~> %(sprintf right i)))
+        |> (fun a -> Array.fold (<|>) a.[0] a.[1..]))
+
+    "ba" => asserts()
+    "ca" => asserts()
+    "s0" => ((    (brackets calls "C%i" "s0" "RT%i") 
+              <|> (brackets calls "G%i" "s0" "RL%i") 
+              <~> &"s0")
+             <|> (&"ca" <~> (&"s0" <|> eps))
+             <|> eps)
+    "s1" => ((    (brackets calls "C%i" "s1" "RT%i") 
+              <|> (brackets calls "G%i" "s0" "RL%i") 
+              <~> &"s1")
+             <|> eps)
+    "s" !=> (((brackets calls "C%i" "s" "RT%i") <~> (&"s" <|> &"s1"))
+             <|> (&"s" <~> (&"s1" <|> &"ba"))
+             <|> (&"s1" <~> &"s")
+             <|> (&"ba" <~> (&"s" <|> eps)))
 
     let automata, tokens = factory.Produce()
     automata.PrintDot "automata.dot" |> ignore

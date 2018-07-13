@@ -13,7 +13,7 @@ type AutomatonNode(id: int, transitions: AutomatonEdge list) =
 
 and  AutomatonEdge = {label: EdgeSymbol; mutable dir: AutomatonNode}
 
-type AutomatonPart = {starts: AutomatonEdge list; ends: AutomatonEdge list}
+type AutomatonPart = {starts: AutomatonEdge list; ends: AutomatonEdge list; epsilon: bool}
 
 [<AllowNullLiteral>]
 type Automaton(id: int, name: string, start: AutomatonNode, final: AutomatonNode) =
@@ -26,18 +26,48 @@ let createEdge label' =
     {label = label'; dir = null}
     
 type AutomataFactory() = 
-    let mutable nodes = new ResizeArray<AutomatonNode>()
-    let mutable nonterminals = new ResizeArray<Automaton>()
-    let mutable alphabet = new HashSet<EdgeSymbol>()
+    let nodes = new ResizeArray<AutomatonNode>([new AutomatonNode(0, [])])
+    let lastNode = nodes.[0]
+    let finals = new HashSet<AutomatonNode>([lastNode])
+
+    let nonterminals = new ResizeArray<Automaton>()
+    let alphabet = new HashSet<EdgeSymbol>()
     let mutable startNonterminalId = 0
 
     let nonterminalIds = new Dictionary<string, int * int>()
+
+    let createRule name (part: AutomatonPart) =
+        if (nonterminalIds.ContainsKey name) then
+            let nontId, nodeId = nonterminalIds.Item name
+            let start = AutomatonNode(nodeId, part.starts)
+            if (part.epsilon) then
+                finals.Add start |> ignore
+
+            part.ends |> List.iter (fun e -> e.dir <- lastNode)
+
+            let nonterminal = new Automaton(nontId, name, start, lastNode)
+
+            nonterminals.[nontId] <- nonterminal
+            nodes.[nodeId] <- start
+            nonterminal
+        else
+            let start = AutomatonNode(nodes.Count, part.starts)
+            nodes.Add start 
+            if (part.epsilon) then
+                finals.Add start |> ignore
+
+            part.ends |> List.iter (fun e -> e.dir <- lastNode)
+
+            let nonterminal = new Automaton(nonterminals.Count, name, start, lastNode)
+            nonterminalIds.Add(name, (nonterminals.Count, start.Id))
+            nonterminals.Add nonterminal
+            nonterminal
 
     member this.Terminal name = 
         let token = Term name
         let edge = createEdge token 
         alphabet.Add token |> ignore
-        {starts = [edge]; ends = [edge]}
+        {starts = [edge]; ends = [edge]; epsilon = false}
     
     member this.Reference name = 
         let id = 
@@ -55,58 +85,34 @@ type AutomataFactory() =
         let token = Nonterm (id * 1<positionInGrammar>)
         let edge = createEdge token
         alphabet.Add token |> ignore
-        {starts = [edge]; ends = [edge]}
+        {starts = [edge]; ends = [edge]; epsilon = false;}
    
-    member this.Epsilon() =
-        let token = Epsilon()
-        let edge = createEdge token
-        alphabet.Add token |> ignore
-        {starts = [edge]; ends = [edge]}
+    member this.Epsilon =
+        {starts = []; ends = []; epsilon = true}
     
     member this.Sequence left right =
         let node = AutomatonNode(nodes.Count, right.starts)
         nodes.Add node
+
+        if (right.epsilon) then
+            finals.Add node |> ignore
         
         left.ends |> List.iter (fun e -> e.dir <- node)
 
-        {starts = left.starts; ends = right.ends}
+        {starts = left.starts; ends = right.ends; epsilon = false}
        
     member this.Alternation left right =
         //TODO: left <-> right?
-        {starts = left.starts @ right.starts; ends = left.ends @ right.ends}
-    
+        {starts = right.starts @ left.starts; 
+         ends = right.ends @ left.ends; 
+         epsilon = left.epsilon || right.epsilon}
+
     member this.Rule name (part: AutomatonPart) =
-        if (nonterminalIds.ContainsKey name) then
-            let nontId, nodeId = nonterminalIds.Item name
-
-            let start = AutomatonNode(nodeId, part.starts)
-            let final = AutomatonNode(nodes.Count, [])
-            nodes.Add final
-
-            part.ends |> List.iter (fun e -> e.dir <- final)
-
-            let nonterminal = new Automaton(nontId, name, start, final)
-
-            nonterminals.[nontId] <- nonterminal
-            nodes.[nodeId] <- start
-            nonterminal
-        else
-            let start = AutomatonNode(nodes.Count, part.starts)
-            nodes.Add start 
-            let final = AutomatonNode(nodes.Count, [])
-            nodes.Add final
-
-            part.ends |> List.iter (fun e -> e.dir <- final)
-
-            let nonterminal = new Automaton(nonterminals.Count, name, start, final)
-            nonterminalIds.Add(name, (nonterminals.Count, start.Id))
-            nonterminals.Add nonterminal
-            nonterminal
+        createRule name part |> ignore
     
     member this.Start name (part: AutomatonPart) = 
-        let rule = this.Rule name part
+        let rule = createRule name part
         startNonterminalId <- rule.Id
-        rule
     
     member this.Combinators =
         this.Terminal, this.Reference, this.Epsilon, this.Rule, this.Start, this.Sequence, this.Alternation
@@ -120,12 +126,12 @@ type AutomataFactory() =
         
         let fsaAlphabet = Set alphabet
         let fsaStateNames = new Dictionary<int<positionInGrammar>, string>()
-        let mutable fsaStarts = []
-        let fsaFinals = new HashSet<int<positionInGrammar>>()
+        let fsaStarts = Array.create nonterminals.Count null
+        let fsaFinals = new HashSet<int<positionInGrammar>>(finals |> Seq.map (fun n -> n.Id * 1<positionInGrammar>))
 
         nonterminals |> Seq.iter (fun n -> 
             fsaStateNames.Add(n.Start.Id * 1<positionInGrammar>, n.Name)
-            fsaStarts <- (HashSet [n.Start.Id * 1<positionInGrammar>]) :: fsaStarts
+            Array.set fsaStarts n.Id (HashSet [n.Start.Id * 1<positionInGrammar>])
             fsaFinals.Add (n.Final.Id * 1<positionInGrammar>) |> ignore)
 
         let fsaStartNumber = startNonterminalId
@@ -135,7 +141,7 @@ type AutomataFactory() =
              Alphabet = fsaAlphabet; 
              StateToNontermName = fsaStateNames;
              StartComponentNumber = fsaStartNumber;
-             StartStates = fsaStarts |> List.toArray;
+             StartStates = fsaStarts;
              FinalStates = fsaFinals}
         
         let printToken token =

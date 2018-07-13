@@ -9,6 +9,7 @@ open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
 open Yard.Generators.GLL.ParserCommon.CommonFuns
 open Yard.Generators.Common.ASTGLLFSA
+open Microsoft.FSharp.Collections
 open YC.GLL.GSS
 
 type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positionInGrammar>>) =
@@ -198,6 +199,27 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         |> Seq.sortByDescending(fun x -> getRightExtension(x.getExtension()) )
         |> Array.ofSeq
         //|> (fun x -> [|x.[0]|])
+    
+    member this.GetRootsForMultipleInitPositions (gss : GSS) (startPosition : _ []) = 
+        let setOfInitPositions = set startPosition
+        let gssRoots = 
+            gss.Vertices
+            |> Seq.filter (fun vert -> vert.Nonterm = startState && setOfInitPositions.Contains vert.PositionInInput)
+            //|> Array.ofSeq
+        
+        gssRoots
+        |> Array.ofSeq
+        |> Array.collect( fun gssVert -> 
+            gssVert.P.SetP
+            |> Array.ofSeq
+            |> Array.map (fun x -> 
+                match x.data with
+                | TreeNode n -> this.Nodes.Item (int n)
+                | _ -> failwith "wrongType")
+            //|> Seq.sortByDescending(fun x -> getRightExtension(x.getExtension()) )
+            )
+        //|> (fun x -> [|x.[0]|])
+    
 
     member this.GetNonTermByName name (ps : ParserSourceGLL) = 
         let token = ps.NameToId.Item name

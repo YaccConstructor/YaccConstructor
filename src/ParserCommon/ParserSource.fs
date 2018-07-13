@@ -10,14 +10,17 @@ type ParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<positi
                      , terminalNums       : HashSet<int<token>>
                      , intToString        : Dictionary<int,string>
                      , anyNonterm         : int<positionInGrammar>
-                     , stateAndTokenToNewState : Dictionary<int, int<positionInGrammar>>
+                     , stateAndTokenToNewState : Dictionary<int64, int<positionInGrammar>>
                      , stringToToken      : Dictionary<string,int<token>>
                      , multipleInEdges    : bool []
-                     , ?rightSideToRule   : string -> int
+                     //, ?rightSideToRule   : string -> int
                      ) =
 
-    let getTermsDictionaryKey (state: int<positionInGrammar>) token = 
-        int( (int state <<< 16) ||| (token - outNonterms.Length) )
+    //let getTermsDictionaryKey (state: int<positionInGrammar>) token = 
+    //    int( (int state <<< 16) ||| (token - outNonterms.Length) )
+    
+    let getTermsDictionaryKey (state: int<positionInGrammar>) token : int64 =
+        ((int64 state <<< 32) ||| (int64 token - int64 outNonterms.Length))
     
     let strToToken str = 
         let isExist, value = stringToToken.TryGetValue(str)
@@ -42,7 +45,7 @@ type ParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<positi
     member this.StateAndTokenToNewState = stateAndTokenToNewState
     member this.StringToToken           = strToToken
     member this.MultipleInEdges         = multipleInEdges
-    member this.RightSideToRule         = rightSideToRule.Value
+    //member this.RightSideToRule         = rightSideToRule.Value
 
     member this.NameToId = 
         rev (this.IntToString |> Seq.map (|KeyValue|)|> Map.ofSeq)

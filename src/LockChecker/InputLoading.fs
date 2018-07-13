@@ -6,7 +6,11 @@ open AbstractAnalysis.Common
 open Yard.Frontends.YardFrontend
 open YC.API
 open AbstractParser
+open System
 open System.Collections.Generic
+open Yard.Core
+open Yard.Core.IL
+//open Yard.Generators.Common.FSA.Common
 
 open Yard.Generators.Common.AutomataCombinators
 
@@ -60,6 +64,8 @@ let genGrammar calls locks asserts =
     *)
 
 let genParser calls locks asserts =
+    let mutable time = System.DateTime.UtcNow
+    
     let factory = new AutomataFactory()
     let (~%), (~&), eps, (=>), (!=>), (<~>), (<|>) = factory.Combinators
 
@@ -87,8 +93,13 @@ let genParser calls locks asserts =
              <|> (&"s1" <~> &"s")
              <|> (&"ba" <~> (&"s" <|> eps)))
 
+    printfn "Automata construction time is %A" (System.DateTime.UtcNow - time)
+
+    time <- System.DateTime.UtcNow
+
     let automata, tokens = factory.Produce()
-    automata.PrintDot "automata.dot" |> ignore
+
+    printfn "Automata generation time is %A" (System.DateTime.UtcNow - time)
 
     let gll = new GLL()
     gll.GenerateFromFSA automata tokens true "gll.fs" :?> ParserSourceGLL
@@ -109,22 +120,32 @@ let parseGraphFile graphFile =
     let locks = int <| info.[2].Trim()    
     let asserts = int <| info.[3].Trim()
 
-    let parser = genParser calls locks asserts
+    let tryParseInt str =
+        try int str
+        with e -> 0
 
-    let startVerts = startVLine.Split ' ' |> Array.map int
+    let startVerts = startVLine.Split ' ' |> Array.map tryParseInt 
     let edges = 
         edgesLines |> Array.map (fun s -> s.Split ' ' |> fun a -> new ParserEdge<_>(int a.[0], int a.[2], a.[1]))
+
+    let parser = genParser calls locks asserts
     
     parser, edges, startVerts
 
 let loadInput graphFile =
     let parserSource, edges, startVerts = parseGraphFile graphFile
-    let time = System.DateTime.UtcNow
-    
-    printfn "ParserSource time is %A" (System.DateTime.UtcNow - time)
-    let tokenizer str = str |> parserSource.StringToToken |> int
 
-    let inputGraph = new SimpleInputGraph<_>(startVerts, [||], tokenizer)
+    let tokenizer str = str |> parserSource.StringToToken |> int
+    
+    let r = new HashSet<_>()
+    let ev = edges |> Array.iter (fun e ->
+        r.Add e.Source |> ignore
+        r.Add e.Target |> ignore)
+
+    printfn "Start: %A" startVerts.Length
+    let inputGraph = new SimpleInputGraph<_>(startVerts |> Array.filter (fun x -> r.Contains x), [||], tokenizer)
+    
+    //let inputGraph = new SimpleInputGraph<_>(startVerts, [||], tokenizer)
     inputGraph.AddVerticesAndEdgeRange edges |> ignore
 
     parserSource, inputGraph

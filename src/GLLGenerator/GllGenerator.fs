@@ -11,18 +11,17 @@ open Yard.Generators.GLL
 open Printer
 open Yard.Generators.Common.FSA.Common
 
+open AbstractAnalysis.Common
 open System.Collections.Generic
+open FSharp.PowerPack
 
 type GLL() = 
     inherit Generator()
-        override this.Name = "GLLGenerator"
-        override this.Constraints = [|noMeta; singleModule|]
-
         member this.GenerateFromFSA fsa tokens generateToFile outFileName =
             let start = System.DateTime.Now
 
             let generatedCode, parserSource = 
-                getGLLparserSource fsa outFileName tokens "" false generateToFile//isAbstract
+                getGLLparserSource fsa outFileName "" false generateToFile//isAbstract
             
             if generateToFile
             then
@@ -35,6 +34,9 @@ type GLL() =
             
             box parserSource
 
+        override this.Name = "GLLGenerator"
+        override this.Constraints = [|noMeta; singleModule|]
+        
         override this.Generate (definition, generateToFile, args) =
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
@@ -88,7 +90,7 @@ type GLL() =
                  
             let fsa = new FSA(definition.grammar.[0].rules)
             
-            let generatedCode, parserSource = getGLLparserSource fsa outFileName tokenType moduleName light generateToFile//isAbstract
+            let generatedCode, parserSource = getGLLparserSource fsa outFileName (*tokenType*) moduleName light generateToFile//isAbstract
             
             if generateToFile
             then

@@ -3,7 +3,8 @@
 open System.Collections.Generic
 
 open Yard.Generators.Common.FSA.Common
-
+open Microsoft.FSharp.Collections
+open AbstractAnalysis.Common
 open Yard.Core.IL
 open Yard.Generators.Common.Epsilon
 open Yard.Generators.Common.SymbolSets

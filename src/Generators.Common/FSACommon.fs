@@ -3,6 +3,7 @@
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 
+open System.Text
 open Yard.Core.IL
 open Yard.Generators.Common.Epsilon
 open Yard.Generators.Common.SymbolSets
@@ -15,6 +16,12 @@ type EdgeSymbol =
     | Term of string
     | Nonterm of int<positionInGrammar>
     | Epsilon of unit
+    with 
+    override this.ToString() =
+        match this with 
+        | Term (s) -> s
+        | Nonterm (i) -> sprintf "%i" i
+        | Epsilon (e) -> "eps"
 
 type InternalFSA = {
     States             : (EdgeSymbol * int<positionInGrammar>) [] []
@@ -39,7 +46,7 @@ let symbolToString nontermStringDict s =
         | Epsilon() -> "Epsilon"
 
 let convertRulesToFSA (ruleList : Rule<Source,Source> list) =
-    let states = new ResizeArray<(EdgeSymbol * int<positionInGrammar>) list>()
+    let states = new ResizeArray<ResizeArray<EdgeSymbol * int<positionInGrammar>>>()
     let alphabet = new HashSet<EdgeSymbol>()
     let nonterms = new Dictionary<string, int<positionInGrammar>>()
     let stateToNontermName = new Dictionary<int<positionInGrammar>, string>()
@@ -48,10 +55,10 @@ let convertRulesToFSA (ruleList : Rule<Source,Source> list) =
 
     let newEpsilonEdge (firstState : int<positionInGrammar>) (finalState : int<positionInGrammar>) = 
         () |> Epsilon |> alphabet.Add |> ignore    
-        states.Item (int firstState) <- states.Item (int firstState) @ [Epsilon(), finalState]
+        states.[int firstState].Add((Epsilon(), finalState))
     
     let newState() : int<positionInGrammar> = 
-        states.Add []
+        states.Add (new ResizeArray<_>())
         (states.Count-1) * 1<positionInGrammar>
 
     let sourse_tToSymbol isTerm (token : Source) =
@@ -81,10 +88,10 @@ let convertRulesToFSA (ruleList : Rule<Source,Source> list) =
         let final = ref dummyState
         if finalState.IsNone then
             final := newState()
-            states.[int firstState] <- states.[int firstState] @ [symbol, !final]
+            states.[int firstState].Add((symbol, !final))
         else
             final := finalState.Value
-            states.[int firstState] <- states.[int firstState] @ [symbol, !final]
+            states.[int firstState].Add(symbol, !final)
         !final
 
     let rec productionToStates (firstState : int<positionInGrammar>) (finalState : int<positionInGrammar> option) prod : int<positionInGrammar> =
@@ -197,8 +204,8 @@ let convertRulesToFSA (ruleList : Rule<Source,Source> list) =
 
     {   States = 
             states
-            |> Seq.map Array.ofList
-            |> Array.ofSeq;
+            |> ResizeArray.map (fun x -> x.ToArray())
+            |> fun x -> x.ToArray();
         Alphabet = set alphabet;
         StateToNontermName = stateToNontermName;
         StartComponentNumber = startComponent.Value;
@@ -287,10 +294,14 @@ let removeEpsilonEdges (fsa : InternalFSA) =
 
 /// Converts NFA without epsilon edges to DFA
 let toDFA fsa = 
+    /// returns sets of edges reacheble in one step by different edgeSymbols
     let getOutSets (set: HashSet<int<positionInGrammar>>) =
         let newSets = new Dictionary<_,HashSet<_>>()
+        //let currFinalStates = new HashSet<_>()
+        //let currLastStates = new HashSet<_>()
         for state in set do
             for symbol,nextState in fsa.States.[int state] do
+                //if finalStates.co
                 let cond, value = newSets.TryGetValue symbol
                 if cond
                 then
@@ -303,42 +314,56 @@ let toDFA fsa =
     let newStartStates = new ResizeArray<HashSet<_>>()
     let newStartComponentNumber = ref -1
     let startStates = fsa.StartStates
+    /// Q of fronts, q because multiple components and multiple fronts
     let queue = new Queue<_>()
-    let statesEliminationSet = new ResizeArray<HashSet<int<positionInGrammar>>>()
-
+    let newStatesStringsOfOldStates = new ResizeArray<string>()
+    let newStatesSetsOfOldStates = new ResizeArray<HashSet<int<_>>>()
+    
+    let hashSetToString hashSet = 
+        let line = new StringBuilder()
+        for elem in hashSet |> Seq.sort do
+            line.Append (elem.ToString() + " ") |> ignore
+        line.ToString()
+             
+    
     startStates
     |> Array.iteri (fun i s ->
         queue.Enqueue s
         /// here it is. each component has only one startState
-        new HashSet<_>([statesEliminationSet.Count * 1<positionInGrammar>]) |> newStartStates.Add |> ignore
+        new HashSet<_>([newStatesSetsOfOldStates.Count * 1<positionInGrammar>]) |> newStartStates.Add |> ignore
         if i = int fsa.StartComponentNumber
         then
-            newStartComponentNumber := statesEliminationSet.Count
-        statesEliminationSet.Add s
+            newStartComponentNumber := newStatesSetsOfOldStates.Count
+        
+        
+        newStatesSetsOfOldStates.Add s
+        newStatesStringsOfOldStates.Add (hashSetToString s)
         )
 
     while queue.Count <> 0 do
-        let setToProcess = queue.Dequeue()
-        let newSets = getOutSets setToProcess
+        let currentFrontWave = queue.Dequeue()
+        let nextWaveSets = getOutSets currentFrontWave
         let newEdges = new ResizeArray<_>()
         newStates.Add newEdges
 
-        for keyValue in newSets do
+        for keyValue in nextWaveSets do
             let symbol = keyValue.Key
             let states = keyValue.Value
+            let lineOfStates = hashSetToString states
             let stateExists = ref false
-
-            statesEliminationSet
-            |> ResizeArray.iteri (fun stateNum set ->
-                if states.SetEquals(set)
-                then
-                    stateExists := true
-                    newEdges.Add(symbol, stateNum))
-
-            if !stateExists |> not
+            
+            let existingState = 
+                newStatesStringsOfOldStates
+                |> ResizeArray.tryFindIndexi(fun stateNum set -> 
+                    lineOfStates = set)
+        
+            if existingState.IsSome
             then
-                statesEliminationSet.Add(states)
-                newEdges.Add(symbol, statesEliminationSet.Count - 1)
+                newEdges.Add(symbol, existingState.Value)
+            else
+                newStatesSetsOfOldStates.Add(states)
+                newStatesStringsOfOldStates.Add(lineOfStates)
+                newEdges.Add(symbol, newStatesSetsOfOldStates.Count - 1)
                 queue.Enqueue(states)
         
     let newFinalStates = new HashSet<_>()
@@ -347,7 +372,7 @@ let toDFA fsa =
     //let lastStates = fsa.LastStates
     let stateToNewState = Array.create (fsa.States.Length) 0<positionInGrammar>
 
-    statesEliminationSet
+    newStatesSetsOfOldStates
     |> ResizeArray.iteri (fun stateNum set ->
         for st in set do
             if finalStates.Contains st
@@ -610,9 +635,11 @@ let printDot filePrintPath fsa =
         let currState = i*1<positionInGrammar>
         let hd =
             let label = stateToString fsa.StateToNontermName currState
-            
-            if fsa.FinalStates.Contains currState && (startStates.Contains currState || initialStates.Contains currState )
-            then sprintf "%i[label=\"%s\", style=filled, fillcolor=brown]" currState label     
+            //  || initialStates.Contains currState )
+            if fsa.FinalStates.Contains currState && (startStates.Contains currState)
+            then sprintf "%i[label=\"%s\", style=filled, fillcolor=brown]" currState label
+            elif fsa.FinalStates.Contains currState && (initialStates.Contains currState)
+            then sprintf "%i[label=\"%s\", style=filled, fillcolor=orange]" currState label      
             elif initialStates.Contains currState
             then sprintf "%i[label=\"%s\", style=filled, fillcolor=green]" currState label
             elif fsa.FinalStates.Contains currState

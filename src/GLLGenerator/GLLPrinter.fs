@@ -10,7 +10,7 @@ open Yard.Generators.Common
 
 let getGLLparserSource (fsa : FSA)
              (outFileName : string)
-             (tokenType : Map<string,string option>)
+             //(tokenType : Map<string,string option>)
              moduleName
              light 
              generateToFile =
@@ -21,11 +21,8 @@ let getGLLparserSource (fsa : FSA)
     let stateTokenNewState = new ResizeArray<int * int<token>* int<positionInGrammar>>()
     let stringToToken = new Dictionary<string,int<token>>()
     
-
-    let inline pack state (token : int<token>) =
-        if (int state < 65536) && (int token - fsa.States.Length < 65536)
-        then int( (int state <<< 16) ||| (int token - fsa.States.Length) )
-        else failwith "State or token is greater then 65535!!"
+    
+    let inline pack state token : int64 =  ((int64 state <<< 32) ||| (int64 token - int64 fsa.States.Length))
 
     let println (x : 'a) =
         Printf.kprintf (fun s -> res.Append(s).Append "\n" |> ignore) x
@@ -45,7 +42,7 @@ let getGLLparserSource (fsa : FSA)
         println "open Yard.Generators.GLL.ParserCommon"
         println "open AbstractAnalysis.Common"
 
-
+    (*
     let printToken () = 
         let defaultType = tokenType.TryFind "_"
         println "type Token ="
@@ -61,7 +58,7 @@ let getGLLparserSource (fsa : FSA)
             <|  match type' with
                 | None -> ""
                 | Some s -> " of (" + s + ")"
-    
+    *)
     let printStringToToken () = 
         println "let stringToToken = new System.Collections.Generic.Dictionary<_,_>()"
         for tokenNumber in stringToToken do
@@ -216,7 +213,7 @@ let getGLLparserSource (fsa : FSA)
     if generateToFile
     then
         printItem printHeaders
-        printItem printToken
+        //printItem printToken
         printItem printStringToToken
 //        printItem printTokenToNumber
         printItem (printIntToString sortedStateToNontermName)
@@ -232,7 +229,7 @@ let getGLLparserSource (fsa : FSA)
     //printItem (printFun isAbstract)
 
     let terminalNums = new HashSet<_>(stringToToken.Values)
-    let stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int, int<positionInGrammar>>()
+    let stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int64, int<positionInGrammar>>()
     for state, token, newState in stateTokenNewState do
         let packed = pack state token
         let cond, _ = stateAndTokenToNewState.TryGetValue(packed)
@@ -251,16 +248,6 @@ let getGLLparserSource (fsa : FSA)
         if cond then failwith "multiple nonterminal names for one state"
         intToString.Add(int numberNonterm.Key, numberNonterm.Value)
 
-    (*let rightSideToRule = 
-        try
-            let newRuleList = fsa.RuleList |> convertRules
-            let indexator = new Indexator(newRuleList, true)
-            let numberredRules = new NumberedRules(newRuleList, indexator, true)
-            numberredRules.rightSideToRule
-        with
-            | ex ->
-                printfn "It would not be possible to use translation because not having some necessary conversions in grammar"
-                fun _ -> failwith "Bad grammar"*)
     let parserSource = new ParserSourceGLL(fsaStatesOutNonterms
                                          , fsa.StartState
                                          , fsa.FinalStates

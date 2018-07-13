@@ -10,9 +10,6 @@ open System.Collections.Generic
 open ResultProcessing
 open InputLoading
 
-open Yard.Generators.Common.AutomataCombinators
-open Yard.Generators.RNGLR
-
 let printAllPaths parserSource inputGraph outputFile = 
     let roots = getAllSPPFRootsAsINodes parserSource inputGraph
     if roots.Length < 1
@@ -25,8 +22,7 @@ let printAllPaths parserSource inputGraph outputFile =
             |> Array.map (fun x -> allPathsForRoot x parserSource.IntToString)
             |> Array.iter (fun s -> res.UnionWith s)
             res
-
-            (*
+        (*
         let croppedRes = 
             result 
             |> Seq.map (fun s -> 
@@ -35,9 +31,8 @@ let printAllPaths parserSource inputGraph outputFile =
                 s.Substring(0,p2).Trim())
                 *)
 
-        //let filteredRes = result |> Seq.filter (fun x -> not <| x.Contains "RT")
-
-        System.IO.File.WriteAllLines(outputFile, result)
+        //let filteredRes = croppedRes |> Seq.filter (fun x -> not <| x.Contains "RT")
+        System.IO.File.WriteAllLines(outputFile, result)//croppedRes)
 
 let printAllBadAsserts parserSource inputGraph outputFile = 
     let roots = getAllSPPFRootsAsINodes parserSource inputGraph
@@ -70,7 +65,6 @@ s: ba s | s ba| s1 s | s s1 | ba | C s RT s1 | C s RT s
 
 [<EntryPoint>]
 let main argv =
-
     let graphFile = argv.[0]
     /// CALLS, LOCKS, ASSERTS
     

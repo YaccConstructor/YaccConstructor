@@ -29,9 +29,9 @@ open Yard.Frontends.YardFrontend
 open Yard.Frontends.FsYaccFrontend
 open Yard.Generators.GLL
 open Yard.Generators.RNGLR
-open Yard.Generators.TreeDump
+//open Yard.Generators.TreeDump
 open Yard.Generators.YardPrinter
-open Yard.Generators.RIGLRGenerator
+//open Yard.Generators.RIGLRGenerator
 
 let dummyPos s = new Source(s)
 let dummyToken s = PToken <| new Source(s)
@@ -41,7 +41,7 @@ exception FEError of string
 let FrontendsManager = [|new FsYaccFrontend(), new YardFrontend()|] |> Seq.ofArray |> Seq.cast<Frontend>
 
 let conversionTestPath = @"./data/Conversions/"
-let GeneratorsManager = [|new GLL(), new RNGLR(), new TreeDump(), new YardPrinter(), new RIGLR()|] |> Seq.ofArray |> Seq.cast<Generator>
+let GeneratorsManager = [|new GLL(), new RNGLR(), (*new TreeDump(), *)new YardPrinter()(*, new RIGLR()*)|] |> Seq.ofArray |> Seq.cast<Generator>
 
 
 let getFrontend name =
@@ -54,7 +54,7 @@ let getBE name =
     | Some be -> be
     | None -> failwith (name + " is not found.")
 
-let treeDump = new Yard.Generators.TreeDump.TreeDump ()
+//let treeDump = new Yard.Generators.TreeDump.TreeDump ()
 
 let dummyRule : ProductionElem<Source,Source> = {omit=false; binding=None; checker=None; rule=PToken (Source "DUMMY")}
 

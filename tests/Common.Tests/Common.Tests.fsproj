@@ -85,11 +85,6 @@
       <Project>{5baf0fba-31b7-406d-bea4-1bcc1418a63f}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\TreeDump\TreeDump.fsproj">
-      <Name>TreeDump</Name>
-      <Project>{99dfb4e9-46c5-4767-9646-ba49b2b6a664}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\..\src\YardFrontend\YardFrontend.fsproj">
       <Name>YardFrontend</Name>
       <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>

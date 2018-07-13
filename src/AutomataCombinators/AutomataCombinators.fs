@@ -141,7 +141,7 @@ type AutomataFactory() =
              Alphabet = fsaAlphabet; 
              StateToNontermName = fsaStateNames;
              StartComponentNumber = fsaStartNumber;
-             StartStates = fsaStarts;
+             StartStatesOfEachNonterminal = fsaStarts;
              FinalStates = fsaFinals}
         
         let printToken token =

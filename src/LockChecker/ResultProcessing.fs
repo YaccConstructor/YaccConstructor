@@ -55,6 +55,7 @@ let allPathsForRoot (root: INode) (intToString : Dictionary<_,_>) =
                 match node with 
                 | :? IntermidiateNode as i -> string i.Extension + "_" + string i.Nonterm, intToString.[int i.Nonterm]
                 | :? NonTerminalNode as n -> string n.Extension + "_" + string n.Name,  intToString.[int n.Name]
+                | _ -> failwith "wrong node type"
             if strName = "s1" //|| strName = "s0"
             then new HashSet<_>()
             elif isGot
@@ -65,7 +66,7 @@ let allPathsForRoot (root: INode) (intToString : Dictionary<_,_>) =
                     match node with 
                     | :? IntermidiateNode as i -> i.First, i.Others
                     | :? NonTerminalNode as n -> n.First, n.Others
-
+                    | _ -> failwith "wrong node type"
                 let first = getPath first
                 
                 let res = new HashSet<_>(first)

@@ -6,7 +6,7 @@ open NUnit.Framework
 open ConversionsTests
 open Yard.Core.Helpers
 
-[<TestFixture>]
+(*[<TestFixture>]
 type ``Conversions eliminate left recursion tests`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "EliminateLeftRecursion")    
 
@@ -36,3 +36,5 @@ type ``Conversions eliminate left recursion tests`` () =
 
     [<Test>]
     member test.``Test epsilon rule`` () = runTest "epsilon.yrd"
+
+*)

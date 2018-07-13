@@ -34,7 +34,7 @@ type ``Inline tests`` () =
     let fe = getFrontend("YardFrontend")
     let conversion = new ReplaceInline()
 
-    //[<Test>]
+    (*[<Test>]
     member test.``Inline 1`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath, "inline1.yrd"))
         Namer.initNamer loadIL.grammar
@@ -53,3 +53,4 @@ type ``Inline tests`` () =
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
         Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
+    *)

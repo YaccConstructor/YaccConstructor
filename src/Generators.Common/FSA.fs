@@ -43,12 +43,12 @@ type FSA(fsa: InternalFSA) =
 
     member this.States = fsa.States
     //after convertion to dfa each startstates HashSet contains only one state
-    member this.StartState = fsa.StartStates.[fsa.StartComponentNumber] |> Seq.find (fun x -> true)
+    member this.StartState = fsa.StartStatesOfEachNonterminal.[fsa.StartComponentNumber] |> Seq.find (fun x -> true)
     member this.FinalStates = fsa.FinalStates
-    member this.NontermCount = fsa.StartStates.Length
+    member this.NontermCount = fsa.StartStatesOfEachNonterminal.Length
     member this.StateToNontermName = fsa.StateToNontermName
     //member this.LastStates = fsa.LastStates
-    member this.StartStates = fsa.StartStates
+    member this.StartStates = fsa.StartStatesOfEachNonterminal
     member this.PrintDot filePrintPath = printDot filePrintPath fsa
     //member this.RuleList = ruleList
     member this.Alphabet = fsa.Alphabet

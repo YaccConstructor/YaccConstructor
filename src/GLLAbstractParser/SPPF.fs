@@ -224,6 +224,25 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                         None
                 | _ -> failwith "wrongType")
             )
+    
+    member this.GetRootsForStart (gss : GSS) (startPositions :_ []) = 
+        let startPoss = new HashSet<int<positionInInput>>(startPositions)
+        let gssRoots = 
+            gss.Vertices
+            |> Seq.filter (fun vert -> vert.Nonterm = startState && startPoss.Contains(vert.PositionInInput) )
+            |> Array.ofSeq
+        
+        gssRoots
+        |> Array.collect (fun x ->
+            x.P.SetP
+            |> ResizeArray.toArray
+            |> Array.choose (fun x -> 
+                match x.data with
+                | TreeNode n -> 
+                    let node = this.Nodes.Item (int n)
+                    Some(node)
+                | _ -> failwith "wrongType")
+            )
 
     member this.GetNonTermByName name (ps : ParserSourceGLL) = 
         let token = ps.NameToId.Item name

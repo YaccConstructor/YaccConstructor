@@ -35,6 +35,7 @@ open System.Linq
 let needChangeDirectory = 
     (@"C:\Users\Artem Gorokhov\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = Directory.GetCurrentDirectory())
     || (@"C:\Users\artem\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = Directory.GetCurrentDirectory())
+    || (@"C:\Users\artem\AppData\Local\JetBrains\Toolbox\apps\Rider\ch-0\181.4952.297\lib\ReSharperHost" = Directory.GetCurrentDirectory())
 
 let outputDir = ""//@"../../../src/GLL.AbstractParser.SimpleTest/"
 

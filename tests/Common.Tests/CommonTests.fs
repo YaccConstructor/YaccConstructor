@@ -8,7 +8,7 @@ open System.Linq
 open System.IO
 open Yard.Generators.GLL
 open Yard.Generators.RNGLR
-open Yard.Generators.TreeDump
+//open Yard.Generators.TreeDump
 open Yard.Generators.YardPrinter
 //open Yard.Generators.RIGLRGenerator
 open Yard.Frontends.FsYaccFrontend
@@ -20,7 +20,7 @@ open Yard.Core.Conversions.ExpandInline
 type ``Components loader tests`` () =
     [<Test>]
     member test.``All generators`` () =
-        let generatorsManager = [|new GLL(), new RNGLR(), new TreeDump(), new YardPrinter()(*, new RIGLR()*)|] |> Seq.ofArray |> Seq.cast<Generator>
+        let generatorsManager = [|new GLL(), new RNGLR(), (*new TreeDump(),*) new YardPrinter()(*, new RIGLR()*)|] |> Seq.ofArray |> Seq.cast<Generator>
         let generatorNames = Seq.map (fun (elem: Generator) -> elem.Name) generatorsManager
         let allGenerators =
             List.ofSeq generatorNames
@@ -77,7 +77,7 @@ type ``Components loader tests`` () =
 
     [<Test>]
     member test.``Get generators name`` () =
-        let generatorsManager = [|new RNGLR(), new TreeDump()|] |> Seq.ofArray |> Seq.cast<Generator>
+        let generatorsManager = [|new RNGLR()(*, new TreeDump()*)|] |> Seq.ofArray |> Seq.cast<Generator>
         let VerificatedGenerators  = ["RNGLRGenerator",true ; "TreeDump",true]
 
         let genfun (x,y)  =

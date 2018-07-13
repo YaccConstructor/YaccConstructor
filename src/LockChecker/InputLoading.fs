@@ -69,13 +69,15 @@ let genParser calls locks asserts =
     let factory = new AutomataFactory()
     let (~%), (~&), eps, (=>), (!=>), (<~>), (<|>) = factory.Combinators
 
-    let asserts() = ([|0..asserts - 1|] 
+    let asserts() =
+        [|0..asserts - 1|] 
         |> Array.map (fun i -> %(sprintf "A%i" i)) 
-        |> (fun a -> Array.fold (<|>) a.[0] a.[1..]))
+        |> (fun a -> Array.fold (<|>) a.[0] a.[1..])
     
-    let brackets count left body right = ([|0..count - 1|]
+    let brackets count left body right =
+        [|0..count - 1|]
         |> Array.map (fun i -> (%(sprintf left i) <~> &body <~> %(sprintf right i)))
-        |> (fun a -> Array.fold (<|>) a.[0] a.[1..]))
+        |> (fun a -> Array.fold (<|>) a.[0] a.[1..])
 
     "ba" => asserts()
     "ca" => asserts()
@@ -135,7 +137,7 @@ let parseGraphFile graphFile =
 let loadInput graphFile =
     let parserSource, edges, startVerts = parseGraphFile graphFile
 
-    let tokenizer str = str |> parserSource.StringToToken |> int
+    let tokenizer str = str |> parserSource.StringToToken
     
     let r = new HashSet<_>()
     let ev = edges |> Array.iter (fun e ->

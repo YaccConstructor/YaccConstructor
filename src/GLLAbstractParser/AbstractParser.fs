@@ -198,7 +198,7 @@ let getAllSPPFRoots (parser : ParserSourceGLL) (input : IParserInput) =
 
 let getAllSPPFRootsAsINodes (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss, sppf, _ = parse parser input true
-    sppf.GetRootsForMultipleInitPositions gss input.InitialPositions
+    sppf.GetRootsForStart gss input.InitialPositions
 
 let isParsed (parser : ParserSourceGLL) (input : LinearInput) = 
     let gss, _, _ = parse parser input false

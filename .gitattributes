@@ -14,3 +14,6 @@ UniprotToEntrezGene.txt filter=lfs diff=lfs merge=lfs -text
 UniprotToGO.txt filter=lfs diff=lfs merge=lfs -text
 UniprotToInterpro.txt filter=lfs diff=lfs merge=lfs -text
 UniprotToString.txt filter=lfs diff=lfs merge=lfs -text
+*.sln text eol=crlf
+*.fsproj text eol=crlf
+*.fs text eol=crlf

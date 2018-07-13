@@ -95,10 +95,10 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
                         if nontermNode <> dummy
                         then
                             let x = (sppf.Nodes.Item (int <| unpackNode nontermNode))
-                            let newIndex = (1<positionInInput>) * getRightExtension (x.getExtension())
+                            let newIndex = getRightExtension (x.getExtension())
                             pop newIndex curContext.GssVertex nontermNode
                         let x = (sppf.Nodes.Item (int <| unpackNode y))
-                        let newIndex = (1<positionInInput>) * getRightExtension (x.getExtension())
+                        let newIndex = getRightExtension (x.getExtension())
                         addContext newIndex stateToContinue curContext.GssVertex y
                     else
                         if stateToContinue |> parser.FinalStates.Contains
@@ -194,14 +194,7 @@ let buildAst (parser : ParserSourceGLL) (input : IParserInput) =
         
 let getAllSPPFRoots (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss, sppf, _ = parse parser input true
-    let forest = 
-        input.InitialPositions 
-        |> Array.choose (fun pos ->
-            let roots = sppf.GetRoots gss pos
-            if roots.Length <> 0 
-            then Some(new Tree<_>(roots, input.PositionToString, parser.IntToString))
-            else None) 
-    forest
+    sppf.GetRootsForStartAndFinal gss input.InitialPositions input.FinalPositions
 
 let getAllSPPFRootsAsINodes (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss, sppf, _ = parse parser input true

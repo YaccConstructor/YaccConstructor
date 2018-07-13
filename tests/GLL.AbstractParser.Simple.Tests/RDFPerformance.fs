@@ -69,9 +69,9 @@ let getParseInputGraph tokenizer file =
 let processFile file =
     let cnt = 1
     let g1, triples1 = 
-        getParseInputGraph (fun x -> GLL.GPPerf1.stringToToken.[x] |> int) file
+        getParseInputGraph (fun x -> GLL.GPPerf1.stringToToken.[x]) file
     let g2, triples1 = 
-        getParseInputGraph (fun x -> GLL.GPPerf2.stringToToken.[x] |> int) file
+        getParseInputGraph (fun x -> GLL.GPPerf2.stringToToken.[x]) file
         
     let start = System.DateTime.Now
     let root1 =

@@ -24,16 +24,16 @@ type LexerEdge<'l ,'br  when 'l: equality> (s, e, t) =
     member this.Label = l
 
 type IParserInput =
-    abstract member InitialPositions: array<int<positionInInput>>
-        
+    abstract member InitialPositions   : array<int<positionInInput>>
+    abstract member FinalPositions     : array<int<positionInInput>>
     abstract member ForAllOutgoingEdges: int<positionInInput> -> (int<token> -> int<positionInInput> -> unit) -> unit
     
-    abstract member PositionToString : int -> string
+    abstract member PositionToString : int<positionInInput> -> string
 
 type ParserEdge<'tag>(s, e, t)=
     inherit TaggedEdge<int, 'tag>(s, e, t)
     
-type SimpleInputGraph<'tag>(initialVertices : int[], finalVertices : int[], tagToToken : 'tag -> int) = 
+type SimpleInputGraph<'tag>(initialVertices : int[], finalVertices : int[], tagToToken : 'tag -> int<token>) = 
     inherit AdjacencyGraph<int, ParserEdge<'tag>>()
 
     member val InitStates = initialVertices 
@@ -55,37 +55,42 @@ type SimpleInputGraph<'tag>(initialVertices : int[], finalVertices : int[], tagT
         out.WriteLine("}")
         out.Close()      
 
-    new (initial : int, final : int, tagToToken : 'tag -> int) = 
+    new (initial : int, final : int, tagToToken : 'tag -> int<token>) = 
         SimpleInputGraph<_>([|initial|], [|final|], tagToToken)
 
-    new (n : int, tagToToken : 'tag -> int) =
+    new (n : int, tagToToken : 'tag -> int<token>) =
         let allVertices = [|for i in 0 .. n - 1 -> i|]
         SimpleInputGraph<_>(allVertices, allVertices, tagToToken)
 
-    new (initial : int<positionInInput>[], tagToToken : 'tag -> int) = 
+    new (initial : int<positionInInput>[], tagToToken : 'tag -> int<token>) = 
         let casted = Array.map(fun x -> int x) initial
         SimpleInputGraph<_>(casted, casted, tagToToken)
  
     interface IParserInput with
         member this.InitialPositions = 
             Array.map(fun x -> x * 1<positionInInput>) this.InitStates
+        
+        member this.FinalPositions = 
+            Array.map(fun x -> x * 1<positionInInput>) this.FinalStates
 
         [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
         member this.ForAllOutgoingEdges curPosInInput pFun =
             let outEdges = int curPosInInput |> this.OutEdges
             outEdges |> Seq.iter
-                (fun e -> pFun ((this.TagToToken e.Tag) * 1<token>) (e.Target * 1<positionInInput>))
+                (fun e -> pFun (this.TagToToken e.Tag) (e.Target * 1<positionInInput>))
 
-        member this.PositionToString (pos : int) =
+        member this.PositionToString (pos : int<positionInInput>) =
             sprintf "%i" pos
 
 
 type LinearInput (initialPositions, input:array<int<token>>) =
     interface IParserInput with
-        member x.PositionToString(pos: int): string = 
+        member x.PositionToString(pos: int<positionInInput>): string = 
             sprintf "%i" pos
 
         member this.InitialPositions = initialPositions
+        
+        member this.FinalPositions = [|input.Length * 1<positionInInput>|]
         
         [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
         member this.ForAllOutgoingEdges curPosInInput pFun =
@@ -98,10 +103,12 @@ type LinearInput (initialPositions, input:array<int<token>>) =
 
 type LinearIputWithErrors(input: int<token> array, errorTag) = 
     interface IParserInput with
-        member x.PositionToString(pos: int): string = 
+        member x.PositionToString(pos: int<positionInInput>): string = 
             sprintf "%i" pos
 
         member this.InitialPositions = [|0<positionInInput>|]
+        
+        member this.FinalPositions = [|input.Length * 1<positionInInput>|]
         
         [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
         member this.ForAllOutgoingEdges curPosInInput pFun =
@@ -141,6 +148,14 @@ type GraphLabelledVertex<'tagType when 'tagType : equality> (initialVertices : '
                     i * 2<positionInInput>
                 | (false, _) -> failwithf "There is no vertex %A" x
             ) this.InitStates
+        
+        member this.FinalPositions =
+            Array.map(fun x -> 
+                match (vMap.TryGetValue x) with 
+                | (true, i) -> 
+                    i * 2<positionInInput>
+                | (false, _) -> failwithf "There is no vertex %A" x
+            ) this.FinalStates
 
         [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
         member this.ForAllOutgoingEdges curPosInInput pFun =
@@ -153,5 +168,5 @@ type GraphLabelledVertex<'tagType when 'tagType : equality> (initialVertices : '
                 this.OutEdges v |> Seq.iter
                     (fun e -> pFun ((this.TagToToken e.Tag) * 1<token>) (vMap.[e.Target] * 2<positionInInput>))
 
-        member this.PositionToString (pos : int) =
+        member this.PositionToString (pos : int<positionInInput>) =
             sprintf "%i" pos

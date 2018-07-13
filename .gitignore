@@ -412,11 +412,23 @@ src/GLLParser.SimpleTest/log.txt
 src/GLLParser.SimpleTest/*.dot
 
 src/FsYaccFrontend/Parser.fs
+src/FsYaccFrontend/Lexer.fs
+src/FsYaccFrontend/Parser.fsi
+
+src/FsYacc/fsyacclex.fs
+src/FsYacc/fsyaccpars.fs
+src/FsYacc/fsyaccpars.fsi
+
+src/FsLex/fslexlex.fs
+src/FsLex/fslexpars.fs
+src/FsLex/fslexpars.fsi
 
 src/YardFrontend/Lexer.fs
 src/YardFrontend/log.txt
 src/YardFrontend/Parser.fs
 src/YardFrontend/out
+
+tests/RNGLRAbstractParser.Tests/Lexer.fs
 
 Tests/AbstractRNGLR/DOT/sppf.dot*
 Tests/AbstractRNGLR/DOT/_sppf.dot*

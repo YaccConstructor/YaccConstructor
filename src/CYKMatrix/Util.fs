@@ -3,6 +3,7 @@
     open System
     open System.Collections.Generic
     open OpenCL.Net
+    open AbstractAnalysis.Common
 //    open Microsoft.FSharp.Math
 
 //    open FSharp.Quotations.Evaluator
@@ -114,7 +115,7 @@
             else []
 
     type BooleanRulesHolder(complexRules: ((NonTerminal * Probability.T) * (NonTerminal * NonTerminal * bool) []) [],
-                            simpleRules: ((NonTerminal * Probability.T) * int) [],
+                            simpleRules: ((NonTerminal * Probability.T) * int<token>) [],
                             epsilonRules: NonTerminal []) =  
                                          
         member this.SimpleRules = simpleRules

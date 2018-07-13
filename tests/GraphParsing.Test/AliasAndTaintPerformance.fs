@@ -19,13 +19,14 @@ open Yard.Core.Helpers
 let PBtokenizer (str:string) =
     let bracketKind = str.Substring(0, 2).ToUpper()
     let bracketIndex = str.Substring(2) |> int
-    match str with
-    | "OP" -> 2*bracketIndex + 1
-    | "CP" -> -2*bracketIndex - 1
-    | "OB" -> 2*bracketIndex
-    | "CB" -> -2*bracketIndex
-    | _ -> 0
-
+    let res = 
+        match str with
+        | "OP" -> 2*bracketIndex + 1
+        | "CP" -> -2*bracketIndex - 1
+        | "OB" -> 2*bracketIndex
+        | "CB" -> -2*bracketIndex
+        | _ -> 0
+    res * 1<token>
 
 let getTriplesFromFile file =
     let triples = new ResizeArray<int*string*int>()  
@@ -66,7 +67,7 @@ let getInputGraph file =
 
     let allVs = triples.ToArray() |> Array.collect (fun (f,l,t) -> [|f * 1<positionInInput>; t * 1<positionInInput>|]) |> Set.ofArray |> Array.ofSeq
 
-    let g = new SimpleInputGraph<_>(allVs, id)
+    let g = new SimpleInputGraph<int<token>>(allVs, id)
     
     [|for (f,l,t) in triples -> edg f t l |]
     |> Array.concat

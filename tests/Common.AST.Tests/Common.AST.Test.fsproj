@@ -56,6 +56,10 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
+      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
+      <Name>AbstractAnalysis.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\AST.Common\Common.AST.fsproj">
       <Name>Common.AST</Name>
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>

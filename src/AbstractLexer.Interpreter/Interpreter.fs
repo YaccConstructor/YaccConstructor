@@ -17,7 +17,7 @@ type GraphAction<'br when 'br:equality> =
     val graph: FSA<'br>
     new (sa, ea, gr) = {startAct = sa; endActs = ea; graph = gr}   
 
-let Interpret (inputFstLexer: FST<_,_>) (actions: array<FSA<_> -> _>) eofToken tokenToNumber =   
+let Interpret (inputFstLexer: FST<_,_>) (actions: array<FSA<_> -> _>) eofToken (tokenToNumber : _ -> int<token>) =   
     let maxV = inputFstLexer.Vertices |> Seq.max |> ref
     let edgesParserGraph = new ResizeArray<_>()
          
@@ -147,13 +147,13 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<FSA<_> -> _>) eofToken t
     let unwrapOption x = 
         match x with
         | Some a -> a |> tokenToNumber
-        | None -> -1
+        | None -> -1<token>
 
     let res = new SimpleInputGraph<_>(inputFstLexer.InitState.[0], inputFstLexer.FinalState.[0], unwrapOption)
     res.AddVerticesAndEdgeRange edgesParserGraph |> ignore  
     res
 
-let Tokenize (fstLexer : FST<_, _>) (actions : array<FSA<_> -> _>) (alphabet: HashSet<_>) eofToken (inputFst : FST<_, _>) tagToToken =    
+let Tokenize (fstLexer : FST<_, _>) (actions : array<FSA<_> -> _>) (alphabet: HashSet<_>) eofToken (inputFst : FST<_, _>) (tagToToken : _ -> int<token>)=    
     let inputFstLexer = FST<_, _>.Compose(inputFst, fstLexer, alphabet) 
     let epsRes = 
         match inputFstLexer with

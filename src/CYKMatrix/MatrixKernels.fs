@@ -15,6 +15,7 @@
     open ManagedCuda
     open ManagedCuda.CudaSparse
     open ManagedCuda.BasicTypes
+    open AbstractAnalysis.Common
 
 
     type ParsingMatrix<'MatrixType> = Dictionary<NonTerminal, 'MatrixType>
@@ -22,7 +23,7 @@
     type IMatrixHandler<'MatrixType, 'InnerType when 'InnerType : comparison> =
         abstract matrixSize : int
         abstract createEmptyMatrix : int -> 'MatrixType
-        abstract ParsingMatrixInitializator : AbstractAnalysis.Common.SimpleInputGraph<int> -> BooleanRulesHolder -> ResizeArray<NonTerminal> -> (ParsingMatrix<'MatrixType> * Dictionary<int,int>)
+        abstract ParsingMatrixInitializator : AbstractAnalysis.Common.SimpleInputGraph<int<token>> -> BooleanRulesHolder -> ResizeArray<NonTerminal> -> (ParsingMatrix<'MatrixType> * Dictionary<int,int>)
         abstract Multiply : 'MatrixType -> 'MatrixType -> 'MatrixType
         abstract Add : 'MatrixType -> 'MatrixType -> 'MatrixType
         abstract Conj : 'MatrixType -> 'MatrixType -> 'MatrixType
@@ -45,7 +46,7 @@
             _CsrRow <- csrRow_upd
             _CsrColInd <- csrColInd_upd
 
-    let initParsingMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int>)
+    let initParsingMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> (graph:AbstractAnalysis.Common.SimpleInputGraph<int<token>>)
                   (allRules: BooleanRulesHolder)
                   nonterminals
                   createEmptyMatrix 

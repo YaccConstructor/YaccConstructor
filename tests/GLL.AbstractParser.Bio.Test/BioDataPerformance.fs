@@ -39,12 +39,12 @@ let SubgraphToGraphVert (subgraph: AdjacencyGraph<_,ParserEdge<_>>) (input: IPar
     for i in subgraph.Vertices do
         if i % 2 = 0
         then
-            let vFrom = input.PositionToString i
+            let vFrom = input.PositionToString (i * 1<positionInInput>)
             let edges1 = subgraph.OutEdges i
             for e1 in edges1 do
                 let edges2 = subgraph.OutEdges e1.Target
                 for e2 in edges2 do
-                    let vTo = input.PositionToString e2.Target 
+                    let vTo = input.PositionToString (e2.Target * 1<positionInInput>) 
                     graphVert.AddVerticesAndEdge (new TaggedEdge<_,_>(vFrom, vTo, e2.Tag)) |> ignore
     graphVert
 
@@ -68,7 +68,7 @@ let trd (_, _, t) = t
 
 let SPPFToSubgraph (sppf : SPPF) (ps : ParserSourceGLL) =
     let tagToLabel x = ps.IntToString.Item (x |> int)
-    let edges = GetTerminals sppf |> Seq.map(fun x -> new ParserEdge<_>(snd x, trd x, (fst x |> tagToLabel)))
+    let edges = GetTerminals sppf |> Seq.map(fun x -> new ParserEdge<_>(snd x |> int, trd x |> int, (fst x |> tagToLabel)))
     let subgraph = new AdjacencyGraph<int, ParserEdge<_>>()
     subgraph.AddVerticesAndEdgeRange(edges) |> ignore
     subgraph
@@ -152,11 +152,11 @@ let getEdges file =
 let getIntGraph file =
     let edges = getEdges file
     let allVs = edges |> Array.collect (fun (f,l,t) -> [|f * 1<positionInInput>; t * 1<positionInInput>|]) |> Set.ofArray |> Array.ofSeq
-    let graph = new SimpleInputGraph<_>(allVs, id)
+    let graph = new SimpleInputGraph<int<token>>(allVs, id)
     edges
     |> Array.collect (fun (f,l,t) -> 
-        if getTokenFromTag (fun x -> (int) GLL.BioCFG.stringToToken.[x]) l <> (int) GLL.BioCFG.stringToToken.["OTHER"]
-        then [|new ParserEdge<_>(f, t, getTokenFromTag (fun x -> (int) GLL.BioCFG.stringToToken.[x]) l)|]
+        if getTokenFromTag (fun x -> GLL.BioCFG.stringToToken.[x]) l <> GLL.BioCFG.stringToToken.["OTHER"]
+        then [|new ParserEdge<_>(f, t, getTokenFromTag (fun x -> GLL.BioCFG.stringToToken.[x]) l)|]
         else [||])
     |> graph.AddVerticesAndEdgeRange
     |> ignore
@@ -173,7 +173,7 @@ let getParseInputGraph file (ps : ParserSourceGLL) =
     let genes = allGenes |> Set.ofArray |> Array.ofSeq
     let firstGene = [|allGenes.[0]|]
      
-    let edgeTagToInt x = getTokenFromTag (fun t -> t |> ps.StringToToken |> int) x
+    let edgeTagToInt x = getTokenFromTag (fun t -> t |> ps.StringToToken) x
     let graph = new SimpleInputGraph<_>(firstGene, edgeTagToInt)
 
     edges

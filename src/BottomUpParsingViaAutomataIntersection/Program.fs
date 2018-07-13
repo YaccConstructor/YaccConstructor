@@ -3,6 +3,7 @@
 open MathNet.Numerics.LinearAlgebra
 open System.Collections.Generic
 open MatrixKernels
+open AbstractAnalysis.Common
 
 [<Struct>]
 type Grammar =

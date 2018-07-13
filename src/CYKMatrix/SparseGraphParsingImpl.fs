@@ -1,7 +1,8 @@
 ﻿module SparseGraphParsingImpl
     open MatrixKernels
     open MathNet.Numerics.LinearAlgebra.Double
-
+    open AbstractAnalysis.Common
+    
     let innerSumFloat f1 f2 = f1 + f2
     let innerMultFloat f1 f2 = f1 * f2
     let innerZeroFloat = 0.0
@@ -9,7 +10,7 @@
 
     let createEmptyMatrixSparse size = SparseMatrix.Create(size, size, innerZeroFloat)
     let matrixSetValueSparse (matrix: SparseMatrix) (i: int) (j: int) (value: float) = matrix.At(i, j, value)
-    let initMatrixSparse (graph:AbstractAnalysis.Common.SimpleInputGraph<int>) allRules nonterminals = 
+    let initMatrixSparse (graph:AbstractAnalysis.Common.SimpleInputGraph<int<token>>) allRules nonterminals = 
         initParsingMatrix<SparseMatrix, float> graph allRules nonterminals createEmptyMatrixSparse matrixSetValueSparse innerOneFloat
 
     type SparseHandler(_matrixSize:int) =       

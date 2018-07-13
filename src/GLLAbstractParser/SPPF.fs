@@ -2,6 +2,7 @@
 
 open System.Collections.Generic
 open FSharpx.Collections.Experimental
+open Microsoft.FSharp.Collections
 
 open Yard.Generators.GLL
 open Yard.Generators.Common.DataStructures
@@ -200,26 +201,29 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         |> Array.ofSeq
         //|> (fun x -> [|x.[0]|])
     
-    member this.GetRootsForMultipleInitPositions (gss : GSS) (startPosition : _ []) = 
-        let setOfInitPositions = set startPosition
+    member this.GetRootsForStartAndFinal (gss : GSS) (startPositions :_ []) (finalPositions :_ []) = 
+        let startPoss = new HashSet<int<positionInInput>>(startPositions)
+        let finalPoss = new HashSet<int<positionInInput>>(finalPositions)
         let gssRoots = 
             gss.Vertices
-            |> Seq.filter (fun vert -> vert.Nonterm = startState && setOfInitPositions.Contains vert.PositionInInput)
-            //|> Array.ofSeq
+            |> Seq.filter (fun vert -> vert.Nonterm = startState && startPoss.Contains(vert.PositionInInput) )
+            |> Array.ofSeq
         
         gssRoots
-        |> Array.ofSeq
-        |> Array.collect( fun gssVert -> 
-            gssVert.P.SetP
-            |> Array.ofSeq
-            |> Array.map (fun x -> 
+        |> Array.collect (fun x ->
+            x.P.SetP
+            |> ResizeArray.toArray
+            |> Array.choose (fun x -> 
                 match x.data with
-                | TreeNode n -> this.Nodes.Item (int n)
+                | TreeNode n -> 
+                    let node = this.Nodes.Item (int n)
+                    if (finalPoss.Contains(node.getExtension() |> getRightExtension))
+                    then
+                        Some(node)
+                    else
+                        None
                 | _ -> failwith "wrongType")
-            //|> Seq.sortByDescending(fun x -> getRightExtension(x.getExtension()) )
             )
-        //|> (fun x -> [|x.[0]|])
-    
 
     member this.GetNonTermByName name (ps : ParserSourceGLL) = 
         let token = ps.NameToId.Item name

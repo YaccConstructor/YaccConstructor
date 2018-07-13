@@ -67,7 +67,7 @@ module internal Core =
         | LetRecursive(dfs, body) ->
             let bindings = List.map (fun (n, p) -> n, mkRuleWithName n p) dfs
             Expr.LetRecursive(bindings, fixExpression body)
-        | Application(op, args) as app ->
+        | Application(op, args) ->
             Expr.Application(
                 if op.Type = typeof<unit -> Product>
                 then <@@ fun (_: unit) -> Product(None, pref %%op) @@>
@@ -109,7 +109,8 @@ module internal Core =
         | PropertySet(None, pinfo, exprs, expr) -> Expr.PropertySet(pinfo, fixExpression expr, List.map fixExpression exprs)
         | PropertySet(Some prop, pinfo, exprs, expr) ->
             Expr.PropertySet(fixExpression prop, pinfo, fixExpression expr, List.map fixExpression exprs)
-        | Quote _ as expr -> failwithf "Cannot use Quotations inside Quotations! %O" expr
+        | QuoteTyped _ as expr -> failwithf "Cannot use Quotations inside Quotations! %O" expr
+        | QuoteRaw _ as expr -> failwithf "Cannot use Quotations inside Quotations! %O" expr
         | t -> failwithf "Internal error. Please report this object to developer team: %O" t
 
     let fixTree (expr: Expr<Product>) : Expr = fixExpression expr.Raw

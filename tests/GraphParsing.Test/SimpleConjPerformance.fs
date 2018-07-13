@@ -14,14 +14,14 @@ open ImplementationTests
 
 let SimpleTokenizer str =
     match str with
-    | "A" -> 1
-    | "B" -> 2
-    | "C" -> 3
-    | _ -> -1
+    | "A" -> 1<token>
+    | "B" -> 2<token>
+    | "C" -> 3<token>
+    | _ -> -1<token>
 
 let denseTest (verticesCount:int) grammarFile =
     let cnt = 1
-    let graph = new SimpleInputGraph<int>(verticesCount, id)
+    let graph = new SimpleInputGraph<int<token>>(verticesCount, id)
     for v1 in [0 .. verticesCount - 1] do
         for v2 in [0 .. verticesCount - 1] do
             if v1 <> v2 then 
@@ -39,14 +39,14 @@ let denseTest (verticesCount:int) grammarFile =
 
 let densityTest (verticesCount:int) (edgesCount:int) grammarFile =
     let cnt = 1
-    let graph = new SimpleInputGraph<int>(verticesCount, id)
+    let graph = new SimpleInputGraph<int<token>>(verticesCount, id)
 
     let rnd = System.Random()
 
     for i in [1..edgesCount] do
         let v1 = rnd.Next(0, verticesCount)
         let v2 = rnd.Next(0, verticesCount)
-        let labelToken = rnd.Next(1, 4)
+        let labelToken = rnd.Next(1, 4) * 1<token>
         graph.AddVerticesAndEdge(new ParserEdge<_>(v1, v2, labelToken) ) |> ignore
 
     //printfn("Graph loaded")
@@ -74,14 +74,14 @@ let conversionBNFconj = new Conversions.CNFandBNF.BNFconj()
 
 let densityBNFTest (verticesCount:int) (edgesCount:int) grammarFile =
     let cnt = 1
-    let graph = new SimpleInputGraph<int>(verticesCount, id)
+    let graph = new SimpleInputGraph<int<token>>(verticesCount, id)
 
     let rnd = System.Random()
 
     for i in [1..edgesCount] do
         let v1 = rnd.Next(0, verticesCount)
         let v2 = rnd.Next(0, verticesCount)
-        let labelToken = rnd.Next(1, 4)
+        let labelToken = rnd.Next(1, 4) * 1<token>
         graph.AddVerticesAndEdge(new ParserEdge<_>(v1, v2, labelToken) ) |> ignore
 
     //printfn("Graph loaded")

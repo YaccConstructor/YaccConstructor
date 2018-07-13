@@ -24,6 +24,10 @@
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
+      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
+      <Name>AbstractAnalysis.Common</Name>
+    </ProjectReference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

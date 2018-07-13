@@ -441,7 +441,7 @@ Target "BuildPackage" DoNothing
 Target "All" DoNothing
 
 "Clean"
-  ==> "AssemblyInfo"
+  //==> "AssemblyInfo"
   ==> "Gen:FsLex"
   ==> "Gen:FsYacc"
   ==> "Build:Core"

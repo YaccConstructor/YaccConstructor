@@ -25,16 +25,13 @@
     <AssemblyName>YC.FsLex</AssemblyName>
     <DefineConstants>INTERNALIZED_POWER_PACK;$(DefineConstants)</DefineConstants>
     <AllowCrossTargeting>true</AllowCrossTargeting>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <!-- These dummy entries are needed for F# Beta2 -->
   <Import Project="$(FSharpPowerPackSourcesRoot)\FSharpPowerPackSource.targets" />
   <PropertyGroup>
     <MinimumVisualStudioVersion>11</MinimumVisualStudioVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <Prefer32bit>false</Prefer32bit>
-    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(FSharpPowerPackSourcesRoot)\..\lkg\FSharp.PowerPack-$(LkgVersion)\bin\FSharp.PowerPack.targets" />
@@ -48,6 +45,10 @@
     </FsYacc>-->
     <None Include="fslexlex.fsl" />
     <None Include="fslexpars.fsy" />
+    <Compile Include="assemblyinfo.Common.fs">
+      <Link>assemblyinfo.Common.fs</Link>
+    </Compile>
+    <Compile Include="assemblyinfo.fslex.exe.fs" />
     <Compile Include="Lexing.fsi" />
     <Compile Include="Lexing.fs" />
     <Compile Include="Parsing.fsi" />
@@ -58,10 +59,6 @@
     <Compile Include="fslexpars.fs" />
     <Compile Include="fslexlex.fs" />
     <Compile Include="fslex.fs" />
-    <Compile Include="assemblyinfo.Common.fs">
-      <Link>assemblyinfo.Common.fs</Link>
-    </Compile>
-    <Compile Include="assemblyinfo.fslex.exe.fs" />
     <None Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -21,7 +21,7 @@
     <TreatWarningsAsErrors>
     </TreatWarningsAsErrors>
     <!-- 5310 tracks reenabling -->
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <AssemblyName>YC.FsLex</AssemblyName>
     <DefineConstants>INTERNALIZED_POWER_PACK;$(DefineConstants)</DefineConstants>
     <AllowCrossTargeting>true</AllowCrossTargeting>

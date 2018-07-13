@@ -108,6 +108,9 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AutomataCombinators", "src\AutomataCombinators\AutomataCombinators.fsproj", "{575E24B3-564E-4290-86C9-D8D8103DB12C}"
 EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x86 = Debug|x86
@@ -537,7 +540,6 @@ Global
 		{33A2AB9A-4E67-447D-9831-3A781301C927}.Release20|Any CPU.Build.0 = Release|Any CPU
 		{33A2AB9A-4E67-447D-9831-3A781301C927}.Release20|x86.ActiveCfg = Release|Any CPU
 		{33A2AB9A-4E67-447D-9831-3A781301C927}.Release20|x86.Build.0 = Release|Any CPU
-<<<<<<< HEAD
 		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -550,20 +552,6 @@ Global
 		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Release20|Any CPU.Build.0 = Release|Any CPU
 		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Release20|x86.ActiveCfg = Release|Any CPU
 		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Release20|x86.Build.0 = Release|Any CPU
-=======
-		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Debug|x86.Build.0 = Debug|Any CPU
-		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Release|Any CPU.Build.0 = Release|Any CPU
-		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Release|x86.ActiveCfg = Release|Any CPU
-		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Release|x86.Build.0 = Release|Any CPU
-		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Release20|Any CPU.ActiveCfg = Debug|Any CPU
-		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Release20|Any CPU.Build.0 = Debug|Any CPU
-		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Release20|x86.ActiveCfg = Debug|Any CPU
-		{117FE82B-461D-4AB6-ADA6-E6D0782D5F83}.Release20|x86.Build.0 = Debug|Any CPU
->>>>>>> JB_2018_last
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

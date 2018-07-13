@@ -15,7 +15,7 @@ let testShuffleLinearInput grammars input =
         
 [<TestFixture>]
 type ``GLL shuffle tests`` () =
-    [<Test>]
+    //[<Test>]
     member test.``2 simple grammars. Correct``() =
         let grammars = [|"../../grammars/D.yrd";
                          "../../grammars/M.yrd"|]
@@ -29,7 +29,7 @@ type ``GLL shuffle tests`` () =
         let input = [|"D";"D";"D";"D";"D";"D"|]
         Assert.IsFalse(testShuffleLinearInput grammars input)
 
-    [<Test>]
+    //[<Test>]
     member test.``one is extra``() =
         let grammars = [|"../../grammars/only_abc.yrd";
                          "../../grammars/only_cd.yrd";

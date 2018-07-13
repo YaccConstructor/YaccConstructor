@@ -70,6 +70,10 @@
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\Generators.Common\Generators.Common.fsproj">
+      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
+      <Name>Generators.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\GLLAbstractParser\GLLAbstractParser.fsproj">
       <Name>GLLAbstractParser</Name>
       <Project>{bd40477e-7ceb-4ff4-b53f-05316f3bb6d8}</Project>

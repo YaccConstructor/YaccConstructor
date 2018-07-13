@@ -90,9 +90,9 @@ let getGLLparserSource (fsa : FSA)
             println "terminalNums.Add(%i<token>) |> ignore" i
 
     let printStateAndTokenToNewState () =
-        println "let private stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int, int<positionInGrammar>>()"
+        println "let private stateAndTokenToNewState = new System.Collections.Generic.Dictionary<int64, int<positionInGrammar>>()"
         for state, token, newState in stateTokenNewState do
-            println "stateAndTokenToNewState.Add(%i, %i<positionInGrammar>)" (pack state token) newState
+            println "stateAndTokenToNewState.Add(%iL, %i<positionInGrammar>)" (pack state token) newState
 
     let printState (state:(int<positionInGrammar> * int<positionInGrammar>) []) isFirst isLast =
         let prefix = if isFirst then "  [|" else "    "
@@ -247,7 +247,7 @@ let getGLLparserSource (fsa : FSA)
         let cond, _ = intToString.TryGetValue(int numberNonterm.Key)
         if cond then failwith "multiple nonterminal names for one state"
         intToString.Add(int numberNonterm.Key, numberNonterm.Value)
-
+                    
     let parserSource = new ParserSourceGLL(fsaStatesOutNonterms
                                          , fsa.StartState
                                          , fsa.FinalStates
@@ -258,7 +258,6 @@ let getGLLparserSource (fsa : FSA)
                                          , stateAndTokenToNewState
                                          , stringToToken
                                          , multipleInEdges)
-                                         //, rightSideToRule=rightSideToRule)
 
 
     res, parserSource

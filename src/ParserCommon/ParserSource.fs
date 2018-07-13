@@ -13,7 +13,7 @@ type ParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<positi
                      , stateAndTokenToNewState : Dictionary<int64, int<positionInGrammar>>
                      , stringToToken      : Dictionary<string,int<token>>
                      , multipleInEdges    : bool []
-                     //, ?rightSideToRule   : string -> int
+                     , ?rightSideToRule   : string -> int
                      ) =
 
     //let getTermsDictionaryKey (state: int<positionInGrammar>) token = 

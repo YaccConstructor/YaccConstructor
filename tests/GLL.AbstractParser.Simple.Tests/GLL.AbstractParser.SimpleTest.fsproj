@@ -84,6 +84,10 @@
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\Generators.Common\Generators.Common.fsproj">
+      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
+      <Name>Generators.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\GLLAbstractParser\GLLAbstractParser.fsproj">
       <Name>GLLAbstractParser</Name>
       <Project>{bd40477e-7ceb-4ff4-b53f-05316f3bb6d8}</Project>

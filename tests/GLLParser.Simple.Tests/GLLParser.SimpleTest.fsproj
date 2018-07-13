@@ -45,7 +45,6 @@
     <None Include="paket.references" />
     <Compile Include="SimpleCalcWithErrors.yrd.fs" />
     <Compile Include="SimpleCalcWithoutErrors.yrd.fs" />
-    <Compile Include="GLLToGLR.Test.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -73,6 +72,10 @@
       <Name>Conversions</Name>
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Generators.Common\Generators.Common.fsproj">
+      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
+      <Name>Generators.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\GLLAbstractParser\GLLAbstractParser.fsproj">
       <Name>GLLAbstractParser</Name>

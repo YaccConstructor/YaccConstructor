@@ -29,9 +29,9 @@ let printAllPaths parserSource inputGraph outputFile =
                 let p = s.LastIndexOf 'A'
                 let p2 = s.IndexOf(' ', p)
                 s.Substring(0,p2).Trim())
+                *)
 
-        let filteredRes = croppedRes |> Seq.filter (fun x -> not <| x.Contains "RT")
-        *)
+        //let filteredRes = croppedRes |> Seq.filter (fun x -> not <| x.Contains "RT")
         System.IO.File.WriteAllLines(outputFile, result)//croppedRes)
 
 let printAllBadAsserts parserSource inputGraph outputFile = 
@@ -51,6 +51,18 @@ let printAllBadAsserts parserSource inputGraph outputFile =
 let printGraph (graph : SimpleInputGraph<_>) (file : string) = 
     graph.PrintToDot file id
 
+(*
+ba: ASSERT
+ca: ASSERT
+
+s0: C s0 RT s0 | G s0 RL s0 | ca s0 | ca | eps
+
+s1: C s1 RT s1 | G s0 RL s1 | eps
+
+[<Start>]
+s: ba s | s ba| s1 s | s s1 | ba | C s RT s1 | C s RT s 
+*)
+
 [<EntryPoint>]
 let main argv =
     let graphFile = argv.[0]
@@ -58,7 +70,7 @@ let main argv =
     
     let parserSource, inputGraph = loadInput graphFile   
 
-    printGraph inputGraph "inputGraph.dot"
+    //printGraph inputGraph "inputGraph.dot"
     let outputFile = argv.[1]
     let start = System.DateTime.Now
     printAllPaths parserSource inputGraph outputFile

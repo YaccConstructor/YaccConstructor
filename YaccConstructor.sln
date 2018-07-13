@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{370FB9E2-14CC-44C0-8160-6A6066F12B26}"
 	ProjectSection(SolutionItems) = preProject
@@ -105,7 +105,12 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLL.AbstractParser.Bio.Test
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LockChecker", "src\LockChecker\LockChecker.fsproj", "{33A2AB9A-4E67-447D-9831-3A781301C927}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AutomataCombinators", "src\AutomataCombinators\AutomataCombinators.fsproj", "{575E24B3-564E-4290-86C9-D8D8103DB12C}"
+EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x86 = Debug|x86
@@ -535,6 +540,18 @@ Global
 		{33A2AB9A-4E67-447D-9831-3A781301C927}.Release20|Any CPU.Build.0 = Release|Any CPU
 		{33A2AB9A-4E67-447D-9831-3A781301C927}.Release20|x86.ActiveCfg = Release|Any CPU
 		{33A2AB9A-4E67-447D-9831-3A781301C927}.Release20|x86.Build.0 = Release|Any CPU
+		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Debug|x86.Build.0 = Debug|Any CPU
+		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Release|x86.ActiveCfg = Release|Any CPU
+		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Release|x86.Build.0 = Release|Any CPU
+		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Release20|Any CPU.ActiveCfg = Release|Any CPU
+		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Release20|Any CPU.Build.0 = Release|Any CPU
+		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Release20|x86.ActiveCfg = Release|Any CPU
+		{575E24B3-564E-4290-86C9-D8D8103DB12C}.Release20|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -578,5 +595,8 @@ Global
 		{DD1E36EF-AB54-42E0-B8EF-AE98ADFDF6AC} = {F4364CD0-7F94-42C7-BEF5-FAF324B75469}
 		{484BA235-43B9-4105-86E8-0E8053CF07B0} = {63AAA0A2-AA38-4AE9-A890-56453B4A3B2B}
 		{E135D6C0-A1BF-444D-8878-FE5A0C02FCCD} = {29F087C7-44E6-45B9-9CE2-D84F619D7B0C}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C3D412A5-87F9-4D67-BEE5-A04F6957AE6F}
 	EndGlobalSection
 EndGlobal

@@ -11,19 +11,29 @@ open Yard.Generators.GLL
 open Printer
 open Yard.Generators.Common.FSA.Common
 
+open AbstractAnalysis.Common
 open System.Collections.Generic
+open FSharp.PowerPack
 
 type GLL() = 
     inherit Generator()
-        member this.GenerateByRules (*rules*) calls locks asserts =
+        member this.GenerateFromFSA fsa tokens generateToFile outFileName =
             let start = System.DateTime.Now
-            let fsa = new FSA((*rules,*) calls, locks, asserts)
-                        
-            let generatedCode, parserSource = getGLLparserSource fsa "" (*new Map<_,_>("",Some "")*) "" false false
+
+            let generatedCode, parserSource = 
+                getGLLparserSource fsa outFileName "" false generateToFile//isAbstract
             
+            if generateToFile
+            then
+                use out = new System.IO.StreamWriter (outFileName)
+                // TODO: write foot of definition
+                out.WriteLine (generatedCode.ToString().Replace("\r\n", "\n").Replace("\n", "\r\n"))
+                out.Flush()
+                out.Close()
             eprintfn "Generation time: %A" <| System.DateTime.Now - start
-            parserSource
             
+            box parserSource
+
         override this.Name = "GLLGenerator"
         override this.Constraints = [|noMeta; singleModule|]
         
@@ -78,7 +88,7 @@ type GLL() =
                 //| "-withoutTree" -> withoutTree := getBoolValue "withoutTree" value
                 | value -> failwithf "Unexpected %s option" value
                  
-            let fsa = new FSA((*definition.grammar.[0].rules,*) 1, 2, 3)
+            let fsa = new FSA(definition.grammar.[0].rules)
             
             let generatedCode, parserSource = getGLLparserSource fsa outFileName (*tokenType*) moduleName light generateToFile//isAbstract
             

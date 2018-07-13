@@ -169,6 +169,7 @@ type NfaNodeMap() =
     let map = new Dictionary<int,NfaNode>(100)
     member x.Item with get(nid) = map.[nid]
     member x.Count = map.Count
+    member x.GetMap = map
 
     member x.NewNfaNode(trs,ac) = 
         let nodeId = map.Count+1 // ID zero is reserved

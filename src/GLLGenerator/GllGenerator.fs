@@ -18,11 +18,11 @@ type GLL() =
         override this.Name = "GLLGenerator"
         override this.Constraints = [|noMeta; singleModule|]
 
-        member this.GenerateFromFSA fsa generateToFile outFileName =
+        member this.GenerateFromFSA fsa tokens generateToFile outFileName =
             let start = System.DateTime.Now
 
             let generatedCode, parserSource = 
-                getGLLparserSource fsa outFileName (new Map<_, _>(["", Some ""])) "" false generateToFile//isAbstract
+                getGLLparserSource fsa outFileName tokens "" false generateToFile//isAbstract
             
             if generateToFile
             then

@@ -8,6 +8,8 @@ open YC.API
 open AbstractParser
 open System.Collections.Generic
 
+open Yard.Generators.Common.AutomataCombinators
+
 (*
 ba: ASSERT
 ca: ASSERT
@@ -19,7 +21,7 @@ s1: C s1 RT s1 | G s0 RL s1 | eps
 [<Start>]
 s: ba s | s ba| s1 s | s s1 | ba | C s RT s1 | C s RT s 
 *)
-
+(*
 let genGrammar calls locks asserts = 
     let assertsGrm = [|0 .. asserts - 1|] |> Array.map (fun i -> "A" + string i) |> String.concat " | "
     let mutable grmHead = 
@@ -55,6 +57,19 @@ let genGrammar calls locks asserts =
     + "\n"
     + alts [|s1Head; s1Calls; s1Locks|] 
     + "\n"
+    *)
+
+let genParser calls locks asserts =
+    let factory = new AutomataFactory()
+    let (~%), (~&), eps, (=>), (!=>), (<~>), (<|>) = factory.Combinators
+
+    let s = "s" !=> ((%"a" <~> &"s") <|> %"b")
+
+    let automata, tokens = factory.Produce()
+    automata.PrintDot "automata.dot" |> ignore
+
+    let gll = new GLL()
+    gll.GenerateFromFSA automata tokens true "gll.fs" :?> ParserSourceGLL
 
 let parseGraphFile graphFile = 
     let data = System.IO.File.ReadAllLines graphFile
@@ -72,22 +87,17 @@ let parseGraphFile graphFile =
     let locks = int <| info.[2].Trim()    
     let asserts = int <| info.[3].Trim()
 
-    let grammar = genGrammar calls locks asserts
+    let parser = genParser calls locks asserts
 
     let startVerts = startVLine.Split ' ' |> Array.map int
     let edges = 
         edgesLines |> Array.map (fun s -> s.Split ' ' |> fun a -> new ParserEdge<_>(int a.[0], int a.[2], a.[1]))
     
-    grammar, edges, startVerts
-
+    parser, edges, startVerts
 
 let loadInput graphFile =
-    let grammar, edges, startVerts = parseGraphFile graphFile
+    let parserSource, edges, startVerts = parseGraphFile graphFile
     let time = System.DateTime.UtcNow
-    let parserSource =
-        let fe = new YardFrontend()
-        let gen = new GLL()
-        GenerateFromStrToObj grammar fe gen None Seq.empty [||] :?> ParserSourceGLL
     
     printfn "ParserSource time is %A" (System.DateTime.UtcNow - time)
     let tokenizer str = str |> parserSource.StringToToken |> int

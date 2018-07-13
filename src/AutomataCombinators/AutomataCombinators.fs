@@ -16,7 +16,7 @@ and  AutomatonEdge = {label: EdgeSymbol; mutable dir: AutomatonNode}
 type AutomatonPart = {starts: AutomatonEdge list; ends: AutomatonEdge list}
 
 [<AllowNullLiteral>]
-type AutomatonNonterminal(id: int, name: string, start: AutomatonNode, final: AutomatonNode) =
+type Automaton(id: int, name: string, start: AutomatonNode, final: AutomatonNode) =
     member this.Id = id
     member this.Name = name
     member this.Start = start
@@ -26,13 +26,12 @@ let createEdge label' =
     {label = label'; dir = null}
     
 type AutomataFactory() = 
-    let mutable nodesCounter = 0
-    let mutable nodes: AutomatonNode list = []
-    let mutable nonterminals = new ResizeArray<AutomatonNonterminal>()
+    let mutable nodes = new ResizeArray<AutomatonNode>()
+    let mutable nonterminals = new ResizeArray<Automaton>()
     let mutable alphabet = new HashSet<EdgeSymbol>()
     let mutable startNonterminalId = 0
 
-    let nonterminalIds = new Dictionary<string, int>()
+    let nonterminalIds = new Dictionary<string, int * int>()
 
     member this.Terminal name = 
         let token = Term name
@@ -43,12 +42,15 @@ type AutomataFactory() =
     member this.Reference name = 
         let id = 
             if (nonterminalIds.ContainsKey name) then
-                nonterminalIds.Item name
+                nonterminalIds.Item name |> snd
             else
+                let nontId = nonterminals.Count
+                let nodeId = nodes.Count
+
                 nonterminals.Add null
-                let newId = nonterminals.Count - 1
-                nonterminalIds.Add(name, newId)
-                newId
+                nodes.Add null
+                nonterminalIds.Add(name, (nontId, nodeId))
+                nodeId
         
         let token = Nonterm (id * 1<positionInGrammar>)
         let edge = createEdge token
@@ -62,9 +64,8 @@ type AutomataFactory() =
         {starts = [edge]; ends = [edge]}
     
     member this.Sequence left right =
-        let node = AutomatonNode(nodesCounter, right.starts)
-        nodesCounter <- nodesCounter + 1
-        nodes <- node :: nodes
+        let node = AutomatonNode(nodes.Count, right.starts)
+        nodes.Add node
         
         left.ends |> List.iter (fun e -> e.dir <- node)
 
@@ -75,23 +76,30 @@ type AutomataFactory() =
         {starts = left.starts @ right.starts; ends = left.ends @ right.ends}
     
     member this.Rule name (part: AutomatonPart) =
-        let start = AutomatonNode(nodesCounter, part.starts)
-        nodesCounter <- nodesCounter + 1
-        let final = AutomatonNode(nodesCounter, [])
-        nodesCounter <- nodesCounter + 1
-
-        nodes <- start :: final :: nodes
-
-        part.ends |> List.iter (fun e -> e.dir <- final)
-
         if (nonterminalIds.ContainsKey name) then
-            let existingId = nonterminalIds.Item name
-            let nonterminal = new AutomatonNonterminal(existingId, name, start, final)
-            nonterminals.Item existingId <- nonterminal
+            let nontId, nodeId = nonterminalIds.Item name
+
+            let start = AutomatonNode(nodeId, part.starts)
+            let final = AutomatonNode(nodes.Count, [])
+            nodes.Add final
+
+            part.ends |> List.iter (fun e -> e.dir <- final)
+
+            let nonterminal = new Automaton(nontId, name, start, final)
+
+            nonterminals.[nontId] <- nonterminal
+            nodes.[nodeId] <- start
             nonterminal
         else
-            let nonterminal = new AutomatonNonterminal(nonterminals.Count, name, start, final)
-            nonterminalIds.Add(name, nonterminals.Count)
+            let start = AutomatonNode(nodes.Count, part.starts)
+            nodes.Add start 
+            let final = AutomatonNode(nodes.Count, [])
+            nodes.Add final
+
+            part.ends |> List.iter (fun e -> e.dir <- final)
+
+            let nonterminal = new Automaton(nonterminals.Count, name, start, final)
+            nonterminalIds.Add(name, (nonterminals.Count, start.Id))
             nonterminals.Add nonterminal
             nonterminal
     
@@ -104,8 +112,8 @@ type AutomataFactory() =
         this.Terminal, this.Reference, this.Epsilon, this.Rule, this.Start, this.Sequence, this.Alternation
 
     member this.Produce() = 
-        let fsaStates = Array.create nodes.Length Array.empty
-        nodes |> List.iter (fun n -> 
+        let fsaStates = Array.create nodes.Count Array.empty
+        nodes |> Seq.iter (fun n -> 
             let transitions = (n.Transitions |> List.map (fun t -> 
                 (t.label, t.dir.Id * 1<positionInGrammar>))) |> List.toArray
             Array.set fsaStates n.Id transitions)
@@ -116,7 +124,7 @@ type AutomataFactory() =
         let fsaFinals = new HashSet<int<positionInGrammar>>()
 
         nonterminals |> Seq.iter (fun n -> 
-            fsaStateNames.Add(n.Id * 1<positionInGrammar>, n.Name)
+            fsaStateNames.Add(n.Start.Id * 1<positionInGrammar>, n.Name)
             fsaStarts <- (HashSet [n.Start.Id * 1<positionInGrammar>]) :: fsaStarts
             fsaFinals.Add (n.Final.Id * 1<positionInGrammar>) |> ignore)
 
@@ -130,4 +138,18 @@ type AutomataFactory() =
              StartStates = fsaStarts |> List.toArray;
              FinalStates = fsaFinals}
         
-        new FSA(internalFSA)
+        let printToken token =
+            match token with
+            | Term t -> t
+            | Nonterm i -> fsaStateNames.Item i
+            | Epsilon() -> ""
+
+        let tokens = Map (alphabet 
+            |> Seq.filter (fun s -> 
+                match s with
+                | Term _ -> true
+                | Nonterm _ -> false
+                | Epsilon() -> false)
+            |> Seq.map (fun s -> (printToken s, None)))
+        
+        new FSA(internalFSA), tokens

@@ -53,7 +53,7 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="DeterministicCombinators.fs" />
+    <Compile Include="AutomataCombinators.fs" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

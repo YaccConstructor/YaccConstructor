@@ -412,6 +412,12 @@ src/GLLParser.SimpleTest/log.txt
 src/GLLParser.SimpleTest/*.dot
 
 src/FsYaccFrontend/Parser.fs
+src/FsYaccFrontend/Lexer.fs
+src/FsYaccFrontend/Parser.fsi
+
+src/FsYacc/fsyacclex.fs
+src/FsYacc/fsyaccpars.fs
+src/FsYacc/fsyaccpars.fsi
 
 src/YardFrontend/Lexer.fs
 src/YardFrontend/log.txt

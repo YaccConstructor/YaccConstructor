@@ -1,7 +1,6 @@
 ﻿module YC.GLL.GSS
 
 open Yard.Generators.GLL.ParserCommon
-open Yard.Generators.Common.DataStructures
 open AbstractAnalysis.Common
 open QuickGraph
 open QuickGraph.Graphviz

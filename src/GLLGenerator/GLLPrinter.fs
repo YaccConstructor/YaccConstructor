@@ -1,12 +1,10 @@
 ﻿module Yard.Generators.GLL.Printer
 
 open System.Collections.Generic
+open AbstractAnalysis.Common
 open Yard.Generators.Common.FSA
 open Yard.Generators.Common.FSA.Common
-open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
-open Yard.Generators.Common.InitialConvert
-open Yard.Generators.Common
 
 let getGLLparserSource (fsa : FSA)
              (outFileName : string)

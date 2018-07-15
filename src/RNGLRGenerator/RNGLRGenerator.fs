@@ -14,7 +14,6 @@
 
 namespace Yard.Generators.RNGLR
 
-open AbstractAnalysis.Common
 open System
 open System.IO
 open System.Text
@@ -150,7 +149,7 @@ type RNGLR() =
                     for cycle in grammar.EpsilonCyclicNonTerms do
                         let nonTerm = List.head cycle
                         grammar.epsilonTrees.[grammar.indexator.nonTermToIndex nonTerm].AstToDot
-                            grammar.indexator.indexToNonTerm (fun _ -> 0<token>) None grammar.rules.leftSideArr
+                            grammar.indexator.indexToNonTerm (fun _ -> 0) None grammar.rules.leftSideArr
                             (Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot"))
                 grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
             
@@ -189,7 +188,6 @@ type RNGLR() =
                     println "open Yard.Generators.RNGLR"
                     println "open Yard.Generators.Common.AST"
                     println "open Yard.Generators.Common.AstNode"
-                    println "open AbstractAnalysis.Common"
 
                     if !needHighlighting
                     then 

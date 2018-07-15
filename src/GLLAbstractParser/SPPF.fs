@@ -1,4 +1,4 @@
-﻿module YC.GLL.SPPF
+module YC.GLL.SPPF
 
 open System.Collections.Generic
 open FSharpx.Collections.Experimental

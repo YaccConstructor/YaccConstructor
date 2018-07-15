@@ -1,13 +1,8 @@
 ﻿module ResultProcessing
-open Yard.Generators.GLL
+
 open Yard.Generators.Common.ASTGLLFSA
-open Yard.Generators.GLL.ParserCommon
 open AbstractAnalysis.Common
-open Yard.Frontends.YardFrontend
-open YC.API
-open AbstractParser
 open System.Collections.Generic
-//open Microsoft.FSharp.Collections
 
 let singlePathForRoot (root: INode) (intToString : Dictionary<_,_>) : seq<string> =
     let results = new Dictionary<INode, _>() 

@@ -8,50 +8,47 @@ open System.Linq
 open System.IO
 open Yard.Generators.GLL
 open Yard.Generators.RNGLR
-//open Yard.Generators.TreeDump
-open Yard.Generators.YardPrinter
 //open Yard.Generators.RIGLRGenerator
-open Yard.Frontends.FsYaccFrontend
 open Yard.Frontends.YardFrontend
 open Yard.Core.Conversions
 open Yard.Core.Conversions.ExpandInline
 
 [<TestFixture>]
 type ``Components loader tests`` () =
+
+    (*
     [<Test>]
     member test.``All generators`` () =
-        let generatorsManager = [|new GLL(), new RNGLR(), (*new TreeDump(),*) new YardPrinter()(*, new RIGLR()*)|] |> Seq.ofArray |> Seq.cast<Generator>
+        let generatorsManager = [|new GLL(), new RNGLR() (*, new TreeDump(), new YardPrinter()*)(*, new RIGLR()*)|] |> Seq.ofArray |> Seq.cast<Generator>
         let generatorNames = Seq.map (fun (elem: Generator) -> elem.Name) generatorsManager
         let allGenerators =
             List.ofSeq generatorNames
             |> List.sort
         let expetedResult =
-            ["GLLGenerator"; "RNGLRGenerator"; "TreeDump"; "YardPrinter";"RIGLRGenerator"]
+            ["GLLGenerator"; "RNGLRGenerator"]
             |> List.sort
         Seq.iter (printfn "%A;") allGenerators
         printfn "**********************"
         Seq.iter (printfn "%A;") expetedResult
         Assert.AreEqual(expetedResult |> List.sort, allGenerators |> List.sort)
-
-
+    *)
 
     [<Test>]
     member test.``All frontends`` () =
-        let frontendsManager = [|new FsYaccFrontend(), new YardFrontend()|] |> Seq.ofArray  |> Seq.cast<Frontend>
+        let frontendsManager = [|(*new FsYaccFrontend(),*) new YardFrontend()|] |> Seq.ofArray  |> Seq.cast<Frontend>
         let frontendNames = Seq.map (fun (elem: Frontend) -> elem.Name) frontendsManager
         let allFrontends =
             List.ofSeq frontendNames
             |> List.sort
         let expetedResult =
-            ["FsYaccFrontend"; "YardFrontend"]
+            [(*"FsYaccFrontend";*) "YardFrontend"]
             |> List.sort
         Seq.iter (printfn "%A;") allFrontends
         printfn "**********************"
         Seq.iter (printfn "%A;") expetedResult
         Assert.AreEqual(expetedResult, allFrontends)
 
-
-
+    (*
     [<Test>]
     member test.``All conversions`` () =
         let conversionsManager = [| new AddDefaultAC.AddDefaultAC(), new AddEOF.AddEOF(), new BuildAST.BuildAST(), new BuildAstSimple.BuildAstSimple(), new CNFandBNF.CNF(),
@@ -73,12 +70,13 @@ type ``Components loader tests`` () =
         printfn "**********************"
         Seq.iter (printfn "%A;") expetedResult
         Assert.AreEqual(expetedResult |> List.sort, allConversions |> List.sort)
+    *)
 
 
     [<Test>]
     member test.``Get generators name`` () =
-        let generatorsManager = [|new RNGLR()(*, new TreeDump()*)|] |> Seq.ofArray |> Seq.cast<Generator>
-        let VerificatedGenerators  = ["RNGLRGenerator",true ; "TreeDump",true]
+        let generatorsManager = [|new RNGLR() (*, new TreeDump()*)|] |> Seq.ofArray |> Seq.cast<Generator>
+        let VerificatedGenerators  = ["RNGLRGenerator",true (*; "TreeDump",true*)]
 
         let genfun (x,y)  =
             match (Seq.tryFind (fun (elem : Generator) -> elem.Name = x) generatorsManager) with
@@ -95,7 +93,7 @@ type ``Components loader tests`` () =
 [<TestFixture>]
 type ``Checker test`` () =
     let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> Frontend
-    let basePath = @"..\..\..\data\Checkers\"
+    let basePath = @"..\..\..\..\data\Checkers\"
 
     let getUndecl path =
         path

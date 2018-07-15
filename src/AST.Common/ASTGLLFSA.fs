@@ -1,10 +1,8 @@
 ﻿module Yard.Generators.Common.ASTGLLFSA
-open System
+
 open System.Collections.Generic
-open Yard.Generators.Common.DataStructures
 open AbstractAnalysis.Common
 open Microsoft.FSharp.Reflection
-
 
 [<AllowNullLiteral>]
 type INode = 

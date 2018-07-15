@@ -21,7 +21,6 @@ open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
 open Microsoft.FSharp.Collections
 open FSharpx.Collections.Experimental
-open AbstractAnalysis.Common
 // Custom graph structure. For optimization and needed (by algorithm) relation with AST
 
 [<AllowNullLiteral>]
@@ -113,8 +112,8 @@ let private containsEdge (v : Vertex) (f : Family) (out : ResizeArray<Vertex * F
         i <- i - 1
     i >= 0 && (let v',f',_ = out.[i] in eq v' v && f = f')
 
-let drawDot (tokenToNumber : _ -> int<token>) (tokens : BlockResizeArray<_>) (leftSide : int[])
-        (initNodes : seq<Vertex>) (numToString : int -> string) (errInd: int<token>) (path : string) =
+let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide : int[])
+        (initNodes : seq<Vertex>) (numToString : int -> string) (errInd: int) (path : string) =
     use out = new System.IO.StreamWriter (path)
     let was = new Dictionary<_,_>()
     let levels = new Dictionary<_,_>()
@@ -124,12 +123,12 @@ let drawDot (tokenToNumber : _ -> int<token>) (tokens : BlockResizeArray<_>) (le
     print "rankdir=RL"
     let getAstString (ast : AstNode) =
         match ast with
-        | :? Terminal as i -> tokens.[i.TokenNumber] |> tokenToNumber |> int |> numToString |> sprintf "%s"    
+        | :? Terminal as i -> tokens.[i.TokenNumber] |> tokenToNumber |> numToString |> sprintf "%s"    
         | :? Epsilon as i -> "eps " + numToString (-i.EpsilonNonTerm-1)
         | :? AST as ast -> 
             let nonT = 
                 if ast.first.prod < leftSide.Length then ast.first.prod
-                else int errInd
+                else errInd
             numToString leftSide.[nonT]
         | _ -> failwith "Unexpected ast"
 
@@ -209,18 +208,18 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             if dict.[state] = null then
                 let v = new Vertex(state, level)
                 dict.[state] <- v
-                let push = parserSource.Gotos.[state].[int !curNum]
+                let push = parserSource.Gotos.[state].[!curNum]
                 // Push to init state is impossible
                 if push <> 0 then
                     pushes.Push (v, push)
-                let arr = parserSource.ZeroReduces.[state].[int !curNum]
+                let arr = parserSource.ZeroReduces.[state].[!curNum]
                 if arr <> null then
                     for prod in arr do
                         reductions.Push (v, prod, 0, None)
                 usedStates.Push state
             let v = dict.[state]
             if edgeOpt.IsSome && not (isEpsilon <| snd edgeOpt.Value) then 
-                let arr = parserSource.Reduces.[state].[int !curNum]
+                let arr = parserSource.Reduces.[state].[!curNum]
                 if arr <> null then
                     for (prod, pos) in arr do
                         reductions.Push (v, prod, pos, edgeOpt)
@@ -244,7 +243,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         if not <| containsEdge final family edges.[state] then
                             let isCreated, edgeLabel = addEdge final family edges.[state] false
                             if pos > 0 && isCreated && not (isEpsilon edgeLabel) then
-                                let arr = parserSource.Reduces.[state].[int !curNum]
+                                let arr = parserSource.Reduces.[state].[!curNum]
                                 let edgeOpt = Some (final, edgeLabel :> AstNode)
                                 if arr <> null then
                                     for (prod, pos) in arr do
@@ -423,7 +422,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 if pushes.Count <> recVertNum
                 then
                     //if reduce is possible
-                    let arr = parserSource.Reduces.[vertex.State].[int !curNum]
+                    let arr = parserSource.Reduces.[vertex.State].[!curNum]
                     if arr <> null
                     then 
                         if  not (isEpsilon vertex.OutEdges.first.Ast) then
@@ -433,7 +432,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         makeReductions !curInd recovery
                         temp.Enqueue path
                     //if shift is possible
-                    let push = parserSource.Gotos.[vertex.State].[int !curNum]
+                    let push = parserSource.Gotos.[vertex.State].[!curNum]
                     if push <> 0 
                     then
                         if pushes.Count <> 0 
@@ -482,11 +481,11 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 let prodNumber = parserSource.Rules.Length
                 if unbrowsed.Length = 0 
                 then 
-                    let ast = getEpsilon (int parserSource.ErrorIndex)
+                    let ast = getEpsilon parserSource.ErrorIndex
                     if not <| containsSimpleEdge vertex ast simpleEdges.[state] 
                     then
                         addSimpleEdge vertex ast simpleEdges.[state]
-                        let arr = parserSource.Reduces.[state].[int !curNum]
+                        let arr = parserSource.Reduces.[state].[!curNum]
                         if arr <> null  && not (isEpsilon ast)
                         then
                             let edgeOpt = Some (vertex, ast :> AstNode)
@@ -499,7 +498,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     if not <| containsEdge vertex family edges.[state] 
                     then
                         let _, edgeLabel = addEdge vertex family edges.[state] true
-                        let arr = parserSource.Reduces.[state].[int !curNum]
+                        let arr = parserSource.Reduces.[state].[!curNum]
                         if arr <> null && not (isEpsilon edgeLabel)
                         then
                             let edgeOpt = Some (vertex, edgeLabel :> AstNode)
@@ -509,7 +508,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                            
             let state = snd <| pushes.Peek()
 
-            if parserSource.Reduces.[state].[int !curNum] <> null
+            if parserSource.Reduces.[state].[!curNum] <> null
             then // reductions is possible
                 let vertex = fst <| pushes.Peek()
                 reduceToError vertex state unbrowsed
@@ -577,7 +576,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     !res
 
                 curNum := prevNum
-                let var = ref <| isRecToken (int !curNum)
+                let var = ref <| isRecToken !curNum
 
                 while !var = -1 && !curNum <> parserSource.EofIndex do
                     let newAstNode = new Terminal(tokens.Length)
@@ -590,7 +589,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         incr curInd
                     else             
                         curNum := parserSource.EofIndex
-                    var := !curNum |> int |> isRecToken
+                    var := isRecToken !curNum
                 
                 if  !var >= 0
                 then 

@@ -2,22 +2,15 @@
 
 open Yard.Core
 open Yard.Core.IL
-open Yard.Core.Checkers
 open Constraints
-open Yard.Generators.Common
-open InitialConvert
 open Yard.Generators.Common.FSA
+open Yard.Generators.Common.FSA.Common
 open Yard.Generators.GLL
 open Printer
-open Yard.Generators.Common.FSA.Common
-
-open AbstractAnalysis.Common
-open System.Collections.Generic
-open FSharp.PowerPack
 
 type GLL() = 
     inherit Generator()
-        member this.GenerateFromFSA fsa tokens generateToFile outFileName =
+        member this.GenerateFromFSA fsa generateToFile outFileName =
             let start = System.DateTime.Now
 
             let generatedCode, parserSource = 
@@ -30,7 +23,7 @@ type GLL() =
                 out.WriteLine (generatedCode.ToString().Replace("\r\n", "\n").Replace("\n", "\r\n"))
                 out.Flush()
                 out.Close()
-            eprintfn "Generation time: %A" <| System.DateTime.Now - start
+            //eprintfn "Generation time: %A" <| System.DateTime.Now - start
             
             box parserSource
 

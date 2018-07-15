@@ -224,14 +224,14 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             verticesToProcess.Enqueue(elem)
 
     let addNonZeroReduction (gssVertex : Vertex) token gssEdge (innerGraphV : VInfo<_>)=
-        let arr = parserSource.Reduces.[gssVertex.State].[parserSource.TokenToNumber token |> int]
+        let arr = parserSource.Reduces.[gssVertex.State].[parserSource.TokenToNumber token]
         if arr <> null 
         then
             for (prod, pos) in arr do
                 innerGraphV.AddReduction(new Reduction(gssVertex, prod, pos, Some gssEdge))
 
     let addZeroReduction (gssVertex : Vertex) token (innerGraphV : VInfo<_>) shouldEnqueue =
-        let arr = parserSource.ZeroReduces.[gssVertex.State].[parserSource.TokenToNumber token |> int]
+        let arr = parserSource.ZeroReduces.[gssVertex.State].[parserSource.TokenToNumber token]
         if arr <> null
         then
             for prod in arr do
@@ -269,7 +269,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     let push (currentGraphV:VInfo<_>) (gssVertex : Vertex) =
         let newUnprocessedGssVs = new ResizeArray<_>(2)
         for e in outEdgesInnerGraph.[currentGraphV.vNum] do
-            let push = parserSource.Gotos.[gssVertex.State].[parserSource.TokenToNumber e.Tag |> int]
+            let push = parserSource.Gotos.[gssVertex.State].[parserSource.TokenToNumber e.Tag]
             if push <> 0 
             then
                 let tailGssV, isNew = addVertex e.Target push (if currentGraphV.vNum = e.Target.vNum then newUnprocessedGssVs else e.Target.unprocessedGssVertices)
@@ -453,7 +453,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state. Possible errors: (" + states + ")")
             | Some res -> 
                 try 
-                    let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString, isErrorToken = isErrorToken)
+                    let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString)//, isErrorToken = isErrorToken)
                     tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "./data/AbstractRNGLR/DOT/sppf.dot"
 //
 //                    let gssInitVertices = 

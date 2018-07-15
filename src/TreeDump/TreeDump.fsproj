@@ -3,13 +3,13 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
-
+  
   <ItemGroup>
-    <Compile Include="Graph.fs" />
+    <Compile Include="TreeDump.fs" />
+    <None Include="app.config" />
   </ItemGroup>
-
+  
   <ItemGroup>
-    <PackageReference Include="YC.QuickGraph" Version="3.7.3" />
+    <ProjectReference Include="..\Common\Common.fsproj" />
   </ItemGroup>
- 
 </Project>

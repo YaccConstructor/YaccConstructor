@@ -4,7 +4,6 @@ open NUnit.Framework
 open System
 open Yard.Generators.Common.AST
 open Yard.Generators.Common.AstNode
-open AbstractAnalysis.Common
 
 type TokenType = NUM of int | PLUS of int | MULT of int | RNGLR_EOF of int
  
@@ -127,10 +126,10 @@ let ast7_5 = getAst <| getFamily 1 (getNodes [|ast6_5|]) <| null
 let tree_5 = new Tree<TokenType>(tokens_5, ast7_5, [||], Some leftSide, Some numToString)
 
 let tokenToNumber = function
-    | NUM _ -> 4<token>
-    | PLUS _ -> 5<token>
-    | RNGLR_EOF _ -> 6<token>
-    | MULT _ -> 7<token>
+    | NUM _ -> 4
+    | PLUS _ -> 5
+    | RNGLR_EOF _ -> 6
+    | MULT _ -> 7
 
 let tokenData = function
     | NUM x -> box x

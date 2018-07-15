@@ -1,14 +1,9 @@
 ﻿module Yard.Generators.GLL.AbstractParser
-open System 
+
 open Microsoft.FSharp.Collections
 open System.Collections.Generic
-open FSharpx.Collections.Experimental
-
-open Yard.Generators.GLL
-open Yard.Generators.Common.DataStructures
 open AbstractAnalysis.Common
 open Yard.Generators.GLL.ParserCommon
-open Yard.Generators.GLL.ParserCommon.CommonFuns
 open Yard.Generators.Common.ASTGLLFSA
 open YC.GLL.GSS
 open YC.GLL.SPPF

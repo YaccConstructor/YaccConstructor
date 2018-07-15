@@ -1,18 +1,7 @@
 @echo off
 cls
 
-.paket\paket.bootstrapper.exe
-if errorlevel 1 (
-  exit /b %errorlevel%
-)
-
-.paket\paket.exe restore
-if errorlevel 1 (
-  exit /b %errorlevel%
-)
-
-IF NOT EXIST build.fsx (
-  .paket\paket.exe update
-  packages\FAKE\tools\FAKE.exe init.fsx
-)
-packages\FAKE\tools\FAKE.exe build.fsx %*
+dotnet build YC.StaticAnalysis.sln
+dotnet test ./tests/Common.Tests/Common.Tests.fsproj 
+dotnet test ./tests/Common.AST.Tests/Common.AST.Tests.fsproj 
+dotnet test ./tests/Conversions.Tests/Conversions.Tests.fsproj

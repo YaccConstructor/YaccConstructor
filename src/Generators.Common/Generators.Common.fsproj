@@ -12,9 +12,9 @@
     <Compile Include="Graph.fs" />
     <Compile Include="Indexator.fs" />
     <Compile Include="NumberedRules.fs" />
-    <Compile Include="Epsilon.fs" />
     <Compile Include="InitialConvert.fs" />
     <Compile Include="SymbolSets.fs" />
+    <Compile Include="Epsilon.fs" />
     <Compile Include="FinalGrammar.fs" />
     <Compile Include="FSACommon.fs" />
     <Compile Include="GrammarFlowGraph.fs" />

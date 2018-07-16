@@ -16,14 +16,13 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj" />
-    <ProjectReference Include="..\AST.Common\Common.AST.fsproj" />
     <ProjectReference Include="..\Common\Common.fsproj" />
     <ProjectReference Include="..\Constraints\Constraints.fsproj" />
     <ProjectReference Include="..\Conversions\Conversions.fsproj" />
     <ProjectReference Include="..\Generators.Common\Generators.Common.fsproj" />
     <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj" />
     <ProjectReference Include="..\RNGLRParser\RNGLRParser.fsproj" />
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="YC.PrettyPrinter" Version="0.0.5" />

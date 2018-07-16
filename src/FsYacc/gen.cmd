@@ -1,2 +1,2 @@
-..\..\lkg\FSharp.PowerPack-1.9.7.7\bin\FsLex.exe --unicode --lexlib Microsoft.FSharp.Text.Lexing fsyacclex.fsl
-..\..\lkg\FSharp.PowerPack-1.9.7.7\bin\FsYacc.exe --internal --module FSharp.PowerPack.FsYacc.Parser --lexlib Microsoft.FSharp.Text.Lexing  --parslib Microsoft.FSharp.Text.Parsing fsyaccpars.fsy
+..\..\tools\fslexyacc\fslex --unicode --lexlib Microsoft.FSharp.Text.Lexing fsyacclex.fsl
+..\..\tools\fslexyacc\fsyacc --internal --module FSharp.PowerPack.FsYacc.Parser --lexlib Microsoft.FSharp.Text.Lexing  --parslib Microsoft.FSharp.Text.Parsing fsyaccpars.fsy

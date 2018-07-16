@@ -214,7 +214,7 @@ let withTokenPrefix token_name =
 let createTypeName ruleName =  sprintf "'%stype_%s" (withPrefix "") ruleName
 
 /// returns file name for tokens
-let createTknFileName fname = System.IO.Path.GetFileNameWithoutExtension fname |> sprintf "tokens_%s.tok"
+let createTknFileName (fname: string) = System.IO.Path.GetFileNameWithoutExtension fname |> sprintf "tokens_%s.tok"
 
 (*
 /// Create new name for rule

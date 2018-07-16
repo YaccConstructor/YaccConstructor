@@ -1,2 +1,2 @@
-..\..\Bin\Release\v40\YC.FsLex.exe --unicode Lexer.fsl
+..\..\tools\fslexyacc\fslex --unicode Lexer.fsl
 echo > log.txt

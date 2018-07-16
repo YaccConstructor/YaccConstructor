@@ -1,92 +1,24 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <Import Project="..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props" Condition="Exists('..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>4049cf0a-8f86-48b7-98ba-d062625ba281</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>AbstractLexer.Common</RootNamespace>
-    <AssemblyName>YC.AbstractAnalysis.Common</AssemblyName>
-    <Name>AbstractAnalysis.Common</Name>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <TargetFramework>net45</TargetFramework>
   </PropertyGroup>
-  <Import Project="../YC.targets" />
-  <PropertyGroup>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
+
   <ItemGroup>
     <Compile Include="Graph.fs" />
-    <None Include="packages.config" />
   </ItemGroup>
+
   <ItemGroup>
-    <Reference Include="DotParser, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\DotParser.1.0.6\lib\net45\DotParser.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharp.Core, Version=4.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\..\packages\FSharp.Core.4.5.0\lib\net45\FSharp.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Collections, Version=1.17.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\FSharpx.Collections.1.17.0\lib\net40\FSharpx.Collections.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Collections.Experimental, Version=1.17.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\FSharpx.Collections.Experimental.1.17.0\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Core, Version=1.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\FSharpx.Core.1.7.3\lib\40\FSharpx.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="YC.QuickGraph, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Data, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.Data.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.FSA, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.FSA.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.FST, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.FST.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Glee, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.Glee.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Graphviz, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.Graphviz.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Petri, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.Petri.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraphFS, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraphFS.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <PackageReference Include="YC.QuickGraph" Version="3.7.3" />
   </ItemGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>-->
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.5.0" />
+    <PackageReference Update="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
+ 
 </Project>

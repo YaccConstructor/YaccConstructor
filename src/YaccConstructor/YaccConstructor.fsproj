@@ -1,88 +1,36 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props" Condition="Exists('..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{e9a0e63b-ead7-43de-8823-13faa6b2b972}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Main</RootNamespace>
-    <AssemblyName>YC.YaccConstructor</AssemblyName>
-    <Name>YaccConstructor</Name>
-    <SccProjectName>
-    </SccProjectName>
-    <SccProvider>
-    </SccProvider>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccLocalPath>
-    </SccLocalPath>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
-    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFramework>net45</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-i test.yrd -c ExpandEbnf -c ExpandMeta -c ExpandInnerAlt -c AddDefaultAC -c Linearize -g "GLLGenerator  -token unit -module GLL.Parse.test"</StartArguments>
-    <StartWorkingDirectory>C:\Code\Yacc Constructor</StartWorkingDirectory>
-    <StartAction>Project</StartAction>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <StartArguments>-i test.yrd -g "GLLGenerator -token unit -module GLL.H22_H23"</StartArguments>
-    <RemoteDebugEnabled>false</RemoteDebugEnabled>
-    <RemoteDebugMachine />
-    <StartWorkingDirectory>C:\Code\Yacc Constructor</StartWorkingDirectory>
-  </PropertyGroup>
-  <Import Project="../YC.targets" />
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" />
-  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-             Other similar extension points exist, see Microsoft.Common.targets.
-        <Target Name="BeforeBuild">
-        </Target>
-        <Target Name="AfterBuild">
-        </Target>
-        -->
+
   <ItemGroup>
     <Compile Include="Common.fs" />
     <Compile Include="API.fs" />
-    <None Include="packages.config" />
+    <None Include="paket.references" />
     <None Include="YaccConstructor.addins">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <Content Include="App.config" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\FsYacc\FsYacc.fsproj">
-      <Name>FsYacc</Name>
-      <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <Reference Include="Argu, Version=5.1.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\Argu.5.1.0\lib\net45\Argu.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharp.Core, Version=4.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\..\packages\FSharp.Core.4.5.0\lib\net45\FSharp.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\Common\Common.fsproj">
-      <Name>Common</Name>
-      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Conversions\Conversions.fsproj">
-      <Name>Conversions</Name>
-      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
+    <PackageReference Include="Argu" Version="5.1.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.fsproj" />
+    <ProjectReference Include="..\Constraints\Constraints.fsproj" />
+    <ProjectReference Include="..\Conversions\Conversions.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.5.0" />
+    <PackageReference Update="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
+  
 </Project>

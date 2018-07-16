@@ -7,22 +7,23 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
-  
+
   <ItemGroup>
-    <!--Compile Include="AstNode.fs" /-->
+    <Compile Include="FunsAndStructs.fs" />
     <Compile Include="ParserSource.fs" />
-    <Compile Include="Helper.fs" />
-    <None Include="app.config" />
   </ItemGroup>
-  
+
+  <ItemGroup>
+    <PackageReference Include="FSharpx.Collections" Version="1.17.0" />
+    <PackageReference Include="FSharpx.Collections.Experimental" Version="1.17.0" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj" />
-    <ProjectReference Include="..\Common\Common.fsproj" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.5.0" />
     <PackageReference Update="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
- 
-</Project>
+ </Project>

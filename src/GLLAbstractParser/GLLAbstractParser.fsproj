@@ -1,139 +1,34 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <Import Project="..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props" Condition="Exists('..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>bd40477e-7ceb-4ff4-b53f-05316f3bb6d8</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>GLLAbstractParser</RootNamespace>
-    <AssemblyName>YC.GLLAbstractParser</AssemblyName>
-    <Name>GLLAbstractParser</Name>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <TargetFrameworkProfile />
+    <TargetFramework>net45</TargetFramework>
   </PropertyGroup>
-  <Import Project="../YC.targets" />
-  <PropertyGroup>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
-  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
+
   <ItemGroup>
     <Compile Include="GSS.fs" />
     <Compile Include="SPPF.fs" />
     <Compile Include="AbstractParser.fs" />
-    <None Include="packages.config" />
-    <None Include="paket.references" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
-      <Name>AbstractAnalysis.Common</Name>
-      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Common\Common.fsproj">
-      <Name>Common</Name>
-      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
-      <Name>Common.AST</Name>
-      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\CustomHashSet\CustomHashSet.csproj">
-      <Name>CustomHashSet</Name>
-      <Project>{6ed4ef0c-128e-4905-bb0a-85256167f9e8}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\ParserCommon\GLLParsers.Common.fsproj">
-      <Name>GLLParsers.Common</Name>
-      <Project>{f2e8eda4-c13f-4f8d-b858-d5ef4fb8a06d}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <Reference Include="DotParser, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\DotParser.1.0.6\lib\net45\DotParser.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharp.Core, Version=4.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\..\packages\FSharp.Core.4.5.0\lib\net45\FSharp.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Collections, Version=1.17.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\FSharpx.Collections.1.17.0\lib\net40\FSharpx.Collections.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Collections.Experimental, Version=1.17.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\FSharpx.Collections.Experimental.1.17.0\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Core, Version=1.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\FSharpx.Core.1.7.3\lib\40\FSharpx.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\Constraints\Constraints.fsproj">
-      <Name>Constraints</Name>
-      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Conversions\Conversions.fsproj">
-      <Name>Conversions</Name>
-      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Generators.Common\Generators.Common.fsproj">
-      <Name>Generators.Common</Name>
-      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\GLLGenerator\GLLGenerator.fsproj">
-      <Name>GLLGenerator</Name>
-      <Project>{8756690f-8138-495a-a368-39afb9029823}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <Reference Include="YC.QuickGraph, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Data, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.Data.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.FSA, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.FSA.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.FST, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.FST.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Glee, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.Glee.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Graphviz, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.Graphviz.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Petri, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.Petri.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraphFS, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraphFS.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <PackageReference Include="YC.QuickGraph" Version="3.7.3" />
   </ItemGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj" />
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj" />
+    <ProjectReference Include="..\CustomHashSet\CustomHashSet.csproj" />
+    <ProjectReference Include="..\Generators.Common\Generators.Common.fsproj" />
+    <ProjectReference Include="..\GLLParsersCommon\GLLParsers.Common.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.5.0" />
+    <PackageReference Update="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
+  
 </Project>

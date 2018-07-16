@@ -1,149 +1,34 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <Import Project="..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props" Condition="Exists('..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6B5022D6-85D4-4587-8F6F-72610754C87D}</ProjectGuid>
+    <TargetFramework>net45</TargetFramework>
     <OutputType>Exe</OutputType>
-    <RootNamespace>LockChecker</RootNamespace>
-    <AssemblyName>LockChecker</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <Tailcalls>false</Tailcalls>
-    <OutputPath>../../Bin/Debug/v40/</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <OtherFlags>--warnon:1182</OtherFlags>
-    <Prefer32bit>false</Prefer32bit>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <Tailcalls>true</Tailcalls>
-    <OutputPath>../../Bin/Release/v40/</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <OtherFlags>--warnon:1182</OtherFlags>
-    <Prefer32bit>false</Prefer32bit>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="DotParser, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\DotParser.1.0.6\lib\net45\DotParser.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharp.Core, Version=4.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\..\packages\FSharp.Core.4.5.0\lib\net45\FSharp.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Collections, Version=1.17.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\FSharpx.Collections.1.17.0\lib\net40\FSharpx.Collections.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Collections.Experimental, Version=1.17.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\FSharpx.Collections.Experimental.1.17.0\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Core, Version=1.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\FSharpx.Core.1.7.3\lib\40\FSharpx.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.ValueTuple">
-      <HintPath>..\..\packages\System.ValueTuple.4.4.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.QuickGraph, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Data, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.Data.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.FSA, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.FSA.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.FST, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.FST.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Glee, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.Glee.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Graphviz, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.Graphviz.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Petri, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.Petri.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraphFS, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraphFS.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-  </ItemGroup>
+
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="FsLexGenerator.fs" />
     <Compile Include="InputLoading.fs" />
     <Compile Include="ResultProcessing.fs" />
     <Compile Include="Program.fs" />
-    <Content Include="packages.config" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
-      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
-      <Name>AbstractAnalysis.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
-      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
-      <Name>Common.AST</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AutomataCombinators\AutomataCombinators.fsproj">
-      <Project>{40d66de1-79ec-4c96-8c43-ffb6925ca412}</Project>
-      <Name>AutomataCombinators</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Common\Common.fsproj">
-      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
-      <Name>Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Generators.Common\Generators.Common.fsproj">
-      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
-      <Name>Generators.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\GLLAbstractParser\GLLAbstractParser.fsproj">
-      <Project>{bd40477e-7ceb-4ff4-b53f-05316f3bb6d8}</Project>
-      <Name>GLLAbstractParser</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\GLLGenerator\GLLGenerator.fsproj">
-      <Project>{8756690f-8138-495a-a368-39afb9029823}</Project>
-      <Name>GLLGenerator</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ParserCommon\GLLParsers.Common.fsproj">
-      <Project>{f2e8eda4-c13f-4f8d-b858-d5ef4fb8a06d}</Project>
-      <Name>GLLParsers.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\YaccConstructor\YaccConstructor.fsproj">
-      <Project>{e9a0e63b-ead7-43de-8823-13faa6b2b972}</Project>
-      <Name>YaccConstructor</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">
-      <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
-      <Name>YardFrontend</Name>
-    </ProjectReference>
+    <PackageReference Include="Argu" Version="5.1.0" />
   </ItemGroup>
-  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj" />
+    <ProjectReference Include="..\AutomataCombinators\AutomataCombinators.fsproj" />
+    <ProjectReference Include="..\GLLAbstractParser\GLLAbstractParser.fsproj" />
+    <ProjectReference Include="..\GLLGenerator\GLLGenerator.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.5.0" />
+    <PackageReference Update="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
 </Project>

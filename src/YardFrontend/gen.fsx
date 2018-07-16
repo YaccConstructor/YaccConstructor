@@ -1,8 +1,6 @@
-﻿#I @"../../Bin/Release/v40"
-
-#r @"YC.RNGLR.dll"
-#r @"YC.Common.dll"
-#r @"YC.FsYaccFrontend.dll"
+﻿#r @"RNGLRGenerator.dll"
+#r @"Common.dll"
+#r @"FsYaccFrontend.dll"
 
 open Yard.Generators.RNGLR
 open Yard.Frontends.FsYaccFrontend

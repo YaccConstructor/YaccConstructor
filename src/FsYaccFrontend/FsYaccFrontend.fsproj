@@ -1,28 +1,13 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props" Condition="Exists('..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{17103a48-db90-4101-92ee-7b2719db2cf0}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>FsYaccFrontend</RootNamespace>
-    <AssemblyName>YC.FsYaccFrontend</AssemblyName>
-    <Name>FsYaccFrontend</Name>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFramework>net45</TargetFramework>
   </PropertyGroup>
-  <Import Project="../YC.targets" />
-  <PropertyGroup>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
+
   <ItemGroup>
     <Compile Include="Parser.fs" />
     <Compile Include="Lexer.fs" />
@@ -34,39 +19,21 @@
     <Compile Include="FsYaccFrontend.fs" />
     <None Include="packages.config" />
   </ItemGroup>
+
   <ItemGroup>
-    <Reference Include="FSharp.Core, Version=4.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\..\packages\FSharp.Core.4.5.0\lib\net45\FSharp.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
+    <PackageReference Include="FsLexYacc" Version="7.0.6" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Common\Common.fsproj">
-      <Name>Common</Name>
-      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Constraints\Constraints.fsproj">
-      <Name>Constraints</Name>
-      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Conversions\Conversions.fsproj">
-      <Name>Conversions</Name>
-      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\FsYacc\FsYacc.fsproj">
-      <Name>FsYacc</Name>
-      <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>
-      <Private>True</Private>
-    </ProjectReference>
+    <ProjectReference Include="..\Common\Common.fsproj" />
   </ItemGroup>
-  <!--PropertyGroup>
-    <PreBuildEvent>"$(SolutionDir)Main\Bin\Debug\Main.exe" -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c LeaveLast -c ExpandBrackets -c AddEOF -c ReplaceLiterals -i "$(SolutionDir)FsYaccFrontend\fsyacc.yrd" &gt; "$(SolutionDir)FsYaccFrontend\Parser.fsy"</PreBuildEvent>
-  </PropertyGroup-->
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.5.0" />
+    <PackageReference Update="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="gen.cmd" />
+  </Target>
 </Project>

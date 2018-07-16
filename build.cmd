@@ -1,18 +1,16 @@
 @echo off
 cls
 
-.paket\paket.bootstrapper.exe
-if errorlevel 1 (
-  exit /b %errorlevel%
-)
+mkdir tools
+cd tools
 
-.paket\paket.exe restore
-if errorlevel 1 (
-  exit /b %errorlevel%
-)
+dotnet new console
+dotnet add tools.csproj package fslexyacc --package-directory .
+xcopy fslexyacc\7.0.6\build fslexyacc
 
-IF NOT EXIST build.fsx (
-  .paket\paket.exe update
-  packages\FAKE\tools\FAKE.exe init.fsx
-)
-packages\FAKE\tools\FAKE.exe build.fsx %*
+cd ../
+
+dotnet build YC.StaticAnalysis.sln
+dotnet test ./tests/Common.Tests/Common.Tests.fsproj 
+dotnet test ./tests/Common.AST.Tests/Common.AST.Test.fsproj 
+dotnet test ./tests/Conversions.Tests/Conversions.Tests.fsproj

@@ -1,8 +1,0 @@
-NUGET
-  remote: https://www.nuget.org/api/v2
-    FAKE (4.61.3)
-    SourceLink.Fake (1.1)
-GITHUB
-  remote: fsharp/FAKE
-    modules/Octokit/Octokit.fsx (0341a2e614eb2a7f34607cec914eb0ed83ce9add)
-      Octokit (>= 0.20)

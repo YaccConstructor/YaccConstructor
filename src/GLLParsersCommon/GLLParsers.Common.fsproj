@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj" />
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

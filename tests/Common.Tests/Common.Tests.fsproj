@@ -1,123 +1,35 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\NUnit.3.10.1\build\NUnit.props" Condition="Exists('..\..\packages\NUnit.3.10.1\build\NUnit.props')" />
-  <Import Project="..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props" Condition="Exists('..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{42244dcc-4326-4e7a-bb6b-ccd8ca544d85}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Common.Test</RootNamespace>
-    <AssemblyName>YC.Common.Tests</AssemblyName>
-    <Name>Common.Tests</Name>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFramework>net45</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <Tailcalls>false</Tailcalls>
-    <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <!--DocumentationFile>bin\Debug\FsYaccFrontend.XML</DocumentationFile-->
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <Tailcalls>true</Tailcalls>
-    <OutputPath>bin\Release</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <!--DocumentationFile>bin\Release\FsYaccFrontend.XML</DocumentationFile-->
-  </PropertyGroup>
-  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
-  <Choose>
-    <When Condition="($(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.7.1' Or $(TargetFrameworkVersion) == 'v4.7.2')) Or ($(TargetFrameworkIdentifier) == '.NETCoreApp' And ($(TargetFrameworkVersion) == 'v2.0' Or $(TargetFrameworkVersion) == 'v2.1')) Or ($(TargetFrameworkIdentifier) == '.NETStandard' And $(TargetFrameworkVersion) == 'v2.0') Or ($(TargetFrameworkIdentifier) == '.NETCore' And $(TargetFrameworkVersion) == 'v5.0')">
-      <PropertyGroup>
-        <__paket__NETStandard_Library_targets>netstandard2.0\NETStandard.Library</__paket__NETStandard_Library_targets>
-      </PropertyGroup>
-    </When>
-  </Choose>
+  
   <ItemGroup>
     <Compile Include="CommonTests.fs" />
-    <None Include="packages.config" />
   </ItemGroup>
+  
   <ItemGroup>
-    <Reference Include="FSharp.Core, Version=4.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\..\packages\FSharp.Core.4.5.0\lib\net45\FSharp.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Collections, Version=1.17.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\FSharpx.Collections.1.17.0\lib\net40\FSharpx.Collections.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Collections.Experimental, Version=1.17.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\FSharpx.Collections.Experimental.1.17.0\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="mscorlib" />
-    <Reference Include="nunit.framework, Version=3.10.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb">
-      <HintPath>..\..\packages\NUnit.3.10.1\lib\net45\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
+    <PackageReference Include="NUnit" Version="3.10.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
   </ItemGroup>
+  
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Common\Common.fsproj">
-      <Name>Common</Name>
-      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Conversions\Conversions.fsproj">
-      <Name>Conversions</Name>
-      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\FsYaccFrontend\FsYaccFrontend.fsproj">
-      <Name>FsYaccFrontend</Name>
-      <Project>{17103a48-db90-4101-92ee-7b2719db2cf0}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\FsYacc\FsYacc.fsproj">
-      <Name>FsYacc</Name>
-      <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\GLLGenerator\GLLGenerator.fsproj">
-      <Name>GLLGenerator</Name>
-      <Project>{8756690f-8138-495a-a368-39afb9029823}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\RNGLRGenerator\RNGLRGenerator.fsproj">
-      <Name>RNGLRGenerator</Name>
-      <Project>{5baf0fba-31b7-406d-bea4-1bcc1418a63f}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\YardFrontend\YardFrontend.fsproj">
-      <Name>YardFrontend</Name>
-      <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\YardPrinter\YardPrinter.fsproj">
-      <Name>YardPrinter</Name>
-      <Project>{3148144c-1649-440e-a9b4-1d5c41677262}</Project>
-      <Private>True</Private>
-    </ProjectReference>
+    <ProjectReference Include="..\..\src\Common\Common.fsproj" />
+    <ProjectReference Include="..\..\src\Conversions\Conversions.fsproj" />
+    <ProjectReference Include="..\..\src\FsYaccFrontend\FsYaccFrontend.fsproj" />
+    <ProjectReference Include="..\..\src\GLLGenerator\GLLGenerator.fsproj" />
+    <ProjectReference Include="..\..\src\RNGLRGenerator\RNGLRGenerator.fsproj" />
+    <ProjectReference Include="..\..\src\YardFrontend\YardFrontend.fsproj" />
+    <ProjectReference Include="..\..\src\YardPrinter\YardPrinter.fsproj" />
   </ItemGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-         Other similar extension points exist, see Microsoft.Common.targets.
-    <Target Name="BeforeBuild">
-    </Target>
-    <Target Name="AfterBuild">
-    </Target>
-    -->
+  
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.5.0" />
+    <PackageReference Update="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
 </Project>

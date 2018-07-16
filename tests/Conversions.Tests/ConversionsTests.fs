@@ -29,7 +29,7 @@ open Yard.Frontends.YardFrontend
 open Yard.Frontends.FsYaccFrontend
 open Yard.Generators.GLL
 open Yard.Generators.RNGLR
-//open Yard.Generators.TreeDump
+open Yard.Generators.TreeDump
 open Yard.Generators.YardPrinter
 //open Yard.Generators.RIGLRGenerator
 
@@ -54,7 +54,7 @@ let getBE name =
     | Some be -> be
     | None -> failwith (name + " is not found.")
 
-//let treeDump = new Yard.Generators.TreeDump.TreeDump ()
+let treeDump = new Yard.Generators.TreeDump.TreeDump ()
 
 let dummyRule : ProductionElem<Source,Source> = {omit=false; binding=None; checker=None; rule=PToken (Source "DUMMY")}
 

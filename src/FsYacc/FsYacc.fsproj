@@ -1,27 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <NoWarn>NU1701</NoWarn>
+
+    <FsLexYaccVersion>7.0.6</FsLexYaccVersion>
+    <FsLexYaccPath>$(NuGetPackageRoot)fslexyacc\$(FsLexYaccVersion)\build\</FsLexYaccPath>
+    <FsLexYaccTargets>$(FsLexYaccPath)FsLexYacc.targets</FsLexYaccTargets>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>NU1701</NoWarn>
-  </PropertyGroup>
+  <Import Condition="Exists($(FsLexYaccTargets))" Project="$(FsLexYaccTargets)" />
+
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <CallTarget Condition="!Exists('fsyacclex.fs')" Targets="CallFsLex" />
+    <CallTarget Condition="!Exists('fsyaccpars.fs')" Targets="CallFsYacc" />
+  </Target>
 
   <ItemGroup>
-    <!--
-    <FsLex Include="fsyacclex.fsl">
-      <OtherFlags>- -lexlib Microsoft.FSharp.Text.Lexing </OtherFlags>
-    </FsLex>
-    <FsYacc Include="fsyaccpars.fsy">
-      <OtherFlags>- -internal - -module FSharp.PowerPack.FsYacc.Parser - -lexlib Microsoft.FSharp.Text.Lexing  - -parslib Microsoft.FSharp.Text.Parsing</OtherFlags>
-    </FsYacc>-->
-    <None Include="fsyacclex.fsl" />
-    <None Include="fsyaccpars.fsy" />
+    <FsLex Include="fsyacclex.fsl" OtherFlags="--unicode --lexlib Microsoft.FSharp.Text.Lexing" />
+    <FsYacc Include="fsyaccpars.fsy" OtherFlags="--internal --module FSharp.PowerPack.FsYacc.Parser --lexlib Microsoft.FSharp.Text.Lexing  --parslib Microsoft.FSharp.Text.Parsing" />
     <Compile Include="assemblyinfo.Common.fs" />
-    <Compile Include="assemblyinfo.fsyacc.exe.fs">
-      <Link>assemblyinfo.fsyacc.exe.fs</Link>
-    </Compile>
     <Compile Include="Lexing.fsi" />
     <Compile Include="Lexing.fs" />
     <Compile Include="Parsing.fsi" />
@@ -36,11 +34,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FsLexYacc" Version="7.0.6">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.5.0" />
     <PackageReference Update="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
-
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="gen.cmd" />
-  </Target>
 </Project>

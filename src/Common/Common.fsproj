@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -20,7 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FsLexYacc.Runtime" Version="7.0.6" />
+    <ProjectReference Include="..\FsLex\FsLex.fsproj" />
+    <ProjectReference Include="..\FsYacc\FsYacc.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

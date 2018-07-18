@@ -1,0 +1,17 @@
+<Project>
+	<PropertyGroup>
+		<YCFsYaccToolPath Condition="'$(YCFsYaccToolPath)' == ''">$(MSBuildThisFileDirectory)</YCFsYaccToolPath>
+		<YCFsYaccToolExe Condition="'$(YCFsYaccToolExe)' == ''">dotnet $(YCFsYaccToolPath)\bin\tool\YC.FsYacc.dll</YCFsYaccToolExe>
+	</PropertyGroup>
+
+	<Target
+		Name="CallYCFsYacc"
+		Inputs="@(YCFsYacc)"
+		Outputs="@(YCFsYacc->'%(Filename).fs')"
+		Condition="'@(YCFsYacc)'!=''">
+
+		<Exec Command="$(YCFsYaccToolExe) %(YCFsYacc.Identity) &quot;%(YCFsYacc.OtherFlags)&quot;" />
+	</Target>
+</Project>
+
+

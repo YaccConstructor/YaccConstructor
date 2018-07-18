@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -12,10 +12,6 @@
     <Compile Include="GSS.fs" />
     <Compile Include="SPPF.fs" />
     <Compile Include="AbstractParser.fs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="YC.QuickGraph" Version="3.7.3" />
   </ItemGroup>
 
   <ItemGroup>

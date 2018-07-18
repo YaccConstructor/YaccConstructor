@@ -1,5 +1,4 @@
-@echo off
-cls
+#!/usr/bin/env bash
 
 dotnet build src/YC.FsYacc/YC.FsYacc.fsproj
 dotnet build src/YaccConstructor/YaccConstructor.fsproj

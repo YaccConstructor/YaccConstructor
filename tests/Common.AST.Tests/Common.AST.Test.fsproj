@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -20,6 +20,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\..\src\AST.Common\Common.AST.fsproj" />
+    <ProjectReference Include="..\..\src\YaccConstructor\YaccConstructor.fsproj" />
   </ItemGroup>
   
   <ItemGroup>

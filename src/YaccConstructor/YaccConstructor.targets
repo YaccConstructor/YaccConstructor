@@ -1,0 +1,18 @@
+<Project>
+	<PropertyGroup>
+		<YCToolPath Condition="'$(YC)' == ''">$(MSBuildThisFileDirectory)</YCToolPath>
+		<YCToolExe Condition="'$(YC)' == ''">dotnet $(YCToolPath)\bin\tool\YaccConstructor.dll</YCToolExe>
+	</PropertyGroup>
+
+	<Target
+		Name="CallYC"
+		Inputs="@(YC)"
+    Outputs="@(YC->'%(OutputFile)')"
+		Condition="'@(YC)'!=''">
+
+		<Exec Condition="'%(YC.Frontend)'!=''" Command="$(YCToolExe) -i %(YC.Identity) -f &quot;%(YC.Frontend)&quot; -g &quot;%(YC.Generator) -o %(YC.OutputFile)&quot; %(YC.OtherFlags)" />
+		<Exec Condition="'%(YC.Frontend)'==''" Command="$(YCToolExe) -i %(YC.Identity) -g &quot;%(YC.Generator) -o %(YC.OutputFile)&quot; %(YC.OtherFlags)" />
+	</Target>
+</Project>
+
+

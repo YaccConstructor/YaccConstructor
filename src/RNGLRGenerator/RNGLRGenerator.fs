@@ -36,7 +36,7 @@ open HighlightingConvertions
 type RNGLR() = 
     inherit Generator()
         override this.Name = "RNGLRGenerator"
-        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; (*noLiterals;*) noAlt; noBrackets; needAC; singleModule|]
+        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; (*noLiterals;*) (*noAlt;*) noBrackets; needAC; singleModule|]
         override this.Generate (definition, generateToFile, args) =
             let start = DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")

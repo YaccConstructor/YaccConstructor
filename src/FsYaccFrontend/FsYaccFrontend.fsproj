@@ -1,39 +1,44 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <NoWarn>NU1701</NoWarn>
+
+    <FsLexYaccVersion>7.0.6</FsLexYaccVersion>
+    <FsLexYaccPath>$(NuGetPackageRoot)fslexyacc\$(FsLexYaccVersion)\build\</FsLexYaccPath>
+    <FsLexYaccTargets>$(FsLexYaccPath)FsLexYacc.targets</FsLexYaccTargets>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>NU1701</NoWarn>
-  </PropertyGroup>
+  <Import Condition="Exists($(FsLexYaccTargets))" Project="$(FsLexYaccTargets)" />
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <CallTarget Condition="!Exists('Lexer.fs')" Targets="CallFsLex" />
+    <CallTarget Condition="!Exists('Parser.fs')" Targets="CallFsYacc" />
+  </Target>
 
   <ItemGroup>
+    <FsLex Include="Lexer.fsl" OtherFlags="--unicode" />
+    <FsYacc Include="Parser.fsy" OtherFlags="--module Yard.Frontends.FsYaccFrontend.Parser --open Yard.Core" />
     <Compile Include="Parser.fs" />
     <Compile Include="Lexer.fs" />
-    <None Include="Lexer.fsl" />
     <CompileYard Include="fsyacc.yrd" />
-    <None Include="Parser.fsy" />
-    <None Include="fsyacc.yrd" />
     <Compile Include="Main.fs" />
     <Compile Include="FsYaccFrontend.fs" />
     <None Include="packages.config" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FsLexYacc" Version="7.0.6" />
+    <PackageReference Include="FsLexYacc" Version="7.0.6">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj" />
+    <ProjectReference Include="..\FsYacc\FsYacc.fsproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.5.0" />
     <PackageReference Update="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
-
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="gen.cmd" />
-  </Target>
 </Project>

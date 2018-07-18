@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -22,8 +22,10 @@
     <ProjectReference Include="..\..\src\Common\Common.fsproj" />
     <ProjectReference Include="..\..\src\Conversions\Conversions.fsproj" />
     <ProjectReference Include="..\..\src\FsYaccFrontend\FsYaccFrontend.fsproj" />
-    <ProjectReference Include="..\..\src\GLLGenerator\GLLGenerator.fsproj" />
     <ProjectReference Include="..\..\src\RNGLRGenerator\RNGLRGenerator.fsproj" />
+    <ProjectReference Include="..\..\src\GLLGenerator\GLLGenerator.fsproj" />
+    <ProjectReference Include="..\..\src\TreeDump\TreeDump.fsproj" />
+    <ProjectReference Include="..\..\src\YaccConstructor\YaccConstructor.fsproj" />
     <ProjectReference Include="..\..\src\YardFrontend\YardFrontend.fsproj" />
     <ProjectReference Include="..\..\src\YardPrinter\YardPrinter.fsproj" />
   </ItemGroup>

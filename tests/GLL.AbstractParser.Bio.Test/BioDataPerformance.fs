@@ -8,7 +8,7 @@ open Yard.Generators.Common.ASTGLLFSA
 open Yard.Generators.GLL.ParserCommon
 open AbstractAnalysis.Common
 open Yard.Frontends.YardFrontend
-open YC.API
+open YaccConstructor.API
 open AbstractParser
 open QuickGraph
 open System.Collections.Generic
@@ -224,10 +224,14 @@ let processFile inputFile grammarFile =
     printfn "Number of edges in subgraph: %i" subgraphVert.EdgeCount
     printfn "Time: %f\n" time1
 
+let outputDir = __SOURCE_DIRECTORY__ + @"\..\data\BioData\result\"
+let dataDir = (__SOURCE_DIRECTORY__ + @"\..\data\BioData\")
+let grammarsDir = __SOURCE_DIRECTORY__ + @"\"
+
 let performTests() =
-    let BioCFGAllDatabases = @"..\..\BioCFG_AllDatabases.yrd"
+    let BioCFGAllDatabases = grammarsDir + "BioCFG_AllDatabases.yrd"
     
-    let files = System.IO.Directory.GetFiles( @"..\..\..\data\BioData\result")
+    let files = System.IO.Directory.GetFiles(outputDir)
     for f in files do
         processFile f BioCFGAllDatabases
     

@@ -40,9 +40,8 @@ exception FEError of string
 
 let FrontendsManager = [|new FsYaccFrontend(), new YardFrontend()|] |> Seq.ofArray |> Seq.cast<Frontend>
 
-let conversionTestPath = @"./data/Conversions/"
+let conversionTestPath = (__SOURCE_DIRECTORY__ + @"../../data/Conversions/")
 let GeneratorsManager = [|new GLL(), new RNGLR(), (*new TreeDump(), *)new YardPrinter()(*, new RIGLR()*)|] |> Seq.ofArray |> Seq.cast<Generator>
-
 
 let getFrontend name =
     match Seq.tryFind (fun (elem : Frontend) -> elem.Name = name) FrontendsManager with

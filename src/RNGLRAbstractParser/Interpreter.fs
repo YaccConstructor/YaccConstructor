@@ -454,7 +454,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             | Some res -> 
                 try 
                     let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules, Some parserSource.LeftSide, Some parserSource.NumToString, isErrorToken = isErrorToken)
-                    tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "./data/AbstractRNGLR/DOT/sppf.dot"
+                    try 
+                        tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "./data/AbstractRNGLR/DOT/sppf.dot"
+                    with 
+                        e -> printfn "Could not print AST: %s" e.Message
 //
 //                    let gssInitVertices = 
 //                    innerGraph.Edges |> Seq.filter (fun e -> List.exists (fun f -> f = e.Target) finalVList) |> Seq.collect (fun e -> e.Source.processedGssVertices)

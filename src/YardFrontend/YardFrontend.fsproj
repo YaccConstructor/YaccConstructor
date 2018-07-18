@@ -1,22 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <CallTarget Condition="!Exists('Lexer.fs')" Targets="CallFsLex" />
+    <CallTarget Condition="!Exists('Parser.fs')" Targets="CallYCFsYacc" />
+  </Target>
+
+  <ItemGroup>
+    <NuGetPaths Include="$(NuGetPackageRoot)" />
+  </ItemGroup>
 
   <PropertyGroup>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <NoWarn>NU1701</NoWarn>
+
+    <FsLexYaccVersion>7.0.6</FsLexYaccVersion>
+    <FsLexYaccPath>$(NuGetPackageRoot)fslexyacc\$(FsLexYaccVersion)\build\</FsLexYaccPath>
+    <FsLexYaccTargets>$(FsLexYaccPath)FsLexYacc.targets</FsLexYaccTargets>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <NoWarn>NU1701</NoWarn>
-  </PropertyGroup>
+  <Import Condition="Exists($(FsLexYaccTargets))" Project="$(FsLexYaccTargets)" />
+  <Import Project="..\YC.FsYacc\YC.FsYacc.targets" />
   
   <ItemGroup>
-    <None Include="Lexer.fsl" />
-    <None Include="Parser.fsy" />
+    <FsLex Include="Lexer.fsl" OtherFlags="--unicode" />
+    <YCFsYacc Include="Parser.fsy" OtherFlags="-o Parser.fs -module Yard.Frontends.YardFrontend.GrammarParser -pos SourcePosition -token Source" />
     <Compile Include="Parser.fs" />
     <Compile Include="Lexer.fs" />
     <Compile Include="Main.fs" />
     <Compile Include="YardFrontend.fs" />
-    <None Include="gen.fsx" />
   </ItemGroup>
   
   <ItemGroup>
@@ -24,15 +34,17 @@
     <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj" />
     <ProjectReference Include="..\RNGLRGenerator\RNGLRGenerator.fsproj" />
     <ProjectReference Include="..\RNGLRParser\RNGLRParser.fsproj" />
+    <ProjectReference Include="..\YC.FsYacc\YC.FsYacc.fsproj" />
   </ItemGroup>
   
+  <ItemGroup>
+    <PackageReference Include="FsLexYacc" Version="7.0.6">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.5.0" />
     <PackageReference Update="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
-  
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="gen.cmd" />
-  </Target>
-  
 </Project>

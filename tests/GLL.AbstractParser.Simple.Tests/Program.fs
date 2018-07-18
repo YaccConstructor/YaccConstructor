@@ -23,7 +23,7 @@ open Yard.Generators.GLL.AbstractParser
 open Yard.Generators.Common.ASTGLL
 open Yard.Generators.Common.ASTGLLFSA
 open Yard.Generators.GLL.ParserCommon
-open YC.API
+open YaccConstructor.API
 open Yard.Frontends.YardFrontend
 open Yard.Generators.GLL
 open Yard.Core.Conversions.ExpandMeta
@@ -32,21 +32,6 @@ open System.Collections.Generic
 open System.Linq
 
 /// for resharper test runner
-let needChangeDirectory = 
-    (@"C:\Users\Artem Gorokhov\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = Directory.GetCurrentDirectory())
-    || (@"C:\Users\artem\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = Directory.GetCurrentDirectory())
-    || (@"C:\Users\artem\AppData\Local\JetBrains\Toolbox\apps\Rider\ch-0\181.4952.297\lib\ReSharperHost" = Directory.GetCurrentDirectory())
-
-let outputDir = ""//@"../../../src/GLL.AbstractParser.SimpleTest/"
-
-let dataDir = 
-    if needChangeDirectory
-    then @"C:/Code/YaccConstructor/tests/data/AbstractGLL/"
-    else @"./data/AbstractGLL/"
-let grammarsDir = 
-    if needChangeDirectory
-    then @"C:/Code/YaccConstructor/tests/GLL.AbstractParser.Simple.Tests/"
-    else @"./GLL.AbstractParser.Simple.Tests/"
 
 
 let lbl tokenId = tokenId
@@ -54,9 +39,12 @@ let edg f t l = new ParserEdge<_>(f,t,lbl l)
 
 let rnd = new System.Random()
 
+let inputFilesPath = @"..\..\..\..\data\AbstractGLL\"
+let grammarFilesPath = @"..\..\..\"
+
 let getInputGraph tokenizer inputFile =    
     let edges = 
-        File.ReadAllLines (dataDir + inputFile)
+        File.ReadAllLines (inputFilesPath + inputFile)
         |> Array.filter(fun x -> not (x = ""))
         |> Array.map (fun s -> let x = s.Split([|' '|])
                                (int x.[0]), (int x.[1]), x.[2])
@@ -74,7 +62,8 @@ let getInputGraph tokenizer inputFile =
 let getParserSource grammarFile conv = 
     let fe = new YardFrontend()
     let gen = new GLL()
-    generate (grammarsDir + grammarFile)
+    printfn "%s" (grammarFilesPath + grammarFile)
+    generate (grammarFilesPath + grammarFile)
              fe gen 
              None
              conv

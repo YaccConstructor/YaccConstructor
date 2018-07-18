@@ -9,7 +9,7 @@ let run path astBuilder =
     let tokens = LexCommon.tokens(path)
     astBuilder tokens
 
-let dir = @"./data/RNGLR/"
+let dir = (__SOURCE_DIRECTORY__ + @"\..\data\RNGLR\")
 let inline printErr (num, token : 'a, msg) =
     printfn "Error in position %d on Token %A: %s" num token msg
     Assert.Fail(sprintf "Error in position %d on Token %A: %s" num token msg)
@@ -50,10 +50,7 @@ type ``RNGLR parser tests with simple lexer`` () =
 
     
     [<Test>]
-    [<Ignore("for release")>]
     member test.``Omit``() =
-        Assert.Pass()
-        (*
         let parser = RNGLR.ParseOmit.buildAst
         let path = dir + "Omit.txt"
 
@@ -63,15 +60,18 @@ type ``RNGLR parser tests with simple lexer`` () =
             let res = translate RNGLR.ParseOmit.translate mAst errors
             printfn "%A" res
             Assert.AreEqual([[1; 3]], res)
-            *)
+            
+            (*
     [<Test>]
     member test.``First grammar test``() =
         runTest RNGLR.ParseFirst.buildAst "First.txt" printAst
+        *)
 
     [<Test>]
     member test.``List test``() =
         runTest RNGLR.ParseList.buildAst "List.txt" printAst
 
+        (*
     [<Test>]
     member test.``Simple Right Null test``() =
         runTest RNGLR.ParseSimpleRightNull.buildAst "SimpleRightNull.txt" printAst
@@ -79,6 +79,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``Complex Right Null test``() =
         runTest RNGLR.ParseComplexRightNull.buildAst "ComplexRightNull.txt" printAst 
+        *)
 
     [<Test>]
     member test.``Counter test - simple for translator``() =
@@ -172,17 +173,18 @@ type ``RNGLR parser tests with simple lexer`` () =
             printfn "Result: %A" res
             Assert.AreEqual([1], res)
 
+            (*
+    [<Test>]
+    member test.``Expression test``() =
+        let parser = RNGLR.ParseExpr.buildAst
+        let path = dir + "expr.txt"
 
-    //[<Test>]
-    //member test.``Expression test``() =
-     //   let parser = RNGLR.ParseExpr.buildAst
-      //  let path = dir + "expr.txt"
-///
- //       match run path parser with
-   //     | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)
-     //   | Parser.Success (mAst, _) ->
-       //     mAst.ChooseLongestMatch()
-         //   mAst.PrintAst()
+        match run path parser with
+        | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)
+        | Parser.Success (mAst, _) ->
+            mAst.ChooseLongestMatch()
+            mAst.PrintAst()
+            *)
 
 //    [<Test>]
 //    member test.``Lol Calc. To test priority``() =
@@ -199,24 +201,26 @@ type ``RNGLR parser tests with simple lexer`` () =
 
     [<Test>]
     member test.``Eps``() =
-        runTest RNGLR.Eps.buildAst "Eps.txt" printAst
+        runTest RNGLR.ParseEps.buildAst "Eps.txt" printAst
 
     [<Test>]
     member test.``Eps2``() =
-        runTest RNGLR.Eps2.buildAst "Eps2.txt" printAst
+        runTest RNGLR.ParseEps2.buildAst "Eps2.txt" printAst
 
     [<Test>]
     member test.``ListEps``() =
-        runTest RNGLR.ListEps.buildAst "ListEps.txt" printAst
+        runTest RNGLR.ParseListEps.buildAst "ListEps.txt" printAst
 
+        (*
     [<Test>]
     member test.Brackets() =
-        runTest RNGLR.Brackets.buildAst "Brackets.txt" printAst
+        runTest RNGLR.ParseBrackets.buildAst "Brackets.txt" printAst
+        *)
 
 
     [<Test>]
     member test._Brackets() =
-        runTest RNGLR._Brackets.buildAst "_Brackets.txt" printAst
+        runTest RNGLR.Parse_Brackets.buildAst "_Brackets.txt" printAst
 
 
 //[<EntryPoint>]

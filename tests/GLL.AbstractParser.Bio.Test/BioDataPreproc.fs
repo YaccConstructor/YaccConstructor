@@ -191,12 +191,16 @@ let writeAllTriples basePath (sw:StreamWriter) numberOfGenes =
     sw.Close()
     printfn "file with %i genes created" numberOfGenes  
     
+let outputDir = __SOURCE_DIRECTORY__ + @"\..\data\BioData\result\"
+let dataDir = (__SOURCE_DIRECTORY__ + @"\..\data\BioData\")
+
 let preprocBioData() = 
-    let basePath = @"..\..\..\data\BioData"
+    let basePath = dataDir
     let numberOfGenes = [|20; 50; 100; 150; 200; 250; 300; 350; 400|]
 
     for n in numberOfGenes do
-        let filePath = sprintf "..\\..\\..\\data\\BioData\\result\\%igenes_AllDatabases.txt" n
+        let filePath = outputDir + (sprintf "%igenes_AllDatabases.txt" n)
+        System.IO.Directory.CreateDirectory (System.IO.Path.GetDirectoryName filePath)
         let sw = new StreamWriter(filePath)
         sw.AutoFlush <- true
         writeAllTriples basePath sw n

@@ -8,7 +8,7 @@ open Yard.Generators.GLL.AbstractParser
 open Yard.Generators.Common.ASTGLL
 open Yard.Generators.Common.ASTGLLFSA
 open Yard.Generators.GLL.ParserCommon
-open YC.API
+open YaccConstructor.API
 open Yard.Frontends.YardFrontend
 open Yard.Generators.GLL
 open Yard.Core.Conversions.ExpandMeta
@@ -16,8 +16,8 @@ open Yard.Core.Conversions.ExpandMeta
 open System.Collections.Generic
 open System.Linq
 
-let dataDir = @"./data/AbstractGLL_LabelledVertices/"
-let grammarsDir =  @"./GLL.AbstractParser.Simple.Tests/"
+let dataDir = (__SOURCE_DIRECTORY__ + @"\..\data\AbstractGLL_LabelledVertices\")
+let grammarsDir = __SOURCE_DIRECTORY__ + @"\"
 
 let removeIdFromVert (s:string) = 
     let ind =  s.IndexOf("_")

@@ -38,7 +38,7 @@
     <Content Include="YaccConstructor.targets" />
   </ItemGroup>
   <Target Name="PostBuild" BeforeTargets="PostBuildEvent">
-    <Exec Command="dotnet publish --no-build" />
+    <Exec Command="dotnet publish --no-build -c $(Configuration)" />
     
     <ItemGroup>
       <Binaries Include="$(OutputPath)\publish\*.dll;$(OutputPath)\publish\*.exe;$(OutputPath)\publish\*.config;$(OutputPath)\publish\*.runtimeconfig.json" />

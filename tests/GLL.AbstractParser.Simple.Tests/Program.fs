@@ -39,10 +39,9 @@ let edg f t l = new ParserEdge<_>(f,t,lbl l)
 
 let rnd = new System.Random()
 
-let inputFilesPath = @"..\..\..\..\data\AbstractGLL\"
-let grammarFilesPath = @"..\..\..\"
-
 let getInputGraph tokenizer inputFile =    
+    let inputFilesPath = Path.Combine (__SOURCE_DIRECTORY__, "..", "data", "AbstractGLL") + Path.DirectorySeparatorChar.ToString()
+
     let edges = 
         File.ReadAllLines (inputFilesPath + inputFile)
         |> Array.filter(fun x -> not (x = ""))
@@ -60,6 +59,8 @@ let getInputGraph tokenizer inputFile =
     g 
 
 let getParserSource grammarFile conv = 
+    let grammarFilesPath = __SOURCE_DIRECTORY__ + Path.DirectorySeparatorChar.ToString()
+
     let fe = new YardFrontend()
     let gen = new GLL()
     printfn "%s" (grammarFilesPath + grammarFile)

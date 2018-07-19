@@ -152,7 +152,7 @@ type ``Checker test`` () =
     [<Test>]
     member test.``Undeclared nonterminals checker. Metarules. Right grammar.`` () =
         let result =
-            Path.Combine(basePath, @"UndeclaredNonterminals\MetaRules_Correct.yrd")
+            Path.Combine(basePath, "UndeclaredNonterminals", "MetaRules_Correct.yrd")
             |> getUndecl
         let expetedResult = []
         Seq.iter (printfn "%s;") result
@@ -163,7 +163,7 @@ type ``Checker test`` () =
     [<Test>]
     member test.``Undeclared nonterminals checker. Metarules. Wrong grammar.`` () =
         let result =
-            Path.Combine(basePath, @"UndeclaredNonterminals\MetaRules_Incorrect.yrd")
+            Path.Combine(basePath, "UndeclaredNonterminals", "MetaRules_Incorrect.yrd")
             |> getUndecl
         let expetedResult = List.sort ["b"; "x"; "y"; "w"; "d"]
         Seq.iter (printf "%s; ") result
@@ -175,7 +175,7 @@ type ``Checker test`` () =
     [<Test>]
     member test.``Undeclared nonterminals checker. Simple. Right grammar.`` () =
         let result =
-            Path.Combine(basePath, @"UndeclaredNonterminals\Simple_Correct.yrd")
+            Path.Combine(basePath, "UndeclaredNonterminals", "Simple_Correct.yrd")
             |> getUndecl
         let expetedResult = []
         Seq.iter (printfn "%A;") result
@@ -186,7 +186,7 @@ type ``Checker test`` () =
     [<Test>]
     member test.``Undeclared nonterminals checker. Simple. Wrong grammar.`` () =
         let result =
-            Path.Combine(basePath, @"UndeclaredNonterminals\Simple_Uncorrect.yrd")
+            Path.Combine(basePath, "UndeclaredNonterminals", "Simple_Uncorrect.yrd")
             |> getUndecl
         let expetedResult = List.sort ["b"]
         Seq.iter (printfn "%A;") result
@@ -196,14 +196,14 @@ type ``Checker test`` () =
 
     [<Test>]
     member test.``Unused nonterminals checker. Metarules. Right grammar.`` () =
-        Path.Combine(basePath, @"UnusedNonterminals\MetaRules_Correct.yrd")
+        Path.Combine(basePath, "UnusedNonterminals", "MetaRules_Correct.yrd")
         |> frontend.ParseGrammar
         |> IsUnusedRulesExists
         |> Assert.IsFalse
 
     [<Test>]
     member test.``Unused nonterminals checker. Metarules. Wrong grammar.`` () =
-        Path.Combine(basePath, @"UnusedNonterminals\MetaRules_Uncorrect.yrd")
+        Path.Combine(basePath, "UnusedNonterminals", "MetaRules_Uncorrect.yrd")
         |> frontend.ParseGrammar
         |> IsUnusedRulesExists
         |> Assert.IsTrue

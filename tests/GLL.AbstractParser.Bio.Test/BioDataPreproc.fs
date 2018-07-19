@@ -191,8 +191,8 @@ let writeAllTriples basePath (sw:StreamWriter) numberOfGenes =
     sw.Close()
     printfn "file with %i genes created" numberOfGenes  
     
-let outputDir = __SOURCE_DIRECTORY__ + @"\..\data\BioData\result\"
-let dataDir = (__SOURCE_DIRECTORY__ + @"\..\data\BioData\")
+let outputDir = System.IO.Path.Combine(__SOURCE_DIRECTORY__, @"\..\data\BioData\result\")
+let dataDir = System.IO.Path.Combine(__SOURCE_DIRECTORY__, @"\..\data\BioData\")
 
 let preprocBioData() = 
     let basePath = dataDir

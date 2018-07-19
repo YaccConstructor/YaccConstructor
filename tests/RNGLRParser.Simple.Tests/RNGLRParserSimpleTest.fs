@@ -4,12 +4,15 @@ open Yard.Generators.RNGLR
 open Yard.Generators.Common.AST
 open NUnit.Framework
 open Microsoft.FSharp.Collections
+open System.IO
 
 let run path astBuilder =
     let tokens = LexCommon.tokens(path)
     astBuilder tokens
 
-let dir = (__SOURCE_DIRECTORY__ + @"\..\data\RNGLR\")
+let dir = Path.Combine(__SOURCE_DIRECTORY__, "..", "data", "RNGLR") + Path.DirectorySeparatorChar.ToString()
+let getPath file = System.IO.Path.Combine(dir, file)
+
 let inline printErr (num, token : 'a, msg) =
     printfn "Error in position %d on Token %A: %s" num token msg
     Assert.Fail(sprintf "Error in position %d on Token %A: %s" num token msg)
@@ -42,7 +45,7 @@ type ``RNGLR parser tests with simple lexer`` () =
 #endif
 
     let runTest parser file processSuccess = 
-        let path = dir + file
+        let path = getPath file
 
         match run path parser with
         | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)
@@ -52,7 +55,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``Omit``() =
         let parser = RNGLR.ParseOmit.buildAst
-        let path = dir + "Omit.txt"
+        let path = getPath "Omit.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)
@@ -113,7 +116,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``Calculation order``() =
         let parser = RNGLR.ParseOrder.buildAst
-        let path = dir + "Order.txt"
+        let path = getPath "Order.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
@@ -127,7 +130,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``Longest match``() =
         let parser = RNGLR.ParseLongest.buildAst
-        let path = dir + "Longest.txt"
+        let path = getPath "Longest.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)
@@ -141,7 +144,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``AST, containing cycles``() =
         let parser = RNGLR.ParseCycle.buildAst
-        let path = dir + "Cycle.txt"
+        let path = getPath "Cycle.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)
@@ -159,7 +162,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``AST, containing long cycles``() =
         let parser = RNGLR.ParseLongCycle.buildAst
-        let path = dir + "LongCycle.txt"
+        let path = getPath "LongCycle.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)

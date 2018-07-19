@@ -1,7 +1,7 @@
 <Project>
 	<PropertyGroup>
 		<YCFsYaccToolPath Condition="'$(YCFsYaccToolPath)' == ''">$(MSBuildThisFileDirectory)</YCFsYaccToolPath>
-		<YCFsYaccToolExe Condition="'$(YCFsYaccToolExe)' == ''">dotnet $(YCFsYaccToolPath)\bin\tool\YC.FsYacc.dll</YCFsYaccToolExe>
+		<YCFsYaccToolExe Condition="'$(YCFsYaccToolExe)' == ''">dotnet $([MSBuild]::NormalizePath($(YCFsYaccToolPath)\bin\tool\YC.FsYacc.dll))</YCFsYaccToolExe>
 	</PropertyGroup>
 
 	<Target

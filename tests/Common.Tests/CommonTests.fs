@@ -16,6 +16,8 @@ open Yard.Frontends.YardFrontend
 open Yard.Core.Conversions
 open Yard.Core.Conversions.ExpandInline
 
+let basePath = Path.Combine(__SOURCE_DIRECTORY__, "..", "data", "Checkers") + Path.DirectorySeparatorChar.ToString()
+
 [<TestFixture>]
 type ``Components loader tests`` () =
     [<Test>]
@@ -94,7 +96,6 @@ type ``Components loader tests`` () =
 [<TestFixture>]
 type ``Checker test`` () =
     let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> Frontend
-    let basePath = (__SOURCE_DIRECTORY__+ @"..\..\data\Checkers\")
 
     let getUndecl path =
         path

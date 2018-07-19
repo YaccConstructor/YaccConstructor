@@ -26,10 +26,11 @@ open System.Collections.Generic
 open Yard.Core.IL
 open Yard.Core.Helpers
 open NUnit.Framework
+open System.IO
 
 module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
 
-let dataDir = (__SOURCE_DIRECTORY__ + @"\..\data\YardFrontend\")
+let dataDir = Path.Combine(__SOURCE_DIRECTORY__, "..", "data", "YardFrontend") + Path.DirectorySeparatorChar.ToString()
 
 let basePath subdir = System.IO.Path.Combine(dataDir, subdir)
 

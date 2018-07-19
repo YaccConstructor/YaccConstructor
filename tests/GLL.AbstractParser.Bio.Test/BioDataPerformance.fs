@@ -224,9 +224,9 @@ let processFile inputFile grammarFile =
     printfn "Number of edges in subgraph: %i" subgraphVert.EdgeCount
     printfn "Time: %f\n" time1
 
-let outputDir = __SOURCE_DIRECTORY__ + @"\..\data\BioData\result\"
-let dataDir = (__SOURCE_DIRECTORY__ + @"\..\data\BioData\")
-let grammarsDir = __SOURCE_DIRECTORY__ + @"\"
+let outputDir = System.IO.Path.Combine(__SOURCE_DIRECTORY__, @"\..\data\BioData\result\")
+let dataDir = System.IO.Path.Combine(__SOURCE_DIRECTORY__,  @"\..\data\BioData\")
+let grammarsDir = __SOURCE_DIRECTORY__
 
 let performTests() =
     let BioCFGAllDatabases = grammarsDir + "BioCFG_AllDatabases.yrd"

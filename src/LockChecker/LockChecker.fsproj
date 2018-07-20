@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
@@ -31,4 +31,14 @@
     <PackageReference Update="FSharp.Core" Version="4.5.0" />
     <PackageReference Update="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
+  
+  <Target Name="PostBuild" BeforeTargets="PostBuildEvent">
+    <Exec Command="dotnet publish --no-build -c $(Configuration)" />
+    
+    <ItemGroup>
+      <Binaries Include="$(OutputPath)\publish\*.dll;$(OutputPath)\publish\*.exe;$(OutputPath)\publish\*.config;$(OutputPath)\publish\*.runtimeconfig.json" />
+    </ItemGroup>   
+
+    <Copy SourceFiles="@(Binaries)" DestinationFolder="bin\app" />
+  </Target>
 </Project>

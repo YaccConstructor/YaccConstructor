@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "YC.FsYacc": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\jetbrains\\Documents\\git\\YaccConstructor\\src\\YardFrontend\\Parser.fsy \"-o Parser.fs -module Yard.Frontends.YardFrontend.GrammarParser -pos SourcePosition -token Source\""
+    }
+  }
+}

@@ -29,9 +29,9 @@ open System.Collections.Generic
 
 open QuickGraph.FSA.GraphBasedFsa
 
-let baseInputGraphsPath = "./data/AbstractRNGLR/DOT"
+let baseInputGraphsPath = Path.Combine(__SOURCE_DIRECTORY__, "..", "data", "Conversions") + Path.DirectorySeparatorChar.ToString()
 
-let path name = System.IO.Path.Combine(baseInputGraphsPath, name)
+let path name = Path.Combine(baseInputGraphsPath, name)
 
 let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)

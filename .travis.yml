@@ -2,6 +2,7 @@ language: csharp
 
 mono:
   - latest
+dotnet: 2.1.300
 
 sudo: false  # use the new container-based Travis infrastructure 
 
@@ -17,4 +18,4 @@ before_script:
   - git lfs pull
 
 script: 
-  - ./build.sh All
+  - ./build.sh

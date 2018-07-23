@@ -1,128 +1,17 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\NUnit.3.10.1\build\NUnit.props" Condition="Exists('..\..\packages\NUnit.3.10.1\build\NUnit.props')" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <Import Project="..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props" Condition="Exists('..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>e135d6c0-a1bf-444d-8878-fe5a0c02fccd</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>GLL.AbstractParser.Bio.Test</RootNamespace>
-    <AssemblyName>GLL.AbstractParser.Bio.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
-    <Name>GLL.AbstractParser.Bio.Test</Name>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <Tailcalls>false</Tailcalls>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\GLL.AbstractParser.Bio.Test.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <Tailcalls>true</Tailcalls>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\GLL.AbstractParser.Bio.Test.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
+
+  <Import Project="..\..\src\YaccConstructor\YaccConstructor.targets" />
+  
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <CallTarget Targets="CallYC" />
+  </Target>
+
   <ItemGroup>
-    <Reference Include="dotNetRDF, Version=2.1.0.0, Culture=neutral, PublicKeyToken=6055ffe4c97cc780">
-      <HintPath>..\..\packages\dotNetRDF.2.1.0\lib\net40\dotNetRDF.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="DotParser, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\DotParser.1.0.6\lib\net45\DotParser.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharp.Core, Version=4.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\..\packages\FSharp.Core.4.5.0\lib\net45\FSharp.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Collections, Version=1.17.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\FSharpx.Collections.1.17.0\lib\net40\FSharpx.Collections.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Collections.Experimental, Version=1.17.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\FSharpx.Collections.Experimental.1.17.0\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Core, Version=1.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\FSharpx.Core.1.7.3\lib\40\FSharpx.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="HtmlAgilityPack, Version=1.8.2.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a">
-      <HintPath>..\..\packages\HtmlAgilityPack.1.8.2\lib\Net45\HtmlAgilityPack.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="mscorlib" />
-    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
-      <HintPath>..\..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="nunit.framework, Version=3.10.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb">
-      <HintPath>..\..\packages\NUnit.3.10.1\lib\net45\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Security" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Xml" />
-    <Reference Include="VDS.Common, Version=1.10.0.0, Culture=neutral, PublicKeyToken=ab5f4eb908061bf0">
-      <HintPath>..\..\packages\VDS.Common.1.10.0\lib\net40-client\VDS.Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Data, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.Data.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.FSA, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.FSA.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.FST, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.FST.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Glee, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.Glee.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Graphviz, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.Graphviz.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Petri, Version=3.7.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraph.Petri.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.QuickGraphFS, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\YC.QuickGraph.3.7.3\lib\net45\YC.QuickGraphFS.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
+    <YC Include="BioCFG.yrd" OutputFile="BioCFG.yrd.fs" Generator="GLLGenerator -pos int -token int -module GLL.BioCFG" />
     <None Include="App.config" />
     <None Include="packages.config" />
     <Compile Include="AssemblyInfo.fs" />
@@ -131,68 +20,26 @@
     <Compile Include="BioDataPerformance.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
+  
   <ItemGroup>
-    <ProjectReference Include="..\..\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
-      <Name>AbstractAnalysis.Common</Name>
-      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\AST.Common\Common.AST.fsproj">
-      <Name>Common.AST</Name>
-      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Common\Common.fsproj">
-      <Name>Common (Core\Common)</Name>
-      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Generators.Common\Generators.Common.fsproj">
-      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
-      <Name>Generators.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\GLLAbstractParser\GLLAbstractParser.fsproj">
-      <Name>GLLAbstractParser</Name>
-      <Project>{bd40477e-7ceb-4ff4-b53f-05316f3bb6d8}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\GLLGenerator\GLLGenerator.fsproj">
-      <Name>GLLGenerator</Name>
-      <Project>{8756690f-8138-495a-a368-39afb9029823}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\ParserCommon\GLLParsers.Common.fsproj">
-      <Name>GLLParsers.Common</Name>
-      <Project>{f2e8eda4-c13f-4f8d-b858-d5ef4fb8a06d}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\YaccConstructor\YaccConstructor.fsproj">
-      <Name>YaccConstructor</Name>
-      <Project>{e9a0e63b-ead7-43de-8823-13faa6b2b972}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\YardFrontend\YardFrontend.fsproj">
-      <Name>YardFrontend</Name>
-      <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
-      <Private>True</Private>
-    </ProjectReference>
+    <PackageReference Include="dotNetRDF" Version="2.1.0" />
+    <PackageReference Include="NUnit" Version="3.10.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
+    <PackageReference Include="YC.QuickGraph" Version="3.7.4" />
   </ItemGroup>
-  <PropertyGroup>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
-  </PropertyGroup>
-  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
-  <Choose>
-    <When Condition="($(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.7.1' Or $(TargetFrameworkVersion) == 'v4.7.2')) Or ($(TargetFrameworkIdentifier) == '.NETCoreApp' And ($(TargetFrameworkVersion) == 'v2.0' Or $(TargetFrameworkVersion) == 'v2.1')) Or ($(TargetFrameworkIdentifier) == '.NETStandard' And $(TargetFrameworkVersion) == 'v2.0') Or ($(TargetFrameworkIdentifier) == '.NETCore' And $(TargetFrameworkVersion) == 'v5.0')">
-      <PropertyGroup>
-        <__paket__NETStandard_Library_targets>netstandard2.0\NETStandard.Library</__paket__NETStandard_Library_targets>
-      </PropertyGroup>
-    </When>
-  </Choose>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Common\Common.fsproj" />
+    <ProjectReference Include="..\..\src\GLLAbstractParser\GLLAbstractParser.fsproj" />
+    <ProjectReference Include="..\..\src\GLLGenerator\GLLGenerator.fsproj" />
+    <ProjectReference Include="..\..\src\GLLParsersCommon\GLLParsers.Common.fsproj" />
+    <ProjectReference Include="..\..\src\YaccConstructor\YaccConstructor.fsproj" />
+    <ProjectReference Include="..\..\src\YardFrontend\YardFrontend.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.5.0" />
+    <PackageReference Update="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
 </Project>

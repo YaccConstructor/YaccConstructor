@@ -26,10 +26,13 @@ open System.Collections.Generic
 open Yard.Core.IL
 open Yard.Core.Helpers
 open NUnit.Framework
+open System.IO
 
 module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
 
-let basePath subdir = System.IO.Path.Combine("./data/YardFrontend/", subdir)
+let dataDir = Path.Combine(__SOURCE_DIRECTORY__, "..", "data", "YardFrontend") + Path.DirectorySeparatorChar.ToString()
+
+let basePath subdir = System.IO.Path.Combine(dataDir, subdir)
 
 let dummyPos s = new Source(s)
 

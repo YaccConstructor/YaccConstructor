@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <EmitEntryPoint>true</EmitEntryPoint>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="YC.FsYacc.targets" />
+    <None Include="YC.FsYacc.runtimeconfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup />
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.fsproj" />
+    <ProjectReference Include="..\FsYaccFrontend\FsYaccFrontend.fsproj" />
+    <ProjectReference Include="..\RNGLRGenerator\RNGLRGenerator.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.5.0" />
+    <PackageReference Update="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" BeforeTargets="PostBuildEvent">
+    <Exec Command="dotnet publish --no-build -c $(Configuration)" />
+    
+    <ItemGroup>
+      <Binaries Include="$(OutputPath)\publish\*.dll;$(OutputPath)\publish\*.exe;$(OutputPath)\publish\*.config;$(OutputPath)\publish\*.runtimeconfig.json" />
+    </ItemGroup>   
+
+    <Copy SourceFiles="@(Binaries)" DestinationFolder="bin\tool" />
+  </Target>
+
+</Project>

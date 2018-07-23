@@ -1,4 +1,4 @@
-﻿module YC.API
+﻿module YaccConstructor.API
 
 open Yard.Core
 open Yard.Core.IL

@@ -1,17 +1,21 @@
-﻿open Yard.Generators.GLL
-open Yard.Generators.Common.ASTGLLFSA
-open Yard.Generators.GLL.ParserCommon
+﻿module Lockchecker.Main
+
+open Argu
+open Yard.Generators.GLL
 open AbstractAnalysis.Common
-open Yard.Frontends.YardFrontend
-open YC.API
 open AbstractParser
 open System.Collections.Generic
+open Yard.Generators.Common.ASTGLLFSA
+open Yard.Generators.GLL.ParserCommon
 
 open ResultProcessing
 open InputLoading
+open System.IO
 
-let printAllPaths parserSource inputGraph outputFile = 
-    let roots = getAllSPPFRootsAsINodes parserSource inputGraph
+let parseGraph parserSource inputGraph =
+    getAllSPPFRootsAsINodes parserSource inputGraph
+
+let printAllPaths (roots: INode []) (parserSource: ParserSourceGLL) outputFile = 
     if roots.Length < 1
     then 
         printfn "doesn't parsed"
@@ -22,20 +26,10 @@ let printAllPaths parserSource inputGraph outputFile =
             |> Array.map (fun x -> allPathsForRoot x parserSource.IntToString)
             |> Array.iter (fun s -> res.UnionWith s)
             res
-        (*
-        let croppedRes = 
-            result 
-            |> Seq.map (fun s -> 
-                let p = s.LastIndexOf 'A'
-                let p2 = s.IndexOf(' ', p)
-                s.Substring(0,p2).Trim())
-                *)
 
-        //let filteredRes = croppedRes |> Seq.filter (fun x -> not <| x.Contains "RT")
-        System.IO.File.WriteAllLines(outputFile, result)//croppedRes)
+        System.IO.File.WriteAllLines(outputFile, result)
 
-let printAllBadAsserts parserSource inputGraph outputFile = 
-    let roots = getAllSPPFRootsAsINodes parserSource inputGraph
+let printAllBadAsserts (roots: INode []) (parserSource: ParserSourceGLL) outputFile = 
     if roots.Length < 1
     then 
         printfn "doesn't parsed"
@@ -51,29 +45,78 @@ let printAllBadAsserts parserSource inputGraph outputFile =
 let printGraph (graph : SimpleInputGraph<_>) (file : string) = 
     graph.PrintToDot file id
 
-(*
-ba: ASSERT
-ca: ASSERT
+type optionsSet = {
+    graphFile: string;
+    verbose: bool;
+    printPaths: bool;
+    pathsOutput: string;
+    printAsserts: bool;
+    assertsOutput: string;
+    drawGraph: bool;
+    graphOutput: string}
+ 
+let startExecution options = 
+    let log message =
+        if options.verbose then
+            printfn "%s" message
 
-s0: C s0 RT s0 | G s0 RL s0 | ca s0 | ca | eps
+    let parserSource, inputGraph = loadInput options.graphFile log
 
-s1: C s1 RT s1 | G s0 RL s1 | eps
+    if options.drawGraph then
+        printGraph inputGraph options.graphOutput
 
-[<Start>]
-s: ba s | s ba| s1 s | s s1 | ba | C s RT s1 | C s RT s 
-*)
+    let start = System.DateTime.Now
+
+    let roots = parseGraph parserSource inputGraph
+
+    log (sprintf "Parsing time: %A" (System.DateTime.Now - start))
+
+    let start = System.DateTime.Now
+
+    if options.printPaths then
+        printAllPaths roots parserSource options.pathsOutput
+
+    if options.printAsserts then
+        printAllBadAsserts roots parserSource options.assertsOutput
+
+    log (sprintf "Processing time: %A" (System.DateTime.Now - start))
+
+type CLIArguments =
+    | [<Unique; AltCommandLine("-v")>] Verbose 
+    | Print_Paths of path:string
+    | Print_Asserts of path:string
+    | Draw_Graph of path:string
+    | [<MainCommand; ExactlyOnce; Last>] Graph_File of path:string
+with
+    interface IArgParserTemplate with   
+        member s.Usage =
+            match s with
+            | Verbose -> "Print additional information, especially time measurements"
+            | Print_Paths path -> "Print all found paths to a specified file"
+            | Print_Asserts path -> "Print all found asserts to a specified file"
+            | Draw_Graph path -> "Print source graph in the .dot format"
+            | Graph_File path -> "Path to graph that should be parsed"
 
 [<EntryPoint>]
 let main argv =
-    let graphFile = argv.[0]
-    /// CALLS, LOCKS, ASSERTS
-    
-    let parserSource, inputGraph = loadInput graphFile   
+    let parser = ArgumentParser.Create<CLIArguments>(programName = "LockChecker")
 
-    //printGraph inputGraph "inputGraph.dot"
-    let outputFile = argv.[1]
-    let start = System.DateTime.Now
-    printAllPaths parserSource inputGraph outputFile
-    //printAllBadAsserts parserSource inputGraph outputFile
-    printfn "Processing time: %A" (System.DateTime.Now - start)
-    0 // return an integer exit code
+    try
+        let results = parser.Parse argv
+
+        let options = 
+            {
+                verbose = results.Contains Verbose
+                printPaths = results.Contains Print_Paths
+                printAsserts = results.Contains Print_Asserts
+                drawGraph = results.Contains Draw_Graph
+                graphFile = results.GetResult Graph_File
+                pathsOutput = results.GetResult (Print_Paths, defaultValue = "")
+                assertsOutput = results.GetResult (Print_Asserts, defaultValue = "")
+                graphOutput = results.GetResult (Draw_Graph, defaultValue = "")
+            }
+
+        startExecution options
+    with e ->
+        printfn "%s" e.Message
+    0

@@ -13,11 +13,10 @@ open Yard.Generators.Common.FSA.Common
 
 open AbstractAnalysis.Common
 open System.Collections.Generic
-open FSharp.PowerPack
 
 type GLL() = 
     inherit Generator()
-        member this.GenerateFromFSA fsa tokens generateToFile outFileName =
+        member this.GenerateFromFSA fsa generateToFile outFileName =
             let start = System.DateTime.Now
 
             let generatedCode, parserSource = 

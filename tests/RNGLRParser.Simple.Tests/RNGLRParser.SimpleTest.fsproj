@@ -1,58 +1,25 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\NUnit.3.10.1\build\NUnit.props" Condition="Exists('..\..\packages\NUnit.3.10.1\build\NUnit.props')" />
-  <Import Project="..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props" Condition="Exists('..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{d65bde42-d396-458c-be08-104477314657}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>RNGLRParser.SimpleTest</RootNamespace>
-    <AssemblyName>YC.RNGLRParser.Simple.Tests</AssemblyName>
-    <Name>RNGLRParser.SimpleTest</Name>
-    <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <Tailcalls>false</Tailcalls>
-    <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <!--DocumentationFile>bin\Debug\FsYaccFrontend.XML</DocumentationFile-->
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <Tailcalls>true</Tailcalls>
-    <OutputPath>bin\Release</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <!--DocumentationFile>bin\Release\FsYaccFrontend.XML</DocumentationFile-->
-  </PropertyGroup>
-  <PropertyGroup>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
-  </PropertyGroup>
-  <ItemGroup>
+  
+  <Import Project="..\..\src\YaccConstructor\YaccConstructor.targets" />
+  
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <CallTarget Targets="CallYC" />
+  </Target>
+  
+  <ItemGroup>	
+    <YC Include="./*.yrd" OutputFile="%(Filename).yrd.fs" Generator="RNGLRGenerator -pos int -token int -module RNGLR.Parse%(Filename) -table LR -translate true" />
     <Compile Include="LexCommon.fs" />
     <Compile Include="Attrs.yrd.fs" />
-    <Compile Include="Brackets.yrd.fs" />
     <Compile Include="_Brackets.yrd.fs" />
     <Compile Include="Calc.yrd.fs" />
-    <Compile Include="ComplexRightNull.yrd.fs" />
     <Compile Include="Cond.yrd.fs" />
     <Compile Include="Counter.yrd.fs" />
     <Compile Include="Cycle.yrd.fs" />
     <Compile Include="Epsilon.yrd.fs" />
-    <Compile Include="Expr.yrd.fs" />
-    <Compile Include="First.yrd.fs" />
     <Compile Include="InfEpsilon.yrd.fs" />
     <Compile Include="List.yrd.fs" />
     <Compile Include="LolCalc.yrd.fs" />
@@ -60,94 +27,27 @@
     <Compile Include="Longest.yrd.fs" />
     <Compile Include="Order.yrd.fs" />
     <Compile Include="Resolvers.yrd.fs" />
-    <Compile Include="SimpleRightNull.yrd.fs" />
     <Compile Include="Omit.yrd.fs" />
     <Compile Include="Eps.yrd.fs" />
     <Compile Include="Eps2.yrd.fs" />
     <Compile Include="ListEps.yrd.fs" />
     <Compile Include="RNGLRParserSimpleTest.fs" />
-    <None Include="Calc.yrd" />
-    <None Include="ComplexRightNull.yrd" />
-    <None Include="Cond.yrd" />
-    <None Include="Counter.yrd" />
-    <None Include="cycle.yrd" />
-    <None Include="Epsilon.yrd" />
-    <None Include="Expr.yrd" />
-    <None Include="First.yrd" />
-    <None Include="List.yrd" />
-    <None Include="packages.config" />
-    <None Include="SimpleRightNull.yrd" />
-    <None Include="Resolvers.yrd" />
-    <None Include="Longest.yrd" />
-    <None Include="Order.yrd" />
-    <None Include="LongCycle.yrd" />
-    <None Include="LolCalc.yrd" />
-    <None Include="Omit.yrd" />
-    <None Include="gen.fsx" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\RNGLRAbstractParser\RNGLRAbstractParser.fsproj" />
+    <ProjectReference Include="..\..\src\RNGLRCommon\RNGLRCommon.fsproj" />
+    <ProjectReference Include="..\..\src\RNGLRGenerator\RNGLRGenerator.fsproj" />
+    <ProjectReference Include="..\..\src\RNGLRParser\RNGLRParser.fsproj" />
+    <ProjectReference Include="..\..\src\YaccConstructor\YaccConstructor.fsproj" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Core, Version=4.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\..\packages\FSharp.Core.4.5.0\lib\net45\FSharp.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Collections, Version=1.17.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\FSharpx.Collections.1.17.0\lib\net40\FSharpx.Collections.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Collections.Experimental, Version=1.17.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\FSharpx.Collections.Experimental.1.17.0\lib\net40\FSharpx.Collections.Experimental.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="mscorlib" />
-    <Reference Include="nunit.framework, Version=3.10.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb">
-      <HintPath>..\..\packages\NUnit.3.10.1\lib\net45\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
+    <PackageReference Include="NUnit" Version="3.10.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
-      <Name>AbstractAnalysis.Common</Name>
-      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\AST.Common\Common.AST.fsproj">
-      <Name>Common.AST</Name>
-      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
-      <Name>RNGLRAbstractParser</Name>
-      <Project>{1873ea19-fab7-4d5f-b452-67c0b93c8b9b}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\RNGLRCommon\RNGLRCommon.fsproj">
-      <Name>RNGLRCommon</Name>
-      <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\RNGLRParser\RNGLRParser.fsproj">
-      <Name>RNGLRParser</Name>
-      <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>
-      <Private>True</Private>
-    </ProjectReference>
+    <PackageReference Update="FSharp.Core" Version="4.5.0" />
+    <PackageReference Update="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" />
-  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
-  <Choose>
-    <When Condition="($(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.7.1' Or $(TargetFrameworkVersion) == 'v4.7.2')) Or ($(TargetFrameworkIdentifier) == '.NETCoreApp' And ($(TargetFrameworkVersion) == 'v2.0' Or $(TargetFrameworkVersion) == 'v2.1')) Or ($(TargetFrameworkIdentifier) == '.NETStandard' And $(TargetFrameworkVersion) == 'v2.0') Or ($(TargetFrameworkIdentifier) == '.NETCore' And $(TargetFrameworkVersion) == 'v5.0')">
-      <PropertyGroup>
-        <__paket__NETStandard_Library_targets>netstandard2.0\NETStandard.Library</__paket__NETStandard_Library_targets>
-      </PropertyGroup>
-    </When>
-  </Choose>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
-         Other similar extension points exist, see Microsoft.Common.targets.
-    <Target Name="BeforeBuild">
-    </Target>
-    <Target Name="AfterBuild">
-    </Target>
-    -->
 </Project>

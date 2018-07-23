@@ -656,3 +656,6 @@ tests/data/BioData/result/allTriples.txt
 tests/GLL.AbstractParser.Bio.Test/time.txt
 tests/GLL.AbstractParser.Simple.Tests/time.txt
 tests/time.txt
+
+tests/data/BioData/result
+tests/*/*.dot

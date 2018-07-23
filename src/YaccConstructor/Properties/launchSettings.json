@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "YaccConstructor": {
+      "commandName": "Project",
+      "commandLineArgs": "-i ..\\..\\..\\..\\..\\tests\\RNGLRAbstractParser.Tests\\AandB.yrd -f \"\" -g \"RNGLRGenerator -pos int -token int -module RNGLR.AandB -translate false -o ..\\..\\..\\..\\..\\tests\\RNGLRAbstractParser.Tests\\AandB.fs\""
+    }
+  }
+}

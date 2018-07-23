@@ -9,35 +9,24 @@ open Yard.Generators
 open LexCommon
 open Microsoft.FSharp.Collections
 
-open YC.API
+open YaccConstructor.API
 open Yard.Generators.GLL.ParserCommon
 open System.Collections.Generic
 open Yard.Generators.GLL.AbstractParser
 open Yard.Frontends.YardFrontend
 open Yard.Generators.GLL
 open Yard.Core.Conversions.ExpandMeta
+open System.IO
 
 //let run path astBuilder =
 //    let tokens = LexCommon.tokens(path)
 //    astBuilder tokens
 
-/// for resharper test runner
-let needChangeDirectory = 
-    (@"C:\Users\Artem Gorokhov\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory())
-    || (@"C:\Users\artem\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory())
-
-let inputFilesPath = 
-    if needChangeDirectory
-    then @"C:/Code/YaccConstructor/tests/data/GLL/"
-    else @"./data/GLL/"
-
-let grammarFilesPath = 
-    if needChangeDirectory
-    then @"C:/Code/YaccConstructor/tests/GLLParser.Simple.Tests/"
-    else @"./GLLParser.Simple.Tests/"
+let inputFilesPath = Path.Combine (__SOURCE_DIRECTORY__, "..", "data", "GLL") + Path.DirectorySeparatorChar.ToString()
+let grammarFilesPath = __SOURCE_DIRECTORY__ + Path.DirectorySeparatorChar.ToString()
 
 let getTokens path =
-    System.IO.File.ReadAllText(inputFilesPath + path)
+    System.IO.File.ReadAllText(System.IO.Path.Combine(inputFilesPath, path))
         .Split([|' '|])
         |> Array.filter ((<>) "")
 
@@ -69,7 +58,7 @@ let getParserSource grammarFile =
     let fe = new YardFrontend()
     let gen = new GLL()
     let conv = seq{yield new ExpandMeta()}
-    generate (grammarFilesPath + grammarFile)
+    generate (System.IO.Path.Combine (grammarFilesPath, grammarFile))
              fe gen 
              None
              conv

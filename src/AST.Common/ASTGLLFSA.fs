@@ -435,11 +435,9 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
                 seq{yield ReducedTree.NonTerm(indToString (int n.Name), n, Seq.toList child )}
             | _ -> failwith "Unexpected node type."
         Seq.head <| (cleanTree root)
-
     member this.ReducedTreeToDot (tree : ReducedTree)  (tokenData : 'TokenType -> obj) (path : string) =
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
-
         let createNode num isAmbiguous nodeType (str : string) =
             let label =
                 let cur = str.Replace("\n", "\\n").Replace ("\r", "")
@@ -451,7 +449,6 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
                 | NonTerminal -> ",shape=point"
             let color = ""
             out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + color + shape + "]")
-
         let createEdge (b : int) (e : int) isBold (str : string) =
             let label = str.Replace("\n", "\\n").Replace ("\r", "")
             let bold = 
@@ -468,7 +465,6 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
             let key = ref 0
             if !num <> -1
             then
-
                 if used.TryGetValue(currentPair.Node, key)
                 then
                     createEdge currentPair.Num !key false ""
@@ -533,12 +529,10 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
         let results = Dictionary<INode,_>()
         let index = ref 0
         let res = new HashSet<string> ()
-
         let rec extractPath (node : INode) : HashSet<string> =  
             match node with
             | :? NonTerminalNode as n ->
                 let isGot,value = results.TryGetValue n
-
                 if isGot then
                     if value = Unchecked.defaultof<_> |> not then value else
                     failwith "cycle detected"
@@ -558,7 +552,6 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
                                       else new HashSet<string> ()
             | :? PackedNode as p ->
                 let isGot,value = results.TryGetValue p
-
                 if isGot then
                     if value = Unchecked.defaultof<_> |> not then value else
                     failwith "cycle detected"
@@ -632,7 +625,6 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
         let cycleNode = ResizeArray<_>()
         let index = ref 0
         let res = Array.init q.Count (fun _ -> new ResizeArray<_>())
-
         let rec extractPath (node : INode) : HashSet<_> =  
             match node with
             | :? NonTerminalNode as n ->

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "LockChecker": {
+      "commandName": "Project",
+      "commandLineArgs": "--print-paths out.txt -v ../../../tests/graph2000.txt"
+    }
+  }
+}

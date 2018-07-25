@@ -19,6 +19,7 @@ let printAllPaths (roots: INode []) (parserSource: ParserSourceGLL) outputFile =
     if roots.Length < 1
     then 
         printfn "doesn't parsed"
+        System.IO.File.WriteAllLines(outputFile, [""])
     else
         let result = 
             let res = new HashSet<_>()
@@ -33,6 +34,7 @@ let printAllBadAsserts (roots: INode []) (parserSource: ParserSourceGLL) outputF
     if roots.Length < 1
     then 
         printfn "doesn't parsed"
+        System.IO.File.WriteAllLines(outputFile, [""])
     else
         let result = 
             roots

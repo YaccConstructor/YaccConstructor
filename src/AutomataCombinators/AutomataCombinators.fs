@@ -156,7 +156,7 @@ type AutomataFactory() =
         let internalFSA: InternalFSA =
             {
                 States = fsaStates
-                Alphabet = set alphabet
+                Alphabet = alphabet
                 StateToNontermName = nonterminalStateNames
                 StartComponentNumber = startNonterminalId
                 StartStatesOfEachNonterminal = fsaStarts

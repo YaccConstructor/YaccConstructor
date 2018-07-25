@@ -118,7 +118,16 @@ let parseGraphFile graphFile log =
     calls, locks, asserts, edges, startVerts
 
 let loadInput graphFile log =
-    let calls, locks, asserts, edges, startVerts = parseGraphFile graphFile log
+    let mutable calls, locks, asserts, edges, startVerts = parseGraphFile graphFile log
+
+    if (calls < 2) then
+        calls <- 2
+    
+    if (locks < 2) then
+        locks <- 2
+    
+    if (asserts < 2) then
+        asserts <- 2
 
     let parserSource = generateParser calls locks asserts log
 

@@ -151,7 +151,6 @@ type AutomataFactory() =
                 fun (nontId, nodeId) -> 
                     Array.set fsaStarts nontId (HashSet [nodeId])
             )
-            
 
         let internalFSA: InternalFSA =
             {

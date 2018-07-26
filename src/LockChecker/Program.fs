@@ -64,8 +64,8 @@ let startExecution options =
 
     let parserSource, inputGraph = loadInput options.graphFile log
 
-    if options.drawGraph then
-        printGraph inputGraph options.graphOutput
+    (*if options.drawGraph then
+        printGraph inputGraph options.graphOutput*)
 
     let start = System.DateTime.Now
 

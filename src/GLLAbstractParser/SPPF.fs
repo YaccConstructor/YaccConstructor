@@ -23,8 +23,8 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
 
     let nonTerminalNodes = new SortedDictionary<int64<extension>, Dictionary<int<positionInGrammar>,int<nodeMeasure>>>()
     let intermidiateNodes = new SortedDictionary<int64<extension>, Dictionary<int<positionInGrammar> * int<positionInGrammar>, int<nodeMeasure>>>()
-    let terminalNodes = new Dictionary<int64<extension>, Dictionary<int<token>,int<nodeMeasure>>>()
-    let epsilonNodes = new Dictionary<int, int<nodeMeasure>>()
+    let terminalNodes = new SortedDictionary<int64<extension>, Dictionary<int<token>,int<nodeMeasure>>>()
+    let epsilonNodes = new SortedDictionary<int, int<nodeMeasure>>()
     let nodes = new BlockResizeArray<INode>()
 
     member this.Nodes = nodes

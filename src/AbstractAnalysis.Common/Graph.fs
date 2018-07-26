@@ -82,6 +82,24 @@ type SimpleInputGraph<'tag>(initialVertices : int[], finalVertices : int[], tagT
         member this.PositionToString (pos : int<positionInInput>) =
             sprintf "%i" pos
 
+type TokenLabeledInputGraph(initialVertices : int[], finalVertices : int[]) =
+    inherit AdjacencyGraph<int, ParserEdge<int<token>>>()
+
+    interface IParserInput with
+        member this.InitialPositions = 
+            Array.map(fun x -> x * 1<positionInInput>) initialVertices
+        
+        member this.FinalPositions = 
+            Array.map(fun x -> x * 1<positionInInput>) finalVertices
+
+        [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+        member this.ForAllOutgoingEdges curPosInInput pFun =
+            let outEdges = int curPosInInput |> this.OutEdges
+            outEdges |> Seq.iter
+                (fun e -> pFun e.Tag (e.Target * 1<positionInInput>))
+
+        member this.PositionToString (pos : int<positionInInput>) =
+            sprintf "%i" pos
 
 type LinearInput (initialPositions, input:array<int<token>>) =
     interface IParserInput with

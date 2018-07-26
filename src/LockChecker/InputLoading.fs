@@ -87,8 +87,6 @@ let generateParser calls locks asserts log =
     parser
 
 let parseGraphFile graphFile log = 
-    let time = System.DateTime.UtcNow
-
     let data = System.IO.File.ReadAllLines graphFile
     
     let data = if data.[data.Length-1].Length < 1 then data.[..data.Length-2] else data
@@ -104,34 +102,25 @@ let parseGraphFile graphFile log =
     let locks = int <| info.[2].Trim()    
     let asserts = int <| info.[3].Trim()
 
+    let parserSource = generateParser calls locks asserts log
+    let stringToToken = parserSource.StringToToken
+
+    let time = System.DateTime.UtcNow
+
     let tryParseInt str =
         try int str
         with e -> 0
 
     let startVerts = startVLine.Split ' ' |> Array.map tryParseInt 
     let edges = 
-        edgesLines |> Array.map (fun s -> s.Split ' ' |> fun a -> new ParserEdge<_>(int a.[0], int a.[2], a.[1]))
+        edgesLines |> Array.map (fun s -> s.Split ' ' |> fun a -> new ParserEdge<_>(int a.[0], int a.[2], stringToToken a.[1]))
 
     log (sprintf "Graph loading time is %A" (System.DateTime.UtcNow - time))
-
     
-    calls, locks, asserts, edges, startVerts
+    parserSource, edges, startVerts
 
 let loadInput graphFile log =
-    let mutable calls, locks, asserts, edges, startVerts = parseGraphFile graphFile log
-
-    if (calls < 2) then
-        calls <- 2
-    
-    if (locks < 2) then
-        locks <- 2
-    
-    if (asserts < 2) then
-        asserts <- 2
-
-    let parserSource = generateParser calls locks asserts log
-
-    let tokenizer str = str |> parserSource.StringToToken
+    let parserSource, edges, startVerts = parseGraphFile graphFile log
     
     let r = new HashSet<_>()
     let ev = edges |> Array.iter (fun e ->
@@ -140,7 +129,7 @@ let loadInput graphFile log =
 
     log (sprintf "Starts: %A" startVerts.Length)
 
-    let inputGraph = new SimpleInputGraph<_>(startVerts |> Array.filter (fun x -> r.Contains x), [||], tokenizer)
+    let inputGraph = new TokenLabeledInputGraph(startVerts |> Array.filter (fun x -> r.Contains x), [||])
     inputGraph.AddVerticesAndEdgeRange edges |> ignore
 
     parserSource, inputGraph

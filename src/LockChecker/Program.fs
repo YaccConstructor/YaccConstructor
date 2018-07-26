@@ -95,6 +95,7 @@ let startExecution options =
             new StreamWriter (options.pathsOutput) :> TextWriter
 
     printAllPaths roots parserSource outputStream
+    outputStream.Close()
 
     log (sprintf "Processing time: %A" (System.DateTime.Now - start))
 

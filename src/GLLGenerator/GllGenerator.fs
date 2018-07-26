@@ -29,7 +29,7 @@ type GLL() =
                 out.WriteLine (generatedCode.ToString().Replace("\r\n", "\n").Replace("\n", "\r\n"))
                 out.Flush()
                 out.Close()
-            eprintfn "Generation time: %A" <| System.DateTime.Now - start
+            //eprintfn "Generation time: %A" <| System.DateTime.Now - start
             
             box parserSource
 

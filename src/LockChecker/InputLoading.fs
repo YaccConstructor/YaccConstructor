@@ -6,6 +6,7 @@ open System.Collections.Generic
 
 open Yard.Generators.Common.AutomataCombinators
 open Yard.Generators.Common.FSA.Common
+open System.IO
 
 (*
 ba: ASSERT
@@ -19,8 +20,9 @@ s1: C s1 RT s1 | G s0 RL s1 | eps
 s: ba s | s ba| s1 s | s s1 | ba | C s RT s1 | C s RT s 
 *)
 
-let generateParser calls locks asserts log =
+let generateParser calls locks asserts log stage =
     let time = System.DateTime.UtcNow
+    stage "Automata construction"
     
     let factory = new AutomataFactory()
     let (~%%), (~&&), (~%), (~&), eps, (=>), (!=>), (<~>), (<|>) = factory.Combinators
@@ -72,12 +74,14 @@ let generateParser calls locks asserts log =
     log (sprintf "Automata construction time is %A" (System.DateTime.UtcNow - time))
 
     let time = System.DateTime.UtcNow
+    stage "Automata conversion"
 
     let automata = factory.Produce()
 
     log (sprintf "Automata conversion time is %A" (System.DateTime.UtcNow - time))
 
     let time = System.DateTime.UtcNow
+    stage "Parser generation"
 
     let gll = new GLL()
     let parser = gll.GenerateFromFSA automata false "gll.fs" :?> ParserSourceGLL
@@ -86,8 +90,10 @@ let generateParser calls locks asserts log =
 
     parser
 
-let parseGraphFile graphFile log = 
-    let data = System.IO.File.ReadAllLines graphFile
+let parseGraphFile (graphStream: TextReader) log stage = 
+    let data =    Seq.initInfinite (fun _ -> graphStream.ReadLine()) 
+               |> Seq.takeWhile ((<>) null)
+               |> Seq.toArray
     
     let data = if data.[data.Length-1].Length < 1 then data.[..data.Length-2] else data
     
@@ -98,14 +104,15 @@ let parseGraphFile graphFile log =
 
     let info = infoLine.Split ' '
 
-    let calls = int <| info.[1].Trim()
-    let locks = int <| info.[2].Trim()    
-    let asserts = int <| info.[3].Trim()
+    let calls = info.[1].Trim() |> int |> fun n -> if (n < 2) then 2 else n
+    let locks = info.[2].Trim() |> int |> fun n -> if (n < 2) then 2 else n  
+    let asserts = info.[3].Trim() |> int |> fun n -> if (n < 2) then 2 else n
 
-    let parserSource = generateParser calls locks asserts log
+    let parserSource = generateParser calls locks asserts log stage
     let stringToToken = parserSource.StringToToken
 
     let time = System.DateTime.UtcNow
+    stage "Graph loading"
 
     let tryParseInt str =
         try int str
@@ -119,8 +126,8 @@ let parseGraphFile graphFile log =
     
     parserSource, edges, startVerts
 
-let loadInput graphFile log =
-    let parserSource, edges, startVerts = parseGraphFile graphFile log
+let loadInput (graphStream: TextReader) log stage =
+    let parserSource, edges, startVerts = parseGraphFile graphStream log stage
     
     let r = new HashSet<_>()
     let ev = edges |> Array.iter (fun e ->

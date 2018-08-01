@@ -118,7 +118,12 @@ let parseGraphFile (graphStream: TextReader) log stage =
         try int str
         with e -> 0
 
-    let startVerts = startVLine.Split ' ' |> Array.map tryParseInt 
+    let startVerts = 
+        if startVLine.Length = 0 then
+            [||]
+        else
+            startVLine.Split ' ' |> Array.map tryParseInt 
+
     let edges = 
         edgesLines |> Array.map (fun s -> s.Split ' ' |> fun a -> new ParserEdge<_>(int a.[0], int a.[2], stringToToken a.[1]))
 

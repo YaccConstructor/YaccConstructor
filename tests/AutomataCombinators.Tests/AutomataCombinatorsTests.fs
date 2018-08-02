@@ -111,7 +111,7 @@ type ``Automaton correctness tests``() =
         let expectedFsa = 
             new FSA ({
                          States = [| [|(Term "a", nid 1)|]; [||] |]
-                         Alphabet = Set [Term "a"]
+                         Alphabet = HashSet [Term "a"]
                          StateToNontermName = new Dictionary<_, _> (dict [(nid 0, "S")])
                          StartComponentNumber = 0
                          StartStatesOfEachNonterminal = [|new HashSet<_> ([nid 0])|]
@@ -128,7 +128,7 @@ type ``Automaton correctness tests``() =
         let expectedFsa = 
             new FSA ({
                          States = [| [|(fakeNonterm actualFsa "S", nid 1)|]; [||] |]
-                         Alphabet = Set [fakeNonterm actualFsa "S"]
+                         Alphabet = HashSet [fakeNonterm actualFsa "S"]
                          StateToNontermName = new Dictionary<_, _> (dict [(nid 0, "S")])
                          StartComponentNumber = 0
                          StartStatesOfEachNonterminal = [|new HashSet<_> ([nid 0])|]
@@ -147,7 +147,7 @@ type ``Automaton correctness tests``() =
         let expectedFsa = 
             new FSA ({
                          States = [| [|(Term "a", nid 1)|]; [|(Term "b", nid 2)|]; [||] |]
-                         Alphabet = Set [Term "a"; Term "b"]
+                         Alphabet = HashSet [Term "a"; Term "b"]
                          StateToNontermName = new Dictionary<_, _> (dict [(nid 0, "S")])
                          StartComponentNumber = 0
                          StartStatesOfEachNonterminal = [|new HashSet<_> ([nid 0])|]
@@ -166,7 +166,7 @@ type ``Automaton correctness tests``() =
         let expectedFsa = 
             new FSA ({
                          States = [| [|(Term "a", nid 1); (Term "b", nid 1)|]; [||] |]
-                         Alphabet = Set [Term "a"; Term "b"]
+                         Alphabet = HashSet [Term "a"; Term "b"]
                          StateToNontermName = new Dictionary<_, _> (dict [(nid 0, "S")])
                          StartComponentNumber = 0
                          StartStatesOfEachNonterminal = [|new HashSet<_> ([nid 0])|]
@@ -192,7 +192,7 @@ type ``Automaton correctness tests``() =
                                      [|(Term "b", nid 2)|]; 
                                      [|(Term "c", nid 3)|]; 
                                      [|(Term "d", nid 4)|]; [||] |]
-                         Alphabet = Set [Term "a"; Term "b"; Term "c"; Term "d"]
+                         Alphabet = HashSet [Term "a"; Term "b"; Term "c"; Term "d"]
                          StateToNontermName = new Dictionary<_, _> (dict [(nid 0, "S")])
                          StartComponentNumber = 0
                          StartStatesOfEachNonterminal = [|new HashSet<_> ([nid 0])|]
@@ -217,7 +217,7 @@ type ``Automaton correctness tests``() =
                          States = [| [|(Term "a", nid 1); (Term "b", nid 1)|]; 
                                      [|(Term "c", nid 2); (Term "d", nid 2)|];
                                      [||] |]
-                         Alphabet = Set [Term "a"; Term "b"; Term "c"; Term "d"]
+                         Alphabet = HashSet [Term "a"; Term "b"; Term "c"; Term "d"]
                          StateToNontermName = new Dictionary<_, _> (dict [(nid 0, "S")])
                          StartComponentNumber = 0
                          StartStatesOfEachNonterminal = [|new HashSet<_> ([nid 0])|]
@@ -243,7 +243,7 @@ type ``Automaton correctness tests``() =
                                      [|(Term "b", nid 3)|];
                                      [|(Term "d", nid 3)|];
                                      [||] |]
-                         Alphabet = Set [Term "a"; Term "b"; Term "c"; Term "d"]
+                         Alphabet = HashSet [Term "a"; Term "b"; Term "c"; Term "d"]
                          StateToNontermName = new Dictionary<_, _> (dict [(nid 0, "S")])
                          StartComponentNumber = 0
                          StartStatesOfEachNonterminal = [|new HashSet<_> ([nid 0])|]
@@ -270,7 +270,7 @@ type ``Automaton correctness tests``() =
                                        (Term "c", nid 1); 
                                        (Term "d", nid 1)|]; 
                                      [||] |]
-                         Alphabet = Set [Term "a"; Term "b"; Term "c"; Term "d"]
+                         Alphabet = HashSet [Term "a"; Term "b"; Term "c"; Term "d"]
                          StateToNontermName = new Dictionary<_, _> (dict [(nid 0, "S")])
                          StartComponentNumber = 0
                          StartStatesOfEachNonterminal = [|new HashSet<_> ([nid 0])|]
@@ -290,7 +290,7 @@ type ``Automaton correctness tests``() =
                          States = [| [|(fakeNonterm actualFsa "A", nid 2)|]
                                      [|(Term "a", nid 2)|]
                                      [||] |]
-                         Alphabet = Set [Term "a"; fakeNonterm actualFsa "A"]
+                         Alphabet = HashSet [Term "a"; fakeNonterm actualFsa "A"]
                          StateToNontermName = new Dictionary<_, _> (dict [(nid 0, "S"); (nid 1, "A")])
                          StartComponentNumber = 0
                          StartStatesOfEachNonterminal = [|new HashSet<_> ([nid 0]); new HashSet<_> ([nid 1])|]
@@ -313,7 +313,7 @@ type ``Automaton correctness tests``() =
                          States = [| [|(Term "a", nid 1)|]
                                      [|(Term "b", nid 2)|]
                                      [||] |]
-                         Alphabet = Set [Term "a"; Term "b"]
+                         Alphabet = HashSet [Term "a"; Term "b"]
                          StateToNontermName = new Dictionary<_, _> (dict [(nid 0, "S")])
                          StartComponentNumber = 0
                          StartStatesOfEachNonterminal = [|new HashSet<_> ([nid 0])|]

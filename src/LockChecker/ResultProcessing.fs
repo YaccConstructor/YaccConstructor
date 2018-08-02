@@ -65,8 +65,9 @@ let allPathsForRoot (root: INode) (intToString : Dictionary<_,_>) =
                 let first = getPath first
                 
                 let res = new HashSet<_>(first)
-                if others <> null 
+                (*if others <> null 
                 then others |> Microsoft.FSharp.Collections.ResizeArray.iter (fun elt -> res.UnionWith (getPath elt))
+                *)
                 let withPH, complete = 
                     Array.ofSeq res
                     |> Array.partition (fun a -> a.Contains name)

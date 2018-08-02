@@ -151,12 +151,11 @@ type AutomataFactory() =
                 fun (nontId, nodeId) -> 
                     Array.set fsaStarts nontId (HashSet [nodeId])
             )
-            
 
         let internalFSA: InternalFSA =
             {
                 States = fsaStates
-                Alphabet = set alphabet
+                Alphabet = alphabet
                 StateToNontermName = nonterminalStateNames
                 StartComponentNumber = startNonterminalId
                 StartStatesOfEachNonterminal = fsaStarts

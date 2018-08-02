@@ -18,7 +18,7 @@ type EdgeSymbol =
 
 type InternalFSA = {
     States             : (EdgeSymbol * int<positionInGrammar>) [] []
-    Alphabet           : Set<EdgeSymbol>
+    Alphabet           : HashSet<EdgeSymbol>
     StateToNontermName : Dictionary<int<positionInGrammar>,string>
     StartComponentNumber         : int
     StartStatesOfEachNonterminal : HashSet<int<positionInGrammar>> []
@@ -196,7 +196,7 @@ let convertRulesToFSA (ruleList : Rule<Source,Source> list) =
             states
             |> ResizeArray.map (fun x -> x.ToArray())
             |> fun x -> x.ToArray();
-        Alphabet = set alphabet;
+        Alphabet = alphabet;
         StateToNontermName = stateToNontermName;
         StartComponentNumber = startComponent.Value;
         StartStatesOfEachNonterminal    = startStatesOfEachNonterminal;
@@ -266,9 +266,11 @@ let removeEpsilonEdges (fsa : InternalFSA) =
             |> (fun x -> new HashSet<_>(x)))
         |> Array.ofSeq
 
+    Epsilon() |> fsa.Alphabet.Remove |> ignore
+
     {fsa with
         States = newStates;
-        Alphabet = Epsilon() |> fsa.Alphabet.Remove;
+        Alphabet = fsa.Alphabet;
         StartStatesOfEachNonterminal    = startStates;
         FinalStates    = finalStates;
         }
@@ -370,7 +372,7 @@ let toDFA fsa =
                     stateToNontermName.Add(stateToNewState.[int i], fsa.StateToNontermName.[i])
                 stateToNewState.[int i] |> Nonterm
             | _ -> symbol)
-        |> set
+        |> HashSet<_> 
 
     {fsa with 
         States = newStates;

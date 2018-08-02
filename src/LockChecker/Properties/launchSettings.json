@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "LockChecker": {
+      "commandName": "Project",
+      "commandLineArgs": "--print-stages ../../../tests/graph2000.txt"
+    }
+  }
+}

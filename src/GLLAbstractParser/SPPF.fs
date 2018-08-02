@@ -21,10 +21,10 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         | TreeNode x -> x
         | _ -> failwith "Wrong type"
 
-    let nonTerminalNodes = new Dictionary<int64<extension>, Dictionary<int<positionInGrammar>,int<nodeMeasure>>>()
-    let intermidiateNodes = new Dictionary<int64<extension>, Dictionary<int<positionInGrammar> * int<positionInGrammar>, int<nodeMeasure>>>()
-    let terminalNodes = new Dictionary<int64<extension>, Dictionary<int<token>,int<nodeMeasure>>>()
-    let epsilonNodes = new Dictionary<int, int<nodeMeasure>>()
+    let nonTerminalNodes = new SortedDictionary<int64<extension>, Dictionary<int<positionInGrammar>,int<nodeMeasure>>>()
+    let intermidiateNodes = new SortedDictionary<int64<extension>, Dictionary<int<positionInGrammar> * int<positionInGrammar>, int<nodeMeasure>>>()
+    let terminalNodes = new SortedDictionary<int64<extension>, Dictionary<int<token>,int<nodeMeasure>>>()
+    let epsilonNodes = new SortedDictionary<int, int<nodeMeasure>>()
     let nodes = new BlockResizeArray<INode>()
 
     member this.Nodes = nodes
@@ -44,7 +44,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
             if not contains
             then
                 let dict1 = new Dictionary<_,_>()
-                let newNode = new NonTerminalNode(state, (packExtension lExt rExt)) 
+                let newNode = new NonTerminalNode(state, (packExtension lExt rExt))
                 let num = this.Nodes.Length *1<nodeMeasure>
                 dict1.Add(state,num)
                 this.Nodes.Add(newNode)

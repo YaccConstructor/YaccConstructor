@@ -34,8 +34,7 @@ type GSSVertex (nonterm: int<positionInGrammar>, posInInput: int<positionInInput
     let setP = new PopSet() 
     
     override this.Equals y =
-        y :? GSSVertex 
-        && (let y = y :?> GSSVertex 
+           (let y = y :?> GSSVertex 
             this.Nonterm = y.Nonterm
             && this.PositionInInput = y.PositionInInput)
 

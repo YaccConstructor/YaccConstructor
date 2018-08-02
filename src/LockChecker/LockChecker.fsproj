@@ -21,10 +21,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AST.Common\Common.AST.fsproj" />
-    <ProjectReference Include="..\AutomataCombinators\AutomataCombinators.fsproj" />
-    <ProjectReference Include="..\GLLAbstractParser\GLLAbstractParser.fsproj" />
-    <ProjectReference Include="..\GLLGenerator\GLLGenerator.fsproj" />
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
+      <Private>true</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\AutomataCombinators\AutomataCombinators.fsproj">
+      <Private>true</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\GLLAbstractParser\GLLAbstractParser.fsproj">
+      <Private>true</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\GLLGenerator\GLLGenerator.fsproj">
+      <Private>true</Private>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>

@@ -444,6 +444,12 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
         out.Close()
         //printfn "Different trees count: %i" !differentTreesCount
 
+    member this.GetAllExistingPaths() : seq<int<positionInInput> * int<positionInInput> * int<positionInGrammar>> =
+        // seq of triples (v1, v2, N), where v1 and v2 -- vertices in input, N -- nonterminal
+        // such that: there exists a path from v1 to v2 starting at N
+        collectAllNonTerminals roots
+        |> Seq.map (fun nonTerm -> (getLeftExtension nonTerm.Extension, getRightExtension nonTerm.Extension, nonTerm.Name))
+
     (*member this.ReduceTree (tokenToNumber : 'TokenType -> int) (indToString : int -> string) : ReducedTree =
         let rec cleanTree (st : INode)  =             
             match st with 

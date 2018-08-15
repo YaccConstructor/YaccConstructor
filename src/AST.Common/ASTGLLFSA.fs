@@ -280,7 +280,34 @@ let rec getBestTree (intToString : Dictionary<int,string>) (currentNonterm : int
     
     dictionary.Add(node, !newInfo)
     !newInfo
-    
+
+let private collectAllNonTerminals (roots : seq<INode>) =
+    let toProcessQueue = new Queue<INode>(roots)
+    let used = new HashSet<INode>()
+
+    let enqueueChildren =
+        Seq.filter (not << used.Contains)
+        >> Seq.iter toProcessQueue.Enqueue
+
+    let enqueueIfNeeded =
+        Seq.filter ((<>) Unchecked.defaultof<_>)
+        >> enqueueChildren
+
+    seq {
+        while toProcessQueue.Count <> 0 do
+            let nextNode = toProcessQueue.Dequeue()
+            used.Add(nextNode) |> ignore
+            match nextNode with
+            | :? EpsilonNode
+            | :? TerminalNode -> ()
+            | :? NonTerminalNode as nonTerm ->
+                yield nonTerm
+                enqueueChildren <| nonTerm.MapChildren(fun x -> x :> INode)
+            | :? IntermidiateNode as inter -> enqueueChildren <| inter.MapChildren(fun x -> x :> INode)
+            | :? PackedNode as packed -> enqueueIfNeeded [packed.Left; packed.Right]
+            | _ -> failwith "unsupported node type"
+    }
+
 [<AllowNullLiteral>]
 type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
     member this.MinimizeBinarized() =

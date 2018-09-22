@@ -2,6 +2,7 @@
     open MatrixKernels
     open SparseGraphParsingImpl
     open AbstractAnalysis.Common
+    open MathNet.Numerics.LinearAlgebra.Double
     
     let innerZeroFloat = 0.0
     let innerOneFloat = 1.0   
@@ -36,6 +37,30 @@
             member this.ParsingMatrixInitializator graph allRules nonterminals = initMatrixMySparse graph allRules nonterminals
             member this.Multiply matrix1 matrix2 = sparseCudaGemm matrix1 matrix2 _matrixSize
             member this.Add matrix1 matrix2 = sparseCudaGeam matrix1 matrix2 _matrixSize
-            member this.Conj matrix1 matrix2 = sparseCudaGeam matrix1 matrix2 _matrixSize //to do pointwiseMinimum
+            member this.Conj matrix1 matrix2 =
+                let m1 = new SparseMatrix(matrix1.Size)
+                for x in 0..(matrix1.Nnz - 1) do
+                    let i = x / matrix1.Size
+                    let j = x % matrix1.Size
+                    m1.At(i, j, matrix1.CsrVal.[x])
+                let storage1 = m1.Storage :?> MathNet.Numerics.LinearAlgebra.Storage.SparseCompressedRowMatrixStorage<_>
+                matrix1.CsrRow.CopyTo(storage1.RowPointers, 0)
+                matrix1.CsrColInd.CopyTo(storage1.ColumnIndices, 0)
+                let m2 = new SparseMatrix(matrix2.Size)
+                for x in 0..(matrix2.Nnz - 1) do
+                    let i = x / matrix2.Size
+                    let j = x % matrix2.Size
+                    m2.At(i, j, matrix2.CsrVal.[x])
+                let storage2 = m2.Storage :?> MathNet.Numerics.LinearAlgebra.Storage.SparseCompressedRowMatrixStorage<_>
+                matrix2.CsrRow.CopyTo(storage2.RowPointers, 0)
+                matrix2.CsrColInd.CopyTo(storage2.ColumnIndices, 0)
+                let result = m1.PointwiseMinimum(m2) :?> SparseMatrix
+                let storage = result.Storage :?> MathNet.Numerics.LinearAlgebra.Storage.SparseCompressedRowMatrixStorage<_>
+                let csrVal = Array.copy storage.Values
+                let csrRow = Array.copy storage.RowPointers
+                let csrColInd = Array.copy storage.ColumnIndices
+
+                new MySparseMatrix(result.RowCount, result.NonZerosCount, csrVal, csrRow, csrColInd)
+
             member this.getNonZerosCount (matrix:MySparseMatrix) = matrix.Nnz
 

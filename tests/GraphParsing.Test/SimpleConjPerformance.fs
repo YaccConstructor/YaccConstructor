@@ -53,7 +53,8 @@ let densityTest (verticesCount:int) (edgesCount:int) grammarFile =
     let fe = new Yard.Frontends.YardFrontend.YardFrontend()
     let loadIL = fe.ParseGrammar grammarFile
 
-    let root, time, countOfPairs = testSparseCPU cnt graph loadIL SimpleTokenizer 1
+    //let root, time, countOfPairs = testSparseCPU cnt graph loadIL SimpleTokenizer 1
+    let root, time, countOfPairs = testSparseGPU cnt graph loadIL SimpleTokenizer 1
 
     verticesCount, edgesCount, time, countOfPairs
 
@@ -96,7 +97,8 @@ let densityBNFTest (verticesCount:int) (edgesCount:int) grammarFile =
                         |> applyConversion expandTopLevelAlt
                         |> applyConversion conversionBNFconj
 
-    let root, time, countOfPairs = testSparseCPU cnt graph result SimpleTokenizer 1
+    //let root, time, countOfPairs = testSparseCPU cnt graph result SimpleTokenizer 1
+    let root, time, countOfPairs = testSparseGPU cnt graph loadIL SimpleTokenizer 1
 
     verticesCount, edgesCount, time, countOfPairs
 

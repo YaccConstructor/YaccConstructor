@@ -350,14 +350,12 @@ type ``Graph parsing tests``() =
         graph.AddVertex(2) |> ignore
         graph.AddVertex(3) |> ignore
         graph.AddVertex(4) |> ignore
-        graph.AddVertex(5) |> ignore
         graph.AddEdge(new ParserEdge<_>(0, 0, 1<token>)) |> ignore
         graph.AddEdge(new ParserEdge<_>(0, 1, 1<token>)) |> ignore
         graph.AddEdge(new ParserEdge<_>(1, 2, 2<token>)) |> ignore
         graph.AddEdge(new ParserEdge<_>(2, 3, 2<token>)) |> ignore
         graph.AddEdge(new ParserEdge<_>(2, 4, 3<token>)) |> ignore
         graph.AddEdge(new ParserEdge<_>(3, 3, 3<token>)) |> ignore
-        graph.AddEdge(new ParserEdge<_>(4, 5, 3<token>)) |> ignore
 
         let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "Conj_abc_bnf.yrd")
         let fe = new Yard.Frontends.YardFrontend.YardFrontend()
@@ -374,9 +372,6 @@ type ``Graph parsing tests``() =
         assert (parsingMatrix.[S].At(0,3) > 0.0 && parsingMatrix.[S].At(0,4) > 0.0)
         printfn "SparseCPU Multiplacation count: %d" multCount
         sparseMatrixPrint parsingMatrix.[S]
-        let (parsingMatrix2,S2,_,multCount2) = graphParse<MySparseMatrix, float> graph (new MySparseHandler(graph.VertexCount)) loadIL tokenizer 1
-        printfn "SparseGPU Multiplacation count: %d" multCount2
-        MySparsePrint parsingMatrix2.[S2]
 
     [<Test>]
     member this._11_Conj_SimpleAprox () =
@@ -544,18 +539,8 @@ type ``Graph parsing tests``() =
         RDFChecker parsingResults
 
     [<Test>]
-    member this._Conj_RDF_GPPerf1_SparseGPU () =
-        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, CONJ_RDF_GPPERF1_GRAMMAR_FILE, (testFileRDF testSparseGPU rdffile CONJ_RDF_GPPERF1_GRAMMAR_FILE)))
-        RDFChecker parsingResults
-
-    [<Test>]
     member this._Conj_RDF_GPPerf2_SparseCPU () =
         let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, CONJ_RDF_GPPERF2_GRAMMAR_FILE, (testFileRDF testSparseCPU rdffile CONJ_RDF_GPPERF2_GRAMMAR_FILE)))
-        RDFChecker parsingResults
-
-    [<Test>]
-    member this._Conj_RDF_GPPerf2_SparseGPU () =
-        let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, CONJ_RDF_GPPERF2_GRAMMAR_FILE, (testFileRDF testSparseGPU rdffile CONJ_RDF_GPPERF2_GRAMMAR_FILE)))
         RDFChecker parsingResults
 
 
@@ -589,9 +574,7 @@ let f x =
 //    t._RDF_GPPerf2_DenseGPU2 ()
 //    t._RDF_GPPerf2_SparseGPU ()
 //    t._Conj_RDF_GPPerf1_SparseCPU ()
-//    t._Conj_RDF_GPPerf1_SparseGPU ()
 //    t._Conj_RDF_GPPerf2_SparseCPU ()
-//    t._Conj_RDF_GPPerf2_SparseGPU ()
 //    YC.GraphParsing.Tests.RDFPerformance.performTests ()
 //    YC.GraphParsing.Tests.BioPerformance.performTests ()
 //    YC.GraphParsing.Tests.AliasAndTaintPerformance.performTests ()

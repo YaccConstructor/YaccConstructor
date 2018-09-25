@@ -427,6 +427,54 @@
 
         !nnzC, csrValPtrC, csrRowPtrC, csrColIndPtrC
 
+
+    let fastSparseCudaGeamSubtraction (matrix1:int * CudaDeviceVariable<float> * CudaDeviceVariable<int> * CudaDeviceVariable<int>)
+                            (matrix2:int * CudaDeviceVariable<float> * CudaDeviceVariable<int> * CudaDeviceVariable<int>)
+                            matrixSize refcnt =
+        let (nnzA, csrValPtrA, csrRowPtrA, csrColIndPtrA) = matrix1
+        let (nnzB, csrValPtrB, csrRowPtrB, csrColIndPtrB) = matrix2
+
+        let transa = cusparseOperation.NonTranspose
+        let transb = cusparseOperation.NonTranspose
+        let descrA = new cusparseMatDescr()      
+        let descrB = new cusparseMatDescr()       
+        let descrC = new cusparseMatDescr()       
+        let refdescrA = ref descrA
+        CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrA) |> ignore
+        let refdescrB = ref descrB
+        CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrB) |> ignore
+        let refdescrC = ref descrC
+        CudaSparseNativeMethods.cusparseCreateMatDescr(refdescrC) |> ignore
+
+        let mutable csrRowPtrC : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
+        let mutable nnzTotalDevHostPtr : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(1))
+        
+        let nnzC = ref 0
+
+        let status1 = CudaSparseNativeMethods.cusparseXcsrgeamNnz(!refcnt, matrixSize, matrixSize,
+                                                !refdescrA, nnzA, csrRowPtrA.DevicePointer, csrColIndPtrA.DevicePointer,
+                                                !refdescrB, nnzB, csrRowPtrB.DevicePointer, csrColIndPtrB.DevicePointer,
+                                                !refdescrC, csrRowPtrC.DevicePointer, nnzTotalDevHostPtr.DevicePointer)
+
+        nnzTotalDevHostPtr.CopyToHost(nnzC)
+
+        let mutable csrColIndPtrC : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(!nnzC))
+        let mutable csrValPtrC : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(!nnzC))
+
+        let alpha_ref = ref 1.0
+        let beta_ref = ref -1.0
+
+        let status2 = CudaSparseNativeMethods.cusparseDcsrgeam(!refcnt, matrixSize, matrixSize, alpha_ref,
+                                                !refdescrA, nnzA, csrValPtrA.DevicePointer, csrRowPtrA.DevicePointer, csrColIndPtrA.DevicePointer,
+                                                beta_ref, !refdescrB, nnzB, csrValPtrB.DevicePointer, csrRowPtrB.DevicePointer, csrColIndPtrB.DevicePointer,
+                                                !refdescrC, csrValPtrC.DevicePointer, csrRowPtrC.DevicePointer, csrColIndPtrC.DevicePointer)
+
+
+        nnzTotalDevHostPtr.Dispose()
+
+        !nnzC, csrValPtrC, csrRowPtrC, csrColIndPtrC
+
+
     let cusparseTransitiveClosure (parsingMatrix : ParsingMatrix<MySparseMatrix>) (allRules : BooleanRulesHolder) 
                                         (nonterminals:ResizeArray<NonTerminal>) matrixSize =
 
@@ -525,6 +573,206 @@
                     csrRow.Dispose()
                     csrColInd.Dispose()
                 conjDeviceMatrices.Remove(nt1,nt2) |> ignore
+            //printfn "Iteration done"
+            multCount <- multCount + 1
+        
+        let resultMatrix = new ParsingMatrix<MySparseMatrix>()
+        for nonterm in nonterminals do
+            let curnnz, csrVal, csrRow, csrColInd = deviceMatrices.[nonterm]
+            if curnnz <> 0 then
+                let csrValArray = Array.init curnnz (fun x -> 0.0)        
+                csrVal.CopyToHost(csrValArray)
+                csrVal.Dispose()
+                let csrRowArray = Array.init (matrixSize + 1) (fun x -> 0)        
+                csrRow.CopyToHost(csrRowArray)
+                csrRow.Dispose()
+                let csrColIndArray = Array.init curnnz (fun x -> 0)        
+                csrColInd.CopyToHost(csrColIndArray)
+                csrColInd.Dispose()
+                deviceMatrices.Remove(nonterm) |> ignore
+                resultMatrix.Add(nonterm, new MySparseMatrix(matrixSize, curnnz, csrValArray, csrRowArray, csrColIndArray))
+            else
+                let csrValArray = Array.init 0 (fun x -> 0.0)        
+                let csrRowArray = Array.init (matrixSize + 1) (fun x -> 0)        
+                let csrColIndArray = Array.init 0 (fun x -> 0)        
+                deviceMatrices.Remove(nonterm) |> ignore
+                resultMatrix.Add(nonterm, new MySparseMatrix(matrixSize, 0, csrValArray, csrRowArray, csrColIndArray))
+        
+        csrValFakePtr.Dispose()
+        csrRowFakePtr.Dispose()
+        csrColIndFakePtr.Dispose()
+
+        (resultMatrix, multCount)
+
+
+    let cusparseTransitiveClosureSemiNaive (parsingMatrix : ParsingMatrix<MySparseMatrix>) (allRules : BooleanRulesHolder) 
+                                        (nonterminals:ResizeArray<NonTerminal>) matrixSize =
+
+        let sparsecntx = new cusparseContext()
+        let mutable refcnt = ref sparsecntx
+        CudaSparseNativeMethods.cusparseCreate(refcnt) |> ignore
+
+        let mutable csrValFakePtr : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(1))
+        let mutable csrRowFakePtr : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(1))
+        let mutable csrColIndFakePtr : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(1))            
+        let fakeDeviceMatrix = (0, csrValFakePtr, csrRowFakePtr, csrColIndFakePtr)
+
+        let deviceMatrices = new Dictionary<NonTerminal, int * CudaDeviceVariable<float> * CudaDeviceVariable<int> * CudaDeviceVariable<int>>()
+        let deviceNewMatrices = new Dictionary<NonTerminal, int * CudaDeviceVariable<float> * CudaDeviceVariable<int> * CudaDeviceVariable<int>>()
+        for nonterm in nonterminals do
+            let curNNZ = parsingMatrix.[nonterm].Nnz
+            if curNNZ = 0 then
+                deviceMatrices.Add(nonterm, fakeDeviceMatrix)
+            else
+                let mutable csrValPtr : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(curNNZ))
+                csrValPtr.CopyToDevice(parsingMatrix.[nonterm].CsrVal)
+                let mutable csrRowPtr : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
+                csrRowPtr.CopyToDevice(parsingMatrix.[nonterm].CsrRow)
+                let mutable csrColIndPtr : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(curNNZ))            
+                csrColIndPtr.CopyToDevice(parsingMatrix.[nonterm].CsrColInd)
+                deviceMatrices.Add(nonterm, (curNNZ, csrValPtr, csrRowPtr, csrColIndPtr))
+
+                let mutable csrValPtrNew : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(curNNZ))
+                csrValPtrNew.CopyToDevice(parsingMatrix.[nonterm].CsrVal)
+                let mutable csrRowPtrNew : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
+                csrRowPtrNew.CopyToDevice(parsingMatrix.[nonterm].CsrRow)
+                let mutable csrColIndPtrNew : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(curNNZ))            
+                csrColIndPtrNew.CopyToDevice(parsingMatrix.[nonterm].CsrColInd)
+                deviceNewMatrices.Add(nonterm, (curNNZ, csrValPtrNew, csrRowPtrNew, csrColIndPtrNew))
+
+        let allConjuncts = allRules.AllConjuncts
+
+        let conjDeviceMatrices = new Dictionary<NonTerminal*NonTerminal, int * CudaDeviceVariable<float> * CudaDeviceVariable<int> * CudaDeviceVariable<int>>()
+
+        let isChanged = ref true
+        let mutable multCount = 0
+
+        while !isChanged do
+            isChanged := false
+            for (nt1, nt2) in allConjuncts do
+                if deviceNewMatrices.ContainsKey(nt1) && deviceNewMatrices.ContainsKey(nt2) then                    
+                    let resultDeviceMatrix1 = fastSparseCudaGemm deviceNewMatrices.[nt1] deviceMatrices.[nt2] matrixSize refcnt fakeDeviceMatrix
+                    let resultDeviceMatrix2 = fastSparseCudaGemm deviceMatrices.[nt1] deviceNewMatrices.[nt2] matrixSize refcnt fakeDeviceMatrix
+                    let nonZ1, csrVal1, csrRow1, csrColInd1 = resultDeviceMatrix1
+                    let nonZ2, csrVal2, csrRow2, csrColInd2 = resultDeviceMatrix2
+                    if (nonZ1<>0) && (nonZ2<>0) then
+                        conjDeviceMatrices.Add((nt1, nt2), fastSparseCudaGeam resultDeviceMatrix1 resultDeviceMatrix2 matrixSize refcnt)
+                        csrVal1.Dispose()
+                        csrRow1.Dispose()
+                        csrColInd1.Dispose()
+                        csrVal2.Dispose()
+                        csrRow2.Dispose()
+                        csrColInd2.Dispose()
+                    elif nonZ1<>0 then
+                        conjDeviceMatrices.Add((nt1, nt2), resultDeviceMatrix1)
+                    elif nonZ2<>0 then
+                        conjDeviceMatrices.Add((nt1, nt2), resultDeviceMatrix2)
+                elif deviceNewMatrices.ContainsKey(nt1) then
+                    let resultDeviceMatrix = fastSparseCudaGemm deviceNewMatrices.[nt1] deviceMatrices.[nt2] matrixSize refcnt fakeDeviceMatrix
+                    let nonZ, csrVal, csrRow, csrColInd = resultDeviceMatrix
+                    if nonZ <> 0 then
+                        conjDeviceMatrices.Add((nt1, nt2), resultDeviceMatrix)
+                elif deviceNewMatrices.ContainsKey(nt2) then
+                    let resultDeviceMatrix = fastSparseCudaGemm deviceMatrices.[nt1] deviceNewMatrices.[nt2] matrixSize refcnt fakeDeviceMatrix
+                    let nonZ, csrVal, csrRow, csrColInd = resultDeviceMatrix
+                    if nonZ <> 0 then
+                        conjDeviceMatrices.Add((nt1, nt2), resultDeviceMatrix)
+
+            for nonterm in deviceNewMatrices.Keys do
+                let _, csrVal, csrRow, csrColInd = deviceNewMatrices.[nonterm]
+                csrVal.Dispose()
+                csrRow.Dispose()
+                csrColInd.Dispose()
+
+            deviceNewMatrices.Clear()
+
+            for (nonTerm,_), conjuncts in allRules.ComplexRules do
+                
+                let nonZ, csrVal, csrRow, csrColInd = deviceMatrices.[nonTerm]
+                if conjuncts.Length = 1 //for context-free rules
+                then
+                    let n1, n2, _ = conjuncts.[0]
+                    if conjDeviceMatrices.ContainsKey(n1,n2) then
+                        let resultMatrix = conjDeviceMatrices.[n1,n2]
+                        let resultNnz,resultCsrVal,resultCsrRow,resultCsrColInd = resultMatrix
+                        if nonZ = 0 then
+                            deviceMatrices.Remove(nonTerm) |> ignore
+
+                            let mutable csrValPtr : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(resultNnz))
+                            let csrValArray = Array.init resultNnz (fun x -> 1.0)
+                            csrValPtr.CopyToDevice(csrValArray)
+                            let mutable csrRowPtr : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
+                            let csrRowArray = Array.init (matrixSize + 1) (fun x -> 0)
+                            resultCsrRow.CopyToHost(csrRowArray)
+                            csrRowPtr.CopyToDevice(csrRowArray)
+                            let mutable csrColIndPtr : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(resultNnz))
+                            let csrColIndArray = Array.init resultNnz (fun x -> 0)  
+                            resultCsrColInd.CopyToHost(csrColIndArray)
+                            csrColIndPtr.CopyToDevice(csrColIndArray)
+                            deviceMatrices.Add(nonTerm, (resultNnz, csrValPtr, csrRowPtr, csrColIndPtr))
+
+                            let mutable csrValPtrNew : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(resultNnz))
+                            csrValPtrNew.CopyToDevice(csrValArray)
+                            let mutable csrRowPtrNew : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(matrixSize + 1))
+                            csrRowPtrNew.CopyToDevice(csrRowArray)
+                            let mutable csrColIndPtrNew : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(resultNnz))
+                            csrColIndPtrNew.CopyToDevice(csrColIndArray)
+                            deviceNewMatrices.Add(nonTerm, (resultNnz, csrValPtrNew, csrRowPtrNew, csrColIndPtrNew))
+                        else
+                            let updatedMatrix = fastSparseCudaGeam deviceMatrices.[nonTerm] resultMatrix matrixSize refcnt
+                            let updatedNonZ, UpdatedCsrVal, UpdatedCsrRow, UpdatedCsrColInd = updatedMatrix
+                            let csrValArray = Array.init updatedNonZ (fun x -> 1.0)
+                            UpdatedCsrVal.CopyToDevice(csrValArray)
+
+                            let updatedNewMatrix = fastSparseCudaGeamSubtraction (updatedNonZ, UpdatedCsrVal, UpdatedCsrRow, UpdatedCsrColInd) deviceMatrices.[nonTerm] matrixSize refcnt
+                            let newNnz,newCsrVal,newCsrRow,newCsrColInd = updatedNewMatrix
+
+                            csrVal.Dispose()
+                            csrRow.Dispose()
+                            csrColInd.Dispose()
+                            deviceMatrices.Remove(nonTerm) |> ignore
+                            deviceMatrices.Add(nonTerm, (updatedNonZ, UpdatedCsrVal, UpdatedCsrRow, UpdatedCsrColInd))
+                            
+                            if (newNnz<>0) && deviceNewMatrices.ContainsKey(nonTerm) then
+                                let finalMatrix = fastSparseCudaGeam updatedNewMatrix deviceNewMatrices.[nonTerm] matrixSize refcnt
+                                let deviceNewNnz, deviceNewVal, deviceNewRow, deviceNewCol = deviceNewMatrices.[nonTerm]
+                                deviceNewVal.Dispose()
+                                deviceNewRow.Dispose()
+                                deviceNewCol.Dispose()
+                                deviceNewMatrices.Remove(nonTerm) |> ignore
+                                deviceNewMatrices.Add(nonTerm, finalMatrix)
+                            elif (newNnz<>0) then
+                                deviceNewMatrices.Add(nonTerm, updatedNewMatrix)
+
+                (*else //to do for conjunctive rules
+                    let resultMatrices = conjuncts |> Array.map (fun (n1,n2,_) -> conjDeviceMatrices.[n1,n2])
+                    let resultConjMatrix = resultMatrices |> Array.fold (fun acc elem -> fastSparseCudaGeam acc elem matrixSize refcnt) resultMatrices.[0]
+                    let resultNnz,_,_,_ = resultConjMatrix
+                    if (nonZ = 0) && (resultNnz <> 0) then
+                        csrVal.Dispose()
+                        csrRow.Dispose()
+                        csrColInd.Dispose()
+                        deviceMatrices.Remove(nonTerm) |> ignore
+                        deviceMatrices.Add(nonTerm, resultConjMatrix)
+                    elif resultNnz <> 0 then
+                        let updatedMatrix = fastSparseCudaGeam deviceMatrices.[nonTerm] resultConjMatrix matrixSize refcnt //need pointwise minimum instead of geam
+                        csrVal.Dispose()
+                        csrRow.Dispose()
+                        csrColInd.Dispose()
+                        deviceMatrices.Remove(nonTerm) |> ignore
+                        deviceMatrices.Add(nonTerm, updatedMatrix)*)
+
+                let newNnz,_,_,_ = deviceMatrices.[nonTerm]
+                if (nonZ <> newNnz)
+                then 
+                    isChanged := true
+                
+            for (nt1, nt2) in conjDeviceMatrices.Keys do
+                let curnnz, csrVal, csrRow, csrColInd = conjDeviceMatrices.[nt1, nt2]
+                csrVal.Dispose()
+                csrRow.Dispose()
+                csrColInd.Dispose()
+            conjDeviceMatrices.Clear()
             //printfn "Iteration done"
             multCount <- multCount + 1
         

@@ -543,6 +543,40 @@ type ``Graph parsing tests``() =
         let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, CONJ_RDF_GPPERF2_GRAMMAR_FILE, (testFileRDF testSparseCPU rdffile CONJ_RDF_GPPERF2_GRAMMAR_FILE)))
         RDFChecker parsingResults
 
+    [<Test>]
+    member this._WorstCaseCycles() =
+        let cnt = 3
+        let k = 4
+        let graph = new SimpleInputGraph<int<token>>([||], id)
+
+        for i in 0..((pown 2 (k+1)) - 1) do
+            graph.AddVertex(i) |> ignore
+
+        for i in 0..((pown 2 k) - 1) do
+            graph.AddEdge(new ParserEdge<_>(i, i+1, 1<token>)) |> ignore
+
+        graph.AddEdge(new ParserEdge<_>((pown 2 k), 0, 1<token>)) |> ignore
+        graph.AddEdge(new ParserEdge<_>(0, (pown 2 k) + 1, 2<token>)) |> ignore
+        
+        for i in ((pown 2 k) + 1)..((pown 2 (k+1)) - 2) do
+            graph.AddEdge(new ParserEdge<_>(i, i+1, 2<token>)) |> ignore
+
+        graph.AddEdge(new ParserEdge<_>((pown 2 (k+1)) - 1, 0, 2<token>)) |> ignore
+
+        let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "PaperExampleGrammar_cnf.yrd")
+        let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+        let loadIL = fe.ParseGrammar grammarPath
+        let tokenizer str =
+            match str with
+                | "A" -> 1<token>
+                | "B" -> 2<token>
+                | _ -> -1<token>
+        let _, timeSparseGPU, resultsSparseGPU = testSparseGPU cnt graph loadIL tokenizer 1
+        let _, timeFastSparseGPU, resultsFastSparseGPU = testFastSparseGPU cnt graph loadIL tokenizer
+        let _, timeFastSparseSemiNaiveGPU, resultsFastSparseSemiNaiveGPU = testFastSparseSemiNaiveGPU cnt graph loadIL tokenizer
+
+        printfn "%A" (timeSparseGPU, resultsSparseGPU, timeFastSparseGPU, resultsFastSparseGPU, timeFastSparseSemiNaiveGPU, resultsFastSparseSemiNaiveGPU)
+
 
 
 [<EntryPoint>]
@@ -575,6 +609,7 @@ let f x =
 //    t._RDF_GPPerf2_SparseGPU ()
 //    t._Conj_RDF_GPPerf1_SparseCPU ()
 //    t._Conj_RDF_GPPerf2_SparseCPU ()
+//    t._WorstCaseCycles ()
 //    YC.GraphParsing.Tests.RDFPerformance.performTests ()
 //    YC.GraphParsing.Tests.BioPerformance.performTests ()
 //    YC.GraphParsing.Tests.AliasAndTaintPerformance.performTests ()

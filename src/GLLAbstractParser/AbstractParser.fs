@@ -42,11 +42,13 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
             new ContextFSA<_>(pos, parser.StartState, vertex, dummy))
 
     /// Stack of contexts
-    let setR = new System.Collections.Generic.Stack<ContextFSA<_>>(startContexts)
+    //let setR = new System.Collections.Generic.Stack<ContextFSA<_>>(startContexts)
+
+    let setR = new C5.IntervalHeap<_>() :> C5.IPriorityQueue<_>
     
     /// Adds new context to stack (setR)
     let pushContext posInInput posInGrammar gssVertex data =
-        setR.Push(new ContextFSA<_>(posInInput, posInGrammar, gssVertex, data))
+        setR.Add(new ContextFSAPriority<_>(posInInput, posInGrammar, gssVertex, data, 0)) |> ignore
 
     /// Adds new context to stack (setR) if it is first occurrence of this context (if SetU doesn't contain it).
     let addContext posInInput posInGrammar (gssVertex:GSSVertex) data =
@@ -77,7 +79,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
                     addContext posInInput e.Tag.StateToContinue e.Target (summLengths newData e.Tag.Data)
 
     ///Creates new descriptors.(Calls when found nonterninal in rule(on current input edge, or on some of next)))
-    let create (curContext:ContextFSA<_>) stateToContinue nonterm =        
+    let create (curContext:ContextFSAPriority<_>) stateToContinue nonterm =        
         let startV = gssVertexInstanceHolder.Get(nonterm, curContext.PosInInput)
         let vertexExists, edgeExists = gss.ContainsVertexAndEdge(startV, curContext.GssVertex, stateToContinue, curContext.Data)        
 
@@ -107,7 +109,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
                         addContext p.posInInput stateToContinue curContext.GssVertex (summLengths curContext.Data p.data))        
         else addContext curContext.PosInInput nonterm startV dummy
 
-    let eatTerm (currentContext : ContextFSA<GSSVertex>) nextToken nextPosInInput nextPosInGrammar =
+    let eatTerm (currentContext : ContextFSAPriority<GSSVertex>) nextToken nextPosInInput nextPosInGrammar =
         if buildTree
         then
             let newR = sppf.GetNodeT nextToken currentContext.PosInInput nextPosInInput
@@ -137,7 +139,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
     let startTime = ref System.DateTime.Now
 
     while setR.Count <> 0 do
-        let currentContext = setR.Pop()
+        let currentContext = setR.DeleteMin()
 
         incr processed
         if !processed = 10000000

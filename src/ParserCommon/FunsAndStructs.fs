@@ -67,6 +67,34 @@ type ParseData =
     | Length of uint16
 
 [<Struct>]
+[<CustomComparison; StructuralEquality>]
+//[<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
+type ContextFSAPriority<'GSSVertex> =
+    /// Priority for descriptors processing order specification.
+    val Priority : int<priority>
+    /// Position in input graph (packed edge+position).
+    val PosInInput         : int<positionInInput>
+    /// Current state of FSA.
+    val PosInGrammar         : int<positionInGrammar>
+    /// Current GSS node.
+    val GssVertex        : 'GSSVertex
+    /// 4 values packed in one int64: leftEdge, leftPos, rightEdge, rightPos.
+    //val LeftPos       : int<leftPosition>
+    /// Length of current result
+    val Data        : ParseData
+    new (index, state, vertex, data, priority) = {PosInInput = index; PosInGrammar = state; GssVertex = vertex; Data = data; Priority = priority}
+    override this.ToString () = "Edge:" + (CommonFuns.getEdge(this.PosInInput).ToString()) +
+                                "; PosOnEdge:" + (CommonFuns.getPosOnEdge(this.PosInInput).ToString()) +
+                                "; State:" + (this.PosInGrammar.ToString()) +
+                                //"; LeftPos:" + (this.LeftPos.ToString()) +
+                                "; Len:" + (this.Data.ToString())
+    interface System.IComparable with 
+        member x.CompareTo(y:obj) = 
+            let y = y :?> ContextFSAPriority<'GSSVertex>
+            (int x.Priority).CompareTo(y.Priority)
+
+
+[<Struct>]
 [<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
 type ContextFSA<'GSSVertex> =
     /// Position in input graph (packed edge+position).

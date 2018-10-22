@@ -13,6 +13,7 @@ type ParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<positi
                      , stateAndTokenToNewState : Dictionary<int, int<positionInGrammar>>
                      , stringToToken      : Dictionary<string,int<token>>
                      , multipleInEdges    : bool []
+                     , epsilonInputTag    : int<token>
                      , ?rightSideToRule   : string -> int
                      ) =
 
@@ -43,6 +44,7 @@ type ParserSourceGLL ( outNonterms        : (int<positionInGrammar> * int<positi
     member this.StringToToken           = strToToken
     member this.MultipleInEdges         = multipleInEdges
     member this.RightSideToRule         = rightSideToRule.Value
+    member this.EpsilonInputTag         = epsilonInputTag
 
     member this.NameToId = 
         rev (this.IntToString |> Seq.map (|KeyValue|)|> Map.ofSeq)

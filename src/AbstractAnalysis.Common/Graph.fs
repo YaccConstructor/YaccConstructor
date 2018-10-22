@@ -12,6 +12,7 @@ open System.Runtime.CompilerServices
 [<Measure>] type length
 [<Measure>] type leftPosition
 [<Measure>] type extension
+[<Measure>] type priority
 
 type LexerEdge<'l ,'br  when 'l: equality> (s, e, t) =
     inherit TaggedEdge<int,Option<'l * 'br>>(s, e, t)
@@ -26,7 +27,7 @@ type LexerEdge<'l ,'br  when 'l: equality> (s, e, t) =
 type IParserInput =
     abstract member InitialPositions   : array<int<positionInInput>>
     abstract member FinalPositions     : array<int<positionInInput>>
-    abstract member ForAllOutgoingEdges: int<positionInInput> -> (int<token> -> int<positionInInput> -> unit) -> unit
+    abstract member ForAllOutgoingEdges: int<positionInInput> -> int<priority> -> (int<token> -> int<positionInInput> -> int<priority> -> unit) -> unit
     
     abstract member PositionToString : int<positionInInput> -> string
 
@@ -74,10 +75,10 @@ type SimpleInputGraph<'tag>(initialVertices : int[], finalVertices : int[], tagT
             Array.map(fun x -> x * 1<positionInInput>) this.FinalStates
 
         [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
-        member this.ForAllOutgoingEdges curPosInInput pFun =
+        member this.ForAllOutgoingEdges curPosInInput priority pFun =
             let outEdges = int curPosInInput |> this.OutEdges
             outEdges |> Seq.iter
-                (fun e -> pFun (this.TagToToken e.Tag) (e.Target * 1<positionInInput>))
+                (fun e -> pFun (this.TagToToken e.Tag) (e.Target * 1<positionInInput>) priority)
 
         member this.PositionToString (pos : int<positionInInput>) =
             sprintf "%i" pos
@@ -93,15 +94,15 @@ type LinearInput (initialPositions, input:array<int<token>>) =
         member this.FinalPositions = [|input.Length * 1<positionInInput>|]
         
         [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
-        member this.ForAllOutgoingEdges curPosInInput pFun =
+        member this.ForAllOutgoingEdges curPosInInput priority pFun =
             if int curPosInInput < input.Length
-            then pFun input.[int curPosInInput] (curPosInInput + 1<positionInInput>)
+            then pFun input.[int curPosInInput] (curPosInInput + 1<positionInInput>) priority
 
     member this.Input = input
 
     new (input:array<int<token>>) = LinearInput ([|0<positionInInput>|], input)
 
-type LinearIputWithErrors(input: int<token> array, errorTag) = 
+type LinearIputWithErrors(input: int<token> array, epsionTag, nextSymbolsForInsert) = 
     interface IParserInput with
         member x.PositionToString(pos: int<positionInInput>): string = 
             sprintf "%i" pos
@@ -109,13 +110,13 @@ type LinearIputWithErrors(input: int<token> array, errorTag) =
         member this.InitialPositions = [|0<positionInInput>|]
         
         member this.FinalPositions = [|input.Length * 1<positionInInput>|]
-        
+
         [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
-        member this.ForAllOutgoingEdges curPosInInput pFun =
+        member this.ForAllOutgoingEdges curPosInInput priority pFun =
             if int curPosInInput < input.Length
             then 
-                pFun input.[int curPosInInput] (curPosInInput + 1<positionInInput>)
-                pFun errorTag (curPosInInput + 1<positionInInput>)
+                pFun input.[int curPosInInput] (curPosInInput + 1<positionInInput>) priority
+                pFun epsionTag (curPosInInput + 1<positionInInput>) (priority + 2<priority>)
 
     member this.Input = input
 
@@ -158,15 +159,15 @@ type GraphLabelledVertex<'tagType when 'tagType : equality> (initialVertices : '
             ) this.FinalStates
 
         [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
-        member this.ForAllOutgoingEdges curPosInInput pFun =
+        member this.ForAllOutgoingEdges curPosInInput priority pFun =
             if ((int)curPosInInput % 2) = 0 
             then 
                 let v = vBackMap.[(int)curPosInInput / 2]
-                pFun ((this.TagToToken v) * 1<token>) (curPosInInput + 1<positionInInput>)
+                pFun ((this.TagToToken v) * 1<token>) (curPosInInput + 1<positionInInput>) priority
             else 
                 let v = vBackMap.[((int)curPosInInput - 1) / 2]
                 this.OutEdges v |> Seq.iter
-                    (fun e -> pFun ((this.TagToToken e.Tag) * 1<token>) (vMap.[e.Target] * 2<positionInInput>))
+                    (fun e -> pFun ((this.TagToToken e.Tag) * 1<token>) (vMap.[e.Target] * 2<positionInInput>) priority) 
 
         member this.PositionToString (pos : int<positionInInput>) =
             sprintf "%i" pos

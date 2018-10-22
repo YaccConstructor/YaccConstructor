@@ -271,6 +271,7 @@ let getGLLparserSource (fsa : FSA)
                                          , stateAndTokenToNewState
                                          , stringToToken
                                          , multipleInEdges
+                                         , -10<token>
                                          , rightSideToRule=rightSideToRule)
 
 

@@ -193,11 +193,12 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
             |> (fun x -> (Array.ofSeq x).[0])
         
         gssRoot.P.SetP
-        |> Seq.map (fun x -> match x.data with
-                             | TreeNode n -> this.Nodes.Item (int n)
-                             | _ -> failwith "wrongType")
-        |> Seq.sortByDescending(fun x -> getRightExtension(x.getExtension()) )
-        |> Array.ofSeq
+        |> ResizeArray.map (fun x -> match x.data with
+                                     | TreeNode n -> this.Nodes.Item (int n)
+                                     | _ -> failwith "wrongType")
+        |> fun a -> a |> ResizeArray.sortBy(fun x -> -1 * getRightExtension(x.getExtension())) ; a
+        |> ResizeArray.toArray
+        
         //|> (fun x -> [|x.[0]|])
     
     member this.GetRootsForStartAndFinal (gss : GSS) (startPositions :_ []) (finalPositions :_ []) = 

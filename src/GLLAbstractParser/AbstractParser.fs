@@ -23,6 +23,7 @@ let unpackNode = function
     | _ -> failwith "Wrong type"
 
 let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) = 
+    
     let dummy = 
         if buildTree
         then TreeNode(-1<nodeMeasure>)
@@ -47,16 +48,16 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
     let setR = new C5.IntervalHeap<_>() :> C5.IPriorityQueue<_>
     
     /// Adds new context to stack (setR)
-    let pushContext posInInput posInGrammar gssVertex data =
-        setR.Add(new ContextFSAPriority<_>(posInInput, posInGrammar, gssVertex, data, 0)) |> ignore
+    let pushContext posInInput posInGrammar gssVertex data priority =
+        setR.Add(new ContextFSAPriority<_>(posInInput, posInGrammar, gssVertex, data, priority)) |> ignore
 
     /// Adds new context to stack (setR) if it is first occurrence of this context (if SetU doesn't contain it).
-    let addContext posInInput posInGrammar (gssVertex:GSSVertex) data =
+    let addContext posInInput posInGrammar (gssVertex:GSSVertex) data priority =
         if not <| gssVertex.ContainsContext posInInput posInGrammar data
-        then pushContext posInInput posInGrammar gssVertex data
+        then pushContext posInInput posInGrammar gssVertex data priority
     
     /// 
-    let rec pop (posInInput:int<positionInInput>) (gssVertex : GSSVertex) (newData : ParseData)=
+    let rec pop (posInInput:int<positionInInput>) (gssVertex : GSSVertex) (newData : ParseData) newPriority =
         let outEdges = gss.OutEdges gssVertex |> Array.ofSeq
         
         if new PoppedData(posInInput, newData) |> gssVertex.P.Add |> not then () else
@@ -68,18 +69,18 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
                     let y, n = sppf.GetNodes e.Tag.StateToContinue e.Target.Nonterm e.Tag.Data newData
                     if y <> dummy
                     then
-                        addContext posInInput e.Tag.StateToContinue e.Target y
+                        addContext posInInput e.Tag.StateToContinue e.Target y newPriority
                     if n <> dummy
                     then
-                        pop posInInput e.Target n
+                        pop posInInput e.Target n newPriority
                 else
                     if e.Tag.StateToContinue |> parser.FinalStates.Contains
                     then
-                        pop posInInput e.Target (summLengths newData e.Tag.Data)
-                    addContext posInInput e.Tag.StateToContinue e.Target (summLengths newData e.Tag.Data)
+                        pop posInInput e.Target (summLengths newData e.Tag.Data) newPriority
+                    addContext posInInput e.Tag.StateToContinue e.Target (summLengths newData e.Tag.Data) newPriority
 
     ///Creates new descriptors.(Calls when found nonterninal in rule(on current input edge, or on some of next)))
-    let create (curContext:ContextFSAPriority<_>) stateToContinue nonterm =        
+    let create (curContext:ContextFSAPriority<_>) stateToContinue nonterm newPriority =        
         let startV = gssVertexInstanceHolder.Get(nonterm, curContext.PosInInput)
         let vertexExists, edgeExists = gss.ContainsVertexAndEdge(startV, curContext.GssVertex, stateToContinue, curContext.Data)        
 
@@ -98,48 +99,64 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
                         then
                             let x = (sppf.Nodes.Item (int <| unpackNode nontermNode))
                             let newIndex = getRightExtension (x.getExtension())
-                            pop newIndex curContext.GssVertex nontermNode
+                            pop newIndex curContext.GssVertex nontermNode newPriority
                         let x = (sppf.Nodes.Item (int <| unpackNode y))
                         let newIndex = getRightExtension (x.getExtension())
-                        addContext newIndex stateToContinue curContext.GssVertex y
+                        addContext newIndex stateToContinue curContext.GssVertex y newPriority
                     else
                         if stateToContinue |> parser.FinalStates.Contains
                         then
-                            pop p.posInInput curContext.GssVertex (summLengths curContext.Data p.data)
-                        addContext p.posInInput stateToContinue curContext.GssVertex (summLengths curContext.Data p.data))        
-        else addContext curContext.PosInInput nonterm startV dummy
+                            pop p.posInInput curContext.GssVertex (summLengths curContext.Data p.data) newPriority
+                        addContext p.posInInput stateToContinue curContext.GssVertex (summLengths curContext.Data p.data) newPriority)        
+        else addContext curContext.PosInInput nonterm startV dummy newPriority
 
-    let eatTerm (currentContext : ContextFSAPriority<GSSVertex>) nextToken nextPosInInput nextPosInGrammar =
+    let eatTerm (currentContext : ContextFSAPriority<GSSVertex>) nextToken nextPosInInput nextPosInGrammar newPriority =
         if buildTree
         then
-            let newR = sppf.GetNodeT nextToken currentContext.PosInInput nextPosInInput
+            let newR = 
+                match nextToken with 
+                | Some nextToken -> sppf.GetNodeT nextToken currentContext.PosInInput nextPosInInput
+                | None -> currentContext.Data
+
             let y, nontermNode = sppf.GetNodes nextPosInGrammar currentContext.GssVertex.Nonterm currentContext.Data newR
 
             if nontermNode <> dummy
             then
-                pop nextPosInInput currentContext.GssVertex nontermNode 
+                pop nextPosInInput currentContext.GssVertex nontermNode newPriority
         
             if parser.MultipleInEdges.[int nextPosInGrammar]
             then 
-                addContext nextPosInInput nextPosInGrammar currentContext.GssVertex y
+                addContext nextPosInInput nextPosInGrammar currentContext.GssVertex y newPriority
             else
-                pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex y
+                pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex y newPriority
         else
             if nextPosInGrammar |> parser.FinalStates.Contains
             then
-                pop nextPosInInput currentContext.GssVertex (summLengths currentContext.Data (Length(1us)))
+                pop nextPosInInput currentContext.GssVertex (summLengths currentContext.Data (Length(1us))) newPriority
             
             if parser.MultipleInEdges.[int nextPosInGrammar]
             then 
-                addContext nextPosInInput nextPosInGrammar currentContext.GssVertex (summLengths currentContext.Data (Length(1us)))
+                addContext nextPosInInput nextPosInGrammar currentContext.GssVertex (summLengths currentContext.Data (Length(1us))) newPriority
             else
-                pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex (summLengths currentContext.Data (Length(1us)))
+                pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex (summLengths currentContext.Data (Length(1us))) newPriority
+    
+    
     let processed = ref 0
     let mlnCount = ref 0
     let startTime = ref System.DateTime.Now
+    let inErrorRecoveryMode = ref false
 
-    while setR.Count <> 0 do
+    let inline isParsed () = 
+        match input with
+        | :? LinearIputWithErrors as input ->
+            gss.Vertices
+            |> Seq.filter (fun v -> v.Nonterm = parser.StartState)
+            |> Seq.exists (fun v -> v.P.SetP |> ResizeArray.exists (fun p -> int p.posInInput = input.Input.Length))
+        | _ -> false
+
+    while setR.Count <> 0 || (!inErrorRecoveryMode && isParsed ()) do
         let currentContext = setR.DeleteMin()
+        inErrorRecoveryMode := currentContext.Priority > 0<priority>
 
         incr processed
         if !processed = 10000000
@@ -158,22 +175,25 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
             then
                 let eps = sppf.GetNodeT epsilon currentContext.PosInInput currentContext.PosInInput
                 let _, nontermNode = sppf.GetNodes currentContext.PosInGrammar currentContext.GssVertex.Nonterm dummy eps
-                pop currentContext.PosInInput currentContext.GssVertex nontermNode
+                pop currentContext.PosInInput currentContext.GssVertex nontermNode currentContext.Priority
             else
-                pop currentContext.PosInInput currentContext.GssVertex dummy
+                pop currentContext.PosInInput currentContext.GssVertex dummy currentContext.Priority
         
         /// Nonterminal transitions. Move pointer in grammar. Position in input is not changed.
         for curNonterm, nextState in possibleNontermMovesInGrammar do            
-            create currentContext nextState curNonterm
+            create currentContext nextState curNonterm currentContext.Priority
 
         /// Terminal transitions.
         input.ForAllOutgoingEdges
             currentContext.PosInInput
-            (fun nextToken nextPosInInput -> 
-                let isTransitionPossible, nextPosInGrammar = parser.StateAndTokenToNewState.TryGetValue (parser.GetTermsDictionaryKey currentContext.PosInGrammar (int nextToken))
-                if isTransitionPossible
-                then eatTerm currentContext nextToken nextPosInInput nextPosInGrammar
-                   //pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex (currentContext.Length + 1us)
+            currentContext.Priority
+            (fun nextToken nextPosInInput newPriority -> 
+                if nextToken = parser.EpsilonInputTag
+                then
+                    let isTransitionPossible, nextPosInGrammar = parser.StateAndTokenToNewState.TryGetValue (parser.GetTermsDictionaryKey currentContext.PosInGrammar (int nextToken))
+                    if isTransitionPossible
+                    then eatTerm currentContext (Some nextToken) nextPosInInput nextPosInGrammar newPriority
+                else eatTerm currentContext None nextPosInInput currentContext.PosInGrammar newPriority
             )
 
     gss, sppf,

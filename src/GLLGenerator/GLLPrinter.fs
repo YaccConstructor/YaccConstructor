@@ -240,7 +240,8 @@ let getGLLparserSource (fsa : FSA)
         stateAndTokenToNewState.Add(packed, newState)
 
     let intToString = new Dictionary<int, string>()
-    
+    intToString.Add(-10,"ErrEps")
+
     for tokenNumber in stringToToken do
         let cond, _ = intToString.TryGetValue(int tokenNumber.Value)
         if cond then failwith "multiple terminal names for one int"

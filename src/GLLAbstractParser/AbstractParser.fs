@@ -40,12 +40,13 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
         |> Array.map(fun pos -> 
             let vertex = gssVertexInstanceHolder.Get(parser.StartState, pos)
             gss.AddVertex vertex |> ignore
-            new ContextFSA<_>(pos, parser.StartState, vertex, dummy))
+            new ContextFSAPriority<_>(pos, parser.StartState, vertex, dummy, 0<priority>))
 
     /// Stack of contexts
     //let setR = new System.Collections.Generic.Stack<ContextFSA<_>>(startContexts)
 
     let setR = new C5.IntervalHeap<_>() :> C5.IPriorityQueue<_>
+    setR.AddAll(startContexts)
     
     /// Adds new context to stack (setR)
     let pushContext posInInput posInGrammar gssVertex data priority =
@@ -116,7 +117,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
             let newR = 
                 match nextToken with 
                 | Some nextToken -> sppf.GetNodeT nextToken currentContext.PosInInput nextPosInInput
-                | None -> currentContext.Data
+                | None -> sppf.GetNodeT (-10<token>) currentContext.PosInInput nextPosInInput //currentContext.Data
 
             let y, nontermNode = sppf.GetNodes nextPosInGrammar currentContext.GssVertex.Nonterm currentContext.Data newR
 
@@ -154,7 +155,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
             |> Seq.exists (fun v -> v.P.SetP |> ResizeArray.exists (fun p -> int p.posInInput = input.Input.Length))
         | _ -> false
 
-    while setR.Count <> 0 || (!inErrorRecoveryMode && isParsed ()) do
+    while not (setR.Count = 0 || (!inErrorRecoveryMode && isParsed ())) do
         let currentContext = setR.DeleteMin()
         inErrorRecoveryMode := currentContext.Priority > 0<priority>
 
@@ -188,7 +189,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) =
             currentContext.PosInInput
             currentContext.Priority
             (fun nextToken nextPosInInput newPriority -> 
-                if nextToken = parser.EpsilonInputTag
+                if nextToken <> parser.EpsilonInputTag
                 then
                     let isTransitionPossible, nextPosInGrammar = parser.StateAndTokenToNewState.TryGetValue (parser.GetTermsDictionaryKey currentContext.PosInGrammar (int nextToken))
                     if isTransitionPossible

@@ -385,7 +385,7 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
                         nodeQueue.Enqueue(new NumNode<INode>(!num, i.First))
                     if i.Others <> null
                     then
-                        printfn "* %i" (i.Others.Count+1)
+                        //printfn "* %i" (i.Others.Count+1)
                         differentTreesCount := !differentTreesCount * (i.Others.Count+1)
                         for nodes in i.Others do
                             nodeQueue.Enqueue(new NumNode<INode>(!num, nodes))

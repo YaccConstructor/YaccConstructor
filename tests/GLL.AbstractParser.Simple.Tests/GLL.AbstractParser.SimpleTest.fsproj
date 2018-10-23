@@ -69,9 +69,6 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="paket.references" />
-    <Compile Include="GPPerf1.yrd.fs" />
-    <Compile Include="GPPerf2.yrd.fs" />
-    <Compile Include="RDFPerformance.fs" />
     <Compile Include="GraphLabelledVertexTests.fs" />
     <Compile Include="ErrorRecovery.fs" />
     <Compile Include="Program.fs" />

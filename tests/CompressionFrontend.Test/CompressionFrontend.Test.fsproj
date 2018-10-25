@@ -34,6 +34,7 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\CompressionFrontend.Test.XML</DocumentationFile>
   </PropertyGroup>
+<Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

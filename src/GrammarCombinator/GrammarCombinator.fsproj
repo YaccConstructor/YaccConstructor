@@ -36,6 +36,7 @@
     <WarningLevel>3</WarningLevel>
     <OtherFlags>--warnon:1182</OtherFlags>
   </PropertyGroup>
+<Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
   <ItemGroup>
     <Reference Include="FSharp.Quotations.Evaluator, Version=1.0.7.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\packages\FSharp.Quotations.Evaluator\lib\net40\FSharp.Quotations.Evaluator.dll</HintPath>

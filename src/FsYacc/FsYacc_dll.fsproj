@@ -23,6 +23,7 @@
     <OutputPath>..\Bin\Release\v40\</OutputPath>
   </PropertyGroup>
   <Import Project="../YC.targets" />
+<Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
   <Import Project="$(FSharpPowerPackSourcesRoot)\FSharpPowerPackSource.targets" />
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(FSharpPowerPackSourcesRoot)\..\lkg\FSharp.PowerPack-$(LkgVersion)\bin\FSharp.PowerPack.targets" />

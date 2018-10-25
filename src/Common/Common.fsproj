@@ -32,6 +32,7 @@
     <DocumentationFile>
     </DocumentationFile>
   </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
   <Import Project="../YC.targets" />
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>

@@ -38,6 +38,7 @@
     <DocumentationFile>bin\Release\GLL.AbstractParser.Bio.Test.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+<Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="System" />

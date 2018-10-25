@@ -38,6 +38,7 @@
     <DocumentationFile>bin\Release\BottomUpParsingViaAutomataIntersection.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+<Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="System" />

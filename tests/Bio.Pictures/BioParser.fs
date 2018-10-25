@@ -53,7 +53,8 @@ type BioParser(grammar) =
         graph
     
     member private this.parse<'MatrixType> handler input =
-        graphParse<'MatrixType, _> (buildInputGraph input) handler finalIL tokenizer 1
+        graphParseGPU  (buildInputGraph input) finalIL tokenizer
+        //graphParse<'MatrixType, _> (buildInputGraph input) handler finalIL tokenizer 1
     
     member val StartNonTerm = startN with get
 
@@ -70,6 +71,9 @@ type BioParser(grammar) =
             in GPU dict
         else 
             let dict, _, _, _ = 
-                this.parse<SparseMatrix> (new SparseHandler(input.Length + 1)) input
+                this.parse<MySparseMatrix> (new MySparseHandler(input.Length + 1)) input
                 //this.parse<System.Collections.BitArray> (new DenseBitMatrix.DenseBitHandler(input.Length + 1)) input
-            in CPU dict 
+            in GPU dict
+                //this.parse<SparseMatrix> (new SparseHandler(input.Length + 1)) input
+                //this.parse<System.Collections.BitArray> (new DenseBitMatrix.DenseBitHandler(input.Length + 1)) input
+            //in CPU dict 

@@ -33,6 +33,7 @@
     <Compile Include="FsYaccPrinter.fs" />
     <None Include="paket.references" />
   </ItemGroup>
+<Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="System" />

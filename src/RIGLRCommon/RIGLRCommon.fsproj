@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="ParserSource.fs" />
   </ItemGroup>
+<Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>

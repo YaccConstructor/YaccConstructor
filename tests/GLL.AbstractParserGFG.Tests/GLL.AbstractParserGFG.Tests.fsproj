@@ -35,6 +35,7 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\GLL.AbstractParserGFG.Tests.XML</DocumentationFile>
   </PropertyGroup>
+<Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="System" />

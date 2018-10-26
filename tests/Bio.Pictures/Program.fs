@@ -79,16 +79,16 @@ let positiveToUIntArray isGpu fastaFile sortNum outFilePath (parser:BioParser)=
             )
 
 let drawPositiveExamples isGpu (legend:(string*Color) list) fastaFile sortNum (parser:BioParser)=
-    let data = getDataFrom16sBase fastaFile sortNum
+    let data = getData fastaFile //getDataFrom16sBase fastaFile sortNum
    // let path = "../../positive/"
    // Directory.CreateDirectory("../../positive2/") |> ignore
     for i in 0..50 do 
         let (id, gen) = data.[i]       
         let path = "../../positive/" + ([for i in 1..sortNum - 1 -> id.Split().[i]] |> String.concat("/")) + "/" 
         Directory.CreateDirectory(path) |> ignore
-        if gen.Length >= 560 then 
-            let picture = new ParsingPicture (560, parser.Parse isGpu gen)
-            picture.Draw(legend, path + id.Split().[0] + ".bmp")
+        //if gen.Length >= 560 then 
+        let picture = new ParsingPicture (gen.Length-1, parser.Parse isGpu gen)
+        picture.Draw(legend, path + id.Split().[0] + ".bmp")
 //    let path = "../../positive/" + fst(legend.[0]) + ".bmp"
 //    if (snd(data.[5000])).Length >= 560 then 
 //            let picture = new ParsingPicture (560, parser.Parse isGpu (snd(data.[5000])))
@@ -128,19 +128,9 @@ let main argv =
 //    let RGBcolors = getCombinations [tmp; tmp; tmp] |> List.map (fun x -> Color.FromArgb(x.[0],x.[1],x.[2]))
     let legend = [for i in 0..nonterms.Length-1 -> 
                                                     match nonterms.[i] with
-                                                    |"h11" -> (nonterms.[i],Color.Red)
-                                                    |"h17" -> (nonterms.[i],Color.Blue)
-                                                    |"h10" -> (nonterms.[i],Color.Green)
-                                                    |"h8" -> (nonterms.[i],Color.HotPink)
-                                                    |"h13" -> (nonterms.[i],Color.HotPink)
-                                                    |"h9" -> (nonterms.[i],Color.Violet)
-                                                    |"h15" -> (nonterms.[i],Color.Violet)
-                                                    |"h12" -> (nonterms.[i],Color.Orange)
-                                                    |"h16" -> (nonterms.[i],Color.Orange)
-                                                    |"h7" -> (nonterms.[i],Color.Orange)
-                                                    |"h14" -> (nonterms.[i],Color.Brown)
-                                                    |"h6" -> (nonterms.[i],Color.Brown)
-                                                    |_ -> (nonterms.[i],Color.Black)
+                                                    |"s1" -> (nonterms.[i],Color.Black)
+                                                    
+                                                    |_ -> (nonterms.[i],Color.White)
                                                     ]
     //let genomeFiles = 
     //"C:/Users/User/Desktop/folder/YaccConstructor/tests/data/bio/complete_genome/"
@@ -151,4 +141,6 @@ let main argv =
     //rawPositiveExamples true legend  "C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
     //positiveToUIntArray true "C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/testRNA.txt"//"C:/Users/User/Desktop/folder/GG/gg_16s_format.fasta" 2//"C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
     //negativeToUintArray true 512 512 genomeFiles outFilePath
+    //@"D:\YC\YaccConstructor\tests\data\bio\trna\semples"
+    drawPositiveExamples true legend @"D:\YC\YaccConstructor\tests\data\bio\trna\semples" 1 parser
     0

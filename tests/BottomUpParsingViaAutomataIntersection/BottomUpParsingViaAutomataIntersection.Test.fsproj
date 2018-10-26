@@ -102,11 +102,6 @@
       <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\GLL.AbstractParser.Simple.Tests\GLL.AbstractParser.SimpleTest.fsproj">
-      <Name>GLL.AbstractParser.SimpleTest</Name>
-      <Project>{61a3b851-03a0-4a87-b786-d21dfe03b9dd}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

@@ -1,15 +1,12 @@
-﻿// Learn more about F# at http://fsharp.org
-// See the 'F# Tutorial' project for more help.
-
-open System.IO
+﻿open System.IO
 open System.Drawing
 
 open Drawing
 open BioParser
 open DataPreprocessing
 open Yard.Frontends.YardFrontend
-open Yard.Core.IL.Rule
-open Yard.Core.IL.Production
+open Yard.Core.IL
+
 open Yard.Core
 open System.Collections.Generic
 
@@ -75,9 +72,9 @@ let positiveToUIntArray isGpu fastaFile sortNum outFilePath (parser:BioParser)=
         //let path = "../../positive/" + ([for i in 1..sortNum - 1 -> id.Split().[i]] |> String.concat("/")) + "/" 
         //Directory.CreateDirectory(path) |> ignore
         if gen.Length >= 512 then 
-            //let picture = toIntArray 512 "s1" (parser.Parse isGpu (gen.Substring(0,512)))  
-            let picture = toIntArray 1830 "s2" (parser.Parse isGpu gen  
-            |> fun x -> System.IO.File.AppendAllText("testout.csv",x)
+            let picture = toIntArray 512 "s1" (parser.Parse isGpu (gen.Substring(i,512)))  
+            formatOutCSVString (outFilePath + id.Split().[0]) picture "\"p\""
+            //|> fun x -> System.IO.File.AppendAllText("outGreenGenes.csv",x)
             |> fun x -> System.IO.File.AppendAllText(outFilePath, x)
             )
 
@@ -152,6 +149,6 @@ let main argv =
     //drawNegativeExamples true 560 560 legend genomeFiles
     //for i in 0..legend.Length-1 do
     //rawPositiveExamples true legend  "C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
-    positiveToUIntArray true "C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/testRNA.txt"//"C:/Users/User/Desktop/folder/GG/gg_16s_format.fasta" 2//"C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
-   // negativeToUintArray true 512 512 genomeFiles outFilePath
+    //positiveToUIntArray true "C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/testRNA.txt"//"C:/Users/User/Desktop/folder/GG/gg_16s_format.fasta" 2//"C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
+    //negativeToUintArray true 512 512 genomeFiles outFilePath
     0

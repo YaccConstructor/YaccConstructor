@@ -14,6 +14,10 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <TargetFrameworkProfile />
   </PropertyGroup>
+  <PropertyGroup>  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>..\..\Bin\Release\v40\</OutputPath>
+  </PropertyGroup>
+
   <Import Project="../YC.targets" />
 
   <PropertyGroup>

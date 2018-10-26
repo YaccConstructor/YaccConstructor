@@ -7,7 +7,7 @@ open Yard.Frontends.YardFrontend
 open Yard.Core.Conversions.ExpandMeta
 open AbstractAnalysis.Common
 open Yard.Core.Conversions
-open Yard.Core.IL.Definition
+open Yard.Core.IL
 open Yard.Core
 open Yard.Generators.YardPrinter
 
@@ -17,6 +17,7 @@ open MatrixKernels
 open GraphParsing
 open MySparseGraphParsingImpl
 open SparseGraphParsingImpl
+open Yard.Core.Conversions.CNFandBNF
 
 type ParsingResult = 
     | CPU of Dictionary<Util.NonTerminal, SparseMatrix> //System.Collections.BitArray> 
@@ -26,7 +27,7 @@ type BioParser(grammar) =
     let (conversions: Conversion list) =
         [new ExpandEbnfStrict.ExpandEbnf(); new ExpandRepet.ExpandExpand(); 
          new ExpandMeta.ExpandMeta(); new ExpandInnerAlt.ExpandInnerAlt();
-         new ExpandTopLevelAlt.ExpandTopLevelAlt(); new ToChomNormForm.ToChomNormForm()]
+         new ExpandTopLevelAlt.ExpandTopLevelAlt(); new CNF()]
     let yardFE = new YardFrontend()
     let IL = yardFE.ParseGrammar grammar
     let finalIL = 

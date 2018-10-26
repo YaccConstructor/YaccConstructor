@@ -1,9 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props"
-          Condition="Exists('..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props')" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" 
-          Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <Import Project="..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props" Condition="Exists('..\..\packages\FSharp.Compiler.Tools\build\FSharp.Compiler.Tools.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -36,7 +34,6 @@
     <WarningLevel>3</WarningLevel>
     <OtherFlags>--warnon:1182</OtherFlags>
   </PropertyGroup>
-
   <ItemGroup>
     <Reference Include="FSharp.Quotations.Evaluator, Version=1.0.7.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\packages\FSharp.Quotations.Evaluator\lib\net40\FSharp.Quotations.Evaluator.dll</HintPath>
@@ -84,18 +81,6 @@
     <ProjectReference Include="..\FsYacc\FsYacc.fsproj">
       <Project>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</Project>
       <Name>FsYacc</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\GLLAbstractParser\GLLAbstractParser.fsproj">
-      <Project>{bd40477e-7ceb-4ff4-b53f-05316f3bb6d8}</Project>
-      <Name>GLLAbstractParser</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\GLLGenerator\GLLGenerator.fsproj">
-      <Project>{8756690f-8138-495a-a368-39afb9029823}</Project>
-      <Name>GLLGenerator</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ParserCommon\GLLParsers.Common.fsproj">
-      <Project>{f2e8eda4-c13f-4f8d-b858-d5ef4fb8a06d}</Project>
-      <Name>GLLParsers.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

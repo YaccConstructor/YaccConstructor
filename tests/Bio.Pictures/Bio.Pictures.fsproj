@@ -2,14 +2,14 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>931330aa-4003-43a5-b4db-173ed8ce1b5e</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Bio.Pictures</RootNamespace>
     <AssemblyName>Bio.Pictures</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <Name>Bio.Pictures</Name>
@@ -49,7 +49,6 @@
       <HintPath>..\..\packages\YC.QuickGraph\lib\net45\YC.QuickGraph.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="DataPreprocessing.fs" />
@@ -98,11 +97,6 @@
     <ProjectReference Include="..\..\src\YardPrinter\YardPrinter.fsproj">
       <Name>YardPrinter</Name>
       <Project>{3148144c-1649-440e-a9b4-1d5c41677262}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\GraphParsing.Test\GraphParsing.Test.fsproj">
-      <Name>GraphParsing.Test</Name>
-      <Project>{dd1e36ef-ab54-42e0-b8ef-ae98adfdf6ac}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

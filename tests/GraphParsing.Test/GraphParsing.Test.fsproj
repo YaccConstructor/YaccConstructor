@@ -94,16 +94,6 @@
       <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\GLL.AbstractParser.Bio.Test\GLL.AbstractParser.Bio.Test.fsproj">
-      <Name>GLL.AbstractParser.Bio.Test</Name>
-      <Project>{e135d6c0-a1bf-444d-8878-fe5a0c02fccd}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\GLL.AbstractParser.Simple.Tests\GLL.AbstractParser.SimpleTest.fsproj">
-      <Name>GLL.AbstractParser.SimpleTest</Name>
-      <Project>{61a3b851-03a0-4a87-b786-d21dfe03b9dd}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

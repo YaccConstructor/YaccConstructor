@@ -17,7 +17,7 @@ open System.Collections.Generic
 //
 // Note: this is an OCaml compat record type. 
 #if INTERNALIZED_POWER_PACK
-type internal Position = 
+type Position = 
 #else
 type Position = 
 #endif

@@ -14,7 +14,7 @@ namespace Microsoft.FSharp.Text.Lexing
 
     // REVIEW: This type showed up on a parsing-intensive performance measurement. Consider whether it can be a struct-record later when we have this feature. -jomo
 #if INTERNALIZED_POWER_PACK
-    type internal Position = 
+    type Position = 
 #else
     type Position = 
 #endif

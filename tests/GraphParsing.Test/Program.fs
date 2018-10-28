@@ -543,10 +543,10 @@ type ``Graph parsing tests``() =
         let parsingResults = RDFfiles |> Array.map (fun rdffile -> (rdffile, CONJ_RDF_GPPERF2_GRAMMAR_FILE, (testFileRDF testSparseCPU rdffile CONJ_RDF_GPPERF2_GRAMMAR_FILE)))
         RDFChecker parsingResults
 
-    [<Test>]
+    [<Ignore("GPU tests are ignored on the build server")>]  
     member this._WorstCaseCycles() =
         let cnt = 3
-        let k = 4
+        let k = 5
         let graph = new SimpleInputGraph<int<token>>([||], id)
 
         for i in 0..((pown 2 (k+1)) - 1) do
@@ -571,11 +571,48 @@ type ``Graph parsing tests``() =
                 | "A" -> 1<token>
                 | "B" -> 2<token>
                 | _ -> -1<token>
-        let _, timeSparseGPU, resultsSparseGPU = testSparseGPU cnt graph loadIL tokenizer 1
+        //let _, timeSparseGPU, resultsSparseGPU = testSparseGPU cnt graph loadIL tokenizer 1
         let _, timeFastSparseGPU, resultsFastSparseGPU = testFastSparseGPU cnt graph loadIL tokenizer
         let _, timeFastSparseSemiNaiveGPU, resultsFastSparseSemiNaiveGPU = testFastSparseSemiNaiveGPU cnt graph loadIL tokenizer
 
-        printfn "%A" (timeSparseGPU, resultsSparseGPU, timeFastSparseGPU, resultsFastSparseGPU, timeFastSparseSemiNaiveGPU, resultsFastSparseSemiNaiveGPU)
+        printfn "%A" ((*timeSparseGPU, resultsSparseGPU,*) timeFastSparseGPU, resultsFastSparseGPU, timeFastSparseSemiNaiveGPU, resultsFastSparseSemiNaiveGPU)
+
+    [<Ignore("GPU tests are ignored on the build server")>]  
+    member this._WorstCaseMultiCycles() =
+        let cnt = 3
+        let k = 5
+        let numberOfComponents = 10
+        let graph = new SimpleInputGraph<int<token>>([||], id)
+
+        for nComp in 0..(numberOfComponents - 1) do
+            let first = nComp * (pown 2 (k + 1))
+            for i in 0..((pown 2 (k + 1)) - 1) do
+                graph.AddVertex(first + i) |> ignore
+
+            for i in 0..((pown 2 k) - 1) do
+                graph.AddEdge(new ParserEdge<_>(first + i, first + i + 1, 1<token>)) |> ignore
+
+            graph.AddEdge(new ParserEdge<_>(first + (pown 2 k), first, 1<token>)) |> ignore
+            graph.AddEdge(new ParserEdge<_>(first, first + (pown 2 k) + 1, 2<token>)) |> ignore
+        
+            for i in ((pown 2 k) + 1)..((pown 2 (k+1)) - 2) do
+                graph.AddEdge(new ParserEdge<_>(first + i, first + i + 1, 2<token>)) |> ignore
+
+            graph.AddEdge(new ParserEdge<_>(first + (pown 2 (k+1)) - 1, first, 2<token>)) |> ignore
+
+        let grammarPath = System.IO.Path.Combine(graphParsingTestPath, "PaperExampleGrammar_cnf.yrd")
+        let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+        let loadIL = fe.ParseGrammar grammarPath
+        let tokenizer str =
+            match str with
+                | "A" -> 1<token>
+                | "B" -> 2<token>
+                | _ -> -1<token>
+        //let _, timeSparseGPU, resultsSparseGPU = testSparseGPU cnt graph loadIL tokenizer 1
+        let _, timeFastSparseGPU, resultsFastSparseGPU = testFastSparseGPU cnt graph loadIL tokenizer
+        let _, timeFastSparseSemiNaiveGPU, resultsFastSparseSemiNaiveGPU = testFastSparseSemiNaiveGPU cnt graph loadIL tokenizer
+
+        printfn "%A" ((*timeSparseGPU, resultsSparseGPU,*) timeFastSparseGPU, resultsFastSparseGPU, timeFastSparseSemiNaiveGPU, resultsFastSparseSemiNaiveGPU)
 
 
 
@@ -610,6 +647,7 @@ let f x =
 //    t._Conj_RDF_GPPerf1_SparseCPU ()
 //    t._Conj_RDF_GPPerf2_SparseCPU ()
 //    t._WorstCaseCycles ()
+//    t._WorstCaseMultiCycles ()
 //    YC.GraphParsing.Tests.RDFPerformance.performTests ()
 //    YC.GraphParsing.Tests.BioPerformance.performTests ()
 //    YC.GraphParsing.Tests.AliasAndTaintPerformance.performTests ()

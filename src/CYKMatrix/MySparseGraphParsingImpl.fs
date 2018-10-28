@@ -36,6 +36,6 @@
             member this.ParsingMatrixInitializator graph allRules nonterminals = initMatrixMySparse graph allRules nonterminals
             member this.Multiply matrix1 matrix2 = sparseCudaGemm matrix1 matrix2 _matrixSize
             member this.Add matrix1 matrix2 = sparseCudaGeam matrix1 matrix2 _matrixSize
-            member this.Conj matrix1 matrix2 = sparseCudaGeam matrix1 matrix2 _matrixSize //to do pointwiseMinimum
+            member this.Conj matrix1 matrix2 = sparseCudaConj matrix1 matrix2 _matrixSize
             member this.getNonZerosCount (matrix:MySparseMatrix) = matrix.Nnz
 

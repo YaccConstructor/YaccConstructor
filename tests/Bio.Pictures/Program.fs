@@ -82,13 +82,14 @@ let drawPositiveExamples isGpu (legend:(string*Color) list) fastaFile sortNum (p
     let data = getData fastaFile //getDataFrom16sBase fastaFile sortNum
    // let path = "../../positive/"
    // Directory.CreateDirectory("../../positive2/") |> ignore
-    for i in 0..50 do 
+    for i in 0..3 do 
         let (id, gen) = data.[i]       
-        let path = "../../positive/" + ([for i in 1..sortNum - 1 -> id.Split().[i]] |> String.concat("/")) + "/" 
-        Directory.CreateDirectory(path) |> ignore
+        let path = @"D:\YC\YaccConstructor\tests\Bio.Pictures\bin\Release\"  + (string i) + ".bmp" // "../../positive/" + ([for i in 1..sortNum - 1 -> id.Split().[i]] |> String.concat("/")) + "/" 
+        printfn "path=%A"  path
+        //Directory.CreateDirectory(path) |> ignore
         //if gen.Length >= 560 then 
-        let picture = new ParsingPicture (gen.Length-1, parser.Parse isGpu gen)
-        picture.Draw(legend, path + id.Split().[0] + ".bmp")
+        let picture = new ParsingPicture (gen.Length, parser.Parse isGpu gen)
+        picture.Draw(legend, path)
 //    let path = "../../positive/" + fst(legend.[0]) + ".bmp"
 //    if (snd(data.[5000])).Length >= 560 then 
 //            let picture = new ParsingPicture (560, parser.Parse isGpu (snd(data.[5000])))
@@ -129,7 +130,7 @@ let main argv =
     let legend = [for i in 0..nonterms.Length-1 -> 
                                                     match nonterms.[i] with
                                                     |"s1" -> (nonterms.[i],Color.Black)
-                                                    
+                                                    |"s0" -> (nonterms.[i],Color.Red)
                                                     |_ -> (nonterms.[i],Color.White)
                                                     ]
     //let genomeFiles = 

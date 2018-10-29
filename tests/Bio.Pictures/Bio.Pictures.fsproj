@@ -26,6 +26,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Debug\Bio.Pictures.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
+    <StartArguments>"" "" "D:\YC\YaccConstructor\src\YC.GrammarZOO\Bio\tests\bio_brackets.yrd"</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -56,7 +57,7 @@
     <Compile Include="Drawing.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
-    <None Include="paket.references" />
+    <None Include="Copy of paket.references" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">

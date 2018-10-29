@@ -71,12 +71,16 @@ let positiveToUIntArray isGpu fastaFile sortNum outFilePath (parser:BioParser)=
         printfn "gene %A" i
         //let path = "../../positive/" + ([for i in 1..sortNum - 1 -> id.Split().[i]] |> String.concat("/")) + "/" 
         //Directory.CreateDirectory(path) |> ignore
-        if gen.Length >= 512 then 
-            let picture = toIntArray 512 "s1" (parser.Parse isGpu (gen.Substring(i,512)))  
-            formatOutCSVString (outFilePath + id.Split().[0]) picture "\"p\""
-            //|> fun x -> System.IO.File.AppendAllText("outGreenGenes.csv",x)
-            |> fun x -> System.IO.File.AppendAllText(outFilePath, x)
-            )
+        let picture = toIntArray 1830 "s2" (parser.Parse isGpu (gen.Substring(i,1830)))
+        formatOutCSVString (outFilePath + id.Split().[0]) picture "\"p\""
+        |> fun x -> System.IO.File.AppendAllText(outFilePath, x)
+        )
+//        if gen.Length >= 512 then 
+//            let picture = toIntArray 512 "s1" (parser.Parse isGpu (gen.Substring(i,512)))  
+//            formatOutCSVString (outFilePath + id.Split().[0]) picture "\"p\""
+//            //|> fun x -> System.IO.File.AppendAllText("outGreenGenes.csv",x)
+//            |> fun x -> System.IO.File.AppendAllText(outFilePath, x)
+//            )
 
 let drawPositiveExamples isGpu (legend:(string*Color) list) fastaFile sortNum (parser:BioParser)=
     let data = getData fastaFile //getDataFrom16sBase fastaFile sortNum
@@ -139,9 +143,17 @@ let main argv =
  //   let legend = [(parser.StartNonTerm, Color.Black)]
     //drawNegativeExamples true 560 560 legend genomeFiles
     //for i in 0..legend.Length-1 do
-    //rawPositiveExamples true legend  "C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
-    //positiveToUIntArray true "C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/testRNA.txt"//"C:/Users/User/Desktop/folder/GG/gg_16s_format.fasta" 2//"C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
+    
+   
+   //rawPositiveExamples true legend  "C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
+   
+    let stopWatch = System.Diagnostics.Stopwatch.StartNew()
+
+    positiveToUIntArray true "C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/testRNA.txt" 1 outFilePath parser//"C:/Users/User/Desktop/folder/GG/gg_16s_format.fasta" 2//"C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
+    stopWatch.Stop()
+    printfn "%f" stopWatch.Elapsed.TotalMilliseconds
+    System.Console.ReadKey() |> ignore
     //negativeToUintArray true 512 512 genomeFiles outFilePath
     //@"D:\YC\YaccConstructor\tests\data\bio\trna\semples"
-    drawPositiveExamples true legend @"D:\YC\YaccConstructor\tests\data\bio\trna\semples" 1 parser
+    //drawPositiveExamples true legend @"D:\YC\YaccConstructor\tests\data\bio\trna\semples" 1 parser
     0

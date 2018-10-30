@@ -62,7 +62,8 @@ let negativeToUintArray isGpu minLength maxLength fastaFiles outFilePath (parser
 let positiveToUIntArray isGpu fastaFile sortNum outFilePath (parser:BioParser)=
     let fe = new YardFrontend()
     let data = getDataFrom16sBase fastaFile sortNum
-
+    let mutable start = System.DateTime.Now
+    let mutable cnt = 0
     data
     |> fun x -> 
         printfn "L=%A" x.Length
@@ -71,9 +72,13 @@ let positiveToUIntArray isGpu fastaFile sortNum outFilePath (parser:BioParser)=
         printfn "gene %A" i
         //let path = "../../positive/" + ([for i in 1..sortNum - 1 -> id.Split().[i]] |> String.concat("/")) + "/" 
         //Directory.CreateDirectory(path) |> ignore
-        let picture = toIntArray 1830 "s2" (parser.Parse isGpu (gen.Substring(i,1830)))
+        let picture = toIntArray 220 "s1" (parser.Parse isGpu gen)
         formatOutCSVString (outFilePath + id.Split().[0]) picture "\"p\""
         |> fun x -> System.IO.File.AppendAllText(outFilePath, x)
+        cnt <- cnt + 1
+        if cnt % 10 = 0 then 
+            printfn "processing time = %A" (System.DateTime.Now - start)
+            start <- System.DateTime.Now
         )
 //        if gen.Length >= 512 then 
 //            let picture = toIntArray 512 "s1" (parser.Parse isGpu (gen.Substring(i,512)))  
@@ -149,7 +154,7 @@ let main argv =
    
     let stopWatch = System.Diagnostics.Stopwatch.StartNew()
 
-    positiveToUIntArray true "C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/testRNA.txt" 1 outFilePath parser//"C:/Users/User/Desktop/folder/GG/gg_16s_format.fasta" 2//"C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
+    positiveToUIntArray true "C:/Users/User/Desktop/folder/YaccConstructor/tests/data/bio/220/prokaryotic.fa" 1 outFilePath parser//"C:/Users/User/Desktop/folder/GG/gg_16s_format.fasta" 2//"C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
     stopWatch.Stop()
     printfn "%f" stopWatch.Elapsed.TotalMilliseconds
     System.Console.ReadKey() |> ignore

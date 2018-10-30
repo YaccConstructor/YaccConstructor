@@ -42,7 +42,8 @@ type BioParser(grammar) =
         | "A" -> 1
         | "C" -> 2
         | "G" -> 3
-        | _ -> 4
+        | "T" | "U" -> 4
+        | _ -> 5
 
     let buildInputGraph (input: string) =
         let edges = 

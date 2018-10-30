@@ -91,14 +91,15 @@ let drawPositiveExamples isGpu (legend:(string*Color) list) fastaFile sortNum (p
     let data = getData fastaFile //getDataFrom16sBase fastaFile sortNum
    // let path = "../../positive/"
    // Directory.CreateDirectory("../../positive2/") |> ignore
-    for i in 0..3 do 
+    for i in 0..5 do 
         let (id, gen) = data.[i]       
-        let path = @"D:\YC\YaccConstructor\tests\Bio.Pictures\bin\Release\"  + (string i) + ".bmp" // "../../positive/" + ([for i in 1..sortNum - 1 -> id.Split().[i]] |> String.concat("/")) + "/" 
+        let path = @"D:\YC\YaccConstructor\tests\Bio.Pictures\bin\Release\"  + (string i) + ".tex" // "../../positive/" + ([for i in 1..sortNum - 1 -> id.Split().[i]] |> String.concat("/")) + "/" 
         printfn "path=%A"  path
         //Directory.CreateDirectory(path) |> ignore
         //if gen.Length >= 560 then 
         let picture = new ParsingPicture (gen.Length, parser.Parse isGpu gen)
-        picture.Draw(legend, path)
+        //picture.Draw(legend, path)
+        picture.DrawInTex("s1",gen,path)
 //    let path = "../../positive/" + fst(legend.[0]) + ".bmp"
 //    if (snd(data.[5000])).Length >= 560 then 
 //            let picture = new ParsingPicture (560, parser.Parse isGpu (snd(data.[5000])))

@@ -1,4 +1,0 @@
-[<Start>]
-list:
-    a=list =>{(a : list<_>).Length = 1}=> b=list {a @ b}
-  | A {[1]}

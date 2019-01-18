@@ -1,13 +1,8 @@
 ﻿module YC.API
 
-open Yard.Core
-open Yard.Core.IL
-open Yard.Core.Helpers
-open Yard.Core.Checkers
-open Microsoft.FSharp.Text
-open System.IO
-open System.Reflection
-open YaccConstructor.Common
+open YC.Core
+open IL
+open Checkers
 
 exception InvalidFEName of string
 exception InvalidGenName of string
@@ -106,7 +101,7 @@ let genToObj ((generator : Generator), genParams, ilTree) =
         | e -> GenError e.Message |> raise
 
 let applyConversions (ilTree : Definition<Source, Source> ref) (frontend : Frontend) conversions convParams =
-    Namer.initNamer ilTree.Value.grammar
+    YC.Core.Conversions.Namer.initNamer ilTree.Value.grammar
     dealWithErrors ilTree
     let lostSources = ref false
     // Let possible to know, after what conversion we lost reference to original code

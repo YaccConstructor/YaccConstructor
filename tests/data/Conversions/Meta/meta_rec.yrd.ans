@@ -1,7 +1,0 @@
-[<Start>]
-s:  yard_rule_a_1;
-
-yard_rule_a_1:  (
-      NUMBER
-    | NUMBER yard_rule_a_1 );
-

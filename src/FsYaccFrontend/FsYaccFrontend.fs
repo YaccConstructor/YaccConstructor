@@ -15,9 +15,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace Yard.Frontends.FsYaccFrontend
+namespace YC.Frontends.FsYaccFrontend
 
-open Yard.Core
+open YC.Core
 
 
 /// Parser of FsYacc grammars. Usually it is files with .fsy extension.
@@ -59,5 +59,5 @@ module Run =
 //                             yield Lexer.token lexbuf  
 //                      }
 //    lexems |> Seq.iter (fun x -> printf "%A ; " x)
-    printf "%A\n" <| Yard.Frontends.FsYaccFrontend.Main.ParseFile filename
+    printf "%A\n" <| YC.Frontends.FsYaccFrontend.Main.ParseFile filename
     ()

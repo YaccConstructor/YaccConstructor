@@ -1,3 +1,0 @@
-[<Start>]
-list : list C elem | elem
-elem : A | B

@@ -11,16 +11,14 @@
 //   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
-module Yard.Core.Conversions.ExpandConjunction
+module YC.Core.Conversions.ExpandConjunction
 
-open Yard.Core
-open Yard.Core.IL
+open YC.Core
+open IL
 open Namer
-
 open TransformAux
 
 let rec extractOneRule (rule:Rule<_,_>) = 
-    //let name = ref None
     let rec expandBody attrs = function
     | PAlt (a,b)  -> let leftBody, leftRules = expandBody attrs a
                      let rightBody, rightRules = expandBody attrs b
@@ -28,7 +26,7 @@ let rec extractOneRule (rule:Rule<_,_>) =
     | PConj (a,b) -> let name = Namer.newName Namer.Names.conjunction
                      PRef(genNewSourceWithRange name a, list2opt <| createParams attrs),
                      (extractOneRule {name=genNewSourceWithRange name a; args=attrs;
-                                             body=PAlt(a, b); isStart=false; isPublic=false;isInline = false;  metaArgs=[]})
+                                             body=PAlt(a, b); isStart=false; isPublic=false; isInline = false; metaArgs=[]})
     | a   -> a, []
     let body, rules = expandBody rule.args rule.body
     {rule with body=body}::rules

@@ -1,4 +1,0 @@
-[<Start>]
-s: m | s1=e PLUS s2=e {s1 + " + " + s2}
-e: m | ERROR{"ERR"}
-m: n=NUM TIMES e=m {n + " * " + e} | NUM

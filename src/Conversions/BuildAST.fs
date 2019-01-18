@@ -14,10 +14,9 @@
 
 module Yard.Core.Conversions.BuildAST
 
-open Yard.Core
-open Yard.Core.IL
+open YC.Core
+open IL
 
-open System.Collections.Generic
 
 (* You need to add following code in grammar header 
 type AST<'token> =
@@ -36,21 +35,20 @@ Type is defined by tokenType parameter of rule application
 
 // different logic for untyped and typed AST
 let isTyped = ref false
-let leafConstr = ref (fun token binding -> sprintf "Leaf(\"%s\")" token)
+let leafConstr = ref (fun token _ -> sprintf "Leaf(\"%s\")" token)
 
 let seqify = function
     | PSeq(x, y,l) -> PSeq(x, y,l)
     | production -> PSeq([{new ProductionElem<Source, Source> with omit=false and rule=production and binding=None and checker=None}], None,None)
 
 let printSeqProduction binding = function
-    | POpt x -> sprintf "(match %s with None -> Node(\"opt\", []) | Some(ast) -> ast)" binding 
+    | POpt _ -> sprintf "(match %s with None -> Node(\"opt\", []) | Some(ast) -> ast)" binding 
     | PToken s | PLiteral s -> !leafConstr s.text binding
-    | PSome p -> sprintf "Node(\"some\", %s)" binding
-    | PMany p -> sprintf "Node(\"many\", %s)" binding    
+    | PSome _ -> sprintf "Node(\"some\", %s)" binding
+    | PMany _ -> sprintf "Node(\"many\", %s)" binding    
     | _ -> binding
 
 let rec _buildAST ruleName (production: Production<Source, Source>) = 
-    let isRef (elem:ProductionElem<Source, Source>) = match elem.rule with PRef(_,_) -> true | _ -> false
     let isTopLevelAlt elem = 
         match elem.rule with
         | PAlt _ -> true
@@ -81,7 +79,7 @@ let rec _buildAST ruleName (production: Production<Source, Source>) =
                                                  rule=PSome(_buildAST (sprintf "%s_Some%d" ruleName (i+1)) p) }
                         | POpt p  -> { elem with binding=Some(new Source(sprintf "S%d" (i+1)));
                                                  rule=POpt (_buildAST (sprintf "%s_Opt%d"  ruleName (i+1)) p) }
-                        | x -> { elem with binding=Some(new Source(sprintf "S%d" (i+1)));
+                        | _ -> { elem with binding=Some(new Source(sprintf "S%d" (i+1)));
                                            rule=_buildAST (sprintf "%s_INNER%d" ruleName (i+1)) elem.rule }
                     )
                 ,

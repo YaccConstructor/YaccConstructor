@@ -1,6 +1,0 @@
-yard_rule_1:  b<<5>>;
-
-yard_rule_a_2:  yard_rule_1;
-
-[<Start>]
-s<<arg>>:  yard_rule_a_2;

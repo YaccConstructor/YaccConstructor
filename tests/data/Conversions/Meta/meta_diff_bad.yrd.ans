@@ -1,8 +1,0 @@
-[<Start>]
-s:  yard_rule_r1_1;
-
-yard_rule_r1_1:  l = f yard_rule_r1_2;
-
-yard_rule_r1_2:  l = b<<l>> yard_rule_r1_2;
-
-b<<s>>:  empty;

@@ -12,25 +12,13 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.Conversions.ExpandInline
+module YC.Core.Conversions.ExpandInline
 
-open Yard.Core
-open Yard.Core.IL
-open System.Collections.Generic
+open YC.Core
+open IL
 
 
 let private replaceInline (rules : Rule<_,_> list) =
-    let closure (inlines : (string * Production<_,_>) list) = 
-        let inlinesDict = inlines |> dict
-        let getName = function
-            | PRef(n,_) | PToken n | PLiteral n -> n.text
-            | x -> ""
-        [for (k,v) in inlines do
-            let cur = ref v
-            while getName !cur |> inlinesDict.ContainsKey do
-                cur := inlinesDict.[getName !cur]
-            yield k,!cur
-        ] |> dict
     let inlines = 
         rules
         |> List.choose
@@ -51,7 +39,7 @@ let private replaceInline (rules : Rule<_,_> list) =
         | PRef (name,_) as prev ->
             if inlines.ContainsKey name.text then modifyBody inlines.[name.text]
             else prev
-        | PMetaRef (name,x,args) as prev ->
+        | PMetaRef (name,x,args) ->
             if inlines.ContainsKey name.text then modifyBody inlines.[name.text]
             else PMetaRef(name,x, List.map modifyBody args)
         | PMany x -> PMany <| modifyBody x

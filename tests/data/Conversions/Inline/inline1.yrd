@@ -1,3 +1,0 @@
-[<Start>]
-s: any* NUM
-inline any: X | Y

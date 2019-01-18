@@ -12,16 +12,16 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.Conversions.RemoveAST
+module YC.Core.Conversions.RemoveAST
 
-open Yard.Core
-open Yard.Core.IL
+open YC.Core
+open IL
 
 
 let private removeAC (ruleList: Rule<Source, Source> list) =
     let rec inner production =
         match production with
-        | PSeq (x,ac,l) -> PSeq(x |> List.map (fun b -> {b with rule = b.rule |> inner}),None,l)
+        | PSeq (x,_,l) -> PSeq(x |> List.map (fun b -> {b with rule = b.rule |> inner}),None,l)
         | PAlt (l,r) -> PAlt (inner l, inner r)
         | PConj (l,r) -> PConj (inner l, inner r)
         | PSome p -> inner p |> PSome

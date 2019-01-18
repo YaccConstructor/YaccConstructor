@@ -1,5 +1,0 @@
-a:(b PLUS a|b);
-[<Start>]
-s: (a|b);
-[<Start>]
-b: NUMBER;

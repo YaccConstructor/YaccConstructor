@@ -12,11 +12,11 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.ConstraintsImpl.NoAlt
+module YC.Core.ConstraintsImpl.NoAlt
 
-open Yard.Core
+open YC.Core
 open IL
-open Yard.Core.ConstraintsImpl.Common
+open YC.Core.ConstraintsImpl.Common
 
 let private checker grammar =
     let rec isAlt = function

@@ -12,26 +12,21 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-namespace Yard.Generators.RNGLR
+namespace YC.Parsing.RNGLR.Generator
 
-open AbstractAnalysis.Common
 open System
 open System.IO
 open System.Text
-open Yard.Core
-open Yard.Core.IL
-open Yard.Core.Checkers
+open YC.Core
+open IL
 open Constraints
-open Yard.Generators.Common
-open Yard.Generators.RNGLR
+open YC.Parsing.Common
+open YC.Parsing.Common.GraphInput
 open InitialConvert
-open Yard.Generators.Common.FinalGrammar
+open YC.Parsing.Common.FinalGrammar
 open States
-open Printer
+open TablePrinter
 open TranslatorPrinter
-open Option
-open HighlightingPrinter
-open HighlightingConvertions
 
 type RNGLR() = 
     inherit Generator()
@@ -120,9 +115,6 @@ type RNGLR() =
 
             let grammar = new FinalGrammar(newDefinition.grammar.[0].rules, caseSensitive)
 
-            if !needHighlighting
-            then generateCsFiles grammar.indexator !namespaceName
-
             let printRules() =
                 let printSymbol (symbol : int) =
                     if symbol < grammar.indexator.nonTermCount 
@@ -184,12 +176,12 @@ type RNGLR() =
                         println "open Yard.Generators.ARNGLR.Parser"
                         println "open AbstractAnalysis.Common"
                     else 
-                        println "open Yard.Generators.RNGLR.Parser"
+                        println "open YC.Parsing.RNGLR.Parser"
                     
-                    println "open Yard.Generators.RNGLR"
-                    println "open Yard.Generators.Common.AST"
-                    println "open Yard.Generators.Common.AstNode"
-                    println "open AbstractAnalysis.Common"
+                    println "open YC.Parsing.RNGLR"
+                    println "open YC.Parsing.Common.AST"
+                    println "open YC.Parsing.Common.AstNode"
+                    println "open YC.Parsing.Common.GraphInput"
 
                     if !needHighlighting
                     then 

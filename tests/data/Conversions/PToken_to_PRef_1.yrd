@@ -1,5 +1,0 @@
-metar<<item>> : item ; 
-[<Start>]
-s: metar<<NUMBER>> ;   
-
-

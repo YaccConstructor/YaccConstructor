@@ -1,5 +1,0 @@
-[<Start>]
-s: (n1 [BB])*
-n1: [CCC] n2 [YYY] [NUM]
-n2: (n3|n2) [VVV]
-n3: FFF [GGG] [GHH] [TTT]

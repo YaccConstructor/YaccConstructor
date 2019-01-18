@@ -12,8 +12,10 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-namespace Yard.Generators.RNGLR
-open AbstractAnalysis.Common
+namespace YC.Parsing.RNGLR
+
+open YC.Parsing.Common.GraphInput
+
 type ParserSource<'TokenType> (gotos : int[][]
                                , reduces : (int * int)[][][]
                                , zeroReduces : int[][][]

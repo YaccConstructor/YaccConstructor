@@ -1,4 +1,0 @@
-do<op> : (op | op IDENT)*;
-
-[<Start>]
-s : do<NUMBER?*> ;

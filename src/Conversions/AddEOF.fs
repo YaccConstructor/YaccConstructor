@@ -14,9 +14,9 @@
 
 module Yard.Core.Conversions.AddEOF
 
-open Yard.Core
-open Yard.Core.IL
-
+open YC.Core
+open IL
+open YC.Core.Conversions
 
 open System.Collections.Generic
 

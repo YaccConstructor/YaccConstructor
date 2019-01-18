@@ -1,7 +1,0 @@
-[<Start>]
-s : z z;
-x : NUM;
-y : PLUS;
-z : x y;
-z : @l(y y);
-z : @l(z z);

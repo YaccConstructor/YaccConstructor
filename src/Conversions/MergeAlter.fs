@@ -12,10 +12,10 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.Conversions.MergeAlter
+module YC.Core.Conversions.MergeAlter
 
-open Yard.Core
-open Yard.Core.IL
+open YC.Core
+open IL
 
 
 open System.Collections.Generic
@@ -29,7 +29,7 @@ let mergeAlter (ruleList: Rule<Source, Source> list) =
             | production::t -> Production.PAlt(production,  buildProduction t)
             | [] -> failwith "buildProduction: expected one or more elements"
         match ruleList with
-        | rule::t -> { rule with body = ruleList |> List.map (fun ruleInner -> ruleInner.body) |> buildProduction }
+        | rule::_ -> { rule with body = ruleList |> List.map (fun ruleInner -> ruleInner.body) |> buildProduction }
         | [] -> failwith "buildAlt: expected one or more elements"
     let findedRules = new HashSet<string>()
     ruleList |>

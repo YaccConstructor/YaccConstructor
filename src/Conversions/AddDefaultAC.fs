@@ -12,13 +12,12 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.Conversions.AddDefaultAC
+module YC.Core.Conversions.AddDefaultAC
 
-open Yard.Core
+open YC.Core
 open Namer
-open Yard.Core.IL
+open YC.Core.IL
 open System.Collections.Generic
-open Yard.Core.Conversions.TransformAux
 
 
 //let dummyPos s = new Source(s)

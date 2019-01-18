@@ -12,10 +12,10 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.Conversions.ExpandInnerAlt
+module YC.Core.Conversions.ExpandInnerAlt
 
-open Yard.Core
-open Yard.Core.IL
+open YC.Core
+open IL
 open TransformAux
 
 let dummyPos s = new Source(s)
@@ -29,7 +29,7 @@ let private expandInnerAlts (ruleList: Rule<_,_> list) =
             | PSeq(elements, actionCode, l) -> 
                 elements |> List.fold (fun (res, attrs) elem ->
                     match elem.rule with 
-                    | PSeq(subelements, subActionCode, l) ->
+                    | PSeq(_,_,_) ->
                         let newName = Namer.newName Namer.Names.brackets
                         toExpand.Enqueue({name = dummyPos newName; args=attrs; body=elem.rule;
                                             isStart=false; isPublic=false; isInline = false; metaArgs=[]})

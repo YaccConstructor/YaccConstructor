@@ -1,9 +1,0 @@
-{
-let f1 = printfn "%s %A"
-let f2 = printfn "%s %A %A"
-}
-[<Start>]
-s: arg1=e arg2=A {f2 "a" arg1 arg2} |
-   arg=X {f1 "x" arg}
-e: arg1=s arg3=B {f2 "b" arg1 arg3} |
-   arg=Y {f1 "y" arg}

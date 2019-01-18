@@ -1,6 +1,0 @@
-[<Start>]
-s:  yard_rule_do_1 yard_rule_do_2;
-
-yard_rule_do_2:  c;
-
-yard_rule_do_1:  b;

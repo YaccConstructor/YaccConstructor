@@ -12,11 +12,11 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.ConstraintsImpl.NoEbnf
+module YC.Core.ConstraintsImpl.NoEbnf
 
-open Yard.Core
-open Yard.Core.IL
-open Yard.Core.ConstraintsImpl.Common
+open YC.Core
+open IL
+open YC.Core.ConstraintsImpl.Common
 
 let private isEbnf = function
     | PMany _ | POpt _ | PSome _ -> true

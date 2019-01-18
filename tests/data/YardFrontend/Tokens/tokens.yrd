@@ -1,8 +1,0 @@
-tokens {
-    | Asd_23 of string
-    | B
-    | _ of int
-}
-
-[<Start>]
-s: A;

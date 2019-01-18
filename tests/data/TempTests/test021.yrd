@@ -1,4 +1,0 @@
-+s : res = e {res};
-e : <r:float> = e PLUS <l:float> = b {r + l};
-e : r = b {r};
-b : <n:string> = NUMBER {float n};

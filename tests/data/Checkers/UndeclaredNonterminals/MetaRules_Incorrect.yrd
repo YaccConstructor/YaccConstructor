@@ -1,5 +1,0 @@
-e<f> : d f;
-[<Start>]
-s : b;
-z : e<(x|y)> w<s>;
-a<b c d> : c;

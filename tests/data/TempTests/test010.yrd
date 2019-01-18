@@ -1,7 +1,0 @@
-+s:e {};
-f: NUMBER {};
-f: LEFT e RIGHT {};
-t: t (MULT|DIV) f {};
-t: f{};
-e: t{};
-e: e (PLUS|MINUS) t {};

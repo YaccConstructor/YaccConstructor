@@ -12,16 +12,16 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Generators.RNGLR.Parser              
+module YC.Parsing.RNGLR.Parser              
 
-open Yard.Generators.RNGLR
 open System.Collections.Generic
-open Yard.Generators.Common.DataStructures
-open Yard.Generators.Common.AST
-open Yard.Generators.Common.AstNode
+open YC.Parsing.Common.DataStructures
+open YC.Parsing.Common.AST
+open YC.Parsing.Common.AstNode
 open Microsoft.FSharp.Collections
 open FSharpx.Collections.Experimental
-open AbstractAnalysis.Common
+open YC.Parsing.Common.GraphInput
+
 // Custom graph structure. For optimization and needed (by algorithm) relation with AST
 
 [<AllowNullLiteral>]
@@ -392,7 +392,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 if !visited < 100 
                 then                    
                     match x  with 
-                    | :? Terminal as t -> res.Add x
+                    | :? Terminal -> res.Add x
                     | :? AST as ast ->
                         if ast.other <> null 
                         then
@@ -453,7 +453,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         let getPrevVertices (curVertices : Stack<Vertex * _>) = 
             let inline isOldVertex (v : Vertex) = 
                 curVertices.ToArray() 
-                |> Array.exists (fun (x, y) -> x.Level = v.Level && x.State = v.State) 
+                |> Array.exists (fun (x, _) -> x.Level = v.Level && x.State = v.State) 
                     
             let oldVertices = curVertices.ToArray()
             curVertices.Clear()

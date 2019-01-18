@@ -1,3 +1,0 @@
-[<Start>]
-s : s A | a
-a : B a | {} 

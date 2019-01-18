@@ -1,8 +1,0 @@
-{
-let res = ref []
-}
-[<Start>]
-s : e1 e1 {()}
-e1 : e2 e2 {()}
-e2 : e3 e3 {()}
-e3 : a=A { res := a :: !res }

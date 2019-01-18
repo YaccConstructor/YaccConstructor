@@ -1,3 +1,0 @@
-[<Start>]
-s : e A | e A s
-e : e B | B

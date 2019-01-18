@@ -1,6 +1,0 @@
-[<Start>]
-b: s1 s3 & s1 s3 & s1 s3
-b: SCO
-s3: b s2 & b s2 & b s2
-s1: SCOR
-s2: SCO

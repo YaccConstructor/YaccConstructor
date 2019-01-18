@@ -12,17 +12,16 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Frontends.YardFrontend.Main
+module YC.Frontends.YardFrontend.Main
 
 open Microsoft.FSharp.Text.Lexing
-open System.Linq
-open Yard.Core.IL
-open Yard.Frontends.YardFrontend
-open Yard.Generators.RNGLR
-open Yard.Generators.Common.AST
+open YC.Core.IL
+open YC.Frontends.YardFrontend
+open YC.Parsing.RNGLR
+open YC.Parsing.Common.AST    
 open Microsoft.FSharp.Collections
 
-module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
+module Lexer = YC.Frontends.YardFrontend.GrammarLexer
 open GrammarParser
 
 let private tokenFun f = function
@@ -196,7 +195,7 @@ let ParseText (s : string) path =
             failwith <| sprintf "\nLexical error in line %d position %d: %s\n" line col msg
 
 let rec ParseFile (args:string) =
-    Yard.Frontends.YardFrontend.GrammarParser.parseFile := ParseFile
+    YC.Frontends.YardFrontend.GrammarParser.parseFile := ParseFile
     let path,userDefs =
         let args = args.Trim().Split('%')
         let defs = 

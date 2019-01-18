@@ -1,3 +1,0 @@
-a : NUMBER;
-[<Start>]
-s : a|b;

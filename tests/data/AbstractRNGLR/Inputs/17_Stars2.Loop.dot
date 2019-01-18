@@ -1,7 +1,0 @@
-digraph g
-{
-rankdir=LR
-node [shape=circle]
-0 -> 0 [label="STAR 1"]
-0 -> 1 [label="RNGLR_EOF 0"]
-}

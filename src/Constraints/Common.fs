@@ -12,9 +12,9 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.ConstraintsImpl.Common
+module YC.Core.ConstraintsImpl.Common
 
-open Yard.Core.IL
+open YC.Core.IL
 
 let existsRules pred (grammar : Grammar<_,_>) =
     grammar |> List.exists (fun m ->

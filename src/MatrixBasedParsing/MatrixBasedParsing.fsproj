@@ -182,6 +182,12 @@
     <Compile Include="GraphParsing.fs" />
     <Compile Include="ProbabilityGraphParsingImpl.fs" />
     <Compile Include="Main.fs" />
+    <Content Include="CudaBlas.dll.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CudaSparse.dll.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -200,6 +206,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="OpenCL.Net.dll.config" />
+    <Content Include="ManagedCuda.dll.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="..\..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />

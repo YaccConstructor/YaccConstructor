@@ -79,7 +79,7 @@ let positiveToUIntArray isGpu fastaFile sortNum outFilePath (parser:BioParser) l
         //let picture = toIntArray 110 "s1" 
         let pict = new ParsingPicture(gen.Length, parsResult) 
 
-        pict.Draw(legend, ("out\\" + name))
+        pict.Draw(legend, (name))
 //        formatOutCSVString id picture "p"
 //        |> fun x -> System.IO.File.AppendAllText(outFilePath, x)
         cnt <- cnt + 1
@@ -88,7 +88,8 @@ let positiveToUIntArray isGpu fastaFile sortNum outFilePath (parser:BioParser) l
             start <- System.DateTime.Now
         )
 //        if gen.Length >= 512 then 
-//            let picture = toIntArray 512 "s1" (parser.Parse isGpu (gen.Substring(i,512)))  
+//            let picture =
+// toIntArray 512 "s1" (parser.Parse isGpu (gen.Substring(i,512)))  
 //            formatOutCSVString (outFilePath + id.Split().[0]) picture "\"p\""
 //            //|> fun x -> System.IO.File.AppendAllText("outGreenGenes.csv",x)
 //            |> fun x -> System.IO.File.AppendAllText(outFilePath, x)
@@ -162,7 +163,7 @@ let main argv =
    
     let stopWatch = System.Diagnostics.Stopwatch.StartNew()
 
-    let inputPath = @"data_filtered_selected.fasta"
+    //let inputPath = @"data_filtered_selected.fasta"
 
     positiveToUIntArray true inputPath 1 outFilePath parser legend//"C:/Users/User/Desktop/folder/GG/gg_16s_format.fasta" 2//"C:/Users/User/Desktop/folder/YaccConstructor/tests/Bio.Pictures/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" 2
     stopWatch.Stop()

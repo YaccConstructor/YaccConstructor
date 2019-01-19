@@ -7,6 +7,7 @@ open Alea.cuBLAS
 open ManagedCuda
 open ManagedCuda.CudaSparse
 open ManagedCuda.BasicTypes
+open ManagedCuda.BasicTypes
 open YC.Parsing.Common.GraphInput
 
 
@@ -587,10 +588,12 @@ let sparseCudaConj (matrix1 : MySparseMatrix) (matrix2 : MySparseMatrix) matrixS
 let cusparseTransitiveClosure (parsingMatrix : ParsingMatrix<MySparseMatrix>) (allRules : BooleanRulesHolder) 
                                     (nonterminals:ResizeArray<NonTerminal>) matrixSize =
 
+    let r = cuInit(0u)
+    //let c = cuCtxGetApiVersion()
     let sparsecntx = new cusparseContext()
     let mutable refcnt = ref sparsecntx
     CudaSparseNativeMethods.cusparseCreate(refcnt) |> ignore
-
+    
     let mutable csrValFakePtr : CudaDeviceVariable<float> = new CudaDeviceVariable<float>(new SizeT(1))
     let mutable csrRowFakePtr : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(1))
     let mutable csrColIndFakePtr : CudaDeviceVariable<int> = new CudaDeviceVariable<int>(new SizeT(1))            

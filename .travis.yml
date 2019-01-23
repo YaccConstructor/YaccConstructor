@@ -1,3 +1,6 @@
+notifications:
+  slack: yaccconstructor:mSbpV6G9f6LgfngzhB9yaJUe
+
 language: csharp
 
 mono:

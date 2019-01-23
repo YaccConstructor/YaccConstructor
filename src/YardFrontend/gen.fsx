@@ -3,6 +3,7 @@
 #r @"RNGLRGenerator.dll"
 #r @"Core.dll"
 #r @"FsYaccFrontend.dll"
+#r @"Parsing.Common.dll"
 
 open YC.Parsing.RNGLR.Generator
 open YC.Frontends.FsYaccFrontend

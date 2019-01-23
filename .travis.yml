@@ -3,7 +3,9 @@ language: csharp
 mono:
   - latest
 
-dotnet : 2.1.402
+install:
+  - nuget # lets get version number
+  - nuget restore YaccConstructor.sln -Verbosity detailed
 
 sudo: false  # use the new container-based Travis infrastructure 
 

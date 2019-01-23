@@ -4,6 +4,7 @@
 #r @"Core.dll"
 #r @"FsYaccFrontend.dll"
 #r @"Parsing.Common.dll"
+//Comment next line if you want to execute script in FSharpInteractive in IDE
 #r @"../../packages/FSharp.Compiler.Tools.10.0.2/tools/FSharp.Core.dll"
 
 open YC.Parsing.RNGLR.Generator

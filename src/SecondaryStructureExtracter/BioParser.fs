@@ -1,27 +1,16 @@
 ﻿module BioParser
 
 open System.Collections.Generic
-
-open YC.API
 open YC.Frontends.YardFrontend
-open YC.Core.Conversions.ExpandMeta
 open YC.Parsing.Common.GraphInput
 open YC.Core.Conversions
 open YC.Core.IL
 open YC.Core
-//open Yard.Generators.YardPrinter
-
-//open MathNet.Numerics.LinearAlgebra.Double
-
 open MatrixKernels
 open GraphParsing
-open MySparseGraphParsingImpl
-open SparseGraphParsingImpl
 open YC.Core.Conversions.CNFandBNF
 
-type ParsingResult = 
-    | CPU of Dictionary<Util.NonTerminal, MySparseMatrix> //System.Collections.BitArray> 
-    | GPU of Dictionary<Util.NonTerminal, MySparseMatrix>
+type ParsingResult = Dictionary<Util.NonTerminal, MySparseMatrix>
 
 type BioParser(grammar) =
     let (conversions: Conversion list) =
@@ -54,28 +43,13 @@ type BioParser(grammar) =
         graph.AddVerticesAndEdgeRange edges |> ignore
         graph
     
-    member private this.parse<'MatrixType> handler input =
+    member private this.parse<'MatrixType> input =
         graphParseGPU  (buildInputGraph input) finalIL tokenizer
-        //graphParse<'MatrixType, _> (buildInputGraph input) handler finalIL tokenizer 1
     
     member val StartNonTerm = startN with get
 
-//    member this.PrintGrammarCNF() =
-//        let printer = new YardPrinter()
-//        printer.Generate(finalIL, false).ToString()
-
-    member this.Parse isGpu (input: string) =
-        if isGpu
-        then
-            let dict, _, _, _ = 
-                this.parse<MySparseMatrix> (new MySparseHandler(input.Length + 1)) input
-                //this.parse<System.Collections.BitArray> (new DenseBitMatrix.DenseBitHandler(input.Length + 1)) input
-            in GPU dict
-        else 
-            let dict, _, _, _ = 
-                this.parse<MySparseMatrix> (new MySparseHandler(input.Length + 1)) input
-                //this.parse<System.Collections.BitArray> (new DenseBitMatrix.DenseBitHandler(input.Length + 1)) input
-            in GPU dict
-                //this.parse<SparseMatrix> (new SparseHandler(input.Length + 1)) input
-                //this.parse<System.Collections.BitArray> (new DenseBitMatrix.DenseBitHandler(input.Length + 1)) input
-            //in CPU dict 
+    member this.Parse (input: string) =
+        let dict, _, _, _ = 
+                this.parse<MySparseMatrix>  input
+        in ParsingResult dict
+       

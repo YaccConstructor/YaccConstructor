@@ -32,6 +32,9 @@
     <OtherFlags>--warnon:1182</OtherFlags>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Argu">
+      <HintPath>..\..\packages\Argu.5.2.0\lib\net45\Argu.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -76,9 +79,9 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="BioParser.fs" />
-    <Compile Include="DataPreprocessing.fs" />
-    <Compile Include="Drawing.fs" />
     <Compile Include="Program.fs" />
+    <Compile Include="Generation.fs" />
+    <Compile Include="Launch.fs" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

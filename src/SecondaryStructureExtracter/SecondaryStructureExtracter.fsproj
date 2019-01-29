@@ -79,7 +79,6 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="BioParser.fs" />
-    <Compile Include="Program.fs" />
     <Compile Include="Generation.fs" />
     <Compile Include="Launch.fs" />
     <Content Include="packages.config" />

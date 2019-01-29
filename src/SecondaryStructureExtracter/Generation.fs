@@ -3,7 +3,6 @@ module Generation
 open BioParser
 open System.Drawing
 
-
 type Output =
     | CSVString
     | BMPImage  

@@ -4,9 +4,9 @@ open BioParser
 open System.Drawing
 
 type Output =
-    | CSVString
-    | BMPImage  
-    | TEXImage 
+    | CSV
+    | BMP  
+    | TEX 
     
 type BMPImage(len, matrices: ParsingResult) =
     

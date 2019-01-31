@@ -10,6 +10,7 @@ type CLIArguments =
     | [<AltCommandLine("-i"); Mandatory>] Input_File of string
     | [<AltCommandLine("-l"); Mandatory>] Sequence_Length of int
     | [<AltCommandLine("-f")>] Output_Formats of Output list
+    | [<AltCommandLine("-o")>] Output_Dir of string
     interface IArgParserTemplate with
         member s.Usage = 
             match s with
@@ -17,6 +18,7 @@ type CLIArguments =
             | Input_File _ -> "Specify a path to file with sequences for processing."
             | Sequence_Length  _ -> "Set a sequence length."
             | Output_Formats _ -> "Specify output formats. Available options are CSV, BMP, TEX."
+            | Output_Dir _ -> "Specify a folder for parsing output"
             
 let getData path = 
     let lst = new ResizeArray<_>()
@@ -25,12 +27,9 @@ let getData path =
         lst.Add((input.[i], input.[i+1], input.[i+2]))
     lst.ToArray()   
 
-let processInput inpPath grammar len (formats: Output list) =
+let processInput inpPath grammar len (formats: Output list) outDir =
     let mutable start = System.DateTime.Now
-    let outDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) +
-                 "/out_" + System.DateTime.Now.ToString("dd/MM/yyyy") + "_" + len.ToString() + "/"
     Directory.CreateDirectory(outDir) |> ignore
-    printfn "output directory: %s" outDir
     let data = getData inpPath
     let parser = new BioParser(grammar)
     data
@@ -67,6 +66,8 @@ let main argv =
     let grammar = args.GetResult(<@ Grammar @>)
     let len = args.GetResult(<@ Sequence_Length @>)
     let outputFormats = args.GetResult(<@ Output_Formats @>, defaultValue=[Output.CSV])
-    
-    processInput inputFile grammar len outputFormats
+    let defaultOutDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) +
+                        "/out_" + System.DateTime.Now.ToString("dd/MM/yyyy") + "_" + len.ToString() + "/"
+    let outDir = args.GetResult(<@ Output_Dir @>, defaultValue=defaultOutDir)
+    processInput inputFile grammar len outputFormats outDir
     0

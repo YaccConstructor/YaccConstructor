@@ -8,7 +8,7 @@ type Output =
     | BMP  
     | TEX 
     
-type BMPImage(len, matrices: ParsingResult) =
+type BMP(len, matrices: ParsingResult) =
     
     let drawLayer name color (bmp: Bitmap) =
         let matrix = matrices.[name].ToArray()
@@ -22,9 +22,8 @@ type BMPImage(len, matrices: ParsingResult) =
         let bmp = new Bitmap(len, len)
         legend |> List.iter (fun (n, c) -> drawLayer (Util.NonTerminal n) c bmp)
         bmp.Save(outPath)
-        
-        
-type CSVString(id, cls, len, matrices: ParsingResult) =
+            
+type CSV(id, cls, len, matrices: ParsingResult) =
     
     let formatOutCSVString arr =
                 [
@@ -50,8 +49,8 @@ type CSVString(id, cls, len, matrices: ParsingResult) =
             formatOutCSVString arr
             |> fun x -> System.IO.File.AppendAllText(outPath + "out.csv", x)
     
-
-type TEXImage(len, matrices: ParsingResult) =
+type TEX(len, matrices: ParsingResult) =
+    
     member this.Generate name outPath (seq: string) =
         let preheader =
             """        \documentclass[a2paper,landscape]{article}

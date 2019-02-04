@@ -36,22 +36,22 @@ let processInput inpPath grammar len (formats: Output list) =
         formats
         |> List.iter (fun f -> 
             match f with
-            | CSVString ->
+            | CSV ->
                 let csv = new CSVString(id, cls, len, parsed)              
                 csv.Generate parser.StartNonTerm outDir
-            | BMPImage ->
+            | BMP ->
                 let legend = [(parser.StartNonTerm, Color.Black)]
                 let path = outDir + cls + "/" 
                 Directory.CreateDirectory(path) |> ignore
                 let img = new BMPImage(len, parsed)
                 img.Generate legend (path + id.[1..] + ".bmp")
-            | TEXImage ->
+            | TEX ->
                 let img = new TEXImage(len, parsed)
                 img.Generate parser.StartNonTerm (outDir + id.[1..] + ".tex") seq
             | _ -> failwith("Unsupported output format")
             )
         if i % 10 = 0 then 
-            printfn "processing time = %A" (System.DateTime.Now - start)
+            printfn "%A sequences processed. Processing time = %A" i (System.DateTime.Now - start)
             start <- System.DateTime.Now
         )
 
@@ -65,5 +65,5 @@ let main argv =
     let grammar = args.GetResult(<@ Grammar @>)
     let outputFormats = args.GetResult(<@ OutputTypes @>, defaultValue=[CSV])
     
-    processInput inputFile grammar 128 outputFormats
+    processInput inputFile grammar 2048 outputFormats
     0

@@ -5,10 +5,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2DEACFB7-6D6E-4CAB-8199-9017C366E53C}</ProjectGuid>
+    <ProjectGuid>{628096CE-4A4F-4041-A1E8-DF4B924E6ACF}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Parsing.Common</RootNamespace>
-    <AssemblyName>Parsing.Common</AssemblyName>
+    <RootNamespace>GLLParser</RootNamespace>
+    <AssemblyName>GLLParser</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
@@ -32,8 +32,8 @@
     <OtherFlags>--warnon:1182</OtherFlags>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Core, Version=4.4.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\..\packages\FSharpx.Collections.Experimental.2.0.0-beta2\lib\net45\FSharp.Core.dll</HintPath>
+    <Reference Include="FSharp.Core, Version=4.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>..\..\packages\FSharpx.Collections.2.0.0-beta3\lib\net45\FSharp.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Collections, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null">
@@ -83,36 +83,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="DataStructures.fs" />
-    <Compile Include="Indexator.fs" />
-    <Compile Include="NumberedRules.fs" />
-    <Compile Include="SymbolSets.fs" />
-    <Compile Include="GraphInput.fs" />
-    <Compile Include="FSACommon.fs" />
-    <Compile Include="FSA.fs" />
-    <Compile Include="AstNode.fs" />
-    <Compile Include="AST.fs" />
-    <Compile Include="Epsilon.fs" />
-    <Compile Include="ASTGLL.fs" />
-    <Compile Include="ASTGLLFSA.fs" />
-    <Compile Include="FinalGrammar.fs" />
-    <Compile Include="InitialConvert.fs" />
-    <Compile Include="FunsAndStructs.fs" />
-    <Compile Include="ParserSource.fs" />
+    <Compile Include="GSS.fs" />
+    <Compile Include="SPPF.fs" />
+    <Compile Include="AbstractParser.fs" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Constraints\Constraints.fsproj">
-      <Project>{23eeecbc-c68a-4cf6-9abb-8cd158ed52b1}</Project>
-      <Name>Constraints</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Conversions\Conversions.fsproj">
-      <Project>{e0c83845-1aac-43be-9259-af89002722c1}</Project>
-      <Name>Conversions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Core\Core.fsproj">
-      <Project>{a0fd0ce8-da33-4c03-86e2-e6417d96fabd}</Project>
-      <Name>Core</Name>
+    <ProjectReference Include="..\Parsing.Common\Parsing.Common.fsproj">
+      <Project>{2deacfb7-6d6e-4cab-8199-9017c366e53c}</Project>
+      <Name>Parsing.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />

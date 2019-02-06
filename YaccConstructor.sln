@@ -36,6 +36,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLLGenerator", "src\GLLGene
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLLParser", "src\GLLParser\GLLParser.fsproj", "{628096CE-4A4F-4041-A1E8-DF4B924E6ACF}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Example", "src\Example\Example.fsproj", "{BD948029-5366-4DAE-B1BE-1455D4FB6E9E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -102,6 +104,10 @@ Global
 		{628096CE-4A4F-4041-A1E8-DF4B924E6ACF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{628096CE-4A4F-4041-A1E8-DF4B924E6ACF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{628096CE-4A4F-4041-A1E8-DF4B924E6ACF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD948029-5366-4DAE-B1BE-1455D4FB6E9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD948029-5366-4DAE-B1BE-1455D4FB6E9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD948029-5366-4DAE-B1BE-1455D4FB6E9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD948029-5366-4DAE-B1BE-1455D4FB6E9E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{71DB60BE-67BB-4250-8467-0FA916DB3ACB} = {E15EC490-7C85-4A8E-BE3C-9EFF36925B11}

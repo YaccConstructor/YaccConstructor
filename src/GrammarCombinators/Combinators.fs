@@ -1,7 +1,15 @@
 namespace YC.Frontends.GrammarCombinators
+
 open YC.Frontends.GrammarCombinators.Wrapper.Shortcuts
+open Microsoft.FSharp.Quotations
 
 module Combinators =
+    open System.Collections.Generic
+    
+    let getId =
+        let i = ref 0
+        fun () -> incr i; !i
+
     type Product = Product of option<string * int> // optional name and unique id
                               * Production<unit -> Product>
     with override this.ToString() =
@@ -15,7 +23,7 @@ module Combinators =
 
     let private applyBinop op a b = mkProd <| op (getProd a) (getProd b)
     let private applyUnaryop op = getProd >> op >> mkProd
-
+    
     type Product with
         static member (%) (p, (m, n)) = mkProd <| Production.PRepet(getProd p, Some m, Some n)
         static member (%) (p, (m)) = mkProd <| Production.PRepet(getProd p, Some m, None)
@@ -28,7 +36,12 @@ module Combinators =
     let (!+) = applyUnaryop Production.PSome
     let (!~) = applyUnaryop Production.PNeg
 
-    let tok = Source >> Production.PToken >> mkProd
+    let internal x = new Dictionary<string, obj>()
+    
+    let tok<'tokenType> = fun (cond: 'tokenType -> bool) ->
+                  (let t = "T_" + string (getId())
+                   x.Add(t,cond)
+                   t) |> (Source >> Production.PToken >> mkProd)
     let Eps = mkProd <| Production.PSeq([], None, None)
 
 module internal Core =
@@ -163,13 +176,19 @@ module internal Core =
         collectRules >> Wrapper.IL.grammar >> Wrapper.IL.definition
 
 module GrammarGenerator =
-    open Microsoft.FSharp.Quotations
+    open System.Collections.Generic
     open FSharp.Quotations.Evaluator
     open Combinators
     open Core
 
-    let generate (name: string) =
-        fixTree
-        >> QuotationEvaluator.EvaluateUntyped
-        >> (fun x -> x :?> Product)
-        >> productToGrammar name
+    let generate<'tokenType> (name: string) =
+        fun x -> 
+        let r = x |>
+                (fixTree
+                >> QuotationEvaluator.EvaluateUntyped
+                >> (fun x -> x :?> Product)
+                >> productToGrammar name)
+        let y = new Dictionary<_,_>(Combinators.x)
+        Combinators.x.Clear()
+        r,(fun (x:'tokenType) -> y |> Seq.find (fun n -> (n.Value :?> ('tokenType -> bool)) x) |> fun x -> x.Key) 
+

@@ -8,7 +8,6 @@ open Argu
 type CLIArguments = 
     | [<AltCommandLine("-g"); Mandatory>] Grammar of string
     | [<AltCommandLine("-i"); Mandatory>] Input_File of string
-    | [<AltCommandLine("-l"); Mandatory>] Sequence_Length of int
     | [<AltCommandLine("-f")>] Output_Formats of Output list
     | [<AltCommandLine("-o")>] Output_Dir of string
     interface IArgParserTemplate with
@@ -16,34 +15,35 @@ type CLIArguments =
             match s with
             | Grammar _ -> "Specify a grammar which describes secondary structure fetures for extraction."
             | Input_File _ -> "Specify a path to file with sequences for processing."
-            | Sequence_Length  _ -> "Set a sequence length."
             | Output_Formats _ -> "Specify output formats. Available options are CSV, BMP, TEX."
             | Output_Dir _ -> "Specify a folder for parsing output"
             
 let getData path = 
     let lst = new ResizeArray<_>()
     let input = System.IO.File.ReadAllLines(path)
-    for i in 0..3..input.Length - 1 do
-        lst.Add((input.[i], input.[i+1], input.[i+2]))
+    for i in 0..2..input.Length - 1 do
+        lst.Add((input.[i], input.[i+1]))
     lst.ToArray()   
 
-let processInput inpPath grammar len (formats: Output list) outDir =
+let processInput inpPath grammar (formats: Output list) outDir =
     let mutable start = System.DateTime.Now
     Directory.CreateDirectory(outDir) |> ignore
     let data = getData inpPath
     let parser = new BioParser(grammar)
+    System.Console.WriteLine(parser.StartNonTerm)
+    let len = snd(data.[0]).Length
     data
-    |> Array.iteri (fun i (id, cls, seq) ->
+    |> Array.iteri (fun i (id, seq) ->
         let parsed = parser.Parse seq
         formats
         |> List.iter (fun f -> 
             match f with
             | CSV ->            
-                let csv = new CSV(id, cls, len, parsed)              
+                let csv = new CSV(id, len, parsed)              
                 csv.Generate parser.StartNonTerm outDir
             | BMP ->
                 let legend = [(parser.StartNonTerm, Color.Black)]
-                let path = outDir + cls + "/" 
+                let path = outDir
                 Directory.CreateDirectory(path) |> ignore
                 let img = new BMP(len, parsed)
                 img.Generate legend (path + id.[1..] + ".bmp")
@@ -64,10 +64,9 @@ let main argv =
     let args = argParser.Parse argv
     let inputFile = args.GetResult(<@ Input_File @>)
     let grammar = args.GetResult(<@ Grammar @>)
-    let len = args.GetResult(<@ Sequence_Length @>)
     let outputFormats = args.GetResult(<@ Output_Formats @>, defaultValue=[Output.CSV])
     let defaultOutDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) +
-                        "/out_" + System.DateTime.Now.ToString("dd/MM/yyyy") + "_" + len.ToString() + "/"
+                        "/out_" + System.DateTime.Now.ToString("dd/MM/yyyy") + "/"
     let outDir = args.GetResult(<@ Output_Dir @>, defaultValue=defaultOutDir)
-    processInput inputFile grammar len outputFormats outDir
+    processInput inputFile grammar outputFormats outDir
     0

@@ -23,13 +23,12 @@ type BMP(len, matrices: ParsingResult) =
         legend |> List.iter (fun (n, c) -> drawLayer (Util.NonTerminal n) c bmp)
         bmp.Save(outPath)
             
-type CSV(id, cls, len, matrices: ParsingResult) =
+type CSV(id, len, matrices: ParsingResult) =
     
     let formatOutCSVString arr =
                 [
                     yield "\"" + id + "\""
                     for i in arr -> uint32 i |> string
-                    yield ("\"" + cls + "\"") 
                 ]    
                 |> String.concat ","
                 |> fun x -> x + "\n"

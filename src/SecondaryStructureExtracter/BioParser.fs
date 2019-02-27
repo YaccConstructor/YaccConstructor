@@ -42,8 +42,26 @@ type BioParser(grammar) =
         let graph = SimpleInputGraph<_>([|0|], [|input.Length|], id)
         graph.AddVerticesAndEdgeRange edges |> ignore
         graph
-    
+        
+    let printGrammar () =
+        finalIL.grammar.Head.rules
+        |> List.iter
+            (fun r ->
+                   let l =
+                        match r.body with
+                        | PSeq(l,_,_) ->
+                            l
+                            |> List.map (fun r -> r.rule)
+                            |> List.map (function PToken t | PRef (t,_) -> t.text)
+                            |> String.concat " "
+
+                        | x -> failwithf "Unexpected rule type %A" x
+                         
+                   printfn "%s %s" r.name.text l) 
+
+        
     member private this.parse<'MatrixType> input =
+        printGrammar()    
         graphParseGPU  (buildInputGraph input) finalIL tokenizer
     
     member val StartNonTerm = startN with get

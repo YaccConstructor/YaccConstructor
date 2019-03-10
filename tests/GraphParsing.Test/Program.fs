@@ -1,11 +1,13 @@
 ﻿module GraphParsingTests
 
+open System
 open System.IO
 open QuickGraph
 open NUnit.Framework
 open YC.GraphParsing.Tests.RDFPerformance
 open YC.GraphParsing.Tests.BioPerformance
 open YC.GraphParsing.Tests.SimpleConjPerformance
+open YC.GraphParsing.Tests.FormatPerformance
 open Util
 open System.Collections.Generic
 open GraphParsing
@@ -98,7 +100,6 @@ let RDFChecker parsingResults =
         | CONJ_RDF_GPPERF2_GRAMMAR_FILE ->
             RDFGPPerf2Checker graphFile results
         | _ -> ignore()
-
 
 [<TestFixture>]
 type ``Graph parsing tests``() = 
@@ -652,4 +653,5 @@ let f x =
 //    YC.GraphParsing.Tests.BioPerformance.performTests ()
 //    YC.GraphParsing.Tests.AliasAndTaintPerformance.performTests ()
 //    YC.GraphParsing.Tests.SimpleConjPerformance.performTests ()
+//    YC.GraphParsing.Tests.FormatPerformance.performTests (Environment.GetCommandLineArgs())
     0

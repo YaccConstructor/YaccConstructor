@@ -37,6 +37,9 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Release\GraphParsing.Test.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
+    <OtherFlags />
+    <StartArguments>
+    </StartArguments>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -51,6 +54,7 @@
     <Compile Include="BioPerformance.fs" />
     <Compile Include="AliasAndTaintPerformance.fs" />
     <Compile Include="SimpleConjPerformance.fs" />
+    <Compile Include="FormatPerformance.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="paket.references" />

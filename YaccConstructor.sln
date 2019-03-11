@@ -38,6 +38,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLLParser", "src\GLLParser\
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Example", "src\Example\Example.fsproj", "{BD948029-5366-4DAE-B1BE-1455D4FB6E9E}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CFPQ_Matrix_Performance", "tests\CFPQ_Matrix_Performance\CFPQ_Matrix_Performance.fsproj", "{059E8838-CEB6-43BF-86A7-A330CE7DFA4B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -108,6 +110,10 @@ Global
 		{BD948029-5366-4DAE-B1BE-1455D4FB6E9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD948029-5366-4DAE-B1BE-1455D4FB6E9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD948029-5366-4DAE-B1BE-1455D4FB6E9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{059E8838-CEB6-43BF-86A7-A330CE7DFA4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{059E8838-CEB6-43BF-86A7-A330CE7DFA4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{059E8838-CEB6-43BF-86A7-A330CE7DFA4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{059E8838-CEB6-43BF-86A7-A330CE7DFA4B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{71DB60BE-67BB-4250-8467-0FA916DB3ACB} = {E15EC490-7C85-4A8E-BE3C-9EFF36925B11}

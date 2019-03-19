@@ -158,7 +158,10 @@ module internal Core =
                     Wrapper.IL.rule (mkName name uid) prod true :: rules)
                 | _ -> __unreachable__()
 
-            assignProd start >> collectRulesFromProduct
+            let startProd name =
+                fun p -> Product(Some(name, 0), getProd p)            
+
+            startProd start >> collectRulesFromProduct
 
         collectRules >> Wrapper.IL.grammar >> Wrapper.IL.definition
 

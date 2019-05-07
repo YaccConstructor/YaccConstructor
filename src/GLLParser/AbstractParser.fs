@@ -1,7 +1,6 @@
 ﻿module YC.Parsing.GLL.AbstractParser
 
 open Microsoft.FSharp.Collections
-open System.Collections.Generic
 open YC.Parsing.Common.GraphInput
 open YC.Parsing.Common.GLL
 open YC.Parsing.Common.ASTGLLFSA

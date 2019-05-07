@@ -46,7 +46,7 @@ let processInput inpPath grammar (formats: Output list) outDir =
                 let path = outDir
                 Directory.CreateDirectory(path) |> ignore
                 let img = new BMP(len, parsed)
-                img.Generate legend (path + id.[1..] + ".bmp")
+                img.Generate legend (System.IO.Path.Combine(path, id.[1..] + ".bmp"))
             | TEX ->               
                 let img = new TEX(len, parsed)
                 img.Generate parser.StartNonTerm (outDir + id.[1..] + ".tex") seq

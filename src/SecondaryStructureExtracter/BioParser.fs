@@ -61,7 +61,7 @@ type BioParser(grammar) =
 
         
     member private this.parse<'MatrixType> input =
-        printGrammar()    
+        //printGrammar()    
         graphParseGPU  (buildInputGraph input) finalIL tokenizer
     
     member val StartNonTerm = startN with get

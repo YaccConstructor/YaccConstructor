@@ -6,8 +6,27 @@ open YC.Parsing.GLL.AbstractParser
 open YC.Frontends.GrammarCombinators
 open Combinators
 open YC.Parsing.Common.GLL
+open System.Diagnostics
 
 type EdgLbl = {i:int; s:string}
+
+module private Utils =
+    let buildTestGraph triples (ps: ParserSourceGLL) tFun =
+        let allVs = triples |> Array.collect (fun (f,t,l) -> [|f * 1<positionInInput>; t * 1<positionInInput>|]) |> Set.ofArray |> Array.ofSeq
+        let g = new SimpleInputGraph<string>(allVs, tFun >> ps.StringToToken)
+
+        [| for (f, t, l) in triples -> new ParserEdge<_>(f, t, l) |]
+        |> g.AddVerticesAndEdgeRange
+        |> ignore
+
+        g
+
+    let expractPath ps graph nonTermName maxLength =
+        let gss, sppf, _ = parse ps graph true
+        
+        let nt = sppf.GetNonTermByName nonTermName ps
+        let pathset = sppf.Iterate nt ps maxLength
+        pathset |> Array.ofSeq
 
 module Test =
 
@@ -65,11 +84,31 @@ module Test =
 
     let private testDef = testCFPQ () |> GrammarGenerator.generate<EdgLbl> "unique"
     
-    let firstTest = sppfTest testDef testGraph "p$2" 10
+    let firstTest () = sppfTest testDef testGraph "p$2" 10
+
+    let testAliased =
+        let triples = [|
+                (0, 1, "foo");
+                (2, 1, "foo_rev")
+            |]
+        
+        let testAliased =
+            <@
+                let rec aliasedTo () = tok ((=)"foo_rev") + aliasedTo () + tok ((=)"foo") + aliasedTo () <|> Eps
+                in aliasedTo ()
+            @>
+            
+        let def = testAliased |> GrammarGenerator.generate<_> "aliasedTo" 
+        let ps =  fst def |> psgll
+        let g = Utils.buildTestGraph triples ps (snd def)
+        let path = Utils.expractPath ps g "aliasedTo$3" 10
+        Debug.WriteLine("Path length = {0}", Seq.length path)
+        for (x, first, last) in path do
+            Debug.WriteLine("{0}: {1} -> {2}", x, first, last)
 
 open Test
 
 [<EntryPoint>]
 let main argv =
-    printfn "%A" firstTest
+    printfn "%A" testAliased
     0

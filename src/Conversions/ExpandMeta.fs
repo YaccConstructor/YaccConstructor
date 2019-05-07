@@ -12,11 +12,11 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.Conversions.ExpandMeta 
+module YC.Core.Conversions.ExpandMeta 
 
-open Yard.Core
-open Yard.Core.IL
-open Yard.Core.Namer
+open YC.Core
+open IL
+open Namer
 open TransformAux
 open System.Collections.Generic
 
@@ -44,7 +44,7 @@ let getKey module' key =
         match this with
         |PAlt (x, y) -> getProdKey x + "|" + getProdKey y
         |PConj (x, y) -> getProdKey x + "&" + getProdKey y
-        |PSeq (ruleSeq, attrs, l) ->
+        |PSeq (ruleSeq, attrs, _) ->
             let strAttrs =
                 match attrs with
                 | None -> ""
@@ -166,7 +166,7 @@ let expandRule =
                 | PSome body -> applyToRes PSome <| simpleExpand body
                 | POpt body  -> applyToRes POpt  <| simpleExpand body
                 | PMany body -> applyToRes PMany <| simpleExpand body
-                | PRef(name, attrs) as x -> (x, resRuleList)
+                | PRef(_,_) as x -> (x, resRuleList)
                 | PAlt (l, r) ->
                     let x,y = expandBody l module' metaRules expanded [], simpleExpand r
                     (PAlt (fst x, fst y), snd x @ snd y)
@@ -182,7 +182,7 @@ let expandRule =
                     |> applyToRes (fun x -> PSeq (List.rev x, actionCode, l))
                 | PLiteral _ as literal -> (literal, resRuleList)
                 | PToken _ as token -> (token, resRuleList)
-                | PMetaRef (name, attrs, metaArgs) as x -> 
+                | PMetaRef (name, attrs, metaArgs) -> 
                     if metaArgs.IsEmpty then
                         (PRef(name, attrs), resRuleList)
                     else expandMetaRef name attrs metaArgs key module' metaRules expanded resRuleList
@@ -210,7 +210,7 @@ let expandRule =
         | PConj (l, r) -> PConj(replace l, replace r)
         | PLiteral _ as literal -> literal
         | PToken _ as token -> token
-        | PRef(name, attrs) as prev ->
+        | PRef(name,_) as prev ->
             prev |> tryReplaceActual formalToAct (sourceToString name)
         | PSeq (ruleList, actionCode, l) ->
             PSeq (ruleList |> List.map (fun x ->  {x with rule = replace x.rule})

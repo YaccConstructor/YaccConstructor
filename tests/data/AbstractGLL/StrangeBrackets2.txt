@@ -1,4 +1,0 @@
-0 1 LBR
-1 2 RBR
-2 3 LBR
-3 0 RBR

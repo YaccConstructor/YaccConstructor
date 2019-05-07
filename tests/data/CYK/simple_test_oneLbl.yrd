@@ -1,6 +1,0 @@
-[<Start>]
-s : x y;
-[<Start>]
-s : y y;
-x: @l(NUM);
-y: PLUS;

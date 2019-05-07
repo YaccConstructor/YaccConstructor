@@ -1,17 +1,10 @@
-﻿namespace Yard.Generators.GLL
+﻿namespace YC.Parsing.GLL
 
-open Yard.Core
-open Yard.Core.IL
-open Yard.Core.Checkers
+open YC.Core
+open IL
 open Constraints
-open Yard.Generators.Common
-open InitialConvert
-open Yard.Generators.Common.FSA
-open Yard.Generators.GLL
-open Printer
-open Yard.Generators.Common.FSA.Common
-
-open System.Collections.Generic
+open YC.Parsing.Common.FSA
+open YC.Parsing.GLL.Printer
 
 type GLL() = 
     inherit Generator()

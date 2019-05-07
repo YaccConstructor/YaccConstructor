@@ -1,7 +1,0 @@
-[<Start>]
-s: A s B | mdl
-mdl: A B
-
-(* s: A l | middle
-middle: A B
-l: s B *)

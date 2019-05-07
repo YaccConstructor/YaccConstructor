@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Generators.RNGLR.Helper
+module YC.Generators.RNGLR.Helper
 
 let _getLiteralName (lit:string) =    
     let replacementDict =

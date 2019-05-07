@@ -1,1 +1,0 @@
-..\..\Bin\Release\v40\YC.YaccConstructor.exe -i ..\YC.GrammarZOO\Bio\tests\very_very_small.yrd  -c ExpandEbnf -c ExpandMeta -g "GLLFSAGenerator -pos int -token int -module GLLFSA.VeryVerySmall -o very_very_small.yrd.fs -abstract true" >> log.txt

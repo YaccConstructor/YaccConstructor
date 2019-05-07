@@ -1,7 +1,0 @@
-list <item separator>:
-{ [] }
-| item (-separator item)*
-
-[<Start>]
-s: (n PLUS?)*
-n: NUM list<NUM? PLUS>

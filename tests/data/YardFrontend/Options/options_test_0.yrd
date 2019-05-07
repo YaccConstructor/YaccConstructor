@@ -1,7 +1,0 @@
-options {
-    first="Some name"
-    second = ololo
-}
-
-[<Start>] // Start rule attribute
-s: A;

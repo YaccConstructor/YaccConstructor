@@ -16,12 +16,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Yard.Frontends.FsYaccFrontend.Lexer
+module YC.Frontends.FsYaccFrontend.Lexer
 
-open Yard.Frontends.FsYaccFrontend.Parser // using tokens type 
-//open Microsoft.FSharp.Text.Lexing
+open YC.Frontends.FsYaccFrontend.Parser
 open Microsoft.FSharp.Text
-open Yard.Core.IL
+open YC.Core.IL
 
 let comment_depth = ref 0
 let source = ref ""
@@ -31,9 +30,12 @@ let offset (pos : Lexing.Position) = pos.AbsoluteOffset
 
 let currentFile = ref ""
 
+let newSourcePosition (fslexPos : Lexing.Position) =
+    new SourcePosition(fslexPos.AbsoluteOffset, fslexPos.Line, fslexPos.Column)
+
 let make_lexeme n1 n2 =
     source.Value.Substring(offset n1, offset n2 - offset n1)
-    |> fun s -> new Source(s, new SourcePosition(n1), new SourcePosition(n2), !currentFile)
+    |> fun s -> new Source(s, newSourcePosition n1 , newSourcePosition n2, !currentFile)
 
 let nextline (lexbuf:Lexing.LexBuffer<_>) = lexbuf.EndPos <- lexbuf.EndPos.NextLine
 }

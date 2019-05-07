@@ -1,8 +1,0 @@
-[<Start>]
-s:  t<<b>>;
-
-t<<b>>:  yard_rule_a_1<<p>>;
-
-yard_rule_a_1<<q>>:  m<<b>>;
-
-m<<e>>:  v;

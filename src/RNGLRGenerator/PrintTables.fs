@@ -12,15 +12,11 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Generators.RNGLR.Printer
+module YC.Parsing.RNGLR.Generator.TablePrinter
 
 open System.Collections.Generic
 
-open Yard.Generators.Common.FinalGrammar
-open Yard.Generators.RNGLR
-open Yard.Core.IL
-
-open HighlightingPrinter
+open YC.Parsing.Common.FinalGrammar
 
 type TargetLanguage =
     | FSharp
@@ -260,7 +256,7 @@ let printTables
         printBr ""
 
         printBr "let defaultAstToDot ="
-        printBrInd 1 "(fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber %s leftSide)" (if isAbstractParsingMode then "(Some tokenData)" else "None")
+        printBrInd 1 "(fun (tree : YC.Parsing.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber %s leftSide)" (if isAbstractParsingMode then "(Some tokenData)" else "None")
 
         printBr ""
 
@@ -275,7 +271,7 @@ let printTables
 
         print2DArrList zeroReduces
             (fun l -> not l.IsEmpty)
-            (fun l -> printListAsArray l (fun (x,y) -> print "%d" x))
+            (fun l -> printListAsArray l (fun (x,_) -> print "%d" x))
             "zeroReduces"
 
         printInd 0 "let private small_acc = "
@@ -312,17 +308,6 @@ let printTables
         else
             printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
             printBrInd 1 "buildAst<Token> parserSource"
-            printBr ""
-
-        if isHighlihgtingMode 
-        then 
-            printInd 0 "let getTerminalNames = ["
-            for i = indexator.termsStart to indexator.termsEnd do
-                print "\"%s\";" <| indexator.indexToTerm i
-            print "]"
-            printBr ""
-            printBr ""
-            printBr "%s" <| printTokenToTreeNode indexator
             printBr ""
             
         res.ToString()
@@ -430,7 +415,7 @@ let printTables
             "reduces"
         print2DArrList zeroReduces
             (fun l -> not l.IsEmpty)
-            (fun l -> printListAsArray l (fun (x,y) -> print "%d" x))
+            (fun l -> printListAsArray l (fun (x,_) -> print "%d" x))
             "zeroReduces"
         printInd 0 "private val small_acc = "
         printList tables.acc (fun x -> print "%d" x)

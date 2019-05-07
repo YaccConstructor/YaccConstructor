@@ -12,11 +12,11 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-namespace Yard.Generators.RNGLR
+namespace YC.Parsing.RNGLR.Generator
 
-open Yard.Generators.Common.FinalGrammar
-open Yard.Generators.RNGLR.States
-open Yard.Generators.RNGLR
+open YC.Parsing.Common.FinalGrammar
+open YC.Parsing.RNGLR
+open States
 
 type Tables (grammar : FinalGrammar, states : StatesInterpreter) =
     let _reduces, _gotos, _acc =

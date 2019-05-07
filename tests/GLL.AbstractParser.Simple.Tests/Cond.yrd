@@ -1,6 +1,0 @@
-[<Start>]
-s : r=if {r}
-if : r=if_else {r} | IF r=stmt {r * 10}
-if_else : IF t=good ELSE f=stmt {t+f}
-good : r=stmt {r} | r=if_else {r}
-stmt : A {2} | r=if {r}

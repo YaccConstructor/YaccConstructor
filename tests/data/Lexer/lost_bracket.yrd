@@ -1,4 +1,0 @@
-f: (NUMBER | (LEFT e RIGHT)) {;
-t: ((t (MULT|DIV) f)| f){};
-[<Start>]
-e: t|(e (PLUS|MINUS) t) {};

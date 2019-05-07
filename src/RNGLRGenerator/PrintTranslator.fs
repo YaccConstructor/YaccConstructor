@@ -12,19 +12,14 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Generators.RNGLR.TranslatorPrinter
+module YC.Parsing.RNGLR.Generator.TranslatorPrinter
 
-open System
-open Yard.Generators.Common.FinalGrammar
-open System.Collections.Generic
-open Yard.Generators.Common
-open Yard.Generators.Common.AST
-open Yard.Generators.Common.AstNode
-open Yard.Core.IL
+open YC.Parsing.Common.FinalGrammar
+open YC.Parsing.Common
+open AstNode
+open YC.Core.IL
 open YC.PrettyPrinter.Pretty
 open YC.PrettyPrinter.StructuredFormat
-open Yard.Generators.Common.Epsilon
-open HighlightingPrinter
 
 let getPosFromSource printPositions fullPath dummyPos (src : Source) =
     let file =

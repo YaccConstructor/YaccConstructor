@@ -15,12 +15,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Yard.Frontends.FsYaccFrontend.Main
+module YC.Frontends.FsYaccFrontend.Main
 
-open Yard.Frontends.FsYaccFrontend.Lexer
-open Yard.Frontends.FsYaccFrontend.Parser
-open Yard.Core.IL
-open Yard.Core
+open YC.Frontends.FsYaccFrontend.Lexer
+open YC.Frontends.FsYaccFrontend.Parser
+open YC.Core.IL
 
 open Microsoft.FSharp.Text.Lexing
 open Microsoft.FSharp.Core
@@ -55,7 +54,7 @@ let rec _addBindings = function
     | x -> x
 
 let addBindings (grammar: Grammar<Source, Source>) = 
-    grammar |> mapGrammar (List.map (fun rule -> { rule with body=_addBindings rule.body } ))
+    grammar |> YC.Core.Helpers.mapGrammar (List.map (fun rule -> { rule with body=_addBindings rule.body } ))
 
 let LexBufferFromFile fileName = 
     let content = System.IO.File.ReadAllText fileName

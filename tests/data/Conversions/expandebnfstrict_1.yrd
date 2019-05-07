@@ -1,9 +1,0 @@
-
-[<Start>]
-s: a lst=(n=NUMBER COMMA {n})* b {lst} ;
-
-alternative: lst=(s=IDENT { PRef((s,(0,0)), None) })*  ac=ACTION_CODE 
-    { PSeq(List.map (fun prod -> {new Production.elem<Source.t, Source.t> with omit=false and rule=prod and binding=None and checker=None}) lst, Some(ac,(0,0))) } ;
-
-
-a: (a|b?)+ c;

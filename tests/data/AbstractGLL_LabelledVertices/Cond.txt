@@ -1,2 +1,0 @@
-IF IF A_1
-A_1 ELSE A_2

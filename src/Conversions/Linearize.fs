@@ -12,10 +12,10 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.Conversions.Linearize
+module YC.Core.Conversions.Linearize
 
-open Yard.Core
-open Yard.Core.IL
+open YC.Core
+open IL
 open TransformAux
 open System.Collections.Generic
 
@@ -96,7 +96,6 @@ let private linearize (grammar: Grammar<_,_>) =
         renamebody' body
     let newRules =
         grammar |> List.collect (fun m ->
-            let name = getModuleName m
             m.rules |> List.map (fun rule ->
                 {rule with
                     name = rename (getModuleName m) [] rule.name

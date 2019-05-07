@@ -1,4 +1,0 @@
-[<Start>]
-s: a X
-a: b | {()}
-b: a s Y | Z

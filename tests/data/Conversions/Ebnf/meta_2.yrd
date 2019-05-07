@@ -1,2 +1,0 @@
-[<Start>]
-s: (NUMBER | IDENT)? (NUMBER | IDENT)? ;

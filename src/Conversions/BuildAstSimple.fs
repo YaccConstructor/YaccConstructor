@@ -12,12 +12,10 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.Conversions.BuildAstSimple
+module YC.Core.Conversions.BuildAstSimple
 
-open Yard.Core
-open Yard.Core.IL
-
-open System.Collections.Generic
+open YC.Core
+open IL
 
 (* You need to add following code in grammar header 
 type AST<'token> =
@@ -31,10 +29,10 @@ let seqify = function
     | production -> PSeq([{new ProductionElem<Source, Source> with omit=false and rule=production and binding=None and checker=None}], None, None)
 
 let printSeqProduction binding = function
-    | POpt(x) -> sprintf "(match %s with None -> [] | Some(ast) -> ast)" binding 
+    | POpt _ -> sprintf "(match %s with None -> [] | Some(ast) -> ast)" binding 
     | PToken s | PLiteral s -> leafConstr s.text binding
-    | PSome(p) -> sprintf "List.concat %s" binding
-    | PMany(p) -> sprintf "List.concat %s" binding
+    | PSome _ -> sprintf "List.concat %s" binding
+    | PMany _ -> sprintf "List.concat %s" binding
     | _ -> binding
 
 /// ruleName is empty when production is inner and action code returns list of nodes
@@ -63,7 +61,7 @@ let rec _buildAstSimple ruleName (production: Production<Source, Source>) =
                             | PMany(p), _ -> { elem with binding=binding; rule=PMany(_buildAstSimple "" p) }
                             | PSome(p), _ -> { elem with binding=binding; rule=PSome(_buildAstSimple "" p) }
                             | POpt(p), _  -> { elem with binding=binding; rule=POpt (_buildAstSimple "" p) }
-                            | PSeq([elem_inner],None, l), _ -> { elem_inner with binding=binding; rule=_buildAstSimple ruleName elem_inner.rule }
+                            | PSeq([elem_inner],None, _), _ -> { elem_inner with binding=binding; rule=_buildAstSimple ruleName elem_inner.rule }
                             | x, _ -> { elem with binding= Some <| new Source(sprintf "FAIL(%A)_S%d" x (i+1))
                                                   rule=_buildAstSimple ruleName elem.rule }
                     )

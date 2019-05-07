@@ -12,9 +12,9 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.Constraints
+module YC.Core.Constraints
 
-open Yard.Core.ConstraintsImpl
+open YC.Core.ConstraintsImpl
 
 let singleModule = SingleModule.singleModule
 let noEbnf = NoEbnf.noEbnf

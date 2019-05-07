@@ -1,7 +1,0 @@
-tokens {
-    _ of string
-}
-
-[<Start>]
-s : op<A> op<B> op<C>
-op<a> : a | {}

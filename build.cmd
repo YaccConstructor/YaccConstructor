@@ -1,18 +1,8 @@
-@echo off
+@echo on
 cls
 
-.paket\paket.bootstrapper.exe
-if errorlevel 1 (
-  exit /b %errorlevel%
-)
+nuget restore YaccConstructor.sln
 
-.paket\paket.exe restore
-if errorlevel 1 (
-  exit /b %errorlevel%
-)
+"packages/FSharp.Compiler.Tools.10.0.2/tools/fsi.exe" --noframework "src/YardFrontend/gen.fsx"
 
-IF NOT EXIST build.fsx (
-  .paket\paket.exe update
-  packages\FAKE\tools\FAKE.exe init.fsx
-)
-packages\FAKE\tools\FAKE.exe build.fsx %*
+msbuild YaccConstructor.sln

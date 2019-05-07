@@ -12,18 +12,17 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.ConstraintsImpl.NoBrackets
+module YC.Core.ConstraintsImpl.NoBrackets
 
-open Yard.Core
+open YC.Core
 open IL
-open Yard.Core.ConstraintsImpl.Common
+open YC.Core.ConstraintsImpl.Common
 
 let private checker grammar =
-    let isAlt = function PAlt _ -> true | _ -> false
     let rec inner = function
         | PSeq (elems,_,_) ->
             elems |> List.exists (fun e -> match e.rule with PSeq _ -> true | _ -> false)
-        | x -> false
+        | _ -> false
     existsRules (fun r -> inner r.body) grammar
     |> not
     

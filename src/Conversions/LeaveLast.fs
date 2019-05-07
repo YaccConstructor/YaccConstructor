@@ -12,10 +12,10 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.Conversions.LeaveLast
+module YC.Core.Conversions.LeaveLast
 
-open Yard.Core
-open Yard.Core.IL
+open YC.Core
+open IL
 
 
 open System.Collections.Generic

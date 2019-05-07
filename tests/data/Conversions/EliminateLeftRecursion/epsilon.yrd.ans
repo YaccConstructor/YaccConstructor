@@ -1,4 +1,0 @@
-[<Start>]
-s: b X | X {()}
-b: X Y yard_lst=yard_lr_b | Z yard_lst=yard_lr_b
-yard_lr_b: {[]} | s Y yard_lst=yard_lr_b | X Y yard_lst=yard_lr_b

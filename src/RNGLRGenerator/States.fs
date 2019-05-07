@@ -12,15 +12,15 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Generators.RNGLR.States
+module YC.Parsing.RNGLR.Generator.States
 
 open System.Collections.Generic
-open Yard.Generators.Common.FinalGrammar
-open Yard.Generators.Common
+open YC.Parsing.Common.FinalGrammar
+open YC.Generators.RNGLR.Generator.Graph
+
 type OutTable = LR | LALR
 
 type Kernel = int
-//type Item = Kernel * Set<int>
 
 type KernelInterpreter =
     static member inline toKernel (prod,pos) = (prod <<< 16) ||| pos

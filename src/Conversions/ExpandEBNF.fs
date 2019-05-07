@@ -12,10 +12,10 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.Conversions.ExpandEbnfStrict
+module YC.Core.Conversions.ExpandEbnfStrict
 
-open Yard.Core
-open Yard.Core.IL
+open YC.Core
+open IL
 open Namer
 open TransformAux
 
@@ -136,7 +136,7 @@ let convertToBnf (rule:(Rule<Source,Source>)) =
         | POpt p -> 
             let generatedName = genOptName()
             let expandedBody = replaceEbnf p attrs metaArgs
-            let newRule, insideNewRule = genRule generatedName p
+            let newRule,_ = genRule generatedName p
             let newBody =
                 PAlt(
                     PSeq([], genAction "None" p, None),
@@ -153,7 +153,7 @@ let convertToBnf (rule:(Rule<Source,Source>)) =
                  metaArgs = metaArgs
                 }) :: !addedBnfRules
             newRule
-        | PMetaRef (src, args, metas) as x ->
+        | PMetaRef (src, args, metas) ->
             metas |> List.map (fun prod -> replaceEbnf prod attrs metaArgs)
             |> fun m -> PMetaRef (src, args, m)
         | PLiteral _ | PPerm _ | PRef _ | PRepet _ | PToken _ as x -> x

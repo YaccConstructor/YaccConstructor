@@ -1,7 +1,14 @@
+notifications:
+  slack: yaccconstructor:mSbpV6G9f6LgfngzhB9yaJUe
+
 language: csharp
 
 mono:
   - latest
+
+install:
+  - nuget # lets get version number
+  - nuget restore YaccConstructor.sln -Verbosity detailed
 
 sudo: false  # use the new container-based Travis infrastructure 
 
@@ -17,4 +24,4 @@ before_script:
   - git lfs pull
 
 script: 
-  - ./build.sh All
+  - ./build.sh

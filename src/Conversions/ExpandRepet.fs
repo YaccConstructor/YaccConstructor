@@ -1,8 +1,7 @@
-﻿module Yard.Core.Conversions.ExpandRepet
+﻿module YC.Core.Conversions.ExpandRepet
 
-open Yard.Core
-open Yard.Core.IL
-open Yard.Core.Namer
+open YC.Core
+open IL
 open TransformAux
 
 open System
@@ -14,9 +13,10 @@ let private expandRepet (ruleList: Rule<_,_> list) =
 
     let rec bodyRule acc b rule =
         if (acc > b) || (acc < 1) then failwith "Incorrect parameters of range for Repeat!"
+        let body = PSeq(List.init acc (fun _ -> {omit=false; rule=rule; binding=None; checker=None }), None, None) 
         if acc = b 
-        then PSeq([for i in 1..acc -> {omit=false; rule=rule; binding=None; checker=None }], None, None)
-        else PAlt(PSeq([for i in 1..acc -> {omit=false; rule=rule; binding=None; checker=None }], None, None), bodyRule (acc + 1) b rule)               
+        then body
+        else PAlt(body, bodyRule (acc + 1) b rule)               
             
     let handleRepeat rule = 
         match rule with 
@@ -51,14 +51,14 @@ let private expandRepet (ruleList: Rule<_,_> list) =
         | PMany x -> PMany(expandBody attrs x)
         | PSome x -> PSome(expandBody attrs x)
         | POpt x ->  POpt(expandBody attrs x)
-        | PRepet (r, a, b) as x -> 
+        | PRepet (r, a, b) -> 
             let newName = Namer.newName Namer.Names.repeat
             toExpand.Enqueue({name = dummyPos newName; args=attrs; body=r;
                                 isStart=false; isPublic=false; isInline = false; metaArgs=[]})
             handleRepeat <| PRepet (PRef(dummyPos newName, list2opt <| createParams attrs), a, b)
         | PToken _ | PLiteral _  | PRef _  as x -> x
         | PPerm _ -> failwith "Unsupported rule in Repetion!"        
-        | PMetaRef (src, args, metas) as x ->                         
+        | PMetaRef (src, args, metas) ->                         
             PMetaRef (src, args, metas |> List.map (fun prod -> expandBody attrs prod))     
         | PShuff _ -> failwith "Unsupported"
         | PNeg _ -> failwith "Unsupported"              

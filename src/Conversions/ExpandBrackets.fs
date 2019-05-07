@@ -12,10 +12,10 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.Conversions.ExpandBrackets
+module YC.Core.Conversions.ExpandBrackets
 
-open Yard.Core
-open Yard.Core.IL
+open YC.Core
+open IL
 open Namer
 open TransformAux
 
@@ -40,7 +40,7 @@ let private expandBrackets (ruleList: Rule<_, _> list) =
                                 | PSeq(x,y,_) -> PSeq(x,y,l)
                                 | _ -> s 
                             { elem with rule = body }
-                        | PSeq(subelements, subActionCode, l) when List.length subelements > 1 || subActionCode <> None ->
+                        | PSeq(subelements, subActionCode, _) when List.length subelements > 1 || subActionCode <> None ->
                             let newName = newName()
                             toExpand.Enqueue({name= genNewSourceWithRange newName elem.rule; args=attrs;
                                                 body=elem.rule; isStart=false; isPublic=false; isInline = false; metaArgs=[]})

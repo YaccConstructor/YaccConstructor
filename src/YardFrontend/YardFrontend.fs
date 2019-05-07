@@ -12,10 +12,9 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-namespace Yard.Frontends.YardFrontend
+namespace YC.Frontends.YardFrontend
 
-
-open Yard.Core
+open YC.Core
 
 type YardFrontend() = 
     inherit Frontend()

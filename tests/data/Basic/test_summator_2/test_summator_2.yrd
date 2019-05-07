@@ -1,3 +1,0 @@
-[<Start>]
-s: e;
-e: NUMBER | e PLUS NUMBER ;

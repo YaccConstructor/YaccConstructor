@@ -1,12 +1,12 @@
-﻿module Yard.Generators.GLL.Printer
+﻿module YC.Parsing.GLL.Printer
 
 open System.Collections.Generic
-open Yard.Generators.Common.FSA
-open Yard.Generators.Common.FSA.Common
-open AbstractAnalysis.Common
-open Yard.Generators.GLL.ParserCommon
-open Yard.Generators.Common.InitialConvert
-open Yard.Generators.Common
+open YC.Parsing.Common
+open YC.Parsing.Common.FSA
+open YC.Parsing.Common.FSA.Common
+open YC.Parsing.Common.GraphInput
+open YC.Parsing.Common.InitialConvert
+
 
 let getGLLparserSource (fsa : FSA)
              (outFileName : string)
@@ -262,7 +262,8 @@ let getGLLparserSource (fsa : FSA)
             | ex ->
                 printfn "It would not be possible to use translation because not having some necessary conversions in grammar"
                 fun _ -> failwith "Bad grammar"
-    let parserSource = new ParserSourceGLL(fsaStatesOutNonterms
+    let parserSource = new GLL.ParserSourceGLL
+                                          (fsaStatesOutNonterms
                                          , fsa.StartState
                                          , fsa.FinalStates
                                          , fsa.NontermCount

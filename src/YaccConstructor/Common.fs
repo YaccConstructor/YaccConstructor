@@ -1,4 +1,4 @@
-﻿module YaccConstructor.Common
+﻿module YC.Common
 
 open Argu
 

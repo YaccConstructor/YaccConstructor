@@ -1,0 +1,223 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <Import Project="../..\packages\FSharp.Compiler.Tools.10.0.2\build\FSharp.Compiler.Tools.props" Condition="Exists('../..\packages\FSharp.Compiler.Tools.10.0.2\build\FSharp.Compiler.Tools.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{20C9D959-5136-47C0-AA40-DAD05703439A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>MatrixBasedParsing</RootNamespace>
+    <AssemblyName>MatrixBasedParsing</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>portable</DebugType>
+    <Optimize>false</Optimize>
+    <Tailcalls>false</Tailcalls>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <OtherFlags>--warnon:1182</OtherFlags>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <OtherFlags>--warnon:1182</OtherFlags>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Alea, Version=3.0.0.0, Culture=neutral, PublicKeyToken=ba52afc3c2e933d6">
+      <HintPath>..\..\packages\Alea.3.0.4\lib\net45\Alea.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Alea.CudaToolkit, Version=1.0.9.0, Culture=neutral, PublicKeyToken=ba52afc3c2e933d6">
+      <HintPath>..\..\packages\Alea.CudaToolkit.1.0.9\lib\net45\Alea.CudaToolkit.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Alea.IL, Version=3.0.0.0, Culture=neutral, PublicKeyToken=ba52afc3c2e933d6">
+      <HintPath>..\..\packages\Alea.3.0.4\lib\net45\Alea.IL.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Alea.Interop, Version=1.0.9.0, Culture=neutral, PublicKeyToken=ba52afc3c2e933d6">
+      <HintPath>..\..\packages\Alea.Interop.1.0.9\lib\net45\Alea.Interop.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Alea.Parallel, Version=3.0.0.0, Culture=neutral, PublicKeyToken=ba52afc3c2e933d6">
+      <HintPath>..\..\packages\Alea.3.0.4\lib\net45\Alea.Parallel.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma, Version=1.1.5.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\Brahma.FSharp.1.1.5\lib\net45\Brahma.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma.Agents, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\Brahma.FSharp.1.1.5\lib\net45\Brahma.Agents.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma.FSharp.OpenCL.AST, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\Brahma.FSharp.1.1.5\lib\net45\Brahma.FSharp.OpenCL.AST.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma.FSharp.OpenCL.Core, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\Brahma.FSharp.1.1.5\lib\net45\Brahma.FSharp.OpenCL.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma.FSharp.OpenCL.Extensions, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\Brahma.FSharp.1.1.5\lib\net45\Brahma.FSharp.OpenCL.Extensions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma.FSharp.OpenCL.Printer, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\Brahma.FSharp.1.1.5\lib\net45\Brahma.FSharp.OpenCL.Printer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma.FSharp.OpenCL.Translator, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\Brahma.FSharp.1.1.5\lib\net45\Brahma.FSharp.OpenCL.Translator.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma.FSharp.OpenCL.TypeProvider, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\Brahma.FSharp.1.1.5\lib\net45\Brahma.FSharp.OpenCL.TypeProvider.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma.Helpers, Version=1.1.5.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\Brahma.FSharp.1.1.5\lib\net45\Brahma.Helpers.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Brahma.OpenCL, Version=1.1.5.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\Brahma.FSharp.1.1.5\lib\net45\Brahma.OpenCL.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="CudaBlas, Version=10.0.31.0, Culture=neutral, PublicKeyToken=539d54d12e99fedb">
+      <HintPath>..\..\packages\ManagedCuda-CUBLAS.10.0.31\lib\net46\CudaBlas.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="CudaSparse, Version=10.0.31.0, Culture=neutral, PublicKeyToken=f65ee2ae6b331585">
+      <HintPath>..\..\packages\ManagedCuda-CUSPARSE.10.0.31\lib\net46\CudaSparse.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharp.Quotations.Evaluator, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\FSharp.Quotations.Evaluator.1.0\lib\net40\FSharp.Quotations.Evaluator.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Collections, Version=1.15.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\FSharpx.Collections.1.15.0\lib\net40\FSharpx.Collections.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ManagedCuda, Version=10.0.31.0, Culture=neutral, PublicKeyToken=242d898828717aa0">
+      <HintPath>..\..\packages\ManagedCuda-100.10.0.31\lib\net46\ManagedCuda.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MathNet.Numerics, Version=4.7.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\MathNet.Numerics.4.7.0\lib\net461\MathNet.Numerics.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MathNet.Numerics.FSharp, Version=4.7.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\MathNet.Numerics.FSharp.4.7.0\lib\net45\MathNet.Numerics.FSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="mscorlib" />
+    <Reference Include="OpenCL.Net, Version=2.2.9.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\OpenCL.Net.2.2.9.0\lib\net40\OpenCL.Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="FSharp.Core">
+      <HintPath>../..\packages\FSharp.Core.4.5.2\lib\net45\FSharp.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="YC.PrettyPrinter, Version=0.0.5.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\YC.PrettyPrinter.0.0.5\lib\net40\YC.PrettyPrinter.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph, Version=3.7.5.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\YC.QuickGraph.3.7.5-deta\lib\net45\YC.QuickGraph.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.Data, Version=3.7.5.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\YC.QuickGraph.3.7.5-deta\lib\net45\YC.QuickGraph.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.FSA, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\YC.QuickGraph.3.7.5-deta\lib\net45\YC.QuickGraph.FSA.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.FST, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\YC.QuickGraph.3.7.5-deta\lib\net45\YC.QuickGraph.FST.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.Glee, Version=3.7.5.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\YC.QuickGraph.3.7.5-deta\lib\net45\YC.QuickGraph.Glee.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.Graphviz, Version=3.7.5.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\YC.QuickGraph.3.7.5-deta\lib\net45\YC.QuickGraph.Graphviz.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraph.Petri, Version=3.7.5.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\YC.QuickGraph.3.7.5-deta\lib\net45\YC.QuickGraph.Petri.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.QuickGraphFS, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\YC.QuickGraph.3.7.5-deta\lib\net45\YC.QuickGraphFS.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Util.fs" />
+    <Compile Include="TPMatrices.fs" />
+    <Compile Include="CYKMatrixOkhotin.fs" />
+    <Compile Include="CYKMatrixBFS.fs" />
+    <Compile Include="CYKMatrix.fs" />
+    <Compile Include="MatrixKernels.fs" />
+    <Compile Include="SparseGraphParsingImpl.fs" />
+    <Compile Include="MySparseGraphParsingImpl.fs" />
+    <Compile Include="GraphParsing.fs" />
+    <Compile Include="ProbabilityGraphParsingImpl.fs" />
+    <Compile Include="Main.fs" />
+    <Content Include="CudaBlas.dll.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CudaSparse.dll.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Conversions\Conversions.fsproj">
+      <Project>{e0c83845-1aac-43be-9259-af89002722c1}</Project>
+      <Name>Conversions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Core\Core.fsproj">
+      <Project>{a0fd0ce8-da33-4c03-86e2-e6417d96fabd}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Parsing.Common\Parsing.Common.fsproj">
+      <Project>{2deacfb7-6d6e-4cab-8199-9017c366e53c}</Project>
+      <Name>Parsing.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="OpenCL.Net.dll.config" />
+    <Content Include="ManagedCuda.dll.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
+  <Import Project="..\..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Alea.3.0.4\build\Alea.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Alea.3.0.4\build\Alea.targets'))" />
+  </Target>
+  <Import Project="..\..\packages\Alea.3.0.4\build\Alea.targets" Condition="Exists('..\..\packages\Alea.3.0.4\build\Alea.targets')" />
+</Project>

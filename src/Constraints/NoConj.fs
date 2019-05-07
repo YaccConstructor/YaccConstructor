@@ -12,11 +12,11 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.ConstraintsImpl.NoConj
+module YC.Core.ConstraintsImpl.NoConj
 
-open Yard.Core
+open YC.Core
 open IL
-open Yard.Core.ConstraintsImpl.Common
+open YC.Core.ConstraintsImpl.Common
 
 let private checker grammar =
     let rec isConj = function

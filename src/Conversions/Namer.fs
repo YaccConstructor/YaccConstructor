@@ -12,8 +12,10 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.Namer
+[<AutoOpen>]
+module YC.Core.Conversions.Namer
 
+open YC.Core
 open IL
 open System.Collections.Generic
 
@@ -93,7 +95,7 @@ let initNamer (grammar : Grammar<_,_>) =
             walk r
         | PNeg x -> walk x
         | PMany x | PSome x | POpt x | PRepet (x,_,_) -> walk x
-        | PSeq (elems, ac, lbl) ->
+        | PSeq (elems,_,_) ->
             elems |> List.iter (fun e ->
                 e.binding |> Option.iter addAC
                 e.checker |> Option.iter addAC
@@ -132,7 +134,7 @@ let newSource (old : Source) = new Source(newName old.text, old)
 
 let genNewSourceWithRange (name : string) (body : Production<_,_>) =
     let rec getBegin = function
-        | PSeq (s, ac,l) ->
+        | PSeq (s, ac, _) ->
             match s with
             | h::_ -> getBegin h.rule
             | _ ->
@@ -140,8 +142,8 @@ let genNewSourceWithRange (name : string) (body : Production<_,_>) =
                 | Some (ac : Source) -> ac
                 | None -> failwith "Empty sequence without action code"
         | PRef (n,_) -> n
-        | PAlt (l, r) -> getBegin l
-        | PConj (l, r) -> getBegin l
+        | PAlt (l, _) -> getBegin l
+        | PConj (l, _) -> getBegin l
         | PLiteral l -> l
         | PMany b -> getBegin b
         | PSome b -> getBegin b
@@ -228,7 +230,3 @@ let createLiteralToken number = sprintf "LITERAL_%d" number
 
 /// returns token name for EOF (End Of File)
 let getEofTokenName = (withPrefix "EOF").ToUpper()
-    
-(* end of module Namer *)
-
-

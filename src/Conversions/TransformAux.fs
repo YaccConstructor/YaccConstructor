@@ -12,10 +12,9 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.Conversions.TransformAux
+module YC.Core.Conversions.TransformAux
 
-open Yard.Core.IL
-open Yard.Core.Namer
+open YC.Core.IL
 
 let getText = sourceToString
 let rec getTextIL = function

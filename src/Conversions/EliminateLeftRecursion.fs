@@ -12,11 +12,11 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.Conversions.EliminateLeftRecursion
+module YC.Core.Conversions.EliminateLeftRecursion
 
-open Yard.Core
-open Yard.Core.IL
-open Yard.Core.Namer
+open YC.Core
+open IL
+open Namer
 open TransformAux
 
 
@@ -168,7 +168,7 @@ let isEpsilonProduction = function
 
 let rec isRuleRef (rule:Rule) = function
     | PRef (name,_) -> name.text = rule.name.text
-    | PSeq (item::items,_,_) -> isRuleRef rule item.rule
+    | PSeq (item::_,_,_) -> isRuleRef rule item.rule
     | _ -> false
 
 let getRulesWithEpsilons indexToRule strongComponent =
@@ -183,7 +183,7 @@ let inlineRule indexToRule targetProductions sourceRuleIndex =
     let sourceRule = indexToRule sourceRuleIndex
     let sourceProductions = splitAlt sourceRule
     let inlineProduction = function
-        | PSeq (firstItem::targetItems,targetAC,dlabel) as prod when isRuleRef sourceRule firstItem.rule ->
+        | PSeq (firstItem::targetItems,targetAC,dlabel) when isRuleRef sourceRule firstItem.rule ->
             let (inlineProductionPart:Production->Production) = function
                 | PSeq (sourceItems,sourceAC,_) ->
                     let inlinedItems = List.append sourceItems targetItems

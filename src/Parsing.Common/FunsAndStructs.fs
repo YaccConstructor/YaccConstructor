@@ -67,11 +67,11 @@ type ParseData =
     | Length of uint16
 
 [<Struct>]
-[<CustomComparison; StructuralEquality>]
+[<CustomComparison; CustomEquality>]
 //[<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
-type ContextFSA<'GSSVertex> =
+type ContextFSA<'GSSVertex,'Priority when 'Priority : comparison and 'GSSVertex : equality> =
     /// Priority of decsriptors to specify oreser of preocessing.
-    val Priority           : (int*int)
+    val Priority           : 'Priority
     /// Position in input graph (packed edge+position).
     val PosInInput         : int<positionInInput>
     /// Current state of FSA.
@@ -91,9 +91,20 @@ type ContextFSA<'GSSVertex> =
                                 
     interface System.IComparable with 
         member x.CompareTo(y:obj) = 
-            let y = y :?> ContextFSA<'GSSVertex>
+            let y = y :?> ContextFSA<'GSSVertex,'Priority>
             compare (x.Priority) (y.Priority)
-
+            //compare (fst x.Priority / snd x.Priority) (fst y.Priority / snd y.Priority)
+            
+    interface System.IEquatable<ContextFSA<'GSSVertex,'Priority>> with 
+        member x.Equals(y:ContextFSA<'GSSVertex,'Priority>):bool = 
+            y.PosInInput = x.PosInInput
+            && y.PosInGrammar = x.PosInGrammar
+            && y.GssVertex = x. GssVertex
+            && y.Data = x.Data
+            
+    override this.GetHashCode() =
+        hash (this.PosInInput, this.PosInGrammar, this.GssVertex, this.Data)
+       
 [<Struct>]
 [<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
 type ContextFSA =

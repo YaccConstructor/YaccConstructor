@@ -23,10 +23,10 @@ type LexerEdge<'l ,'br  when 'l: equality> (s, e, t) =
     member this.BackRef = br
     member this.Label = l
 
-type IParserInput =
+type IParserInput<'Priority> =
     abstract member InitialPositions   : array<int<positionInInput>>
     abstract member FinalPositions     : array<int<positionInInput>>
-    abstract member ForAllOutgoingEdges: int<positionInInput> -> (int*int) -> (int<token> -> int<positionInInput> -> (int*int) -> unit) -> unit
+    abstract member ForAllOutgoingEdges: int<positionInInput> -> 'Priority -> (int<token> -> int<positionInInput> -> 'Priority -> unit) -> unit
     
     abstract member PositionToString : int<positionInInput> -> string
 
@@ -66,7 +66,7 @@ type SimpleInputGraph<'tag>(initialVertices : int[], finalVertices : int[], tagT
         let casted = Array.map(fun x -> int x) initial
         SimpleInputGraph<_>(casted, casted, tagToToken)
  
-    interface IParserInput with
+    interface IParserInput<int> with
         member this.InitialPositions = 
             Array.map(fun x -> x * 1<positionInInput>) this.InitStates
         
@@ -84,7 +84,7 @@ type SimpleInputGraph<'tag>(initialVertices : int[], finalVertices : int[], tagT
 
 
 type LinearInput (initialPositions, input:array<int<token>>) =
-    interface IParserInput with
+    interface IParserInput<int> with
         member x.PositionToString(pos: int<positionInInput>): string = 
             sprintf "%i" pos
 
@@ -102,7 +102,7 @@ type LinearInput (initialPositions, input:array<int<token>>) =
     new (input:array<int<token>>) = LinearInput ([|0<positionInInput>|], input)
 
 type LinearIputWithErrors(input: int<token> array, epsilonTag, nextSymbolsForInsert) = 
-    interface IParserInput with
+    interface IParserInput<int> with
         member x.PositionToString(pos: int<positionInInput>): string = 
             sprintf "%i" pos
 
@@ -114,8 +114,8 @@ type LinearIputWithErrors(input: int<token> array, epsilonTag, nextSymbolsForIns
         member this.ForAllOutgoingEdges curPosInInput priority pFun =
             if int curPosInInput < input.Length
             then 
-                pFun input.[int curPosInInput] (curPosInInput + 1<positionInInput>) (fst priority, (snd priority - 1))
-                pFun epsilonTag (curPosInInput + 1<positionInInput>) (fst priority + 1, (snd priority - 1))
+                pFun input.[int curPosInInput] (curPosInInput + 1<positionInInput>) priority
+                pFun epsilonTag (curPosInInput + 1<positionInInput>) (priority + 10)
 
     member this.Input = input
 
@@ -140,7 +140,7 @@ type GraphLabelledVertex<'tagType when 'tagType : equality> (initialVertices : '
     new (initial : 'tagType[], tagToToken : 'tagType -> int) = 
           GraphLabelledVertex<_>(initial, initial, tagToToken)
 
-    interface IParserInput with
+    interface IParserInput<int> with
         member this.InitialPositions = 
             Array.map(fun x -> 
                 match (vMap.TryGetValue x) with 

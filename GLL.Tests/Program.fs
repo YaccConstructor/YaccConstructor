@@ -38,12 +38,13 @@ let run grammarFile inputFile =
     printfn "processing time = %A" (System.DateTime.Now - start)
     let n, e, t, amb = tree.CountCounters
     tree.AstToDot "out.dot"
-    printfn "%A, %A" n e
+    printfn "%A, %A, t=%A" n e t
     ()
 
 
 [<EntryPoint>]
 let main argv =
     // N LBR N PLUS N RBR
+    // N PLUS PLUS PLUS PLUS N
     run argv.[0] argv.[1] 
     0 // return an integer exit code

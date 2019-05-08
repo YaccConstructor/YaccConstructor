@@ -22,6 +22,8 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
     let epsilonNodes = new Dictionary<int, int<nodeMeasure>>()
     let nodes = new BlockResizeArray<INode>()
 
+    let packedNodes = new Dictionary<_,_>()
+    
     member this.Nodes = nodes
     member this.TerminalNodes = terminalNodes
     member this.NonTerminalNodes = nonTerminalNodes
@@ -82,8 +84,15 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
 
     member this.FindSppfPackedNode parent (state : int<positionInGrammar>) leftExtension rightExtension (left : INode) (right : INode) =
         let createNode () =
-            let newNode = new PackedNode(state, left, right)
-            this.Nodes.Add(newNode)
+            let newNode =
+                if packedNodes.ContainsKey((state, left, right))
+                then packedNodes.[(state, left, right)]
+                else
+                    let r = new PackedNode(state, left, right)
+                    packedNodes.Add((state, left, right),r)
+                    this.Nodes.Add(r)
+                    r
+                    
             let num = (this.Nodes.Length - 1 )*1<nodeMeasure>
             ///
             if parent = dummyNode then failwith "try to get dummyNode from sppfNodes"
@@ -101,13 +110,13 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
 
     member this.GetNodeT (symbol : int<token>) (pos : int<positionInInput>) (nextPos : int<positionInInput>) =
         let index = int pos + 1
-        if symbol = epsilon
+        if symbol = epsilon //|| symbol = -10<token>
         then
             let contains, v = this.EpsilonNodes.TryGetValue index
             if not contains
             then
                 let t = new EpsilonNode(packExtension pos pos)
-                let res = this.Nodes.Length *1<nodeMeasure>
+                let res = this.Nodes.Length * 1<nodeMeasure>
                 this.Nodes.Add t
                 this.EpsilonNodes.Add(index, res)
                 TreeNode(res)
@@ -120,7 +129,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
             then
                 let dict1 = new Dictionary<_,_>()
                 let t = new TerminalNode(symbol, packExtension pos nextPos)
-                let res = this.Nodes.Length *1<nodeMeasure>
+                let res = this.Nodes.Length * 1<nodeMeasure>
                 dict1.Add(symbol, res)
                 this.Nodes.Add t
                 this.TerminalNodes.Add(hash, dict1)
@@ -130,7 +139,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 if not cont
                 then
                     let t = new TerminalNode(symbol, packExtension pos nextPos)
-                    let res = this.Nodes.Length *1<nodeMeasure>
+                    let res = this.Nodes.Length * 1<nodeMeasure>
                     this.Nodes.Add t
                     v.Add(symbol, res)
                     TreeNode(res)
@@ -144,6 +153,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
          
         if currentN <> dummyNode
         then
+            printfn "state = %A" state
             let currL = this.Nodes.Item (int currentN)
             let extL = currL.getExtension ()
             let lExtL = getLeftExtension extL//, getRightExtension extL
@@ -183,16 +193,22 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         otherNode, nontermNode
 
     member this.GetRoots (gss : GSS) startPosition = 
-        let gssRoot = 
-            gss.Vertices
-            |> Seq.filter (fun vert -> vert.Nonterm = startState && vert.PositionInInput = startPosition)
-            |> (fun x -> (Array.ofSeq x).[0])
+        let gssRoots = 
+            let s =
+                gss.Vertices
+                |> Seq.filter (fun vert -> vert.Nonterm = startState)
+            s
+            |> Seq.sortBy (fun vert -> vert.PositionInInput)
+            //|> (fun x -> (Array.ofSeq x).[0])
         
+        gssRoots
+        |> Seq.collect (fun gssRoot ->
         gssRoot.P.SetP
         |> Seq.map (fun x -> match x.data with
                              | TreeNode n -> this.Nodes.Item (int n)
                              | _ -> failwith "wrongType")
         |> Seq.sortByDescending(fun x -> getRightExtension(x.getExtension()) )
+        |> Array.ofSeq)
         |> Array.ofSeq
         //|> (fun x -> [|x.[0]|])
     

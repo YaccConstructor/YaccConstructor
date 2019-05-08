@@ -397,7 +397,7 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
                         for n in a.Others do
                             nodeQueue.Enqueue(new NumNode<INode>(!num, n))
                 | :? PackedNode as p ->
-                    createNode false !num false Packed ""
+                    createNode false !num false Packed (sprintf "%A" p.State)
                     createEdge currentPair.Ancestor !num false ""
                     if not <| isDummy p.Left then 
                         nodeQueue.Enqueue(new NumNode<INode>(!num, p.Left))

@@ -113,15 +113,16 @@ type LinearIputWithErrors(input: int<token> array, epsilonTag, nextSymbolsForIns
         [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
         member this.ForAllOutgoingEdges curPosInInput priority pFun =
             if int curPosInInput < input.Length
-            then 
+            then
+                let newPriority = (priority + 1 * 1000 + (input.Length - int curPosInInput - 1))
                 pFun input.[int curPosInInput] (curPosInInput + 1<positionInInput>) priority
-                pFun epsilonTag (curPosInInput + 1<positionInInput>) (priority + 1)
+                pFun epsilonTag (curPosInInput + 1<positionInInput>) newPriority
                 nextSymbolsForInsert
                 |> Array.iter (fun t ->
                     if t <> input.[int curPosInInput]
-                    then pFun t (curPosInInput + 1<positionInInput>) (priority + 1))
-                //nextSymbolsForInsert
-                //|> Array.iter (fun t -> pFun t curPosInInput (priority + 1))
+                    then pFun t (curPosInInput + 1<positionInInput>) newPriority)
+                nextSymbolsForInsert
+                |> Array.iter (fun t -> pFun t curPosInInput newPriority)
 
 
     member this.Input = input

@@ -86,7 +86,7 @@ type ContextFSA<'GSSVertex,'Priority when 'Priority : comparison and 'GSSVertex 
     override this.ToString () = "Edge:" + (CommonFuns.getEdge(this.PosInInput).ToString()) +
                                 "; PosOnEdge:" + (CommonFuns.getPosOnEdge(this.PosInInput).ToString()) +
                                 "; State:" + (this.PosInGrammar.ToString()) +
-                                //"; LeftPos:" + (this.LeftPos.ToString()) +
+                                "; Priority:" + (this.Priority.ToString()) +
                                 "; Len:" + (this.Data.ToString())
                                 
     interface System.IComparable with 

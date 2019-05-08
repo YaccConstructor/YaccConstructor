@@ -10,14 +10,14 @@ open YC.API
 
 let grammarsDir =  @""
 
-let getInput epsilonTag tokenizer file = 
+let getInput epsilonTag tokenizer allTermianls file = 
     let tokens = 
         System.IO.File.ReadAllLines(file)
         |> Seq.map (fun s -> s.Split [|' '|] |> Seq.map tokenizer)
         |> Seq.concat
         |> Array.ofSeq
 
-    new LinearIputWithErrors(tokens, epsilonTag, [||])
+    new LinearIputWithErrors(tokens, epsilonTag, allTermianls |> Array.ofSeq)
 
 let getParserSource grammarFile conv = 
     let fe = new YardFrontend()
@@ -33,7 +33,7 @@ let run grammarFile inputFile =
     let conv = [new ExpandEbnf() :> Conversion; new ExpandMeta() :> Conversion]
     let parser = getParserSource grammarFile conv
     let start = System.DateTime.Now
-    let input  = getInput parser.EpsilonInputTag parser.StringToToken inputFile
+    let input  = getInput parser.EpsilonInputTag parser.StringToToken parser.TerminalNums inputFile
     let tree = buildAst parser input
     printfn "processing time = %A" (System.DateTime.Now - start)
     let n, e, t, amb = tree.CountCounters

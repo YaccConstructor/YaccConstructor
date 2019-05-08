@@ -22,8 +22,6 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
     let epsilonNodes = new Dictionary<int, int<nodeMeasure>>()
     let nodes = new BlockResizeArray<INode>()
 
-    let packedNodes = new Dictionary<_,_>()
-    
     member this.Nodes = nodes
     member this.TerminalNodes = terminalNodes
     member this.NonTerminalNodes = nonTerminalNodes
@@ -84,25 +82,42 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
 
     member this.FindSppfPackedNode parent (state : int<positionInGrammar>) leftExtension rightExtension (left : INode) (right : INode) =
         let createNode () =
-            let newNode =
-                if packedNodes.ContainsKey((state, left, right))
-                then packedNodes.[(state, left, right)]
-                else
+            if parent = dummyNode then failwith "try to get dummyNode from sppfNodes"
+            
+            match (this.Nodes.Item (int parent)) with
+            | :? NonTerminalNode as n ->
+                if n.MapChildren (fun n -> n.State = state && n.Left = left && n.Right = right)
+                   |> Seq.exists id
+                   |> not
+                then
                     let r = new PackedNode(state, left, right)
-                    packedNodes.Add((state, left, right),r)
                     this.Nodes.Add(r)
-                    r
+                    //r
+                    n.AddChild r
+            | :? IntermidiateNode as i ->
+                if i.MapChildren (fun n -> n.State = state && n.Left = left && n.Right = right)
+                   |> Seq.exists id
+                   |> not
+                then
+                    let r = new PackedNode(state, left, right)
+                    this.Nodes.Add(r)
+                    //r
+                    i.AddChild r 
+            | x -> failwithf "Unexpected tye of node: %A" x
+//            let newNode =
+//                if false //packedNodes.ContainsKey((state, left, right))
+//                then packedNodes.[(state, left, right)]
+//                else
+//                    let r = new PackedNode(state, left, right)
+//                    //packedNodes.Add((state, left, right),r)
+//                    this.Nodes.Add(r)
+//                    r
                     
             let num = (this.Nodes.Length - 1 )*1<nodeMeasure>
             ///
-            if parent = dummyNode then failwith "try to get dummyNode from sppfNodes"
+            
             ///
-            match (this.Nodes.Item (int parent)) with
-            | :? NonTerminalNode as n ->
-                n.AddChild newNode
-            | :? IntermidiateNode as i ->
-                i.AddChild newNode
-            | _ -> failwith "adjf;sawf"
+            
             num
         
         let newNode = createNode()
@@ -207,9 +222,11 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         |> Seq.map (fun x -> match x.data with
                              | TreeNode n -> this.Nodes.Item (int n)
                              | _ -> failwith "wrongType")
-        |> Seq.sortByDescending(fun x -> getRightExtension(x.getExtension()) )
-        |> Array.ofSeq)
+        //|> Seq.sortByDescending(fun x -> getRightExtension(x.getExtension()) )
+        //|> Array.ofSeq)
+        )
         |> Array.ofSeq
+        |> Array.sortByDescending(fun x -> getRightExtension(x.getExtension()) - (getLeftExtension(x.getExtension())))
         //|> (fun x -> [|x.[0]|])
     
     member this.GetRootsForStartAndFinal (gss : GSS) (startPositions :_ []) (finalPositions :_ []) = 

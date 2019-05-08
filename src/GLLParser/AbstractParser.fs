@@ -45,7 +45,8 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
 
     /// Adds new context to stack (setR) if it is first occurrence of this context (if SetU doesn't contain it).
     let addContext posInInput posInGrammar (gssVertex:GSSVertex) data priority =
-        if not <| gssVertex.ContainsContext posInInput posInGrammar data
+        if (not <| gssVertex.ContainsContext posInInput posInGrammar data)
+        //&& (posInInput > 0<positionInInput> && not <| gssVertex.ContainsContext (posInInput + 1<positionInInput>) posInGrammar data)
         then pushContext posInInput posInGrammar gssVertex data priority
     
     /// 
@@ -151,7 +152,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
             |> Seq.exists (fun v -> v.P.SetP |> ResizeArray.exists (fun p -> int p.posInInput = input.Input.Length))
         | _ -> false
 
-    while not (setR.Count = 0 || ((*!inErrorRecoveryMode &&*) isParsed ())) do
+    while not (setR.Count = 0 (* || ((*!inErrorRecoveryMode &&*) isParsed ())*)) do
         let currentContext = setR.DeleteMin()
         inErrorRecoveryMode := currentContext.Priority <> 0
 

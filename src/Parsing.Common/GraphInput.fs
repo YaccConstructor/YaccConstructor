@@ -115,7 +115,13 @@ type LinearIputWithErrors(input: int<token> array, epsilonTag, nextSymbolsForIns
             if int curPosInInput < input.Length
             then 
                 pFun input.[int curPosInInput] (curPosInInput + 1<positionInInput>) priority
-                pFun epsilonTag (curPosInInput + 1<positionInInput>) (priority + 10)
+                pFun epsilonTag (curPosInInput + 1<positionInInput>) (priority + 1)
+                nextSymbolsForInsert
+                |> Array.iter (fun t ->
+                    if t <> input.[int curPosInInput]
+                    then
+                        pFun t (curPosInInput + 1<positionInInput>) (priority + 2)
+                        pFun t curPosInInput (priority + 1))
 
     member this.Input = input
 

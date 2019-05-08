@@ -227,7 +227,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
         )
         |> Array.ofSeq
         |> Array.sortByDescending(fun x -> getRightExtension(x.getExtension()) - (getLeftExtension(x.getExtension())))
-        //|> (fun x -> [|x.[0]|])
+        |> (fun x -> [|x.[0]|])
     
     member this.GetRootsForStartAndFinal (gss : GSS) (startPositions :_ []) (finalPositions :_ []) = 
         let startPoss = new HashSet<int<positionInInput>>(startPositions)

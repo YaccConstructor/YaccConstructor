@@ -112,7 +112,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
                     let newR = sppf.GetNodeT nextToken currentContext.PosInInput nextPosInInput
                     sppf.GetNodes nextPosInGrammar currentContext.GssVertex.Nonterm currentContext.Data newR               
                 | None ->
-                    printfn "%A --- %A" currentContext.PosInInput nextPosInInput
+                    //printfn "%A --- %A" currentContext.PosInInput nextPosInInput
                     //sppf.GetNodeT (-10<token>) currentContext.PosInInput nextPosInInput //
                     currentContext.Data, dummy
 
@@ -152,7 +152,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
             |> Seq.exists (fun v -> v.P.SetP |> ResizeArray.exists (fun p -> int p.posInInput = input.Input.Length))
         | _ -> false
 
-    while not (setR.Count = 0 (* || ((*!inErrorRecoveryMode &&*) isParsed ())*)) do
+    while not (setR.Count = 0  || ((*!inErrorRecoveryMode &&*) isParsed ())) do
         let currentContext = setR.DeleteMin()
         inErrorRecoveryMode := currentContext.Priority <> 0
 

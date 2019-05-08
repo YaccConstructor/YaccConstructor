@@ -1,2 +1,4 @@
 [<Start>]
+prg: prg SEMI stmt | stmt
+stmt : V EQ s
 s : N | s PLUS N | LBR s RBR

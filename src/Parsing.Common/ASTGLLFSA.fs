@@ -340,7 +340,9 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
             let shape =
                 match nodeType with
                 | Intermidiate -> ",shape=box"
-                | Packed -> ",shape=box"//",shape=point"
+                | Packed ->
+                     //",shape=box"
+                     ",shape=point"
                 | Terminal -> ",shape=box"
                 | Epsilon -> ",shape=box"
                 | NonTerminal -> ",shape=oval"

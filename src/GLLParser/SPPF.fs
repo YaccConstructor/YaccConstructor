@@ -10,7 +10,7 @@ open YC.Parsing.GLL.GSS
 
 type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positionInGrammar>>) =
     let dummyNode = -1<nodeMeasure>
-    let dummyAST = new TerminalNode(-1<token>, packExtension -1 -1)
+    let dummyAST = new TerminalNode(-1<token>, packExtension -1 -1, 0<weight>)
     let epsilon = -1<token>
     let unpackNode = function
         | TreeNode x -> x
@@ -83,10 +83,10 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
     member this.FindSppfPackedNode parent (state : int<positionInGrammar>) leftExtension rightExtension (left : INode) (right : INode) =
         let createNode () =
             if parent = dummyNode then failwith "try to get dummyNode from sppfNodes"
-            
+            let newWeight = left.getWeight() + right.getWeight()
             match (this.Nodes.Item (int parent)) with
-            | :? NonTerminalNode as n ->
-                if n.MapChildren (fun n -> n.State = state && n.Left = left && n.Right = right)
+            | :? NonTerminalNode as n ->                
+                if n.MapChildren (fun n -> (n.State = state && n.Left = left && n.Right = right) || n.Weight < newWeight)
                    |> Seq.exists id
                    |> not
                 then
@@ -95,7 +95,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                     //r
                     n.AddChild r
             | :? IntermidiateNode as i ->
-                if i.MapChildren (fun n -> n.State = state && n.Left = left && n.Right = right)
+                if i.MapChildren (fun n -> (n.State = state && n.Left = left && n.Right = right) || n.Weight < newWeight)
                    |> Seq.exists id
                    |> not
                 then
@@ -104,26 +104,13 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                     //r
                     i.AddChild r 
             | x -> failwithf "Unexpected tye of node: %A" x
-//            let newNode =
-//                if false //packedNodes.ContainsKey((state, left, right))
-//                then packedNodes.[(state, left, right)]
-//                else
-//                    let r = new PackedNode(state, left, right)
-//                    //packedNodes.Add((state, left, right),r)
-//                    this.Nodes.Add(r)
-//                    r
                     
-            let num = (this.Nodes.Length - 1 )*1<nodeMeasure>
-            ///
-            
-            ///
-            
-            num
+            (this.Nodes.Length - 1 )*1<nodeMeasure>
         
         let newNode = createNode()
         newNode
 
-    member this.GetNodeT (symbol : int<token>) (pos : int<positionInInput>) (nextPos : int<positionInInput>) =
+    member this.GetNodeT (symbol : int<token>) (pos : int<positionInInput>) (nextPos : int<positionInInput>) weight =
         let index = int pos + 1
         if symbol = epsilon //|| symbol = -10<token>
         then
@@ -143,7 +130,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
             if not contains
             then
                 let dict1 = new Dictionary<_,_>()
-                let t = new TerminalNode(symbol, packExtension pos nextPos)
+                let t = new TerminalNode(symbol, packExtension pos nextPos, weight)
                 let res = this.Nodes.Length * 1<nodeMeasure>
                 dict1.Add(symbol, res)
                 this.Nodes.Add t
@@ -153,7 +140,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 let cont, v1 = v.TryGetValue symbol
                 if not cont
                 then
-                    let t = new TerminalNode(symbol, packExtension pos nextPos)
+                    let t = new TerminalNode(symbol, packExtension pos nextPos, weight)
                     let res = this.Nodes.Length * 1<nodeMeasure>
                     this.Nodes.Add t
                     v.Add(symbol, res)

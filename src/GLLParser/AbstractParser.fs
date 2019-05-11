@@ -108,8 +108,8 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
         then
             let y, nontermNode =
                 match nextToken with 
-                | Some nextToken ->
-                    let newR = sppf.GetNodeT nextToken currentContext.PosInInput nextPosInInput
+                | Some (nextToken,weight) ->
+                    let newR = sppf.GetNodeT nextToken currentContext.PosInInput nextPosInInput weight
                     sppf.GetNodes nextPosInGrammar currentContext.GssVertex.Nonterm currentContext.Data newR               
                 | None ->
                     //printfn "%A --- %A" currentContext.PosInInput nextPosInInput
@@ -171,7 +171,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
         then 
             if buildTree
             then
-                let eps = sppf.GetNodeT epsilon currentContext.PosInInput currentContext.PosInInput
+                let eps = sppf.GetNodeT epsilon currentContext.PosInInput currentContext.PosInInput 0<weight>
                 let _, nontermNode = sppf.GetNodes currentContext.PosInGrammar currentContext.GssVertex.Nonterm dummy eps
                 pop currentContext.PosInInput currentContext.GssVertex nontermNode currentContext.Priority
             else
@@ -185,12 +185,12 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
         input.ForAllOutgoingEdges
             currentContext.PosInInput
             currentContext.Priority
-            (fun nextToken nextPosInInput newPriority -> 
+            (fun nextToken nextPosInInput newPriority weight -> 
                 if nextToken <> parser.EpsilonInputTag
                 then
                     let isTransitionPossible, nextPosInGrammar = parser.StateAndTokenToNewState.TryGetValue (parser.GetTermsDictionaryKey currentContext.PosInGrammar (int nextToken))
                     if isTransitionPossible
-                    then eatTerm currentContext (Some nextToken) nextPosInInput nextPosInGrammar newPriority
+                    then eatTerm currentContext (Some (nextToken, weight)) nextPosInInput nextPosInGrammar newPriority
                 else eatTerm currentContext None nextPosInInput currentContext.PosInGrammar newPriority
             )
 

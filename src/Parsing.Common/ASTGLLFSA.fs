@@ -9,6 +9,9 @@ open Microsoft.FSharp.Reflection
 type INode = 
     interface
     abstract member getExtension : unit -> int64<extension>
+    abstract member getWeight: unit -> int<weight>
+    abstract member setWeight: int<weight> -> unit
+    //abstract member set
     end
 
 [<AllowNullLiteral>]
@@ -16,7 +19,8 @@ type NonTerminalNode =
     val Extension : int64<extension>
     val Name      : int<positionInGrammar>
     val mutable First     : PackedNode 
-    val mutable Others    : ResizeArray<PackedNode> 
+    val mutable Others    : ResizeArray<PackedNode>
+    val mutable Weight    : int<weight>
     member this.AddChild (child : PackedNode) : unit = 
         if this.First <> Unchecked.defaultof<_>
         then 
@@ -41,28 +45,39 @@ type NonTerminalNode =
 
     interface INode with
         member this.getExtension () = this.Extension
-    new (name, extension) = {Name = name; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
+        member this.getWeight () = this.Weight
+        member this.setWeight weight = this.Weight <- weight
+    new (name, extension) = {Name = name; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>; Weight = 0<weight>}
     
 and TerminalNode =
     val Name : int<token>
     val Extension : int64<extension>
+    val mutable Weight    : int<weight>
     interface INode with
         member this.getExtension () = this.Extension
-    new (name, extension) = {Name = name; Extension = extension}
+        member this.getWeight () = this.Weight
+        member this.setWeight weight = this.Weight <- weight
+    new (name, extension, weight) = {Name = name; Extension = extension; Weight = weight}
 
 and EpsilonNode =
     val Extension : int64<extension>
+    val mutable Weight    : int<weight>
     interface INode with
         member this.getExtension () = this.Extension
-    new (extension) = {Extension = extension}
+        member this.getWeight () = this.Weight
+        member this.setWeight weight = this.Weight <- weight
+    new (extension) = {Extension = extension; Weight = 0<weight>}
 
 and PackedNode = 
     val State : int<positionInGrammar>
     val mutable Left : INode
     val mutable Right : INode
+    val mutable Weight : int<weight> 
     interface INode with
         member this.getExtension () = this.Right.getExtension ()
-    new (state, left, right) = {State = state; Left = left; Right = right}
+        member this.getWeight () = this.Weight
+        member this.setWeight weight = this.Weight <- weight
+    new (state, left, right) = {State = state; Left = left; Right = right; Weight = 0<weight>}
 
 and IntermidiateNode = 
     val State     : int<positionInGrammar>
@@ -70,8 +85,11 @@ and IntermidiateNode =
     val Extension : int64<extension>
     val mutable First     : PackedNode
     val mutable Others    : ResizeArray<PackedNode>
+    val mutable Weight : int<weight> 
     interface INode with
         member this.getExtension () = this.Extension
+        member this.getWeight () = this.Weight
+        member this.setWeight weight = this.Weight <- weight
     member this.AddChild (child : PackedNode) : unit = 
         if this.First <> Unchecked.defaultof<_>
         then 
@@ -92,7 +110,7 @@ and IntermidiateNode =
                     for child in this.Others do
                         yield func child
         }
-    new (state, nonterm, extension) = {Nonterm = nonterm; State = state; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
+    new (state, nonterm, extension) = {Nonterm = nonterm; State = state; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>; Weight = 0<weight>}
     
 
 type private DotNodeType = Packed | NonTerminal | Intermidiate | Terminal | Epsilon

@@ -12,6 +12,7 @@ open System.Runtime.CompilerServices
 [<Measure>] type length
 [<Measure>] type leftPosition
 [<Measure>] type extension
+[<Measure>] type weight
 
 type LexerEdge<'l ,'br  when 'l: equality> (s, e, t) =
     inherit TaggedEdge<int,Option<'l * 'br>>(s, e, t)
@@ -26,7 +27,7 @@ type LexerEdge<'l ,'br  when 'l: equality> (s, e, t) =
 type IParserInput<'Priority> =
     abstract member InitialPositions   : array<int<positionInInput>>
     abstract member FinalPositions     : array<int<positionInInput>>
-    abstract member ForAllOutgoingEdges: int<positionInInput> -> 'Priority -> (int<token> -> int<positionInInput> -> 'Priority -> unit) -> unit
+    abstract member ForAllOutgoingEdges: int<positionInInput> -> 'Priority -> (int<token> -> int<positionInInput> -> 'Priority -> int<weight> -> unit) -> unit
     
     abstract member PositionToString : int<positionInInput> -> string
 
@@ -77,7 +78,7 @@ type SimpleInputGraph<'tag>(initialVertices : int[], finalVertices : int[], tagT
         member this.ForAllOutgoingEdges curPosInInput priority pFun =
             let outEdges = int curPosInInput |> this.OutEdges
             outEdges |> Seq.iter
-                (fun e -> pFun (this.TagToToken e.Tag) (e.Target * 1<positionInInput>) priority)
+                (fun e -> pFun (this.TagToToken e.Tag) (e.Target * 1<positionInInput>) priority 0<weight>)
 
         member this.PositionToString (pos : int<positionInInput>) =
             sprintf "%i" pos
@@ -95,7 +96,7 @@ type LinearInput (initialPositions, input:array<int<token>>) =
         [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
         member this.ForAllOutgoingEdges curPosInInput priority pFun =
             if int curPosInInput < input.Length
-            then pFun input.[int curPosInInput] (curPosInInput + 1<positionInInput>) priority
+            then pFun input.[int curPosInInput] (curPosInInput + 1<positionInInput>) priority 0<weight>
 
     member this.Input = input
 
@@ -115,14 +116,14 @@ type LinearIputWithErrors(input: int<token> array, epsilonTag, nextSymbolsForIns
             if int curPosInInput < input.Length
             then
                 let newPriority k d = ((priority / 1000 + k) * 1000 + (input.Length - int curPosInInput - d))
-                pFun input.[int curPosInInput] (curPosInInput + 1<positionInInput>) priority
-                pFun epsilonTag (curPosInInput + 1<positionInInput>) (newPriority 1 1)
+                pFun input.[int curPosInInput] (curPosInInput + 1<positionInInput>) priority 0<weight>
+                pFun epsilonTag (curPosInInput + 1<positionInInput>) (newPriority 1 1) 1<weight>
                 nextSymbolsForInsert
                 |> Array.iter (fun t ->
                     if t <> input.[int curPosInInput]
-                    then pFun t (curPosInInput + 1<positionInInput>) (newPriority 1 1))
+                    then pFun t (curPosInInput + 1<positionInInput>) (newPriority 1 1) 1<weight> )
                 nextSymbolsForInsert
-                |> Array.iter (fun t -> pFun t curPosInInput (newPriority 2 0))
+                |> Array.iter (fun t -> pFun t curPosInInput (newPriority 2 0) 1<weight>)
 
 
     member this.Input = input
@@ -170,11 +171,11 @@ type GraphLabelledVertex<'tagType when 'tagType : equality> (initialVertices : '
             if ((int)curPosInInput % 2) = 0 
             then 
                 let v = vBackMap.[(int)curPosInInput / 2]
-                pFun ((this.TagToToken v) * 1<token>) (curPosInInput + 1<positionInInput>) priority
+                pFun ((this.TagToToken v) * 1<token>) (curPosInInput + 1<positionInInput>) priority 0<weight>
             else 
                 let v = vBackMap.[((int)curPosInInput - 1) / 2]
                 this.OutEdges v |> Seq.iter
-                    (fun e -> pFun ((this.TagToToken e.Tag) * 1<token>) (vMap.[e.Target] * 2<positionInInput>) priority)
+                    (fun e -> pFun ((this.TagToToken e.Tag) * 1<token>) (vMap.[e.Target] * 2<positionInInput>) priority 0<weight>)
 
         member this.PositionToString (pos : int<positionInInput>) =
             sprintf "%i" pos

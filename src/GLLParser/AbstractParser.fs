@@ -196,8 +196,11 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
 
     gss, sppf,
         if buildTree
-        then 
-            Some <| new Tree<_>(sppf.GetRoots gss input.InitialPositions.[0], input.PositionToString, parser.IntToString)
+        then
+            let roots = sppf.GetRoots gss input.InitialPositions.[0]
+            sppf.SetWeights roots
+            sppf.ChooseMinimalForest roots
+            Some <| new Tree<_>(roots, input.PositionToString, parser.IntToString)
         else
             None
        

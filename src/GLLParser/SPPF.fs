@@ -1,5 +1,6 @@
 ﻿module YC.Parsing.GLL.SPPF
 
+open System
 open System.Collections.Generic
 open FSharpx.Collections.Experimental
 open Microsoft.FSharp.Collections
@@ -270,6 +271,84 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 | :? EpsilonNode as eps -> ()
                 | x -> failwithf "Strange type of node: %A" x.GetType
         }
+
+
+    member this.SetWeights (roots : array<INode>)  = 
+        
+        let visited = new HashSet<_>()        
+        
+        let rec _go (node:INode) =
+            if visited.Contains node
+            then 0<weight>
+            else 
+                visited.Add node
+                match node with
+                | :? NonTerminalNode as nt -> let l = _go (nt.First)
+                                              let w =
+                                                  if nt.Others <> null
+                                                  then nt.Others |> ResizeArray.fold (fun w n -> min w (_go n)) 0<weight>
+                                                  else Int32.MaxValue * 1<weight>
+                                              min l w
+                                              let w = min l w
+                                              nt.Weight <- w
+                                              w
+                                              
+                | :? IntermidiateNode as interm ->
+                                              let l = _go (interm.First)
+                                              let w =
+                                                  if interm.Others <> null
+                                                  then interm.Others |> ResizeArray.fold (fun w n -> min w (_go n)) 0<weight>
+                                                  else Int32.MaxValue * 1<weight>
+                                              let w = min l w
+                                              interm.Weight <- w
+                                              w
+                | :? PackedNode as packed->
+                    let w = _go packed.Left + _go packed.Right
+                    packed.Weight <- w
+                    w
+                | :? TerminalNode as term -> term.Weight                                         
+                | :? EpsilonNode as eps -> eps.Weight
+                | x -> failwithf "Strange type of node: %A" x.GetType
+                
+        Array.map _go roots
+        |> ignore
+
+
+    member this.ChooseMinimalForest (roots : array<INode>)  = 
+        
+        let visited = new HashSet<_>()        
+        
+        let rec _go (node:INode) =
+            //if visited.Contains node
+            //then 0<weight>
+            //else 
+            //    visited.Add node
+                match node with
+                | :? NonTerminalNode as nt ->
+                                          if nt.Others <> null
+                                          then                                          
+                                                  
+                                                  let w = nt.Others |> ResizeArray.toArray |> Array.minBy (fun n -> n.Weight) 
+                                                  if nt.First.Weight > w.Weight then nt.First <- w
+                                          nt.Others <- null
+                                          _go (nt.First)
+                                                  
+                | :? IntermidiateNode as interm ->
+                                              if interm.Others <> null
+                                              then                                                                                            
+                                                  let w = interm.Others |> ResizeArray.toArray |> Array.minBy (fun n -> n.Weight) 
+                                                  if interm.First.Weight > w.Weight then interm.First <- w
+                                              interm.Others <- null
+                                              _go (interm.First)
+
+                | :? PackedNode as packed->
+                    _go packed.Left
+                    _go packed.Right
+                    
+                | _ -> ()                                         
+                
+        Array.iter _go roots
+        
 
 
 let GetTerminals (sppf : SPPF) = 

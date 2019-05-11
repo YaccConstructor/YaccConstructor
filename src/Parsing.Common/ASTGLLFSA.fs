@@ -359,8 +359,8 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
                 match nodeType with
                 | Intermidiate -> ",shape=box"
                 | Packed ->
-                     //",shape=box"
-                     ",shape=point"
+                     ",shape=box"
+                     //",shape=point"
                 | Terminal -> ",shape=box"
                 | Epsilon -> ",shape=box"
                 | NonTerminal -> ",shape=oval"
@@ -417,7 +417,7 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
                         for n in a.Others do
                             nodeQueue.Enqueue(new NumNode<INode>(!num, n))
                 | :? PackedNode as p ->
-                    createNode false !num false Packed (sprintf "%A, %A, %A" p.State (p.Left.getExtension()) (p.Right.getExtension()))
+                    createNode false !num false Packed (sprintf "%A, %A, %A, %A" p.State (p.Left.getExtension()) (p.Right.getExtension()) p.Weight)
                     createEdge currentPair.Ancestor !num false ""
                     if not <| isDummy p.Left then 
                         nodeQueue.Enqueue(new NumNode<INode>(!num, p.Left))
@@ -440,7 +440,10 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
                     then
                         if t.Name <> -2<token>
                         then
-                            createNode false !num false Terminal (sprintf "%s,%s,%s" (indToString.[int t.Name]) (unpackPos <| getLeftExtension t.Extension) (unpackPos <| getRightExtension t.Extension))
+                            createNode false !num false Terminal (sprintf "%s,%s,%s, %A" (indToString.[int t.Name])
+                                                                                         (unpackPos <| getLeftExtension t.Extension)
+                                                                                         (unpackPos <| getRightExtension t.Extension)
+                                                                                         t.Weight)
                             createEdge currentPair.Ancestor !num false ""
                         else
                             createNode false !num false Terminal ("dummy")

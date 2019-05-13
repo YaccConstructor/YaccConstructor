@@ -189,10 +189,8 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 | _ -> false
 
             if (currentN = dummyNode)&&(not isCurrentRNontermAndItsExtentsEqual)
-            then
-                dataCurrentR
-            else
-                this.GetNodeP posInGrammar (Intermed (posInGrammar, stateOfCurrentNonterm)) currentN currentR
+            then dataCurrentR
+            else this.GetNodeP posInGrammar (Intermed (posInGrammar, stateOfCurrentNonterm)) currentN currentR
         otherNode, nontermNode
 
     member this.GetRoots (gss : GSS) startPosition = 
@@ -275,18 +273,19 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
 
     member this.SetWeights (roots : array<INode>)  = 
         
-        let visited = new HashSet<_>()        
+        let visited = new HashSet<_>()
+       // let processed = new HashSet<_>()
         
         let rec _go (node:INode) =
             if visited.Contains node
-            then 0<weight>
+            then (if node.getWeight() >= 0<weight> then node.getWeight() else 1000<weight>)
             else 
                 visited.Add node
                 match node with
                 | :? NonTerminalNode as nt -> let l = _go (nt.First)
                                               let w =
                                                   if nt.Others <> null
-                                                  then nt.Others |> ResizeArray.fold (fun w n -> min w (_go n)) 0<weight>
+                                                  then nt.Others |> ResizeArray.fold (fun w n -> min w (_go n)) (Int32.MaxValue * 1<weight>)
                                                   else Int32.MaxValue * 1<weight>
                                               min l w
                                               let w = min l w
@@ -297,7 +296,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                                               let l = _go (interm.First)
                                               let w =
                                                   if interm.Others <> null
-                                                  then interm.Others |> ResizeArray.fold (fun w n -> min w (_go n)) 0<weight>
+                                                  then interm.Others |> ResizeArray.fold (fun w n -> min w (_go n)) (Int32.MaxValue * 1<weight>)
                                                   else Int32.MaxValue * 1<weight>
                                               let w = min l w
                                               interm.Weight <- w

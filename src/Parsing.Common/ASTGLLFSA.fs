@@ -47,7 +47,7 @@ type NonTerminalNode =
         member this.getExtension () = this.Extension
         member this.getWeight () = this.Weight
         member this.setWeight weight = this.Weight <- weight
-    new (name, extension) = {Name = name; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>; Weight = 0<weight>}
+    new (name, extension) = {Name = name; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>; Weight = -1<weight>}
     
 and TerminalNode =
     val Name : int<token>
@@ -66,7 +66,7 @@ and EpsilonNode =
         member this.getExtension () = this.Extension
         member this.getWeight () = this.Weight
         member this.setWeight weight = this.Weight <- weight
-    new (extension) = {Extension = extension; Weight = 0<weight>}
+    new (extension) = {Extension = extension; Weight = -1<weight>}
 
 and PackedNode = 
     val State : int<positionInGrammar>
@@ -77,7 +77,7 @@ and PackedNode =
         member this.getExtension () = this.Right.getExtension ()
         member this.getWeight () = this.Weight
         member this.setWeight weight = this.Weight <- weight
-    new (state, left, right) = {State = state; Left = left; Right = right; Weight = 0<weight>}
+    new (state, left, right) = {State = state; Left = left; Right = right; Weight = -1<weight>}
 
 and IntermidiateNode = 
     val State     : int<positionInGrammar>
@@ -110,7 +110,7 @@ and IntermidiateNode =
                     for child in this.Others do
                         yield func child
         }
-    new (state, nonterm, extension) = {Nonterm = nonterm; State = state; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>; Weight = 0<weight>}
+    new (state, nonterm, extension) = {Nonterm = nonterm; State = state; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>; Weight = -1<weight>}
     
 
 type private DotNodeType = Packed | NonTerminal | Intermidiate | Terminal | Epsilon
@@ -403,7 +403,7 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
                 | :? NonTerminalNode as a -> 
                     let isAmbiguous = a.Others <> null
                     let isRoot = currentPair.Ancestor = -1
-                    createNode isRoot !num isAmbiguous NonTerminal (sprintf "%s,%s,%s" (indToString.[int a.Name]) (unpackPos <| getLeftExtension a.Extension) (unpackPos <| getRightExtension a.Extension))
+                    createNode isRoot !num isAmbiguous NonTerminal (sprintf "%s,%s,%s, %A" (indToString.[int a.Name]) (unpackPos <| getLeftExtension a.Extension) (unpackPos <| getRightExtension a.Extension) (a.Weight))
                     if not isRoot
                     then
                         createEdge currentPair.Ancestor !num false ""

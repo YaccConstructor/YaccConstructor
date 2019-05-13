@@ -113,8 +113,9 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
                     sppf.GetNodes nextPosInGrammar currentContext.GssVertex.Nonterm currentContext.Data newR               
                 | None ->
                     //printfn "%A --- %A" currentContext.PosInInput nextPosInInput
-                    //sppf.GetNodeT (-10<token>) currentContext.PosInInput nextPosInInput //
-                    currentContext.Data, dummy
+                    let newR = sppf.GetNodeT (-10<token>) currentContext.PosInInput nextPosInInput 1<weight>
+                    sppf.GetNodes nextPosInGrammar currentContext.GssVertex.Nonterm currentContext.Data newR
+                    //currentContext.Data, dummy
 
              
 
@@ -199,6 +200,7 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
         then
             let roots = sppf.GetRoots gss input.InitialPositions.[0]
             sppf.SetWeights roots
+            //6, 12884901902L, 60129542159L, 0
             sppf.ChooseMinimalForest roots
             Some <| new Tree<_>(roots, input.PositionToString, parser.IntToString)
         else

@@ -93,7 +93,6 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 then
                     let r = new PackedNode(state, left, right)
                     this.Nodes.Add(r)
-                    //r
                     n.AddChild r
             | :? IntermidiateNode as i ->
                 if i.MapChildren (fun n -> (n.State = state && n.Left = left && n.Right = right) || n.Weight < newWeight)
@@ -102,18 +101,17 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 then
                     let r = new PackedNode(state, left, right)
                     this.Nodes.Add(r)
-                    //r
                     i.AddChild r 
             | x -> failwithf "Unexpected tye of node: %A" x
                     
-            (this.Nodes.Length - 1 )*1<nodeMeasure>
+            (this.Nodes.Length - 1 ) * 1<nodeMeasure>
         
         let newNode = createNode()
         newNode
 
     member this.GetNodeT (symbol : int<token>) (pos : int<positionInInput>) (nextPos : int<positionInInput>) weight =
         let index = int pos + 1
-        if symbol = epsilon //|| symbol = -10<token>
+        if symbol = epsilon
         then
             let contains, v = this.EpsilonNodes.TryGetValue index
             if not contains
@@ -156,7 +154,6 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
          
         if currentN <> dummyNode
         then
-            printfn "state = %A" state
             let currL = this.Nodes.Item (int currentN)
             let extL = currL.getExtension ()
             let lExtL = getLeftExtension extL//, getRightExtension extL
@@ -193,23 +190,19 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
             else this.GetNodeP posInGrammar (Intermed (posInGrammar, stateOfCurrentNonterm)) currentN currentR
         otherNode, nontermNode
 
-    member this.GetRoots (gss : GSS) startPosition = 
+    member this.GetRoots (gss : GSS) = 
         let gssRoots = 
-            let s =
-                gss.Vertices
-                |> Seq.filter (fun vert -> vert.Nonterm = startState)
-            s
+            gss.Vertices
+            |> Seq.filter (fun vert -> vert.Nonterm = startState)
             |> Seq.sortBy (fun vert -> vert.PositionInInput)
-            //|> (fun x -> (Array.ofSeq x).[0])
         
         gssRoots
-        |> Seq.collect (fun gssRoot ->
-        gssRoot.P.SetP
-        |> Seq.map (fun x -> match x.data with
-                             | TreeNode n -> this.Nodes.Item (int n)
-                             | _ -> failwith "wrongType")
-        //|> Seq.sortByDescending(fun x -> getRightExtension(x.getExtension()) )
-        //|> Array.ofSeq)
+        |> Seq.collect (
+            fun gssRoot ->
+                gssRoot.P.SetP
+                |> Seq.map (fun x -> match x.data with
+                                     | TreeNode n -> this.Nodes.Item (int n)
+                                     | _ -> failwith "wrongType")
         )
         |> Array.ofSeq
         |> Array.sortByDescending(fun x -> getRightExtension(x.getExtension()) - (getLeftExtension(x.getExtension())))
@@ -231,11 +224,9 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 match x.data with
                 | TreeNode n -> 
                     let node = this.Nodes.Item (int n)
-                    if (finalPoss.Contains(node.getExtension() |> getRightExtension))
-                    then
-                        Some(node)
-                    else
-                        None
+                    if finalPoss.Contains(node.getExtension() |> getRightExtension)
+                    then Some node
+                    else None
                 | _ -> failwith "wrongType")
             )
 
@@ -274,7 +265,6 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
     member this.SetWeights (roots : array<INode>)  = 
         
         let visited = new HashSet<_>()
-       // let processed = new HashSet<_>()
         
         let rec _go (node:INode) =
             if visited.Contains node
@@ -314,41 +304,33 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
 
 
     member this.ChooseMinimalForest (roots : array<INode>)  = 
-        
-        let visited = new HashSet<_>()        
-        
         let rec _go (node:INode) =
-            //if visited.Contains node
-            //then 0<weight>
-            //else 
-            //    visited.Add node
-                match node with
-                | :? NonTerminalNode as nt ->
-                                          if nt.Others <> null
-                                          then                                          
-                                                  
-                                                  let w = nt.Others |> ResizeArray.toArray |> Array.minBy (fun n -> n.Weight) 
-                                                  if nt.First.Weight > w.Weight then nt.First <- w
-                                          nt.Others <- null
-                                          _go (nt.First)
-                                                  
-                | :? IntermidiateNode as interm ->
-                                              if interm.Others <> null
-                                              then                                                                                            
-                                                  let w = interm.Others |> ResizeArray.toArray |> Array.minBy (fun n -> n.Weight) 
-                                                  if interm.First.Weight > w.Weight then interm.First <- w
-                                              interm.Others <- null
-                                              _go (interm.First)
+            match node with
+            | :? NonTerminalNode as nt ->
+                                      if nt.Others <> null
+                                      then                                          
+                                              
+                                              let w = nt.Others |> ResizeArray.toArray |> Array.minBy (fun n -> n.Weight) 
+                                              if nt.First.Weight > w.Weight then nt.First <- w
+                                      nt.Others <- null
+                                      _go (nt.First)
+                                              
+            | :? IntermidiateNode as interm ->
+                                          if interm.Others <> null
+                                          then                                                                                            
+                                              let w = interm.Others |> ResizeArray.toArray |> Array.minBy (fun n -> n.Weight) 
+                                              if interm.First.Weight > w.Weight then interm.First <- w
+                                          interm.Others <- null
+                                          _go (interm.First)
 
-                | :? PackedNode as packed->
-                    _go packed.Left
-                    _go packed.Right
-                    
-                | _ -> ()                                         
+            | :? PackedNode as packed->
+                _go packed.Left
+                _go packed.Right
                 
+            | _ -> ()                                         
+            
         Array.iter _go roots
         
-
 
 let GetTerminals (sppf : SPPF) = 
     sppf.GetTerminalNodes |> Seq.map (fun x -> x.Name, getLeftExtension x.Extension, getRightExtension x.Extension)

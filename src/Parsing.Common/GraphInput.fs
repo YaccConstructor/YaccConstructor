@@ -121,6 +121,7 @@ type LinearIputWithErrors(input: int<token> array, epsilonTag, nextSymbolsForIns
                 nextSymbolsForInsert
                 |> Array.iter (fun t ->
                     if t <> input.[int curPosInInput]
+                    //use (newPriority 1 1) 1<weight> ) to get other result after recovery 
                     then pFun t (curPosInInput + 1<positionInInput>) (newPriority 2 1) 2<weight> )
                 nextSymbolsForInsert
                 |> Array.iter (fun t -> pFun t curPosInInput (newPriority 1 0) 1<weight>)

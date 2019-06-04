@@ -37,7 +37,7 @@ let run grammarFile inputFile =
     let tree = buildAst parser input
     printfn "processing time = %A" (System.DateTime.Now - start)
     let n, e, t, amb = tree.CountCounters
-    tree.AstToDot false "out.dot"
+    tree.AstToDot true "out.dot"
     printfn "%A, %A, t=%A" n e t
     ()
 

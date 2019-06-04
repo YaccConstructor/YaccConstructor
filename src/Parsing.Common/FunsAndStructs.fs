@@ -82,7 +82,8 @@ type ContextFSA<'GSSVertex,'Priority when 'Priority : comparison and 'GSSVertex 
     //val LeftPos       : int<leftPosition>
     /// Length of current result
     val Data        : ParseData
-    new (index, state, vertex, data, priority) = {PosInInput = index; PosInGrammar = state; GssVertex = vertex; Data = data; Priority = priority}
+    new (index, state, vertex, data, priority) =        
+        {PosInInput = index; PosInGrammar = state; GssVertex = vertex; Data = data; Priority = priority}
     override this.ToString () = "Edge:" + (CommonFuns.getEdge(this.PosInInput).ToString()) +
                                 "; PosOnEdge:" + (CommonFuns.getPosOnEdge(this.PosInInput).ToString()) +
                                 "; State:" + (this.PosInGrammar.ToString()) +

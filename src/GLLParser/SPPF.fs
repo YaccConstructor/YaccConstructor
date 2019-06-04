@@ -87,17 +87,17 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
             let newWeight = left.getWeight() + right.getWeight()
             match (this.Nodes.Item (int parent)) with
             | :? NonTerminalNode as n ->                
-                if n.MapChildren (fun n -> (n.State = state && n.Left = left && n.Right = right) || n.Weight < newWeight)
-                   |> Seq.exists id
-                   |> not
+                if true //n.MapChildren (fun n -> (n.State = state && n.Left = left && n.Right = right) (*|| n.Weight < newWeight*))
+                   //|> Seq.exists id
+                   //|> not
                 then
                     let r = new PackedNode(state, left, right)
                     this.Nodes.Add(r)
                     n.AddChild r
             | :? IntermidiateNode as i ->
-                if i.MapChildren (fun n -> (n.State = state && n.Left = left && n.Right = right) || n.Weight < newWeight)
-                   |> Seq.exists id
-                   |> not
+                if true //i.MapChildren (fun n -> (n.State = state && n.Left = left && n.Right = right) (*|| n.Weight < newWeight*))
+                   //|> Seq.exists id
+                   //|> not
                 then
                     let r = new PackedNode(state, left, right)
                     this.Nodes.Add(r)

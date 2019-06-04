@@ -102,7 +102,8 @@ type LinearInput (initialPositions, input:array<int<token>>) =
 
     new (input:array<int<token>>) = LinearInput ([|0<positionInInput>|], input)
 
-type LinearIputWithErrors(input: int<token> array, epsilonTag, nextSymbolsForInsert) = 
+type LinearIputWithErrors(input: int<token> array, epsilonTag, nextSymbolsForInsert) =
+    let insertionInPos = Array.zeroCreate (input.Length + 1)
     interface IParserInput<int> with
         member x.PositionToString(pos: int<positionInInput>): string = 
             sprintf "%i" pos
@@ -116,13 +117,16 @@ type LinearIputWithErrors(input: int<token> array, epsilonTag, nextSymbolsForIns
             if int curPosInInput < input.Length
             then
                 let newPriority k d = ((priority / 1000 + k) * 1000 + (input.Length - int curPosInInput - d))
-                pFun input.[int curPosInInput] (curPosInInput + 1<positionInInput>) priority 0<weight>
+                pFun input.[int curPosInInput] (curPosInInput + 1<positionInInput>) (newPriority 0 1) 0<weight>
                 pFun epsilonTag (curPosInInput + 1<positionInInput>) (newPriority 1 1) 1<weight>
                 nextSymbolsForInsert
                 |> Array.iter (fun t ->
                     if t <> input.[int curPosInInput]
                     //use (newPriority 1 1) 1<weight> ) to get other result after recovery 
-                    then pFun t (curPosInInput + 1<positionInInput>) (newPriority 2 1) 2<weight> )
+                    then pFun t (curPosInInput + 1<positionInInput>) (newPriority 1 1) 2<weight> )
+                //if insertionInPos.[int curPosInInput] < 2
+                //then
+                    //insertionInPos.[int curPosInInput]  <- insertionInPos.[int curPosInInput] + 1
                 nextSymbolsForInsert
                 |> Array.iter (fun t -> pFun t curPosInInput (newPriority 1 0) 1<weight>)
 

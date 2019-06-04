@@ -22,6 +22,8 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
         then TreeNode(-1<nodeMeasure>)
         else Length(0us)
     let epsilon = -1<token>
+    
+    let inputLength = (input :?> LinearIputWithErrors).Input.Length + 1
 
     let gss = new GSS()
     let gssVertexInstanceHolder = new GSSVertexInstanceHolder()
@@ -41,6 +43,8 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
     
 /// Adds new context to stack (setR)
     let pushContext posInInput posInGrammar gssVertex data priority =
+        //if priority % 1000 + CommonFuns.getEdge(posInInput) > 21
+        //then printfn "!!!"
         setR.Add(new ContextFSA<_,_>(posInInput, posInGrammar, gssVertex, data, priority)) |> ignore
 
     /// Adds new context to stack (setR) if it is first occurrence of this context (if SetU doesn't contain it).
@@ -92,10 +96,10 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
                         then
                             let x = (sppf.Nodes.Item (int <| unpackNode nontermNode))
                             let newIndex = getRightExtension (x.getExtension())
-                            pop newIndex curContext.GssVertex nontermNode newPriority
+                            pop newIndex curContext.GssVertex nontermNode (newPriority - newPriority % 1000 + inputLength - int newIndex)
                         let x = (sppf.Nodes.Item (int <| unpackNode y))
                         let newIndex = getRightExtension (x.getExtension())
-                        addContext newIndex stateToContinue curContext.GssVertex y newPriority
+                        addContext newIndex stateToContinue curContext.GssVertex y (newPriority - newPriority % 1000 + inputLength - int newIndex)
                     else
                         if stateToContinue |> parser.FinalStates.Contains
                         then
@@ -152,8 +156,8 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
             |> Seq.filter (fun v -> v.Nonterm = parser.StartState)
             |> Seq.exists (fun v -> v.P.SetP |> ResizeArray.exists (fun p -> int p.posInInput = input.Input.Length))
         | _ -> false
-
-    while not (setR.Count = 0  || ((*!inErrorRecoveryMode &&*) isParsed ())) do
+    let isTooLate () = (setR.FindMin()).Priority / 1000 > 10  //inputLength / 2
+    while not (setR.Count = 0  || isTooLate()(*|| ((*!inErrorRecoveryMode &&*) isParsed ())*)) do
         let currentContext = setR.DeleteMin()
         inErrorRecoveryMode := currentContext.Priority <> 0
 

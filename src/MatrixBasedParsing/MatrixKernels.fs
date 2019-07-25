@@ -88,13 +88,7 @@ let initParsingMatrix<'MatrixType, 'InnerType when 'InnerType : comparison> (gra
                 matrixSetValue parsingMatrix.[simpleNonterminal] (6*graph.VertexCount + row) (6*graph.VertexCount + col) innerOne
                 matrixSetValue parsingMatrix.[simpleNonterminal] (7*graph.VertexCount + row) (7*graph.VertexCount + col) innerOne*)
         //System.GC.Collect()
-    
-    for nonterm in allRules.EpsilonRules do
-        for i in 0 .. graph.VertexCount - 1 do //1xsize
-        //for i in 0 .. 8*graph.VertexCount - 1 do //8xsize
-            matrixSetValue parsingMatrix.[nonterm] i i innerOne 
-            
-    
+
     parsingMatrix, vertexToInt
 
 let aleaCudaMultArrays (blas:Blas) (from1: float []) (from2: float []) matrixSize (mult1:DeviceMemory<float>) (mult2:DeviceMemory<float>) (result:DeviceMemory<float>) =

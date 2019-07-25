@@ -9,9 +9,6 @@ open Microsoft.FSharp.Reflection
 type INode = 
     interface
     abstract member getExtension : unit -> int64<extension>
-    abstract member getWeight: unit -> int<weight>
-    abstract member setWeight: int<weight> -> unit
-    //abstract member set
     end
 
 [<AllowNullLiteral>]
@@ -19,8 +16,7 @@ type NonTerminalNode =
     val Extension : int64<extension>
     val Name      : int<positionInGrammar>
     val mutable First     : PackedNode 
-    val mutable Others    : ResizeArray<PackedNode>
-    val mutable Weight    : int<weight>
+    val mutable Others    : ResizeArray<PackedNode> 
     member this.AddChild (child : PackedNode) : unit = 
         if this.First <> Unchecked.defaultof<_>
         then 
@@ -45,39 +41,28 @@ type NonTerminalNode =
 
     interface INode with
         member this.getExtension () = this.Extension
-        member this.getWeight () = this.Weight
-        member this.setWeight weight = this.Weight <- weight
-    new (name, extension) = {Name = name; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>; Weight = -1<weight>}
+    new (name, extension) = {Name = name; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
     
 and TerminalNode =
     val Name : int<token>
     val Extension : int64<extension>
-    val mutable Weight    : int<weight>
     interface INode with
         member this.getExtension () = this.Extension
-        member this.getWeight () = this.Weight
-        member this.setWeight weight = this.Weight <- weight
-    new (name, extension, weight) = {Name = name; Extension = extension; Weight = weight}
+    new (name, extension) = {Name = name; Extension = extension}
 
 and EpsilonNode =
     val Extension : int64<extension>
-    val mutable Weight    : int<weight>
     interface INode with
         member this.getExtension () = this.Extension
-        member this.getWeight () = this.Weight
-        member this.setWeight weight = this.Weight <- weight
-    new (extension) = {Extension = extension; Weight = -1<weight>}
+    new (extension) = {Extension = extension}
 
 and PackedNode = 
     val State : int<positionInGrammar>
     val mutable Left : INode
     val mutable Right : INode
-    val mutable Weight : int<weight> 
     interface INode with
         member this.getExtension () = this.Right.getExtension ()
-        member this.getWeight () = this.Weight
-        member this.setWeight weight = this.Weight <- weight
-    new (state, left, right) = {State = state; Left = left; Right = right; Weight = -1<weight>}
+    new (state, left, right) = {State = state; Left = left; Right = right}
 
 and IntermidiateNode = 
     val State     : int<positionInGrammar>
@@ -85,11 +70,8 @@ and IntermidiateNode =
     val Extension : int64<extension>
     val mutable First     : PackedNode
     val mutable Others    : ResizeArray<PackedNode>
-    val mutable Weight : int<weight> 
     interface INode with
         member this.getExtension () = this.Extension
-        member this.getWeight () = this.Weight
-        member this.setWeight weight = this.Weight <- weight
     member this.AddChild (child : PackedNode) : unit = 
         if this.First <> Unchecked.defaultof<_>
         then 
@@ -110,7 +92,7 @@ and IntermidiateNode =
                     for child in this.Others do
                         yield func child
         }
-    new (state, nonterm, extension) = {Nonterm = nonterm; State = state; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>; Weight = -1<weight>}
+    new (state, nonterm, extension) = {Nonterm = nonterm; State = state; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
     
 
 type private DotNodeType = Packed | NonTerminal | Intermidiate | Terminal | Epsilon
@@ -342,7 +324,7 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
         thread.Join()
         !result
 
-    member this.AstToDot dbg (path : string) =
+    member this.AstToDot (*(indToString : Dictionary<int,_>)*) (path : string) =
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
 
@@ -358,7 +340,7 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
             let shape =
                 match nodeType with
                 | Intermidiate -> ",shape=box"
-                | Packed -> if dbg then ",shape=box" else ",shape=point"
+                | Packed -> ",shape=point"
                 | Terminal -> ",shape=box"
                 | Epsilon -> ",shape=box"
                 | NonTerminal -> ",shape=oval"
@@ -385,19 +367,15 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
         for root in roots do
             nodeQueue.Enqueue(new NumNode<INode>(-1, root))
         let isDummy (n:INode) = match n with :? TerminalNode as t -> t.Extension = packExtension -1 -1 | _ -> false
-        
-        let getNodeName name e w =
-            if dbg
-            then sprintf "%s,%s,%s,%A" name (unpackPos <| getLeftExtension e) (unpackPos <| getRightExtension e) w
-            else sprintf "%s,%s,%s" name (unpackPos <| getLeftExtension e) (unpackPos <| getRightExtension e) 
 
-        while nodeQueue.Count <> 0 do
+        while nodeQueue.Count <> 0  do
             let currentPair = nodeQueue.Dequeue()
             let key = ref 0
             if currentPair.Node <> null && used.TryGetValue(currentPair.Node, key)
             then
                 if currentPair.Ancestor <> -1
-                then createEdge currentPair.Ancestor !key false ""
+                then
+                    createEdge currentPair.Ancestor !key false ""
             else    
                 num := !num + 1
                 used.Add(currentPair.Node, !num)
@@ -405,7 +383,7 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
                 | :? NonTerminalNode as a -> 
                     let isAmbiguous = a.Others <> null
                     let isRoot = currentPair.Ancestor = -1
-                    createNode isRoot !num isAmbiguous NonTerminal (getNodeName (indToString.[int a.Name]) a.Extension a.Weight)
+                    createNode isRoot !num isAmbiguous NonTerminal (sprintf "%s,%s,%s" (indToString.[int a.Name]) (unpackPos <| getLeftExtension a.Extension) (unpackPos <| getRightExtension a.Extension))
                     if not isRoot
                     then
                         createEdge currentPair.Ancestor !num false ""
@@ -414,18 +392,19 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
                         nodeQueue.Enqueue(new NumNode<INode>(!num, a.First))
                     if isAmbiguous
                     then
+                        //printfn "* %i" (a.Others.Count+1)
                         differentTreesCount := !differentTreesCount * (a.Others.Count+1)
                         for n in a.Others do
                             nodeQueue.Enqueue(new NumNode<INode>(!num, n))
                 | :? PackedNode as p ->
-                    createNode false !num false Packed (getNodeName (string p.State) (p.Left.getExtension()) p.Weight)
+                    createNode false !num false Packed ""
                     createEdge currentPair.Ancestor !num false ""
                     if not <| isDummy p.Left then 
                         nodeQueue.Enqueue(new NumNode<INode>(!num, p.Left))
                     if not <| isDummy p.Right then 
                         nodeQueue.Enqueue(new NumNode<INode>(!num, p.Right))
                 | :? IntermidiateNode as i ->
-                    createNode false !num false Intermidiate (getNodeName (string i.State) i.Extension i.Weight)
+                    createNode false !num false Intermidiate (sprintf "%i,%s,%s" i.State (unpackPos <| getLeftExtension i.Extension) (unpackPos <| getRightExtension i.Extension))
                     createEdge currentPair.Ancestor !num false ""
                     if i.First <> Unchecked.defaultof<_>
                     then
@@ -441,7 +420,7 @@ type Tree<'TokenType> (roots : INode[], unpackPos, indToString) =
                     then
                         if t.Name <> -2<token>
                         then
-                            createNode false !num false Terminal (getNodeName indToString.[int t.Name] t.Extension t.Weight)
+                            createNode false !num false Terminal (sprintf "%s,%s,%s" (indToString.[int t.Name]) (unpackPos <| getLeftExtension t.Extension) (unpackPos <| getRightExtension t.Extension))
                             createEdge currentPair.Ancestor !num false ""
                         else
                             createNode false !num false Terminal ("dummy")

@@ -1,6 +1,7 @@
 ﻿module YC.Parsing.GLL.AbstractParser
 
 open Microsoft.FSharp.Collections
+open System.Collections.Generic
 open YC.Parsing.Common.GraphInput
 open YC.Parsing.Common.GLL
 open YC.Parsing.Common.ASTGLLFSA
@@ -16,14 +17,12 @@ let unpackNode = function
     | TreeNode x -> x
     | _ -> failwith "Wrong type"
 
-let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool) = 
+let parse (parser : ParserSourceGLL) (input : IParserInput) (buildTree : bool) = 
     let dummy = 
         if buildTree
         then TreeNode(-1<nodeMeasure>)
         else Length(0us)
     let epsilon = -1<token>
-    
-    let inputLength = (input :?> LinearIputWithErrors).Input.Length + 1
 
     let gss = new GSS()
     let gssVertexInstanceHolder = new GSSVertexInstanceHolder()
@@ -35,26 +34,22 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
         |> Array.map(fun pos -> 
             let vertex = gssVertexInstanceHolder.Get(parser.StartState, pos)
             gss.AddVertex vertex |> ignore
-            new ContextFSA<_,_>(pos, parser.StartState, vertex, dummy, 0))
+            new ContextFSA<_>(pos, parser.StartState, vertex, dummy))
 
     /// Stack of contexts
-    let setR = new C5.IntervalHeap<_>() :> C5.IPriorityQueue<_>
-    setR.AddAll(startContexts)
+    let setR = new System.Collections.Generic.Stack<ContextFSA<_>>(startContexts)
     
-/// Adds new context to stack (setR)
-    let pushContext posInInput posInGrammar gssVertex data priority =
-        //if priority % 1000 + CommonFuns.getEdge(posInInput) > 21
-        //then printfn "!!!"
-        setR.Add(new ContextFSA<_,_>(posInInput, posInGrammar, gssVertex, data, priority)) |> ignore
+    /// Adds new context to stack (setR)
+    let pushContext posInInput posInGrammar gssVertex data =
+        setR.Push(new ContextFSA<_>(posInInput, posInGrammar, gssVertex, data))
 
     /// Adds new context to stack (setR) if it is first occurrence of this context (if SetU doesn't contain it).
-    let addContext posInInput posInGrammar (gssVertex:GSSVertex) data priority =
-        if (not <| gssVertex.ContainsContext posInInput posInGrammar data)
-        //&& (posInInput > 0<positionInInput> && not <| gssVertex.ContainsContext (posInInput + 1<positionInInput>) posInGrammar data)
-        then pushContext posInInput posInGrammar gssVertex data priority
+    let addContext posInInput posInGrammar (gssVertex:GSSVertex) data =
+        if not <| gssVertex.ContainsContext posInInput posInGrammar data
+        then pushContext posInInput posInGrammar gssVertex data
     
     /// 
-    let rec pop (posInInput:int<positionInInput>) (gssVertex : GSSVertex) (newData : ParseData) newPriority =
+    let rec pop (posInInput:int<positionInInput>) (gssVertex : GSSVertex) (newData : ParseData)=
         let outEdges = gss.OutEdges gssVertex |> Array.ofSeq
         
         if new PoppedData(posInInput, newData) |> gssVertex.P.Add |> not then () else
@@ -66,18 +61,18 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
                     let y, n = sppf.GetNodes e.Tag.StateToContinue e.Target.Nonterm e.Tag.Data newData
                     if y <> dummy
                     then
-                        addContext posInInput e.Tag.StateToContinue e.Target y newPriority
+                        addContext posInInput e.Tag.StateToContinue e.Target y
                     if n <> dummy
                     then
-                        pop posInInput e.Target n newPriority
+                        pop posInInput e.Target n
                 else
                     if e.Tag.StateToContinue |> parser.FinalStates.Contains
                     then
-                        pop posInInput e.Target (summLengths newData e.Tag.Data) newPriority
-                    addContext posInInput e.Tag.StateToContinue e.Target (summLengths newData e.Tag.Data) newPriority
+                        pop posInInput e.Target (summLengths newData e.Tag.Data)
+                    addContext posInInput e.Tag.StateToContinue e.Target (summLengths newData e.Tag.Data)
 
     ///Creates new descriptors.(Calls when found nonterninal in rule(on current input edge, or on some of next)))
-    let create (curContext:ContextFSA<_,_>) stateToContinue nonterm newPriority =        
+    let create (curContext:ContextFSA<_>) stateToContinue nonterm =        
         let startV = gssVertexInstanceHolder.Get(nonterm, curContext.PosInInput)
         let vertexExists, edgeExists = gss.ContainsVertexAndEdge(startV, curContext.GssVertex, stateToContinue, curContext.Data)        
 
@@ -96,70 +91,48 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
                         then
                             let x = (sppf.Nodes.Item (int <| unpackNode nontermNode))
                             let newIndex = getRightExtension (x.getExtension())
-                            pop newIndex curContext.GssVertex nontermNode (newPriority - newPriority % 1000 + inputLength - int newIndex)
+                            pop newIndex curContext.GssVertex nontermNode
                         let x = (sppf.Nodes.Item (int <| unpackNode y))
                         let newIndex = getRightExtension (x.getExtension())
-                        addContext newIndex stateToContinue curContext.GssVertex y (newPriority - newPriority % 1000 + inputLength - int newIndex)
+                        addContext newIndex stateToContinue curContext.GssVertex y
                     else
                         if stateToContinue |> parser.FinalStates.Contains
                         then
-                            pop p.posInInput curContext.GssVertex (summLengths curContext.Data p.data) newPriority
-                        addContext p.posInInput stateToContinue curContext.GssVertex (summLengths curContext.Data p.data) newPriority)        
-        else addContext curContext.PosInInput nonterm startV dummy newPriority
+                            pop p.posInInput curContext.GssVertex (summLengths curContext.Data p.data)
+                        addContext p.posInInput stateToContinue curContext.GssVertex (summLengths curContext.Data p.data))        
+        else addContext curContext.PosInInput nonterm startV dummy
 
-    let eatTerm (currentContext : ContextFSA<GSSVertex,_>) nextToken nextPosInInput nextPosInGrammar newPriority =
+    let eatTerm (currentContext : ContextFSA<GSSVertex>) nextToken nextPosInInput nextPosInGrammar =
         if buildTree
         then
-            let y, nontermNode =
-                match nextToken with 
-                | Some (nextToken,weight) ->
-                    let newR = sppf.GetNodeT nextToken currentContext.PosInInput nextPosInInput weight
-                    sppf.GetNodes nextPosInGrammar currentContext.GssVertex.Nonterm currentContext.Data newR               
-                | None ->
-                    //printfn "%A --- %A" currentContext.PosInInput nextPosInInput
-                    let newR = sppf.GetNodeT (-10<token>) currentContext.PosInInput nextPosInInput 1<weight>
-                    sppf.GetNodes nextPosInGrammar currentContext.GssVertex.Nonterm currentContext.Data newR
-                    //currentContext.Data, dummy
-
-             
+            let newR = sppf.GetNodeT nextToken currentContext.PosInInput nextPosInInput
+            let y, nontermNode = sppf.GetNodes nextPosInGrammar currentContext.GssVertex.Nonterm currentContext.Data newR
 
             if nontermNode <> dummy
             then
-                pop nextPosInInput currentContext.GssVertex nontermNode newPriority
+                pop nextPosInInput currentContext.GssVertex nontermNode 
         
             if parser.MultipleInEdges.[int nextPosInGrammar]
             then 
-                addContext nextPosInInput nextPosInGrammar currentContext.GssVertex y newPriority
+                addContext nextPosInInput nextPosInGrammar currentContext.GssVertex y
             else
-                pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex y newPriority
+                pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex y
         else
             if nextPosInGrammar |> parser.FinalStates.Contains
             then
-                pop nextPosInInput currentContext.GssVertex (summLengths currentContext.Data (Length(1us))) newPriority
+                pop nextPosInInput currentContext.GssVertex (summLengths currentContext.Data (Length(1us)))
             
             if parser.MultipleInEdges.[int nextPosInGrammar]
             then 
-                addContext nextPosInInput nextPosInGrammar currentContext.GssVertex (summLengths currentContext.Data (Length(1us))) newPriority
+                addContext nextPosInInput nextPosInGrammar currentContext.GssVertex (summLengths currentContext.Data (Length(1us)))
             else
-                pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex (summLengths currentContext.Data (Length(1us))) newPriority
-    
-    
+                pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex (summLengths currentContext.Data (Length(1us)))
     let processed = ref 0
     let mlnCount = ref 0
     let startTime = ref System.DateTime.Now
-    let inErrorRecoveryMode = ref false
 
-    let inline isParsed () = 
-        match input with
-        | :? LinearIputWithErrors as input ->
-            gss.Vertices
-            |> Seq.filter (fun v -> v.Nonterm = parser.StartState)
-            |> Seq.exists (fun v -> v.P.SetP |> ResizeArray.exists (fun p -> int p.posInInput = input.Input.Length))
-        | _ -> false
-    let isTooLate () = (setR.FindMin()).Priority / 1000 > 10  //inputLength / 2
-    while not (setR.Count = 0  || isTooLate()(*|| ((*!inErrorRecoveryMode &&*) isParsed ())*)) do
-        let currentContext = setR.DeleteMin()
-        inErrorRecoveryMode := currentContext.Priority <> 0
+    while setR.Count <> 0 do
+        let currentContext = setR.Pop()
 
         incr processed
         if !processed = 10000000
@@ -176,36 +149,30 @@ let parse (parser : ParserSourceGLL) (input : IParserInput<_>) (buildTree : bool
         then 
             if buildTree
             then
-                let eps = sppf.GetNodeT epsilon currentContext.PosInInput currentContext.PosInInput 0<weight>
+                let eps = sppf.GetNodeT epsilon currentContext.PosInInput currentContext.PosInInput
                 let _, nontermNode = sppf.GetNodes currentContext.PosInGrammar currentContext.GssVertex.Nonterm dummy eps
-                pop currentContext.PosInInput currentContext.GssVertex nontermNode currentContext.Priority
+                pop currentContext.PosInInput currentContext.GssVertex nontermNode
             else
-                pop currentContext.PosInInput currentContext.GssVertex dummy currentContext.Priority
+                pop currentContext.PosInInput currentContext.GssVertex dummy
         
         /// Nonterminal transitions. Move pointer in grammar. Position in input is not changed.
         for curNonterm, nextState in possibleNontermMovesInGrammar do            
-            create currentContext nextState curNonterm currentContext.Priority
+            create currentContext nextState curNonterm
 
         /// Terminal transitions.
         input.ForAllOutgoingEdges
             currentContext.PosInInput
-            currentContext.Priority
-            (fun nextToken nextPosInInput newPriority weight -> 
-                if nextToken <> parser.EpsilonInputTag
-                then
-                    let isTransitionPossible, nextPosInGrammar = parser.StateAndTokenToNewState.TryGetValue (parser.GetTermsDictionaryKey currentContext.PosInGrammar (int nextToken))
-                    if isTransitionPossible
-                    then eatTerm currentContext (Some (nextToken, weight)) nextPosInInput nextPosInGrammar newPriority
-                else eatTerm currentContext None nextPosInInput currentContext.PosInGrammar newPriority
+            (fun nextToken nextPosInInput -> 
+                let isTransitionPossible, nextPosInGrammar = parser.StateAndTokenToNewState.TryGetValue (parser.GetTermsDictionaryKey currentContext.PosInGrammar (int nextToken))
+                if isTransitionPossible
+                then eatTerm currentContext nextToken nextPosInInput nextPosInGrammar
+                   //pushContext nextPosInInput nextPosInGrammar currentContext.GssVertex (currentContext.Length + 1us)
             )
 
     gss, sppf,
         if buildTree
-        then
-            let roots = sppf.GetRoots gss
-            sppf.SetWeights roots
-            sppf.ChooseMinimalForest roots
-            Some <| new Tree<_>(roots, input.PositionToString, parser.IntToString)
+        then 
+            Some <| new Tree<_>(sppf.GetRoots gss input.InitialPositions.[0], input.PositionToString, parser.IntToString)
         else
             None
        
@@ -213,14 +180,14 @@ let findVertices (gss:GSS) state : seq<GSSVertex> =
     gss.Vertices
     |> Seq.filter (fun v -> v.Nonterm = state)
 
-let buildAst (parser : ParserSourceGLL) (input : IParserInput<_>) = 
+let buildAst (parser : ParserSourceGLL) (input : IParserInput) = 
     let _, _, tree = parse parser input true
     let tree = if tree.IsNone
                 then failwith "NotParsed"
                 else tree.Value
     tree
         
-let getAllSPPFRoots (parser : ParserSourceGLL) (input : IParserInput<_>) = 
+let getAllSPPFRoots (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss, sppf, _ = parse parser input true
     sppf.GetRootsForStartAndFinal gss input.InitialPositions input.FinalPositions
 
@@ -233,7 +200,7 @@ let getAllRangesForState gss state =
     findVertices gss state
     |> Seq.collect (fun v -> v.P.SetP |> Seq.map (fun poped -> v.PositionInInput, poped.posInInput))    
 
-let getAllRangesForStartState (parser : ParserSourceGLL) (input : IParserInput<_>) = 
+let getAllRangesForStartState (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss, _, _ = parse parser input false
     getAllRangesForState gss parser.StartState
 
@@ -241,10 +208,10 @@ let getAllRangesForStateWithLength gss state =
     findVertices gss state
     |> Seq.collect (fun v -> v.P.SetP |> Seq.map (fun poped -> v.PositionInInput, poped.posInInput, match poped.data with Length x -> x | TreeNode _ -> failwith "Impossible!"))
 
-let getGSS (parser : ParserSourceGLL) (input : IParserInput<_>) = 
+let getGSS (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss, _, _ = parse parser input false
     gss
 
-let getAllRangesForStartStateWithLength (parser : ParserSourceGLL) (input : IParserInput<_>) = 
+let getAllRangesForStartStateWithLength (parser : ParserSourceGLL) (input : IParserInput) = 
     let gss, _, _ = parse parser input false
     getAllRangesForStateWithLength gss parser.StartState

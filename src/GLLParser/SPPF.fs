@@ -1,6 +1,5 @@
 ﻿module YC.Parsing.GLL.SPPF
 
-open System
 open System.Collections.Generic
 open FSharpx.Collections.Experimental
 open Microsoft.FSharp.Collections
@@ -11,7 +10,7 @@ open YC.Parsing.GLL.GSS
 
 type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positionInGrammar>>) =
     let dummyNode = -1<nodeMeasure>
-    let dummyAST = new TerminalNode(-1<token>, packExtension -1 -1, 0<weight>)
+    let dummyAST = new TerminalNode(-1<token>, packExtension -1 -1)
     let epsilon = -1<token>
     let unpackNode = function
         | TreeNode x -> x
@@ -83,33 +82,24 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
 
     member this.FindSppfPackedNode parent (state : int<positionInGrammar>) leftExtension rightExtension (left : INode) (right : INode) =
         let createNode () =
+            let newNode = new PackedNode(state, left, right)
+            this.Nodes.Add(newNode)
+            let num = (this.Nodes.Length - 1 )*1<nodeMeasure>
+            ///
             if parent = dummyNode then failwith "try to get dummyNode from sppfNodes"
-            let newWeight = left.getWeight() + right.getWeight()
+            ///
             match (this.Nodes.Item (int parent)) with
-            | :? NonTerminalNode as n ->                
-                if true //n.MapChildren (fun n -> (n.State = state && n.Left = left && n.Right = right) (*|| n.Weight < newWeight*))
-                   //|> Seq.exists id
-                   //|> not
-                then
-                    let r = new PackedNode(state, left, right)
-                    this.Nodes.Add(r)
-                    n.AddChild r
+            | :? NonTerminalNode as n ->
+                n.AddChild newNode
             | :? IntermidiateNode as i ->
-                if true //i.MapChildren (fun n -> (n.State = state && n.Left = left && n.Right = right) (*|| n.Weight < newWeight*))
-                   //|> Seq.exists id
-                   //|> not
-                then
-                    let r = new PackedNode(state, left, right)
-                    this.Nodes.Add(r)
-                    i.AddChild r 
-            | x -> failwithf "Unexpected tye of node: %A" x
-                    
-            (this.Nodes.Length - 1 ) * 1<nodeMeasure>
+                i.AddChild newNode
+            | _ -> failwith "adjf;sawf"
+            num
         
         let newNode = createNode()
         newNode
 
-    member this.GetNodeT (symbol : int<token>) (pos : int<positionInInput>) (nextPos : int<positionInInput>) weight =
+    member this.GetNodeT (symbol : int<token>) (pos : int<positionInInput>) (nextPos : int<positionInInput>) =
         let index = int pos + 1
         if symbol = epsilon
         then
@@ -117,7 +107,7 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
             if not contains
             then
                 let t = new EpsilonNode(packExtension pos pos)
-                let res = this.Nodes.Length * 1<nodeMeasure>
+                let res = this.Nodes.Length *1<nodeMeasure>
                 this.Nodes.Add t
                 this.EpsilonNodes.Add(index, res)
                 TreeNode(res)
@@ -129,8 +119,8 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
             if not contains
             then
                 let dict1 = new Dictionary<_,_>()
-                let t = new TerminalNode(symbol, packExtension pos nextPos, weight)
-                let res = this.Nodes.Length * 1<nodeMeasure>
+                let t = new TerminalNode(symbol, packExtension pos nextPos)
+                let res = this.Nodes.Length *1<nodeMeasure>
                 dict1.Add(symbol, res)
                 this.Nodes.Add t
                 this.TerminalNodes.Add(hash, dict1)
@@ -139,8 +129,8 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 let cont, v1 = v.TryGetValue symbol
                 if not cont
                 then
-                    let t = new TerminalNode(symbol, packExtension pos nextPos, weight)
-                    let res = this.Nodes.Length * 1<nodeMeasure>
+                    let t = new TerminalNode(symbol, packExtension pos nextPos)
+                    let res = this.Nodes.Length *1<nodeMeasure>
                     this.Nodes.Add t
                     v.Add(symbol, res)
                     TreeNode(res)
@@ -186,27 +176,25 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 | _ -> false
 
             if (currentN = dummyNode)&&(not isCurrentRNontermAndItsExtentsEqual)
-            then dataCurrentR
-            else this.GetNodeP posInGrammar (Intermed (posInGrammar, stateOfCurrentNonterm)) currentN currentR
+            then
+                dataCurrentR
+            else
+                this.GetNodeP posInGrammar (Intermed (posInGrammar, stateOfCurrentNonterm)) currentN currentR
         otherNode, nontermNode
 
-    member this.GetRoots (gss : GSS) = 
-        let gssRoots = 
+    member this.GetRoots (gss : GSS) startPosition = 
+        let gssRoot = 
             gss.Vertices
-            |> Seq.filter (fun vert -> vert.Nonterm = startState)
-            |> Seq.sortBy (fun vert -> vert.PositionInInput)
+            |> Seq.filter (fun vert -> vert.Nonterm = startState && vert.PositionInInput = startPosition)
+            |> (fun x -> (Array.ofSeq x).[0])
         
-        gssRoots
-        |> Seq.collect (
-            fun gssRoot ->
-                gssRoot.P.SetP
-                |> Seq.map (fun x -> match x.data with
-                                     | TreeNode n -> this.Nodes.Item (int n)
-                                     | _ -> failwith "wrongType")
-        )
+        gssRoot.P.SetP
+        |> Seq.map (fun x -> match x.data with
+                             | TreeNode n -> this.Nodes.Item (int n)
+                             | _ -> failwith "wrongType")
+        |> Seq.sortByDescending(fun x -> getRightExtension(x.getExtension()) )
         |> Array.ofSeq
-        |> Array.sortByDescending(fun x -> getRightExtension(x.getExtension()) - (getLeftExtension(x.getExtension())))
-        |> (fun x -> [|x.[0]|])
+        //|> (fun x -> [|x.[0]|])
     
     member this.GetRootsForStartAndFinal (gss : GSS) (startPositions :_ []) (finalPositions :_ []) = 
         let startPoss = new HashSet<int<positionInInput>>(startPositions)
@@ -224,9 +212,11 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 match x.data with
                 | TreeNode n -> 
                     let node = this.Nodes.Item (int n)
-                    if finalPoss.Contains(node.getExtension() |> getRightExtension)
-                    then Some node
-                    else None
+                    if (finalPoss.Contains(node.getExtension() |> getRightExtension))
+                    then
+                        Some(node)
+                    else
+                        None
                 | _ -> failwith "wrongType")
             )
 
@@ -261,76 +251,6 @@ type SPPF(startState : int<positionInGrammar>, finalStates : HashSet<int<positio
                 | x -> failwithf "Strange type of node: %A" x.GetType
         }
 
-
-    member this.SetWeights (roots : array<INode>)  = 
-        
-        let visited = new HashSet<_>()
-        
-        let rec _go (node:INode) =
-            if visited.Contains node
-            then (if node.getWeight() >= 0<weight> then node.getWeight() else 1000<weight>)
-            else 
-                visited.Add node
-                match node with
-                | :? NonTerminalNode as nt -> let l = _go (nt.First)
-                                              let w =
-                                                  if nt.Others <> null
-                                                  then nt.Others |> ResizeArray.fold (fun w n -> min w (_go n)) (Int32.MaxValue * 1<weight>)
-                                                  else Int32.MaxValue * 1<weight>
-                                              min l w
-                                              let w = min l w
-                                              nt.Weight <- w
-                                              w
-                                              
-                | :? IntermidiateNode as interm ->
-                                              let l = _go (interm.First)
-                                              let w =
-                                                  if interm.Others <> null
-                                                  then interm.Others |> ResizeArray.fold (fun w n -> min w (_go n)) (Int32.MaxValue * 1<weight>)
-                                                  else Int32.MaxValue * 1<weight>
-                                              let w = min l w
-                                              interm.Weight <- w
-                                              w
-                | :? PackedNode as packed->
-                    let w = _go packed.Left + _go packed.Right
-                    packed.Weight <- w
-                    w
-                | :? TerminalNode as term -> term.Weight                                         
-                | :? EpsilonNode as eps -> eps.Weight
-                | x -> failwithf "Strange type of node: %A" x.GetType
-                
-        Array.map _go roots
-        |> ignore
-
-
-    member this.ChooseMinimalForest (roots : array<INode>)  = 
-        let rec _go (node:INode) =
-            match node with
-            | :? NonTerminalNode as nt ->
-                                      if nt.Others <> null
-                                      then                                          
-                                              
-                                              let w = nt.Others |> ResizeArray.toArray |> Array.minBy (fun n -> n.Weight) 
-                                              if nt.First.Weight > w.Weight then nt.First <- w
-                                      nt.Others <- null
-                                      _go (nt.First)
-                                              
-            | :? IntermidiateNode as interm ->
-                                          if interm.Others <> null
-                                          then                                                                                            
-                                              let w = interm.Others |> ResizeArray.toArray |> Array.minBy (fun n -> n.Weight) 
-                                              if interm.First.Weight > w.Weight then interm.First <- w
-                                          interm.Others <- null
-                                          _go (interm.First)
-
-            | :? PackedNode as packed->
-                _go packed.Left
-                _go packed.Right
-                
-            | _ -> ()                                         
-            
-        Array.iter _go roots
-        
 
 let GetTerminals (sppf : SPPF) = 
     sppf.GetTerminalNodes |> Seq.map (fun x -> x.Name, getLeftExtension x.Extension, getRightExtension x.Extension)

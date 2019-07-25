@@ -67,45 +67,25 @@ type ParseData =
     | Length of uint16
 
 [<Struct>]
-[<CustomComparison; CustomEquality>]
-//[<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
-type ContextFSA<'GSSVertex,'Priority when 'Priority : comparison and 'GSSVertex : equality> =
-    /// Priority of decsriptors to specify oreser of preocessing.
-    val Priority           : 'Priority
+[<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
+type ContextFSA<'GSSVertex> =
     /// Position in input graph (packed edge+position).
     val PosInInput         : int<positionInInput>
     /// Current state of FSA.
-    val PosInGrammar       : int<positionInGrammar>
+    val PosInGrammar         : int<positionInGrammar>
     /// Current GSS node.
-    val GssVertex          : 'GSSVertex
+    val GssVertex        : 'GSSVertex
     /// 4 values packed in one int64: leftEdge, leftPos, rightEdge, rightPos.
     //val LeftPos       : int<leftPosition>
     /// Length of current result
     val Data        : ParseData
-    new (index, state, vertex, data, priority) =        
-        {PosInInput = index; PosInGrammar = state; GssVertex = vertex; Data = data; Priority = priority}
+    new (index, state, vertex, data) = {PosInInput = index; PosInGrammar = state; GssVertex = vertex; Data = data}
     override this.ToString () = "Edge:" + (CommonFuns.getEdge(this.PosInInput).ToString()) +
                                 "; PosOnEdge:" + (CommonFuns.getPosOnEdge(this.PosInInput).ToString()) +
                                 "; State:" + (this.PosInGrammar.ToString()) +
-                                "; Priority:" + (this.Priority.ToString()) +
+                                //"; LeftPos:" + (this.LeftPos.ToString()) +
                                 "; Len:" + (this.Data.ToString())
-                                
-    interface System.IComparable with 
-        member x.CompareTo(y:obj) = 
-            let y = y :?> ContextFSA<'GSSVertex,'Priority>
-            compare (x.Priority) (y.Priority)
-            //compare (fst x.Priority / snd x.Priority) (fst y.Priority / snd y.Priority)
-            
-    interface System.IEquatable<ContextFSA<'GSSVertex,'Priority>> with 
-        member x.Equals(y:ContextFSA<'GSSVertex,'Priority>):bool = 
-            y.PosInInput = x.PosInInput
-            && y.PosInGrammar = x.PosInGrammar
-            && y.GssVertex = x. GssVertex
-            && y.Data = x.Data
-            
-    override this.GetHashCode() =
-        hash (this.PosInInput, this.PosInGrammar, this.GssVertex, this.Data)
-       
+
 [<Struct>]
 [<System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)>]
 type ContextFSA =

@@ -103,8 +103,11 @@ let processFile file grammarFile cnt =
 let performTests (args:string[]) = 
     let grammarFile = args.[0]
     let matrixFile = args.[1]
-    let cnt = args.[2] |> int
-    printfn "%A" <| processFile matrixFile grammarFile cnt
+    let output = args.[3]
+    let cnt = args.[2] |> int    
+    let (file,time,count) = processFile matrixFile grammarFile cnt
+    System.IO.File.WriteAllText(output,sprintf "s 0 %A" count)
+    printfn "%A" <| (file,time,count)
 
 [<EntryPoint>]
 let main argv = 

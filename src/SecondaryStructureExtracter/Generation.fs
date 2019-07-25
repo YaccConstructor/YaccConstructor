@@ -34,12 +34,13 @@ type CSV(id, len, matrices: ParsingResult) =
                 |> fun x -> x + "\n"
     
     let toIntArray nterm =
-        let matrix = matrices.[nterm].ToArray() 
-        let bArray = new System.Collections.BitArray(len * (len - 1) / 2,false)
+        let matrix = matrices.[nterm].ToArray()
+        
+        let bArray = new System.Collections.BitArray(len * len / 2,false)
         let mutable k = 0
-        for i in 0 .. len - 2 do
-            for j in i + 1 .. len - 1 do
-                if matrix.[i, j] <> 0.0 
+        for i in 0 .. len - 1 do
+            for j in i .. len - 1 do
+                if matrix.[i, j] <> 0.0 && k < 24201
                 then bArray.[k] <- true
                 k <- k + 1
         let fInfo = typeof<System.Collections.BitArray>.GetField("m_array", System.Reflection.BindingFlags.NonPublic ||| System.Reflection.BindingFlags.Instance)

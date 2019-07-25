@@ -89,6 +89,14 @@
       <Project>{a0fd0ce8-da33-4c03-86e2-e6417d96fabd}</Project>
       <Name>Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\GLLGenerator\GLLGenerator.fsproj">
+      <Project>{1df8f6a5-20ae-491d-b9ed-76025a2ae931}</Project>
+      <Name>GLLGenerator</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\GLLParser\GLLParser.fsproj">
+      <Project>{628096ce-4a4f-4041-a1e8-df4b924e6acf}</Project>
+      <Name>GLLParser</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\MatrixBasedParsing\MatrixBasedParsing.fsproj">
       <Project>{20c9d959-5136-47c0-aa40-dad05703439a}</Project>
       <Name>MatrixBasedParsing</Name>
@@ -96,6 +104,14 @@
     <ProjectReference Include="..\..\src\Parsing.Common\Parsing.Common.fsproj">
       <Project>{2deacfb7-6d6e-4cab-8199-9017c366e53c}</Project>
       <Name>Parsing.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\YaccConstructor\YaccConstructor.fsproj">
+      <Project>{60daff09-245c-4531-be87-3426ec2bc029}</Project>
+      <Name>YaccConstructor</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\YardFrontend\YardFrontend.fsproj">
+      <Project>{edb177ba-bcff-4697-be11-faeb37b19b6c}</Project>
+      <Name>YardFrontend</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />

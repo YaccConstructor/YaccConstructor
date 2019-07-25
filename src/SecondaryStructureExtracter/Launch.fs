@@ -66,7 +66,7 @@ let main argv =
     let grammar = args.GetResult(<@ Grammar @>)
     let outputFormats = args.GetResult(<@ Output_Formats @>, defaultValue=[Output.CSV])
     let defaultOutDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) +
-                        "/out_" + System.DateTime.Now.ToString("dd/MM/yyyy") + "/"
+                        "/out"
     let outDir = args.GetResult(<@ Output_Dir @>, defaultValue=defaultOutDir)
     processInput inputFile grammar outputFormats outDir
     0
